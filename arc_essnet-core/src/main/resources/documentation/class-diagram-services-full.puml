@@ -1,0 +1,287 @@
+@startuml
+abstract class AbstractService [[java:fr.insee.arc_essnet.core.service.AbstractService]] {
+	+{static}String IS_DEV
+	#{static}Logger LOGGER
+	+{static}String SUFFIXE_TEMP_FILE_ORIADE
+	+{static}String FICHIER_MISE_EN_PRODUCTION
+	+{static}int HEURE_INITIALISATION_PRODUCTION
+	+int NB_PARALLEL
+	+{static}String ID_SOURCE
+	#Connection connexion
+	#String envExecution
+	#String envParameters
+	#String previousPhase
+	#String tablePrevious
+	#String currentPhase
+	#String tablePil
+	#String tablePilTemp
+	#Integer nbEnr
+	#String tableCalendrier
+	#String directoryRoot
+	#String nullString
+	#String paramBatch
+	+int reporting
+	#String idSource
+	+{static}String SEPARATEUR_JOINTURE_XML
+	#Boolean todo
+	#HashMap<String,ArrayList<String>> tabIdSource
+	#String tableNorme
+	#Integer cptBoucle
+	-String tableOutKo
+	+void repriseSurErreur(Connection connexion, String phase, String tablePil, Exception exception, String[] tableDrop)
+	+{static}String creationTableResultat(String tableIn, String tableToBeCreated, Boolean[] image)
+	+{static}void declencherInitialisationEnProduction()
+	+{static}StringBuilder pilotageMarkIdsource(String tablePilotage, String idSource, String phaseNew, String etatNew, String rapport, String[] jointure)
+	+{static}String temporaryTableName(String aEnvExecution, String aCurrentPhase, String tableName, String[] suffix)
+	+{static}String dbEnv(String env)
+}
+
+interface IApiService [[java:fr.insee.arc_essnet.core.service.IApiService]] {
+	boolean initialiser()
+	void finaliser()
+	void executer()
+}
+
+interface IDbConstant [[java:fr.insee.arc_essnet.core.model.IDbConstant]] {
+}
+
+interface IConstanteNumerique [[java:fr.insee.siera.textutils.IConstanteNumerique]] {
+}
+
+abstract class AbstractPhaseService [[java:fr.insee.arc_essnet.core.service.AbstractPhaseService]] {
++{static}String IS_DEV
+	#{static}Logger LOGGER
+	+{static}String SUFFIXE_TEMP_FILE_ORIADE
+	+{static}String FICHIER_MISE_EN_PRODUCTION
+	+{static}int HEURE_INITIALISATION_PRODUCTION
+	+int NB_PARALLEL
+	+{static}String ID_SOURCE
+	#Connection connexion
+	#String envExecution
+	#String envParameters
+	#String tablePrevious
+	#String tablePil
+	#String tablePilTemp
+	#Integer nbEnr
+	#String tableCalendrier
+	#String directoryRoot
+	#String nullString
+	#String paramBatch
+	+int reporting
+	#String idSource
+	+{static}String SEPARATEUR_JOINTURE_XML
+	#Boolean todo
+	#HashMap<String,ArrayList<String>> tabIdSource
+	#String tableNorme
+	#Integer cptBoucle
+	#String tableOutKo
+}
+
+interface IPhaseService [[java:fr.insee.arc_essnet.core.service.IPhaseService]] {
+	boolean checkTodo(String tablePil, String phaseAncien, String phaseNouveau)
+	void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp, Integer nbEnr)
+	void deletePreviousTable(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch)
+}
+
+abstract class AbstractThreadService [[java:fr.insee.arc_essnet.core.service.thread.AbstractThreadService]] {
+	#{static}Logger LOGGER
+	#Thread actualThread
+	#String tablePilTempThread
+	#int threadId
+	#String tableJeuDeRegle
+	#String tableChargementRegle
+	#String tableNormageRegle
+	#String tableFiltrageRegle
+	#String tableMappingRegle
+	#String tableControleRegle
+	#String tableSeuil
+	+void start()
+	+void run()
+	-void marquagePilotageFinal()
+	+boolean initialisation()
+	+{abstract}void initialisationTodo()
+	+String createTableTravailIdSource(String tableIn, String tableOut, String idSource, String[] extraCols)
+	+void updateNbEnr(String tablePilTemp, String tableTravailTemp)
+	+String createTablePilotageIdSource(String tableIn, String tableOut, String idSource)
+	+{static}void deleteTodo(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch)
+	#String marqueJeuDeRegleApplique(String pilTemp)
+	+String marquageFinal(String tablePil, String tablePilTemp)
+	+String marquageFinal(String tablePil, String tablePilTemp, String id_source)
+	+String listeColonne(Connection connexion, String tableIn)
+	+String createTableTravail(String extraColumns, String tableIn, String tableOut, String tablePilTemp, String idSource, Boolean isIdSource, String[] etat_traitement)
+	+void createTableInherit(Connection connexion, String tableIn, String tableIdSource)
+	+{static}String tableOfIdSource(String tableName, String idSource)
+	+String globalTableName(String aEnvExecution, String aCurrentPhase, String tableName)
+	+Thread getActualThread()
+	+void setActualThread(Thread actualThread)
+	+String getTablePilTempThread()
+	+void setTablePilTempThread(String tablePilTempThread)
+}
+
+interface Runnable [[java:java.lang.Runnable]] {
+	void run()
+}
+
+abstract class "AbstractThreadRunnerService<T extends AbstractThreadService>" as AbstractThreadRunnerService_AbstractThreadService_ [[java:fr.insee.arc_essnet.core.service.AbstractThreadRunnerService]] {
+	#{static}Logger LOGGER
+	#Class<T> classThread
+	+void executer()
+	+void threadRunner()
+	-AbstractThreadService createThread(int currentIndice, Connection connectionThread)
+	+void waitForAbstractServiceThreads(int parallel, List<? extends AbstractThreadService> threadList, List<Connection> connexionList)
+	+{static}ArrayList<Connection> prepareThreads(int parallel, Connection connexion)
+	+HashMap<String,ArrayList<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase, String etat)
+	+Connection chooseConnection(Connection connextionThread, List<? extends AbstractThreadService> threadList, List<Connection> connexionList)
+}
+
+class ApiChargementService [[java:fr.insee.arc_essnet.core.service.ApiChargementService]] {
+	-{static}Logger LOGGER
+	-{static}Class<ThreadChargementService> THREAD_TYPE
+	#String directoryIn
+	-String tableTempA
+	#String tableTempAll
+	#String tableChargementOK
+	-String tableChargementBrutal
+	~HashMap<String,Integer> col
+	-ArrayList<String> allCols
+	-HashMap<String,Integer> colData
+	-StringBuilder requeteInsert
+	#StringBuilder requeteBilan
+	#int nbFileLoaded
+	+int start
+	#String fileName
+	#List<Norme> listeNorme
+	-HashMap<String,ArrayList<String>> listIdsource
+}
+
+interface IApiServiceWithoutOutputTablePreviousPhase [[java:fr.insee.arc_essnet.core.service.IApiServiceWithoutOutputTablePreviousPhase]] {
+}
+
+class ApiControleService [[java:fr.insee.arc_essnet.core.service.ApiControleService]] {
+	-{static}Logger LOGGER
+	-{static}Class<ThreadControleService> THREAD_TYPE
+	+ServiceJeuDeRegle sjdr
+	#ArrayList<JeuDeRegle> listJdr
+	-int currentIndice
+	+void execute(Connection connexion, String env, String phase, String tableControle)
+	+ArrayList<JeuDeRegle> getListJdr()
+	+void setListJdr(ArrayList<JeuDeRegle> listJdr)
+	+ServiceJeuDeRegle getSjdr()
+	+void setSjdr(ServiceJeuDeRegle sjdr)
+}
+
+interface IApiServiceWithOutputTablePreviousPhase [[java:fr.insee.arc_essnet.core.service.IApiServiceWithOutputTablePreviousPhase]] {
+}
+
+class ApiFiltrageService [[java:fr.insee.arc_essnet.core.service.ApiFiltrageService]] {
+	-{static}Logger LOGGER
+	#String seuilExclusion
+	#HierarchicalView normeToPeriodiciteToValiditeInfToValiditeSupToRegle
+	-{static}Class<ThreadFiltrageService> THREAD_TYPE
+}
+
+class ApiIdentificationService [[java:fr.insee.arc_essnet.core.service.ApiIdentificationService]] {
+	-{static}Logger LOGGER
+	-{static}Class<ThreadIdentificationService> THREAD_TYPE
+	#String directoryIn
+	#int nbFileLoaded
+	+int start
+	#String fileName
+	#List<Norme> listeNorme
+}
+
+class ApiInitialisationService [[java:fr.insee.arc_essnet.core.service.ApiInitialisationService]] {
+	-{static}int NB_FICHIER_PER_ARCHIVE
+	-{static}int Nb_Jour_A_Conserver
+	-{static}Logger LOGGER
+	+String tablePilTemp2
+	+void executer()
+	+void rebuildFileSystem()
+	+{static}void bddScript(String envExecution, Connection connexion)
+	+{static}void synchroniserSchemaExecution(Connection connexion, String envParameters, String envExecution)
+	+void reinstate(Connection connexion, String tablePil)
+	+{static}void mettreAJourSchemaTableMetier(Connection connexion, String envParameters, String envExecution)
+	+{static}void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution)
+	+void cleanToDelete(Connection connexion, String tablePil)
+	+void nettoyerTablePilotage(Connection connexion, String envExecution)
+	+{static}void copyTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment)
+	+{static}void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment)
+	+void retourPhasePrecedente(TraitementPhase phase, String querySelection, ArrayList<TraitementEtat> listEtat)
+	+void resetEnvironnement()
+	+StringBuilder requeteListAllTablesEnvTmp(String env)
+	+{static}StringBuilder requeteListAllTablesEnv(String env)
+	+{static}StringBuilder requeteListTableEnv(String env, String phase)
+	+void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution)
+	+{static}void rebuildPilotage(Connection connexion, String tablePilotage)
+	+boolean remettreEtapePilotage()
+	+boolean nettoyerTableBufferColonne(String nomTable)
+	+boolean nettoyerTableColonne(String nomTable)
+	+Boolean nettoyerTableLigne(String envExecution, String nomTable)
+	+Boolean nettoyerTableBufferLigne(String envExecution, String nomTable)
+	+{static}String deleteTableByPilotage(String nomTable, String nomTableSource, String tablePil, String phase, String etat, String extraCond)
+	+{static}void clearPilotageAndDirectories(String repertoire, String env)
+	+{static}void setDummyFilePROD(Boolean todo)
+	+void deletePreviousTable(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch)
+}
+
+class ApiNormageService [[java:fr.insee.arc_essnet.core.service.ApiNormageService]] {
+	-{static}Logger LOGGER
+	#String separator
+	-{static}Class<ThreadNormageService> THREAD_TYPE
+}
+
+class ApiReceptionService [[java:fr.insee.arc_essnet.core.service.ApiReceptionService]] {
+-{static}Logger LOGGER
+	-{static}Pattern p
+	+ApiReceptionService()
+	+ApiReceptionService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String[] paramBatch)
+	+void executer()
+	+void moveClientFiles(int fileSizeLimit)
+	+void registerFiles(Connection connexion, String anExecutionEnvironment, String directoryRoot)
+	+String buildContainerName(String container, String v_container)
+	+String normalizeContainerName(String container, String v_container, String extension)
+	+void soumettreRequete(StringBuilder requete)
+	+void insertPilotage(StringBuilder requete, String tablePilotage, String originalContainer, String newContainer, String v_container, String fileName, String etat, String rapport)
+	+{static}void deplacerFichier(String dirIn, String dirOut, String FileNameIn, String fileNameOut)
+	+GenericBean dispatchFiles(File[] FilesIn)
+	+void deletePreviousTable(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch)
+}
+
+class MappingService [[java:fr.insee.arc_essnet.core.service.mapping.MappingService]] {
+	-{static}Logger LOGGER
+	-{static}String prefixIdentifiantRubrique
+	#RequeteMappingCalibree requeteSQLCalibree
+	#JeuDeRegleDao jdrDAO
+	#RegleMappingFactory regleMappingFactory
+	+{static}Set<String> colNeverNull
+	+{static}String getPrefixidentifiantrubrique()
+}
+
+class ThreadPhaseService {
+}
+
+AbstractService <|-- AbstractPhaseService
+IApiService <|.. AbstractService
+IDbConstant <|.. AbstractService
+IConstanteNumerique <|.. AbstractService
+IPhaseService <|.. AbstractPhaseService
+AbstractService <|-- AbstractThreadService
+Runnable <|.. AbstractThreadService
+AbstractPhaseService <|-- AbstractThreadRunnerService_AbstractThreadService_
+AbstractThreadRunnerService_AbstractThreadService_ <|-- ApiChargementService
+IApiServiceWithoutOutputTablePreviousPhase <|.. ApiChargementService
+AbstractThreadRunnerService_AbstractThreadService_ <|-- ApiControleService
+IApiServiceWithOutputTablePreviousPhase <|.. ApiControleService
+AbstractThreadRunnerService_AbstractThreadService_ <|-- ApiFiltrageService
+IApiServiceWithOutputTablePreviousPhase <|.. ApiFiltrageService
+AbstractThreadRunnerService_AbstractThreadService_ <|-- ApiIdentificationService
+IApiServiceWithoutOutputTablePreviousPhase <|.. ApiIdentificationService
+AbstractPhaseService <|-- ApiInitialisationService
+AbstractThreadRunnerService_AbstractThreadService_ <|-- ApiNormageService
+IApiServiceWithOutputTablePreviousPhase <|.. ApiNormageService
+AbstractPhaseService <|-- ApiReceptionService
+AbstractThreadRunnerService_AbstractThreadService_ <|-- MappingService
+IApiServiceWithOutputTablePreviousPhase <|.. MappingService
+AbstractThreadService <|-- ThreadPhaseService
+
+@enduml

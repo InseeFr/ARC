@@ -1,0 +1,20 @@
+@startuml
+class ParentTable << (T,orchid) >> {
+  text id_source
+  integer id
+  text date_integration
+  text id_norme
+  text periodicite
+  text validite
+
+}
+class ChildTable1 << (T,orchid) >> {
+
+}
+class ChildTable2 << (T,orchid) >> {
+  
+}
+
+ParentTable  <|-- ChildTable1
+ParentTable  <|-- ChildTable2
+@enduml

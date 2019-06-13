@@ -1,0 +1,30 @@
+@startuml calendar_database
+!define table << (T,orchid) >>
+!define primary_key(x) <u>x</u>
+hide methods
+hide stereotypes
+
+class norm_family << table >>  {
+  text primary_key(id_family) 
+
+}
+class norm << table >>  {
+  text  primary_key(id_norm)
+  text periodicity
+  text def_norm
+  text def_validity
+  text state 
+}
+
+
+class calendar << table >> {
+  date primary_key(validity_inf)
+  date primary_key(validity_sup)
+  text state
+
+}
+
+norm_family "1" -right- "0..n" norm : < implements
+norm "1" -right- "0..n" calendar : has >
+
+@enduml

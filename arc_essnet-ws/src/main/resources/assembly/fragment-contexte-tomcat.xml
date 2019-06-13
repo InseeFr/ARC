@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	Fichier blanc destiné à contenir le fragment de contexte Tomcat propre à l'application.
+	NE PAS RENOMMER, l'assembly Maven se charge de modifier le nom du fichier lors
+	de la création d'un livrable.
+ -->

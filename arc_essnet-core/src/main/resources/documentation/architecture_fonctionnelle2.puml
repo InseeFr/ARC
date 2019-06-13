@@ -1,0 +1,36 @@
+@startuml
+start
+:Get files to process;
+
+:Create temporary pilotage table;
+
+repeat
+
+  :Create working table with file data;
+  
+	floating note right
+	Each file are processed in \n
+	individual thread
+	end note
+  
+  :Get file's user defined rules;
+  
+  :Apply rules;
+  
+	if (An error occured ?) then (yes)
+	  :Tag file as KO;
+	  
+	  :Send data file to KO table;
+	    
+	else (no)
+	  :Tag file as OK;
+	  
+	  :Send data file to OK table;
+	  
+	endif
+  
+  :Update pilotage table;
+  
+repeat while (more file)
+stop
+@enduml

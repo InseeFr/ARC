@@ -1,0 +1,18 @@
+<dataset>
+
+	<norme id_norme="G_F" periodicite="A"
+		def_norme="select 1 from alias_table where  id_source LIKE '%GF%'"
+		def_validite="SELECT '2015-01-01'" id="1" etat="1" id_famille="DSN" />
+	<norme id_norme="PHAS3v1_v2" periodicite="M"
+		def_norme="{V_S10_G00_00_006} IN ('P03V01')" def_validite="{v_s20_g00_05_005}"
+		id="2" etat="1" id_famille="DSN" />
+	<norme id_norme="PHASE2V1" periodicite="M"
+		def_norme="{V_S10_G00_00_006} IN ('P02V00','P02V01')" def_validite="{v_s20_g00_05_005}"
+		id="3" etat="1" id_famille="DSN" />
+	<norme id_norme="n4ds" periodicite="A"
+		def_norme="sselect 1 from alias_table where id_source like '%.n4ds%' "
+		def_validite="SELECT max(to_char(to_date(replace(split_part(ligne, ',',2),'''',''),'ddmmyyyy'),'yyyy-mm-dd')::text) FROM alias_table WHERE ligne LIKE '%S20_G01_00_003_001%' "
+		id="4" etat="1" id_famille="DSN" />
+
+
+</dataset>

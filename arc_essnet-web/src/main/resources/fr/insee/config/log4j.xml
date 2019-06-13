@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration>
+	<!-- APPENDERS LIST -->
+
+	<!-- Pour un affichage dans la console -->
+	<!-- Traces -->
+	<appender name="console_trace" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%5p %d{DATE}- %c{1}:%-4L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="TRACE" />
+			<param name="LevelMax" value="TRACE" />
+		</filter>
+	</appender>
+	<appender name="query_trace" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="TRACE" />
+			<param name="LevelMax" value="TRACE" />
+		</filter>
+	</appender>
+	<!-- Debug -->
+	<appender name="console_debug" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%5p %d{DATE}- %c{1}:%-4L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="DEBUG" />
+			<param name="LevelMax" value="DEBUG" />
+		</filter>
+	</appender>
+	<!-- Info -->
+	<appender name="console_info" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%5p %d{DATE}- %c{1}:%-4L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="INFO" />
+			<param name="LevelMax" value="INFO" />
+		</filter>
+	</appender>
+
+	<!-- Warn -->
+	<appender name="console_warn" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%5p %d{DATE}- %c{1}:%-4L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="WARN" />
+			<param name="LevelMax" value="WARN" />
+		</filter>
+	</appender>
+	<!-- Error -->
+	<appender name="console_error" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%5p %d{DATE}- %c{1}:%-4L - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="ERROR" />
+			<param name="LevelMax" value="ERROR" />
+		</filter>
+	</appender>
+
+	<!-- LOGGER LIST -->
+
+	<logger name="fr.insee.arc_essnet" additivity="false">
+		<level value="TRACE" />
+		<appender-ref ref="query_trace" />
+		<appender-ref ref="console_info" />
+		<appender-ref ref="console_debug" />
+		<appender-ref ref="console_warn" />
+		<appender-ref ref="console_error" />
+	</logger>
+
+
+
+	<!-- Déclaration du logger de base -->
+	<root>
+		<priority value="ERROR"></priority>
+		<appender-ref ref="query_trace" />
+		<appender-ref ref="console_debug" />
+		<appender-ref ref="console_info" />
+		<appender-ref ref="console_warn" />
+		<appender-ref ref="console_error" />
+	</root>
+
+</log4j:configuration>

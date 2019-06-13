@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+<!-- 	<Valve className="fr.insee.tomcat.saml.sp.SPAuthenticator" oiosamlHome="${catalina.base}/conf/saml" /> -->
+<!-- 	<Realm className="fr.insee.tomcat.saml.sp.SAMLRealm" roleAttribute="roles" usernameAttribute="uid"/> -->
+</Context>

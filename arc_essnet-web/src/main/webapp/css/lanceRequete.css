@@ -1,0 +1,44 @@
+h1 {
+	font-family: Arial;
+	font-size:11px;
+}
+
+table {
+	font-family: Arial;
+	font-size:11px;
+	border: 1px solid #666;
+}
+
+table thead tr  {
+	background-color: #bbb;	
+}
+
+table tbody tr:nth-child(even) {
+	background-color: #e0efff;
+}
+
+table tbody tr:nth-child(odd) {
+	background-color: #ffffff;
+}
+
+table td {
+	border-right: 1px dotted #bbb;
+	padding-right: 5px;
+	padding-left: 5px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.errorMessage {
+	color: red;
+	list-style-image: url(/GEOLOC_interactif/images/exclamation.png);
+	background-color:#fdd;
+	font-weight: bold;
+}
+
+.divField {
+	border: 1px solid #000000;
+	margin: 15px 5px;
+	background-color: #e5f0ff;
+	padding: 5px;
+}

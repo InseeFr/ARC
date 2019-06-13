@@ -1,0 +1,31 @@
+@startuml
+
+actor user
+actor batch
+
+rectangle "ARC application"{
+	rectangle service [
+	service
+	---
+	create a thread for each file \n to process
+	]
+	rectangle "thread Service" as threadService1
+	rectangle "thread Service" as threadService2
+	rectangle "thread Service" as threadService3
+}
+database database
+
+user --> service : invoke
+batch --> service : invoke
+
+service --> database : request file to process 
+service <-- database 
+
+service --> threadService1 : create
+service --> threadService2 : create
+service --> threadService3 : create
+
+threadService1 --> database : send SQL treatments
+threadService2 --> database : send SQL treatments
+threadService3 --> database : send SQL treatments
+@enduml

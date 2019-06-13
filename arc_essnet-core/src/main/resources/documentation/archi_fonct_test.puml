@@ -1,0 +1,40 @@
+@startuml
+
+folder "Input folder"{
+	[Input files]
+}
+
+folder "Archive folder"{
+	[Archive files]
+}
+
+node "ARC application" {
+	node "ARC-core" {
+	  [Business services]
+	  
+	}
+	
+	node "ARC-web" {
+	  [Struts2 action classes]
+	}
+	
+	node "ARC-batch" {
+	  [Batch runner]
+	}
+	
+	node "ARC-utils" {
+	   [Utility classes]
+	}
+}
+
+database "PostgreSQL" {
+	[Data base]
+}
+
+[Batch runner] -->  [Business services] : call
+[Struts2 action classes] -->  [Business services] : call
+[Business services] -down-> [Data base] : access
+[Business services] -left-> [Input files] : read
+[Business services] --> [Utility classes] : use
+[Business services] -up-> [Archive files] : write
+@enduml
