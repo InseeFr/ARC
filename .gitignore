@@ -44,3 +44,7 @@ local.properties
 ### puml
 ##########################
 out/
+
+outdated.txt
+.factorypath
+devarc.properties

@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,12 +12,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc_essnet.utils.format.Format;
-import fr.insee.arc_essnet.utils.structure.GenericBean;
 import fr.insee.arc_essnet.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc_essnet.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc_essnet.utils.textUtils.SequentialUntokenizer;
