@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 
-@Component
+@Component("properties")
 @Getter
 @Setter
 public class PropertiesHandler {
@@ -24,20 +24,27 @@ public class PropertiesHandler {
     private String logNiveau ;
     private String logConfiguration ;
     private String batchParametreRepertoire ;
-    private String threadsChargement ;
+    private int threadsChargement ;
     private int threadsNormage ;
     private int threadsControle ;
     private int threadsFiltrage ;
     private int threadsMapping ;
     private int threadsRegle ;
+    private String version;
+    private String schemaReference;
+    private Boolean isProd;
+    private String application;
+    private String tn;
+    private String repertoireRoot;
     
-    public static PropertiesHandler getProperties() {
+    public static PropertiesHandler getInstance() {
 	GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
 
 	PropertiesHandler propertitiesHandler = (PropertiesHandler) ctx.getBean("properties");
 	ctx.close();
 	return propertitiesHandler;
     }
+
 
 
 }

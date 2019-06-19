@@ -12,14 +12,13 @@
 	<context:annotation-config></context:annotation-config>
 	<context:component-scan base-package="fr.insee.arc_essnet.web"></context:component-scan>
 	<context:component-scan base-package="fr.insee.arc_essnet.core"></context:component-scan>
-	<bean
-	 id="propertyConfigurer"
+	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
-				<value>classpath:fr/insee/config/devarc.properties
-				</value>
 				<value>classpath:fr/insee/config/arc.properties
+				</value>
+				<value>classpath:fr/insee/config/devarc.properties
 				</value>
 			</list>
 		</property>
@@ -48,6 +47,11 @@
 		<property name="threadsFiltrage" value="${fr.insee.arc.threads.filtrage}"></property>
 		<property name="threadsMapping" value="${fr.insee.arc.threads.mapping}"></property>
 		<property name="threadsRegle" value="${fr.insee.arc.threads.regle}"></property>
+		<property name="version" value="${fr.insee.arc.version}"></property>
+		<property name="isProd" value="${fr.insee.plateforme.prod:false}"></property>
+		<property name="application" value="${fr.insee.application}"></property>
+		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
+		<property name="repertoireRoot" value="${fr.insee.arc.repertoire.root}"></property>
 
 	</bean>
 
