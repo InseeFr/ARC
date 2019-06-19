@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
-import fr.insee.config.InseeConfig;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/index.jsp"),
@@ -21,7 +20,6 @@ public class IndexAction extends ArcAction {
     private static final Logger LOGGER = Logger.getLogger(IndexAction.class);
     private static final String ACTION_NAME = "Index";
 
-    private String version = InseeConfig.getConfig().getString("fr.insee.arc.version");
 
     /**
      * Pour récupérer le choix de la norme
@@ -60,13 +58,7 @@ public class IndexAction extends ArcAction {
 	return "status";
     }
 
-    public String getVersion() {
-	return version;
-    }
 
-    public void setVersion(String version) {
-	this.version = version;
-    }
 
     @Override
     public void putAllVObjects() {

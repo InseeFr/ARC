@@ -40,11 +40,14 @@ import fr.insee.arc_essnet.utils.utils.ManipString;
 import fr.insee.arc_essnet.utils.utils.SQLExecutor;
 import fr.insee.arc_essnet.web.model.SessionParameters;
 import fr.insee.arc_essnet.web.util.VObject;
-import fr.insee.config.InseeConfig;
+import lombok.Getter;
+import lombok.Setter;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererPilotageBAS8.jsp"),
 	@Result(name = "index", location = "/jsp/index.jsp") })
+@Getter
+@Setter
 public class PilotageBAS8Action extends ArcAction {
 
     private static final String ARC = "ARC_";
@@ -75,7 +78,6 @@ public class PilotageBAS8Action extends ArcAction {
 
     private List<TraitementPhaseEntity> listePhase;
 
-    private String repertoire = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire");
 
     /**
      * Phase sélectionnée par l'utilisateur
@@ -978,20 +980,6 @@ public class PilotageBAS8Action extends ArcAction {
 	return null;
     }
 
-    public String getPhaseAExecuter() {
-	return phaseAExecuter;
-    }
 
-    public void setPhaseAExecuter(String phaseAExecuter) {
-	this.phaseAExecuter = phaseAExecuter;
-    }
-
-    public List<TraitementPhaseEntity> getListePhase() {
-	return listePhase;
-    }
-
-    public void setListePhase(List<TraitementPhaseEntity> listePhase) {
-	this.listePhase = listePhase;
-    }
 
 }

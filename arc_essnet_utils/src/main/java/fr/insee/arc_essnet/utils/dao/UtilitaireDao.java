@@ -54,6 +54,7 @@ import org.apache.tools.tar.TarInputStream;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -82,9 +83,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
     @Autowired
     private static Environment env;
     
-    @Autowired
-    private PropertiesHandler propertiesHandler;
-    
+
     private static final int DEFAULT_MX_RETRY = 120;
     /**
      * Format des données utilisées dans la commande copy
@@ -240,16 +239,17 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
      */
     public final Connection getDriverConnexion() throws Exception {
 	// invocation du driver
+	 PropertiesHandler properties = PropertiesHandler.getInstance();
 	Class.forName(
-		propertiesHandler.getDriverClassName());
+		properties.getDatabaseArcDriverClassName());
 	boolean connectionOk = false;
 	int nbTry = 0;
 	Connection c = null;
 	while (!connectionOk && nbTry < maxRetry) {
 	    // renvoie la connexion relative au driver
 	    try {
-		c = DriverManager.getConnection(propertiesHandler.getUrl(), propertiesHandler.getUserName(),
-			propertiesHandler.getPassword());
+		c = DriverManager.getConnection(properties.getDatabaseArcUrl(), properties.getDatabaseArcUsername(),
+			properties.getDatabaseArcPassword());
 		connectionOk = true;
 	    } catch (Exception e) {
 		int sleep = 60000;
@@ -2641,16 +2641,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	try {
 
 	    // get some properties manually
-	    FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<PropertiesConfiguration>(
-		    PropertiesConfiguration.class).configure(
-			    new Parameters().properties().setFileName(aCheminAcces).setThrowExceptionOnMissing(true)
-				    .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
-				    .setIncludesAllowed(false));
-	    PropertiesConfiguration config = builder.getConfiguration();
-
-	    return DriverManager.getConnection(config.getString("fr.insee.database." + aPool + ".url")//
-		    , config.getString("fr.insee.database." + aPool + ".username")//
-		    , config.getString("fr.insee.database." + aPool + ".password")//
+	    PropertiesHandler properties = PropertiesHandler.getInstance();
+	    return DriverManager.getConnection(properties.getDatabaseArcUrl()//
+		    , properties.getDatabaseArcUsername()//
+		    , properties.getDatabaseArcPassword()//
 	    );
 	} catch (Exception e) {
 	    LoggerHelper.error(LOGGER, e, e.getMessage());

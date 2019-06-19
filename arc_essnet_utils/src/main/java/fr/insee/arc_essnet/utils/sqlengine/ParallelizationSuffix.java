@@ -10,7 +10,7 @@ public class ParallelizationSuffix
     @Autowired
     private static PropertiesHandler propertiesHandler;
     
-    private static String TN = propertiesHandler.getTN();
+    private static String TN = propertiesHandler.getTn();
     
     private static final ThreadLocal<String> INSTANCE = ThreadLocal.withInitial(() -> TN);
 

@@ -20,6 +20,8 @@
 		</dependency>
 
 		<dependency>
+
+
 			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-core</artifactId>
 			<version>${project.struts2.version}</version>
