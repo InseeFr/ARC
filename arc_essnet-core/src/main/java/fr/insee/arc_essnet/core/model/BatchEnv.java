@@ -6,9 +6,8 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import fr.insee.arc_essnet.utils.dao.UtilitaireDao;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
-import fr.insee.config.InseeConfig;
 
 /**
  * FIXME make abstract Classe des variables d'environnement liées au batch
@@ -35,21 +34,23 @@ public class BatchEnv {
 
     public BatchEnv() {
 
-        this.repertoireReception = InseeConfig.getConfig().getString("fr.insee.arc.repertoire.reception");
-        this.repertoireChargement = InseeConfig.getConfig().getString("fr.insee.arc.repertoire.chargement");
-        this.repertoireStockage = InseeConfig.getConfig().getString("fr.insee.arc.repertoire.stockage");
+	PropertiesHandler properties = PropertiesHandler.getInstance();
 
-        try {
-            Class.forName("org.postgresql.Driver");
-            this.connexion = DriverManager.getConnection(InseeConfig.getConfig().getString("fr.insee.database.arc.url"), InseeConfig.getConfig()
-                    .getString("fr.insee.database.arc.username"), UtilitaireDao.getProtectedConfig("fr.insee.database.arc.password"));
-        } catch (SQLException ex) {
-            LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
-        } catch (ClassNotFoundException ex) {
-            LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
-        }
+	this.repertoireReception = properties.getRepertoireReception();
+	this.repertoireChargement = properties.getRepertoireChargement();
+	this.repertoireStockage = properties.getRepertoireStockage();
 
-        this.databaseSchema = InseeConfig.getConfig().getString("fr.insee.database.arc.schema");
+	try {
+	    Class.forName("org.postgresql.Driver");
+	    this.connexion = DriverManager.getConnection(properties.getDatabaseArcUrl(),
+		    properties.getDatabaseArcUsername(), properties.getDatabaseArcPassword());
+	} catch (SQLException ex) {
+	    LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
+	} catch (ClassNotFoundException ex) {
+	    LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
+	}
+
+	this.databaseSchema = properties.getDatabaseArcSchema();
     }
 
 }

@@ -128,7 +128,7 @@ public class ThreadIdentifyService extends AbstractThreadService {
 	LoggerDispatcher.info("** normeFinder : " + this.idSource + " **", LOGGER);
 	// Si on a pas 1 seule norme alors le fichier est en erreur
 	ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
-	chgrBrtl.setConnexion(getConnexion());
+	chgrBrtl.setConnexion(getConnection());
 	chgrBrtl.setListeNorme(normList);
 
 	try {
@@ -181,7 +181,7 @@ public class ThreadIdentifyService extends AbstractThreadService {
 	}
 
 	bloc3.append("where id_source='" + idSource + "' AND phase_traitement='" + this.tokenInputPhaseName + "'; \n");
-	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnexion(), bloc3);
+	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnection(), bloc3);
 	java.util.Date endDate = new java.util.Date();
 
 	LoggerDispatcher.info(

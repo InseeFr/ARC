@@ -140,7 +140,7 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 		this.bddTable.getQualifedName(BddTable.ID_WORKING_TABLE_KO), this.getTablePilTempThread(),
 		TraitementState.KO.toString()));
 
-	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnexion(), request);
+	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnection(), request);
 
     }
 
@@ -234,7 +234,7 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 
 	}
 
-	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnexion(), request);
+	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnection(), request);
 	request.setLength(0);
 
     }

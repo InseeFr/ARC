@@ -94,7 +94,7 @@ public class AbstractServiceTest {
 	fillTableDBunit(XML_FILE_PILOTAGE_TABLE);
 
 	AbstractService abstractService = Mockito.mock(AbstractService.class, Mockito.CALLS_REAL_METHODS);
-	abstractService.setConnexion(connection);
+	abstractService.setConnection(connection);
 
 	String actualPilTable = bddTableTest.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER);
 	Exception actualException = new Exception("test exception");
@@ -171,7 +171,7 @@ public class AbstractServiceTest {
 	createTestTable(BddTable.ID_TABLE_NORME_SPECIFIC);
 	fillTableDBunit(XML_FILE_NORME_TABLE);
 	AbstractService abstractService = Mockito.mock(AbstractService.class, Mockito.CALLS_REAL_METHODS);
-	abstractService.setConnexion(connection);
+	abstractService.setConnection(connection);
 	abstractService.setBddTable(bddTableTest);
 
 	// WHEN
