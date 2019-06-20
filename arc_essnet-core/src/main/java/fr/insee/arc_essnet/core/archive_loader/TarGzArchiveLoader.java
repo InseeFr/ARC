@@ -9,6 +9,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc_essnet.core.service.SizeLimiterInputStream;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 
 /**
@@ -59,7 +60,8 @@ public class TarGzArchiveLoader extends AbstractArchiveFileLoader {
 
 	// Optimization : if the archive contains more file than the number of thread =>
 	// extraction
-	if (countNbEntries(tarInput) > THREAD_NUMBER) {
+	int numberThread = PropertiesHandler.getInstance().getThreadsChargement();
+	if (countNbEntries(tarInput) > numberThread) {
 	    extractArchive(fileDecompresor);
 	    this.filesInputStreamLoad = readFile(streamNames);
 	} else {

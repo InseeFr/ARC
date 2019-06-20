@@ -18,6 +18,8 @@ import fr.insee.arc_essnet.utils.dao.UtilitaireDao;
 import fr.insee.arc_essnet.utils.queryhandler.BatchQueryHandler;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Abstract class that all the phaseService class need to extends. Provide a
@@ -74,7 +76,7 @@ public abstract class AbstractThreadRunnerService<T extends AbstractThreadServic
 
 	// Get the number of file to process
 	@SuppressWarnings("resource")
-	PilotageDAO pilotageDao = new PilotageDAO(new BatchQueryHandler(this.getConnexion()),
+	PilotageDAO pilotageDao = new PilotageDAO(new BatchQueryHandler(this.getConnection()),
 		this.getBddTable().getContextName(BddTable.ID_TABLE_PILOTAGE_TEMP));
 
 	this.filesToProcess = pilotageDao.getFilesToProcess(this.phaseName, TraitementState.ENCOURS.toString());
@@ -216,7 +218,7 @@ public abstract class AbstractThreadRunnerService<T extends AbstractThreadServic
 	    boolean choosen = true;
 
 	    for (int j = 0; j < threadList.size(); j++) {
-		if (connexionList.get(i).equals(threadList.get(j).getConnexion())) {
+		if (connexionList.get(i).equals(threadList.get(j).getConnection())) {
 		    choosen = false;
 		}
 	    }

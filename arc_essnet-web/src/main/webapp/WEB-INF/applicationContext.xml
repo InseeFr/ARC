@@ -41,17 +41,19 @@
 		<property name="logNiveau" value="${fr.insee.arc.log.niveau}"></property>
 		<property name="logConfiguration" value="${fr.insee.arc.log.configuration}"></property>
 		<property name="batchParametreRepertoire" value="${fr.insee.arc.batch.parametre.repertoire}"></property>
-		<property name="threadsChargement" value="${fr.insee.arc.threads.chargement}"></property>
-		<property name="threadsNormage" value="${fr.insee.arc.threads.normage}"></property>
-		<property name="threadsControle" value="${fr.insee.arc.threads.controle}"></property>
-		<property name="threadsFiltrage" value="${fr.insee.arc.threads.filtrage}"></property>
-		<property name="threadsMapping" value="${fr.insee.arc.threads.mapping}"></property>
-		<property name="threadsRegle" value="${fr.insee.arc.threads.regle}"></property>
+		<property name="threadsChargement" value="${fr.insee.arc.threads.chargement:1}"></property>
+		<property name="threadsNormage" value="${fr.insee.arc.threads.normage:1}"></property>
+		<property name="threadsControle" value="${fr.insee.arc.threads.controle:1}"></property>
+		<property name="threadsFiltrage" value="${fr.insee.arc.threads.filtrage:1}"></property>
+		<property name="threadsMapping" value="${fr.insee.arc.threads.mapping:1}"></property>
+		<property name="threadsRegle" value="${fr.insee.arc.threads.regle:1}"></property>
+		<property name="threadNombre" value="${fr.insee.arc.threads.nombre:1}"></property>
 		<property name="version" value="${fr.insee.arc.version}"></property>
 		<property name="isProd" value="${fr.insee.plateforme.prod:false}"></property>
-		<property name="application" value="${fr.insee.application}"></property>
+		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 		<property name="repertoireRoot" value="${fr.insee.arc.repertoire.root}"></property>
+		
 
 	</bean>
 

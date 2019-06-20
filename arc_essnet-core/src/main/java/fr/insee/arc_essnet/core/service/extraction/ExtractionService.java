@@ -14,14 +14,14 @@ import org.apache.log4j.Logger;
 
 import fr.insee.arc_essnet.core.model.extraction.DemandeExtraction;
 import fr.insee.arc_essnet.core.model.extraction.Rubrique;
-import fr.insee.config.InseeConfig;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 
 public class ExtractionService {
 
     private static final Logger LOGGER = Logger.getLogger(ExtractionService.class);
 
-    private final int nbThreads = InseeConfig.getConfig().getInt("fr.insee.arc.threads.nombre");
-
+    PropertiesHandler properties;
+    
     private FileWriter fichierEnSortie;
 
     private BufferedWriter bufferedWriter;
@@ -41,6 +41,7 @@ public class ExtractionService {
 
     public ExtractionService() {
 	super();
+	properties = PropertiesHandler.getInstance();
     }
 
     public String getPathFichiersCSVEnLecture() {
@@ -102,7 +103,7 @@ public class ExtractionService {
 	    // Puis on lance l'extraction
 	    try {
 		int compteur = 0;
-		ExecutorService executor = Executors.newFixedThreadPool(nbThreads);
+		ExecutorService executor = Executors.newFixedThreadPool(properties.getThreadNombre());
 		for (File file : listeDeFichiers) {
 
 		    compteur++;

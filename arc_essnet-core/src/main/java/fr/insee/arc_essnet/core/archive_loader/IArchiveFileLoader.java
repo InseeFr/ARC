@@ -2,7 +2,6 @@ package fr.insee.arc_essnet.core.archive_loader;
 
 import java.io.IOException;
 
-import fr.insee.config.InseeConfig;
 
 
 /**
@@ -12,11 +11,6 @@ import fr.insee.config.InseeConfig;
  *
  */
 public interface IArchiveFileLoader {
-    
-    /**
-     * If there is more than THREAD_NUMBER file in archive file it will be extract
-     */
-    public static final int THREAD_NUMBER = InseeConfig.getConfig().getInt("fr.insee.arc.threads.chargement");
     
 
     /**

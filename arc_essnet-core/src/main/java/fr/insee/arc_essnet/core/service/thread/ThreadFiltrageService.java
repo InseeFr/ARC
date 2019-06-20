@@ -50,11 +50,11 @@ public class ThreadFiltrageService extends AbstractThreadService
 	this.tableFiltrageDataTemp = FormatSQL.temporaryTableName("filtrage_data_temp");
 
 	this.tableTempFiltrageKo = FormatSQL
-		.temporaryTableName(dbEnv(this.getEnvExecution()) + this.tokenInputPhaseName + "_" + TraitementState.KO);
+		.temporaryTableName(dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.KO);
 	this.tableTempFiltrageOk = FormatSQL
-		.temporaryTableName(dbEnv(this.getEnvExecution()) + this.tokenInputPhaseName + "_" + TraitementState.OK);
-	this.tableFiltrageKo = globalTableName(this.getEnvExecution(), this.tokenInputPhaseName, "ko");
-	this.tableFiltrageOk = globalTableName(this.getEnvExecution(), this.tokenInputPhaseName, "ok");
+		.temporaryTableName(dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.OK);
+	this.tableFiltrageKo = globalTableName(this.getExecutionEnv(), this.tokenInputPhaseName, "ko");
+	this.tableFiltrageOk = globalTableName(this.getExecutionEnv(), this.tokenInputPhaseName, "ok");
 
 	this.nbEnr = theApi.getNbEnr();
 

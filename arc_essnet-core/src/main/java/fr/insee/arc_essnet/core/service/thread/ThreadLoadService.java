@@ -30,7 +30,6 @@ import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.utils.utils.ManipString;
 import fr.insee.arc_essnet.utils.utils.SQLExecutor;
-import fr.insee.config.InseeConfig;
 
 /**
  * This is a loading business logic. This thread like other extends {@link AbstractThreadService}.
@@ -95,7 +94,7 @@ public class ThreadLoadService extends AbstractThreadService  {
 	this.tableChargementOK = globalTableName(executionEnv, this.tokenInputPhaseName,
 		TraitementState.OK.toString());
 		
-	this.fileNorme = new NormeDAO(new BatchQueryHandler(this.getConnexion()), getBddTable().getContextName(BddTable.ID_TABLE_NORME_SPECIFIC)).getFromID(aApi.getFilesToProcess().get(currentIndice).getIdNorme());
+	this.fileNorme = new NormeDAO(new BatchQueryHandler(this.getConnection()), getBddTable().getContextName(BddTable.ID_TABLE_NORME_SPECIFIC)).getFromID(aApi.getFilesToProcess().get(currentIndice).getIdNorme());
 		new Norme(aApi.getFilesToProcess().get(currentIndice).getIdNorme());
 	this.validity = aApi.getFilesToProcess().get(currentIndice).getValidite();
 	this.periodicite = aApi.getFilesToProcess().get(currentIndice).getPeriodicite();
@@ -173,8 +172,8 @@ public class ThreadLoadService extends AbstractThreadService  {
      * @throws Exception
      */
     public void export(String table) throws Exception {
-	String repertoire = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire");
-	String envDir = this.getEnvExecution().replace(".", "_").toUpperCase();
+	String repertoire = properties.getBatchParametreRepertoire();
+	String envDir = this.getExecutionEnv().replace(".", "_").toUpperCase();
 	String dirOut = repertoire + envDir + File.separator + "EXPORT";
 	File f = new File(dirOut);
 
@@ -249,7 +248,7 @@ public class ThreadLoadService extends AbstractThreadService  {
     @SQLExecutor
     private Norme calculerTypeFichier(String idNorme) throws Exception {
 	Norme outputed = new Norme();
-	GenericBean g = new GenericBean(UtilitaireDao.get(DbConstant.POOL_NAME).executeRequest(this.getConnexion(),
+	GenericBean g = new GenericBean(UtilitaireDao.get(DbConstant.POOL_NAME).executeRequest(this.getConnection(),
 		"SELECT type_fichier, delimiter, format FROM " + this.bddTable.getQualifedName(BddTable.ID_TABLE_CHARGEMENT_REGLE) + " WHERE id_norme ='"
 			+ idNorme + "';"));
 

@@ -35,6 +35,8 @@ import fr.insee.arc_essnet.utils.utils.FormatSQL;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.utils.utils.SQLExecutor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Abstract class that all threads have to extends. Provide variables and
@@ -43,6 +45,8 @@ import fr.insee.arc_essnet.utils.utils.SQLExecutor;
  * @author Rémi Pépin
  *
  */
+@Getter
+@Setter
 public abstract class AbstractThreadService extends AbstractService implements Runnable {
 
     private static final String THREAD_ERROR_MESG = "Thread %s encounter a error in %s ";
@@ -60,12 +64,12 @@ public abstract class AbstractThreadService extends AbstractService implements R
     protected IQueryHandler queyHandler;
 
     public AbstractThreadService(int indice, AbstractPhaseService theApi, Connection aConnexion) {
-	super(aConnexion, theApi.getPhaseName(), theApi.getEnvParameters(), theApi.getEnvExecution(),
+	super(aConnexion, theApi.getPhaseName(), theApi.getParameterEnv(), theApi.getExecutionEnv(),
 		theApi.getDirectoryRoot(), theApi.getNbEnr(), theApi.getParamBatch());
 
 	this.threadId = indice;
 	this.idSource = theApi.getFilesToProcess().get(indice).getIdSource();
-	this.executionEnv = theApi.getEnvExecution();
+	this.executionEnv = theApi.getExecutionEnv();
 	this.tokenInputPhaseName = theApi.getPhaseName();
 
 	this.connection = aConnexion;
@@ -291,7 +295,7 @@ public abstract class AbstractThreadService extends AbstractService implements R
 		+ " group by id_source) b ");
 	query.append("\n \t WHERE a.id_source='" + idSource + "'; \n");
 
-	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnexion(), query);
+	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnection(), query);
 
     }
 
@@ -548,25 +552,12 @@ public abstract class AbstractThreadService extends AbstractService implements R
 	return dbEnv(aExecutionEnv) + aCurrentPhase + "_" + tableName;
     }
 
-    public Thread getActualThread() {
-	return actualThread;
-    }
 
-    public void setActualThread(Thread actualThread) {
-	this.actualThread = actualThread;
-    }
 
     public String getTablePilTempThread() {
 	return this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_TEMP_THREAD);
     }
 
-    public String getTokenInputPhaseName() {
-	return tokenInputPhaseName;
-    }
-
-    public void setTokenInputPhaseName(String tokenInputPhaseName) {
-	this.tokenInputPhaseName = tokenInputPhaseName;
-    }
 
     public String getTablePrevious() {
 	return bddTable.getQualifedName(BddTable.ID_TABLE_PREVIOUS_PHASE);

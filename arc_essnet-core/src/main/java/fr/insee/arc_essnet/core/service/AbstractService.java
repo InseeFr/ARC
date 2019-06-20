@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc_essnet.core.dao.NormeDAO;
@@ -21,13 +21,18 @@ import fr.insee.arc_essnet.core.model.TraitementTableExecution;
 import fr.insee.arc_essnet.core.util.EDateFormat;
 import fr.insee.arc_essnet.utils.dao.UtilitaireDao;
 import fr.insee.arc_essnet.utils.queryhandler.BatchQueryHandler;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.sqlengine.Namings;
 import fr.insee.arc_essnet.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc_essnet.utils.utils.FormatSQL;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.utils.utils.SQLExecutor;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public abstract class AbstractService implements IApiService, IConstanteNumerique {
 
     public static final String IS_DEV = "fr.insee.arc.environnement.is.dev";
@@ -68,9 +73,12 @@ public abstract class AbstractService implements IApiService, IConstanteNumeriqu
     protected BddTable bddTable;
     protected List<String> idTableToClean = new ArrayList<>();
 
+    public  PropertiesHandler properties;
+    
     public AbstractService(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution,
 	    String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
 	LoggerDispatcher.info(String.format("** Service constructor %s**", aCurrentPhase), LOGGER);
+	
 
 	createConnectionToDB();
 	
@@ -112,6 +120,8 @@ public abstract class AbstractService implements IApiService, IConstanteNumeriqu
      */
     private void setValues(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution,
 	    String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
+	
+	properties = PropertiesHandler.getInstance();
 	if (paramBatch != null && paramBatch.length > 0) {
 	    this.paramBatch = paramBatch[0];
 	}
@@ -327,29 +337,7 @@ public abstract class AbstractService implements IApiService, IConstanteNumeriqu
 	return env.replace(".", "_") + ".";
     }
 
-    public Connection getConnexion() {
-	return connection;
-    }
 
-    public void setConnexion(Connection connexion) {
-	this.connection = connexion;
-    }
-
-    public String getEnvExecution() {
-	return executionEnv;
-    }
-
-    public void setEnvExecution(String envExecution) {
-	this.executionEnv = envExecution;
-    }
-
-    public String getEnvParameters() {
-	return parameterEnv;
-    }
-
-    public void setEnvParameters(String envParameters) {
-	this.parameterEnv = envParameters;
-    }
 
     public String getTablePil() {
 	return bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER);
@@ -359,69 +347,5 @@ public abstract class AbstractService implements IApiService, IConstanteNumeriqu
 	return bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_TEMP);
     }
 
-    public String getTableCalendrier() {
-	return calendarTable;
-    }
-
-    public void setTableCalendrier(String tableCalendrier) {
-	this.calendarTable = tableCalendrier;
-    }
-
-    public String getDirectoryRoot() {
-	return directoryRoot;
-    }
-
-    public void setDirectoryRoot(String directoryRoot) {
-	this.directoryRoot = directoryRoot;
-    }
-
-    public String getParamBatch() {
-	return paramBatch;
-    }
-
-    public void setParamBatch(String paramBatch) {
-	this.paramBatch = paramBatch;
-    }
-
-    public String getIdSource() {
-	return idSource;
-    }
-
-    public void setIdSource(String idSource) {
-	this.idSource = idSource;
-    }
-
-
-    public String getTableOutKo() {
-	return tableOutKo;
-    }
-
-    public void setTableOutKo(String tableOutKo) {
-	this.tableOutKo = tableOutKo;
-    }
-
-    public Integer getNbEnr() {
-	return nbEnr;
-    }
-
-    public void setNbEnr(Integer nbEnr) {
-	this.nbEnr = nbEnr;
-    }
-
-    public List<PilotageEntity> getFilesToProcess() {
-        return filesToProcess;
-    }
-
-    public void setFilesToProcess(List<PilotageEntity> filesToProcess) {
-        this.filesToProcess = filesToProcess;
-    }
-
-    public BddTable getBddTable() {
-	return bddTable;
-    }
-
-    public void setBddTable(BddTable bddTable) {
-	this.bddTable = bddTable;
-    }
 
 }

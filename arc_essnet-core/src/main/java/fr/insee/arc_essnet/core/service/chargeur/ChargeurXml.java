@@ -52,7 +52,7 @@ public class ChargeurXml implements ILoader {
 
     public ChargeurXml(ThreadLoadService threadChargementService, FilesInputStreamLoad filesInputStreamLoad) {
 	this.fileName = threadChargementService.getIdSource();
-	this.connection = threadChargementService.getConnexion();
+	this.connection = threadChargementService.getConnection();
 	this.tableChargementPilTemp = threadChargementService.getTablePilTempThread();
 	this.currentPhase = threadChargementService.getTokenInputPhaseName();
 	this.validite = threadChargementService.getValidite();

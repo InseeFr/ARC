@@ -6,6 +6,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.log4j.Logger;
 
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.ManipString;
 
@@ -31,8 +32,9 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 	LoggerDispatcher.info("begin loadArchive() ", LOGGER);
 
 	try (ZipFile zipFileChargement = new ZipFile(this.archiveToLoad)) {
+	    int numberThread = PropertiesHandler.getInstance().getThreadsChargement();
 
-	    if (zipFileChargement.size() > THREAD_NUMBER) {
+	    if (zipFileChargement.size() > numberThread) {
 		extractArchive(fileDecompresor);
 		this.filesInputStreamLoad = readFile(streamNames);
 
@@ -52,18 +54,18 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 	this.filesInputStreamLoad = new FilesInputStreamLoad();
 
 	for (FilesInputStreamLoadKeys aStreamName : streamNames) {
-	    //Need to be keep open because if the resource is closed, all stream are closed too !
-	    @SuppressWarnings({"resource", "squid:S2095"})
+	    // Need to be keep open because if the resource is closed, all stream are closed
+	    // too !
+	    @SuppressWarnings({ "resource", "squid:S2095" })
 	    ZipFile zipInput = new ZipFile(this.archiveToLoad);
-		/*
-		 * Looking for the file in the archive. idSourceInArchive is like repository_fileName.
-		 * The name of the file is after the first _
-		 */
-		this.filesInputStreamLoad.getMapInputStream().put(aStreamName//
-			, zipInput.getInputStream(//
-				zipInput.getEntry(ManipString.substringAfterFirst(this.idSourceInArchive, "_"))));
-	    }
-	
+	    /*
+	     * Looking for the file in the archive. idSourceInArchive is like
+	     * repository_fileName. The name of the file is after the first _
+	     */
+	    this.filesInputStreamLoad.getMapInputStream().put(aStreamName//
+		    , zipInput.getInputStream(//
+			    zipInput.getEntry(ManipString.substringAfterFirst(this.idSourceInArchive, "_"))));
+	}
 
 	LoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);
 	return filesInputStreamLoad;
