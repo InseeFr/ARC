@@ -1,11 +1,13 @@
 package fr.insee.arc_essnet.utils.ressourceUtils;
 
+
 import java.net.URL;
 
 import org.apache.log4j.xml.DOMConfigurator;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
+
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -47,14 +49,15 @@ public class PropertiesHandler implements ApplicationListener<ContextStartedEven
     private String repertoireChargement;
     private String repertoireStockage;
 
+
     public void initializeLog() {
-	System.out.println("plop");
 	URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
 	// si la ressource est une ressource interne au projet : du type
 	// "fr/insee/config/log4j.xml"
 	DOMConfigurator.configure(log4jprops);
 
     }
+
 
     public static PropertiesHandler getInstance() {
 	GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
@@ -69,5 +72,6 @@ public class PropertiesHandler implements ApplicationListener<ContextStartedEven
 	initializeLog();
 	
     }
+
 
 }
