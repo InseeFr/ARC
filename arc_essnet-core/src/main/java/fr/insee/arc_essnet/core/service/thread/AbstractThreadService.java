@@ -552,14 +552,27 @@ public abstract class AbstractThreadService extends AbstractService implements R
 	return dbEnv(aExecutionEnv) + aCurrentPhase + "_" + tableName;
     }
 
+	public Thread getActualThread() {
+		return actualThread;
+	}
 
+	public void setActualThread(Thread actualThread) {
+		this.actualThread = actualThread;
+	}
 
-    public String getTablePilTempThread() {
-	return this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_TEMP_THREAD);
-    }
+	public String getTablePilTempThread() {
+		return this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_TEMP_THREAD);
+	}
 
+	public String getTokenInputPhaseName() {
+		return tokenInputPhaseName;
+	}
 
-    public String getTablePrevious() {
-	return bddTable.getQualifedName(BddTable.ID_TABLE_PREVIOUS_PHASE);
-    }
+	public void setTokenInputPhaseName(String tokenInputPhaseName) {
+		this.tokenInputPhaseName = tokenInputPhaseName;
+	}
+
+	public String getTablePrevious() {
+		return bddTable.getQualifedName(BddTable.ID_TABLE_PREVIOUS_PHASE);
+	}
 }

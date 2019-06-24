@@ -337,7 +337,29 @@ public abstract class AbstractService implements IApiService, IConstanteNumeriqu
 	return env.replace(".", "_") + ".";
     }
 
+    public Connection getConnection() {
+	return connection;
+    }
 
+    public void setConnection(Connection connexion) {
+	this.connection = connexion;
+    }
+
+    public String getExecutionEnv() {
+	return executionEnv;
+    }
+
+    public void setExecutionEnv(String executionEnv) {
+	this.executionEnv = executionEnv;
+    }
+
+    public String getParameterEnv() {
+	return parameterEnv;
+    }
+
+    public void setParameterEnv(String parameterEnv) {
+	this.parameterEnv = parameterEnv;
+    }
 
     public String getTablePil() {
 	return bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER);
@@ -347,5 +369,68 @@ public abstract class AbstractService implements IApiService, IConstanteNumeriqu
 	return bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_TEMP);
     }
 
+    public String getTableCalendrier() {
+	return calendarTable;
+    }
 
+    public void setTableCalendrier(String tableCalendrier) {
+	this.calendarTable = tableCalendrier;
+    }
+
+    public String getDirectoryRoot() {
+	return directoryRoot;
+    }
+
+    public void setDirectoryRoot(String directoryRoot) {
+	this.directoryRoot = directoryRoot;
+    }
+
+    public String getParamBatch() {
+	return paramBatch;
+    }
+
+    public void setParamBatch(String paramBatch) {
+	this.paramBatch = paramBatch;
+    }
+
+    public String getIdSource() {
+	return idSource;
+    }
+
+    public void setIdSource(String idSource) {
+	this.idSource = idSource;
+    }
+
+
+    public String getTableOutKo() {
+	return tableOutKo;
+    }
+
+    public void setTableOutKo(String tableOutKo) {
+	this.tableOutKo = tableOutKo;
+    }
+
+    public Integer getNbEnr() {
+	return nbEnr;
+    }
+
+    public void setNbEnr(Integer nbEnr) {
+	this.nbEnr = nbEnr;
+    }
+
+    public List<PilotageEntity> getFilesToProcess() {
+        return filesToProcess;
+    }
+
+    public void setFilesToProcess(List<PilotageEntity> filesToProcess) {
+        this.filesToProcess = filesToProcess;
+    }
+
+    public BddTable getBddTable() {
+	return bddTable;
+    }
+
+    public void setBddTable(BddTable bddTable) {
+	this.bddTable = bddTable;
+    }
 }

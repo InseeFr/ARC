@@ -495,5 +495,115 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
     }
 
 
+   public List<String> getFilUrl() {
+	return this.filUrl;
+   }
+
+   public void setFilUrl(List<String> filUrl) {
+	this.filUrl = filUrl;
+   }
+
+
+
+   /**
+    * @return the bddTable
+    */
+   public final BddTable getBddTable() {
+	return this.bddTable;
+   }
+
+   /**
+    * @param bddTable
+    *            the bddTable to set
+    */
+   public final void setBddTable(BddTable bddTable) {
+	this.bddTable = bddTable;
+   }
+
+   /**
+    * @return the scope
+    */
+   public final String getScope() {
+	return this.scope;
+   }
+
+   /**
+    * @param scope
+    *            the scope to set
+    */
+   public final void setScope(String scope) {
+	this.scope = scope;
+   }
+
+   /**
+    * @return the mapVObject
+    */
+   private final Map<VObject, Consumer<? super VObject>> getMapVObject() {
+	return this.mapVObject;
+   }
+
+   /**
+    * @param mapVObject
+    *            the mapVObject to set
+    */
+   private final void setMapVObject(Map<VObject, Consumer<? super VObject>> mapVObject) {
+	this.mapVObject = mapVObject;
+   }
+
+   public List<VObject> getListVObjectOrder() {
+	return this.listVObjectOrder;
+   }
+
+   public void setListVObjectOrder(List<VObject> listVObjectOrder) {
+	this.listVObjectOrder = listVObjectOrder;
+   }
+
+   /**
+    * @return the queryHandler
+    */
+   public final UtilitaireDAOIhmQueryHandler getQueryHandler() {
+	return this.queryHandler;
+   }
+
+   /**
+    * @param queryHandler
+    *            the queryHandler to set
+    */
+   public final void setQueryHandler(UtilitaireDAOIhmQueryHandler queryHandler) {
+	this.queryHandler = queryHandler;
+   }
+
+   private final String getIdep() {
+	return this.userId;
+   }
+
+   public String getBacASable() {
+	return bacASable;
+   }
+
+   public void setBacASable(String bacASable) {
+	this.bacASable = bacASable;
+   }
+
+   public List<String> getListBas() {
+	return listBas;
+   }
+
+   public void setListBas(List<String> listBas) {
+	this.listBas = listBas;
+   }
+
+   public InputStream getInputStream() {
+	return inputStream;
+   }
+
+   public void setInputStream(InputStream inputStream) {
+	this.inputStream = inputStream;
+   }
+
+   public Map<String, String> getEnvMap() {
+	return envMap;
+   }
+
 
 }

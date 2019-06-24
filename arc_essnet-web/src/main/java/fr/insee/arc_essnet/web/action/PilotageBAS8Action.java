@@ -980,6 +980,12 @@ public class PilotageBAS8Action extends ArcAction {
 	return null;
     }
 
+    public List<TraitementPhaseEntity> getListePhase() {
+	return listePhase;
+    }
 
+    public void setListePhase(List<TraitementPhaseEntity> listePhase) {
+	this.listePhase = listePhase;
+    }
 
 }
