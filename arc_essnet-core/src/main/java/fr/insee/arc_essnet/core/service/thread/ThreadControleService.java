@@ -40,9 +40,7 @@ public class ThreadControleService extends AbstractThreadService {
 
 	this.nbEnr = theApi.getNbEnr();
 
-	this.listRuleSets = theApi.getListJdr();
-
-	this.sjdr = new ServiceRuleSets((ArrayList<String>) theApi.sjdr.getListRubTable());
+	this.sjdr = new ServiceRuleSets();
 
 	this.tableTempControleFoo = FormatSQL.temporaryTableName("controle_foo_temp");
 

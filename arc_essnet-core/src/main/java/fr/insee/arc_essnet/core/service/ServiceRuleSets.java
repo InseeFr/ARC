@@ -37,7 +37,7 @@ public class ServiceRuleSets {
 	
 	
     public ServiceRuleSets(){
-        
+    	this.servSql = new ServiceRequeteSqlRegle();
     }
     
     public ServiceRuleSets(ArrayList<String> listRubTable){

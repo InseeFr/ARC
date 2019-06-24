@@ -34,15 +34,15 @@ public class ApiControleService extends AbstractThreadRunnerService<ThreadContro
     private static final Logger LOGGER = Logger.getLogger(ApiControleService.class);
     private static final Class<ThreadControleService> THREAD_TYPE = ThreadControleService.class ;
 
-    @Autowired
-    public ServiceRuleSets sjdr;
+    public ServiceRuleSets sjdrDummy;
 
-    protected ArrayList<RuleSets> listJdr;
+    protected ArrayList<RuleSets> listJdrDummy;
 
     private int currentIndice;
 
     public ApiControleService() {
 	super();
+		this.sjdrDummy=new ServiceRuleSets();
     }
 
     public ApiControleService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
@@ -76,26 +76,26 @@ public class ApiControleService extends AbstractThreadRunnerService<ThreadContro
     public void execute(Connection connexion, String env, String phase, String tableControle) throws Exception {
         LoggerDispatcher.info("** execute CONTROLE sur la table : " + tableControle + " **", LOGGER);
 
-        for (RuleSets jdr : this.getListJdr()) {
-            this.sjdr.executeJeuDeRegle(connexion, jdr, tableControle);
+        for (RuleSets jdr : this.getListJdrDummy()) {
+            this.sjdrDummy.executeJeuDeRegle(connexion, jdr, tableControle);
         }
 
     }
 
-    public ArrayList<RuleSets> getListJdr() {
-        return listJdr;
+    public ArrayList<RuleSets> getListJdrDummy() {
+        return listJdrDummy;
     }
 
-    public void setListJdr(ArrayList<RuleSets> listJdr) {
-        this.listJdr = listJdr;
+    public void setListJdrDummy(ArrayList<RuleSets> listJdrDummy) {
+        this.listJdrDummy = listJdrDummy;
     }
 
-    public ServiceRuleSets getSjdr() {
-        return sjdr;
+    public ServiceRuleSets getSjdrDummy() {
+        return sjdrDummy;
     }
 
-    public void setSjdr(ServiceRuleSets sjdr) {
-        this.sjdr = sjdr;
+    public void setSjdr(ServiceRuleSets sjdrDummy) {
+        this.sjdrDummy = sjdrDummy;
     }
 
 }

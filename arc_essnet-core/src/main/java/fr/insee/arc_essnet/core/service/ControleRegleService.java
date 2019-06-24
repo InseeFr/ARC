@@ -25,7 +25,6 @@ import fr.insee.arc_essnet.utils.utils.SQLExecutor;
 @Component
 public class ControleRegleService {
 
-	@Autowired
 	private ApiControleService lanc;
 
 	private static final Logger LOGGER = Logger.getLogger(ControleRegleService.class);
@@ -256,7 +255,9 @@ public class ControleRegleService {
 
 	    String nomTableRCTestComplet = nomTableRegleControle(env, true);
 
-	    lanc.sjdr.fillRegleControle(connexion, jdr, nomTableRCTestComplet);
+	    lanc=new ApiControleService();
+	    
+	    lanc.sjdrDummy.fillRegleControle(connexion, jdr, nomTableRCTestComplet);
 
 	    // Fabrication de la table vide
 	    LoggerDispatcher.info("Fabrication de la table vide", LOGGER);
@@ -267,7 +268,7 @@ public class ControleRegleService {
 	    // bidouille pour pouvoir lancer la méthode execute
 	    ArrayList<RuleSets> listJdr = new ArrayList<>();
 	    listJdr.add(jdr);
-	    lanc.setListJdr(listJdr);
+	    lanc.setListJdrDummy(listJdr);
 	    LoggerDispatcher.info("Execution sur la table vide : " + emptyTable, LOGGER);
 	    lanc.execute(connexion, env, phase, emptyTable);
 	} finally {
