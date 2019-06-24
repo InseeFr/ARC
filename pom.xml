@@ -12,13 +12,6 @@
 		<project.struts2.version>2.5.20</project.struts2.version>
 	</properties>
 
-	<parent>
-		<groupId>fr.insee.maven</groupId>
-		<artifactId>pom-parent</artifactId>
-		<version>3.1.1</version>
-	</parent>
-
-
 	<!-- Adresse URL de la page d'accueil du projet ; balise requise dans pour 
 		le déploiement de la documentation automatique -->
 	<url>http://www.insee.fr</url>
@@ -249,13 +242,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.7</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>fr.insee</groupId>
-			<artifactId>java-sicore</artifactId>
-			<version>2.2.1</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>

@@ -88,11 +88,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>fr.insee.config</groupId>
-			<artifactId>insee-config-api</artifactId>
-			<version>2.3.2</version>
-		</dependency>
-		<dependency>
 			<groupId>fr.insee.arc_essnet</groupId>
 			<artifactId>arc_essnet_utils</artifactId>
 			<version>${project.version}</version>

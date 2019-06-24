@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>fr.insee</groupId>
 		<artifactId>arc_essnet</artifactId>
-		<version>${version}</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	<groupId>fr.insee.arc_essnet</groupId>
 	<artifactId>arc_essnet_utils</artifactId>

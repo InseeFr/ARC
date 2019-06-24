@@ -112,18 +112,6 @@
 			<artifactId>json</artifactId>
 			<version>20180813</version>
 		</dependency>
-
-		<dependency>
-			<groupId>fr.insee</groupId>
-			<artifactId>pilote-igesa</artifactId>
-			<version>1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
