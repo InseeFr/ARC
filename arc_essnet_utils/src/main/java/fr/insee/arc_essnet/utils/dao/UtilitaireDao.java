@@ -2311,73 +2311,74 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
      * @param aDelim
      * @throws Exception
      */
-    public void importing(Connection connexion, String table, InputStream is, boolean csv, String... aDelim)
-	    throws Exception {
-	ConnectionWrapper conn = initConnection(connexion);
-	try {
-	    conn.getConnexion().setAutoCommit(false);
-	    CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
-	    String delimiter = "";
-	    String quote = Character.toString((char) 2);
+	public void importing(Connection connexion, String table, InputStream is, boolean csv, String... aDelim)
+			throws Exception {
+		ConnectionWrapper conn = initConnection(connexion);
+		try {
+			conn.getConnexion().setAutoCommit(false);
+			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
+			String delimiter = "";
+			String quote = Character.toString((char) 2);
 
-	    if (aDelim != null && aDelim.length > 0) {
-		delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
-	    }
+			if (aDelim != null && aDelim.length > 0) {
+				delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
+			}
 
-	    boolean header = true;
-	    if (aDelim != null && aDelim.length > 1) {
-		header = false;
-	    }
+			boolean header = true;
+			if (aDelim != null && aDelim.length > 1) {
+				header = false;
+			}
 
-	    String h = (header ? ", HEADER true " : "");
+			String h = (header ? ", HEADER true " : "");
 
-	    if (csv) {
-		copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", is);
-	    } else {
-		copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
-	    }
-	    conn.getConnexion().commit();
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    conn.getConnexion().rollback();
-	} finally {
-	    conn.close();
+			if (csv) {
+				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", is);
+			} else {
+				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
+			}
+			conn.getConnexion().commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+			conn.getConnexion().rollback();
+		} finally {
+			conn.close();
+		}
 	}
-    }
 
-    public void importing(Connection connexion, String table, Reader aReader, boolean csv, boolean header,
-	    String... aDelim) throws Exception {
-	ConnectionWrapper conn = initConnection(connexion);
-	try {
-	    conn.getConnexion().setAutoCommit(false);
-	    CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
-	    String delimiter = "";
-	    String quote = Character.toString((char) 2);
+	public void importing(Connection connexion, String table, Reader aReader, boolean csv, boolean header,
+			String... aDelim) throws Exception {
+		ConnectionWrapper conn = initConnection(connexion);
+		try {
+			conn.getConnexion().setAutoCommit(false);
+			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
+			String delimiter = "";
+			String quote = Character.toString((char) 2);
 
-	    if (aDelim != null && aDelim.length > 0) {
-		delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
-	    }
+			if (aDelim != null && aDelim.length > 0) {
+				delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
+			}
 
-	    if (aDelim != null && aDelim.length > 1) {
-		header = false;
-	    }
+			if (aDelim != null && aDelim.length > 1) {
+				header = false;
+			}
 
-	    String h = (header ? ", HEADER true " : "");
+			String h = (header ? ", HEADER true " : "");
 
-	    if (csv) {
-		copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", aReader);
-	    } else {
-		copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", aReader);
-	    }
-	    conn.getConnexion().commit();
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    conn.getConnexion().rollback();
-	} finally {
-	    conn.close();
+			if (csv) {
+				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", aReader);
+			} else {
+				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", aReader);
+			}
+			conn.getConnexion().commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+			conn.getConnexion().rollback();
+		} finally {
+			conn.close();
+		}
 	}
-    }
-
+    
+    
     /**
      * Copie brutal de fichier plat dans une table SQL.
      * 
@@ -2391,11 +2392,24 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
      * @param aQuote
      * @throws Exception
      */
-    public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-	    boolean header, String aDelim, String aQuote) throws Exception {
-	importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote);
-    }
+	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
+			boolean header, String aDelim, String aQuote) throws Exception {
+		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote);
+	}
 
+	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
+			boolean header, String aDelim, String aQuote, String encoding) throws Exception {
+		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote,
+				encoding);
+	}
+
+    public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format, boolean header, String aDelim, String aQuote)
+            throws Exception
+    {
+    	importing(connexion, table, aColumnName, is, format, header,  aDelim, aQuote, null);
+    }
+    
+    
     /**
      * Copie brutal de fichier plat dans une table SQL.
      * 
@@ -2414,61 +2428,68 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
      * @param aQuote
      * @throws Exception
      */
-    public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
-	    boolean header, String aDelim, String aQuote) throws Exception {
-	LoggerHelper.info(LOGGER, "importing()");
-	ConnectionWrapper conn = initConnection(connexion);
-	try {
-	    conn.getConnexion().setAutoCommit(false);
-	    CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
-	    String delimiter = "";
-	    String quote = "";
-	    String columnName = "";
-	    if (aDelim != null && aDelim.length() == 1) {
-		delimiter = ", DELIMITER '" + aDelim + "'";
-	    }
+	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
+			boolean header, String aDelim, String aQuote, String encoding) throws Exception {
+		LoggerHelper.info(LOGGER, "importing()");
+		ConnectionWrapper conn = initConnection(connexion);
+		try {
+			conn.getConnexion().setAutoCommit(false);
+			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
+			String delimiter = "";
+			String quote = "";
+			String columnName = "";
+			String encode = "UTF8";
 
-	    if (aQuote != null && aQuote.length() == 1) {
-		quote = ", QUOTE '" + aQuote + "'";
-	    }
+			if (aDelim != null && aDelim.length() == 1) {
+				delimiter = ", DELIMITER '" + aDelim + "'";
+			}
 
-	    if (aColumnName != null && aColumnName != "") {
-		columnName = aColumnName;
-	    }
+			if (aQuote != null && aQuote.length() == 1) {
+				quote = ", QUOTE '" + aQuote + "'";
+			}
 
-	    String h = (header ? ", HEADER true " : "");
-	    if (format.equals(FORMAT_CSV) || format.equals(FORMAT_TEXT)) {
-		copyManager.copyIn("COPY " + table + columnName + " FROM STDIN WITH (FORMAT " + format
-			+ ", ENCODING 'UTF8' " + h + delimiter + quote + ") ", is);
-	    }
+			if (aColumnName != null && aColumnName != "") {
+				columnName = aColumnName;
+			}
 
-	    if (format.equals(FORMAT_BINARY)) {
-		copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
-	    }
+			if (encoding != null) {
+				encode = encoding;
+			}
 
-	    conn.getConnexion().commit();
+			String h = (header ? ", HEADER true " : "");
+			
+			if (format.equals(FORMAT_CSV) || format.equals(FORMAT_TEXT)) {
+				copyManager.copyIn("COPY " + table + columnName + " FROM STDIN WITH (FORMAT " + format + ", ENCODING '"
+						+ encode + "' " + h + delimiter + quote + ") ", is);
+			}
 
-	    LoggerHelper.info(LOGGER, "importing done");
-	} catch (Exception e) {
+			if (format.equals(FORMAT_BINARY)) {
+				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
+			}
 
-	    e.printStackTrace();
+			conn.getConnexion().commit();
 
-	    if (e.getMessage().startsWith("ERROR: missing data for column")) {
+			LoggerHelper.info(LOGGER, "importing done");
+		} catch (Exception e) {
 
-		throw new Exception("Il manque une/des colonne dans le corps du fichier");
+			e.printStackTrace();
 
-	    } else if (e.getMessage().startsWith("ERROR: extra data after last expected column")) {
+			if (e.getMessage().startsWith("ERROR: missing data for column")) {
 
-		throw new Exception("Il manque un/des headers");
+				throw new Exception("Il manque une/des colonne dans le corps du fichier");
 
-	    } else {
-		throw e;
-	    }
+			} else if (e.getMessage().startsWith("ERROR: extra data after last expected column")) {
 
-	} finally {
-	    conn.close();
+				throw new Exception("Il manque un/des headers");
+
+			} else {
+				throw e;
+			}
+
+		} finally {
+			conn.close();
+		}
 	}
-    }
 
     /**
      * On passe une table et une liste de colonne pour voir si un index avec ces
