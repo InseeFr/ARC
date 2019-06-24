@@ -19,12 +19,6 @@ pom.xml.next
 release.properties
 
 ##########################
-## IntelliJ
-##########################
-.idea
-*.iml
-
-##########################
 ## Eclipse
 ##########################
 .metadata
@@ -41,6 +35,12 @@ local.properties
 .loadpath
 
 ##########################
+## IntelliJ
+##########################
+.idea
+*.iml
+
+##########################
 ### VS Code
 ##########################
 .vscode/
@@ -50,3 +50,11 @@ local.properties
 ### puml
 ##########################
 out/
+
+
+##########################
+### project
+##########################
+outdated.txt
+.factorypath
+devarc.properties
