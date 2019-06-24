@@ -13,11 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc_essnet.utils.textUtils.IConstanteCaractere;
-import fr.insee.config.InseeConfig;
 
 public class Format implements IConstanteCaractere {
 
@@ -524,9 +523,6 @@ public class Format implements IConstanteCaractere {
 //        return null;
 //    }
 
-    public static boolean isDev() {
-        return InseeConfig.getConfig().getBoolean("fr.insee.arc.environnement.is.dev");
-    }
 
     public static String toUpperCase(String string) {
         return string == null ? null : string.toUpperCase();

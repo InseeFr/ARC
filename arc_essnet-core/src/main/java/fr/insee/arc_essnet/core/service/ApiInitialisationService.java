@@ -32,7 +32,6 @@ import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.utils.utils.ManipString;
 import fr.insee.arc_essnet.utils.utils.Pair;
 import fr.insee.arc_essnet.utils.utils.SQLExecutor;
-import fr.insee.config.InseeConfig;
 
 /**
  * ApiInitialisationService
@@ -55,8 +54,6 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
     private static final String ARCHIVE = "_ARCHIVE";
 
     private static final String ARC_IHM_ENTREPOT = "arc.ihm_entrepot";
-
-    private static final String FR_INSEE_ARC_BATCH_PARAMETRE_REPERTOIRE = "fr.insee.arc.batch.parametre.repertoire";
 
     private static final String BDD_SCRIPT_FUNCTION_SQL = "BdD/script_function.sql";
     private static final String BDD_SCRIPT_TABLE_SQL = "BdD/script_table.sql";
@@ -126,7 +123,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	LoggerDispatcher.info("rebuildFileSystem", LOGGER);
 
 	// parcourir toutes les archives dans le répertoire d'archive
-	String repertoire = InseeConfig.getConfig().getString(FR_INSEE_ARC_BATCH_PARAMETRE_REPERTOIRE);
+	String repertoire = properties.getBatchParametreRepertoire();
 	String envDir = this.executionEnv.replace(".", "_").toUpperCase();
 	String nomTableArchive = dbEnv(executionEnv) + "pilotage_archive";
 
@@ -160,14 +157,14 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 		String fileTable = "t_files";
 		// Insert table in the temporary table t_files
 		StringBuilder request = new StringBuilder();
-		
 
 		request.append(FormatSQL.dropUniqueTable(fileTable));
-		request.append(FormatSQL.createTemporaryTableWithColumn("t_files", new Pair<String,String>("fname", "text")));
-		
+		request.append(
+			FormatSQL.createTemporaryTableWithColumn("t_files", new Pair<String, String>("fname", "text")));
+
 		boolean first = true;
 
-        System.out.println("$$$$$ Répertoire : "+dirIn);
+		System.out.println("$$$$$ Répertoire : " + dirIn);
 
 		for (File fichier : files) {
 		    if (!fichier.isDirectory()) {
@@ -450,7 +447,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 			.get("container");
 
 	if (containerList != null) {
-	    String repertoire = InseeConfig.getConfig().getString(FR_INSEE_ARC_BATCH_PARAMETRE_REPERTOIRE);
+	    String repertoire = properties.getBatchParametreRepertoire();
 	    String envDir = this.executionEnv.replace(".", "_").toUpperCase();
 
 	    for (String s : containerList) {
@@ -795,7 +792,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	if (m.get("entrepot").size() > 0) {
 
 	    // 7. Déplacer les archives effacées dans le répertoire de sauvegarde "OLD"
-	    String repertoire = InseeConfig.getConfig().getString(FR_INSEE_ARC_BATCH_PARAMETRE_REPERTOIRE);
+	    String repertoire = properties.getBatchParametreRepertoire();
 	    String envDir = this.executionEnv.replace(".", "_").toUpperCase();
 
 	    String entrepotSav = "";
@@ -847,6 +844,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	    LoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
 	}
     }
+
     @SQLExecutor
     public static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment,
 	    String anExecutionEnvironment) throws Exception {
@@ -1500,6 +1498,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	return requete.toString();
 
     }
+
     @SQLExecutor
     public static void clearPilotageAndDirectories(String repertoire, String env) throws Exception {
 	try {

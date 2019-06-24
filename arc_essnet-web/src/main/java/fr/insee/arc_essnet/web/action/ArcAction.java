@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -34,6 +35,7 @@ import fr.insee.arc_essnet.utils.dao.UtilitaireDao;
 import fr.insee.arc_essnet.utils.files.FileUtils;
 import fr.insee.arc_essnet.utils.queryhandler.UtilitaireDAOIhmQueryHandler;
 import fr.insee.arc_essnet.utils.queryhandler.UtilitaireDAOQueryHandler;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.structure.AttributeValue;
 import fr.insee.arc_essnet.utils.structure.GenericBean;
 import fr.insee.arc_essnet.utils.textUtils.IConstanteCaractere;
@@ -42,7 +44,8 @@ import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.web.model.SessionParameters;
 import fr.insee.arc_essnet.web.util.VObject;
-import fr.insee.config.InseeConfig;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * An abstract class that all the action class must extends. Contain general
@@ -54,23 +57,22 @@ import fr.insee.config.InseeConfig;
  * @author Pépin Rémi
  *
  */
-@Component
+@Getter
+@Setter
 public abstract class ArcAction extends Authentifier implements IConstanteCaractere {
     private static final Logger LOGGER = Logger.getLogger(ArcAction.class);
     public static final String NONE = "none";
     public static final String POOLNAME = "arc";
-    public static final String SCHEMA_REFERENCE = InseeConfig.getConfig().getString("fr.insee.arc.schema.reference");
+    @Autowired
+    @Qualifier("properties")
+    public  PropertiesHandler properties;
+    
+    protected String repertoire;
 
     private List<String> listBas = Arrays.asList("BAS1", "BAS2", "BAS3", "BAS4", "BAS5", "BAS6", "BAS7", "BAS8",
 	    "PROD");
 
-    private Map<String, String> envMap = Stream
-	    .of(new String[][] { { SCHEMA_REFERENCE + "_BAS1", "BAS1" }, { SCHEMA_REFERENCE + "_BAS2", "BAS2" },
-		    { SCHEMA_REFERENCE + "_BAS3", "BAS3" }, { SCHEMA_REFERENCE + "_BAS4", "BAS4" },
-		    { SCHEMA_REFERENCE + "_BAS5", "BAS5" }, { SCHEMA_REFERENCE + "_BAS6", "BAS6" },
-		    { SCHEMA_REFERENCE + "_BAS7", "BAS7" }, { SCHEMA_REFERENCE + "_BAS8", "BAS8" },
-		    { SCHEMA_REFERENCE + "_PROD", "PROD" }, })
-	    .collect(Collectors.toMap(data -> data[0], data -> data[1]));
+    private Map<String, String> envMap ;
 
     /**
      *
@@ -124,6 +126,18 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
     
     
     protected boolean isRefreshMonitoring = false;
+    
+    public void initializeArcActionWithProperties() {
+	   this.envMap = Stream
+		    .of(new String[][] { { properties.getSchemaReference() + "_BAS1", "BAS1" }, { properties.getSchemaReference() + "_BAS2", "BAS2" },
+			    { properties.getSchemaReference() + "_BAS3", "BAS3" }, { properties.getSchemaReference() + "_BAS4", "BAS4" },
+			    { properties.getSchemaReference() + "_BAS5", "BAS5" }, { properties.getSchemaReference() + "_BAS6", "BAS6" },
+			    { properties.getSchemaReference() + "_BAS7", "BAS7" }, { properties.getSchemaReference() + "_BAS8", "BAS8" },
+			    { properties.getSchemaReference() + "_PROD", "PROD" }, })
+		    .collect(Collectors.toMap(data -> data[0], data -> data[1]));
+	   
+	  this.repertoire = properties.getRepertoireRoot();
+    }
 
     public Consumer<? super VObject> putVObject(VObject vObject, Consumer<? super VObject> initialize) {
 	this.listVObjectOrder.add(vObject);
@@ -156,6 +170,7 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
     public void initialize() {
 	LoggerHelper.debug(LOGGER, String.join(" ** initialize() called by %s **",
 		Thread.currentThread().getStackTrace()[2].getMethodName()));
+	initializeArcActionWithProperties();
 	getDataBaseStatus();
 	setProfilsAutorises();
 	grantAccess(this.autorisedProfil.toArray(new String[0]));
@@ -187,7 +202,7 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
 	    // if the env in session is null initialiaze it
 	    if (getSession().get(SessionParameters.ENV) == null) {
 		getSession().put(SessionParameters.ENV,
-			InseeConfig.getConfig().getString("fr.insee.arc.schema.reference") + "_BAS1");
+			properties.getSchemaReference() + "_BAS1");
 	    }
 	}
 	setUser(this.userId);
@@ -447,87 +462,6 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
      */
     public abstract String getActionName();
 
-    public List<String> getFilUrl() {
-	return this.filUrl;
-    }
-
-    public void setFilUrl(List<String> filUrl) {
-	this.filUrl = filUrl;
-    }
-
-
-
-    /**
-     * @return the bddTable
-     */
-    public final BddTable getBddTable() {
-	return this.bddTable;
-    }
-
-    /**
-     * @param bddTable
-     *            the bddTable to set
-     */
-    public final void setBddTable(BddTable bddTable) {
-	this.bddTable = bddTable;
-    }
-
-    /**
-     * @return the scope
-     */
-    public final String getScope() {
-	return this.scope;
-    }
-
-    /**
-     * @param scope
-     *            the scope to set
-     */
-    public final void setScope(String scope) {
-	this.scope = scope;
-    }
-
-    /**
-     * @return the mapVObject
-     */
-    private final Map<VObject, Consumer<? super VObject>> getMapVObject() {
-	return this.mapVObject;
-    }
-
-    /**
-     * @param mapVObject
-     *            the mapVObject to set
-     */
-    private final void setMapVObject(Map<VObject, Consumer<? super VObject>> mapVObject) {
-	this.mapVObject = mapVObject;
-    }
-
-    public List<VObject> getListVObjectOrder() {
-	return this.listVObjectOrder;
-    }
-
-    public void setListVObjectOrder(List<VObject> listVObjectOrder) {
-	this.listVObjectOrder = listVObjectOrder;
-    }
-
-    /**
-     * @return the queryHandler
-     */
-    public final UtilitaireDAOIhmQueryHandler getQueryHandler() {
-	return this.queryHandler;
-    }
-
-    /**
-     * @param queryHandler
-     *            the queryHandler to set
-     */
-    public final void setQueryHandler(UtilitaireDAOIhmQueryHandler queryHandler) {
-	this.queryHandler = queryHandler;
-    }
-
-    private final String getIdep() {
-	return this.userId;
-    }
 
     /**
      * renvoi si l'environnement est un de production
@@ -539,32 +473,18 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
     }
 
     public boolean isPlateformeProd() {
-	return InseeConfig.getConfig().getBoolean("fr.insee.plateforme.prod");
+	return properties.getIsProd();
     }
 
     public String getVersion() {
-	return InseeConfig.getConfig().getString("fr.insee.version");
+	return properties.getVersion();
     }
 
     public String getApplication() {
-	return InseeConfig.getConfig().getString("fr.insee.application");
+	return properties.getApplication();
     }
 
-    public String getBacASable() {
-	return bacASable;
-    }
 
-    public void setBacASable(String bacASable) {
-	this.bacASable = bacASable;
-    }
-
-    public List<String> getListBas() {
-	return listBas;
-    }
-
-    public void setListBas(List<String> listBas) {
-	this.listBas = listBas;
-    }
 
     public boolean getIsDataBaseOK() {
 	return isDataBaseOK;
@@ -574,16 +494,6 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
 	this.isDataBaseOK = isDataBaseOK;
     }
 
-    public InputStream getInputStream() {
-	return inputStream;
-    }
 
-    public void setInputStream(InputStream inputStream) {
-	this.inputStream = inputStream;
-    }
-
-    public Map<String, String> getEnvMap() {
-	return envMap;
-    }
 
 }

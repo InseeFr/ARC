@@ -52,7 +52,7 @@ public class LoaderCSV implements ILoader {
 
     public LoaderCSV(ThreadLoadService threadChargementService, FilesInputStreamLoad filesInputStreamLoad) {
         this.fileName = threadChargementService.getIdSource();
-        this.connection = threadChargementService.getConnexion();
+        this.connection = threadChargementService.getConnection();
         this.tablePilotageLoadTemp = threadChargementService.getTablePilTempThread();
         this.currentPhase = threadChargementService.getTokenInputPhaseName();
         this.currentNorme = threadChargementService.getNormeFile();

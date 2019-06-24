@@ -17,21 +17,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc_essnet.web.util.VObject;
-import fr.insee.config.InseeConfig;
+import lombok.Getter;
+import lombok.Setter;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererFile.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
+@Getter
+@Setter
 public class GererFileAction implements SessionAware, IConstanteCaractere {
     @Override
     public void setSession(Map<String, Object> session) {
         this.viewDirIn.setMessage("");
         this.viewDirOut.setMessage("");
     }
+    
+    @Autowired
+    public PropertiesHandler PROPERTIES;
 
-    public String dirIn;
-    public String dirOut;
+
+    public String dirIn ;
+    public String dirOut ;
 
     public static String REPERTOIRE_EFFACABLE="TO_DELETE";
 
@@ -87,7 +95,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
         if (this.dirIn==null)
         {
-            this.dirIn=InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire");
+            this.dirIn=PROPERTIES.getRepertoireRoot();
         }
 
         ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.viewDirIn.mapFilterFields());
@@ -284,7 +292,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
         if (this.dirOut==null)
         {
-            this.dirOut=InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire");
+            this.dirIn=PROPERTIES.getRepertoireRoot();
         }
 
         ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.viewDirOut.mapFilterFields());
@@ -459,46 +467,6 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
             this.dirOut=null;
         }
         return sessionSyncronize();
-    }
-
-    public VObject getViewDirOut() {
-        return this.viewDirOut;
-    }
-
-    public void setViewDirOut(VObject viewDirOut) {
-        this.viewDirOut = viewDirOut;
-    }
-
-
-    public String getDirIn() {
-        return this.dirIn;
-    }
-
-    public void setDirIn(String dirIn) {
-        this.dirIn = dirIn;
-    }
-
-    public String getDirOut() {
-        return this.dirOut;
-    }
-
-    public void setDirOut(String dirOut) {
-        this.dirOut = dirOut;
-    }
-
-    /**
-     * @return the scope
-     */
-    public final String getScope() {
-        return this.scope;
-    }
-
-    /**
-     * @param scope
-     *            the scope to set
-     */
-    public final void setScope(String scope) {
-        this.scope = scope;
     }
 
 

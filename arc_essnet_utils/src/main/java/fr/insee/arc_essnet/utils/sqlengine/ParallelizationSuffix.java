@@ -1,11 +1,17 @@
 package fr.insee.arc_essnet.utils.sqlengine;
 
-import fr.insee.config.InseeConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 
 public class ParallelizationSuffix
 {
-    private static final String TN = InseeConfig.getConfig().getString("fr.insee.siera.sqlengine.parallelize.suffix",
-            "$TN");
+    
+    @Autowired
+    private static PropertiesHandler propertiesHandler;
+    
+    private static String TN = propertiesHandler.getTn();
+    
     private static final ThreadLocal<String> INSTANCE = ThreadLocal.withInitial(() -> TN);
 
     public static final String get()

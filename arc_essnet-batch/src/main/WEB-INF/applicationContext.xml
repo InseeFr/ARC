@@ -22,5 +22,9 @@
 		<bean class ="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
 	 -->
  
+    <bean id="propertiesHandler" class="fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler">
+        <property name="key1" value="${key1}"></property>
+        <property name="key2" value="${key2}"></property>
+    </bean>
 
 </beans>

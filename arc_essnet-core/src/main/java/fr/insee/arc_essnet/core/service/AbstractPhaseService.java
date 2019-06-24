@@ -25,7 +25,6 @@ import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.utils.utils.ManipString;
 import fr.insee.arc_essnet.utils.utils.SQLExecutor;
-import fr.insee.config.InseeConfig;
 
 @Component
 public abstract class AbstractPhaseService extends AbstractService implements IPhaseService {
@@ -408,13 +407,6 @@ public abstract class AbstractPhaseService extends AbstractService implements IP
     
 
 
-    /**
-     *
-     * @return are we in dev or prod ?
-     */
-    public static final boolean isDev() {
-	return InseeConfig.getConfig().getBoolean(IS_DEV);
-    }
 
     public String getPhaseName() {
 	return phaseName;

@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc_essnet.core.archive_loader.FilesInputStreamLoad;
@@ -30,10 +30,10 @@ import fr.insee.arc_essnet.core.service.AbstractPhaseService;
 import fr.insee.arc_essnet.core.service.thread.ThreadLoadService;
 import fr.insee.arc_essnet.core.util.CustomTreeFormat;
 import fr.insee.arc_essnet.utils.dao.UtilitaireDao;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.utils.utils.ManipString;
-import fr.insee.config.InseeConfig;
 
 /**
  * Loader to convert key value file to xml one
@@ -67,14 +67,14 @@ public class ChargeurClefValeur implements ILoader {
 	super();
 
 	this.fileName = threadChargementService.getIdSource();
-	this.connection = threadChargementService.getConnexion();
+	this.connection = threadChargementService.getConnection();
 	this.tableChargementPilTemp = threadChargementService.getTablePilTempThread();
 	this.currentPhase = threadChargementService.getTokenInputPhaseName();
 	this.tmpInxChargement = filesInputStreamLoad.getTmpInxLoad();
 	this.normeOk = threadChargementService.getNormeFile();
 	this.separator = this.normeOk.getRegleChargement().getDelimiter();
 	this.xmlLoader = new ChargeurXml(threadChargementService, filesInputStreamLoad);
-	this.envExecution = threadChargementService.getEnvExecution();
+	this.envExecution = threadChargementService.getExecutionEnv();
     }
 
 
@@ -437,7 +437,7 @@ public class ChargeurClefValeur implements ILoader {
 	// Delete start and end quote
 	data = deleteQuote(data);
 	// Escape special caracter
-	data = StringEscapeUtils.escapeXml(data);
+	data = StringEscapeUtils.escapeXml11(data);
 	return data;
     }
 
@@ -470,7 +470,7 @@ public class ChargeurClefValeur implements ILoader {
     }
 
     private void initializeFileOutput() throws UnsupportedEncodingException, FileNotFoundException {
-	String repertoire = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire");
+	String repertoire = PropertiesHandler.getInstance().getBatchParametreRepertoire();
 	String envDir = this.envExecution.replace(".", "_").toUpperCase();
 	String dirOut = repertoire + envDir + File.separator + "EXPORT";
 	File f = new File(dirOut);

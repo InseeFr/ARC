@@ -30,6 +30,7 @@ import fr.insee.arc_essnet.core.service.AbstractPhaseService;
 import fr.insee.arc_essnet.core.service.ApiInitialisationService;
 import fr.insee.arc_essnet.utils.dao.UtilitaireDao;
 import fr.insee.arc_essnet.utils.format.Format;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.structure.GenericBean;
 import fr.insee.arc_essnet.utils.utils.FormatSQL;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
@@ -41,7 +42,6 @@ import fr.insee.arc_essnet.web.model.ViewFichierPROD;
 import fr.insee.arc_essnet.web.model.ViewPilotagePROD;
 import fr.insee.arc_essnet.web.model.ViewRapportPROD;
 import fr.insee.arc_essnet.web.util.VObject;
-import fr.insee.config.InseeConfig;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererPilotagePROD.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
@@ -82,7 +82,7 @@ public class PilotagePRODAction implements SessionAware {
 
     private String scope;
 
-    private String repertoire = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire");
+    private String repertoire ;
 
     public String sessionSyncronize() {
 
