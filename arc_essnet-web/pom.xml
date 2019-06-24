@@ -215,7 +215,6 @@
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
-				<filtering>true</filtering>
 				<excludes>
 					<exclude>prod/*.properties</exclude>
 				</excludes>
