@@ -125,7 +125,11 @@ public class ChargementBrutalTable {
     private boolean chargerFichierBrutalement(String idSource, BufferedReader br, int nb_boucle) throws Exception {
         LoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
+        
+        // no delimiter and no quote. The line is loaded as raw data
         String delimiter = Character.toString((char) 1);
+        String quote = Character.toString((char) 2);
+
         boolean output = false;
 
         String header = "id_source" + delimiter + "id_ligne" + delimiter + "ligne\n";
@@ -149,7 +153,8 @@ public class ChargementBrutalTable {
         requete.insert(0, header);
         byte[] bytes = requete.toString().getBytes(StandardCharsets.UTF_8);
         InputStream is = new ByteArrayInputStream(bytes);
-        UtilitaireDao.get("arc").importing(this.connexion, TABLE_CHARGEMENT_BRUTAL, is, true, delimiter);
+        UtilitaireDao.get("arc").importing(this.connexion, TABLE_CHARGEMENT_BRUTAL, null, is, true, true, delimiter, quote, null);
+
         is.close();
 
         java.util.Date endDate = new java.util.Date();
