@@ -1,7 +1,34 @@
+CREATE OR REPLACE FUNCTION arc.update_list_param(
+    n text,
+    dt text)
+  RETURNS boolean AS
+$BODY$
+DECLARE p text;
+BEGIN
+begin
+	p:=current_setting(n);
+	exception when others then 
+	perform set_config(n,';'||dt||';',true );
+	return false;
+end;
+
+if (p='') then
+	perform set_config(n,';'||dt||';',true );
+	return false;
+end if;
+
+if (p not like '%;'||dt||';%') then
+	perform set_config(n,p||dt||';',true );
+end if;
+
+return true;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE
+COST 100;
+
 -- Function: arc.transpose_pilotage_calcul()
-
 -- DROP FUNCTION arc.transpose_pilotage_calcul();
-
 CREATE OR REPLACE FUNCTION arc.transpose_pilotage_calcul()
   RETURNS trigger AS
 $BODY$
@@ -158,118 +185,145 @@ $BODY$
   LANGUAGE sql IMMUTABLE STRICT
   COST 100;
 
-         do $$ begin CREATE SEQUENCE arc.number_generator cycle; exception when others then end; $$; 
-         CREATE OR REPLACE FUNCTION public.curr_val(text) 
-           RETURNS bigint AS 
-         $BODY$ 
-         BEGIN 
-         return currval($1); 
-         exception when others then 
-         return nextval($1); 
-         END; 
-         $BODY$ 
-         LANGUAGE plpgsql VOLATILE 
-         COST 100; 
-        
-         CREATE OR REPLACE FUNCTION arc.fn_check_calendrier() 
-         RETURNS boolean AS 
-         $BODY$ 
-         DECLARE 
-         n integer; 
-         BEGIN  
-         select count(1) into n from arc.ihm_calendrier a 
-         where exists (select 1 from arc.ihm_calendrier b 
-         where a.validite_inf>=b.validite_inf  
-         and a.validite_inf<=b.validite_sup  
-         and a.id_norme=b.id_norme  
-         and a.periodicite=b.periodicite 
-         and a.etat='1' 
-         and a.etat=b.etat 
-         and a.id<>b.id); 
-               	if n>0 then  
-         RAISE EXCEPTION 'Chevauchement de calendrier'; 
-         end if; 
-         select count(1) into n from arc.ihm_calendrier a 
-         where a.validite_inf>a.validite_sup; 
-               	if n>0 then  
-         RAISE EXCEPTION 'Intervalle non valide. Date inf >= Date sup'; 
-         end if; 
-         return true; 
-         END;  
-         $BODY$ 
-         LANGUAGE plpgsql VOLATILE 
-         COST 100; 
-        
-        
-         CREATE OR REPLACE FUNCTION arc.fn_check_jeuderegle() 
-         RETURNS boolean AS 
-         $BODY$ 
-         DECLARE 
-           n integer; 
-         BEGIN  
-         SELECT count(1) into n 
-         FROM 	( 
-         SELECT id_norme, periodicite, validite_inf, validite_sup, etat, count(etat) 
-         FROM arc.ihm_jeuderegle  b 
-         WHERE b.etat != 'inactif' 
-         GROUP BY id_norme, periodicite, validite_inf, validite_sup, etat 
-         HAVING count(etat)>1 
-         ) AS foo; 
-         if n>0 then  
-         RAISE EXCEPTION 'Un seul jeu de règle en production ou par bac àsable pour un calendrier'; 
-         end if; 
-         return true; 
-         END;  
-         $BODY$ 
-         LANGUAGE plpgsql VOLATILE 
-         COST 100; 
+do $$ begin CREATE SEQUENCE arc.number_generator cycle; exception when others then end; $$; 
+
+CREATE OR REPLACE FUNCTION public.curr_val(text) 
+   RETURNS bigint AS 
+ $BODY$ 
+ BEGIN 
+ return currval($1); 
+ exception when others then 
+ return nextval($1); 
+ END; 
+ $BODY$ 
+ LANGUAGE plpgsql VOLATILE 
+ COST 100; 
+
+ CREATE OR REPLACE FUNCTION arc.fn_check_calendrier() 
+ RETURNS boolean AS 
+ $BODY$ 
+ DECLARE 
+ n integer; 
+ BEGIN  
+ select count(1) into n from arc.ihm_calendrier a 
+ where exists (select 1 from arc.ihm_calendrier b 
+ where a.validite_inf>=b.validite_inf  
+ and a.validite_inf<=b.validite_sup  
+ and a.id_norme=b.id_norme  
+ and a.periodicite=b.periodicite 
+ and a.etat='1' 
+ and a.etat=b.etat 
+ and a.id<>b.id); 
+       	if n>0 then  
+ RAISE EXCEPTION 'Chevauchement de calendrier'; 
+ end if; 
+ select count(1) into n from arc.ihm_calendrier a 
+ where a.validite_inf>a.validite_sup; 
+       	if n>0 then  
+ RAISE EXCEPTION 'Intervalle non valide. Date inf >= Date sup'; 
+ end if; 
+ return true; 
+ END;  
+ $BODY$ 
+ LANGUAGE plpgsql VOLATILE 
+ COST 100; 
         
         
-         CREATE OR REPLACE FUNCTION arc.isdate( 
-         text, 
-         text) 
-         RETURNS boolean AS 
-         $BODY$ 
-         BEGIN 
-         IF TO_CHAR(TO_DATE($1,$2), $2) != $1 THEN 
-         RETURN FALSE; 
-         END IF; 
-         RETURN TRUE; 
-         EXCEPTION WHEN others THEN 
-         RETURN FALSE; 
-         END; 
-         $BODY$ 
-         LANGUAGE plpgsql IMMUTABLE 
-         COST 100;
+CREATE OR REPLACE FUNCTION arc.fn_check_jeuderegle() 
+ RETURNS boolean AS 
+ $BODY$ 
+ DECLARE 
+   n integer; 
+ BEGIN  
+ SELECT count(1) into n 
+ FROM 	( 
+ SELECT id_norme, periodicite, validite_inf, validite_sup, etat, count(etat) 
+ FROM arc.ihm_jeuderegle  b 
+ WHERE b.etat != 'inactif' 
+ GROUP BY id_norme, periodicite, validite_inf, validite_sup, etat 
+ HAVING count(etat)>1 
+ ) AS foo; 
+ if n>0 then  
+ RAISE EXCEPTION 'Un seul jeu de règle en production ou par bac àsable pour un calendrier'; 
+ end if; 
+ return true; 
+ END;  
+ $BODY$ 
+ LANGUAGE plpgsql VOLATILE 
+ COST 100; 
+
+
+CREATE OR REPLACE FUNCTION arc.isdate( 
+ text, 
+ text) 
+ RETURNS boolean AS 
+ $BODY$ 
+ BEGIN 
+ IF TO_CHAR(TO_DATE($1,$2), $2) != $1 THEN 
+ RETURN FALSE; 
+ END IF; 
+ RETURN TRUE; 
+ EXCEPTION WHEN others THEN 
+ RETURN FALSE; 
+ END; 
+ $BODY$ 
+ LANGUAGE plpgsql IMMUTABLE 
+ COST 100;
          
-         
-CREATE OR REPLACE FUNCTION arc.update_list_param(
-    n text,
-    dt text)
-  RETURNS boolean AS
+CREATE OR REPLACE FUNCTION arc.verif_doublon()
+RETURNS trigger AS
 $BODY$
-DECLARE p text;
-BEGIN
-begin
-	p:=current_setting(n);
-	exception when others then 
-	perform set_config(n,';'||dt||';',true );
-	return false;
-end;
-
-if (p='') then
-	perform set_config(n,';'||dt||';',true );
-	return false;
+DECLARE
+n integer;
+k integer;
+nom_table text := quote_ident(TG_TABLE_SCHEMA) || '.'|| quote_ident(TG_TABLE_NAME);
+query text;
+BEGIN 
+--RAISE NOTICE 'Nom de la table : %', nom_table;
+query := 'SELECT count(1) FROM (SELECT count(1)	FROM '|| nom_table ||' b WHERE id_classe=''CARDINALITE'' 
+GROUP BY id_norme, periodicite, validite_inf, validite_sup, version, lower(rubrique_pere), lower(rubrique_fils)
+HAVING count(1)>1) AS foo';
+--RAISE NOTICE 'Query vaut : %', query;	
+EXECUTE query INTO n;
+query := 'SELECT count(1) FROM 	(SELECT count(1) FROM '|| nom_table ||' b WHERE id_classe IN(''NUM'',''DATE'',''ALPHANUM'')
+GROUP BY id_norme, periodicite, validite_inf, validite_sup, version, lower(rubrique_pere)
+HAVING count(1)>1) AS foo';
+--RAISE NOTICE 'Query vaut : %', query;
+EXECUTE query INTO k;
+RAISE NOTICE 'Variable de comptage n : %', n;
+RAISE NOTICE 'Variable de comptage k : %', k;
+if n>0 then 
+RAISE EXCEPTION 'Règles de CARDINALITE en doublon'; 
 end if;
-
-if (p not like '%;'||dt||';%') then
-	perform set_config(n,p||dt||';',true );
+if k>0 then 
+RAISE EXCEPTION 'Règles de format (NUM,DATE,ALPHANUM) en doublon'; 
 end if;
-
-return true;
-END;
+RETURN NEW;
+END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
-ALTER FUNCTION arc.update_list_param(text, text)
-  OWNER TO arc;
+LANGUAGE plpgsql VOLATILE
+COST 100;
+
+
+CREATE OR REPLACE FUNCTION arc.insert_controle()
+RETURNS trigger AS
+$BODY$
+DECLARE i integer;
+nom_table text := quote_ident(TG_TABLE_SCHEMA) || '.'|| quote_ident(TG_TABLE_NAME);
+query text;
+  BEGIN
+if (new.id_regle is null) then
+query:='select coalesce(max(id_regle),0)+1 from '||nom_table||' 
+where id_norme='''||NEW.id_norme||''' 
+and periodicite='''||NEW.periodicite||''' 
+and validite_inf='''||NEW.validite_inf||''' 
+and validite_sup='''||NEW.validite_sup||'''  
+and version='''||NEW.version||''' ';
+EXECUTE query INTO i;
+NEW.id_regle:=i;
+end if;
+RETURN NEW;
+  END;
+$BODY$
+LANGUAGE plpgsql VOLATILE
+COST 100;
