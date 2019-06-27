@@ -150,7 +150,9 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	    for (String s : repoList) {
 		String dirIn = repertoire + envDir + File.separator + TypeTraitementPhase.REGISTER + "_" + s + ARCHIVE;
 		String dirOut = repertoire + envDir + File.separator + TypeTraitementPhase.REGISTER + "_" + s;
-
+		
+		rebuildDirectories(dirIn,dirOut);
+		
 		// on itère sur les fichiers trouvé dans le répertoire d'archive
 		File f = new File(dirIn);
 		File[] files = f.listFiles();
@@ -198,6 +200,22 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	}
     }
 
+    /**
+     * Create directory if not exists
+     * @param dirs
+     */
+    public static void rebuildDirectories(String... dirs)
+    {
+    	for (String d:dirs)
+    	{
+    		File f = new File(d);
+    		if (!f.exists())
+    		{
+    			f.mkdirs();
+    		}
+    	}
+    }
+    
     private void processInconsistentFiles(String nomTableArchive, String dirIn, String dirOut) throws SQLException {
 	StringBuilder request;
 	request = new StringBuilder();
@@ -282,7 +300,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	    request.append(createSchema(executionEnv, user));
 	}
 
-	requestCreateMonitotirngTableT(request);
+	requestCreateMonitoringTableT(request);
 	requestCreateMonitoringTable(request);
 	requestCreateMonitoringtableArchive(request);
 
@@ -293,6 +311,8 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	    // fonction script
 	    request.append(IOUtils.toString(getClass().getClassLoader().getResourceAsStream(BDD_SCRIPT_FUNCTION_SQL),
 		    "UTF-8"));
+	    request.append(IOUtils.toString(getClass().getClassLoader().getResourceAsStream(BDD_SCRIPT_FUNCTION_SQL),
+			    "UTF-8"));
 	} catch (IOException e) {
 	    LoggerDispatcher.error("Error dowload sql function file", e, LOGGER);
 	}
@@ -348,16 +368,20 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 		"nom_archive", FormatSQL.TEXT_COLLATE_C));
     }
 
-    private void requestCreateMonitotirngTableT(StringBuilder request) {
+    private void requestCreateMonitoringTableT(StringBuilder request) {
 	request.append(createTableNoVacum(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T)));
 	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T),
 		"date_entree", FormatSQL.TEXT_COLLATE_C));
     }
+    
+
 
     private void requestCreateMonitoringTable(StringBuilder request) {
 	request.append(createTableNoVacum(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)));
 	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER), "id_source",
 		FormatSQL.TEXT_COLLATE_C));
+	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER), "id_norme",
+				FormatSQL.TEXT_COLLATE_C));  
 	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER), "validite",
 		FormatSQL.TEXT_COLLATE_C));
 	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER),
@@ -392,6 +416,8 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 		"v_container", FormatSQL.TEXT_COLLATE_C));
 	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER),
 		"o_container", FormatSQL.TEXT_COLLATE_C));
+	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER),
+			"to_delete", FormatSQL.TEXT_COLLATE_C));
 	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER), "client",
 		"text[]"));
 	request.append(addColumnToTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER),
@@ -889,7 +915,9 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 			|| listeTableParamettre[i] == TraitementTableParametre.CONTROLE_REGLE//
 			|| listeTableParamettre[i] == TraitementTableParametre.MAPPING_REGLE //
 			|| listeTableParamettre[i] == TraitementTableParametre.FILTRAGE_REGLE //
-			|| listeTableParamettre[i] == TraitementTableParametre.PARAMETTRAGE_ORDRE_PHASE) {
+//			|| listeTableParamettre[i] == TraitementTableParametre.PARAMETTRAGE_ORDRE_PHASE
+			) 
+		{
 		    condition.append(" WHERE exists (select 1 from " + anParametersEnvironment
 			    + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
 		    condition.append(" and exists (select 1 from " + anParametersEnvironment
@@ -898,9 +926,9 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 			    + "_jeuderegle b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup AND a.version=b.version and b.etat=lower('"
 			    + modaliteEtat + "'");
 		    condition.append("))");
-		    if (listeTableParamettre[i] == TraitementTableParametre.PARAMETTRAGE_ORDRE_PHASE) {
-			condition.append(" OR id_norme ISNULL");
-		    }
+//		    if (listeTableParamettre[i] == TraitementTableParametre.PARAMETTRAGE_ORDRE_PHASE) {
+//			condition.append(" OR id_norme ISNULL");
+//		    }
 		}
 		requete.append(FormatSQL.dropTable(tableImage).toString());
 		requete.append("CREATE TABLE " + tableImage + " " + FormatSQL.WITH_NO_VACUUM + " AS SELECT a.* FROM "

@@ -106,7 +106,8 @@ public abstract class AbstractThreadService extends AbstractService implements R
     private void getPreviousPhase() {
 	@SuppressWarnings("resource")
 	ProcessPhaseDAO processPhaseDAO = new ProcessPhaseDAO(queyHandler,
-		this.bddTable.getNaming(BddTable.ID_TABLE_PHASE_ORDER));
+//		this.bddTable.getNaming(BddTable.ID_TABLE_PHASE_ORDER));
+			this.bddTable.getNaming(BddTable.ID_TABLE_IHM_PARAMETTRAGE_ORDRE_PHASE));
 	try {
 	    this.actualPhaseEntity = processPhaseDAO.getPreviousPhase(getTablePil(),
 		    this.tokenInputPhaseName.toUpperCase());

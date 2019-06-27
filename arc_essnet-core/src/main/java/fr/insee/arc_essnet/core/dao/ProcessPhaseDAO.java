@@ -86,17 +86,19 @@ public class ProcessPhaseDAO extends AbstractDAO<TraitementPhaseEntity> {
     
     public TraitementPhaseEntity getPreviousPhase(String tablePilotage, String currentPhase) throws Exception {
 	StringBuilder conditionWhere = new StringBuilder();
-	conditionWhere.append("\n\t exists (");
-	conditionWhere.append("\n\t SELECT 1 FROM " + tablePilotage + " pil ");
-	conditionWhere.append("\n\t WHERE (");
-	conditionWhere.append("\n\t\t pil.id_norme = " + this.getNomTableEntity().toString() + ".id_norme");
-	conditionWhere.append("\n\t\tAND pil.periodicite = " + this.getNomTableEntity().toString() + ".periodicite");
-	conditionWhere.append("\n\t\tAND pil.validite::date > " + this.getNomTableEntity().toString() + ".validite_inf");
-	conditionWhere.append("\n\t\tAND pil.validite::date < " + this.getNomTableEntity().toString() + ".validite_sup");
-	conditionWhere.append("\n\t\tAND " + this.getNomTableEntity().toString() + ".nom_phase = '" + currentPhase + "')");
-	conditionWhere.append("\n\t\tOR");
-	conditionWhere.append("\n\t\t( pil.id_norme isnull");
-	conditionWhere.append("\n\t\tAND " + this.getNomTableEntity().toString() + ".nom_phase = '" + currentPhase + "'))");
+	conditionWhere.append("TRUE");
+	
+//	conditionWhere.append("\n\t exists (");
+//	conditionWhere.append("\n\t SELECT 1 FROM " + tablePilotage + " pil ");
+//	conditionWhere.append("\n\t WHERE (");
+//	conditionWhere.append("\n\t\t pil.id_norme = " + this.getNomTableEntity().toString() + ".id_norme");
+//	conditionWhere.append("\n\t\t AND pil.periodicite = " + this.getNomTableEntity().toString() + ".periodicite");
+//	conditionWhere.append("\n\t\t AND pil.validite::date > " + this.getNomTableEntity().toString() + ".validite_inf");
+//	conditionWhere.append("\n\t\t AND pil.validite::date < " + this.getNomTableEntity().toString() + ".validite_sup");
+//	conditionWhere.append("\n\t\t AND " + this.getNomTableEntity().toString() + ".nom_phase = '" + currentPhase + "')");
+//	conditionWhere.append("\n\t\t OR");
+//	conditionWhere.append("\n\t\t ( pil.id_norme isnull");
+//	conditionWhere.append("\n\t\t AND " + this.getNomTableEntity().toString() + ".nom_phase = '" + currentPhase + "'))");
 
 	
 	

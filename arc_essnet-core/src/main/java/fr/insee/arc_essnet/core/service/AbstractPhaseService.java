@@ -184,43 +184,43 @@ public abstract class AbstractPhaseService extends AbstractService implements IP
 	request.append("\n\t FROM " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER) + " pil ");
 	request.append("\n\t WHERE '" + TraitementState.OK + ANY_ETAT_TRAITEMENT);
 	request.append("\n\t AND etape=1");
-	request.append("\n\t AND EXISTS (");
-	request.append(
-		"\n\t\t SELECT 1 FROM " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PHASE_ORDER) + " as phase");
-	request.append("\n\t\t WHERE ");
-	// condition pour savoir si la norme du fichier dispose de la phase que l'on
-	// veux lancer
-	request.append("\n\t\t (pil.id_norme = phase.id_norme");
-	request.append("\n\t\t AND pil.periodicite = phase.periodicite");
-	request.append("\n\t\t AND pil.validite::date > phase.validite_inf");
-	request.append("\n\t\t AND pil.validite::date < phase.validite_sup");
-	request.append("\n\t\t AND pil.phase_traitement = (SELECT phase_precedente from "
-		+ this.bddTable.getQualifedName(BddTable.ID_TABLE_PHASE_ORDER) + " as previous where nom_phase ='" + newPhase
-		+ "' AND previous.id_norme = pil.id_norme))");
-	// condition dans le cas que l'on veuille lancer une phase obligatoire
-	request.append("\n\t OR (pil.phase_traitement = (SELECT phase_precedente from "
-		+ this.bddTable.getQualifedName(BddTable.ID_TABLE_PHASE_ORDER) + " where nom_phase ='" + newPhase
-		+ "' AND IS_NEEDED)");
-
-	request.append("\n\t ))) ");
-	request.append("\n\t,mark AS (SELECT a.*    FROM prep a WHERE cum_enr<" + nbEnr + " ");
-	request.append("\n\tUNION   (SELECT a.* FROM prep a LIMIT 1)) ");
-	request.append("\n\t, update as ( UPDATE " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)
+//	request.append("\n\t AND EXISTS (");
+//	request.append(
+//		"\n\t\t SELECT 1 FROM " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PHASE_ORDER) + " as phase");
+//	request.append("\n\t\t WHERE ");
+//	// condition pour savoir si la norme du fichier dispose de la phase que l'on
+//	// veux lancer
+//	request.append("\n\t\t (pil.id_norme = phase.id_norme");
+//	request.append("\n\t\t AND pil.periodicite = phase.periodicite");
+//	request.append("\n\t\t AND pil.validite::date > phase.validite_inf");
+//	request.append("\n\t\t AND pil.validite::date < phase.validite_sup");
+//	request.append("\n\t\t AND pil.phase_traitement = (SELECT phase_precedente from "
+//		+ this.bddTable.getQualifedName(BddTable.ID_TABLE_PHASE_ORDER) + " as previous where nom_phase ='" + newPhase
+//		+ "' AND previous.id_norme = pil.id_norme))");
+//	// condition dans le cas que l'on veuille lancer une phase obligatoire
+//	request.append("\n\t OR (pil.phase_traitement = (SELECT phase_precedente from "
+//		+ this.bddTable.getQualifedName(BddTable.ID_TABLE_PHASE_ORDER) + " where nom_phase ='" + newPhase
+//		+ "' AND IS_NEEDED)");
+//	request.append("\n\t )) ");
+	request.append("\n\t ) ");
+	request.append("\n\t , mark AS (SELECT a.*    FROM prep a WHERE cum_enr<" + nbEnr + " ");
+	request.append("\n\t UNION   (SELECT a.* FROM prep a LIMIT 1)) ");
+	request.append("\n\t , update as ( UPDATE " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)
 		+ " pil set etape=0 from mark b where pil.id_source=b.id_source and pil.etape=1) ");
-	request.append("\n\tINSERT INTO " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER) + " ");
+	request.append("\n\t INSERT INTO " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER) + " ");
 	request.append(
 		"(container, id_source, date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape ");
 	if (newPhase.equals(TypeTraitementPhase.STRUCTURIZE_XML.toString())) {
 	    request.append(",jointure");
 	}
 	request.append(") ");
-	request.append("\n\tselect container, id_source, date_entree, id_norme, validite, periodicite, '" + newPhase
+	request.append("\n\t select container, id_source, date_entree, id_norme, validite, periodicite, '" + newPhase
 		+ "' as phase_traitement, '{" + TraitementState.ENCOURS + "}' as etat_traitement ");
 	request.append(", '" + formatter.format(date) + "', rapport, taux_ko, nb_enr, nb_essais, 1 as etape");
 	if (newPhase.equals(TypeTraitementPhase.STRUCTURIZE_XML.toString())) {
 	    request.append(",jointure ");
 	}
-	request.append("\n\tfrom mark; ");
+	request.append("\n\t from mark; ");
 
 	return request.toString();
     }
