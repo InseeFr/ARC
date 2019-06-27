@@ -4,10 +4,6 @@ package fr.insee.arc_essnet.utils.ressourceUtils;
 import java.net.URL;
 
 import org.apache.log4j.xml.DOMConfigurator;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
-
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -194,6 +190,7 @@ import lombok.Setter;
 
 	public void setLogConfiguration(String logConfiguration) {
 		this.logConfiguration = logConfiguration;
+		// TODO use spring Log4jConfigListener ?
 		initializeLog();
 	}
 
