@@ -56,8 +56,17 @@
 ></script>
 </head>
 <body>
+
+
 	<%@include file="tiles/header.jsp"%>
 
+<s:form
+	spellcheck="false"
+	namespace="/"
+	method="POST"
+	theme="simple"
+	enctype="multipart/form-data"
+>
 	<div class="container-fluid">
 
 		<div class="row">
@@ -67,13 +76,6 @@
 			</div>
 		</div>
 		<hr />
-		<s:form
-			spellcheck="false"
-			namespace="/"
-			method="POST"
-			theme="simple"
-			enctype="multipart/form-data"
-		>
 			<div class="row">
 				<div class="col-md">
 					<div class="row">
@@ -142,15 +144,7 @@
 					</div>
 				</div>
 			</div>
-		</s:form>
 		<hr />
-		<s:form
-			spellcheck="false"
-			namespace="/"
-			method="POST"
-			theme="simple"
-			enctype="multipart/form-data"
-		>
 			<div class="row">
 
 				<div class="col-md">
@@ -303,19 +297,10 @@
 							style="margin-left: 25px;"
 						/>
 					</div>
-		</s:form>
 	</div>
 
 
 	<div class="col-md">
-		<s:form
-			spellcheck="false"
-			namespace="/"
-			method="POST"
-			theme="simple"
-			enctype="multipart/form-data"
-		>
-
 			<s:include value="tiles/templateVObject.jsp">
 				<s:set
 					var="view"
@@ -336,15 +321,6 @@
 				</s:param>
 			</s:include>
 
-		</s:form>
-
-		<s:form
-			spellcheck="false"
-			namespace="/"
-			method="POST"
-			theme="simple"
-			enctype="multipart/form-data"
-		>
 			<s:include value="tiles/templateVObject.jsp">
 				<s:set
 					var="view"
@@ -426,9 +402,9 @@
 					/>
 				</s:param>
 			</s:include>
-		</s:form>
 	</div>
 	</div>
 	</div>
+</s:form>
 </body>
 </html>

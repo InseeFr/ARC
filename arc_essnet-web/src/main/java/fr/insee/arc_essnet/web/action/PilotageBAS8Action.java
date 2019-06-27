@@ -114,6 +114,19 @@ public class PilotageBAS8Action extends ArcAction {
 	this.viewPilotageBAS8.initialize(requete.toString(), getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields);
     }
 
+    /**
+     * Entering sandbox monitoring from main menu build the database and filesystem
+     * TODO : use liquibase instead
+     * @return
+     */
+    @Action(value = "/enterPilotageBAS8")
+    public String enterPilotageBAS8() {
+	ApiInitialisationService serv = new ApiInitialisationService(TypeTraitementPhase.INITIALIZE.toString(),
+			"arc.ihm", (String) getSession().get(SessionParameters.ENV), this.repertoire, TypeTraitementPhase.INITIALIZE.getNbLinesToProcess());
+	serv.bddScript();	
+	return selectPilotageBAS8();
+    }
+
     @Action(value = "/selectPilotageBAS8")
     public String selectPilotageBAS8() {
 	initialize();
@@ -280,6 +293,32 @@ public class PilotageBAS8Action extends ArcAction {
 		"10000000").invokeApi();
 	return generateDisplay();
     }
+    
+    /*
+     * Allow the user to select files for the undoBatch fucntionnality
+     */
+    public String undoFilesSelection() {
+    	String selectedSrc=null;
+    	
+    	HashMap<String,ArrayList<String>> m=new HashMap<String,ArrayList<String>>(viewFichierBAS8.mapContentSelected());
+    	
+    	if (m!=null && !m.isEmpty() && m.get("id_source")!=null)
+    	{
+    		for (int i=0;i<m.get("id_source").size();i++)
+    		{
+    			if (selectedSrc!=null)
+    			{
+    				selectedSrc+="\n UNION ALL SELECT ";
+    			}
+    			else
+    			{
+    				selectedSrc="SELECT ";
+    			}
+    			selectedSrc+="'"+m.get("id_source").get(i)+"'::text as id_source ";
+    		}
+    	}
+    	return selectedSrc;
+    }
 
     @Action(value = "/undoBatch")
     public String undoBatch() {
@@ -289,7 +328,7 @@ public class PilotageBAS8Action extends ArcAction {
 	ApiInitialisationService serv = new ApiInitialisationService(TypeTraitementPhase.INITIALIZE.toString(),
 		"arc.ihm", (String) getSession().get(SessionParameters.ENV), this.repertoire, TypeTraitementPhase.INITIALIZE.getNbLinesToProcess());
 	try {
-	    serv.backToPreviousPhase(TypeTraitementPhase.valueOf(this.phaseAExecuter), null,
+	    serv.backToPreviousPhase(TypeTraitementPhase.valueOf(this.phaseAExecuter), undoFilesSelection(),
 		    new ArrayList<TraitementState>(Arrays.asList(TraitementState.OK, TraitementState.KO)));
 	} finally {
 	    serv.finalizePhase();
@@ -956,7 +995,9 @@ public class PilotageBAS8Action extends ArcAction {
 	LoggerDispatcher.debug("instanciateAllDAOs()", LOGGER);
 	try {
 	ProcessPhaseDAO traitementPhaseDAO = new ProcessPhaseDAO(getQueryHandler(),
-		getBddTable().getContextName(BddTable.ID_TABLE_PHASE_ORDER).getNaming());
+//		getBddTable().getContextName(BddTable.ID_TABLE_PHASE_ORDER).getNaming()
+			getBddTable().getContextName(BddTable.ID_TABLE_IHM_PARAMETTRAGE_ORDRE_PHASE).getNaming()
+		);
 	    TraitementPhaseContainer traitementPhaseContainer = traitementPhaseDAO.getAllPhaseOfNorme();
 	    this.setListePhase(traitementPhaseContainer.getListDifferentPhase());
 	} catch (Exception e) {
