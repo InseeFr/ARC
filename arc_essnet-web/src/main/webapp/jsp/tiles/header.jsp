@@ -35,7 +35,7 @@
     
     <s:form
     spellcheck="false"
-    action="selectPilotageBAS8"
+    action="enterPilotageBAS8"
     namespace="/"
     method="POST"
     theme="simple"
@@ -59,7 +59,6 @@
         class="btn btn-outline-primary"
         type="submit"
         doAction='%{actionName}'
-        scope=""
         ajax="false"
         key="header.validate"
       ></s:submit>
