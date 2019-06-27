@@ -18,8 +18,8 @@
 			<list>
 				<value>classpath:fr/insee/config/arc.properties
 				</value>
-				<value>classpath:fr/insee/config/devarc.properties
-				</value>
+<!-- 				<value>classpath:fr/insee/config/devarc.properties -->
+<!-- 				</value> -->
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />

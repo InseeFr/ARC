@@ -17,7 +17,8 @@ import lombok.Setter;
 @Component("properties")
 @Getter
 @Setter
-public class PropertiesHandler implements ApplicationListener<ContextStartedEvent> {
+//public class PropertiesHandler implements ApplicationListener<ContextStartedEvent> {
+	public class PropertiesHandler {
 
     private String databasePoolName;
     private String databaseArcUrl;
@@ -32,6 +33,8 @@ public class PropertiesHandler implements ApplicationListener<ContextStartedEven
     private String logNiveau;
     private String logConfiguration;
     private String batchParametreRepertoire;
+    private String batchExecutionEnvironment;
+    private String batchArcEnvironment;
     private int threadsChargement;
     private int threadsNormage;
     private int threadsControle;
@@ -67,11 +70,11 @@ public class PropertiesHandler implements ApplicationListener<ContextStartedEven
 	return propertitiesHandler;
     }
 
-    @Override
-    public void onApplicationEvent(ContextStartedEvent event) {
-	initializeLog();
-	
-    }
+//    @Override
+//    public void onApplicationEvent(ContextStartedEvent event) {
+//	initializeLog();
+//	
+//    }
 
 
 	public String getDatabasePoolName() {
@@ -191,6 +194,7 @@ public class PropertiesHandler implements ApplicationListener<ContextStartedEven
 
 	public void setLogConfiguration(String logConfiguration) {
 		this.logConfiguration = logConfiguration;
+		initializeLog();
 	}
 
 
@@ -201,6 +205,26 @@ public class PropertiesHandler implements ApplicationListener<ContextStartedEven
 
 	public void setBatchParametreRepertoire(String batchParametreRepertoire) {
 		this.batchParametreRepertoire = batchParametreRepertoire;
+	}
+	
+	
+	public String getBatchExecutionEnvironment() {
+		return batchExecutionEnvironment;
+	}
+
+
+	public void setBatchExecutionEnvironment(String batchExecutionEnvironment) {
+		this.batchExecutionEnvironment = batchExecutionEnvironment;
+	}
+
+
+	public String getBatchArcEnvironment() {
+		return batchArcEnvironment;
+	}
+
+
+	public void setBatchArcEnvironment(String batchArcEnvironment) {
+		this.batchArcEnvironment = batchArcEnvironment;
 	}
 
 

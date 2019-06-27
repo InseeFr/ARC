@@ -19,11 +19,11 @@ import fr.insee.arc_essnet.core.model.TypeTraitementPhase;
 import fr.insee.arc_essnet.core.service.AbstractPhaseService;
 import fr.insee.arc_essnet.core.service.ApiInitialisationService;
 import fr.insee.arc_essnet.utils.dao.UtilitaireDao;
+import fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc_essnet.utils.structure.GenericBean;
 import fr.insee.arc_essnet.utils.utils.LoggerDispatcher;
 import fr.insee.arc_essnet.utils.utils.LoggerHelper;
 import fr.insee.arc_essnet.utils.utils.ManipString;
-import fr.insee.config.InseeConfig;
 
 /**
  * Classe lanceur de l'application Accueil Reception Contrôle
@@ -218,17 +218,19 @@ public class LanceurARC {
 	public static void main(String[] args) {
 
 		boolean fichierRestant=false;
+	    PropertiesHandler properties =new PropertiesHandler();
+
 
 		do {
 		
 		message("Batch ARC "+version);
 		
 		try{
-		String env = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.env");
-		mapParam.put("env", env);
-		String envExecution = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.envExecution").replace(".", "_");
+		String env = properties.getBatchArcEnvironment();
+		mapParam.put(ENV, env);
+		String envExecution = properties.getBatchExecutionEnvironment();
 		mapParam.put(ENV_EXECUTION, envExecution);
-		String repertoire = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire");
+		String repertoire = properties.getBatchParametreRepertoire();
 		mapParam.put(REPERTOIRE, repertoire);
 
 
