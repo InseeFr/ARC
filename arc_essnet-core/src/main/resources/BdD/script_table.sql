@@ -1,5 +1,40 @@
 CREATE SCHEMA IF NOT EXISTS arc;
-/* création des table de modalités IHM*/
+
+CREATE TABLE IF NOT EXISTS arc.ihm_paramettrage_ordre_phase (
+  id_norme text,
+  validite_inf date,
+  validite_sup date,
+  version text,
+  periodicite text,
+  nom_phase text,
+  type_phase text,
+  ordre integer,
+  nb_ligne_traitee integer,
+  phase_precedente text,
+  is_needed boolean,
+  is_in_ihm boolean,
+  is_ra_ihm boolean,
+   CONSTRAINT pk_ihm_paramettrage_ordre_phase PRIMARY KEY (ordre)
+  /* CONSTRAINT pk_ihm_paramettrage_ordre_phase PRIMARY KEY (nom_phase, id_norme, validite_inf, validite_sup, version, periodicite) */
+);
+
+   
+do $$ begin 
+insert into arc.ihm_paramettrage_ordre_phase
+(id_norme,validite_inf,validite_sup,version,periodicite,nom_phase,type_phase,ordre,nb_ligne_traitee,phase_precedente,is_needed,is_in_ihm,is_ra_ihm)
+values 
+(null,null,null,null,null,'DUMMY','DUMMY',0,1,null,true,true,true)
+,(null,null,null,null,null,'INITIALIZE','INITIALIZE',1,1,'DUMMY',true,true,true)
+,(null,null,null,null,null,'REGISTER','REGISTER',2,1,'INITIALIZE',true,true,true)
+,(null,null,null,null,null,'IDENTIFY','IDENTIFY',3,1,'REGISTER',true,true,true)
+,(null,null,null,null,null,'LOAD','LOAD',4,1,'IDENTIFY',true,true,true)
+,(null,null,null,null,null,'STRUCTURIZE_XML','STRUCTURIZE_XML',5,1,'LOAD',false,true,true)
+,(null,null,null,null,null,'CONTROL','CONTROL',6,1,'STRUCTURIZE_XML',false,true,true)
+,(null,null,null,null,null,'FILTER','FILTER',7,1,'CONTROL',false,true,true)
+,(null,null,null,null,null,'FORMAT_TO_MODEL','FORMAT_TO_MODEL',8,1,'FILTER',false,true,true)
+;
+EXCEPTION WHEN OTHERS then end; $$;
+
 CREATE TABLE IF NOT EXISTS arc.ext_etat (
   id text,
   val text,

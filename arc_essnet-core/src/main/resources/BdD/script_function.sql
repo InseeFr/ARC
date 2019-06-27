@@ -73,10 +73,6 @@ END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION arc.transpose_pilotage_calcul()
-  OWNER TO arc;
-
-
 
 -- Function: arc.transpose_pilotage_fin()
 
@@ -169,9 +165,6 @@ $BODY$
 	 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION arc.transpose_pilotage_fin()
-  OWNER TO arc;
-
 
 
 do $$ begin create type public.cle_valeur as (
