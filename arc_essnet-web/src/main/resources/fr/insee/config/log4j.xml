@@ -69,11 +69,11 @@
 	<!-- LOGGER LIST -->
 
 	<logger name="fr.insee.arc_essnet" additivity="false">
-		<level value="TRACE" />
-		<appender-ref ref="query_trace" />
-		<appender-ref ref="console_info" />
-		<appender-ref ref="console_debug" />
-		<appender-ref ref="console_warn" />
+		<level value="ERROR" />
+<!-- 		<appender-ref ref="query_trace" /> -->
+<!-- 		<appender-ref ref="console_info" /> -->
+<!-- 		<appender-ref ref="console_debug" /> -->
+<!-- 		<appender-ref ref="console_warn" /> -->
 		<appender-ref ref="console_error" />
 		</logger>
 
