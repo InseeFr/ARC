@@ -40,14 +40,10 @@ import fr.insee.arc_essnet.utils.utils.ManipString;
 import fr.insee.arc_essnet.utils.utils.SQLExecutor;
 import fr.insee.arc_essnet.web.model.SessionParameters;
 import fr.insee.arc_essnet.web.util.VObject;
-import lombok.Getter;
-import lombok.Setter;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererPilotageBAS8.jsp"),
 	@Result(name = "index", location = "/jsp/index.jsp") })
-@Getter
-@Setter
 public class PilotageBAS8Action extends ArcAction {
 
     private static final String ARC = "ARC_";
@@ -993,12 +989,23 @@ public class PilotageBAS8Action extends ArcAction {
     @Override
     public void instanciateAllDAOs() {
 	LoggerDispatcher.debug("instanciateAllDAOs()", LOGGER);
-	try {
-	ProcessPhaseDAO traitementPhaseDAO = new ProcessPhaseDAO(getQueryHandler(),
-//		getBddTable().getContextName(BddTable.ID_TABLE_PHASE_ORDER).getNaming()
+
+	try 
+	{
+		
+		TraitementPhaseContainer traitementPhaseContainer;	
+	if (getSession().get("traitementPhaseContainer") == null) {
+		ProcessPhaseDAO traitementPhaseDAO = new ProcessPhaseDAO(getQueryHandler(),
 			getBddTable().getContextName(BddTable.ID_TABLE_IHM_PARAMETTRAGE_ORDRE_PHASE).getNaming()
 		);
-	    TraitementPhaseContainer traitementPhaseContainer = traitementPhaseDAO.getAllPhaseOfNorme();
+	    traitementPhaseContainer = traitementPhaseDAO.getAllPhaseOfNorme();
+	    traitementPhaseDAO.close();
+		getSession().put("traitementPhaseContainer",traitementPhaseContainer);
+	}
+	else
+	{
+		traitementPhaseContainer=(TraitementPhaseContainer) getSession().get("traitementPhaseContainer");
+	}
 	    this.setListePhase(traitementPhaseContainer.getListDifferentPhase());
 	} catch (Exception e) {
 	    LoggerDispatcher.error("erreur lors de la récuparation des phases", e, LOGGER);
