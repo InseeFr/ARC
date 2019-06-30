@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>fr.insee</groupId>
-		<artifactId>arc_essnet</artifactId>
+		<artifactId>arc</artifactId>
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
-	<groupId>fr.insee.arc_essnet</groupId>
-	<artifactId>arc_essnet_utils</artifactId>
-	<name>arc_essnet_utility</name>
+	<groupId>fr.insee.arc</groupId>
+	<artifactId>arc_utils</artifactId>
+	<name>arc_utility</name>
 	<description>Contain all utility classes</description>
 
 	<dependencies>

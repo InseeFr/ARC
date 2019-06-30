@@ -1,5 +1,5 @@
 @startuml
-abstract class AbstractService [[java:fr.insee.arc_essnet.core.service.AbstractService]] {
+abstract class AbstractService [[java:fr.insee.arc.core.service.AbstractService]] {
 	+{static}String IS_DEV
 	#{static}Logger LOGGER
 	+{static}String SUFFIXE_TEMP_FILE_ORIADE
@@ -36,19 +36,19 @@ abstract class AbstractService [[java:fr.insee.arc_essnet.core.service.AbstractS
 	+{static}String dbEnv(String env)
 }
 
-interface IApiService [[java:fr.insee.arc_essnet.core.service.IApiService]] {
+interface IApiService [[java:fr.insee.arc.core.service.IApiService]] {
 	boolean initialiser()
 	void finaliser()
 	void executer()
 }
 
-interface IDbConstant [[java:fr.insee.arc_essnet.core.model.IDbConstant]] {
+interface IDbConstant [[java:fr.insee.arc.core.model.IDbConstant]] {
 }
 
 interface IConstanteNumerique [[java:fr.insee.siera.textutils.IConstanteNumerique]] {
 }
 
-abstract class AbstractPhaseService [[java:fr.insee.arc_essnet.core.service.AbstractPhaseService]] {
+abstract class AbstractPhaseService [[java:fr.insee.arc.core.service.AbstractPhaseService]] {
 +{static}String IS_DEV
 	#{static}Logger LOGGER
 	+{static}String SUFFIXE_TEMP_FILE_ORIADE
@@ -77,13 +77,13 @@ abstract class AbstractPhaseService [[java:fr.insee.arc_essnet.core.service.Abst
 	#String tableOutKo
 }
 
-interface IPhaseService [[java:fr.insee.arc_essnet.core.service.IPhaseService]] {
+interface IPhaseService [[java:fr.insee.arc.core.service.IPhaseService]] {
 	boolean checkTodo(String tablePil, String phaseAncien, String phaseNouveau)
 	void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp, Integer nbEnr)
 	void deletePreviousTable(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch)
 }
 
-abstract class AbstractThreadService [[java:fr.insee.arc_essnet.core.service.thread.AbstractThreadService]] {
+abstract class AbstractThreadService [[java:fr.insee.arc.core.service.thread.AbstractThreadService]] {
 	#{static}Logger LOGGER
 	#Thread actualThread
 	#String tablePilTempThread
@@ -122,7 +122,7 @@ interface Runnable [[java:java.lang.Runnable]] {
 	void run()
 }
 
-abstract class "AbstractThreadRunnerService<T extends AbstractThreadService>" as AbstractThreadRunnerService_AbstractThreadService_ [[java:fr.insee.arc_essnet.core.service.AbstractThreadRunnerService]] {
+abstract class "AbstractThreadRunnerService<T extends AbstractThreadService>" as AbstractThreadRunnerService_AbstractThreadService_ [[java:fr.insee.arc.core.service.AbstractThreadRunnerService]] {
 	#{static}Logger LOGGER
 	#Class<T> classThread
 	+void executer()
@@ -134,7 +134,7 @@ abstract class "AbstractThreadRunnerService<T extends AbstractThreadService>" as
 	+Connection chooseConnection(Connection connextionThread, List<? extends AbstractThreadService> threadList, List<Connection> connexionList)
 }
 
-class ApiChargementService [[java:fr.insee.arc_essnet.core.service.ApiChargementService]] {
+class ApiChargementService [[java:fr.insee.arc.core.service.ApiChargementService]] {
 	-{static}Logger LOGGER
 	-{static}Class<ThreadChargementService> THREAD_TYPE
 	#String directoryIn
@@ -154,10 +154,10 @@ class ApiChargementService [[java:fr.insee.arc_essnet.core.service.ApiChargement
 	-HashMap<String,ArrayList<String>> listIdsource
 }
 
-interface IApiServiceWithoutOutputTablePreviousPhase [[java:fr.insee.arc_essnet.core.service.IApiServiceWithoutOutputTablePreviousPhase]] {
+interface IApiServiceWithoutOutputTablePreviousPhase [[java:fr.insee.arc.core.service.IApiServiceWithoutOutputTablePreviousPhase]] {
 }
 
-class ApiControleService [[java:fr.insee.arc_essnet.core.service.ApiControleService]] {
+class ApiControleService [[java:fr.insee.arc.core.service.ApiControleService]] {
 	-{static}Logger LOGGER
 	-{static}Class<ThreadControleService> THREAD_TYPE
 	+ServiceJeuDeRegle sjdr
@@ -170,17 +170,17 @@ class ApiControleService [[java:fr.insee.arc_essnet.core.service.ApiControleServ
 	+void setSjdr(ServiceJeuDeRegle sjdr)
 }
 
-interface IApiServiceWithOutputTablePreviousPhase [[java:fr.insee.arc_essnet.core.service.IApiServiceWithOutputTablePreviousPhase]] {
+interface IApiServiceWithOutputTablePreviousPhase [[java:fr.insee.arc.core.service.IApiServiceWithOutputTablePreviousPhase]] {
 }
 
-class ApiFiltrageService [[java:fr.insee.arc_essnet.core.service.ApiFiltrageService]] {
+class ApiFiltrageService [[java:fr.insee.arc.core.service.ApiFiltrageService]] {
 	-{static}Logger LOGGER
 	#String seuilExclusion
 	#HierarchicalView normeToPeriodiciteToValiditeInfToValiditeSupToRegle
 	-{static}Class<ThreadFiltrageService> THREAD_TYPE
 }
 
-class ApiIdentificationService [[java:fr.insee.arc_essnet.core.service.ApiIdentificationService]] {
+class ApiIdentificationService [[java:fr.insee.arc.core.service.ApiIdentificationService]] {
 	-{static}Logger LOGGER
 	-{static}Class<ThreadIdentificationService> THREAD_TYPE
 	#String directoryIn
@@ -190,7 +190,7 @@ class ApiIdentificationService [[java:fr.insee.arc_essnet.core.service.ApiIdenti
 	#List<Norme> listeNorme
 }
 
-class ApiInitialisationService [[java:fr.insee.arc_essnet.core.service.ApiInitialisationService]] {
+class ApiInitialisationService [[java:fr.insee.arc.core.service.ApiInitialisationService]] {
 	-{static}int NB_FICHIER_PER_ARCHIVE
 	-{static}int Nb_Jour_A_Conserver
 	-{static}Logger LOGGER
@@ -224,13 +224,13 @@ class ApiInitialisationService [[java:fr.insee.arc_essnet.core.service.ApiInitia
 	+void deletePreviousTable(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch)
 }
 
-class ApiNormageService [[java:fr.insee.arc_essnet.core.service.ApiNormageService]] {
+class ApiNormageService [[java:fr.insee.arc.core.service.ApiNormageService]] {
 	-{static}Logger LOGGER
 	#String separator
 	-{static}Class<ThreadNormageService> THREAD_TYPE
 }
 
-class ApiReceptionService [[java:fr.insee.arc_essnet.core.service.ApiReceptionService]] {
+class ApiReceptionService [[java:fr.insee.arc.core.service.ApiReceptionService]] {
 -{static}Logger LOGGER
 	-{static}Pattern p
 	+ApiReceptionService()
@@ -247,7 +247,7 @@ class ApiReceptionService [[java:fr.insee.arc_essnet.core.service.ApiReceptionSe
 	+void deletePreviousTable(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch)
 }
 
-class MappingService [[java:fr.insee.arc_essnet.core.service.mapping.MappingService]] {
+class MappingService [[java:fr.insee.arc.core.service.mapping.MappingService]] {
 	-{static}Logger LOGGER
 	-{static}String prefixIdentifiantRubrique
 	#RequeteMappingCalibree requeteSQLCalibree

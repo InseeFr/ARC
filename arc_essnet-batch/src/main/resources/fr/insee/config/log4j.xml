@@ -66,7 +66,7 @@
 	</appender>
 
 	<!-- LOGGER LIST -->
-	<logger name="fr.insee.arc_essnet" additivity="false">
+	<logger name="fr.insee.arc" additivity="false">
 		<level value="TRACE" />
 		<appender-ref ref="console_error" />
 		<appender-ref ref="console_trace" />

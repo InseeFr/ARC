@@ -10,8 +10,8 @@
 		">
 
 	<context:annotation-config></context:annotation-config>
-	<context:component-scan base-package="fr.insee.arc_essnet.web"></context:component-scan>
-	<context:component-scan base-package="fr.insee.arc_essnet.core"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.web"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.core"></context:component-scan>
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
@@ -28,7 +28,7 @@
 
 	<!-- Gestion des properties -->
 	<bean id="properties"
-		class="fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler">
+		class="fr.insee.arc.utils.ressourceUtils.PropertiesHandler">
 		<property name="databasePoolName" value="${fr.insee.database.poolName}"></property>
 		<property name="databaseArcUrl" value="${fr.insee.database.arc.url}"></property>
 		<property name="databaseArcUsername" value="${fr.insee.database.arc.username}"></property>
@@ -63,13 +63,13 @@
 
 
 	<bean id="queryHandler"
-		class="fr.insee.arc_essnet.utils.queryhandler.UtilitaireDAOIhmQueryHandler"
+		class="fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler"
 		scope="session">
 		<aop:scoped-proxy />
 		<constructor-arg value="${fr.insee.database.poolName}" />
 	</bean>
 
-	<bean id="viewListNomenclatures" class="fr.insee.arc_essnet.web.model.ViewListNomenclatures"
+	<bean id="viewListNomenclatures" class="fr.insee.arc.web.model.ViewListNomenclatures"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -77,7 +77,7 @@
 		<property name="title" value="Liste des nomenclatures" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewNomenclature" class="fr.insee.arc_essnet.web.model.ViewNomenclature"
+	<bean id="viewNomenclature" class="fr.insee.arc.web.model.ViewNomenclature"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -85,7 +85,7 @@
 		<property name="title" value="Nomenclature" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewSchemaNmcl" class="fr.insee.arc_essnet.web.model.ViewSchemaNmcl"
+	<bean id="viewSchemaNmcl" class="fr.insee.arc.web.model.ViewSchemaNmcl"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -93,7 +93,7 @@
 		<property name="title" value="Schema d'une nomenclature" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewClient" class="fr.insee.arc_essnet.web.model.ViewClient"
+	<bean id="viewClient" class="fr.insee.arc.web.model.ViewClient"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -101,7 +101,7 @@
 		<property name="title" value="Applications clientes pour cette norme" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewFamilleNorme" class="fr.insee.arc_essnet.web.model.ViewFamilleNorme"
+	<bean id="viewFamilleNorme" class="fr.insee.arc.web.model.ViewFamilleNorme"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -109,7 +109,7 @@
 		<property name="title" value="Liste des familles de normes" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewNorme" class="fr.insee.arc_essnet.web.model.ViewNorme"
+	<bean id="viewNorme" class="fr.insee.arc.web.model.ViewNorme"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -118,7 +118,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewCalendrier" class="fr.insee.arc_essnet.web.model.ViewCalendrier"
+	<bean id="viewCalendrier" class="fr.insee.arc.web.model.ViewCalendrier"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -127,7 +127,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewJeuxDeRegles" class="fr.insee.arc_essnet.web.model.ViewJeuxDeRegles"
+	<bean id="viewJeuxDeRegles" class="fr.insee.arc.web.model.ViewJeuxDeRegles"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -136,7 +136,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewChargement" class="fr.insee.arc_essnet.web.model.ViewChargement"
+	<bean id="viewChargement" class="fr.insee.arc.web.model.ViewChargement"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -146,7 +146,7 @@
 	</bean>
 
 
-	<bean id="viewNormage" class="fr.insee.arc_essnet.web.model.ViewNormage"
+	<bean id="viewNormage" class="fr.insee.arc.web.model.ViewNormage"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -155,7 +155,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewControle" class="fr.insee.arc_essnet.web.model.ViewControle"
+	<bean id="viewControle" class="fr.insee.arc.web.model.ViewControle"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -164,7 +164,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewFiltrage" class="fr.insee.arc_essnet.web.model.ViewFiltrage"
+	<bean id="viewFiltrage" class="fr.insee.arc.web.model.ViewFiltrage"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -173,7 +173,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewMapping" class="fr.insee.arc_essnet.web.model.ViewMapping"
+	<bean id="viewMapping" class="fr.insee.arc.web.model.ViewMapping"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -182,7 +182,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewTableMetier" class="fr.insee.arc_essnet.web.model.ViewTableMetier"
+	<bean id="viewTableMetier" class="fr.insee.arc.web.model.ViewTableMetier"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -190,7 +190,7 @@
 		<property name="title" value="Tables métier" />
 		<property name="paginationSize" value="10" />
 	</bean>
-	<bean id="viewVariableMetier" class="fr.insee.arc_essnet.web.model.ViewVariableMetier"
+	<bean id="viewVariableMetier" class="fr.insee.arc.web.model.ViewVariableMetier"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -198,7 +198,7 @@
 		<property name="title" value="Variables métier" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewJeuxDeReglesCopie" class="fr.insee.arc_essnet.web.model.ViewJeuxDeReglesCopie"
+	<bean id="viewJeuxDeReglesCopie" class="fr.insee.arc.web.model.ViewJeuxDeReglesCopie"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -207,7 +207,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewCampagne" class="fr.insee.arc_essnet.web.model.ViewCampagne"
+	<bean id="viewCampagne" class="fr.insee.arc.web.model.ViewCampagne"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -217,7 +217,7 @@
 	</bean>
 
 
-	<bean id="viewPilotageBAS8" class="fr.insee.arc_essnet.web.model.ViewPilotageBAS8"
+	<bean id="viewPilotageBAS8" class="fr.insee.arc.web.model.ViewPilotageBAS8"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -225,7 +225,7 @@
 		<property name="title" value="Etat des fichiers" />
 		<property name="paginationSize" value="5" />
 	</bean>
-	<bean id="viewRapportBAS8" class="fr.insee.arc_essnet.web.model.ViewRapportBAS8"
+	<bean id="viewRapportBAS8" class="fr.insee.arc.web.model.ViewRapportBAS8"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -233,7 +233,7 @@
 		<property name="title" value="Rapports d'anomalie" />
 		<property name="paginationSize" value="10" />
 	</bean>
-	<bean id="viewFichierBAS8" class="fr.insee.arc_essnet.web.model.ViewFichierBAS8"
+	<bean id="viewFichierBAS8" class="fr.insee.arc.web.model.ViewFichierBAS8"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -241,7 +241,7 @@
 		<property name="title" value="Détail des fichiers du Bac à Sable" />
 		<property name="paginationSize" value="10" />
 	</bean>
-	<bean id="viewEntrepotBAS8" class="fr.insee.arc_essnet.web.model.ViewEntrepotBAS8"
+	<bean id="viewEntrepotBAS8" class="fr.insee.arc.web.model.ViewEntrepotBAS8"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -249,7 +249,7 @@
 		<property name="title" value="Détail des fichiers du Bac à Sable" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewArchiveBAS8" class="fr.insee.arc_essnet.web.model.ViewArchiveBAS8"
+	<bean id="viewArchiveBAS8" class="fr.insee.arc.web.model.ViewArchiveBAS8"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -257,7 +257,7 @@
 		<property name="title" value="Contenu du répertoire d'archive" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewPilotagePROD" class="fr.insee.arc_essnet.web.model.ViewPilotagePROD"
+	<bean id="viewPilotagePROD" class="fr.insee.arc.web.model.ViewPilotagePROD"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -265,7 +265,7 @@
 		<property name="title" value="Pilotage de la production" />
 		<property name="paginationSize" value="10" />
 	</bean>
-	<bean id="viewRapportPROD" class="fr.insee.arc_essnet.web.model.ViewRapportPROD"
+	<bean id="viewRapportPROD" class="fr.insee.arc.web.model.ViewRapportPROD"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -273,7 +273,7 @@
 		<property name="title" value="Rapports d'anomalie" />
 		<property name="paginationSize" value="10" />
 	</bean>
-	<bean id="viewFichierPROD" class="fr.insee.arc_essnet.web.model.ViewFichierPROD"
+	<bean id="viewFichierPROD" class="fr.insee.arc.web.model.ViewFichierPROD"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -281,7 +281,7 @@
 		<property name="title" value="Detail des Fichiers de la production" />
 		<property name="paginationSize" value="10" />
 	</bean>
-	<bean id="viewEntrepotPROD" class="fr.insee.arc_essnet.web.model.ViewEntrepotPROD"
+	<bean id="viewEntrepotPROD" class="fr.insee.arc.web.model.ViewEntrepotPROD"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -289,7 +289,7 @@
 		<property name="title" value="Détail des fichiers de la production" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewArchivePROD" class="fr.insee.arc_essnet.web.model.ViewArchivePROD"
+	<bean id="viewArchivePROD" class="fr.insee.arc.web.model.ViewArchivePROD"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -297,7 +297,7 @@
 		<property name="title" value="Contenu du répertoire d'archive" />
 		<property name="paginationSize" value="15" />
 	</bean>
-	<bean id="viewListProfils" class="fr.insee.arc_essnet.web.model.ViewListProfils"
+	<bean id="viewListProfils" class="fr.insee.arc.web.model.ViewListProfils"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -306,7 +306,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 	<bean id="viewListUtilisateursDuProfil"
-		class="fr.insee.arc_essnet.web.model.ViewListUtilisateursDuProfil"
+		class="fr.insee.arc.web.model.ViewListUtilisateursDuProfil"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -315,7 +315,7 @@
 		<property name="paginationSize" value="15" />
 	</bean>
 
-	<bean id="viewQuery" class="fr.insee.arc_essnet.web.model.ViewQuery"
+	<bean id="viewQuery" class="fr.insee.arc.web.model.ViewQuery"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -323,7 +323,7 @@
 		<property name="title" value="Résultat" />
 		<property name="paginationSize" value="10" />
 	</bean>
-	<bean id="viewTable" class="fr.insee.arc_essnet.web.model.ViewTable"
+	<bean id="viewTable" class="fr.insee.arc.web.model.ViewTable"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -331,7 +331,7 @@
 		<property name="title" value="Tables du schéma" />
 		<property name="paginationSize" value="0" />
 	</bean>
-	<bean id="viewDirIn" class="fr.insee.arc_essnet.web.model.ViewDirIn"
+	<bean id="viewDirIn" class="fr.insee.arc.web.model.ViewDirIn"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
@@ -339,7 +339,7 @@
 		<property name="title" value="Fichier du répertoire en entrée" />
 		<property name="paginationSize" value="0" />
 	</bean>
-	<bean id="viewDirOut" class="fr.insee.arc_essnet.web.model.ViewDirOut"
+	<bean id="viewDirOut" class="fr.insee.arc.web.model.ViewDirOut"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />

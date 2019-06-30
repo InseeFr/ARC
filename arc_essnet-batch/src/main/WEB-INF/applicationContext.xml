@@ -11,9 +11,9 @@
          http://www.springframework.org/schema/aop/spring-aop-4.1.xsd">
 	
 	<context:annotation-config></context:annotation-config>
-	<context:component-scan base-package="fr.insee.arc_essnet.web"></context:component-scan>
-	<context:component-scan base-package="fr.insee.arc_essnet.core"></context:component-scan>
-	<context:component-scan base-package="fr.insee.arc_essnet.batch"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.web"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.core"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.batch"></context:component-scan>
 
 	
 	<!-- Pour que le Spring puisse utiliser l'AOP -->
@@ -22,7 +22,7 @@
 		<bean class ="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
 	 -->
  
-    <bean id="propertiesHandler" class="fr.insee.arc_essnet.utils.ressourceUtils.PropertiesHandler">
+    <bean id="propertiesHandler" class="fr.insee.arc.utils.ressourceUtils.PropertiesHandler">
         <property name="key1" value="${key1}"></property>
         <property name="key2" value="${key2}"></property>
     </bean>

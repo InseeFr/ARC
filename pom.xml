@@ -3,9 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>fr.insee</groupId>
-	<artifactId>arc_essnet</artifactId>
+	<artifactId>arc</artifactId>
 	<version>${version}</version>
-	<name>arc_essnet</name>
+	<name>arc</name>
 	<description>ARC version type composite</description>
 	<properties>
 		<version>0.0.2-SNAPSHOT</version>
@@ -286,10 +286,10 @@
 	</dependencies>
 	<packaging>pom</packaging>
 	<modules>
-		<module>arc_essnet-core</module>
-		<module>arc_essnet-batch</module>
-		<module>arc_essnet-web</module>
-		<module>arc_essnet-ws</module>
-		<module>arc_essnet_utils</module>
+		<module>arc-core</module>
+		<module>arc-batch</module>
+		<module>arc-web</module>
+		<module>arc-ws</module>
+		<module>arc_utils</module>
 	</modules>
 </project>

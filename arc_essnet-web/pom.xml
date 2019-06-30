@@ -4,14 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>fr.insee</groupId>
-		<artifactId>arc_essnet</artifactId>
+		<artifactId>arc</artifactId>
 		<version>${version}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>fr.insee.arc_essnet</groupId>
-	<artifactId>arc_essnet-web</artifactId>
+	<groupId>fr.insee.arc</groupId>
+	<artifactId>arc-web</artifactId>
 	<packaging>war</packaging>
-	<name>arc_essnet-web</name>
+	<name>arc-web</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -70,8 +70,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>fr.insee.arc_essnet</groupId>
-			<artifactId>arc_essnet_utils</artifactId>
+			<groupId>fr.insee.arc</groupId>
+			<artifactId>arc_utils</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
@@ -81,8 +81,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>fr.insee.arc_essnet</groupId>
-			<artifactId>arc_essnet-core</artifactId>
+			<groupId>fr.insee.arc</groupId>
+			<artifactId>arc-core</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
@@ -234,7 +234,7 @@
 
 
 		<plugins>
-			<!-- Ce plugin est celui qui est utilisé pour construire des arc_essnethives 
+			<!-- Ce plugin est celui qui est utilisé pour construire des archives 
 				personnalisées à partir d'un projet. Le descripteur "assembly-web.xml" contient 
 				les fichiers properties de l'application, un fragment de contexte Tomcat, 
 				la fiche de livraison, et le WAR du projet, conformément aux normes de livraison. -->

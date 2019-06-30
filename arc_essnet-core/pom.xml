@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>fr.insee</groupId>
-		<artifactId>arc_essnet</artifactId>
+		<artifactId>arc</artifactId>
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
-	<groupId>fr.insee.arc_essnet</groupId>
-	<artifactId>arc_essnet-core</artifactId>
-	<name>arc_essnet-core</name>
+	<groupId>fr.insee.arc</groupId>
+	<artifactId>arc-core</artifactId>
+	<name>arc-core</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,7 +21,7 @@
 
 
 		<!-- La partie ci-dessous exclut les fichiers properties "de production" 
-			(contenus dans src/main/resources/prod) de l'arc_essnethive produite par 
+			(contenus dans src/main/resources/prod) de l'archive produite par 
 			exécution de "mvn package" En revanche, les fichiers seront quand même présents 
 			dans le ZIP créé par l'exécution de "mvn assembly:single", à des fins de 
 			livraison. -->
@@ -80,8 +80,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>fr.insee.arc_essnet</groupId>
-			<artifactId>arc_essnet_utils</artifactId>
+			<groupId>fr.insee.arc</groupId>
+			<artifactId>arc_utils</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

@@ -1,85 +1,85 @@
 @startuml
 hide empty members
 
-abstract class AbstractService [[java:fr.insee.arc_essnet.core.service.AbstractService]] {
+abstract class AbstractService [[java:fr.insee.arc.core.service.AbstractService]] {
 }
 
-interface IApiService [[java:fr.insee.arc_essnet.core.service.IApiService]] {
+interface IApiService [[java:fr.insee.arc.core.service.IApiService]] {
 }
 
-interface IDbConstant [[java:fr.insee.arc_essnet.core.model.IDbConstant]] {
+interface IDbConstant [[java:fr.insee.arc.core.model.IDbConstant]] {
 }
 
 interface IConstanteNumerique [[java:fr.insee.siera.textutils.IConstanteNumerique]] {
 }
 
-abstract class AbstractPhaseService [[java:fr.insee.arc_essnet.core.service.AbstractPhaseService]] {
+abstract class AbstractPhaseService [[java:fr.insee.arc.core.service.AbstractPhaseService]] {
 }
 
-interface IPhaseService [[java:fr.insee.arc_essnet.core.service.IPhaseService]] {
+interface IPhaseService [[java:fr.insee.arc.core.service.IPhaseService]] {
 }
 
-abstract class "AbstractThreadRunnerService<T extends AbstractThreadService>" as AbstractThreadRunnerService_AbstractThreadService_ [[java:fr.insee.arc_essnet.core.service.AbstractThreadRunnerService]] {
+abstract class "AbstractThreadRunnerService<T extends AbstractThreadService>" as AbstractThreadRunnerService_AbstractThreadService_ [[java:fr.insee.arc.core.service.AbstractThreadRunnerService]] {
 }
 
-class ApiChargementService [[java:fr.insee.arc_essnet.core.service.ApiChargementService]] {
+class ApiChargementService [[java:fr.insee.arc.core.service.ApiChargementService]] {
 }
 
-interface IApiServiceWithoutOutputTable [[java:fr.insee.arc_essnet.core.service.IApiServiceWithoutOutputTable]] {
+interface IApiServiceWithoutOutputTable [[java:fr.insee.arc.core.service.IApiServiceWithoutOutputTable]] {
 }
 
-class ApiControleService [[java:fr.insee.arc_essnet.core.service.ApiControleService]] {
+class ApiControleService [[java:fr.insee.arc.core.service.ApiControleService]] {
 }
 
-interface IApiServiceWithOutputTable [[java:fr.insee.arc_essnet.core.service.IApiServiceWithOutput]] {
+interface IApiServiceWithOutputTable [[java:fr.insee.arc.core.service.IApiServiceWithOutput]] {
 }
 
-class ApiFiltrageService [[java:fr.insee.arc_essnet.core.service.ApiFiltrageService]] {
+class ApiFiltrageService [[java:fr.insee.arc.core.service.ApiFiltrageService]] {
 }
 
-class ApiIdentificationService [[java:fr.insee.arc_essnet.core.service.ApiIdentificationService]] {
+class ApiIdentificationService [[java:fr.insee.arc.core.service.ApiIdentificationService]] {
 }
 
-class ApiInitialisationService [[java:fr.insee.arc_essnet.core.service.ApiInitialisationService]] {
+class ApiInitialisationService [[java:fr.insee.arc.core.service.ApiInitialisationService]] {
 }
 
-class ApiNormageService [[java:fr.insee.arc_essnet.core.service.ApiNormageService]] {
+class ApiNormageService [[java:fr.insee.arc.core.service.ApiNormageService]] {
 }
 
-class ApiReceptionService [[java:fr.insee.arc_essnet.core.service.ApiReceptionService]] {
+class ApiReceptionService [[java:fr.insee.arc.core.service.ApiReceptionService]] {
 }
 
-class MappingService [[java:fr.insee.arc_essnet.core.service.mapping.MappingService]] {
+class MappingService [[java:fr.insee.arc.core.service.mapping.MappingService]] {
 }
 
 
 package Thread <<Rectangle>> {
 
-abstract class AbstractThreadService [[java:fr.insee.arc_essnet.core.service.thread.AbstractThreadService]] {
+abstract class AbstractThreadService [[java:fr.insee.arc.core.service.thread.AbstractThreadService]] {
 }
 
 interface Runnable [[java:java.lang.Runnable]] {
 }
 
-class ThreadChargementService [[java:fr.insee.arc_essnet.core.service.thread.ThreadChargementService]] {
+class ThreadChargementService [[java:fr.insee.arc.core.service.thread.ThreadChargementService]] {
 }
 
-class ThreadControleService [[java:fr.insee.arc_essnet.core.service.thread.ThreadControleervice]]{
+class ThreadControleService [[java:fr.insee.arc.core.service.thread.ThreadControleervice]]{
 }
 
-class ThreadFiltrageService [[java:fr.insee.arc_essnet.core.service.thread.ThreadFiltrageService]]{
+class ThreadFiltrageService [[java:fr.insee.arc.core.service.thread.ThreadFiltrageService]]{
 }
 
-class ThreadIdentificationService [[java:fr.insee.arc_essnet.core.service.thread.ThreadIdentificationService]]{
+class ThreadIdentificationService [[java:fr.insee.arc.core.service.thread.ThreadIdentificationService]]{
 }
 
-class ThreadMappingService [[java:fr.insee.arc_essnet.core.service.thread.ThreadMappingService]]{
+class ThreadMappingService [[java:fr.insee.arc.core.service.thread.ThreadMappingService]]{
 }
 
-class ThreadNormageService [[java:fr.insee.arc_essnet.core.service.thread.ThreadNormageService]]{
+class ThreadNormageService [[java:fr.insee.arc.core.service.thread.ThreadNormageService]]{
 }
 
-interface IRulesUserService [[java:fr.insee.arc_essnet.core.service.thread.IRulesUserService]] {
+interface IRulesUserService [[java:fr.insee.arc.core.service.thread.IRulesUserService]] {
 
 }
 }

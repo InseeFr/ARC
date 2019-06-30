@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>fr.insee</groupId>
-		<artifactId>arc_essnet</artifactId>
+		<artifactId>arc</artifactId>
 		<version>${version}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>fr.insee.arc_essnet</groupId>
-	<artifactId>arc_essnet-batch</artifactId>
-	<name>arc_essnet-batch</name>
+	<groupId>fr.insee.arc</groupId>
+	<artifactId>arc-batch</artifactId>
+	<name>arc-batch</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -83,13 +83,13 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>fr.insee.arc_essnet</groupId>
-			<artifactId>arc_essnet-core</artifactId>
+			<groupId>fr.insee.arc</groupId>
+			<artifactId>arc-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>fr.insee.arc_essnet</groupId>
-			<artifactId>arc_essnet_utils</artifactId>
+			<groupId>fr.insee.arc</groupId>
+			<artifactId>arc_utils</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
