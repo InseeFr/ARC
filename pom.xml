@@ -290,6 +290,6 @@
 		<module>arc-batch</module>
 		<module>arc-web</module>
 		<module>arc-ws</module>
-		<module>arc_utils</module>
+		<module>arc-utils</module>
 	</modules>
 </project>

@@ -7,7 +7,7 @@
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	<groupId>fr.insee.arc</groupId>
-	<artifactId>arc_utils</artifactId>
+	<artifactId>arc-utils</artifactId>
 	<name>arc_utility</name>
 	<description>Contain all utility classes</description>
 

@@ -71,7 +71,7 @@
 		</dependency>
 		<dependency>
 			<groupId>fr.insee.arc</groupId>
-			<artifactId>arc_utils</artifactId>
+			<artifactId>arc-utils</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
