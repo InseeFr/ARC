@@ -1298,9 +1298,9 @@ public class GererNormeAction extends ArcAction {
 		requete.append(")");
 
 		requete.append("SELECT ");
-		requete.append(String.join(",",
-			"row_number() over () +(SELECT max(id_regle) FROM " + this.getSelectedJeuDeRegle() + ")",
-			"'" + selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0) + "'"//
+		requete.append(String.join(","
+			, "row_number() over () +(SELECT max(id_regle) FROM " + this.getSelectedJeuDeRegle() + ")"
+			, "'" + selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0) + "'"//
 			, "'" + selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0) + "'"//
 			, "'" + selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0) + "'::date "//
 			, "'" + selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0) + "'::date "//
@@ -1312,7 +1312,8 @@ public class GererNormeAction extends ArcAction {
 		NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
 			getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
 		requete.append("(");
-		requete.append(String.join(",", ConstanteBD.ID_REGLE.getValue()//
+		requete.append(String.join(","
+			, "row_number() over () +(SELECT max(id_regle) FROM " + this.getSelectedJeuDeRegle() + ")"
 			, ConstanteBD.ID_NORME.getValue()//
 			, ConstanteBD.VALIDITE_INF.getValue()//
 			, ConstanteBD.VALIDITE_SUP.getValue()//
