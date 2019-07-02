@@ -27,9 +27,18 @@ import fr.insee.arc.utils.utils.ManipString;
  */
 public class ChargementBrutalTable {
 
+	// The file is read line by line to determine its norm
+	// This process may be very long on large file whereas the information can oftenly found be at the very beginning of the file
+	
+	// That is why the file is chunked and the rules to determine to norm are applied every for every chunck
+	// The following parameters set the maximum number of chunk to be read and the maximum amount of line in every single chunk 
+
+	/**TODO the followings constant should become part of the load rules **/
+    // The maximum number of lines loaded every loop
+    public static final int LIMIT_CHARGEMENT_BRUTAL = 500;
+	// The maximum number of chunk
+	public static final int LIMIT_BOUCLE = 1;
     
-    //Combien de ligne on charge à la fois (OPTI)
-    public static final int LIMIT_CHARGEMENT_BRUTAL = 5;
     public static final String TABLE_CHARGEMENT_BRUTAL = "B";
     private static final Logger LOGGER = Logger.getLogger(ChargementBrutalTable.class);
     private Connection connexion;
@@ -50,21 +59,21 @@ public class ChargementBrutalTable {
         LoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
 
         Norme normeOk = new Norme();
-        int nb_boucle = 0;
+        int nbBoucle = 0;
         boolean erreur = false;
 
         InputStreamReader isr = new InputStreamReader(fileStream);
         BufferedReader br = new BufferedReader(isr);
         
         //On boucle tant que l'on a pas une norme ou une erreur
-        while (normeOk.getIdNorme() == null && !erreur) {
-            requeteCreateTableChargementBrutal(nb_boucle);
+        while (normeOk.getIdNorme() == null && !erreur && nbBoucle<LIMIT_BOUCLE) {
+            requeteCreateTableChargementBrutal(nbBoucle);
 
-            erreur = chargerFichierBrutalement(idSource, br, nb_boucle);
+            erreur = chargerFichierBrutalement(idSource, br, nbBoucle);
 
             normeOk = calculerNorme(idSource);
 
-            nb_boucle++;
+            nbBoucle++;
 
         }
         
