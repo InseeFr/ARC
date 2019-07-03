@@ -90,7 +90,7 @@ public abstract class AbstractThreadRunnerService<T extends AbstractThreadServic
 	List<AbstractThreadService> threadList = new ArrayList<>();
 
 	// Connection pool
-	List<Connection> connexionList = prepareThreads(nbThread, null);
+	List<Connection> connexionList = prepareThreads(nbThread, null, this.executionEnv);
 	currentIndice = 0;
 
 	LoggerDispatcher.info(String.format("** %s thread generation**", this.phaseName), LOGGER);
@@ -179,25 +179,35 @@ public abstract class AbstractThreadRunnerService<T extends AbstractThreadServic
 
     }
 
-    public static List<Connection> prepareThreads(int parallel, Connection connexion) {
+    /**
+     * Build the connections to be used by multi-threading
+     * @param parallel
+     * @param connexion
+     * @param anEnvExecution
+     * @return
+     */
+    public static List<Connection> prepareThreads(int parallel, Connection connexion, String anEnvExecution) {
 	ArrayList<Connection> connexionList = new ArrayList<>();
 
-	if (connexion != null) {
-	    connexionList.add(connexion);
-	}
+		try {
+			if (connexion != null) {
+				connexionList.add(connexion);
+				UtilitaireDao.get("arc").executeImmediate(connexion, connectionConfig(anEnvExecution));
+			}
 
-	for (int i = connexionList.size(); i < parallel; i++) {
-	    try {
-		Connection connexionTemp = UtilitaireDao.get(DbConstant.POOL_NAME).getDriverConnexion();
+			for (int i = connexionList.size(); i < parallel; i++) {
 
-		connexionList.add(connexionTemp);
+				Connection connexionTemp = UtilitaireDao.get(DbConstant.POOL_NAME).getDriverConnexion();
+				connexionList.add(connexionTemp);
+				
+				UtilitaireDao.get("arc").executeImmediate(connexionTemp, connectionConfig(anEnvExecution));
+			}
 
-	    } catch (Exception ex) {
-		LoggerHelper.error(LOGGER, AbstractPhaseService.class, "prepareThreads()", ex);
-	    }
-	}
+		} catch (Exception ex) {
+			LoggerHelper.error(LOGGER, AbstractPhaseService.class, "prepareThreads()", ex);
+		}
 
-	return connexionList;
+		return connexionList;
 
     }
 

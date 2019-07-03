@@ -84,15 +84,20 @@ public abstract class AbstractPhaseService extends AbstractService implements IP
     }
 
     /**
-     * Configure the connection
+     * Configure the connection behaviour in postgres
      */
     public StringBuilder connectionConfig() {
-	StringBuilder requete = new StringBuilder();
-	requete.append(FormatSQL
-		.modeParallel(ManipString.substringBeforeFirst(AbstractPhaseService.dbEnv(this.executionEnv), ".")));
-	return requete;
+        return connectionConfig(this.executionEnv);
+    }
+
+    
+    public static StringBuilder connectionConfig(String anEnvExecution) {
+        StringBuilder requete = new StringBuilder();
+        requete.append(FormatSQL.modeParallel(ManipString.substringBeforeFirst(AbstractPhaseService.dbEnv(anEnvExecution), ".")));
+        return requete;
 
     }
+
 
     /**
      * Check if there is something to process
