@@ -49,11 +49,11 @@ public class PropertiesHandler {
 
 
     public static PropertiesHandler getInstance() {
-        GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
+	GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
 
-        PropertiesHandler propertiesHandler = (PropertiesHandler) ctx.getBean("properties");
-        ctx.close();
-        return propertiesHandler;
+	PropertiesHandler propertitiesHandler = (PropertiesHandler) ctx.getBean("properties");
+	ctx.close();
+	return propertitiesHandler;
     }
 
 
@@ -80,7 +80,6 @@ public class PropertiesHandler {
     public String getDatabaseArcUsername() {
         return databaseArcUsername;
     }
-
 
     public void setDatabaseArcUsername(String databaseArcUsername) {
         this.databaseArcUsername = databaseArcUsername;
