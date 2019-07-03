@@ -18,14 +18,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.InputSource;
 
-import fr.insee.arc.core.dao.PilotageDAO;
 import fr.insee.arc.core.dbUnitExt.CustomPostgresqlDataTypeFactory;
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.PilotageEntity;
-import fr.insee.arc.core.model.TraitementPhaseContainer;
 import fr.insee.arc.core.model.TraitementState;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dao.AbstractDAO.DAOException;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.queryhandler.BatchQueryHandler;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler.AbstractQueryHandlerException;
 import fr.insee.arc.utils.utils.FormatSQL;

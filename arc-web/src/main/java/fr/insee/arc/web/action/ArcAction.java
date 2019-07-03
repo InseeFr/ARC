@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.util.EDateFormat;
