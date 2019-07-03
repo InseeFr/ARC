@@ -16,15 +16,15 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.siera.version>0.0.2-SNAPSHOT</project.siera.version>
 	</properties>
-	<!-- Le tag <build> permet de gérer des éléments ayant trait à la construction 
-		du projet par Maven, notamment la configuration des plugins quand le comportement 
+	<!-- Le tag <build> permet de gérer des éléments ayant trait à la construction
+		du projet par Maven, notamment la configuration des plugins quand le comportement
 		par défaut de ceux-ci n'est pas adapté. -->
 	<build>
 
 
-		<!-- La partie ci-dessous exclut les fichiers properties "de production" 
-			(contenus dans src/main/resources/prod) de l'archive produite par exécution 
-			de "mvn package" En revanche, les fichiers seront quand même présents dans 
+		<!-- La partie ci-dessous exclut les fichiers properties "de production"
+			(contenus dans src/main/resources/prod) de l'archive produite par exécution
+			de "mvn package" En revanche, les fichiers seront quand même présents dans
 			le ZIP créé par l'exécution de "mvn assembly:single", à des fins de livraison. -->
 		<resources>
 			<resource>
@@ -38,18 +38,18 @@
 
 
 
-		<!-- La configuration des plugins se fait au cas par cas, à l'aide de tags 
-			<plugin>, eux-mêmes contenus dans un tag <plugins>. Le tag se présente de 
-			la manière suivante (l'exemple est pris sur le plugin "site" dans le fichier 
-			pom Insee) : <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-site-plugin</artifactId> 
-			<version>2.0.1</version> <configuration> <locales>fr</locales> </configuration> 
-			</plugin> Les tags <groupId>, <artifactId> et <version> servent à identifier 
-			le plugin que vous souhaitez ajouter configurer. Le tag <configuration> est 
-			celui qui va porter les différents éléments de configuration du plugin. Il 
-			va de soi que le contenu de ce tag change d'un plugin à l'autre. Dans l'exemple, 
-			nous demandons au plugin "site" (chargé de créer le site HTML documentaire 
-			Maven) de générer un site en français. Quasiment tous les plugins possèdent 
-			un site Internet, sur lequel on pourra trouver les informations nécessaires 
+		<!-- La configuration des plugins se fait au cas par cas, à l'aide de tags
+			<plugin>, eux-mêmes contenus dans un tag <plugins>. Le tag se présente de
+			la manière suivante (l'exemple est pris sur le plugin "site" dans le fichier
+			pom Insee) : <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-site-plugin</artifactId>
+			<version>2.0.1</version> <configuration> <locales>fr</locales> </configuration>
+			</plugin> Les tags <groupId>, <artifactId> et <version> servent à identifier
+			le plugin que vous souhaitez ajouter configurer. Le tag <configuration> est
+			celui qui va porter les différents éléments de configuration du plugin. Il
+			va de soi que le contenu de ce tag change d'un plugin à l'autre. Dans l'exemple,
+			nous demandons au plugin "site" (chargé de créer le site HTML documentaire
+			Maven) de générer un site en français. Quasiment tous les plugins possèdent
+			un site Internet, sur lequel on pourra trouver les informations nécessaires
 			à leur configuration. -->
 
 		<plugins>
