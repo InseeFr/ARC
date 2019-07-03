@@ -4,7 +4,7 @@
 
 	<groupId>fr.insee</groupId>
 	<artifactId>arc</artifactId>
-	<version>${version}</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>arc</name>
 	<description>ARC version type composite</description>
 	<properties>
@@ -207,11 +207,6 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
 			<version>1.9</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.ant</groupId>
