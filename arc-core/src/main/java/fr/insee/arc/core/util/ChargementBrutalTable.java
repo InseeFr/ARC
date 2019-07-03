@@ -240,20 +240,20 @@ public class ChargementBrutalTable {
         java.util.Date beginDate = new java.util.Date();
         
         String returned = null;
-        int nb_boucle = 0;
+        int nbBoucle = 0;
         boolean erreur = false;
 
         InputStreamReader isr = new InputStreamReader(file);
         BufferedReader br = new BufferedReader(isr);
 
-        while (StringUtils.isEmpty(returned) && !erreur) {
-            requeteCreateTableChargementBrutal(nb_boucle);
+        while (StringUtils.isEmpty(returned) && !erreur && nbBoucle<LIMIT_BOUCLE) {
+            requeteCreateTableChargementBrutal(nbBoucle);
 
-            erreur = chargerFichierBrutalement(idSource, br, nb_boucle);
+            erreur = chargerFichierBrutalement(idSource, br, nbBoucle);
 
             returned = calculerValidite(idSource, norme);
 
-            nb_boucle++;
+            nbBoucle++;
 
         }
 
