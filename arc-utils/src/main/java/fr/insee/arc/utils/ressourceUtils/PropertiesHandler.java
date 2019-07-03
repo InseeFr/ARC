@@ -1,18 +1,11 @@
 package fr.insee.arc.utils.ressourceUtils;
 
-
-import java.net.URL;
-
-import org.apache.log4j.xml.DOMConfigurator;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
-import lombok.Getter;
-import lombok.Setter;
+
 
 @Component("properties")
-@Getter
-@Setter
 public class PropertiesHandler {
 
     /* Database */
@@ -55,13 +48,6 @@ public class PropertiesHandler {
     private String storageDirectory;
 
 
-    public void initializeLog() {
-        URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
-        // Using here an XML configuration
-        DOMConfigurator.configure(log4jprops);
-    }
-
-
     public static PropertiesHandler getInstance() {
         GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
 
@@ -81,103 +67,103 @@ public class PropertiesHandler {
     }
 
 
-    public String getDatabaseUrl() {
-        return databaseUrl;
+    public String getDatabaseArcUrl() {
+        return databaseArcUrl;
     }
 
 
-    public void setDatabaseUrl(String databaseUrl) {
-        this.databaseUrl = databaseUrl;
+    public void setDatabaseArcUrl(String databaseArcUrl) {
+        this.databaseArcUrl = databaseArcUrl;
     }
 
 
-    public String getDatabaseUsername() {
-        return databaseUsername;
+    public String getDatabaseArcUsername() {
+        return databaseArcUsername;
     }
 
 
-    public void setDatabaseUsername(String databaseUsername) {
-        this.databaseUsername = databaseUsername;
+    public void setDatabaseArcUsername(String databaseArcUsername) {
+        this.databaseArcUsername = databaseArcUsername;
     }
 
 
-    public String getDatabasePassword() {
-        return databasePassword;
+    public String getDatabaseArcPassword() {
+        return databaseArcPassword;
     }
 
 
-    public void setDatabasePassword(String databasePassword) {
-        this.databasePassword = databasePassword;
+    public void setDatabaseArcPassword(String databaseArcPassword) {
+        this.databaseArcPassword = databaseArcPassword;
     }
 
 
-    public String getDatabaseDriverClassName() {
-        return databaseDriverClassName;
+    public String getDatabaseArcDriverClassName() {
+        return databaseArcDriverClassName;
     }
 
 
-    public void setDatabaseDriverClassName(String databaseDriverClassName) {
-        this.databaseDriverClassName = databaseDriverClassName;
+    public void setDatabaseArcDriverClassName(String databaseArcDriverClassName) {
+        this.databaseArcDriverClassName = databaseArcDriverClassName;
     }
 
 
-    public String getDatabaseSchema() {
-        return databaseSchema;
+    public String getDatabaseArcSchema() {
+        return databaseArcSchema;
     }
 
 
-    public void setDatabaseSchema(String databaseSchema) {
-        this.databaseSchema = databaseSchema;
+    public void setDatabaseArcSchema(String databaseArcSchema) {
+        this.databaseArcSchema = databaseArcSchema;
     }
 
 
-    public String getLdapDirectoryUri() {
-        return ldapDirectoryUri;
+    public String getAnnuaireArcUri() {
+        return annuaireArcUri;
     }
 
 
-    public void setLdapDirectoryUri(String ldapDirectoryUri) {
-        this.ldapDirectoryUri = ldapDirectoryUri;
+    public void setAnnuaireArcUri(String annuaireArcUri) {
+        this.annuaireArcUri = annuaireArcUri;
     }
 
 
-    public String getLdapDirectoryIdent() {
-        return ldapDirectoryIdent;
+    public String getAnnuaireArcIdent() {
+        return annuaireArcIdent;
     }
 
 
-    public void setLdapDirectoryIdent(String ldapDirectoryIdent) {
-        this.ldapDirectoryIdent = ldapDirectoryIdent;
+    public void setAnnuaireArcIdent(String annuaireArcIdent) {
+        this.annuaireArcIdent = annuaireArcIdent;
     }
 
 
-    public String getLdapDirectoryPassword() {
-        return ldapDirectoryPassword;
+    public String getAnnuaireArcPassword() {
+        return annuaireArcPassword;
     }
 
 
-    public void setLdapDirectoryPassword(String ldapDirectoryPassword) {
-        this.ldapDirectoryPassword = ldapDirectoryPassword;
+    public void setAnnuaireArcPassword(String annuaireArcPassword) {
+        this.annuaireArcPassword = annuaireArcPassword;
     }
 
 
-    public String getLogPath() {
-        return logPath;
+    public String getLogChemin() {
+        return logChemin;
     }
 
 
-    public void setLogPath(String logPath) {
-        this.logPath = logPath;
+    public void setLogChemin(String logChemin) {
+        this.logChemin = logChemin;
     }
 
 
-    public String getLogLevel() {
-        return logLevel;
+    public String getLogNiveau() {
+        return logNiveau;
     }
 
 
-    public void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
+    public void setLogNiveau(String logNiveau) {
+        this.logNiveau = logNiveau;
     }
 
 
@@ -188,18 +174,16 @@ public class PropertiesHandler {
 
     public void setLogConfiguration(String logConfiguration) {
         this.logConfiguration = logConfiguration;
-        // TODO use spring Log4jConfigListener ?
-        initializeLog();
     }
 
 
-    public String getBatchParametersDirectory() {
-        return batchParametersDirectory;
+    public String getBatchParametreRepertoire() {
+        return batchParametreRepertoire;
     }
 
 
-    public void setBatchParametersDirectory(String batchParametersDirectory) {
-        this.batchParametersDirectory = batchParametersDirectory;
+    public void setBatchParametreRepertoire(String batchParametreRepertoire) {
+        this.batchParametreRepertoire = batchParametreRepertoire;
     }
 
 
@@ -343,43 +327,45 @@ public class PropertiesHandler {
     }
 
 
-    public String getRootDirectory() {
-        return rootDirectory;
+    public String getRepertoireRoot() {
+        return repertoireRoot;
     }
 
 
-    public void setRootDirectory(String rootDirectory) {
-        this.rootDirectory = rootDirectory;
+    public void setRepertoireRoot(String repertoireRoot) {
+        this.repertoireRoot = repertoireRoot;
     }
 
 
-    public String getRegistrationDirectory() {
-        return registrationDirectory;
+    public String getRepertoireReception() {
+        return repertoireReception;
     }
 
 
-    public void setRegistrationDirectory(String registrationDirectory) {
-        this.registrationDirectory = registrationDirectory;
+    public void setRepertoireReception(String repertoireReception) {
+        this.repertoireReception = repertoireReception;
     }
 
 
-    public String getLoadingDirectory() {
-        return loadingDirectory;
+    public String getRepertoireChargement() {
+        return repertoireChargement;
     }
 
 
-    public void setLoadingDirectory(String loadingDirectory) {
-        this.loadingDirectory = loadingDirectory;
+    public void setRepertoireChargement(String repertoireChargement) {
+        this.repertoireChargement = repertoireChargement;
     }
 
 
-    public String getStorageDirectory() {
-        return storageDirectory;
+    public String getRepertoireStockage() {
+        return repertoireStockage;
     }
 
 
-    public void setStorageDirectory(String storageDirectory) {
-        this.storageDirectory = storageDirectory;
+    public void setRepertoireStockage(String repertoireStockage) {
+        this.repertoireStockage = repertoireStockage;
     }
+
+
 
 }
