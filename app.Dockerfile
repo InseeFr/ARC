@@ -2,6 +2,7 @@ FROM maven:3.6-jdk-8-alpine AS build
 
 ARG HTTP_PROXY
 ARG HTTPS_PROXY
+ARG MAVEN_SETTINGS
 
 COPY . /usr/src/app/
 
