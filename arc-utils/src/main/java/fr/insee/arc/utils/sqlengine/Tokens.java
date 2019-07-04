@@ -2,6 +2,8 @@ package fr.insee.arc.utils.sqlengine;
 
 import fr.insee.arc.utils.sqlengine.model.IToken;
 
+// TODO rename the constants and the string associated
+// see the related issue : https://github.com/InseeFr/ARC/issues/7#issuecomment-508509524
 public class Tokens {
     /**
      * Schema token

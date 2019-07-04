@@ -2,7 +2,7 @@ package fr.insee.arc.utils.sqlengine.model;
 
 /**
  *
- * Un nom atomique
+ * An atomic name
  *
  */
 public interface IToken {
