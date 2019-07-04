@@ -1,17 +1,19 @@
 #!/bin/bash
 
-VAR_HTTP_PROXY=$HTTP_PROXY
+VAR_HTTP_PROXY=$HTTP_PROXY;
+
+MAVEN_CONF=;
 
 echo $VAR_HTTP_PROXY;
 
 # Check if var is null
 if [ -z $VAR_HTTP_PROXY ]; then
-echo "vide";
+echo "no http proxy";
 else 
 Dhttp_proxyHost=$(cut -d':' -f2 <<<$VAR_HTTP_PROXY);
 Dhttp_proxyPort=$(cut -d':' -f3 <<<$VAR_HTTP_PROXY);
-HTTP_PROXY_PORT="${Dhttp_proxyPort%/*}";
-HTTP_PROXY_HOST="${Dhttp_proxyHost#//}";
+MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyHost=${Dhttp_proxyHost%/*}";
+MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyPort=${Dhttp_proxyPort#//}";
 fi
 
 
@@ -21,16 +23,12 @@ echo $VAR_HTTPS_PROXY;
 
 # Check if var is null
 if [ -z $VAR_HTTPS_PROXY ]; then
-echo "vide";
+echo "no https proxy";
 else 
 Dhttps_proxyHost=$(cut -d':' -f2 <<<$VAR_HTTPS_PROXY);
 Dhttps_proxyPort=$(cut -d':' -f3 <<<$VAR_HTTPS_PROXY);
-HTTPS_PROXY_PORT="${Dhttps_proxyPort%/*}";
-HTTPS_PROXY_HOST="${Dhttps_proxyHost#//}";
+MAVEN_CONF="$MAVEN_CONF -Dhttps.proxyHost=${Dhttps_proxyHost%/*}";
+MAVEN_CONF="$MAVEN_CONF -Dhttps.proxyPort=${Dhttps_proxyPort#//}";
 fi
 
-if [ -z $VAR_HTTPS_PROXY -a  -z $VAR_HTTP_PROXY ]; then
-mvn -f /usr/src/app/pom.xml clean package -DskipTests ;
-else
-mvn -f /usr/src/app/pom.xml clean package -DskipTests -Dhttp.proxyHost=$HTTP_PROXY_HOST -Dhttp.proxyPort=$HTTP_PROXY_PORT -Dhttps.proxyHost=$HTTPS_PROXY_HOST -Dhttps.proxyPort=$HTTPS_PROXY_PORT ;
-fi
+mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF;
