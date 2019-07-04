@@ -1,5 +1,8 @@
 FROM maven:3.6-jdk-8-alpine AS build
 
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+
 COPY . /usr/src/app/
 
 # Run a conditional script for the maven build
