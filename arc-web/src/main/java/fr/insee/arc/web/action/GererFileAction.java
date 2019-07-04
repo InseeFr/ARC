@@ -95,7 +95,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
         if (this.dirIn==null)
         {
-            this.dirIn=PROPERTIES.getRepertoireRoot();
+            this.dirIn=PROPERTIES.getRootDirectory();
         }
 
         ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.viewDirIn.mapFilterFields());
@@ -292,7 +292,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
         if (this.dirOut==null)
         {
-            this.dirIn=PROPERTIES.getRepertoireRoot();
+            this.dirIn=PROPERTIES.getRootDirectory();
         }
 
         ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.viewDirOut.mapFilterFields());

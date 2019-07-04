@@ -123,7 +123,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	LoggerDispatcher.info("rebuildFileSystem", LOGGER);
 
 	// parcourir toutes les archives dans le répertoire d'archive
-	String repertoire = properties.getBatchParametreRepertoire();
+	String repertoire = properties.getBatchParametersDirectory();
 	String envDir = this.executionEnv.replace(".", "_").toUpperCase();
 	String nomTableArchive = dbEnv(executionEnv) + "pilotage_archive";
 
@@ -473,7 +473,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 			.get("container");
 
 	if (containerList != null) {
-	    String repertoire = properties.getBatchParametreRepertoire();
+	    String repertoire = properties.getBatchParametersDirectory();
 	    String envDir = this.executionEnv.replace(".", "_").toUpperCase();
 
 	    for (String s : containerList) {
@@ -818,7 +818,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	if (m.get("entrepot").size() > 0) {
 
 	    // 7. Déplacer les archives effacées dans le répertoire de sauvegarde "OLD"
-	    String repertoire = properties.getBatchParametreRepertoire();
+	    String repertoire = properties.getBatchParametersDirectory();
 	    String envDir = this.executionEnv.replace(".", "_").toUpperCase();
 
 	    String entrepotSav = "";

@@ -1,7 +1,6 @@
 package fr.insee.arc.batch;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
-import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 
@@ -22,7 +21,7 @@ public class LanceurUnitaire {
 		ApiServiceFactory.getService(args[0]
 				, properties.getBatchArcEnvironment()
 				, properties.getBatchExecutionEnvironment()
-				, properties.getBatchParametreRepertoire()
+				, properties.getBatchParametersDirectory()
 				, nb).invokeApi();
 	}
 

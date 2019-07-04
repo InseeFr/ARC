@@ -9,13 +9,13 @@ public class AbstractBatchEnv {
     public AbstractBatchEnv() {
 		super();
 		PropertiesHandler properties = PropertiesHandler.getInstance();
-		this.repertoireReception=properties.getRepertoireReception();
-		this.repertoireChargement=properties.getRepertoireChargement();
-		this.repertoireStockage=properties.getRepertoireStockage();
-	    this.databaseSchema=properties.getDatabaseArcSchema();
-	    this.urlDatabase=properties.getDatabaseArcUrl();
-	    this.usernameDatabase=properties.getDatabaseArcUsername();
-	    this.passwordDatabase=properties.getDatabaseArcPassword();
+		this.repertoireReception=properties.getRegistrationDirectory();
+		this.repertoireChargement=properties.getLoadingDirectory();
+		this.repertoireStockage=properties.getStorageDirectory();
+	    this.databaseSchema=properties.getDatabaseSchema();
+	    this.urlDatabase=properties.getDatabaseUrl();
+	    this.usernameDatabase=properties.getDatabaseUsername();
+	    this.passwordDatabase=properties.getDatabasePassword();
 	}
 
 	/*

@@ -11,7 +11,7 @@ public class Main {
 
 	PropertiesHandler propertitiesHandler = (PropertiesHandler) ctx.getBean("properties");
 	
-	System.out.println(propertitiesHandler.getAnnuaireArcIdent());
+	System.out.println(propertitiesHandler.getLdapDirectoryIdent());
     
     }
 

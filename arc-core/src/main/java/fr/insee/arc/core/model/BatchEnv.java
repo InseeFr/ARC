@@ -36,21 +36,21 @@ public class BatchEnv {
 
 	PropertiesHandler properties = PropertiesHandler.getInstance();
 
-	this.repertoireReception = properties.getRepertoireReception();
-	this.repertoireChargement = properties.getRepertoireChargement();
-	this.repertoireStockage = properties.getRepertoireStockage();
+	this.repertoireReception = properties.getRegistrationDirectory();
+	this.repertoireChargement = properties.getLoadingDirectory();
+	this.repertoireStockage = properties.getStorageDirectory();
 
 	try {
 	    Class.forName("org.postgresql.Driver");
-	    this.connexion = DriverManager.getConnection(properties.getDatabaseArcUrl(),
-		    properties.getDatabaseArcUsername(), properties.getDatabaseArcPassword());
+	    this.connexion = DriverManager.getConnection(properties.getDatabaseUrl(),
+		    properties.getDatabaseUsername(), properties.getDatabasePassword());
 	} catch (SQLException ex) {
 	    LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
 	} catch (ClassNotFoundException ex) {
 	    LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
 	}
 
-	this.databaseSchema = properties.getDatabaseArcSchema();
+	this.databaseSchema = properties.getDatabaseSchema();
     }
 
 }

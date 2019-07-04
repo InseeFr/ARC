@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.util.EDateFormat;
@@ -135,7 +134,7 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
 			    { properties.getSchemaReference() + "_PROD", "PROD" }, })
 		    .collect(Collectors.toMap(data -> data[0], data -> data[1]));
 	   
-	  this.repertoire = properties.getRepertoireRoot();
+	  this.repertoire = properties.getRootDirectory();
     }
 
     public Consumer<? super VObject> putVObject(VObject vObject, Consumer<? super VObject> initialize) {
