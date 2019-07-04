@@ -230,7 +230,7 @@ public class LanceurARC {
 		mapParam.put(ENV, env);
 		String envExecution = properties.getBatchExecutionEnvironment();
 		mapParam.put(ENV_EXECUTION, envExecution);
-		String repertoire = properties.getBatchParametreRepertoire();
+		String repertoire = properties.getBatchParametersDirectory();
 		mapParam.put(REPERTOIRE, repertoire);
 
 

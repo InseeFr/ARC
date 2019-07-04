@@ -7,12 +7,11 @@ import fr.insee.arc.utils.textUtils.MapUntokenizer;
 
 
 /**
+ * A name belonging to a context. </br>
+ * This interface allows the combination of a {@link Naming} with a {@link MapUntokenizer}.</br>
+ * It extends {@link IToken}, implementations must return a name.
  *
- * Un nom lié à un contexte.</br>
- * Interface permettant de combiner un {@link Naming} avec son {@link MapUntokenizer}.</br>
- * Comme elle étend {@link IToken}, les implémentations doivent pouvoir renvoyer un nom.</br>
- * 
- * Pour une implémentation
+ * As an implementation :
  * @see CompoundName
  */
 public interface ContextName extends IToken {

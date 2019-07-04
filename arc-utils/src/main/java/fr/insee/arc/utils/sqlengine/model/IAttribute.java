@@ -1,16 +1,12 @@
 package fr.insee.arc.utils.sqlengine.model;
 
-public interface IAttribute extends IToken
-{
+public interface IAttribute extends IToken {
     /**
-     *
-     * @return le type sérialisé, qui dépend donc du support pour la
-     *         sérialisation (Base de données, fichier, flux ...)
+     * @return the serialization of the type which depends on the target (database, file, stream...)
      */
     IType getSerializedType();
 
-    default String serializedTypeName()
-    {
+    default String serializedTypeName() {
         return getSerializedType().name().name();
     }
 }

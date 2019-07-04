@@ -172,7 +172,7 @@ public class ThreadLoadService extends AbstractThreadService  {
      * @throws Exception
      */
     public void export(String table) throws Exception {
-	String repertoire = properties.getBatchParametreRepertoire();
+	String repertoire = properties.getBatchParametersDirectory();
 	String envDir = this.getExecutionEnv().replace(".", "_").toUpperCase();
 	String dirOut = repertoire + envDir + File.separator + "EXPORT";
 	File f = new File(dirOut);

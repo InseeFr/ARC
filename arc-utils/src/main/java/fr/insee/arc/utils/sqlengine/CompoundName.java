@@ -4,8 +4,8 @@ import fr.insee.arc.utils.sqlengine.model.IToken;
 import fr.insee.arc.utils.textUtils.MapUntokenizer;
 
 /**
- * Implémentation simple de l'interface {@link ContextName}.</br>
- * Se veut un nom composé simple.
+ * Simple implementation of the {@link ContextName} interface.</br>
+ * It's a simple compound name.
  */
 public class CompoundName implements ContextName {
     
@@ -19,7 +19,7 @@ public class CompoundName implements ContextName {
     }
 
     /**
-     * Evalue le nom textuel, si besoin avant de le renvoyer.
+     * If necessary, evaluate the name before returning it.
      */
     @Override
     public final String name() {
@@ -30,7 +30,7 @@ public class CompoundName implements ContextName {
     }
 
     /**
-     * Combine le {@link Namings} avec le {@link MapUntokenizer}
+     * Combination of {@link Namings} with {@link MapUntokenizer}
      */
     private void evaluate() {
         this.name = this.untokenizer.untokenize(this.naming.tokens());
@@ -63,18 +63,15 @@ public class CompoundName implements ContextName {
     }
 
     /**
-     * Attention, il faut absolument utiliser {@link #name()} qui évalue le nom avant de le renvoyer. 
+     * Warning : one must use {@link #name()} in order to evaluate a name before returning it.
      */
     @Override
     public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        result = prime * result + ((name() == null) ? 0 : name().hashCode());
         return defaultHashCode();
     }
 
     /**
-     * Attention, il faut absolument utiliser {@link #name()} qui évalue le nom avant de le renvoyer. 
+     * Warning : one must use {@link #name()} in order to evaluate a name before returning it.
      */
     @Override
     public boolean equals(Object obj) {

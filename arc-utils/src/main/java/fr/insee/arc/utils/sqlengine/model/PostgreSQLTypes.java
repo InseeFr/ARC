@@ -20,9 +20,9 @@ public class PostgreSQLTypes
     public static final IType CHANGE_THIS_TO_EFFECTIVE_TYPE_PLEASE = new AttributeType("TEXT");
 
     /**
+     * @return a map which keys are types and values are functions used to properly
+     * write the value.
      *
-     * @return la map dont les clefs sont des types et les valeurs les fonctions
-     *         qui écrivent correctement une valeur du type donné.
      */
     public static final Map<IType, Function<String, String>> prettySQLPrinter()
     {

@@ -13,11 +13,9 @@ import fr.insee.arc.utils.textUtils.MapUntokenizer;
 import fr.insee.arc.utils.utils.Containers;
 
 /**
- * Implémentation simple de {@link Naming}. </br>
- * Pour la construction complète d'un nom de table, </br>
- * cette classe est combinée avec un {@link MapUntokenizer} dans la classe concrète {@link CompoundName}. 
- * 
- *
+ * Simple implemenation of {@link Naming}. </br>
+ * <p>
+ * In order to build a complete table name, this class is combined with {@link MapUntokenizer} in the implementation class {@link CompoundName}.
  */
 public class DefaultNaming implements Naming {
 
@@ -28,7 +26,8 @@ public class DefaultNaming implements Naming {
     }
 
     /**
-     * TODO à réfléchir sur le fait de vérifier que les clefs de la map sont existent bien dans {@link Tokens}.
+     * TODO Checking that map keys exist in  {@link Tokens}
+     *
      * @param tokens
      */
     public DefaultNaming(Map<IToken, IToken> tokens) {
@@ -37,16 +36,17 @@ public class DefaultNaming implements Naming {
     }
 
     /**
-     * Attention, il faut que le nombre de paramètre soit pair </br>
-     * et que l'ordre soit le suivant : </br>
-     *  un {@link Tokens} suivi d'une valeur. </br>
+     * Warning : the number of parameter must be even and the order must be for each pair :
+     * a {@link Tokens} followed by a value;
+     * <p>
+     *
      * @param tokens
      */
-    public DefaultNaming(IToken... tokens){
-        this( Containers.fillMap(new HashMap<>(), Arrays.asList(tokens)));
+    public DefaultNaming(IToken... tokens) {
+        this(Containers.fillMap(new HashMap<>(), Arrays.asList(tokens)));
     }
-    
-    
+
+
     @Override
     public Map<IToken, IToken> tokens() {
         return this.tokens;
@@ -73,7 +73,7 @@ public class DefaultNaming implements Naming {
     public Naming deepClone() {
         return new DefaultNaming(this.tokens);
     }
-    
+
     public String toString() {
         return this.tokens.toString();
     }

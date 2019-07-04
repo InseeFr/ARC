@@ -6,26 +6,30 @@ import fr.insee.arc.utils.sqlengine.model.IToken;
 
 /**
  *
- * Fournit les éléments de nommage d'un objet. Ces éléments sont identifiés de
- * manière unique :<br/>
- * 1. Les clés sont des identifiants de parties de noms, ordonnées.<br/>
- * 2. Les valeurs sont les parties de noms.<br/>
- * Par exemple un {@code Naming} pour une table relationnelle pourra être :<br/>
- * <code>"schema" ::= "sch", "separateur" ::= ".", "nom_table" ::= "ma_table"</code>
- * <br/>
- * Le nom est obtenu (par ailleurs) par agrégation de certains des tokens.
- * L'agrégation peut être obtenue par concaténation ou par une autre méthode
- * implémentée dans la classe utilisatrice de {@code Naming}.<br/>
- * Par exemple :<br/>
- * 1. Si la liste des tokens est <code>{"nom_table"}</code>, le nom généré est
- * simplement <code>"ma_table"</code>.<br/>
- * 2. Si la liste des tokens est
- * <code>{"nom_table", "separateur", "nom_table"}</code>, le nom obtenu pourra
- * être <code>"sch.ma_table"</code>.<br/>
- * L'intérêt de cette méthode est de pouvoir obtenir facilement des noms selon
- * un patron prédéfini et ordonné.
- * Pour une implémentation
+ * Provides naming elements for an object. These elements are uniquely identified:
+ *
+ * 1. keys are ids for name parts (and are ordered)
+ * 2. values are name parts
+ *
+ * For example, a {@code Naming} used for a relational table could be:
+ * <code>"schema" ::= "sch", "separator" ::= ".", "table_name" ::= "my_table"</code>
+ *
+ * A name is made of the aggregation of multiple tokens.
+ *
+ * This aggregation is obtained through concatenation ou other methods implemented by
+ * the class using {@code Naming}.
+ *
+ * For example:
+ *
+ * 1. for a token list of <code>{"table_name}</code>, the generated name
+ *    will be <code>"table_name"</code>
+ * 2. for a token list of <code>{"schema", "separator", "table_name"}</code>,
+ *    the generated name will be <code>"sch.my_table</code>
+ *
+ * We use this method to easily get object names through predefined and ordered template.
+ *
  * @see DefaultNaming
+ *
  */
 public interface Naming {
 

@@ -43,10 +43,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Parameters;
-import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.tools.tar.TarEntry;
@@ -54,7 +50,6 @@ import org.apache.tools.tar.TarInputStream;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -241,15 +236,15 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	// invocation du driver
 	 PropertiesHandler properties = PropertiesHandler.getInstance();
 	Class.forName(
-		properties.getDatabaseArcDriverClassName());
+		properties.getDatabaseDriverClassName());
 	boolean connectionOk = false;
 	int nbTry = 0;
 	Connection c = null;
 	while (!connectionOk && nbTry < maxRetry) {
 	    // renvoie la connexion relative au driver
 	    try {
-		c = DriverManager.getConnection(properties.getDatabaseArcUrl(), properties.getDatabaseArcUsername(),
-			properties.getDatabaseArcPassword());
+		c = DriverManager.getConnection(properties.getDatabaseUrl(), properties.getDatabaseUsername(),
+			properties.getDatabasePassword());
 		connectionOk = true;
 	    } catch (Exception e) {
 		int sleep = 60000;
@@ -2663,9 +2658,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	    // get some properties manually
 	    PropertiesHandler properties = PropertiesHandler.getInstance();
-	    return DriverManager.getConnection(properties.getDatabaseArcUrl()//
-		    , properties.getDatabaseArcUsername()//
-		    , properties.getDatabaseArcPassword()//
+	    return DriverManager.getConnection(properties.getDatabaseUrl()//
+		    , properties.getDatabaseUsername()//
+		    , properties.getDatabasePassword()//
 	    );
 	} catch (Exception e) {
 	    LoggerHelper.error(LOGGER, e, e.getMessage());

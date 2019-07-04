@@ -6,6 +6,7 @@
 		<groupId>fr.insee</groupId>
 		<artifactId>arc</artifactId>
 		<version>0.0.2-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<groupId>fr.insee.arc</groupId>
 	<artifactId>arc-core</artifactId>

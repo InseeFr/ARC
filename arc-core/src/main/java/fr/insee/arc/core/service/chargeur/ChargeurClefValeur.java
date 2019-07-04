@@ -470,7 +470,7 @@ public class ChargeurClefValeur implements ILoader {
     }
 
     private void initializeFileOutput() throws UnsupportedEncodingException, FileNotFoundException {
-	String repertoire = PropertiesHandler.getInstance().getBatchParametreRepertoire();
+	String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
 	String envDir = this.envExecution.replace(".", "_").toUpperCase();
 	String dirOut = repertoire + envDir + File.separator + "EXPORT";
 	File f = new File(dirOut);

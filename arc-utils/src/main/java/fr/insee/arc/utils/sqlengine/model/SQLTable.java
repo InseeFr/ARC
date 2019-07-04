@@ -15,14 +15,14 @@ import fr.insee.arc.utils.textUtils.MapUntokenizer;
 
 /**
  *
- * Une table dont le nom est pleinement qualifié
+ * A fully qualified table
  *
  */
 public abstract class SQLTable<T extends IAttribute> implements ITable<T>
 {
     
     /**
-     * Un MapUntokenizer minimal, le plus simple avec uniquement un schema et un nom
+     * A minimalist MapUntokenizer with only schema and name
      */
     public static final MapUntokenizer<IToken, IToken> SCHEMA_PLUS_NOM = (map) -> //
     (map.get(Tokens.TOK_SCHEMA)==null)?//
@@ -31,9 +31,10 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
     
     
     /**
-     * Façon de construire les noms dans thésée.<br/>
-     * &lt;nomSchema&gt;.&lt;nomPhase&gt;_&lt;identifiantCampagne&gt;_&lt;identifiantFiltre&gt;_&lt;nom&gt;
-     * 
+     * The Thésée way of building names.
+     *
+     * &lt;schemaName&gt;.&lt;phaseName&gt;_&lt;campaignIdentifier&gt;_&lt;filterIdentifier&gt;_&lt;name&gt;
+     *
      */
     public static final MapUntokenizer<IToken, IToken> SQL_QUALIFIED_TABLENAME_ASSEMBLER_THESEE = (objects) -> {
         StringBuilder returned = new StringBuilder();
@@ -52,11 +53,12 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
         returned.append(liste.stream().filter((t) -> t != null).map(IToken::name).collect(Collectors.joining("_")));
         return returned.toString();
     };
-    
+
     /**
-     * Façon de construire les noms dans thésée.<br/>
-     * &lt;nomSchema&gt;.&lt;nomPhase&gt;_&lt;identifiantCampagne&gt;_&lt;identifiantFiltre&gt;_&lt;nom&gt;
-     * 
+     * The Thésée way of building names.
+     *
+     * &lt;schemaName&gt;.&lt;phaseName&gt;_&lt;campaignIdentifier&gt;_&lt;filterIdentifier&gt;_&lt;name&gt;
+     *
      */
     public static final MapUntokenizer<IToken, IToken> SQL_QUALIFIED_TABLENAME_ASSEMBLER_THESEE_SOURCE = (objects) -> {
         StringBuilder returned = new StringBuilder();
@@ -79,9 +81,10 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
     
     
     /**
-     * Façon de construire les noms dans diane.<br/>
-     * &lt;nomSchema&gt;.&lt;identifiantCampagne&gt;_&lt;identifiantSample&gt;_&lt;nomPhase&gt;_&lt;nom&gt;
-     * 
+     * The Diane way of building names.
+     *
+     * &lt;schemaName&gt;.&lt;campaignIdentifier&gt;_&lt;sampleIdentifier&gt;_&lt;phaseName&gt;_&lt;name&gt;
+     *
      */
     public static final MapUntokenizer<IToken, IToken> SQL_QUALIFIED_TABLENAME_ASSEMBLER = (objects) -> {
         StringBuilder returned = new StringBuilder();
@@ -117,8 +120,10 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
     };
     
     /**
-     * Prend un MapUntokenizer en entrée pour fournir en sortie un MapUntokenizer (interface fonctionnelle avec une seule méthode).
-     * Protection contre le fait que le contenu du {@link Tokens#TOK_SUFFIX_TEMP} est null.
+     * This function change the suffix order for {@code Tokens#TOK_SUFFIX_TEMP}.
+     *
+     * It also handle the case where TOK_SUFFIX_TEMP is null.
+     *
      */
     public static final Function<MapUntokenizer<IToken, IToken>, MapUntokenizer<IToken, IToken>> TO_TEMPORARY = (
             untok) -> (objects) -> {
@@ -165,10 +170,12 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
     }
 
     /**
-     * Actuellement, fabrique le nom de la table avec le suffixe de parallelisation.
-     * @return Le nom qualifié de la table
+     * Currently builds a table name with the parallelization suffix.
+     *
+     * @return the fully qualified table name
+     *
      */
-    // todo : a modifier
+    // todo : to be modified
     public String qualifiedName()
     {
         return name().name() + ParallelizationSuffix.get();
@@ -176,7 +183,7 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
 
     /**
      *
-     * @return Le nom qualifié de la table
+     * @return the fully qualified table name
      */
     public String notQualifiedName()
     {
