@@ -3,9 +3,9 @@ package fr.insee.arc.utils.sqlengine;
 import fr.insee.arc.utils.sqlengine.model.IToken;
 
 /**
+ * Wrap a {@link String} and provide {@link #hashCode()} et {@code #equals(Object)}.
  *
- * Encapsule une {@link String} chaîne de caractères et fournit les opérations {@link #hashCode()} et {@code #equals(Object)}. Permet
- * d'implémenter le pattern poids-mouche facilement.
+ * This way it implements a GOF lightweight pattern.
  *
  */
 public class StringToken implements IToken {
@@ -28,9 +28,6 @@ public class StringToken implements IToken {
      */
     @Override
     public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        result = prime * result + ((name() == null) ? 0 : name().hashCode());
         return defaultHashCode();
     }
 
@@ -65,5 +62,5 @@ public class StringToken implements IToken {
     public String toString() {
         return name();
     }
-    
+
 }

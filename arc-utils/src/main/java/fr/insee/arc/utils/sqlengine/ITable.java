@@ -4,21 +4,19 @@ import fr.insee.arc.utils.sqlengine.model.IAttribute;
 import fr.insee.arc.utils.sqlengine.model.IToken;
 
 /**
- *
- * La {@link ITable} est un type relationnel défini par un nom ({@link IToken})
- * et un modèle ({@link IModel}).
+ * {@link ITable} describes a relational type defined by a name ({@link IToken}) and a model (({@link IModel}))
  */
 public interface ITable<T extends IAttribute>
 {
     /**
      *
-     * @return le nom de cette table
+     * @return the table name
      */
     IToken name();
 
     /**
      *
-     * @return le modèle de cette table
+     * @return the table model
      */
     IModel<T> model();
 

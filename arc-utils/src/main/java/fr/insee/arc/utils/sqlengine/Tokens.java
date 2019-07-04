@@ -2,60 +2,58 @@ package fr.insee.arc.utils.sqlengine;
 
 import fr.insee.arc.utils.sqlengine.model.IToken;
 
-public class Tokens
-{
+public class Tokens {
     /**
-     * Token pour le nom du schéma
+     * Schema token
      */
     public static final IToken TOK_SCHEMA = new StringToken("tok_schema");
     /**
-     * Token pour le nom complet non qualifié de la table
+     * Unqualified complete table name token
      */
     public static final IToken TOK_TABLE_NAME = new StringToken("tok_table_name");
     /**
-     * Token pour le suffixe indiquant que la table est temporaire comme par
-     * exemple <code>$tmp$1569925756$0523</code>
+     * Token used to indicate a temporary table, for example: <code>$tmp$1569925756$0523</code>
      */
     public static final IToken TOK_SUFFIX_TEMP = new StringToken("tok_suffix_temp");
     /**
-     * Token pour le nom de la phase
+     * Phase name token
      */
     public static final IToken TOK_NOM_PHASE = new StringToken("tok_nom_phase");
     /**
-     * Token pour n'importe quel préfixe
+     * Prefix token
      */
     public static final IToken TOK_PREFIX = new StringToken("tok_prefix");
     /**
-     * Token pour marquer un commentaire
+     * Comment token
      */
     public static final IToken TOK_COMMENT = new StringToken("tok_comment");
     /**
-     * Token pour marquer la campagne
+     * Campaign token
      */
     public static final IToken TOK_CAMPAGNE = new StringToken("tok_campagne");
     /**
-     * Token pour marquer la échantillon
+     * Sample token
      */
     public static final IToken TOK_SAMPLE = new StringToken("tok_sample");
-    
+
     /**
-     * Token pour marquer le filtre
+     * Filter token
      */
     public static final IToken TOK_FILTRE = new StringToken("tok_filtre");
-    
+
     /**
-     * Token pour marquer l'environnement
+     * Environment token
      */
     public static final IToken TOK_ENV = new StringToken("tok_env");
-    
+
     /**
-     * Token pour marquer un numéro
+     * Number token
      */
     public static final IToken TOK_NUMERO = new StringToken("tok_numero");
-    
+
     /**
-     * Token pour marquer un numéro
+     * Business token
      */
     public static final IToken TOK_METIER = new StringToken("tok_metier");
-    
+
 }
