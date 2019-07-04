@@ -5,24 +5,24 @@ import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.utils.batch.Batch;
 
-public class RecevoirBatch extends Batch {
+public class ReceiveBatch extends Batch {
 
     public ServiceReporting report;
 
-    public RecevoirBatch(String... someArgs) {
+    public ReceiveBatch(String... someArgs) {
         super(someArgs);
     }
 
     /**
      *
      * @param args
-     *            {@code args[0]} : environnement de travail de départ<br/>
-     *            {@code args[1]} : environnement de travail d'arrivée<br/>
-     *            {@code args[2]} : répertoire racine<br/>
-     *            {@code args[3]} : nombre de lignes maximal à traiter
+     *            {@code args[0]} : origin workspace<br/>
+     *            {@code args[1]} : final workspace<br/>
+     *            {@code args[2]} : root directory<br/>
+     *            {@code args[3]} : maximum number of lines to process
      */
     public static void main(String[] args) {
-        Batch batch = new RecevoirBatch(args);
+        Batch batch = new ReceiveBatch(args);
         batch.execute();
 
     }

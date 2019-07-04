@@ -1,16 +1,15 @@
 package fr.insee.arc.batch;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
-import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 
-public class LanceurUnitaire {
+public class UnitaryLauncher {
 
 	/**
 	 * 
 	 * @param args
-	 *            {@code args[0]} : service à invoquer<br/>
+	 *            {@code args[0]} : service to invoke<br/>
 	 *            {@code args[1]} : amount of files to be processed<br/>
 	 */
 	

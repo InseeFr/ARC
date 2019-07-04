@@ -5,9 +5,9 @@ import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.utils.batch.Batch;
 
-public class NormerBatch extends Batch {
+public class NormalizeBatch extends Batch {
 
-    public NormerBatch(String... someArgs) {
+    public NormalizeBatch(String... someArgs) {
         super(someArgs);
     }
 
@@ -16,13 +16,13 @@ public class NormerBatch extends Batch {
     /**
      *
      * @param args
-     *            {@code args[0]} : environnement de travail de départ<br/>
-     *            {@code args[1]} : environnement de travail d'arrivée<br/>
-     *            {@code args[2]} : répertoire racine<br/>
-     *            {@code args[3]} : nombre de lignes maximal à traiter
+     *            {@code args[0]} : origin workspace<br/>
+     *            {@code args[1]} : final workspace<br/>
+     *            {@code args[2]} : root directory<br/>
+     *            {@code args[3]} : maximum number of lines to process
      */
     public static void main(String[] args) {
-        Batch batch = new NormerBatch(args);
+        Batch batch = new NormalizeBatch(args);
         batch.execute();
     }
 

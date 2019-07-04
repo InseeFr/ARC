@@ -128,7 +128,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  InitialiserBatch c=new InitialiserBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , tailleMaxReceptionEnMb, keepInDatabase?null:mapParam.get(NUMLOT));
+			  InitializeBatch c=new InitializeBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , tailleMaxReceptionEnMb, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  this.report=c.report;
 		  }
@@ -139,7 +139,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			RecevoirBatch c=new RecevoirBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , tailleMaxReceptionEnMb, keepInDatabase?null:mapParam.get(NUMLOT));
+			ReceiveBatch c=new ReceiveBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , tailleMaxReceptionEnMb, keepInDatabase?null:mapParam.get(NUMLOT));
 			c.execute();
 			this.report=c.report;
 		  }
@@ -150,7 +150,7 @@ public class LanceurARC {
 
 		@Override
 		  public void run() {
-			ChargerBatch c=new ChargerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			LoadBatch c=new LoadBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			c.execute();
 			this.report=c.report;
 			step.set(step.indexOf(0),1);
@@ -162,7 +162,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  NormerBatch c=new NormerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			  NormalizeBatch c=new NormalizeBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  step.set(step.indexOf(1),2);
 			  this.report=c.report;
@@ -174,7 +174,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  ControlerBatch c=new ControlerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			  ControlBatch c=new ControlBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  step.set(step.indexOf(2),3);
 			  this.report=c.report;
@@ -186,7 +186,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  FiltrerBatch c=new FiltrerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			  FilterBatch c=new FilterBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  step.set(step.indexOf(3),4);
 			  this.report=c.report;
