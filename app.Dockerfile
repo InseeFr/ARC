@@ -1,6 +1,6 @@
 FROM maven:3.6-jdk-8-alpine AS build
 COPY . /usr/src/app/
-RUN mvn -f /usr/src/app/pom.xml clean package -DskipTests -Dhttp.proxyHost=proxy-rie.http.insee.fr -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy-rie.http.insee.fr -Dhttps.proxyPort=8080 
+RUN mvn -f /usr/src/app/pom.xml clean package -DskipTests 
 
 FROM tomcat:8.0.48-jre8
 
