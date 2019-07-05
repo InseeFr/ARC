@@ -5,11 +5,11 @@ The ARC (from the French: Acquisition - Réception - Contrôles) software allows
 
 These functionnalities/services aim the statistician’s independence and ability to adapt to the data evolutions, thereby avoiding impacts on the statistical chain.
 
-![workflow](user-guide/img/workflow.png)
+![workflow](user-guide\img\workflow.png)
 
 ## Running the application
 
-The ARC application is a java 8 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web/src/main/resources/fr/insee/config/arc.properties) file. Once this is done
+The ARC application is a java 8 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web\src\main\resources\fr\insee\config\arc.properties) file. Once this is done
 
 ### Running the web application with Docker
 
@@ -81,4 +81,4 @@ In a web browser go to localhost:8080/status.action. The status action returns :
 
 > Change the host ip adress and port number according to the tomcat server and tomcat ARC application context configuration.
 
-> For more information about the installation go check the [Install guide](user-guide/Install_guide.md)
+> For more information about the installation go check the [Install guide](user-guide\Install_guide.md)
