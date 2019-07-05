@@ -17,4 +17,3 @@ RUN rm -rf $CATALINA_HOME/webapps/*
 
 # Copy the war file
 COPY --from=build usr/src/app/arc-web/target/*.war $CATALINA_HOME/webapps/ROOT.war
-
