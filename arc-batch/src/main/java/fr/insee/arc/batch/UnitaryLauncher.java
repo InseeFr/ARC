@@ -21,7 +21,7 @@ public class UnitaryLauncher {
 		ApiServiceFactory.getService(args[0]
 				, properties.getBatchArcEnvironment()
 				, properties.getBatchExecutionEnvironment()
-				, properties.getBatchParametreRepertoire()
+				, properties.getBatchParametersDirectory()
 				, nb).invokeApi();
 	}
 
