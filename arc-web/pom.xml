@@ -20,11 +20,7 @@
 
 	<profiles>
 		<profile>
-			<id>git-lab</id>
-			<properties>
-				<plateforme>gitLab</plateforme>
-				<root.repo>/..</root.repo>
-			</properties>
+			<id>docker</id>
 		</profile>
 
 		<profile>
