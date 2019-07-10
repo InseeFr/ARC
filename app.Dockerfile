@@ -12,6 +12,11 @@ ARG DATABASE_URL
 ARG DATABASE_USER
 ARG DATABASE_PASSWORD
 
+# Log properties
+ARG LOG_PATH=logs/log-arc.log
+ARG LOG_LEVEL=ERROR
+ARG LOG_SETTINGS=fr/insee/config/log4j.xml
+
 COPY . /usr/src/app/
 
 # Run a conditional script for the maven build
