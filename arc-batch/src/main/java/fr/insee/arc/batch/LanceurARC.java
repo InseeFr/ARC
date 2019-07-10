@@ -139,7 +139,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			RecevoirBatch c=new RecevoirBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , tailleMaxReceptionEnMb, keepInDatabase?null:mapParam.get(NUMLOT));
+			RecevoirBatch c=new RecevoirBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , tailleMaxReceptionEnMb, keepInDatabase?null:mapParam.get(NUMLOT));
 			c.execute();
 			this.report=c.report;
 		  }
@@ -150,7 +150,7 @@ public class LanceurARC {
 
 		@Override
 		  public void run() {
-			ChargerBatch c=new ChargerBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			ChargerBatch c=new ChargerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			c.execute();
 			this.report=c.report;
 			step.set(step.indexOf(0),1);
@@ -162,7 +162,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  NormerBatch c=new NormerBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			  NormerBatch c=new NormerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  step.set(step.indexOf(1),2);
 			  this.report=c.report;
@@ -174,7 +174,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  ControlerBatch c=new ControlerBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			  ControlerBatch c=new ControlerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  step.set(step.indexOf(2),3);
 			  this.report=c.report;
@@ -186,7 +186,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  FiltrerBatch c=new FiltrerBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			  FiltrerBatch c=new FiltrerBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  step.set(step.indexOf(3),4);
 			  this.report=c.report;
@@ -199,7 +199,7 @@ public class LanceurARC {
 
 		  @Override
 		  public void run() {
-			  MapperBatch c= new MapperBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
+			  MapperBatch c= new MapperBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE) , nbFichier, keepInDatabase?null:mapParam.get(NUMLOT));
 			  c.execute();
 			  step.remove(step.indexOf(4));
 			  this.report=c.report;
@@ -243,13 +243,23 @@ public class LanceurARC {
 		ControlerThread controler=new ControlerThread();
 		FiltrerThread filtrer=new FiltrerThread();
 		MapperThread mapper=new MapperThread();
+//		VacuumThread vacuum=new VacuumThread(); 
+
+		
+		// opération de maintenance
+//		message("Maintenance catalogue");
+//		// table du catalogue
+//		ApiService.maintenancePgCatalog(null, "full");
+//		message("Fin de Maintenance catalogue");
 
 		// rebuild de la table de pilotage
+		//ApiInitialisationService.rebuildPilotage(null, envExecution+".pilotage_fichier");
 		message("Maintenance pilotage");
 		AbstractPhaseService.pilotageMaintenance(null, envExecution, "freeze");
 		message("Fin de Maintenance pilotage");
 		
 		message("Déplacements de fichiers");
+
 		boolean productionOn=productionOn();
 
 		if (productionOn())
@@ -330,8 +340,11 @@ public class LanceurARC {
 			ApiInitialisationService.setDummyFilePROD(false);
 
 			
-			UtilitaireDao.get("arc").executeRequest(null, "update arc.pilotage_batch set last_init=to_char(current_date + interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+AbstractPhaseService.PRODUCTION_START_TIME+"' , operation=case when operation='R' then 'O' else operation end;");
-
+			UtilitaireDao.get("arc").executeRequest(null, "update arc.pilotage_batch set last_init=to_char(to_date(last_init,'yyyy-mm-dd')+interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+AbstractPhaseService.PRODUCTION_START_TIME+"' , operation=case when operation='R' then 'O' else operation end;");
+			
+			// on met la date d'initialsiation à la date courante
+			// si la production a demandée à etre réactivée, on la réactive
+//			UtilitaireDao.get("arc").executeRequest(null, "update arc.pilotage_batch set last_init='"+dateFormat.format(dNow)+"', operation=case when operation='R' then 'O' else operation end;");
 		}
 		 productionOn=productionOn();
 
@@ -468,6 +481,7 @@ public class LanceurARC {
 				effacerRepertoireChargement(repertoire, envExecution);
 			}
 
+//		Files.deleteIfExists(f.toPath());
 		}
 
 		// si on n'est pas en production, on itere tant qu'il y a des fichiers dans le repertoire.
@@ -476,7 +490,11 @@ public class LanceurARC {
 
 		message("Fin");
 		
-	
+		// paliatif production pour ARC
+        UtilitaireDao.get("arc").grantToRole("SELECT","***REMOVED***");
+     // paliatif production pour ARC-DADS
+        UtilitaireDao.get("arc").grantToRole("SELECT","***REMOVED***");
+		
         
         if (args!=null && args.length>0 && args[0].equals("noExit"))
         {
