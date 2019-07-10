@@ -92,6 +92,9 @@ public class RequeteMapping implements  IConstanteCaractere, IConstanteNumerique
     private String nomTableTemporaireIdTable;
     private String nomTableTemporaireFinale;
     private String nomTableFichierCourant;
+    
+    // thread number. Necessary to be sure that table created in the thread won't collide
+    private int threadId;
 
     public static final Set<String> setIdSource = new HashSet<String>() {
         private static final long serialVersionUID = 9031984127160616029L;
@@ -110,7 +113,7 @@ public class RequeteMapping implements  IConstanteCaractere, IConstanteNumerique
     }
 
     public RequeteMapping(Connection aConnexion, RegleMappingFactory aRegleMappingFactory, String anIdFamille,
-            RuleSets aJeuDeRegle, String anEnvironnement, String aNomTablePrecedente) {
+            RuleSets aJeuDeRegle, String anEnvironnement, String aNomTablePrecedente, int threadId) {
         this();
         this.regleMappingFactory = aRegleMappingFactory;
         /**
@@ -126,6 +129,7 @@ public class RequeteMapping implements  IConstanteCaractere, IConstanteNumerique
         this.nomTablePrecedente = aNomTablePrecedente;
         this.nomTableModVariableMetier = AbstractPhaseService.dbEnv(this.environnement) + "mod_variable_metier";
         this.nomTableRegleMapping = AbstractPhaseService.dbEnv(this.environnement) + "mapping_regle";
+        this.threadId=threadId;
     }
 
     public void construire() throws Exception {
@@ -239,18 +243,8 @@ public class RequeteMapping implements  IConstanteCaractere, IConstanteNumerique
         this.ensembleRubriqueIdentifianteTable=new HashMap<TableMapping,HashSet<String>>();
 
         
-//      Set <String> identifiantsTable=new HashSet<String>();
-//      for (TableMapping table : this.ensembleTableMapping) {
-//          identifiantsTable.add(table.getPrimaryKey());
-//      }
-//      identifiantsTable.add(varIdSource);
-        
         for (TableMapping table : this.ensembleTableMapping) {
-//          System.out.println("*********");
 
-//          System.out.println(table.getPrimaryKey()+ " " +table.getEnsembleVariableMapping());
-
-            
             HashSet<String> s=new HashSet<String>();
             
             for (VariableMapping var : this.ensembleVariableMapping) {
@@ -258,63 +252,17 @@ public class RequeteMapping implements  IConstanteCaractere, IConstanteNumerique
                 if (table.getEnsembleVariableMapping().contains(var) 
                         && !var.toString().startsWith(idKeyPrefix)
                         && !var.toString().startsWith(foreignKeyPrefix) 
-//                      && !identifiantsTable.contains(var.toString()
                     ||  var.toString().equals(table.getPrimaryKey())
                     )
 
                 {
                     s.addAll(var.getEnsembleIdentifiantsRubriques());
-                    
-//                  System.out.println(var.getNomVariable() + var.getEnsembleIdentifiantsRubriques());
-
                 }
-                
-//              for (String var: variable.getEnsembleIdentifiantsRubriques())
-//              {
-//                      s.add(e)
-//              }
             }
-            
-//          System.out.println(table.getNomTable());
-//          System.out.println(s);
-            this.ensembleRubriqueIdentifianteTable.put(table,s);
-//          System.out.println(this.ensembleRubriqueIdentifianteTable);
 
+            this.ensembleRubriqueIdentifianteTable.put(table,s);
             
         }
-        
-//      // passage 2 : on ajoute les feuilles
-//      // faire l'arbre
-//      HashMap<TableMapping,TableMapping> tree=new HashMap<TableMapping,TableMapping>();
-//      
-//      for (TableMapping table : this.ensembleTableMapping) {
-//          for (TableMapping table0 : this.ensembleTableMapping) {
-//              
-//              if (!table.equals(table0) && table.getEnsembleVarMapping().contains(table0.getPrimaryKey()))
-//              {
-//                  tree.put(table, table0);
-//              }
-//              
-//          }
-//      }
-//      
-//      
-//      // parcours de l'arbre pour ajouter aux peres les rubriques des filles
-//      HashMap<TableMapping,TableMapping> tree2=(HashMap<TableMapping, TableMapping>) tree.clone();
-//      
-//      while (!tree.isEmpty())
-//      {
-//          for (TableMapping fils : tree.keySet()) {
-//              if (!tree.containsValue(fils))
-//              {
-//                  this.ensembleRubriqueIdentifianteTable.get(tree.get(fils)).addAll(this.ensembleRubriqueIdentifianteTable.get(fils));
-//                  tree2.remove(fils);
-//              }
-//          }
-//          tree=(HashMap<TableMapping, TableMapping>) tree2.clone();
-//      }
-        
-        
     }
     
     
@@ -349,7 +297,7 @@ public class RequeteMapping implements  IConstanteCaractere, IConstanteNumerique
              */
             if (!mapTable.containsKey(result.get(i).get(ARRAY_SECOND_COLUMN_INDEX))) {
                 mapTable.put(result.get(i).get(ARRAY_SECOND_COLUMN_INDEX), new TableMapping(this.environnement, result
-                        .get(i).get(ARRAY_SECOND_COLUMN_INDEX)));
+                        .get(i).get(ARRAY_SECOND_COLUMN_INDEX),threadId));
             }
             /*
              * Ajout de la variable à la table

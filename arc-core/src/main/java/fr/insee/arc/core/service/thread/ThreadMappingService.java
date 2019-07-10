@@ -44,10 +44,9 @@ public class ThreadMappingService extends AbstractThreadService {
 
     public ThreadMappingService(int currentIndice, MappingService anApi, Connection zeConnexion) {
 	super(currentIndice, anApi, zeConnexion);
-
-
+    
 	this.tableTempFiltrageOk = temporaryTableName(this.getExecutionEnv(), this.tokenInputPhaseName,
-		"temp_filtrage_ok");
+		"temp_filtrage_ok", Integer.toString(threadId));
 
 	this.requeteSQLCalibree = new RequeteMappingCalibree(this.connection, FormatSQL.TAILLE_MAXIMAL_BLOC_SQL,
 		this.getTablePilTempThread());
@@ -89,7 +88,7 @@ public class ThreadMappingService extends AbstractThreadService {
              * Instancier une requête de mapping générique pour ce jeu de règles.
              */
             RequeteMapping requeteMapping = new RequeteMapping(this.connection, this.regleMappingFactory, idFamille, listeJeuxDeRegles.get(i),
-                    this.getExecutionEnv(), this.tableTempFiltrageOk);
+                    this.getExecutionEnv(), this.tableTempFiltrageOk, this.threadId);
             /*
              * Construire la requête de mapping (dérivation des règles)
              */

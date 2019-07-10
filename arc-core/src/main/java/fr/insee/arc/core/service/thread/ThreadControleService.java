@@ -185,9 +185,9 @@ public class ThreadControleService extends AbstractThreadService {
 
 	LoggerDispatcher.info("Initialize some table name", LOGGER);
 	String tableOutOkTemp = FormatSQL.temporaryTableName(
-		dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.OK);
+		dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.OK + FormatSQL.DOLLAR + threadId);
 	String tableOutKoTemp = FormatSQL.temporaryTableName(
-		dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.KO);
+		dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.KO + FormatSQL.DOLLAR + threadId);
 
 	String tableOutOk = dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.OK;
 	String tableOutKo = dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.KO;

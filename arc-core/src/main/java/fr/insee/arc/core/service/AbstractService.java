@@ -300,7 +300,8 @@ public abstract class AbstractService implements IApiService, IConstanteNumeriqu
 	    String... suffix) {
 
 	if (suffix != null && suffix.length > 0) {
-	    return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName, suffix[0]);
+		String suffixJoin = String.join(FormatSQL.DOLLAR, suffix);
+    	return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName, suffixJoin);
 	} else {
 	    return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName);
 	}

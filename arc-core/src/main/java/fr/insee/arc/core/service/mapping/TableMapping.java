@@ -55,13 +55,13 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
     private Set<RegleMappingClePrimaire> ensembleRegleMappingClefPrimaire;
 
-    public TableMapping(String anEnvironnement, String aNomTableCourt) {
+    public TableMapping(String anEnvironnement, String aNomTableCourt, int threadId) {
         this.nomTableCourt = aNomTableCourt;
         this.nomTable = new StringBuilder(AbstractPhaseService.dbEnv(anEnvironnement)).append(aNomTableCourt).toString();
         this.ensembleVariableMapping = new TreeSet<>();
         this.environnement = anEnvironnement;
         this.ensembleRegleMappingClefPrimaire = new HashSet<RegleMappingClePrimaire>();
-        this.nomTableTemporaire=FormatSQL.temporaryTableName(AbstractPhaseService.dbEnv(this.environnement) + this.nomTableCourt+"_"+encours);
+        this.nomTableTemporaire=FormatSQL.temporaryTableName(AbstractPhaseService.dbEnv(this.environnement) + this.nomTableCourt + "_" + encours + FormatSQL.DOLLAR + threadId);
         this.ensembleIdentifiantsRubriques = new HashSet<>();
         this.mapGroupeToEnsembleIdentifiantsRubriques = new TreeMap<>();
         this.mapGroupeToEnsembleNomsRubriques = new TreeMap<>();
