@@ -133,7 +133,7 @@ public class ARCLauncher {
 
 		@Override
 		public void run() {
-			ReceiveBatch c = new ReceiveBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION),
+			ReceiveBatch c = new ReceiveBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION),
 					mapParam.get(REPERTOIRE), maxReceptionSizeInMB, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			this.report = c.report;
@@ -146,7 +146,7 @@ public class ARCLauncher {
 
 		@Override
 		public void run() {
-			LoadBatch c = new LoadBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
+			LoadBatch c = new LoadBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
 					numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			this.report = c.report;
@@ -160,7 +160,7 @@ public class ARCLauncher {
 
 		@Override
 		public void run() {
-			NormalizeBatch c = new NormalizeBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION),
+			NormalizeBatch c = new NormalizeBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION),
 					mapParam.get(REPERTOIRE), numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.set(step.indexOf(1), 2);
@@ -174,7 +174,7 @@ public class ARCLauncher {
 
 		@Override
 		public void run() {
-			ControlBatch c = new ControlBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION),
+			ControlBatch c = new ControlBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION),
 					mapParam.get(REPERTOIRE), numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.set(step.indexOf(2), 3);
@@ -188,7 +188,7 @@ public class ARCLauncher {
 
 		@Override
 		public void run() {
-			FilterBatch c = new FilterBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
+			FilterBatch c = new FilterBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
 					numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.set(step.indexOf(3), 4);
@@ -202,7 +202,7 @@ public class ARCLauncher {
 
 		@Override
 		public void run() {
-			MapperBatch c = new MapperBatch(mapParam.get("env"), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
+			MapperBatch c = new MapperBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
 					numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.remove(step.indexOf(4));
@@ -245,17 +245,7 @@ public class ARCLauncher {
 				ControlThread controller = new ControlThread();
 				FilterThread filter = new FilterThread();
 				MapperThread mapper = new MapperThread();
-				// VacuumThread vacuum=new VacuumThread();
 
-				// opération de maintenance
-				// message("Maintenance catalogue");
-				// // table du catalogue
-				// ApiService.maintenancePgCatalog(null, "full");
-				// message("Fin de Maintenance catalogue");
-
-				// rebuild de la table de pilotage
-				// ApiInitialisationService.rebuildPilotage(null,
-				// envExecution+".pilotage_fichier");
 				message("Maintenance pilotage");
 				AbstractPhaseService.pilotageMaintenance(null, envExecution, "freeze");
 				message("Fin de Maintenance pilotage");
@@ -465,8 +455,6 @@ public class ARCLauncher {
 								// Effacer les fichiers du répertoire OK
 								effacerRepertoireChargement(repertoire, envExecution);
 							}
-
-							// Files.deleteIfExists(f.toPath());
 						}
 
 						// si on n'est pas en production, on itere tant qu'il y a des fichiers dans le
@@ -474,11 +462,6 @@ public class ARCLauncher {
 					} while (!production && receiver.report.nbLines > 0 && productionOn);
 
 					message("Fin");
-
-					// paliatif production pour ARC
-					UtilitaireDao.get("arc").grantToRole("SELECT", "***REMOVED***");
-					// paliatif production pour ARC-DADS
-					UtilitaireDao.get("arc").grantToRole("SELECT", "***REMOVED***");
 
 					if (args != null && args.length > 0 && args[0].equals("noExit")) {
 						message("No Exit");
