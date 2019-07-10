@@ -58,3 +58,4 @@ out/
 outdated.txt
 .factorypath
 devarc.properties
+arc-web/src/main/resources/fr/insee/config/devarc_temp.properties
