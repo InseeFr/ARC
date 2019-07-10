@@ -13,8 +13,8 @@ else
 echo "http proxy set";
 Dhttp_proxyHost=$(cut -d':' -f2 <<<$VAR_HTTP_PROXY);
 Dhttp_proxyPort=$(cut -d':' -f3 <<<$VAR_HTTP_PROXY);
-MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyPort=${Dhttp_proxyHost%/*}";
-MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyHost=${Dhttp_proxyPort#//}";
+MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyPort=${Dhttp_proxyPort%/*}";
+MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyHost=${Dhttp_proxyHost#//}";
 fi
 
 
@@ -40,4 +40,4 @@ fi
 
 echo "mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD;"
 
-mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF;
+mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD;
