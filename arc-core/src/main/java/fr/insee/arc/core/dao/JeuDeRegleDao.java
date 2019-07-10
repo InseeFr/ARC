@@ -35,7 +35,9 @@ public class JeuDeRegleDao {
         StringBuilder requete = new StringBuilder();
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
         requete.append("\n FROM " + tableJeuDeRegle + " a ");
-        requete.append("\n WHERE EXISTS (SELECT 1 FROM " + nomTableATraiter + " b ");
+        // optimization : a thread per file so reading the first line is enough
+        // TODO : it could be done by the pilotage table via the file id
+        requete.append("\n WHERE EXISTS (SELECT 1 FROM (SELECT * FROM " + nomTableATraiter + " LIMIT 1) b ");
         requete.append("\n  WHERE a.id_norme=b.id_norme ");
         requete.append("\n    AND a.periodicite=b.periodicite ");
         requete.append("\n    AND to_date(b.validite,'YYYY-MM-DD')>=a.validite_inf ");
