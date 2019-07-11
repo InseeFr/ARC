@@ -5,15 +5,23 @@ The ARC (from the French: Acquisition - Réception - Contrôles) software allows
 
 These functionnalities/services aim the statistician’s independence and ability to adapt to the data evolutions, thereby avoiding impacts on the statistical chain.
 
-![workflow](user-guide/img/workflow.png)
+![workflow](user-guide\img\workflow.png)
 
 ## Running the application
 
-The ARC application is a java 8 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web/src/main/resources/fr/insee/config/arc.properties) file. Once this is done
+The ARC application is a java 8 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web\src\main\resources\fr\insee\config\arc.properties) file. Once this is done
 
 ### Running the web application with Docker
 
-The easiest way to run the ARC application is with docker. Because you could want to build the app with some custom maven settings or behind a proxy, there is 3 way to build the web app.
+The easiest way to run the ARC application is with docker, without modifying the code, you can easily pass some configuration like :
+
+- maven build configuration
+- database configuration
+- log configuration
+
+### Maven build configuration (optionnal)
+
+Because you could want to build the app with some custom maven settings or behind a proxy, there is 3 way to build the web app.
 
 - The easy peasy way. If you don't need proxy or custom settings just run
   
@@ -21,7 +29,7 @@ The easiest way to run the ARC application is with docker. Because you could wan
   docker build -f app.Dockerfile -t arc .
   ```
 
-- Behind a proxy. To run the maven phase behind a proxy you have to specify it. We created two args to pass the proxy settings to maven. If your proxy environnement variables are set, run 
+- Behind a proxy. To run the maven phase behind a proxy you have to specify it. We created two args to pass the proxy settings to maven. If your proxy environnement variables are set, run
 
   ```shell
   docker build -f app.Dockerfile \
@@ -42,11 +50,57 @@ The easiest way to run the ARC application is with docker. Because you could wan
     .
   ```
 
+### Database configuration
+
+To configure the web application to use your database just pass the url, user and password in the docker build phases like this :
+
+  ```shell
+  docker build -f app.Dockerfile \
+    --build-arg DATABASE_URL=jdbc:postgresql://your.db.url/schema\
+    --build-arg DATABASE_USER=aValidUser \
+    --build-arg DATABASE_PASSWORD=aValidPassword \
+    -t arc \
+    .
+  ```
+
+### Log configuration (optionnal)
+
+If you want to configure the log without modifying the code of the application, pass the output log file and it path, the log level and a custom log4j.xml file to the docker build phase like this :
+
+  ```shell
+  docker build -f app.Dockerfile \
+    --build-arg LOG_PATH= the/path/to/output.log #logs/log-arc.log by default \
+    --build-arg LOG_LEVEL= #ERROR by default \
+    --build-arg LOG_SETTINGS= #fr/insee/config/log4j.xml by default \
+    -t arc \
+    .
+  ```
+
+### All build options
+
+  ```shell
+  docker build -f app.Dockerfile \
+    --build-arg HTTP_PROXY=  #optionnal \
+    --build-arg HTTPS_PROXY= #optionnal \
+    --build-arg MAVEN_SETTINGS= #optionnal \
+    --build-arg DATABASE_URL= \
+    --build-arg DATABASE_USER= \
+    --build-arg DATABASE_PASSWORD= \
+    --build-arg LOG_PATH= #optionnal \
+    --build-arg LOG_LEVEL= #optionnal \
+    --build-arg LOG_SETTINGS= #optionnal\
+    -t arc \
+    .
+  ```
+
+### To run the image
+
 After the image build,
 
   ```shell
     docker run -p 8080:8080 arc
   ```
+
 
 ### Running the app with tomcat
 
@@ -81,4 +135,4 @@ In a web browser go to localhost:8080/status.action. The status action returns :
 
 > Change the host ip adress and port number according to the tomcat server and tomcat ARC application context configuration.
 
-> For more information about the installation go check the [Install guide](user-guide/Install_guide.md)
+> For more information about the installation go check the [Install guide](user-guide\Install_guide.md)
