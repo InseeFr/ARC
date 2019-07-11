@@ -1,15 +1,30 @@
 # ARC - Acquire - Register - Control : Workbench for acquisition and normalization of data sets
 
-General présentation of the application
+- [General présentation of the application](#General-présentation-of-the-application)
+- [Running the application](#Running-the-application)
+  - [Running the web application with Docker](#Running-the-web-application-with-Docker)
+    - [Maven build configuration (optionnal)](#Maven-build-configuration-optionnal)
+    - [Database configuration](#Database-configuration)
+    - [Log configuration (optionnal)](#Log-configuration-optionnal)
+    - [All build options](#All-build-options)
+    - [To run the image](#To-run-the-image)
+  - [Running the app with docker-compose](#Running-the-app-with-docker-compose)
+  - [Running the app with tomcat](#Running-the-app-with-tomcat)
+    - [Set the tomcat and the database connection](#Set-the-tomcat-and-the-database-connection)
+    - [Deploy or update the application](#Deploy-or-update-the-application)
+  - [Test the deployment](#Test-the-deployment)
+
+## General présentation of the application
+
 The ARC (from the French: Acquisition - Réception - Contrôles) software allows receiving (administrative) data supplied by the providers (several formats are supported, particularly XML), to control the compliance of the received files, and to transform administrative data to elementary statistical data. The software enables the statistician to define and apply controls and mappings, to test them in a sandbox environment (linked to the software), and to put them into production without frequently calling on a developer.
 
 These functionnalities/services aim the statistician’s independence and ability to adapt to the data evolutions, thereby avoiding impacts on the statistical chain.
 
-![workflow](user-guide\img\workflow.png)
+![workflow](user-guide/img/workflow.png)
 
 ## Running the application
 
-The ARC application is a java 8 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web\src\main\resources\fr\insee\config\arc.properties) file. Once this is done
+The ARC application is a java 8 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web/src/main/resources/fr/insee/config/arc.properties) file. Once this is done
 
 ### Running the web application with Docker
 
@@ -19,7 +34,7 @@ The easiest way to run the ARC application is with docker, without modifying the
 - database configuration
 - log configuration
 
-### Maven build configuration (optionnal)
+#### Maven build configuration (optionnal)
 
 Because you could want to build the app with some custom maven settings or behind a proxy, there is 3 way to build the web app.
 
@@ -50,20 +65,20 @@ Because you could want to build the app with some custom maven settings or behin
     .
   ```
 
-### Database configuration
+#### Database configuration
 
 To configure the web application to use your database just pass the url, user and password in the docker build phases like this :
 
   ```shell
   docker build -f app.Dockerfile \
-    --build-arg DATABASE_URL=jdbc:postgresql://your.db.url/schema\
+    --build-arg DATABASE_URL=jdbc:postgresql://your.db.url/schema \
     --build-arg DATABASE_USER=aValidUser \
     --build-arg DATABASE_PASSWORD=aValidPassword \
     -t arc \
     .
   ```
 
-### Log configuration (optionnal)
+#### Log configuration (optionnal)
 
 If you want to configure the log without modifying the code of the application, pass the output log file and it path, the log level and a custom log4j.xml file to the docker build phase like this :
 
@@ -76,7 +91,7 @@ If you want to configure the log without modifying the code of the application, 
     .
   ```
 
-### All build options
+#### All build options
 
   ```shell
   docker build -f app.Dockerfile \
@@ -93,7 +108,7 @@ If you want to configure the log without modifying the code of the application, 
     .
   ```
 
-### To run the image
+#### To run the image
 
 After the image build,
 
@@ -101,6 +116,13 @@ After the image build,
     docker run -p 8080:8080 arc
   ```
 
+### Running the app with docker-compose
+
+If you want do not have a postgreSQL database ready and want to try the app on the fly use docker-compose. It will build the wep application, the database ans link them. So just run
+
+```shell
+docker-compose up
+```
 
 ### Running the app with tomcat
 
