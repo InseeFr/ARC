@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -45,15 +46,26 @@ public class TarGzDecompressor implements ArchiveExtractor {
 				f.getAbsolutePath()), LOGGER);
 		    }
 		} else {
-		    int count;
-		    byte[] data = new byte[32738];
+			int count;
+		    byte data[] = new byte[32738];
+		    
+		    // temporary name for the file being uncompress
 		    FileOutputStream fos = new FileOutputStream(
-			    dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()), false);
-		    try (BufferedOutputStream dest = new BufferedOutputStream(fos, 32738)) {
+			    dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()) + ".tmp", false);
+		    BufferedOutputStream dest = new BufferedOutputStream(fos, 32738);
+		    GZIPOutputStream zdest=new GZIPOutputStream(dest);
+		    try {
 			while ((count = tarIn.read(data, 0, 32738)) != -1) {
-			    dest.write(data, 0, count);
-			}
+				zdest.write(data, 0, count);
+				}
+	    	} finally {
+	    		zdest.close();
+	    		fos.close();
 		    }
+		    
+		    // rename the file when over makes it thread safe and available for other threads waiting
+		    new File( dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()) + ".tmp")
+				.renameTo(new File(dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName())));
 		}
 	    }
 

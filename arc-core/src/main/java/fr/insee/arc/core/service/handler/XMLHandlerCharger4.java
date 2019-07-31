@@ -70,12 +70,10 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
     public List<String> lineValues = new ArrayList<String>();
 
     // parametrage des types de la base de données
-    public String textBdType = "text collate \"C\"";
-    public String numBdType = "integer";
+    public String textBdType = "text";
+    public String numBdType = "int";
 
     public StringBuilder requete;
-    public String tempTableA;
-    // public String tempTableI;
 
     // indique que la balise courante a des données
     public boolean hasData = false;
@@ -85,6 +83,13 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
     public Norme normeCourante;
     public String validite;
 
+    
+    // column of the load table A
+	public String tempTableA;
+    public ArrayList<String> tempTableAColumnsLongName;
+    public ArrayList<String> tempTableAColumnsShortName;
+
+    
     /**
      * Actions à réaliser sur les données
      */
@@ -109,6 +114,8 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	insertQueryBuilder(this.requete, this.tempTableA, this.fileName, this.lineCols, this.lineIds, this.lineValues);
 	this.start = this.requete.length();
 
+	renameColumns(this.requete);
+	
 	try {
 	    UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);
 	} catch (SQLException ex) {
@@ -153,9 +160,10 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 		// this.requete.append("alter table " + this.tempTableA + " add v" +
 		// this.allCols.indexOf(this.currentTag) + " " + this.textBdType + ";");
+		this.requete.append("alter table " + this.tempTableA + " add v" + this.allCols.indexOf(this.currentTag) + " " + this.textBdType + ";");
 
-		this.requete.append(
-			"alter table " + this.tempTableA + " add v_" + this.currentTag + " " + this.textBdType + ";");
+//		this.requete.append(
+//			"alter table " + this.tempTableA + " add v_" + this.currentTag + " " + this.textBdType + ";");
 
 		// } catch (SQLException e) {
 		// 666 LoggerHelper.error(LOGGER, ex, "index()");
@@ -333,8 +341,10 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 	    // this.requete.append("alter table " + this.tempTableA + " add i" +
 	    // this.allCols.indexOf(this.currentTag) + " " + this.numBdType + ";");
-	    this.requete.append(
-		    "alter table " + this.tempTableA + " add i_" + this.currentTag + " " + this.numBdType + ";");
+		this.requete.append("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag) + " " + this.numBdType + ";");
+
+//	    this.requete.append(
+//		    "alter table " + this.tempTableA + " add i_" + this.currentTag + " " + this.numBdType + ";");
 
 	    // } catch (SQLException e) {
 	    // 666 LoggerHelper.error(LOGGER, ex, "index()");
@@ -558,8 +568,15 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	StringBuilder req = new StringBuilder();
 	StringBuilder req2 = new StringBuilder();
 	this.idLigne++;
-	req.append("insert into " + tempTableI + "(id_source, id, date_integration, id_norme, periodicite, validite");
 
+	req.append("insert into " + tempTableI + 
+			"(" + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id_source")) +
+			"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id")) +
+			"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("date_integration")) +
+			"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id_norme")) +
+			"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("periodicite")) +
+			"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("validite")));
+	
 	req2.append("('" + fileName + "'," + this.idLigne + ",current_date,'" + normeCourante.getIdNorme() + "','"
 		+ normeCourante.getPeriodicite() + "','" + validite + "'");
 
@@ -574,15 +591,14 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	    // tree.containsValue(lineCols.get(i)));
 
 	    if (doNotinsert.get(this.tree.get(lineCols.get(i))) == null || this.treeNode.get(lineCols.get(i)) != null) {
-		// req.append(",i" + lineCols.get(i));
-		req.append(",i_" + this.allCols.get(lineCols.get(i)));
-		req2.append("," + lineIds.get(i));
+				
+	    		req.append(",i" + this.allCols.indexOf(this.allCols.get(lineCols.get(i))));
+				req2.append("," + lineIds.get(i));
 
-		if (lineValues.get(i) != null) {
-		    // req.append(",v" + lineCols.get(i));
-		    req.append(",v_" + this.allCols.get(lineCols.get(i)));
-		    req2.append(",'" + lineValues.get(i) + "'");
-		}
+				if (lineValues.get(i) != null) {
+					req.append(",v" + this.allCols.indexOf(this.allCols.get(lineCols.get(i))));
+					req2.append(",'" + lineValues.get(i) + "'");
+				}
 	    }
 
 	    // else
@@ -752,6 +768,29 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	// }
 	this.jointure = req.toString().replace("'", "''");
 
+    }
+    
+    /**
+     * For optimization purpose, the columns of the load table had been shortened
+     * Build the query to retrieve the long columns name of the load table A
+     * @param aRequete
+     */
+    private void renameColumns(StringBuilder aRequete)
+    {
+    	for (int i=0;i<this.tempTableAColumnsShortName.size();i++)
+    	{
+    		aRequete.append("\n ALTER TABLE "+this.tempTableA+" RENAME "+this.tempTableAColumnsShortName.get(i)+" TO "+this.tempTableAColumnsLongName.get(i)+";");
+    	}
+    	
+    	for (int i=0;i<this.allCols.size();i++)
+    	{
+    			aRequete.append("\n ALTER TABLE "+this.tempTableA+" RENAME i"+i+" TO i_" + this.allCols.get(i)+";");
+    		if (colData.get(this.allCols.get(i))!=null)
+    		{
+        		aRequete.append("\n ALTER TABLE "+this.tempTableA+" RENAME v"+i+" TO v_" + this.allCols.get(i)+";");
+    		}
+    	}
+    		
     }
 
 }

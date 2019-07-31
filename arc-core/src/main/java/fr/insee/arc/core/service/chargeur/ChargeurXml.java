@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,7 +43,6 @@ public class ChargeurXml implements ILoader {
     private HashMap<String, Integer> colData = new HashMap<>();
     private List<String> allCols = new ArrayList<>();
     private StringBuilder requeteInsert = new StringBuilder();
-    private String tableTempA = "A";
     private int start;
     private String tableChargementPilTemp;
     private String currentPhase;
@@ -50,14 +50,21 @@ public class ChargeurXml implements ILoader {
     private String validite;
     private InputStream is;
 
+    // temporary table where data will be loaded by the XML SAX engine
+    private String tableTempA = "A";
+    private ArrayList<String> tempTableAColumnsLongName=new ArrayList<String>(Arrays.asList("id_source","id","date_integration","id_norme","periodicite","validite"));
+    private ArrayList<String> tempTableAColumnsShortName=new ArrayList<String>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
+    private ArrayList<String> tempTableAColumnsType=new ArrayList<String>(Arrays.asList("text collate \"C\"","int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
+
+
     public ChargeurXml(ThreadLoadService threadChargementService, FilesInputStreamLoad filesInputStreamLoad) {
 	this.fileName = threadChargementService.getIdSource();
 	this.connection = threadChargementService.getConnection();
 	this.tableChargementPilTemp = threadChargementService.getTablePilTempThread();
 	this.currentPhase = threadChargementService.getTokenInputPhaseName();
-	this.validite = threadChargementService.getValidite();
 	this.is = filesInputStreamLoad.getTmpInxLoad();
 	this.norme = threadChargementService.getNormeFile();
+	this.validite = threadChargementService.getValidite();
     }
 
     @Override
@@ -76,16 +83,23 @@ public class ChargeurXml implements ILoader {
 	    request.append(" ");
 	}
 
-	request.append(" TABLE " + this.tableTempA + " (" //
-		+ "\n   id_source " + FormatSQL.TEXT_COLLATE_C//
-		+ "\n , id integer"//
-		+ "\n , date_integration " + FormatSQL.TEXT_COLLATE_C//
-		+ "\n , id_norme " + FormatSQL.TEXT_COLLATE_C//
-		+ "\n , periodicite " + FormatSQL.TEXT_COLLATE_C//
-		+ "\n , validite " + FormatSQL.TEXT_COLLATE_C//
-		+ "\n ) " //
-		+ FormatSQL.WITH_AUTOVACUUM_FALSE //
-		+ ";\n");
+	request.append(" TABLE " + this.tableTempA + " (");
+    boolean noComma=true;
+    for (int i=0;i<tempTableAColumnsLongName.size();i++)
+    {
+    	if (noComma)
+    	{
+    		noComma=false;
+    	}
+    	else
+    	{
+    		request.append(",");
+    	}
+    	request.append(tempTableAColumnsShortName.get(i)+" "+tempTableAColumnsType.get(i)+" ");
+    }
+    request.append(") ");
+    request.append(FormatSQL.WITH_NO_VACUUM);
+    request.append(";");
 
 	try {
 	    UtilitaireDao.get("arc").executeBlock(this.connection, request);
@@ -155,6 +169,8 @@ public class ChargeurXml implements ILoader {
 	handler.sizeLimit = 0;
 	handler.normeCourante = norme;
 	handler.validite = validite;
+	handler.tempTableAColumnsLongName=this.tempTableAColumnsLongName;
+    handler.tempTableAColumnsShortName=this.tempTableAColumnsShortName;
 	return handler;
     }
 

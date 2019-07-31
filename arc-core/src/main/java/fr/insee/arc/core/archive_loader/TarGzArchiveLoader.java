@@ -20,66 +20,41 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 public class TarGzArchiveLoader extends AbstractArchiveFileLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(TarGzArchiveLoader.class);
+	private static final Logger LOGGER = Logger.getLogger(TarGzArchiveLoader.class);
 
-    public TarGzArchiveLoader(File fileChargement, String idSource) {
-	super(fileChargement, idSource);
-	this.fileDecompresor = new TarGzDecompressor();
-
-    }
-
-    @Override
-    public FilesInputStreamLoad readFileWithoutExtracting(FilesInputStreamLoadKeys[] streamNames) throws IOException {
-	LoggerDispatcher.info("begin readFileWithoutExtracting() ", LOGGER);
-
-	this.filesInputStreamLoad = new FilesInputStreamLoad();
-	for (FilesInputStreamLoadKeys aStreamName : streamNames) {
-	    LoggerDispatcher.info(String.format("Create stream %s", aStreamName), LOGGER);
-	    TarArchiveInputStream tarInput = new TarArchiveInputStream(
-		    new GZIPInputStream(new FileInputStream(this.archiveToLoad)));
-
-	    this.filesInputStreamLoad.getMapInputStream().put(aStreamName//
-		    , new SizeLimiterInputStream(//
-			    tarInput//
-			    , tarInput.getNextTarEntry().getSize()));
+	public TarGzArchiveLoader(File fileChargement, String idSource) {
+		super(fileChargement, idSource);
+		this.fileDecompresor = new TarGzDecompressor();
 
 	}
 
-	LoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);
-	return filesInputStreamLoad;
+	@Override
+	public FilesInputStreamLoad readFileWithoutExtracting(FilesInputStreamLoadKeys[] streamNames) throws IOException {
+		return null;
+	}
+	
+	@Override
+	public FilesInputStreamLoad loadArchive(FilesInputStreamLoadKeys[] streamNames)
+			throws IOException, InterruptedException {
+		LoggerDispatcher.info("begin loadArchive() ", LOGGER);
 
-    }
+		// Mandatory for multithreading to decompress tar.gz archive
+		// as it is not possible to address a specific entry in targz
+		extractArchive(fileDecompresor);
+		this.filesInputStreamLoad = readFile(streamNames);
 
-    @Override
-    public FilesInputStreamLoad loadArchive(FilesInputStreamLoadKeys[] streamNames)
-	    throws IOException, InterruptedException {
-	LoggerDispatcher.info("begin loadArchive() ", LOGGER);
-	TarArchiveInputStream tarInput = new TarArchiveInputStream(//
-		new GZIPInputStream(//
-			new FileInputStream(this.archiveToLoad)));
+		LoggerDispatcher.info("end loadArchive() ", LOGGER);
+		return this.filesInputStreamLoad;
 
-	// Optimization : if the archive contains more file than the number of thread =>
-	// extraction
-	int numberThread = PropertiesHandler.getInstance().getThreadsChargement();
-	if (countNbEntries(tarInput) > numberThread) {
-	    extractArchive(fileDecompresor);
-	    this.filesInputStreamLoad = readFile(streamNames);
-	} else {
-	    readFileWithoutExtracting(streamNames);
 	}
 
-	LoggerDispatcher.info("end loadArchive() ", LOGGER);
-	return this.filesInputStreamLoad;
+	public int countNbEntries(TarArchiveInputStream tarInput) throws IOException {
+		int count = 0;
+		while (null != (tarInput.getNextTarEntry())) {
+			count++;
+		}
+		return count;
 
-    }
-
-    public int countNbEntries(TarArchiveInputStream tarInput) throws IOException {
-	int count = 0;
-	while (null != (tarInput.getNextTarEntry())) {
-	    count++;
 	}
-	return count;
-
-    }
 
 }

@@ -31,17 +31,7 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 	    throws IOException, InterruptedException {
 	LoggerDispatcher.info("begin loadArchive() ", LOGGER);
 
-	try (ZipFile zipFileChargement = new ZipFile(this.archiveToLoad)) {
-	    int numberThread = PropertiesHandler.getInstance().getThreadsChargement();
-
-	    if (zipFileChargement.size() > numberThread) {
-		extractArchive(fileDecompresor);
-		this.filesInputStreamLoad = readFile(streamNames);
-
-	    } else {
-		readFileWithoutExtracting(streamNames);
-	    }
-	}
+	readFileWithoutExtracting(streamNames);
 
 	LoggerDispatcher.info("end loadArchive() ", LOGGER);
 	return this.filesInputStreamLoad;
