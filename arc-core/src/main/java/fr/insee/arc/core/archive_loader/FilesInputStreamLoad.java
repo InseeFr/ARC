@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
 
@@ -26,12 +27,12 @@ public class FilesInputStreamLoad {
     private Map<FilesInputStreamLoadKeys, InputStream> mapInputStream = new EnumMap<>(FilesInputStreamLoadKeys.class); 
     
     
-    public FilesInputStreamLoad(File theFileToRead, FilesInputStreamLoadKeys... keys) throws FileNotFoundException {
+    public FilesInputStreamLoad(File theFileToRead, FilesInputStreamLoadKeys... keys) throws Exception {
 	super();
 	try {
 	   if (keys != null) {
 	    for (FilesInputStreamLoadKeys aKey : keys) {
-		mapInputStream.put(aKey, new FileInputStream(theFileToRead));
+		mapInputStream.put(aKey, new GZIPInputStream(new FileInputStream(theFileToRead)));
 	    }
 	}
 	} catch (FileNotFoundException e) {
@@ -63,10 +64,6 @@ public class FilesInputStreamLoad {
 
     public InputStream getTmpInxIdentify() {
 	return mapInputStream.get(FilesInputStreamLoadKeys.IDENTIFICATION);
-    }
-   
-    public InputStream getTmpInxValidite() {
-	return mapInputStream.get(FilesInputStreamLoadKeys.VALIDITY);
     }
   
     public InputStream getTmpInxCSV() {

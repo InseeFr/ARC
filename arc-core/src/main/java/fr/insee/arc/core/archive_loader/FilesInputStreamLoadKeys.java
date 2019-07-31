@@ -9,6 +9,5 @@ public enum FilesInputStreamLoadKeys {
 
     IDENTIFICATION,//
     LOAD,
-    VALIDITY,
     CSV
 }
