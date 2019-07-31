@@ -290,11 +290,9 @@ public abstract class AbstractThreadService extends AbstractService implements R
 	LoggerDispatcher.info("** updateNbEnr **", LOGGER);
 
 	query.append("\n UPDATE " + tablePilTemp + " a ");
-	query.append("\n \t SET nb_enr=b.nb_enr, ");
-	query.append("\n \t etat_traitement='{" + TraitementState.OK + "}'");
-	query.append("\n \t FROM (select id_source, count(1) as nb_enr from " + threadWorkingTable
-		+ " group by id_source) b ");
-	query.append("\n \t WHERE a.id_source='" + idSource + "'; \n");
+    query.append("\n \t SET nb_enr=(select count(*) from " + threadWorkingTable + ") ");
+    query.append("\n \t , etat_traitement='{" + TraitementState.OK + "}'; ");
+    
 
 	UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(this.getConnection(), query);
 
@@ -341,22 +339,36 @@ public abstract class AbstractThreadService extends AbstractService implements R
 
 	    // batch => drop source table
 	    // otherwise , supress link with inherited table
-	    StringBuilder query = new StringBuilder();
-	    HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get(DbConstant.POOL_NAME)
-		    .executeRequest(connexion, "select id_source from " + tablePilTemp + "")).mapContent();
-	    for (String z : m.get("id_source")) {
-		if (paramBatch == null) {
-		    query.append("ALTER TABLE " + tableOfIdSource(tablePrevious, z) + " NO INHERIT " + tablePrevious
-			    + "_todo ;");
-		} else {
-		    query.append("DROP TABLE IF EXISTS " + tableOfIdSource(tablePrevious, z) + ";");
 
+		StringBuilder query = new StringBuilder();
+		HashMap<String, ArrayList<String>> m = new GenericBean(
+				UtilitaireDao.get(DbConstant.POOL_NAME).executeRequest(connexion, "select id_source from " + tablePilTemp + ""))
+						.mapContent();
+		int count = 0;
+		for (String z : m.get("id_source")) {
+
+			count++;
+			if (paramBatch == null) {
+				query.append("ALTER TABLE " + tableOfIdSource(tablePrevious, z) + " NO INHERIT " + tablePrevious
+						+ "_todo ;");
+			} else {
+				query.append("DROP TABLE IF EXISTS " + tableOfIdSource(tablePrevious, z) + ";");
+
+			}
+			
+			if (count > FormatSQL.MAX_LOCK_PER_TRANSACTION) {
+				UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(connexion, query);
+				query.setLength(0);
+				count = 0;
+			}
 		}
-	    }
-	    UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(connexion, query);
+		UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(connexion, query);
 
-	} catch (Exception ex) {
-	    LoggerHelper.error(LOGGER, AbstractPhaseService.class, "deleteTodo()", ex);
+	}catch(
+
+	Exception ex)
+	{
+		LoggerHelper.error(LOGGER, AbstractPhaseService.class, "deleteTodo()", ex);
 	}
 
     }

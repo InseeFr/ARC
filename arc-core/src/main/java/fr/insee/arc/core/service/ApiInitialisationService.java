@@ -933,73 +933,6 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 		requete.append(FormatSQL.dropTable(tableImage).toString());
 		requete.append("CREATE TABLE " + tableImage + " " + FormatSQL.WITH_NO_VACUUM + " AS SELECT a.* FROM "
 			+ anParametersEnvironment + "_" + listeTableParamettre[i] + " AS a " + condition + ";\n");
-		// Identifier les changements en comparant la table image et la
-		// table courante dans l'environnement
-		// Marquer les changement dans la norme (changement de nom,
-		// changement de définition ou disparition)
-		if (!UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists(tableCurrent))) {
-		    requete.append("CREATE TABLE " + tableCurrent + " " + FormatSQL.WITH_NO_VACUUM
-			    + " AS SELECT a.* FROM " + anParametersEnvironment + "_" + listeTableParamettre[i]
-			    + " AS a " + condition + ";\n");
-		}
-		if (listeTableParamettre[i] == TraitementTableParametre.NORME) {
-		    requete.append("with prep as ( ");
-		    requete.append("	select * from ( ");
-		    requete.append(
-			    "		select b.id_norme as id_norme_new, b.def_validite as def_validite_new, b.def_norme as def_norme_new, a.id_norme, a.def_validite, a.def_norme ");
-		    requete.append("		,case when a.id_norme!=b.id_norme then 1 else 0 end as chgt_norme ");
-		    requete.append(
-			    "		,case when a.def_norme!=b.def_norme or a.def_validite!=b.def_validite then 1 else 0 end as chgt_def ");
-		    requete.append(
-			    "		,case when a.id_norme is not null and b.id_norme is null then 1 else 0 end as erase_norme ");
-		    requete.append("		FROM " + tableImage + " b FULL OUTER JOIN " + tableCurrent + " a ");
-		    requete.append("		ON a.id=b.id ");
-		    requete.append(") u ");
-		    requete.append("where chgt_norme+chgt_def+erase_norme>0 ) ");
-		    requete.append("UPDATE " + tablePil + " a ");
-		    requete.append("set id_norme=case when chgt_norme=1 then b.id_norme_new else a.id_norme end ");
-		    requete.append(
-			    ",rapport=case when chgt_def=1 and phase_traitement='" + TypeTraitementPhase.STRUCTURIZE_XML
-				    + "' then '" + TraitementRapport.INITIALISATION_CHGT_DEF_NORME + "' ");
-		    requete.append("when erase_norme='1'  and phase_traitement='" + TypeTraitementPhase.STRUCTURIZE_XML
-			    + "' then '" + TraitementRapport.INITIALISATION_NORME_OBSOLETE + "' ");
-		    requete.append("else a.rapport end ");
-		    requete.append("FROM prep b ");
-		    requete.append("WHERE a.id_norme=b.id_norme ");
-		    requete.append("and exists (select 1 from prep); \n");
-		}
-		// Marquer les changement dans le calendrier (hors validite)
-		if (listeTableParamettre[i] == TraitementTableParametre.CALENDRIER) {
-		    requete.append("with prep as ( ");
-		    requete.append("select * from (");
-		    requete.append(
-			    "select b.id_norme as id_norme_new, b.periodicite as periodicite_new, b.validite_inf as validite_inf_new, b.validite_sup as validite_sup_new ");
-		    requete.append(",a.id_norme, a.periodicite, a.validite_inf, a.validite_sup ");
-		    requete.append(
-			    ",case when a.validite_inf!=b.validite_inf or a.validite_sup!=b.validite_sup then 1 else 0 end as chgt_cal ");
-		    requete.append(
-			    ",case when a.id_norme is not null and b.id_norme is null then 1 else 0 end as erase_cal ");
-		    requete.append("FROM " + tableImage + " b FULL OUTER JOIN " + tableCurrent + " a ");
-		    requete.append("ON a.id=b.id ");
-		    requete.append(") u ");
-		    requete.append("where chgt_cal+erase_cal>0 ");
-		    requete.append(") ");
-		    requete.append("UPDATE " + tablePil + " a ");
-		    requete.append("set rapport= ");
-		    requete.append(
-			    "case when erase_cal=1 then '" + TraitementRapport.CONTROLE_CALENDRIER_OBSOLETE + "' ");
-		    requete.append(
-			    "when a.validite::date>b.validite_sup_new or a.validite::date<b.validite_inf_new then '"
-				    + TraitementRapport.CONTROLE_VALIDITE_HORS_CALENDRIER + "' ");
-		    requete.append("else a.rapport end ");
-		    requete.append("from prep b ");
-		    requete.append("where a.id_norme=b.id_norme ");
-		    requete.append("and a.periodicite=b.periodicite ");
-		    requete.append("and a.validite_inf=b.validite_inf ");
-		    requete.append("and a.validite_sup=b.validite_sup ");
-		    requete.append("and a.phase_traitement='" + TypeTraitementPhase.CONTROL + "' ");
-		    requete.append("and exists (select 1 from prep); \n ");
-		}
 		// Une fois que c'est fait, on drop la table courante et on la
 		// remplace par la table image
 		requete.append(FormatSQL.dropTable(tableCurrent).toString());
@@ -1232,61 +1165,69 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 		    String etat = ManipString.substringAfterLast(nomTable, "_").toUpperCase();
 
 		    // la table a-t-elle des héritages ?
-		    HashMap<String, ArrayList<String>> m = new GenericBean(
-			    UtilitaireDao.get(DbConstant.POOL_NAME).executeRequest(connexion,
-				    "SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"
-					    + nomTable + "\\_child\\_%'")).mapContent();
+            HashMap<String, ArrayList<String>> m;
+            do {
+   		 	m=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, 
+   		 					"SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_child\\_%' LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION
+   		 					)).mapContent();
 
-		    StringBuilder query = new StringBuilder();
-		    // Oui elle a des héritages
-		    if (!m.isEmpty()) {
+   		 	
+   		 	
+       		 	StringBuilder query=new StringBuilder();
+       		 	// Oui elle a des héritages
+       		 	if (!m.isEmpty())
+       		 	{
+       		 		
+       		 		// on parcourt les tables héritées
+           		 	for (String t:m.get("tablename"))
+           		 	{
+           		 		// on récupère la variable etape dans la phase
+           		 		// si on ne trouve la source de la table dans la phase, on drop !
+           		 		String etape=UtilitaireDao.get("arc").getString(connexion, "SELECT etape FROM "+this.getTablePil()+" WHERE phase_traitement='" + phase + "' AND '" + etat + "'=ANY(etat_traitement) AND id_source=(select id_source from "+t+" limit 1)");
+           		 		
+           		 		if (etape==null)
+           		 		{
+           		 			query.append("\n DROP TABLE IF EXISTS "+t+"; COMMIT;");
+           		 		}
+           		 		else
+           		 		{
+	           		 			// si on ne trouve pas la table dans la phase en etape=1, on détruit le lien avec todo
+		           		 		if (!etape.equals("1"))
+		           		 		{
+		           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" NO INHERIT "+ManipString.substringBeforeFirst(t,"_child_")+"_todo;"));
+		           		 		}
+		           		 		else
+		           		 		// sinon on pose le lien (etape 1 ou 2)
+		           		 		{
+		           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" INHERIT "+ManipString.substringBeforeFirst(t,"_child_")+"_todo;"));
+		           		 		}
+           		 		}
+           		 	}
+           		 	
+   		 			UtilitaireDao.get("arc").executeImmediate(connexion, query);
 
-			// on parcourt les tables héritées
-			for (String t : m.get("tablename")) {
-			    // on récupère la variable etape dans la phase
-			    // si on ne trouve la source de la table dans la phase, on drop !
-			    String etape = UtilitaireDao.get(DbConstant.POOL_NAME).getString(connexion,
-				    "SELECT etape FROM " + getTablePil() + " WHERE phase_traitement='" + phase
-					    + "' AND '" + etat
-					    + "'=ANY(etat_traitement) AND id_source=(select id_source from " + t
-					    + " limit 1)");
+                }
+                else
+                {
+                	
+                	UtilitaireDao.get("arc").executeBlock(connexion, deleteTableByPilotage(nomTable, nomTable, this.getTablePil(), phase, etat, ""));
+                    UtilitaireDao.get("arc").executeImmediate(connexion,
+                            "set default_statistics_target=1; vacuum analyze " + nomTable + "(id_source); set default_statistics_target=100;");
 
-			    if (etape == null) {
-				query.append("\n DROP TABLE IF EXISTS " + t + ";");
-			    } else {
-				// si on ne trouve pas la table dans la phase en etape=1, on détruit le lien
-				// avec todo
-				if (!etape.equals("1")) {
-				    query.append(FormatSQL.tryQuery("\n ALTER TABLE " + t + " NO INHERIT "
-					    + ManipString.substringBeforeFirst(t, "_child_") + "_todo;"));
-				} else
-				// sinon on pose le lien (etape 1 ou 2)
-				{
-				    query.append(FormatSQL.tryQuery("\n ALTER TABLE " + t + " INHERIT "
-					    + ManipString.substringBeforeFirst(t, "_child_") + "_todo;"));
-				}
-			    }
-			}
-			UtilitaireDao.get(DbConstant.POOL_NAME).executeImmediate(connexion, query);
 
-		    } else {
+                	if (!nomTable.contains(TypeTraitementPhase.FORMAT_TO_MODEL.toString().toLowerCase())
+                            && nomTable.endsWith("_" + TraitementState.OK.toString().toLowerCase())) {
+                    	UtilitaireDao.get("arc").executeBlock(connexion, deleteTableByPilotage(nomTable+"_todo", nomTable, this.getTablePil(), phase, etat, "AND etape=1"));
+                        UtilitaireDao.get("arc").executeImmediate(connexion,
+                                "set default_statistics_target=1; vacuum analyze " + nomTable + "_todo (id_source); set default_statistics_target=100;");
+                    }
 
-			UtilitaireDao.get("arc").executeBlock(this.connection,
-				deleteTableByPilotage(nomTable, nomTable, this.getTablePil(), phase, etat, ""));
-			UtilitaireDao.get("arc").executeImmediate(connexion,
-				"set default_statistics_target=1; vacuum analyze " + nomTable
-					+ "(id_source); set default_statistics_target=100;");
-
-			if (!nomTable.contains(TypeTraitementPhase.FORMAT_TO_MODEL.toString().toLowerCase())
-				&& nomTable.endsWith("_" + TraitementState.OK.toString().toLowerCase())) {
-			    UtilitaireDao.get("arc").executeBlock(this.connection, deleteTableByPilotage(
-				    nomTable + "_todo", nomTable, this.getTablePil(), phase, etat, "AND etape=1"));
-			    UtilitaireDao.get("arc").executeImmediate(connexion,
-				    "set default_statistics_target=1; vacuum analyze " + nomTable
-					    + "_todo (id_source); set default_statistics_target=100;");
-			}
-
-		    }
+                }
+   		 	
+            } while (!m.isEmpty());
+   		 	
+		    
+		    
 		}
 
 	    }
