@@ -23,6 +23,9 @@ import fr.insee.arc.utils.structure.tree.HierarchicalView;
 @Component
 public class ApiFiltrageService extends AbstractThreadRunnerService<ThreadFiltrageService>
 implements IApiServiceWithOutputTable {
+	
+    // maximum number of workers allocated to the service processing
+    private static int MAX_PARALLEL_WORKERS=4;
 
     private static final Logger LOGGER = Logger.getLogger(ApiFiltrageService.class);
     protected String seuilExclusion;
@@ -44,14 +47,14 @@ implements IApiServiceWithOutputTable {
         super(THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, null, aNbEnr, paramBatch);
 
         // fr.insee.arc.threads.filtrage
-        this.nbThread = 3;
+        this.nbThread = MAX_PARALLEL_WORKERS;
 
     }
     public ApiFiltrageService(Connection connexion, String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
         super(connexion,THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, null, aNbEnr, paramBatch);
 
         // fr.insee.arc.threads.filtrage
-        this.nbThread = 3;
+        this.nbThread = MAX_PARALLEL_WORKERS;
 
     }
 

@@ -30,6 +30,9 @@ import fr.insee.arc.core.service.thread.ThreadStructurizeService;
 public class ApiNormageService extends AbstractThreadRunnerService<ThreadStructurizeService>
 	implements IApiServiceWithOutputTable {
 
+    // maximum number of workers allocated to the service processing
+    private static int MAX_PARALLEL_WORKERS=4;
+	
     private static final Logger LOGGER = Logger.getLogger(ApiNormageService.class);
     protected String separator = ",";
     private static final Class<ThreadStructurizeService> THREAD_TYPE = ThreadStructurizeService.class;
@@ -43,7 +46,7 @@ public class ApiNormageService extends AbstractThreadRunnerService<ThreadStructu
 	super(THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 
 	// fr.insee.arc.threads.normage
-	this.nbThread = 3;
+	this.nbThread = MAX_PARALLEL_WORKERS;
 
     }
 

@@ -31,15 +31,16 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
 public class ApiControleService extends AbstractThreadRunnerService<ThreadControleService>
 	implements IApiServiceWithOutputTable {
 
+    // maximum number of workers allocated to the service processing
+    private static int MAX_PARALLEL_WORKERS=4;
+	
     private static final Logger LOGGER = Logger.getLogger(ApiControleService.class);
     private static final Class<ThreadControleService> THREAD_TYPE = ThreadControleService.class ;
 
     public ServiceRuleSets sjdrDummy;
 
     protected ArrayList<RuleSets> listJdrDummy;
-
-    private int currentIndice;
-
+    
     public ApiControleService() {
 	super();
 		this.sjdrDummy=new ServiceRuleSets();
@@ -49,8 +50,7 @@ public class ApiControleService extends AbstractThreadRunnerService<ThreadContro
             String... paramBatch) {
         super(THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
         
-        // fr.insee.arc.threads.controle
-        this.nbThread = 3;
+        this.nbThread = MAX_PARALLEL_WORKERS;
 
     }
 
@@ -59,8 +59,7 @@ public class ApiControleService extends AbstractThreadRunnerService<ThreadContro
             String... paramBatch) {
         super(connexion,THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
         
-        // fr.insee.arc.threads.controle
-        this.nbThread = 3;
+        this.nbThread = MAX_PARALLEL_WORKERS;
     }
 
     /**

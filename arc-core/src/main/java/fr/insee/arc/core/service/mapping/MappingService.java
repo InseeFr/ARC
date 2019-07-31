@@ -50,7 +50,8 @@ import fr.insee.arc.utils.utils.FormatSQL;
 public class MappingService extends AbstractThreadRunnerService<ThreadMappingService>
 	implements IApiServiceWithOutputTable {
 
-    // degré de parallélisme demandé
+    // maximum number of workers allocated to the service processing
+    private static int MAX_PARALLEL_WORKERS=6;
 
     private static final Logger LOGGER = Logger.getLogger(MappingService.class);
     private static final String prefixIdentifiantRubrique = "i_";
@@ -96,8 +97,8 @@ public class MappingService extends AbstractThreadRunnerService<ThreadMappingSer
 	    String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
 	super(ThreadMappingService.class, aCurrentPhase, anParametersEnvironment, anEnvironnementExecution, null, aNbEnr, paramBatch);
 
-	// fr.insee.arc.threads.mapping
-	this.nbThread = 3;
+	this.nbThread = MAX_PARALLEL_WORKERS;
+	
 	this.requeteSQLCalibree = new RequeteMappingCalibree(this.connection, FormatSQL.TAILLE_MAXIMAL_BLOC_SQL,
 		this.getTablePilTemp());
 	this.jdrDAO = new JeuDeRegleDao();

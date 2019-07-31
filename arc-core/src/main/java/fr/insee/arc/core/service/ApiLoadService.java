@@ -39,9 +39,12 @@ import fr.insee.arc.core.service.thread.ThreadLoadService;
 @Component
 public class ApiLoadService extends AbstractThreadRunnerService<ThreadLoadService>
 	implements IApiServiceWithoutOutputTable {
-    private static final Class<ThreadLoadService> THREAD_TYPE = ThreadLoadService.class;
 
-    
+    // maximum number of workers allocated to the service processing
+    private static int MAX_PARALLEL_WORKERS=4;
+	
+	private static final Class<ThreadLoadService> THREAD_TYPE = ThreadLoadService.class;
+
     protected String loadOkTable;
 
     private Map<String, Integer> col = new HashMap<>();
@@ -64,8 +67,7 @@ public class ApiLoadService extends AbstractThreadRunnerService<ThreadLoadServic
 	    String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
 	super(THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 
-	// fr.insee.arc.threads.chargement
-	this.nbThread = 3;
+	this.nbThread = MAX_PARALLEL_WORKERS;
 
 	// Get all normes in database
 	this.normList = getAllNorms();
@@ -77,8 +79,7 @@ public class ApiLoadService extends AbstractThreadRunnerService<ThreadLoadServic
 	super(connexion, THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr,
 		paramBatch);
 
-	// fr.insee.arc.threads.chargement
-	this.nbThread = 3;
+	this.nbThread = MAX_PARALLEL_WORKERS;
 
 	// Get all normes in database
 	this.normList = getAllNorms();
