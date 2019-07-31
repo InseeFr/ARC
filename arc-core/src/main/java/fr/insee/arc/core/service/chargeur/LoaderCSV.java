@@ -301,9 +301,6 @@ public class LoaderCSV implements ILoader {
 
         StringBuilder req = new StringBuilder();
 
-        // on récupère la validité
-
-        req.setLength(0);
         req.append("DROP TABLE IF EXISTS " + tableTempA + ";");
         req.append("CREATE ");
         if (!tableTempA.contains(".")) {
