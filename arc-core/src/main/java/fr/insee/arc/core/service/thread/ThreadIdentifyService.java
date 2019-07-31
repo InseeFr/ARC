@@ -115,7 +115,7 @@ public class ThreadIdentifyService extends AbstractThreadService {
 
 	this.filesInputStreamLoad = archiveChargeur.loadArchive(new FilesInputStreamLoadKeys[] { //
 		FilesInputStreamLoadKeys.IDENTIFICATION//
-		, FilesInputStreamLoadKeys.VALIDITY });
+		});
 
     }
 
@@ -130,24 +130,12 @@ public class ThreadIdentifyService extends AbstractThreadService {
 	ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
 	chgrBrtl.setConnexion(getConnection());
 	chgrBrtl.setListeNorme(normList);
-
-	try {
-	    this.normeOk = chgrBrtl.calculeNormeFichiers(this.idSource, this.filesInputStreamLoad.getTmpInxIdentify());
-	} catch (Exception e) {
-	    LoggerDispatcher.error("Erreur dans la détermination de la norme du fichier " + this.idSource, e, LOGGER);
-	    throw new Exception("Erreur dans la détermination de la norme du fichier " + this.idSource);
-	}
-
-	/*
-	 * Maintenant qu'on a la norme, on calcule la validité
-	 */
-
-	try {
-	    this.validite = chgrBrtl.calculeValiditeFichiers(this.idSource,
-		    this.filesInputStreamLoad.getTmpInxValidite(), this.normeOk);
-	} catch (Exception e) {
-	    throw new Exception("Erreur dans la détermination de la validite du fichier " + this.idSource);
-	}
+	Norme[] n=new Norme[1];
+	String[] v=new String[1];
+			
+	chgrBrtl.calculeNormeAndValiditeFichiers(this.idSource, this.filesInputStreamLoad.getTmpInxIdentify(),n,v);
+	this.normeOk=n[0];
+	this.validite=v[0];
 
     }
 

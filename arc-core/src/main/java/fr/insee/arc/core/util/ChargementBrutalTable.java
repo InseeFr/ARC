@@ -27,68 +27,17 @@ import fr.insee.arc.utils.utils.ManipString;
  */
 public class ChargementBrutalTable {
 
-	// The file is read line by line to determine its norm
-	// This process may be very long on large file whereas the information can oftenly found be at the very beginning of the file
-	
-	// That is why the file is chunked and the rules to determine to norm are applied every for every chunck
-	// The following parameters set the maximum number of chunk to be read and the maximum amount of line in every single chunk 
-
-	/**TODO the followings constant should become part of the load rules **/
-    // The maximum number of lines loaded every loop
-    public static final int LIMIT_CHARGEMENT_BRUTAL = 500;
-	// The maximum number of chunk
-	public static final int LIMIT_BOUCLE = 1;
     
+	// todo : externaliser dans les regles de chargement
+	// Combien de boucle au maximum
+	public static final int LIMIT_BOUCLE = 1;
+    // Combien de ligne on charge à la fois (OPTI)
+    public static final int LIMIT_CHARGEMENT_BRUTAL = 50;
+       
     public static final String TABLE_CHARGEMENT_BRUTAL = "B";
     private static final Logger LOGGER = Logger.getLogger(ChargementBrutalTable.class);
     private Connection connexion;
     private List<Norme> listeNorme;
-
-    /**
-     * 
-     * Pour pouvoir traiter des fichiers clef-valeur, on doit pouvoir déterminer la norme du fichier AVANT de le mettre en base pour être
-     * capable de le mettre correctement en base.
-     *
-     * @return normage ko?
-     * @param idSource
-     * @param fileStream
-     * @throws Exception
-     */
-    public Norme calculeNormeFichiers(String idSource, InputStream fileStream) throws Exception {
-
-        LoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
-
-        Norme normeOk = new Norme();
-        int nbBoucle = 0;
-        boolean erreur = false;
-
-        InputStreamReader isr = new InputStreamReader(fileStream);
-        BufferedReader br = new BufferedReader(isr);
-        
-        //On boucle tant que l'on a pas une norme ou une erreur
-        while (normeOk.getIdNorme() == null && !erreur && nbBoucle<LIMIT_BOUCLE) {
-            requeteCreateTableChargementBrutal(nbBoucle);
-
-            erreur = chargerFichierBrutalement(idSource, br, nbBoucle);
-
-            normeOk = calculerNorme(idSource);
-
-            nbBoucle++;
-
-        }
-        
-        br.close();
-        isr.close();
-
-        if (normeOk.getIdNorme()==null) {
-            throw (new Exception("Aucune norme trouvée"));
-        }
-        if (erreur) {
-            throw (new Exception("Une erreur est survenu lors du calcule de la norme du fichier"));
-        }
-        return normeOk;
-
-    }
 
     /**
      * Création de la table qui va accueillir la chargement brutal des fichiers
@@ -134,8 +83,6 @@ public class ChargementBrutalTable {
     private boolean chargerFichierBrutalement(String idSource, BufferedReader br, int nb_boucle) throws Exception {
         LoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
-        
-        // no delimiter and no quote. The line is loaded as raw data
         String delimiter = Character.toString((char) 1);
         String quote = Character.toString((char) 2);
 
@@ -162,6 +109,7 @@ public class ChargementBrutalTable {
         requete.insert(0, header);
         byte[] bytes = requete.toString().getBytes(StandardCharsets.UTF_8);
         InputStream is = new ByteArrayInputStream(bytes);
+//        UtilitaireDao.get("arc").importing(this.connexion, TABLE_CHARGEMENT_BRUTAL, is, true, delimiter);
         UtilitaireDao.get("arc").importing(this.connexion, TABLE_CHARGEMENT_BRUTAL, null, is, true, true, delimiter, quote, null);
 
         is.close();
@@ -173,153 +121,120 @@ public class ChargementBrutalTable {
 
     }
 
-    /**
-     * On calcule les normes d'un fichier. On retourne ça sous forme de liste. 3 cas possible : >0 norme, on a essayé toutes les normes sans
-     * succès >1 norme, on a essayé toues les normes, une seule a matché >2 normes, 2 normes ont matché, il y en a peut être plus mais on
-     * s'est arrêté avant car ficheir KO
-     * 
-     * @param idSource
-     * @return
-     * @throws SQLException
-     */
-    private Norme calculerNorme(String idSource) {
+    
+    private String requeteFichierBrutalement(String idSource, BufferedReader br, int nb_boucle) throws Exception {
+        LoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
+
+    	
+    	StringBuilder requete=new StringBuilder();
+    	int idLigne = nb_boucle * LIMIT_CHARGEMENT_BRUTAL;
+    	String line = br.readLine();
+
+    	boolean start=true;
+    	while (line != null && idLigne < (nb_boucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
+          if (start)
+          {
+    		requete.append("\nSELECT '"+idSource.replace("'", "''")+"'::text as id_source,"+ idLigne +"::int as id_ligne,'"+line.replace("'", "''")+"'::text as ligne");
+    		start=false;
+          }
+          else
+          {
+      		requete.append("\nUNION ALL SELECT '"+idSource.replace("'", "''")+"',"+ idLigne +",'"+line.replace("'", "''")+"'"); 
+          }
+          
+          idLigne++;
+          if (idLigne < (nb_boucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
+              line = br.readLine();
+          }
+       }
+    	return requete.toString();
+
+    }
+    
+    public void calculeNormeAndValiditeFichiers(String idSource, InputStream file, Norme[] normeOk, String[] validiteOk) {
+    try {
+    	LoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
+    	
+	    normeOk[0] = new Norme();
+	    validiteOk[0]= null;
+	   
+	    int nbBoucle = 0;
+	    boolean erreur = false;
+	
+	    InputStreamReader isr = new InputStreamReader(file);
+	    BufferedReader br = new BufferedReader(isr);
+	
+	    //On boucle tant que l'on a pas une norme ou une erreur
+	    while (normeOk[0].getIdNorme() == null && !erreur && nbBoucle<LIMIT_BOUCLE) {
+//	        requeteCreateTableChargementBrutal(nbBoucle);
+//	
+//	        erreur = chargerFichierBrutalement(idSource, br, nbBoucle);
+//	
+//	    	calculerNormeAndValidite(normeOk, validiteOk);
+	    	
+	        calculerNormeAndValidite(normeOk, validiteOk, requeteFichierBrutalement(idSource, br, nbBoucle));
+
+	        nbBoucle++;
+	
+	    }
+	    
+	    br.close();
+	    isr.close();
+	
+	    if (normeOk[0].getIdNorme()==null) {
+	        throw (new Exception("Aucune norme trouvée"));
+	    }
+	    if (erreur) {
+	        throw (new Exception("Une erreur est survenu lors du calcule de la norme du fichier"));
+	    }
+	    
+    }
+    catch(Exception e)
+    {
+    	e.printStackTrace();
+    }
+    }
+    
+    private void calculerNormeAndValidite(Norme[] normeOk, String[] validiteOk, String b) throws Exception {
         LoggerDispatcher.info("** calculerNorme **", LOGGER);
-        java.util.Date beginDate = new java.util.Date();
+
+        StringBuilder query=new StringBuilder();
+//        query.append("\n WITH alias_table AS ( SELECT * FROM " + TABLE_CHARGEMENT_BRUTAL+ " )");
+        query.append("\n WITH alias_table AS ("+b+" )");
+
+        query.append("\n SELECT * FROM (");
         
-        Norme normeOk = new Norme();
-
-        // calcule de la norme. Si plus d'une norme détectée, on sort de la boucle car le fichier sera en erreur
-        int i = 0;
-        UtilitaireDao.get("arc").setSilent(true);
-        while (normeOk.getIdNorme() == null && i < listeNorme.size()) {
-            LoggerDispatcher.info("Marquage de la norme " + listeNorme.get(i).getIdNorme(), LOGGER);
-
-            StringBuilder requeteNormage = new StringBuilder();
-            requeteNormage.append("with alias_table as (");
-            requeteNormage.append("select * from " + TABLE_CHARGEMENT_BRUTAL);
-            requeteNormage.append(")");
-            requeteNormage.append("select 1 where exists (\n");
-            requeteNormage.append(ManipString.extractAllRubrique(listeNorme.get(i).getDefNorme()));
-            requeteNormage.append(");");
-
-            // requeteNormage.append("\nCreate table arc_bas8.chargement_brutal as select * from "+this.tableChargementBrutal+";");
-
-            try {
-                ArrayList<ArrayList<String>> result = UtilitaireDao.get("arc").executeRequest(this.connexion, requeteNormage);
-
-                if (UtilitaireDao.hasResults(UtilitaireDao.get("arc").executeRequest(this.connexion, requeteNormage))) {
-                    normeOk = listeNorme.get(i);
-                }
-
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            i++;
-            UtilitaireDao.get("arc").setSilent(false);
+        for (int i=0;i<listeNorme.size();i++)
+        {
+        	if (i>0)
+        	{
+        		query.append("\n UNION ALL ");
+        	}
+        	query.append("\n SELECT "+i+"::int as id_norme ");
+        	query.append("\n , ("+listeNorme.get(i).getDefNorme()+" LIMIT 1)::text as norme ");
+        	query.append("\n , ("+listeNorme.get(i).getDefValidite()+" LIMIT 1)::text as validite ");
+        }
+        query.append("\n ) vv ");
+        query.append("\n where norme is not null ");
+        
+        
+        ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, query);
+        if (result.size()>1)
+        {
+        	throw new Exception("More than one norm match the expression");
         }
         
-        java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** calculerNorme temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
-        
-        return normeOk;
+        if (result.size()==0)
+        {
+        	throw new Exception("Zero norm match the expression");
+        }
 
+        normeOk[0]=listeNorme.get(Integer.parseInt(result.get(0).get(0)));
+        validiteOk[0]=result.get(0).get(2);
     }
-
-    /**
-     * Rebelotte. On fait comme pour la norme, mais avec la validité (refactor possible ?)
-     * @param idSource
-     * @param file
-     * @param norme
-     * @return
-     * @throws Exception
-     */
-    public String calculeValiditeFichiers(String idSource, InputStream file, Norme norme) throws Exception {
-        LoggerDispatcher.info("** calculeValiditeFichiers **", LOGGER);
-        java.util.Date beginDate = new java.util.Date();
-        
-        String returned = null;
-        int nbBoucle = 0;
-        boolean erreur = false;
-
-        InputStreamReader isr = new InputStreamReader(file);
-        BufferedReader br = new BufferedReader(isr);
-
-        while (StringUtils.isEmpty(returned) && !erreur && nbBoucle<LIMIT_BOUCLE) {
-            requeteCreateTableChargementBrutal(nbBoucle);
-
-            erreur = chargerFichierBrutalement(idSource, br, nbBoucle);
-
-            returned = calculerValidite(idSource, norme);
-
-            nbBoucle++;
-
-        }
-
-        br.close();
-        isr.close();
-
-        if (erreur) {
-            throw (new Exception("aucune norme trouvée"));
-        }
-        
-        
-        java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** calculeValiditeFichiers temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
-        
-        return returned;
-
-    }
-
-    /**
-     * On calcule la validite d'un fichier.
-     * 
-     * @param idSource
-     * @return
-     * @throws SQLException
-     */
-    private String calculerValidite(String idSource, Norme norme) {
-        LoggerDispatcher.info("** calculerValidite **", LOGGER);
-        java.util.Date beginDate = new java.util.Date();
-
-        
-        String returned = "";
-
-        // calcule de la norme. Si plus d'une norme détectée, on sort de la boucle car le fichier sera en erreur
-        int i = 0;
-        UtilitaireDao.get("arc").setSilent(true);
-
-        StringBuilder validite = new StringBuilder();
-        validite.append("with alias_table as (");
-        validite.append("select * from " + TABLE_CHARGEMENT_BRUTAL);
-        validite.append(")");
-        validite.append(norme.getDefValidite());
-
-        // requeteNormage.append("\nCreate table arc_bas8.chargement_brutal as select * from "+this.tableChargementBrutal+";");
-
-        try {
-            ArrayList<ArrayList<String>> result = UtilitaireDao.get("arc").executeRequest(this.connexion, validite);
-
-            if (UtilitaireDao.hasResults(UtilitaireDao.get("arc").executeRequest(this.connexion, validite))) {
-                returned = result.get(2).get(0);
-            }
-
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        UtilitaireDao.get("arc").setSilent(false);
-
-        
-        java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** calculerValidite temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
-        
-        return returned;
-
-    }
-
+    
+    
+    
     /**
      * @return the connexion
      */

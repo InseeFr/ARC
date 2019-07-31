@@ -52,16 +52,13 @@ public class ThreadIdentifyServiceTest {
 	
 	//THEN
 	InputStream expectedStreamIdentify = new FileInputStream(new File(fileToTest));
-	InputStream expectedStreamValidity = new FileInputStream(new File(fileToTest));
 
 	assertTrue(CompareInputStream.isSame(threadIdentifyServiceToTest.filesInputStreamLoad.getTmpInxIdentify(), expectedStreamIdentify));
-	assertTrue(CompareInputStream.isSame(threadIdentifyServiceToTest.filesInputStreamLoad.getTmpInxValidite(), expectedStreamValidity));
 	assertTrue(threadIdentifyServiceToTest.filesInputStreamLoad.getTmpInxCSV()== null);
 	assertTrue(threadIdentifyServiceToTest.filesInputStreamLoad.getTmpInxLoad()== null);
 
 
 	expectedStreamIdentify.close();
-	expectedStreamValidity.close();
     }
 
 }
