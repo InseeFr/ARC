@@ -59,10 +59,14 @@ public class ARCLauncher {
 
 	// For the current batch, the total size of the envelopes processed must not
 	// exceed a certain limit
-	protected static String maxReceptionSizeInMB = "100";
+	protected static String maxReceptionSizeInMB = "10";
 
-	// Number of files processed in each phase iteration
-	protected static String numberOfFiles = "31";
+	// Maximum number of files to load
+	protected static String maxFilesToLoad="101";
+
+	// Maximum number of files processed in each phase iteration
+	protected static String maxFilesPerPhase="1000000";
+	
 
 	// Maximum lag behind phases: if a phase is deltaStepAllowed steps ahead, it
 	// waits for the next one to finish before proceeding
@@ -147,7 +151,7 @@ public class ARCLauncher {
 		@Override
 		public void run() {
 			LoadBatch c = new LoadBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
-					numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
+					maxFilesToLoad, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			this.report = c.report;
 			step.set(step.indexOf(0), 1);
@@ -161,7 +165,7 @@ public class ARCLauncher {
 		@Override
 		public void run() {
 			NormalizeBatch c = new NormalizeBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION),
-					mapParam.get(REPERTOIRE), numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
+					mapParam.get(REPERTOIRE), maxFilesPerPhase, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.set(step.indexOf(1), 2);
 			this.report = c.report;
@@ -175,7 +179,7 @@ public class ARCLauncher {
 		@Override
 		public void run() {
 			ControlBatch c = new ControlBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION),
-					mapParam.get(REPERTOIRE), numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
+					mapParam.get(REPERTOIRE), maxFilesPerPhase, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.set(step.indexOf(2), 3);
 			this.report = c.report;
@@ -189,7 +193,7 @@ public class ARCLauncher {
 		@Override
 		public void run() {
 			FilterBatch c = new FilterBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
-					numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
+					maxFilesPerPhase, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.set(step.indexOf(3), 4);
 			this.report = c.report;
@@ -203,7 +207,7 @@ public class ARCLauncher {
 		@Override
 		public void run() {
 			MapperBatch c = new MapperBatch(mapParam.get(ENV), mapParam.get(ENV_EXECUTION), mapParam.get(REPERTOIRE),
-					numberOfFiles, keepInDatabase ? null : mapParam.get(NUMLOT));
+					maxFilesPerPhase, keepInDatabase ? null : mapParam.get(NUMLOT));
 			c.execute();
 			step.remove(step.indexOf(4));
 			this.report = c.report;
@@ -496,13 +500,19 @@ public class ARCLauncher {
 	}
 
 	/**
-	 * test si la chaine batch est arrétée
+	 * Check if the user hadn't asked to stop the batch process by the web user interface
 	 * 
-	 * @return
+	 * @return true : pipeline is active, false : pipeline had been asked to be stopped by the user
 	 * @throws Exception
 	 */
 	public static boolean productionOn() throws Exception {
-		return UtilitaireDao.get("arc").hasResults(null, "select 1 from arc.pilotage_batch where operation='O'");
+		if (production) {
+			return UtilitaireDao.get("arc").hasResults(null, "select 1 from arc.pilotage_batch where operation='O'");
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	/**
