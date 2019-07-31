@@ -44,7 +44,7 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
      * extracting we check if the directory exists.
      * <ul>
      * <li>do not exists : extraction</li>
-     * <li>exists : a thread is already exctracting. Wait for the file to be create</li<
+     * <li>exists : a thread is already extracting. Wait for the file to be create</li<
      * </ul>
      * Note : an archive can contains multiple file, that's why multiple thread can
      * extract the archive, each one want its file.
@@ -56,25 +56,31 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
      * @throws Exception 
      */
     @Override
-    public void extractArchive(ArchiveExtractor decompressor) throws IOException, InterruptedException  {
+	public void extractArchive(ArchiveExtractor decompressor) throws IOException, InterruptedException {
 
-	String fileName = ManipString.substringAfterFirst(this.idSourceInArchive, "_");
+		String fileName = ManipString.substringAfterFirst(this.idSourceInArchive, "_");
 
-	File dir = new File(this.archiveToLoad + ".dir");
-	if (!dir.exists()) {
-	    LoggerDispatcher.info(String.format("directory %s do not exist, have to extract",dir.getName()), LOGGER);
-	    dir.mkdir();
-	    decompressor.extract(this.archiveToLoad);
-	} else {
-	    File toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
-	    LoggerDispatcher.info(String.format("directory %s exists, wait for file %s to be created",dir.getName(), toRead.getName()), LOGGER);
-	    while (!toRead.exists()) {
-		toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
-		Thread.sleep(500);
-	    }
+		boolean uncompressInProgress = false;
+		
+		File dir = new File(this.archiveToLoad + ".dir");
+		// check if the decompress directory exists
+		if (!dir.exists()) {
+			// create the compress directory and start decompression if the creation had been successfull
+			if (dir.mkdir()) {
+				decompressor.extract(this.archiveToLoad);
+				uncompressInProgress = true;
+			}
+		}
+
+		if (!uncompressInProgress) {
+			// check if file exists
+			File toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
+			while (!toRead.exists()) {
+				toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
+				Thread.sleep(500);
+			}
+		}
 	}
-
-    }
 
     /**
      * Open inpustream to a file 
