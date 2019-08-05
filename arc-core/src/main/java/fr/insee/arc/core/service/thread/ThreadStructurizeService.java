@@ -377,8 +377,10 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 		+ ManipString.substringAfterFirst(r, "insert into {table_destination}");
 
 	// on crée la table destination avec les bonnes colonnes
-	r = "DROP TABLE IF EXISTS {table_destination}; CREATE TABLE {table_destination} as SELECT " + fieldsToBeInserted
-		+ " FROM {table_source} where false; \n " + r;
+    // on crée la table destination avec les bonnes colonnes		    
+	r="DROP TABLE IF EXISTS {table_destination}; CREATE TEMPORARY TABLE {table_destination} as SELECT * FROM {table_source} where false; \n "
+	   + this.columnToBeAdded+"\n"
+	   + r;
 	return r;
     }
 
