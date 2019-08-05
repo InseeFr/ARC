@@ -64,11 +64,17 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 		
 		File dir = new File(this.archiveToLoad + ".dir");
 		// check if the decompress directory exists
+		
 		if (!dir.exists()) {
-			// create the compress directory and start decompression if the creation had been successfull
-			if (dir.mkdir()) {
-				decompressor.extract(this.archiveToLoad);
-				uncompressInProgress = true;
+			// create the compress directory and start decompression if the creation had
+			// been successfull
+			try {
+				if (dir.mkdir()) {
+					decompressor.extract(this.archiveToLoad);
+					uncompressInProgress = true;
+				}
+			} catch (Exception e) {
+				// resume if random access error
 			}
 		}
 
