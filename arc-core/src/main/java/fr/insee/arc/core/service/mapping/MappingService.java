@@ -51,7 +51,7 @@ public class MappingService extends AbstractThreadRunnerService<ThreadMappingSer
 	implements IApiServiceWithOutputTable {
 
     // maximum number of workers allocated to the service processing
-    private static int MAX_PARALLEL_WORKERS=6;
+    private static int MAX_PARALLEL_WORKERS=4;
 
     private static final Logger LOGGER = Logger.getLogger(MappingService.class);
     private static final String prefixIdentifiantRubrique = "i_";
