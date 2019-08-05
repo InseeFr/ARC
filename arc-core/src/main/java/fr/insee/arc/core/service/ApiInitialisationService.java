@@ -1086,7 +1086,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	    if (insert) {
 		requete.append(" UNION ALL ");
 	    }
-	    r = requsteListTableEnv(env, phase[i].toString()).toString();
+	    r = requeteListTableEnv(env, phase[i].toString()).toString();
 	    insert = (r.length() != 0);
 	    requete.append(r);
 	}
@@ -1101,7 +1101,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
      * @param phase
      * @return an sql query
      */
-    public static StringBuilder requsteListTableEnv(String env, String phase) {
+    public static StringBuilder requeteListTableEnv(String env, String phase) {
 	// Les tables dans l'environnement sont de la forme
 	TraitementState[] etat = TraitementState.values();
 	StringBuilder requete = new StringBuilder();
@@ -1164,12 +1164,20 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 			    .toUpperCase();
 		    String etat = ManipString.substringAfterLast(nomTable, "_").toUpperCase();
 
-		    // la table a-t-elle des héritages ?
+		    // temporary table to store inherit table already checked
+ 			UtilitaireDao.get("arc").executeImmediate(connexion, "DROP TABLE IF EXISTS TMP_INHERITED_TABLES_TO_CHECK; CREATE TEMPORARY TABLE TMP_INHERITED_TABLES_TO_CHECK (tablename text);" );
+		    
+ 			// Does the table have some inherited table left to check ?
+	 		// Only MAX_LOCK_PER_TRANSACTION tables can be proceed at the same time so iteration is required
             HashMap<String, ArrayList<String>> m;
             do {
-   		 	m=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, 
-   		 					"SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_child\\_%' LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION
-   		 					)).mapContent();
+						m = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
+								"\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"
+										+ nomTable
+										+ "\\_child\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "
+										+ FormatSQL.MAX_LOCK_PER_TRANSACTION + " ) "
+										+ "\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
+										+ "\n SELECT tablename from TMP_SELECT ")).mapContent();
 
    		 	
    		 	
@@ -1207,23 +1215,6 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
    		 			UtilitaireDao.get("arc").executeImmediate(connexion, query);
 
                 }
-                else
-                {
-                	
-                	UtilitaireDao.get("arc").executeBlock(connexion, deleteTableByPilotage(nomTable, nomTable, this.getTablePil(), phase, etat, ""));
-                    UtilitaireDao.get("arc").executeImmediate(connexion,
-                            "set default_statistics_target=1; vacuum analyze " + nomTable + "(id_source); set default_statistics_target=100;");
-
-
-                	if (!nomTable.contains(TypeTraitementPhase.FORMAT_TO_MODEL.toString().toLowerCase())
-                            && nomTable.endsWith("_" + TraitementState.OK.toString().toLowerCase())) {
-                    	UtilitaireDao.get("arc").executeBlock(connexion, deleteTableByPilotage(nomTable+"_todo", nomTable, this.getTablePil(), phase, etat, "AND etape=1"));
-                        UtilitaireDao.get("arc").executeImmediate(connexion,
-                                "set default_statistics_target=1; vacuum analyze " + nomTable + "_todo (id_source); set default_statistics_target=100;");
-                    }
-
-                }
-   		 	
             } while (!m.isEmpty());
    		 	
 		    
@@ -1298,174 +1289,6 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	UtilitaireDao.get("arc").executeBlock(this.connection, requete);
 
 	return true;
-    }
-
-    public boolean nettoyerTableBufferColonne(String nomTable) throws Exception {
-	return nettoyerTableColonne(nomTable + "_todo");
-    }
-
-    /**
-     * Destruction des colonnes inutiles de la table si elle est vide
-     * 
-     * @param nomTable
-     * @return
-     * @throws Exception
-     */
-    @SQLExecutor
-    public boolean nettoyerTableColonne(String nomTable) throws Exception {
-	LoggerDispatcher.info("nettoyage en colonne :" + nomTable, LOGGER);
-	Boolean destroyedColumn = false;
-	StringBuilder requeteDestruction = new StringBuilder();
-
-	/** nettoyage en colonne : on va supprimer les colonnes inutiles **/
-	if (!(nomTable.toLowerCase().contains("_" + TypeTraitementPhase.FORMAT_TO_MODEL.toString().toLowerCase() + "_")
-		&& nomTable.toLowerCase().endsWith("_ok"))) {
-	    // ArrayList<Integer> r=new ArrayList<Integer>();
-
-	    // si pas d'enregistrement, on cherche pas à faire les stats et on detruit les
-	    // colonnes directement
-	    if (!UtilitaireDao.get("arc").hasResults(this.connection, "select 1 from " + nomTable + " limit 1;")) {
-
-		destroyedColumn = true;
-
-		ArrayList<String> l = UtilitaireDao.get(DbConstant.POOL_NAME).listeCol(connection, nomTable);
-
-		for (int i = 0; i < l.size(); i++) {
-		    String c = l.get(i);
-		    if (c.toLowerCase().startsWith("i_") || c.toLowerCase().startsWith("v_")
-			    || c.toLowerCase().startsWith("m_")) {
-			LoggerDispatcher.info("Destruction de la colonne :" + c + " de la table " + nomTable, LOGGER);
-			requeteDestruction.append("alter table " + nomTable + " drop column " + c + " cascade; \n");
-		    }
-		}
-	    }
-
-	}
-
-	if (destroyedColumn) {
-	    UtilitaireDao.get("arc").executeRequest(this.connection, requeteDestruction);
-
-	    // patch postgres pour reset l'index de colonne (posgres ne fait pas -1 quand on
-	    // drop une colonne)
-	    UtilitaireDao.get("arc").executeRequest(this.connection,
-		    "DROP TABLE IF EXISTS " + nomTable + "_TMP CASCADE;" + " CREATE TABLE " + nomTable + "_TMP "
-			    + FormatSQL.WITH_NO_VACUUM + " as select * from " + nomTable + "; "
-			    + " DROP TABLE IF EXISTS " + nomTable + " CASCADE; " + " ALTER TABLE " + nomTable
-			    + "_TMP rename to " + ManipString.substringAfterFirst(nomTable, ".") + "; ");
-
-	}
-
-	return destroyedColumn;
-    }
-
-    /**
-     * Enleve les lignes d'une table en fonction du contenu dans la table de
-     * pilotage
-     *
-     * @param executionEnv
-     *            , bac à sable(bas) ou batch
-     * @param phaseSel
-     *            , phase servant de sélection
-     * @param nomTable
-     *            , nom de la table que doit être nettoyé
-     * @return
-     * @throws Exception
-     */
-    public Boolean nettoyerTableLigne(String executionEnv, String nomTable) throws Exception {
-	LoggerDispatcher.info("nettoyer en ligne :" + nomTable, LOGGER);
-	// On retrouve la phase et l'état à vérifier à partir du nom de la table
-	String phase = ManipString.substringBeforeFirst(nomTable.substring(executionEnv.length() + 1), "_")
-		.toUpperCase();
-	String etat = ManipString.substringAfterLast(nomTable, "_").toUpperCase();
-
-	try {
-	    StringBuilder requete = new StringBuilder();
-	    // effacer les enregistrements present dans la table de stockage dont on ne
-	    // trouve plus référence dans le pilotage
-	    requete.append(deleteTableByPilotage(nomTable, nomTable, this.getTablePil(), phase, etat, ""));
-	    UtilitaireDao.get("arc").executeBlock(this.connection, requete);
-
-	} catch (Exception e) {
-	    LoggerDispatcher.error("nettoyerTableLigne()", e, LOGGER);
-	    throw e;
-	}
-
-	return true;
-
-    }
-
-    // rebuild de la table buffer relative à la table
-    /**
-     * rebuild de la table todo
-     * 
-     * @throws Exception
-     */
-    public Boolean nettoyerTableBufferLigne(String executionEnv, String nomTable) throws Exception {
-
-	LoggerDispatcher.info("nettoyer en ligne :" + nomTable, LOGGER);
-	// On retrouve la phase et l'état à vérifier à partir du nom de la table
-	String phase = ManipString.substringBeforeFirst(nomTable.substring(executionEnv.length() + 1), "_")
-		.toUpperCase();
-	String etat = ManipString.substringAfterLast(nomTable, "_").toUpperCase();
-
-	try {
-	    StringBuilder requete = new StringBuilder();
-	    // effacer les enregistrements present dans la table de stockage dont on ne
-	    // trouve plus référence dans le pilotage
-
-	    requete.append(deleteTableByPilotage(nomTable + "_todo", nomTable, this.getTablePil(), phase, etat,
-		    "AND etape=1"));
-
-	    UtilitaireDao.get("arc").executeBlock(this.connection, requete);
-	} catch (Exception e) {
-	    LoggerDispatcher.error("nettoyerTableBufferLigne()", e, LOGGER);
-	    throw e;
-	}
-
-	return true;
-
-    }
-
-    /**
-     * Rebuild des grosses tables attention si on touche parameteres de requetes ou
-     * à la clause exists; forte volumétrie !
-     */
-    public static String deleteTableByPilotage(String nomTable, String nomTableSource, String tablePil, String phase,
-	    String etat, String extraCond) {
-	StringBuilder requete = new StringBuilder();
-
-	String tableDestroy = FormatSQL.temporaryTableName(nomTable, "D");
-	requete.append("\n SET enable_nestloop=off; ");
-
-	requete.append("\n DROP TABLE IF EXISTS " + tableDestroy + " CASCADE; ");
-	requete.append("\n DROP TABLE IF EXISTS TMP_SOURCE_SELECTED CASCADE; ");
-
-	// PERF : selection des id_source dans une table temporaire pour que postgres
-	// puisse partir en semi-hash join
-	requete.append("\n CREATE TEMPORARY TABLE TMP_SOURCE_SELECTED AS ");
-	requete.append("\n SELECT id_source from " + tablePil + " ");
-	requete.append("\n WHERE phase_traitement='" + phase + "' ");
-	requete.append("\n AND '" + etat + "'=ANY(etat_traitement) ");
-	requete.append("\n " + extraCond + " ");
-	requete.append("\n ; ");
-
-	requete.append("\n ANALYZE TMP_SOURCE_SELECTED; ");
-
-	requete.append("\n CREATE  TABLE " + tableDestroy + " " + FormatSQL.WITH_NO_VACUUM + " ");
-	requete.append("\n AS select * from " + nomTableSource + " a ");
-	requete.append("\n WHERE exists (select 1 from TMP_SOURCE_SELECTED b WHERE a.id_source=b.id_source) ");
-	requete.append("\n ; ");
-
-	requete.append("\n DROP TABLE IF EXISTS " + nomTable + " CASCADE; ");
-	requete.append("\n ALTER TABLE " + tableDestroy + " rename to " + ManipString.substringAfterFirst(nomTable, ".")
-		+ ";\n");
-
-	requete.append("\n DROP TABLE IF EXISTS TMP_SOURCE_SELECTED; ");
-
-	requete.append("\n SET enable_nestloop=on; ");
-
-	return requete.toString();
-
     }
 
     @SQLExecutor
