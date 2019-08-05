@@ -76,8 +76,8 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 			// check if file exists
 			File toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
 			while (!toRead.exists()) {
-				toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
 				Thread.sleep(500);
+				toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
 			}
 		}
 	}
