@@ -10,11 +10,12 @@ import java.util.Map;
 import javax.swing.text.AbstractDocument.LeafElement;
 
 /**
- * Convertir et manipuler une relation de la même manière qu'une hiérarchie (arbre ou forêt)<br/>
- * Les colonnes de la relation sont connues, et il est possible d'accéder aux élements d'une colonne choisie arbritrairement.<br/>
- * Pour que la vue hiérarchique soit fonctionnelle, les colonnes doivent être présentée dans l'ordre de la hiérarchie.<br/>
- * Ainsi, dans l'exemple d'une relation présentant la taxinomie des graminae, la relation doit être présentée sous la forme :<br/>
- * | famille | genre | espèce | variété |<br/>
+ * Transform a relation into a hierarchy (tree or forest), enable its manipulation through hierarchical methods. <br/>
+ *
+ * Relation columns are known, we can access to elements of a specific column. <br/>
+ *
+ * In order to have a working hierarchy the columns must be given in the hierarchy order. For example, considering the
+ * gramineae taxonomy, the hierarchy must be : | Family | Genus | Species | Strain
  *
  * @author QV47IK
  */
@@ -29,24 +30,29 @@ public class HierarchicalView implements ITree<String, String> {
     private String levelName;
     private int levelNumber;
     /**
-     * Si lazy est vrai, la vision en colonnes (coupe de l'arbre selon un éloignement depuis la racine) n'est disponible que pour la racine.
+     * If lazy is true, the column representation (sectional vision of the tree from the root) is only available for the the root.
      */
     private boolean lazy = false;
+
     /**
-     * Vue par colonne de la relation. La colonne est simplement vue comme une forêt dont les racines peuvent être doublonnées.
+     * Column view of the relation.
+     *
+     * The relation is viewed as a forest with potential doubled roots.
      */
     private Map<String, List<HierarchicalView>> levelView;
+
     /**
-     * Ordre des colonnes
+     * Column order
      */
     private List<String> levelOrder;
+
     /**
-     * Vue hiérarchique de la relation : name -> hierarchy
+     * Hierarchical view of the relation (name -> hierarchy)
      */
     private Map<String, HierarchicalView> mapView;
 
     /**
-     * Le constructeur pour un élément non racine
+     * The constructor for a non-root element.
      *
      * @param aName
      * @param aParent
@@ -70,7 +76,7 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * Le constructeur pour une racine
+     * The constructor for a root element.
      *
      * @param aName
      * @param aLevelName
@@ -97,77 +103,66 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * FIXME pour le moment, c'est moche car pas optimisé.
+     * Gives a sectional view of the hierarchy.
+     *
+     * TODO add documentation
+     * FIXME ugly AND not optimized
      *
      * @param aHierarchicalView
      * @param aLevelOrder
-     * @return la projection
+     * @return the projection
      */
     public static HierarchicalView asCoupe(HierarchicalView aHierarchicalView, List<String> aLevelOrder) {
         HierarchicalView returned = asRoot(rootLevel);
         List<String> path = new ArrayList<String>();
-        /**
-         * Pour chaque niveau
-         */
+         // For every level
         for (int i = 0; i < aLevelOrder.size(); i++) {
-            /**
-             * J'ajoute ce niveau
-             */
+            // Adding this level
             returned.addLevel(aLevelOrder.get(i));
-            /**
-             * Pour chaque élément du niveau en question
-             */
+            // For every element of the considered level
             for (HierarchicalView v : aHierarchicalView.getLevel(aLevelOrder.get(i))) {
                 HierarchicalView current = v;
-                /**
-                 * Recherche du chemin vers l'élément depuis la racine : tant que le niveau de l'élément courant n'est pas celui en instance
-                 * de parcours
-                 */
+                // Searching for the path to this element from the root.
                 while (!current.getLevelName().equals(rootLevel)) {
-                    /**
-                     * Un niveau au-dessus
-                     */
+                    // One level up
                     current = current.getParent();
                     if (aLevelOrder.contains(current.getLevelName())) {
                         path.add(0, current.getLocalRoot());
                     }
                 }
                 current = returned;
-                /**
-                 * Parcours de ce chemin jusqu'au parent de l'élément
-                 */
+                // Walk the path up to the element parent
                 for (int j = 0; j < path.size(); j++) {
                     current = current.get(path.get(j));
                 }
                 path.clear();
-                /**
-                 * Puis insertion de cet élément dans la coupe
-                 */
+                // Then we insert the element in the sectional vision
                 current.put(v.getLocalRoot());
             }
         }
         return returned;
     }
 
+    // TODO add documentation
     public static final HierarchicalView asRoot(String aName) {
         return new HierarchicalView(aName, rootLevel, levelZero, new HashMap<String, List<HierarchicalView>>(), new ArrayList<String>(),
                 new HashMap<String, HierarchicalView>());
     }
 
+    // TODO add documentation
     public static final HierarchicalView asChild(String aName, HierarchicalView aParent) {
         HierarchicalView returned = new HierarchicalView(aName, aParent, aParent.absoluteRoot, aParent.levelOrder.get(levelZero),
                 aParent.levelNumber + 1, new HashMap<String, List<HierarchicalView>>(), new ArrayList<String>(),
                 new HashMap<String, HierarchicalView>());
-        // Récupération des niveaux qui suivent ce niveau
+        // Grabbing the following levels
         for (int i = 1; i < aParent.levelOrder.size(); i++) {
             returned.levelOrder.add(aParent.levelOrder.get(i));
             returned.levelView.put(aParent.levelOrder.get(i), new ArrayList<HierarchicalView>());
         }
-        // Cet élément est le fils à papa
+        // This element is its daddy son
         if (!aParent.hasChild(aName)) {
             aParent.setChild(returned);
-            // Cet élément doit apparaître dans l'arborescence de tous ses
-            // ancêtres
+            // This element must be in its ancestors tree
             HierarchicalView view = returned.parent;
             while (view != null) {
                 view.getLevel(returned.levelName).add(returned);
@@ -178,26 +173,26 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * Charge les colonnes de {@code aRelationalView} dans une vue hiérarchique, dans la limite des colonnes indiquées dans
-     * {@code aListeColonne}. {@link LeafElement} i-ième élement de {@code aListeColonne} est considéré comme le nom de la i-ième colonne de
-     * {@code aRelationalView}
+     * Load columns of a {@code aRelationalView} into a hierarchichal view, constrained by {@code aColumnList}.
+     *
+     * The nth {@link LeafElement} of a {@code aColumnList} is taken as the name of the nth column of {@code aRelationalView}.
      *
      * @param aRootName
-     * @param aListeColonne
+     * @param aColumnList
      * @param aRelationalView
      * @return
      */
-    public static final HierarchicalView asRelationalToHierarchical(String aRootName, List<String> aListeColonne, List<List<String>> aRelationalView) {
+    public static final HierarchicalView asRelationalToHierarchical(String aRootName, List<String> aColumnList, List<List<String>> aRelationalView) {
         HierarchicalView returned = asRoot(aRootName);
-        // Ajout de toutes les colonnes
-        for (int i = 0; i < aListeColonne.size(); i++) {
-            returned.levelOrder.add(i, aListeColonne.get(i));
-            returned.levelView.put(aListeColonne.get(i), new ArrayList<HierarchicalView>());
+        // Adding every column
+        for (int i = 0; i < aColumnList.size(); i++) {
+            returned.levelOrder.add(i, aColumnList.get(i));
+            returned.levelView.put(aColumnList.get(i), new ArrayList<HierarchicalView>());
         }
         HierarchicalView local;
         for (int ligne = 0; ligne < aRelationalView.size(); ligne++) {
             local = returned;
-            for (int colonne = 0; colonne < aListeColonne.size(); colonne++) {
+            for (int colonne = 0; colonne < aColumnList.size(); colonne++) {
                 asChild(aRelationalView.get(ligne).get(colonne), local);
                 local = local.get(aRelationalView.get(ligne).get(colonne));
             }
@@ -210,7 +205,7 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * L'enfant n'est ajouté que si aucun enfant n'a le même nom
+     * Adding a child if no other child has the same name.
      */
     @Override
     public void put(String childName) {
@@ -259,12 +254,12 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * Ajoute un niveau à tous les fils et à ceci
+     * Add a level to every children.
      *
      * @param aName
      */
     private void addLevelDescending(String aName) {
-        // Le niveau parent a un seul niveau : ce niveau est aName
+        // The parent level has only one level, aName.
         if (this.parent != null && this.parent.levelOrder.size() == 1) {
             this.levelName = aName;
         }
@@ -278,7 +273,7 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * Ajouter un niveau : je suppose qu'un niveau n'est ajouté que sur un arbre équilibré
+     * Adding a level ; we suppose here that we only add to a balanced tree.
      *
      * @param aName
      */
@@ -305,7 +300,7 @@ public class HierarchicalView implements ITree<String, String> {
 
     /**
      * @param generation
-     * @return le parent de la {@code generation}-ième génération
+     * @return the parent of the nth {@code generation}
      */
     public HierarchicalView getAncestor(int generation) {
         return generation < 0 ? null : //
@@ -315,7 +310,7 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * Récupère le premier enfant de cette hiérarchie
+     * Grab the first child of this hierarchy.
      *
      * @return
      */
@@ -343,7 +338,7 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     /**
-     * Renvoie vrai si cette hiérarchie contient le chemin {@code orderedChildren[0] -> ... -> orderedChildren[n-1]}
+     * Return true only if the path {@code orderedChildren[0] -> ... -> orderedChildren[n-1]} exists in this hierarchy.
      *
      * @param orderedChildren
      * @return

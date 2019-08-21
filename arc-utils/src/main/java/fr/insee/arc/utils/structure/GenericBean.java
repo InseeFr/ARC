@@ -3,6 +3,7 @@ package fr.insee.arc.utils.structure;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// TODO add documentation of the purpose of this class
 public class GenericBean {
 
 	public ArrayList<String> headers;
@@ -37,7 +38,10 @@ public class GenericBean {
 	}
 
 	/**
-	 * @return les index des entetes sous forme de hashmap(entete,type)
+	 * Transform the headers ArrayList to a HashMap containing the index
+	 * of headers (key: header, value: index)
+	 *
+	 * @return the resulting HashMap
 	 */
 	public HashMap<String, Integer> mapIndex() {
 		HashMap<String, Integer> r = new HashMap<String, Integer>();
@@ -48,7 +52,9 @@ public class GenericBean {
 	}
 
 	/**
-	 * @return le type des entetes sous forme de hashmap(entete,type)
+	 * Produce a HashMap containing headers and their relative types (header, type)
+	 *
+	 * @return the HashMap
 	 */
 	public HashMap<String, String> mapTypes() {
 		HashMap<String, String> r = new HashMap<String, String>();
@@ -60,8 +66,9 @@ public class GenericBean {
 	}
 
 	/**
-	 * @return le contenu (la liste) relatif à l'entete sous forme de
-	 *         hashmap(entete,contenu)
+	 * Produce a HashMap containing headers and their relative content (header, content)
+	 *
+	 * @return the HashMap
 	 */
 	public HashMap<String, ArrayList<String>> mapContent() {
 		if (this.content == null || this.content.size() == 0) {
