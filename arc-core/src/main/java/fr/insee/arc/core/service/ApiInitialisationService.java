@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.DbConstant;
+import fr.insee.arc.core.model.TraitementPhaseEntity;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TraitementTableExecution;
@@ -1164,6 +1165,10 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 			    .toUpperCase();
 		    String etat = ManipString.substringAfterLast(nomTable, "_").toUpperCase();
 
+            // TODO : add a flag to know if phase output tables are inherited tables or not
+            if (!nomTable.contains(TypeTraitementPhase.FORMAT_TO_MODEL.toString().toLowerCase())){
+            	
+		    
 		    // temporary table to store inherit table already checked
  			UtilitaireDao.get("arc").executeImmediate(connexion, "DROP TABLE IF EXISTS TMP_INHERITED_TABLES_TO_CHECK; CREATE TEMPORARY TABLE TMP_INHERITED_TABLES_TO_CHECK (tablename text);" );
 		    
@@ -1217,7 +1222,13 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
                 }
             } while (!m.isEmpty());
    		 	
-		    
+            }
+            else
+            {
+            	UtilitaireDao.get("arc").executeBlock(this.connection, deleteTableByPilotage(nomTable, nomTable, this.getTablePil(), phase, etat, ""));
+                UtilitaireDao.get("arc").executeImmediate(connexion,
+                        "set default_statistics_target=1; vacuum analyze " + nomTable + "(id_source); set default_statistics_target=100;");
+            }
 		    
 		}
 
@@ -1332,23 +1343,46 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	}
     }
 
+    
     /**
-     * Créer le fichier dummy qui sert à déclencher l'initialisation suite à une
-     * mise en production
-     *
-     * @param todo
-     *
-     *            todo = true : on crée le fichier todo = false : on efface le
-     *            fichier
-     *
-     *            Ne sert à priori plus car le batch ne se lance plus sous condition
-     *            de présence de fichier mais se lance toutes les 5 minutes
-     *            quoiqu'il arrive Garder commentée cette méthode si jamais la
-     *            production exige que le scan se fasse sous condition de présence
-     *            de fichier !!
+     * Remove from table the records that are lined to a file which is not more found in the pilotage table
+     * Be careful when modifying this query because of the high load
      */
-    public static void setDummyFilePROD(Boolean todo) {
+    public static String deleteTableByPilotage(String nomTable, String nomTableSource, String tablePil, String phase, String etat, String extraCond) {
+        StringBuilder requete = new StringBuilder();
+
+        String tableDestroy = FormatSQL.temporaryTableName(nomTable, "D");
+        requete.append("\n SET enable_nestloop=off; ");
+        
+        requete.append("\n DROP TABLE IF EXISTS " + tableDestroy + " CASCADE; ");
+        requete.append("\n DROP TABLE IF EXISTS TMP_SOURCE_SELECTED CASCADE; ");
+        
+        // PERF NOTICE : id_source file id are materialized in a temporary table 
+        // in order to make DB able to proceed with a semi-hash join
+        requete.append("\n CREATE TEMPORARY TABLE TMP_SOURCE_SELECTED AS ");
+        requete.append("\n SELECT id_source from " + tablePil + " ");
+        requete.append("\n WHERE phase_traitement='" + phase + "' ");
+        requete.append("\n AND '" + etat + "'=ANY(etat_traitement) ");
+        requete.append("\n "+extraCond+" ");
+        requete.append("\n ; ");
+        
+        requete.append("\n ANALYZE TMP_SOURCE_SELECTED; ");
+        
+        requete.append("\n CREATE  TABLE " + tableDestroy + " "+FormatSQL.WITH_NO_VACUUM+" ");
+        requete.append("\n AS select * from " + nomTableSource + " a ");
+        requete.append("\n WHERE exists (select 1 from TMP_SOURCE_SELECTED b WHERE a.id_source=b.id_source) ");
+        requete.append("\n ; ");
+
+        requete.append("\n DROP TABLE IF EXISTS " + nomTable + " CASCADE; ");
+        requete.append("\n ALTER TABLE " + tableDestroy + " rename to " + ManipString.substringAfterFirst(nomTable, ".") + ";\n");
+        
+        requete.append("\n DROP TABLE IF EXISTS TMP_SOURCE_SELECTED; ");
+
+        requete.append("\n SET enable_nestloop=on; ");
+        
+        return requete.toString();
 
     }
+
 
 }
