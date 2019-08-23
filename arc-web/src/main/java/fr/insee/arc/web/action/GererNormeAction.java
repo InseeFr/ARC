@@ -375,7 +375,6 @@ public class GererNormeAction extends ArcAction {
 	    for (int i = 0; i < selection.get("etat").size(); i++) {
 		String etat = selection.get("etat").get(i);
 		if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-		    ApiInitialisationService.setDummyFilePROD(true);
 		    NormManagementUtilitary.sendRuleSetToProduction(this.viewRulesSet,
 			    getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_BATCH));
 		}

@@ -326,7 +326,6 @@ public class ARCLauncher {
 								message("Initialisation : " + (int) initializer.report.nbLines + " e : "
 										+ initializer.report.duree + " ms");
 							}
-							ApiInitialisationService.setDummyFilePROD(false);
 
 							UtilitaireDao.get("arc").executeRequest(null,
 									"update arc.pilotage_batch set last_init=to_char(to_date(last_init,'yyyy-mm-dd')+interval '"
