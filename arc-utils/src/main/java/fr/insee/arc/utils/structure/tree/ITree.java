@@ -1,16 +1,17 @@
 package fr.insee.arc.utils.structure.tree;
 
+// TODO add documentation
 public interface ITree<K, V> {
 
     /**
-     * Ajoute un enfant à ce noeud
-     * 
+     * Add a child to this node.
+     *
      * @param childName
      */
     public void put(K childName);
 
     /**
-     * Récupère l'arbre dont {@code key} est la racine
+     * Get the tree of wich {@code key} is the root.
      * 
      * @param key
      * @return
