@@ -135,7 +135,7 @@
 												<th style="display: none;"></th>
 											</s:if>
 											<s:else>
-												<th></th>
+												<th style="text-align:center; font-weight:bold;font-size:1.5em;">?</th>
 											</s:else>
 										</s:if>
 										<s:iterator
@@ -281,9 +281,9 @@
 									</s:else>
 								</s:else>
 								<s:if test="#ligneAdd.equals('true')">
-									<tr style="background-color: #ffffee;">
+									<tr style="background-color: #fffaee;">
 										<s:if test="#checkbox.equals('true')">
-											<td></td>
+											<td style="text-align:center; font-weight:bold;font-size:1.5em;">+</td>
 										</s:if>
 										<s:iterator
 											value="%{#view.databaseColumnsLabel}"
@@ -414,7 +414,7 @@
 					<s:if test="#btnAdd.equals('true')">
 						<button
 							id="<s:property value="#view.sessionName"/>.add"
-							class="btn btn-success btn-sm "
+							class="btn btn-primary btn-sm "
 							type="submit"
 							doAction="add<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeAdd}"
@@ -424,7 +424,7 @@
 					<s:if test="#btnUpdate.equals('true')">
 						<button
 							id="<s:property value="#view.sessionName"/>.update"
-							class="btn btn-warning btn-sm "
+							class="btn btn-primary btn-sm "
 							type="submit"
 							doAction="update<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeUpdate}"
@@ -434,7 +434,7 @@
 					<s:if test="#btnDelete.equals('true')">
 						<button
 							id="<s:property value="#view.sessionName"/>.delete"
-							class="btn btn-danger btn-sm "
+							class="btn btn-primary btn-sm "
 							type="submit"
 							doAction="delete<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeDelete}"
@@ -454,22 +454,18 @@
 						</s:iterator>
 					</s:if>
 				</div>
-			</div>
-		</div>
+				
+				<s:if test='1<#view.nbPages'>
+				<div
+					class="btn-group btn-group-sm"
+					style="float:right;"
+					role="group"
+					>
 
-		<div class="row mt-3">
-			<s:if test='0!=#view.nbPages'>
-				<br />
-				<div class='col-md'>
-					<div class="row">
-
-
-						<div class="col-md-5">
-
-							<table>
+							<table style="width: 10em;">
 								<tr>
-									<td>Page :</td>
-									<td style="background-color: #ffffff;"><s:textarea
+									<td style="width: 4em;">Page :</td>
+									<td style="background-color: #ffffff; width: 4em;"><s:textarea
 											name="%{#view.sessionName}.idPage"
 											value="%{#view.idPage}"
 											theme="simple"
@@ -477,48 +473,40 @@
 									<td>/</td>
 									<td><s:property value="%{#view.nbPages}" /></td>
 							</tr>
-							</table>
-						</div>
-						<div class="col-md-7">
-							<!-- 						</div> -->
-							<!-- 						<div class="col-md-8"> -->
-							<div
-								class="btn-group btn-group-sm"
-								role="group"
-							>
+					</table>
+
 								<button
 									class="btn btn-primary btn-sm"
 									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-999999999);"
 								><span
 									class="fa fa-fast-backward"
 									aria-hidden="true"
-								/></button>
+								></span></button>
 								<button
 									class="btn btn-primary btn-sm"
 									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-1);"
 								><span
 									class="fa fa-step-backward"
 									aria-hidden="true"
-								/></button>
+								></span></button>
 								<button
 									class="btn btn-primary btn-sm"
 									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),1);"
 								><span
 									class="fa fa-step-forward"
 									aria-hidden="true"
-								/></button>
+								></span></button>
 								<button
 									class="btn btn-primary btn-sm"
 									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),999999999);"
 								><span
 									class="fa fa-fast-forward"
 									aria-hidden="true"
-								/></button>
-							</div>
-						</div>
+								></span></button>
 					</div>
+					</s:if>
 				</div>
-			</s:if>
 		</div>
+		<br>
 	</s:if>
 </div>

@@ -101,7 +101,7 @@
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewClient" />
 		<property name="title" value="Applications clientes pour cette norme" />
-		<property name="paginationSize" value="15" />
+		<property name="paginationSize" value="5" />
 	</bean>
 	<bean id="viewFamilleNorme" class="fr.insee.arc.web.model.ViewFamilleNorme"
 		scope="session">
@@ -109,7 +109,7 @@
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewFamilleNorme" />
 		<property name="title" value="Liste des familles de normes" />
-		<property name="paginationSize" value="15" />
+		<property name="paginationSize" value="5" />
 	</bean>
 	<bean id="viewNorme" class="fr.insee.arc.web.model.ViewNorme"
 		scope="session">
@@ -190,7 +190,7 @@
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewTableMetier" />
 		<property name="title" value="Tables métier" />
-		<property name="paginationSize" value="10" />
+		<property name="paginationSize" value="5" />
 	</bean>
 	<bean id="viewVariableMetier" class="fr.insee.arc.web.model.ViewVariableMetier"
 		scope="session">

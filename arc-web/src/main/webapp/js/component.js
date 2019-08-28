@@ -228,10 +228,11 @@ $(document).on('ready readyAgain',function() {
 	if (configJS.indexOf("Render:TextareaEllipsis;")>-1)
 	{
 		$('td textarea, th textarea').each(function(){
+			$(this).css('height', '1px').css('min-height', 28);
 			$(this).css('height', '1px').css('height', this.scrollHeight);
-
 		});
 
+		
 
 		$('td textarea, th textarea').each(function()
 				{
@@ -562,7 +563,7 @@ function updateSee(view)
 function drawEllipsis(t)
 {
 	setTimeout(function(){
-		if (t.scrollHeight > t.clientHeight)
+		if (t.scrollHeight-5 > t.clientHeight)
 		{
 			$(t).css("background-image", 'url("./img/ellipsis.png")');
 		}
