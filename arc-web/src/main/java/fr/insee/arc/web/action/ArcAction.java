@@ -36,7 +36,7 @@ import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -57,7 +57,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class ArcAction extends Authentifier implements IConstanteCaractere {
+public abstract class ArcAction extends Authentifier implements ICharacterConstant {
     private static final Logger LOGGER = Logger.getLogger(ArcAction.class);
     public static final String NONE = "none";
     public static final String POOLNAME = "arc";

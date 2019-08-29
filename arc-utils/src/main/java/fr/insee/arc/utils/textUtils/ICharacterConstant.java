@@ -1,9 +1,9 @@
 package fr.insee.arc.utils.textUtils;
 
 /**
- * Conteneur pour toutes les constantes alphabétiques
+ * Character constants
  */
-public interface IConstanteCaractere {
+public interface ICharacterConstant {
 
 //TODO UPPER
     // Marker

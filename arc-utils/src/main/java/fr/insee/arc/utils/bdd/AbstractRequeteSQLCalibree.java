@@ -4,14 +4,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 
 /**
  *
  * Buffer à requêtes SQL.
  *
  */
-public abstract class AbstractRequeteSQLCalibree implements IConstanteCaractere
+public abstract class AbstractRequeteSQLCalibree implements ICharacterConstant
 {
     public static final Integer tailleParDefaut = new Integer(256 * 1024);
     public static final String regexTokenArg = "\\{\\}";

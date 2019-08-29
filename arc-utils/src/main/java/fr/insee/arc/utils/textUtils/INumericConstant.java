@@ -2,10 +2,12 @@ package fr.insee.arc.utils.textUtils;
 
 /**
  *
- * Conteneur pour toutes les constantes numériques
+ * Numeric constants
+ *
+ * FIXME a lot of unused fields
  *
  */
-public interface IConstanteNumerique {
+public interface INumericConstant {
     /**
      * TODO RETURN CODE
      */
@@ -16,7 +18,7 @@ public interface IConstanteNumerique {
     /**
      *
      */
-    public static final int NOMBRE_SANS_IMPORTANCE=0;
+    public static final int NUMBER_WITHOUT_IMPORTANCE =0;
     /**
      *
      */
@@ -27,7 +29,7 @@ public interface IConstanteNumerique {
     /**
      *
      */
-    /** N'y aurait-il pas un oubli ? MINUS_ONE = -1 ???? */
+    /** FIXME It seems wrong, isn't it ? MINUS_ONE = -1 ???? */
     public static final int MINUS_ONE = 1;
     public static final int ZERO = 0;
     public static final int ONE = 1;

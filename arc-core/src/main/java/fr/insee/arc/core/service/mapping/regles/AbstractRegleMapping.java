@@ -5,15 +5,15 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc.core.service.mapping.VariableMapping;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.INumericConstant;
 
 /**
  *
  * Abstraction pour les règles de mapping. Pour obtenir l'expression SQL d'une règle : {@link #deriver()}.
  *
  */
-public abstract class AbstractRegleMapping implements IConstanteCaractere, IConstanteNumerique {
+public abstract class AbstractRegleMapping implements ICharacterConstant, INumericConstant {
 
     protected static final Logger LOGGER = Logger.getLogger(AbstractRegleMapping.class);
 

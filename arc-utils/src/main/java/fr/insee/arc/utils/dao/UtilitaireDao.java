@@ -57,8 +57,8 @@ import fr.insee.arc.utils.files.FileUtils;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.INumericConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
@@ -71,7 +71,7 @@ import fr.insee.arc.utils.utils.SQLExecutor;
  *
  */
 @Component
-public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
+public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 
     private static final Logger LOGGER = Logger.getLogger(UtilitaireDao.class);
     

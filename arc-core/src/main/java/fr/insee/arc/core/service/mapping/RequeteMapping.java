@@ -20,8 +20,8 @@ import fr.insee.arc.core.service.AbstractPhaseService;
 import fr.insee.arc.core.service.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.INumericConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -39,7 +39,7 @@ import fr.insee.arc.utils.utils.ManipString;
  * mapping s'obtient par l'invocation de la méthode {@link #getRequete(String)}. La première invocation calcule la requête, les suivantes la
  * restituent telle que calculée la première fois.
  */
-public class RequeteMapping implements  IConstanteCaractere, IConstanteNumerique {
+public class RequeteMapping implements ICharacterConstant, INumericConstant {
     public static final String varIdSource = "id_source";
     public static final String tokenIdSource = "{:idSource}";
     public static final String tokenId = "{:id}";

@@ -11,8 +11,8 @@ import java.util.TreeSet;
 import fr.insee.arc.core.service.AbstractPhaseService;
 import fr.insee.arc.core.service.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.INumericConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -24,7 +24,7 @@ import fr.insee.arc.utils.utils.ManipString;
  *
  *
  */
-public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
+public class TableMapping implements ICharacterConstant, INumericConstant {
 
     private static final String encours = "encours";
 
