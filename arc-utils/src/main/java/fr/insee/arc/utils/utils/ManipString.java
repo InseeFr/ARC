@@ -18,9 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 
-public class ManipString implements IConstanteCaractere {
+public class ManipString implements ICharacterConstant {
 
     private static final Logger LOGGER = Logger.getLogger(ManipString.class);
     
@@ -379,7 +379,7 @@ public class ManipString implements IConstanteCaractere {
                 else if (Character.toString(ch).equals("Ã€")) {
                     sb.append("A");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("A");
                     space = false;
                 } else if (Character.toString(ch).equals("Ã‚")) {
@@ -415,16 +415,16 @@ public class ManipString implements IConstanteCaractere {
                 } else if (Character.toString(ch).equals("ÃŒ")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("I");
                     space = false;
                 } else if (Character.toString(ch).equals("ÃŽ")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("D");
                     space = false;
                 } else if (Character.toString(ch).equals("Ã‘")) {
@@ -460,7 +460,7 @@ public class ManipString implements IConstanteCaractere {
                 } else if (Character.toString(ch).equals("Ãœ")) {
                     sb.append("U");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("Y");
                     space = false;
                 }
@@ -512,7 +512,7 @@ public class ManipString implements IConstanteCaractere {
                 else if (Character.toString(ch).equals("Ã€")) {
                     sb.append("A");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("A");
                     space = false;
                 } else if (Character.toString(ch).equals("Ã‚")) {
@@ -548,16 +548,16 @@ public class ManipString implements IConstanteCaractere {
                 } else if (Character.toString(ch).equals("ÃŒ")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("I");
                     space = false;
                 } else if (Character.toString(ch).equals("ÃŽ")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("D");
                     space = false;
                 } else if (Character.toString(ch).equals("Ã‘")) {
@@ -593,7 +593,7 @@ public class ManipString implements IConstanteCaractere {
                 } else if (Character.toString(ch).equals("Ãœ")) {
                     sb.append("U");
                     space = false;
-                } else if (Character.toString(ch).equals("Ã?")) {
+                } else if (Character.toString(ch).equals("ï¿½?")) {
                     sb.append("Y");
                     space = false;
                 }

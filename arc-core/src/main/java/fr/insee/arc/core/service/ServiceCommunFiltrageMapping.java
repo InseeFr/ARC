@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 public class ServiceCommunFiltrageMapping {
@@ -53,7 +53,7 @@ public class ServiceCommunFiltrageMapping {
             String expressionRegleInterprete = aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle
                     .getLevel(aNomColonneRegle).get(i).getLocalRoot();
             if (expressionRegleInterprete==null){
-            	expressionRegleInterprete=IConstanteCaractere.EMPTY;
+            	expressionRegleInterprete= ICharacterConstant.EMPTY;
             }
             aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle
                     .getLevel(aNomColonneRegle)

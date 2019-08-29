@@ -10,7 +10,7 @@ import fr.insee.arc.utils.sqlengine.ITable;
 import fr.insee.arc.utils.sqlengine.Naming;
 import fr.insee.arc.utils.sqlengine.ParallelizationSuffix;
 import fr.insee.arc.utils.sqlengine.Tokens;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.textUtils.MapUntokenizer;
 
 /**
@@ -42,7 +42,7 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
                 && (objects.get(Tokens.TOK_SCHEMA).name() != null))
         {
             returned.append(objects.get(Tokens.TOK_SCHEMA).name());
-            returned.append(IConstanteCaractere.DOT);
+            returned.append(ICharacterConstant.DOT);
         }
         List<IToken> liste = Arrays.asList(//
                 objects.get(Tokens.TOK_NOM_PHASE), //
@@ -66,7 +66,7 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
                 && (objects.get(Tokens.TOK_SCHEMA).name() != null))
         {
             returned.append(objects.get(Tokens.TOK_SCHEMA).name());
-            returned.append(IConstanteCaractere.DOT);
+            returned.append(ICharacterConstant.DOT);
         }
         List<IToken> liste = Arrays.asList(//
                 objects.get(Tokens.TOK_ENV), //
@@ -92,7 +92,7 @@ public abstract class SQLTable<T extends IAttribute> implements ITable<T>
                 && (objects.get(Tokens.TOK_SCHEMA).name() != null))
         {
             returned.append(objects.get(Tokens.TOK_SCHEMA).name());
-            returned.append(IConstanteCaractere.DOT);
+            returned.append(ICharacterConstant.DOT);
         }
         List<IToken> liste = Arrays.asList(//
                 objects.get(Tokens.TOK_CAMPAGNE), //

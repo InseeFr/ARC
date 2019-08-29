@@ -36,7 +36,7 @@ import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -947,7 +947,7 @@ public class NormManagementUtilitary {
 
 		    // Importing the file in the database (COPY command)
 		    UtilitaireDao.get("arc").importing(null, nomTableImage, bufferedReader, true, false,
-			    IConstanteCaractere.SEMI_COLON);
+			    ICharacterConstant.SEMI_COLON);
 
 		} catch (Exception ex) {
 		    vObjectToUpdate.setMessage("Error when uploading the file : " + ex.getMessage());
@@ -1007,7 +1007,7 @@ public class NormManagementUtilitary {
 
     private static List<String> getHeaderFromFile(BufferedReader bufferedReader) throws IOException {
 	String listeColonnesAggregees = bufferedReader.readLine();
-	List<String> listeColonnes = Arrays.asList(listeColonnesAggregees.split(IConstanteCaractere.SEMI_COLON));
+	List<String> listeColonnes = Arrays.asList(listeColonnesAggregees.split(ICharacterConstant.SEMI_COLON));
 	LoggerHelper.debug(LOGGER, "Columns list : ", Format.untokenize(listeColonnes, ", "));
 	return listeColonnes;
     }
