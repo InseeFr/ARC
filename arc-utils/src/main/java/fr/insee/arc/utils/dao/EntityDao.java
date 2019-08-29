@@ -8,8 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.INumericConstant;
 
 /**
  *
@@ -17,7 +17,7 @@ import fr.insee.arc.utils.textUtils.IConstanteNumerique;
  *
  * @param <T>
  */
-public abstract class EntityDao<T extends AbstractEntity> implements IConstanteNumerique, IConstanteCaractere {
+public abstract class EntityDao<T extends AbstractEntity> implements INumericConstant, ICharacterConstant {
 
     private List<String> names;
     private List<String> types;

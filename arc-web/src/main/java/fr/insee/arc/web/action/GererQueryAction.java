@@ -13,12 +13,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.web.util.VObject;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererQuery.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class GererQueryAction implements SessionAware, IConstanteCaractere {
+public class GererQueryAction implements SessionAware, ICharacterConstant {
     @Override
     public void setSession(Map<String, Object> session) {
     	this.viewTable.setMessage("");

@@ -24,14 +24,14 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.model.DbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.util.VObject;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererNomenclature.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class GererNomenclatureAction implements SessionAware, IConstanteCaractere {
+public class GererNomenclatureAction implements SessionAware, ICharacterConstant {
 
     private static final String NMCL_ = "nmcl_";
     private static final String NOM_TABLE = "nom_table";

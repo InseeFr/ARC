@@ -5,14 +5,18 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 /**
- * Parcourt une collection d'objets et construit une chaîne de caractère en concaténant la représentation de tous ces objets. Les éléments à
- * fournir sont :<br/>
- * 1. Une fonction qui transforme l'objet en sa représentation (par exemple {@code (t) -> t.toString()}).<br/>
- * 2. Le début de la chaîne de caractère en sortie.<br/>
- * 3. La fin de la chaîne de caractère en sortie.<br/>
- * 4. Le token qui sera inséré entre deux objets concaténés.<br/>
- * Une implémentation par défaut transforme une collection d'objets {@code obj1, obj2, ..., objN} en la concaténation des
- * {@code objI.toString()} séparés par {@code ", "}.
+ *
+ * From a collection of objects, builds a string representation by concatenating them. <br/>
+ *
+ * You must provide to this function:<br/>
+ *
+ * 1. a transformation function (for example {@code (t) -> t.toString()}),<br/>
+ * 2. the first character of the resulting string,
+ * 3. the last character of the resulting string,
+ * 4. the separating character. <br/>
+ *
+ * The default implementation transforms an object collection {@code obj1, obj2, ..., objN} to a string representation
+ * using {@code objI.toString()} with {@code ", "} as a separator.
  *
  * @param <T>
  */

@@ -18,7 +18,7 @@ import fr.insee.arc.core.service.ServiceCommunFiltrageMapping;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.Pair;
@@ -31,7 +31,7 @@ import fr.insee.arc.utils.utils.Pair;
  *
  */
 public class ThreadFiltrageService extends AbstractThreadService
-	implements IConstanteCaractere, IMappingServiceConstanteToken, IRulesUserService {
+	implements ICharacterConstant, IMappingServiceConstanteToken, IRulesUserService {
 
     private static final Logger LOGGER_THREAD = Logger.getLogger(ThreadFiltrageService.class);
 

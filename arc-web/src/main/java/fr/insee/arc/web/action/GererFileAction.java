@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.web.util.VObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +27,7 @@ import lombok.Setter;
 @Results({ @Result(name = "success", location = "/jsp/gererFile.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
 @Getter
 @Setter
-public class GererFileAction implements SessionAware, IConstanteCaractere {
+public class GererFileAction implements SessionAware, ICharacterConstant {
     @Override
     public void setSession(Map<String, Object> session) {
         this.viewDirIn.setMessage("");

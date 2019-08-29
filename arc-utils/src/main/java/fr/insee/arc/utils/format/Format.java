@@ -16,9 +16,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 
-public class Format implements IConstanteCaractere {
+public class Format implements ICharacterConstant {
 
     private static final Logger LOGGER = Logger.getLogger(Format.class);
     

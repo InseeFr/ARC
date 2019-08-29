@@ -4,10 +4,9 @@ import java.util.Collection;
 
 /**
  *
- * Classe utilitaire capable de concaténer des objets et de stocker le résultat de cette concaténation dans un
- * {@link String}.
+ * Functional interface describing the concatenation of {@link Collection} items into a {@link String}.
  *
- * @param <T>
+ * @param <T> the collection type
  */
 
 @FunctionalInterface

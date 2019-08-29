@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
 
 public class PostgreSQLTypes
 {
@@ -37,11 +37,11 @@ public class PostgreSQLTypes
     {
         HOW_TO_PRINT.put(TEXT,
                 (t) -> (t.equalsIgnoreCase(VALUE_NULL) ? VALUE_NULL
-                        : IConstanteCaractere.QUOTE + t + IConstanteCaractere.QUOTE) + OPERATOR_CAST
+                        : ICharacterConstant.QUOTE + t + ICharacterConstant.QUOTE) + OPERATOR_CAST
                         + TEXT.name().name());
         HOW_TO_PRINT.put(DATE,
                 (t) -> (t.equalsIgnoreCase(VALUE_NULL) ? VALUE_NULL
-                        : IConstanteCaractere.QUOTE + t + IConstanteCaractere.QUOTE) + OPERATOR_CAST
+                        : ICharacterConstant.QUOTE + t + ICharacterConstant.QUOTE) + OPERATOR_CAST
                         + DATE.name().name());
         HOW_TO_PRINT.put(BIGINT, (t) -> t + OPERATOR_CAST + BIGINT.name().name());
     }

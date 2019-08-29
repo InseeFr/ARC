@@ -4,8 +4,7 @@ import java.util.List;
 
 /**
  *
- * Concatène les objets de deux listes de même taille et renvoie le résultat de cette concaténation sous forme de
- * {@code String}
+ * Concatenates list items from two equally sized lists, returns a {@code String} in result.
  *
  * @param <T>
  * @param <U>
@@ -19,10 +18,10 @@ public interface BiUntokenizer<T, U>
     /**
      *
      * @param lefty
-     *            la première liste des éléments à concaténer
+     *            the first list
      * @param righty
-     *            la seconde liste des éléments à concaténer
-     * @return la concaténation des élements de la liste, soit pris de façon séquentielle, soit parallèle
+     *            the second list
+     * @return list elements concatenated, either sequencially or in parallel
      */
     String untokenize(List<? extends T> lefty, List<? extends U> righty);
 }

@@ -17,11 +17,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.INumericConstant;
 import fr.insee.arc.utils.textUtils.SequentialUntokenizer;
 
-public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
+public class FormatSQL implements ICharacterConstant, INumericConstant {
 
     private static final String END_COMMENTARY = "*/";
     private static final String BEGIN_COMMENTARY = "/*";

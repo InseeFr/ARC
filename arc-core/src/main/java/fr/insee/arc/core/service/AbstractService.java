@@ -23,7 +23,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.queryhandler.BatchQueryHandler;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.sqlengine.Namings;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.textUtils.INumericConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -33,7 +33,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class AbstractService implements IApiService, IConstanteNumerique {
+public abstract class AbstractService implements IApiService, INumericConstant {
 
     public static final String IS_DEV = "fr.insee.arc.environnement.is.dev";
     protected static final Logger LOGGER = Logger.getLogger(AbstractService.class);
