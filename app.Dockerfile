@@ -1,8 +1,21 @@
 FROM maven:3.6-jdk-8-alpine AS build
 
+# Proxies
 ARG HTTP_PROXY
 ARG HTTPS_PROXY
+
+# path of settings.xml 
 ARG MAVEN_SETTINGS
+
+# DB properties
+ARG DATABASE_URL
+ARG DATABASE_USER
+ARG DATABASE_PASSWORD
+
+# Log properties
+ARG LOG_PATH=logs/log-arc.log
+ARG LOG_LEVEL=ERROR
+ARG LOG_SETTINGS=fr/insee/config/log4j.xml
 
 COPY . /usr/src/app/
 
