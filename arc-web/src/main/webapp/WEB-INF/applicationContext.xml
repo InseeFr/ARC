@@ -55,6 +55,7 @@
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 		<property name="rootDirectory" value="${fr.insee.arc.repertoire.root}"></property>
+		<property name="lang" value="${fr.insee.arc.lang:FR}"></property>
 	</bean>
 
 
@@ -190,7 +191,7 @@
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewTableMetier" />
 		<property name="title" value="Tables métier" />
-		<property name="paginationSize" value="5" />
+		<property name="paginationSize" value="10" />
 	</bean>
 	<bean id="viewVariableMetier" class="fr.insee.arc.web.model.ViewVariableMetier"
 		scope="session">

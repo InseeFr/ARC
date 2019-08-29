@@ -53,7 +53,8 @@ public class PropertiesHandler {
     private String registrationDirectory;
     private String loadingDirectory;
     private String storageDirectory;
-
+    /* lang */
+    private String lang;
 
     public void initializeLog() {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
@@ -382,4 +383,15 @@ public class PropertiesHandler {
         this.storageDirectory = storageDirectory;
     }
 
+
+	public String getLang() {
+		return lang;
+	}
+
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
+
+    
+    
 }

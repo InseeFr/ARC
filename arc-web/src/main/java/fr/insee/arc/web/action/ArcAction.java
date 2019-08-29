@@ -111,6 +111,12 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
     protected String userId;
 
     /**
+     * Language for IHM
+     */
+    public String lang;
+
+    
+    /**
      * State of the database
      */
     private boolean isDataBaseOK;
@@ -602,6 +608,10 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
    public Map<String, String> getEnvMap() {
 	return envMap;
    }
+
+	public String getLang() {
+		return properties.getLang();
+	}
 
 
 }

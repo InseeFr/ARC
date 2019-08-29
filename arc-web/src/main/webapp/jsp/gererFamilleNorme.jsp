@@ -70,7 +70,7 @@
 		>
 			<div class="row">
 				<div
-					class="col-md-3"
+					class="col-md-4"
 					class="aside"
 				>
 					<div class="row">
@@ -142,7 +142,7 @@
 				</div>
 
 				<div
-					class="col-md-9"
+					class="col-md-8"
 					class="central"
 				>
 					<div class="row">

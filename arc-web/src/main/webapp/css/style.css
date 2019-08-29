@@ -11,12 +11,24 @@
 
 .btn-group-sm>.btn, .btn-sm {
     padding: .25rem .5rem;
-    font-size: .8rem;
+/*     font-size: .8rem; */
     line-height: 1.5;
     border-radius: .2rem;
 }
 
+li.nav-item {
+    color: #000000;
+}
 
+li.nav-item.active {
+    border-bottom: 1px solid #000000;
+}
+
+.navbar-light {
+    font-weight: 500;
+}
+
+/* End of bootstap revamp */
 
 .collapser {
 	cursor: pointer;
