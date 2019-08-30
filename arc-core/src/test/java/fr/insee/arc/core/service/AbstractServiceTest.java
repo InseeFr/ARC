@@ -22,6 +22,7 @@ import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.dataset.xml.FlatXmlProducer;
 import org.dbunit.operation.DatabaseOperation;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.xml.sax.InputSource;
@@ -35,6 +36,7 @@ import fr.insee.arc.core.service.AbstractService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 
+@Ignore("Need a proper management of the test DB")
 public class AbstractServiceTest {
     private static final String XML_FILE_PILOTAGE_TABLE = "src/test/resources/dbUnit/pilotage_fichier.xml";
     private static final String XML_FILE_NORME_TABLE = "src/test/resources/dbUnit/norme.xml";
