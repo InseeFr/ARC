@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import fr.insee.arc.core.model.PilotageEntity;
@@ -21,6 +22,7 @@ import fr.insee.arc.core.service.thread.ThreadIdentifyService;
 import fr.insee.arc.core.utils.CompareInputStream;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 
+@Ignore("Need a proper management of the test DB")
 public class ThreadIdentifyServiceTest {
 
     @Test
