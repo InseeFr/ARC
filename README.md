@@ -1,4 +1,8 @@
-# ARC - Acquire - Register - Control : Workbench for acquisition and normalization of data sets
+# ARC - Acquire - Register - Control 
+## Workbench for acquisition and normalization of data sets
+[![Build Status](https://travis-ci.org/InseeFr/ARC.svg?branch=master)](https://travis-ci.org/InseeFr/ARC)
+
+![GitHub](https://img.shields.io/github/license/inseefr/arc)
 
 - [General présentation of the application](#General-présentation-of-the-application)
 - [Running the application](#Running-the-application)
