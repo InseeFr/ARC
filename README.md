@@ -1,4 +1,8 @@
-# ARC - Acquire - Register - Control : Workbench for acquisition and normalization of data sets
+# ARC - Acquire - Register - Control 
+## Workbench for acquisition and normalization of data sets
+[![Build Status](https://travis-ci.org/InseeFr/ARC.svg?branch=master)](https://travis-ci.org/InseeFr/ARC)
+
+![GitHub](https://img.shields.io/github/license/inseefr/arc)
 
 General présentation of the application
 The ARC (from the French: Acquisition - Réception - Contrôles) software allows receiving (administrative) data supplied by the providers (several formats are supported, particularly XML), to control the compliance of the received files, and to transform administrative data to elementary statistical data. The software enables the statistician to define and apply controls and mappings, to test them in a sandbox environment (linked to the software), and to put them into production without frequently calling on a developer.
