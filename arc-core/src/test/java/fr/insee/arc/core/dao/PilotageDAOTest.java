@@ -16,6 +16,7 @@ import org.dbunit.operation.DatabaseOperation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.xml.sax.InputSource;
 
 import fr.insee.arc.core.dbUnitExt.CustomPostgresqlDataTypeFactory;
@@ -28,6 +29,7 @@ import fr.insee.arc.utils.queryhandler.BatchQueryHandler;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler.AbstractQueryHandlerException;
 import fr.insee.arc.utils.utils.FormatSQL;
 
+@Ignore("Need a proper management of the test DB")
 public class PilotageDAOTest {
     private static final String ARC_TEST = "arc_test";
     private static final String ARC_BAS8 = "arc_bas8";

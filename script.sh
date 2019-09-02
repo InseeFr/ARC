@@ -6,15 +6,15 @@ MAVEN_CONF=;
 
 echo $VAR_HTTP_PROXY;
 
-# Check if var is null
+# Check if VAR_HTTP_PROXY is null
 if [ -z $VAR_HTTP_PROXY ] && [ ! -z $MAVEN_SETTINGS ]; then
 echo "no http proxy";
 else 
 echo "http proxy set";
 Dhttp_proxyHost=$(cut -d':' -f2 <<<$VAR_HTTP_PROXY);
 Dhttp_proxyPort=$(cut -d':' -f3 <<<$VAR_HTTP_PROXY);
-MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyPort=${Dhttp_proxyHost%/*}";
-MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyHost=${Dhttp_proxyPort#//}";
+MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyPort=${Dhttp_proxyPort%/*}";
+MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyHost=${Dhttp_proxyHost#//}";
 fi
 
 
@@ -22,7 +22,7 @@ VAR_HTTPS_PROXY=$HTTPS_PROXY
 
 echo $VAR_HTTPS_PROXY;
 
-# Check if var is null
+# Check if VAR_HTTPS_PROXY is null
 if [ -z $VAR_HTTPS_PROXY ] && [ ! -z $MAVEN_SETTINGS ]; then
 echo "no https proxy";
 else 
@@ -38,6 +38,6 @@ echo "maven settings.xml set to $MAVEN_SETTINGS";
 MAVEN_CONF="-s usr/src/app/$MAVEN_SETTINGS";
 fi
 
-echo "mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF;"
+echo "mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.logPath=$LOG_PATH -Denv.logSettings=$LOG_SETTINGS -Denv.logLevel=$LOG_LEVEL -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD";
 
-mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF;
+mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.logPath=$LOG_PATH -Denv.logSettings=$LOG_SETTINGS -Denv.logLevel=$LOG_LEVEL -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD;

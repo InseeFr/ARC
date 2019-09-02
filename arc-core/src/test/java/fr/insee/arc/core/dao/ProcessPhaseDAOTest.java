@@ -13,6 +13,7 @@ import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.dataset.xml.FlatXmlProducer;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.InputSource;
 
@@ -25,6 +26,7 @@ import fr.insee.arc.utils.queryhandler.BatchQueryHandler;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler.AbstractQueryHandlerException;
 import fr.insee.arc.utils.utils.FormatSQL;
 
+@Ignore("Need a proper management of the test DB")
 public class ProcessPhaseDAOTest {
 
     private static final String ARC_TEST = "arc_test";
