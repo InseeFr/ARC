@@ -55,7 +55,6 @@
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 		<property name="rootDirectory" value="${fr.insee.arc.repertoire.root}"></property>
-		<property name="lang" value="${fr.insee.arc.lang:FR}"></property>
 	</bean>
 
 
