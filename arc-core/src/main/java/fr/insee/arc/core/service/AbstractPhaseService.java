@@ -215,14 +215,14 @@ public abstract class AbstractPhaseService extends AbstractService implements IP
 	request.append("\n\t INSERT INTO " + this.bddTable.getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER) + " ");
 	request.append(
 		"(container, id_source, date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape ");
-	if (newPhase.equals(TypeTraitementPhase.STRUCTURIZE_XML.toString())) {
+	if (newPhase.equals(TypeTraitementPhase.STRUCTURIZE.toString())) {
 	    request.append(",jointure");
 	}
 	request.append(") ");
 	request.append("\n\t select container, id_source, date_entree, id_norme, validite, periodicite, '" + newPhase
 		+ "' as phase_traitement, '{" + TraitementState.ENCOURS + "}' as etat_traitement ");
 	request.append(", '" + formatter.format(date) + "', rapport, taux_ko, nb_enr, nb_essais, 1 as etape");
-	if (newPhase.equals(TypeTraitementPhase.STRUCTURIZE_XML.toString())) {
+	if (newPhase.equals(TypeTraitementPhase.STRUCTURIZE.toString())) {
 	    request.append(",jointure ");
 	}
 	request.append("\n\t from mark; ");

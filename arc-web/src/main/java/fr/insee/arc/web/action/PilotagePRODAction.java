@@ -446,8 +446,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.STRUCTURIZE_XML.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.STRUCTURIZE_XML.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TypeTraitementPhase.STRUCTURIZE.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TypeTraitementPhase.STRUCTURIZE.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 
@@ -476,8 +476,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.FORMAT_TO_MODEL.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.FORMAT_TO_MODEL.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TypeTraitementPhase.MAPMODEL.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TypeTraitementPhase.MAPMODEL.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 

@@ -8,10 +8,10 @@ public enum TypeTraitementPhase {
     , REGISTER(1, 1000000)//
     , IDENTIFY(2, 1000000)//
     , LOAD(3, 1000000)//
-    , STRUCTURIZE_XML(4, 1000000)//
+    , STRUCTURIZE(4, 1000000)//
     , CONTROL(5, 1000000)//
     , FILTER(6, 1000000)//
-    , FORMAT_TO_MODEL(7, 1000000);//
+    , MAPMODEL(7, 1000000);//
 
     private TypeTraitementPhase(int anOrdre, int aNbLigneATraiter) {
 	this.order = anOrdre;

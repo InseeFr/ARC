@@ -35,6 +35,12 @@ values
 ;
 EXCEPTION WHEN OTHERS then end; $$;
 
+/* Consistancy update. Phases names should be single token */
+update arc.ihm_paramettrage_ordre_phase set nom_phase='STRUCTURIZE', type_phase='STRUCTURIZE' where nom_phase='STRUCTURIZE_XML';
+update arc.ihm_paramettrage_ordre_phase set nom_phase='MAPMODEL', type_phase='MAPMODEL' where nom_phase='FORMAT_TO_MODEL';
+
+
+
 CREATE TABLE IF NOT EXISTS arc.ext_etat (
   id text,
   val text,

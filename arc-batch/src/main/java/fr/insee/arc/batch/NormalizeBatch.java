@@ -28,7 +28,7 @@ public class NormalizeBatch extends Batch {
 
     @Override
     public void execute() {
-        this.report = ApiServiceFactory.getService(TypeTraitementPhase.STRUCTURIZE_XML.toString(), (String) this.args[0], (String) this.args[1],
+        this.report = ApiServiceFactory.getService(TypeTraitementPhase.STRUCTURIZE.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
 
     }

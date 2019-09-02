@@ -24,11 +24,10 @@ public class ApiServiceFactory {
 	this.map.put(TypeTraitementPhase.REGISTER.toString(), ApiReceptionServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.IDENTIFY.toString(), ApiIdentificationServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.LOAD.toString(), ApiChargementServiceFactory.getInstance());
-	this.map.put(TypeTraitementPhase.STRUCTURIZE_XML.toString(), ApiNormageServiceFactory.getInstance());
+	this.map.put(TypeTraitementPhase.STRUCTURIZE.toString(), ApiNormageServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.CONTROL.toString(), ApiControleServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.FILTER.toString(), ApiFiltrageServiceFactory.getInstance());
-	this.map.put(TypeTraitementPhase.FORMAT_TO_MODEL.toString(), ApiMappingServiceFactory.getInstance());
-//	this.map.put(TraitementPhase.TRANSFORMATION.toString(), ApiTransformationServiceFactory.getInstance());
+	this.map.put(TypeTraitementPhase.MAPMODEL.toString(), ApiMappingServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.DUMMY.toString(), ApiDummyServiceFactory.getInstance());
     }
 

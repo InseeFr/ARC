@@ -440,7 +440,7 @@ public abstract class AbstractThreadService extends AbstractService implements R
 	}
 
 	// Remove of column jointure after STRUCTURIZE_XML, to big and not usefull
-	if (tokenInputPhaseName.equals(TypeTraitementPhase.STRUCTURIZE_XML.toString())) {
+	if (tokenInputPhaseName.equals(TypeTraitementPhase.STRUCTURIZE.toString())) {
 	    query.append("\n \t   , jointure = null ");
 
 	}
