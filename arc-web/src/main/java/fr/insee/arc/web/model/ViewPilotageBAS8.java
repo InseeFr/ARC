@@ -37,9 +37,9 @@ public class ViewPilotageBAS8 extends VObject {
                 put("load_encours", new ColumnRendering(true, "Load RUNNING", "", "text", null, true));
                 put("load_ko", new ColumnRendering(true, "Load KO", "", "text", null, true));
                 put("load_ok", new ColumnRendering(true, "Load OK", "", "text", null, true));
-                put("structurize_xml_encours", new ColumnRendering(true, "Struct. RUNNING", "", "text", null, true));
-                put("structurize_xml_ko", new ColumnRendering(true, "Struct. KO", "", "text", null, true));
-                put("structurize_xml_ok", new ColumnRendering(true, "Struct. OK", "", "text", null, true));
+                put("structure_encours", new ColumnRendering(true, "Struct. RUNNING", "", "text", null, true));
+                put("structure_ko", new ColumnRendering(true, "Struct. KO", "", "text", null, true));
+                put("structure_ok", new ColumnRendering(true, "Struct. OK", "", "text", null, true));
                 put("control_encours", new ColumnRendering(true, "Control RUNNING", "", "text", null, true));
                 put("control_ok$ko", new ColumnRendering(true, "Control OK/KO", "", "text", null, true));
                 put("control_ok", new ColumnRendering(true, "Control OK", "", "text", null, true));
@@ -47,9 +47,9 @@ public class ViewPilotageBAS8 extends VObject {
                 put("filter_ok", new ColumnRendering(true, "Filter OK", "", "text", null, true));
                 put("filter_ko", new ColumnRendering(true, "Filter KO", "", "text", null, true));
                 put("filter_ok$ko", new ColumnRendering(true, "Filtre OK/KO", "", "text", null, true));
-                put("format_to_model_ok", new ColumnRendering(true, "Format OK", "", "text", null, true));
-                put("format_to_model_ko", new ColumnRendering(true, "Format KO", "", "text", null, true));
-                put("format_to_model_ENCOURS", new ColumnRendering(true, "Format RUNNING", "", "text", null, true));
+                put("format_ok", new ColumnRendering(true, "Format OK", "", "text", null, true));
+                put("format_ko", new ColumnRendering(true, "Format KO", "", "text", null, true));
+                put("format_encours", new ColumnRendering(true, "Format RUNNING", "", "text", null, true));
 
 
             }

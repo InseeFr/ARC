@@ -138,12 +138,13 @@ public class VObject implements Serializable {
 
     // Sort magement
     // The list of the column use to sort the table
-    private ArrayList<String> databaseColumnsSort;
+    private ArrayList<String> databaseColumnsSortLabel;
 
-    // Asc or desc order ?
-    private ArrayList<Boolean> databaseSortColumnsOrder;
+    // Asc or desc order
+    private ArrayList<Boolean> databaseColumnsSortOrder;
 
-    private String databaseSortColumns;
+    // the column being clicked by the user to be sort
+    private String databaseColumnSort;
 
     // The selected lines
     private ArrayList<Boolean> selectedLines;
@@ -387,14 +388,14 @@ public class VObject implements Serializable {
 	    this.inSessionVObject = (VObject) session.getAttribute(this.sessionName);
 
 	    if (inSessionVObject != null) {
-		if (StringUtils.isEmpty(this.databaseSortColumns)) {
-		    setHeaderSortDLabel(inSessionVObject.databaseSortColumns);
+		if (StringUtils.isEmpty(this.databaseColumnSort)) {
+		    setHeaderSortDLabel(inSessionVObject.databaseColumnSort);
 		}
-		if (CollectionUtils.isEmpty(this.databaseColumnsSort )) {
-		    setDatabaseColumnsSort(inSessionVObject.databaseColumnsSort);
+		if (CollectionUtils.isEmpty(this.databaseColumnsSortLabel )) {
+		    setDatabaseColumnsSort(inSessionVObject.databaseColumnsSortLabel);
 		}
-		if (CollectionUtils.isEmpty(this.databaseSortColumnsOrder )) {
-		    setDatabaseSortColumnsOrder(inSessionVObject.databaseSortColumnsOrder);
+		if (CollectionUtils.isEmpty(this.databaseColumnsSortOrder )) {
+		    setDatabaseSortColumnsOrder(inSessionVObject.databaseColumnsSortOrder);
 		}
 		if (this.idPage == null) {
 		    setIdPage(inSessionVObject.idPage);
@@ -460,6 +461,7 @@ public class VObject implements Serializable {
 
 	} catch (Exception ex) {
 	    LoggerHelper.error(LOGGER, "initialize()", ex);
+	    ex.printStackTrace();
 	}
 
     }
@@ -590,7 +592,7 @@ public class VObject implements Serializable {
 
 	// do in the gui some column are selected to order the result ?
 	if (!this.noOrder) {
-	    theQueryToRun.append(buildOrderBy(this.databaseColumnsSort, this.databaseSortColumnsOrder));
+	    theQueryToRun.append(buildOrderBy(this.databaseColumnsSortLabel, this.databaseColumnsSortOrder));
 	}
 
 	// pagination if needed
@@ -1492,35 +1494,47 @@ public class VObject implements Serializable {
      */
     public void sort() {
 	LoggerHelper.debugAsComment(LOGGER, "sort()");
+
+	
+	System.out.print("*** SORT ***");
+	
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
 	VObject v0 = (VObject) session.getAttribute(this.sessionName);
-	if (v0.databaseColumnsLabel.indexOf(this.databaseSortColumns) != -1) {
-	    this.databaseColumnsSort = v0.databaseColumnsSort;
-	    this.databaseSortColumnsOrder = v0.databaseSortColumnsOrder;
+	
+	System.out.print(v0.databaseColumnsLabel);
+	System.out.print(this.databaseColumnSort);
+	
+	if (v0.databaseColumnsLabel.indexOf(this.databaseColumnSort) != -1) {
+		
+		System.out.print("***"+this.databaseColumnsSortLabel);
+		System.out.print("***"+this.databaseColumnsSortOrder);
+		
+	    this.databaseColumnsSortLabel = v0.databaseColumnsSortLabel;
+	    this.databaseColumnsSortOrder = v0.databaseColumnsSortOrder;
 	    // on initialize si la liste n'existe pas
-	    if (this.databaseColumnsSort == null) {
-		this.databaseColumnsSort = new ArrayList<String>();
-		this.databaseSortColumnsOrder = new ArrayList<Boolean>();
+	    if (this.databaseColumnsSortLabel == null) {
+		this.databaseColumnsSortLabel = new ArrayList<String>();
+		this.databaseColumnsSortOrder = new ArrayList<Boolean>();
 	    }
-	    int pos = this.databaseColumnsSort.indexOf(this.databaseSortColumns);
+	    int pos = this.databaseColumnsSortLabel.indexOf(this.databaseColumnSort);
 	    // si le champ a sort est en premiere position, on va inverser le
 	    // sens de l'order by
 	    if (pos == 0) {
-		this.databaseSortColumnsOrder.set(0, !this.databaseSortColumnsOrder.get(0));
+		this.databaseColumnsSortOrder.set(0, !this.databaseColumnsSortOrder.get(0));
 	    }
 	    // si le champ est inconnu, on le met en premiere position avec un
 	    // sens asc
 	    else if (pos == -1) {
-		this.databaseColumnsSort.add(0, this.databaseSortColumns);
-		this.databaseSortColumnsOrder.add(0, true);
+		this.databaseColumnsSortLabel.add(0, this.databaseColumnSort);
+		this.databaseColumnsSortOrder.add(0, true);
 	    }
 	    // sinon on l'enleve de la liste existante et on le remet en
 	    // premiere position avec un sens inverse a celui d'avant
 	    else {
-		this.databaseColumnsSort.remove(pos);
-		this.databaseSortColumnsOrder.remove(pos);
-		this.databaseColumnsSort.add(0, this.databaseSortColumns);
-		this.databaseSortColumnsOrder.add(0, true);
+		this.databaseColumnsSortLabel.remove(pos);
+		this.databaseColumnsSortOrder.remove(pos);
+		this.databaseColumnsSortLabel.add(0, this.databaseColumnSort);
+		this.databaseColumnsSortOrder.add(0, true);
 	    }
 	}
     }
@@ -1533,7 +1547,7 @@ public class VObject implements Serializable {
 	}
 	String requete = "select alias_de_table.* from (" + v0.mainQuery + ") alias_de_table "
 		+ buildFilter(this.filterFields, v0.databaseColumnsLabel)
-		+ buildOrderBy(v0.databaseColumnsSort, v0.databaseSortColumnsOrder);
+		+ buildOrderBy(v0.databaseColumnsSortLabel, v0.databaseColumnsSortOrder);
 	ArrayList<String> fileNames = new ArrayList<String>();
 	fileNames.add("Vue");
 	this.download(fileNames, requete);
@@ -2133,7 +2147,7 @@ public class VObject implements Serializable {
     }
 
     public void setRequiredHeaders(List<Boolean> requiredHeaders) {
-	if (CollectionUtils.isEmpty(databaseColumnsSort)) {
+	if (CollectionUtils.isEmpty(databaseColumnsSortLabel)) {
 	    this.requiredHeaders = new ArrayList<>();
 	} else {
 	    this.requiredHeaders = new ArrayList<>(requiredHeaders);
@@ -2141,35 +2155,35 @@ public class VObject implements Serializable {
     }
 
     public List<String> getDatabaseColumnsSort() {
-	return databaseColumnsSort;
+	return databaseColumnsSortLabel;
     }
 
     public void setDatabaseColumnsSort(List<String> databaseColumnsSort) {
 	if (CollectionUtils.isEmpty(databaseColumnsSort)) {
-	    this.databaseColumnsSort = new ArrayList<>();
+	    this.databaseColumnsSortLabel = new ArrayList<>();
 	} else {
-	    this.databaseColumnsSort = new ArrayList<>(databaseColumnsSort);
+	    this.databaseColumnsSortLabel = new ArrayList<>(databaseColumnsSort);
 	}
     }
 
     public List<Boolean> getDatabaseSortColumnsOrder() {
-	return databaseSortColumnsOrder;
+	return databaseColumnsSortOrder;
     }
 
     public void setDatabaseSortColumnsOrder(List<Boolean> databaseSortColumnsOrder) {
-	if (CollectionUtils.isEmpty(databaseColumnsSort)) {
-	    this.databaseSortColumnsOrder = new ArrayList<>();
+	if (CollectionUtils.isEmpty(databaseColumnsSortLabel)) {
+	    this.databaseColumnsSortOrder = new ArrayList<>();
 	} else {
-	    this.databaseSortColumnsOrder = new ArrayList<>(databaseSortColumnsOrder);
+	    this.databaseColumnsSortOrder = new ArrayList<>(databaseSortColumnsOrder);
 	}
     }
 
     public String getHeaderSortDLabel() {
-	return databaseSortColumns;
+	return databaseColumnSort;
     }
 
     public void setHeaderSortDLabel(String headerSortDLabel) {
-	this.databaseSortColumns = headerSortDLabel;
+	this.databaseColumnSort = headerSortDLabel;
     }
 
     public List<Boolean> getSelectedLines() {
@@ -2300,6 +2314,14 @@ public class VObject implements Serializable {
     public void setInSessionVObject(VObject inSessionVObject) {
 	this.inSessionVObject = inSessionVObject;
     }
+
+	public String getDatabaseColumnSort() {
+		return databaseColumnSort;
+	}
+
+	public void setDatabaseColumnSort(String databaseColumnSort) {
+		this.databaseColumnSort = databaseColumnSort;
+	}
 
 
 }

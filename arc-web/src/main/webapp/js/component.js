@@ -1947,8 +1947,8 @@ $("[id='"+view+"'] textarea").filter(function(){return $(this).text()==searchStr
 function updateSort(e,t)
 {
 	var view=$(t).parents().filter('div[id]').attr('id');
-	$('[name="'+view+'.headerSortDLabel"]').attr('value',$(t).parent().siblings().children().eq($(t).parent().children().index($(t))).text().trim());
-	$('[name="'+view+'.headerSortDLabel"]').attr('m','js');
+	$('[name="'+view+'.databaseColumnSort"]').attr('value',$(t).parent().siblings().children().eq($(t).parent().children().index($(t))).text().trim());
+	$('[name="'+view+'.databaseColumnSort"]').attr('m','js');
 	$('[id="'+view+'.sort"]').trigger('click');
 }
 

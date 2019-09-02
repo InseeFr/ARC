@@ -75,15 +75,12 @@
 				<div class="jumbotron jumbotron-fluid">
 					<div class="container">
 						<h1 class="display-4">Welcome in the ARC application</h1>
-						<p class="lead">Enjoy</p>
+						<p class="lead">Version 20190830a</p>
 					</div>
 				</div>
 			</div>
 	</div>
 	</div>
-	
-
-
 
 </body>
 </html>

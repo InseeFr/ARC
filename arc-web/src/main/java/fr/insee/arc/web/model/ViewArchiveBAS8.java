@@ -17,8 +17,8 @@ public class ViewArchiveBAS8 extends VObject {
             private static final long serialVersionUID = -7589043509155060981L;
 
             {
-                put("entrepot", new ColumnRendering(true, "Entrepot de dépôt", "120px", "text", null, true));
-                put("nom_archive", new ColumnRendering(true, "Nom de l'archive", "400px", "text", null, true));
+                put("entrepot", new ColumnRendering(true, "label.filestore", "120px", "text", null, true));
+                put("nom_archive", new ColumnRendering(true, "label.archive", "400px", "text", null, true));
 
             }
         }

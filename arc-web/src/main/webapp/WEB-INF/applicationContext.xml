@@ -117,8 +117,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewNorme" />
-		<property name="title" value="Liste des normes" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 	<bean id="viewCalendrier" class="fr.insee.arc.web.model.ViewCalendrier"
@@ -126,8 +124,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewCalendrier" />
-		<property name="title" value="Calendrier des Normes" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 	<bean id="viewJeuxDeRegles" class="fr.insee.arc.web.model.ViewJeuxDeRegles"
@@ -135,8 +131,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewJeuxDeRegles" />
-		<property name="title" value="Jeux de Regles" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 	<bean id="viewChargement" class="fr.insee.arc.web.model.ViewChargement"
@@ -144,8 +138,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewChargement" />
-		<property name="title" value="Chargement" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 
@@ -154,8 +146,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewNormage" />
-		<property name="title" value="Normage" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 	<bean id="viewControle" class="fr.insee.arc.web.model.ViewControle"

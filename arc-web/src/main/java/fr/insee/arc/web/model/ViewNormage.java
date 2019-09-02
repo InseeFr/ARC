@@ -9,6 +9,11 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 public class ViewNormage extends VObject {
     public ViewNormage() {
         super();
+        
+        this.setTitle("view.structurize");
+        
+        this.setPaginationSize(15);
+        
         this.constantVObject = new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**
 			 * 
@@ -16,18 +21,18 @@ public class ViewNormage extends VObject {
             private static final long serialVersionUID = -8371019897936660387L;
 
 			{
-                put("id_norme", new ColumnRendering(false, "Norme", "0", "text", null, true));
-                put("periodicite", new ColumnRendering(false, "Periodicite", "0", "text", null, true));
-                put("validite_inf", new ColumnRendering(false, "Debut Validite", "0", "text", null, true));
-                put("validite_sup", new ColumnRendering(false, "Fin Validite", "0", "text", null, true));
-                put("version", new ColumnRendering(false, "Version", "0", "text", null, true));
-                put("id_regle", new ColumnRendering(true, "Id", "5%", "text", null, true));
-                put("id_classe", new ColumnRendering(true, "Type de contrôle", "23%", "select",
+                put("id_norme", new ColumnRendering(false, "label.norm", "0", "text", null, true));
+                put("periodicite", new ColumnRendering(false, "label.periodicity", "0", "text", null, true));
+                put("validite_inf", new ColumnRendering(false, "label.validity.min", "0", "text", null, true));
+                put("validite_sup", new ColumnRendering(false, "label.validity.max", "0", "text", null, true));
+                put("version", new ColumnRendering(false, "label.version", "0", "text", null, true));
+                put("id_regle", new ColumnRendering(true, "label.id", "5%", "text", null, true));
+                put("id_classe", new ColumnRendering(true, "label.structure.type", "23%", "select",
                         "select id, id from arc.ext_type_normage order by ordre", true));
-                put("rubrique", new ColumnRendering(true, "Rubrique", "24%", "text", null, true));
-                put("rubrique_nmcl", new ColumnRendering(true, "Rubrique Nomenclature", "24%", "text", null, true));
-                put("commentaire", new ColumnRendering(true, "Commentaire", "24%", "text", null, true));
-                put("todo", new ColumnRendering(false, "todo", "0%", "text", null, true));
+                put("rubrique", new ColumnRendering(true, "label.structure.element.main", "24%", "text", null, true));
+                put("rubrique_nmcl", new ColumnRendering(true, "label.structure.element.child", "24%", "text", null, true));
+                put("commentaire", new ColumnRendering(true, "label.comment", "24%", "text", null, true));
+                put("todo", new ColumnRendering(false, "label.todo", "0%", "text", null, true));
 
 
             }

@@ -12,7 +12,7 @@
 <html>
 <s:if test="scope==null">
 	<head>
-<title>Gerer les normes</title>
+<title><s:text name="header.normManagement"/></title>
 <link
 	rel="stylesheet"
 	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -72,15 +72,9 @@
 			theme="simple"
 		>
 			<div class="row">
-				<div class="col-md d-flex justify-content-center">
-
-					<%-- 					<h1><s:text name="managementNorm.header" /></h1> --%>
-				</div>
-			</div>
-
-			<div class="row">
 				<!-- left column -->
-				<div class="col-md-5 border-right">
+				<div class="col-md-5 border-right" style="margin-top: 2.25rem;"
+				>
 					<div class="row">
 						<div class="col-md">
 							<!-- norm list -->
@@ -108,7 +102,6 @@
 							</s:include>
 						</div>
 					</div>
-					<hr />
 
 					<div class="row">
 						<div class="col-md">
@@ -170,11 +163,10 @@
 				<div class="col-md-7">
 					<div class="row">
 						<div class="col-md">
-
 							<!-- tab to choose the module -->
 
 							<ul
-								class="nav nav-pills nav-fill"
+								class="nav nav-tabs"
 								id="chooseModule"
 								role="tablist"
 							>
@@ -224,16 +216,17 @@
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
-										id="map-tab"
+										id="mapmodel-tab"
 										data-toggle="tab"
-										href="#map"
+										href="#mapmodel"
 										role="tab"
-										aria-controls="map"
+										aria-controls="mapmodel"
 										aria-selected="false"
 									>
-										<s:text name="managementNorm.map" />
+										<s:text name="managementNorm.mapmodel" />
 									</a></li>
 							</ul>
+
 
 							<!-- The content of the tab -->
 							<div
@@ -265,6 +258,23 @@
 										<s:param name="checkboxVisible">true</s:param>
 										<s:param name="otherButton">
 
+											<input
+												class="btn btn-primary btn-sm"
+												id="viewChargement.truncate"
+												type="submit"
+												doAction="viderChargement"
+												scope="viewChargement;"
+												value="<s:text name="gui.button.deleteRuleset"/>"
+											/>
+											<input
+												class="btn btn-primary btn-sm"
+												id="viewChargement.copie"
+												type="submit"
+												doAction="selectJeuxDeReglesChargementCopie"
+												scope="viewChargement;viewJeuxDeReglesCopie;"
+												value="<s:text name="gui.button.replaceRuleset"/>"
+											/>
+											
 											<div class="input-group my-3">
 												<div class="custom-file">
 													<input
@@ -292,22 +302,6 @@
 												</div>
 											</div>
 
-											<input
-												class="btn btn-primary btn-sm"
-												id="viewChargement.truncate"
-												type="submit"
-												doAction="viderChargement"
-												scope="viewChargement;"
-												value="Supprimer ces règles"
-											/>
-											<input
-												class="btn btn-primary btn-sm"
-												id="viewChargement.copie"
-												type="submit"
-												doAction="selectJeuxDeReglesChargementCopie"
-												scope="viewChargement;viewJeuxDeReglesCopie;"
-												value="Remplacer ce jeu de règles"
-											/>
 										</s:param>
 
 									</s:include>
@@ -340,17 +334,33 @@
 											<s:if
 												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
 											>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewNormage.truncate"
+													type="submit"
+													doAction="viderNormage"
+													scope="viewNormage;"
+													value="<s:text name="gui.button.deleteRuleset"/>"
+												/>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewNormage.copie"
+													type="submit"
+													doAction="selectJeuxDeReglesNormageCopie"
+													scope="viewNormage;viewJeuxDeReglesCopie;"
+													value="<s:text name="gui.button.replaceRuleset"/>"
+												/>
 												<div class="input-group my-3">
 													<div class="custom-file">
 														<input
-															name="fileUploadStructurize"
+															name="fileUploadstructure"
 															type="file"
 															class="custom-file-input"
-															id="inputGroupFileStructurize"
+															id="inputGroupFilestructure"
 														/> <label
 															class="custom-file-label"
-															for="inputGroupFileStructurize"
-															aria-describedby="Choose file to upload for structurize module"
+															for="inputGroupFilestructure"
+															aria-describedby="Choose file to upload for structure module"
 														>Choose file</label>
 													</div>
 													<div class="input-group-append">
@@ -366,23 +376,6 @@
 															/></button>
 													</div>
 												</div>
-
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewNormage.truncate"
-													type="submit"
-													doAction="viderNormage"
-													scope="viewNormage;"
-													value="Supprimer ces règles"
-												/>
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewNormage.copie"
-													type="submit"
-													doAction="selectJeuxDeReglesNormageCopie"
-													scope="viewNormage;viewJeuxDeReglesCopie;"
-													value="Remplacer ce jeu de règles"
-												/>
 											</s:if>
 										</s:param>
 
@@ -416,6 +409,22 @@
 											<s:if
 												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
 											>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewControle.truncate"
+													type="submit"
+													doAction="viderControle"
+													scope="viewControle;"
+													value="<s:text name="gui.button.deleteRuleset"/>"
+												/>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewControle.copie"
+													type="submit"
+													doAction="selectJeuxDeReglesControleCopie"
+													scope="viewControle;viewJeuxDeReglesCopie;"
+													value="<s:text name="gui.button.replaceRuleset"/>"
+												/>
 												<div class="input-group my-3">
 													<div class="custom-file">
 														<input
@@ -441,22 +450,6 @@
 															/></button>
 													</div>
 												</div>
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewControle.truncate"
-													type="submit"
-													doAction="viderControle"
-													scope="viewControle;"
-													value="Supprimer ces règles"
-												/>
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewControle.copie"
-													type="submit"
-													doAction="selectJeuxDeReglesControleCopie"
-													scope="viewControle;viewJeuxDeReglesCopie;"
-													value="Remplacer ce jeu de règles"
-												/>
 											</s:if>
 										</s:param>
 
@@ -486,27 +479,33 @@
 										<s:param name="checkbox">true</s:param>
 										<s:param name="checkboxVisible">true</s:param>
 										<s:param name="otherButton">
-											<s:if test="viewFiltrage.content.lines.size()==0">
-												<input
-													id="viewFiltrage.creerNouveau"
-													type="submit"
-													doAction="preGenererRegleFiltrage"
-													scope="viewFiltrage;"
-													value="Pré-générer les règles"
-												></input>
-											</s:if>
-
 											<s:if
 												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
 											>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewFiltrage.truncate"
+													type="submit"
+													doAction="viderFiltrage"
+													scope="viewFiltrage;"
+													value="<s:text name="gui.button.deleteRuleset"/>"
+												></input>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewFiltrage.copie"
+													type="submit"
+													doAction="selectJeuxDeReglesFiltrageCopie"
+													scope="viewFiltrage;viewJeuxDeReglesCopie;"
+													value="<s:text name="gui.button.replaceRuleset"/>"
+												></input>
 
-												<s:if test="viewFiltrage.content.t.size()==0">
+												<s:if test="viewFiltrage.content.lines.size()==0">
 													<input
 														id="viewFiltrage.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleFiltrage"
 														scope="viewFiltrage;"
-														value="Pré-générer les règles"
+														value="<s:text name="gui.button.generateRuleset"/>"
 													></input>
 												</s:if>
 												<div class="input-group my-3">
@@ -535,22 +534,6 @@
 															/></button>
 													</div>
 												</div>
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewFiltrage.truncate"
-													type="submit"
-													doAction="viderFiltrage"
-													scope="viewFiltrage;"
-													value="Supprimer ces règles"
-												></input>
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewFiltrage.copie"
-													type="submit"
-													doAction="selectJeuxDeReglesFiltrageCopie"
-													scope="viewFiltrage;viewJeuxDeReglesCopie;"
-													value="Remplacer ce jeu de règles"
-												></input>
 											</s:if>
 										</s:param>
 
@@ -560,9 +543,9 @@
 								<%-- MAPPING TAB --%>
 								<div
 									class="tab-pane fade"
-									id="map"
+									id="mapmodel"
 									role="tabpanel"
-									aria-labelledby="map-tab"
+									aria-labelledby="mapmodel-tab"
 								>
 									<s:include value="tiles/templateVObject.jsp">
 										<s:set
@@ -581,26 +564,33 @@
 										<s:param name="checkbox">true</s:param>
 										<s:param name="checkboxVisible">true</s:param>
 										<s:param name="otherButton">
-											<s:if test="viewMapping.content.lines.size()==0">
-												<input
-													id="viewMapping.creerNouveau"
-													type="submit"
-													doAction="preGenererRegleMapping"
-													scope="viewMapping;"
-													value="Pré-générer les règles"
-												></input>
-											</s:if>
 											<s:if
 												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
 											>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewMapping.truncate"
+													type="submit"
+													doAction="viderMapping"
+													scope="viewMapping;"
+													value="<s:text name="gui.button.deleteRuleset"/>"
+												></input>
+												<input
+													class="btn btn-primary btn-sm"
+													id="viewMapping.copie"
+													type="submit"
+													doAction="selectJeuxDeReglesMappingCopie"
+													scope="viewMapping;viewJeuxDeReglesCopie;"
+													value="<s:text name="gui.button.replaceRuleset"/>"
+												></input>
 
-												<s:if test="viewMapping.content.t.size()==0">
+												<s:if test="viewMapping.content.lines.size()==0">
 													<input
 														id="viewMapping.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleMapping"
 														scope="viewMapping;"
-														value="Pré-générer les règles"
+														value="<s:text name="gui.button.generateRuleset"/>"
 													></input>
 												</s:if>
 												<div class="input-group my-3">
@@ -629,22 +619,6 @@
 															/></button>
 													</div>
 												</div>
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewMapping.copie"
-													type="submit"
-													doAction="selectJeuxDeReglesMappingCopie"
-													scope="viewMapping;viewJeuxDeReglesCopie;"
-													value="Remplacer ce jeu de règles"
-												></input>
-												<input
-													class="btn btn-primary btn-sm"
-													id="viewMapping.truncate"
-													type="submit"
-													doAction="viderMapping"
-													scope="viewMapping;"
-													value="Supprimer ces règles"
-												></input>
 											</s:if>
 										</s:param>
 

@@ -21,6 +21,13 @@ public class IndexAction extends ArcAction {
     private static final String ACTION_NAME = "Index";
 
 
+    @Action(value = "/locale")
+    public String locale() {
+    	initialize();
+    	return generateDisplay();
+    }
+    
+    
     /**
      * Pour récupérer le choix de la norme
      **/
