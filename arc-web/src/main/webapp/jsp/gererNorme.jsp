@@ -179,7 +179,7 @@
 										aria-controls="load"
 										aria-selected="true"
 									>
-										<s:text name="managementNorm.load" />
+										<s:text name="normManagement.load" />
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -190,7 +190,7 @@
 										aria-controls="structurize"
 										aria-selected="false"
 									>
-										<s:text name="managementNorm.structurize" />
+										<s:text name="normManagement.structurize" />
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -201,7 +201,7 @@
 										aria-controls="control"
 										aria-selected="false"
 									>
-										<s:text name="managementNorm.control" />
+										<s:text name="normManagement.control" />
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -212,7 +212,7 @@
 										aria-controls="filter"
 										aria-selected="false"
 									>
-										<s:text name="managementNorm.filter" />
+										<s:text name="normManagement.filter" />
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -223,7 +223,7 @@
 										aria-controls="mapmodel"
 										aria-selected="false"
 									>
-										<s:text name="managementNorm.mapmodel" />
+										<s:text name="normManagement.mapmodel" />
 									</a></li>
 							</ul>
 
@@ -644,7 +644,7 @@
 									<div class="modal-content">
 										<div class="modal-header">
 											<h5 class="copyRulesHeader"><s:text
-													name="managementNorm.copyRules"
+													name="normManagement.copyRules"
 												/></h5>
 											<button
 												type="button"

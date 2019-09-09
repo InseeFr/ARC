@@ -60,16 +60,31 @@
   		</li>
        <li class="nobullet mt-auto">
 	      		<ul style="margin: 0;">
-				<li class="nobullet">	
-				<s:url action="locale" var="localeFR"><s:param name="request_locale" >fr</s:param></s:url>
-				<s:a href="%{localeFR}" >FR</s:a>
-				</li>
-				<li class="nobullet">
-				<s:url action="locale" var="localeEN"><s:param name="request_locale" >en</s:param></s:url>
-				<s:a href="%{localeEN}" >EN</s:a>
-				</li>		
-     		</ul> 
-      </li>
+	      		
+	      		<s:if test='%{#session.WW_TRANS_I18N_LOCALE == null}'>
+	      		<s:param name="request_locale" >fr</s:param>
+	      		</s:if>
+	      		
+				<s:if test='%{#session.WW_TRANS_I18N_LOCALE.toString().equals("en")}'>
+					<li class="nobullet nav-link">	
+					<s:url action="locale" var="localeFR"><s:param name="request_locale" >fr</s:param></s:url>
+					<s:a href="%{localeFR}" >FR</s:a>
+					</li>
+					<li class="nobullet btn-success nav-link">
+	      			<s:property value="#session.WW_TRANS_I18N_LOCALE.toString().toUpperCase()"/>
+	      			</li>
+				</s:if>
+				<s:else>
+					<li class="nobullet btn-success nav-link">
+	      			<s:property value="#session.WW_TRANS_I18N_LOCALE.toString().toUpperCase()"/>
+	      			</li>
+					<li class="nobullet nav-link">
+					<s:url action="locale" var="localeEN"><s:param name="request_locale" >en</s:param></s:url>
+					<s:a href="%{localeEN}" >EN</s:a>
+					</li>
+				</s:else>
+     			</ul> 
+      	</li>
     </ul>
     </div>
 </nav>

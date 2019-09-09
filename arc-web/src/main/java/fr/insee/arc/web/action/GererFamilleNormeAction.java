@@ -242,28 +242,12 @@ public class GererFamilleNormeAction extends ArcAction {
         return false;
     }
 
-    /*
-     * VARIABLES METIER
-     */
-    public static final HashMap<String, ColumnRendering> getInitialRendering(List<String> aVariableListe) {
-        HashMap<String, ColumnRendering> returned = new HashMap<String, ColumnRendering>();
-        String size = "100px";
-        String type = "text";
-        String query = null;
-        for (int i = 0; i < aVariableListe.size(); i++) {
-            System.out.println(aVariableListe.get(i).replaceAll("^mapping_[^_]*_", "").replaceAll("_ok$", "").toLowerCase());
-            returned.put(aVariableListe.get(i),
-                    new ColumnRendering(true, aVariableListe.get(i).replaceAll("^mapping_[^_]*_", "").replaceAll("_ok$", "").toLowerCase(), size,
-                            type, query, true));
-        }
-        return returned;
-    }
 
     public void initializeVariableMetier() {
 	if (CollectionUtils.isNotEmpty(this.viewFamilleNorme.mapContentSelected().get("id_famille"))) {
 	    List<String> listeTableFamille = getListeTableMetierFamille(this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0));
-	    HashMap<String, ColumnRendering> rendering = getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
-	    rendering.putAll(getInitialRendering(listeTableFamille));
+	    HashMap<String, ColumnRendering> rendering = ViewVariableMetier.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
+	    rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
 	    this.viewVariableMetier.initialiserColumnRendering(rendering);
 	    try {
 		System.out.println("/* initializeVariableMetier */");
@@ -284,15 +268,6 @@ public class GererFamilleNormeAction extends ArcAction {
 	
     }
 
-    public static HashMap<String, ColumnRendering> getInitialRenderingViewVariableMetier(HashMap<String, ColumnRendering> returned) {
-        returned.put("id_famille", new ColumnRendering(false, "Id.", "20px", "text", null, true));
-        returned.put("nom_variable_metier", new ColumnRendering(true, "Nom de la variable", "200px", "text", null, true));
-        returned.put("description_variable_metier", new ColumnRendering(true, "Description", "200px", "text", null, true));
-        returned.put("type_variable_metier", new ColumnRendering(true, "Type de la variable", "100px", "select",
-                "SELECT nom_type id, nom_type val FROM arc.ext_mod_type_autorise ORDER BY nom_type", true));
-        returned.put("type_consolidation", new ColumnRendering(true, "Type consolidation", "200px", "text", null, true));
-        return returned;
-    }
 
     /**
      *

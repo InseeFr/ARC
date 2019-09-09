@@ -3,7 +3,10 @@ package fr.insee.arc.web.action;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+import javax.servlet.http.HttpSession;
+
 import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -35,6 +38,8 @@ public class IndexAction extends ArcAction {
     @Action(value = "/index")
     public String index() {
 	LoggerHelper.trace(LOGGER, getActionName());
+	HttpSession session = ServletActionContext.getRequest().getSession(true);
+	session.setAttribute("console", "");
 	initialize();
 	return generateDisplay();
     }
@@ -96,4 +101,20 @@ public class IndexAction extends ArcAction {
 	return ACTION_NAME;
     }
 
+    
+    public String request_locale;
+
+
+	public String getRequest_locale() {
+		return request_locale;
+	}
+
+
+	public void setRequest_locale(String request_locale) {
+		this.request_locale = request_locale;
+	}
+    
+    
+    
+    
 }

@@ -63,7 +63,7 @@ li.nav-item {
 
 .nav-link {
     display: block;
-    padding: 0.25rem 0.25rem;
+    padding: 0rem 0rem;
 	font-weight: 500;
 }
 
@@ -72,6 +72,15 @@ li.nav-item {
     background-color: transparent;
 }
 
+.btn-success {
+    color: #fff !important;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.bg-primary {
+    background-color: #005baf!important;
+}
 
 /* End of bootstap revamp */
 
