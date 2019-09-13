@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>fr.insee.arc</groupId>
 	<artifactId>arc-utils</artifactId>
-	<name>arc_utility</name>
+	<name>ARC-UTILS</name>
 	<description>Contain all utility classes</description>
 
 	<dependencies>
