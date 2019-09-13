@@ -131,100 +131,9 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	return returned.toString();
     }
 
-    public boolean dropSomeSchema(Connection connexion, Collection<String> listeSchemaConserver) {
-	StringBuilder sb = new StringBuilder();
-	sb.append(
-		"\n SELECT string_agg('DROP SCHEMA IF EXISTS '||schema_name||' CASCADE;', '' ORDER BY schema_name)::text");
-	sb.append("\n FROM information_schema.schemata \n");
-	sb.append("\n WHERE schema_owner IN ");
-	sb.append("\n (SELECT role_name FROM information_schema.enabled_roles)");
-	if (listeSchemaConserver != null && listeSchemaConserver.size() > 0) {
-	    sb.append("\n AND schema_name NOT IN " + Format.sqlListe(listeSchemaConserver));
-	}
-	try {
-	    this.executeImmediate(connexion, sb);
-	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "dropSomeSchema()", LOGGER, ex);
-	    return false;
-	}
-	return true;
-    }
-
-    public boolean prepareTablePartition(Connection aConnexion, String aTable, String aTableTempName, String aPartition,
-	    List<String> listColonnes) {
-	try {
-	    List<String> listePartition = Arrays.asList(aPartition.split(","));
-	    String expressionPartition = "abs(hashtext("//
-		    + listePartition.stream()//
-			    .map(t -> "coalesce(" + t.trim() + ",'')")//
-			    .collect(Collectors.joining("||"))//
-		    + "))";//
-	    String idHashName = "id_hash";
-	    int idHashModulo = 1000000000;
-	    String idRowName = "id_row";
-	    StringBuilder sb = new StringBuilder();
-	    sb.append("\n CREATE TABLE " + aTableTempName + " ");
-	    sb.append("\n AS  ");
-	    sb.append("\n WITH tmp_count AS ( ");
-	    sb.append("\n 		SELECT (count(*)*10000) + 1 AS n  ");
-	    sb.append("\n 		FROM " + aTable + " tablesample system(0.01) ");
-	    sb.append("\n 	), nb_partition AS ( ");
-	    sb.append("\n 	SELECT CASE 	WHEN log(n) <= 5 THEN 2 ");
-	    sb.append("\n 					WHEN log(n) <= 6 THEN 8 ");
-	    sb.append("\n 					WHEN log(n) <= 7 THEN 64 ");
-	    sb.append("\n 					ELSE 1024 ");
-	    sb.append("\n 			END AS n ");
-	    sb.append("\n 	FROM tmp_count ");
-	    sb.append("\n 	)  ");
-	    sb.append("\n SELECT " + listColonnes.stream()
-		    .filter(t -> !t.equalsIgnoreCase(idRowName) && !t.equalsIgnoreCase(idHashName)).map(t -> "foo." + t)
-		    .collect(Collectors.joining(",")));
-	    sb.append(", foo." + idHashName);
-	    if (!listColonnes.contains(idRowName)) {
-		sb.append("\n , " + idHashName + "::bigint" + "*" + idHashModulo + "::bigint"
-			+ " + ROW_NUMBER() OVER() AS " + idRowName);
-	    } else {
-		sb.append("\n , CASE WHEN " + idRowName + "::bigint<" + idHashModulo + "::bigint");
-		sb.append("\n 			THEN " + idRowName + "::bigint+" + idHashModulo + "::bigint" + "*"
-			+ idHashName + "::bigint");
-		sb.append("\n 			ELSE " + idRowName + "::bigint");
-		sb.append("\n 			END AS " + idRowName);
-	    }
-	    sb.append("\n FROM ( ");
-
-	    sb.append("\n 		SELECT " + listColonnes.stream().filter(t -> !t.equalsIgnoreCase(idHashName))
-		    .map(t -> "tab." + t).collect(Collectors.joining(",")));
-	    sb.append("\n 		, " + expressionPartition + "% nb_partition.n + 1 AS " + idHashName);
-	    sb.append("\n 		FROM " + aTable + " tab, nb_partition ");
-
-	    sb.append("\n ) foo ");
-	    sb.append("\n ; ");
-	    sb.append(FormatSQL.dropUniqueTable(aTable));
-	    sb.append(FormatSQL.renameTableTo(aTableTempName, aTable));
-	    this.executeImmediate(aConnexion, sb);
-	} catch (Exception e) {
-	    LoggerHelper.error(LOGGER, e, "Erreur lors de l'ajout du id_hash");
-	    return false;
-	}
-	return true;
-    }
-
-    public boolean createSchema(Connection aConnexion, String schema, String anAuthorization, String... someGrantAlls) {
-	StringBuilder sb = new StringBuilder("BEGIN;");
-	sb.append("CREATE SCHEMA " + schema + " AUTHORIZATION " + anAuthorization + ";");
-	for (int i = 0; i < someGrantAlls.length; i++) {
-	    sb.append("GRANT ALL ON SCHEMA " + schema + " TO " + someGrantAlls[i] + ";");
-	}
-	sb.append("END;");
-	try {
-	    this.executeImmediate(aConnexion, sb);
-	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "createSchema()", LOGGER, ex);
-	    return false;
-	}
-	return true;
-    }
-
+ 
+ 
+ 
     /**
      * Retourne une connexion hors contexte (sans pooling)
      *
@@ -278,26 +187,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
     }
 
     /**
-     *
-     * @param connexion
-     * @return une nouvelle connexion non poolée si connexion isnull, ou la
-     *         connexion en entrée
-     */
-    public final ConnectionWrapper initConnection(Connection connexion, String caller) {
-	try {
-	    Boolean isNull = (connexion == null);
-
-	    ConnectionWrapper connectionWrapper = new ConnectionWrapper(isNull,
-		    isNull ? getDriverConnexion() : connexion);
-
-	    return connectionWrapper;
-	} catch (Exception e) {
-	    LoggerHelper.error(LOGGER, "initConnection()", e);
-	}
-	return null;
-    }
-
-    /**
      * Vérifier qu'une table existe <br/>
      *
      */
@@ -308,25 +197,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	} catch (Exception e) {
 	}
 	return b;
-    }
-
-    /**
-     * <br/>
-     *
-     *
-     * @param connexion
-     *            la connexion à la base
-     * @param table
-     *            le nom de la table
-     * @return
-     */
-    @SQLExecutor
-    public void dropUniqueTable(Connection connexion, String table) {
-	try {
-	    executeRequest(connexion, "DROP TABLE IF EXISTS " + table + ";");
-	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "dropUniqueTable()", LOGGER, ex);
-	}
     }
 
     /**
@@ -361,62 +231,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	dropTable(connexion, Arrays.asList(someTables));
     }
 
-    /**
-     * <br/>
-     *
-     *
-     * @param connexion
-     * @param table
-     */
-    @SQLExecutor
-    public void truncateTable(Connection connexion, String table) {
-	try {
-	    executeRequest(connexion, "TRUNCATE TABLE " + table);
-	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "truncateTable()", LOGGER, ex);
-	}
-    }
-
-    @SQLExecutor
-    public void grantToRole(String droit, String role) {
-	try {
-	    GenericBean gb = new GenericBean(executeRequest(null,
-		    "select 'do $$ begin GRANT " + droit + " ON TABLE '||schemaname||'.'||tablename||' TO " + role
-			    + "; exception when others then end; $$;' as query from pg_tables "));
-	    ArrayList<String> allReq = gb.mapContent().get("query");
-	    StringBuilder requete = new StringBuilder();
-	    for (String req : allReq) {
-		requete.append(req + "\n");
-		if (requete.length() > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
-		    executeRequest(null, requete);
-		    requete.setLength(0);
-		}
-	    }
-	    executeRequest(null, requete);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
-    }
-
-    /**
-     * <br/>
-     *
-     *
-     * @param connexion
-     *            la connexion à la base
-     * @param seq
-     *            le nom de la séquence
-     */
-    @SQLExecutor
-    public void createSequence(Connection connexion, String seq) {
-	try {
-	    executeRequest(connexion, "CREATE SEQUENCE " + seq);
-	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "createSequence()", LOGGER, ex);
-	}
-    }
-
-    /**
+     /**
      * Exécute une requête {@code sql} avec des arguments {@code args}, renvoie le
      * booléen (unique) que cette requête est censée rendre<br/>
      *
@@ -606,17 +421,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	return ZERO;
     }
 
-    /**
-     *
-     * @param connexion
-     * @param table
-     * @param column
-     * @return la valeur maximale obtenue sur la colonne {@code column} de la table
-     *         {@code table}
-     */
-    public int getMax(Connection connexion, String table, String column) {
-	return getInt(connexion, new StringBuilder("select max(" + column + ") max_value from " + table));
-    }
 
     public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) {
 	return getColumns(aConnexion, new HashSet<String>(), aNomTable).contains(aNomVariable);
@@ -1940,26 +1744,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	    requete.append("a." + colKeyList.get(i) + "=b." + colKeyList.get(i) + " ");
 	}
 	requete.append("\n) ");
-	//
-	// requete.append("\n WHERE (");
-	// for (int i = 0; i < colKeyList.size(); i++)
-	// {
-	// if (i > 0)
-	// {
-	// requete.append(" , ");
-	// }
-	// requete.append(colKeyList.get(i));
-	// }
-	// requete.append("\n) NOT IN (select distinct ");
-	// for (int i = 0; i < colKeyList.size(); i++)
-	// {
-	// if (i > 0)
-	// {
-	// requete.append(", ");
-	// }
-	// requete.append(colKeyList.get(i));
-	// }
-	// requete.append("\n from " + tableFastUpdate + " b)");
 	requete.append("\n UNION ALL ");
 	requete.append("\n SELECT ");
 	for (int i = 0; i < colList.size(); i++) {
@@ -1987,153 +1771,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		"\n alter table " + tableImage + " rename to " + ManipString.substringAfterFirst(tableName, ".") + ";");
 	requete.append("analyze " + tableName + " (" + keys + ");");
 	get(poolName).executeBlock(aConnexion, requete);
-	requete.setLength(0);
-    }
-
-    /**
-     * Fast update qui accepte les fonctions d'aggregation
-     *
-     * @param poolName
-     * @param aConnexion
-     * @param tableName
-     * @param keys
-     * @param where
-     * @param set
-     * @throws SQLException
-     */
-    public void fastUpdateAggr(String poolName, Connection aConnexion, String tableName, String keys, String where,
-	    String... set) throws SQLException {
-	// récupérer la liste des colonnes
-	// liste de toutes les colonnes
-	ArrayList<String> colList = listeCol(poolName, aConnexion, tableName);
-	// liste des colonnes à mettre à jour
-	ArrayList<String> colSetList = new ArrayList<String>();
-	ArrayList<String> setList = new ArrayList<String>();
-	for (int i = 0; i < set.length; i++) {
-	    String col = ManipString.substringAfterLast(set[i].trim(), "as ").toUpperCase();
-	    if (colList.contains(col)) {
-		colSetList.add(col);
-		setList.add(set[i]);
-	    }
-	}
-	// liste des colonnes de la jointure (clé primaire de la table initiale)
-	ArrayList<String> colKeyList = new ArrayList<String>();
-	for (int i = 0; i < keys.split(",").length; i++) {
-	    colKeyList.add(keys.split(",")[i].trim().toUpperCase());
-	}
-	// construction de la requete
-	StringBuilder requete = new StringBuilder();
-	String tableFastUpdate = FormatSQL.temporaryTableName(tableName, "FA");
-	String tableImage = FormatSQL.temporaryTableName(tableName, "IA");
-	// reecriture pour prendre en compte les fonction d'aggregation
-	// set titi=max() over () se fait avant la clause where
-	requete.append("analyze " + tableName + "(");
-	for (int i = 0; i < colKeyList.size(); i++) {
-	    if (i > 0) {
-		requete.append(" , ");
-	    }
-	    requete.append(colKeyList.get(i));
-	}
-	requete.append(");");
-	requete.append(" drop table if exists " + tableFastUpdate + " ;");
-	requete.append("\n create table " + tableFastUpdate + " " + FormatSQL.WITH_NO_VACUUM + " as ");
-	requete.append("\n select * from (select " + keys + " ");
-	for (int i = 0; i < setList.size(); i++) {
-	    requete.append("," + setList.get(i));
-	}
-	requete.append("\n from " + tableName + " ");
-	requete.append("\n ) a ");
-	requete.append(" WHERE EXISTS (select 1 from " + tableName + " b ");
-	requete.append("\n WHERE ");
-	for (int i = 0; i < colKeyList.size(); i++) {
-	    if (i > 0) {
-		requete.append("AND ");
-	    }
-	    requete.append("a." + colKeyList.get(i) + "=b." + colKeyList.get(i) + " ");
-	}
-	requete.append("\n AND " + where + " ");
-	requete.append("\n ); ");
-	// requete.append("\n ) u WHERE (");
-	// for (int i = 0; i < colKeyList.size(); i++) {
-	// if (i > 0) {
-	// requete.append(" , ");
-	// }
-	// requete.append(colKeyList.get(i));
-	// }
-	// requete.append(") IN (SELECT distinct ");
-	// for (int i = 0; i < colKeyList.size(); i++) {
-	// if (i > 0) {
-	// requete.append(" , ");
-	// }
-	// requete.append(colKeyList.get(i));
-	// }
-	// requete.append(" FROM " + tableName + " WHERE " + where + ") ;");
-	// requete.append("\n create index idx1_" +
-	// ManipString.substringAfterFirst(tableFastUpdate, ".") + " on " +
-	// tableFastUpdate +
-	// "("+keys+");");
-	requete.append("\n drop table if exists " + tableImage + ";");
-	requete.append("\n create table " + tableImage + " " + FormatSQL.WITH_NO_VACUUM + " as ");
-	requete.append("\n SELECT ");
-	for (int i = 0; i < colList.size(); i++) {
-	    if (i > 0) {
-		requete.append(",");
-	    }
-	    requete.append("a." + colList.get(i));
-	}
-	requete.append("\n FROM " + tableName + " a");
-	// requete.append("\n WHERE NOT EXISTS (select 1 from " +
-	// tableFastUpdate + " b ");
-	// requete.append("\n WHERE ");
-	// for (int i = 0; i < colKeyList.size(); i++) {
-	// if (i > 0) {
-	// requete.append("AND ");
-	// }
-	// requete.append("a."+colKeyList.get(i)+"=b."+colKeyList.get(i)+" ");
-	// }
-	//
-	// requete.append("\n) ");
-	requete.append("\n WHERE (");
-	for (int i = 0; i < colKeyList.size(); i++) {
-	    if (i > 0) {
-		requete.append(" , ");
-	    }
-	    requete.append(colKeyList.get(i));
-	}
-	requete.append("\n) NOT IN (select distinct ");
-	for (int i = 0; i < colKeyList.size(); i++) {
-	    if (i > 0) {
-		requete.append(" , ");
-	    }
-	    requete.append(colKeyList.get(i));
-	}
-	requete.append("\n from  " + tableFastUpdate + " b)");
-	requete.append("\n UNION ALL ");
-	requete.append("\n SELECT ");
-	for (int i = 0; i < colList.size(); i++) {
-	    if (i > 0) {
-		requete.append(",");
-	    }
-	    if (colSetList.contains(colList.get(i))) {
-		requete.append("b." + colList.get(i));
-	    } else {
-		requete.append("a." + colList.get(i));
-	    }
-	}
-	requete.append("\n FROM " + tableName + " a, " + tableFastUpdate + " b WHERE ");
-	for (int i = 0; i < colKeyList.size(); i++) {
-	    if (i > 0) {
-		requete.append(" AND ");
-	    }
-	    requete.append("a." + colKeyList.get(i) + "=b." + colKeyList.get(i));
-	}
-	requete.append(";");
-	requete.append("\n drop table if exists " + tableFastUpdate + ";");
-	requete.append("\n drop table if exists " + tableName + ";");
-	requete.append(
-		"\n alter table " + tableImage + " rename to " + ManipString.substringAfterFirst(tableName, ".") + ";");
-	requete.append("analyze " + tableName + " (" + keys + ");");
-	this.executeBlockNoError(aConnexion, requete);
 	requete.setLength(0);
     }
 
@@ -2296,114 +1933,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	}
     }
 
-    /**
-     * Copie brutal de fichier plat dans une table SQL.
-     *
-     * @param connexion
-     * @param table
-     * @param is
-     * @param csv
-     * @param aDelim
-     * @throws Exception
-     */
-	public void importing(Connection connexion, String table, InputStream is, boolean csv, String... aDelim)
-			throws Exception {
-		ConnectionWrapper conn = initConnection(connexion);
-		try {
-			conn.getConnexion().setAutoCommit(false);
-			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
-			String delimiter = "";
-			String quote = Character.toString((char) 2);
-
-			if (aDelim != null && aDelim.length > 0) {
-				delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
-			}
-
-			boolean header = true;
-			if (aDelim != null && aDelim.length > 1) {
-				header = false;
-			}
-
-			String h = (header ? ", HEADER true " : "");
-
-			if (csv) {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", is);
-			} else {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
-			}
-			conn.getConnexion().commit();
-		} catch (Exception e) {
-			e.printStackTrace();
-			conn.getConnexion().rollback();
-		} finally {
-			conn.close();
-		}
-	}
-
-	public void importing(Connection connexion, String table, Reader aReader, boolean csv, boolean header,
-			String... aDelim) throws Exception {
-		ConnectionWrapper conn = initConnection(connexion);
-		try {
-			conn.getConnexion().setAutoCommit(false);
-			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
-			String delimiter = "";
-			String quote = Character.toString((char) 2);
-
-			if (aDelim != null && aDelim.length > 0) {
-				delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
-			}
-
-			if (aDelim != null && aDelim.length > 1) {
-				header = false;
-			}
-
-			String h = (header ? ", HEADER true " : "");
-
-			if (csv) {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", aReader);
-			} else {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", aReader);
-			}
-			conn.getConnexion().commit();
-		} catch (Exception e) {
-			e.printStackTrace();
-			conn.getConnexion().rollback();
-		} finally {
-			conn.close();
-		}
-	}
-    
-    
-    /**
-     * Copie brutal de fichier plat dans une table SQL.
-     * 
-     * @param connexion
-     * @param table
-     * @param aColumnName
-     * @param is
-     * @param csv
-     * @param header
-     * @param aDelim
-     * @param aQuote
-     * @throws Exception
-     */
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean header, String aDelim, String aQuote) throws Exception {
-		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote);
-	}
-
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean header, String aDelim, String aQuote, String encoding) throws Exception {
-		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote,
-				encoding);
-	}
-
-    public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format, boolean header, String aDelim, String aQuote)
-            throws Exception
-    {
-    	importing(connexion, table, aColumnName, is, format, header,  aDelim, aQuote, null);
-    }
-    
     
     /**
      * Copie brutal de fichier plat dans une table SQL.
@@ -2423,7 +1952,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
      * @param aQuote
      * @throws Exception
      */
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
+	public <T> void importing(Connection connexion, String table, String aColumnName, T is, String format,
 			boolean header, String aDelim, String aQuote, String encoding) throws Exception {
 		LoggerHelper.info(LOGGER, "importing()");
 		ConnectionWrapper conn = initConnection(connexion);
@@ -2453,13 +1982,30 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 
 			String h = (header ? ", HEADER true " : "");
 			
+			InputStream z=null;
+			
+			
 			if (format.equals(FORMAT_CSV) || format.equals(FORMAT_TEXT)) {
-				copyManager.copyIn("COPY " + table + columnName + " FROM STDIN WITH (FORMAT " + format + ", ENCODING '"
-						+ encode + "' " + h + delimiter + quote + ") ", is);
+			
+				try {
+					copyManager.copyIn("COPY " + table + columnName + " FROM STDIN WITH (FORMAT " + format + ", ENCODING '"
+							+ encode + "' " + h + delimiter + quote + ") ", (InputStream) is);
+				}
+				catch (ClassCastException e)
+				{
+					copyManager.copyIn("COPY " + table + columnName + " FROM STDIN WITH (FORMAT " + format + ", ENCODING '"
+							+ encode + "' " + h + delimiter + quote + ") ", (Reader) is);
+				}
 			}
 
 			if (format.equals(FORMAT_BINARY)) {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
+				try {
+					copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", (InputStream) is);
+				}
+				catch (ClassCastException e)
+				{
+					copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", (Reader) is);
+				}
 			}
 
 			conn.getConnexion().commit();
@@ -2485,6 +2031,44 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 			conn.close();
 		}
 	}
+    
+	public <T> void importing(Connection connexion, String table, InputStream is, boolean csv, String aDelim)
+			throws Exception {
+		importing(connexion, table, null, is, csv, true, aDelim, null);
+	}
+
+	public <T> void importing(Connection connexion, String table, T is, boolean csv) throws Exception {
+		importing(connexion, table, null, is, csv, true, null, null);
+	}
+
+	public <T> void importing(Connection connexion, String table, T is, boolean csv,
+			boolean aHeader, String aDelim) throws Exception {
+		importing(connexion, table, null, is, csv, aHeader, aDelim, null);
+	}
+
+	public <T> void importing(Connection connexion, String table, String aColumnName, T is, boolean csv,
+			boolean aHeader, String aDelim) throws Exception {
+		importing(connexion, table, aColumnName, is, csv, aHeader, aDelim, null);
+
+	}
+
+	public <T> void importing(Connection connexion, String table, String aColumnName, T is, boolean csv,
+			boolean header, String aDelim, String aQuote) throws Exception {
+		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote);
+	}
+
+	public <T> void importing(Connection connexion, String table, String aColumnName, T is, boolean csv,
+			boolean header, String aDelim, String aQuote, String encoding) throws Exception {
+		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote,
+				encoding);
+	}
+
+	public <T> void importing(Connection connexion, String table, String aColumnName, T is, String format,
+			boolean header, String aDelim, String aQuote) throws Exception {
+		importing(connexion, table, aColumnName, is, format, header, aDelim, aQuote, null);
+	}
+    
+  
 
     /**
      * On passe une table et une liste de colonne pour voir si un index avec ces
@@ -2516,25 +2100,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	return returned;
     }
 
-    public void importing(Connection connexion, String table, InputStream is, boolean csv, String aDelim)
-	    throws Exception {
-	importing(connexion, table, null, is, csv, true, aDelim, null);
-    }
 
-    public void importing(Connection connexion, String table, InputStream is, boolean csv) throws Exception {
-	importing(connexion, table, null, is, csv, true, null, null);
-    }
-
-    public void importing(Connection connexion, String table, InputStream is, boolean csv, boolean aHeader,
-	    String aDelim) throws Exception {
-	importing(connexion, table, null, is, csv, aHeader, aDelim, null);
-    }
-
-    public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-	    boolean aHeader, String aDelim) throws Exception {
-	importing(connexion, table, aColumnName, is, csv, aHeader, aDelim, null);
-
-    }
 
     public Date getDate(Connection aConnexion, StringBuilder aRequete, SimpleDateFormat aSimpleDateFomrat)
 	    throws ParseException, SQLException {
@@ -2547,103 +2113,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	return resultat == null ? null : aSimpleDateFomrat.parse(resultat);
     }
 
-    /**
-     *
-     * @param aConnexion
-     * @param schema
-     * @param pattern
-     * @return la liste des tables telles que {@code pg_namespace.nspname = schema}
-     *         et {@code pg_class.relname LIKE pattern}
-     */
-    public List<String> listeTablesFromPattern(Connection aConnexion, String schema, String pattern) {
-	StringBuilder requete = new StringBuilder();
-	requete.append("\n SELECT nspname||'.'||relname AS nom_qualifie");
-	requete.append("\n FROM pg_class INNER JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid");
-	requete.append("\n WHERE pg_namespace.nspname = '" + schema + "'");
-	requete.append("\n   AND pg_class.relname LIKE '" + pattern + "'");
-	requete.append("\n   AND pg_class.relkind = 'r'");
-	requete.append(";");
-	return getList(aConnexion, requete, new ArrayList<String>());
-    }
-
-    /**
-     *
-     * @param aConnexion
-     * @param schema
-     * @param pattern
-     * @return la liste des tables telles que {@code pg_namespace.nspname = schema}
-     *         et {@code pg_class.relname LIKE pattern}
-     */
-    public List<String> listeTablesFromConditions(Connection aConnexion, String schema, String... conditions) {
-	StringBuilder requete = new StringBuilder();
-	requete.append("\n SELECT nspname||'.'||relname AS nom_qualifie");
-	requete.append("\n FROM pg_class INNER JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid");
-	requete.append("\n WHERE pg_namespace.nspname = '" + schema + "'");
-	for (String condition : conditions) {
-	    requete.append("\n   AND pg_class.relname " + condition);
-	}
-	requete.append("\n   AND pg_class.relkind = 'r'");
-	requete.append(";");
-	return getList(aConnexion, requete, new ArrayList<String>());
-    }
-
-    public List<String> listeContraintes(Connection connexion, String aSchema, String aTable, String aTypeContrainte) {
-	return getList(connexion, FormatSQL.listeContraintes(aSchema, aTable, aTypeContrainte),
-		new ArrayList<String>());
-    }
-
-    public List<String> listeAllContraintes(Connection connexion, String aSchema, String aTable) {
-	List<String> returned = new ArrayList<>();
-	List<String> listeTypeConstraint = new ArrayList<>(Arrays.asList("c", "f", "p", "u", "t", "x"));
-	for (String type : listeTypeConstraint) {
-	    returned.addAll(
-		    getList(connexion, FormatSQL.listeContraintes(aSchema, aTable, type), new ArrayList<String>()));
-	}
-	return returned;
-    }
-
-    /**
-     *
-     * @param aConnexion
-     * @param schema
-     * @param pattern
-     * @return la liste des tables telles que {@code pg_namespace.nspname = schema}
-     *         et {@code pg_class.relname LIKE pattern}
-     */
-    public List<String> listeTablesFromPattern(Connection aConnexion, String schema, Collection<String> patterns) {
-	StringBuilder requete = new StringBuilder();
-	requete.append("\n SELECT schemaname||'.'||tablename AS nom_qualifie");
-	requete.append("\n FROM pg_tables ");
-	requete.append("\n WHERE schemaname='" + schema + "'");
-	requete.append("\n AND ( ");
-	boolean isFirst = true;
-	for (String pattern : patterns) {
-	    if (isFirst) {
-		isFirst = false;
-	    } else {
-		requete.append("\n   OR ");
-	    }
-	    requete.append("tablename LIKE '" + pattern + "'");
-	}
-	requete.append(");");
-	return getList(aConnexion, requete, new ArrayList<String>());
-    }
-
-    /**
-     * Quand postgresql 9.5 arrive, virer cette méthode et faire des create index if
-     * not exists
-     *
-     * @param aConnexion
-     * @param nomIndex
-     * @param nomSchema
-     * @param nomTable
-     * @return
-     */
-    @Deprecated
-    public boolean isIndexExist(Connection aConnexion, String nomIndex, String nomSchema, String nomTable) {
-	return getCountFromRequest(aConnexion, "SELECT * FROM pg_indexes WHERE indexname = '" + nomIndex
-		+ "' AND tablename = '" + nomTable + "' AND schemaname = '" + nomSchema + "'") > 0;
-    }
 
     public boolean isSilent() {
 	return this.silent;

@@ -402,38 +402,9 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
         UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(null, creationTableDef);
     }
 
-    private void remplissageTableTemporaire(BufferedReader rd) throws IOException, SQLException {
+    private void remplissageTableTemporaire(BufferedReader rd) throws Exception {
         String newNomenclatureName = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
-        StringBuilder insert = new StringBuilder();
-        insert.append("\n INSERT INTO arc.temp_" + newNomenclatureName + " VALUES ");
-        String row = "";
-        boolean first = true;
-        while ((row = rd.readLine()) != null) {
-            insert.append("\n " + (first ? "  (" : ", ("));
-            first = false;
-            String[] valeurs = row.split(";");
-            for (int i = 0; i < valeurs.length; i++) {
-                // echapement des quotes pour le insert
-//                insert.append((i > 0 ? ", " : "") + "'" + valeurs[i].replace(QUOTE, quotequote) + "'");
-            }
-            insert.append(") ");
-
-            /**
-             * Si la requête devient longue (en termes de caractère)
-             */
-            if (insert.length() > 10000) {
-                UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(null, insert + ";");
-                insert = new StringBuilder();
-                insert.append("\n INSERT INTO arc.temp_" + newNomenclatureName + " VALUES ");
-                first = true;
-
-            }
-        }
-        rd.close();
-        /*
-         * Execution du bout de requête restant ( a priori de longueur inférieur à XXXXX
-         */
-        UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(null, insert + ";");
+    	UtilitaireDao.get(DbConstant.POOL_NAME).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
     }
 
     private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws SQLException {
