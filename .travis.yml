@@ -1,2 +1,10 @@
 language: java
 jdk: openjdk8
+addons:
+  sonarcloud:
+    organization: "inseefr"
+    token:
+      # encrypting the token via https://docs.travis-ci.com/user/encryption-keys/ 
+      secure: "p/TDhk7nCCyA4SuRVTKqjOUge0zkm9NQqtkAGft+Qtk0lVZhupSSaNRUGORYDAtGe8NETj6c+G676adw0Gb1KIB5Jbf8Ih9Ed67QqSV4qytfZMnFj1haEpjVZnWHnPiSu3/KuasgAVdA+FlpGHwpP+DD/nyC0DZK/KYSs9dNMbbWe+ZhQqChYHEJu8alRwgcREMEgfbH6PQ2eolq0KWUzuo69jBzme4xaC7pN7TDfg+tEt6Mkpuf9zn9vElxl6ZXjbDCEG41rCTb6oFPnvA4nji/O6vaW7mfMPnUX/0zHtX4r6dVzTiOoCH7mTyY/qugjeGYDE9epdNdUxTd9BtNZucDhoz2hN4tbMkSHPhUbHxkPIxfZLEXWDgXrfrieILfzDa8q7sUIJ+9l8PQxYPY6vG2oGUYTyrvBFpqGfDRaLG3U3IGb0qs4/6DXNl8Is8fOrrrE6CLISx2SU22Os0lBanZq+5x16QzRikEbTdAxyzRWDJ6EBDmFwgBNFVvax2fic0fdImfMaN3dZh/PbNZC1t44SjsI2cvjP9OqNYcqBdPFWjftLne7T6RTRd0e6uP35yy4ibUOVtRe1T+SsF384jm1zb12Bu7yLyuz2+pgZ8wADRHnWuzsPRroEvba3UEWTLJ2+ut2/pcPy7hL/8gFo7iyrptQlHs+vewm3aS+yU="
+script:
+ - mvn clean verify sonar:sonar -Pcoverage 
