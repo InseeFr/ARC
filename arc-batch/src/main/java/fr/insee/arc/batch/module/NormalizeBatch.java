@@ -1,13 +1,13 @@
-package fr.insee.arc.batch;
+package fr.insee.arc.batch.module;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.utils.batch.Batch;
 
-public class IdentifyBatch extends Batch {
+public class NormalizeBatch extends Batch {
 
-    public IdentifyBatch(String... someArgs) {
+    public NormalizeBatch(String... someArgs) {
         super(someArgs);
     }
 
@@ -22,14 +22,13 @@ public class IdentifyBatch extends Batch {
      *            {@code args[3]} : maximum number of lines to process
      */
     public static void main(String[] args) {
-        Batch batch = new IdentifyBatch(args);
+        Batch batch = new NormalizeBatch(args);
         batch.execute();
-
     }
 
     @Override
     public void execute() {
-        this.report = ApiServiceFactory.getService(TypeTraitementPhase.IDENTIFY.toString(), (String) this.args[0], (String) this.args[1],
+        this.report = ApiServiceFactory.getService(TypeTraitementPhase.STRUCTURIZE.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
 
     }

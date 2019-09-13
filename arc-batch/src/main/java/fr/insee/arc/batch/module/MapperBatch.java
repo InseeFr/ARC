@@ -1,14 +1,12 @@
-package fr.insee.arc.batch;
+package fr.insee.arc.batch.module;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.utils.batch.Batch;
 
-
-public class LoadBatch extends Batch {
-
-    public LoadBatch(String... someArgs) {
+public class MapperBatch extends Batch {
+    public MapperBatch(String... someArgs) {
         super(someArgs);
     }
 
@@ -23,14 +21,15 @@ public class LoadBatch extends Batch {
      *            {@code args[3]} : maximum number of lines to process
      */
     public static void main(String[] args) {
-        Batch batch = new LoadBatch(args);
+        Batch batch = new MapperBatch(args);
         batch.execute();
     }
 
     @Override
     public void execute() {
-        this.report = ApiServiceFactory.getService(TypeTraitementPhase.LOAD.toString(), (String) this.args[0], (String) this.args[1],
+        this.report = ApiServiceFactory.getService(TypeTraitementPhase.MAPMODEL.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
 
     }
+
 }

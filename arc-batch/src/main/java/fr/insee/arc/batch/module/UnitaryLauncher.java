@@ -1,4 +1,4 @@
-package fr.insee.arc.batch;
+package fr.insee.arc.batch.module;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;

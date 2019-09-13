@@ -13,11 +13,19 @@ import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import fr.insee.arc.batch.module.ControlBatch;
+import fr.insee.arc.batch.module.FilterBatch;
+import fr.insee.arc.batch.module.InitializeBatch;
+import fr.insee.arc.batch.module.LoadBatch;
+import fr.insee.arc.batch.module.MapperBatch;
+import fr.insee.arc.batch.module.NormalizeBatch;
+import fr.insee.arc.batch.module.ReceiveBatch;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.core.service.AbstractPhaseService;
 import fr.insee.arc.core.service.ApiInitialisationService;
+import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -31,7 +39,7 @@ import fr.insee.arc.utils.utils.ManipString;
  * 
  * @author Manu
  */
-public class ARCLauncher {
+public class ARCLauncher implements IReturnCode {
 	private static final Logger LOGGER = Logger.getLogger(ARCLauncher.class);
 	static HashMap<String, String> mapParam = new HashMap<>();
 	private static final String ENV = "env";
@@ -469,13 +477,13 @@ public class ARCLauncher {
 					if (args != null && args.length > 0 && args[0].equals("noExit")) {
 						message("No Exit");
 					} else {
-						System.exit(0);
+						System.exit(STATUS_SUCCESS);
 					}
 				}
 
 			} catch (Exception ex) {
-				LoggerHelper.errorGenTextAsComment(ARCLauncher.class, "main()", LOGGER, ex);
-				System.exit(202);
+				ex.printStackTrace();
+				System.exit(STATUS_FAILURE_TECHNICAL_WARNING);
 			}
 
 		} while (remainingFile);
