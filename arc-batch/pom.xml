@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>fr.insee.arc</groupId>
 	<artifactId>arc-batch</artifactId>
-	<name>arc-batch</name>
+	<name>ARC-BATCH</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

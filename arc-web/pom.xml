@@ -11,7 +11,7 @@
 	<groupId>fr.insee.arc</groupId>
 	<artifactId>arc-web</artifactId>
 	<packaging>war</packaging>
-	<name>arc-web</name>
+	<name>ARC-WEB</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

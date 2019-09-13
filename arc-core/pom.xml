@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>fr.insee.arc</groupId>
 	<artifactId>arc-core</artifactId>
-	<name>arc-core</name>
+	<name>ARC-CORE</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

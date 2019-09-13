@@ -5,7 +5,7 @@
 	<groupId>fr.insee</groupId>
 	<artifactId>arc</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
-	<name>arc</name>
+	<name>ARC</name>
 	<description>ARC version type composite</description>
 	<properties>
 		<version>0.0.2-SNAPSHOT</version>
