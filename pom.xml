@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>fr.insee</groupId>
@@ -11,44 +12,16 @@
 		<version>0.0.2-SNAPSHOT</version>
 		<project.struts2.version>2.5.20</project.struts2.version>
 	</properties>
-
-	<!-- Adresse URL de la page d'accueil du projet ; balise requise dans pour 
-		le déploiement de la documentation automatique -->
 	<url>http://www.insee.fr</url>
 
-	<!-- On définit ici le lien vers le tracker d'anomalies du projet. L'URL 
-		est disponible sur la page GForge du projet. -->
 	<issueManagement>
 		<system>gforge.insee.fr</system>
 		<url>http://gforge.insee.fr</url>
 	</issueManagement>
 
 
-	<!-- Déploiement du projet sur CVS via Maven : ne rien mettre si vous utilisez 
-		Eclipse ou TortoiseCVS On définit ici les informations nécessaires pour relier 
-		le projet à son dépôt CVS. Ces informations sont par exemple utilisées par 
-		les plugins scm et release de Maven. -->
 	<scm>
-		<!-- La balise <connection> doit être de la forme : scm:cvs:ext:idep@gforge.insee.fr:/cvsroot/nom-du-projet:nom-du-module 
-			Par exemple : scm:cvs:ext:ozp6kz@gforge.insee.fr:/cvsroot/maven-repo:nom-du-module -->
-		<!-- La balise URL doit contenir un lien vers le dépôt CVS de votre projet. 
-			Le plus simple est d'y accéder par GForge, puis de copier/coller à la main 
-			l'URL depuis votre navigateur vers ce pom. -->
 	</scm>
-
-	<!-- Déploiement du site HTML : laisser en commentaire si vous n'utilisez 
-		pas la fonction Les balises suivantes permettent de définir l'URL du site 
-		sur lequel sera deployé les pages documentaires HTML générées par Maven lors 
-		de la commande mvn site:deploy. Veuillez vous assurer d'avoir les droits 
-		nécessaires pour déployer des fichiers sur l'URL choisie avant de lancer 
-		la commande. Par exemple : <distributionManagement> <site> <id>gforge.insee.fr</id> 
-		<name>Site web test</name> <url> scp://gforge.insee.fr/insee/groups/maven-repo/htdocs/testSite 
-		</url> </site> </distributionManagement> Maven va déployer le site HTML sur 
-		le projet "maven-repo" de GForge. Il sera ensuite accessible via l'URL http://gforge.insee.fr/groups/maven-repo/testSite/ -->
-
-
-	<!-- Ce bloc permet de recenser les différents membres de l'équipe projet, 
-		chacun étant défini dans une balise <developer> distincte -->
 	<developers>
 
 		<developer>
@@ -64,9 +37,6 @@
 
 	</developers>
 
-	<!-- Si des individus extérieurs à l'équipe projet ont contribué, ils peuvent 
-		être référencés à l'aide du bloc suivant Dans le cas contraire, simplement 
-		supprimer le bloc correspondant. -->
 	<contributors>
 
 		<contributor>
@@ -90,16 +60,9 @@
 			<url>${urlToDeploy}</url>
 		</site>
 	</distributionManagement>
-	<!-- Le tag <build> permet de gérer des éléments ayant trait à la construction 
-		du projet par Maven, notamment la configuration des plugins quand le comportement 
-		par défaut de ceux-ci n'est pas adapté. -->
+
 	<build>
 
-
-		<!-- La partie ci-dessous exclut les fichiers properties "de production" 
-			(contenus dans src/main/resources/prod) de l'archive produite par exécution 
-			de "mvn package" En revanche, les fichiers seront quand même présents dans 
-			le ZIP créé par l'exécution de "mvn assembly:single", à des fins de livraison. -->
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
@@ -111,39 +74,7 @@
 		</resources>
 
 
-
-
-		<!-- La configuration des plugins se fait au cas par cas, à l'aide de tags 
-			<plugin>, eux-mêmes contenus dans un tag <plugins>. Le tag se présente de 
-			la manière suivante (l'exemple est pris sur le plugin "site" dans le fichier 
-			pom Insee) : <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-site-plugin</artifactId> 
-			<version>2.0.1</version> <configuration> <locales>fr</locales> </configuration> 
-			</plugin> Les tags <groupId>, <artifactId> et <version> servent à identifier 
-			le plugin que vous souhaitez ajouter configurer. Le tag <configuration> est 
-			celui qui va porter les différents éléments de configuration du plugin. Il 
-			va de soi que le contenu de ce tag change d'un plugin à l'autre. Dans l'exemple, 
-			nous demandons au plugin "site" (chargé de créer le site HTML documentaire 
-			Maven) de générer un site en français. Quasiment tous les plugins possèdent 
-			un site Internet, sur lequel on pourra trouver les informations nécessaires 
-			à leur configuration. -->
-
 		<plugins>
-			<!-- Ce plugin est celui qui est utilisé pour construire des archives 
-				personnalisées à partir d'un projet. Le descripteur "assembly-web.xml" contient 
-				les fichiers properties de l'application, un fragment de contexte Tomcat, 
-				la fiche de livraison, et le WAR du projet, conformément aux normes de livraison. -->
-			<!-- <plugin> -->
-			<!-- <artifactId>maven-assembly-plugin</artifactId> -->
-			<!-- <version>2.2.1</version> -->
-			<!-- <configuration> -->
-			<!-- <descriptors> -->
-			<!-- <descriptor>src/main/resources/assembly/assembly-web.xml</descriptor> -->
-			<!-- </descriptors> -->
-			<!-- </configuration> -->
-			<!-- executions> <execution> <id>make-assembly-src</id> <phase>package</phase> 
-				<goals> <goal>single</goal> </goals> </execution> </executions -->
-			<!-- </plugin> -->
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -227,20 +158,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>log4j</groupId>
-		    <artifactId>log4j</artifactId>
-		    <version>1.2.17</version>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.slf4j</groupId> -->
-<!-- 			<artifactId>slf4j-log4j12</artifactId> -->
-<!-- 			<version>1.7.7</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.slf4j</groupId> -->
-<!-- 			<artifactId>slf4j-api</artifactId> -->
-<!-- 			<version>1.7.7</version> -->
-<!-- 		</dependency> -->
+
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
 			<groupId>commons-io</groupId>

@@ -1,13 +1,13 @@
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>fr.insee</groupId>
 		<artifactId>arc</artifactId>
 		<version>0.0.2-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
-
 	</parent>
 	<groupId>fr.insee.arc</groupId>
 	<artifactId>arc-ws</artifactId>
@@ -19,21 +19,7 @@
 		<project.struts2.version>2.5.10.1</project.struts2.version>
 	</properties>
 
-
-
-	<!-- *************************************** LA GESTION DES DEPENDANCES 
-		COMMENCE ICI *************************************** -->
 	<dependencies>
-	<!-- C'est ici que seront declarées toutes les dépendances du projet. La 
-		déclaration d'une dépendance se fait de la manière suivante : <dependency> 
-		<groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.8.2</version> 
-		<scope>test</scope> </dependency> Les tags <groupId>, <artifactId> et <version> 
-		servent à identifier la librairie que vous souhaitez ajouter en dépendance. 
-		Le tag <scope> correspond à la portée des dépendances : - compile (valeur 
-		par defaut si le tag est omis) : pour la compilation ET l'exécution - runtime 
-		: pour l'exécution uniquement - test : pour l'exécution des tests - provided 
-		: librairie déjà présente sur l'environnement d'exécution (exemple : la librairie 
-		servlet-api, qui sera portée par le serveur d'application) -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -97,20 +83,8 @@
 		</dependency>
 	</dependencies>
 
-	<!-- ********************************* FIN DE LA GESTION DES DEPENDANCES 
-		********************************* -->
-
-	<!-- Le tag <build> permet de gérer des éléments ayant trait à la construction 
-		du projet par Maven, notamment la configuration des plugins quand le comportement 
-		par défaut de ceux-ci n'est pas adapté. -->
 	<build>
-
-
-		<!-- La partie ci-dessous exclut les fichiers properties "de production" 
-			(contenus dans src/main/resources/prod) de l'archive produite par 
-			exécution de "mvn package" En revanche, les fichiers seront quand même présents 
-			dans le ZIP créé par l'exécution de "mvn assembly:single", à des fins de 
-			livraison. -->
+		<finalName>arc-ws</finalName>
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
@@ -119,27 +93,7 @@
 				</excludes>
 			</resource>
 		</resources>
-
-
-		<!-- La configuration des plugins se fait au cas par cas, à l'aide de tags 
-			<plugin>, eux-mêmes contenus dans un tag <plugins>. Le tag se présente de 
-			la manière suivante (l'exemple est pris sur le plugin "site" dans le fichier 
-			pom Insee) : <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-site-plugin</artifactId> 
-			<version>2.0.1</version> <configuration> <locales>fr</locales> </configuration> 
-			</plugin> Les tags <groupId>, <artifactId> et <version> servent à identifier 
-			le plugin que vous souhaitez ajouter configurer. Le tag <configuration> est 
-			celui qui va porter les différents éléments de configuration du plugin. Il 
-			va de soi que le contenu de ce tag change d'un plugin à l'autre. Dans l'exemple, 
-			nous demandons au plugin "site" (chargé de créer le site HTML documentaire 
-			Maven) de générer un site en français. Quasiment tous les plugins possèdent 
-			un site Internet, sur lequel on pourra trouver les informations nécessaires 
-			à leur configuration. -->
-
 		<plugins>
-			<!-- Ce plugin est celui qui est utilisé pour construire des archives 
-				personnalisées à partir d'un projet. Le descripteur "assembly-web.xml" contient 
-				les fichiers properties de l'application, un fragment de contexte Tomcat, 
-				la fiche de livraison, et le WAR du projet, conformément aux normes de livraison. -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.2.1</version>
@@ -148,8 +102,6 @@
 						<descriptor>src/main/resources/assembly/assembly-web.xml</descriptor>
 					</descriptors>
 				</configuration>
-				<!-- executions> <execution> <id>make-assembly-src</id> <phase>package</phase> 
-					<goals> <goal>single</goal> </goals> </execution> </executions -->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

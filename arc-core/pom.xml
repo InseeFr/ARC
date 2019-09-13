@@ -1,6 +1,7 @@
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>fr.insee</groupId>
@@ -15,17 +16,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<!-- Le tag <build> permet de gérer des éléments ayant trait à la construction 
-		du projet par Maven, notamment la configuration des plugins quand le comportement 
-		par défaut de ceux-ci n'est pas adapté. -->
 	<build>
 
-
-		<!-- La partie ci-dessous exclut les fichiers properties "de production" 
-			(contenus dans src/main/resources/prod) de l'archive produite par 
-			exécution de "mvn package" En revanche, les fichiers seront quand même présents 
-			dans le ZIP créé par l'exécution de "mvn assembly:single", à des fins de 
-			livraison. -->
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
@@ -34,21 +26,6 @@
 				</excludes>
 			</resource>
 		</resources>
-
-
-		<!-- La configuration des plugins se fait au cas par cas, à l'aide de tags 
-			<plugin>, eux-mêmes contenus dans un tag <plugins>. Le tag se présente de 
-			la manière suivante (l'exemple est pris sur le plugin "site" dans le fichier 
-			pom Insee) : <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-site-plugin</artifactId> 
-			<version>2.0.1</version> <configuration> <locales>fr</locales> </configuration> 
-			</plugin> Les tags <groupId>, <artifactId> et <version> servent à identifier 
-			le plugin que vous souhaitez ajouter configurer. Le tag <configuration> est 
-			celui qui va porter les différents éléments de configuration du plugin. Il 
-			va de soi que le contenu de ce tag change d'un plugin à l'autre. Dans l'exemple, 
-			nous demandons au plugin "site" (chargé de créer le site HTML documentaire 
-			Maven) de générer un site en français. Quasiment tous les plugins possèdent 
-			un site Internet, sur lequel on pourra trouver les informations nécessaires 
-			à leur configuration. -->
 
 		<plugins>
 			<plugin>
@@ -61,8 +38,18 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-		</plugins>
 
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<!-- put the default-jar in the none phase to skip it from being created -->
+						<phase>none</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 	<distributionManagement>
@@ -86,9 +73,9 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>joda-time</groupId>
-		    <artifactId>joda-time</artifactId>
-		    <version>2.10.2</version>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.10.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencsv</groupId>
@@ -118,7 +105,6 @@
 			<version>3.11.1</version>
 			<scope>test</scope>
 		</dependency>
-
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
 		<dependency>

@@ -159,29 +159,8 @@
 		</snapshotRepository>
 	</distributionManagement>
 
-
-	<!-- ********************************* FIN DE LA GESTION DES DEPENDANCES
-		********************************* -->
-
-	<!-- Le tag <build> permet de gérer des éléments ayant trait à la construction
-		du projet par Maven, notamment la configuration des plugins quand le comportement
-		par défaut de ceux-ci n'est pas adapté. -->
 	<build>
 		<finalName>arc-web</finalName>
-		<!-- La configuration des plugins se fait au cas par cas, à l'aide de tags
-			<plugin>, eux-mêmes contenus dans un tag <plugins>. Le tag se présente de
-			la manière suivante (l'exemple est pris sur le plugin "site" dans le fichier
-			pom Insee) : <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-site-plugin</artifactId>
-			<version>2.0.1</version> <configuration> <locales>fr</locales> </configuration>
-			</plugin> Les tags <groupId>, <artifactId> et <version> servent à identifier
-			le plugin que vous souhaitez ajouter configurer. Le tag <configuration> est
-			celui qui va porter les différents éléments de configuration du plugin. Il
-			va de soi que le contenu de ce tag change d'un plugin à l'autre. Dans l'exemple,
-			nous demandons au plugin "site" (chargé de créer le site HTML documentaire
-			Maven) de générer un site en français. Quasiment tous les plugins possèdent
-			un site Internet, sur lequel on pourra trouver les informations nécessaires
-			à leur configuration. -->
-
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
@@ -205,10 +184,6 @@
 
 
 		<plugins>
-			<!-- Ce plugin est celui qui est utilisé pour construire des archives
-				personnalisées à partir d'un projet. Le descripteur "assembly-web.xml" contient
-				les fichiers properties de l'application, un fragment de contexte Tomcat,
-				la fiche de livraison, et le WAR du projet, conformément aux normes de livraison. -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.2.1</version>
@@ -217,8 +192,6 @@
 						<descriptor>src/main/resources/assembly/assembly-web.xml</descriptor>
 					</descriptors>
 				</configuration>
-				<!-- executions> <execution> <id>make-assembly-src</id> <phase>package</phase>
-					<goals> <goal>single</goal> </goals> </execution> </executions -->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
