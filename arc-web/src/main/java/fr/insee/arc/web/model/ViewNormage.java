@@ -29,8 +29,8 @@ public class ViewNormage extends VObject {
                 put("id_regle", new ColumnRendering(true, "label.id", "5%", "text", null, true));
                 put("id_classe", new ColumnRendering(true, "label.structure.type", "23%", "select",
                         "select id, id from arc.ext_type_normage order by ordre", true));
-                put("rubrique", new ColumnRendering(true, "label.structure.element.main", "24%", "text", null, true));
-                put("rubrique_nmcl", new ColumnRendering(true, "label.structure.element.child", "24%", "text", null, true));
+                put("rubrique", new ColumnRendering(true, "label.element.main", "24%", "text", null, true));
+                put("rubrique_nmcl", new ColumnRendering(true, "label.element.child", "24%", "text", null, true));
                 put("commentaire", new ColumnRendering(true, "label.comment", "24%", "text", null, true));
                 put("todo", new ColumnRendering(false, "label.todo", "0%", "text", null, true));
 

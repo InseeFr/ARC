@@ -148,8 +148,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewControle" />
-		<property name="title" value="Controle" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 	<bean id="viewFiltrage" class="fr.insee.arc.web.model.ViewFiltrage"
@@ -157,8 +155,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewFiltrage" />
-		<property name="title" value="Filtrage" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 	<bean id="viewMapping" class="fr.insee.arc.web.model.ViewMapping"
@@ -166,8 +162,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewMapping" />
-		<property name="title" value="Mapping" />
-		<property name="paginationSize" value="15" />
 	</bean>
 
 	<bean id="viewTableMetier" class="fr.insee.arc.web.model.ViewTableMetier"
