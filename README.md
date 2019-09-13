@@ -2,6 +2,8 @@
 ## Workbench for acquisition and normalization of data sets
 [![Build Status](https://travis-ci.org/InseeFr/ARC.svg?branch=master)](https://travis-ci.org/InseeFr/ARC)
 
+![Sonar Quality Gate](https://img.shields.io/sonar/quality_gate/fr.insee:arc?server=https%3A%2F%2Fsonarcloud.io)
+
 ![GitHub](https://img.shields.io/github/license/inseefr/arc)
 
 - [General présentation of the application](#General-présentation-of-the-application)

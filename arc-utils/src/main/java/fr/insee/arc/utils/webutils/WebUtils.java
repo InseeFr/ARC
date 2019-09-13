@@ -62,6 +62,7 @@ public class WebUtils {
         if (!foundCookie && StringUtils.isNotEmpty(value)) {
 
                 Cookie cookie1 = new Cookie(key, value);
+                cookie1.setHttpOnly(true);
                 cookie1.setMaxAge(1 * 24 * 60 * 60 * 1000);
                 response.addCookie(cookie1);
         }
