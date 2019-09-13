@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.tools.ant.util.XmlConstants;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -42,6 +43,8 @@ public class CustomTreeFormat {
         
         // get the format of the norme
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+        // Securing the parsing by disallowing the use of a DTD
+        saxParserFactory.setFeature(XmlConstants.FEATURE_DISALLOW_DTD, true);
         XMLParserSecurityUtils.parserSecurityConfiguration(saxParserFactory);
         SAXParser saxParser = saxParserFactory.newSAXParser();
         FormatFichierHandler formatHandler = new FormatFichierHandler();

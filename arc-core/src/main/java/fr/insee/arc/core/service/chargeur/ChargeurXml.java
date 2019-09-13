@@ -14,6 +14,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.log4j.Logger;
+import org.apache.tools.ant.util.XmlConstants;
 import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.archive_loader.FilesInputStreamLoad;
@@ -129,6 +130,8 @@ public class ChargeurXml implements ILoader {
 	}
 
 	SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+	// Securing the parsing by disallowing the use of a DTD
+	saxParserFactory.setFeature(XmlConstants.FEATURE_DISALLOW_DTD, true);
 	XMLHandlerCharger4 handler = handlerCreationAndConfiguration();
 
 
