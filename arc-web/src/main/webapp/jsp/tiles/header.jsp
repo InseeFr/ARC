@@ -60,11 +60,6 @@
   		</li>
        <li class="nobullet mt-auto">
 	      		<ul style="margin: 0;">
-	      		
-	      		<s:if test='%{#session.WW_TRANS_I18N_LOCALE == null}'>
-	      		<s:param name="request_locale" >fr</s:param>
-	      		</s:if>
-	      		
 				<s:if test='%{#session.WW_TRANS_I18N_LOCALE.toString().equals("en")}'>
 					<li class="nobullet nav-link">	
 					<s:url action="locale" var="localeFR"><s:param name="request_locale" >fr</s:param></s:url>
@@ -76,7 +71,10 @@
 				</s:if>
 				<s:else>
 					<li class="nobullet btn-success nav-link">
-	      			<s:property value="#session.WW_TRANS_I18N_LOCALE.toString().toUpperCase()"/>
+					<s:if test="%{#session.WW_TRANS_I18N_LOCALE == null}">FR</s:if>
+					<s:else>
+	      				<s:property value="#session.WW_TRANS_I18N_LOCALE.toString().toUpperCase()"/>
+	      			</s:else>
 	      			</li>
 					<li class="nobullet nav-link">
 					<s:url action="locale" var="localeEN"><s:param name="request_locale" >en</s:param></s:url>
