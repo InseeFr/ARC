@@ -1,6 +1,6 @@
 # ARC Installation guide
 
-
+- [Build ARC java executables from release tags](#Build-ARC-java-executables-from-realease-tags)
 - [ARC database building](#ARC-database-building)
 - [Choose your application components](#Choose-your-application-components)
   - [Install the ARC web-user interface component](#Install-the-ARC-web-user-interface-component)
@@ -33,6 +33,17 @@
     - [WS2 request structure](#WS2-request-structure)
     - [WS2 response structure](#WS2-response-structure)
   - [How to retrieve data](#How-to-retrieve-data)
+
+## Build ARC java executables from realease tags
+ARC web application may be deployed by docker as described in the readme file.
+
+[Maven](https://maven.apache.org/index.html) software may also be used to generate easily the 2 war files of the web application and the data retrieval web-service application and the runnable jar file of the batch application.
+1. Get the selected realease source code
+2. Execute "maven clean install" command in the ARC directory
+3. The web application tomcat file arc-web.war will be found in the ARC/arc-web/target/ directory
+4. The data-retrieval web-service application tomcat file arc-ws.war will be found in the ARC/arc-ws/target/ directory 
+5. The runnable jar file arc-batch.jar used to start the ARC batch application will be found in the ARC/arc-batch/target/ directory
+
 ## ARC database building
 
 1. Build a postgres database with version 9.6 or higher
