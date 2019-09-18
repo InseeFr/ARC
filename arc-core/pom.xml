@@ -38,17 +38,6 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>default-jar</id>
-						<!-- put the default-jar in the none phase to skip it from being created -->
-						<phase>none</phase>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
