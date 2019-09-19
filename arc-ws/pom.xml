@@ -13,7 +13,6 @@
 	<artifactId>arc-ws</artifactId>
 	<packaging>war</packaging>
 	<name>ARC-WS</name>
-	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.struts2.version>2.5.10.1</project.struts2.version>

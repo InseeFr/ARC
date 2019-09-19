@@ -12,7 +12,6 @@
 	<artifactId>arc-web</artifactId>
 	<packaging>war</packaging>
 	<name>ARC-WEB</name>
-	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.struts2.version>2.5.10.1</project.struts2.version>
@@ -40,7 +39,7 @@
 				<war.remote.dir>depot</war.remote.dir>
 				<war.remote.server.id>arc.cts.dv</war.remote.server.id>
 				<!-- Insert the url address of FTP server for war file -->
-				<war.remote.url>ftp://dvarctsweblas01.ad.insee.intra</war.remote.url>
+				<war.remote.url></war.remote.url>
 			</properties>
 		</profile>
 	</profiles>
@@ -145,19 +144,6 @@
 			<version>2.5</version>
 		</dependency>
 	</dependencies>
-
-	<distributionManagement>
-		<repository>
-			<id>insee-releases</id>
-			<name>Repository INSEE pour les releases</name>
-			<url>dav:http://integration-continue.insee.fr:80/artifactory/libs-releases-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>insee-snapshots</id>
-			<name>Repository INSEE pour les snapshots</name>
-			<url>dav:http://integration-continue.insee.fr:80/artifactory/libs-snapshots-local</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<build>
 		<finalName>arc-web</finalName>

@@ -12,54 +12,18 @@
 		<version>0.0.2-SNAPSHOT</version>
 		<project.struts2.version>2.5.20</project.struts2.version>
 	</properties>
-	<url>http://www.insee.fr</url>
+	<url>https://github.com/InseeFr/ARC</url>
 
 	<issueManagement>
-		<system>gforge.insee.fr</system>
-		<url>http://gforge.insee.fr</url>
+		<url>https://github.com/InseeFr/ARC/issues</url>
+		<system>GitHub Issues</system>
 	</issueManagement>
 
-
 	<scm>
+		<url>https://github.com/InseeFr/ARC</url>
+		<connection>scm:git:https://github.com/InseeFr/ARC.git</connection>
+		<developerConnection>scm:git:git@github.com:InseeFr/ARC.git</developerConnection>
 	</scm>
-	<developers>
-
-		<developer>
-			<id>idep</id>
-			<name>Prénom Nom</name>
-			<email>prenom.nom@insee.fr</email>
-			<organization>INSEE</organization>
-			<organizationUrl>http://www.insee.fr</organizationUrl>
-			<roles>
-				<role>Développeur</role>
-			</roles>
-		</developer>
-
-	</developers>
-
-	<contributors>
-
-		<contributor>
-			<name>Prénom Nom</name>
-			<email>prenom.nom@organisation.fr</email>
-			<!-- Si le contributeur est extérieur à l'Insee, on pourra définir son 
-				organisation d'appartenance -->
-			<organization>Nom de l'organisation</organization>
-			<organizationUrl>http://www.organisation.fr</organizationUrl>
-			<roles>
-				<role>Testeur</role>
-			</roles>
-		</contributor>
-
-	</contributors>
-
-	<distributionManagement>
-		<site>
-			<id>gforge.insee.fr</id>
-			<name>Siera doc</name>
-			<url>${urlToDeploy}</url>
-		</site>
-	</distributionManagement>
 
 	<build>
 
