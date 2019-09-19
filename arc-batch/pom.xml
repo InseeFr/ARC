@@ -12,7 +12,6 @@
 	<groupId>fr.insee.arc</groupId>
 	<artifactId>arc-batch</artifactId>
 	<name>ARC-BATCH</name>
-	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.siera.version>0.0.2-SNAPSHOT</project.siera.version>
@@ -68,20 +67,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<distributionManagement>
-		<repository>
-			<id>insee-releases</id>
-			<name>Repository INSEE pour les releases</name>
-			<url>dav:http://integration-continue.insee.fr:80/artifactory/libs-releases-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>insee-snapshots</id>
-			<name>Repository INSEE pour les snapshots</name>
-			<url>dav:http://integration-continue.insee.fr:80/artifactory/libs-snapshots-local</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 
 	<dependencies>
 		<dependency>
