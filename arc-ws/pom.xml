@@ -15,7 +15,7 @@
 	<name>ARC-WS</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.struts2.version>2.5.10.1</project.struts2.version>
+		<project.struts2.version>2.5.20</project.struts2.version>
 	</properties>
 
 	<dependencies>
