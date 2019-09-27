@@ -60,7 +60,7 @@
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
-			<version>1.2.2</version>
+			<version>[1.4,)</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -136,7 +136,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>4.1.2.RELEASE</version>
+			<version>[4.3.17,)</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
