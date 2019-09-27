@@ -16,8 +16,8 @@ public class ViewListNomenclatures extends VObject {
             private static final long serialVersionUID = 9180943017049417575L;
 
 			{
-                put("nom_table", new ColumnRendering(true, "Nomenclatures", "200px", "text", null, true));
-                put("description", new ColumnRendering(true, "Description", "200px", "text", null, true));
+                put("nom_table", new ColumnRendering(true, "Nomenclatures", "100%", "text", null, true));
+                put("description", new ColumnRendering(true, "Description", "75%", "text", null, true));
             }
         }
 

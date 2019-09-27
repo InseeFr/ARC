@@ -18,9 +18,9 @@ public class ViewSchemaNmcl extends VObject{
             private static final long serialVersionUID = -6107441894921031807L;
 
             {
-                put("type_nmcl", new ColumnRendering(false, "Type de la nomenclature", "200px", "text", null, true));
-                put("nom_colonne", new ColumnRendering(true, "Variable", "100px", "text", null, true));
-                put("type_colonne", new ColumnRendering(true, "Type", "100px", "text", null, true));
+                put("type_nmcl", new ColumnRendering(false, "Type de la nomenclature", "100%", "text", null, true));
+                put("nom_colonne", new ColumnRendering(true, "Variable", "100%", "text", null, true));
+                put("type_colonne", new ColumnRendering(true, "Type", "50%", "text", null, true));
 
             }
         }

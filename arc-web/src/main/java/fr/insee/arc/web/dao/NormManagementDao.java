@@ -1,4 +1,4 @@
-package fr.insee.arc.web.util;
+package fr.insee.arc.web.dao;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,6 +43,9 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.action.GererNormeAction;
+import fr.insee.arc.web.util.ConstanteBD;
+import fr.insee.arc.web.util.EAlphaNumConstante;
+import fr.insee.arc.web.util.VObject;
 
 /**
  * Will own all the utilitary methode used in the {@link GererNormeAction}
@@ -50,10 +53,10 @@ import fr.insee.arc.web.action.GererNormeAction;
  * @author Pépin Rémi
  *
  */
-public class NormManagementUtilitary {
+public class NormManagementDao {
     private static final String JDR = " jdr.";
     private static final String MAPPING = "mapping.";
-    private static final Logger LOGGER = Logger.getLogger(NormManagementUtilitary.class);
+    private static final Logger LOGGER = Logger.getLogger(NormManagementDao.class);
 
     private static final String CLEF_CONSOLIDATION = "{clef}";
     public static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
@@ -62,7 +65,7 @@ public class NormManagementUtilitary {
 
     private static final String MESSAGE_VARIABLE_CLEF_NULL = "La variable {tokenNomVariable} est une variable clef pour la consolidation.\nVous devez vous assurer qu'elle ne soit jamais null.";
 
-    private NormManagementUtilitary() {
+    private NormManagementDao() {
 	throw new IllegalStateException("Utility class");
     }
 
@@ -612,7 +615,7 @@ public class NormManagementUtilitary {
 		/*
 		 * Récupération du jeu de règle
 		 */
-		RuleSets jdr = NormManagementUtilitary.fetchJeuDeRegle(viewRulesSet);
+		RuleSets jdr = NormManagementDao.fetchJeuDeRegle(viewRulesSet);
 		/*
 		 * recopie des tables de l'environnement
 		 */

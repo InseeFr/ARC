@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -204,6 +205,9 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
 	    this.isRefreshMonitoring = true;
 	} else {
 	    // if the env in session is null initialiaze it
+		
+		System.out.println(getSession());
+		
 	    if (getSession().get(SessionParameters.ENV) == null) {
 		getSession().put(SessionParameters.ENV,
 			properties.getSchemaReference() + "_BAS1");

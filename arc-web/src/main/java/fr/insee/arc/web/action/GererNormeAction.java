@@ -38,8 +38,8 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
+import fr.insee.arc.web.dao.NormManagementDao;
 import fr.insee.arc.web.util.ConstanteBD;
-import fr.insee.arc.web.util.NormManagementUtilitary;
 import fr.insee.arc.web.util.VObject;
 
 @Component
@@ -115,31 +115,31 @@ public class GererNormeAction extends ArcAction {
 
     @Override
     public void putAllVObjects() {
-	putVObject(getViewNorme(), t -> NormManagementUtilitary.initializeViewNorme(t,
+	putVObject(getViewNorme(), t -> NormManagementDao.initializeViewNorme(t,
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORME)));
 	//
-	putVObject(getViewCalendrier(), t -> NormManagementUtilitary.initializeViewCalendar(t, getViewNorme(),
+	putVObject(getViewCalendrier(), t -> NormManagementDao.initializeViewCalendar(t, getViewNorme(),
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CALENDRIER)));
 	//
-	putVObject(getViewJeuxDeRegles(), t -> NormManagementUtilitary.initializeViewRulesSet(t, getViewCalendrier(),
+	putVObject(getViewJeuxDeRegles(), t -> NormManagementDao.initializeViewRulesSet(t, getViewCalendrier(),
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS)));
 	//
-	putVObject(getViewChargement(), t -> NormManagementUtilitary.initializeModuleRules(t, getViewJeuxDeRegles(),
+	putVObject(getViewChargement(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE)));
 	//
-	putVObject(getViewNormage(), t -> NormManagementUtilitary.initializeModuleRules(t, getViewJeuxDeRegles(),
+	putVObject(getViewNormage(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE)));
 	//
-	putVObject(getViewControle(), t -> NormManagementUtilitary.initializeModuleRules(t, getViewJeuxDeRegles(),
+	putVObject(getViewControle(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE)));
 	//
-	putVObject(getViewFiltrage(), t -> NormManagementUtilitary.initializeModuleRules(t, getViewJeuxDeRegles(),
+	putVObject(getViewFiltrage(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE)));
 	//
-	putVObject(getViewMapping(), t -> NormManagementUtilitary.initializeMapping(t, getViewJeuxDeRegles(),
+	putVObject(getViewMapping(), t -> NormManagementDao.initializeMapping(t, getViewJeuxDeRegles(),
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE)));
 	//
-	putVObject(getViewJeuxDeReglesCopie(), t -> NormManagementUtilitary.initializeJeuxDeReglesCopie(t,
+	putVObject(getViewJeuxDeReglesCopie(), t -> NormManagementDao.initializeJeuxDeReglesCopie(t,
 		getViewJeuxDeRegles(), getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS)));
 
     }
@@ -375,7 +375,7 @@ public class GererNormeAction extends ArcAction {
 	    for (int i = 0; i < selection.get("etat").size(); i++) {
 		String etat = selection.get("etat").get(i);
 		if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-		    NormManagementUtilitary.sendRuleSetToProduction(this.viewRulesSet,
+		    NormManagementDao.sendRuleSetToProduction(this.viewRulesSet,
 			    getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_BATCH));
 		}
 	    }
@@ -408,19 +408,19 @@ public class GererNormeAction extends ArcAction {
 	Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
 	if (!selection.isEmpty()) {
 	    StringBuilder requeteRegleChargement = new StringBuilder();
-	    requeteRegleChargement.append(NormManagementUtilitary.recupRegle(this.viewRulesSet,
+	    requeteRegleChargement.append(NormManagementDao.recupRegle(this.viewRulesSet,
 		    getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE)));
 	    StringBuilder requeteRegleNormage = new StringBuilder();
-	    requeteRegleNormage.append(NormManagementUtilitary.recupRegle(this.viewRulesSet,
+	    requeteRegleNormage.append(NormManagementDao.recupRegle(this.viewRulesSet,
 		    getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE)));
 	    StringBuilder requeteRegleControle = new StringBuilder();
-	    requeteRegleControle.append(NormManagementUtilitary.recupRegle(this.viewRulesSet,
+	    requeteRegleControle.append(NormManagementDao.recupRegle(this.viewRulesSet,
 		    getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE)));
 	    StringBuilder requeteRegleMapping = new StringBuilder();
-	    requeteRegleMapping.append(NormManagementUtilitary.recupRegle(this.viewRulesSet,
+	    requeteRegleMapping.append(NormManagementDao.recupRegle(this.viewRulesSet,
 		    getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE)));
 	    StringBuilder requeteRegleFiltrage = new StringBuilder();
-	    requeteRegleFiltrage.append(NormManagementUtilitary.recupRegle(this.viewRulesSet,
+	    requeteRegleFiltrage.append(NormManagementDao.recupRegle(this.viewRulesSet,
 		    getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE)));
 
 	    ArrayList<String> fileNames = new ArrayList<>();
@@ -509,7 +509,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/importChargement")
     public String importChargement() {
 	initialize();
-	NormManagementUtilitary.uploadFileRule(getViewChargement(), viewRulesSet, this.fileUploadLoad);
+	NormManagementDao.uploadFileRule(getViewChargement(), viewRulesSet, this.fileUploadLoad);
 	return generateDisplay();
     }
 
@@ -522,7 +522,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/importNormage")
     public String importNormage() {
 	initialize();
-	NormManagementUtilitary.uploadFileRule(getViewNormage(), viewRulesSet, this.fileUploadStructurize);
+	NormManagementDao.uploadFileRule(getViewNormage(), viewRulesSet, this.fileUploadStructurize);
 	return generateDisplay();
     }
 
@@ -625,7 +625,7 @@ public class GererNormeAction extends ArcAction {
 	    // Fabrication de la table temporaire pour tester l'insertion
 
 	    UtilitaireDao.get("arc").executeRequest(null,
-		    NormManagementUtilitary.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
+		    NormManagementDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
 	    // Insertion de cette règle dans la table temporaire
 	    isToInsert = this.service.ajouterRegles(jdr, "arc", listRegle);
 	} catch (Exception e) {
@@ -672,7 +672,7 @@ public class GererNormeAction extends ArcAction {
 	try {
 	    // Create a temporary table to test the insertion
 	    UtilitaireDao.get("arc").executeRequest(null,
-		    NormManagementUtilitary.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
+		    NormManagementDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
 
 	    // Delete data from the temporary table
 	    this.viewControle.delete("arc.test_ihm_" + TraitementTableParametre.CONTROLE_REGLE.toString());
@@ -702,7 +702,7 @@ public class GererNormeAction extends ArcAction {
     @SQLExecutor
     public String updateControle() {
 	initialize();
-	RuleSets jdr = NormManagementUtilitary.fetchJeuDeRegle(this.viewRulesSet);
+	RuleSets jdr = NormManagementDao.fetchJeuDeRegle(this.viewRulesSet);
 
 	LoggerDispatcher.info("The new rule : " + this.viewControle.listSameContentFromPreviousVObject().toString(), LOGGER);
 	ArrayList<RegleControleEntity> listRegleNouv = new ArrayList<>();
@@ -713,7 +713,7 @@ public class GererNormeAction extends ArcAction {
 	try {
 	    // Create a temporary table to test the updating
 	    UtilitaireDao.get("arc").executeRequest(null,
-		    NormManagementUtilitary.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
+		    NormManagementDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
 
 	    // Delete the update rules
 	    this.viewControle.deleteForUpdate("arc.test_ihm_" + TraitementTableParametre.CONTROLE_REGLE.toString());
@@ -780,7 +780,7 @@ public class GererNormeAction extends ArcAction {
 		    .miseEnRegleC(ControleRegleService.nomTableRegleControle("arc.test_ihm", true), fichierRegle);
 	    try {
 		// Create a temporary table to test the importing
-		UtilitaireDao.get("arc").executeRequest(null, NormManagementUtilitary
+		UtilitaireDao.get("arc").executeRequest(null, NormManagementDao
 			.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
 		// Insert the rules in the temporary table
 		isAjouter = this.service.ajouterRegles(jdr, "arc", listRegle);
@@ -813,7 +813,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/viderControle")
     public String viderControle() {
 	initialize();
-	NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+	NormManagementDao.emptyRuleTable(this.viewRulesSet,
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE));
 	return generateDisplay();
     }
@@ -826,7 +826,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/viderFiltrage")
     public String viderFiltrage() {
 	initialize();
-	NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+	NormManagementDao.emptyRuleTable(this.viewRulesSet,
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE));
 	return generateDisplay();
 
@@ -840,7 +840,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/viderMapping")
     public String viderMapping() {
 	initialize();
-	NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+	NormManagementDao.emptyRuleTable(this.viewRulesSet,
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE));
 	return generateDisplay();
 
@@ -863,7 +863,7 @@ public class GererNormeAction extends ArcAction {
 	StringBuilder message = new StringBuilder();
 	try {
 	    // Create test table
-	    UtilitaireDao.get("arc").executeRequest(null, NormManagementUtilitary
+	    UtilitaireDao.get("arc").executeRequest(null, NormManagementDao
 		    .createTableTest("arc.test_ihm_controle_ok", ManipString.extractRubriques(exprRegleFiltre)));
 
 	    UtilitaireDao.get("arc").executeRequest(null,
@@ -922,7 +922,7 @@ public class GererNormeAction extends ArcAction {
     public String updateMapping() {
 	initialize();
 	Map<String, ArrayList<String>> afterUpdate = this.viewMapping.mapSameContentFromCurrentVObject();
-	boolean isRegleOk = NormManagementUtilitary.testerReglesMapping(this.viewMapping, this.viewRulesSet,
+	boolean isRegleOk = NormManagementDao.testerReglesMapping(this.viewMapping, this.viewRulesSet,
 		this.viewNorme, afterUpdate);
 	if (isRegleOk) {
 	    this.viewMapping.update();
@@ -939,7 +939,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/importFiltrage")
     public String importFiltrage() {
 	initialize();
-	NormManagementUtilitary.uploadFileRule(this.viewFiltrage, this.viewRulesSet, this.fileUploadLoad);
+	NormManagementDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, this.fileUploadLoad);
 	return generateDisplay();
     }
 
@@ -992,7 +992,7 @@ public class GererNormeAction extends ArcAction {
 	    try {
 		Map<String, String> mapVariableToType = new HashMap<>();
 		Map<String, String> mapVariableToTypeConso = new HashMap<>();
-		NormManagementUtilitary.calculerVariableToType(this.viewNorme, mapVariableToType,
+		NormManagementDao.calculerVariableToType(this.viewNorme, mapVariableToType,
 			mapVariableToTypeConso);
 		Set<String> variablesAttendues = mapVariableToType.keySet();
 		String nomTable = "arc.ihm_mapping_regle";
@@ -1000,7 +1000,7 @@ public class GererNormeAction extends ArcAction {
 		EntityDao<RegleMappingEntity> dao = new MappingRegleDao();
 		dao.setTableName(nomTable);
 		dao.setEOLSeparator(true);
-		Map<String, ArrayList<String>> reglesAImporter = NormManagementUtilitary.calculerReglesAImporter(
+		Map<String, ArrayList<String>> reglesAImporter = NormManagementDao.calculerReglesAImporter(
 			this.fileUploadMap, listeRegle, dao, mapVariableToType, mapVariableToTypeConso);
 		Set<String> variablesSoumises = new HashSet<>();
 		for (int i = 0; i < listeRegle.size(); i++) {
@@ -1016,7 +1016,7 @@ public class GererNormeAction extends ArcAction {
 		if (!variablesSoumises.isEmpty()) {
 		    throw new IllegalStateException("Variables " + variablesSoumises + " are not in the model.");
 		}
-		isRegleOk = NormManagementUtilitary.testerReglesMapping(this.viewMapping, this.viewRulesSet,
+		isRegleOk = NormManagementDao.testerReglesMapping(this.viewMapping, this.viewRulesSet,
 			this.viewNorme, reglesAImporter);
 		Map<String, String> map = new HashMap<>();
 		map.put("id_regle", "(SELECT max(id_regle)+1 FROM " + nomTable + ")");
@@ -1032,7 +1032,7 @@ public class GererNormeAction extends ArcAction {
 			this.viewRulesSet.mapContentSelected().get(ConstanteBD.PERIODICITE.getValue()).get(0));
 		if (isRegleOk) {
 		    // check if each varialbe have a rule
-		    RuleSets jdr = NormManagementUtilitary.fetchJeuDeRegle(this.viewRulesSet);
+		    RuleSets jdr = NormManagementDao.fetchJeuDeRegle(this.viewRulesSet);
 		    StringBuilder bloc = new StringBuilder();
 		    /*
 		     * DELETE from
@@ -1196,7 +1196,7 @@ public class GererNormeAction extends ArcAction {
 	    StringBuilder requete = new StringBuilder();
 	    requete.append("INSERT INTO " + this.getSelectedJeuDeRegle() + " ");
 	    if (this.getSelectedJeuDeRegle().equals("arc.ihm_normage_regle")) {
-		NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+		NormManagementDao.emptyRuleTable(this.viewRulesSet,
 			getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
 		requete.append("(");
 		requete.append(String.join(",", ConstanteBD.ID_NORME.getValue()//
@@ -1220,7 +1220,7 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.COMMENTAIRE.getValue()));
 
 	    } else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
-		NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+		NormManagementDao.emptyRuleTable(this.viewRulesSet,
 			getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE));
 		requete.append("(");
 		requete.append(String.join(",", ConstanteBD.ID_NORME.getValue()//
@@ -1257,7 +1257,7 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.COMMENTAIRE.getValue()));
 
 	    } else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
-		NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+		NormManagementDao.emptyRuleTable(this.viewRulesSet,
 			getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE));
 		requete.append("(");
 		requete.append(String.join(",", ConstanteBD.ID_REGLE.getValue()//
@@ -1282,7 +1282,7 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.COMMENTAIRE.getValue()));
 
 	    } else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
-		NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+		NormManagementDao.emptyRuleTable(this.viewRulesSet,
 			getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE));
 
 		requete.append("(");
@@ -1308,7 +1308,7 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.EXPR_REGLE_COL.getValue(), ConstanteBD.COMMENTAIRE.getValue()));
 
 	    } else if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
-		NormManagementUtilitary.emptyRuleTable(this.viewRulesSet,
+		NormManagementDao.emptyRuleTable(this.viewRulesSet,
 			getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
 		requete.append("(");
 		requete.append(String.join(","

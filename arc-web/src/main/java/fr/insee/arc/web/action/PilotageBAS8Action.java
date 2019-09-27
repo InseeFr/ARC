@@ -370,7 +370,7 @@ public class PilotageBAS8Action extends ArcAction {
 	    String phase =  ManipString.substringBeforeLast(selectionColonne.get(0), "_").toUpperCase();
 	    String etat =  ManipString.substringAfterLast(selectionColonne.get(0), "_").toUpperCase();
 
-	    // get the file iwth the selected date_entree, state, and phase_tratement
+	    // get the file with the selected date_entree, state, and phase_tratement
 	    String sqlConditon = "date_entree" + ManipString.sqlEqual(selectionLigne.get("date_entree").get(0), "text")+
 		    " and array_to_string(etat_traitement,'$')" + ManipString.sqlEqual(etat, "text")+
 		    " and phase_traitement" + ManipString.sqlEqual(phase, "text");

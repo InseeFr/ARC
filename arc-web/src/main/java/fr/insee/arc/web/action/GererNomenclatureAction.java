@@ -21,17 +21,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.DbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.web.dao.ExternalFilesManagementDao;
 import fr.insee.arc.web.util.VObject;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererNomenclature.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class GererNomenclatureAction implements SessionAware, ICharacterConstant {
+public class GererNomenclatureAction extends ArcAction {
 
     private static final String NMCL_ = "nmcl_";
     private static final String NOM_TABLE = "nom_table";
@@ -51,6 +53,19 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
     @Qualifier("viewSchemaNmcl")
     VObject viewSchemaNmcl;
 
+    
+    @Override
+    public void putAllVObjects() {
+	putVObject(viewListNomenclatures, t -> ExternalFilesManagementDao.initializeViewListNomenclatures(t,
+"arc.ihm_nmcl"));
+	//
+	putVObject(viewNomenclature, t -> ExternalFilesManagementDao.initializeViewNomenclature(t,
+			viewListNomenclatures));
+	//
+	putVObject(viewSchemaNmcl, t -> ExternalFilesManagementDao.intializeViewSchemaNmcl(t, viewListNomenclatures));
+	//
+    }
+    
     private File fileUpload;
     private String fileUploadContentType;
     private String fileUploadFileName;
@@ -61,87 +76,18 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
 
     private String scope;
 
-    @Override
-    public void setSession(Map<String, Object> session) {
-        this.viewListNomenclatures.setMessage("");
-        this.viewNomenclature.setMessage("");
-        this.viewSchemaNmcl.setMessage("");
+//    @Override
+//    public void setSession(Map<String, Object> session) {
+//        this.viewListNomenclatures.setMessage("");
+//        this.viewNomenclature.setMessage("");
+//        this.viewSchemaNmcl.setMessage("");
+//
+//    }
 
-    }
-
-    public String sessionSyncronize() {
-
-        System.out.println("Scope : " + this.scope);
-
-        this.viewListNomenclatures.setActivation(this.scope);
-        this.viewNomenclature.setActivation(this.scope);
-        this.viewSchemaNmcl.setActivation(this.scope);
-
-        Boolean defaultWhenNoScope = true;
-
-        if (scope != null && this.viewListNomenclatures.getIsScoped()) {
-            initializeListNomenclatures();
-            defaultWhenNoScope = false;
-        }
-
-        if (scope != null && this.viewSchemaNmcl.getIsScoped()) {
-            intializeSchemaNmcl();
-            defaultWhenNoScope = false;
-        }
-
-        if (scope != null && this.viewNomenclature.getIsScoped()) {
-            initializeNomenclature();
-            defaultWhenNoScope = false;
-        }
-
-        if (defaultWhenNoScope) {
-            System.out.println("default");
-            initializeListNomenclatures();
-            this.viewListNomenclatures.setIsActive(true);
-            this.viewListNomenclatures.setIsScoped(true);
-
-            intializeSchemaNmcl();
-            this.viewSchemaNmcl.setIsActive(true);
-            this.viewSchemaNmcl.setIsScoped(true);
-
-            initializeNomenclature();
-            this.viewNomenclature.setIsActive(true);
-            this.viewNomenclature.setIsScoped(true);
-
-        }
-
-        return "success";
-    }
-
-    /**
-     * Retourne le nom des tables de nomenclature présentes dans la base ainsi que le descriptif associé à chaque table
-     */
-    public void initializeListNomenclatures() {
-        System.out.println("/* initializeListeNomenclatures */");
-        HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-        // this.viewListNomenclatures.initialize("SELECT tablename,'salut' as example FROM pg_tables WHERE schemaname = 'arc' AND tablename LIKE 'nmcl_%'",
-        // "pg_tables", defaultInputFields);
-        StringBuilder requete = new StringBuilder();
-        // requete.append("\n   SELECT tablename, description ");
-        // requete.append("\n   FROM pg_tables a, pg_description b ");
-        // requete.append("\n   WHERE schemaname = 'arc' ");
-        // requete.append("\n   AND tablename LIKE 'nmcl_%' ");
-        // requete.append("\n   AND a.tablename::regclass::oid = b.objoid ");
-        // requete.append("\n UNION ALL ");
-        // requete.append("\n   SELECT tablename, null::text as description ");
-        // requete.append("\n   FROM pg_tables a ");
-        // requete.append("\n   WHERE schemaname = 'arc' ");
-        // requete.append("\n   AND tablename LIKE 'nmcl_%' ");
-        // requete.append("\n   AND NOT EXISTS (SELECT 1 FROM pg_description b WHERE a.tablename::regclass::oid = b.objoid)");
-        requete.append("\n SELECT " + NOM_TABLE + ", description FROM arc.ihm_nmcl");
-
-        this.viewListNomenclatures.initialize(requete.toString(), "arc.ihm_nmcl", defaultInputFields);
-
-    }
-
+ 
     @Action(value = "/selectListNomenclatures")
     public String selectListNomenclatures() {
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/addListNomenclatures")
@@ -150,7 +96,7 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
         if (validationNomTable(nomTable)) {
             this.viewListNomenclatures.insert();
         }
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/updateListNomenclatures")
@@ -172,13 +118,13 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
             this.viewListNomenclatures.update();
         }
 
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/sortListNomenclatures")
     public String sortListNomenclatures() {
         this.viewListNomenclatures.sort();
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/deleteListNomenclatures")
@@ -205,7 +151,7 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return sessionSyncronize();
+        return basicAction();
     }
 
     private String typeNomenclature(String nomTable) {
@@ -228,7 +174,7 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
             LoggerHelper.errorGenTextAsComment(getClass(), "importListNomenclatures()", LOGGER, ex);
         }
 
-        return sessionSyncronize();
+        return basicAction();
     }
 
     private boolean validationNomTable(String nomTable) {
@@ -261,33 +207,10 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
         return true;
     }
 
-    private void intializeSchemaNmcl() {
-        // visual des Calendriers
-
-        System.out.println("/* initializeSchemaNmcl */");
-        Map<String, ArrayList<String>> selection = this.viewListNomenclatures.mapContentSelected();
-
-        if (!selection.isEmpty()) {
-            // requete de la vue
-            StringBuilder requete = new StringBuilder();
-            requete.append("\n SELECT type_nmcl, nom_colonne, type_colonne FROM arc.ihm_schema_nmcl ");
-            requete.append("\n WHERE type_nmcl = '" + typeNomenclature(selection.get(NOM_TABLE).get(0)) + "'");
-            // // construction des valeurs par défaut pour les ajouts
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-            defaultInputFields.put("type_nmcl", typeNomenclature(selection.get(NOM_TABLE).get(0)));
-
-            // this.viewCalendrier.setAfterInsertQuery("select arc.fn_check_calendrier(); ");
-            // this.viewCalendrier.setAfterUpdateQuery("select arc.fn_check_calendrier(); ");
-            // this.viewCalendrier.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewCalendrier.getSessionName()));
-            this.viewSchemaNmcl.initialize(requete.toString(), "arc.ihm_schema_nmcl", defaultInputFields);
-        } else {
-            this.viewSchemaNmcl.destroy();
-        }
-    }
 
     @Action(value = "/selectSchemaNmcl")
     public String selectSchemaNmcl() {
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/addSchemaNmcl")
@@ -298,7 +221,7 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
 
             this.viewSchemaNmcl.insert();
         }
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/updateSchemaNmcl")
@@ -325,19 +248,19 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
                 this.viewSchemaNmcl.update();
             }
         }
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/sortSchemaNmcl")
     public String sortSchemaNmcl() {
         this.viewSchemaNmcl.sort();
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/deleteSchemaNmcl")
     public String deleteSchemaNmcl() {
         this.viewSchemaNmcl.delete();
-        return sessionSyncronize();
+        return basicAction();
     }
 
     private void importNomenclatureDansBase() throws Exception {
@@ -516,114 +439,18 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
         return true;
     }
 
-    /**
-     * 
-     * Créer la table ihm_schema_nmcl si elle n'existe pas.
-     * 
-     * @throws SQLException
-     */
-    private void createTableIhmSchemaNmclIfNotExists() throws SQLException {
-        StringBuilder createTableIhmSchemaNmcl = new StringBuilder();
-        createTableIhmSchemaNmcl.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_schema_nmcl(");
-        createTableIhmSchemaNmcl.append("\n    type_nmcl text,");
-        createTableIhmSchemaNmcl.append("\n    nom_colonne text,");
-        createTableIhmSchemaNmcl.append("\n    CONSTRAINT pk_ihm_schema_nmcl PRIMARY KEY (nom_table, nom_colonne)");
-        createTableIhmSchemaNmcl.append("\n );");
-        UtilitaireDao.get(DbConstant.POOL_NAME).executeRequest(null, createTableIhmSchemaNmcl);
-    }
-
-    public void initializeNomenclature() {
-        System.out.println("/* initializeNomenclature */");
-
-        Map<String, ArrayList<String>> selection = this.viewListNomenclatures.mapContentSelected();
-
-        if (!selection.isEmpty() && UtilitaireDao.get(DbConstant.POOL_NAME).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0))) {
-            StringBuilder requete = new StringBuilder();
-            requete.append("select * from arc." + selection.get(NOM_TABLE).get(0) + " ");
-
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-            defaultInputFields.put(NOM_TABLE, selection.get(NOM_TABLE).get(0));
-
-            this.viewNomenclature.initialize(requete.toString(), "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
-
-            System.out.println(this.viewNomenclature.mapContent());
-
-        } else {
-            this.viewNomenclature.destroy();
-        }
-
-    }
-
     @Action(value = "/selectNomenclature")
     public String selectNomenclature() {
-        return sessionSyncronize();
+        return basicAction();
     }
 
     @Action(value = "/sortNomenclature")
     public String sortNomenclature() {
         this.viewNomenclature.sort();
-        return sessionSyncronize();
+        return basicAction();
     }
 
-    // @Action(value = "/addNomenclature")
-    // public String addNomenclature() {
-    // this.viewNomenclature.insert();
-    // return sessionSyncronize();
-    // }
-    //
-    // @Action(value = "/deleteNomenclature")
-    // public String deleteNomenclature() {
-    // this.viewNomenclature.delete();
-    // return sessionSyncronize();
-    // }
-    //
-    // @Action(value = "/updateNomenclature")
-    // public String updateNomenclature() {
-    // this.viewNomenclature.update();
-    // return sessionSyncronize();
-    // }
-
-    // /**
-    // * Ajouter une nouvelle nomenclature dans la BDD
-    // *
-    // */
-    // @Action(value = "/addNomenclature")
-    // public String addNomenclature() {
-    //
-    // try {
-    // // Champ de saisie
-    // ArrayList<String> champSaisie = this.viewListNomenclatures.getInputFields();
-    //
-    // // le nom de la table à tester
-    // String nomTable = champSaisie.get(0);
-    //
-    // // // la description associé à la table
-    // // String description = champSaisie.get(1);
-    //
-    // // 1.Verification sur le nom de la table
-    // validationNomTable(nomTable);
-    //
-    // // // 2.Création de la table dans le schema
-    // // StringBuilder query = new StringBuilder();
-    // //
-    // // query.append("CREATE TABLE arc." + nomTable + ";");
-    //
-    // // // Ajout de la description si elle n'est pas vide
-    // // if (!description.isEmpty()) {
-    // // String commentaireEntreCote = "'" + description + "'";
-    // // query.append("COMMENT ON TABLE ").append(nomTable).append(" IS ").append(commentaireEntreCote).append(";");
-    // // }
-    //
-    // // UtilitaireDao.get(poolName).executeBlock(null, query);
-    //
-    // } catch (Exception e) {
-    // viewListNomenclatures.setMessage(e.toString());
-    // LoggerHelper.errorGenTextAsComment(getClass(), "importNomenclature()", LOGGER, e);
-    // }
-    //
-    // return sessionSyncronize();
-    // }
-
+  
     /**
      * Setters et getters
      */
@@ -700,12 +527,22 @@ public class GererNomenclatureAction implements SessionAware, ICharacterConstant
         this.viewSchemaNmcl = viewSchemaNmcl;
     }
 
-    public String getScope() {
-        return scope;
-    }
+	@Override
+	public void instanciateAllDAOs() {	
+	}
 
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
+	@Override
+	public void setProfilsAutorises() {
+	}
+
+	@Override
+	protected void specificTraitementsPostDAO() {		
+	}
+
+	@Override
+	public String getActionName() {
+		return null;
+	}
+
 
 }
