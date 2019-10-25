@@ -14,13 +14,5 @@ $( document ).on('ready readyAgain',function() {
 		  $(this).tab('show')
 		})
 		
-		if ($("#viewJeuxDeReglesCopie").children().length > 0)
-			{
-			$('#viewJeuxDeReglesCopieModal').modal('show')
-			
-			} else {
-				$('#viewJeuxDeReglesCopieModal').modal('hide')
-			}
-		
 }
 );

@@ -2,9 +2,14 @@
 
 
 /* Override bootstrap css */
+
+.bg-light {
+    background-color: #aabbfa!important;
+}
+
 .btn-outline-primary, .btn-primary  {
-    background-color: #ffcccc;
-	color: #000000;
+    background-color: #222222;
+    color: #ffffff;
     border-color: #007bff;
 }
 
@@ -27,12 +32,12 @@ li.nav-item {
 }
 
 li.nav-item.active {
-	    border-bottom: 1px solid #eeeeee;
+	        border-bottom: 2px solid #000000;
 }
 
 .navbar-light .navbar-nav .nav-link.active {
     color: rgba(0,0,0,.9);
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 2px solid #000000;
 }
 .mt-3, .my-3 {
     margin-top:0.1rem !important;
@@ -46,19 +51,28 @@ li.nav-item {
     color: #000000;
     text-align: center;
     width: 11rem;
+    height: 1.8rem;
 }
 
 .navbar-brand {
     font-size: 2rem;
 }
 
+.nav-tabs {
+    background-color: #ffffff;
+}
+
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
     color: #495057;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 2px solid #000000;
     border-top: none;
     border-left: none;
     border-right: none;
-    margin-bottom: 5px;
+}
+
+.nav-tabs .nav-link {
+    height: 1.6rem;
+    padding-top: 0.2rem;
 }
 
 .nav-link {

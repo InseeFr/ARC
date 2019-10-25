@@ -48,22 +48,24 @@
 ></script>
 	</head>
 </s:if>
-<body>
+<body class='bg-light'>
+
+<s:form
+	spellcheck="false"
+	namespace="/"
+	method="POST"
+	theme="simple"
+	enctype="multipart/form-data"
+>
 
 	<%@include file="tiles/header.jsp"%>
 
 
 	<div class="container-fluid">
 
-		<s:form
-			spellcheck="false"
-			namespace="/"
-			method="POST"
-			theme="simple"
-		>
 			<div class="row">
 				<!-- left column -->
-				<div class="col-md-5 border-right" style="margin-top: 2.25rem;"
+				<div class="col-md-5 border-right"
 				>
 					<div class="row">
 						<div class="col-md">
@@ -156,7 +158,7 @@
 							<!-- tab to choose the module -->
 
 							<ul
-								class="nav nav-tabs"
+								class="nav nav-tabs mb-2"
 								id="chooseModule"
 								role="tablist"
 							>
@@ -619,31 +621,9 @@
 
 
 
+
 							<%-- Modal to rule copy --%>
-							<div
-								id="viewJeuxDeReglesCopieModal"
-								class="modal"
-								tabindex="-1"
-								role="dialog"
-								aria-labelledby="copyRulesHeader"
-							>
-								<div
-									class="modal-dialog  modal-lg"
-									role="document"
-								>
-									<div class="modal-content">
-										<div class="modal-header">
-											<h5 class="copyRulesHeader"><s:text
-													name="normManagement.copyRules"
-												/></h5>
-											<button
-												type="button"
-												class="close"
-												data-dismiss="modal"
-												aria-label="Close"
-											><span aria-hidden="true">&times;</span></button>
-										</div>
-										<div class="modal-body">
+										<div>
 
 
 											<s:include value="tiles/templateVObject.jsp">
@@ -671,14 +651,12 @@
 
 
 										</div>
-									</div>
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</s:form>
 	</div>
+</s:form>
+	
 </body>
 </html>

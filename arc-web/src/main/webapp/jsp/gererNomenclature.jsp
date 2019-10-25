@@ -48,18 +48,19 @@
 ></script>
 	</head>
 </s:if>
-<body>
+<body class='bg-light'>
 
+<s:form
+	spellcheck="false"
+	namespace="/"
+	method="POST"
+	theme="simple"
+	enctype="multipart/form-data"
+>
 	<%@include file="tiles/header.jsp"%>
 
 
 	<div class="container-fluid">
-	<s:form
-			spellcheck="false"
-			namespace="/"
-			method="POST"
-			theme="simple"
-		>
 		<div class="row">
 				<!-- left column -->
 				<div class="col-md-3 border-right" style="margin-top: 2.25rem;"
@@ -155,8 +156,8 @@
 			
 			</div>
 			
-	</s:form>
 	</div>	
+</s:form>
 	
 
 </body>

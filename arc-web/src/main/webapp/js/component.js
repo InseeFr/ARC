@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 //Modules disponibles
 //Render:Tree;
 //Render:Pilotage;
@@ -201,12 +201,10 @@ $(document).on('ready readyAgain',function() {
 		$('.datepicker').on('focus',function(){$(this).attr('m','js');});
 
 		$('select').on('change',function(){
-			$(this).css("background-color","#ffcccc");
 			$(this).attr('m','js');
 		});
 
 		$(":checkbox").on('change',function(){
-			$(this).css("background-color","#ffcccc");
 			$(this).attr('m','js');
 			$(this).siblings().attr('m','js');
 		});

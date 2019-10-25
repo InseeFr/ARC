@@ -47,18 +47,17 @@
 ></script>
 </head>
 <body class="bg-light">
+<s:form
+	spellcheck="false"
+	namespace="/"
+	method="POST"
+	theme="simple"
+	enctype="multipart/form-data"
+>
+
 	<%@include file="tiles/header.jsp"%>
 
 	<div class="container-fluid">
-
-
-		<s:form
-			spellcheck="false"
-			namespace="/"
-			method="POST"
-			theme="simple"
-			enctype="multipart/form-data"
-		>
 			<div class="row">
 				<div
 					class="col-md-4"

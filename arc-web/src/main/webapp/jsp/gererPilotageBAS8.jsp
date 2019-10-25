@@ -46,10 +46,7 @@
 	src="<s:url value='/js/component.js'/>"
 ></script>
 </head>
-<body>
-
-
-	<%@include file="tiles/header.jsp"%>
+<body class="bg-light">
 
 <s:form
 	spellcheck="false"
@@ -58,6 +55,9 @@
 	theme="simple"
 	enctype="multipart/form-data"
 >
+
+	<%@include file="tiles/header.jsp"%>
+
 	<div class="container-fluid">
 
 		<div class="row">

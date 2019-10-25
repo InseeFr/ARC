@@ -1,1 +1,1 @@
-var configJS="";
+var configJS="ICS:AjaxDataSelector;";
