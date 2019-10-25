@@ -1,14 +1,10 @@
 package fr.insee.arc.web.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,11 +55,7 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
  *
  */
 @Component
-public class VObject implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6609509084694479069L;
+public class VObject {
     private static final Logger LOGGER = Logger.getLogger(VObject.class);
     /**
      *
@@ -71,7 +63,7 @@ public class VObject implements Serializable {
     private String pool;
 
     // The previous VObject put in session for persistance.
-    private transient VObject inSessionVObject;
+    private VObjectOld inSessionVObject;
 
     // Title for the gui
     private String title;
@@ -176,6 +168,10 @@ public class VObject implements Serializable {
     public Map<String, String> customValues;
     public Map<String, HashMap<String, String>> mapCustomValues;
 
+    // connection
+	private Connection connection = null;
+
+    
     public VObject() {
 	super();
 	this.customValues = new HashMap<>();
@@ -183,23 +179,52 @@ public class VObject implements Serializable {
 	this.isInitialized = false;
     }
 
-    /**
-     * This method makes a "deep clone" of a given Vobject.
-     * 
-     * @author Alvin Alexander, http://alvinalexander.com
-     */
-    public VObject deepClone() {
-	try {
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    ObjectOutputStream oos = new ObjectOutputStream(baos);
-	    oos.writeObject(this);
-	    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-	    ObjectInputStream ois = new ObjectInputStream(bais);
-	    return (VObject) ois.readObject();
-	} catch (Exception e) {
-	    LoggerHelper.error(LOGGER, "Error when deep cloning", e);
-	    return null;
-	}
+    public static class VObjectOld {
+        // titre de la fenetre
+        public String title;
+        // nom de session
+        public String sessionName;
+        // nombre de ligne par page
+        public Integer paginationSize;
+        // indicateur d'initialisation
+        public Boolean isInitialized;
+        // requete de generation du tableau
+        public String mainQuery;
+
+        public String beforeSelectQuery;
+        public String afterUpdateQuery;
+        public String afterInsertQuery;
+        // table utilisée pour les update/insert/delete
+        public String table;
+        // tableau du contenu de la requete (ligne,colonne)
+        public TableObject content;
+        // nom des colonnes, type en base (D=Database), label dans la vue
+        // (V=VUE) ,
+        // taille sur la vue
+        public ArrayList<String> databaseColumnsLabel;
+        public ArrayList<String> databaseColumnsType;
+        public ArrayList<String> guiColumnsLabel;
+        public ArrayList<String> guiColumnsSize;
+        public ArrayList<String> guiColumnsType;
+        public ArrayList<LinkedHashMap<String, String>> guiSelectedColumns;
+        public ArrayList<Boolean> visibleHeaders;
+        // gestion du sort
+        public ArrayList<String> databaseColumnsSortLabel;
+        public ArrayList<Boolean> databaseColumnsSortOrder;
+        public String databaseColumnSort;
+        // tableau des lignes et des colonnes selectionnées
+        public ArrayList<Boolean> selectedLines;
+        public ArrayList<Boolean> selectedColumns;
+        // champs de saisie
+        public HashMap<String, String> defaultInputFields;
+        public ArrayList<String> inputFields;
+        // Pagination
+        public Integer nbPages;
+        public String idPage;
+        // filtrage
+        public ArrayList<String> filterFields;
+        public ArrayList<Boolean> updatableHeaders;
+        public ArrayList<Boolean> requiredHeaders;
     }
 
     /**
@@ -315,7 +340,7 @@ public class VObject implements Serializable {
 	    if (this.constantVObject.getColumnRender().get(databaseColumnsLabel.get(i)) != null
 		    && this.constantVObject.getColumnRender().get(databaseColumnsLabel.get(i)).query != null) {
 		try {
-		    arrayVSelect = UtilitaireDao.get(this.pool).executeRequest(null,
+		    arrayVSelect = UtilitaireDao.get(this.pool).executeRequest(connection,
 			    this.constantVObject.getColumnRender().get(databaseColumnsLabel.get(i)).query);
 		    arrayVSelect.remove(0);
 		    arrayVSelect.remove(0);
@@ -378,14 +403,15 @@ public class VObject implements Serializable {
 
 	setMainQuery(mainQuery);
 	setTable(table);
-
+	
 	try {
-
+		connection= UtilitaireDao.get(this.pool).getDriverConnexion();
+		
 	    if (this.beforeSelectQuery != null) {
-		UtilitaireDao.get(this.pool).executeRequest(null, this.beforeSelectQuery);
+		UtilitaireDao.get(this.pool).executeRequest(connection, this.beforeSelectQuery);
 	    }
 	    HttpSession session = ServletActionContext.getRequest().getSession(false);
-	    this.inSessionVObject = (VObject) session.getAttribute(this.sessionName);
+	    this.inSessionVObject = (VObjectOld) session.getAttribute(this.sessionName);
 
 	    if (inSessionVObject != null) {
 		if (StringUtils.isEmpty(this.databaseColumnSort)) {
@@ -456,12 +482,126 @@ public class VObject implements Serializable {
 			    .map(databaseHeader -> selectedHeaders.contains(databaseHeader))//
 			    .collect(Collectors.toList()));//
 
+	    
+	    // on cale l'objet en session
+        if (inSessionVObject == null) {
+            inSessionVObject = new VObjectOld();
+        }
+        // C'est laid mais je vois pas comment faire autrement. Java de merde :
+        // tout cela pour une pauvre passage par valeur
+        inSessionVObject.title = this.title;
+        inSessionVObject.sessionName = this.sessionName;
+        inSessionVObject.paginationSize = this.paginationSize;
+        inSessionVObject.isInitialized = this.isInitialized;
+        inSessionVObject.mainQuery = this.mainQuery;
+        inSessionVObject.beforeSelectQuery = this.beforeSelectQuery;
+        inSessionVObject.afterUpdateQuery = this.afterUpdateQuery;
+        inSessionVObject.afterInsertQuery = this.afterInsertQuery;
+        inSessionVObject.table = this.table;
+        if (this.content != null) {
+            inSessionVObject.content = this.content.clone();
+        } else {
+            inSessionVObject.content = null;
+        }
+        if (this.databaseColumnsLabel!= null) {
+            inSessionVObject.databaseColumnsLabel = (ArrayList<String>) this.databaseColumnsLabel.clone();
+        } else {
+            inSessionVObject.databaseColumnsLabel = null;
+        }
+        if (this.databaseColumnsType != null) {
+            inSessionVObject.databaseColumnsType = (ArrayList<String>) this.databaseColumnsType.clone();
+        } else {
+            inSessionVObject.databaseColumnsType = null;
+        }
+        if (this.guiColumnsLabel != null) {
+            inSessionVObject.guiColumnsLabel = (ArrayList<String>) this.guiColumnsLabel.clone();
+        } else {
+            inSessionVObject.guiColumnsLabel = null;
+        }
+        if (this.guiColumnsSize != null) {
+            inSessionVObject.guiColumnsSize = (ArrayList<String>) this.guiColumnsSize.clone();
+        } else {
+            inSessionVObject.guiColumnsSize = null;
+        }
+        if (this.guiColumnsType != null) {
+            inSessionVObject.guiColumnsType = (ArrayList<String>) this.guiColumnsType.clone();
+        } else {
+            inSessionVObject.guiColumnsType = null;
+        }
+        if (this.guiSelectedColumns != null) {
+            inSessionVObject.guiSelectedColumns = (ArrayList<LinkedHashMap<String, String>>) this.guiSelectedColumns.clone();
+        } else {
+            inSessionVObject.guiSelectedColumns = null;
+        }
+        if (this.visibleHeaders != null) {
+            inSessionVObject.visibleHeaders = (ArrayList<Boolean>) this.visibleHeaders.clone();
+        } else {
+            inSessionVObject.visibleHeaders = null;
+        }
+        if (this.updatableHeaders != null) {
+            inSessionVObject.updatableHeaders = (ArrayList<Boolean>) this.updatableHeaders.clone();
+        } else {
+            inSessionVObject.updatableHeaders = null;
+        }
+        if (this.requiredHeaders != null) {
+            inSessionVObject.requiredHeaders = (ArrayList<Boolean>) this.requiredHeaders.clone();
+        } else {
+            inSessionVObject.requiredHeaders = null;
+        }
+        if (this.databaseColumnsSortLabel != null) {
+            inSessionVObject.databaseColumnsSortLabel = (ArrayList<String>) this.databaseColumnsSortLabel.clone();
+        } else {
+            inSessionVObject.databaseColumnsSortLabel = null;
+        }
+        if (this.databaseColumnsSortOrder != null) {
+            inSessionVObject.databaseColumnsSortOrder = (ArrayList<Boolean>) this.databaseColumnsSortOrder.clone();
+        } else {
+            inSessionVObject.databaseColumnsSortOrder = null;
+        }
+        inSessionVObject.databaseColumnSort = this.databaseColumnSort;
+        if (this.selectedLines != null) {
+            inSessionVObject.selectedLines = (ArrayList<Boolean>) this.selectedLines.clone();
+        } else {
+            inSessionVObject.selectedLines = null;
+        }
+        if (this.selectedColumns != null) {
+            inSessionVObject.selectedColumns = (ArrayList<Boolean>) this.selectedColumns.clone();
+        } else {
+            inSessionVObject.selectedColumns = null;
+        }
+        if (this.defaultInputFields != null) {
+            inSessionVObject.defaultInputFields = (HashMap<String, String>) this.defaultInputFields.clone();
+        } else {
+            inSessionVObject.defaultInputFields = null;
+        }
+        if (this.inputFields != null) {
+            inSessionVObject.inputFields = (ArrayList<String>) this.inputFields.clone();
+        } else {
+            inSessionVObject.inputFields = null;
+        }
+        inSessionVObject.nbPages = this.nbPages;
+        inSessionVObject.idPage = this.idPage;
+        if (this.filterFields != null) {
+            inSessionVObject.filterFields = (ArrayList<String>) this.filterFields.clone();
+        } else {
+            inSessionVObject.filterFields = null;
+        }
+        session.setAttribute(this.sessionName, inSessionVObject);
+	    
 	    // Put the object in session
-	    session.setAttribute(this.sessionName, deepClone());
+//	    session.setAttribute(this.sessionName, deepClone());
 
 	} catch (Exception ex) {
 	    LoggerHelper.error(LOGGER, "initialize()", ex);
 	    ex.printStackTrace();
+	} finally {
+		try {
+			connection.close();
+			this.connection=null;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
     }
@@ -602,7 +742,7 @@ public class VObject implements Serializable {
 	}
 
 	try {
-	    aContent = reworkContent(UtilitaireDao.get(this.pool).executeRequest(null, theQueryToRun, ModeRequete.IHM_INDEXED));
+	    aContent = reworkContent(UtilitaireDao.get(this.pool).executeRequest(connection, theQueryToRun, ModeRequete.IHM_INDEXED));
 	} catch (SQLException ex) {
 	    this.message = ex.getMessage();
 	    LoggerHelper.error(LOGGER, "initialize()", ex);
@@ -632,7 +772,7 @@ public class VObject implements Serializable {
     private void setNbPagesFromQuery() {
 	if (this.paginationSize > 0 && !this.noOrder) {
 	    try {
-		List<ArrayList<String>> aContent = UtilitaireDao.get(this.pool).executeRequest(null,
+		List<ArrayList<String>> aContent = UtilitaireDao.get(this.pool).executeRequest(connection,
 			"select ceil(count(1)::float/" + this.paginationSize + ") from (" + this.mainQuery
 				+ ") alias_de_table " + buildFilter(this.filterFields, this.databaseColumnsLabel),
 			ModeRequete.IHM_INDEXED);
@@ -673,7 +813,7 @@ public class VObject implements Serializable {
 	    Map<String, String> map = new HashMap<>();
 	    Arrays.asList(attributeValues).forEach(t -> map.put(t.getFirst().toLowerCase(), t.getSecond()));
 	    HttpSession session = ServletActionContext.getRequest().getSession(false);
-	    VObject previousVObject = (VObject) session.getAttribute(this.sessionName);
+	    VObjectOld previousVObject = (VObjectOld) session.getAttribute(this.sessionName);
 	    // on remet dans inputFields venant du client les valeurs par default
 	    // des input field
 	    updateInputFiledWithDefaultInputField();
@@ -730,7 +870,7 @@ public class VObject implements Serializable {
 	    requete.append("END;");
 	    try {
 		if (!allNull) {
-		    UtilitaireDao.get(this.pool).executeRequest(null, requete.toString());
+		    UtilitaireDao.get(this.pool).executeRequest(connection, requete.toString());
 		}
 	    } catch (SQLException e) {
 		setMessage(e.getMessage());
@@ -798,7 +938,7 @@ public class VObject implements Serializable {
 		}
 		requete.append("END;");
 		try {
-		    UtilitaireDao.get(this.pool).executeRequest(null, requete.toString());
+		    UtilitaireDao.get(this.pool).executeRequest(connection, requete.toString());
 		} catch (SQLException e) {
 		    setMessage(e.getMessage());
 		    return false;
@@ -874,7 +1014,7 @@ public class VObject implements Serializable {
     public void delete(String... tables) {
 	LoggerHelper.traceAsComment(LOGGER, "delete()", this.sessionName);
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 
 	ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null,
 		new ArrayList<String>(), this.table);
@@ -913,7 +1053,7 @@ public class VObject implements Serializable {
 	}
 	reqDelete.append("END; ");
 	try {
-	    UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete);
+	    UtilitaireDao.get(this.pool).executeRequest(connection, "" + reqDelete);
 	} catch (SQLException e) {
 	    this.message = e.getMessage();
 	}
@@ -926,7 +1066,7 @@ public class VObject implements Serializable {
     public void deleteForUpdate(String... tables) {
 	LoggerHelper.debugAsComment(LOGGER, "deleteBeforeUpdate()", this.sessionName);
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	// comparaison des lignes dans la table avant et aprés
 	// toBeUpdated contient l'identifiant des lignes à update
 	ArrayList<Integer> toBeUpdated = new ArrayList<Integer>();
@@ -969,7 +1109,7 @@ public class VObject implements Serializable {
 	}
 	reqDelete.append("END; ");
 	try {
-	    UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete);
+	    UtilitaireDao.get(this.pool).executeRequest(connection, "" + reqDelete);
 	} catch (SQLException e) {
 	    this.message = e.getMessage();
 	}
@@ -1007,11 +1147,34 @@ public class VObject implements Serializable {
     }
     
     
+    public List<ArrayList<String>> listSameContentFromVObject(VObjectOld aVobject) {
+	if (inSessionVObject == null) {
+	    return new ArrayList<>();
+	}
+	List<ArrayList<String>> identicalsLines = new ArrayList<>();
+	// comparaison des lignes dans la table avant et aprés
+	// toBeUpdated contient l'identifiant des lignes à update
+	for (int i = 0; i < this.content.size(); i++) {
+	    int j = 0;
+	    boolean equals = true;
+	    while (j < this.content.get(i).getData().size() && equals) {
+		equals = ManipString.compareStringWithNull(inSessionVObject.content.get(i).getData().get(j),
+			this.content.get(i).getData().get(j));
+		j++;
+	    }
+	    if (!equals) {
+		identicalsLines.add(new ArrayList<String>(aVobject.content.get(i).getData()));
+	    }
+	}
+	return identicalsLines;
+    }
+    
+    
     @SQLExecutor
     public void update() {
 	LoggerHelper.trace(LOGGER, "update()", this.sessionName);
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	// comparaison des lignes dans la table avant et aprés
 	// toBeUpdated contient l'identifiant des lignes à update
 	ArrayList<Integer> toBeUpdated = new ArrayList<Integer>();
@@ -1105,7 +1268,7 @@ public class VObject implements Serializable {
 	reqUpdate.append("END;");
 	try {
 	    if (toBeUpdated.size() > 0) {
-		UtilitaireDao.get(this.pool).executeRequest(null, "" + reqUpdate);
+		UtilitaireDao.get(this.pool).executeRequest(connection, "" + reqUpdate);
 	    }
 	    // Si la requete s'est bien déroulée, mettre à jour le content de v0
 	    // avec le this.content
@@ -1119,7 +1282,7 @@ public class VObject implements Serializable {
 
     public HashMap<String, String> mapHeadersType() {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (v0 == null) {
 	    return new HashMap<String, String>();
 	}
@@ -1134,7 +1297,7 @@ public class VObject implements Serializable {
 
     public HashMap<String, ArrayList<String>> mapInputFields() {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	return new GenericBean(v0.databaseColumnsLabel, v0.databaseColumnsType, listInputFields()).mapContent();
     }
 
@@ -1146,13 +1309,13 @@ public class VObject implements Serializable {
 
     public HashMap<String, ArrayList<String>> mapLineContent(int i) {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	return new GenericBean(v0.databaseColumnsLabel, v0.databaseColumnsType, listLineContent(i)).mapContent();
     }
 
     public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(int i) {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
 	r.add(listSameContentFromPreviousVObject().get(i));
 	return new GenericBean(v0.databaseColumnsLabel, v0.databaseColumnsType, r).mapContent();
@@ -1196,7 +1359,7 @@ public class VObject implements Serializable {
 
     public ArrayList<ArrayList<String>> listContent() {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (v0 == null) {
 	    return new ArrayList<ArrayList<String>>();
 	}
@@ -1217,7 +1380,7 @@ public class VObject implements Serializable {
      */
     public HashMap<String, ArrayList<String>> mapContent() {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (v0 == null) {
 	    return new HashMap<String, ArrayList<String>>();
 	}
@@ -1239,7 +1402,7 @@ public class VObject implements Serializable {
      */
     public ArrayList<String> listHeadersSelected() {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (v0 == null) {
 	    return new ArrayList<String>();
 	}
@@ -1278,7 +1441,7 @@ public class VObject implements Serializable {
 
     public StringBuilder queryView() {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (this.filterFields == null) {
 	    this.filterFields = v0.filterFields;
 	}
@@ -1299,7 +1462,7 @@ public class VObject implements Serializable {
     public HashMap<String, ArrayList<String>> mapView() {
 	HashMap<String, ArrayList<String>> result = new HashMap<>();
 	try {
-	    GenericBean g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(null, queryView()));
+	    GenericBean g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(connection, queryView()));
 	    result = g.mapContent();
 	} catch (SQLException ex) {
 	    LoggerHelper.errorGenTextAsComment(getClass(), "mapView()", LOGGER, ex);
@@ -1499,10 +1662,7 @@ public class VObject implements Serializable {
 	System.out.print("*** SORT ***");
 	
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
-	
-	System.out.print(v0.databaseColumnsLabel);
-	System.out.print(this.databaseColumnSort);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	
 	if (v0.databaseColumnsLabel.indexOf(this.databaseColumnSort) != -1) {
 		
@@ -1541,7 +1701,7 @@ public class VObject implements Serializable {
 
     public void download() {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (this.filterFields == null) {
 	    this.filterFields = v0.filterFields;
 	}
@@ -1569,7 +1729,7 @@ public class VObject implements Serializable {
      */
     public void download(List<String> fileNames, String... requetes) {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (this.filterFields == null) {
 	    this.filterFields = v0.filterFields;
 	}
@@ -1623,7 +1783,7 @@ public class VObject implements Serializable {
     public void downloadXML(String requete, String repertoire, String anEnvExcecution, String phase, String etatOk,
 	    String etatKo) {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	if (this.filterFields == null) {
 	    this.filterFields = v0.filterFields;
 	}
@@ -1686,7 +1846,7 @@ public class VObject implements Serializable {
      */
     public void downloadEnveloppe(String requete, String repertoire, ArrayList<String> listRepertoire) {
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
-	VObject v0 = (VObject) session.getAttribute(this.sessionName);
+	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 
 	if (this.filterFields == null) {
 	    this.filterFields = v0.filterFields;
@@ -2307,13 +2467,6 @@ public class VObject implements Serializable {
 	this.constantVObject = constantVObject;
     }
 
-    public VObject getInSessionVObject() {
-	return inSessionVObject;
-    }
-
-    public void setInSessionVObject(VObject inSessionVObject) {
-	this.inSessionVObject = inSessionVObject;
-    }
 
 	public String getDatabaseColumnSort() {
 		return databaseColumnSort;
