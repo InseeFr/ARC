@@ -127,10 +127,10 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 	LoggerDispatcher.debug(String.format("Thread's pilotage table : %s", this.getTablePilTempThread()), LOGGER);
 
 	// Tag the structurize phase as OK
-	request.append("UPDATE " + this.getTablePilTempThread());
-	request.append("\n\t SET etat_traitement = '{" + TraitementState.OK + "}'");
-	request.append("\n\t , phase_traitement = '" + this.tokenInputPhaseName + "'");
-	request.append("\n\t WHERE id_source='" + this.idSource + "';");
+	request.append("\n UPDATE " + this.getTablePilTempThread());
+	request.append("\n	SET etat_traitement = '{" + TraitementState.OK + "}'");
+	request.append("\n	, phase_traitement = '" + this.tokenInputPhaseName + "'");
+	request.append("\n	WHERE id_source='" + this.idSource + "';");
 
 	LoggerDispatcher
 		.debug(String.format("Thread's %s : %s", this.bddTable.getQualifedName(BddTable.ID_WORKING_TABLE_KO),

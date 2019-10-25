@@ -32,9 +32,6 @@ public class ThreadIdentifyService extends AbstractThreadService {
     // the container of the file
     private String container;
 
-    // How many line do we load each time with ChargementBrutal
-    public static final int LIMIT_CHARGEMENT_BRUTAL = 5;
-
     // validity of the file
     public String validite;
 

@@ -109,7 +109,7 @@ public abstract class AbstractThreadService extends AbstractService implements R
 //		this.bddTable.getNaming(BddTable.ID_TABLE_PHASE_ORDER));
 			this.bddTable.getNaming(BddTable.ID_TABLE_IHM_PARAMETTRAGE_ORDRE_PHASE));
 	try {
-	    this.actualPhaseEntity = processPhaseDAO.getPreviousPhase(getTablePil(),
+	    this.actualPhaseEntity = processPhaseDAO.getPreviousPhaseOfNorme(getTablePil(),
 		    this.tokenInputPhaseName.toUpperCase());
 	    this.bddTable.addTable(BddTable.ID_TABLE_PREVIOUS_PHASE,
 		    Namings.GET_TABLE_NAME.apply(executionEnv, actualPhaseEntity.getPreviousPhase() + "_OK"));
@@ -558,7 +558,7 @@ public abstract class AbstractThreadService extends AbstractService implements R
 	} catch (NoSuchAlgorithmException e) {
 	    LoggerDispatcher.error("tableOfIdSource", e, LOGGER);
 	}
-	return tableName + "_child_" + hashText;
+	return tableName + "_"+CHILD_TABLE_TOKEN+"_" + hashText;
     }
 
     public String globalTableName(String aExecutionEnv, String aCurrentPhase, String tableName) {

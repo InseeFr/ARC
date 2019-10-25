@@ -1179,7 +1179,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 						m = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
 								"\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"
 										+ nomTable
-										+ "\\_child\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "
+										+ "\\_"+CHILD_TABLE_TOKEN+"\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "
 										+ FormatSQL.MAX_LOCK_PER_TRANSACTION + " ) "
 										+ "\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
 										+ "\n SELECT tablename from TMP_SELECT ")).mapContent();
@@ -1207,12 +1207,12 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	           		 			// si on ne trouve pas la table dans la phase en etape=1, on détruit le lien avec todo
 		           		 		if (!etape.equals("1"))
 		           		 		{
-		           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" NO INHERIT "+ManipString.substringBeforeFirst(t,"_child_")+"_todo;"));
+		           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" NO INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
 		           		 		}
 		           		 		else
 		           		 		// sinon on pose le lien (etape 1 ou 2)
 		           		 		{
-		           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" INHERIT "+ManipString.substringBeforeFirst(t,"_child_")+"_todo;"));
+		           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
 		           		 		}
            		 		}
            		 	}

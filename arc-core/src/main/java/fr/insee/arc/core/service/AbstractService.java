@@ -40,6 +40,11 @@ public abstract class AbstractService implements IApiService, INumericConstant {
 
     public static final String PRODUCTION_FILE = "production.dummy";
     public static final int PRODUCTION_START_TIME = 22;
+    public int NB_PROCESSORS=16;
+    public int NB_PARALLEL;
+    public static final String CHILD_TABLE_TOKEN="child";
+
+    
     protected int nbThread;
     public static final String ID_SOURCE = "id_source";
 
@@ -61,8 +66,7 @@ public abstract class AbstractService implements IApiService, INumericConstant {
     public static final String XML_JOIN_SEPARATOR = "\n";
     protected Boolean todo = false;
     protected List<PilotageEntity> filesToProcess ;
-    
-    
+
 
     /**
      * Simple counter to check excecution loop
