@@ -1,16 +1,12 @@
 package fr.insee.arc.web.util;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public  class LineObject implements Iterable<String> , Serializable {
+public  class LineObject implements Iterable<String> {
     
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -7713378009007338700L;
     private List<String> data;
     
     public LineObject() {
@@ -55,5 +51,7 @@ public  class LineObject implements Iterable<String> , Serializable {
 	return "LineObject [data=" + data + "]";
     }
     
-    
+    public LineObject clone() {
+        return new LineObject((List<String>) ((ArrayList<String>) (this.data)).clone());
+    }
 }

@@ -1,6 +1,5 @@
 package fr.insee.arc.web.util;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,21 +8,13 @@ import java.util.Map;
  *
  *
  */
-public final class ConstantVObject implements Serializable {
+public final class ConstantVObject {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 195199045745139789L;
     public Map<String, ColumnRendering> columnRender = new HashMap<String, ColumnRendering>();
     public static int logSize = 10000;
 
-    public static class ColumnRendering implements Serializable{
-        /**
-	 * 
-	 */
-	private static final long serialVersionUID = -3356257967437602860L;
-	public Boolean visible;
+    public static class ColumnRendering {
+        public Boolean visible;
         public String label;
         public String size;
         public String type;

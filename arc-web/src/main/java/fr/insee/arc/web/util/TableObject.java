@@ -1,6 +1,5 @@
 package fr.insee.arc.web.util;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.stream.Collectors;
  * @author Pépin Rémi
  *
  */
-public class TableObject implements Iterable<LineObject>, Serializable{
+public class TableObject implements Iterable<LineObject>{
     /**
      * 
      */
@@ -69,6 +68,12 @@ public class TableObject implements Iterable<LineObject>, Serializable{
 	return "TableObject [table=" + lines + "]";
     }
     
-    
+    public TableObject clone() {
+        ArrayList<LineObject> clonedContent = new ArrayList<LineObject>();
+        for (int i = 0; i < this.lines.size(); i++) {
+            clonedContent.add(this.lines.get(i).clone());
+        }
+        return new TableObject(clonedContent);
+    }
 
 }
