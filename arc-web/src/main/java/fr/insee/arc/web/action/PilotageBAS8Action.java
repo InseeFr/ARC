@@ -1036,4 +1036,14 @@ public class PilotageBAS8Action extends ArcAction {
 	this.listePhase = listePhase;
     }
 
+
+	public String getPhaseAExecuter() {
+		return phaseAExecuter;
+	}
+
+
+	public void setPhaseAExecuter(String phaseAExecuter) {
+		this.phaseAExecuter = phaseAExecuter;
+	}
+
 }

@@ -84,26 +84,40 @@ public class ProcessPhaseDAO extends AbstractDAO<TraitementPhaseEntity> {
 	
     }
     
-    public TraitementPhaseEntity getPreviousPhase(String tablePilotage, String currentPhase) throws Exception {
+    public TraitementPhaseEntity getPreviousPhaseOfNorme(String tablePilotage, String currentPhase) throws Exception {
 	StringBuilder conditionWhere = new StringBuilder();
-	conditionWhere.append("TRUE");
 	
-//	conditionWhere.append("\n\t exists (");
-//	conditionWhere.append("\n\t SELECT 1 FROM " + tablePilotage + " pil ");
-//	conditionWhere.append("\n\t WHERE (");
-//	conditionWhere.append("\n\t\t pil.id_norme = " + this.getNomTableEntity().toString() + ".id_norme");
-//	conditionWhere.append("\n\t\t AND pil.periodicite = " + this.getNomTableEntity().toString() + ".periodicite");
-//	conditionWhere.append("\n\t\t AND pil.validite::date > " + this.getNomTableEntity().toString() + ".validite_inf");
-//	conditionWhere.append("\n\t\t AND pil.validite::date < " + this.getNomTableEntity().toString() + ".validite_sup");
-//	conditionWhere.append("\n\t\t AND " + this.getNomTableEntity().toString() + ".nom_phase = '" + currentPhase + "')");
-//	conditionWhere.append("\n\t\t OR");
-//	conditionWhere.append("\n\t\t ( pil.id_norme isnull");
-//	conditionWhere.append("\n\t\t AND " + this.getNomTableEntity().toString() + ".nom_phase = '" + currentPhase + "'))");
-
+	System.out.println(currentPhase);
 	
+	conditionWhere.append("\n nom_phase = '" + currentPhase + "' ");
+	
+	conditionWhere.append("\n AND ( ");
+	// case when we don't want phase to be norm specific
+	conditionWhere.append("\n id_norme is null ");
+	
+	conditionWhere.append("\n OR ");
+	// case when we want phases process to be set by norm
+	// we prevent to mix the two modes : either we set the process phase by norms or not at all
+	conditionWhere.append("\n ( NOT EXISTS (SELECT 1 FROM " + this.getNomTableEntity().toString()+ " ww where ww.id_norme is null) ");
+	conditionWhere.append("\n 	AND EXISTS (");
+	conditionWhere.append("\n 	SELECT 1 FROM " + tablePilotage + " pil ");
+	conditionWhere.append("\n 	WHERE ( ");
+	conditionWhere.append("\n		pil.id_norme = " + this.getNomTableEntity().toString() + ".id_norme ");
+	conditionWhere.append("\n		AND pil.periodicite = " + this.getNomTableEntity().toString() + ".periodicite ");
+	conditionWhere.append("\n		AND pil.validite::date > " + this.getNomTableEntity().toString() + ".validite_inf ");
+	conditionWhere.append("\n		AND pil.validite::date < " + this.getNomTableEntity().toString() + ".validite_sup ");
+	conditionWhere.append("\n		OR ");
+	conditionWhere.append("\n		pil.id_norme is null ) ");
+	conditionWhere.append("\n 			) ");
+	conditionWhere.append("\n ) ");
+	conditionWhere.append("\n ) ");
 	
 	return getListWhere(conditionWhere.toString()).get(0);
     }
+
+    
+    
+    
     
     @Override
     public String getOrderByColumn() {
