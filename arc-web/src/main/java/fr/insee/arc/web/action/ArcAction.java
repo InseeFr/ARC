@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -62,14 +63,13 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
     private static final Logger LOGGER = Logger.getLogger(ArcAction.class);
     public static final String NONE = "none";
     public static final String POOLNAME = "arc";
+    
+    public static final int NUMBER_OF_SANDBOXES = 8;
     @Autowired
     @Qualifier("properties")
     public  PropertiesHandler properties;
     
     protected String repertoire;
-
-    private List<String> listBas = Arrays.asList("BAS1", "BAS2", "BAS3", "BAS4", "BAS5", "BAS6", "BAS7", "BAS8",
-	    "PROD");
 
     private Map<String, String> envMap ;
 
@@ -132,16 +132,21 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
     
     protected boolean isRefreshMonitoring = false;
     
-    public void initializeArcActionWithProperties() {
-	   this.envMap = Stream
-		    .of(new String[][] { { properties.getSchemaReference() + "_BAS1", "BAS1" }, { properties.getSchemaReference() + "_BAS2", "BAS2" },
-			    { properties.getSchemaReference() + "_BAS3", "BAS3" }, { properties.getSchemaReference() + "_BAS4", "BAS4" },
-			    { properties.getSchemaReference() + "_BAS5", "BAS5" }, { properties.getSchemaReference() + "_BAS6", "BAS6" },
-			    { properties.getSchemaReference() + "_BAS7", "BAS7" }, { properties.getSchemaReference() + "_BAS8", "BAS8" },
-			    { properties.getSchemaReference() + "_PROD", "PROD" }, })
-		    .collect(Collectors.toMap(data -> data[0], data -> data[1]));
-	   
-	  this.repertoire = properties.getRootDirectory();
+    @SuppressWarnings("unchecked")
+	public void initializeArcActionWithProperties() {
+
+	    
+		if (getSession().get(SessionParameters.ENV_MAP) == null) {
+			this.envMap = new LinkedHashMap<String, String>();
+			for (int i = 1; i <= NUMBER_OF_SANDBOXES; i++) {
+				this.envMap.put(properties.getSchemaReference() + "_BAS" + i, "BAS" + i);
+			}
+			this.envMap.put(properties.getSchemaReference() + "_PROD", "PROD");
+			getSession().put(SessionParameters.ENV_MAP, this.envMap);
+		}
+    	
+    	this.envMap=(Map<String, String>) getSession().get(SessionParameters.ENV_MAP);
+    	this.repertoire = properties.getRootDirectory();
     }
 
     public Consumer<? super VObject> putVObject(VObject vObject, Consumer<? super VObject> initialize) {
@@ -593,13 +598,6 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
 	this.bacASable = bacASable;
    }
 
-   public List<String> getListBas() {
-	return listBas;
-   }
-
-   public void setListBas(List<String> listBas) {
-	this.listBas = listBas;
-   }
 
    public InputStream getInputStream() {
 	return inputStream;
