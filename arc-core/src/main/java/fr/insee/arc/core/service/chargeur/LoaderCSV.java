@@ -21,6 +21,7 @@ import fr.insee.arc.core.service.thread.ThreadLoadService;
 import fr.insee.arc.core.util.CustomTreeFormat;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.utils.utils.ManipString;
 
 /**
  * Read CSV files.
@@ -46,6 +47,7 @@ public class LoaderCSV implements ILoader {
     private static final String TABLE_TEMP_T = "T";
     private String quote ="\"";
     private String jointure;
+    private String env;
     private String validity;
     private InputStream streamHeader;
     private InputStream streamContent;
@@ -59,6 +61,7 @@ public class LoaderCSV implements ILoader {
         this.streamContent =  filesInputStreamLoad.getTmpInxCSV();
         this.streamHeader = filesInputStreamLoad.getTmpInxLoad();
         this.validity = threadChargementService.getValidite();
+        this.env=threadChargementService.getExecutionEnv();
     }
 
     public LoaderCSV() {
@@ -133,6 +136,284 @@ public class LoaderCSV implements ILoader {
         streamContent.close();
     }
 
+    
+    /**
+     * restructure a flat file
+     * @throws SQLException 
+     * @throws Exception
+     * @throws IOException
+     */
+    public void applyFormat() throws SQLException {
+    	String format=currentNorme.getRegleChargement().getFormat();
+    	if (format!=null && !format.isEmpty())
+    	{
+    		format=format.trim();
+    		String[] lines=format.split("\n");
+    		
+    		ArrayList<String> cols=new ArrayList<String>();
+    		ArrayList<String> exprs=new ArrayList<String>();
+    		ArrayList<String> wheres=new ArrayList<String>();
+
+    		ArrayList<String> joinTable=new ArrayList<String>();
+    		ArrayList<String> joinType=new ArrayList<String>();
+    		ArrayList<String> joinClause=new ArrayList<String>();
+    		ArrayList<String> joinSelect=new ArrayList<String>();
+    		ArrayList<String> partitionExpression=new ArrayList<String>();
+
+    		for (String line:lines)
+    		{
+    			if (line.startsWith("<join-table>"))
+    			{
+    				joinTable.add(ManipString.substringAfterFirst(line,">").trim());
+    			}
+    			else if (line.startsWith("<join-type>"))
+    			{
+    				joinType.add(ManipString.substringAfterFirst(line,">").trim());
+    			}
+    			else if (line.startsWith("<join-clause>"))
+    			{
+    				joinClause.add(ManipString.substringAfterFirst(line,">").trim());
+    			}
+    			else if (line.startsWith("<join-select"))
+    			{
+    				joinSelect.add(ManipString.substringAfterFirst(line,">").trim());
+    			}
+    			else if (line.startsWith("<where>"))
+    			{
+    				wheres.add(ManipString.substringAfterFirst(line,">").trim());
+    			}
+    			else if (line.startsWith("<partition-expression>"))
+    			{
+    				partitionExpression.add(ManipString.substringAfterFirst(line,">").trim());
+    			}
+    			else if (line.startsWith("<encoding>"))
+    			{
+    			}
+    			else if (line.startsWith("<headers>"))
+    			{
+    			}
+    			else if (line.startsWith("<quote>"))
+    			{
+    			}
+    			else if (line.startsWith("/*"))
+    			{
+
+    			}
+    			else
+    			{
+    				cols.add(ManipString.substringBeforeFirst(line,"=").trim());
+    				exprs.add(ManipString.substringAfterFirst(line,"=").trim());
+    			}
+    		}
+    		
+    		
+    		/* jointure
+    		 * 
+    		 */
+    		
+    		StringBuilder addId=new StringBuilder();
+    		StringBuilder req;
+    	
+    		if (!joinTable.isEmpty())
+    		{
+				req = new StringBuilder();
+
+				req.append("\n DROP TABLE IF EXISTS TTT; ");
+				req.append("\n CREATE TEMPORARY TABLE TTT AS ");
+
+				// On renumérote les lignes après jointure pour etre cohérent
+				req.append("\n SELECT  (row_number() over ())::int as id$new$, l.* ");
+				for (int i = 0; i < joinTable.size(); i++) {
+					req.append("\n , v"+i+".* ");
+				}
+				req.append("FROM  " + this.tableTempA + " l ");
+				
+    			
+				for (int i = 0; i < joinTable.size(); i++) {
+					// if schema precised in table name, keep it, if not , add execution schema to
+					// tablename
+
+					joinTable.set(i,
+							joinTable.get(i).contains(".") ? joinTable.get(i) : this.env + "." + joinTable.get(i));
+
+					// récupération des colonnes de la table
+					List<String> colsIn = new ArrayList<String>();
+					colsIn = UtilitaireDao.get("arc")
+							.executeRequest(this.connection, "select "+joinSelect.get(i)+" from " + joinTable.get(i) + " limit 0").get(0);
+
+					// join type
+					req.append("\n " + joinType.get(i) + " ");
+
+					req.append("\n (SELECT ");
+					// build column name to be suitable to load process aka : i_col, v_col
+					boolean start = true;
+					for (int j = 0; j < colsIn.size(); j++) {
+						if (start) {
+							start = false;
+						} else {
+							req.append("\n ,");
+						}
+
+						req.append(
+									"null::int as i_" + colsIn.get(j) + ", " + 
+										colsIn.get(j) + " as v_" + colsIn.get(j) + " ");
+
+					}
+					req.append("\n FROM " + joinTable.get(i) + " ");
+					req.append("\n ) v"+i+" ");
+					req.append("\n ON " + joinClause.get(i) + " ");
+
+				}
+				req.append("\n ;");
+				req.append("\n ALTER TABLE TTT DROP COLUMN id; ");
+				req.append("\n ALTER TABLE TTT RENAME COLUMN id$new$ TO id; ");
+				req.append("\n DROP TABLE " + this.tableTempA + ";");
+				req.append("\n ALTER TABLE TTT RENAME TO " + this.tableTempA + ";");
+				UtilitaireDao.get("arc").executeImmediate(connection, req);
+			}
+    		
+            /*
+			 * recalcule de colonnes
+			 * si une colonne existe déjà, elle est écrasée
+			 * sinon la nouvelle colonne est créée
+			 */
+    		if (!cols.isEmpty())
+    		{
+	            List<String> colsIn = new ArrayList <String>();
+	            colsIn=UtilitaireDao.get("arc").executeRequest(this.connection, "select * from "+this.tableTempA+" limit 0").get(0);
+	    		
+	    		String renameSuffix="$new$";
+	    		String partitionNumberPLaceHolder="#pn#";
+	    		req=new StringBuilder();
+	
+	    		// Creation de la table
+	    		req.append("\n DROP TABLE IF EXISTS TTT; ");
+	    		req.append("\n CREATE TEMPORARY TABLE TTT AS ");
+	    		req.append("\n SELECT w.* FROM ");
+	    		req.append("\n (SELECT v.* ");
+	    		for (int i=0;i<cols.size();i++)
+	    		{
+	    			// si on trouve dans l'expression le suffix alors on sait qu'on a voulu préalablement calculer la valeur
+	    			if (exprs.get(i).contains(renameSuffix))
+	    			{
+		    			req.append("\n ,");
+		    			req.append(exprs.get(i).replace(partitionNumberPLaceHolder,"0::bigint"));
+		    			req.append(" as ");
+		    			req.append(cols.get(i)+renameSuffix+" ");
+	    			}
+	    		}
+	    		req.append("\n FROM ");
+	    		req.append("\n (SELECT u.* ");
+	    		for (int i=0;i<cols.size();i++)
+	    		{
+	    			if (!exprs.get(i).contains(renameSuffix))
+	    			{
+		    			req.append("\n ,");
+		    			req.append(exprs.get(i).replace(partitionNumberPLaceHolder,"0::bigint"));
+		    			req.append(" as ");
+		    			req.append(cols.get(i)+renameSuffix+" ");
+	    			}
+	    		}
+	    		req.append("\n FROM "+this.tableTempA+" u ) v ) w ");
+	    		req.append("\n WHERE false ");
+	    		for (String s : wheres)
+	    		{
+	    			req.append("\n AND "+s);
+	    		}
+	    		req.append(";");
+	            UtilitaireDao.get("arc").executeImmediate(connection, req);
+
+	    		
+	    		// Itération
+	    		
+	    		// si pas de partition, nbIteration=1
+	    		boolean partitionedProcess=(partitionExpression.size()>0);
+	    		// default value 100000
+	    		int partition_size=100000;
+	    		
+	    		
+	    		int nbPartition=1;
+	    		// creation de l'index de partitionnement
+	    		if (partitionedProcess)
+	    		{
+	    			req=new StringBuilder();
+
+	    			// comptage rapide su échantillon à 1/10000 pour trouver le nombre de partiton
+	    			nbPartition=UtilitaireDao.get("arc").getInt(connection, "select ((count(*)*10000)/"+partition_size+")+1 from "+this.tableTempA+" tablesample system(0.01)");
+	    			
+	    			req=new StringBuilder();
+		    		req.append("\n CREATE INDEX idx_a on "+this.tableTempA+" ((abs(hashtext("+partitionExpression.get(0)+"::text)) % "+nbPartition+"));");
+		            UtilitaireDao.get("arc").executeImmediate(connection, req);
+	    		}
+	    		
+	    		int nbIteration=nbPartition;
+	    		
+	    		for (int part=0;part<nbIteration;part++)
+	    		{	
+		    		req=new StringBuilder();
+		    		req.append("\n INSERT INTO TTT ");
+		    		req.append("\n SELECT w.* FROM ");
+		    		req.append("\n (SELECT v.* ");
+		    		for (int i=0;i<cols.size();i++)
+		    		{
+		    			// si on trouve dans l'expression le suffix alors on sait qu'on a voulu préalablement calculer la valeur
+		    			if (exprs.get(i).contains(renameSuffix))
+		    			{
+			    			req.append("\n ,");
+			    			req.append(exprs.get(i).replace(partitionNumberPLaceHolder,part+"000000000000::bigint"));
+			    			req.append(" as ");
+			    			req.append(cols.get(i)+renameSuffix+" ");
+		    			}
+		    		}
+		    		req.append("\n FROM ");
+		    		req.append("\n (SELECT u.* ");
+		    		for (int i=0;i<cols.size();i++)
+		    		{
+		    			if (!exprs.get(i).contains(renameSuffix))
+		    			{
+			    			req.append("\n ,");
+			    			req.append(exprs.get(i).replace(partitionNumberPLaceHolder,part+"000000000000::bigint"));
+			    			req.append(" as ");
+			    			req.append(cols.get(i)+renameSuffix+" ");
+		    			}
+		    		}
+		    		req.append("\n FROM "+this.tableTempA+" u ");
+		    		if (partitionedProcess)
+		    		{
+		    			req.append("\n WHERE abs(hashtext("+partitionExpression.get(0)+"::text)) % "+nbPartition+"="+part+" ");
+		    		}
+		    		req.append("\n ) v ) w ");
+		    		req.append("\n WHERE true ");
+		    		for (String s : wheres)
+		    		{
+		    			req.append("\n AND "+s);
+		    		}
+		    		req.append(";");
+		            UtilitaireDao.get("arc").executeImmediate(connection, req);
+	    		}
+	    		
+	    		req=new StringBuilder();
+	    		for (int i=0;i<cols.size();i++)
+	    		{
+					
+	    			if (colsIn.contains(cols.get(i)))
+	    			{
+	    				req.append("\n ALTER TABLE TTT DROP COLUMN "+cols.get(i)+";");
+	    			}
+	    			req.append("\n ALTER TABLE TTT RENAME COLUMN "+cols.get(i)+renameSuffix+" TO "+cols.get(i)+";");
+	    		}
+	    		
+				req.append("\n DROP TABLE "+this.tableTempA+";");
+				req.append("\n ALTER TABLE TTT RENAME TO "+this.tableTempA+";");
+				
+	            UtilitaireDao.get("arc").executeImmediate(connection, req);
+    		}
+    	}
+    }
+    
+    
+    
+    
     /**
      * Create the table
      * @throws SQLException
@@ -202,105 +483,12 @@ public class LoaderCSV implements ILoader {
 
         return colonneErreur;
     }
-
-    /**
-     * Transformation de la base "plate" (celle issue de la copy du fichier) en base hierachique. La "hierachie" ce fait grâce aux colonnes
-     * i_XX qui permettent de voir les bloc identiques
-     * 
-     * @param aFormat
-     * @throws SQLException
-     * @deprecated
-     */
-    public void flatBaseToHierarchicalBase(CustomTreeFormat aFormat) throws SQLException {
-        LoggerDispatcher.info("** FlatBaseToHierarchicalBase **", LOGGER);
-
-        StringBuilder req = new StringBuilder();
-
-        // on récupère la validité
-
-        req.append("with alias_table as (");
-        req.append("select * from " + this.tableHardLoad);
-        req.append(")");
-        req.append(this.currentNorme.getDefValidite());
-        String validite = UtilitaireDao.get("arc").executeRequest(this.connection, req).get(2).get(0);
-
-        req.setLength(0);
-        req.append("DROP TABLE IF EXISTS " + tableTempA + ";");
-        req.append("CREATE ");
-        if (!tableTempA.contains(".")) {
-            req.append("TEMPORARY ");
-        } else {
-            req.append(" ");
-        }
-
-        req.append(" TABLE " + this.tableTempA);
-        req.append(" AS (SELECT ");
-        req.append("\n\t '" + this.fileName + "'::text collate \"C\" as id_source");
-        req.append("\n\t ,id::integer as id");
-        req.append("\n\t ,current_date::text collate \"C\" as date_integration ");
-        req.append("\n\t ,'" + this.currentNorme.getIdNorme() + "'::text collate \"C\" as id_norme ");
-        req.append("\n\t ,'" + this.currentNorme.getPeriodicite() + "'::text collate \"C\" as periodicite ");
-        req.append("\n\t ,'" + validite + "'::text collate \"C\" as validite ");
-        req.append("\n\t ,0::integer as nombre_colonne");
-
-        req.append("\n\t , ");
-
-        for (String feuille : aFormat.getEndLeaves()) {
-
-            List<String> listePere = aFormat.getAncestors(feuille);
-
-            req.append("DENSE_RANK() OVER (ORDER BY ");
-            for (int i = listePere.size() - 1; i >= 0; i--) {
-                req.append(listePere.get(i));
-
-                if (i != 0) {
-                    req.append(", ");
-                }
-            }
-            
-            // tcp
-            req.append(") as i_" + feuille +"," + feuille + " as v_" + feuille + ",");
-
-            
-        }
-
-        for (String branche : aFormat.getBranches()) {
-            List<String> listePere = aFormat.getAncestors(branche);
-            req.append("DENSE_RANK() OVER (ORDER BY ");
-            for (int i = listePere.size() - 1; i >= 0; i--) {
-                req.append(listePere.get(i));
-
-                if (i == 0) {
-
-                } else {
-                    req.append(", ");
-                }
-            }
-
-            // tcp
-            req.append(") as i_" + branche + "," + branche + " as v_" + branche + ",");
-            
-        }
-        req.setLength(req.length() - 1);
-                
-        req.append("\n FROM " + TABLE_TEMP_T + ")");
-
-        UtilitaireDao.get("arc").executeImmediate(this.connection, req);
-
-        StringBuilder requeteBilan = new StringBuilder();
-        requeteBilan.append(AbstractPhaseService.pilotageMarkIdsource(this.tablePilotageLoadTemp, fileName, this.currentPhase, TraitementState.OK.toString(),
-                null));
-
-        UtilitaireDao.get("arc").executeBlock(this.connection, requeteBilan);
-
-    }
-
+    
     public void flatBaseToIdedFlatBase() throws SQLException {
         LoggerDispatcher.info("** FlatBaseToIdedFlatBase **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
         StringBuilder req = new StringBuilder();
-
         req.append("DROP TABLE IF EXISTS " + tableTempA + ";");
         req.append("CREATE ");
         if (!tableTempA.contains(".")) {
@@ -332,10 +520,12 @@ public class LoaderCSV implements ILoader {
         req.setLength(req.length() - 1);
 
 
-        req.append("\n FROM " + TABLE_TEMP_T + ")");
+        req.append("\n FROM " + TABLE_TEMP_T + ");");
+        req.append("DROP TABLE IF EXISTS " + TABLE_TEMP_T + ";");
 
         UtilitaireDao.get("arc").executeImmediate(this.connection, req);
 
+        applyFormat();
 
         StringBuilder requeteBilan = new StringBuilder();
         requeteBilan.append(AbstractPhaseService.pilotageMarkIdsource(this.tablePilotageLoadTemp, fileName, this.currentPhase, TraitementState.OK.toString(),
