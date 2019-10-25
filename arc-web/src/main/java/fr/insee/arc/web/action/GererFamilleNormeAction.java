@@ -592,7 +592,7 @@ public class GererFamilleNormeAction extends ArcAction {
         requeteListeAddRegleMapping.append(", norme.periodicite");
         requeteListeAddRegleMapping.append(", var.nom_variable_metier");
         requeteListeAddRegleMapping.append(", '" + FormatSQL.NULL + "'");
-        requeteListeAddRegleMapping.append(", 'règle générée automatiquement lors de la création de cette variable'");
+        requeteListeAddRegleMapping.append(", " + FormatSQL.NULL + "::text ");
         requeteListeAddRegleMapping.append("\n  FROM (SELECT DISTINCT id_famille, nom_variable_metier FROM arc."+IHM_MOD_VARIABLE_METIER+") var INNER JOIN arc.ihm_famille fam");
         requeteListeAddRegleMapping.append("\n    ON var.id_famille=fam.id_famille");
         requeteListeAddRegleMapping.append("\n  INNER JOIN arc.ihm_norme norme");
