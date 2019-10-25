@@ -564,12 +564,14 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		} catch (Exception e) {
 		    st.cancel();
 		    LoggerHelper.error(LOGGER, "executeRequest()", e);
+		    e.printStackTrace();
 		    throw e;
 		}
 	    }
 
 	} catch (Exception e) {
 	    LoggerHelper.error(LOGGER, "executeRequest()", e);
+	    e.printStackTrace();
 	    throw e;
 	} finally {
 	    if (connexionWrapper.isLocal()) {
@@ -714,7 +716,8 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		    return null;
 		} catch (Exception e) {
 		    if (!this.silent) {
-			LoggerHelper.error(LOGGER, stmt.toString());
+		    	LoggerHelper.error(LOGGER, stmt.toString());
+		    	e.printStackTrace();
 		    }
 		    throw e;
 		} finally {
@@ -724,6 +727,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	    } catch (Exception e) {
 		if (!this.silent) {
 		    LoggerHelper.error(LOGGER, "executeRequest()", e);
+		    e.printStackTrace();
 		}
 		connexionWrapper.getConnexion().rollback();
 		throw e;
@@ -732,7 +736,8 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	    }
 	} catch (Exception ex) {
 	    if (!this.silent) {
-		LoggerHelper.error(LOGGER, "Lors de l'exécution de", updatedQuery);
+			LoggerHelper.error(LOGGER, "Lors de l'exécution de", updatedQuery);
+			ex.printStackTrace();
 	    }
 	    throw ex;
 	}
