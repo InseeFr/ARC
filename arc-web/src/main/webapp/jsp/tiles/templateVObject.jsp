@@ -387,7 +387,7 @@
 							class="btn btn-secondary btn-sm "
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
-							scope="<s:property value="#view.sessionName"/>;${param.extraScopeSee}"
+							scope="<s:property value="#view.sessionName"/>;"
 							value="<s:text name="gui.button.refresh"/>"
 						><span class="fa fa-refresh">&nbsp;</span><s:text name="gui.button.refresh"/></button>
 					</s:if>
@@ -398,7 +398,7 @@
 							class="btn btn-secondary btn-sm"
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
-							scope="<s:property value="#view.sessionName"/>;${param.extraScopeSee}"
+							scope="${param.extraScopeSee}"
 							value="<s:text name="gui.button.see"/>"
 						><span class="fa fa-eye-open">&nbsp;</span>"<s:text name="gui.button.see"/></button>
 					</s:if>

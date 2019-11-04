@@ -86,10 +86,10 @@
 								<s:param name="ligneFilter">true</s:param>
 								<s:param name="checkbox">true</s:param>
 								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeDelete">-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeUpdate">viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeSee">viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
+								<s:param name="extraScopeAdd">-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeDelete">-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeUpdate">-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeSee">viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 
 							</s:include>
 						</div>
@@ -114,10 +114,10 @@
 								<s:param name="ligneFilter">true</s:param>
 								<s:param name="checkbox">true</s:param>
 								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeDelete">viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeUpdate">viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeSee">viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;</s:param>
+								<s:param name="extraScopeAdd">-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeDelete">-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeUpdate">-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeSee">viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 
 							</s:include>
 						</div>
@@ -142,9 +142,9 @@
 								<s:param name="ligneFilter">true</s:param>
 								<s:param name="checkbox">true</s:param>
 								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeUpdate">viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeSee">viewJeuxDeRegles;viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeAdd">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeUpdate">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+								<s:param name="extraScopeSee">viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 
 							</s:include>
 						</div>
@@ -177,7 +177,7 @@
 										role="tab"
 										aria-controls="load"
 										aria-selected="true"
-										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.load" />
 									</a></li>
@@ -189,7 +189,7 @@
 										role="tab"
 										aria-controls="structurize"
 										aria-selected="false"
-										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.structurize" />
 									</a></li>
@@ -201,7 +201,7 @@
 										role="tab"
 										aria-controls="control"
 										aria-selected="false"
-										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.control" />
 									</a></li>
@@ -213,7 +213,7 @@
 										role="tab"
 										aria-controls="filter"
 										aria-selected="false"
-										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.filter" />
 									</a></li>
@@ -225,7 +225,7 @@
 										role="tab"
 										aria-controls="mapmodel"
 										aria-selected="false"
-										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.mapmodel" />
 									</a></li>
