@@ -144,7 +144,7 @@
 								<s:param name="checkboxVisible">true</s:param>
 								<s:param name="extraScopeAdd">viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;</s:param>
 								<s:param name="extraScopeUpdate">viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;</s:param>
-								<s:param name="extraScopeSee">viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;</s:param>
+								<s:param name="extraScopeSee">viewJeuxDeRegles;viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 
 							</s:include>
 						</div>
@@ -154,14 +154,21 @@
 
 				<div class="col-md-7">
 					<div class="row">
-						<div class="col-md">
+						<div  id="viewModuleButtons" class="col-md">
 							<!-- tab to choose the module -->
-
+						<s:if test="viewChargement.isInitialized==true&&viewChargement.isScoped==true
+						|| viewNormage.isInitialized==true&&viewNormage.isScoped==true
+						|| viewControle.isInitialized==true&&viewControle.isScoped==true
+						|| viewFiltrage.isInitialized==true&&viewFiltrage.isScoped==true
+						|| viewMapping.isInitialized==true&&viewMapping.isScoped==true
+						">
 							<ul
 								class="nav nav-tabs mb-2"
 								id="chooseModule"
 								role="tablist"
 							>
+							
+							
 								<li class="nav-item"><a
 										class="nav-link active"
 										id="load-tab"
@@ -170,6 +177,7 @@
 										role="tab"
 										aria-controls="load"
 										aria-selected="true"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.load" />
 									</a></li>
@@ -181,6 +189,7 @@
 										role="tab"
 										aria-controls="structurize"
 										aria-selected="false"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.structurize" />
 									</a></li>
@@ -192,6 +201,7 @@
 										role="tab"
 										aria-controls="control"
 										aria-selected="false"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.control" />
 									</a></li>
@@ -203,6 +213,7 @@
 										role="tab"
 										aria-controls="filter"
 										aria-selected="false"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.filter" />
 									</a></li>
@@ -214,11 +225,12 @@
 										role="tab"
 										aria-controls="mapmodel"
 										aria-selected="false"
+										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
 										<s:text name="normManagement.mapmodel" />
 									</a></li>
 							</ul>
-
+						</s:if>
 
 							<!-- The content of the tab -->
 							<div
@@ -227,7 +239,7 @@
 							>
 								<%-- LOAD PANEL --%>
 								<div
-									class="tab-pane fade show active"
+									
 									id="load"
 									role="tabpanel"
 									aria-labelledby="load-tab"
@@ -301,7 +313,6 @@
 
 								<%-- STRUCTURIZE PANEL --%>
 								<div
-									class="tab-pane fade"
 									id="structurize"
 									role="tabpanel"
 									aria-labelledby="structurize-tab"
@@ -376,7 +387,6 @@
 
 								<%-- CONTROL TAB --%>
 								<div
-									class="tab-pane fade"
 									id="control"
 									role="tabpanel"
 									aria-labelledby="control-tab"
@@ -449,7 +459,6 @@
 								</div>
 								<%-- FILTER TAB --%>
 								<div
-									class="tab-pane fade"
 									id="filter"
 									role="tabpanel"
 									aria-labelledby="filter-tab"
@@ -534,7 +543,6 @@
 
 								<%-- MAPPING TAB --%>
 								<div
-									class="tab-pane fade"
 									id="mapmodel"
 									role="tabpanel"
 									aria-labelledby="mapmodel-tab"
@@ -633,16 +641,18 @@
 													scope="request"
 												></s:set>
 												<s:param name="btnSee">true</s:param>
+												<s:param name="btnSelect">true</s:param>
+												<s:param name="btnSort">true</s:param>
 												<s:param name="ligneFilter">true</s:param>
 												<s:param name="checkbox">true</s:param>
 												<s:param name="checkboxVisible">true</s:param>
 												<s:param name="otherButton">
 													<input
-														class="btn btn-success btn-sm"
+														class="btn btn-primary btn-sm"
 														id="viewJeuxDeReglesCopie.copie"
 														type="submit"
 														doAction="copieJeuxDeRegles"
-														scope="-viewJeuxDeReglesCopie;viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;"
+														scope="-viewJeuxDeReglesCopie;<s:property value="%{viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']}"/>;"
 														value="Copier"
 													></input>
 												</s:param>

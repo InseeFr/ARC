@@ -47,8 +47,9 @@ import fr.insee.arc.web.util.VObject;
 	@Result(name = "index", location = "/jsp/index.jsp") })
 public class GererNormeAction extends ArcAction {
 
-    private static final String SELECTED_JEU_DE_REGLE = "selectedJeuDeRegle";
-
+    private static final String SELECTED_RULESET_TABLE = "SELECTED_RULESET_TABLE";
+    private static final String SELECTED_RULESET_NAME = "SELECTED_RULESET_NAME";
+    
     private static final Logger LOGGER = Logger.getLogger(GererNormeAction.class);
 
     @Autowired
@@ -140,7 +141,7 @@ public class GererNormeAction extends ArcAction {
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE)));
 	//
 	putVObject(getViewJeuxDeReglesCopie(), t -> NormManagementDao.initializeJeuxDeReglesCopie(t,
-		getViewJeuxDeRegles(), getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS)));
+		getViewJeuxDeRegles(), getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS) , getScope()  ));
 
     }
 
@@ -1122,7 +1123,8 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "selectJeuxDeReglesChargementCopie")
     public String selectJeuxDeReglesChargementCopie() {
 	initialize();
-	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_JEU_DE_REGLE, this.viewChargement.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
 	return generateDisplay();
     }
 
@@ -1135,7 +1137,8 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "selectJeuxDeReglesNormageCopie")
     public String selectJeuxDeReglesNormageCopie() {
 	initialize();
-	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_JEU_DE_REGLE, this.viewNormage.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
 	return generateDisplay();
     }
 
@@ -1148,7 +1151,8 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "selectJeuxDeReglesControleCopie")
     public String selectJeuxDeReglesControleCopie() {
 	initialize();
-	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_JEU_DE_REGLE, this.viewControle.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewControle.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
 	return generateDisplay();
     }
 
@@ -1161,7 +1165,8 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "selectJeuxDeReglesFiltrageCopie")
     public String selectJeuxDeReglesFiltrageCopie() {
 	initialize();
-	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_JEU_DE_REGLE, this.viewFiltrage.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
 	return generateDisplay();
     }
 
@@ -1174,7 +1179,8 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/selectJeuxDeReglesMappingCopie")
     public String selectJeuxDeReglesMappingCopie() {
 	initialize();
-	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_JEU_DE_REGLE, this.viewMapping.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
+	this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
 	return generateDisplay();
     }
 
@@ -1210,10 +1216,10 @@ public class GererNormeAction extends ArcAction {
 
 		requete.append(")");
 		requete.append("SELECT ");
-		requete.append(String.join("','", "'" + selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0) + "'"//
+		requete.append(String.join(",", "'" + selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0) + "'"//
 			, "'" + selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0) + "'"//
-			, "'" + selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0) + "'::date, "//
-			, "'" + selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0) + "'::date, "//
+			, "'" + selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0) + "'::date "//
+			, "'" + selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0) + "'::date "//
 			, "'" + selectionOut.get(ConstanteBD.VERSION.getValue()).get(0) + "'"//
 			, ConstanteBD.ID_CLASS.getValue()//
 			, ConstanteBD.RUBRIQUE_NMCL.getValue()//
@@ -1493,7 +1499,7 @@ public class GererNormeAction extends ArcAction {
      * @return the selectedJeuDeRegle
      */
     public String getSelectedJeuDeRegle() {
-	return this.viewJeuxDeReglesCopie.getCustomValues().get(SELECTED_JEU_DE_REGLE);
+	return this.viewJeuxDeReglesCopie.getCustomValues().get(SELECTED_RULESET_TABLE);
     }
 
     public File getFileUploadLoad() {

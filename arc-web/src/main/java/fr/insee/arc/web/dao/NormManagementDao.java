@@ -411,10 +411,10 @@ public class NormManagementDao {
      *  Initialize the {@value GererNormeAction#viewJeuxDeReglesCopie}. Get in database all the reccord the rule sets.
      * @param viewJeuxDeReglesCopie
      */
-    public static void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie,VObject viewRulesSet, String theTableName) {
+    public static void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie,VObject viewRulesSet, String theTableName, String scope) {
 	LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
 	Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-	if (!selection.isEmpty()) {
+	if (scope!=null) {
 	    List<String> listColumnSelect = new ArrayList<>();
 	    listColumnSelect.add( AbstractRuleDAO.ID_NORME);
 	    listColumnSelect.add( AbstractRuleDAO.PERIODICITE);
@@ -422,7 +422,7 @@ public class NormManagementDao {
 	    listColumnSelect.add( AbstractRuleDAO.VALIDITE_SUP);
 	    listColumnSelect.add( AbstractRuleDAO.VERSION);
 	    listColumnSelect.add( ConstanteBD.STATE.getValue());
-	    
+    
 	    HashMap<String, String> defaultInputFields = new HashMap<>();
 	    viewJeuxDeReglesCopie.initialize(FormatSQL.getAllReccordsFromATable(listColumnSelect, theTableName).toString()//
 		    , theTableName, defaultInputFields);

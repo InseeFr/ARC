@@ -487,8 +487,7 @@ public class VObject {
         if (inSessionVObject == null) {
             inSessionVObject = new VObjectOld();
         }
-        // C'est laid mais je vois pas comment faire autrement. Java de merde :
-        // tout cela pour une pauvre passage par valeur
+        
         inSessionVObject.title = this.title;
         inSessionVObject.sessionName = this.sessionName;
         inSessionVObject.paginationSize = this.paginationSize;
@@ -1954,7 +1953,7 @@ public class VObject {
 	if (this.getIsScoped() == null) {
 	    this.setIsScoped(false);
 	}
-
+	
 	if (t && scope != null && scope.contains("-" + this.sessionName + ";")) {
 	    this.setIsActive(false);
 	    t = false;
