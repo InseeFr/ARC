@@ -3,6 +3,11 @@
 
 /* Override bootstrap css */
 
+.form-control{
+	width: auto;
+	font-size: inherit;
+}
+
 .bg-light {
     background-color: #aabbfa!important;
 }
@@ -51,7 +56,7 @@ li.nav-item {
     color: #000000;
     text-align: center;
     width: 11rem;
-    height: 1.8rem;
+    margin-bottom: auto;
 }
 
 .navbar-brand {
