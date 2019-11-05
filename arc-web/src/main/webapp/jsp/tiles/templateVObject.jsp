@@ -400,7 +400,7 @@
 							doAction="select<s:property value="#viewType"/>"
 							scope="${param.extraScopeSee}"
 							value="<s:text name="gui.button.see"/>"
-						><span class="fa fa-eye-open">&nbsp;</span>"<s:text name="gui.button.see"/></button>
+						><span class="fa fa-eye-open">&nbsp;</span><s:text name="gui.button.see"/></button>
 					</s:if>
 					<s:if test="#btnSort.equals('true')">
 						<button
