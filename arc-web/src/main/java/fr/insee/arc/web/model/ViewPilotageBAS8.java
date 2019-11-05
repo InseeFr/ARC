@@ -27,7 +27,7 @@ public class ViewPilotageBAS8 extends VObject {
             private static final long serialVersionUID = 3294598955186326004L;
 
             {
-                put("date_entree", new ColumnRendering(true, "Date d'entrée", "", "text", null, true));
+                put("date_entree", new ColumnRendering(true, "Date d'entrée", "4%", "text", null, true));
                 put("register_ok", new ColumnRendering(true, "Register OK", "", "text", null, true));
                 put("register_ko", new ColumnRendering(true, "Register KO", "", "text", null, true));
                 put("register_encours", new ColumnRendering(true, "Register RUNNING", "", "text", null, true));
