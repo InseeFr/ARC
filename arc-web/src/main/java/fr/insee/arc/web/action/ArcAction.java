@@ -185,8 +185,6 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
 	setProfilsAutorises();
 	grantAccess(this.autorisedProfil.toArray(new String[0]));
 	recupererEnvironnementTravail();
-	this.bddTable = new BddTable(getSession().get(SessionParameters.ENV).toString());
-	this.bddTable.export(getSession());
 	instanciateAllDAOs();
 	specificTraitementsPostDAO();
 	putAllVObjects();
@@ -221,6 +219,10 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
 	setUser(this.userId);
 
 	LoggerDispatcher.info(String.format("env selected %s", getSession().get(SessionParameters.ENV)), LOGGER);
+
+	// Update Bddtable to point on the right environnement
+	this.bddTable = new BddTable(getSession().get(SessionParameters.ENV).toString());
+	this.bddTable.export(getSession());	
 
     }
 
