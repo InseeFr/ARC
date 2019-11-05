@@ -235,7 +235,7 @@ public class FormatSQL implements ICharacterConstant, INumericConstant {
 	requete.append(SELECT_ + SCHEMANAME + SQL_CONCAT_DOT + TABLENAME + _AS_ + "table_name");
 	requete.append(NEWLINE_TABULATION + FROM_ + PG_TABLES);
 	requete.append(
-		NEWLINE_TABULATION + WHERE_ + TABLENAME + EQUALS + QUOTE + tableName.toLowerCase() + QUOTE + SPACE);
+		NEWLINE_TABULATION + WHERE_ + TABLENAME + _LIKE_ + QUOTE + tableName.toLowerCase() + QUOTE + SPACE);
 	if (table.contains(DOT)) {
 	    requete.append(_AND_ + SCHEMANAME + EQUALS + QUOTE + tableSchema.toLowerCase() + QUOTE + SPACE);
 	}
