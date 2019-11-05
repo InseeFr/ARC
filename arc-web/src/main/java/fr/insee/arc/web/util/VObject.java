@@ -474,14 +474,11 @@ public class VObject {
 	    setFileUploadFileName(null);
 
 	    // compute the selected line with the new content
-	    computeSelectedLineId(selectedContent);
+	    computeSelectedLines(selectedContent);
 
 	    // Compute the new column selection if the column changed
-	    setSelectedColumns(//
-		    databaseColumnsLabel.stream()//
-			    .map(databaseHeader -> selectedHeaders.contains(databaseHeader))//
-			    .collect(Collectors.toList()));//
-
+	    computeSelectedColumns(selectedHeaders);
+    
 	    
 	    // on cale l'objet en session
         if (inSessionVObject == null) {
@@ -605,6 +602,21 @@ public class VObject {
 
     }
 
+    
+    private void computeSelectedColumns(ArrayList<String> selectedHeaders)
+    {
+        ArrayList<Boolean> selectedColumns = new ArrayList<Boolean>();
+        for (int i = 0; i < this.databaseColumnsLabel.size(); i++) {
+            if (selectedHeaders.contains(this.databaseColumnsLabel.get(i))) {
+                selectedColumns.add(true);
+            } else {
+                selectedColumns.add(false);
+            }
+        }
+        setSelectedColumns(selectedColumns);
+
+    }
+    
     /**
      * This methode found the new selected line id after any change in the VObject.
      * This make it possible to keep the same selected line avec a sort.
@@ -612,7 +624,7 @@ public class VObject {
      * 
      * @param selectedContent
      */
-    private void computeSelectedLineId(Map<String, ArrayList<String>> selectedContent) {
+    private void computeSelectedLines(Map<String, ArrayList<String>> selectedContent) {
 	List<Boolean> selectedLinesTemp = new ArrayList<>();
 	// If there is selection find the line
 	if (!selectedContent.isEmpty()) {
