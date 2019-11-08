@@ -19,6 +19,12 @@ public class ViewPilotageBAS8 extends VObject {
 
     public ViewPilotageBAS8() {
         super();
+        
+    	this.setTitle("view.envManagement");
+    	
+    	this.setPaginationSize(5);
+    	
+        
         this.constantVObject = new ConstantVObject(new HashMap<String, ColumnRendering>() {
 
             /**
