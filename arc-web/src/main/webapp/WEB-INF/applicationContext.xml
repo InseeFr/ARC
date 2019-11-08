@@ -200,8 +200,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewPilotageBAS8" />
-		<property name="title" value="Etat des fichiers" />
-		<property name="paginationSize" value="5" />
 	</bean>
 	<bean id="viewRapportBAS8" class="fr.insee.arc.web.model.ViewRapportBAS8"
 		scope="session">

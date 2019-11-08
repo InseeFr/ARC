@@ -9,7 +9,16 @@
 }
 
 .bg-light {
-    background-color: #aabbfa!important;
+/*     background-color: #aabbfa!important; */
+	background-color: #ffffff !important;
+}
+
+.navbar {
+	background-color: #eeeeee !important;	
+}
+
+.btn-primary, .btn-secondary{
+	line-height:0.9rem;
 }
 
 .btn-outline-primary, .btn-primary  {
