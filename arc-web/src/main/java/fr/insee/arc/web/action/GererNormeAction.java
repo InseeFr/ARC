@@ -126,19 +126,19 @@ public class GererNormeAction extends ArcAction {
 		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS)));
 	//
 	putVObject(getViewChargement(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
-		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE)));
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE), getScope()));
 	//
 	putVObject(getViewNormage(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
-		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE)));
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE), getScope()));
 	//
 	putVObject(getViewControle(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
-		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE)));
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE), getScope()));
 	//
 	putVObject(getViewFiltrage(), t -> NormManagementDao.initializeModuleRules(t, getViewJeuxDeRegles(),
-		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE)));
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE), getScope()));
 	//
 	putVObject(getViewMapping(), t -> NormManagementDao.initializeMapping(t, getViewJeuxDeRegles(),
-		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE)));
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE), getScope()));
 	//
 	putVObject(getViewJeuxDeReglesCopie(), t -> NormManagementDao.initializeJeuxDeReglesCopie(t,
 		getViewJeuxDeRegles(), getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS) , getScope()  ));

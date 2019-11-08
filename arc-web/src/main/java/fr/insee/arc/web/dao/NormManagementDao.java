@@ -240,10 +240,10 @@ public class NormManagementDao {
      * VALIDITE_SUP=VALIDITE_SUP_selected::date AND VERSION=VERSION_selected::text
      * 
      */
-    public static void initializeModuleRules(VObject moduleView, VObject viewRulesSet, String theTableName) {
+    public static void initializeModuleRules(VObject moduleView, VObject viewRulesSet, String theTableName, String scope) {
 	LoggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
 	Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-	if (!selection.isEmpty()) {
+	if (!selection.isEmpty() && (scope!=null || moduleView.getSessionName().equals("viewControle"))) {
 	    HashMap<String, String> type = viewRulesSet.mapHeadersType();
 
 	    HashMap<String, String> defaultInputFields = new HashMap<>();
@@ -322,10 +322,10 @@ public class NormManagementDao {
      * AND mapping.version=version_selected::text</br>
      * 
      */
-    public static void initializeMapping(VObject viewMapping, VObject viewRulesSet, String theTableName) {
+    public static void initializeMapping(VObject viewMapping, VObject viewRulesSet, String theTableName, String scope) {
 	System.out.println("/* initializeMapping */");
 	Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-	if (!selection.isEmpty()) {
+	if (!selection.isEmpty() && scope!=null) {
 	    HashMap<String, String> type = viewRulesSet.mapHeadersType();
 	    List<String> listColumnSelect = new ArrayList<>();
 	    listColumnSelect.add("mapping.id_regle");
