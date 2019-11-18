@@ -233,31 +233,31 @@
 					<s:param name="checkbox">true</s:param>
 					<s:param name="ligneFilter">true</s:param>
 					<s:param name="otherButton">
-						<s:submit class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.downloadBd" value="Telecharger BD"
+						<input class="btn btn-primary btn-sm" type="submit"
+							id="viewFichierBAS8.downloadBd" value="<s:text name="gui.button.downloadDatabase"/>"
 							doAction="downloadBdBAS8" ajax="false" />
-						<s:submit class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.downloadFichier" value="Telecharger fichier"
+						<input class="btn btn-primary btn-sm" type="submit"
+							id="viewFichierBAS8.downloadFichier" value="<s:text name="gui.button.downloadFile"/>"
 							doAction="downloadFichierBAS8" ajax="false" />
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS8.downloadEnveloppe"
-							value="Telecharger Enveloppe" doAction="downloadEnveloppeBAS8"
+							value="<s:text name="gui.button.downloadArchive"/>" doAction="downloadEnveloppeBAS8"
 							ajax="false" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.toDelete" value="Supprimer fichiers"
+							id="viewFichierBAS8.toDelete" value="<s:text name="gui.button.deleteFiles"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="toDeleteBAS8" onclick="updateConsoleState=true;" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.toRestore" value="Rejouer fichiers"
+							id="viewFichierBAS8.toRestore" value="<s:text name="gui.button.replayFiles"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="toRestoreBAS8" onclick="updateConsoleState=true;" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.toRestoreArchive" value="Rejouer Archive"
+							id="viewFichierBAS8.toRestoreArchive" value="<s:text name="gui.button.replayArchives"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="toRestoreArchiveBAS8"
 							onclick="updateConsoleState=true;" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.undoAction" value="Annulation action"
+							id="viewFichierBAS8.undoAction" value="<s:text name="gui.button.cancelTodo"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="undoActionBAS8" onclick="updateConsoleState=true;" />
 					</s:param>

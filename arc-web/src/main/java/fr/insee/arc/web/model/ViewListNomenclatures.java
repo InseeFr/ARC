@@ -9,6 +9,10 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 public class ViewListNomenclatures extends VObject {
 	public ViewListNomenclatures() {
 		super();
+		
+		this.setTitle("view.nomenclatureList");
+		this.setPaginationSize(15);
+		
         this.constantVObject = new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**
 			 * 
@@ -16,8 +20,8 @@ public class ViewListNomenclatures extends VObject {
             private static final long serialVersionUID = 9180943017049417575L;
 
 			{
-                put("nom_table", new ColumnRendering(true, "Nomenclatures", "100%", "text", null, true));
-                put("description", new ColumnRendering(true, "Description", "75%", "text", null, true));
+                put("nom_table", new ColumnRendering(true, "label.tablename", "100%", "text", null, true));
+                put("description", new ColumnRendering(true, "label.comment", "75%", "text", null, true));
             }
         }
 

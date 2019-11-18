@@ -9,6 +9,10 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 public class ViewNomenclature extends VObject {
 	public ViewNomenclature() {
 		super();
+		
+		this.setTitle("view.nomenclature");
+		this.setPaginationSize(15);
+		
         this.constantVObject = new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**
 			 * 

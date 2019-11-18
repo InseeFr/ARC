@@ -11,6 +11,10 @@ public class ViewSchemaNmcl extends VObject{
     
     public ViewSchemaNmcl() {
         super();
+        
+		this.setTitle("view.nomenclatureSchema");
+		this.setPaginationSize(15);
+        
         this.constantVObject = new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**
              * 

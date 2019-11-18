@@ -76,24 +76,18 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewListNomenclatures" />
-		<property name="title" value="Liste des nomenclatures" />
-		<property name="paginationSize" value="15" />
 	</bean>
 	<bean id="viewNomenclature" class="fr.insee.arc.web.model.ViewNomenclature"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewNomenclature" />
-		<property name="title" value="Nomenclature" />
-		<property name="paginationSize" value="15" />
 	</bean>
 	<bean id="viewSchemaNmcl" class="fr.insee.arc.web.model.ViewSchemaNmcl"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewSchemaNmcl" />
-		<property name="title" value="Schema d'une nomenclature" />
-		<property name="paginationSize" value="15" />
 	</bean>
 	<bean id="viewClient" class="fr.insee.arc.web.model.ViewClient"
 		scope="session">
@@ -206,16 +200,12 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewRapportBAS8" />
-		<property name="title" value="Rapports d'anomalie" />
-		<property name="paginationSize" value="10" />
 	</bean>
 	<bean id="viewFichierBAS8" class="fr.insee.arc.web.model.ViewFichierBAS8"
 		scope="session">
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewFichierBAS8" />
-		<property name="title" value="Détail des fichiers du Bac à Sable" />
-		<property name="paginationSize" value="10" />
 	</bean>
 	<bean id="viewEntrepotBAS8" class="fr.insee.arc.web.model.ViewEntrepotBAS8"
 		scope="session">

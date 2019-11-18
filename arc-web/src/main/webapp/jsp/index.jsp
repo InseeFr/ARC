@@ -81,7 +81,7 @@
 	<div class="col-md-8">
 				<div class="jumbotron jumbotron-fluid">
 					<div class="container">
-						<h1 class="display-4">Welcome in the ARC application</h1>
+						<h1 class="display-4"><s:text name="home.welcome" /></h1>
 						<p class="lead">Version 20191025a</p>
 					</div>
 				</div>
