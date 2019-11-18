@@ -28,7 +28,7 @@ public class ViewFichierBAS8 extends VObject {
                 put("taux_ko", new ColumnRendering(true, "label.step.error", "50px", "text", null, true));
                 put("date_traitement", new ColumnRendering(true, "label.date.processing", "100px", "text", null, true));
                 put("rapport", new ColumnRendering(true, "label.step.report", "80px", "text", null, true));
-                put("nb_enr", new ColumnRendering(true, "label.step.count", "40px", "text", null, true));
+                put("nb_enr", new ColumnRendering(true, "label.step.count.line", "40px", "text", null, true));
                 put("to_delete", new ColumnRendering(true, "label.step.todo", "40px", "text", null, true));
                 put("jointure", new ColumnRendering(true, "label.step.XML", "80px", "text", null, true));
             }
