@@ -73,13 +73,13 @@ public class ThreadIdentifyService extends AbstractThreadService {
      * 
      * @throws SQLException
      */
-    private void cleanBdd() throws SQLException {
-	// Nettoyage
-	StringBuilder blocFin = new StringBuilder();
-
-	blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
-    }
+//    private void cleanBdd() throws SQLException {
+//	// Nettoyage
+//	StringBuilder blocFin = new StringBuilder();
+//
+//	blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
+//	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
+//    }
 
     /**
      * Traitement métier lié à l'identification.
@@ -215,7 +215,7 @@ public class ThreadIdentifyService extends AbstractThreadService {
 
     @Override
     public void finalizePhase() throws SQLException {
-	cleanBdd();
+//	cleanBdd();
 
     }
 

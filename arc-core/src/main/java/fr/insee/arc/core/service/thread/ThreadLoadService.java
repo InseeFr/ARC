@@ -137,7 +137,7 @@ public class ThreadLoadService extends AbstractThreadService  {
 	StringBuilder blocFin = new StringBuilder();
 	blocFin.append(FormatSQL.dropTable(this.tableTempA));
 	blocFin.append(FormatSQL.dropTable(this.tableTempAll));
-	blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
+//	blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
 	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
 
     }

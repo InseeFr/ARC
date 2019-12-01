@@ -327,7 +327,7 @@ public abstract class AbstractService implements IApiService, INumericConstant {
      * @param tableName
      */
     protected void addTableToBeCleandService(String tableId, String tableName) {
-	this.bddTable.addTable(tableId, this.executionEnv, tableName);
+	this.bddTable.addTemporaryTable(tableId, tableName);
 	this.idTableToClean.add(tableId);
     }
 
