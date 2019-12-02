@@ -1,5 +1,4 @@
-﻿﻿
-//Modules disponibles
+﻿//Modules disponibles
 //Render:Tree;
 //Render:Pilotage;
 //Render:AlertBox;
@@ -756,7 +755,7 @@ function updateCells(e,t)
 	var view=$(t).parents().filter('div[id]').attr('id');
 	
 	// validation avec entrée
-	if (e.keyCode == 13) {
+	if (e.ctrlKey && e.keyCode == 13) {
 		e.preventDefault();
 		$('[id="'+view+'.update"]').trigger('click');
 	}

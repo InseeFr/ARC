@@ -38,7 +38,7 @@
 
 
 		<ul class="navbar-nav navbar-right ml-auto">
-     	<li class="nobullet mr-5 mt-auto">
+     	<li class="nobullet mr-auto mt-auto">
 	   		<s:if test="isDataBaseOK">
 	   		<button id="connectionCheck" class="btn btn-success btn-sm" type="button"><s:text name="header.database.ok" /></button>
 	   		</s:if>
@@ -49,18 +49,18 @@
 
 
        <li class="nobullet mt-auto">
-	      		<ul style="margin: 0;">
+	      		<ul style="margin: 0; padding-inline-start: 0.5rem;">
 				<s:if test='%{#session.WW_TRANS_I18N_LOCALE.toString().equals("en")}'>
 					<li class="nobullet nav-link">	
 					<s:url action="locale" var="localeFR"><s:param name="request_locale" >fr</s:param></s:url>
 					<s:a href="%{localeFR}" >FR</s:a>
 					</li>
-					<li class="nobullet btn-success nav-link">
+					<li class="nobullet btn-light nav-link" style="color:#000000;">
 	      			<s:property value="#session.WW_TRANS_I18N_LOCALE.toString().toUpperCase()"/>
 	      			</li>
 				</s:if>
 				<s:else>
-					<li class="nobullet btn-success nav-link">
+					<li class="nobullet btn-light nav-link" style="color:#000000;">
 					<s:if test="%{#session.WW_TRANS_I18N_LOCALE == null}">FR</s:if>
 					<s:else>
 	      				<s:property value="#session.WW_TRANS_I18N_LOCALE.toString().toUpperCase()"/>
