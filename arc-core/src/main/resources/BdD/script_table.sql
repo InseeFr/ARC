@@ -39,6 +39,7 @@ EXCEPTION WHEN OTHERS then end; $$;
 update arc.ihm_paramettrage_ordre_phase set nom_phase='STRUCTURIZE', type_phase='STRUCTURIZE' where nom_phase='STRUCTURIZE_XML';
 update arc.ihm_paramettrage_ordre_phase set phase_precedente='STRUCTURIZE' where phase_precedente='STRUCTURIZE_XML';
 update arc.ihm_paramettrage_ordre_phase set nom_phase='MAPMODEL', type_phase='MAPMODEL' where nom_phase='FORMAT_TO_MODEL';
+update arc.ihm_paramettrage_ordre_phase set nom_phase='MAPPING', type_phase='MAPPING' where nom_phase='MAPMODEL';
 
 
 CREATE TABLE IF NOT EXISTS arc.ext_etat (
@@ -71,6 +72,7 @@ exception
   when others then
 end;
 $$;
+UPDATE arc.ext_etat_jeuderegle set id='arc.bas1', val='BAC A SABLE 1' where id='arc.bas';
 CREATE TABLE IF NOT EXISTS arc.ext_etat_jeuderegle (
   id text NOT NULL,
   val text,
@@ -428,6 +430,10 @@ CREATE TABLE IF NOT EXISTS arc.ihm_mod_variable_metier (
   ),
   CONSTRAINT fk_ihm_mod_variable_table_metier FOREIGN KEY (id_famille, nom_table_metier) REFERENCES arc.ihm_mod_table_metier (id_famille, nom_table_metier) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+
+alter table arc.ihm_mod_variable_metier alter column type_consolidation set default '{exclus}';
+
+
 CREATE TABLE IF NOT EXISTS arc.ihm_nmcl (
   nom_table text NOT NULL,
   description text,
