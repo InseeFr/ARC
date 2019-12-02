@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -279,7 +280,7 @@ public class GererFamilleNormeAction extends ArcAction {
         StringBuilder left = new StringBuilder("(SELECT nom_variable_metier");
         for (int i = 0; i < listeTableMetier.size(); i++) {
             left.append(",\n  CASE WHEN '['||string_agg(nom_table_metier,'][' ORDER BY nom_table_metier)||']' LIKE '%['||'" + listeTableMetier.get(i)
-                    + "'||']%' then 'oui' else '' end " + listeTableMetier.get(i));
+                    + "'||']%' then 'x' else '' end " + listeTableMetier.get(i));
         }
         left.append("\nFROM arc."+IHM_MOD_VARIABLE_METIER+" WHERE id_famille='" + idFamille + "'\n");
         left.append("GROUP BY nom_variable_metier) left_side");
@@ -447,7 +448,9 @@ public class GererFamilleNormeAction extends ArcAction {
             StringBuilder requete = new StringBuilder();
             boolean blank=true;
             for (int i = numberOfColumnTableVariableMetier; i < this.viewVariableMetier.getInputFields().size(); i++) {
-                if (StringUtils.isNotBlank(this.viewVariableMetier.getInputFields().get(i)) && this.viewVariableMetier.getInputFields().get(i).equals("oui")) {
+                if (StringUtils.isNotBlank(this.viewVariableMetier.getInputFields().get(i))
+                		// && this.viewVariableMetier.getInputFields().get(i).equals("oui")
+                		) {
                 	
                 	// au moins une table est resnseignée
                 	blank=false;
@@ -693,7 +696,7 @@ public class GererFamilleNormeAction extends ArcAction {
 
     private boolean isMofificationOk(StringBuilder message, HashMap<String, ArrayList<String>> mapContentAfterUpdate) {
         return estCeQueLesNomsDeVariablesSontNonNuls(message, mapContentAfterUpdate)
-                && estCeQueLesIdentifiantsSontExclus(message, mapContentAfterUpdate)
+               // && estCeQueLesIdentifiantsSontExclus(message, mapContentAfterUpdate)
                 && estCeQueLeSchemaNeComportePasDeCycles(message, mapContentAfterUpdate);
     }
 
@@ -797,7 +800,7 @@ public class GererFamilleNormeAction extends ArcAction {
     }
 
     public final boolean isNomTableMetierValide(String nomTable) {
-        return nomTable.matches("(?i)^mapping_" + this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
+        return nomTable.matches("(?i)^"+TypeTraitementPhase.MAPPING.toString().toLowerCase()+"_" + this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
     }
 
     @Action(value = "/addTableMetier")

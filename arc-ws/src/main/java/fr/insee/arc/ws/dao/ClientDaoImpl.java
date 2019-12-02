@@ -85,7 +85,7 @@ public class ClientDaoImpl implements ClientDao {
         if (validiteInf != "") {
             request.append("AND validite>='" + validiteInf + "' ");
         }
-        request.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TypeTraitementPhase.MAPMODEL + "' ");
+        request.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TypeTraitementPhase.MAPPING + "' ");
         request.append("AND EXISTS (SELECT 1 FROM " + AbstractPhaseService.dbEnv(environnement) + "norme T2 WHERE T2.id_famille='" + idFamille
                 + "' AND T1.id_norme=T2.id_norme) ");
         if (!reprise) {
@@ -169,7 +169,7 @@ public class ClientDaoImpl implements ClientDao {
                 query.append("AND validite>='" + requeteJSON.getString(JsonKeys.VALINF.getKey()) + "' ");
             }
 
-            query.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TypeTraitementPhase.MAPMODEL + "' ");
+            query.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TypeTraitementPhase.MAPPING + "' ");
             query.append("AND EXISTS (SELECT 1 FROM " + env + "norme T2 WHERE T2.id_famille='" + idFamille + "' AND T1.id_norme=T2.id_norme) ");
 
             if (!reprise) {
@@ -196,7 +196,7 @@ public class ClientDaoImpl implements ClientDao {
                 query.append("AND validite>='" + requeteJSON.getString(JsonKeys.VALINF.getKey()) + "' ");
             }
 
-            query.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TypeTraitementPhase.MAPMODEL + "' ");
+            query.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TypeTraitementPhase.MAPPING + "' ");
             query.append("AND EXISTS (SELECT 1 FROM " + env + "norme T2 WHERE T2.id_famille='" + idFamille + "' AND T1.id_norme=T2.id_norme) ");
 
             if (!reprise) {
@@ -356,7 +356,7 @@ public class ClientDaoImpl implements ClientDao {
         // columnClient.append("AND T1.id_source IN (SELECT id_source FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp+
         // "_id_source) ");
         columnClient.append("AND EXISTS (SELECT 1 FROM " + tableSource + " T2 where T1.id_source=T2.id_source) ");
-        columnClient.append("AND T1.phase_traitement='" + TypeTraitementPhase.MAPMODEL + "';");
+        columnClient.append("AND T1.phase_traitement='" + TypeTraitementPhase.MAPPING + "';");
 
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();

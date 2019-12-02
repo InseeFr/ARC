@@ -27,7 +27,7 @@ public class ApiServiceFactory {
 	this.map.put(TypeTraitementPhase.STRUCTURIZE.toString(), ApiNormageServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.CONTROL.toString(), ApiControleServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.FILTER.toString(), ApiFiltrageServiceFactory.getInstance());
-	this.map.put(TypeTraitementPhase.MAPMODEL.toString(), ApiMappingServiceFactory.getInstance());
+	this.map.put(TypeTraitementPhase.MAPPING.toString(), ApiMappingServiceFactory.getInstance());
 	this.map.put(TypeTraitementPhase.DUMMY.toString(), ApiDummyServiceFactory.getInstance());
     }
 

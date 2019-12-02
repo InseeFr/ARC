@@ -323,7 +323,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 	                	requete.append("DELETE FROM "+nomTable+" a where exists (select 1 from a_rejouer b where a.id_source=b.id_source); ");
 	                    requete.append("vacuum "+nomTable+"; ");
 	                    
-	                    if (!nomTable.contains(TypeTraitementPhase.MAPMODEL.toString().toLowerCase())
+	                    if (!nomTable.contains(TypeTraitementPhase.MAPPING.toString().toLowerCase())
 	                            && nomTable.endsWith("_" + TraitementState.OK.toString().toLowerCase())) {
 	                    requete.append("DELETE FROM "+nomTable+"_todo a where exists (select 1 from a_rejouer b where a.id_source=b.id_source); ");
 	                    requete.append("vacuum "+nomTable+"_todo; ");	                    

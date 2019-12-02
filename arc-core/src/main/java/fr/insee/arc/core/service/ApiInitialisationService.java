@@ -332,7 +332,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 			dbEnv(executionEnv) + TypeTraitementPhase.CONTROL + "_" + TraitementState.KO,
 			dbEnv(executionEnv) + TypeTraitementPhase.FILTER + "_" + TraitementState.OK,
 			dbEnv(executionEnv) + TypeTraitementPhase.FILTER + "_" + TraitementState.KO,
-			dbEnv(executionEnv) + TypeTraitementPhase.MAPMODEL + "_" + TraitementState.KO,
+			dbEnv(executionEnv) + TypeTraitementPhase.MAPPING + "_" + TraitementState.KO,
 			dbEnv(executionEnv) + TypeTraitementPhase.LOAD + "_" + TraitementState.OK + TODO,
 			dbEnv(executionEnv) + TypeTraitementPhase.STRUCTURIZE + "_" + TraitementState.OK + TODO,
 			dbEnv(executionEnv) + TypeTraitementPhase.CONTROL + "_" + TraitementState.OK + TODO,
@@ -731,7 +731,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 		.append(",isFichierToDelete AS (	 ").append("SELECT id_source, container, date_client ")
 		.append("FROM ").append(nomTablePilotage).append(" a ").append(", arc.ihm_norme b ")
 		.append(", clientsParFamille c ")
-		.append("WHERE a.phase_traitement='" + TypeTraitementPhase.MAPMODEL + "' ")
+		.append("WHERE a.phase_traitement='" + TypeTraitementPhase.MAPPING + "' ")
 		.append("AND a.etat_traitement='{" + TraitementState.OK + "}' ").append("AND a.client is not null ")
 		.append("AND a.id_norme=b.id_norme ").append("AND a.periodicite=b.periodicite ")
 		.append("AND b.id_famille=c.id_famille ")
@@ -1166,7 +1166,7 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 		    String etat = ManipString.substringAfterLast(nomTable, "_").toUpperCase();
 
             // TODO : add a flag to know if phase output tables are inherited tables or not
-            if (!nomTable.contains(TypeTraitementPhase.MAPMODEL.toString().toLowerCase())){
+            if (!nomTable.contains(TypeTraitementPhase.MAPPING.toString().toLowerCase())){
             	
 		    
 		    // temporary table to store inherit table already checked
