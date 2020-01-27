@@ -325,7 +325,7 @@ public class RequeteMapping implements ICharacterConstant, INumericConstant {
 
 
 		if (!this.isRequeteCalculee) {
-			StringBuilder requeteGlobale = new StringBuilder("DISCARD TEMP; SET ENABLE_HASHAGG=ON; SET ENABLE_BITMAPSCAN=OFF; \n");
+			StringBuilder requeteGlobale = new StringBuilder("SET ENABLE_HASHAGG=ON; SET ENABLE_BITMAPSCAN=OFF; \n");
 
 			construireTablePrecedente(requeteGlobale);
 

@@ -30,6 +30,11 @@ public class Format implements ICharacterConstant {
         return string.replaceAll("[\r\n\t]", " ");
     }
 
+    public static <T> int size(ArrayList<T> o)
+    {
+		return o==null?0:o.size();
+    }
+    
     /**
      *
      * @param list

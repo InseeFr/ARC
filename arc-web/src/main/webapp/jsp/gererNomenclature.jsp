@@ -92,6 +92,9 @@
 							</s:include>
 						</div>
 					</div>
+					
+					 <s:file name="fileUpload" label="Select a File to upload" size="40" />
+					 <input type="submit" id="btnFileUpload" value=<s:property value="getText('managementSandbox.load')"/> scope="" doAction="importListNomenclatures" onclick="submitForm()" style="margin-left: 25px;" ajax="false" />
 			</div>
 
 				<div class="col-md-2 border-right" style="margin-top: 2.25rem;"

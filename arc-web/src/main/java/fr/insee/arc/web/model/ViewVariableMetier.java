@@ -37,7 +37,7 @@ public class ViewVariableMetier  extends VObject {
         returned.put("description_variable_metier", new ColumnRendering(true, "label.comment", "200px", "text", null, true));
         returned.put("type_variable_metier", new ColumnRendering(true, "label.mapmodel.field.type", "100px", "select",
                 "SELECT nom_type id, nom_type val FROM arc.ext_mod_type_autorise ORDER BY nom_type", true));
-        returned.put("type_consolidation", new ColumnRendering(true, "label.mapmodel.field.aggregate", "200px", "text", null, true));
+        returned.put("type_consolidation", new ColumnRendering(false, "label.mapmodel.field.aggregate", "200px", "text", null, true));
         return returned;
     }
     

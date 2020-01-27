@@ -262,7 +262,7 @@ public class ThreadControleService extends AbstractThreadService {
 	blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
 	blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
 	blocFin.append(FormatSQL.dropTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA)).toString());
-	blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
+//	blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
 
 	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
 

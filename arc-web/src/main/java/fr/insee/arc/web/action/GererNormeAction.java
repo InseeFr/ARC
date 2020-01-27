@@ -955,8 +955,8 @@ public class GererNormeAction extends ArcAction {
 	    UtilitaireDao.get("arc").executeRequest(null,
 		    new StringBuilder("INSERT INTO " + this.viewFiltrage.getTable())//
 			    .append("  " + Format.stringListe(this.viewFiltrage.getDatabaseColumnsLabel()))//
-			    .append("  SELECT (SELECT max(id_regle) FROM " + this.viewFiltrage.getTable()
-				    + ")+row_number() over () ,")//
+			    .append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.viewFiltrage.getTable()
+				    + "),0)+row_number() over () ,")//
 			    .append("  '"
 				    + this.viewRulesSet.mapContentSelected().get(ConstanteBD.ID_NORME.getValue()).get(0)
 				    + "', ")//
@@ -1065,8 +1065,8 @@ public class GererNormeAction extends ArcAction {
 	    // List hard coded to be sure of the order in the select
 	    StringBuilder requete = new StringBuilder("INSERT INTO " + this.viewMapping.getTable()).append(
 		    "  (id_regle, id_norme, validite_inf, validite_sup,  version , periodicite, variable_sortie, expr_regle_col, commentaire) ")
-		    .append("  SELECT (SELECT max(id_regle) FROM " + this.viewMapping.getTable()
-			    + ")+row_number() over () ,")
+		    .append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.viewMapping.getTable()
+			    + "),0)+row_number() over () ,")
 		    .append("  '" + this.viewRulesSet.mapContentSelected().get(ConstanteBD.ID_NORME.getValue()).get(0)
 			    + "', ")
 		    .append("  '"

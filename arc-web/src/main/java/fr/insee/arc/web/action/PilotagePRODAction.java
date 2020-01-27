@@ -475,8 +475,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.MAPMODEL.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.MAPMODEL.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TypeTraitementPhase.MAPPING.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TypeTraitementPhase.MAPPING.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 

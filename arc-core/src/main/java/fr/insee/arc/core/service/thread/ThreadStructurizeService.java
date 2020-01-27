@@ -27,6 +27,7 @@ import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.rules.RuleStructurizeEntity;
 import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -191,6 +192,8 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 	} else {
 	    jointure = jointure.toLowerCase();
 
+	    if (Format.size(regle.get("id_regle"))>0)
+	    {
 	    // ORDRE IMPORTANT
 	    // on supprime les rubriques inutilisées quand le service est invoqué en batch
 	    // (this.paramBatch!=null)
@@ -213,7 +216,9 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 	    jointure = appliquerRegleUnicite(regle, norme, validite, periodicite, jointure);
 
 	    jointure = appliquerRegleRelation(regle, norme, validite, periodicite, jointure);
-
+	    
+	    }
+	    
 	    // optimisation manu 9.6
 	    // retravaille de la requete pour éliminer UNION ALL
 	    jointure = optimisation96(jointure);

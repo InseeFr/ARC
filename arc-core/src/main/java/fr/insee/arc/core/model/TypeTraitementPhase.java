@@ -11,7 +11,7 @@ public enum TypeTraitementPhase {
     , STRUCTURIZE(4, 1000000)//
     , CONTROL(5, 1000000)//
     , FILTER(6, 1000000)//
-    , MAPMODEL(7, 1000000);//
+    , MAPPING(7, 1000000);//
 
     private TypeTraitementPhase(int anOrdre, int aNbLigneATraiter) {
 	this.order = anOrdre;

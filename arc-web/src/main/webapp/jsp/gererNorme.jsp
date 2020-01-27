@@ -65,7 +65,7 @@
 
 			<div class="row">
 				<!-- left column -->
-				<div class="col-md-5 border-right"
+				<div class="col-md-6 border-right"
 				>
 					<div class="row">
 						<div class="col-md">
@@ -152,7 +152,7 @@
 
 				</div>
 
-				<div class="col-md-7">
+				<div class="col-md-6">
 					<div class="row">
 						<div  id="viewModuleButtons" class="col-md">
 							<!-- tab to choose the module -->

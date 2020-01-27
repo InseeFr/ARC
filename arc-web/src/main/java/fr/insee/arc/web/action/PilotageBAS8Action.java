@@ -169,9 +169,11 @@ public class PilotageBAS8Action extends ArcAction {
 
 	@Action(value = "/filesUploadBAS8")
 	public String filesUploadBAS8() {
-		initialize();
 		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : " + this.viewEntrepotBAS8.getCustomValues() + " */ *");
 
+		initializeArcActionWithProperties();
+		recupererEnvironnementTravail();
+		
 		if (this.viewEntrepotBAS8.getCustomValues() != null
 				&& !this.viewEntrepotBAS8.getCustomValues().get(WRITING_REPO).equals("")
 				&& this.viewPilotageBAS8.getFileUploadFileName() != null) {
@@ -202,6 +204,9 @@ public class PilotageBAS8Action extends ArcAction {
 		ApiServiceFactory.getService(TypeTraitementPhase.REGISTER.toString(), "arc.ihm",
 				(String) getSession().get(SessionParameters.ENV), this.repertoire,
 				String.valueOf(TypeTraitementPhase.REGISTER.getNbLinesToProcess())).invokeApi();
+
+		initialize();
+		
 		return generateDisplay();
 
 	}

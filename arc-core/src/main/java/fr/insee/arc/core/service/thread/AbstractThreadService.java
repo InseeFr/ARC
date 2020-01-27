@@ -213,6 +213,7 @@ public abstract class AbstractThreadService extends AbstractService implements R
 	StringBuilder request = new StringBuilder();
 	request.append(this.marquageFinal(getTablePil(), this.getTablePilTempThread()));
 	request.append(FormatSQL.dropTable(this.getTablePilTempThread()));
+	request.append("\n DISCARD SEQUENCES; DISCARD TEMP;");
 	UtilitaireDao.get("arc").executeBlock(this.connection, request);
     }
 
@@ -456,6 +457,7 @@ public abstract class AbstractThreadService extends AbstractService implements R
 	}
 	query.append("\n \t AND a.etape = 1 ; ");
 	query.append("\n set enable_hashjoin = on; ");
+
 	return query.toString();
 
     }
