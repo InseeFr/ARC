@@ -413,7 +413,6 @@ public class NormManagementDao {
      */
     public static void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie,VObject viewRulesSet, String theTableName, String scope) {
 	LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
-	Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 	if (scope!=null) {
 	    List<String> listColumnSelect = new ArrayList<>();
 	    listColumnSelect.add( AbstractRuleDAO.ID_NORME);

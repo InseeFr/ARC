@@ -81,7 +81,8 @@ public class ThreadLoadService extends AbstractThreadService  {
 
     private static final String RECEPTION = TypeTraitementPhase.REGISTER.name();
 
-    public ThreadLoadService( int currentIndice, ApiLoadService aApi, Connection connexion) throws Exception {
+    @SuppressWarnings("resource")
+	public ThreadLoadService( int currentIndice, ApiLoadService aApi, Connection connexion) throws Exception {
 	super(currentIndice, aApi, connexion);
 
 	this.fileToLoad = aApi.getFilesToProcess().get(currentIndice);

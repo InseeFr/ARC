@@ -312,11 +312,9 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 	r = " \n " + r;
 
 	boolean blocInsert = false;
-	boolean fieldsToBeInsertedFound = false;
 
 	String[] lines = r.split("\n");
 	String insert = null;
-	String fieldsToBeInserted = "";
 
 	r = "";
 	for (int i = 0; i < lines.length; i++) {
@@ -325,11 +323,6 @@ public class ThreadStructurizeService extends AbstractThreadService implements I
 		insert = ";\n" + lines[i];
 		if (!lines[i].contains(")")) {
 		    insert = insert + ")";
-		}
-		if (!fieldsToBeInsertedFound) {
-		    fieldsToBeInserted = ManipString.substringBeforeLast(
-			    ManipString.substringAfterFirst(insert, "insert into {table_destination} ("), ")");
-		    fieldsToBeInsertedFound = true;
 		}
 	    }
 

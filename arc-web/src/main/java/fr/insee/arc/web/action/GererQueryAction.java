@@ -29,7 +29,8 @@ public class GererQueryAction implements SessionAware, ICharacterConstant {
     public String mySchema;
     public String defaultSchema="arc";
 
-    private static final Logger logger = Logger.getLogger(GererQueryAction.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(GererQueryAction.class);
     @Autowired
     @Qualifier("viewQuery")
     VObject viewQuery;

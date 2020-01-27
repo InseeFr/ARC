@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 /**
  * FIXME make abstract Classe des variables d'environnement liées au batch
@@ -45,9 +45,9 @@ public class BatchEnv {
 	    this.connexion = DriverManager.getConnection(properties.getDatabaseUrl(),
 		    properties.getDatabaseUsername(), properties.getDatabasePassword());
 	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
+		LoggerDispatcher.error(ex, LOGGER);
 	} catch (ClassNotFoundException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
+		LoggerDispatcher.error(ex, LOGGER);
 	}
 
 	this.databaseSchema = properties.getDatabaseSchema();

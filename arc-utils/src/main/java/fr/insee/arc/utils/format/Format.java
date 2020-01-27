@@ -20,7 +20,8 @@ import fr.insee.arc.utils.textUtils.ICharacterConstant;
 
 public class Format implements ICharacterConstant {
 
-    private static final Logger LOGGER = Logger.getLogger(Format.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(Format.class);
     
     public static final String removeJSONForbiddenChars(String string) {
         if (StringUtils.isBlank(string)) {

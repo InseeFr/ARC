@@ -8,8 +8,6 @@ import java.util.function.Function;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc.core.model.PilotageEntity;
-import fr.insee.arc.core.model.TraitementPhaseEntity;
-import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.core.service.AbstractPhaseService;
 import fr.insee.arc.utils.dao.AbstractDAO;

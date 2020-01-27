@@ -18,8 +18,6 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.queryhandler.BatchQueryHandler;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Abstract class that all the phaseService class need to extends. Provide a

@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.function.Function;
 
 import fr.insee.arc.core.model.Calendar;
-import fr.insee.arc.core.model.Norme;
 import fr.insee.arc.utils.dao.AbstractDAO;
 import fr.insee.arc.utils.dao.IQueryHandler;
 import fr.insee.arc.utils.sqlengine.ContextName;

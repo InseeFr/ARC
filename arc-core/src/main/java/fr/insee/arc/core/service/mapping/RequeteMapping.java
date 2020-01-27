@@ -835,15 +835,6 @@ public class RequeteMapping implements ICharacterConstant, INumericConstant {
 	}
 
 	/**
-	 *
-	 * @return {@code true} si et seulement si l'ensemble des groupes est non vide.
-	 */
-	private boolean isRequeteAGroupes() {
-		return !this.ensembleGroupes.isEmpty();
-	}
-
-
-	/**
 	 * 
 	 * @param returned
 	 * @param table
@@ -860,21 +851,6 @@ public class RequeteMapping implements ICharacterConstant, INumericConstant {
 		return returned;
 	}
 	
-	/**
-	 *
-	 * @param returned
-	 * @param table
-	 * @return
-	 */
-	private static StringBuilder calculerRequeteFinale(StringBuilder returned, TableMapping table, StringBuilder requeteArrayAggGroup) {
-		returned.append("\n INSERT INTO " + table.getNomTableTemporaire() + " (" + sqlListeVariablesOrdonnee(table)
-		        + ")");
-		returned.append("\n SELECT " + sqlListeVariablesOrdonnee(table));
-		returned.append("\n FROM ");
-		returned.append(requeteArrayAggGroup);
-		returned.append(";\n");
-		return returned;
-	}
 
 	/**
 	 *
@@ -887,10 +863,6 @@ public class RequeteMapping implements ICharacterConstant, INumericConstant {
 		        .append(Format.untokenize(table.getEnsembleVariableNonClef(), ", "));
 	}
 
-	private static StringBuilder listeVariablesPrepUnion(StringBuilder returned, TableMapping table) {
-		table.sqlListeVariables(returned);
-		return returned;
-	}
 
 	private static StringBuilder listeVariablesTypesPrepUnion(StringBuilder returned, TableMapping table,
 	        String separateur, boolean removeArrayTypeForGroupe) {

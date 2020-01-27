@@ -24,13 +24,11 @@ import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.core.service.AbstractPhaseService;
-import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
-import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
 /**
@@ -309,7 +307,6 @@ public class ARCLauncher implements IReturnCode {
 
 						DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
 						DateFormat dateFormat2 = new SimpleDateFormat("yyyyMMddHH");
-						DateFormat dateFormatHour = new SimpleDateFormat("HH");
 
 						String lastInitialize = null;
 						lastInitialize = UtilitaireDao.get("arc").getString(null,

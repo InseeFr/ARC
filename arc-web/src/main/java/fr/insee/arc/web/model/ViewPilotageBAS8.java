@@ -4,18 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import fr.insee.arc.web.util.ConstantVObject;
-import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.util.VObject;
 
 public class ViewPilotageBAS8 extends VObject {
     /**
      * 
      */
-    private static final long serialVersionUID = -8577430079827164584L;
-
-    /**
-	 *
-	 */
 
     public ViewPilotageBAS8() {
         super();

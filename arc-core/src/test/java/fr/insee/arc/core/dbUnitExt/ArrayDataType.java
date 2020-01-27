@@ -1,5 +1,17 @@
 package fr.insee.arc.core.dbUnitExt;
 
+import java.lang.invoke.MethodHandles;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.datatype.AbstractDataType;
 import org.dbunit.dataset.datatype.TypeCastException;
@@ -7,15 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import java.lang.invoke.MethodHandles;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class ArrayDataType extends AbstractDataType {
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private static final Class CLASS_TYPE = Array.class;
+    private static final Class<Array> CLASS_TYPE = Array.class;
 
     public ArrayDataType(String name, int sqlType, boolean isNumber) {
         super(name, sqlType, CLASS_TYPE, isNumber);
@@ -119,7 +126,7 @@ public class ArrayDataType extends AbstractDataType {
 
 
     private Object[] toArray(Object value) {
-        List list = new ArrayList(0);
+        ArrayList<Object> list = new ArrayList<Object>(0);
         if (value instanceof String) {
             String valueStr = (String) value;
             if (!StringUtils.isEmpty(valueStr)) {

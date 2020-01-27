@@ -14,7 +14,6 @@ public class TableObject implements Iterable<LineObject>{
     /**
      * 
      */
-    private static final long serialVersionUID = 3497853934055535830L;
     private List<LineObject> lines;
 
     public TableObject(TableObject tableObjectToCopy) {

@@ -29,10 +29,6 @@ public class HierarchicalView implements ITree<String, String> {
     private HierarchicalView absoluteRoot;
     private String levelName;
     private int levelNumber;
-    /**
-     * If lazy is true, the column representation (sectional vision of the tree from the root) is only available for the the root.
-     */
-    private boolean lazy = false;
 
     /**
      * Column view of the relation.
@@ -97,10 +93,6 @@ public class HierarchicalView implements ITree<String, String> {
         this.mapView = aMapView;
     }
 
-    private static final class HierarchicalViewHelper {
-        private boolean isLazy = false;
-
-    }
 
     /**
      * Gives a sectional view of the hierarchy.

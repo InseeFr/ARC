@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -351,8 +350,7 @@ public class VObject {
 		    headerVSelect.add(m);
 		} catch (SQLException ex) {
 		    this.message = ex.getMessage();
-		    LoggerHelper.errorGenTextAsComment(getClass(), "buildHeadersVSelect()", LOGGER, ex);
-		}
+			LoggerDispatcher.error("buildGuiSelectedColumns", ex, LOGGER);		}
 	    } else {
 		LinkedHashMap<String, String> m = new LinkedHashMap<String, String>();
 		headerVSelect.add(m);
@@ -813,9 +811,6 @@ public class VObject {
      * @return true if the insertion is effective, false otherwise. Check the
      *         {@link VObject#message} to know what happened
      * 
-     * @deprecated this method, is deprecated because it go found in session v0. But
-     *             it's a bad way to do, because if the vobject is initialize this
-     *             is already load
      */
     @SQLExecutor
     public boolean insert(AttributeValue... attributeValues) {
@@ -888,8 +883,8 @@ public class VObject {
 		return false;
 	    }
 	} catch (Exception ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "insert()", LOGGER, ex);
-	    setMessage(ex.getMessage());
+		LoggerDispatcher.error(ex,LOGGER);
+		setMessage(ex.getMessage());
 	    return false;
 	}
 	return true;
@@ -955,7 +950,9 @@ public class VObject {
 		    return false;
 		}
 	    } catch (Exception ex) {
-		LoggerHelper.errorGenTextAsComment(getClass(), "insert()", LOGGER, ex);
+	    
+		LoggerDispatcher.error("insertWIP", ex, LOGGER);
+		
 		setMessage(ex.getMessage());
 		return false;
 	    }
@@ -1023,7 +1020,9 @@ public class VObject {
      */
     @SQLExecutor
     public void delete(String... tables) {
-	LoggerHelper.traceAsComment(LOGGER, "delete()", this.sessionName);
+    	
+	LoggerDispatcher.trace("delete on "+ this.sessionName, LOGGER);
+	
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
 	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 
@@ -1075,7 +1074,9 @@ public class VObject {
      */
     @SQLExecutor
     public void deleteForUpdate(String... tables) {
-	LoggerHelper.debugAsComment(LOGGER, "deleteBeforeUpdate()", this.sessionName);
+    	
+	LoggerDispatcher.trace("deleteBeforeUpdate on "+ this.sessionName, LOGGER);
+	
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
 	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	// comparaison des lignes dans la table avant et aprés
@@ -1093,7 +1094,7 @@ public class VObject {
 		toBeUpdated.add(i);
 	    }
 	}
-	LoggerHelper.traceAsComment(LOGGER, "toBeUpdated : ", toBeUpdated);
+	
 	StringBuilder reqDelete = new StringBuilder();
 	reqDelete.append("BEGIN; ");
 	for (int i = 0; i < v0.content.size(); i++) {
@@ -1476,8 +1477,8 @@ public class VObject {
 	    GenericBean g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(connection, queryView()));
 	    result = g.mapContent();
 	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "mapView()", LOGGER, ex);
-	}
+		LoggerDispatcher.error(ex, LOGGER);
+		}
 	return result;
     }
 
@@ -1667,11 +1668,9 @@ public class VObject {
      * Trier suivant une colonne
      */
     public void sort() {
-	LoggerHelper.debugAsComment(LOGGER, "sort()");
 
-	
-	System.out.print("*** SORT ***");
-	
+    LoggerDispatcher.trace("sort",LOGGER);
+    	
 	HttpSession session = ServletActionContext.getRequest().getSession(false);
 	VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
 	
@@ -1768,13 +1767,13 @@ public class VObject {
 		zos.close();
 	    }
 	} catch (IOException | SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
+		LoggerDispatcher.error(ex,LOGGER);
 	} finally {
 	    try {
 		response.getOutputStream().flush();
 		response.getOutputStream().close();
 	    } catch (IOException ex) {
-		LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
+	    	LoggerDispatcher.error(ex,LOGGER);
 	    }
 	}
     }
@@ -1811,7 +1810,7 @@ public class VObject {
 	    UtilitaireDao.get(this.pool).zipOutStreamRequeteSelect(null, requete, taos, repertoire, anEnvExcecution,
 		    phase, "ARCHIVE");
 	} catch (IOException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
+		LoggerDispatcher.error(ex,LOGGER);
 	} finally {
 	    try {
 		if (taos != null) {
@@ -1824,7 +1823,7 @@ public class VObject {
 		response.getOutputStream().flush();
 		response.getOutputStream().close();
 	    } catch (IOException ex) {
-		LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
+	    	LoggerDispatcher.error(ex,LOGGER);
 	    }
 	}
     }
@@ -1876,7 +1875,7 @@ public class VObject {
 	    UtilitaireDao.get(this.pool).copieFichiers(null, requete, taos, repertoire, listRepertoire);
 
 	} catch (IOException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
+		LoggerDispatcher.error(ex,LOGGER);
 	} finally {
 
 	    try {
@@ -1891,7 +1890,7 @@ public class VObject {
 		response.getOutputStream().close();
 
 	    } catch (IOException ex) {
-		LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
+	    	LoggerDispatcher.error(ex,LOGGER);
 	    }
 	}
     }
@@ -1900,9 +1899,6 @@ public class VObject {
 	if (this.fileUploadFileName != null) {
 	    for (int i = 0; i < this.fileUpload.size(); i++) {
 		String location = repertoireCible + File.separator + this.fileUploadFileName.get(i);
-		// LoggerDispatcher.info("Repertoire Cible "+repertoireCible,logger);
-		// LoggerDispatcher.info("Existance ? "+newFile2.exists(),logger);
-		// LoggerDispatcher.info("Droit d'écriture "+newFile2.canWrite(),logger);
 		LoggerDispatcher.info("Upload >> " + location, LOGGER);
 		File newFile = new File(location);
 		if (newFile.exists()) {
@@ -1911,7 +1907,7 @@ public class VObject {
 		try {
 		    FileUtils.copyFile(this.fileUpload.get(i), newFile);
 		} catch (IOException ex) {
-		    LoggerHelper.errorGenTextAsComment(getClass(), "upload()", LOGGER, ex);
+			LoggerDispatcher.error(ex,LOGGER);
 		}
 		// LoggerDispatcher.info("Fichier copié ? "+newFile.exists(),logger);
 	    }
@@ -2009,7 +2005,6 @@ public class VObject {
 		table).mapContent();
     }
 
-    @SuppressWarnings("unchecked")
     public void initializeByList(ArrayList<ArrayList<String>> liste, HashMap<String, String> defaultInputFields) {
 	StringBuilder requete = new StringBuilder();
 	ArrayList<String> header = liste.get(0);

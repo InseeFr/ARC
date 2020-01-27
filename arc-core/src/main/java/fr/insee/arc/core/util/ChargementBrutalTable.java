@@ -1,23 +1,19 @@
 package fr.insee.arc.core.util;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc.core.model.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
-import fr.insee.arc.utils.utils.ManipString;
 
 
 /**
@@ -73,55 +69,6 @@ public class ChargementBrutalTable {
 
     }
 
-    /**
-     * Méthode de gros bourrin, on prend le fichier et on le charge ligne par ligne en base. On utilise le COPY pour aller plus vite
-     * 
-     * @param idSource
-     * @param br
-     * @throws Exception
-     */
-    private boolean chargerFichierBrutalement(String idSource, BufferedReader br, int nb_boucle) throws Exception {
-        LoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
-        java.util.Date beginDate = new java.util.Date();
-        String delimiter = Character.toString((char) 1);
-        String quote = Character.toString((char) 2);
-
-        boolean output = false;
-
-        String header = "id_source" + delimiter + "id_ligne" + delimiter + "ligne\n";
-        int idLigne = nb_boucle * LIMIT_CHARGEMENT_BRUTAL;
-        StringBuilder requete = new StringBuilder();
-
-        String line = br.readLine();
-        if (line == null) {
-            output = true;
-        }
-
-        while (line != null && idLigne < (nb_boucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
-            requete.append(idSource + delimiter + idLigne + delimiter + line + "\n");
-            idLigne++;
-
-            if (idLigne < (nb_boucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
-                line = br.readLine();
-            }
-
-        }
-        requete.insert(0, header);
-        byte[] bytes = requete.toString().getBytes(StandardCharsets.UTF_8);
-        InputStream is = new ByteArrayInputStream(bytes);
-//        UtilitaireDao.get("arc").importing(this.connexion, TABLE_CHARGEMENT_BRUTAL, is, true, delimiter);
-        UtilitaireDao.get("arc").importing(this.connexion, TABLE_CHARGEMENT_BRUTAL, null, is, true, true, delimiter, quote, null);
-
-        is.close();
-
-        java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** chargerFichierBrutalement temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
-        
-        return output;
-
-    }
-
-    
     private String requeteFichierBrutalement(String idSource, BufferedReader br, int nb_boucle) throws Exception {
         LoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
 

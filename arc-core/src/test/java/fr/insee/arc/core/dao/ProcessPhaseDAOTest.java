@@ -116,6 +116,7 @@ public class ProcessPhaseDAOTest {
 	ProcessPhaseDAO processPhaseDAO = new ProcessPhaseDAO(new BatchQueryHandler(connection), bddTableTest.getNaming(BddTable.ID_TABLE_PHASE_ORDER));
 	// WHEN
 
+	@SuppressWarnings("unused")
 	TraitementPhaseContainer traitementPhaseContainer =processPhaseDAO.getAllPhaseOfNorme();
 	
 	// THEN

@@ -27,7 +27,8 @@ public class FormatSQL implements ICharacterConstant, INumericConstant {
     private static final String BEGIN_COMMENTARY = "/*";
     private static final String COLUMN_NAME_DATA_TYPE_UDT_NAME_AS_T = " column_name||'.'||data_type||'.'||udt_name as t ";
     private static final String VACUUM_ = "VACUUM ";
-    private static final String _VACUUM_ = " vacuum ";
+    @SuppressWarnings("unused")
+	private static final String _VACUUM_ = " vacuum ";
     private static final String COALESCE_OPEN = "coalesce(";
     private static final String TEMPORARY_ = "TEMPORARY ";
     private static final String _DISTINCT_ = " DISTINCT ";
@@ -64,11 +65,14 @@ public class FormatSQL implements ICharacterConstant, INumericConstant {
     private static final String _CASCADE_ = SPACE + CASCADE + SPACE;
     private static final String COMIT = "COMIT";
     private static final String COMIT_END = COMIT + SEMI_COLON;
-    private static final String UNION = "UNION";
-    private static final String _UNION_ = SPACE + "UNION" + SPACE;
+    @SuppressWarnings("unused")
+	private static final String UNION = "UNION";
+    @SuppressWarnings("unused")
+	private static final String _UNION_ = SPACE + "UNION" + SPACE;
     private static final String _AND_ = SPACE + "AND" + SPACE;
     private static final String INSERT_INTO_ = "INSERT INTO" + SPACE;
-    private static final String SELECT = "SELECT";
+    @SuppressWarnings("unused")
+	private static final String SELECT = "SELECT";
     private static final String SELECT_ = "SELECT" + SPACE;
     private static final String _SELECT_ = SPACE + SELECT_;
     private static final String __SELECT_ = NEWLINE + _SELECT_;
@@ -116,7 +120,8 @@ public class FormatSQL implements ICharacterConstant, INumericConstant {
     public static final String EXPRESSION_TYPE_SQL = EXPRESSION_TYPE_SQL_SEUL + " AS data_type";
     private static final String FALSE = "FALSE";
     private static final String TRUE = "TRUE";
-    private static final String _CASCADE = SPACE + CASCADE;
+    @SuppressWarnings("unused")
+	private static final String _CASCADE = SPACE + CASCADE;
     private static final String TABLE_NAME = "table_name";
 
     public enum ObjectType {

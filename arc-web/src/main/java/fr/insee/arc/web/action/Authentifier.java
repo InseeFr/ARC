@@ -8,7 +8,8 @@ import org.apache.struts2.interceptor.SessionAware;
 
 public class Authentifier implements SessionAware
 {
-    private static final Logger LOGGER = Logger.getLogger(Authentifier.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(Authentifier.class);
     private Map<String, Object> session;
     private String user;
 

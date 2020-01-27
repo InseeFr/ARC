@@ -1,15 +1,11 @@
 package fr.insee.arc.core.archive_loader;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.core.service.SizeLimiterInputStream;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 /**

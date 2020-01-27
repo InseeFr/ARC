@@ -30,7 +30,6 @@ import fr.insee.arc.core.service.AbstractPhaseService;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -653,10 +652,9 @@ public class PilotagePRODAction implements SessionAware {
         String etatBdd = "{" + etat.replace("$", ",") + "}";
 
         // Sélection des table métiers en fonction de la phase sélectionner (5 pour mapping 1 sinon)
-        ApiInitialisationService serv = new ApiInitialisationService();
         ArrayList<String> tableDownload = new ArrayList<>();
         try {
-            GenericBean g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, serv.requeteListAllTablesEnv(this.envExecution)));
+            GenericBean g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, ApiInitialisationService.requeteListAllTablesEnv(this.envExecution)));
             if (!g.mapContent().isEmpty()) {
                 ArrayList<String> envTables = g.mapContent().get("table_name");
                 System.out.println("Le contenu de ma envTables : " + envTables);

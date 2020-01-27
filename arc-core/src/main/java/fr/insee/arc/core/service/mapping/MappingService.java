@@ -53,7 +53,8 @@ public class MappingService extends AbstractThreadRunnerService<ThreadMappingSer
     // maximum number of workers allocated to the service processing
     private static int MAX_PARALLEL_WORKERS=4;
 
-    private static final Logger LOGGER = Logger.getLogger(MappingService.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(MappingService.class);
     private static final String prefixIdentifiantRubrique = "i_";
 
     protected RequeteMappingCalibree requeteSQLCalibree;

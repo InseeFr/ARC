@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 public class ConnectionWrapper implements Closeable {
 
@@ -41,7 +41,7 @@ public class ConnectionWrapper implements Closeable {
                 this.connexion.close();
                 this.connexion = null;
             } catch (SQLException ex) {
-                LoggerHelper.errorGenTextAsComment(getClass(), "close()", LOGGER, ex);
+            	LoggerDispatcher.error(ex,LOGGER);
             }
         }
     }

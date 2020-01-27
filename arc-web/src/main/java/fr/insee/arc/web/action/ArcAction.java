@@ -6,7 +6,6 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -25,7 +23,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
-import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -561,9 +558,6 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
     * @param mapVObject
     *            the mapVObject to set
     */
-   private final void setMapVObject(Map<VObject, Consumer<? super VObject>> mapVObject) {
-	this.mapVObject = mapVObject;
-   }
 
    public List<VObject> getListVObjectOrder() {
 	return this.listVObjectOrder;
@@ -588,9 +582,6 @@ public abstract class ArcAction extends Authentifier implements ICharacterConsta
 	this.queryHandler = queryHandler;
    }
 
-   private final String getIdep() {
-	return this.userId;
-   }
 
    public String getBacASable() {
 	return bacASable;

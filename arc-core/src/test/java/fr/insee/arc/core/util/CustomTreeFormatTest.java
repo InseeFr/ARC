@@ -1,6 +1,7 @@
 package fr.insee.arc.core.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,9 +12,6 @@ import org.junit.Test;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.model.Norme;
-import fr.insee.arc.core.util.CustomTreeFormat;
-import fr.insee.arc.core.util.RegleChargement;
-import fr.insee.arc.core.util.TypeChargement;
 
 public class CustomTreeFormatTest {
 
@@ -83,7 +81,8 @@ public class CustomTreeFormatTest {
 
         // WHEN
         
-        CustomTreeFormat arbreFormatActual = new CustomTreeFormat(normeGiven);
+        @SuppressWarnings("unused")
+		CustomTreeFormat arbreFormatActual = new CustomTreeFormat(normeGiven);
 
         // THEN
 
@@ -115,7 +114,8 @@ public class CustomTreeFormatTest {
 
         // WHEN
         
-        CustomTreeFormat arbreFormatActual = new CustomTreeFormat(normeGiven);
+        @SuppressWarnings("unused")
+		CustomTreeFormat arbreFormatActual = new CustomTreeFormat(normeGiven);
 
         // THEN
 

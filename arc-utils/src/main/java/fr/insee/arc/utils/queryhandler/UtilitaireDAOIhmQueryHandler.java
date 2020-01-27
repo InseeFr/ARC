@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import javax.sql.DataSource;
-
 import fr.insee.arc.utils.dao.IQueryHandler;
 
 public class UtilitaireDAOIhmQueryHandler extends UtilitaireDAOQueryHandler implements IQueryHandler

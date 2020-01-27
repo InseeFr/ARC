@@ -10,7 +10,6 @@ import fr.insee.arc.core.model.DbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.web.action.GererNormeAction;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.utils.textUtils.ICharacterConstant;
 
 
 /**
@@ -21,12 +20,10 @@ import fr.insee.arc.utils.textUtils.ICharacterConstant;
  */
 public class ExternalFilesManagementDao {
 
-    private static final Logger LOGGER = Logger.getLogger(ExternalFilesManagementDao.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(ExternalFilesManagementDao.class);
 
-    private static final String NMCL_ = "nmcl_";
     private static final String NOM_TABLE = "nom_table";
-    private static final String TYPE_COLONNE = "type_colonne";
-    private static final String NOM_COLONNE = "nom_colonne";
     
     private ExternalFilesManagementDao() {
 	throw new IllegalStateException("Utility class");

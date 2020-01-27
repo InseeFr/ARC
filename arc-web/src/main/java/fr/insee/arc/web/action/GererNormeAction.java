@@ -27,7 +27,6 @@ import fr.insee.arc.core.model.RegleMappingEntity;
 import fr.insee.arc.core.model.RuleSets;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.model.TypeTraitementPhase;
-import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ControleRegleService;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.utils.dao.EntityDao;

@@ -51,7 +51,8 @@ public  class LineObject implements Iterable<String> {
 	return "LineObject [data=" + data + "]";
     }
     
-    public LineObject clone() {
+    @SuppressWarnings("unchecked")
+	public LineObject clone() {
         return new LineObject((List<String>) ((ArrayList<String>) (this.data)).clone());
     }
 }

@@ -129,6 +129,7 @@ public class PilotageDAOTest {
 		bddTableTest.getContextName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
 	// WHEN
 
+	@SuppressWarnings("unused")
 	List<PilotageEntity> actualListToProcess = pilotageDAO.getFilesToProcess("IDENTIFY",
 		TraitementState.KO.toString());
 

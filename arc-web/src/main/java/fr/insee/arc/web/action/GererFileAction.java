@@ -43,7 +43,8 @@ public class GererFileAction implements SessionAware, ICharacterConstant {
 
     public static String REPERTOIRE_EFFACABLE="TO_DELETE";
 
-    private static final Logger logger = Logger.getLogger(GererFileAction.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(GererFileAction.class);
     @Autowired
     @Qualifier("viewDirIn")
     VObject viewDirIn;

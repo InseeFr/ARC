@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 /**
  *
@@ -95,9 +95,8 @@ public class RequeteSQLCalibree extends AbstractRequeteSQLCalibree
             try
             {
                 stmt.execute(this.requete.toString());
-                LoggerHelper.traceAsComment(LOGGER, getClass(), "#execute()", "Début[", this.requete.toString(),
-                        "]fin");
-                LoggerHelper.infoAsComment(LOGGER, "COMMIT.", "Taille du commit :", this.requete.length());
+            	LoggerDispatcher.trace("execute() ["+this.requete.toString()+"]",LOGGER);
+            	LoggerDispatcher.info("execute() Taille du commit :"+this.requete.length()+"]",LOGGER);
             } finally
             {
                 stmt.close();
@@ -116,12 +115,10 @@ public class RequeteSQLCalibree extends AbstractRequeteSQLCalibree
      */
     public void flush() throws SQLException
     {
-        LoggerHelper.debugDebutMethodeAsComment(getClass(), "flush()", LOGGER);
         if (this.requete.length() > 0)
         {
             execute();
         }
-        LoggerHelper.debugFinMethodeAsComment(getClass(), "flush()", LOGGER);
     }
 
     public String toString()

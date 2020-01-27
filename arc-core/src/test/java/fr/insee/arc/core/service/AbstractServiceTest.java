@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.assertj.core.util.Arrays;
 import org.dbunit.Assertion;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;
@@ -32,7 +31,6 @@ import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.Norme;
 import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TypeTraitementPhase;
-import fr.insee.arc.core.service.AbstractService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 

@@ -1,10 +1,7 @@
 package fr.insee.arc.core.service.thread;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -18,7 +15,6 @@ import org.junit.Test;
 import fr.insee.arc.core.model.PilotageEntity;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.core.service.ApiIdentifyService;
-import fr.insee.arc.core.service.thread.ThreadIdentifyService;
 import fr.insee.arc.core.utils.CompareInputStream;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 

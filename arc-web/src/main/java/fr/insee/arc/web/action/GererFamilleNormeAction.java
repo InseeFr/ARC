@@ -641,9 +641,6 @@ public class GererFamilleNormeAction extends ArcAction {
         try {
             boolean drop = true;
             StringBuilder delete = new StringBuilder();
-            // GenericRequest grDropColumn = GenericRequestFactory.as(new StringBuilder("ALTER TABLE {:table} DROP COLUMN {:column};"));
-            StringBuilder requeteListeEnvironnement = new StringBuilder("SELECT distinct replace(id,'.','_') FROM arc.ext_etat_jeuderegle where isenv");
-            List<String> listeEnvironnement = UtilitaireDao.get("arc").getList(null, requeteListeEnvironnement, new ArrayList<String>());
             /**
              * Pour chaque variable :<br/>
              * 1. Lister les tables<br/>

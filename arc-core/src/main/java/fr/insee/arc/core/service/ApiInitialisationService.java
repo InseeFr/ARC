@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.DbConstant;
-import fr.insee.arc.core.model.TraitementPhaseEntity;
-import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
@@ -69,20 +67,15 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
     private static final int TIME_TO_KEEP = 365;
 
     private static final Logger LOGGER = Logger.getLogger(ApiInitialisationService.class);
-    private String tablePilTemp2;
 
     public ApiInitialisationService(String aCurrentPhase, String anParametersEnvironment, String aexecutionEnv,
 	    String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
 	super(aCurrentPhase, anParametersEnvironment, aexecutionEnv, aDirectoryRoot, aNbEnr, paramBatch);
-	this.tablePilTemp2 = FormatSQL
-		.temporaryTableName(dbEnv(aexecutionEnv) + TraitementTableExecution.PILOTAGE_FICHIER, "2");
     }
 
     public ApiInitialisationService(Connection connexion, String aCurrentPhase, String anParametersEnvironment,
 	    String aexecutionEnv, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
 	super(connexion, aCurrentPhase, anParametersEnvironment, aexecutionEnv, aDirectoryRoot, aNbEnr, paramBatch);
-	this.tablePilTemp2 = FormatSQL
-		.temporaryTableName(dbEnv(aexecutionEnv) + TraitementTableExecution.PILOTAGE_FICHIER, "2");
     }
 
     @Override
@@ -881,7 +874,8 @@ public class ApiInitialisationService extends AbstractPhaseService implements IA
 	    TraitementTableParametre[] listeTableParamettre = TraitementTableParametre.values();
 	    StringBuilder condition = new StringBuilder();
 	    String modaliteEtat = anExecutionEnvironment.replace("_", ".");
-	    String tablePil = AbstractPhaseService.dbEnv(anExecutionEnvironment)
+		@SuppressWarnings("unused")
+		String tablePil = AbstractPhaseService.dbEnv(anExecutionEnvironment)
 		    + TraitementTableExecution.PILOTAGE_FICHIER;
 	    String tableImage;
 	    String tableCurrent;

@@ -6,7 +6,6 @@ import java.util.zip.ZipFile;
 
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -38,7 +37,8 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 
     }
 
-    @Override
+    @SuppressWarnings("resource")
+	@Override
     public FilesInputStreamLoad readFileWithoutExtracting(FilesInputStreamLoadKeys[] streamNames) throws IOException {
 	LoggerDispatcher.info("begin readFileWithoutExtracting() ", LOGGER);
 	this.filesInputStreamLoad = new FilesInputStreamLoad();
@@ -46,7 +46,7 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 	for (FilesInputStreamLoadKeys aStreamName : streamNames) {
 	    // Need to be keep open because if the resource is closed, all stream are closed
 	    // too !
-	    @SuppressWarnings({ "resource", "squid:S2095" })
+//	    @SuppressWarnings({ "resource", "squid:S2095" })
 	    ZipFile zipInput = new ZipFile(this.archiveToLoad);
 	    /*
 	     * Looking for the file in the archive. idSourceInArchive is like

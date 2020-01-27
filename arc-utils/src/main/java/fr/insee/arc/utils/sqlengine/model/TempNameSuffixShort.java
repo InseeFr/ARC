@@ -11,7 +11,6 @@ package fr.insee.arc.utils.sqlengine.model;
 public class TempNameSuffixShort implements IToken
 {
     private final String name;
-    private static ThreadLocal<Integer> rank = ThreadLocal.withInitial(() -> 0);
 
     public TempNameSuffixShort()
     {

@@ -145,7 +145,7 @@ public class ManipString implements ICharacterConstant {
             positionCourante = matcher.end();
         }
         returned.append(input.substring(positionCourante));
-        LoggerHelper.debugAsComment(LOGGER, "Transformation de", input, "en",returned.toString());
+		LoggerDispatcher.debug("Tranform "+ input+ " into "+returned.toString(), LOGGER);
         return returned.toString();
     }
 
@@ -485,133 +485,6 @@ public class ManipString implements ICharacterConstant {
         }
     }
 
-    public static String translateAsciiWithoutSpace(String s) {
-
-        if (s != null) {
-
-            String sUpper = s.toUpperCase();
-            final StringBuilder sb = new StringBuilder(sUpper.length() * 2);
-
-            final StringCharacterIterator iterator = new StringCharacterIterator(sUpper);
-
-            char ch = iterator.current();
-            Boolean space = false;
-
-            while (ch != CharacterIterator.DONE) {
-                // A-Z : on garde
-                if ((int) ch > 64 && (int) ch < 91) {
-                    sb.append(ch);
-                    space = false;
-                }
-                // 0-9 : on garde
-                else if ((int) ch > 47 && (int) ch < 58) {
-                    sb.append(ch);
-                    space = false;
-                }
-                // caractères spéciaux : on transforme
-                else if (Character.toString(ch).equals("À")) {
-                    sb.append("A");
-                    space = false;
-                } else if (Character.toString(ch).equals("�?")) {
-                    sb.append("A");
-                    space = false;
-                } else if (Character.toString(ch).equals("Â")) {
-                    sb.append("A");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ã")) {
-                    sb.append("A");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ä")) {
-                    sb.append("A");
-                    space = false;
-                } else if (Character.toString(ch).equals("Å")) {
-                    sb.append("A");
-                    space = false;
-                } else if (Character.toString(ch).equals("Æ")) {
-                    sb.append("A");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ç")) {
-                    sb.append("C");
-                    space = false;
-                } else if (Character.toString(ch).equals("È")) {
-                    sb.append("E");
-                    space = false;
-                } else if (Character.toString(ch).equals("É")) {
-                    sb.append("E");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ê")) {
-                    sb.append("E");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ë")) {
-                    sb.append("E");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ì")) {
-                    sb.append("I");
-                    space = false;
-                } else if (Character.toString(ch).equals("�?")) {
-                    sb.append("I");
-                    space = false;
-                } else if (Character.toString(ch).equals("Î")) {
-                    sb.append("I");
-                    space = false;
-                } else if (Character.toString(ch).equals("�?")) {
-                    sb.append("I");
-                    space = false;
-                } else if (Character.toString(ch).equals("�?")) {
-                    sb.append("D");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ñ")) {
-                    sb.append("N");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ò")) {
-                    sb.append("O");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ó")) {
-                    sb.append("O");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ô")) {
-                    sb.append("O");
-                    space = false;
-                } else if (Character.toString(ch).equals("Õ")) {
-                    sb.append("O");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ö")) {
-                    sb.append("O");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ø")) {
-                    sb.append("0");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ù")) {
-                    sb.append("U");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ú")) {
-                    sb.append("U");
-                    space = false;
-                } else if (Character.toString(ch).equals("Û")) {
-                    sb.append("U");
-                    space = false;
-                } else if (Character.toString(ch).equals("Ü")) {
-                    sb.append("U");
-                    space = false;
-                } else if (Character.toString(ch).equals("�?")) {
-                    sb.append("Y");
-                    space = false;
-                }
-                // else if(Character.toString(ch).equals("#")){sb.append("#"); space=false;}
-                else if (Character.toString(ch).equals("Œ")) {
-                    sb.append("#");
-                    space = false;
-                }
-                // Les caractères non trouvés sont supprimés :
-
-                ch = iterator.next();
-            }
-
-            return sb.toString().trim();
-        } else {
-            return null;
-        }
-    }
 
     public static void replaceStringBuilder(StringBuilder sb, String toReplace, String replacement) {
         int index = -1;

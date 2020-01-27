@@ -27,7 +27,8 @@ implements IApiServiceWithOutputTable {
     // maximum number of workers allocated to the service processing
     private static int MAX_PARALLEL_WORKERS=4;
 
-    private static final Logger LOGGER = Logger.getLogger(ApiFiltrageService.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(ApiFiltrageService.class);
     protected String seuilExclusion;
     protected HierarchicalView normeToPeriodiciteToValiditeInfToValiditeSupToRegle;
     private static final Class<ThreadFiltrageService> THREAD_TYPE = ThreadFiltrageService.class ;

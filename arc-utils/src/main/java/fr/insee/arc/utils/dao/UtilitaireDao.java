@@ -60,6 +60,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.textUtils.INumericConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.Pair;
@@ -216,7 +217,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		);
 	    }
 	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "dropTable()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
     }
 
@@ -275,9 +276,9 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	    } finally {
 		connexionWrapper.close();
 	    }
-	} catch (Exception e) {
-	    LoggerHelper.errorAsComment(LOGGER, e, sql, Arrays.asList(args));
-	    throw e;
+	} catch (Exception ex) {
+    	LoggerDispatcher.error(ex,LOGGER);
+	    throw ex;
 	}
 	return null;
     }
@@ -416,7 +417,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	    String returned = executeRequest(connexion, sql, modes).get(2).get(0);
 	    return (returned == null ? ZERO : Integer.parseInt(returned));
 	} catch (Exception ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "getInt()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
 	return ZERO;
     }
@@ -469,7 +470,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		connexionWrapper.close();
 	    }
 	} catch (Exception ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "getColumns()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
 	return liste;
     }
@@ -613,8 +614,8 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	    } finally {
 		connexionWrapper.close();
 	    }
-	} catch (SQLException e) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "testResultRequest()", LOGGER, e);
+	} catch (SQLException ex) {
+    	LoggerDispatcher.error(ex,LOGGER);
 	    return isresult;
 	}
     }
@@ -1027,7 +1028,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		connexionWrapper.close();
 	    }
 	} catch (Exception ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "outStreamRequeteSelect()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
     }
 
@@ -1084,7 +1085,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		copy(new FileInputStream(fileIn), taos);
 		taos.closeArchiveEntry();
 	    } catch (IOException ex) {
-		LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromFile()", LOGGER, ex);
+	    	LoggerDispatcher.error(ex,LOGGER);
 	    }
 	}
     }
@@ -1121,7 +1122,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		}
 		tarInput.close();
 	    } catch (IOException ex) {
-		LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromZip()", LOGGER, ex);
+	    	LoggerDispatcher.error(ex, LOGGER);
 	    }
 	}
     }
@@ -1139,7 +1140,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
     public static void generateEntryFromTarGz(String receptionDirectoryRoot, String currentContainer,
 	    ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
 	File fileIn = new File(receptionDirectoryRoot + "/" + currentContainer);
-	LoggerHelper.traceAsComment(LOGGER, "#generateEntryFromTarGz()", receptionDirectoryRoot, "/", currentContainer);
+	LoggerDispatcher.trace("#generateEntryFromTarGz()" + receptionDirectoryRoot + "/" + currentContainer, LOGGER);
 	if (fileIn.exists()) {
 	    // on crée le stream pour lire à l'interieur de
 	    // l'archive
@@ -1159,7 +1160,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		}
 		tarInput.close();
 	    } catch (IOException ex) {
-		LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromTarGz()", LOGGER, ex);
+	    	LoggerDispatcher.error(ex, LOGGER);
 	    }
 	}
     }
@@ -1199,7 +1200,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		taos.closeArchiveEntry();
 		tarInput.close();
 	    } catch (IOException ex) {
-		LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromGz()", LOGGER, ex);
+        	LoggerDispatcher.error(ex,LOGGER);
 	    }
 	}
     }
@@ -1227,8 +1228,8 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	    if (input != null) {
 		try {
 		    input.close();
-		} catch (IOException ioe) {
-		    LoggerHelper.errorAsComment(LOGGER, ioe, "Lors de la clôture de InputStream");
+		} catch (IOException ex) {
+        	LoggerDispatcher.error(ex,LOGGER);
 		}
 	    }
 	}
@@ -1252,7 +1253,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
     @SQLExecutor
     public void copieFichiers(Connection connexion, String requete, TarArchiveOutputStream taos, String path,
 	    List<String> listRepertoireIn) {
-	LoggerHelper.debugDebutMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
+	LoggerDispatcher.debug("copieFichiers", LOGGER);
 	GenericBean g;
 	ArrayList<String> listFichier = new ArrayList<>();
 	File fileIn = null;
@@ -1261,13 +1262,15 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 	try {
 	    g = new GenericBean(this.executeRequest(null, requete.toString()));
 	    listFichier = g.mapContent().get("nom_fichier");
-	    LoggerHelper.traceAsComment(LOGGER, "listeFichier =", listFichier);
 	    if (listFichier == null) {
-		LoggerHelper.traceAsComment(LOGGER, "listeFichier est null, sortie de la méthode");
+	    	LoggerDispatcher.trace("listeFichier is null, exit", LOGGER);
 		return;
 	    }
+		LoggerDispatcher.trace("listeFichier ="+ listFichier, LOGGER);
+
 	    for (int i = 0; i < listFichier.size(); i++) {
-		LoggerHelper.traceAsComment(LOGGER, "listFichier.get(", i, ") =", listFichier.get(i));
+	    	LoggerDispatcher.trace("listFichier.get("+ i + ") =" + listFichier.get(i), LOGGER);
+	    	
 		// boucle sur l'ensemble des dossiers de recherche
 		find = false;
 		for (int j = 0; j < listRepertoireIn.size() && !find; j++) {
@@ -1279,7 +1282,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		}
 		// Ajout d'un nouveau fichier
 		// Ajout de l'entrée ?
-		LoggerHelper.traceAsComment(LOGGER, "Copie du fichier", fileIn);
+		LoggerDispatcher.debug("start of FilesCopy()", LOGGER);
 		if (fileIn != null) {
 		    TarArchiveEntry entry = new TarArchiveEntry(fileIn.getName());
 		    entry.setSize(fileIn.length());
@@ -1290,9 +1293,9 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		}
 	    }
 	} catch (SQLException | IOException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "copieFichiers()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
-	LoggerHelper.debugFinMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
+	LoggerDispatcher.debug("end of FilesCopy()", LOGGER);
     }
 
     /**
@@ -1368,7 +1371,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		stmt.close();
 	    }
 	} catch (Exception ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "getStringArray()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
 	return returnedList;
     }
@@ -1395,7 +1398,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		connexionWrapper.close();
 	    }
 	} catch (Exception ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "getList()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
 	return returned;
     }
@@ -1417,7 +1420,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		connexionWrapper.close();
 	    }
 	} catch (Exception ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "getList()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
 	return returned;
     }
@@ -1439,7 +1442,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		requete.append(l.get(i).get(0) + "\n");
 	    }
 	} catch (SQLException ex) {
-	    LoggerHelper.errorGenTextAsComment(getClass(), "createQueryByQuery()", LOGGER, ex);
+    	LoggerDispatcher.error(ex,LOGGER);
 	}
 	return requete;
     }
@@ -1492,13 +1495,13 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 		listContainer = m.get("container");
 		listIdSourceEtat = m.get("etat_traitement");
 	    } catch (SQLException ex) {
-		LoggerHelper.errorGenTextAsComment(getClass(), "zipOutStreamRequeteSelect()", LOGGER, ex);
+	    	LoggerDispatcher.error(ex,LOGGER);
 	    }
 	    if (listIdSource == null) {
-		LoggerHelper.traceAsComment(LOGGER, "listIdSource est null, sortie");
+	    	LoggerDispatcher.trace(" listIdSource is null. exit",LOGGER);
 		break;
 	    }
-	    LoggerHelper.traceAsComment(LOGGER, " listIdSource.size() =", listIdSource.size());
+    	LoggerDispatcher.trace(" listIdSource.size() = "+listIdSource.size(),LOGGER);
 	    // Ajout des fichiers à l'archive
 	    int i = 0;
 	    while (i < listIdSource.size()) {
@@ -1581,7 +1584,7 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
     @SQLExecutor
     public void maintenancePgCatalog(Connection connexion, String type) {
 	try {
-	    LoggerHelper.debugAsComment(LOGGER, "vacuum", type, "sur le catalogue.");
+    	LoggerDispatcher.debug("vacuum on catalog",LOGGER);
 
 	    executeImmediate(connexion, FormatSQL.setTimeOutMaintenance());
 
@@ -1986,9 +1989,6 @@ public class UtilitaireDao implements INumericConstant, ICharacterConstant {
 			}
 
 			String h = (header ? ", HEADER true " : "");
-			
-			InputStream z=null;
-			
 			
 			if (format.equals(FORMAT_CSV) || format.equals(FORMAT_TEXT)) {
 			

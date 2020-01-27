@@ -465,11 +465,10 @@ public class PilotageBAS8Action extends ArcAction {
 
 		// Sélection des table métiers en fonction de la phase sélectionner (5 pour
 		// mapping 1 sinon)
-		ApiInitialisationService serv = new ApiInitialisationService();
 		ArrayList<String> tableDownload = new ArrayList<>();
 		try {
 			GenericBean g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-					serv.requeteListAllTablesEnv((String) getSession().get(SessionParameters.ENV))));
+					ApiInitialisationService.requeteListAllTablesEnv((String) getSession().get(SessionParameters.ENV))));
 			if (!g.mapContent().isEmpty()) {
 				ArrayList<String> envTables = g.mapContent().get("table_name");
 				System.out.println("Le contenu de ma envTables : " + envTables);

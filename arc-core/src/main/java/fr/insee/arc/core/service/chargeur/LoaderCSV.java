@@ -211,7 +211,6 @@ public class LoaderCSV implements ILoader {
     		 * 
     		 */
     		
-    		StringBuilder addId=new StringBuilder();
     		StringBuilder req;
     	
     		if (!joinTable.isEmpty())

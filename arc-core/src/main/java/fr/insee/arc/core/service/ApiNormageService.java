@@ -33,7 +33,8 @@ public class ApiNormageService extends AbstractThreadRunnerService<ThreadStructu
     // maximum number of workers allocated to the service processing
     private static int MAX_PARALLEL_WORKERS=4;
 	
-    private static final Logger LOGGER = Logger.getLogger(ApiNormageService.class);
+    @SuppressWarnings("unused")
+	private static final Logger LOGGER = Logger.getLogger(ApiNormageService.class);
     protected String separator = ",";
     private static final Class<ThreadStructurizeService> THREAD_TYPE = ThreadStructurizeService.class;
 

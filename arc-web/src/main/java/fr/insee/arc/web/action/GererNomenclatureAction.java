@@ -3,31 +3,26 @@ package fr.insee.arc.web.action;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.DbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.ICharacterConstant;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.web.dao.ExternalFilesManagementDao;
 import fr.insee.arc.web.util.VObject;
 
@@ -39,7 +34,6 @@ public class GererNomenclatureAction extends ArcAction {
     private static final String NOM_TABLE = "nom_table";
     private static final String TYPE_COLONNE = "type_colonne";
     private static final String NOM_COLONNE = "nom_colonne";
-    private static final String REGEX_FILE_NMCL = "^nmcl_+[0-9a-z]+_{1}[0-9a-z]+$";
     private static final Logger LOGGER = Logger.getLogger(GererNormeAction.class);
     @Autowired
     @Qualifier("viewListNomenclatures")
@@ -73,8 +67,6 @@ public class GererNomenclatureAction extends ArcAction {
 
     private ArrayList<String> nomenclaturesList;
     private ArrayList<ArrayList<String>> nomenclatureTable;
-
-    private String scope;
 
 //    @Override
 //    public void setSession(Map<String, Object> session) {
@@ -165,14 +157,14 @@ public class GererNomenclatureAction extends ArcAction {
 
     @Action(value = "/importListNomenclatures")
     public String importListNomenclatures() {
-        LoggerHelper.debugDebutMethodeAsComment(getClass(), "importListNomenclatures()", LOGGER);
-        try {
+    	LoggerDispatcher.debug("importListNomenclatures",LOGGER);
+    	try {
             importNomenclatureDansBase();
         } catch (Exception ex) {
             ex.printStackTrace();
             this.viewListNomenclatures.setMessage(ex.toString());
-            LoggerHelper.errorGenTextAsComment(getClass(), "importListNomenclatures()", LOGGER, ex);
-        }
+            LoggerDispatcher.error(ex,LOGGER);
+          }
 
         return basicAction();
     }
@@ -271,7 +263,6 @@ public class GererNomenclatureAction extends ArcAction {
         }
 
         String nouvelleNomenclature = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
-        String typeNomenclature = typeNomenclature(nouvelleNomenclature);
         System.out.println("/* Import de la nomenclature : " + nouvelleNomenclature + "*/");
 
         if (StringUtils.isEmpty(nouvelleNomenclature)) {
