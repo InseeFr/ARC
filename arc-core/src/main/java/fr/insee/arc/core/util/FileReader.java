@@ -78,17 +78,16 @@ public class FileReader {
             normOk[0] = new Norme();
             validityOk[0] = null;
             int loopNb = 0;
-            InputStreamReader isr = new InputStreamReader(file);
-            BufferedReader br = new BufferedReader(isr);
-            // Loops looking for a norm.
-            // As of now, only loops once (thrown exceptions in readFileAsQuery) to prevent
-            // losing time reading large files without norm.
-            while (normOk[0].getIdNorme() == null && loopNb < LOOPS_LIMIT) {
-                findNormAndValidity(normOk, validityOk, readFileAsQuery(idSource, br, loopNb));
-                loopNb++;
+            try(InputStreamReader isr = new InputStreamReader(file);
+            BufferedReader br = new BufferedReader(isr);) {
+	            // Loops looking for a norm.
+	            // As of now, only loops once (thrown exceptions in readFileAsQuery) to prevent
+	            // losing time reading large files without norm.
+	            while (normOk[0].getIdNorme() == null && loopNb < LOOPS_LIMIT) {
+	                findNormAndValidity(normOk, validityOk, readFileAsQuery(idSource, br, loopNb));
+	                loopNb++;
+	            }
             }
-            br.close();
-            isr.close();
             if (normOk[0].getIdNorme() == null) {
                 throw (new Exception("Zero norm match the expression"));
             }
