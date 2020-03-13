@@ -18,7 +18,7 @@ import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TypeTraitementPhase;
 import fr.insee.arc.core.service.ApiIdentifyService;
-import fr.insee.arc.core.util.ChargementBrutalTable;
+import fr.insee.arc.core.util.FileReader;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
@@ -122,18 +122,17 @@ public class ThreadIdentifyService extends AbstractThreadService {
      * @throws Exception
      */
     private void normeFinder() throws Exception {
-	LoggerDispatcher.info("** normeFinder : " + this.idSource + " **", LOGGER);
-	// Si on a pas 1 seule norme alors le fichier est en erreur
-	ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
-	chgrBrtl.setConnexion(getConnection());
-	chgrBrtl.setListeNorme(normList);
-	Norme[] n=new Norme[1];
-	String[] v=new String[1];
-			
-	chgrBrtl.calculeNormeAndValiditeFichiers(this.idSource, this.filesInputStreamLoad.getTmpInxIdentify(),n,v);
-	this.normeOk=n[0];
-	this.validite=v[0];
-
+		LoggerDispatcher.info("** normeFinder : " + this.idSource + " **", LOGGER);
+		// If there is not exactly one norm then the file is in error
+		FileReader fileReader = new FileReader();
+		fileReader.setConnection(getConnection());
+		fileReader.setNormList(normList);
+		Norme[] n=new Norme[1];
+		String[] v=new String[1];
+				
+		fileReader.findFileNormAndValidity(this.idSource, this.filesInputStreamLoad.getTmpInxIdentify(),n,v);
+		this.normeOk=n[0];
+		this.validite=v[0];
     }
 
     /**
