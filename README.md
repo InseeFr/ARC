@@ -163,4 +163,4 @@ In a web browser go to localhost:8080/status.action. The status action returns :
 
 > Change the host ip adress and port number according to the tomcat server and tomcat ARC application context configuration.
 
-> For more information about the installation go check the [Install guide](user-guide\Install_guide.md)
+> For more information about the installation go check the [Install guide](user-guide/Install_guide.md)
