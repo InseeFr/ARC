@@ -102,7 +102,7 @@ public class PilotageBAS8Action extends ArcAction {
 	public void initializePilotageBAS8() {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS8 *");
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-		StringBuilder requete = FormatSQL.getAllReccordsFromATableDescOrder(
+		StringBuilder requete = FormatSQL.getAllReccordsFromATableAscOrder(
 				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), "date_entree");
 
 		this.viewPilotageBAS8.initialize(requete.toString(),
@@ -148,6 +148,7 @@ public class PilotageBAS8Action extends ArcAction {
 		requete.append("from " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
 		requete.append(" where rapport is not null ");
 		requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
+		requete.append("order by date_entree asc ");
 		this.viewRapportBAS8.initialize(requete.toString(), null, defaultInputFields);
 	}
 
