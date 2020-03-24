@@ -933,7 +933,7 @@ public class PilotagePRODAction implements SessionAware {
 
             UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
 			AbstractPhaseService.startProductionInitialization();
-            message = "Archives(s) à rejoués(s)";
+            message = "Archives(s) à rejouer";
         } catch (SQLException e) {
             LoggerDispatcher
                     .info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  " + updateToDelete, logger);
