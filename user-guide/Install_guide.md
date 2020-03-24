@@ -11,7 +11,7 @@
     - [Set the tomcat and the database connection for the webservice](#Set-the-tomcat-and-the-database-connection-for-the-webservice)
     - [Deploy or update the webservice](#Deploy-or-update-the-webservice)
     - [Test the deployment of the webservice](#Test-the-deployment-of-the-webservice)
- - [Batch launcher component](#Batch-launcher-component)
+  - [Batch launcher component](#Batch-launcher-component)
     - [Installation steps](#Installation-steps)
 - [Configuration parameters](#Configuration-parameters)
   - [Java configuration parameters](#Java-configuration-parameters)
