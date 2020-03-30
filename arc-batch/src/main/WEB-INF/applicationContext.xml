@@ -28,6 +28,7 @@
 			<list>
 				<value>classpath:fr/insee/config/app.properties
 				</value>
+				<value>${properties.path}</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
