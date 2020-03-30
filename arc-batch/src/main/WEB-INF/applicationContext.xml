@@ -21,10 +21,46 @@
 	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"></bean>	
 		<bean class ="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
 	 -->
+	 
+	 <bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:fr/insee/config/app.properties
+				</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="ignoreResourceNotFound" value="true" />
+	</bean>
  
-    <bean id="propertiesHandler" class="fr.insee.arc.utils.ressourceUtils.PropertiesHandler">
-        <property name="key1" value="${key1}"></property>
-        <property name="key2" value="${key2}"></property>
+    <bean id="properties" class="fr.insee.arc.utils.ressourceUtils.PropertiesHandler">
+        <property name="databasePoolName" value="${fr.insee.database.poolName}"></property>
+		<property name="databaseUrl" value="${fr.insee.database.arc.url}"></property>
+		<property name="databaseUsername" value="${fr.insee.database.arc.username}"></property>
+		<property name="databasePassword" value="${fr.insee.database.arc.password}"></property>
+		<property name="databaseDriverClassName" value="${fr.insee.database.arc.driverClassName}"></property>
+		<property name="ldapDirectoryUri" value="${fr.insee.annuaire.arc.uri}"></property>
+		<property name="ldapDirectoryIdent" value="${fr.insee.annuaire.arc.ident}"></property>
+		<property name="ldapDirectoryPassword" value="${fr.insee.annuaire.arc.password}"></property>
+		<property name="logPath" value="${fr.insee.arc.log.chemin}"></property>
+		<property name="logLevel" value="${fr.insee.arc.log.niveau}"></property>
+		<property name="logConfiguration" value="${fr.insee.arc.log.configuration}"></property>
+		<property name="batchArcEnvironment" value="${fr.insee.arc.batch.parametre.env}"></property>
+		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution}"></property>
+		<property name="batchParametersDirectory" value="${fr.insee.arc.batch.parametre.repertoire}"></property>
+		<property name="threadsChargement" value="${fr.insee.arc.threads.chargement:1}"></property>
+		<property name="threadsNormage" value="${fr.insee.arc.threads.normage:1}"></property>
+		<property name="threadsControle" value="${fr.insee.arc.threads.controle:1}"></property>
+		<property name="threadsFiltrage" value="${fr.insee.arc.threads.filtrage:1}"></property>
+		<property name="threadsMapping" value="${fr.insee.arc.threads.mapping:1}"></property>
+		<property name="threadsRegle" value="${fr.insee.arc.threads.regle:1}"></property>
+		<property name="threadNombre" value="${fr.insee.arc.threads.nombre:1}"></property>
+		<property name="version" value="${fr.insee.arc.version}"></property>
+		<property name="isProd" value="${fr.insee.plateforme.prod:false}"></property>
+		<property name="application" value="${fr.insee.application:ARC}"></property>
+		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
+		<property name="rootDirectory" value="${fr.insee.arc.repertoire.root}"></property>
     </bean>
 
 </beans>

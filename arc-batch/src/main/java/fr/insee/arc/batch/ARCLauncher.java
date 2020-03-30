@@ -232,7 +232,7 @@ public class ARCLauncher implements IReturnCode {
 	public static void main(String[] args) {
 
 		boolean remainingFile = false;
-		PropertiesHandler properties = new PropertiesHandler();
+		PropertiesHandler properties = PropertiesHandler.getInstance();
 
 		do {
 
