@@ -293,7 +293,7 @@ public class GererFileAction implements SessionAware, ICharacterConstant {
 
         if (this.dirOut==null)
         {
-            this.dirIn=PROPERTIES.getRootDirectory();
+            this.dirOut=PROPERTIES.getRootDirectory();
         }
 
         ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.viewDirOut.mapFilterFields());
