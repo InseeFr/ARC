@@ -469,7 +469,10 @@ public class GererFileAction implements SessionAware, ICharacterConstant {
         }
         return sessionSyncronize();
     }
-
+    
+    public VObject getViewDirOut() {
+		return viewDirOut;
+	}
 
     public ArrayList<ArrayList<String>> getFilesFromDirectory(String dir, HashMap<String,ArrayList<String>> filter2)
     {
@@ -582,5 +585,8 @@ public class GererFileAction implements SessionAware, ICharacterConstant {
 
     }
 
+    public void setScope(String scope) {
+		this.scope = scope;
+	}
 
 }
