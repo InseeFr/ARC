@@ -32,14 +32,14 @@
             <div class="bandeau">
               <s:property value="%{viewTable.title}" />
             </div>
-            <s:hidden name="viewTable.headerSortDLabel" value="" />
+            <s:hidden name="viewTable.databaseColumnsSortLabel" value="" />
             <table class="fixedHeader" style="table-layout:auto; width:100%;">
               <thead>
                 <tr>
                   <th></th>
-                  <s:iterator value="viewTable.headersVLabel" var="head" status="incr">
-                    <s:if test="viewTable.headersVisible[#incr.index]">
-                      <th class="sort" style="width:<s:property value='viewTable.headersVSize[#incr.index]'/>;">
+                  <s:iterator value="viewTable.guiColumnsLabel" var="head" status="incr">
+                    <s:if test="viewTable.visibleHeaders[#incr.index]">
+                      <th class="sort" style="width:<s:property value='viewTable.guiColumnsSize[#incr.index]'/>;">
                         <s:property />
                       </th>
                     </s:if>
@@ -52,7 +52,7 @@
                 </tr>
                 <tr style="display: none;">
                   <th></th>
-                  <s:iterator value="viewTable.headersDLabel" var="head" status="incr">
+                  <s:iterator value="viewTable.databaseColumnsLabel" var="head" status="incr">
                     <th>
                       <s:property />
                     </th>
@@ -60,7 +60,7 @@
                 </tr>
                 <tr style="display: none;">
                   <th></th>
-                  <s:iterator value="viewTable.headersDLabel" var="head" status="incr">
+                  <s:iterator value="viewTable.databaseColumnsLabel" var="head" status="incr">
                     <th>
                       <s:checkbox name="viewTable.selectedColumns[%{#incr.index}]" theme="simple"></s:checkbox>
                     </th>
@@ -68,8 +68,8 @@
                 </tr>
                 <tr>
                   <th></th>
-                  <s:iterator value="viewTable.headersVLabel" var="head" status="incr">
-                    <s:if test="viewTable.headersVisible[#incr.index]">
+                  <s:iterator value="viewTable.guiColumnsLabel" var="head" status="incr">
+                    <s:if test="viewTable.visibleHeaders[#incr.index]">
                       <th>
                         <s:textarea name="viewTable.filterFields[%{#incr.index}]" value="%{viewTable.filterFields[#incr.index]}" theme="simple"></s:textarea>
                       </th>
@@ -90,23 +90,23 @@
                         <s:checkbox name="viewTable.selectedLines[%{#incr1.index}]" onclick="updateCheckBox('viewTable',$(this));" theme="simple"></s:checkbox>
                       </td>
                       <s:iterator value="#line" status="incr2">
-                        <s:if test="viewTable.headersVisible[#incr2.index]">
+                        <s:if test="viewTable.visibleHeaders[#incr2.index]">
                           <td>
-                            <s:if test='"text".equals(viewTable.headersVType[#incr2.index])'>
-                              <s:textarea name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
+                            <s:if test='"text".equals(viewTable.guiColumnsType[#incr2.index])'>
+                              <s:textarea name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewTable.headersVSelect[#incr2.index]}" name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewTable.guiSelectedColumns[#incr2.index]}" name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:if>
                         <s:else>
                           <td style="display: none;">
-                            <s:if test='"text".equals(viewTable.headersVType[#incr2.index])'>
-                              <s:textarea name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
+                            <s:if test='"text".equals(viewTable.guiColumnsType[#incr2.index])'>
+                              <s:textarea name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewTable.headersVSelect[#incr2.index]}" name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewTable.guiSelectedColumns[#incr2.index]}" name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:else>
@@ -123,24 +123,24 @@
                 </s:else>
                 <tr>
                   <td></td>
-                  <s:iterator value="viewTable.headersDLabel" var="input" status="incr">
-                    <s:if test="viewTable.headersVisible[#incr.index]">
+                  <s:iterator value="viewTable.databaseColumnsLabel" var="input" status="incr">
+                    <s:if test="viewTable.visibleHeaders[#incr.index]">
                       <td>
-                        <s:if test='"text".equals(viewTable.headersVType[#incr.index])'>
+                        <s:if test='"text".equals(viewTable.guiColumnsType[#incr.index])'>
                           <s:textarea name="viewTable.inputFields[%{#incr.index}]" theme="simple"></s:textarea>
                         </s:if>
                         <s:else>
-                          <s:select list="%{viewTable.headersVSelect[#incr.index]}" emptyOption="true" name="viewTable.inputFields[%{#incr.index}]" theme="simple"></s:select>
+                          <s:select list="%{viewTable.guiSelectedColumns[#incr.index]}" emptyOption="true" name="viewTable.inputFields[%{#incr.index}]" theme="simple"></s:select>
                         </s:else>
                       </td>
                     </s:if>
                     <s:else>
                       <td style="display: none;">
-                        <s:if test='"text".equals(viewTable.headersVType[#incr.index])'>
+                        <s:if test='"text".equals(viewTable.guiColumnsType[#incr.index])'>
                           <s:textarea name="viewTable.inputFields[%{#incr.index}]" theme="simple"></s:textarea>
                         </s:if>
                         <s:else>
-                          <s:select list="%{viewTable.headersVSelect[#incr.index]}" value="%{viewTable.headersVSelect[#incr.index][0]}" name="viewTable.inputFields[%{#incr.index}]" theme="simple"></s:select>
+                          <s:select list="%{viewTable.guiSelectedColumns[#incr.index]}" value="%{viewTable.guiSelectedColumns[#incr.index][0]}" name="viewTable.inputFields[%{#incr.index}]" theme="simple"></s:select>
                         </s:else>
                       </td>
                     </s:else>
@@ -196,14 +196,14 @@
             <div class="bandeau">
               <s:property value="%{viewQuery.title}" />
             </div>
-            <s:hidden name="viewQuery.headerSortDLabel" value="" />
+            <s:hidden name="viewQuery.databaseColumnsSortLabel" value="" />
             <table class="fixedHeader" style="table-layout:auto; width:auto;">
               <thead>
                 <tr>
                   <th></th>
-                  <s:iterator value="viewQuery.headersVLabel" var="head" status="incr">
-                    <s:if test="viewQuery.headersVisible[#incr.index]">
-                      <th class="sort" style="width:<s:property value='viewQuery.headersVSize[#incr.index]'/>;">
+                  <s:iterator value="viewQuery.guiColumnsLabel" var="head" status="incr">
+                    <s:if test="viewQuery.visibleHeaders[#incr.index]">
+                      <th class="sort" style="width:<s:property value='viewQuery.guiColumnsSize[#incr.index]'/>;">
                         <s:property />
                       </th>
                     </s:if>
@@ -216,7 +216,7 @@
                 </tr>
                 <tr style="display: none;">
                   <th></th>
-                  <s:iterator value="viewQuery.headersDLabel" var="head" status="incr">
+                  <s:iterator value="viewQuery.databaseColumnsLabel" var="head" status="incr">
                     <th>
                       <s:property />
                     </th>
@@ -224,7 +224,7 @@
                 </tr>
                 <tr style="display: none;">
                   <th></th>
-                  <s:iterator value="viewQuery.headersDLabel" var="head" status="incr">
+                  <s:iterator value="viewQuery.databaseColumnsLabel" var="head" status="incr">
                     <th>
                       <s:checkbox name="viewQuery.selectedColumns[%{#incr.index}]" theme="simple"></s:checkbox>
                     </th>
@@ -232,8 +232,8 @@
                 </tr>
                 <tr>
                   <th></th>
-                  <s:iterator value="viewQuery.headersVLabel" var="head" status="incr">
-                    <s:if test="viewQuery.headersVisible[#incr.index]">
+                  <s:iterator value="viewQuery.guiColumnsLabel" var="head" status="incr">
+                    <s:if test="viewQuery.visibleHeaders[#incr.index]">
                       <th>
                         <s:textarea name="viewQuery.filterFields[%{#incr.index}]" value="%{viewQuery.filterFields[#incr.index]}" theme="simple"></s:textarea>
                       </th>
@@ -254,23 +254,23 @@
                         <s:checkbox name="viewQuery.selectedLines[%{#incr1.index}]" onclick="updateCheckBox('viewQuery',$(this));" theme="simple"></s:checkbox>
                       </td>
                       <s:iterator value="#line" status="incr2">
-                        <s:if test="viewQuery.headersVisible[#incr2.index]">
+                        <s:if test="viewQuery.visibleHeaders[#incr2.index]">
                           <td>
-                            <s:if test='"text".equals(viewQuery.headersVType[#incr2.index])'>
-                              <s:textarea name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
+                            <s:if test='"text".equals(viewQuery.guiColumnsType[#incr2.index])'>
+                              <s:textarea name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewQuery.headersVSelect[#incr2.index]}" name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewQuery.guiSelectedColumns[#incr2.index]}" name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:if>
                         <s:else>
                           <td style="display: none;">
-                            <s:if test='"text".equals(viewQuery.headersVType[#incr2.index])'>
-                              <s:textarea name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
+                            <s:if test='"text".equals(viewQuery.guiColumnsType[#incr2.index])'>
+                              <s:textarea name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewQuery.headersVSelect[#incr2.index]}" name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewQuery.guiSelectedColumns[#incr2.index]}" name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:else>
@@ -287,24 +287,24 @@
                 </s:else>
                 <tr>
                   <td></td>
-                  <s:iterator value="viewQuery.headersDLabel" var="input" status="incr">
-                    <s:if test="viewQuery.headersVisible[#incr.index]">
+                  <s:iterator value="viewQuery.databaseColumnsLabel" var="input" status="incr">
+                    <s:if test="viewQuery.visibleHeaders[#incr.index]">
                       <td>
-                        <s:if test='"text".equals(viewQuery.headersVType[#incr.index])'>
+                        <s:if test='"text".equals(viewQuery.guiColumnsType[#incr.index])'>
                           <s:textarea name="viewQuery.inputFields[%{#incr.index}]" theme="simple"></s:textarea>
                         </s:if>
                         <s:else>
-                          <s:select list="%{viewQuery.headersVSelect[#incr.index]}" emptyOption="true" name="viewQuery.inputFields[%{#incr.index}]" theme="simple"></s:select>
+                          <s:select list="%{viewQuery.guiSelectedColumns[#incr.index]}" emptyOption="true" name="viewQuery.inputFields[%{#incr.index}]" theme="simple"></s:select>
                         </s:else>
                       </td>
                     </s:if>
                     <s:else>
                       <td style="display: none;">
-                        <s:if test='"text".equals(viewQuery.headersVType[#incr.index])'>
+                        <s:if test='"text".equals(viewQuery.guiColumnsType[#incr.index])'>
                           <s:textarea name="viewQuery.inputFields[%{#incr.index}]" theme="simple"></s:textarea>
                         </s:if>
                         <s:else>
-                          <s:select list="%{viewQuery.headersVSelect[#incr.index]}" value="%{viewQuery.headersVSelect[#incr.index][0]}" name="viewQuery.inputFields[%{#incr.index}]" theme="simple"></s:select>
+                          <s:select list="%{viewQuery.guiSelectedColumns[#incr.index]}" value="%{viewQuery.guiSelectedColumns[#incr.index][0]}" name="viewQuery.inputFields[%{#incr.index}]" theme="simple"></s:select>
                         </s:else>
                       </td>
                     </s:else>
