@@ -655,7 +655,7 @@
 														type="submit"
 														doAction="copieJeuxDeRegles"
 														scope="-viewJeuxDeReglesCopie;<s:property value="%{viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']}"/>;"
-														value="Copier"
+														value="<s:text name="gui.button.copy"/>"
 													></input>
 												</s:param>
 
