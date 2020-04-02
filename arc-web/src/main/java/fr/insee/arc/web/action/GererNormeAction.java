@@ -1300,8 +1300,8 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.VALIDITE_INF.getValue()//
 			, ConstanteBD.VALIDITE_SUP.getValue()//
 			, ConstanteBD.VERSION.getValue()//
-			, ConstanteBD.PERIODICITE.getValue()//
-			, ConstanteBD.EXPR_REGLE_FILTRE.getValue()));
+			, ConstanteBD.EXPR_REGLE_FILTRE.getValue()//
+			, ConstanteBD.COMMENTAIRE.getValue()));
 
 		requete.append(")");
 
