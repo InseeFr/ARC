@@ -145,7 +145,17 @@
 								<s:param name="extraScopeAdd">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 								<s:param name="extraScopeUpdate">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 								<s:param name="extraScopeSee">viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-
+								<s:param name="otherButton">
+									<button
+										class="btn btn-primary btn-sm"
+										id="viewJeuxDeRegles.download"
+										type="submit"
+										doAction="downloadJeuxDeRegles"
+										ajax="false"
+									><span class="fa fa-download">&nbsp;</span> <s:text
+											name="gui.button.downloadRuleset"
+										/></button>
+								</s:param>
 							</s:include>
 						</div>
 					</div>
