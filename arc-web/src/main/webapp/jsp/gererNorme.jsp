@@ -502,6 +502,7 @@
 
 												<s:if test="viewFiltrage.content.lines.size()==0">
 													<input
+														class="btn btn-primary btn-sm"
 														id="viewFiltrage.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleFiltrage"
@@ -586,6 +587,7 @@
 
 												<s:if test="viewMapping.content.lines.size()==0">
 													<input
+														class="btn btn-primary btn-sm"
 														id="viewMapping.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleMapping"
