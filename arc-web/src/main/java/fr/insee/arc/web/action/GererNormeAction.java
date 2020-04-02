@@ -1238,6 +1238,7 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.VERSION.getValue()//
 			, ConstanteBD.ID_CLASS.getValue()//
 			, ConstanteBD.RUBRIQUE_NMCL.getValue()//
+			, ConstanteBD.ID_REGLE.getValue()//
 			, ConstanteBD.COMMENTAIRE.getValue()));
 
 		requete.append(")");
@@ -1249,6 +1250,7 @@ public class GererNormeAction extends ArcAction {
 			, "'" + selectionOut.get(ConstanteBD.VERSION.getValue()).get(0) + "'"//
 			, ConstanteBD.ID_CLASS.getValue()//
 			, ConstanteBD.RUBRIQUE_NMCL.getValue()//
+			, ConstanteBD.ID_REGLE.getValue()//
 			, ConstanteBD.COMMENTAIRE.getValue()));
 
 	    } else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
