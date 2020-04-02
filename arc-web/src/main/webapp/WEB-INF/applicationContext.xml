@@ -175,7 +175,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewJeuxDeReglesCopie" />
-		<property name="title" value="Choix d'un jeux de règles" />
 		<property name="paginationSize" value="15" />
 	</bean>
 
