@@ -243,12 +243,28 @@
 																></s:select>
 															</s:else>
 														</s:if> <s:else>
-															<s:textarea
-																name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
-																theme="simple"
-																readonly="true"
-															></s:textarea>
+															<s:if
+																test='%{"select".equals(#view.guiColumnsType[#incr2.index])}'
+															>
+															<s:select
+																class="w-100"
+																	list="%{#view.guiSelectedColumns[#incr2.index]}"
+																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
+																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																	theme="simple"
+																	disabled="true"
+																></s:select>
+																<s:hidden name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
+																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}" />
+															</s:if>
+															<s:else>
+																<s:textarea
+																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
+																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																	theme="simple"
+																	readonly="true"
+																></s:textarea>
+															</s:else>
 														</s:else></td>
 												</s:if>
 												<s:else>
