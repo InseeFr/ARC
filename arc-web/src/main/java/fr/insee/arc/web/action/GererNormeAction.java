@@ -939,7 +939,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/importFiltrage")
     public String importFiltrage() {
 	initialize();
-	NormManagementDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, this.fileUploadLoad);
+	NormManagementDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, this.fileUploadFilter);
 	return generateDisplay();
     }
 

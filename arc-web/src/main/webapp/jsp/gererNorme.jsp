@@ -356,7 +356,7 @@
 												<div class="input-group my-3">
 													<div class="custom-file">
 														<input
-															name="fileUploadstructure"
+															name="fileUploadStructurize"
 															type="file"
 															class="custom-file-input"
 															id="inputGroupFilestructure"
