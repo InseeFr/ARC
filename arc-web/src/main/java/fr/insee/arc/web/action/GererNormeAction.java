@@ -806,6 +806,33 @@ public class GererNormeAction extends ArcAction {
     }
 
     /**
+     * Clean the loading rules. Update GUI and database
+     * 
+     * @return
+     */
+    @Action(value = "/viderChargement")
+    public String viderChargement() {
+	initialize();
+	NormManagementDao.emptyRuleTable(this.viewRulesSet,
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
+	return generateDisplay();
+    }
+    
+    /**
+     * Clean the structure rules. Update GUI and database
+     * 
+     * @return
+     */
+    @Action(value = "/viderNormage")
+    public String viderNormage() {
+	initialize();
+	NormManagementDao.emptyRuleTable(this.viewRulesSet,
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
+	return generateDisplay();
+    }
+    
+    
+    /**
      * Clean the control rules. Update GUI and database
      * 
      * @return
