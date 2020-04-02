@@ -311,7 +311,7 @@
 														scope="viewChargement;"
 														multipart="true"
 													><span class="fa fa-upload">&nbsp;</span> <s:text
-															name="general.uploadFile"
+															name="gui.button.importRuleset"
 														/></button>
 												</div>
 											</div>
@@ -385,7 +385,7 @@
 															scope="viewNormage;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
@@ -458,7 +458,7 @@
 															scope="viewControle;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
@@ -542,7 +542,7 @@
 															scope="viewFiltrage;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
@@ -627,7 +627,7 @@
 															scope="viewMapping;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
