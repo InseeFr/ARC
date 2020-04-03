@@ -204,6 +204,7 @@ $(document).on('ready readyAgain',function() {
 		$('.datepicker').on('focus',function(){$(this).attr('m','js');});
 
 		$('select').on('change',function(){
+			$(this).css("background-color","#ffcccc");
 			$(this).attr('m','js');
 		});
 
