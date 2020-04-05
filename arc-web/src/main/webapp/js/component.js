@@ -11,6 +11,7 @@
 //ICS:AjaxDataSelector;
 //Render:ConsoleIhm;
 //Render:FixedHeader;
+//Render:ChooseFileWithName;
 
 var fadeDelay=0, setTimeoutConst;
 
@@ -157,6 +158,15 @@ $(document).on('ready readyAgain',function() {
 		$('[name="consoleIhm"]').height(Math.max($('div[id^="viewPilotage"]').height(),$('div[id^="viewRapport"]').height())-50);
 	}
 
+/* Fix Bootstrap  not showing the file name with custom-file-input class.*/
+	if (configJS.indexOf("Render:ChooseFileWithName;"))
+	{
+		$('.custom-file-input').on('change', function(e){
+			var fileName = this.files[0].name;
+			var nextSibling = e.target.nextElementSibling;
+			nextSibling.innerText = fileName;
+		});
+	}
 
 
 	if (configJS.indexOf("ICS:AjaxDataSelector;")>-1)
@@ -194,6 +204,7 @@ $(document).on('ready readyAgain',function() {
 		$('.datepicker').on('focus',function(){$(this).attr('m','js');});
 
 		$('select').on('change',function(){
+			$(this).css("background-color","#ffcccc");
 			$(this).attr('m','js');
 		});
 

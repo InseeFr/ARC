@@ -145,7 +145,17 @@
 								<s:param name="extraScopeAdd">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 								<s:param name="extraScopeUpdate">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
 								<s:param name="extraScopeSee">viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-
+								<s:param name="otherButton">
+									<button
+										class="btn btn-primary btn-sm"
+										id="viewJeuxDeRegles.download"
+										type="submit"
+										doAction="downloadJeuxDeRegles"
+										ajax="false"
+									><span class="fa fa-download">&nbsp;</span> <s:text
+											name="gui.button.downloadRuleset"
+										/></button>
+								</s:param>
 							</s:include>
 						</div>
 					</div>
@@ -301,7 +311,7 @@
 														scope="viewChargement;"
 														multipart="true"
 													><span class="fa fa-upload">&nbsp;</span> <s:text
-															name="general.uploadFile"
+															name="gui.button.importRuleset"
 														/></button>
 												</div>
 											</div>
@@ -356,7 +366,7 @@
 												<div class="input-group my-3">
 													<div class="custom-file">
 														<input
-															name="fileUploadstructure"
+															name="fileUploadStructurize"
 															type="file"
 															class="custom-file-input"
 															id="inputGroupFilestructure"
@@ -375,7 +385,7 @@
 															scope="viewNormage;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
@@ -448,7 +458,7 @@
 															scope="viewControle;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
@@ -502,6 +512,7 @@
 
 												<s:if test="viewFiltrage.content.lines.size()==0">
 													<input
+														class="btn btn-primary btn-sm"
 														id="viewFiltrage.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleFiltrage"
@@ -531,7 +542,7 @@
 															scope="viewFiltrage;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
@@ -586,6 +597,7 @@
 
 												<s:if test="viewMapping.content.lines.size()==0">
 													<input
+														class="btn btn-primary btn-sm"
 														id="viewMapping.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleMapping"
@@ -615,7 +627,7 @@
 															scope="viewMapping;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="general.uploadFile"
+																name="gui.button.importRuleset"
 															/></button>
 													</div>
 												</div>
@@ -653,7 +665,7 @@
 														type="submit"
 														doAction="copieJeuxDeRegles"
 														scope="-viewJeuxDeReglesCopie;<s:property value="%{viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']}"/>;"
-														value="Copier"
+														value="<s:text name="gui.button.copy"/>"
 													></input>
 												</s:param>
 

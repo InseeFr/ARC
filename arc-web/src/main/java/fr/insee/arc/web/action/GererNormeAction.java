@@ -806,6 +806,33 @@ public class GererNormeAction extends ArcAction {
     }
 
     /**
+     * Clean the loading rules. Update GUI and database
+     * 
+     * @return
+     */
+    @Action(value = "/viderChargement")
+    public String viderChargement() {
+	initialize();
+	NormManagementDao.emptyRuleTable(this.viewRulesSet,
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
+	return generateDisplay();
+    }
+    
+    /**
+     * Clean the structure rules. Update GUI and database
+     * 
+     * @return
+     */
+    @Action(value = "/viderNormage")
+    public String viderNormage() {
+	initialize();
+	NormManagementDao.emptyRuleTable(this.viewRulesSet,
+		getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
+	return generateDisplay();
+    }
+    
+    
+    /**
      * Clean the control rules. Update GUI and database
      * 
      * @return
@@ -939,7 +966,7 @@ public class GererNormeAction extends ArcAction {
     @Action(value = "/importFiltrage")
     public String importFiltrage() {
 	initialize();
-	NormManagementDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, this.fileUploadLoad);
+	NormManagementDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, this.fileUploadFilter);
 	return generateDisplay();
     }
 
@@ -1211,6 +1238,7 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.VERSION.getValue()//
 			, ConstanteBD.ID_CLASS.getValue()//
 			, ConstanteBD.RUBRIQUE_NMCL.getValue()//
+			, ConstanteBD.ID_REGLE.getValue()//
 			, ConstanteBD.COMMENTAIRE.getValue()));
 
 		requete.append(")");
@@ -1222,6 +1250,7 @@ public class GererNormeAction extends ArcAction {
 			, "'" + selectionOut.get(ConstanteBD.VERSION.getValue()).get(0) + "'"//
 			, ConstanteBD.ID_CLASS.getValue()//
 			, ConstanteBD.RUBRIQUE_NMCL.getValue()//
+			, ConstanteBD.ID_REGLE.getValue()//
 			, ConstanteBD.COMMENTAIRE.getValue()));
 
 	    } else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
@@ -1271,8 +1300,8 @@ public class GererNormeAction extends ArcAction {
 			, ConstanteBD.VALIDITE_INF.getValue()//
 			, ConstanteBD.VALIDITE_SUP.getValue()//
 			, ConstanteBD.VERSION.getValue()//
-			, ConstanteBD.PERIODICITE.getValue()//
-			, ConstanteBD.EXPR_REGLE_FILTRE.getValue()));
+			, ConstanteBD.EXPR_REGLE_FILTRE.getValue()//
+			, ConstanteBD.COMMENTAIRE.getValue()));
 
 		requete.append(")");
 
