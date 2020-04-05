@@ -203,7 +203,7 @@
             <div class="bandeau">
               <s:property value="%{viewDirOut.title}" />
             </div>
-            <s:hidden name="viewDirOut.headerSortDLabel" value="" />
+            <s:hidden name="viewDirOut.databaseColumnsSort" value="" />
             <table class="fixedHeader" style="table-layout:auto; width:100%;">
               <thead>
                 <tr>
