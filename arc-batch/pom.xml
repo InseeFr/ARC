@@ -25,6 +25,13 @@
 					<exclude>prod/*.properties</exclude>
 				</excludes>
 			</resource>
+			
+			<resource>
+				<directory>src/main/WEB-INF</directory>
+				<includes>
+                    <include>**/*.xml</include>
+                </includes>
+			</resource>	
 		</resources>
 
 		<plugins>
