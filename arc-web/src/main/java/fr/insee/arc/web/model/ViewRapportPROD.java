@@ -20,7 +20,7 @@ public class ViewRapportPROD  extends VObject {
                 put("phase_traitement", new ColumnRendering(true, "Phase", "90px", "text", null, true));
                 put("etat_traitement", new ColumnRendering(true, "Etat", "60px", "text", null, true));
                 put("rapport", new ColumnRendering(true, "Rapport d'anomalie", "200px", "text", null, true));
-                put("nb", new ColumnRendering(true, "Nombre de fichier", "55px", "text", null, true));
+                put("nb", new ColumnRendering(true, "Nombre de fichiers", "55px", "text", null, true));
             
             }
         }

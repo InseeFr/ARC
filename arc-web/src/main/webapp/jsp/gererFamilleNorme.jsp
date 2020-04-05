@@ -127,6 +127,9 @@
 							<s:param name="btnDelete">true</s:param>
 							<s:param name="checkbox">true</s:param>
 							<s:param name="checkboxVisible">true</s:param>
+							<s:param name="extraScopeAdd">viewVariableMetier;</s:param>
+							<s:param name="extraScopeUpdate">viewVariableMetier;</s:param>
+							<s:param name="extraScopeDelete">viewVariableMetier;</s:param>
 						</s:include>
 					</div>
 				</div>

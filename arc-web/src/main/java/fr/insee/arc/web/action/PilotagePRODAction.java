@@ -164,7 +164,7 @@ public class PilotagePRODAction implements SessionAware {
         System.out.println("/* initializePilotagePROD */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
         StringBuilder requete = new StringBuilder();
-        requete.append("select * from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier_t order by date_entree desc");
+        requete.append("select * from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier_t order by date_entree asc");
 
         // this.viewPilotagePROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewPilotagePROD.getSessionName()));
         this.viewPilotagePROD.initialize(requete.toString(), null, defaultInputFields);
@@ -191,6 +191,7 @@ public class PilotagePRODAction implements SessionAware {
         requete.append("from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier ");
         requete.append("where rapport is not null ");
         requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
+        requete.append("order by date_entree asc ");
         // this.viewRapportPROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewRapportPROD.getSessionName()));
         this.viewRapportPROD.initialize(requete.toString(), null, defaultInputFields);
     }
@@ -378,7 +379,7 @@ public class PilotagePRODAction implements SessionAware {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}    	
+		}
         return sessionSyncronize();
     }
 
@@ -393,7 +394,7 @@ public class PilotagePRODAction implements SessionAware {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}    	
+		}
         return sessionSyncronize();
     }
     
@@ -933,7 +934,7 @@ public class PilotagePRODAction implements SessionAware {
 
             UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
 			AbstractPhaseService.startProductionInitialization();
-            message = "Archives(s) à rejoués(s)";
+            message = "Archives(s) à rejouer";
         } catch (SQLException e) {
             LoggerDispatcher
                     .info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  " + updateToDelete, logger);

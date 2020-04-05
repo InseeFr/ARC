@@ -25,7 +25,9 @@ import fr.insee.arc.web.model.ViewFamilleNorme;
 import fr.insee.arc.web.model.ViewTableMetier;
 import fr.insee.arc.web.model.ViewVariableMetier;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.util.ArcStringUtils;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.util.LineObject;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererFamilleNorme.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
@@ -353,6 +355,11 @@ public class GererFamilleNormeAction extends ArcAction {
 
 	    HashMap<String, ArrayList<String>> mBefore = this.viewVariableMetier.mapSameContentFromPreviousVObject();
 	    List<ArrayList<String>> lBefore = this.viewVariableMetier.listSameContentFromPreviousVObject();
+	    
+	    for (LineObject line : this.viewVariableMetier.getContent().getLines()) {
+	    	int indexOfVar = this.viewVariableMetier.getDatabaseColumnsLabel().indexOf("nom_variable_metier");
+	    	line.getData().set(indexOfVar, ArcStringUtils.cleanUpVariable(line.getData().get(indexOfVar)));
+	    }
 
 	    HashMap<String, ArrayList<String>> mAfter = this.viewVariableMetier.mapSameContentFromCurrentVObject();
 	    List<ArrayList<String>> lAfter = this.viewVariableMetier.listSameContentFromCurrentVObject();
@@ -454,6 +461,9 @@ public class GererFamilleNormeAction extends ArcAction {
                 	
                 	// au moins une table est resnseignée
                 	blank=false;
+
+                	String nomVariableMetier = this.viewVariableMetier.getInputFieldFor("nom_variable_metier");
+                    this.viewVariableMetier.setInputFieldFor("nom_variable_metier", ArcStringUtils.cleanUpVariable(nomVariableMetier));
                 	
                     if (checkIsValide(this.viewVariableMetier.getInputFields())) {
                         requete.append("INSERT INTO arc."+IHM_MOD_VARIABLE_METIER+" (");
@@ -727,7 +737,7 @@ public class GererFamilleNormeAction extends ArcAction {
 
 //	            String nomFamille = mapContentAfterUpdate.get("id_famille").get(i);
 //            Set <String> keys=mapContentAfterUpdate.keySet();
-//            
+//
 //            for (String s:keys)
 //            {
 //            	if (!s.equals("id_famille")
@@ -737,21 +747,21 @@ public class GererFamilleNormeAction extends ArcAction {
 //            			&& !s.equals("type_consolidation")
 //            			)
 //            	{
-//                    
-//                    String nomTableCourt = 
+//
+//                    String nomTableCourt =
 //                    		ManipString.substringAfterFirst(ManipString.substringBeforeLast(s,underscore),underscore)
 //                    		.substring(nomFamille.length()+1)
 //                    		;
-//                    
-//                    
-//                    
+//
+//
+//
 //                    if (nomVariable.equals("id_"+nomTableCourt) && !typeConsolidation.equalsIgnoreCase("{exclus}")) {
 //                        message.append("La variable identifiante technique " + nomVariable + " doit avoir type_consolidation = \"{exclus}\".");
 //                        return false;
 //                    }
-//            		
+//
 //            	}
-//            		
+//
 //            }
             
             

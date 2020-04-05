@@ -1313,6 +1313,30 @@ public class VObject {
 	return new GenericBean(v0.databaseColumnsLabel, v0.databaseColumnsType, listInputFields()).mapContent();
     }
 
+    /** Set the input value for the specified column.
+     * @param headerDLabel column name in database
+     * @param value new value
+     * @throw IllegalArgumentException if the column name is invalid */
+    public void setInputFieldFor(String headerDLabel, String value) {
+    	int index = databaseColumnsLabel.indexOf(headerDLabel);
+    	if (index == -1) {
+    		throw new IllegalArgumentException("Column " + headerDLabel + " not found.");
+    	}
+    	inputFields.set(index, value);
+    }
+
+    /** Return the input value for the specified column.
+     * Syntaxic sugar for mapInputFields().get("my_column").get(0).
+     * @param headerDLabel column name in database
+     * @throw IllegalArgumentException if the column name is invalid */
+    public String getInputFieldFor(String headerDLabel) {
+    	int index = databaseColumnsLabel.indexOf(headerDLabel);
+    	if (index == -1) {
+    		throw new IllegalArgumentException("Column " + headerDLabel + " not found.");
+    	}
+    	return mapInputFields().get(headerDLabel).get(0);
+    }
+    
     public ArrayList<ArrayList<String>> listLineContent(int i) {
 	ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
 	r.add(new ArrayList<String>(this.content.get(i).getData()));

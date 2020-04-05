@@ -102,7 +102,7 @@ public class PilotageBAS8Action extends ArcAction {
 	public void initializePilotageBAS8() {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS8 *");
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-		StringBuilder requete = FormatSQL.getAllReccordsFromATableDescOrder(
+		StringBuilder requete = FormatSQL.getAllReccordsFromATableAscOrder(
 				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), "date_entree");
 
 		this.viewPilotageBAS8.initialize(requete.toString(),
@@ -148,6 +148,7 @@ public class PilotageBAS8Action extends ArcAction {
 		requete.append("from " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
 		requete.append(" where rapport is not null ");
 		requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
+		requete.append("order by date_entree asc ");
 		this.viewRapportBAS8.initialize(requete.toString(), null, defaultInputFields);
 	}
 
@@ -733,7 +734,7 @@ public class PilotageBAS8Action extends ArcAction {
 		try {
 
 			UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			message = "Fichier(s) à rejoués(s)";
+			message = "Fichier(s) à rejouer";
 		} catch (SQLException e) {
 			LoggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
@@ -796,7 +797,7 @@ public class PilotageBAS8Action extends ArcAction {
 		try {
 
 			UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			message = "Archives(s) à rejoués(s)";
+			message = "Archives(s) à rejouer";
 		} catch (SQLException e) {
 			LoggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
