@@ -104,7 +104,7 @@ $(document).on('ready readyAgain',function() {
 	if (configJS.indexOf("Render:FixedHeader;")>-1)
 	{
 		// met une dimension au th sans width des tableaux à largeur fixe
-		$(".fixedHeader,.light th").each(
+		$(".fixedHeader th,.light th").each(
 				function() {
 					if ($(this).attr('style')!=null &&  $(this).attr('style').indexOf("width:/**/;")>-1)
 					{
