@@ -84,15 +84,17 @@ public class GererNomenclatureAction extends ArcAction {
 
     @Action(value = "/addListNomenclatures")
     public String addListNomenclatures() {
+    	initialize();
         String nomTable = this.viewListNomenclatures.mapInputFields().get(NOM_TABLE).get(0);
         if (validationNomTable(nomTable)) {
             this.viewListNomenclatures.insert();
         }
-        return basicAction();
+        return generateDisplay();
     }
 
     @Action(value = "/updateListNomenclatures")
     public String updateListNomenclatures() {
+    	initialize();
         // vérification que tous les noms de tables updatés soient conformes
         boolean zeroErreur = true;
         if (this.viewListNomenclatures.mapSameContentFromPreviousVObject().size() > 0) {
@@ -110,7 +112,7 @@ public class GererNomenclatureAction extends ArcAction {
             this.viewListNomenclatures.update();
         }
 
-        return basicAction();
+        return generateDisplay();
     }
 
     @Action(value = "/sortListNomenclatures")
@@ -157,6 +159,7 @@ public class GererNomenclatureAction extends ArcAction {
 
     @Action(value = "/importListNomenclatures")
     public String importListNomenclatures() {
+    	initialize();
     	LoggerDispatcher.debug("importListNomenclatures",LOGGER);
     	try {
             importNomenclatureDansBase();
@@ -166,7 +169,7 @@ public class GererNomenclatureAction extends ArcAction {
             LoggerDispatcher.error(ex,LOGGER);
           }
 
-        return basicAction();
+        return generateDisplay();
     }
 
     private boolean validationNomTable(String nomTable) {
@@ -207,18 +210,19 @@ public class GererNomenclatureAction extends ArcAction {
 
     @Action(value = "/addSchemaNmcl")
     public String addSchemaNmcl() {
-
+    	initialize();
         if (isColonneValide(this.viewSchemaNmcl.mapInputFields().get(NOM_COLONNE).get(0))
                 && isTypeValide(this.viewSchemaNmcl.mapInputFields().get(TYPE_COLONNE).get(0))) {
 
             this.viewSchemaNmcl.insert();
         }
-        return basicAction();
+        return generateDisplay();
     }
 
     @Action(value = "/updateSchemaNmcl")
     public String updateSchemaNmcl() {
         System.out.println("/* updateSchemaNmcl */");
+        initialize();
         HashMap<String, ArrayList<String>> selection = this.viewSchemaNmcl.mapSameContentFromPreviousVObject();
         System.out.println("taille selection : " + selection.size());
         System.out.println("Colonne : " + Format.untokenize(selection.keySet(), ", "));
@@ -240,7 +244,7 @@ public class GererNomenclatureAction extends ArcAction {
                 this.viewSchemaNmcl.update();
             }
         }
-        return basicAction();
+        return generateDisplay();
     }
 
     @Action(value = "/sortSchemaNmcl")
@@ -256,7 +260,6 @@ public class GererNomenclatureAction extends ArcAction {
     }
 
     private void importNomenclatureDansBase() throws Exception {
-
         if (this.viewListNomenclatures.mapContentSelected().isEmpty()) {
             this.viewListNomenclatures.setMessage("Vous devez selectionner une nomenclature pour l'importation.");
             return;
