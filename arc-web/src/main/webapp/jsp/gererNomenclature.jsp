@@ -12,7 +12,7 @@
 <html>
 <s:if test="scope==null">
 	<head>
-<title><s:text name="header.normManagement"/></title>
+<title><s:text name="header.externalFile"/></title>
 <link
 	rel="stylesheet"
 	href="<s:url value='/css/bootstrap.min.css'/>"
