@@ -495,7 +495,7 @@
 
 								<button
 									class="btn btn-primary btn-sm"
-									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-999999999);"
+									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-${view.idPage - 1});"
 								><span
 									class="fa fa-fast-backward"
 									aria-hidden="true"
@@ -516,7 +516,7 @@
 								></span></button>
 								<button
 									class="btn btn-primary btn-sm"
-									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),999999999);"
+									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),${view.nbPages - view.idPage});"
 								><span
 									class="fa fa-fast-forward"
 									aria-hidden="true"
