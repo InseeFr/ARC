@@ -300,7 +300,7 @@
 														class="custom-file-label"
 														for="inputGroupFileLoad"
 														aria-describedby="Choose file to upload for load module"
-													>Choose file</label>
+													><s:text name="general.chooseFile" /></label>
 												</div>
 												<div class="input-group-append">
 													<button
@@ -374,7 +374,7 @@
 															class="custom-file-label"
 															for="inputGroupFilestructure"
 															aria-describedby="Choose file to upload for structure module"
-														>Choose file</label>
+														><s:text name="general.chooseFile" /></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -448,7 +448,7 @@
 															class="custom-file-label"
 															for="inputGroupFileControle"
 															aria-describedby="Choose file to upload for control module"
-														>Choose file</label>
+														><s:text name="general.chooseFile" /></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -531,7 +531,7 @@
 															class="custom-file-label"
 															for="inputGroupFileFilter"
 															aria-describedby="Choose file to upload for filter module"
-														>Choose file</label>
+														><s:text name="general.chooseFile" /></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -616,7 +616,7 @@
 															class="custom-file-label"
 															for="inputGroupFileMap"
 															aria-describedby="Choose file to upload for map module"
-														>Choose file</label>
+														><s:text name="general.chooseFile" /></label>
 													</div>
 													<div class="input-group-append">
 														<button

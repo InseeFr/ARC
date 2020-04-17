@@ -103,7 +103,7 @@
 							/> <label
 								class="custom-file-label"
 								for="externalFile"
-							>Select a file to upload</label>
+							><s:text name="general.chooseFile" /></label>
 						</div>
 						<div class="input-group-append">
 							<button
