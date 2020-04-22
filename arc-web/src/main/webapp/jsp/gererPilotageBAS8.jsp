@@ -50,22 +50,42 @@
 								<h3>
 									<s:text name="managementSandbox.loadFile" />
 								</h3>
-								<label for="ActionsBAS8.selectFiles"><s:text
-										name="managementSandbox.fileToLoad" /> :</label>
-								<s:file id="ActionsBAS8.selectFiles" multiple="true"
-									name="viewPilotageBAS8.fileUpload" />
-								<label class="ml-2" for="entrepotCible"><s:text
-										name="managementSandbox.repository" /> :</label>
-								<s:select id="entrepotCible"
-									list="%{viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}"
-									value="%{viewEntrepotBAS8.customValues['entrepotEcriture']}"
-									name="viewEntrepotBAS8.customValues['entrepotEcriture']"
-									theme="simple" emptyOption="true"></s:select>
-								<input type="submit" id="ActionsBAS8.load"
-									value=<s:property value="getText('managementSandbox.load')"/>
-									scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;viewArchiveBAS8;viewEntrepotBAS8;"
-									doAction="filesUploadBAS8" onclick="updateConsoleState=true;"
-									multipart="true" ajax="false" />
+								<div class="input-group my-3">
+									<div class="custom-file">
+										<input
+											name="viewPilotageBAS8.fileUpload"
+											type="file"
+											class="custom-file-input"
+											id="ActionsBAS8.selectFiles"
+											size="40"
+											multiple="true"
+										/> <label
+											class="custom-file-label"
+											for="ActionsBAS8.selectFiles"
+										><s:text name="managementSandbox.fileToLoad"/></label>
+									</div>
+									<div class="input-group-append">										
+										<label class="ml-2" for="entrepotCible"><s:text
+												name="managementSandbox.repository" /> :</label>
+										<s:select id="entrepotCible"
+											list="%{viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}"
+											value="%{viewEntrepotBAS8.customValues['entrepotEcriture']}"
+											name="viewEntrepotBAS8.customValues['entrepotEcriture']"
+											theme="simple" emptyOption="true"></s:select>
+										<button
+											class="btn btn-primary btn-sm"
+											id="ActionsBAS8.load"
+											type="submit"
+											doAction="filesUploadBAS8"
+											scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;viewArchiveBAS8;viewEntrepotBAS8;"
+											multipart="true"
+											ajax="false"
+											onclick="updateConsoleState=true;"
+										><span class="fa fa-upload">&nbsp;</span> <s:text
+												name="managementSandbox.load"
+											/></button>
+									</div>
+								</div>
 							</div>
 
 							<div class="col-md-4 border-left">
@@ -78,7 +98,8 @@
 									value="%{viewEntrepotBAS8.customValues['entrepotLecture']}"
 									name="viewEntrepotBAS8.customValues['entrepotLecture']"
 									theme="simple" emptyOption="true"></s:select>
-								<input type="submit" id="ActionsBAS8.visualiserEntrepot"
+								<input class="btn btn-primary btn-sm" 
+									type="submit" id="ActionsBAS8.visualiserEntrepot"
 									value=<s:property value="getText('managementSandbox.seeRepository')" />
 									scope="viewEntrepotBAS8;viewRapportBAS8;viewPilotageBAS8;-viewFichierBAS8;viewArchiveBAS8;"
 									doAction="visualiserEntrepotBAS8"
@@ -217,7 +238,8 @@
 					<s:param name="taille">col-md</s:param>
 					<s:param name="checkbox">true</s:param>
 					<s:param name="otherButton">
-						<input type="submit" id="viewArchiveBAS8.downloadEnveloppe"
+						<input class="btn btn-primary btn-sm"
+							type="submit" id="viewArchiveBAS8.downloadEnveloppe"
 							value="Telecharger Enveloppe"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewEntrepotBAS8;"
 							doAction="downloadEnveloppeFromArchiveBAS8" ajax="false" />
