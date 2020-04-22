@@ -219,7 +219,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewArchiveBAS8" />
-		<property name="title" value="Contenu du répertoire d'archive" />
 		<property name="paginationSize" value="15" />
 	</bean>
 	<bean id="viewPilotagePROD" class="fr.insee.arc.web.model.ViewPilotagePROD"
