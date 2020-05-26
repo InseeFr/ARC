@@ -117,11 +117,12 @@ public class PilotageBAS8Action extends ArcAction {
 	 */
 	@Action(value = "/enterPilotageBAS8")
 	public String enterPilotageBAS8() {
+		initialize();
 		ApiInitialisationService serv = new ApiInitialisationService(TypeTraitementPhase.INITIALIZE.toString(),
 				"arc.ihm", (String) getSession().get(SessionParameters.ENV), this.repertoire,
 				TypeTraitementPhase.INITIALIZE.getNbLinesToProcess());
 		serv.bddScript();
-		return selectPilotageBAS8();
+		return generateDisplay();
 	}
 
 	@Action(value = "/selectPilotageBAS8")

@@ -9,6 +9,9 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 public class ViewArchiveBAS8 extends VObject {
     public ViewArchiveBAS8() {
         super();
+        
+        this.setTitle("view.envManagement.archive");
+        
         this.constantVObject = new ConstantVObject(new HashMap<String, ColumnRendering>() {
 
             /**
