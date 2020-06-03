@@ -11,28 +11,31 @@ import java.util.zip.GZIPOutputStream;
 
 public class StringCompress {
 	public static String compress(String str) throws IOException{
-	    ByteArrayOutputStream out = new ByteArrayOutputStream();
-	    GZIPOutputStream gzip = new GZIPOutputStream(out);
-	    gzip.write(str.getBytes());
-	    gzip.close();
-	    return new BigInteger(out.toByteArray()).toString();
+	    try(
+	    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    	GZIPOutputStream gzip = new GZIPOutputStream(out);
+	    	)
+	    {
+	    	gzip.write(str.getBytes());
+	    	return new BigInteger(out.toByteArray()).toString();
+	    }
 	 }
 
 	public static String uncompress(String zz) throws IOException {
 		BigInteger z=new BigInteger(zz);
 		
-		ByteArrayInputStream bis = new ByteArrayInputStream(z.toByteArray());
+		try(ByteArrayInputStream bis = new ByteArrayInputStream(z.toByteArray());
 		GZIPInputStream gis = new GZIPInputStream(bis);
 		BufferedReader br = new BufferedReader(new InputStreamReader(gis));
-		StringBuilder sb = new StringBuilder();
-		String line;
-		while((line = br.readLine()) != null) {
-			sb.append(line);
+			)
+		{
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while((line = br.readLine()) != null) {
+				sb.append(line);
+			}
+			return sb.toString();
 		}
-		br.close();
-		gis.close();
-		bis.close();
-		return sb.toString();
 	}
 	
 	

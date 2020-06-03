@@ -1,9 +1,7 @@
 package fr.insee.arc.core.factory;
 
-import java.sql.Connection;
-
-import fr.insee.arc.core.service.AbstractPhaseService;
 import fr.insee.arc.core.service.ApiFiltrageService;
+import fr.insee.arc.core.service.ApiService;
 
 public class ApiFiltrageServiceFactory implements IServiceFactory {
 
@@ -16,17 +14,7 @@ public class ApiFiltrageServiceFactory implements IServiceFactory {
 	 * @param aNbEnr
 	 */
 	@Override
-	public AbstractPhaseService get(Connection connexion, String... args) {
-		if (args.length==5)
-		{
-			return new ApiFiltrageService(connexion,args[0], args[1], args[2], args[3], Integer.valueOf(args[4]));
-		}
-		else
-		{
-			return new ApiFiltrageService(connexion,args[0], args[1], args[2], args[3], Integer.valueOf(args[4]), args[5]);
-		}
-	}
-	public AbstractPhaseService get(String... args) {
+	public ApiService get(String... args) {
 		if (args.length==5)
 		{
 			return new ApiFiltrageService(args[0], args[1], args[2], args[3],Integer.valueOf(args[4]));

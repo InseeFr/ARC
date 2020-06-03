@@ -7,16 +7,19 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.model.RuleSets;
+import fr.insee.arc.core.model.JeuDeRegle;
+import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.core.service.thread.ThreadControleService;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
+
 
 /**
  * ApiChargementService
  *
  * 1- Créer les tables de reception du chargement</br>
  * 2- Récupérer la liste des fichiers à traiter et le nom de leur entrepôt</br>
- * 3- Pour chaque fichier, determiner son format de ***REMOVED*** (zip, tgz, raw) et le chargeur à utlisé (voir entrepot)</br> 
+ * 3- Pour chaque fichier, determiner son format de lecture (zip, tgz, raw) et le chargeur à utlisé (voir entrepot)</br> 
  * 4- Pour chaque fichier, invoquer le chargeur</br> 
  *  4-1 Parsing du fichier</br> 
  *  4-2 Insertion dans les tables I et A des données lues dans le fichier</br> 
@@ -27,38 +30,82 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  *
  */
 @Component
-public class ApiControleService extends AbstractThreadRunnerService<ThreadControleService>
-	implements IApiServiceWithOutputTable {
+public class ApiControleService extends ApiService {
+	private static final Logger logger = Logger.getLogger(ApiControleService.class);
 
-    // maximum number of workers allocated to the service processing
-    private static int MAX_PARALLEL_WORKERS=4;
-	
-    private static final Logger LOGGER = Logger.getLogger(ApiControleService.class);
-    private static final Class<ThreadControleService> THREAD_TYPE = ThreadControleService.class ;
+    private int currentIndice;
 
-    public ServiceRuleSets sjdrDummy;
-
-    protected ArrayList<RuleSets> listJdrDummy;
-    
     public ApiControleService() {
-	super();
-		this.sjdrDummy=new ServiceRuleSets();
+        super();
     }
 
     public ApiControleService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String... paramBatch) {
-        super(THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
-        
-        this.nbThread = MAX_PARALLEL_WORKERS;
-
+        super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
     }
 
+    /**
+     *
+     * @param anExecutionEnvironment
+     * @param directoryRoot
+     * @param aPreviousPhase
+     * @param aCurrentPhase
+     * @param aNbEnr
+     */
 
-    public ApiControleService(Connection connexion, String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
-            String... paramBatch) {
-        super(connexion,THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
+    @Override
+    public void executer() throws Exception {
+
+        LoggerDispatcher.info("** executer **", LOGGER);
+
+        this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiControleService.MAX_PARALLEL_WORKERS",3);
+
         
-        this.nbThread = MAX_PARALLEL_WORKERS;
+        long dateDebut = java.lang.System.currentTimeMillis() ;
+        // Initilisation de la table de pilotage
+//        initialiserTablePilotage();
+
+        // récupère le nombre de fichier à traiter
+        this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
+        int nbFichier = getTabIdSource().get(ID_SOURCE).size();
+        // long dateDebut = java.lang.System.currentTimeMillis() ;
+        Connection connextionThread = null;
+        ArrayList<ThreadControleService> threadList = new ArrayList<ThreadControleService>();
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
+        currentIndice = 0;
+
+        LoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
+
+        for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
+
+            if (currentIndice % 10 == 0) {
+                LoggerDispatcher.info("contrôle fichier " + currentIndice + "/" + nbFichier, logger);
+            }
+
+            connextionThread = chooseConnection(connextionThread, threadList, connexionList);
+            this.currentIdSource = getTabIdSource().get("id_source").get(currentIndice);
+
+            ThreadControleService r = new ThreadControleService(connextionThread, currentIndice, this);
+            threadList.add(r);
+            r.start();
+            waitForThreads2(MAX_PARALLEL_WORKERS, threadList, connexionList);
+
+        }
+
+        LoggerDispatcher.info("** Attente de la fin des threads **", logger);
+        
+        waitForThreads2(0, threadList, connexionList);
+
+        LoggerDispatcher.info("** Fermeture des connexions **", logger);
+        for (Connection connection : connexionList) {
+            connection.close();
+            
+        }
+        long dateFin= java.lang.System.currentTimeMillis() ;
+
+        LoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
+
+
     }
 
     /**
@@ -71,29 +118,11 @@ public class ApiControleService extends AbstractThreadRunnerService<ThreadContro
      *
      * @throws SQLException
      */
-    public void execute(Connection connexion, String env, String phase, String tableControle) throws Exception {
-        LoggerDispatcher.info("** execute CONTROLE sur la table : " + tableControle + " **", LOGGER);
-
-        for (RuleSets jdr : this.getListJdrDummy()) {
-            this.sjdrDummy.executeJeuDeRegle(connexion, jdr, tableControle);
+    public static void executeABlanc(Connection connexion, String env, String phase, String tableControle, ServiceJeuDeRegle sjdrA, ArrayList<JeuDeRegle> listJdrA) throws Exception {
+        LoggerDispatcher.info("** execute CONTROLE sur la table : " + tableControle + " **", logger);
+        for (JeuDeRegle jdr : listJdrA) {
+            sjdrA.executeJeuDeRegle(connexion, jdr, tableControle, null);
         }
 
     }
-
-    public ArrayList<RuleSets> getListJdrDummy() {
-        return listJdrDummy;
-    }
-
-    public void setListJdrDummy(ArrayList<RuleSets> listJdrDummy) {
-        this.listJdrDummy = listJdrDummy;
-    }
-
-    public ServiceRuleSets getSjdrDummy() {
-        return sjdrDummy;
-    }
-
-    public void setSjdr(ServiceRuleSets sjdrDummy) {
-        this.sjdrDummy = sjdrDummy;
-    }
-
 }

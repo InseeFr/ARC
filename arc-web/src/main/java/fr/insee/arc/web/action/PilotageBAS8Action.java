@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dao.ProcessPhaseDAO;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.BddTable;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementPhaseContainer;
 import fr.insee.arc.core.model.TraitementPhaseEntity;
 import fr.insee.arc.core.model.TraitementState;
@@ -72,7 +73,7 @@ public class PilotageBAS8Action extends ArcAction {
 	@Qualifier("viewArchiveBAS8")
 	VObject viewArchiveBAS8;
 
-	private List<TraitementPhaseEntity> listePhase;
+	private List<TraitementPhase> listePhase;
 
 	/**
 	 * Phase sélectionnée par l'utilisateur
@@ -118,9 +119,9 @@ public class PilotageBAS8Action extends ArcAction {
 	@Action(value = "/enterPilotageBAS8")
 	public String enterPilotageBAS8() {
 		initialize();
-		ApiInitialisationService serv = new ApiInitialisationService(TypeTraitementPhase.INITIALIZE.toString(),
+		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
 				"arc.ihm", (String) getSession().get(SessionParameters.ENV), this.repertoire,
-				TypeTraitementPhase.INITIALIZE.getNbLinesToProcess());
+				TraitementPhase.INITIALISATION.getNbLigneATraiter());
 		serv.bddScript();
 		return generateDisplay();
 	}
@@ -1048,11 +1049,11 @@ public class PilotageBAS8Action extends ArcAction {
 		return null;
 	}
 
-	public List<TraitementPhaseEntity> getListePhase() {
+	public List<TraitementPhase> getListePhase() {
 		return listePhase;
 	}
 
-	public void setListePhase(List<TraitementPhaseEntity> listePhase) {
+	public void setListePhase(List<TraitementPhase> listePhase) {
 		this.listePhase = listePhase;
 	}
 

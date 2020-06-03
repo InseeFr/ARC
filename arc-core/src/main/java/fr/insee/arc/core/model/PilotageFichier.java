@@ -6,9 +6,9 @@ import java.util.Date;
 public class PilotageFichier {
 
     private String idSource;
-    private RuleSets jeuDeRegle;
+    private JeuDeRegle jeuDeRegle;
 
-    public PilotageFichier(String idSource, RuleSets jeuDeRegle) {
+    public PilotageFichier(String idSource, JeuDeRegle jeuDeRegle) {
         super();
         this.idSource = idSource;
         this.jeuDeRegle = jeuDeRegle;
@@ -26,7 +26,7 @@ public class PilotageFichier {
      */
     public PilotageFichier(String idSource, String idNorme, String periodicite, String validiteInf, String validiteSup, String version)
             throws ParseException {
-        this(idSource, new RuleSets(idNorme, periodicite, validiteInf, validiteSup, version));
+        this(idSource, new JeuDeRegle(idNorme, periodicite, validiteInf, validiteSup, version));
     }
 
     /**
@@ -39,7 +39,7 @@ public class PilotageFichier {
      * @param version
      */
     public PilotageFichier(String idSource, String idNorme, String periodicite, Date validiteInf, Date validiteSup, String version) {
-        this(idSource, new RuleSets(idNorme, periodicite, validiteInf, validiteSup, version));
+        this(idSource, new JeuDeRegle(idNorme, periodicite, validiteInf, validiteSup, version));
     }
 
     /**
@@ -52,7 +52,7 @@ public class PilotageFichier {
     /**
      * @return the jeuDeRegle
      */
-    public RuleSets getJeuDeRegle() {
+    public JeuDeRegle getJeuDeRegle() {
         return this.jeuDeRegle;
     }
 

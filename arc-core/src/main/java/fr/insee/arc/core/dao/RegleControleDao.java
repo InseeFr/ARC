@@ -7,8 +7,6 @@ import fr.insee.arc.utils.dao.EntityDao;
 
 /**
  * DAO to get the control rules
- * @author Pépin Rémi
- *
  */
 public class RegleControleDao extends EntityDao<RegleControleEntity> {
 

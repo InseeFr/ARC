@@ -41,6 +41,6 @@ public interface Naming {
 
     Integer size();
 
-    Naming deepClone();
+    Naming clone();
 
 }

@@ -1,8 +1,11 @@
 package fr.insee.arc.utils.utils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
@@ -18,14 +21,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
-public class ManipString implements ICharacterConstant {
+public class ManipString implements IConstanteCaractere {
 
     private static final Logger LOGGER = Logger.getLogger(ManipString.class);
-    
-    
-    
+
+    public static final String patternForRubrique = "([^}{,]*)";
+
+    public static final String patternForRubriqueWithBrackets = "\\{"+patternForRubrique+"\\}";
+
+    public static final String patternForIdRubrique = "(i\\_[^}{,]*)";
+
+    public static final String patternForIdRubriqueWithBrackets = "\\{"+patternForIdRubrique+"\\}";
+
     public static String redoEntryName(String e)
     {
         return e.replace("/", "§").replace("\\","§");
@@ -44,6 +53,19 @@ public class ManipString implements ICharacterConstant {
         return arrayWithSpace.stream()//
                              .map(t-> t.trim().toLowerCase())//
                              .collect(Collectors.toList());
+    }
+    
+    /**
+     * Transforme une chaîne de caractères en list, utilisant le separateur indiqué
+     * @param aChainedList
+     * @param aSeparator
+     * @return
+     */
+    public static List<String> splitAndCleanList(String aChainedList, String aSeparator){//
+    	return Arrays.asList(aChainedList.split(aSeparator))//
+    				 .stream()//
+				     .map(t->t.trim())//
+				     .collect(Collectors.toList());//
     }
     
     /**
@@ -86,20 +108,26 @@ public class ManipString implements ICharacterConstant {
      *            , la chaine de caractère à lire
      * @return une liste de rubrique
      */
+    // TODO : a réécrire : super faux
     static public ArrayList<String> extractRubriques(final String cond) {
-        ArrayList<String> listRubrique = new ArrayList<String>();
+    	
+    	
+    	ArrayList<String> listRubrique = new ArrayList<String>();
         boolean isTrue = true;
         if (StringUtils.isBlank(cond)){
             return listRubrique;
         }
         String replaced = cond;
         while (isTrue) {
-            String rubrique = extractRubrique(replaced);
+            String rubrique = extractBetweenBrackets(replaced);
             if (rubrique.length() == 0) {
                 // plus rien à trouver
                 isTrue = false;
             } else {
-                listRubrique.add(rubrique);
+                if (rubrique.matches(patternForRubrique)) 
+                {
+                	listRubrique.add(rubrique);
+                }
                 replaced = replaced.replace("{" + rubrique + "}", "");
             }
 
@@ -145,12 +173,12 @@ public class ManipString implements ICharacterConstant {
             positionCourante = matcher.end();
         }
         returned.append(input.substring(positionCourante));
-		LoggerDispatcher.debug("Tranform "+ input+ " into "+returned.toString(), LOGGER);
+        LoggerHelper.debugAsComment(LOGGER, "Transformation de", input, "en",returned.toString());
         return returned.toString();
     }
 
     public static final String[] tokenize(String string, String... tokens) {
-        return string.split("[" + Format.untokenize(tokens, EMPTY) + "]");
+        return string.split("[" + Format.untokenize(tokens, empty) + "]");
     }
 
     /**
@@ -168,7 +196,7 @@ public class ManipString implements ICharacterConstant {
         return tokenize(string, tokens)[ordinal];
     }
 
-    static public String extractRubrique(String condition) {
+    static public String extractBetweenBrackets(String condition) {
         String rubrique = "";
         int i = condition.indexOf("{", 0);
         int j = condition.indexOf("}", i + 1);
@@ -189,11 +217,11 @@ public class ManipString implements ICharacterConstant {
 
     static public String extractAllRubrique(String condition) {
 
-        return condition.replaceAll("\\{([^}{]*)\\}", "$1");
+        return condition.replaceAll(patternForRubriqueWithBrackets, "$1");
     }
 
     static public String extractAllRubriqueJson(String condition) {
-        Matcher m = Pattern.compile("\\{([^}{,]*)\\}").matcher(condition);
+        Matcher m = Pattern.compile(patternForRubriqueWithBrackets).matcher(condition);
 
         StringBuilder sb = new StringBuilder();
         int last = 0;
@@ -314,17 +342,14 @@ public class ManipString implements ICharacterConstant {
 
     public static String readFileAsString(String filePath) throws IOException {
         StringBuffer fileData = new StringBuffer();
-        try( BufferedReader reader = new BufferedReader(new FileReader(filePath)))
-        {
-            
-            char[] buf = new char[1024];
-            int numRead = 0;
-            while ((numRead = reader.read(buf)) != -1) {
-        	String readData = String.valueOf(buf, 0, numRead);
-        	fileData.append(readData);
-            }
-            
+        BufferedReader reader = Files.newBufferedReader(new File(filePath).toPath(),Charset.forName("UTF-8"));
+        char[] buf = new char[1024];
+        int numRead = 0;
+        while ((numRead = reader.read(buf)) != -1) {
+            String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
         }
+        reader.close();
         return fileData.toString();
     }
 
@@ -379,7 +404,7 @@ public class ManipString implements ICharacterConstant {
                 else if (Character.toString(ch).equals("À")) {
                     sb.append("A");
                     space = false;
-                } else if (Character.toString(ch).equals("�?")) {
+                } else if (Character.toString(ch).equals("Á")) {
                     sb.append("A");
                     space = false;
                 } else if (Character.toString(ch).equals("Â")) {
@@ -415,16 +440,16 @@ public class ManipString implements ICharacterConstant {
                 } else if (Character.toString(ch).equals("Ì")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("�?")) {
+                } else if (Character.toString(ch).equals("Í")) {
                     sb.append("I");
                     space = false;
                 } else if (Character.toString(ch).equals("Î")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("�?")) {
+                } else if (Character.toString(ch).equals("Ï")) {
                     sb.append("I");
                     space = false;
-                } else if (Character.toString(ch).equals("�?")) {
+                } else if (Character.toString(ch).equals("Ð")) {
                     sb.append("D");
                     space = false;
                 } else if (Character.toString(ch).equals("Ñ")) {
@@ -460,7 +485,7 @@ public class ManipString implements ICharacterConstant {
                 } else if (Character.toString(ch).equals("Ü")) {
                     sb.append("U");
                     space = false;
-                } else if (Character.toString(ch).equals("�?")) {
+                } else if (Character.toString(ch).equals("Ý")) {
                     sb.append("Y");
                     space = false;
                 }
@@ -485,6 +510,133 @@ public class ManipString implements ICharacterConstant {
         }
     }
 
+    public static String translateAsciiWithoutSpace(String s) {
+
+        if (s != null) {
+
+            String sUpper = s.toUpperCase();
+            final StringBuilder sb = new StringBuilder(sUpper.length() * 2);
+
+            final StringCharacterIterator iterator = new StringCharacterIterator(sUpper);
+
+            char ch = iterator.current();
+            Boolean space = false;
+
+            while (ch != CharacterIterator.DONE) {
+                // A-Z : on garde
+                if ((int) ch > 64 && (int) ch < 91) {
+                    sb.append(ch);
+                    space = false;
+                }
+                // 0-9 : on garde
+                else if ((int) ch > 47 && (int) ch < 58) {
+                    sb.append(ch);
+                    space = false;
+                }
+                // caractères spéciaux : on transforme
+                else if (Character.toString(ch).equals("À")) {
+                    sb.append("A");
+                    space = false;
+                } else if (Character.toString(ch).equals("Á")) {
+                    sb.append("A");
+                    space = false;
+                } else if (Character.toString(ch).equals("Â")) {
+                    sb.append("A");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ã")) {
+                    sb.append("A");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ä")) {
+                    sb.append("A");
+                    space = false;
+                } else if (Character.toString(ch).equals("Å")) {
+                    sb.append("A");
+                    space = false;
+                } else if (Character.toString(ch).equals("Æ")) {
+                    sb.append("A");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ç")) {
+                    sb.append("C");
+                    space = false;
+                } else if (Character.toString(ch).equals("È")) {
+                    sb.append("E");
+                    space = false;
+                } else if (Character.toString(ch).equals("É")) {
+                    sb.append("E");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ê")) {
+                    sb.append("E");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ë")) {
+                    sb.append("E");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ì")) {
+                    sb.append("I");
+                    space = false;
+                } else if (Character.toString(ch).equals("Í")) {
+                    sb.append("I");
+                    space = false;
+                } else if (Character.toString(ch).equals("Î")) {
+                    sb.append("I");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ï")) {
+                    sb.append("I");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ð")) {
+                    sb.append("D");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ñ")) {
+                    sb.append("N");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ò")) {
+                    sb.append("O");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ó")) {
+                    sb.append("O");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ô")) {
+                    sb.append("O");
+                    space = false;
+                } else if (Character.toString(ch).equals("Õ")) {
+                    sb.append("O");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ö")) {
+                    sb.append("O");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ø")) {
+                    sb.append("0");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ù")) {
+                    sb.append("U");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ú")) {
+                    sb.append("U");
+                    space = false;
+                } else if (Character.toString(ch).equals("Û")) {
+                    sb.append("U");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ü")) {
+                    sb.append("U");
+                    space = false;
+                } else if (Character.toString(ch).equals("Ý")) {
+                    sb.append("Y");
+                    space = false;
+                }
+                // else if(Character.toString(ch).equals("#")){sb.append("#"); space=false;}
+                else if (Character.toString(ch).equals("Œ")) {
+                    sb.append("#");
+                    space = false;
+                }
+                // Les caractères non trouvés sont supprimés :
+
+                ch = iterator.next();
+            }
+
+            return sb.toString().trim();
+        } else {
+            return null;
+        }
+    }
 
     public static void replaceStringBuilder(StringBuilder sb, String toReplace, String replacement) {
         int index = -1;
@@ -537,7 +689,8 @@ public class ManipString implements ICharacterConstant {
      * @return
      */
     public static String reformerRadical(String radical) {
-	return radical + (radical.endsWith(CLOSING_BRACE) ? EMPTY : CLOSING_BRACE);
+	return radical + (radical.endsWith(closingBrace) ? empty : closingBrace);
     }
     
 }
+

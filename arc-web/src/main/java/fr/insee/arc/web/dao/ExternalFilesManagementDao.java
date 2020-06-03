@@ -82,10 +82,10 @@ public class ExternalFilesManagementDao {
     }
 
     private static String typeNomenclature(String nomTable) {
-        String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.ICharacterConstant.UNDERSCORE);
+        String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.UNDERSCORE);
         StringBuilder typeNomenclature = new StringBuilder();
         for (int i = 0; i < tokens.length - 1; i++) {
-            typeNomenclature.append((i > 0 ? fr.insee.arc.utils.textUtils.ICharacterConstant.UNDERSCORE : "") + tokens[i]);
+            typeNomenclature.append((i > 0 ? fr.insee.arc.utils.textUtils.IConstanteCaractere.UNDERSCORE : "") + tokens[i]);
         }
         return typeNomenclature.toString();
     }

@@ -1,7 +1,7 @@
 package fr.insee.arc.core.model;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 
 public class RegleControle {
 
@@ -26,7 +26,7 @@ public class RegleControle {
 	 * Constructeur spécific à la viewControle
 	 * @param inputFields
 	 */
-	public RegleControle(Map<String, ArrayList<String>> mapInputFields) {
+	public RegleControle(HashMap<String, ArrayList<String>> mapInputFields) {
 		idRegle=mapInputFields.get("id_regle").get(0);
 		idClasse=mapInputFields.get("id_classe").get(0);
 		rubriquePere=mapInputFields.get("rubrique_pere").get(0);
@@ -223,6 +223,7 @@ public class RegleControle {
 		}
 		return true;
 	}
+	
 	
 	
 	

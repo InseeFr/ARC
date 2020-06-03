@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.utils.utils.LoggerHelper;
 
 /**
  * FIXME make abstract Classe des variables d'environnement liées au batch
@@ -40,15 +41,15 @@ public class BatchEnv {
 	this.repertoireChargement = properties.getLoadingDirectory();
 	this.repertoireStockage = properties.getStorageDirectory();
 
-	try {
-	    Class.forName("org.postgresql.Driver");
-	    this.connexion = DriverManager.getConnection(properties.getDatabaseUrl(),
-		    properties.getDatabaseUsername(), properties.getDatabasePassword());
-	} catch (SQLException ex) {
-		LoggerDispatcher.error(ex, LOGGER);
-	} catch (ClassNotFoundException ex) {
-		LoggerDispatcher.error(ex, LOGGER);
-	}
+        try {
+        	 Class.forName("org.postgresql.Driver");
+     	    this.connexion = DriverManager.getConnection(properties.getDatabaseUrl(),
+     		    properties.getDatabaseUsername(), properties.getDatabasePassword());
+        } catch (SQLException ex) {
+            LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
+        } catch (ClassNotFoundException ex) {
+            LoggerHelper.errorGenTextAsComment(getClass(), "BatchEnv()", LOGGER, ex);
+        }
 
 	this.databaseSchema = properties.getDatabaseSchema();
     }

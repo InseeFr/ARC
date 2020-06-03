@@ -215,7 +215,7 @@ public abstract class AbstractQueryHandler implements IQueryHandler, AutoCloseab
         };
     }
 
-    protected Consumer<? super Connection> onClose = HowToClose.JUST_CLOSE;
+    private Consumer<? super Connection> onClose = HowToClose.JUST_CLOSE;
 
     protected <T> T execute(Function<ResultSet, T> onResult, String query, BiConsumer<Throwable, String> onException,
             Consumer<? super Connection> howToClose)
@@ -254,8 +254,9 @@ public abstract class AbstractQueryHandler implements IQueryHandler, AutoCloseab
         try
         {
             Statement stmt = connection.createStatement();
-            try( ResultSet result = stmt.executeQuery(query))
+            try
             {
+                ResultSet result = stmt.executeQuery(query);
                 while (result.next())
                 {
                     returned.add(onRecord.apply(result));

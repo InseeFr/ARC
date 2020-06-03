@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.utils.utils.LoggerHelper;
 
 /**
  *
@@ -74,7 +74,7 @@ public class RequeteSQLCalibree extends AbstractRequeteSQLCalibree
         {
             requeteParsee = requeteParsee.replaceFirst(regexTokenArg, args.get(i));
         }
-        this.requete.append(NEWLINE).append(requeteParsee);
+        this.requete.append(newline).append(requeteParsee);
         if (this.requete.length() > this.taille)
         {
             this.execute();
@@ -95,8 +95,9 @@ public class RequeteSQLCalibree extends AbstractRequeteSQLCalibree
             try
             {
                 stmt.execute(this.requete.toString());
-            	LoggerDispatcher.trace("execute() ["+this.requete.toString()+"]",LOGGER);
-            	LoggerDispatcher.info("execute() Taille du commit :"+this.requete.length()+"]",LOGGER);
+                LoggerHelper.traceAsComment(LOGGER, getClass(), "#execute()", "Début[", this.requete.toString(),
+                        "]fin");
+                LoggerHelper.infoAsComment(LOGGER, "COMMIT.", "Taille du commit :", this.requete.length());
             } finally
             {
                 stmt.close();
@@ -115,10 +116,12 @@ public class RequeteSQLCalibree extends AbstractRequeteSQLCalibree
      */
     public void flush() throws SQLException
     {
+        LoggerHelper.debugDebutMethodeAsComment(getClass(), "flush()", LOGGER);
         if (this.requete.length() > 0)
         {
             execute();
         }
+        LoggerHelper.debugFinMethodeAsComment(getClass(), "flush()", LOGGER);
     }
 
     public String toString()

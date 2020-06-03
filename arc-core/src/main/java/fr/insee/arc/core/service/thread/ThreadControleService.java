@@ -1,339 +1,459 @@
 package fr.insee.arc.core.service.thread;
 
 import java.sql.Connection;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.core.model.BddTable;
-import fr.insee.arc.core.model.DbConstant;
-import fr.insee.arc.core.model.RuleSets;
-import fr.insee.arc.core.model.TraitementState;
-import fr.insee.arc.core.service.AbstractPhaseService;
+import fr.insee.arc.core.model.JeuDeRegle;
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiControleService;
-import fr.insee.arc.core.service.ServiceRuleSets;
+import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
-import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.SQLExecutor;
 
 /**
- * 
- * 
+ * Comme pour le normage et le filtrage, on parallélise en controlant chaque fichier dans des threads séparés.
  * @author S4LWO8
  *
  */
-public class ThreadControleService extends AbstractThreadService {
+public class ThreadControleService extends ApiControleService implements Runnable {
+
+
+
     private static final Logger LOGGER = Logger.getLogger(ThreadControleService.class);
 
-    private String tableTempControleFoo;
-    private ServiceRuleSets sjdr;
+    private int indice;
 
-    protected List<RuleSets> listRuleSets;
+    public String tableControleDataTemp;
+    protected String tableControlePilTemp;
+    public String tableTempControleFoo;
 
-    private static final String ALTER_TABLE_INHERIT = "alter table %s inherit %s;";
-    public ThreadControleService(int currentIndice, ApiControleService theApi, Connection connexion) {
-	super(currentIndice, theApi, connexion);
+    public ServiceJeuDeRegle sjdr;
 
-	this.nbEnr = theApi.getNbEnr();
+    public JeuDeRegle jdr;
+    
+    public String structure;
 
-	this.sjdr = new ServiceRuleSets();
+    public ThreadControleService(Connection connexion, int currentIndice, ApiControleService theApi) {
 
-	this.tableTempControleFoo = FormatSQL.temporaryTableName("controle_foo_temp");
+        this.indice = currentIndice;
+        this.setEnvExecution(theApi.getEnvExecution());
+        this.idSource = theApi.getTabIdSource().get(ID_SOURCE).get(indice);
+        this.connexion = connexion;
+        try {
+            this.connexion.setClientInfo("ApplicationName", "Controle fichier "+idSource);
+        } catch (SQLClientInfoException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
+        this.setTablePil(theApi.getTablePil());
+        this.tablePilTemp = theApi.getTablePilTemp();
+
+        this.setPreviousPhase(theApi.getPreviousPhase());
+        this.setCurrentPhase(theApi.getCurrentPhase());
+
+        this.setNbEnr(theApi.getNbEnr());
+
+        this.setTablePrevious(theApi.getTablePrevious());
+        this.setTabIdSource(theApi.getTabIdSource());
+
+        this.setTableNorme(theApi.getTableNorme());
+        this.setTableNormageRegle(theApi.getTableNormageRegle());
+
+        this.setParamBatch(theApi.getParamBatch());
+
+        this.setTableJeuDeRegle(theApi.getTableJeuDeRegle());
+        this.setTableControleRegle(theApi.getTableControleRegle());
+
+//        this.setListJdr(theApi.getListJdr());
+
+//        this.sjdr = new ServiceJeuDeRegle((ArrayList<String>) theApi.sjdr.getListRubTable());
+        
+        this.sjdr = new ServiceJeuDeRegle(theApi.getTableControleRegle());
+        this.jdr =new JeuDeRegle();
+
+        
+        this.setTableSeuil(theApi.getTableSeuil());
+
+        // Nom des tables temporaires      
+        this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
+        this.tableControlePilTemp= FormatSQL.temporaryTableName("controle_pil_temp");
+        this.tableTempControleFoo = FormatSQL.temporaryTableName("controle_foo_temp");        
     }
 
     @Override
-    public void initialisationTodo() throws Exception {
-	// Clean the connection
-	UtilitaireDao.get("arc").executeImmediate(this.connection, "DISCARD TEMP;");
+    public void run() {
+        try {
+            
+            preparation();
 
-	preparation();
+            execute();          
 
+            finControle();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+	    try {
+		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+			"aucuneTableADroper");
+	    } catch (SQLException e2) {
+		// TODO Auto-generated catch block
+		e2.printStackTrace();
+	    }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        }
     }
 
-    @Override
-    public void process() throws Exception {
-	execute();
-
-    }
-
-    @Override
-    public void finalizePhase() throws Exception {
-	finControle();
-
+    public void start() {
+        LoggerDispatcher.debug("Starting ThreadContrôleService", LOGGER);
+        if (t == null) {
+            t = new Thread(this, indice + "");
+            t.start();
+        }
     }
 
     /**
-     * Prepare data and get usefull rule sets
+     * Préparation des données et implémentation des jeux de règles utiles
      *
+     * @param this.connexion
+     *
+     * @param tableIn
+     *            la table issue du chargement-normage
+     *
+     * @param env
+     *            l'environnement d'execution
+     * @param tableControle
+     *            la table temporaire à controler
+     * @param tablePilTemp
+     *            la table temporaire listant les fichiers en cours de traitement
+     * @param tableJeuDeRegle
+     *            la table des jeux de règles
+     * @param tableRegleC
+     *            la table des règles de controles
      * @throws SQLException
      */
     public void preparation() throws SQLException {
-	LoggerDispatcher.info("** preparation **", LOGGER);
+        LoggerDispatcher.info("** preparation **", LOGGER);
 
-	StringBuilder blocPrep = new StringBuilder();
+        StringBuilder blocPrep = new StringBuilder();
 
-	LoggerDispatcher.info("Create thread specific pilotage table", LOGGER);
-	blocPrep.setLength(0);
-	blocPrep.append(
-		getRequestTocreateTablePilotageIdSource(this.getTablePilTemp(), this.getTablePilTempThread(), this.idSource));
-	blocPrep.append(resetPilotageTable(this.getTablePilTempThread()));
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocPrep);
+        // Marquage du jeux de règles appliqué
+        LoggerDispatcher.info("Récupération des rubrique de la table ", LOGGER);
 
-	LoggerDispatcher.info("Tag rule sets to apply ", LOGGER);
-	blocPrep.setLength(0);
-	blocPrep.append(marqueJeuDeRegleApplique(this.getTablePilTempThread()));
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocPrep);
+        // fabrication de la table de pilotage controle lié au thread
+        blocPrep.append("DISCARD TEMP;");
+        blocPrep.append(createTablePilotageIdSource(this.tablePilTemp, this.tableControlePilTemp, this.idSource));
+        blocPrep.append(resetTablePilotage(this.tableControlePilTemp));
 
-	blocPrep.setLength(0);
-	LoggerDispatcher.info("Create thread specific work table", LOGGER);
-	blocPrep.append(getRequestToCreateWorkingTable(this.getTablePrevious(),
-		this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA), this.idSource,
-		"'0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
+        // Marquage du jeux de règles appliqué
+        LoggerDispatcher.info("Marquage du jeux de règles appliqué ", LOGGER);
+        blocPrep.append(marqueJeuDeRegleApplique(this.tableControlePilTemp));
+        
+        // Fabrication de la table de controle temporaire
+        LoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
+        blocPrep.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocPrep);
+        //blocPrep.append(createTableControle(this.getTablePrevious(), this.tableControleDataTemp, this.tableControlePilTemp, this.getCurrentPhase()));
+        UtilitaireDao.get("arc").executeBlock(this.connexion, blocPrep);
 
-	LoggerDispatcher.info("Get rule sets bind to data", LOGGER);
-	this.setListJdr(
-		this.sjdr.recupJeuDeRegle(this.connection, this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA),
-			this.bddTable.getQualifedName(BddTable.ID_TABLE_RULESETS_BAS)));
-
-	LoggerDispatcher.info("Get control rules bind to rule sets", LOGGER);
-	for (RuleSets jdr : this.getListJdr()) {
-	    this.sjdr.fillRegleControle(this.connection, jdr,
-		    this.bddTable.getQualifedName(BddTable.ID_TABLE_CONTROLE_REGLE));
-	}
+        // Récupération des Jeux de règles associés
+        this.sjdr.fillRegleControle(this.connexion, jdr, this.getTableControleRegle(), this.tableControleDataTemp);
+        this.structure=UtilitaireDao.get("arc").getString(this.connexion, "SELECT jointure FROM "+this.tableControlePilTemp);
     }
 
-    /**
-     * 
-     * @param tablePilTempThread : pilotage table to rese
-     * @return sql query
-     */
-    protected String resetPilotageTable(String tablePilTempThread) {
-	StringBuilder requete = new StringBuilder();
-	requete.append("\n UPDATE " + tablePilTempThread + " set etat_traitement=NULL ");
-	requete.append(";");
-	return requete.toString();
+    
+    protected String resetTablePilotage(String tableControlePilTemp) {
+        StringBuilder requete = new StringBuilder();
+        requete.append("\n UPDATE " + tableControlePilTemp + " set etat_traitement=NULL ");
+        requete.append(";");
+        return requete.toString();
     }
 
+    
+    
     /**
-     * Method to control a table
      * Méthode pour controler une table
+     *
+     * @param connexion
+     *
+     * @param tableControle
+     *            la table à controler
      *
      * @throws SQLException
      */
     public void execute() throws Exception {
-	LoggerDispatcher.info(String.format("** process CONTROL on table :%s **",
-		this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA) ), LOGGER);
+        LoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
 
-	for (RuleSets jdr : this.getListJdr()) {
-	    this.sjdr.executeJeuDeRegle(this.connection, jdr,
-		    this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA));
-	}
+        this.sjdr.executeJeuDeRegle(this.connexion, jdr, this.tableControleDataTemp, this.structure);
 
     }
 
     /**
-     * Tag controle='1' controled table's reccords
+     * Méthode pour marquer à controle='1' les enregistrements de la table controlée
      *
      * @param tableControle
-     * @return sql query
+     * @return
      */
     public String marqueEnregistrementSansRegle(String tableControle) {
-	StringBuilder requete = new StringBuilder();
-	requete.append("UPDATE " + tableControle + " a ");
-	requete.append("\n SET controle='1' ");
-	requete.append("\n WHERE EXISTS(    SELECT 1 ");
-	requete.append("\n      FROM " + this.getTablePilTempThread() + " b ");
-	requete.append("\n      WHERE phase_traitement='CONTROLE' ");
-	requete.append("\n          AND 'KO'=ANY(etat_traitement) ");
-	requete.append("\n          AND a.id_source=b.id_source); ");
-	return requete.toString();
+        StringBuilder requete = new StringBuilder();
+        requete.append("UPDATE " + tableControle + " a ");
+        requete.append("\n SET controle='1' ");
+        requete.append("\n WHERE EXISTS(    SELECT 1 ");
+        requete.append("\n      FROM " + this.tableControlePilTemp + " b ");
+        requete.append("\n      WHERE phase_traitement='CONTROLE' ");
+        requete.append("\n          AND 'KO'=ANY(etat_traitement) ");
+        requete.append("\n          AND a.id_source=b.id_source); ");
+        return requete.toString();
+    }
+
+    /**
+     * Méthode pour marquer à KO les id_source de pilotage_fichier qui n'ont pas de règle associée
+     *
+     * @return
+     */
+    private String marqueFichierSansRegle() {
+        StringBuilder requete = new StringBuilder();
+        requete.append("\n WITH ");
+        requete.append("prep AS (   SELECT id_norme, periodicite, validite ");
+        requete.append("\n          FROM " + this.tableControlePilTemp + " ");
+        requete.append("\n          WHERE phase_traitement='" + TraitementPhase.CONTROLE + "') ");
+        // selection des jeux de règles applicables à la table
+        requete.append("\n ,jdr AS (    SELECT DISTINCT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version ");
+        requete.append("\n      FROM " + this.getTableJeuDeRegle() + " a ");
+        requete.append("\n          INNER JOIN prep ON a.id_norme=prep.id_norme AND a.periodicite = prep.periodicite ");
+        requete.append("\n      WHERE a.id_norme=prep.id_norme ");
+        requete.append("\n          AND a.periodicite = prep.periodicite ");
+        requete.append("\n          AND a.validite_inf<=prep.validite::date ");
+        requete.append("\n          AND a.validite_sup>=prep.validite::date) ");
+        // Comptage du nombre de règles associées à chaque JdR
+        requete.append("\n ,nb AS ( SELECT jdr.id_norme, jdr.periodicite, jdr.validite_inf, jdr.validite_sup, jdr.version, count(a.id_regle) as nb_regle ");
+        requete.append("\n  FROM " + this.getTableControleRegle() + " a ");
+        requete.append("\n  RIGHT JOIN jdr ON a.id_norme=jdr.id_norme AND a.periodicite=jdr.periodicite AND a.validite_inf=jdr.validite_inf AND a.validite_sup=jdr.validite_sup AND a.version=jdr.version ");
+        requete.append("\n  GROUP BY jdr.id_norme, jdr.periodicite, jdr.validite_inf, jdr.validite_sup, jdr.version), ");
+        requete.append("\n exclude AS (SELECT DISTINCT a.id_source ");
+        requete.append("\n          FROM " + this.tableControleDataTemp + " a ");
+        requete.append("\n          LEFT JOIN nb ON a.id_norme=nb.id_norme AND a.periodicite = nb.periodicite AND nb.validite_inf<=a.validite::date AND nb.validite_sup>=a.validite::date ");
+        requete.append("\n          WHERE nb_regle IS NULL OR nb_regle = 0) ");
+        requete.append("\n UPDATE " + this.tableControlePilTemp + " a \n \t SET etat_traitement=array['KO'],rapport='"
+                + TraitementRapport.TOUTE_PHASE_AUCUNE_REGLE
+                + "' \n \t WHERE phase_traitement='CONTROLE' AND EXISTS (SELECT 1 FROM exclude WHERE a.id_source=exclude.id_source); ");
+        return requete.toString();
     }
 
 
     /**
-     * Tag a state for a batch of files containt in pilotageTable
-     * Methode grade for the temporary piloage table. No check on the phase
-     * because the table contain only control
+     * Marquage d'un état pour un ensemble de fichier (on les prends tous pas de limitation) Méthode calibré pour notre table de pilotage
+     * temporaire pas de vérification sur la phase car la table de pilotage temporaire ne contient que des CONTROLE de même, la table de
+     * pilotage temporaire n'a pas d'état ENCOURS (il a été remis à NULL précédemment)
      *
-     * @param newState
-     * @param pilotageTable
-     * @return an sql query
+     * @param tableControlePilTemp
+     * @param etatNouveau
+     * @param TableOut
+     * @param
+     * @return
      */
-    public String stateChange (String newState, String pilotageTable) {
-	StringBuilder query = new StringBuilder();
-	query.append(" UPDATE " + this.getTablePilTempThread() + " b ");
-	query.append(" SET  etat_traitement=etat_traitement||'{" + newState + "}' ");
-	query.append(" WHERE exists (select 1 from " + pilotageTable + " a where a.id_source=b.id_source); ");
-	return query.toString();
+    public String passageEtat(String tablePilTemp, String etatNouveau, String TableOut) {
+        StringBuilder requete = new StringBuilder();
+        requete.append(" UPDATE " + tableControlePilTemp + " b ");
+        requete.append(" SET  etat_traitement=etat_traitement||'{" + etatNouveau + "}' ");
+        // requete.append(", date_traitement='"+ formatter.format(date) + "'::date");
+        requete.append(" WHERE exists (select 1 from " + TableOut + " a where a.id_source=b.id_source); ");
+        return requete.toString();
     }
 
     /**
      * Méthode à passer après les controles
      *
-     * @throws Exception
+     * @param connexion
+     *
+     * @param tableIn
+     *            la table temporaire avec les marquage du controle
+     * @param tableOutOk
+     *            la table permanente sur laquelle on ajoute les bons enregistrements de tableIn
+     * @param tableOutKo
+     *            la table permanente sur laquelle on ajoute les mauvais enregistrements de tableIn
+     * @param tablePil
+     *            la table de pilotage des fichiers
+     * @param tableSeuil
+     *            la table des seuils
+     * @throws SQLException
      */
-    @SQLExecutor
     public void finControle() throws Exception {
-	LoggerDispatcher.info("finControle", LOGGER);
+        LoggerDispatcher.info("finControle", LOGGER);
 
-	LoggerDispatcher.info("Initialize some table name", LOGGER);
-	String tableOutOkTemp = FormatSQL.temporaryTableName(
-		dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.OK + FormatSQL.DOLLAR + threadId);
-	String tableOutKoTemp = FormatSQL.temporaryTableName(
-		dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.KO + FormatSQL.DOLLAR + threadId);
+        String tableOutOkTemp = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK + "$" +indice);
+        String tableOutKoTemp = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO + "$" +indice);
 
-	String tableOutOk = dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.OK;
-	String tableOutKo = dbEnv(this.getExecutionEnv()) + this.tokenInputPhaseName + "_" + TraitementState.KO;
+        String tableOutOk = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK;
+        String tableOutKo = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO;
 
-	StringBuilder blocFin = new StringBuilder();
+        StringBuilder blocFin = new StringBuilder();
+        // Creation des tables temporaires ok et ko
+        LoggerDispatcher.info("Creation des tables temporaires ok et ko", LOGGER);
+        blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
+        blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
 
-	LoggerDispatcher.info("Create temporary ok and ko table", LOGGER);
-	blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
-	blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
-	blocFin.append(AbstractPhaseService
-		.creationTableResultat(this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA), tableOutOkTemp));
-	blocFin.append(AbstractPhaseService
-		.creationTableResultat(this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA), tableOutKoTemp));
+        // Execution à mi parcours du bloc de requete afin que les tables tempo soit bien créées
+        // ensuite dans le java on s'appuie sur le dessin de ces tables pour ecrire du SQL
+        blocFin.append(ApiService.creationTableResultat(this.tableControleDataTemp, tableOutOkTemp));
+        blocFin.append(ApiService.creationTableResultat(this.tableControleDataTemp, tableOutKoTemp));
 
+        // Calcul et maj du taux d'erreur
+        LoggerDispatcher.info("Calcul et maj du taux d'erreur", LOGGER);
+        blocFin.append(calculTauxErreur(this.tableControleDataTemp, this.tableControlePilTemp));
 
-	LoggerDispatcher.info("Compute error rate", LOGGER);
-	blocFin.append(computeErrorRate(this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA),
-		this.getTablePilTempThread()));
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
+        // Marquage etat controle_KO pour les seuils d'erreur trop elevé
+        LoggerDispatcher.info("Marquage etat controle_KO pour les seuils d'erreur trop elevé", LOGGER);
+        blocFin.append(marquageControleKoSeuil(this.tableControlePilTemp, this.getTableSeuil()));
+        UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
-	LoggerDispatcher.info("Tag ko if error rate > error step", LOGGER);
-	blocFin.append(marquageControleKoSeuil(this.getTablePilTempThread(),
-		this.bddTable.getQualifedName(BddTable.ID_TABLE_SEUIL)));
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
+        UtilitaireDao.get("arc").executeImmediate(this.connexion, "vacuum analyze " + this.tableControlePilTemp + ";");
 
-	UtilitaireDao.get("arc").executeImmediate(this.connection,
-		"vacuum analyze " + this.getTablePilTempThread() + ";");
-
-	LoggerDispatcher.info("Add reccors in final table", LOGGER);
-	String listColTableIn = listeColonne(tableOutOkTemp);
+        // Ajout des enregistrements dans la table finale
+        LoggerDispatcher.info("Ajout des enregistrements dans la table finale", LOGGER);
+        String listColTableIn = this.listeColonne(this.connexion, tableOutOkTemp);
 
 
-	//Insert in table ok if final not completly ko brcause of error_step(process_state is null)
-	blocFin.setLength(0);
-	LoggerDispatcher.info("Insert in OK", LOGGER);
-	blocFin.append(ajoutTableControle(listColTableIn, this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA),
-		tableOutOkTemp, this.getTablePilTempThread(), "etat_traitement is null", "controle='0' AND "));
+        // on insere dans la table OK que les fichiers pas déclarés complétement
+        // KO à cause du seuil (etat_traitement is null)
+        blocFin.setLength(0);
+        LoggerDispatcher.info("Insertion dans OK", LOGGER);
+        blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutOkTemp, this.tableControlePilTemp, "etat_traitement is null",
+                "controle='0' AND "));
+        // blocFin.append("\n analyze "+tableOutOkTemp+"(id_source);");
 
-	// Insert in table KO reccords with controle!=0 and ko file
-	LoggerDispatcher.info("Insert in KO", LOGGER);
-	blocFin.append(ajoutTableControle(listColTableIn, this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA),
-		tableOutKoTemp, this.getTablePilTempThread(), "etat_traitement='{" + TraitementState.KO + "}'",
-		"controle!='0' OR "));
+        // on insere dans la table KO tous les enregistrements à controle!=0 et
+        // tous ceux des fichiers déclarés en KO de seuil
+        LoggerDispatcher.info("Insertion dans KO", LOGGER);
+        blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutKoTemp, this.tableControlePilTemp, "etat_traitement='{"
+                + TraitementEtat.KO + "}'", "controle!='0' OR "));
+        // blocFin.append("\n analyze "+tableOutKoTemp+"(id_source);");
 
-	LoggerDispatcher.info("Reset pilotage table, all state = null", LOGGER);
-	blocFin.append(resetPilotageTable(this.getTablePilTempThread()));
-	blocFin.append(stateChange( TraitementState.OK.toString(), tableOutOkTemp));
-	blocFin.append(stateChange( TraitementState.KO.toString(), tableOutKoTemp));
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
+        // Reset de la table de pilotage : on remet tout les états à null
+        blocFin.append(resetTablePilotage(this.tableControlePilTemp));
+        blocFin.append(passageEtat(this.tableControlePilTemp, TraitementEtat.OK.toString(), tableOutOkTemp));
+        blocFin.append(passageEtat(this.tableControlePilTemp, TraitementEtat.KO.toString(), tableOutKoTemp));
+        UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
-	LoggerDispatcher.info("insert temp table in real tables", LOGGER);
-	LoggerDispatcher.info("Create inherited table", LOGGER);
-	String tableIdSourceOK = tableOfIdSource(tableOutOk, this.idSource);
-	createTableInherit(tableOutOkTemp, tableIdSourceOK);
-	String tableIdSourceKO = tableOfIdSource(tableOutKo, this.idSource);
-	createTableInherit(tableOutKoTemp, tableIdSourceKO);
+        // Insertion des table temp dans les vraies tables
 
-	StringBuilder requete = new StringBuilder();
 
-	requete.append(FormatSQL.tryQuery(String.format(ALTER_TABLE_INHERIT,tableIdSourceOK, tableOutOk + "_todo")));
-	requete.append(FormatSQL.tryQuery(String.format(ALTER_TABLE_INHERIT,tableIdSourceOK, tableOutOk)));
-	if (paramBatch == null) {
-	    requete.append(FormatSQL.tryQuery(String.format(ALTER_TABLE_INHERIT,tableIdSourceKO, tableOutKo)));
-	    
-	}
-
-	requete.append(this.marquageFinal(this.getTablePil(), this.getTablePilTempThread()));
-	UtilitaireDao.get("arc").executeBlock(connection, requete);
-
-	blocFin.setLength(0);
-	LoggerDispatcher.info("Clean temporary table", LOGGER);
-	blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
-	blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
-	blocFin.append(FormatSQL.dropTable(this.bddTable.getQualifedName(BddTable.ID_TABLE_POOL_DATA)).toString());
-//	blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
-
-	UtilitaireDao.get("arc").executeBlock(this.connection, blocFin);
+        // Créer les tables héritées
+        String tableIdSourceOK=tableOfIdSource(tableOutOk ,this.idSource);
+        createTableInherit(connexion, tableOutOkTemp, tableIdSourceOK);
+        String tableIdSourceKO=tableOfIdSource(tableOutKo ,this.idSource);
+        createTableInherit(connexion, tableOutKoTemp, tableIdSourceKO);
+        
+        StringBuilder requete = new StringBuilder();
+        
+        if (paramBatch == null) {
+        	requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
+            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk +";"));
+            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ tableOutKo +";"));
+        }
+        else
+        {
+            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
+            requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
+//            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ tableOutKo +";"));
+        }
+        
+        requete.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp));
+        UtilitaireDao.get("arc").executeBlock(connexion, requete);
+        
+        blocFin.setLength(0);
+        // Vidage des tables temporaires
+        blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
+        blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
+        blocFin.append(FormatSQL.dropTable(this.tableControleDataTemp).toString());
+        blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
+        
+	    UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
     }
 
     /**
-     * Tag CONTROLE_KO if too many errors
+     * Mise en CONTROLE_KO des fichiers avec trop d'erreur
      *
-     * @param ID_TABLE_PILOTAGE_TEMP
+     * @param tablePilTemp
      *            , table de pilotage des fichiers
      * @param tableSeuil
      *            , table de seuil pour la comparaison
-     * @return a sql query
+     * @return
      */
-    public String marquageControleKoSeuil(String tablePilTempThread, String tableSeuil) {
-	StringBuilder request = new StringBuilder();
-	request.append("WITH ");
-	request.append("seuil AS (  SELECT valeur ");
-	request.append("        FROM " + tableSeuil + " ");
-	request.append("        WHERE nom='s_taux_erreur'), ");
-	request.append("prep AS (   SELECT id_source,taux_ko,valeur ");
-	request.append("        FROM " + tablePilTempThread + ", seuil ");
-	request.append("        WHERE taux_ko > valeur) ");
-	request.append("UPDATE " + tablePilTempThread + " ");
-	request.append("\n\t SET etat_traitement='{" + TraitementState.KO.toString() + "}', ");
-	request.append("\n\t\t rapport='Fichier avec trop d''erreur' ");
-	request.append("\n\t WHERE id_source in (SELECT distinct id_source FROM prep); ");
-	return request.toString();
+    public String marquageControleKoSeuil(String tableControlePilTemp, String tableSeuil) {
+        StringBuilder requete = new StringBuilder();
+        requete.append("WITH ");
+        requete.append("seuil AS (  SELECT valeur ");
+        requete.append("        FROM " + tableSeuil + " ");
+        requete.append("        WHERE nom='s_taux_erreur'), ");
+        requete.append("prep AS (   SELECT id_source,taux_ko,valeur ");
+        requete.append("        FROM " + tableControlePilTemp + ", seuil ");
+        requete.append("        WHERE taux_ko > valeur) ");
+        requete.append("UPDATE " + tableControlePilTemp + " ");
+        requete.append("\n\t SET etat_traitement='{" + TraitementEtat.KO.toString() + "}', ");
+        requete.append("\n\t\t rapport='Fichier avec trop d''erreur' ");
+        requete.append("\n\t WHERE id_source in (SELECT distinct id_source FROM prep); ");
+        return requete.toString();
     }
 
     /**
-     * Compute error rate (row with controle !=0) ans update pilotage table
+     * Calcul du taux d'erreur (ligne dont le controle est différent de 0) et mise à jour dans pilotage
+     *
      * @param tableIn
      *            , la table ayant subi des controles
      * @param tablePil
      *            , la table de pilotage des fichiers (à mettre à jour)
-     * @return sql query
+     * @return
      */
-    public String computeErrorRate(String tableIn, String tablePil) {
-	StringBuilder request = new StringBuilder();
-	request.append("\n DROP TABLE IF EXISTS " + this.tableTempControleFoo + " CASCADE; ");
-	request.append("\n CREATE ");
-	if (!this.tableTempControleFoo.contains(".")) {
-	    request.append("\n TEMPORARY ");
-	}
-	request.append("\n TABLE " + this.tableTempControleFoo
-		+ " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) as select * FROM (");
-	request.append("\n \t with erreur AS(   SELECT id_source, count(id_source)::numeric as nb_erreur ");
-	request.append("\n          FROM " + tableIn + " ");
-	request.append("\n          WHERE controle != '0' ");
-	request.append("\n          GROUP BY id_source), ");
-	request.append("\n tot AS (SELECT id_source, count(id_source)::numeric AS nb_enr ");
-	request.append("\n      FROM " + tableIn + " ");
-	request.append("\n      GROUP BY id_source), ");
-	request.append("\n maj AS (SELECT   tot.id_source,");
-	request.append("\n              (CASE   WHEN erreur.nb_erreur is null ");
-	request.append("\n                  THEN 0 ");
-	request.append("\n                  ELSE erreur.nb_erreur/tot.nb_enr ");
-	request.append("\n              END)::numeric as taux_ko ");
-	request.append(
-		"\n      FROM tot LEFT JOIN (SELECT * FROM erreur) AS erreur ON tot.id_source=erreur.id_source) ");
-	request.append("\n select * from maj) foo; ");
+    public String calculTauxErreur(String tableIn, String tablePil) {
+        StringBuilder requete = new StringBuilder();
+        requete.append("\n DROP TABLE IF EXISTS " + this.tableTempControleFoo + " CASCADE; ");
+        requete.append("\n CREATE ");
+        if (!this.tableTempControleFoo.contains("."))
+        {
+            requete.append("\n TEMPORARY ");
+        }
+        requete.append("\n TABLE " + this.tableTempControleFoo
+                + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) as select * FROM (");
+        requete.append("\n \t with erreur AS(   SELECT id_source, count(id_source)::numeric as nb_erreur ");
+        requete.append("\n          FROM " + tableIn + " ");
+        requete.append("\n          WHERE controle != '0' ");
+        requete.append("\n          GROUP BY id_source), ");
+        requete.append("\n tot AS (SELECT id_source, count(id_source)::numeric AS nb_enr ");
+        requete.append("\n      FROM " + tableIn + " ");
+        requete.append("\n      GROUP BY id_source), ");
+        requete.append("\n maj AS (SELECT   tot.id_source,");
+        requete.append("\n              (CASE   WHEN erreur.nb_erreur is null ");
+        requete.append("\n                  THEN 0 ");
+        requete.append("\n                  ELSE erreur.nb_erreur/tot.nb_enr ");
+        requete.append("\n              END)::numeric as taux_ko ");
+        requete.append("\n      FROM tot LEFT JOIN (SELECT * FROM erreur) AS erreur ON tot.id_source=erreur.id_source) ");
+        requete.append("\n select * from maj) foo; ");
 
-	request.append("\n UPDATE " + tablePil + " a SET taux_ko = b.taux_ko from " + this.tableTempControleFoo
-		+ " b WHERE a.id_source = b.id_source; ");
-	request.append("\n DROP TABLE IF EXISTS " + this.tableTempControleFoo + " CASCADE; ");
-	return request.toString();
+        requete.append("\n UPDATE " + tablePil + " a SET taux_ko = b.taux_ko from " + this.tableTempControleFoo
+                + " b WHERE a.id_source = b.id_source; ");
+        requete.append("\n DROP TABLE IF EXISTS " + this.tableTempControleFoo + " CASCADE; ");
+        return requete.toString();
     }
 
     /**
-     * Insert data from a table to another with selection condition
+     * Insertion des données d'une table dans une autre avec un critère de sélection
      *
      * @param listColTableIn
      *
@@ -343,77 +463,50 @@ public class ThreadControleService extends AbstractThreadService {
      *            la table des données à insérer
      * @param tableOut
      *            la table réceptacle
-     * @param tablePilTempThread
+     * @param tableControlePilTemp
      *            la table de pilotage des fichiers
      * @param etatNull
      *            pour sélectionner certains fichiers
      * @param condEnregistrement
      *            la condition pour filtrer la recopie
-     * @return sql query
+     * @return
      */
-    public String ajoutTableControle(String listColTableIn, String tableIn, String tableOut, String tablePilTempThread,
-	    String condFichier, String condEnregistrement) {
+    public String ajoutTableControle(String listColTableIn, String tableIn, String tableOut, String tableControlePilTemp, String condFichier,
+            String condEnregistrement) {
 
-	StringBuilder request = new StringBuilder();
-	request.append("\n INSERT INTO " + tableOut + "(" + listColTableIn + ")");
-	request.append("\n \t   SELECT " + listColTableIn + " ");
-	request.append("\n \t   FROM " + tableIn + " a ");
-	request.append("\n \t   WHERE " + condEnregistrement + " ");
-	request.append("\n \t   EXISTS (select 1 from  " + tablePilTempThread + " b where a.id_source=b.id_source and "
-		+ condFichier + ");");
-	return request.toString();
-    }
-
-    /**
-     * Return the table column list, with an , separator
-     *
-     * @param connexion
-     * @param tableIn
-     * @return a string like col1,col2,col3 ...
-     */
-    @SQLExecutor
-    public String listeColonne( String tableIn) {
-	ArrayList<ArrayList<String>> result = new ArrayList<>();
-	try {
-	    result = UtilitaireDao.get(DbConstant.POOL_NAME).executeRequest(this.connection, FormatSQL.listeColonne(tableIn));
-
-	} catch (SQLException ex) {
-	    LoggerHelper.error(LOGGER, AbstractPhaseService.class, "listeColonne()", ex);
-	}
-	StringBuilder listCol = new StringBuilder();
-	if (result.size() >= 2) {// les données ne sont qu'à partir du 3e
-	    // élement (1er noms, 2e types)
-	    for (int i = 2; i < result.size(); i++) {
-		if (i == 2) {// initialisation de la liste (pas de virgule)
-		    listCol.append(result.get(i).get(0));
-		} else {
-		    listCol.append("," + result.get(i).get(0));
-		}
-	    }
-	}
-	return listCol.toString();
+        StringBuilder requete = new StringBuilder();
+        requete.append("\n INSERT INTO " + tableOut + "(" + listColTableIn + ")");
+        requete.append("\n \t   SELECT " + listColTableIn + " ");
+        requete.append("\n \t   FROM " + tableIn + " a ");
+        requete.append("\n \t   WHERE " + condEnregistrement + " ");
+        requete.append("\n \t   EXISTS (select 1 from  " + tableControlePilTemp + " b where a.id_source=b.id_source and "
+                + condFichier + ");");
+        return requete.toString();
     }
 
     // Getter et Setter
-    public ServiceRuleSets getSjdr() {
-	return this.sjdr;
+    public ServiceJeuDeRegle getSjdr() {
+        return this.sjdr;
     }
 
-    public void setSjdr(ServiceRuleSets sjdr) {
-	this.sjdr = sjdr;
+    public void setSjdr(ServiceJeuDeRegle sjdr) {
+        this.sjdr = sjdr;
     }
 
-    public List<RuleSets> getListJdr() {
-	return this.listRuleSets;
+    public Thread getT() {
+        return t;
     }
 
-    public void setListJdr(List<RuleSets> listJdr) {
-	this.listRuleSets = listJdr;
+    public void setT(Thread t) {
+        this.t = t;
     }
 
-    @Override
-    public boolean initialize() {
-	return false;
+    public Connection getConnexion() {
+        return connexion;
+    }
+
+    public void setConnexion(Connection connexion) {
+        this.connexion = connexion;
     }
 
 }

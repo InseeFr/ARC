@@ -4,7 +4,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 
-import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
 /**
  *
@@ -58,7 +58,7 @@ public class LoggerHelper
         {
             if (i > 0)
             {
-                returned.append(ICharacterConstant.SPACE);
+                returned.append(IConstanteCaractere.space);
             }
             returned.append(tokens[i]);
         }
@@ -66,7 +66,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @see Logger#log(Priority, Object, Throwable)
      * @param aLogger
@@ -82,7 +82,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @see Logger#log(Priority, Object, Throwable)
      * @param aLogger
@@ -109,7 +109,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @see Logger#trace(Object)
      * @param aLogger
@@ -132,7 +132,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @see Logger#trace(Object, Throwable)
      * @param aLogger
@@ -155,7 +155,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @see Logger#debug(Object)
      * @param aLogger
@@ -178,7 +178,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param t
@@ -190,7 +190,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param clazz
      * @param method
@@ -198,11 +198,11 @@ public class LoggerHelper
      */
     public static void debugDebutMethodeAsComment(Class<?> clazz, String method, Logger aLogger)
     {
-        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), ICharacterConstant.SHARP, method, "(début)");
+        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), IConstanteCaractere.sharp, method, "(début)");
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param clazz
      * @param method
@@ -210,7 +210,7 @@ public class LoggerHelper
      */
     public static void debugFinMethodeAsComment(Class<?> clazz, String method, Logger aLogger)
     {
-        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), ICharacterConstant.SHARP, method, "(fin)");
+        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), IConstanteCaractere.sharp, method, "(fin)");
     }
 
     /**
@@ -224,7 +224,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param tokens
@@ -246,7 +246,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param t
@@ -268,7 +268,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param tokens
@@ -290,7 +290,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param t
@@ -312,7 +312,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param tokens
@@ -334,7 +334,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param t
@@ -346,7 +346,7 @@ public class LoggerHelper
     }
 
     /**
-     * @deprecated Préférer le formattage du message dans les paramètres de
+     * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
      * @param aLogger
      * @param t
@@ -355,6 +355,6 @@ public class LoggerHelper
     public static final void errorGenTextAsComment(Class<?> clazz, String method, Logger aLogger, Throwable t)
     {
         logAsComment(aLogger, Level.ERROR, t, "Lors de l'exécution de", clazz.getCanonicalName(),
-                ICharacterConstant.SHARP, method);
+                IConstanteCaractere.sharp, method);
     }
 }

@@ -6,8 +6,6 @@ import java.util.Map;
 
 import javax.naming.CompoundName;
 
-import org.apache.tools.ant.types.resources.Tokens;
-
 import fr.insee.arc.utils.sqlengine.model.IToken;
 import fr.insee.arc.utils.textUtils.MapUntokenizer;
 import fr.insee.arc.utils.utils.Containers;
@@ -70,7 +68,7 @@ public class DefaultNaming implements Naming {
     }
 
     @Override
-    public Naming deepClone() {
+    public Naming clone() {
         return new DefaultNaming(this.tokens);
     }
 

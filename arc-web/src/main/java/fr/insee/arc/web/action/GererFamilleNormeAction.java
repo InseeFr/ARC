@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.model.TypeTraitementPhase;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -483,7 +483,7 @@ public class GererFamilleNormeAction extends ArcAction {
                         message.append("La variable "
                                 + this.viewVariableMetier.getInputFields().get(1)
                                 + " existe déjà. Pour la modifier, passez par la ligne correspondante du tableau variable*table.\nAucune variable n'a été ajoutée.\n");
-                        return EMPTY;
+                        return empty;
                     }
                 }
             }
@@ -492,7 +492,7 @@ public class GererFamilleNormeAction extends ArcAction {
        	 if (blank)
        	 {
        		 message.append("Vous avez oublié de spécifier les tables cibles pour votre variable");
-                return EMPTY;
+                return empty;
        	 }
             
             message.append("L'ajout de variables s'est achevé sur un succès.\n");
@@ -501,7 +501,7 @@ public class GererFamilleNormeAction extends ArcAction {
             LOGGER.error("Erreur ", ex);
             message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
         }
-        return EMPTY;
+        return empty;
     }
 
     private static boolean checkIsValide(List<String> inputFields) {
@@ -563,7 +563,7 @@ public class GererFamilleNormeAction extends ArcAction {
             ex.printStackTrace();
             message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
         }
-        return EMPTY;
+        return empty;
     }
 
     private static String synchronizeRegleWithVariableMetier(StringBuilder message, String idFamille) {
@@ -698,7 +698,7 @@ public class GererFamilleNormeAction extends ArcAction {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return EMPTY;
+        return empty;
     }
 
     private boolean isMofificationOk(StringBuilder message, HashMap<String, ArrayList<String>> mapContentAfterUpdate) {
@@ -786,7 +786,7 @@ public class GererFamilleNormeAction extends ArcAction {
             requeteLocale.append("\n  SET type_consolidation = '" + someViewVariableMetier.mapSameContentFromCurrentVObject().get("type_consolidation").get(i)
                     + "'");
             requeteLocale.append(",\n    description_variable_metier = '"
-                    + someViewVariableMetier.mapSameContentFromCurrentVObject().get("description_variable_metier").get(i).replace(QUOTE, QUOTE_QUOTE) + "'");
+                    + someViewVariableMetier.mapSameContentFromCurrentVObject().get("description_variable_metier").get(i).replace(quote, quotequote) + "'");
             requeteLocale.append("\n  WHERE id_famille = '" + someViewVariableMetier.mapSameContentFromCurrentVObject().get("id_famille").get(i) + "'");
             requeteLocale.append("\n    AND nom_variable_metier = '"
                     + someViewVariableMetier.mapSameContentFromCurrentVObject().get("nom_variable_metier").get(i) + "'");
@@ -807,7 +807,7 @@ public class GererFamilleNormeAction extends ArcAction {
     }
 
     public final boolean isNomTableMetierValide(String nomTable) {
-        return nomTable.matches("(?i)^"+TypeTraitementPhase.MAPPING.toString().toLowerCase()+"_" + this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
+        return nomTable.matches("(?i)^"+TraitementPhase.MAPPING.toString().toLowerCase()+"_" + this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
     }
 
     @Action(value = "/addTableMetier")

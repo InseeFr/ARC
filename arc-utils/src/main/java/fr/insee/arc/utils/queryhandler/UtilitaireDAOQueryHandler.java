@@ -34,7 +34,7 @@ public abstract class UtilitaireDAOQueryHandler
 {
     static final Logger LOGGER = Logger.getLogger(UtilitaireDAOQueryHandler.class);
     private static final int DEFAULT_MAX_RETRY = 120;
-    private int maxRetry = 120;
+    private int maxRetry = DEFAULT_MAX_RETRY;
 
     public static class AbstractQueryHandlerException extends RuntimeException
     {
