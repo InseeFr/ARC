@@ -55,7 +55,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     // racine xml
     public static final String ROOT="root";
 
-	protected PropertiesHandler properties = PropertiesHandler.getInstance();
+	protected PropertiesHandler properties;
 
     
     protected Connection connexion;

@@ -15,6 +15,8 @@ import lombok.Setter;
 @Setter
 public class PropertiesHandler {
 
+	private static PropertiesHandler singletonInstance = null; 
+	
     /* Database */
     private String databasePoolName;
     private String databaseUrl;
@@ -66,13 +68,14 @@ public class PropertiesHandler {
 
     public static PropertiesHandler getInstance() {
     	
-    	System.out.println("Properties getInstance");
+    	if (singletonInstance==null)
+    	{
+    		GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
+    		singletonInstance = (PropertiesHandler) ctx.getBean("properties");
+    		ctx.close();
+    	}
     	
-        GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
-
-        PropertiesHandler propertiesHandler = (PropertiesHandler) ctx.getBean("properties");
-        ctx.close();
-        return propertiesHandler;
+        return singletonInstance;
     }
 
 
@@ -82,7 +85,6 @@ public class PropertiesHandler {
 
 
     public void setDatabasePoolName(String databasePoolName) {
-    	System.out.println("setDatabasePoolName");
         this.databasePoolName = databasePoolName;
     }
 
