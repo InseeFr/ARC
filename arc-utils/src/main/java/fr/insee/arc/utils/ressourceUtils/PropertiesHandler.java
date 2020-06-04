@@ -58,12 +58,16 @@ public class PropertiesHandler {
 
     public void initializeLog() {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
+
         // Using here an XML configuration
         DOMConfigurator.configure(log4jprops);
     }
 
 
     public static PropertiesHandler getInstance() {
+    	
+    	System.out.println("Properties getInstance");
+    	
         GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
 
         PropertiesHandler propertiesHandler = (PropertiesHandler) ctx.getBean("properties");
@@ -78,6 +82,7 @@ public class PropertiesHandler {
 
 
     public void setDatabasePoolName(String databasePoolName) {
+    	System.out.println("setDatabasePoolName");
         this.databasePoolName = databasePoolName;
     }
 
@@ -189,7 +194,6 @@ public class PropertiesHandler {
 
     public void setLogConfiguration(String logConfiguration) {
         this.logConfiguration = logConfiguration;
-        // TODO use spring Log4jConfigListener ?
         initializeLog();
     }
 

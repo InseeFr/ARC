@@ -1,12 +1,10 @@
 package fr.insee.arc.utils.dao;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
@@ -49,8 +47,6 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.files.FileUtils;
@@ -75,8 +71,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static final Logger LOGGER = Logger.getLogger(UtilitaireDao.class);
 
-    @Autowired
-    private static Environment env;
     
     
 	private int nbTryMax = 120;
@@ -1806,38 +1800,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	/**
-	 * Permet d'éventuellement protéger un property dans un fichier local en mettant
-	 * FPASS:: devant le chemin vers le fichier, getConfig ira lire la premiere
-	 * ligne du fichier pour la mettre en property
-	 * 
-	 * @param propertyName
-	 * @return
-	 */
-	public static String getProtectedConfig(String propertyName) {
-		String s = env.getProperty(propertyName);
-		if (s.startsWith(FILE_THAT_CONTAINS_CONFIG_PARAMETER)) {
-			String g = ManipString.substringAfterFirst(s, FILE_THAT_CONTAINS_CONFIG_PARAMETER);
-
-			BufferedReader br = null;
-			try {
-				br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(g)), "UTF-8"));
-				s = br.readLine();
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if (br != null) {
-						br.close();
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return s;
 	}
 
 	/**

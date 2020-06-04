@@ -84,10 +84,10 @@
 	<!-- Déclaration du logger de base -->
 	<root>
 		<priority value="TRACE"></priority>
-<!-- 		<appender-ref ref="query_trace" /> -->
-<!-- 		<appender-ref ref="console_debug" /> -->
-<!-- 		<appender-ref ref="console_info" /> -->
-<!-- 		<appender-ref ref="console_warn" /> -->
+		<appender-ref ref="query_trace" />
+		<appender-ref ref="console_debug" />
+		<appender-ref ref="console_info" />
+		<appender-ref ref="console_warn" />
 		<appender-ref ref="console_error" />
 	</root>
 

@@ -24,10 +24,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
-import fr.insee.arc.core.model.TraitementState;
-import fr.insee.arc.core.model.TypeTraitementPhase;
-import fr.insee.arc.core.service.AbstractPhaseService;
+import fr.insee.arc.core.model.BddTable;
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
+import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -44,7 +45,7 @@ import fr.insee.arc.web.util.VObject;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererPilotagePROD.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class PilotagePRODAction implements SessionAware {
+public class PilotagePRODAction extends ArcAction implements SessionAware {
 
 	private String envExecution="arc_PROD";
 	
@@ -149,24 +150,20 @@ public class PilotagePRODAction implements SessionAware {
 	            requete.append("select ''::text as id_entrepot");
 	        }
         } catch (Exception e) {
-	        // TODO Auto-generated catch block
 	        e.printStackTrace();
         }
 
-        // this.viewEntrepotPROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewEntrepotPROD.getSessionName()));
         this.viewEntrepotPROD.initialize(requete.toString(), null, defaultInputFields);
     }
 
-    // private SessionMap session;
 
     // visual des Pilotages du bac à sable
     public void initializePilotagePROD() {
         System.out.println("/* initializePilotagePROD */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
         StringBuilder requete = new StringBuilder();
-        requete.append("select * from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier_t order by date_entree asc");
+        requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T)+" order by date_entree desc");
 
-        // this.viewPilotagePROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewPilotagePROD.getSessionName()));
         this.viewPilotagePROD.initialize(requete.toString(), null, defaultInputFields);
     }
 
@@ -186,13 +183,13 @@ public class PilotagePRODAction implements SessionAware {
     public void initializeRapportPROD() {
         System.out.println("/* initializeRapportPROD */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-        StringBuilder requete = new StringBuilder();
-        requete.append("select date_entree, phase_traitement, array_to_string(etat_traitement,'$') as etat_traitement, rapport, count(1) as nb ");
-        requete.append("from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier ");
-        requete.append("where rapport is not null ");
-        requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
-        requete.append("order by date_entree asc ");
-        // this.viewRapportPROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewRapportPROD.getSessionName()));
+		StringBuilder requete = new StringBuilder();
+		requete.append(
+				"select date_entree, phase_traitement, array_to_string(etat_traitement,'$') as etat_traitement, rapport, count(1) as nb ");
+		requete.append("from " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
+		requete.append(" where rapport is not null ");
+		requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
+		requete.append("order by date_entree asc ");
         this.viewRapportPROD.initialize(requete.toString(), null, defaultInputFields);
     }
 
@@ -217,7 +214,7 @@ public class PilotagePRODAction implements SessionAware {
 
         if (this.viewEntrepotPROD.getCustomValues() != null && !this.viewEntrepotPROD.getCustomValues().get("entrepotEcriture").equals("")
                 && this.viewPilotagePROD.getFileUploadFileName() != null) {
-            String repertoireUpload = this.repertoire + "ARC_PROD" + File.separator + TypeTraitementPhase.REGISTER + "_"
+            String repertoireUpload = this.repertoire + "ARC_PROD" + File.separator + TraitementPhase.RECEPTION + "_"
                     + this.viewEntrepotPROD.getCustomValues().get("entrepotEcriture");
 
             this.viewPilotagePROD.upload(repertoireUpload);
@@ -248,10 +245,8 @@ public class PilotagePRODAction implements SessionAware {
                 && !this.viewEntrepotPROD.getCustomValues().get("entrepotLecture").equals("")) {
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
             StringBuilder requete = new StringBuilder();
-
-            requete.append("select * from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_archive where entrepot='"
-                    + this.viewEntrepotPROD.getCustomValues().get("entrepotLecture") + "'");
-            // this.viewArchivePROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewArchivePROD.getSessionName()));
+			 requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_ARCHIVE)+" where entrepot='"
+	                    + this.viewEntrepotPROD.getCustomValues().get("entrepotLecture") + "'");
             this.viewArchivePROD.initialize(requete.toString(), null, defaultInputFields);
         } else {
 
@@ -286,7 +281,7 @@ public class PilotagePRODAction implements SessionAware {
         StringBuilder querySelection = new StringBuilder();
         querySelection.append("select distinct alias_de_table.nom_archive as nom_fichier from (" + this.viewArchivePROD.getMainQuery()
                 + ") alias_de_table ");
-        querySelection.append(this.viewArchivePROD.buildFilter(this.viewArchivePROD.getFilterFields(), this.viewArchivePROD.getDatabaseColumnsLabel()));
+        querySelection.append(this.viewArchivePROD.buildFilter(this.viewArchivePROD.getFilterFields(), this.viewArchivePROD.getHeadersDLabel()));
 
         if (!selection.isEmpty()) {
             querySelection.append(" AND nom_archive IN " + Format.sqlListe(selection.get("nom_archive")) + " ");
@@ -305,7 +300,7 @@ public class PilotagePRODAction implements SessionAware {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        listRepertoire.add(TypeTraitementPhase.REGISTER + "_" + entrepot + "_ARCHIVE");
+        listRepertoire.add(TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE");
         String chemin = this.repertoire + File.separator + "ARC_PROD";
         this.viewArchivePROD.downloadEnveloppe(querySelection.toString(), chemin, listRepertoire);
         return "none";
@@ -403,8 +398,8 @@ public class PilotagePRODAction implements SessionAware {
     public String startInitialisationPROD() {
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
         
-    	ApiServiceFactory.getService(TypeTraitementPhase.INITIALIZE.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.INITIALIZE.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+    	ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 
@@ -414,7 +409,7 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.REGISTER.toString(), "arc.ihm", this.envExecution, this.repertoire,
+        ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), "arc.ihm", this.envExecution, this.repertoire,
                 "100",new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
@@ -425,19 +420,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.LOAD.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.LOAD.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
-        return sessionSyncronize();
-    }
-    
-    @Action(value = "/startIdentificationPROD")
-    public String startIdentificationPROD() {
-        LoggerDispatcher.trace("startChargementBAS1", logger);
-        ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm", this.envExecution);
-
-        // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.IDENTIFY.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.IDENTIFY.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TraitementPhase.CHARGEMENT.getNbLigneATraiter()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 
@@ -446,8 +430,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.STRUCTURIZE.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.STRUCTURIZE.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TraitementPhase.NORMAGE.getNbLigneATraiter()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 
@@ -456,8 +440,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.CONTROL.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.CONTROL.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TraitementPhase.CONTROLE.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TraitementPhase.CONTROLE.getNbLigneATraiter()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 
@@ -466,8 +450,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.FILTER.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.FILTER.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TraitementPhase.FILTRAGE.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TraitementPhase.FILTRAGE.getNbLigneATraiter()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 
@@ -476,8 +460,8 @@ public class PilotagePRODAction implements SessionAware {
         ApiInitialisationService.copyTablesToExecution(null, "arc.ihm", this.envExecution);
 
         // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiServiceFactory.getService(TypeTraitementPhase.MAPPING.toString(), "arc.ihm", this.envExecution, this.repertoire,
-                String.valueOf(TypeTraitementPhase.MAPPING.getNbLinesToProcess()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
+        ApiServiceFactory.getService(TraitementPhase.MAPPING.toString(), "arc.ihm", this.envExecution, this.repertoire,
+                String.valueOf(TraitementPhase.MAPPING.getNbLigneATraiter()),new SimpleDateFormat("yyyyMMddHH").format(new Date())).invokeApi();
         return sessionSyncronize();
     }
 
@@ -572,30 +556,29 @@ public class PilotagePRODAction implements SessionAware {
             String phase = selectionColonne.get(0).split("_")[0].toUpperCase();
             String etat = selectionColonne.get(0).split("_")[1].toUpperCase();
 
-            StringBuilder requete = new StringBuilder();
-            requete.append("select container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier ");
-            requete.append("where date_entree" + ManipString.sqlEqual(selectionLigne.get("date_entree").get(0), "text"));
-            requete.append(" and array_to_string(etat_traitement,'$')" + ManipString.sqlEqual(etat, "text"));
-            requete.append(" and phase_traitement" + ManipString.sqlEqual(phase, "text"));
+			 StringBuilder requete = new StringBuilder();
+	            requete.append("select container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
+	            requete.append(" FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
+	            requete.append(" where date_entree" + ManipString.sqlEqual(selectionLigne.get("date_entree").get(0), "text"));
+	            requete.append(" and array_to_string(etat_traitement,'$')" + ManipString.sqlEqual(etat, "text"));
+	            requete.append(" and phase_traitement" + ManipString.sqlEqual(phase, "text"));
 
-            // this.viewFichierPROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewFichierPROD.getSessionName()));
-            this.viewFichierPROD.initialize(requete.toString(), null, defaultInputFields);
+	            this.viewFichierPROD.initialize(requete.toString(), null, defaultInputFields);
         } else if (!selectionLigneRapport.isEmpty()) {
-            System.out.println("/* initializeFichierPROD */");
 
             HashMap<String, String> type = this.viewRapportPROD.mapHeadersType();
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 
             StringBuilder requete = new StringBuilder();
-            requete.append("select container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier ");
-            requete.append("where date_entree" + ManipString.sqlEqual(selectionLigneRapport.get("date_entree").get(0), "text"));
+            requete.append("select container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
+            requete.append(" from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
+            requete.append(" where date_entree" + ManipString.sqlEqual(selectionLigneRapport.get("date_entree").get(0), "text"));
             requete.append(" and array_to_string(etat_traitement,'$')"
                     + ManipString.sqlEqual(selectionLigneRapport.get("etat_traitement").get(0), type.get("etat_traitement")));
             requete.append(" and phase_traitement"
                     + ManipString.sqlEqual(selectionLigneRapport.get("phase_traitement").get(0), type.get("phase_traitement")));
             requete.append(" and rapport" + ManipString.sqlEqual(selectionLigneRapport.get("rapport").get(0), type.get("rapport")));
-
-            // this.viewFichierPROD.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewFichierPROD.getSessionName()));
+			
             this.viewFichierPROD.initialize(requete.toString(), null, defaultInputFields);
         } else {
             this.viewFichierPROD.destroy();
@@ -631,8 +614,8 @@ public class PilotagePRODAction implements SessionAware {
         querySelection.append(" order by container ");
 
         // String repertoire= ServletActionContext.getServletContext().getRealPath("/");
-        this.viewFichierPROD.downloadXML(querySelection.toString(), this.repertoire, this.envExecution, TypeTraitementPhase.REGISTER.toString(),
-                TraitementState.OK.toString(), TraitementState.KO.toString());
+        this.viewFichierPROD.downloadXML(querySelection.toString(), this.repertoire, this.envExecution, TraitementPhase.RECEPTION.toString(),
+                TraitementEtat.OK.toString(), TraitementEtat.KO.toString());
 
         LoggerDispatcher.trace("*** Fin du téléchargement des fichiers XML ***", logger);
         sessionSyncronize();
@@ -680,7 +663,7 @@ public class PilotagePRODAction implements SessionAware {
             // Début de la requete sur les données de la phase
             StringBuilder requete = new StringBuilder();
             requete.append("with prep as ( ");
-            requete.append("select id_source, date_entree from "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier ");
+            requete.append("select id_source, date_entree from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
             requete.append("where phase_traitement='" + phase + "' ");
             requete.append("AND etat_traitement='" + etatBdd + "' ");
             requete.append("AND date_entree='" + date + "' ");
@@ -715,14 +698,14 @@ public class PilotagePRODAction implements SessionAware {
 
         // Récupération des règles appliquées sur ces fichiers à télécharger
         StringBuilder requeteRegleC = new StringBuilder();
-        requeteRegleC.append(recupRegle("CONTROLE", AbstractPhaseService.dbEnv(this.envExecution)+"controle_regle"));
-        tableauRequete[tableauRequete.length - 3] = requeteRegleC.toString();
-        StringBuilder requeteRegleM = new StringBuilder();
-        requeteRegleM.append(recupRegle("MAPPING", AbstractPhaseService.dbEnv(this.envExecution)+"mapping_regle"));
-        tableauRequete[tableauRequete.length - 2] = requeteRegleM.toString();
-        StringBuilder requeteRegleF = new StringBuilder();
-        requeteRegleF.append(recupRegle("FILTRAGE", AbstractPhaseService.dbEnv(this.envExecution)+"filtrage_regle"));
-        tableauRequete[tableauRequete.length - 1] = requeteRegleF.toString();
+		requeteRegleC.append(recupRegle("CONTROLE", getBddTable().getQualifedName(BddTable.ID_TABLE_CONTROLE_REGLE)));
+		tableauRequete[tableauRequete.length - 3] = requeteRegleC.toString();
+		StringBuilder requeteRegleM = new StringBuilder();
+		requeteRegleM.append(recupRegle("MAPPING", getBddTable().getQualifedName(BddTable.ID_TABLE_MAPPING_REGLE)));
+		tableauRequete[tableauRequete.length - 2] = requeteRegleM.toString();
+		StringBuilder requeteRegleF = new StringBuilder();
+		requeteRegleF.append(recupRegle("FILTRAGE", getBddTable().getQualifedName(BddTable.ID_TABLE_FILTRAGE_REGLE)));
+		tableauRequete[tableauRequete.length - 1] = requeteRegleF.toString();
         // Pour donner des noms aux fichiers csv
         ArrayList<String> fileNames = new ArrayList<>();
         for (int k = 0; k < tableDownload.size(); k++) {
@@ -746,7 +729,7 @@ public class PilotagePRODAction implements SessionAware {
         StringBuilder querySelection = new StringBuilder();
         querySelection.append("select distinct alias_de_table.container as nom_fichier from (" + this.viewFichierPROD.getMainQuery()
                 + ") alias_de_table ");
-        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getDatabaseColumnsLabel()));
+        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getHeadersDLabel()));
 
         if (!selection.isEmpty()) {
             querySelection.append(" AND container IN " + Format.sqlListe(selection.get("container")) + " ");
@@ -755,8 +738,8 @@ public class PilotagePRODAction implements SessionAware {
         LoggerDispatcher.info("Ma requete pour récupérer la liste des enveloppes : " + querySelection.toString(), logger);
 
         ArrayList<String> listRepertoire = new ArrayList<>();
-        listRepertoire.add(TypeTraitementPhase.REGISTER + "_" + TraitementState.OK);
-        listRepertoire.add(TypeTraitementPhase.REGISTER + "_" + TraitementState.KO);
+        listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.OK);
+        listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.KO);
         String chemin = this.repertoire + File.separator + "ARC_PROD";
         this.viewFichierPROD.downloadEnveloppe(querySelection.toString(), chemin, listRepertoire);
         LoggerDispatcher.trace("*** Fin du téléchargement des enveloppes ***", logger);
@@ -778,7 +761,7 @@ public class PilotagePRODAction implements SessionAware {
         // Récupération de la sélection de l'utilisateur
         StringBuilder querySelection = new StringBuilder();
         querySelection.append("select distinct container, id_source from (" + this.viewFichierPROD.getMainQuery() + ") alias_de_table ");
-        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getDatabaseColumnsLabel()));
+        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getHeadersDLabel()));
         // si la selection de fichiers n'est pas vide, on se restreint aux fichiers sélectionné
         if (!selection.isEmpty()) {
             // concaténation des informations
@@ -798,7 +781,7 @@ public class PilotagePRODAction implements SessionAware {
         try {
 
             UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			AbstractPhaseService.startProductionInitialization();
+			ApiService.declencherInitialisationEnProduction();
             message = "Fichier(s) supprimé(s)";
         } catch (SQLException e) {
             LoggerDispatcher
@@ -823,7 +806,7 @@ public class PilotagePRODAction implements SessionAware {
         // Récupération de la sélection de l'utilisateur
         StringBuilder querySelection = new StringBuilder();
         querySelection.append("select distinct container, id_source from (" + this.viewFichierPROD.getMainQuery() + ") alias_de_table ");
-        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getDatabaseColumnsLabel()));
+        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getHeadersDLabel()));
         // si la selection de fichiers n'est pas vide, on se restreint aux fichiers sélectionné
         if (!selection.isEmpty()) {
             // concaténation des informations
@@ -865,7 +848,7 @@ public class PilotagePRODAction implements SessionAware {
         // Récupération de la sélection de l'utilisateur
         StringBuilder querySelection = new StringBuilder();
         querySelection.append("select distinct container, id_source from (" + this.viewFichierPROD.getMainQuery() + ") alias_de_table ");
-        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getDatabaseColumnsLabel()));
+        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getHeadersDLabel()));
         // si la selection de fichiers n'est pas vide, on se restreint aux fichiers sélectionnés
         if (!selection.isEmpty()) {
             // concaténation des informations
@@ -885,7 +868,7 @@ public class PilotagePRODAction implements SessionAware {
         try {
 
             UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			AbstractPhaseService.startProductionInitialization();
+			ApiService.declencherInitialisationEnProduction();
             message = "Fichier(s) à rejouer";
         } catch (SQLException e) {
             LoggerDispatcher
@@ -908,12 +891,11 @@ public class PilotagePRODAction implements SessionAware {
     public String toRestoreArchivePROD() {
         LoggerDispatcher.trace("*** Marquage de fichier à rejouer ***", logger);
         Map<String, ArrayList<String>> selection = this.viewFichierPROD.mapContentSelected();
-        // System.out.println(selection);
 
         // Récupération de la sélection de l'utilisateur
         StringBuilder querySelection = new StringBuilder();
         querySelection.append("select distinct container, id_source from (" + this.viewFichierPROD.getMainQuery() + ") alias_de_table ");
-        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getDatabaseColumnsLabel()));
+        querySelection.append(this.viewFichierPROD.buildFilter(this.viewFichierPROD.getFilterFields(), this.viewFichierPROD.getHeadersDLabel()));
         // si la selection de fichiers n'est pas vide, on se restreint aux fichiers sélectionnés
         if (!selection.isEmpty()) {
             // concaténation des informations
@@ -926,14 +908,13 @@ public class PilotagePRODAction implements SessionAware {
             }
             querySelection.append(" AND container||'+'||id_source IN " + Format.sqlListe(infoConcatenee) + " ");
         }
-        // LoggerDispatcher.info("Ma requete de selection : " + querySelection, logger);
 
         StringBuilder updateToDelete = requeteUpdateToDelete(querySelection, "'RA'");
         String message;
         try {
 
             UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			AbstractPhaseService.startProductionInitialization();
+			ApiService.declencherInitialisationEnProduction();
             message = "Archives(s) à rejouer";
         } catch (SQLException e) {
             LoggerDispatcher
@@ -955,7 +936,7 @@ public class PilotagePRODAction implements SessionAware {
         updateToDelete.append("prep AS ( ");
         updateToDelete.append(querySelection);
         updateToDelete.append("         ) ");
-        updateToDelete.append("UPDATE "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier a ");
+        updateToDelete.append("UPDATE "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" a ");
         updateToDelete.append("SET to_delete=" + valeur + " ");
         updateToDelete.append("WHERE EXISTS (SELECT 1 FROM prep WHERE a.container=prep.container AND a.id_source=prep.id_source); ");
         return updateToDelete;
@@ -973,7 +954,7 @@ public class PilotagePRODAction implements SessionAware {
         StringBuilder requete = new StringBuilder();
         requete.append("WITH ");
         requete.append("prep as (SELECT DISTINCT id_norme, periodicite, validite_inf, validite_sup, version ");
-        requete.append("    FROM "+AbstractPhaseService.dbEnv(this.envExecution)+"pilotage_fichier ");
+        requete.append("    FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
         requete.append("    WHERE phase_traitement in('" + phase + "') AND rapport is null ");
         if (!this.viewFichierPROD.mapContentSelected().isEmpty()) {
             ArrayList<String> filesSelected = this.viewFichierPROD.mapContentSelected().get("id_source");
@@ -1019,13 +1000,12 @@ public class PilotagePRODAction implements SessionAware {
         String phase = this.viewFichierPROD.mapContent().get("phase_traitement").get(0);
 
         // Lancement du retour arrière
-        // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
-        ApiInitialisationService serv = new ApiInitialisationService(TypeTraitementPhase.INITIALIZE.toString(), "arc.ihm", this.envExecution,
+        ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(), "arc.ihm", this.envExecution,
                 this.repertoire, 100000);
         try {
-            serv.backToPreviousPhase(TypeTraitementPhase.valueOf(phase), querySelection.toString(), null);
+            serv.retourPhasePrecedente(TraitementPhase.valueOf(phase), querySelection.toString(), null);
         } finally {
-            serv.finalizePhase();
+            serv.finaliser();
         }
         return sessionSyncronize();
     }
@@ -1106,12 +1086,35 @@ public class PilotagePRODAction implements SessionAware {
 
     }
 
-    public String getScope() {
-        return this.scope;
-    }
 
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
+	@Override
+	public void putAllVObjects() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void instanciateAllDAOs() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setProfilsAutorises() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void specificTraitementsPostDAO() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getActionName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

@@ -15,8 +15,8 @@ import java.util.zip.ZipOutputStream;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-import fr.insee.arc.core.model.DbConstant;
-import fr.insee.arc.core.service.AbstractPhaseService;
+import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -32,7 +32,7 @@ import fr.insee.arc.ws.dao.QueryDao;
  * @author N6YF91
  *
  */
-public class InitiateRequest{
+public class InitiateRequest implements IDbConstant{
 
     protected static final Logger LOGGER = Logger.getLogger(InitiateRequest.class);
     private static final String EXPORT = "EXPORT";
@@ -182,7 +182,7 @@ public class InitiateRequest{
                 this.clientDao.createTableFamille(this.timestamp, client, environnement);
                 this.clientDao.createTablePeriodicite(this.timestamp, client, environnement);
                 // on renvoie l'id du client avec son timestamp
-                resp.send(AbstractPhaseService.dbEnv(environnement) + client + "_" + this.timestamp);
+                resp.send(ApiService.dbEnv(environnement) + client + "_" + this.timestamp);
                 resp.endSending();
 
             } catch (DAOException e) {
@@ -330,7 +330,7 @@ public class InitiateRequest{
 
             File zipFile = new File(Paths.get(pathZip).resolve(nomZip).toString());
             
-            Connection connexion = UtilitaireDao.get(DbConstant.POOL_NAME).getDriverConnexion();
+            Connection connexion = UtilitaireDao.get(poolName).getDriverConnexion();
 
             try (FileOutputStream fop = new FileOutputStream(zipFile)) {
         	ZipOutputStream zos = new ZipOutputStream(fop);
@@ -338,7 +338,7 @@ public class InitiateRequest{
                     // Ajout d'un nouveau fichier
                     ZipEntry entry = new ZipEntry(tableNames.get(i) + ".csv");
                     zos.putNextEntry(entry);
-                    UtilitaireDao.get(DbConstant.POOL_NAME).outStreamRequeteSelect(connexion, requetes.get(i), zos);
+                    UtilitaireDao.get(poolName).outStreamRequeteSelect(connexion, requetes.get(i), zos);
                     zos.closeEntry();
                 }
 
@@ -351,7 +351,7 @@ public class InitiateRequest{
 
         private void supprimerTablesTemp(List<String> nomTablesASupprimer) throws Exception {
 
-            Connection connexion = UtilitaireDao.get(DbConstant.POOL_NAME).getDriverConnexion();
+            Connection connexion = UtilitaireDao.get(poolName).getDriverConnexion();
 
             try {
                 UtilitaireDao.get("arc").dropTable(connexion, nomTablesASupprimer);

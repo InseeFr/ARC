@@ -97,8 +97,8 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
     	initialize();
         // vérification que tous les noms de tables updatés soient conformes
         boolean zeroErreur = true;
-        if (this.viewListNomenclatures.mapSameContentFromPreviousVObject().size() > 0) {
-            for (String nomTable : this.viewListNomenclatures.mapSameContentFromPreviousVObject().get(NOM_TABLE)) {
+        if (this.viewListNomenclatures.mapContentAfterUpdate().size() > 0) {
+            for (String nomTable : this.viewListNomenclatures.mapContentAfterUpdate().get(NOM_TABLE)) {
                 if (!validationNomTable(nomTable)) {
                     this.viewListNomenclatures.setMessage(nomTable + "n'est pas un nom de table valide.");
                     zeroErreur = false;
@@ -223,9 +223,7 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
     public String updateSchemaNmcl() {
         System.out.println("/* updateSchemaNmcl */");
         initialize();
-        HashMap<String, ArrayList<String>> selection = this.viewSchemaNmcl.mapSameContentFromPreviousVObject();
-        System.out.println("taille selection : " + selection.size());
-        System.out.println("Colonne : " + Format.untokenize(selection.keySet(), ", "));
+        HashMap<String, ArrayList<String>> selection = this.viewSchemaNmcl.mapContentAfterUpdate();
         if (!selection.isEmpty()) {
             boolean zeroErreur = true;
             String nomColonne = "";
