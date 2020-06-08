@@ -150,17 +150,15 @@
 									<div class="btn-group d-flex btn-group-sm" role="group"
 										aria-label="action">
 										<s:iterator value="listePhase" var="phase" status="i">
-											<s:if test="isInIhm">
 												<button ajax="true" doAction="executerBatch"
 													class="btn btn-primary w-100"
 													scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 													onclick="return alimenterPhase($(this));" type="submit"
-													label="<s:property value='nomPhase'/>"
+													label="<s:property value='phase'/>"
 													name="phaseAExecuter"
-													value='<s:property value="nomPhase"/>'>
-													<s:property value="nomPhase" />
+													value='<s:property value="phase"/>'>
+													<s:property value="phase" />
 												</button>
-											</s:if>
 										</s:iterator>
 
 									</div>
@@ -170,19 +168,17 @@
 									<div class="btn-group d-flex btn-group-sm mt-1" role="group"
 										aria-label="RA action">
 										<s:iterator value="listePhase" var="phase" status="i">
-											<s:if test="isRAIhm">
 												<button ajax="true" doAction="undoBatch"
 													class="btn btn-primary w-100"
 													scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 													onclick="return alimenterPhase($(this));" type="submit"
-													label="<s:property value='nomPhase'/>"
+													label="<s:property value='phase'/>"
 													name="phaseAExecuter"
-													value='<s:property value="nomPhase"
+													value='<s:property value="phase"
 								/>'>
 													RA
-													<s:property value="nomPhase" />
+													<s:property value="phase" />
 												</button>
-											</s:if>
 										</s:iterator>
 									</div>
 								</div>
