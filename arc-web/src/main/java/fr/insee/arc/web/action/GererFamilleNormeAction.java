@@ -314,10 +314,6 @@ public class GererFamilleNormeAction extends ArcAction {
         bloc.append(addNonExistingVariableMetierWithoutSync(message));
         bloc.append(synchronizeRegleWithVariableMetier(message, this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0)));
         executeRequeteMiseAjourTableMetier(message, bloc);
-//        for (String envExecution : UtilitaireDao.get(poolName).getList(null, "SELECT replace(id,'.','_') FROM arc.ext_etat_jeuderegle WHERE isenv;",
-//                new ArrayList<String>())) {
-//        		ApiInitialisationService.mettreAJourSchemaTableMetier(null, "arc.ihm", envExecution);
-//        }
         this.viewVariableMetier.setMessage(message.toString());
         return generateDisplay();
     }
@@ -336,10 +332,6 @@ public class GererFamilleNormeAction extends ArcAction {
 	            this.viewVariableMetier.listContentSelected(), false));
 	    bloc.append(synchronizeRegleWithVariableMetier(message, this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0)));
 	    executeRequeteMiseAjourTableMetier(message, bloc);
-//	    for (String envExecution : UtilitaireDao.get(poolName).getList(null, "SELECT replace(id,'.','_') FROM arc.ext_etat_jeuderegle WHERE isenv;",
-//	            new ArrayList<String>())) {
-//	    		ApiInitialisationService.mettreAJourSchemaTableMetier(null, "arc.ihm", envExecution);
-//	    }
 	    this.viewVariableMetier.setMessage(message.toString());
 	    return generateDisplay();
 	}
@@ -459,7 +451,7 @@ public class GererFamilleNormeAction extends ArcAction {
                 		// && this.viewVariableMetier.getInputFields().get(i).equals("oui")
                 		) {
                 	
-                	// au moins une table est resnseignée
+                	// au moins une table est renseignée
                 	blank=false;
 
                 	String nomVariableMetier = this.viewVariableMetier.getInputFieldFor("nom_variable_metier");
