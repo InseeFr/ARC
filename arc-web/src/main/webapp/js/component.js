@@ -299,13 +299,6 @@ $(document).on('ready readyAgain',function() {
 		});
 	}
 
-	if (configJS.indexOf("Render:Pilotage;")>-1) 
-	{
-		$("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewPilotage']").filter("[name*='selectedLines']:checked").closest("tr").index()).find("td").eq($("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("th").index()).css("background-color","#aaaabb");
-		$("[name^='viewRapport']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewRapport']").filter("[name*='selectedLines']:checked").closest("tr").index()).css("background-color","#aaaabb");
-		$("[id^='viewPilotage'] .sort:contains(' KO')").css("outline",'3px solid #ff0000');
-	}
-
 	if (configJS.indexOf("Render:TableBlock;")>-1) 
 	{
 		renderTableBlock();

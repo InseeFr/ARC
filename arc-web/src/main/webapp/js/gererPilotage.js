@@ -1,7 +1,7 @@
 var configJS = "Render:FixedHeader;" + "Render:ConsoleIhm;"
 		+ "ICS:AjaxDataSelector;" + "VObject:Sort;"
 		+ "Render:TextareaEllipsis;" + "IHM:TextareaHotkeys;"
-		+ "IHM:TableMultiCheckbox;" + "Render:AlertBox;" + "Render:Pilotage;";
+		+ "IHM:TableMultiCheckbox;" + "Render:AlertBox;";
 
 function alimenterPhase(t){
 	console.log("savePhaseChoice :"+$("#savePhaseChoice").attr("value"));
@@ -16,9 +16,13 @@ function alimenterPhase(t){
 
 $(document).on('ready readyAgain', function() {
 
-
-	$("#viewPilotageBAS8").find("td").click(function() {
+	$("#viewPilotageBAS8").find("td").off('click').on('click',function() {
 		updateCheckBoxGrid('viewPilotageBAS8;viewRapportBAS8',$(this));
 	})
 
+	$("[name^='viewPilotage']").filter("[name*='selectedColumns']").closest("table").find("tbody").find("tr").find("td").css("background-color","");
+	$("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewPilotage']").filter("[name*='selectedLines']:checked").closest("tr").index()).find("td").eq($("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("th").index()).css("background-color","#aaaabb");
+	$("[name^='viewRapport']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewRapport']").filter("[name*='selectedLines']:checked").closest("tr").index()).css("background-color","#aaaabb");
+	$("[id^='viewPilotage'] .sort:contains(' KO')").css("outline",'3px solid #ff0000');
+	
 });
