@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public enum TraitementPhase {
     DUMMY(-1, 1), INITIALISATION(0, 1000000), RECEPTION(1, 1000000), CHARGEMENT(2, 1000000), NORMAGE(3, 1000000)
-    , CONTROLE(4, 1000000), FILTRAGE(5, 1000000), MAPPING(6, 1000000), TRANSFORMATION(0,1);
+    , CONTROLE(4, 1000000), FILTRAGE(5, 1000000), MAPPING(6, 1000000);
     private TraitementPhase(int anOrdre, int aNbLigneATraiter) {
         this.ordre = anOrdre;
         this.nbLigneATraiter = aNbLigneATraiter;
