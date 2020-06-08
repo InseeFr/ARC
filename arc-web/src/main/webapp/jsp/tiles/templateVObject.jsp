@@ -127,7 +127,7 @@
 									>
 										<th>
 											<s:checkbox
-												name="%{#view.sessionName}.headersVSelect[%{#incr.index}]"
+												name="%{#view.sessionName}.selectedColumns[%{#incr.index}]"
 												theme="simple">
 												</s:checkbox>
 										</th>
