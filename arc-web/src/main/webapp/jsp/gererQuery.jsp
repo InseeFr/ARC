@@ -93,20 +93,20 @@
                         <s:if test="viewTable.visibleHeaders[#incr2.index]">
                           <td>
                             <s:if test='"text".equals(viewTable.guiColumnsType[#incr2.index])'>
-                              <s:textarea name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
+                              <s:textarea name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewTable.guiSelectedColumns[#incr2.index]}" name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewTable.guiSelectedColumns[#incr2.index]}" name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:if>
                         <s:else>
                           <td style="display: none;">
                             <s:if test='"text".equals(viewTable.guiColumnsType[#incr2.index])'>
-                              <s:textarea name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
+                              <s:textarea name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewTable.guiSelectedColumns[#incr2.index]}" name="viewTable.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewTable.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewTable.guiSelectedColumns[#incr2.index]}" name="viewTable.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewTable.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:else>
@@ -257,20 +257,20 @@
                         <s:if test="viewQuery.visibleHeaders[#incr2.index]">
                           <td>
                             <s:if test='"text".equals(viewQuery.guiColumnsType[#incr2.index])'>
-                              <s:textarea name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
+                              <s:textarea name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewQuery.guiSelectedColumns[#incr2.index]}" name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewQuery.guiSelectedColumns[#incr2.index]}" name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:if>
                         <s:else>
                           <td style="display: none;">
                             <s:if test='"text".equals(viewQuery.guiColumnsType[#incr2.index])'>
-                              <s:textarea name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:textarea>
+                              <s:textarea name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:textarea>
                             </s:if>
                             <s:else>
-                              <s:select list="%{viewQuery.guiSelectedColumns[#incr2.index]}" name="viewQuery.content.lines[%{#incr1.index}].data[%{#incr2.index}]" value="%{viewQuery.content.lines[#incr1.index].data[#incr2.index]}" theme="simple"></s:select>
+                              <s:select list="%{viewQuery.guiSelectedColumns[#incr2.index]}" name="viewQuery.content.t[%{#incr1.index}].d[%{#incr2.index}]" value="%{viewQuery.content.t[#incr1.index].d[#incr2.index]}" theme="simple"></s:select>
                             </s:else>
                           </td>
                         </s:else>

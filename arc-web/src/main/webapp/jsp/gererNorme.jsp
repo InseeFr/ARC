@@ -510,7 +510,7 @@
 													value="<s:text name="gui.button.replaceRuleset"/>"
 												></input>
 
-												<s:if test="viewFiltrage.content.lines.size()==0">
+												<s:if test="viewFiltrage.content.t.size()==0">
 													<input
 														class="btn btn-primary btn-sm"
 														id="viewFiltrage.creerNouveau"
@@ -595,7 +595,7 @@
 													value="<s:text name="gui.button.replaceRuleset"/>"
 												></input>
 
-												<s:if test="viewMapping.content.lines.size()==0">
+												<s:if test="viewMapping.content.t.size()==0">
 													<input
 														class="btn btn-primary btn-sm"
 														id="viewMapping.creerNouveau"
