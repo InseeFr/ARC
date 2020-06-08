@@ -1006,11 +1006,14 @@ public class PilotageBAS8Action extends ArcAction {
 			
 			List<TraitementPhase> listePhaseC = new ArrayList<>();
 			
-			for (TraitementPhase t : TraitementPhase.values()) { 
-				listePhaseC.add(t);
+			for (TraitementPhase t : TraitementPhase.values()) {
+				if (t.getOrdre()>=0)
+					listePhaseC.add(t);
 			}
 			
 			this.setListePhase(listePhaseC);
+
+			
 		} catch (Exception e) {
 			LoggerDispatcher.error("erreur lors de la récuparation des phases", e, LOGGER);
 		}
