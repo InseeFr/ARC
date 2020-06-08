@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.model.DbConstant;
+import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -28,7 +28,7 @@ import fr.insee.arc.web.util.VObject;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererNomenclature.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class GererNomenclatureAction extends ArcAction {
+public class GererNomenclatureAction extends ArcAction implements IDbConstant{
 
     private static final String NMCL_ = "nmcl_";
     private static final String NOM_TABLE = "nom_table";
@@ -97,8 +97,8 @@ public class GererNomenclatureAction extends ArcAction {
     	initialize();
         // vérification que tous les noms de tables updatés soient conformes
         boolean zeroErreur = true;
-        if (this.viewListNomenclatures.mapSameContentFromPreviousVObject().size() > 0) {
-            for (String nomTable : this.viewListNomenclatures.mapSameContentFromPreviousVObject().get(NOM_TABLE)) {
+        if (this.viewListNomenclatures.mapContentAfterUpdate().size() > 0) {
+            for (String nomTable : this.viewListNomenclatures.mapContentAfterUpdate().get(NOM_TABLE)) {
                 if (!validationNomTable(nomTable)) {
                     this.viewListNomenclatures.setMessage(nomTable + "n'est pas un nom de table valide.");
                     zeroErreur = false;
@@ -127,18 +127,18 @@ public class GererNomenclatureAction extends ArcAction {
             // Suppression de la table nom table
             String nomTable = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
             System.out.println("/* Delete nomenclature : " + nomTable + " */");
-            UtilitaireDao.get(DbConstant.POOL_NAME).executeImmediate(null, FormatSQL.dropUniqueTable(nomTable));
+            UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropUniqueTable(nomTable));
             StringBuilder requete = new StringBuilder();
             requete.append("\n SELECT nom_table FROM arc.ihm_nmcl ");
             requete.append("\n WHERE nom_table like '" + typeNomenclature(nomTable) + "%'");
             requete.append("\n AND nom_table <> '" + nomTable + "'");
-            List<String> listeTables = UtilitaireDao.get(DbConstant.POOL_NAME).getList(null, requete.toString(), new ArrayList<String>());
+            List<String> listeTables = UtilitaireDao.get(poolName).getList(null, requete.toString(), new ArrayList<String>());
             System.out.println("# Liste tables : " + Format.untokenize(listeTables, ", "));
             if (listeTables.isEmpty()) {
                 requete = new StringBuilder();
                 requete.append("\n DELETE FROM arc.ihm_schema_nmcl");
                 requete.append("\n WHERE type_nmcl = '" + typeNomenclature(nomTable) + "'");
-                UtilitaireDao.get(DbConstant.POOL_NAME).executeImmediate(null, requete.toString());
+                UtilitaireDao.get(poolName).executeImmediate(null, requete.toString());
             }
 
             this.viewListNomenclatures.delete();
@@ -149,10 +149,10 @@ public class GererNomenclatureAction extends ArcAction {
     }
 
     private String typeNomenclature(String nomTable) {
-        String[] tokens = nomTable.split(UNDERSCORE);
+        String[] tokens = nomTable.split(underscore);
         StringBuilder typeNomenclature = new StringBuilder();
         for (int i = 0; i < tokens.length - 1; i++) {
-            typeNomenclature.append((i > 0 ? UNDERSCORE : "") + tokens[i]);
+            typeNomenclature.append((i > 0 ? underscore : "") + tokens[i]);
         }
         return typeNomenclature.toString();
     }
@@ -192,7 +192,7 @@ public class GererNomenclatureAction extends ArcAction {
             return false;
         }
 
-        if (nomTable.split(UNDERSCORE).length < 3) {
+        if (nomTable.split(underscore).length < 3) {
             this.viewListNomenclatures.setMessage("Erreur - le nom doit être de la forme nmcl_type_millesime (au moins deux underscore)");
             return false;
         }
@@ -223,9 +223,7 @@ public class GererNomenclatureAction extends ArcAction {
     public String updateSchemaNmcl() {
         System.out.println("/* updateSchemaNmcl */");
         initialize();
-        HashMap<String, ArrayList<String>> selection = this.viewSchemaNmcl.mapSameContentFromPreviousVObject();
-        System.out.println("taille selection : " + selection.size());
-        System.out.println("Colonne : " + Format.untokenize(selection.keySet(), ", "));
+        HashMap<String, ArrayList<String>> selection = this.viewSchemaNmcl.mapContentAfterUpdate();
         if (!selection.isEmpty()) {
             boolean zeroErreur = true;
             String nomColonne = "";
@@ -314,14 +312,12 @@ public class GererNomenclatureAction extends ArcAction {
         creationTableDef.append("\n CREATE TABLE arc." + newNomenclatureName);
         creationTableDef.append("\n AS SELECT * FROM arc.temp_" + newNomenclatureName + ";");
         creationTableDef.append("\n DROP TABLE arc.temp_" + newNomenclatureName + ";");
-        // creationTableDef.append("\n COMMENT ON TABLE " + newNomenclatureName + " IS " + "'" + this.commentaire + "'" + ";");
-        // Pas besoin de supprimer la temporary table
-        UtilitaireDao.get(DbConstant.POOL_NAME).executeBlock(null, creationTableDef);
+        UtilitaireDao.get(poolName).executeBlock(null, creationTableDef);
     }
 
     private void remplissageTableTemporaire(BufferedReader rd) throws Exception {
         String newNomenclatureName = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
-    	UtilitaireDao.get(DbConstant.POOL_NAME).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
+    	UtilitaireDao.get(poolName).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
     }
 
     private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws SQLException {
@@ -337,7 +333,7 @@ public class GererNomenclatureAction extends ArcAction {
         }
         createTableRequest.append(");");
 
-        UtilitaireDao.get(DbConstant.POOL_NAME).executeRequest(null, createTableRequest);
+        UtilitaireDao.get(poolName).executeRequest(null, createTableRequest);
     }
 
     /**
@@ -355,13 +351,13 @@ public class GererNomenclatureAction extends ArcAction {
         // Verification des noms de colonnes et des types
         String selectNomColonne = "SELECT nom_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> colonnesDansTableIhmSchemaNmcl = new ArrayList<String>();
-        UtilitaireDao.get(DbConstant.POOL_NAME).getList(null, selectNomColonne, colonnesDansTableIhmSchemaNmcl);
+        UtilitaireDao.get(poolName).getList(null, selectNomColonne, colonnesDansTableIhmSchemaNmcl);
         isListesIdentiques(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl);
 
         // Verification des types
         String selectTypeColonne = "SELECT type_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> typesDansTableIhmSchemaNmcl = new ArrayList<String>();
-        UtilitaireDao.get(DbConstant.POOL_NAME).getList(null, selectTypeColonne, typesDansTableIhmSchemaNmcl);
+        UtilitaireDao.get(poolName).getList(null, selectTypeColonne, typesDansTableIhmSchemaNmcl);
         isListesIdentiques(typesDansFichier, typesDansTableIhmSchemaNmcl);
 
     }
@@ -404,7 +400,7 @@ public class GererNomenclatureAction extends ArcAction {
     private boolean isColonneValide(String nomColonne) {
         System.out.println("Validation de : " + nomColonne);
         try {
-            UtilitaireDao.get(DbConstant.POOL_NAME).executeImmediate(null, "SELECT null as " + nomColonne);
+            UtilitaireDao.get(poolName).executeImmediate(null, "SELECT null as " + nomColonne);
         } catch (Exception e) {
             String message = nomColonne + " n'est pas un nom de colonne valide.";
             this.viewSchemaNmcl.setMessage(message);
@@ -424,7 +420,7 @@ public class GererNomenclatureAction extends ArcAction {
     private boolean isTypeValide(String typeColonne) {
         System.out.println("Validation de : " + typeColonne);
         try {
-            UtilitaireDao.get(DbConstant.POOL_NAME).executeImmediate(null, "SELECT null::" + typeColonne);
+            UtilitaireDao.get(poolName).executeImmediate(null, "SELECT null::" + typeColonne);
         } catch (Exception e) {
             String message = typeColonne + " n'est pas un type valide.";
             this.viewSchemaNmcl.setMessage(message);

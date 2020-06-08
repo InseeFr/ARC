@@ -177,9 +177,9 @@ public class XMLHandlerAno extends org.xml.sax.helpers.DefaultHandler {
 
 
 		} catch (IOException ex) {
-			LoggerHelper.error(LOGGER, ex, "index()");
+			LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 		} catch (NoSuchAlgorithmException ex) {
-			LoggerHelper.error(LOGGER, ex, "index()");
+			LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 		}
 
    }
@@ -193,7 +193,7 @@ public class XMLHandlerAno extends org.xml.sax.helpers.DefaultHandler {
     try {
 	    this.bw.flush();
     } catch (IOException ex) {
-	    LoggerHelper.error(LOGGER, ex, "index()");
+	    LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
     }
   }
 
@@ -206,7 +206,7 @@ public class XMLHandlerAno extends org.xml.sax.helpers.DefaultHandler {
 		this.bw.write("</"+qName+">\n");
 		this.retourChariot=true;
 	} catch (IOException ex) {
-		LoggerHelper.error(LOGGER, ex, "index()");
+		LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 	}
   }
 
@@ -220,7 +220,7 @@ public class XMLHandlerAno extends org.xml.sax.helpers.DefaultHandler {
 //		bw = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
 		this.bw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 	} catch (IOException ex) {
-		LoggerHelper.error(LOGGER, ex, "index()");
+		LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 	}
 
   }
@@ -236,7 +236,7 @@ public class XMLHandlerAno extends org.xml.sax.helpers.DefaultHandler {
 		  try {
 			  this.bw.write("\n");
 		  } catch (IOException ex) {
-			  LoggerHelper.error(LOGGER, ex, "index()" );
+			  LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 		  }
 	  }
 
@@ -246,21 +246,21 @@ public class XMLHandlerAno extends org.xml.sax.helpers.DefaultHandler {
 	try {
 		this.bw.write("<"+this.currentTag);
 	} catch (IOException ex) {
-		LoggerHelper.error(LOGGER, ex, "index()");
+		LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 	}
 
     for (int i = 0; i < attributes.getLength(); i++) {
     	try {
 			this.bw.write(" "+attributes.getQName(i)+"=\""+attributes.getValue(i)+"\"");
 		} catch (IOException ex) {
-			LoggerHelper.error(LOGGER, ex, "index()");
+			LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 		}
  //  	System.out.println("attribut "+i+" - "+atts.getName(i)+" : "+atts.getValue(i));
       }
     try {
 		this.bw.write(">");
 	} catch (IOException ex) {
-		LoggerHelper.error(LOGGER, ex, "index()");
+		LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
 	}
   }
 

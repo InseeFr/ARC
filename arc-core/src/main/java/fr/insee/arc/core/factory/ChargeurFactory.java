@@ -1,16 +1,17 @@
 package fr.insee.arc.core.factory;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.core.archive_loader.FilesInputStreamLoad;
-import fr.insee.arc.core.service.chargeur.ChargeurClefValeur;
-import fr.insee.arc.core.service.chargeur.ChargeurXml;
-import fr.insee.arc.core.service.chargeur.ILoader;
-import fr.insee.arc.core.service.chargeur.LoaderCSV;
-import fr.insee.arc.core.service.thread.ThreadLoadService;
+import fr.insee.arc.core.service.ApiChargementService;
+import fr.insee.arc.core.service.engine.chargeur.ChargeurCSV;
+import fr.insee.arc.core.service.engine.chargeur.ChargeurClefValeur;
+import fr.insee.arc.core.service.engine.chargeur.ChargeurXml;
+import fr.insee.arc.core.service.engine.chargeur.ChargeurXmlComplexe;
+import fr.insee.arc.core.service.engine.chargeur.IChargeur;
+import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.TypeChargement;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 
@@ -21,21 +22,23 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  *
  */
 public class ChargeurFactory {
-    private Map<TypeChargement, ILoader> map = new EnumMap<>(TypeChargement.class);
+    private Map<TypeChargement, IChargeur> map = new HashMap<TypeChargement, IChargeur>();
     private static final Logger LOGGER = Logger.getLogger(ChargeurFactory.class);
 
 
-    public ChargeurFactory(ThreadLoadService threadChargementService, FilesInputStreamLoad filesInputStreamLoad ) {
+    public ChargeurFactory(ThreadChargementService threadChargementService, String fileName) {
         this.map.put(TypeChargement.XML,
-                new ChargeurXml(threadChargementService,filesInputStreamLoad));
+                new ChargeurXml(threadChargementService,fileName));
+        this.map.put(TypeChargement.XML_COMPLEXE,
+                new ChargeurXmlComplexe(threadChargementService,fileName));
         this.map.put(TypeChargement.CLEF_VALEUR,
-                new ChargeurClefValeur(threadChargementService,filesInputStreamLoad));
+                new ChargeurClefValeur(threadChargementService,fileName));
         this.map.put(TypeChargement.PLAT,
-                new LoaderCSV(threadChargementService,filesInputStreamLoad));
+                new ChargeurCSV(threadChargementService,fileName));
 
     }
     
-    public ILoader getChargeur(TypeChargement typeChargement){
+    public IChargeur getChargeur(TypeChargement typeChargement){
         LoggerDispatcher.info("** getChargeur **", LOGGER);
         return this.map.get(typeChargement);
     }

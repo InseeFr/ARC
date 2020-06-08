@@ -48,11 +48,13 @@
 <s:set var="checkbox">${param.checkbox}</s:set>
 <s:set var="checkboxVisible">${param.checkboxVisible}</s:set>
 <s:set var="multiSelection">${param.multiSelection}</s:set>
+<s:set var="extraScopeSelect">${param.extraScopeSelect}</s:set>
 <s:set var="extraScopeUpdate">${param.extraScopeUpdate}</s:set>
 <s:set var="extraScopeDelete">${param.extraScopeDelete}</s:set>
 <s:set var="extraScopeAdd">${param.extraScopeAdd}</s:set>
 <s:set var="extraScopeSee">${param.extraScopeSee}</s:set>
 <s:set var="otherButton">${param.otherButton}</s:set>
+<s:set var="allowResize">${param.allowResize}</s:set>
 
 <div
 	id="<s:property value="#view.sessionName"/>"
@@ -67,7 +69,7 @@
 					</div>
 					<div class="card-body p-0">
 						<s:hidden
-							name="%{#view.sessionName}.databaseColumnSort"
+							name="%{#view.sessionName}.headerSortDLabel"
 							value=""
 						/>
 						<table class="fixedHeader w-100 ">
@@ -82,16 +84,16 @@
 										</s:else>
 									</s:if>
 									<s:iterator
-										value="%{#view.guiColumnsLabel}"
+										value="%{#view.headersVLabel}"
 										var="head"
 										status="incr"
 									>
-										<s:if test="%{#view.visibleHeaders[#incr.index]}">
+										<s:if test="%{#view.headersVisible[#incr.index]}">
 											<th
 												class="sort"
 												scope="col"
-												style="width:<s:property value='%{#view.guiColumnsSize[#incr.index]}'/>;"
-											><s:text name="%{#view.guiColumnsLabel[#incr.index]}" />
+												style="width:<s:property value='%{#view.headersVSize[#incr.index]}'/>;"
+											><s:text name="%{#view.headersVLabel[#incr.index]}" />
 											</th>
 										</s:if>
 										<s:else>
@@ -102,7 +104,7 @@
 								<tr style="display: none;">
 									<th></th>
 									<s:iterator
-										value="%{#view.databaseColumnsLabel}"
+										value="%{#view.headersDLabel}"
 										var="head"
 										status="incr"
 									>
@@ -119,14 +121,16 @@
 										</s:else>
 									</s:if>
 									<s:iterator
-										value="%{#view.databaseColumnsLabel}"
+										value="%{#view.headersDLabel}"
 										var="head"
 										status="incr"
 									>
-										<th><s:checkbox
+										<th>
+											<s:checkbox
 												name="%{#view.sessionName}.selectedColumns[%{#incr.index}]"
-												theme="simple"
-											></s:checkbox></th>
+												theme="simple">
+												</s:checkbox>
+										</th>
 									</s:iterator>
 							</tr>
 								<s:if test="#ligneFilter.equals('true')">
@@ -136,15 +140,15 @@
 												<th style="display: none;"></th>
 											</s:if>
 											<s:else>
-												<th style="text-align:center; font-weight:bold;font-size:1.5em;">?</th>
+												<th style="text-align:center; font-weight:bold;font-size:1.5em;"></th>
 											</s:else>
 										</s:if>
 										<s:iterator
-											value="%{#view.guiColumnsLabel}"
+											value="%{#view.headersVLabel}"
 											var="head"
 											status="incr"
 										>
-											<s:if test="%{#view.visibleHeaders[#incr.index]}">
+											<s:if test="%{#view.headersVisible[#incr.index]}">
 												<th><s:textarea
 														name="%{#view.sessionName}.filterFields[%{#incr.index}]"
 														value="%{#view.filterFields[#incr.index]}"
@@ -198,90 +202,74 @@
 												value="#line"
 												status="incr2"
 											>
-												<s:if test="%{#view.visibleHeaders[#incr2.index]}">
+												<s:if test="%{#view.headersVisible[#incr2.index]}">
 													<td><s:if
-															test='%{#view.updatableHeaders[#incr2.index]}'
+															test='%{#view.headersUpdatable[#incr2.index]}'
 														>
 															<s:if
-																test='%{"text".equals(#view.guiColumnsType[#incr2.index])}'
+																test='%{"text".equals(#view.headersVType[#incr2.index])}'
 															>
 																<s:textarea
-																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																	name="%{#view.sessionName}.content.t[%{#incr1.index}].d[%{#incr2.index}]"
+																	value="%{#view.content.t[#incr1.index].d[#incr2.index]}"
 																	theme="simple"
 																></s:textarea>
 															</s:if>
 
 															<s:elseif
-																test='%{"datepicker".equals(#view.guiColumnsType[#incr2.index])}'
+																test='%{"datepicker".equals(#view.headersVType[#incr2.index])}'
 															>
 																<s:textfield
 																	class="datepicker full-width"
 																	type2="date"
 																	dateFormat="yyyy-mm-dd"
-																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																	name="%{#view.sessionName}.content.t[%{#incr1.index}].d[%{#incr2.index}]"
+																	value="%{#view.content.t[#incr1.index].d[#incr2.index]}"
 																	theme="simple"
 																></s:textfield>
 															</s:elseif>
 															<s:elseif
-																test='%{"multiSelect".equals(#view.guiColumnsType[#incr2.index])}'
+																test='%{"multiSelect".equals(#view.headersVType[#incr2.index])}'
 															>
 																<s:textarea
-																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																	name="%{#view.sessionName}.content.t[%{#incr1.index}].d[%{#incr2.index}]"
+																	value="%{#view.content.t[#incr1.index].d[#incr2.index]}"
 																	theme="simple"
 																></s:textarea>
 															</s:elseif>
 															<s:else>
 																<s:select
 																class="w-100"
-																	list="%{#view.guiSelectedColumns[#incr2.index]}"
-																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																	list="%{#view.headersVSelect[#incr2.index]}"
+																	name="%{#view.sessionName}.content.t[%{#incr1.index}].d[%{#incr2.index}]"
+																	value="%{#view.content.t[#incr1.index].d[#incr2.index]}"
 																	theme="simple"
 																></s:select>
 															</s:else>
 														</s:if> <s:else>
-															<s:if
-																test='%{"select".equals(#view.guiColumnsType[#incr2.index])}'
-															>
-															<s:select
-																class="w-100"
-																	list="%{#view.guiSelectedColumns[#incr2.index]}"
-																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
-																	theme="simple"
-																	disabled="true"
-																></s:select>
-																<s:hidden name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}" />
-															</s:if>
-															<s:else>
-																<s:textarea
-																	name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																	value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
-																	theme="simple"
-																	readonly="true"
-																></s:textarea>
-															</s:else>
+															<s:textarea
+																name="%{#view.sessionName}.content.t[%{#incr1.index}].d[%{#incr2.index}]"
+																value="%{#view.content.t[#incr1.index].d[#incr2.index]}"
+																theme="simple"
+																readonly="true"
+															></s:textarea>
 														</s:else></td>
 												</s:if>
 												<s:else>
 													<td style="display: none;"><s:if
-															test='%{"text".equals(#view.guiColumnsType[#incr2.index])}'
+															test='%{"text".equals(#view.headersVType[#incr2.index])}'
 														>
 															<s:textarea
-																name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																name="%{#view.sessionName}.content.t[%{#incr1.index}].d[%{#incr2.index}]"
+																value="%{#view.content.t[#incr1.index].d[#incr2.index]}"
 																theme="simple"
 															></s:textarea>
 														</s:if> <s:else>
 															<s:select
 															class="w-100"
-																list="%{#view.guiSelectedColumns[#incr2.index]}"
-																name="%{#view.sessionName}.content.lines[%{#incr1.index}].data[%{#incr2.index}]"
-																value="%{#view.content.lines[#incr1.index].data[#incr2.index]}"
+																list="%{#view.headersVSelect[#incr2.index]}"
+																name="%{#view.sessionName}.content.t[%{#incr1.index}].d[%{#incr2.index}]"
+																value="%{#view.content.t[#incr1.index].d[#incr2.index]}"
 																theme="simple"
 															></s:select>
 														</s:else></td>
@@ -303,12 +291,12 @@
 											<td style="text-align:center; font-weight:bold;font-size:1.5em;">+</td>
 										</s:if>
 										<s:iterator
-											value="%{#view.databaseColumnsLabel}"
+											value="%{#view.headersDLabel}"
 											var="input"
 											status="incr"
 										>
-											<s:if test="%{#view.visibleHeaders[#incr.index]}">
-												<s:if test="%{!#view.updatableHeaders[#incr.index]}">
+											<s:if test="%{#view.headersVisible[#incr.index]}">
+												<s:if test="%{!#view.headersUpdatable[#incr.index]}">
 													<td><s:textarea
 															name="#view.inputFields[%{#incr.index}]"
 															theme="simple"
@@ -317,14 +305,14 @@
 												</s:if>
 												<s:else>
 													<td><s:if
-															test='%{"text".equals(#view.guiColumnsType[#incr.index])}'
+															test='%{"text".equals(#view.headersVType[#incr.index])}'
 														>
 															<s:textarea
 																name="%{#view.sessionName}.inputFields[%{#incr.index}]"
 																theme="simple"
 															></s:textarea>
 														</s:if> <s:elseif
-															test='%{"datepicker".equals(#view.guiColumnsType[#incr.index])}'
+															test='%{"datepicker".equals(#view.headersVType[#incr.index])}'
 														>
 															<s:textfield
 																class="datepicker full-width"
@@ -334,12 +322,12 @@
 																theme="simple"
 															></s:textfield>
 														</s:elseif> <s:elseif
-															test='%{"multiSelect".equals(#view.guiColumnsType[#incr.index])}'
+															test='%{"multiSelect".equals(#view.headersVType[#incr.index])}'
 														>
 															<s:select
 															class="w-100"
 																multiple="true"
-																list="%{#view.guiSelectedColumns[#incr.index]}"
+																list="%{#view.headersVSelect[#incr.index]}"
 																emptyOption="true"
 																name="%{#view.sessionName}.inputFields[%{#incr.index}]"
 																theme="simple"
@@ -348,7 +336,7 @@
 															<s:select
 															class="w-100"
 																emptyOption="true"
-																list="%{#view.guiSelectedColumns[#incr.index]}"
+																list="%{#view.headersVSelect[#incr.index]}"
 																name="%{#view.sessionName}.inputFields[%{#incr.index}]"
 																theme="simple"
 															></s:select>
@@ -357,7 +345,7 @@
 											</s:if>
 											<s:else>
 												<td style="display: none;"><s:if
-														test='%{"text".equals(#view.guiColumnsType[#incr.index])}'
+														test='%{"text".equals(#view.headersVType[#incr.index])}'
 													>
 														<s:textarea
 															name="%{#view.sessionName}.inputFields[%{#incr.index}]"
@@ -367,8 +355,8 @@
 														<s:select
 														class="w-100"
 															requiredLabel="true"
-															list="%{#view.guiSelectedColumns[#incr.index]}"
-															value="%{#view.selectedColumns[#incr.index][0]}"
+															list="%{#view.headersVSelect[#incr.index]}"
+															value="%{#view.headersVSelect[#incr.index][0]}"
 															name="%{#view.sessionName}.inputFields[%{#incr.index}]"
 															theme="simple"
 														></s:select>
@@ -403,9 +391,9 @@
 							class="btn btn-secondary btn-sm "
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
-							scope="<s:property value="#view.sessionName"/>;"
-							value="<s:text name="gui.button.refresh"/>"
-						><span class="fa fa-refresh">&nbsp;</span><s:text name="gui.button.refresh"/></button>
+							scope="<s:property value="#view.sessionName"/>;${param.extraScopeSelect}"
+							value="Rafraîchir"
+						><span class="fa fa-refresh">&nbsp;</span>Rafraîchir</button>
 					</s:if>
 					<s:if test="#btnSee.equals('true')">
 						<button
@@ -415,8 +403,8 @@
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
 							scope="${param.extraScopeSee}"
-							value="<s:text name="gui.button.see"/>"
-						><span class="fa fa-eye-open">&nbsp;</span><s:text name="gui.button.see"/></button>
+							value="Voir"
+						><span class="fa fa-eye-open">&nbsp;</span>Voir</button>
 					</s:if>
 					<s:if test="#btnSort.equals('true')">
 						<button
@@ -426,8 +414,8 @@
 							type="submit"
 							doAction="sort<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;"
-							value="<s:text name="gui.button.sort"/>"
-						><span class="fa fa-sort">&nbsp;</span><s:text name="gui.button.sort"/></button>
+							value="Trier"
+						><span class="fa fa-sort">&nbsp;</span>Trier</button>
 					</s:if>
 					<s:if test="#btnAdd.equals('true')">
 						<button
@@ -436,8 +424,8 @@
 							type="submit"
 							doAction="add<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeAdd}"
-							value="<s:text name="gui.button.add"/>"
-						><span class="fa fa-check">&nbsp;</span><s:text name="gui.button.add"/></button>
+							value="Ajouter"
+						><span class="fa fa-check">&nbsp;</span>Ajouter</button>
 					</s:if>
 					<s:if test="#btnUpdate.equals('true')">
 						<button
@@ -446,8 +434,8 @@
 							type="submit"
 							doAction="update<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeUpdate}"
-							value="<s:text name="gui.button.update"/>"
-						><span class="fa fa-save">&nbsp;</span><s:text name="gui.button.update"/></button>
+							value="Mettre à jour"
+						><span class="fa fa-save">&nbsp;</span>Mettre à jour</button>
 					</s:if>
 					<s:if test="#btnDelete.equals('true')">
 						<button
@@ -456,8 +444,8 @@
 							type="submit"
 							doAction="delete<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeDelete}"
-							value="<s:text name="gui.button.delete"/>"
-						><span class="fa fa-remove">&nbsp;</span><s:text name="gui.button.delete"/></button>
+							value="Supprimer"
+						><span class="fa fa-remove">&nbsp;</span>Supprimer</button>
 					</s:if>
 
 					<s:if test="#otherButton != null">
@@ -473,57 +461,11 @@
 					</s:if>
 				</div>
 				
-				<s:if test='1<#view.nbPages'>
-				<div
-					class="btn-group btn-group-sm"
-					style="float:right;"
-					role="group"
-					>
-
-							<table style="width: 10em;">
-								<tr>
-									<td style="width: 4em;">Page :</td>
-									<td style="background-color: #ffffff; width: 4em;"><s:textarea
-											name="%{#view.sessionName}.idPage"
-											value="%{#view.idPage}"
-											theme="simple"
-										/></td>
-									<td>/</td>
-									<td><s:property value="%{#view.nbPages}" /></td>
-							</tr>
-					</table>
-
-								<button
-									class="btn btn-primary btn-sm"
-									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-${view.idPage - 1});"
-								><span
-									class="fa fa-fast-backward"
-									aria-hidden="true"
-								></span></button>
-								<button
-									class="btn btn-primary btn-sm"
-									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-1);"
-								><span
-									class="fa fa-step-backward"
-									aria-hidden="true"
-								></span></button>
-								<button
-									class="btn btn-primary btn-sm"
-									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),1);"
-								><span
-									class="fa fa-step-forward"
-									aria-hidden="true"
-								></span></button>
-								<button
-									class="btn btn-primary btn-sm"
-									onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),${view.nbPages - view.idPage});"
-								><span
-									class="fa fa-fast-forward"
-									aria-hidden="true"
-								></span></button>
-					</div>
-					</s:if>
-				</div>
+				<s:include value="template_page_manager.jsp">
+					<s:set var="view" value="%{view}" scope="request"></s:set>
+					<s:param name="allowResize"><s:property value="allowResize"/></s:param>
+				</s:include>
+			</div>
 		</div>
 		<br>
 	</s:if>

@@ -1,5 +1,7 @@
 package fr.insee.arc.utils.sqlengine.model;
 
+import fr.insee.arc.utils.utils.FormatSQL;
+
 /**
  *
  * Builds a tuple with:
@@ -14,7 +16,7 @@ public class TempNameSuffixShort implements IToken
 
     public TempNameSuffixShort()
     {
-        this.name = new StringBuilder().append("$tmp$").toString();
+        this.name = new StringBuilder().append(FormatSQL._TMP).toString();
     }
     
     @Override

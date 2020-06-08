@@ -24,6 +24,6 @@ public interface ContextName extends IToken {
 
     Naming getNaming();
 
-    ContextName deepClone();
+    ContextName clone();
 
 }

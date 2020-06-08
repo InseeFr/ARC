@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.web.util.VObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +27,7 @@ import lombok.Setter;
 @Results({ @Result(name = "success", location = "/jsp/gererFile.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
 @Getter
 @Setter
-public class GererFileAction implements SessionAware, ICharacterConstant {
+public class GererFileAction implements SessionAware, IConstanteCaractere {
     @Override
     public void setSession(Map<String, Object> session) {
         this.viewDirIn.setMessage("");
@@ -219,8 +219,8 @@ public class GererFileAction implements SessionAware, ICharacterConstant {
 
     @Action(value = "/renameIn")
     public String renameIn() {
-          Map<String,ArrayList<String>> m=this.viewDirIn.mapSameContentFromPreviousVObject();
-          Map<String,ArrayList<String>> n=this.viewDirIn.mapSameContentFromPreviousVObject();
+          Map<String,ArrayList<String>> m=this.viewDirIn.mapContentSelected();
+          Map<String,ArrayList<String>> n=this.viewDirIn.mapContentSelected();
 
           if (!m.isEmpty())
           {
@@ -414,8 +414,8 @@ public class GererFileAction implements SessionAware, ICharacterConstant {
 
     @Action(value = "/renameOut")
     public String renameOut() {
-          Map<String,ArrayList<String>> m=this.viewDirOut.mapSameContentFromPreviousVObject();
-          Map<String,ArrayList<String>> n=this.viewDirOut.mapSameContentFromPreviousVObject();
+          Map<String,ArrayList<String>> m=this.viewDirOut.mapContentSelected();
+          Map<String,ArrayList<String>> n=this.viewDirOut.mapContentSelected();
 
           if (!m.isEmpty())
           {

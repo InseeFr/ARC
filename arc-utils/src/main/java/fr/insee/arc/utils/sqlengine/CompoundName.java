@@ -58,8 +58,8 @@ public class CompoundName implements ContextName {
         return this.naming;
     }
 
-    public CompoundName deepClone() {
-        return new CompoundName(getNaming().deepClone(), getUntokenizer());
+    public CompoundName clone() {
+        return new CompoundName(getNaming().clone(), getUntokenizer());
     }
 
     /**

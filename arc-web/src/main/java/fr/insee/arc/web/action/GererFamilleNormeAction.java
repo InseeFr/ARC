@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.model.TypeTraitementPhase;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -25,9 +25,9 @@ import fr.insee.arc.web.model.ViewFamilleNorme;
 import fr.insee.arc.web.model.ViewTableMetier;
 import fr.insee.arc.web.model.ViewVariableMetier;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.util.VObject.LineObject;
 import fr.insee.arc.web.util.ArcStringUtils;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
-import fr.insee.arc.web.util.LineObject;
 
 @Component
 @Results({ @Result(name = "success", location = "/jsp/gererFamilleNorme.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
@@ -314,10 +314,6 @@ public class GererFamilleNormeAction extends ArcAction {
         bloc.append(addNonExistingVariableMetierWithoutSync(message));
         bloc.append(synchronizeRegleWithVariableMetier(message, this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0)));
         executeRequeteMiseAjourTableMetier(message, bloc);
-//        for (String envExecution : UtilitaireDao.get(poolName).getList(null, "SELECT replace(id,'.','_') FROM arc.ext_etat_jeuderegle WHERE isenv;",
-//                new ArrayList<String>())) {
-//        		ApiInitialisationService.mettreAJourSchemaTableMetier(null, "arc.ihm", envExecution);
-//        }
         this.viewVariableMetier.setMessage(message.toString());
         return generateDisplay();
     }
@@ -336,10 +332,6 @@ public class GererFamilleNormeAction extends ArcAction {
 	            this.viewVariableMetier.listContentSelected(), false));
 	    bloc.append(synchronizeRegleWithVariableMetier(message, this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0)));
 	    executeRequeteMiseAjourTableMetier(message, bloc);
-//	    for (String envExecution : UtilitaireDao.get(poolName).getList(null, "SELECT replace(id,'.','_') FROM arc.ext_etat_jeuderegle WHERE isenv;",
-//	            new ArrayList<String>())) {
-//	    		ApiInitialisationService.mettreAJourSchemaTableMetier(null, "arc.ihm", envExecution);
-//	    }
 	    this.viewVariableMetier.setMessage(message.toString());
 	    return generateDisplay();
 	}
@@ -353,16 +345,16 @@ public class GererFamilleNormeAction extends ArcAction {
 	    StringBuilder message = new StringBuilder();
 	    StringBuilder requete = new StringBuilder();
 
-	    HashMap<String, ArrayList<String>> mBefore = this.viewVariableMetier.mapSameContentFromPreviousVObject();
-	    List<ArrayList<String>> lBefore = this.viewVariableMetier.listSameContentFromPreviousVObject();
+	    HashMap<String, ArrayList<String>> mBefore = this.viewVariableMetier.mapContentBeforeUpdate();
+	    List<ArrayList<String>> lBefore = this.viewVariableMetier.listContentBeforeUpdate();
 	    
-	    for (LineObject line : this.viewVariableMetier.getContent().getLines()) {
-	    	int indexOfVar = this.viewVariableMetier.getDatabaseColumnsLabel().indexOf("nom_variable_metier");
-	    	line.getData().set(indexOfVar, ArcStringUtils.cleanUpVariable(line.getData().get(indexOfVar)));
+	    for (LineObject line : this.viewVariableMetier.getContent().getT()) {
+	    	int indexOfVar = this.viewVariableMetier.getHeadersDLabel().indexOf("nom_variable_metier");
+	    	line.getD().set(indexOfVar, ArcStringUtils.cleanUpVariable(line.getD().get(indexOfVar)));
 	    }
 
-	    HashMap<String, ArrayList<String>> mAfter = this.viewVariableMetier.mapSameContentFromCurrentVObject();
-	    List<ArrayList<String>> lAfter = this.viewVariableMetier.listSameContentFromCurrentVObject();
+	    HashMap<String, ArrayList<String>> mAfter = this.viewVariableMetier.mapContentAfterUpdate();
+	    List<ArrayList<String>> lAfter = this.viewVariableMetier.listContentAfterUpdate();
 
 	    // partie 1 : update nom de variable
 	    // créer une map des noms avant aprés pour modifier les règles et les tables
@@ -393,7 +385,7 @@ public class GererFamilleNormeAction extends ArcAction {
 		    for (String envName : listeEnvironnement) {
 			for (int k = numberOfColumnTableVariableMetier; k < mBefore.size(); k++) {
 			    String nomVeridique = envName + "."
-				    + this.viewVariableMetier.getDatabaseColumnsLabel().get(k);
+				    + this.viewVariableMetier.getHeadersDLabel().get(k);
 
 			    /**
 			     * Si la variable est définie pour cette table
@@ -459,7 +451,7 @@ public class GererFamilleNormeAction extends ArcAction {
                 		// && this.viewVariableMetier.getInputFields().get(i).equals("oui")
                 		) {
                 	
-                	// au moins une table est resnseignée
+                	// au moins une table est renseignée
                 	blank=false;
 
                 	String nomVariableMetier = this.viewVariableMetier.getInputFieldFor("nom_variable_metier");
@@ -473,17 +465,17 @@ public class GererFamilleNormeAction extends ArcAction {
                                 requete.append(", ");
                                 values.append(", ");
                             }
-                            requete.append(this.viewVariableMetier.getDatabaseColumnsLabel().get(j));
+                            requete.append(this.viewVariableMetier.getHeadersDLabel().get(j));
                             values.append("'" + this.viewVariableMetier.getInputFields().get(j) + "'::"
-                                    + this.viewVariableMetier.getDatabaseColumnsType().get(j));
+                                    + this.viewVariableMetier.getHeadersDType().get(j));
                         }
-                        requete.append(", nom_table_metier) VALUES (" + values.append(", '" + this.viewVariableMetier.getDatabaseColumnsLabel().get(i))
+                        requete.append(", nom_table_metier) VALUES (" + values.append(", '" + this.viewVariableMetier.getHeadersDLabel().get(i))
                                 + "'::text);\n");
                     } else {
                         message.append("La variable "
                                 + this.viewVariableMetier.getInputFields().get(1)
                                 + " existe déjà. Pour la modifier, passez par la ligne correspondante du tableau variable*table.\nAucune variable n'a été ajoutée.\n");
-                        return EMPTY;
+                        return empty;
                     }
                 }
             }
@@ -492,7 +484,7 @@ public class GererFamilleNormeAction extends ArcAction {
        	 if (blank)
        	 {
        		 message.append("Vous avez oublié de spécifier les tables cibles pour votre variable");
-                return EMPTY;
+                return empty;
        	 }
             
             message.append("L'ajout de variables s'est achevé sur un succès.\n");
@@ -501,7 +493,7 @@ public class GererFamilleNormeAction extends ArcAction {
             LOGGER.error("Erreur ", ex);
             message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
         }
-        return EMPTY;
+        return empty;
     }
 
     private static boolean checkIsValide(List<String> inputFields) {
@@ -528,12 +520,12 @@ public class GererFamilleNormeAction extends ArcAction {
                 /**
                  * Et pour l'ensemble des tables métier
                  */
-                for (int j = numberOfColumnTableVariableMetier; j < this.viewVariableMetier.mapSameContentFromCurrentVObject(i).size(); j++) {
+                for (int j = numberOfColumnTableVariableMetier; j < this.viewVariableMetier.mapContentAfterUpdate(i).size(); j++) {
                     /**
                      * Si une variable est à "oui" pour cette table alors qu'elle n'y était pas...
                      */
                     if (StringUtils.isNotBlank(listContent.get(i).get(j))
-                            && StringUtils.isBlank(this.viewVariableMetier.listSameContentFromPreviousVObject().get(i).get(j))) {
+                            && StringUtils.isBlank(this.viewVariableMetier.listContentBeforeUpdate().get(i).get(j))) {
                         /**
                          * ... on l'ajoute
                          */
@@ -547,12 +539,12 @@ public class GererFamilleNormeAction extends ArcAction {
                                 requete.append(", ");
                                 values.append(", ");
                             }
-                            requete.append(this.viewVariableMetier.getDatabaseColumnsLabel().get(k));
+                            requete.append(this.viewVariableMetier.getHeadersDLabel().get(k));
                             values.append(//
                             ((listContent.get(i).get(k) == null) ? "null" : ("'" + listContent.get(i).get(k) + "'"))//
-                                    + "::" + this.viewVariableMetier.getDatabaseColumnsType().get(k));
+                                    + "::" + this.viewVariableMetier.getHeadersDType().get(k));
                         }
-                        requete.append(", nom_table_metier) VALUES (" + values.append(", '" + this.viewVariableMetier.getDatabaseColumnsLabel().get(j))
+                        requete.append(", nom_table_metier) VALUES (" + values.append(", '" + this.viewVariableMetier.getHeadersDLabel().get(j))
                                 + "'::text);\n");
                     }
                 }
@@ -563,7 +555,7 @@ public class GererFamilleNormeAction extends ArcAction {
             ex.printStackTrace();
             message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
         }
-        return EMPTY;
+        return empty;
     }
 
     private static String synchronizeRegleWithVariableMetier(StringBuilder message, String idFamille) {
@@ -673,7 +665,7 @@ public class GererFamilleNormeAction extends ArcAction {
                  */
                 for (int i = numberOfColumnTableVariableMetier; (i < map.size()) && drop; i++) {
                     if (StringUtils.isBlank(arrayList.get(j).get(i)) || !onlyWhereBlank) {
-                        listeTable.append("[" + this.viewVariableMetier.getDatabaseColumnsLabel().get(i) + "]");
+                        listeTable.append("[" + this.viewVariableMetier.getHeadersDLabel().get(i) + "]");
                     }
                 }
                 delete.append("DELETE FROM arc."+IHM_MOD_VARIABLE_METIER+" WHERE id_famille='" + map.get("id_famille").get(j)
@@ -698,7 +690,7 @@ public class GererFamilleNormeAction extends ArcAction {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return EMPTY;
+        return empty;
     }
 
     private boolean isMofificationOk(StringBuilder message, HashMap<String, ArrayList<String>> mapContentAfterUpdate) {
@@ -777,19 +769,18 @@ public class GererFamilleNormeAction extends ArcAction {
 
     private static String mettreAJourInformationsVariables(VObject someViewVariableMetier) {
         StringBuilder requete = new StringBuilder();
-        System.out.println("----------> " + someViewVariableMetier.mapSameContentFromCurrentVObject());
-        for (int i = 0; i < someViewVariableMetier.listSameContentFromCurrentVObject().size(); i++) {
+        for (int i = 0; i < someViewVariableMetier.listContentAfterUpdate().size(); i++) {
             if (i > 0) {
                 requete.append("\n");
             }
             StringBuilder requeteLocale = new StringBuilder("UPDATE arc."+IHM_MOD_VARIABLE_METIER+"");
-            requeteLocale.append("\n  SET type_consolidation = '" + someViewVariableMetier.mapSameContentFromCurrentVObject().get("type_consolidation").get(i)
+            requeteLocale.append("\n  SET type_consolidation = '" + someViewVariableMetier.mapContentAfterUpdate().get("type_consolidation").get(i)
                     + "'");
             requeteLocale.append(",\n    description_variable_metier = '"
-                    + someViewVariableMetier.mapSameContentFromCurrentVObject().get("description_variable_metier").get(i).replace(QUOTE, QUOTE_QUOTE) + "'");
-            requeteLocale.append("\n  WHERE id_famille = '" + someViewVariableMetier.mapSameContentFromCurrentVObject().get("id_famille").get(i) + "'");
+                    + someViewVariableMetier.mapContentAfterUpdate().get("description_variable_metier").get(i).replace(quote, quotequote) + "'");
+            requeteLocale.append("\n  WHERE id_famille = '" + someViewVariableMetier.mapContentAfterUpdate().get("id_famille").get(i) + "'");
             requeteLocale.append("\n    AND nom_variable_metier = '"
-                    + someViewVariableMetier.mapSameContentFromCurrentVObject().get("nom_variable_metier").get(i) + "'");
+                    + someViewVariableMetier.mapContentAfterUpdate().get("nom_variable_metier").get(i) + "'");
             requete.append(requeteLocale).append(";");
         }
         return requete.toString();
@@ -807,7 +798,7 @@ public class GererFamilleNormeAction extends ArcAction {
     }
 
     public final boolean isNomTableMetierValide(String nomTable) {
-        return nomTable.matches("(?i)^"+TypeTraitementPhase.MAPPING.toString().toLowerCase()+"_" + this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
+        return nomTable.matches("(?i)^"+TraitementPhase.MAPPING.toString().toLowerCase()+"_" + this.viewFamilleNorme.mapContentSelected().get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
     }
 
     @Action(value = "/addTableMetier")

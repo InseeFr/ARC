@@ -8,8 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fr.insee.arc.utils.textUtils.ICharacterConstant;
-import fr.insee.arc.utils.textUtils.INumericConstant;
+import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 
 /**
  *
@@ -17,7 +17,7 @@ import fr.insee.arc.utils.textUtils.INumericConstant;
  *
  * @param <T>
  */
-public abstract class EntityDao<T extends AbstractEntity> implements INumericConstant, ICharacterConstant {
+public abstract class EntityDao<T extends AbstractEntity> implements IConstanteNumerique, IConstanteCaractere {
 
     private List<String> names;
     private List<String> types;
@@ -194,8 +194,8 @@ public abstract class EntityDao<T extends AbstractEntity> implements INumericCon
         if (anExpression == null) {
             return "null";
         }
-        return anExpression.matches("^\\(.*\\)$") ? anExpression : new StringBuilder(QUOTE).append(anExpression.replace(QUOTE, QUOTE_QUOTE))
-                .append(QUOTE).toString();
+        return anExpression.matches("^\\(.*\\)$") ? anExpression : new StringBuilder(quote).append(anExpression.replace(quote, quotequote))
+                .append(quote).toString();
     }
 
     /**
@@ -214,8 +214,8 @@ public abstract class EntityDao<T extends AbstractEntity> implements INumericCon
     }
 
     public String toString() {
-        return new StringBuilder(this.tableName + NEWLINE)//
-                .append(this.getNames() + NEWLINE)//
+        return new StringBuilder(this.tableName + newline)//
+                .append(this.getNames() + newline)//
                 .append(this.getTypes())//
                 .toString();
     }

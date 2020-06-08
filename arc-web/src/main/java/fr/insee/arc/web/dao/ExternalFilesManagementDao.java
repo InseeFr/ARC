@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.core.model.DbConstant;
+import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.web.action.GererNormeAction;
 import fr.insee.arc.web.util.VObject;
@@ -18,7 +18,7 @@ import fr.insee.arc.web.util.VObject;
  * @author Manuel Soulier
  *
  */
-public class ExternalFilesManagementDao {
+public class ExternalFilesManagementDao implements IDbConstant {
 
     @SuppressWarnings("unused")
 	private static final Logger LOGGER = Logger.getLogger(ExternalFilesManagementDao.class);
@@ -46,7 +46,7 @@ public class ExternalFilesManagementDao {
 
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
-        if (!selection.isEmpty() && UtilitaireDao.get(DbConstant.POOL_NAME).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0))) {
+        if (!selection.isEmpty() && UtilitaireDao.get(poolName).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0))) {
             StringBuilder requete = new StringBuilder();
             requete.append("select * from arc." + selection.get(NOM_TABLE).get(0) + " ");
 
@@ -82,10 +82,10 @@ public class ExternalFilesManagementDao {
     }
 
     private static String typeNomenclature(String nomTable) {
-        String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.ICharacterConstant.UNDERSCORE);
+        String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore);
         StringBuilder typeNomenclature = new StringBuilder();
         for (int i = 0; i < tokens.length - 1; i++) {
-            typeNomenclature.append((i > 0 ? fr.insee.arc.utils.textUtils.ICharacterConstant.UNDERSCORE : "") + tokens[i]);
+            typeNomenclature.append((i > 0 ? fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore : "") + tokens[i]);
         }
         return typeNomenclature.toString();
     }

@@ -30,10 +30,10 @@ public class BddTable {
     public static final String ID_TABLE_PILOTAGE_BATCH = "PILOTAGE_BATCH";
 
     public static final String NOM_TABLE_IHM_CALENDRIER = "ihm_calendrier";
-    public static final String ID_TABLE_IHM_CALENDRIER = "CALENDRIER_IHM";
+    public static final String ID_TABLE_IHM_CALENDRIER = "IHM_CALENDRIER";
     
     public static final String NOM_TABLE_IHM_RULESET = "ihm_jeuderegle";
-    public static final String ID_TABLE_IHM_RULESETS = "JEUDEREGLE_IHM";
+    public static final String ID_TABLE_IHM_RULESETS = "IHM_JEUDEREGLE";
     
     public static final String NOM_TABLE_IHM_CHARGEMENT_REGLE= "ihm_chargement_regle";
     public static final String ID_TABLE_IHM_CHARGEMENT_REGLE= "IHM_CHARGEMENT_REGLE";

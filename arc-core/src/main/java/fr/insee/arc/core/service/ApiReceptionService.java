@@ -24,18 +24,17 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
-import fr.insee.arc.core.model.TraitementState;
 import fr.insee.arc.core.model.TraitementTypeFichier;
-import fr.insee.arc.core.model.TypeTraitementPhase;
-import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.SQLExecutor;
+import fr.insee.arc.utils.utils.LoggerDispatcher;
+
 
 /**
  * ApiReceptionService
@@ -50,7 +49,7 @@ import fr.insee.arc.utils.utils.SQLExecutor;
  *
  */
 @Component
-public class ApiReceptionService extends AbstractPhaseService  implements IApiServiceWithoutOutputTable  {
+public class ApiReceptionService extends ApiService {
 	public ApiReceptionService() {
 		super();
 	}
@@ -62,37 +61,32 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 	private static final Pattern p = Pattern.compile("^[A-Z]{6}-W.*");
 	
 	
-	public ApiReceptionService(String aCurrentPhase, String anParametersEnvironment, String aexecutionEnv, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
-		super(aCurrentPhase, anParametersEnvironment, aexecutionEnv, aDirectoryRoot, aNbEnr, paramBatch);
-	}
-
-
-	public ApiReceptionService(Connection connexion,String aCurrentPhase, String anParametersEnvironment, String aexecutionEnv, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
-	    super(connexion, aCurrentPhase, anParametersEnvironment, aexecutionEnv, aDirectoryRoot, aNbEnr, paramBatch);
+	public ApiReceptionService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
+		super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}
 
 
 	@Override
-	public void process() {
+	public void executer() {
 		// Déplacement et archivage des fichiers
 		moveClientFiles(this.nbEnr);
 		// Enregistrement des fichiers
-		registerFiles(this.connection, this.executionEnv, this.directoryRoot);
+		registerFiles(this.connexion, this.envExecution, this.directoryRoot);
 	}
 
-	    @SQLExecutor
+
 	public void moveClientFiles(int fileSizeLimit) {
 		LoggerDispatcher.info("moveClientFiles", LOGGER);
-		String receptionDirectoryRoot = this.directoryRoot + this.executionEnv.toUpperCase().replace(".", "_") + File.separator
-				+ TypeTraitementPhase.REGISTER;
+		String receptionDirectoryRoot = this.directoryRoot + this.envExecution.toUpperCase().replace(".", "_") + File.separator
+				+ TraitementPhase.RECEPTION;
 		
 		try {
 			// vérifier que les répertoires cible existent; sinon les créer
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementState.ENCOURS);
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementState.OK);
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementState.KO);
+			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS);
+			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.OK);
+			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.KO);
 			// déplacer les fichiers du répertoire de l'entrepot vers le répertoire encours
-			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connection,
+			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,
 					"select id_entrepot from arc.ihm_entrepot")).mapContent();
 			
 			// pour limiter le nombre de fichier simultanés : taillemax*coeff
@@ -104,7 +98,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 			String dirIn;
 			String dirArchive;
 			File fDirIn;
-			String dirOut = receptionDirectoryRoot + "_" + TraitementState.ENCOURS;
+			String dirOut = receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS;
 
 			int fileSize = 0;
 			int fileNb = 0;
@@ -113,7 +107,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 
 			for (String d : entrepotList.get("id_entrepot")) {
 
-				if (fileSize >= fileSizeLimit || fileNb> fileSizeLimit*coeffNb) {
+				if (fileSize > fileSizeLimit || fileNb> fileSizeLimit*coeffNb) {
 					this.reporting=fileNb;
 					break;
 				}
@@ -150,10 +144,10 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 								// oriade : format des fichiers temporaires
 //								&& !f.getName().endsWith(ApiService.SUFFIXE_TEMP_FILE_ORIADE)
 								&& !matcher.matches()
-								&& !f.getName().equals(AbstractPhaseService.PRODUCTION_FILE)
+								&& !f.getName().equals(ApiService.FICHIER_MISE_EN_PRODUCTION)
 								)
 						{
-							if (fileSize >= fileSizeLimit || fileNb>fileSizeLimit*coeffNb) {
+							if (fileSize > fileSizeLimit || fileNb>fileSizeLimit*coeffNb) {
 								this.reporting=fileNb;
 								break;
 							}
@@ -219,8 +213,8 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 										
 										// enregistrer le fichier
 										UtilitaireDao.get("arc").executeBlock(
-												this.connection,
-												"INSERT INTO " + dbEnv(this.executionEnv) + "pilotage_archive (entrepot,nom_archive) values ('" + d + "','" + fname
+												this.connexion,
+												"INSERT INTO " + dbEnv(this.envExecution) + "pilotage_archive (entrepot,nom_archive) values ('" + d + "','" + fname
 												+ "'); ");
 
 										// nbFile++;
@@ -236,7 +230,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 			}
 			}		
 		} catch (Exception ex) {
-		    LoggerHelper.error(LOGGER, ex, "moveClientFiles()" );
+		    LoggerHelper.errorGenTextAsComment(getClass(), "moveClientFiles()", LOGGER, ex);
 		}
 	}
 
@@ -247,9 +241,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 	public void registerFiles(Connection connexion, String anExecutionEnvironment, String directoryRoot) {
 		LoggerDispatcher.info("registerFiles", LOGGER);
 		String receptionDirectoryRoot = directoryRoot + anExecutionEnvironment.toUpperCase().replace(".", "_") + File.separator
-				+ TypeTraitementPhase.REGISTER;
+				+ TraitementPhase.RECEPTION;
 		// on considère tous les fichiers du repertoire reception en cours
-		File folder = new File(receptionDirectoryRoot + "_" + TraitementState.ENCOURS);
+		File folder = new File(receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS);
 		File[] filesIn = folder.listFiles();
 		// la bean (fileName,type, etat) contient pour chaque fichier, le type
 		// du fichier et l'action à réaliser
@@ -259,12 +253,12 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 		try {
 		
 		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.dropTable(this.getTablePilTemp()));
-		requete.append(creationTableResultat(this.getTablePil(), this.getTablePilTemp()));
+		requete.append(FormatSQL.dropTable(this.tablePilTemp));
+		requete.append(creationTableResultat(this.tablePil, this.tablePilTemp));
 		soumettreRequete(requete);
 
 		if (!g.content.isEmpty()) {
-			String dirIn = receptionDirectoryRoot + "_" + TraitementState.ENCOURS;
+			String dirIn = receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS;
 			for (int i = 0; i < g.content.size(); i++) {
 				String container = g.content.get(i).get(g.headers.indexOf("container"));
 				String v_container = g.content.get(i).get(g.headers.indexOf("v_container"));
@@ -274,7 +268,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 				String rapport = g.content.get(i).get(g.headers.indexOf("rapport"));
 				String containerNewName = buildContainerName(container, v_container);
 				if (type.equals(TraitementTypeFichier.DA.toString())) {
-					insertPilotage(requete,  this.getTablePilTemp(), container, containerNewName, v_container, fileName, etat, rapport);
+					insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName, etat, rapport);
 				}
 				if (type.equals(TraitementTypeFichier.A.toString())) {
 					String dirOut = receptionDirectoryRoot + "_" + etat;
@@ -283,14 +277,14 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 				if (type.equals(TraitementTypeFichier.AC.toString())) {
 					String dirOut = receptionDirectoryRoot + "_" + etat;
 					deplacerFichier(dirIn, dirOut, container, containerNewName);
-					insertPilotage(requete,  this.getTablePilTemp(), container, containerNewName, v_container, fileName, etat, rapport);
+					insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName, etat, rapport);
 				}
 				// pour les fichier seul, on en fait une archive
 				if (type.equals(TraitementTypeFichier.D.toString())) {
 					// String dirOut = receptionDirectoryRoot + "_" + etat;
 					// en termes de destination, les fichiers seuls vont tout le temps dans RECEPTION_OK, même s'ils sont KO pour la table
 					// de pilotage
-					String dirOut = receptionDirectoryRoot + "_" + TraitementState.OK;
+					String dirOut = receptionDirectoryRoot + "_" + TraitementEtat.OK;
 					File fileIn = new File(dirIn + "/" + fileName);
 					File fileOut = new File(dirOut + "/" + containerNewName);
 				    
@@ -299,23 +293,23 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 					}
 						UtilitaireDao.generateTarGzFromFile(fileIn, fileOut, ManipString.substringAfterFirst(fileIn.getName(), "_"));
 						fileIn.delete();
-						insertPilotage(requete,  this.getTablePilTemp(), container, containerNewName, v_container, fileName, etat, rapport);
+						insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName, etat, rapport);
 
 				}
 			}
 			requete.append(";");
 			soumettreRequete(requete);
 
-	        boolean fichierARejouer=UtilitaireDao.get("arc").hasResults(connexion, "select 1 from " +  this.getTablePil() + " where phase_traitement='RECEPTION' and to_delete in ('R','F') limit 1;");
+	        boolean fichierARejouer=UtilitaireDao.get("arc").hasResults(connexion, "select 1 from " + this.tablePil + " where phase_traitement='RECEPTION' and to_delete in ('R','F') limit 1;");
 
 			if (fichierARejouer)
 			{
 				// marque les fichiers à effacer (ils vont etre rechargés)
-				requete.append("CREATE TEMPORARY TABLE a_rejouer "+FormatSQL.WITH_NO_VACUUM+" as select distinct id_source from "+this.getTablePil()+" a where to_delete='R' and exists (select 1 from " + this.getTablePilTemp() + " b where a.id_source=b.id_source); ");
+				requete.append("CREATE TEMPORARY TABLE a_rejouer "+FormatSQL.WITH_NO_VACUUM+" as select distinct id_source from "+this.tablePil+" a where to_delete='R' and exists (select 1 from " + this.tablePilTemp + " b where a.id_source=b.id_source); ");
 				
 				// balayer toutes les tables; effacer les enregistrements 
 	
-	            g = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, ApiInitialisationService.requeteListAllTablesEnv(executionEnv)));
+	            g = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, ApiInitialisationService.requeteListAllTablesEnv(envExecution)));
 	            if (!g.mapContent().isEmpty()) {
 	                ArrayList<String> envTables = g.mapContent().get("table_name");
 	                for (String nomTable : envTables) {
@@ -323,8 +317,8 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 	                	requete.append("DELETE FROM "+nomTable+" a where exists (select 1 from a_rejouer b where a.id_source=b.id_source); ");
 	                    requete.append("vacuum "+nomTable+"; ");
 	                    
-	                    if (!nomTable.contains(TypeTraitementPhase.MAPPING.toString().toLowerCase())
-	                            && nomTable.endsWith("_" + TraitementState.OK.toString().toLowerCase())) {
+	                    if (!nomTable.contains(TraitementPhase.MAPPING.toString().toLowerCase())
+	                            && nomTable.endsWith("_" + TraitementEtat.OK.toString().toLowerCase())) {
 	                    requete.append("DELETE FROM "+nomTable+"_todo a where exists (select 1 from a_rejouer b where a.id_source=b.id_source); ");
 	                    requete.append("vacuum "+nomTable+"_todo; ");	                    
 	                    }
@@ -333,20 +327,21 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 	            }
 				
 				// effacer de la table pilotage des to_delete à R
-				requete.append("DELETE FROM " + this.getTablePil() + " a using a_rejouer b where a.id_source=b.id_source; ");
+				requete.append("DELETE FROM " + this.tablePil + " a using a_rejouer b where a.id_source=b.id_source; ");
 			}
 
 			
 			// pb des archives sans nom de fichier
-			requete.append("UPDATE " + this.getTablePilTemp() + " set id_source='' where id_source is null; ");
-			requete.append("INSERT INTO " + this.getTablePil() + " select * from " + this.getTablePilTemp() + "; \n");
+			requete.append("UPDATE " + this.tablePilTemp + " set id_source='' where id_source is null; ");
+			requete.append("INSERT INTO " + this.tablePil + " select * from " + this.tablePilTemp + "; \n");
 			requete.append("DISCARD TEMP; \n");
 			soumettreRequete(requete);
 
-//			 maintenancePilotage(connexion,this.executionEnv, "");
+//			 maintenancePilotage(connexion,this.envExecution, "");
 		}
 		} catch (Exception ex) {
-		    LoggerHelper.error( LOGGER, ex, "registerFiles()");
+		    LoggerHelper.errorGenTextAsComment(getClass(), "registerFiles()", LOGGER, ex);
+		    ex.printStackTrace();
 		}
 	}
 
@@ -378,9 +373,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 
 	public void soumettreRequete(StringBuilder requete) {
 		try {
-			UtilitaireDao.get("arc").executeImmediate(this.connection, requete);
+			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
 		} catch (SQLException ex) {
-		    LoggerHelper.error( LOGGER, ex, "soumettreRequete()");
+		    LoggerHelper.errorGenTextAsComment(getClass(), "soumettreRequete()", LOGGER, ex);
 		}
 		requete.setLength(0);
 	}
@@ -388,11 +383,11 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 	public void insertPilotage(StringBuilder requete, String tablePilotage, String originalContainer, String newContainer, String v_container,
 			String fileName, String etat, String rapport) {
 		Date d = new Date();
-		SimpleDateFormat dateFormat = new SimpleDateFormat(EDateFormat.DATE_FORMAT_WITH_HOUR.getValue());
-		SimpleDateFormat formatter = new SimpleDateFormat(EDateFormat.DATE_FORMAT_WITH_SECOND.getValue());
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		
 		// si ko, etape vaut 2
-		String etape=etat.equals(TraitementState.KO.toString())?"2":"1";
+		String etape=etat.equals(TraitementEtat.KO.toString())?"2":"1";
 		
 		if (requete.length()==0)
 		{		
@@ -404,7 +399,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 			requete.append("\n,");
 		}
 		requete.append(" (" + FormatSQL.cast(originalContainer) + "," + FormatSQL.cast(newContainer) + "," + FormatSQL.cast(v_container) + ", "
-				+ FormatSQL.cast(fileName) + "," + FormatSQL.cast(dateFormat.format(d)) + "," + FormatSQL.cast(TypeTraitementPhase.REGISTER.toString())
+				+ FormatSQL.cast(fileName) + "," + FormatSQL.cast(dateFormat.format(d)) + "," + FormatSQL.cast(TraitementPhase.RECEPTION.toString())
 				+ "," + FormatSQL.cast("{" + etat + "}") + "," + FormatSQL.cast(formatter.format(d)) + "," + FormatSQL.cast(rapport) + ",1,"+etape+") ");
 	}
 
@@ -440,10 +435,10 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 	 * @return
 	 */
 	public GenericBean dispatchFiles(File[] FilesIn) {
-		ArrayList<String> headers = new ArrayList<>(Arrays.asList("container", "fileName", "type", "etat", "rapport", "v_container"));
-		ArrayList<String> types = new ArrayList<>(Arrays.asList("text", "text", "text", "text", "text", "text"));
-		ArrayList<ArrayList<String>> content = new ArrayList<>();
-		ArrayList<ArrayList<String>> contentTemp = new ArrayList<>();
+		ArrayList<String> headers = new ArrayList<String>(Arrays.asList("container", "fileName", "type", "etat", "rapport", "v_container"));
+		ArrayList<String> types = new ArrayList<String>(Arrays.asList("text", "text", "text", "text", "text", "text"));
+		ArrayList<ArrayList<String>> content = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> contentTemp = new ArrayList<ArrayList<String>>();
 		ArrayList<String> l;
 		for (File f : FilesIn) {
 			String entrepot = ManipString.substringBeforeFirst(f.getName(), "_") + "_";
@@ -473,13 +468,13 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 									// vérifier si l'entry est lisible (on
 									// appelle nextEntry)
 									erreur = 0;
-									etat = TraitementState.OK.toString();
+									etat = TraitementEtat.OK.toString();
 									rapport = null;
 									try {
 										currentEntry = tarInput.getNextEntry();
 									} catch (IOException e) {
 										erreur = 2;
-										etat = TraitementState.KO.toString();
+										etat = TraitementEtat.KO.toString();
 										rapport = TraitementRapport.INITIALISATION_CORRUPTED_ENTRY.toString();
 										currentEntry = null;
 									}
@@ -499,16 +494,23 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 							rapport = TraitementRapport.INITIALISATION_CORRUPTED_ARCHIVE.toString();
 							gzis.close();
 							fis.close();
+						} finally {
+							gzis.close();
+							fis.close();
 						}
 					} catch (IOException e1) {
 						erreur = 1;
 						rapport = TraitementRapport.INITIALISATION_CORRUPTED_ARCHIVE.toString();
 						fis.close();
 					}
+					 finally {
+							fis.close();
+						}
 				} catch (IOException e1) {
 					erreur = 1;
 					rapport = TraitementRapport.INITIALISATION_CORRUPTED_ARCHIVE.toString();
 				}
+				
 				// Inscription de l'archive
 				l = new ArrayList<String>();
 				l.add(f.getName());
@@ -519,9 +521,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 					l.add(TraitementTypeFichier.A.toString());
 				}
 				if (erreur > 0) {
-					l.add(TraitementState.KO.toString());
+					l.add(TraitementEtat.KO.toString());
 				} else {
-					l.add(TraitementState.OK.toString());
+					l.add(TraitementEtat.OK.toString());
 				}
 				l.add(rapport);
 				l.add(null);
@@ -530,9 +532,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 				// en erreur sinon, tout en ok
 				for (ArrayList<String> z : contentTemp) {
 					if (erreur > 0) {
-						z.set(headers.indexOf("etat"), TraitementState.KO.toString());
+						z.set(headers.indexOf("etat"), TraitementEtat.KO.toString());
 					} else {
-						z.set(headers.indexOf("etat"), TraitementState.OK.toString());
+						z.set(headers.indexOf("etat"), TraitementEtat.OK.toString());
 					}
 				}
 				content.addAll(contentTemp);
@@ -563,13 +565,13 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 								// vérifier si l'entry est lisible (on appelle
 										// nextEntry)
 										erreur = 0;
-								etat = TraitementState.OK.toString();
+								etat = TraitementEtat.OK.toString();
 								rapport = null;
 								try {
 									currentEntry = tarInput.getNextZipEntry();
 								} catch (IOException e) {
 									erreur = 2;
-									etat = TraitementState.KO.toString();
+									etat = TraitementEtat.KO.toString();
 									rapport = TraitementRapport.INITIALISATION_CORRUPTED_ENTRY.toString();
 									currentEntry = null;
 								}
@@ -605,9 +607,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 					l.add(TraitementTypeFichier.A.toString());
 				}
 				if (erreur > 0) {
-					l.add(TraitementState.KO.toString());
+					l.add(TraitementEtat.KO.toString());
 				} else {
-					l.add(TraitementState.OK.toString());
+					l.add(TraitementEtat.OK.toString());
 				}
 				l.add(rapport);
 				l.add(null);
@@ -616,9 +618,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 				// en erreur sinon, tout en ok
 				for (ArrayList<String> z : contentTemp) {
 					if (erreur > 0) {
-						z.set(headers.indexOf("etat"), TraitementState.KO.toString());
+						z.set(headers.indexOf("etat"), TraitementEtat.KO.toString());
 					} else {
-						z.set(headers.indexOf("etat"), TraitementState.OK.toString());
+						z.set(headers.indexOf("etat"), TraitementEtat.OK.toString());
 					}
 				}
 				content.addAll(contentTemp);
@@ -645,11 +647,11 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 								// for (int c = tarInput.read(); c != -1; c =
 								// tarInput.read()) {}
 								erreur = 0;
-								etat = TraitementState.OK.toString();
+								etat = TraitementEtat.OK.toString();
 								rapport = null;
 							} catch (IOException e) {
 								erreur = 2;
-								etat = TraitementState.KO.toString();
+								etat = TraitementEtat.KO.toString();
 								rapport = TraitementRapport.INITIALISATION_CORRUPTED_ENTRY.toString();
 							}
 							l.add(etat);
@@ -680,9 +682,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 					l.add(TraitementTypeFichier.A.toString());
 				}
 				if (erreur > 0) {
-					l.add(TraitementState.KO.toString());
+					l.add(TraitementEtat.KO.toString());
 				} else {
-					l.add(TraitementState.OK.toString());
+					l.add(TraitementEtat.OK.toString());
 				}
 				l.add(rapport);
 				l.add(null);
@@ -691,9 +693,9 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 				// en erreur sinon, tout en ok
 				for (ArrayList<String> z : contentTemp) {
 					if (erreur > 0) {
-						z.set(headers.indexOf("etat"), TraitementState.KO.toString());
+						z.set(headers.indexOf("etat"), TraitementEtat.KO.toString());
 					} else {
-						z.set(headers.indexOf("etat"), TraitementState.OK.toString());
+						z.set(headers.indexOf("etat"), TraitementEtat.OK.toString());
 					}
 				}
 				content.addAll(contentTemp);
@@ -703,7 +705,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 				l.add(f.getName() + ".tar.gz");
 				l.add(f.getName());
 				l.add(TraitementTypeFichier.D.toString());
-				l.add(TraitementState.OK.toString());
+				l.add(TraitementEtat.OK.toString());
 				l.add(null);
 				l.add(null);
 				LoggerDispatcher.info("Insertion du cas rebus : " + l.toString(), LOGGER);
@@ -718,8 +720,8 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 		LoggerDispatcher.info("Recherche de doublons de fichiers", LOGGER);
 
 		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.dropTable(this.getTablePilTemp()));
-		requete.append(creationTableResultat(this.getTablePil(), this.getTablePilTemp()));
+		requete.append(FormatSQL.dropTable(this.tablePilTemp));
+		requete.append(creationTableResultat(this.tablePil, this.tablePilTemp));
 		String fileName;
 		String container;
 		String type;
@@ -728,7 +730,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 			container = content.get(i).get(headers.indexOf("container"));
 			fileName = content.get(i).get(headers.indexOf("fileName"));
 			if (fileName != null) {
-				requete.append("insert into " + this.getTablePilTemp() + " (container, id_source) values (" + FormatSQL.cast(container) + ","
+				requete.append("insert into " + this.tablePilTemp + " (container, id_source) values (" + FormatSQL.cast(container) + ","
 						+ FormatSQL.cast(fileName) + "); \n");
 			}
 		}
@@ -736,20 +738,20 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 		// detection des doublons de fichiers sur les id_source juste insérés
 		// faut comparer les id_sources en retirant le #nnn représentant le numéro de l'archive (on utilise le regexp_replace pour retirer le #nnn)
 
-		requete.append("select container, id_source FROM " + this.getTablePilTemp() + " where id_source in ( ");
+		requete.append("select container, id_source FROM " + this.tablePilTemp + " where id_source in ( ");
 		requete.append("select distinct id_source from ( ");
-		requete.append("select id_source, count(1) over (partition by id_source) as n from " + this.getTablePilTemp() + " ");
+		requete.append("select id_source, count(1) over (partition by id_source) as n from " + this.tablePilTemp + " ");
 		requete.append(") ww where n>1 ");
 		requete.append(") ");
 		// detection des doublons de fichiers dans la table de pilotage
 		requete.append("UNION ");
-		requete.append("SELECT container, id_source from " + this.getTablePilTemp() + " a ");
-		requete.append("where exists (select 1 from " + this.getTablePil() + " b where a.id_source=b.id_source) \n");
-		requete.append("and a.id_source not in (select distinct id_source from " + this.getTablePil() + " b where b.to_delete='R') ;\n");
+		requete.append("SELECT container, id_source from " + this.tablePilTemp + " a ");
+		requete.append("where exists (select 1 from " + this.tablePil + " b where a.id_source=b.id_source) \n");
+		requete.append("and a.id_source not in (select distinct id_source from " + this.tablePil + " b where b.to_delete='R') ;\n");
 		
 		// récupérer les doublons pour mettre à jour le dispatcher
 		try {
-			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connection, requete)).mapContent().get("id_source");
+			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, requete)).mapContent().get("id_source");
 			
 			// on va parcourir la liste des fichiers
 			// si on retrouve l'id_source dans la liste, on le marque en erreur
@@ -759,25 +761,25 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 					// on passe l'état à KO et on marque l'anomalie
 					if (z.get(headers.indexOf("fileName")) != null) {
 						if (listIdsourceDoublons.contains(z.get(headers.indexOf("fileName")))) {
-							z.set(headers.indexOf("etat"), TraitementState.KO.toString());
+							z.set(headers.indexOf("etat"), TraitementEtat.KO.toString());
 							z.set(headers.indexOf("rapport"), TraitementRapport.INITIALISATION_DUPLICATE.toString());
 						}
 					}
 				}
 			}
 		} catch (SQLException ex) {
-		    LoggerHelper.error( LOGGER, ex, "dispatchFiles()");
+		    LoggerHelper.errorGenTextAsComment(getClass(), "dispatchFiles()", LOGGER, ex);
 		}
 		
 		// on ignore les doublons de l'archive pour les fichiers à rejouer
 		// on recrée un nouvelle liste en ne lui ajoutant pas ces doublons à ignorer
 		requete = new StringBuilder();
-		requete.append("SELECT container, container||'>'||id_source as id_source from " + this.getTablePilTemp() + " a ");
-		requete.append("where exists (select 1 from " + this.getTablePil() + " b where to_delete='R' and a.id_source=b.id_source) ;\n");
+		requete.append("SELECT container, container||'>'||id_source as id_source from " + this.tablePilTemp + " a ");
+		requete.append("where exists (select 1 from " + this.tablePil + " b where to_delete='R' and a.id_source=b.id_source) ;\n");
 
 		ArrayList<ArrayList<String>> content2 = new ArrayList<ArrayList<String>>();
 		try {
-			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connection, requete)).mapContent();
+			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, requete)).mapContent();
 			ArrayList<String> listContainerARejouer = m.get("container");
 			ArrayList<String> listIdsourceARejouer = m.get("id_source");
 
@@ -813,7 +815,7 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 			}
 		
 		} catch (SQLException ex) {
-		    LoggerHelper.error( LOGGER, ex, "dispatchFiles()");
+		    LoggerHelper.errorGenTextAsComment(getClass(), "dispatchFiles()", LOGGER, ex);
 		}
 		content=content2;
 
@@ -832,18 +834,18 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 			fileName = content.get(i).get(headers.indexOf("fileName"));
 			type = content.get(i).get(headers.indexOf("type"));
 			if (type.equals(TraitementTypeFichier.AC.toString())) {
-				requete.append("insert into " + this.getTablePilTemp() + " (container, id_source) values (" + FormatSQL.cast(container) + ","
+				requete.append("insert into " + this.tablePilTemp + " (container, id_source) values (" + FormatSQL.cast(container) + ","
 						+ FormatSQL.cast(fileName) + "); \n");
 			}
 		}
 		soumettreRequete(requete);
 				
 		requete.append("select container ");
-		requete.append(" , coalesce((select max(v_container::integer)+1 from  " + this.getTablePil()
+		requete.append(" , coalesce((select max(v_container::integer)+1 from  " + this.tablePil
 				+ " b where a.container=b.o_container),1)::text as v_container ");
-		requete.append("from (select distinct container from " + this.getTablePilTemp() + " where container is not null) a ");
+		requete.append("from (select distinct container from " + this.tablePilTemp + " where container is not null) a ");
 		try {
-			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connection, requete)).mapContent();
+			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, requete)).mapContent();
 			ArrayList<String> listContainerDoublons = m.get("container");
 			ArrayList<String> listVersionContainerDoublons = m.get("v_container");
 			if (listContainerDoublons != null) {
@@ -855,13 +857,13 @@ public class ApiReceptionService extends AbstractPhaseService  implements IApiSe
 				}
 			}
 		} catch (SQLException ex) {
-		    LoggerHelper.error( LOGGER, ex, "dispatchFiles()");
+		    LoggerHelper.errorGenTextAsComment(getClass(), "dispatchFiles()", LOGGER, ex);
 		}
 		requete.setLength(0);
-		requete.append(FormatSQL.dropTable(this.getTablePilTemp()));
+		requete.append(FormatSQL.dropTable(this.tablePilTemp));
 		soumettreRequete(requete);
+	//	LoggerDispatcher.info("Contenu de content juste avant le retour: " + content.toString(), logger);
 		GenericBean g = new GenericBean(headers, types, content);
 		return g;
 	}
-
 }

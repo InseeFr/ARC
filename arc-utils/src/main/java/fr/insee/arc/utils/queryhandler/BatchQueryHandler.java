@@ -18,7 +18,6 @@ public class BatchQueryHandler extends AbstractQueryHandler implements IQueryHan
     {
         super();
         this.connection = connection;
-        this.onClose = HowToClose.DO_NOT_CLOSE;
     }
 
     /*

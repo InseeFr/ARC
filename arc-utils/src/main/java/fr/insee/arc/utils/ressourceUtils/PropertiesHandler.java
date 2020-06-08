@@ -15,6 +15,8 @@ import lombok.Setter;
 @Setter
 public class PropertiesHandler {
 
+	private static PropertiesHandler singletonInstance = null; 
+	
     /* Database */
     private String databasePoolName;
     private String databaseUrl;
@@ -58,17 +60,22 @@ public class PropertiesHandler {
 
     public void initializeLog() {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
+
         // Using here an XML configuration
         DOMConfigurator.configure(log4jprops);
     }
 
 
     public static PropertiesHandler getInstance() {
-        GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
-
-        PropertiesHandler propertiesHandler = (PropertiesHandler) ctx.getBean("properties");
-        ctx.close();
-        return propertiesHandler;
+    	
+    	if (singletonInstance==null)
+    	{
+    		GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
+    		singletonInstance = (PropertiesHandler) ctx.getBean("properties");
+    		ctx.close();
+    	}
+    	
+        return singletonInstance;
     }
 
 
@@ -189,7 +196,6 @@ public class PropertiesHandler {
 
     public void setLogConfiguration(String logConfiguration) {
         this.logConfiguration = logConfiguration;
-        // TODO use spring Log4jConfigListener ?
         initializeLog();
     }
 

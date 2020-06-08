@@ -3,7 +3,8 @@ package fr.insee.arc.core.util;
 public enum TypeChargement {
     CLEF_VALEUR("clef-valeur"),
     XML("xml"),
-    PLAT("plat");
+    PLAT("plat"),
+    XML_COMPLEXE("xml-complexe");
     
     private String nom;
 
@@ -28,6 +29,8 @@ public enum TypeChargement {
                 return XML;
             case "plat":
                 return PLAT;
+            case "xml-complexe":
+                return XML_COMPLEXE;
             default:
                 return null;
          }

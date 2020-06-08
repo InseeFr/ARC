@@ -4,9 +4,9 @@ public enum Services {
 	QUERY( "query" ),
 	CLIENT( "arcClient" ),
 	TABLE_NAME( "tableName" ),
-	TABLE_CONTENT( "tableContent" );
+	TABLE_CONTENT( "tableContent" ),
+	RUN( "run" );
 
-	
 	private String service;
 	
 	private Services( String name ){

@@ -58,12 +58,6 @@
 	</bean>
 
 
-
-	<!-- Pour que le Spring puisse utiliser l'AOP -->
-	<!-- <bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"></bean> 
-		<bean class ="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/> -->
-
-
 	<bean id="queryHandler"
 		class="fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler"
 		scope="session">

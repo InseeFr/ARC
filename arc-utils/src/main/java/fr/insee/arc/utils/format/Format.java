@@ -16,9 +16,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.utils.textUtils.ICharacterConstant;
+import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
-public class Format implements ICharacterConstant {
+public class Format implements IConstanteCaractere {
 
     @SuppressWarnings("unused")
 	private static final Logger LOGGER = Logger.getLogger(Format.class);
@@ -179,7 +179,7 @@ public class Format implements ICharacterConstant {
      * @return
      */
     public static String untokenize(Object[] array, String separator) {
-        StringBuilder sb = new StringBuilder(EMPTY);
+        StringBuilder sb = new StringBuilder(empty);
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
                 sb.append(separator);
@@ -198,7 +198,7 @@ public class Format implements ICharacterConstant {
      * @return
      */
     public static String untokenize(Collection<?> tokens, String separator) {
-        return tokens == null ? EMPTY : untokenize(tokens.toArray(new Object[tokens.size()]), separator);
+        return tokens == null ? empty : untokenize(tokens.toArray(new Object[tokens.size()]), separator);
     }
 
     /**
@@ -227,7 +227,7 @@ public class Format implements ICharacterConstant {
         return new StringBuilder(avantTout)//
                 .append(avantToken)//
                 .append(untokenize(array, new StringBuilder(apresToken + separateur + avantToken).toString()))//
-                .append(array.length > 0 ? apresToken : EMPTY)//
+                .append(array.length > 0 ? apresToken : empty)//
                 .append(apresTout)//
                 .toString();
     }
@@ -239,12 +239,12 @@ public class Format implements ICharacterConstant {
     /**
      * Transforme le nom d'une balise.</br>
      * Exemple : </br>
-     * <code>n4ds:s21_g00_30_001</code> devient <code>s21_g00_30_001</code>
+     * <code>n4ds:s21.g00.30.001</code> devient <code>s21_g00_30_001</code>
      * @param attribut
      * @return
      */
     public static String toBdRaw(String attribut) {
-        return attribut.substring(attribut.lastIndexOf(':') + 1).replace(".", "_");
+        return attribut.substring(attribut.lastIndexOf(':') + 1).replaceAll("[^A-Za-z0-9_]", "_");
     }
 
     public static String toBdId(String attribut) {
@@ -516,19 +516,13 @@ public class Format implements ICharacterConstant {
     }
 
     public static String sqlListe(Collection<String> liste) {
-        return new StringBuilder(OPENING_PARENTHESIS).append(QUOTE).append(untokenize(liste, QUOTE + COMMA + SPACE + QUOTE)).append(QUOTE)
-                .append(CLOSING_PARENTHESIS).toString();
+        return new StringBuilder(openingParenthesis).append(quote).append(untokenize(liste, quote + comma + space + quote)).append(quote)
+                .append(closingParenthesis).toString();
     }
 
     public static String stringListe(Collection<String> liste) {
-        return new StringBuilder(OPENING_PARENTHESIS).append(untokenize(liste, COMMA + SPACE)).append(CLOSING_PARENTHESIS).toString();
+        return new StringBuilder(openingParenthesis).append(untokenize(liste, comma + space)).append(closingParenthesis).toString();
     }
-
-
-//    public static String getMaxLeafs(int i, int[][] arr, HashMap<String, Integer> colData, List<String> allCols) {
-//        return null;
-//    }
-
 
     public static String toUpperCase(String string) {
         return string == null ? null : string.toUpperCase();

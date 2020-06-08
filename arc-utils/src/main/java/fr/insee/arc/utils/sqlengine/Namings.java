@@ -32,9 +32,7 @@ public final class Namings {
             .createDateTimeFormatter();
 
     private Namings() {
-    }
-
-    ;
+    };
 
     public static final IToken PREFIX_ID = new StringToken("id_");
     public static final BiFunction<String, String, Naming> GET_DEFAULT_NAMING = (schema,
@@ -84,7 +82,7 @@ public final class Namings {
      * @return
      */
     public static final Naming cloneAndChange(Naming naming, IToken key, IToken value) {
-        Naming returned = naming.deepClone();
+        Naming returned = naming.clone();
         returned.tokens().put(key, value);
         return returned;
     }
@@ -96,7 +94,7 @@ public final class Namings {
      * @return
      */
     public static final ContextName cloneAndChange(ContextName contextName, IToken key, IToken value) {
-        ContextName returned = contextName.deepClone();
+        ContextName returned = contextName.clone();
         returned.getNaming().tokens().put(key, value);
         return returned;
     }
@@ -253,10 +251,6 @@ public final class Namings {
         IToken zeTableName = (!aTableName.contains(".")) ? new StringToken(aTableName) : new StringToken(ManipString.substringAfterFirst(aTableName, "."));
         map.put(Tokens.TOK_SCHEMA, zeSchema);
         map.put(Tokens.TOK_TABLE_NAME, zeTableName);
-
-//        map.put(Tokens.TOK_SCHEMA, aSchema);
-//        map.put(Tokens.TOK_TABLE_NAME, new StringToken(aTableName));
-
 
         return new CompoundName(new DefaultNaming(map), SQLTable.SQL_QUALIFIED_TABLENAME_ASSEMBLER);
     }

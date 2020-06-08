@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import fr.insee.arc.core.model.TraitementState;
-import fr.insee.arc.core.model.TypeTraitementPhase;
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -60,27 +60,27 @@ public class ViewPilotage implements Serializable {
 
 		//Check if one of the two headers is date_entree. Because date_entree is not a TypeTraitementPhase
 		try {
-		    TypeTraitementPhase.valueOf(phaseA);
+		    TraitementPhase.valueOf(phaseA);
 		} catch (Exception e) {
 		    return -1;
 		}
 
 		try {
-		    TypeTraitementPhase.valueOf(phaseB);
+			TraitementPhase.valueOf(phaseB);
 		} catch (Exception e) {
 		    return 1;
 		}
 
-		if (TypeTraitementPhase.valueOf(phaseA).getOrder() > TypeTraitementPhase.valueOf(phaseB).getOrder()) {
+		if (TraitementPhase.valueOf(phaseA).getOrdre() > TraitementPhase.valueOf(phaseB).getOrdre()) {
 		    return 1;
 		}
-		if (TypeTraitementPhase.valueOf(phaseA).getOrder() < TypeTraitementPhase.valueOf(phaseB).getOrder()) {
+		if (TraitementPhase.valueOf(phaseA).getOrdre() < TraitementPhase.valueOf(phaseB).getOrdre()) {
 		    return -1;
 		}
-		if (TraitementState.valueOf(etatA).getOrdre() > TraitementState.valueOf(etatB).getOrdre()) {
+		if (TraitementEtat.valueOf(etatA).getOrdre() > TraitementEtat.valueOf(etatB).getOrdre()) {
 		    return 1;
 		}
-		if (TraitementState.valueOf(etatA).getOrdre() < TraitementState.valueOf(etatB).getOrdre()) {
+		if (TraitementEtat.valueOf(etatA).getOrdre() < TraitementEtat.valueOf(etatB).getOrdre()) {
 		    return -1;
 		}
 		return 0;

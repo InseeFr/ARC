@@ -57,9 +57,6 @@ public class UtilitaireDAOIhmQueryHandler extends UtilitaireDAOQueryHandler impl
         return null;
     }
 
-    /**
-     * TODO
-     */
     @Override
     public void setWrapped(Connection connection)
     {

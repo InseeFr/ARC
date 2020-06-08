@@ -1,6 +1,7 @@
 package fr.insee.arc.utils.sqlengine.model;
 
 import org.apache.commons.lang3.StringUtils;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 /**
  *
@@ -17,7 +18,7 @@ public class TempNameSuffix implements IToken
 
     public TempNameSuffix()
     {
-        this.name = new StringBuilder().append("$tmp$").append(Thread.currentThread().getId()).append("$")
+        this.name = new StringBuilder().append(FormatSQL._TMP).append(Thread.currentThread().getId()).append("$")
                 .append(StringUtils.leftPad(String.valueOf(rank.get()), 4, '0')).toString();
         rank.set(rank.get() + 1);
     }

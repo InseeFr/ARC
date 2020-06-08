@@ -10,15 +10,15 @@ import fr.insee.arc.utils.dao.AbstractEntity;
 
 public class RegleMappingEntity extends AbstractEntity {
 
-    private static final String COL_ID_RULE = "id_regle";
-    private static final String COL_ID_NORME = "id_norme";
-    private static final String COL_VALIDITY_INF = "validite_inf";
-    private static final String COL_VALIDITY_SUP = "validite_sup";
-    private static final String COL_VERSION = "version";
-    private static final String COL_PERIODICITY = "periodicite";
-    private static final String COL_OUTPUT_VAR = "variable_sortie";
-    private static final String COL_EXPR_RULE = "expr_regle_col";
-    private static final String COL_COMMENTARY= "commentaire";
+    private static final String colIdRegle = "id_regle";
+    private static final String colIdNorme = "id_norme";
+    private static final String colValiditeInf = "validite_inf";
+    private static final String colValiditeSup = "validite_sup";
+    private static final String colVersion = "version";
+    private static final String colPeriodicite = "periodicite";
+    private static final String colVariableSortie = "variable_sortie";
+    private static final String colExprRegleCol = "expr_regle_col";
+    private static final String colCommentaire = "commentaire";
 
     private static final Set<String> colNames = new HashSet<String>() {
         /**
@@ -27,15 +27,15 @@ public class RegleMappingEntity extends AbstractEntity {
         private static final long serialVersionUID = 3677223986776708059L;
 
         {
-            add(COL_COMMENTARY);
-            add(COL_EXPR_RULE);
-            add(COL_ID_NORME);
-            add(COL_ID_RULE);
-            add(COL_PERIODICITY);
-            add(COL_VALIDITY_INF);
-            add(COL_VALIDITY_SUP);
-            add(COL_OUTPUT_VAR);
-            add(COL_VERSION);
+            add(colCommentaire);
+            add(colExprRegleCol);
+            add(colIdNorme);
+            add(colIdRegle);
+            add(colPeriodicite);
+            add(colValiditeInf);
+            add(colValiditeSup);
+            add(colVariableSortie);
+            add(colVersion);
         }
     };
 
@@ -49,87 +49,87 @@ public class RegleMappingEntity extends AbstractEntity {
 
     public RegleMappingEntity(HashMap<String, ArrayList<String>> mapInputFields) {
         super(mapInputFields);
-        this.setIdRegle(mapInputFields.get(COL_ID_RULE).get(0));
-        this.setIdNorme(mapInputFields.get(COL_ID_NORME).get(0));
-        this.setValiditeInf(mapInputFields.get(COL_VALIDITY_INF).get(0));
-        this.setValiditeSup(mapInputFields.get(COL_VALIDITY_SUP).get(0));
-        this.setVersion(mapInputFields.get(COL_VERSION).get(0));
-        this.setPeriodicite(mapInputFields.get(COL_PERIODICITY).get(0));
-        this.setVariableSortie(mapInputFields.get(COL_OUTPUT_VAR).get(0));
-        this.setExprRegleCol(mapInputFields.get(COL_EXPR_RULE).get(0));
-        this.setCommentaire(mapInputFields.get(COL_COMMENTARY).get(0));
+        this.setIdRegle(mapInputFields.get(colIdRegle).get(0));
+        this.setIdNorme(mapInputFields.get(colIdNorme).get(0));
+        this.setValiditeInf(mapInputFields.get(colValiditeInf).get(0));
+        this.setValiditeSup(mapInputFields.get(colValiditeSup).get(0));
+        this.setVersion(mapInputFields.get(colVersion).get(0));
+        this.setPeriodicite(mapInputFields.get(colPeriodicite).get(0));
+        this.setVariableSortie(mapInputFields.get(colVariableSortie).get(0));
+        this.setExprRegleCol(mapInputFields.get(colExprRegleCol).get(0));
+        this.setCommentaire(mapInputFields.get(colCommentaire).get(0));
     }
 
     public String getIdRegle() {
-        return this.getMap().get(COL_ID_RULE);
+        return this.getMap().get(colIdRegle);
     }
 
     public void setIdRegle(String idRegle) {
-        this.getMap().put(COL_ID_RULE, idRegle);
+        this.getMap().put(colIdRegle, idRegle);
     }
 
     public String getIdNorme() {
-        return this.getMap().get(COL_ID_NORME);
+        return this.getMap().get(colIdNorme);
     }
 
     public void setIdNorme(String idNorme) {
-        this.getMap().put(COL_ID_NORME, idNorme);
+        this.getMap().put(colIdNorme, idNorme);
     }
 
     public String getValiditeInf() {
-        return this.getMap().get(COL_VALIDITY_INF);
+        return this.getMap().get(colValiditeInf);
     }
 
     public void setValiditeInf(String validiteInf) {
-        this.getMap().put(COL_VALIDITY_INF, validiteInf);
+        this.getMap().put(colValiditeInf, validiteInf);
     }
 
     public String getValiditeSup() {
-        return this.getMap().get(COL_VALIDITY_SUP);
+        return this.getMap().get(colValiditeSup);
     }
 
     public void setValiditeSup(String validiteSup) {
-        this.getMap().put(COL_VALIDITY_SUP, validiteSup);
+        this.getMap().put(colValiditeSup, validiteSup);
     }
 
     public String getVersion() {
-        return this.getMap().get(COL_VERSION);
+        return this.getMap().get(colVersion);
     }
 
     public void setVersion(String version) {
-        this.getMap().put(COL_VERSION, version);
+        this.getMap().put(colVersion, version);
     }
 
     public String getPeriodicite() {
-        return this.getMap().get(COL_PERIODICITY);
+        return this.getMap().get(colPeriodicite);
     }
 
     public void setPeriodicite(String periodicite) {
-        this.getMap().put(COL_PERIODICITY, periodicite);
+        this.getMap().put(colPeriodicite, periodicite);
     }
 
     public String getVariableSortie() {
-        return this.getMap().get(COL_OUTPUT_VAR);
+        return this.getMap().get(colVariableSortie);
     }
 
     public void setVariableSortie(String variableSortie) {
-        this.getMap().put(COL_OUTPUT_VAR, variableSortie);
+        this.getMap().put(colVariableSortie, variableSortie);
     }
 
     public String getExprRegleCol() {
-        return this.getMap().get(COL_EXPR_RULE);
+        return this.getMap().get(colExprRegleCol);
     }
 
     public void setExprRegleCol(String exprRegleCol) {
-        this.getMap().put(COL_EXPR_RULE, exprRegleCol);
+        this.getMap().put(colExprRegleCol, exprRegleCol);
     }
 
     public String getCommentaire() {
-        return this.getMap().get(COL_COMMENTARY);
+        return this.getMap().get(colCommentaire);
     }
 
     public void setCommentaire(String commentaire) {
-        this.getMap().put(COL_COMMENTARY, commentaire);
+        this.getMap().put(colCommentaire, commentaire);
     }
 
     @Override

@@ -14,17 +14,17 @@ import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler.OnException;
 public interface IQueryExecutor
 {
     /**
-     * ExÃ©cute une requÃªte qui renvoie un rÃ©sultat, et transforme chaque
-     * enregistrement du rÃ©sultat dans un objet de type {@link T}, en utilisant
+     * Exécute une requête qui renvoie un résultat, et transforme chaque
+     * enregistrement du résultat dans un objet de type {@link T}, en utilisant
      * une factory <i>ad hoc</i>.<br/>
-     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dÃ©pendant
-     * de l'erreur et de la requÃªte.
+     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dépendant
+     * de l'erreur et de la requête.
      *
      * @param onRecord
      *            La fonction qui transforme un enregistrement en un objet de
      *            type {@code T}
      * @param query
-     *            la requÃªte textuelle en SQL
+     *            la requête textuelle en SQL
      * @param onException
      *            le gestionnaire d'exception
      * @return
@@ -37,17 +37,17 @@ public interface IQueryExecutor
             BiConsumer<Throwable, String> onException) throws SQLException;
     
     /**
-     * ExÃ©cute une requÃªte qui renvoie un rÃ©sultat, et transforme chaque
-     * enregistrement du rÃ©sultat dans un objet de type {@link T}, en utilisant
+     * Exécute une requête qui renvoie un résultat, et transforme chaque
+     * enregistrement du résultat dans un objet de type {@link T}, en utilisant
      * une factory <i>ad hoc</i>.<br/>
-     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dÃ©pendant
-     * de l'erreur et de la requÃªte.
+     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dépendant
+     * de l'erreur et de la requête.
      *
      * @param onResult
      *            La fonction qui transforme un enregistrement en un objet de
      *            type {@code T}
      * @param query
-     *            la requÃªte textuelle en SQL
+     *            la requête textuelle en SQL
      * @param onException
      *            le gestionnaire d'exception
      * @return
@@ -60,12 +60,12 @@ public interface IQueryExecutor
             BiConsumer<Throwable, String> onException) throws SQLException;
 
     /**
-     * ExÃ©cute une requÃªte ne renvoyant aucun rÃ©sultat.<br/>
-     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dÃ©pendant
-     * de l'erreur et de la requÃªte.
+     * Exécute une requête ne renvoyant aucun résultat.<br/>
+     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dépendant
+     * de l'erreur et de la requête.
      *
      * @param query
-     *            la requÃªte textuelle en SQL
+     *            la requête textuelle en SQL
      * @param onException
      *            le gestionnaire d'exception
      * @return
@@ -81,7 +81,7 @@ public interface IQueryExecutor
     /**
      *
      * @param howToClose
-     *            doit gÃ©rer la clÃ´ture de la connection.
+     *            doit gérer la clôture de la connection.
      * @see HowToClose#JUST_CLOSE
      * @see HowToClose#ASSERT_CLOSE
      * @see HowToClose#COMMIT

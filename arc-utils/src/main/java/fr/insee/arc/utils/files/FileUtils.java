@@ -9,7 +9,7 @@ import java.nio.file.Path;
 
 import org.apache.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.utils.utils.LoggerHelper;
 
 public class FileUtils {
 
@@ -28,13 +28,12 @@ public class FileUtils {
 	    stream = new RandomAccessFile(file, "rw");
 	    return true;
 	} catch (Exception e) {
-		LoggerDispatcher.warn("Le fichier"+ file.getName()+ "est en cours d'écriture.", LOGGER);
+            LoggerHelper.warnAsComment(LOGGER, e, "Le fichier", file.getName(), "est en cours d'Ã©criture.");
 	} finally {
 	    if (stream != null) {
 		try {
 		    stream.close();
-		} catch (IOException e) {
-		}
+                } catch (IOException e) {}
 	    }
 	}
 	try {

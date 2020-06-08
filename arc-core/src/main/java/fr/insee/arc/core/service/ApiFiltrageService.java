@@ -1,12 +1,17 @@
 package fr.insee.arc.core.service;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.service.engine.mapping.IMappingServiceConstanteToken;
 import fr.insee.arc.core.service.thread.ThreadFiltrageService;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
+import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 /**
  * La table {@code <environnement>_controle_ok} contient les données chargées, normées et contrôlées.<br/>
@@ -21,21 +26,19 @@ import fr.insee.arc.utils.structure.tree.HierarchicalView;
  *
  */
 @Component
-public class ApiFiltrageService extends AbstractThreadRunnerService<ThreadFiltrageService>
-implements IApiServiceWithOutputTable {
-	
-    // maximum number of workers allocated to the service processing
-    private static int MAX_PARALLEL_WORKERS=4;
+public class ApiFiltrageService extends ApiService implements IConstanteCaractere, IMappingServiceConstanteToken {
+    private static final Logger logger = Logger.getLogger(ApiFiltrageService.class);
 
-    @SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(ApiFiltrageService.class);
+        
     protected String seuilExclusion;
     protected HierarchicalView normeToPeriodiciteToValiditeInfToValiditeSupToRegle;
-    private static final Class<ThreadFiltrageService> THREAD_TYPE = ThreadFiltrageService.class ;
+    
+    private int currentIndice;
 
     public ApiFiltrageService() {
-	super();
+        super();
     }
+
     /**
      *
      * @param aCurrentPhase
@@ -45,19 +48,59 @@ implements IApiServiceWithOutputTable {
      * @param aNbEnr
      */
     public ApiFiltrageService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
-        super(THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, null, aNbEnr, paramBatch);
-
-        // fr.insee.arc.threads.filtrage
-        this.nbThread = MAX_PARALLEL_WORKERS;
-
-    }
-    public ApiFiltrageService(Connection connexion, String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
-        super(connexion,THREAD_TYPE, aCurrentPhase, anParametersEnvironment, aEnvExecution, null, aNbEnr, paramBatch);
-
-        // fr.insee.arc.threads.filtrage
-        this.nbThread = MAX_PARALLEL_WORKERS;
-
+        super(aCurrentPhase, anParametersEnvironment, aEnvExecution, null, aNbEnr, paramBatch);
     }
 
+ 
 
+    /**
+     * Exécute le mapping de bout en bout
+     * @throws Exception 
+     */
+    public void executer() throws Exception {
+        
+        this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
+    	
+        this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
+        int nbFichier = getTabIdSource().get(ID_SOURCE).size();
+        
+        // long dateDebut = java.lang.System.currentTimeMillis() ;
+        Connection connextionThread = null;
+        ArrayList<ThreadFiltrageService> threadList = new ArrayList<ThreadFiltrageService>();
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
+        currentIndice = 0;
+
+        LoggerDispatcher.info("** Generation des threads pour le filtrage **", logger);
+        
+        for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
+
+            if (currentIndice % 10 == 0) {
+                LoggerDispatcher.info("filtrage fichier " + currentIndice + "/" + nbFichier, logger);
+            }
+
+            connextionThread = chooseConnection(connextionThread, threadList, connexionList);
+            this.currentIdSource = getTabIdSource().get("id_source").get(currentIndice);
+
+            ThreadFiltrageService r = new ThreadFiltrageService(connextionThread, currentIndice, this);
+            threadList.add(r);
+            r.start();
+            waitForThreads2(MAX_PARALLEL_WORKERS, threadList, connexionList);
+
+        }
+
+        LoggerDispatcher.info("** Attente de la fin des threads **", logger);
+        waitForThreads2(0, threadList, connexionList);
+
+
+
+        LoggerDispatcher.info("** Fermeture des connexions **", logger);
+        for (Connection connection : connexionList) {
+            connection.close();
+        }
+
+
+    }
+
+
+    
 }

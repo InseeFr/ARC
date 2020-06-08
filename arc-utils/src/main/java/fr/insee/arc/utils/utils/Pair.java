@@ -1,6 +1,6 @@
 package fr.insee.arc.utils.utils;
 
-public class Pair<E, F> implements IPair<E, F>
+public class Pair<E, F> implements Cloneable, IPair<E, F>
 {
     private E first;
     private F second;
@@ -45,9 +45,9 @@ public class Pair<E, F> implements IPair<E, F>
         this.second = second;
     }
 
-    public Pair<E, F> deepClone()
+    public Pair<E, F> clone()
     {
-        return new Pair<>(this.getFirst(), this.getSecond());
+        return new Pair<E, F>(this.getFirst(), this.getSecond());
     }
 
     /**
