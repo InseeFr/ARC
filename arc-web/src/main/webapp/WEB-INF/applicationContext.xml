@@ -16,9 +16,9 @@
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
-				<value>classpath:fr/insee/config/arc.properties
+				<value>file:${CATALINA_HOME}/webapps/arc.properties
 				</value>
-				<value>classpath:fr/insee/config/devarc.properties
+				<value>classpath:fr/insee/config/arc.properties
 				</value>
 			</list>
 		</property>

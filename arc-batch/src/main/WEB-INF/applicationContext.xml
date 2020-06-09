@@ -26,7 +26,7 @@
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
-				<value>classpath:fr/insee/config/app.properties
+				<value>classpath:fr/insee/config/arc.properties
 				</value>
 				<value>${properties.path}</value>
 			</list>
