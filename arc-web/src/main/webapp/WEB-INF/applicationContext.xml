@@ -16,16 +16,16 @@
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
-				<value>file:${CATALINA_HOME}/webapps/arc.properties
-				</value>
 				<value>classpath:fr/insee/config/arc.properties
+				</value>
+				<value>file:${CATALINA_BASE}/webapps/arc.properties
+				</value>
+				<value>file:${catalina.base}/wtpwebapps/arc.properties
 				</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 		<property name="ignoreResourceNotFound" value="true" />
-		
-
 	</bean>
 
 	<!-- Gestion des properties -->
