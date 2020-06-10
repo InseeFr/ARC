@@ -143,7 +143,7 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
 		}
     	
     	this.envMap=(Map<String, String>) getSession().get(SessionParameters.ENV_MAP);
-    	this.repertoire = properties.getRootDirectory();
+    	this.repertoire = properties.getBatchParametersDirectory();
     }
 
     public Consumer<? super VObject> putVObject(VObject vObject, Consumer<? super VObject> initialize) {

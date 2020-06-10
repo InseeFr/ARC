@@ -61,7 +61,6 @@
 		<property name="isProd" value="${fr.insee.plateforme.prod:false}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
-		<property name="rootDirectory" value="${fr.insee.arc.repertoire.root}"></property>
     </bean>
 
 </beans>

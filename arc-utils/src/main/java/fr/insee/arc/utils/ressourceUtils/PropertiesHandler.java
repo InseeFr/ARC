@@ -51,7 +51,6 @@ public class PropertiesHandler {
     private String application;
     private String tn;
     /* Directories */
-    private String rootDirectory;
     private String registrationDirectory;
     private String loadingDirectory;
     private String storageDirectory;
@@ -348,17 +347,6 @@ public class PropertiesHandler {
     public void setTn(String tn) {
         this.tn = tn;
     }
-
-
-    public String getRootDirectory() {
-        return rootDirectory;
-    }
-
-
-    public void setRootDirectory(String rootDirectory) {
-        this.rootDirectory = rootDirectory;
-    }
-
 
     public String getRegistrationDirectory() {
         return registrationDirectory;
