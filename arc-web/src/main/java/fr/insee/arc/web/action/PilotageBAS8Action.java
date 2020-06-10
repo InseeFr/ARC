@@ -324,6 +324,13 @@ public class PilotageBAS8Action extends ArcAction {
 		LoggerDispatcher.debug("undoBatch", LOGGER);
 		LoggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 		initialize();
+		
+		if (TraitementPhase.valueOf(this.phaseAExecuter).getOrdre()==0)
+		{
+			resetBAS8();
+			return generateDisplay();
+		}
+		
 		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
 				"arc.ihm", (String) getSession().get(SessionParameters.ENV), this.repertoire,
 				TraitementPhase.INITIALISATION.getNbLigneATraiter());
