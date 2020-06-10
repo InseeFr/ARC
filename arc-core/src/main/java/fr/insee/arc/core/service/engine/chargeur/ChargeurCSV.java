@@ -19,6 +19,7 @@ import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -136,6 +137,14 @@ public class ChargeurCSV implements IChargeur {
         	this.headers=userDefinedHeaders.replaceAll(" ","").split(",");
         }
 
+        // Make headers format to be database compliant
+        for (int i=0;i<headers.length;i++)
+        {
+        	headers[i]=Format.toBdRaw(headers[i]);
+        }
+        
+        
+        
         // On crée la table dans laquelle on va COPYer le tout
         initialiserTable();
 
