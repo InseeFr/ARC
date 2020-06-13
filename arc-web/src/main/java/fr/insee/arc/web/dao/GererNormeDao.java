@@ -434,7 +434,7 @@ public class GererNormeDao implements IDbConstant {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
 		StringBuilder requete = new StringBuilder();
-        requete.append("DELETE FROM arc.ihm_" + table);
+        requete.append("DELETE FROM " + table);
         requete.append(" WHERE id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
         requete.append(" AND periodicite" + ManipString.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
         requete.append(" AND validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
