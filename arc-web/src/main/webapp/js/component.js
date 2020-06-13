@@ -150,13 +150,6 @@ $(document).on('ready readyAgain',function() {
 		applyFormat();
 	}
 
-	
-	
-	if (configJS.indexOf("Render:ConsoleIhm;")>-1)
-	{		
-		$('[name="consoleIhm"]').width(Math.min($('body').width()-$('div[id^="viewPilotage"]').width()-$('div[id^="viewRapport"]').width()-60,500));
-		$('[name="consoleIhm"]').height(Math.max($('div[id^="viewPilotage"]').height(),$('div[id^="viewRapport"]').height())-50);
-	}
 
 /* Fix Bootstrap  not showing the file name with custom-file-input class.*/
 	if (configJS.indexOf("Render:ChooseFileWithName;"))
