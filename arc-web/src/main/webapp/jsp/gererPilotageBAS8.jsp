@@ -154,10 +154,10 @@
 													class="btn btn-primary w-100"
 													scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 													onclick="return alimenterPhase($(this));" type="submit"
-													label="<s:property value='phase'/>"
+													label="<s:text name='%{#phase}'/>"
 													name="phaseAExecuter"
 													value='<s:property value="phase"/>'>
-													<s:property value="phase" />
+													<s:text name='%{#phase}'/>
 												</button>
 										</s:iterator>
 
@@ -172,12 +172,10 @@
 													class="btn btn-primary w-100"
 													scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 													onclick="return alimenterPhase($(this));" type="submit"
-													label="<s:property value='phase'/>"
+													label="<s:text name='RA_%{#phase}'/>"
 													name="phaseAExecuter"
-													value='<s:property value="phase"
-								/>'>
-													RA
-													<s:property value="phase" />
+													value='<s:property value="phase"/>'>
+													<s:text name='RA_%{#phase}'/>
 												</button>
 										</s:iterator>
 									</div>
