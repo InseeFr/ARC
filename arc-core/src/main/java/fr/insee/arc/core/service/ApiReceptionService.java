@@ -400,7 +400,7 @@ public class ApiReceptionService extends ApiService {
 		}
 		requete.append(" (" + FormatSQL.cast(originalContainer) + "," + FormatSQL.cast(newContainer) + "," + FormatSQL.cast(v_container) + ", "
 				+ FormatSQL.cast(fileName) + "," + FormatSQL.cast(dateFormat.format(d)) + "," + FormatSQL.cast(TraitementPhase.RECEPTION.toString())
-				+ "," + FormatSQL.cast("{" + etat + "}") + "," + FormatSQL.cast(formatter.format(d)) + "," + FormatSQL.cast(rapport) + ",1,"+etape+") ");
+				+ "," + FormatSQL.cast("{" + etat + "}") + "," + "to_date("+FormatSQL.cast(formatter.format(d))+",'"+this.bdDateFormat+"')" + "," + FormatSQL.cast(rapport) + ",1,"+etape+") ");
 	}
 
 	/**

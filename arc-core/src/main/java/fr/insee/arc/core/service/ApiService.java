@@ -82,6 +82,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     protected String currentIdSource;
     public int reporting=0;
 
+    protected String bdDateFormat="DD/MM/YYYY H24:MI:SS";
+
     
     protected String idSource;
 
@@ -529,7 +531,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         StringBuilder requete = new StringBuilder();
         Date date = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-//      requete.append("WITH prep as (SELECT a.*, sum(nb_enr) OVER (ORDER BY date_traitement, nb_essais, id_source) as cum_enr ");
+        
         requete.append("WITH prep as (SELECT a.*, count(1) OVER (ORDER BY date_traitement, nb_essais, id_source) as cum_enr ");
         requete.append("FROM " + tablePil + " a ");
         requete.append("WHERE phase_traitement='"+phaseAncien+"'  AND '" + TraitementEtat.OK + "'=ANY(etat_traitement) and etape=1 ) ");
@@ -541,7 +543,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         requete.append(",jointure");
         requete.append(") ");
         requete.append("select container, id_source, date_entree, id_norme, validite, periodicite, '" + phaseNouveau + "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
-        requete.append(", '" + formatter.format(date) + "', rapport, taux_ko, nb_enr, nb_essais, 1 as etape, generation_composite ");
+        requete.append(", to_date('" + formatter.format(date) + "','"+this.bdDateFormat+"') , rapport, taux_ko, nb_enr, nb_essais, 1 as etape, generation_composite ");
         requete.append(",jointure ");
         requete.append("from mark; ");
 
@@ -824,6 +826,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public String marquageFinal(String tablePil, String tablePilTemp, String id_source) {
         StringBuilder requete = new StringBuilder();
         Date date = new Date();
+        
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         requete.append("\n set enable_hashjoin=off; ");
         requete.append("\n UPDATE " + tablePil + " AS a ");
@@ -832,7 +835,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         requete.append("\n \t   validite = b.validite, ");
         requete.append("\n \t   periodicite = b.periodicite, ");
         requete.append("\n \t   taux_ko = b.taux_ko, ");
-        requete.append("\n \t   date_traitement = '" + formatter.format(date) + "', ");
+        requete.append("\n \t   date_traitement = to_date('" + formatter.format(date) + "','"+this.bdDateFormat+"'), ");
         requete.append("\n \t   nb_enr = b.nb_enr, ");
         requete.append("\n \t   rapport = b.rapport, ");
         requete.append("\n \t   validite_inf = b.validite_inf, ");
