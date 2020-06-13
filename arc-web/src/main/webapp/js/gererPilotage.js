@@ -23,6 +23,5 @@ $(document).on('ready readyAgain', function() {
 	$("[name^='viewPilotage']").filter("[name*='selectedColumns']").closest("table").find("tbody").find("tr").find("td").css("background-color","");
 	$("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewPilotage']").filter("[name*='selectedLines']:checked").closest("tr").index()).find("td").eq($("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("th").index()).css("background-color","#aaaabb");
 	$("[name^='viewRapport']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewRapport']").filter("[name*='selectedLines']:checked").closest("tr").index()).css("background-color","#aaaabb");
-	$("[id^='viewPilotage'] .sort:contains(' KO')").css("outline",'3px solid #ff0000');
-	
+	$("[id^='viewPilotage'] .sort:contains(' KO')").attr('style',$("[id^='viewPilotage'] .sort:contains(' KO')").attr('style')+";outline: rgb(255, 0, 0) solid 3px;");
 });
