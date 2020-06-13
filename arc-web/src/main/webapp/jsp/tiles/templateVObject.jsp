@@ -391,9 +391,9 @@
 							class="btn btn-secondary btn-sm "
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
-							scope="<s:property value="#view.sessionName"/>;${param.extraScopeSelect}"
-							value="Rafraîchir"
-						><span class="fa fa-refresh">&nbsp;</span>Rafraîchir</button>
+							scope="<s:property value="#view.sessionName"/>;"
+							value="<s:text name="gui.button.refresh"/>"
+						><span class="fa fa-refresh">&nbsp;</span><s:text name="gui.button.refresh"/></button>
 					</s:if>
 					<s:if test="#btnSee.equals('true')">
 						<button
@@ -403,8 +403,8 @@
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
 							scope="${param.extraScopeSee}"
-							value="Voir"
-						><span class="fa fa-eye-open">&nbsp;</span>Voir</button>
+							value="<s:text name="gui.button.see"/>"
+						><span class="fa fa-eye-open">&nbsp;</span><s:text name="gui.button.see"/></button>
 					</s:if>
 					<s:if test="#btnSort.equals('true')">
 						<button
@@ -414,8 +414,8 @@
 							type="submit"
 							doAction="sort<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;"
-							value="Trier"
-						><span class="fa fa-sort">&nbsp;</span>Trier</button>
+							value="<s:text name="gui.button.sort"/>"
+						><span class="fa fa-sort">&nbsp;</span><s:text name="gui.button.sort"/></button>
 					</s:if>
 					<s:if test="#btnAdd.equals('true')">
 						<button
@@ -424,8 +424,8 @@
 							type="submit"
 							doAction="add<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeAdd}"
-							value="Ajouter"
-						><span class="fa fa-check">&nbsp;</span>Ajouter</button>
+							value="<s:text name="gui.button.add"/>"
+						><span class="fa fa-check">&nbsp;</span><s:text name="gui.button.add"/></button>
 					</s:if>
 					<s:if test="#btnUpdate.equals('true')">
 						<button
@@ -434,8 +434,8 @@
 							type="submit"
 							doAction="update<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeUpdate}"
-							value="Mettre à jour"
-						><span class="fa fa-save">&nbsp;</span>Mettre à jour</button>
+							value="<s:text name="gui.button.update"/>"
+						><span class="fa fa-save">&nbsp;</span><s:text name="gui.button.update"/></button>
 					</s:if>
 					<s:if test="#btnDelete.equals('true')">
 						<button
@@ -444,8 +444,8 @@
 							type="submit"
 							doAction="delete<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeDelete}"
-							value="Supprimer"
-						><span class="fa fa-remove">&nbsp;</span>Supprimer</button>
+							value="<s:text name="gui.button.delete"/>"
+						><span class="fa fa-remove">&nbsp;</span><s:text name="gui.button.delete"/></button>
 					</s:if>
 
 					<s:if test="#otherButton != null">
