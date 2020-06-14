@@ -1014,7 +1014,7 @@ public class PilotageBAS8Action extends ArcAction {
 			List<TraitementPhase> listePhaseC = new ArrayList<>();
 			
 			for (TraitementPhase t : TraitementPhase.values()) {
-				if (t.getOrdre()>=0)
+				if (t.getOrdre()==0 || t.getOrdre()>1)
 					listePhaseC.add(t);
 			}
 			
