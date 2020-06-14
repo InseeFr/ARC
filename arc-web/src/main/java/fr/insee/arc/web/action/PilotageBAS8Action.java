@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
@@ -1014,7 +1015,7 @@ public class PilotageBAS8Action extends ArcAction {
 			List<TraitementPhase> listePhaseC = new ArrayList<>();
 			
 			for (TraitementPhase t : TraitementPhase.values()) {
-				if (t.getOrdre()==0 || t.getOrdre()>1)
+				if (t.getOrdre()>=0)
 					listePhaseC.add(t);
 			}
 			
