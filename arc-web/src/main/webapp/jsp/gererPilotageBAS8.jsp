@@ -65,15 +65,15 @@
 										><s:text name="managementSandbox.fileToLoad"/></label>
 									</div>
 									<div class="input-group-append">										
-										<label class="ml-2" for="entrepotCible"><s:text
+										<label class="ml-4 mt-2 mr-1" for="entrepotCible"><s:text
 												name="managementSandbox.repository" /> :</label>
 										<s:select id="entrepotCible"
 											list="%{viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}"
 											value="%{viewEntrepotBAS8.customValues['entrepotEcriture']}"
 											name="viewEntrepotBAS8.customValues['entrepotEcriture']"
-											theme="simple" emptyOption="true"></s:select>
+											theme="simple" emptyOption="false"></s:select>
 										<button
-											class="btn btn-primary btn-sm"
+											class="btn btn-primary btn-sm ml-4"
 											id="ActionsBAS8.load"
 											type="submit"
 											doAction="filesUploadBAS8"
