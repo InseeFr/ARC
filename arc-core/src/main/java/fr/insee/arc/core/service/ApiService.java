@@ -120,6 +120,15 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
 
 
+    public PropertiesHandler getProperties()
+    {
+    	if (properties==null)
+    	{
+    		this.properties=PropertiesHandler.getInstance();
+    	}
+ 		return properties;
+    }
+    
 
     public  void waitForThreads2(int parallel, ArrayList<? extends ApiService> threadList, ArrayList<Connection> connexionList)
             throws Exception {

@@ -95,7 +95,7 @@ public class ApiInitialisationService extends ApiService {
         LoggerDispatcher.info("rebuildFileSystem", LOGGER);
 
         // parcourir toutes les archives dans le répertoire d'archive
-    	String repertoire = properties.getBatchParametersDirectory();
+    	String repertoire = getProperties().getBatchParametersDirectory();
         String envDir = this.envExecution.replace(".", "_").toUpperCase();
         String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
 
@@ -993,7 +993,7 @@ public class ApiInitialisationService extends ApiService {
                 "select distinct container from " + tablePil + " where to_delete in ('R','RA')")).mapContent().get("container");
 
         if (containerList != null) {
-        	String repertoire = properties.getBatchParametersDirectory();
+        	String repertoire = getProperties().getBatchParametersDirectory();
             String envDir = this.envExecution.replace(".", "_").toUpperCase();
 
             for (String s : containerList) {
@@ -1337,7 +1337,7 @@ public class ApiInitialisationService extends ApiService {
         if (m.get("entrepot").size()>0) {
 
             // 7. Déplacer les archives effacées dans le répertoire de sauvegarde "OLD"
-        	String repertoire = properties.getBatchParametersDirectory();
+        	String repertoire = getProperties().getBatchParametersDirectory();
             String envDir = this.envExecution.replace(".", "_").toUpperCase();
 
             String entrepotSav = "";
@@ -1567,6 +1567,8 @@ public class ApiInitialisationService extends ApiService {
         // MAJ de la table de pilotage
         Integer nbLignes = 0;
 
+        
+        // Delete the selected file entries from the pilotage table from all the phases after the undo phase
         for (TraitementPhase phaseNext : phase.nextPhases()) {
             requete.setLength(0);
             requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = '" + phaseNext + "' ");
@@ -1577,6 +1579,31 @@ public class ApiInitialisationService extends ApiService {
             nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion, requete);
         }
 
+        
+        // Mark the selected file entries to be reload then rebuild the file system for the reception phase
+        if (phase.equals(TraitementPhase.RECEPTION))
+        {
+        	requete.setLength(0);
+            requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = '" + phase + "' ");
+            if (querySelection != null) {
+                requete.append("AND " + FormatSQL.writeInQuery("id_source", querySelection));
+            }
+            try {
+				UtilitaireDao.get("arc").executeImmediate(connexion, requete);
+			} catch (SQLException e) {
+				LoggerDispatcher.error(e, LOGGER);
+			}
+            
+            try {
+                reinstate(this.connexion, this.tablePil);
+            } catch (Exception e) {
+            	LoggerDispatcher.error(e, LOGGER);
+            }
+            
+            nbLignes++;
+        }
+
+        // Delete the selected file entries from the pilotage table from the undo phase
         requete.setLength(0);
         requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = '" + phase + "' ");
         if (querySelection != null) {
@@ -1585,11 +1612,11 @@ public class ApiInitialisationService extends ApiService {
         requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
         nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion, requete);
 
+        // Run a database synchronization with the pilotage table
         try {
 	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
         } catch (Exception e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
+        	LoggerDispatcher.error(e, LOGGER);
         }
 
         if (nbLignes > 0) {
@@ -1604,8 +1631,7 @@ public class ApiInitialisationService extends ApiService {
 	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
 	        maintenancePilotage(this.connexion, this.envExecution, "");
         } catch (Exception e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
+        	LoggerDispatcher.error(e, LOGGER);
         }
     }
 
