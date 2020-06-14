@@ -28,6 +28,7 @@ import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
+import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -457,7 +458,7 @@ public class PilotageBAS8Action extends ArcAction {
 	}
 
 	@Action(value = "/downloadBdBAS8")
-	public String downloadBdBAS8() {
+	public String downloadBdBAS8() throws Exception {
 
 		recupererEnvironnementTravail();
 
@@ -470,91 +471,108 @@ public class PilotageBAS8Action extends ArcAction {
 
 		String[] etatList = etat.split("\\$");
 		String etatBdd = "{" + etat.replace("$", ",") + "}";
-
+		
+				
 		// Sélection des table métiers en fonction de la phase sélectionner (5 pour
 		// mapping 1 sinon)
 		ArrayList<String> tableDownload = new ArrayList<>();
 		try {
-			GenericBean g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-					ApiInitialisationService.requeteListAllTablesEnv((String) getSession().get(SessionParameters.ENV))));
+			GenericBean g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, ApiInitialisationService
+					.requeteListAllTablesEnv((String) getSession().get(SessionParameters.ENV))));
 			if (!g.mapContent().isEmpty()) {
 				ArrayList<String> envTables = g.mapContent().get("table_name");
 				System.out.println("Le contenu de ma envTables : " + envTables);
 				for (String table : envTables) {
 					// selection des tables qui contiennent la phase dans leur nom
-					if (table.toUpperCase().contains(phase.toUpperCase())) {
-						// ajout uniquement si pas déjà présent (pour éviter les doublons dû à table OK
-						// et KO
-						if (!tableDownload.contains(ManipString.substringBeforeLast(table, "_"))) {
-							tableDownload.add(ManipString.substringBeforeLast(table, "_"));
+					for (int i = 0; i < etatList.length; i++) {
+						if (table.toUpperCase().contains("." + phase.toUpperCase() + "_" + etatList[i].toUpperCase())
+								&& !tableDownload.contains(table)) {
+							tableDownload.add(table);
+
 						}
 					}
 				}
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LoggerDispatcher.error(e, LOGGER);
 		}
-		System.out.println("Le contenu de ma tableDownload : " + tableDownload + " pour la phase : " + phase);
+		
+		// List of queries that will be executed to download
+		List<String> tableauRequete=new ArrayList<String>();
+		// Name of the file containing the data download
+		List<String> fileNames = new ArrayList<>();
 
-		String tableauRequete[] = new String[tableDownload.size() + 3];
-		for (int k = 0; k < tableDownload.size(); k++) {
-			// Début de la requete sur les données de la phase
-			StringBuilder requete = new StringBuilder();
-			requete.append("with prep as ( ");
-			requete.append("select id_source, date_entree from "
-					+ getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
-			requete.append(" where phase_traitement='" + phase + "' ");
-			requete.append("AND etat_traitement='" + etatBdd + "' ");
-			requete.append("AND date_entree='" + date + "' ");
+		
+		for (String t : tableDownload) {
+			// Check if the table to download got children
+			if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null,
+					FormatSQL.getAllInheritedTables(ManipString.substringBeforeFirst(t, "."),
+							ManipString.substringAfterFirst(t, ".")) + " LIMIT 1"))) {
 
-			// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
-			// fichiers
-			if (!this.viewFichierBAS8.mapContentSelected().isEmpty()) {
-				ArrayList<String> filesSelected = this.viewFichierBAS8.mapContentSelected().get("id_source");
-				requete.append("AND id_source IN (");
-				for (int i = 0; i < filesSelected.size(); i++) {
-					if (i > 0) {
-						requete.append(",");
+				// Get the files to download
+				StringBuilder requete = new StringBuilder();
+				requete.append(
+						"select id_source from " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
+				requete.append(" where phase_traitement='" + phase + "' ");
+				requete.append("AND etat_traitement='" + etatBdd + "' ");
+				requete.append("AND date_entree='" + date + "' ");
+
+				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
+				// fichiers
+				if (!this.viewFichierBAS8.mapContentSelected().isEmpty()) {
+					ArrayList<String> filesSelected = this.viewFichierBAS8.mapContentSelected().get("id_source");
+					requete.append("AND id_source IN (");
+					for (int i = 0; i < filesSelected.size(); i++) {
+						if (i > 0) {
+							requete.append(",");
+						}
+						requete.append("'" + filesSelected.get(i) + "'");
 					}
-					requete.append("'" + filesSelected.get(i) + "'");
+					requete.append(")");
 				}
-				requete.append(")");
-			}
-			requete.append(" ) ");
-			requete.append("select * from ( ");
 
-			for (int i = 0; i < etatList.length; i++) {
-				if (i > 0) {
-					requete.append("UNION ALL ");
+				ArrayList<String> idSources = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, requete))
+						.mapContent().get("id_source");
+
+				// for each files, generate the download query
+				for (String idSource : idSources) {
+					tableauRequete.add("SELECT * FROM " + ApiService.tableOfIdSource(t, idSource));
+					fileNames.add(t + "_" + idSource);
 				}
-				requete.append("select * from " + tableDownload.get(k) + "_" + etatList[i]
-						+ " a where exists (select 1 from prep b where a.id_source=b.id_source) ");
-			}
-			requete.append(") u ");
-			System.out.println(requete);
-			tableauRequete[k] = requete.toString();
-			// fin de la requete pour les données d'une des tables
-		}
 
-		// Récupération des règles appliquées sur ces fichiers à télécharger
-		StringBuilder requeteRegleC = new StringBuilder();
-		requeteRegleC.append(recupRegle("CONTROLE", getBddTable().getQualifedName(BddTable.ID_TABLE_CONTROLE_REGLE)));
-		tableauRequete[tableauRequete.length - 3] = requeteRegleC.toString();
-		StringBuilder requeteRegleM = new StringBuilder();
-		requeteRegleM.append(recupRegle("MAPPING", getBddTable().getQualifedName(BddTable.ID_TABLE_MAPPING_REGLE)));
-		tableauRequete[tableauRequete.length - 2] = requeteRegleM.toString();
-		StringBuilder requeteRegleF = new StringBuilder();
-		requeteRegleF.append(recupRegle("FILTRAGE", getBddTable().getQualifedName(BddTable.ID_TABLE_FILTRAGE_REGLE)));
-		tableauRequete[tableauRequete.length - 1] = requeteRegleF.toString();
-		// Pour donner des noms aux fichiers csv
-		ArrayList<String> fileNames = new ArrayList<>();
-		for (int k = 0; k < tableDownload.size(); k++) {
-			fileNames.add("Data_" + ManipString.substringAfterFirst(tableDownload.get(k), "_") + "_" + date);
+			}
+			// if no children
+			else {
+				
+				StringBuilder requete = new StringBuilder();
+				requete.append("with prep as ( ");
+				requete.append("select id_source from "
+						+ getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
+				requete.append(" where phase_traitement='" + phase + "' ");
+				requete.append("AND etat_traitement='" + etatBdd + "' ");
+				requete.append("AND date_entree='" + date + "' ");
+
+				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
+				// fichiers
+				if (!this.viewFichierBAS8.mapContentSelected().isEmpty()) {
+					ArrayList<String> filesSelected = this.viewFichierBAS8.mapContentSelected().get("id_source");
+					requete.append("AND id_source IN (");
+					for (int i = 0; i < filesSelected.size(); i++) {
+						if (i > 0) {
+							requete.append(",");
+						}
+						requete.append("'" + filesSelected.get(i) + "'");
+					}
+					requete.append(")");
+				}
+				requete.append(" ) ");
+				requete.append("\n SELECT * from " + t + " a where exists (select 1 from prep b where a.id_source=b.id_source) ");
+				tableauRequete.add(requete.toString());
+				fileNames.add(t);
+			}
+
 		}
-		fileNames.add("Regles_controle");
-		fileNames.add("Regles_mapping");
-		fileNames.add("Regles_filtrage");
+		
 		this.viewFichierBAS8.download(fileNames, tableauRequete);
 
 		return "none";
