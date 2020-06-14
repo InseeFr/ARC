@@ -1985,7 +1985,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
          requete.append("\n SELECT true");
          requete.append("\n FROM pg_proc");
          requete.append("\n WHERE proname  = "+FormatSQL.textToSql(aNom)+" AND pronargs = "+ aNbArg );
-         requete.append("\n ;");
+         requete.append("\n ");
          return requete.toString();
     }
     
@@ -2002,7 +2002,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     	requete.append("\n JOIN pg_class as p ON (inhparent=p.oid) ");
     	requete.append("\n JOIN pg_namespace pn ON pn.oid = p.relnamespace ");
     	requete.append("\n JOIN pg_namespace cn ON cn.oid = c.relnamespace ");
-    	requete.append("\n WHERE p.relname = '"+tableName+"' and pn.nspname = '"+tableSchema+"' ; ");
+    	requete.append("\n WHERE p.relname = '"+tableName+"' and pn.nspname = '"+tableSchema+"' ");
     	return requete.toString();
     }
     
