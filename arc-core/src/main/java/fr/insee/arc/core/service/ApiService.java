@@ -205,11 +205,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public ApiService(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String... paramBatch) {
         LoggerDispatcher.info("** initialiserVariable **", LOGGER);
-        // System.out.println(new java.util.Date());
         try {
             this.connexion = UtilitaireDao.get(poolName).getDriverConnexion();
-            // this.connexion = InseeConfig.getPool(poolName).getConnection();
-            // this.connexion=null;
         } catch (Exception ex) {
             LoggerHelper.error(LOGGER,ApiService.class, "ApiService()",ex);
         }
@@ -218,7 +215,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             this.setParamBatch(paramBatch[0]);
         }
 
-        // Initialisation de la phase;
+        // Initialisation de la phase
         this.setCurrentPhase(aCurrentPhase);
         this.setPreviousPhase(TraitementPhase.valueOf(this.getCurrentPhase()).previousPhase().toString());
         // Table en entrée
@@ -1018,7 +1015,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     	
     	int HEURE_INITIALISATION_PRODUCTION=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
     	
-        // String repertoire=ServletActionContext.getServletContext().getRealPath("/");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
         Date dNow = DateUtils.setHours(new Date(), HEURE_INITIALISATION_PRODUCTION);
 
@@ -1031,7 +1027,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
                             + "', operation=case when operation='R' then 'O' else operation end;");
 
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
+            LoggerHelper.error(LOGGER, e);
         }
     }
     
