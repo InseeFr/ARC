@@ -484,9 +484,6 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
 	return BddTable.SCHEMA_ARC_PROD.equalsIgnoreCase(getEnvironnementTravail());
     }
 
-    public boolean isPlateformeProd() {
-	return properties.getIsProd();
-    }
 
     public String getVersion() {
 	return properties.getVersion();
