@@ -36,18 +36,9 @@ public class PropertiesHandler {
     private String batchParametersDirectory;
     private String batchExecutionEnvironment;
     private String batchArcEnvironment;
-    /* Threads */
-    private int threadsChargement;
-    private int threadsNormage;
-    private int threadsControle;
-    private int threadsFiltrage;
-    private int threadsMapping;
-    private int threadsRegle;
-    private int threadNombre;
     /* Miscellaneous */
     private String version;
     private String schemaReference;
-    private Boolean isProd;
     private String application;
     private String tn;
     /* Directories */
@@ -66,15 +57,7 @@ public class PropertiesHandler {
 
 
     public static PropertiesHandler getInstance() {
-    	
-    	if (singletonInstance==null)
-    	{
-    		GenericXmlApplicationContext ctx = new GenericXmlApplicationContext("applicationContext.xml");
-    		singletonInstance = (PropertiesHandler) ctx.getBean("properties");
-    		ctx.close();
-    	}
-    	
-        return singletonInstance;
+    	return (PropertiesHandler) SpringApplicationContext.getBean("properties");
     }
 
 
@@ -229,77 +212,7 @@ public class PropertiesHandler {
     }
 
 
-    public int getThreadsChargement() {
-        return threadsChargement;
-    }
-
-
-    public void setThreadsChargement(int threadsChargement) {
-        this.threadsChargement = threadsChargement;
-    }
-
-
-    public int getThreadsNormage() {
-        return threadsNormage;
-    }
-
-
-    public void setThreadsNormage(int threadsNormage) {
-        this.threadsNormage = threadsNormage;
-    }
-
-
-    public int getThreadsControle() {
-        return threadsControle;
-    }
-
-
-    public void setThreadsControle(int threadsControle) {
-        this.threadsControle = threadsControle;
-    }
-
-
-    public int getThreadsFiltrage() {
-        return threadsFiltrage;
-    }
-
-
-    public void setThreadsFiltrage(int threadsFiltrage) {
-        this.threadsFiltrage = threadsFiltrage;
-    }
-
-
-    public int getThreadsMapping() {
-        return threadsMapping;
-    }
-
-
-    public void setThreadsMapping(int threadsMapping) {
-        this.threadsMapping = threadsMapping;
-    }
-
-
-    public int getThreadsRegle() {
-        return threadsRegle;
-    }
-
-
-    public void setThreadsRegle(int threadsRegle) {
-        this.threadsRegle = threadsRegle;
-    }
-
-
-    public int getThreadNombre() {
-        return threadNombre;
-    }
-
-
-    public void setThreadNombre(int threadNombre) {
-        this.threadNombre = threadNombre;
-    }
-
-
-    public String getVersion() {
+     public String getVersion() {
         return version;
     }
 
@@ -316,16 +229,6 @@ public class PropertiesHandler {
 
     public void setSchemaReference(String schemaReference) {
         this.schemaReference = schemaReference;
-    }
-
-
-    public Boolean getIsProd() {
-        return isProd;
-    }
-
-
-    public void setIsProd(Boolean isProd) {
-        this.isProd = isProd;
     }
 
 
