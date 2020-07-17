@@ -28,6 +28,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -69,13 +70,30 @@ public class ApiReceptionService extends ApiService {
 	@Override
 	public void executer() {
 		// Déplacement et archivage des fichiers
-		moveClientFiles(this.nbEnr);
+		
+		int maxNumberOfFiles;
+		
+		if (paramBatch!=null)
+		{
+			maxNumberOfFiles = BDParameters.getInt(null, "ApiReceptionService.batch.maxNumberOfFiles",25000);
+		}
+		else
+		{
+			maxNumberOfFiles = BDParameters.getInt(null, "ApiReceptionService.ihm.maxNumberOfFiles",5000);
+		}
 		// Enregistrement des fichiers
-		registerFiles(this.connexion, this.envExecution, this.directoryRoot);
+		GenericBean archiveContent =  moveClientFiles(this.nbEnr, maxNumberOfFiles);
+		if (archiveContent!=null)
+		{
+			registerFiles(this.connexion, this.envExecution, this.directoryRoot,archiveContent);
+		}
 	}
 
 
-	public void moveClientFiles(int fileSizeLimit) {
+	public GenericBean moveClientFiles(int fileSizeLimit, int maxNumberOfFiles) {
+		
+		GenericBean archiveContent=null;
+		
 		LoggerDispatcher.info("moveClientFiles", LOGGER);
 		String receptionDirectoryRoot = this.directoryRoot + this.envExecution.toUpperCase().replace(".", "_") + File.separator
 				+ TraitementPhase.RECEPTION;
@@ -88,10 +106,7 @@ public class ApiReceptionService extends ApiService {
 			// déplacer les fichiers du répertoire de l'entrepot vers le répertoire encours
 			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,
 					"select id_entrepot from arc.ihm_entrepot")).mapContent();
-			
-			// pour limiter le nombre de fichier simultanés : taillemax*coeff
-			int coeffNb=50;
-		
+					
 			if (!entrepotList.isEmpty())
 			{
 			
@@ -107,7 +122,7 @@ public class ApiReceptionService extends ApiService {
 
 			for (String d : entrepotList.get("id_entrepot")) {
 
-				if (fileSize > fileSizeLimit || fileNb> fileSizeLimit*coeffNb) {
+				if (fileSize > fileSizeLimit || fileNb > maxNumberOfFiles) {
 					this.reporting=fileNb;
 					break;
 				}
@@ -147,7 +162,7 @@ public class ApiReceptionService extends ApiService {
 								&& !f.getName().equals(ApiService.FICHIER_MISE_EN_PRODUCTION)
 								)
 						{
-							if (fileSize > fileSizeLimit || fileNb>fileSizeLimit*coeffNb) {
+							if (fileSize > fileSizeLimit || fileNb > maxNumberOfFiles) {
 								this.reporting=fileNb;
 								break;
 							}
@@ -208,7 +223,20 @@ public class ApiReceptionService extends ApiService {
 										}
 										
 										fileSize=fileSize+(int)(fileOutArchive.length()/1024/1024);
-										fileNb=fileNb+1;
+										
+										//
+										GenericBean archiveContentTemp=dispatchFiles(new File[] {new File(dirOut + File.separator + d + "_"+ fname)});
+										
+										if (archiveContent==null)
+										{
+											archiveContent=archiveContentTemp;
+										}
+										else
+										{
+											archiveContent.content.addAll(archiveContentTemp.content);
+										}
+										
+										fileNb=fileNb+archiveContentTemp.content.size();
 
 										
 										// enregistrer le fichier
@@ -216,8 +244,6 @@ public class ApiReceptionService extends ApiService {
 												this.connexion,
 												"INSERT INTO " + dbEnv(this.envExecution) + "pilotage_archive (entrepot,nom_archive) values ('" + d + "','" + fname
 												+ "'); ");
-
-										// nbFile++;
 										break;
 									}
 
@@ -232,13 +258,15 @@ public class ApiReceptionService extends ApiService {
 		} catch (Exception ex) {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "moveClientFiles()", LOGGER, ex);
 		}
+		
+		return archiveContent;
 	}
 
 	/**
 	 * Enregistrer les fichiers en entrée Déplacer les fichier reçus dans les repertoires OK ou pas OK selon le bordereau Supprimer les
 	 * fichiers déjà existants de la table de pilotage Marquer les fichiers dans la table de pilotage
 	 */
-	public void registerFiles(Connection connexion, String anExecutionEnvironment, String directoryRoot) {
+	public void registerFiles(Connection connexion, String anExecutionEnvironment, String directoryRoot, GenericBean archiveContent) {
 		LoggerDispatcher.info("registerFiles", LOGGER);
 		String receptionDirectoryRoot = directoryRoot + anExecutionEnvironment.toUpperCase().replace(".", "_") + File.separator
 				+ TraitementPhase.RECEPTION;
@@ -248,7 +276,7 @@ public class ApiReceptionService extends ApiService {
 		// la bean (fileName,type, etat) contient pour chaque fichier, le type
 		// du fichier et l'action à réaliser
 		LoggerDispatcher.info("dispatchFiles", LOGGER);
-		GenericBean g = dispatchFiles(filesIn);
+		GenericBean g = findDuplicates(archiveContent);
 		
 		try {
 		
@@ -713,7 +741,21 @@ public class ApiReceptionService extends ApiService {
 			}
 		}
 		
-	//	LoggerDispatcher.info("Contenu de content juste avant la localisation des doublons : " + content.toString(), logger);
+		GenericBean g = new GenericBean(headers, types, content);
+		return g;
+	}
+	
+	
+	/**
+	 * Find the duplicates files in the database
+	 * @param fileList
+	 * @return
+	 */
+	public GenericBean findDuplicates(GenericBean fileList) {
+		ArrayList<String> headers = fileList.headers;
+		ArrayList<String> types = fileList.types;
+		ArrayList<ArrayList<String>> content = fileList.content;
+		
 		// Localiser les doublons
 		// Note : l'insertion est redondante mais au niveau métier, c'est
 		// beaucoup plus logique
