@@ -1,30 +1,18 @@
 package fr.insee.arc.ws.actions;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.utils.utils.Services;
-import fr.insee.arc.ws.dao.ClientDao;
 import fr.insee.arc.ws.dao.DAOException;
-import fr.insee.arc.ws.dao.QueryDao;
+import fr.insee.arc.ws.services.ExecuteProcessService;
+import fr.insee.arc.ws.services.GetQueryResultService;
+import fr.insee.arc.ws.services.ImportStep1InitializeClientTablesService;
+import fr.insee.arc.ws.services.ImportStep2GetTableNameService;
+import fr.insee.arc.ws.services.ImportStep3GetTableDataService;
 
 /**
  * Cette classe permet d'initier le requêtage auprès de la base de données.
@@ -32,335 +20,265 @@ import fr.insee.arc.ws.dao.QueryDao;
  * @author N6YF91
  *
  */
-public class InitiateRequest implements IDbConstant{
+public class InitiateRequest implements IDbConstant {
 
-    protected static final Logger LOGGER = Logger.getLogger(InitiateRequest.class);
-    private static final String EXPORT = "EXPORT";
-    private QueryDao queryDao;
-    private ClientDao clientDao;
-    private JSONObject dsnRequest;
-    private List<String> ids;
-    private HashMap<String, String> sqlRequests;
-    private int service;
-    private long timestamp;
+	protected static final Logger LOGGER = Logger.getLogger(InitiateRequest.class);
+	private JSONObject dsnRequest;
 
-    /**
-     * Identifie le service solicité et préparation pour le traitement.
-     *
-     * Voici les formes des JSON reçus pour atteindre un des deux services : <br/>
-     * - service "query": { "type":"jsonwsp/request", "client":"string", "service":"query", "requests": [ { "id":"string", "sql":"string" },
-     * ] } <br/>
-     * - service "arcClient": { "type":"jsonwsp/request",
-     *
-     * "client":"string", "service":"arcClient", "reprise":"boolean", "environnement":"string", "familleNorme":"string",
-     * "validiteInf":"string", "validiteSup":"string", "periodicite":"string" } <br/>
-     *
-     * @param queryDao
-     *            Objet responsable d'obtenir le données auprès de la base de donnée pour le service query.
-     * @param clientDao
-     *            Objet responsable d'obtenir le données auprès de la base de donnée pour le service arcClient.
-     * @param dsnRequest
-     *            Le JSON contenant les paramètres de la requête.
-     */
-    public InitiateRequest(QueryDao queryDao, ClientDao clientDao, JSONObject dsnRequest) {
-        this.queryDao = queryDao;
-        this.clientDao = clientDao;
-        this.timestamp = System.currentTimeMillis();
-        if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.QUERY.getService())) {
-            this.ids = new ArrayList<String>();
-            this.sqlRequests = new HashMap<String, String>();
-            this.service = 0;
-            parseRequests(dsnRequest);
-        } else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.CLIENT.getService())) {
-            this.service = 1;
-            this.dsnRequest = new JSONObject();
-            this.dsnRequest = dsnRequest;
-        } else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.TABLE_NAME.getService())) {
-            this.service = 2;
-            this.dsnRequest = new JSONObject();
-            this.dsnRequest = dsnRequest;
-        } else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.TABLE_CONTENT.getService())) {
-            this.service = 3;
-            this.dsnRequest = new JSONObject();
-            this.dsnRequest = dsnRequest;
-        } else {
-            throw new DAOException("Le JSON n'est pas conforme");
-        }
-    }
+	/**
+	 * Identifie le service solicité et préparation pour le traitement.
+	 *
+	 * Voici les formes des JSON reçus pour atteindre un des deux services : <br/>
+	 * - service "query": { "type":"jsonwsp/request", "client":"string",
+	 * "service":"query", "requests": [ { "id":"string", "sql":"string" }, ] } <br/>
+	 * - service "arcClient": { "type":"jsonwsp/request",
+	 *
+	 * "client":"string", "service":"arcClient", "reprise":"boolean",
+	 * "environnement":"string", "familleNorme":"string", "validiteInf":"string",
+	 * "validiteSup":"string", "periodicite":"string" } <br/>
+	 *
+	 * @param queryDao   Objet responsable d'obtenir le données auprès de la base de
+	 *                   donnée pour le service query.
+	 * @param clientDao  Objet responsable d'obtenir le données auprès de la base de
+	 *                   donnée pour le service arcClient.
+	 * @param dsnRequest Le JSON contenant les paramètres de la requête.
+	 */
+	public InitiateRequest(JSONObject dsnRequest) {
+		this.dsnRequest = dsnRequest;
+	}
 
-    /**
-     * Cette fonction permet de parser les requêtes sql contenue dans le fichier JSON reçu.
-     *
-     * @param dsnRequest
-     */
-    private void parseRequests(JSONObject dsnRequest) {
-        JSONObject sqlRequest = new JSONObject();
-        for (int i = 0; i < dsnRequest.getJSONArray(JsonKeys.REQUESTS.getKey()).length(); i++) {
-            sqlRequest = dsnRequest.getJSONArray(JsonKeys.REQUESTS.getKey()).getJSONObject(i);
-            if (this.sqlRequests.containsKey(sqlRequest.getString(JsonKeys.ID.getKey())) == false) {
-                if (sqlRequest.getString(JsonKeys.ID.getKey()) != "") {
-                    this.ids.add("temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_"
-                            + sqlRequest.getString(JsonKeys.ID.getKey()));
-                    this.sqlRequests.put(
-                            "temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_"
-                                    + sqlRequest.getString(JsonKeys.ID.getKey()), sqlRequest.getString(JsonKeys.SQL.getKey()));
-                } else {
-                    this.ids.add("temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_r" + i);
-                    this.sqlRequests.put("temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_r" + i,
-                            sqlRequest.getString(JsonKeys.SQL.getKey()));
-                }
-            } else {
-                throw new DAOException("Id présent plusieurs fois : " + sqlRequest.getString(JsonKeys.ID.getKey()));
-            }
-        }
-    }
+	/**
+	 * Initie le requêtage en faisant appel au DAO.
+	 *
+	 * @param resp Le flux dans lequel on écrit la réponse.
+	 */
+	public void doRequest(SendResponse resp) {
+		LoggerHelper.debugDebutMethodeAsComment(getClass(), "doRequest()", LOGGER);
 
-    /**
-     * Initie le requêtage en faisant appel au DAO.
-     *
-     * @param resp
-     *            Le flux dans lequel on écrit la réponse.
-     */
-    @SQLExecutor
-    public void doRequest(SendResponse resp) {
-        LoggerHelper.debugDebutMethodeAsComment(getClass(), "doRequest()", LOGGER);
+		if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.QUERY.getService())) {
+			new GetQueryResultService(dsnRequest).buildParam().execute(resp);
+		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.CLIENT.getService())) {
+			new ImportStep1InitializeClientTablesService(dsnRequest).buildParam().execute(resp);
+		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.TABLE_NAME.getService())) {
+			new ImportStep2GetTableNameService(dsnRequest).buildParam().execute(resp);
+		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.TABLE_CONTENT.getService())) {
+			new ImportStep3GetTableDataService(dsnRequest).buildParam().execute(resp);
+		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.RUN.getService())) {
+			new ExecuteProcessService(dsnRequest).buildParam().execute(resp);
+		}
+		else {
+			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"Le service n'est pas reconnu.\"}");
+			resp.endSending();
+			throw new DAOException("Le JSON n'est pas conforme");
+		}
+	}
 
-        String environnement;
-        String client;
-        boolean reprise;
+	// resp.send("{\"type\":\"jsonwsp/response\",\"responses\":[");
+	// int i = 0;
+	// for (ArrayList<String> tableMetier : tablesMetierNames) {
+	// String tableMetierString = tableMetier.get(0);
+	// i++;
+	// this.clientDao.getResponse(this.timestamp, client, tableMetierString,
+	// environnement, resp);
+	// if (i < tablesMetierNames.size()) {
+	// resp.send(",");
+	// }
+	// }
+	//
+	// resp.send("],\"" + JsonKeys.NOMENCLATURES.getKey() + "\":[");
+	// this.clientDao.sendNmcl(environnement, resp);
+	// resp.send("],\"" + JsonKeys.TABLEMETIER.getKey() + "\":[");
+	// this.clientDao.sendTableMetier(environnement, resp);
+	// resp.send("],\"" + JsonKeys.VARMETIER.getKey() + "\":[");
+	// this.clientDao.sendVarMetier(environnement, resp);
+	// resp.send("]}");
 
-        // Identifie le service
-        switch (this.service) {
-        // Cas requête générique :
-        case 0:
-            try {
-                this.queryDao.createImage(this.ids, this.sqlRequests, this.timestamp);
-                resp.send("{\"type\":\"jsonwsp/response\",\"responses\":[");
-                int i = 0;
-                for (String id : this.ids) {
-                    i++;
-                    resp.send("{\"" + JsonKeys.ID.getKey() + "\":\"");
-                    for (int j = 3; j < id.split("_").length; j++) {
-                        if (j != 3) {
-                            resp.send("_");
-                        }
-                        resp.send(id.split("_")[j]);
-                    }
-                    resp.send("\",\"" + JsonKeys.TABLE.getKey() + "\":");
-                    this.queryDao.doRequest(id, resp, this.timestamp);
-                    resp.send("}");
-                    if (this.ids.size() != i) {
-                        resp.send(",");
-                    }
-                }
-                resp.send("]}");
-                resp.endSending();
-            } catch (DAOException e) {
-                resp.send("{\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
-                resp.endSending();
-            }
-            break;
+	// ajouter la table normage
+	// ArrayList<String> tableNormage=new ArrayList<String>();
+	// tableNormage.add("normage_ok");
+	//
+	//
+	// this.clientDao.addImage(this.timestamp, client, environnement, tableNormage,
+	// tablesImagesCrees);
 
-        // requete arc 1
-        case 1:
-            ArrayList<ArrayList<String>> tablesMetierNames = new ArrayList<ArrayList<String>>();
-            environnement = this.dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());
-            client = this.dsnRequest.getString(JsonKeys.CLIENT.getKey());
-            reprise = this.dsnRequest.getBoolean(JsonKeys.REPRISE.getKey());
+	// Ici on lance un thread parallèle pour decharger les données envoyées dans des
+	// fichiers de sauvegarde
+	// ... et pour supprimer les tables de travail dans la base.
+	// tablesASupprimer.addAll(tablesImagesCrees);
+	//
+	// // on ajoute la table id_source
+	// String nomTableIdSource = ApiService.dbEnv(environnement) + client + "_" +
+	// timestamp + "_id_source";
+	// tablesASupprimer.add(nomTableIdSource);
+	//
+	//
+	// //On n'exporte les tables que si la paramètre json reprise = false
+	// if(!reprise){
+	// tablesAExporter.addAll(tablesImagesCrees);
+	// }
+	//
+	//
+	// dechargerDonneesDansFichiers(tablesAExporter,tablesASupprimer);
 
-            try {
+//    /**
+//     * Decharger le contenu de tables metiers dans des fichiers
+//     *
+//     * @param tablesAExporter
+//     *            : les tables que l'on veut decharger
+//     * @param tablesASupprimer
+//     */
+//    private void dechargerDonneesDansFichiers(ArrayList<String> tablesAExporter, ArrayList<String> tablesASupprimer) {
+//
+//        String client = this.dsnRequest.getString(JsonKeys.CLIENT.getKey());
+//        String environnement = this.dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());
+//        List<String> requetes = new ArrayList<String>();
+//
+//        // Chemin de stockage de l'archive
+//        String pathZip = null;
+//        // Nom de strockage de l'archive
+//        String nomZip = null;
+//
+//        // Si on a des tables à exporter, on construit les requêtes
+//        // qui serviront pour la suite du traitement + instanciation du pathZip et du nomZip
+//        if (!tablesAExporter.isEmpty()) {
+//            requetes = getRequetes(tablesAExporter);
+//
+//            /* Constitution du nom du zip et du path */
+//            nomZip = "wsimport_" + client.toLowerCase() + "_" + this.timestamp + ".zip";
+//            pathZip = InseeConfig.getConfig().getString("fr.insee.arc.batch.parametre.repertoire") + environnement.replace(".", "_").toUpperCase()
+//                    + File.separator + EXPORT;
+//
+//            // vérifier si le directory existe. Sinon le créer
+//            File f = new File(pathZip);
+//            if (!f.exists()) {
+//                f.mkdir();
+//            }
+//
+//            pathZip = pathZip + File.separator;
+//        }
+//
+//        // lancement de l'export
+//        ExportThread exportThread = new ExportThread(tablesAExporter, requetes, pathZip, nomZip, tablesASupprimer);
+//        if (!exportThread.isAlive()) {
+//            exportThread.start();
+//        }
+//
+//    }
+//
+//    /**
+//     * Création des requêtes de récupération des données envoyées par le WS
+//     *
+//     * @param tablesMetierNames
+//     * @return liste de requêtes
+//     */
+//    private List<String> getRequetes(ArrayList<String> tablesMetierNames) {
+//        List<String> requetes = new ArrayList<>();
+//
+//        for (String tableName : tablesMetierNames) {
+//            // il s'agit d'une table image et on récupère toute la table
+//            requetes.add("SELECT  * FROM  " + tableName + " ");
+//        }
+//
+//        return requetes;
+//    }
+//
+//    /**
+//     * Création d'un thread asynchrone pour ne pas que le client attende la fin de l'opération de décharge
+//     *
+//     * */
+//    public static class ExportThread extends Thread {
+//
+//        /** Liste des tables à exporter */
+//        private List<String> tableAExporter;
+//
+//        /** Liste des tables à supprimer */
+//        private List<String> tablesASupprimer;
+//
+//        /** Liste des requetes pour l'export */
+//        private List<String> requetes;
+//        /** Nom et chemin du zip */
+//        private String nomZip;
+//        private String pathZip;
+//
+//        /** Logger */
+//        public static final Logger LOGGER = Logger.getLogger(InitiateRequest.class);
+//
+//        public ExportThread(List<String> tableAExporter, List<String> requetes, String pathZip, String nomZip, List<String> tablesASupprimer) {
+//
+//            super();
+//            this.tableAExporter = tableAExporter;
+//            this.requetes = requetes;
+//            this.pathZip = pathZip;
+//            this.nomZip = nomZip;
+//            this.tablesASupprimer = tablesASupprimer;
+//        }
+//
+//        @Override
+//        public void run() {
+//            try {
+//                // Si on a des tables à exporter
+//                if (!this.tableAExporter.isEmpty()) {
+//                    export(this.tableAExporter, this.requetes, this.pathZip, this.nomZip);
+//                }
+//                // On supprime les tables créees au cours du traitement
+//                supprimerTablesTemp(this.tablesASupprimer);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//
+//        /**
+//         *
+//         * //TODO : Méthode à exporter dans un service
+//         *
+//         * Téléchargement dans un zip de N fichiers csv, les données étant extraites de la base de données
+//         *
+//         * @param tableNames
+//         * @param requetes
+//         * @param nomApplicationCliente
+//         * @param environnementSource
+//         * @throws SQLException
+//         * @throws ClassNotFoundException       * @throws IOException
+//         */
+//        public void export(List<String> tableNames, List<String> requetes, String pathZip, String nomZip) throws Exception {
+//
+//            File zipFile = new File(Paths.get(pathZip).resolve(nomZip).toString());
+//            FileOutputStream fop = new FileOutputStream(zipFile);
+//            ZipOutputStream zos = new ZipOutputStream(fop);
+//            Connection connexion = UtilitaireDao.get(poolName).getDriverConnexion();
+//
+//            try {
+//                for (int i = 0; i < tableNames.size(); i++) {
+//                    // Ajout d'un nouveau fichier
+//                    ZipEntry entry = new ZipEntry(tableNames.get(i) + ".csv");
+//                    zos.putNextEntry(entry);
+//                    UtilitaireDao.get(poolName).outStreamRequeteSelect(connexion, requetes.get(i), zos);
+//                    zos.closeEntry();
+//                }
+//
+//            } finally {
+//                zos.close();
+//                fop.flush();
+//                fop.close();
+//                connexion.close();
+//                connexion = null;
+//            }
+//
+//        }
+//
+//        private void supprimerTablesTemp(List<String> nomTablesASupprimer) throws Exception {
+//
+//            Connection connexion = UtilitaireDao.get(poolName).getDriverConnexion();
+//
+//            try {
+//                UtilitaireDao.get("arc").dropTable(connexion, nomTablesASupprimer);
+//            } finally {
+//                connexion.close();
+//            }
+//
+//        }
 
-                if (!environnement.equalsIgnoreCase("arc")) {
-                    this.clientDao.verificationClientFamille(this.timestamp, client, this.dsnRequest.getString(JsonKeys.FAMILLE.getKey()),
-                            environnement);
-                    tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.timestamp, this.dsnRequest);
-                    this.clientDao.createImages(this.timestamp, client, environnement, tablesMetierNames);
-                    this.clientDao.createTableMetier(this.timestamp, client,this.dsnRequest.getString(JsonKeys.FAMILLE.getKey()), environnement);
-                    this.clientDao.createVarMetier(this.timestamp, client, this.dsnRequest.getString(JsonKeys.FAMILLE.getKey()), environnement);
-                }
-                this.clientDao.createNmcl(this.timestamp, client, environnement);
-                this.clientDao.createTableFamille(this.timestamp, client, environnement);
-                this.clientDao.createTablePeriodicite(this.timestamp, client, environnement);
-                // on renvoie l'id du client avec son timestamp
-                resp.send(ApiService.dbEnv(environnement) + client + "_" + this.timestamp);
-                resp.endSending();
-
-            } catch (DAOException e) {
-                e.printStackTrace();
-                resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
-                resp.endSending();
-            }
-            break;
-
-        case 2:
-            try {
-                StringBuilder type = new StringBuilder();
-
-                client = this.dsnRequest.getString(JsonKeys.CLIENT.getKey());
-                environnement = this.dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());
-                reprise = this.dsnRequest.getBoolean(JsonKeys.REPRISE.getKey());
-
-                String tableName = this.clientDao.getAClientTable(client);
-
-                if (tableName == null) {
-                    tableName = this.clientDao.getIdTable(client);
-
-                    if (!reprise) {
-                        this.clientDao.updatePilotage(this.timestamp, environnement, tableName);
-                    }
-
-                    this.clientDao.dropTable(tableName);
-                    tableName = "";
-                } else {
-                    // récupération du type
-                    ArrayList<ArrayList<String>> l = UtilitaireDao.get("arc").executeRequest(null, "select * from " + tableName + " where false ");
-
-                    for (int j = 0; j < l.get(0).size(); j++) {
-                        if (j > 0) {
-                            type.append(",");
-                        }
-
-                        for (int i = 0; i < l.size(); i++) {
-                            type.append(" " + l.get(i).get(j));
-                        }
-                    }
-                }
-
-                // renvoie un nom de table du client si il en reste une
-                resp.send(tableName + " " + type);
-                resp.endSending();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
-                resp.endSending();
-            }
-
-            break;
-
-        case 3:
-            try {
-                client = this.dsnRequest.getString(JsonKeys.CLIENT.getKey());
-
-                UtilitaireDao.get("arc").exporting(null, client, resp.getWr(), false);
-                this.clientDao.dropTable(client);
-
-                resp.endSending();
-
-                // renvoie un nom de table du client si il en reste une
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
-                resp.endSending();
-            }
-
-            break;
-
-        default:
-            resp.send("\"type\":\"jsonwsp/response\",\"error\":\"Le service n'est pas reconnu.\"}");
-            resp.endSending();
-            break;
-        }
-    }
-
-
-  
-    /**
-     * Création d'un thread asynchrone pour ne pas que le client attende la fin de l'opération de décharge
-     *
-     * */
-    public static class ExportThread extends Thread {
-
-        /** Liste des tables à exporter */
-        private List<String> tableAExporter;
-
-        /** Liste des tables à supprimer */
-        private List<String> tablesASupprimer;
-
-        /** Liste des requetes pour l'export */
-        private List<String> requetes;
-        /** Nom et chemin du zip */
-        private String nomZip;
-        private String pathZip;
-
-        /** Logger */
-        public static final Logger LOGGER = Logger.getLogger(InitiateRequest.class);
-
-        public ExportThread(List<String> tableAExporter, List<String> requetes, String pathZip, String nomZip, List<String> tablesASupprimer) {
-
-            super();
-            this.tableAExporter = tableAExporter;
-            this.requetes = requetes;
-            this.pathZip = pathZip;
-            this.nomZip = nomZip;
-            this.tablesASupprimer = tablesASupprimer;
-        }
-
-        @Override
-        public void run() {
-            try {
-                // Si on a des tables à exporter
-                if (!this.tableAExporter.isEmpty()) {
-                    export(this.tableAExporter, this.requetes, this.pathZip, this.nomZip);
-                }
-                // On supprime les tables créees au cours du traitement
-                supprimerTablesTemp(this.tablesASupprimer);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-
-        /**
-         *
-         * //TODO : Méthode à exporter dans un service
-         *
-         * Téléchargement dans un zip de N fichiers csv, les données étant extraites de la base de données
-         *
-         * @param tableNames
-         * @param requetes
-         * @param nomApplicationCliente
-         * @param environnementSource
-         * @throws SQLException
-         * @throws ClassNotFoundException
-         * @throws IOException
-         */
-        public void export(List<String> tableNames, List<String> requetes, String pathZip, String nomZip) throws Exception {
-
-            File zipFile = new File(Paths.get(pathZip).resolve(nomZip).toString());
-            
-            Connection connexion = UtilitaireDao.get(poolName).getDriverConnexion();
-
-            try (FileOutputStream fop = new FileOutputStream(zipFile)) {
-        	ZipOutputStream zos = new ZipOutputStream(fop);
-                for (int i = 0; i < tableNames.size(); i++) {
-                    // Ajout d'un nouveau fichier
-                    ZipEntry entry = new ZipEntry(tableNames.get(i) + ".csv");
-                    zos.putNextEntry(entry);
-                    UtilitaireDao.get(poolName).outStreamRequeteSelect(connexion, requetes.get(i), zos);
-                    zos.closeEntry();
-                }
-
-            } finally {
-                connexion.close();
-                connexion = null;
-            }
-
-        }
-
-        private void supprimerTablesTemp(List<String> nomTablesASupprimer) throws Exception {
-
-            Connection connexion = UtilitaireDao.get(poolName).getDriverConnexion();
-
-            try {
-                UtilitaireDao.get("arc").dropTable(connexion, nomTablesASupprimer);
-            } finally {
-                connexion.close();
-            }
-
-        }
-
-    }
+//    }
 
 }

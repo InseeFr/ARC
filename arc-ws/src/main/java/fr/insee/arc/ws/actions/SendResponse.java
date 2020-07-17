@@ -99,14 +99,6 @@ public class SendResponse {
 	public SendResponse( HttpServletResponse response ){
 		try {
 			this.wr=response.getOutputStream();
-
-//			response.addHeader("Content-Encoding", "gzip");
-////			response.setCharacterEncoding("UTF-8");
-//			this.wr = new GZIPOutputStream( response.getOutputStream() ){
-//				{
-//					this.def.setLevel(Deflater.BEST_SPEED);
-//				}
-//			};
 		}
 		catch (IOException e) {
 			e.printStackTrace();

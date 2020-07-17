@@ -1,7 +1,7 @@
 package fr.insee.arc.ws.dao;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,7 +134,7 @@ public class QueryDaoImpl implements QueryDao {
         if (connection != null) {
             try {
                 connection.close();
-            } catch (SQLException ex) {
+            } catch (Exception ex) {
                 LoggerHelper.errorGenTextAsComment(QueryDaoImpl.class, "close(Connection)", LOGGER, ex);
             }
         }

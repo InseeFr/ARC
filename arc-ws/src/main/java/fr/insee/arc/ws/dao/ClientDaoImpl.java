@@ -1,7 +1,7 @@
 package fr.insee.arc.ws.dao;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -555,7 +555,7 @@ public class ClientDaoImpl implements ClientDao {
         if (connection != null) {
             try {
                 connection.close();
-            } catch (SQLException ex) {
+            } catch (Exception ex) {
                 LoggerHelper.errorGenTextAsComment(ClientDaoImpl.class, "close(Connection)", LOGGER, ex);
             }
         }
