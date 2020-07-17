@@ -965,33 +965,37 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return a list of string with the {@link Class} and {@link Method} of all
 	 *         method with the {@link SQLExecutor} in the statcktrace
 	 */
+	// TODO : totally bugged
 	private List<String> findSQLQueryContructor() {
-		Set<Pair<Class<?>, Method>> methodsWithTheAnnotation = new HashSet<>();
-		StackTraceElement[] stacktraces = Thread.currentThread().getStackTrace();
-		for (StackTraceElement stackTraceElement : stacktraces) {
-			Class<?> aClass;
-			try {
-				aClass = Class.forName(stackTraceElement.getClassName());
-				Method[] methods = aClass.getMethods();
-				String methodName = stackTraceElement.getMethodName();
-				for (Method method : methods) {
-					// Can't directly get the methiod, only it's name so have to check the name with
-					// the methode in the stacktrace :(
-					if (method.getName().equals(methodName)) {
-						if (method.getAnnotation(SQLExecutor.class) != null) {
-							methodsWithTheAnnotation.add(new Pair<Class<?>, Method>(aClass, method));
-						}
-					}
-				}
-			} catch (ClassNotFoundException e) {
-				LoggerHelper.error(LOGGER, "Error when searching for annotation to better log");
-			}
-
-		}
-
-		return methodsWithTheAnnotation.stream()
-				.map(pair -> pair.getFirst().getSimpleName() + " " + pair.getSecond().getName())
-				.collect(Collectors.toList());
+//		Set<Pair<Class<?>, Method>> methodsWithTheAnnotation = new HashSet<>();
+//		StackTraceElement[] stacktraces = Thread.currentThread().getStackTrace();
+//		for (StackTraceElement stackTraceElement : stacktraces) {
+//			Class<?> aClass;
+//			try {
+//				aClass = Class.forName(stackTraceElement.getClassName());
+//				Method[] methods = aClass.getMethods();
+//				String methodName = stackTraceElement.getMethodName();
+//				for (Method method : methods) {
+//					// Can't directly get the methiod, only it's name so have to check the name with
+//					// the methode in the stacktrace :(
+//					if (method.getName().equals(methodName)) {
+//						if (method.getAnnotation(SQLExecutor.class) != null) {
+//							methodsWithTheAnnotation.add(new Pair<Class<?>, Method>(aClass, method));
+//						}
+//					}
+//				}
+//			} catch (ClassNotFoundException e) {
+//				LoggerHelper.error(LOGGER, "Error when searching for annotation to better log");
+//			}
+//
+//		}
+//
+//		return methodsWithTheAnnotation.stream()
+//				.map(pair -> pair.getFirst().getSimpleName() + " " + pair.getSecond().getName())
+//				.collect(Collectors.toList());
+		
+		return new ArrayList<String>();
+		
 	}
 
 	/**
