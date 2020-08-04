@@ -12,7 +12,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class SpringApplicationContext implements ApplicationContextAware {
 
-  private static ApplicationContext CONTEXT;
+  private static ApplicationContext springContext;
 
   /**
    * This method is called from within the ApplicationContext once it is 
@@ -20,7 +20,7 @@ public class SpringApplicationContext implements ApplicationContextAware {
    * @param context a reference to the ApplicationContext.
    */
   public void setApplicationContext(ApplicationContext context) throws BeansException {
-    CONTEXT = context;
+    springContext = context;
   }
 
   /**
@@ -33,7 +33,8 @@ public class SpringApplicationContext implements ApplicationContextAware {
    * @param beanName the name of the bean to get.
    * @return an Object reference to the named bean.
    */
-  public static Object getBean(String beanName) {
-    return CONTEXT.getBean(beanName);
+  public static Object getBean(String beanName, Object... args) {
+    return springContext.getBean(beanName, args);
   }
+
 }

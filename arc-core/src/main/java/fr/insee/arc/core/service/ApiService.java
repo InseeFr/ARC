@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -55,6 +56,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     // racine xml
     public static final String ROOT="root";
 
+    @Autowired
 	protected PropertiesHandler properties;
 
     
@@ -119,16 +121,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
     }
 
-
-    public PropertiesHandler getProperties()
-    {
-    	if (properties==null)
-    	{
-    		this.properties=PropertiesHandler.getInstance();
-    	}
- 		return properties;
-    }
-    
 
     public  void waitForThreads2(int parallel, ArrayList<? extends ApiService> threadList, ArrayList<Connection> connexionList)
             throws Exception {

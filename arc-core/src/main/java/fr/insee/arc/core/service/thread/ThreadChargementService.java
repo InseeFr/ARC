@@ -200,7 +200,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @throws Exception
      */
     public void export(String table) throws Exception {
-   	String repertoire = getProperties().getBatchParametersDirectory();
+   	String repertoire = properties.getBatchParametersDirectory();
 	String envDir = this.getEnvExecution().replace(".", "_").toUpperCase();
 	String dirOut = repertoire + envDir + File.separator + "EXPORT";
 	File f = new File(dirOut);

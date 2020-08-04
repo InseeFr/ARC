@@ -12,6 +12,12 @@
 	<context:annotation-config></context:annotation-config>
 	<context:component-scan base-package="fr.insee.arc.web"></context:component-scan>
 	<context:component-scan base-package="fr.insee.arc.core"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.utils"></context:component-scan>	
+	
+	<bean id="utilitaireDao" class="fr.insee.arc.utils.dao.UtilitaireDao">
+  	<constructor-arg index="0" value="arc" />
+	</bean>
+	
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
@@ -43,19 +49,13 @@
 		<property name="logLevel" value="${fr.insee.arc.log.niveau}"></property>
 		<property name="logConfiguration" value="${fr.insee.arc.log.configuration}"></property>
 		<property name="batchParametersDirectory" value="${fr.insee.arc.batch.parametre.repertoire}"></property>
-		<property name="threadsChargement" value="${fr.insee.arc.threads.chargement:1}"></property>
-		<property name="threadsNormage" value="${fr.insee.arc.threads.normage:1}"></property>
-		<property name="threadsControle" value="${fr.insee.arc.threads.controle:1}"></property>
-		<property name="threadsFiltrage" value="${fr.insee.arc.threads.filtrage:1}"></property>
-		<property name="threadsMapping" value="${fr.insee.arc.threads.mapping:1}"></property>
-		<property name="threadsRegle" value="${fr.insee.arc.threads.regle:1}"></property>
-		<property name="threadNombre" value="${fr.insee.arc.threads.nombre:1}"></property>
 		<property name="version" value="${fr.insee.arc.version}"></property>
-		<property name="isProd" value="${fr.insee.plateforme.prod:false}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 	</bean>
 
+
+	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>
 
 	<bean id="queryHandler"
 		class="fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler"

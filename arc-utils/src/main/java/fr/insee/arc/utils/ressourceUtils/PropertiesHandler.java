@@ -14,8 +14,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PropertiesHandler {
-
-	private static PropertiesHandler singletonInstance = null; 
 	
     /* Database */
     private String databasePoolName;

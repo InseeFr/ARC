@@ -11,17 +11,17 @@
          http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
 	
 	<context:annotation-config></context:annotation-config>
-	<context:component-scan base-package="fr.insee.arc.web"></context:component-scan>
-	<context:component-scan base-package="fr.insee.arc.core"></context:component-scan>
 	<context:component-scan base-package="fr.insee.arc.batch"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.core"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.utils"></context:component-scan>	
 
-	
-	<!-- Pour que le Spring puisse utiliser l'AOP -->
-		<!--
-	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"></bean>	
-		<bean class ="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
-	 -->
-	 
+	<bean id="batchARC" class="fr.insee.arc.batch.BatchARC">
+	</bean>
+	 	 
+	<bean id="utilitaireDao" class="fr.insee.arc.utils.dao.UtilitaireDao">
+  	<constructor-arg index="0" value="arc" />
+	</bean> 	 
+	 	 
 	 <bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
@@ -35,8 +35,10 @@
 		<property name="ignoreResourceNotFound" value="true" />
 	</bean>
  
-    <bean id="properties" class="fr.insee.arc.utils.ressourceUtils.PropertiesHandler">
-        <property name="databasePoolName" value="${fr.insee.database.poolName}"></property>
+	<!-- Gestion des properties -->
+	<bean id="properties"
+		class="fr.insee.arc.utils.ressourceUtils.PropertiesHandler">
+		<property name="databasePoolName" value="${fr.insee.database.poolName}"></property>
 		<property name="databaseUrl" value="${fr.insee.database.arc.url}"></property>
 		<property name="databaseUsername" value="${fr.insee.database.arc.username}"></property>
 		<property name="databasePassword" value="${fr.insee.database.arc.password}"></property>
@@ -47,20 +49,11 @@
 		<property name="logPath" value="${fr.insee.arc.log.chemin}"></property>
 		<property name="logLevel" value="${fr.insee.arc.log.niveau}"></property>
 		<property name="logConfiguration" value="${fr.insee.arc.log.configuration}"></property>
-		<property name="batchArcEnvironment" value="${fr.insee.arc.batch.parametre.env}"></property>
-		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution}"></property>
 		<property name="batchParametersDirectory" value="${fr.insee.arc.batch.parametre.repertoire}"></property>
-		<property name="threadsChargement" value="${fr.insee.arc.threads.chargement:1}"></property>
-		<property name="threadsNormage" value="${fr.insee.arc.threads.normage:1}"></property>
-		<property name="threadsControle" value="${fr.insee.arc.threads.controle:1}"></property>
-		<property name="threadsFiltrage" value="${fr.insee.arc.threads.filtrage:1}"></property>
-		<property name="threadsMapping" value="${fr.insee.arc.threads.mapping:1}"></property>
-		<property name="threadsRegle" value="${fr.insee.arc.threads.regle:1}"></property>
-		<property name="threadNombre" value="${fr.insee.arc.threads.nombre:1}"></property>
 		<property name="version" value="${fr.insee.arc.version}"></property>
-		<property name="isProd" value="${fr.insee.plateforme.prod:false}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
-    </bean>
-
+		<property name="batchArcEnvironment" value="${fr.insee.arc.batch.parametre.env}"></property>
+		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution}"></property>
+	</bean>
 </beans>

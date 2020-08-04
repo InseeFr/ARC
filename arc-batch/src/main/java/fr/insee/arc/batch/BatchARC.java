@@ -13,6 +13,10 @@ import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 
 import fr.insee.arc.batch.unitaryLauncher.ChargerBatch;
 import fr.insee.arc.batch.unitaryLauncher.ControlerBatch;
@@ -39,8 +43,8 @@ import fr.insee.arc.utils.utils.ManipString;
  * @author Manu
  * 
  */
-public class LanceurARC {
-	private static final Logger LOGGER = Logger.getLogger(LanceurARC.class);
+public class BatchARC {
+	private static final Logger LOGGER = Logger.getLogger(BatchARC.class);
 	static HashMap<String, String> mapParam = new HashMap<>();
 
 	/**
@@ -53,7 +57,11 @@ public class LanceurARC {
 	 * - je lance initialisation
 	 * etc.
 	 */
-
+	private static String version="ARC 11.1.1 10/02/2020";
+	
+	@Autowired
+	PropertiesHandler properties;
+	
 	// mode production (boucle sur les paquets d'enveloppes)
 	private static boolean production=true;
 	
@@ -61,8 +69,6 @@ public class LanceurARC {
 	// false en production 
 	private static boolean keepInDatabase= Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase","false"));
 	
-	private static String version="ARC 11.1.1 10/02/2020";
-
 	// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas excéder une certaine taille
 	protected static int tailleMaxReceptionEnMb=BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb",10);
 
@@ -82,24 +88,8 @@ public class LanceurARC {
 	// heure d'initalisation en production
 	private static int HEURE_INITIALISATION_PRODUCTION=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
 	
-	
-	/**
-	 * 	notificationStart
-	 * variable pilotage de l'ordonnancement du batch. Voir modalité plus bas
-	 *  0 initlisation terminée, ok pour passer les autres batchs
-	 *  1 demande d'initialisation programmée : les batchs doivent s'arreter
-	 *  2 tout les batch sont arretés : pret a initialiser
-	 *  3 initialisation lancée
-	 **/
-	// Nombre de jour entre chaque batch initialisation
-//	private static int jourEntreInitialisation = 1;
-//	// heure de départ min de l'initialisation
-//	private static Integer heureInitialisationMin= 20;
-//	// heure de fin max de l'initialisation
-//	private static Integer heureInitialisationMax= 5;
-	
 	// interval entre chaque initialisation en nb de jours
-	private final static Integer INTERVAL_JOUR_INITIALISATION = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
+	private static Integer INTERVAL_JOUR_INITIALISATION = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
 	
 
 	/**
@@ -112,7 +102,7 @@ public class LanceurARC {
 		 try {
 			Thread.sleep(duree);
 		} catch (InterruptedException ex) {
-			LoggerHelper.errorGenTextAsComment(LanceurARC.class, "sleep()", LOGGER, ex);
+			LoggerHelper.errorGenTextAsComment(BatchARC.class, "sleep()", LOGGER, ex);
 		}
 	}
 
@@ -200,10 +190,8 @@ public class LanceurARC {
 	 * Lanceur MAIN arc
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public void execute(String[] args) {
 
-		PropertiesHandler properties = PropertiesHandler.getInstance();
-		
 		boolean fichierRestant=false;
 
 		message ("Main");
@@ -467,7 +455,7 @@ public class LanceurARC {
 		
 
     } catch (Exception ex) {
-         LoggerHelper.errorGenTextAsComment(LanceurARC.class, "main()", LOGGER, ex);
+         LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
 		System.exit(202);
     }
 	

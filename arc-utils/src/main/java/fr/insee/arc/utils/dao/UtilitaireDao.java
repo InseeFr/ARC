@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -47,18 +46,19 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.files.FileUtils;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
+import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.Pair;
 import fr.insee.arc.utils.utils.SQLExecutor;
 
 /**
@@ -93,16 +93,25 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static String FILE_THAT_CONTAINS_CONFIG_PARAMETER = "file:///";
 
+	@Autowired
+	PropertiesHandler properties;
+
 	private UtilitaireDao(String aPool) {
 		this.pool = aPool;
+		if (map == null) {
+			map = new HashMap<>();
+		}
+		if (!map.containsKey(aPool)) {
+			map.put(aPool, this);
+		}
 	}
 
 	public static final UtilitaireDao get(String aPool) {
 		if (map == null) {
-			map = new HashMap<String, UtilitaireDao>();
+			map = new HashMap<>();
 		}
 		if (!map.containsKey(aPool)) {
-			map.put(aPool, new UtilitaireDao(aPool));
+			map.put(aPool, (UtilitaireDao) SpringApplicationContext.getBean("utilitaireDao",aPool));
 		}
 		return map.get(aPool);
 	}
@@ -227,7 +236,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public final Connection getDriverConnexion() throws Exception {
 		// invocation du driver
-		PropertiesHandler properties = PropertiesHandler.getInstance();
 		Class.forName(
 		properties.getDatabaseDriverClassName());
 		boolean connectionOk = false;

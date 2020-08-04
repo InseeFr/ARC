@@ -95,7 +95,7 @@ public class ApiInitialisationService extends ApiService {
         LoggerDispatcher.info("rebuildFileSystem", LOGGER);
 
         // parcourir toutes les archives dans le répertoire d'archive
-    	String repertoire = getProperties().getBatchParametersDirectory();
+    	String repertoire = properties.getBatchParametersDirectory();
         String envDir = this.envExecution.replace(".", "_").toUpperCase();
         String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
 
@@ -993,7 +993,7 @@ public class ApiInitialisationService extends ApiService {
                 "select distinct container from " + tablePil + " where to_delete in ('R','RA')")).mapContent().get("container");
 
         if (containerList != null) {
-        	String repertoire = getProperties().getBatchParametersDirectory();
+        	String repertoire = properties.getBatchParametersDirectory();
             String envDir = this.envExecution.replace(".", "_").toUpperCase();
 
             for (String s : containerList) {
@@ -1337,7 +1337,7 @@ public class ApiInitialisationService extends ApiService {
         if (m.get("entrepot").size()>0) {
 
             // 7. Déplacer les archives effacées dans le répertoire de sauvegarde "OLD"
-        	String repertoire = getProperties().getBatchParametersDirectory();
+        	String repertoire = properties.getBatchParametersDirectory();
             String envDir = this.envExecution.replace(".", "_").toUpperCase();
 
             String entrepotSav = "";
