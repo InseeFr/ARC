@@ -19,7 +19,8 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.springframework.stereotype.Component;
@@ -55,7 +56,7 @@ public class ApiReceptionService extends ApiService {
 		super();
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(ApiReceptionService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ApiReceptionService.class);
 	
 	//Expression régulière correspondant au nom des fichiers temporaires 
 	//transmis via le flux Oriade (soit XXXXXX-W, avec X dans [A-Z])

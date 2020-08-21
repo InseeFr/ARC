@@ -7,7 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -16,7 +17,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 public class JeuDeRegleDao {
 
-    private static final Logger LOGGER = Logger.getLogger(JeuDeRegleDao.class);
+    private static final Logger LOGGER = LogManager.getLogger(JeuDeRegleDao.class);
 
     /**
      * Récupération de l'ensemble des jeux de règles applicables à une table à controler Une même table peu contenir des validités

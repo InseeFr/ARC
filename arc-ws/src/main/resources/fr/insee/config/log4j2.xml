@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+
+	<!-- APPENDERS LIST -->
+	<Appenders>
+		<!-- Pour un affichage dans la console -->
+		<Console name="Console">
+            <PatternLayout pattern="%5p %d{DATE} - - %X{UserID} - %c{1}:%-4L - %m%n" />
+        </Console>
+	</Appenders>
+	<!-- LOGGER LIST -->
+
+	<Loggers>
+		<Logger name="fr.insee.arc" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        
+        <Logger name="fr.insee.arc" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+	    
+		<Root level="error">
+            <AppenderRef ref="Console" />
+        </Root>
+
+	</Loggers>
+</Configuration>

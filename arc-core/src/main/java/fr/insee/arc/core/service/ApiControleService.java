@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -31,7 +32,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 @Component
 public class ApiControleService extends ApiService {
-	private static final Logger logger = Logger.getLogger(ApiControleService.class);
+	private static final Logger logger = LogManager.getLogger(ApiControleService.class);
 
     private int currentIndice;
 

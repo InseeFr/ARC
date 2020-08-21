@@ -14,7 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
@@ -49,7 +50,7 @@ public class PilotageBAS8Action extends ArcAction {
 
 	private static final String WRITING_REPO = "entrepotEcriture";
 
-	private static final Logger LOGGER = Logger.getLogger(PilotageBAS8Action.class);
+	private static final Logger LOGGER = LogManager.getLogger(PilotageBAS8Action.class);
 
 	@Autowired
 	@Qualifier("viewPilotageBAS8")

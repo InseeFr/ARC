@@ -3,7 +3,8 @@ package fr.insee.arc.core.ArchiveLoader;
 import java.io.File;
 import java.util.zip.ZipFile;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
@@ -13,7 +14,7 @@ import fr.insee.arc.utils.utils.ManipString;
  */
 public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(ZipArchiveLoader.class);
+    private static final Logger LOGGER = LogManager.getLogger(ZipArchiveLoader.class);
 
     public ZipArchiveLoader(File fileChargement, String idSource) {
 	super(fileChargement, idSource);

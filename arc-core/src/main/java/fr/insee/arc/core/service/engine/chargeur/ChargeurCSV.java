@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.opencsv.CSVReader;
 
@@ -32,7 +33,7 @@ import fr.insee.arc.utils.utils.ManipString;
  */
 
 public class ChargeurCSV implements IChargeur {
-    private static final Logger LOGGER = Logger.getLogger(ChargeurCSV.class);
+    private static final Logger LOGGER = LogManager.getLogger(ChargeurCSV.class);
 
     private String separateur = ";";
     private String encoding=null;

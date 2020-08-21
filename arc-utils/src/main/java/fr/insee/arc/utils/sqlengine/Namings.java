@@ -6,7 +6,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.format.datetime.joda.DateTimeFormatterFactory;
@@ -27,7 +28,7 @@ import fr.insee.arc.utils.utils.ManipString;
  * Utility class for handling names sent to the SQL engine.teur SQL.
  */
 public final class Namings {
-    private static final Logger LOGGER = Logger.getLogger(Namings.class);
+    private static final Logger LOGGER = LogManager.getLogger(Namings.class);
     private static final DateTimeFormatter DTF_TIMESTAMP = new DateTimeFormatterFactory("yyyyMMddHHmmss")
             .createDateTimeFormatter();
 

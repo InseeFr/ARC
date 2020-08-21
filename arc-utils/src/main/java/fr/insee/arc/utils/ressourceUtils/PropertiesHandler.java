@@ -3,7 +3,7 @@ package fr.insee.arc.utils.ressourceUtils;
 
 import java.net.URL;
 
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +50,7 @@ public class PropertiesHandler {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
 
         // Using here an XML configuration
-        DOMConfigurator.configure(log4jprops);
+        Configurator.initialize(null, log4jprops.toString());
     }
 
 

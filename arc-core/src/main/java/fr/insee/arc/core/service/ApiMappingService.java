@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dao.JeuDeRegleDao;
@@ -39,7 +40,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 @Component
 public class ApiMappingService extends ApiService {
-	private static final Logger logger = Logger.getLogger(ApiMappingService.class);
+	private static final Logger logger = LogManager.getLogger(ApiMappingService.class);
         
     public ApiMappingService() {
         super();

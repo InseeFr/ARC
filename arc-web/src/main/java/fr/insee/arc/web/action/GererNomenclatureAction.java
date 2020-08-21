@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -34,7 +35,7 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
     private static final String NOM_TABLE = "nom_table";
     private static final String TYPE_COLONNE = "type_colonne";
     private static final String NOM_COLONNE = "nom_colonne";
-    private static final Logger LOGGER = Logger.getLogger(GererNormeAction.class);
+    private static final Logger LOGGER = LogManager.getLogger(GererNormeAction.class);
     @Autowired
     @Qualifier("viewListNomenclatures")
     VObject viewListNomenclatures;

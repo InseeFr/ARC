@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -22,7 +23,7 @@ import fr.insee.arc.ws.actions.SendResponse;
  */
 public class QueryDaoImpl implements QueryDao {
 
-    protected static final Logger LOGGER = Logger.getLogger(QueryDaoImpl.class);
+    protected static final Logger LOGGER = LogManager.getLogger(QueryDaoImpl.class);
 
     /*
      * (non-Javadoc)

@@ -7,7 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dao.JeuDeRegleDao;
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -27,7 +28,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 public class ThreadMappingService extends ApiMappingService implements Runnable {
 
-    private static final Logger LOGGER = Logger.getLogger(ThreadMappingService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
 
     int indice;
     private Thread t;

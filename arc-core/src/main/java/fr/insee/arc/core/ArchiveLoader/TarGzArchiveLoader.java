@@ -7,7 +7,8 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.engine.SizeLimiterInputStream;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -18,7 +19,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 public class TarGzArchiveLoader extends AbstractArchiveFileLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(TarGzArchiveLoader.class);
+    private static final Logger LOGGER = LogManager.getLogger(TarGzArchiveLoader.class);
 
     public TarGzArchiveLoader(File fileChargement, String idSource) {
 	super(fileChargement, idSource);

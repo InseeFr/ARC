@@ -10,7 +10,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.AbstractQueryHandler;
 import fr.insee.arc.utils.dao.IQueryExecutor;
@@ -32,7 +33,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 public abstract class UtilitaireDAOQueryHandler
         implements IQueryHandler, AutoCloseable, IQueryExecutor, IWrapper<Connection>
 {
-    static final Logger LOGGER = Logger.getLogger(UtilitaireDAOQueryHandler.class);
+    static final Logger LOGGER = LogManager.getLogger(UtilitaireDAOQueryHandler.class);
     private static final int DEFAULT_MAX_RETRY = 120;
     private int maxRetry = DEFAULT_MAX_RETRY;
 

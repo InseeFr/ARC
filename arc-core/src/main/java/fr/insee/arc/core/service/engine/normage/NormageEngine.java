@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
@@ -22,7 +23,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 public class NormageEngine {
 
-	private static final Logger LOGGER = Logger.getLogger(ThreadNormageService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
 
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private String columnToBeAdded = "";

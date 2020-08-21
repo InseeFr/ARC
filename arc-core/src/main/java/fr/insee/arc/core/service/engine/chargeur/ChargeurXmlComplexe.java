@@ -13,7 +13,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.model.NormeFichier;
@@ -39,7 +40,7 @@ import fr.insee.arc.utils.utils.Pair;
  *
  */
 public class ChargeurXmlComplexe implements IChargeur{
-    private static final Logger LOGGER = Logger.getLogger(ChargeurXmlComplexe.class);
+    private static final Logger LOGGER = LogManager.getLogger(ChargeurXmlComplexe.class);
     private String fileName;
     private HashMap<String, Integer> col;
     private Connection connexion;

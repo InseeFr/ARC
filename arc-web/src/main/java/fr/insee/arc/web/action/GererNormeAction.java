@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -47,7 +48,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	private static final String SELECTED_RULESET_TABLE = "SELECTED_RULESET_TABLE";
 	private static final String SELECTED_RULESET_NAME = "SELECTED_RULESET_NAME";
 
-	private static final Logger LOGGER = Logger.getLogger(GererNormeAction.class);
+	private static final Logger LOGGER = LogManager.getLogger(GererNormeAction.class);
 
 	@Autowired
 	ControleRegleService service;

@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiNormageService;
@@ -32,7 +33,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 public class ThreadNormageService extends ApiNormageService implements Runnable {
 
-    private static final Logger LOGGER = Logger.getLogger(ThreadNormageService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
 
     public int indice ;
     public Thread t = null;

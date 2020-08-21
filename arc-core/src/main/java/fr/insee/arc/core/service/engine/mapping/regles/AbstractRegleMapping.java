@@ -2,7 +2,8 @@ package fr.insee.arc.core.service.engine.mapping.regles;
 
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
@@ -16,7 +17,7 @@ import fr.insee.arc.utils.textUtils.IConstanteNumerique;
  */
 public abstract class AbstractRegleMapping implements IDbConstant, IConstanteCaractere, IConstanteNumerique {
 
-    protected static final Logger LOGGER = Logger.getLogger(AbstractRegleMapping.class);
+    protected static final Logger LOGGER = LogManager.getLogger(AbstractRegleMapping.class);
 
     public static final String exprNull = "null";
 

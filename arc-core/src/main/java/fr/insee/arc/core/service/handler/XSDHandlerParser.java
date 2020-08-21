@@ -4,7 +4,8 @@ import java.util.HashSet;
 
 import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
@@ -15,7 +16,7 @@ import fr.insee.arc.utils.format.Format;
  */
 public class XSDHandlerParser extends org.xml.sax.helpers.DefaultHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(XSDHandlerParser.class);
+    private static final Logger LOGGER = LogManager.getLogger(XSDHandlerParser.class);
 
   public XSDHandlerParser() {
     super();

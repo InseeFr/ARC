@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -21,7 +22,7 @@ import fr.insee.arc.web.util.VObject;
 public class ExternalFilesManagementDao implements IDbConstant {
 
     @SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(ExternalFilesManagementDao.class);
+	private static final Logger LOGGER = LogManager.getLogger(ExternalFilesManagementDao.class);
 
     private static final String NOM_TABLE = "nom_table";
     

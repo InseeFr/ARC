@@ -11,7 +11,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
 
@@ -31,7 +32,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  */
 public abstract class AbstractQueryHandler implements IQueryHandler, AutoCloseable, IQueryExecutor, IWrapper<Connection>
 {
-    static final Logger LOGGER = Logger.getLogger(AbstractQueryHandler.class);
+    static final Logger LOGGER = LogManager.getLogger(AbstractQueryHandler.class);
 
     public static class AbstractQueryHandlerException extends RuntimeException
     {

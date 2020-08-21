@@ -18,14 +18,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
 public class ManipString implements IConstanteCaractere {
 
-    private static final Logger LOGGER = Logger.getLogger(ManipString.class);
+    private static final Logger LOGGER = LogManager.getLogger(ManipString.class);
 
     public static final String patternForRubrique = "([^}{,]*)";
 

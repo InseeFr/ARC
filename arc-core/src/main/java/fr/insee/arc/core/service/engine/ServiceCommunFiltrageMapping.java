@@ -8,7 +8,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
@@ -16,7 +17,7 @@ import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 public class ServiceCommunFiltrageMapping {
-    private static final Logger logger = Logger.getLogger(ServiceCommunFiltrageMapping.class);
+    private static final Logger logger = LogManager.getLogger(ServiceCommunFiltrageMapping.class);
     public static final String debutRequeteResultatUnique = "{:";
     public static final int longueurDebutRequeteResultatUnique = debutRequeteResultatUnique.length();
     public static final String finRequeteResultatUnique = "}";

@@ -1,6 +1,7 @@
 package fr.insee.arc.ws.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.model.IDbConstant;
@@ -22,7 +23,7 @@ import fr.insee.arc.ws.services.ImportStep3GetTableDataService;
  */
 public class InitiateRequest implements IDbConstant {
 
-	protected static final Logger LOGGER = Logger.getLogger(InitiateRequest.class);
+	protected static final Logger LOGGER = LogManager.getLogger(InitiateRequest.class);
 	private JSONObject dsnRequest;
 
 	/**
@@ -201,7 +202,7 @@ public class InitiateRequest implements IDbConstant {
 //        private String pathZip;
 //
 //        /** Logger */
-//        public static final Logger LOGGER = Logger.getLogger(InitiateRequest.class);
+//        public static final Logger LOGGER = LogManager.getLogger(InitiateRequest.class);
 //
 //        public ExportThread(List<String> tableAExporter, List<String> requetes, String pathZip, String nomZip, List<String> tablesASupprimer) {
 //

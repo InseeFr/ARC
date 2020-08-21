@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+
+	<!-- APPENDERS LIST -->
+	<Appenders>
+		<!-- Pour un affichage dans la console -->
+		<Console name="Console">
+            <PatternLayout pattern="%5p %d{DATE} - - %X{UserID} - %c{1}:%-4L - %m%n" />
+        </Console>
+
+        <!-- configuration du fichier de log de base -->
+        <RollingFile name="logBase" fileName="${cheminLog}/log.log" filePattern="${cheminLog}/log-%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <pattern>%5p %d{DATE} - %X{UserID} - %c{1}:%-4L - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+
+        <!-- Déclaration de l'appender error -->
+        <RollingFile name="error" fileName="${cheminLog}/logError.log" filePattern="${cheminLog}/logError-%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <pattern>%5p %d{DATE} - %X{UserID} - %c{1}:%-4L - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+	</Appenders>
+	<!-- LOGGER LIST -->
+
+	<Loggers>
+		<Logger name="fr.insee.arc" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+			<AppenderRef ref="logBase" />
+			<AppenderRef ref="error" level="error" />
+        </Logger>
+	    
+		<Root level="warn">
+            <AppenderRef ref="Console" />
+        </Root>
+
+	</Loggers>
+</Configuration>

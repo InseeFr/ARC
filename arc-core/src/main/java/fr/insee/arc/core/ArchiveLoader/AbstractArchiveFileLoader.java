@@ -2,7 +2,8 @@ package fr.insee.arc.core.ArchiveLoader;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
@@ -11,7 +12,7 @@ import fr.insee.arc.utils.utils.ManipString;
  * Loader have to inherit this class
  */
 public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
-    private static final Logger LOGGER = Logger.getLogger(AbstractArchiveFileLoader.class);
+    private static final Logger LOGGER = LogManager.getLogger(AbstractArchiveFileLoader.class);
 
     /**
      * Archive file to be processed 

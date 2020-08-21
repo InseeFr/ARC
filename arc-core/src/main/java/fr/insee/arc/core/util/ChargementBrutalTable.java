@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -28,7 +29,7 @@ public class ChargementBrutalTable {
     /** Combien de ligne on charge à la fois (OPTI) */
     public static final int LIMIT_CHARGEMENT_BRUTAL = 50;
        
-    private static final Logger LOGGER = Logger.getLogger(ChargementBrutalTable.class);
+    private static final Logger LOGGER = LogManager.getLogger(ChargementBrutalTable.class);
     private Connection connexion;
     private List<Norme> listeNorme;
 

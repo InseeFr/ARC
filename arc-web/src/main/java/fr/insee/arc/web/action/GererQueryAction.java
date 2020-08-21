@@ -3,7 +3,8 @@ package fr.insee.arc.web.action;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -30,7 +31,7 @@ public class GererQueryAction implements SessionAware, IConstanteCaractere {
     public String defaultSchema="arc";
 
     @SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(GererQueryAction.class);
+	private static final Logger LOGGER = LogManager.getLogger(GererQueryAction.class);
     @Autowired
     @Qualifier("viewQuery")
     VObject viewQuery;

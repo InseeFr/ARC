@@ -9,7 +9,8 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
@@ -21,7 +22,7 @@ import fr.insee.arc.utils.utils.ManipString;
  *
  */
 public class TarGzDecompressor implements ArchiveExtractor {
-    private static final Logger LOGGER = Logger.getLogger(TarGzDecompressor.class);
+    private static final Logger LOGGER = LogManager.getLogger(TarGzDecompressor.class);
 
     @Override
     public void extract(File archiveFile) throws Exception {

@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -64,7 +65,7 @@ public class ServiceRequeteSqlRegle {
 	public String tableTempData;
 	public String tableTempMark;
 
-	private static final Logger logger = Logger.getLogger(ServiceRequeteSqlRegle.class);
+	private static final Logger logger = LogManager.getLogger(ServiceRequeteSqlRegle.class);
 
 	/**
 	 * Code SQL pour la création d'une table temporaire spécifique à un jeu de règle
