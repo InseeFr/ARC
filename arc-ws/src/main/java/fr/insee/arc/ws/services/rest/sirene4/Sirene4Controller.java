@@ -192,190 +192,173 @@ public class Sirene4Controller {
 					ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(c, fileName, inputStream, "A", version,
 							periodicite, validite, tableRegleChargement);
 					chargeur.executeEngine();
-//					jointure = chargeur.jointure.replace("''", "'");
+					jointure = chargeur.jointure.replace("''", "'");
 				}
 				
-//				HashMap<String, ArrayList<String>> pil = new HashMap<>();
-//				pil.put("id_source", new ArrayList<String>(Arrays.asList(fileName)));
-//				pil.put("id_norme", new ArrayList<String>(Arrays.asList(version)));
-//				pil.put("validite", new ArrayList<String>(Arrays.asList(validite)));
-//				pil.put("periodicite", new ArrayList<String>(Arrays.asList(periodicite)));
-//				pil.put("jointure", new ArrayList<String>(Arrays.asList(jointure)));
-//
-//				HashMap<String, ArrayList<String>> regle = new HashMap<>();
-//				regle.put("id_regle", new ArrayList<String>());
-//				regle.put("id_norme", new ArrayList<String>());
-//				regle.put("periodicite", new ArrayList<String>());
-//				regle.put("validite_inf", new ArrayList<String>());
-//				regle.put("validite_sup", new ArrayList<String>());
-//				regle.put("id_classe", new ArrayList<String>());
-//				regle.put("rubrique", new ArrayList<String>());
-//				regle.put("rubrique_nmcl", new ArrayList<String>());
-//
-//				HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles = new HashMap<>();
-//				rubriqueUtiliseeDansRegles.put("var", new ArrayList<String>());
-//
-//				NormageEngine normage = new NormageEngine(c, pil, regle, rubriqueUtiliseeDansRegles, "A", "B", null);
-//				normage.executeEngine();
-//
-//				requete = new StringBuilder();
-//				requete.append(
-//						"CREATE TEMPORARY TABLE c as select *, '0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules from b;");
-//				UtilitaireDao.get("arc").executeImmediate(c, requete);
-//
-//				ServiceJeuDeRegle sjdr = new ServiceJeuDeRegle(env + ".controle_regle");
-//
-//				// Récupération des règles de controles associées aux jeux de règle
-//				JeuDeRegle jdr = new JeuDeRegle();
-//
-//				sjdr.fillRegleControle(c, jdr, env + ".controle_regle", "c");
-//				sjdr.executeJeuDeRegle(c, jdr, "c", normage.structure);
-//
-//				
-//				envoiView.setDateHeureReception(new Date());
-//				envoiView.setVersionConformite(version);
-//				
-//				// retrouver la table des données controlées pour requeter
-//				String tableControle="c";
-//				String tableRubriqueEntete=env+".nmcl_rubriqueentete_v001";
-//				String tableRegleControle=env+".controle_regle";
-//
-//				// récupérer les résultats
-//				requete=new StringBuilder();
-//				requete.append("\n with tmp_count as (SELECT count(distinct(i_liasse)) as nb_liasse from "+tableControle+")");
-//				requete.append("\n , tmp_rules as (select  distinct unnest(brokenrules)::int as brokenrules from "+tableControle+")");
-//				requete.append("\n , tmp_regle as ( ");
-//				requete.append("\n  SELECT id_regle, id_classe, rubrique_pere, rubrique_fils, rubrique as entete");
-//				requete.append("\n  FROM "+tableRegleControle+" a");
-//				requete.append("\n  LEFT OUTER JOIN "+tableRubriqueEntete+" b ON (lower(a.rubrique_pere) like '_\\_'||lower(b.rubrique) or lower(a.rubrique_fils) like '_\\_'||lower(b.rubrique))");
-//				requete.append("\n  ");
-//				requete.append("\n  WHERE id_norme='"+version+"'");
-//				requete.append("\n  AND EXISTS (SELECT from tmp_rules b where a.id_regle=b.brokenrules)");
-//				requete.append("\n )");
-//				requete.append("\n , tmp_declaration as (");
-//				requete.append("\n SELECT distinct v_c02 as numero_declaration, regexp_replace(string_agg(v_c10_1,' ') over (partition by v_c02 order by i_c10_1),'([^ ]+)( \\1)*','\\1','g') as evenementDeclaration ");
-//				requete.append("\n from "+tableControle+" b ");
-//				requete.append("\n )");
-//				requete.append("\n  , tmp_data as (");
-//				requete.append("\n 	SELECT * from (");
-//				requete.append("\n 	SELECT distinct v_c02 as numero_declaration, regexp_replace(string_agg(v_c10_1,' ') over (partition by v_c02 order by i_c10_1),'([^ ]+)( \\1)*','\\1','g') as evenement_declaration, brokenrules");
-//				requete.append("\n 		 FROM "+tableControle+" b");
-//				requete.append("\n 		 where exists (select from "+tableControle+" b where brokenrules is not null)");
-//				requete.append("\n 	) vv	 where brokenrules is not null");
-//				requete.append("\n 	 )");
-//				requete.append("\n ");
-//				requete.append("\n  SELECT 1 as type_reponse, nb_liasse::text, null as numero_declaration, null as evenement_declaration, null as code, null as categorie, null as id_regle, null as message from tmp_count");
-//				requete.append("\n ");
-//				requete.append("\n  UNION ALL");
-//				requete.append("\n  SELECT 2, null, null, null, id_classe, 'BLOQUANT', id_regle, ");
-//				requete.append("\n  'Echec du contrôle de '||id_classe||case when rubrique_fils is null then ' sur '||substring(rubrique_pere,3) else ' entre '||substring(rubrique_pere,3)||' et '||substring(rubrique_fils,3) end");
-//				requete.append("\n  FROM tmp_regle a where entete is not null");
-//				requete.append("\n ");
-//				requete.append("\n  UNION ALL");
-//				requete.append("\n 	(");
-//				requete.append("\n  SELECT * FROM (");
-//				requete.append("\n  SELECT 3 as type_reponse, null, numero_declaration, evenementDeclaration, null, null, null, null from tmp_declaration a ");
-//				requete.append("\n  UNION ALL ");
-//				requete.append("\n  SELECT 4, null, numero_declaration, evenement_declaration, id_classe, 'BLOQUANT', id_regle, ");
-//				requete.append("\n  'Echec du contrôle de '||id_classe||case when rubrique_fils is null then ' sur '||substring(rubrique_pere,3) else ' entre '||substring(rubrique_pere,3)||' et '||substring(rubrique_fils,3) end");
-//				requete.append("\n  FROM tmp_regle a");
-//				requete.append("\n  , lateral (");
-//				requete.append("\n  select distinct numero_declaration, evenement_declaration from tmp_data b");
-//				requete.append("\n 		WHERE b.brokenrules @>  array[a.id_regle::text]");
-//				requete.append("\n  ) v");
-//				requete.append("\n   where entete is null");
-//				requete.append("\n   ) w");
-//				requete.append("\n order by numero_declaration, type_reponse");
-//				requete.append("\n  )");
-//
-//				
-//
-//				HashMap<String,ArrayList<String>> mapResultat=new GenericBean(UtilitaireDao.get("arc").executeRequest(c,
-//						requete)).mapContent();
-//				
-//
-//				List<AnomalieView> anomaliesEntete = new ArrayList<>();
-//				EnteteAnomalieView enteteAnomalieView=new EnteteAnomalieView();
-//				enteteAnomalieView.setAnomalies(anomaliesEntete);
-//		    	EnteteView enteteView = new EnteteView();
-//				enteteView.setEnteteAnomalie(enteteAnomalieView);
-//				envoiView.setEntete(enteteView);
-//
-//				DeclarationIdentificationView declarationIdentificationView=null;
-//				DeclarationView declarationView=null;
-//				DeclarationAnomalieView declarationAnomalieView=null;
-//				List<AnomalieView> anomaliesDeclaration =null;
-//						
-//				List<DeclarationView> declarations =new ArrayList<>();
-//				envoiView.setDeclarations(declarations);
-//
-//				for (int i=0;i<mapResultat.get("type_reponse").size();i++)
-//				{
-//					String typeReponse = mapResultat.get("type_reponse").get(i);
-//					if (typeReponse.equals("1"))
-//					{
-//						envoiView.setNombreDeclarations(Integer.parseInt(mapResultat.get("nb_liasse").get(i)));
-//					}
-//					if (typeReponse.equals("2"))
-//					{
-//						anomaliesEntete.add(new AnomalieView(mapResultat.get("code").get(i),
-//								EnumCategorie.valueOf(mapResultat.get("categorie").get(i)),
-//								mapResultat.get("message").get(i)
-//								, Integer.parseInt(mapResultat.get("id_regle").get(i)), 0));
-//					}
-//					if (typeReponse.equals("3"))
-//					{
-//
-//						if (declarationIdentificationView==null
-//								|| !declarationIdentificationView.getNumeroDeclaration()
-//								.equals(mapResultat.get("numero_declaration").get(i)))
-//						{
-//							
-//						
-//							declarationView=new DeclarationView();
-//							declarationIdentificationView=new DeclarationIdentificationView();
-//							declarationIdentificationView.setNumeroDeclaration(mapResultat.get("numero_declaration").get(i));
-//							declarationIdentificationView.setEvenementDeclaration(mapResultat.get("evenement_declaration").get(i));
-//							
-//							declarationAnomalieView=new DeclarationAnomalieView();
-//							anomaliesDeclaration=new ArrayList<AnomalieView>();
-//							declarationAnomalieView.setAnomalies(anomaliesDeclaration);
-//
-//							declarationView.setDeclarationIdentification(declarationIdentificationView);
-//							declarationView.setDeclarationAnomalie(declarationAnomalieView);
-//							declarations.add(declarationView);
-//
-//						}
-//					}
-//					if (typeReponse.equals("4"))
-//					{
-//						anomaliesDeclaration.add(new AnomalieView(
-//								mapResultat.get("code").get(i)
-//								, EnumCategorie.valueOf(mapResultat.get("categorie").get(i))
-//								, mapResultat.get("message").get(i)
-//								, Integer.parseInt(mapResultat.get("id_regle").get(i)), 0));
-//					}
-//				}
+				HashMap<String, ArrayList<String>> pil = new HashMap<>();
+				pil.put("id_source", new ArrayList<String>(Arrays.asList(fileName)));
+				pil.put("id_norme", new ArrayList<String>(Arrays.asList(version)));
+				pil.put("validite", new ArrayList<String>(Arrays.asList(validite)));
+				pil.put("periodicite", new ArrayList<String>(Arrays.asList(periodicite)));
+				pil.put("jointure", new ArrayList<String>(Arrays.asList(jointure)));
+
+				HashMap<String, ArrayList<String>> regle = new HashMap<>();
+				regle.put("id_regle", new ArrayList<String>());
+				regle.put("id_norme", new ArrayList<String>());
+				regle.put("periodicite", new ArrayList<String>());
+				regle.put("validite_inf", new ArrayList<String>());
+				regle.put("validite_sup", new ArrayList<String>());
+				regle.put("id_classe", new ArrayList<String>());
+				regle.put("rubrique", new ArrayList<String>());
+				regle.put("rubrique_nmcl", new ArrayList<String>());
+
+				HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles = new HashMap<>();
+				rubriqueUtiliseeDansRegles.put("var", new ArrayList<String>());
+
+				NormageEngine normage = new NormageEngine(c, pil, regle, rubriqueUtiliseeDansRegles, "A", "B", null);
+				normage.executeEngine();
+
+				requete = new StringBuilder();
+				requete.append(
+						"CREATE TEMPORARY TABLE c as select *, '0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules from b;");
+				UtilitaireDao.get("arc").executeImmediate(c, requete);
+
+				ServiceJeuDeRegle sjdr = new ServiceJeuDeRegle(env + ".controle_regle");
+
+				// Récupération des règles de controles associées aux jeux de règle
+				JeuDeRegle jdr = new JeuDeRegle();
+
+				sjdr.fillRegleControle(c, jdr, env + ".controle_regle", "c");
+				sjdr.executeJeuDeRegle(c, jdr, "c", normage.structure);
+
+				
+				envoiView.setDateHeureReception(new Date());
+				envoiView.setVersionConformite(version);
+				
+				// retrouver la table des données controlées pour requeter
+				String tableControle="c";
+				String tableRubriqueEntete=env+".nmcl_rubriqueentete_v001";
+				String tableRegleControle=env+".controle_regle";
+
+				// récupérer les résultats
+				requete=new StringBuilder();
+				requete.append("\n with tmp_count as (SELECT count(distinct(i_liasse)) as nb_liasse from "+tableControle+")");
+				requete.append("\n , tmp_rules as (select  distinct unnest(brokenrules)::int as brokenrules from "+tableControle+")");
+				requete.append("\n , tmp_regle as ( ");
+				requete.append("\n  SELECT id_regle, id_classe, rubrique_pere, rubrique_fils, rubrique as entete");
+				requete.append("\n  FROM "+tableRegleControle+" a");
+				requete.append("\n  LEFT OUTER JOIN "+tableRubriqueEntete+" b ON (lower(a.rubrique_pere) like '_\\_'||lower(b.rubrique) or lower(a.rubrique_fils) like '_\\_'||lower(b.rubrique))");
+				requete.append("\n  ");
+				requete.append("\n  WHERE id_norme='"+version+"'");
+				requete.append("\n  AND EXISTS (SELECT from tmp_rules b where a.id_regle=b.brokenrules)");
+				requete.append("\n )");
+				requete.append("\n , tmp_declaration as (");
+				requete.append("\n SELECT distinct v_c02 as numero_declaration, regexp_replace(string_agg(v_c10_1,' ') over (partition by v_c02 order by i_c10_1),'([^ ]+)( \\1)*','\\1','g') as evenementDeclaration ");
+				requete.append("\n from "+tableControle+" b ");
+				requete.append("\n )");
+				requete.append("\n  , tmp_data as (");
+				requete.append("\n 	SELECT * from (");
+				requete.append("\n 	SELECT distinct v_c02 as numero_declaration, regexp_replace(string_agg(v_c10_1,' ') over (partition by v_c02 order by i_c10_1),'([^ ]+)( \\1)*','\\1','g') as evenement_declaration, brokenrules");
+				requete.append("\n 		 FROM "+tableControle+" b");
+				requete.append("\n 		 where exists (select from "+tableControle+" b where brokenrules is not null)");
+				requete.append("\n 	) vv	 where brokenrules is not null");
+				requete.append("\n 	 )");
+				requete.append("\n ");
+				requete.append("\n  SELECT 1 as type_reponse, nb_liasse::text, null as numero_declaration, null as evenement_declaration, null as code, null as categorie, null as id_regle, null as message from tmp_count");
+				requete.append("\n ");
+				requete.append("\n  UNION ALL");
+				requete.append("\n  SELECT 2, null, null, null, id_classe, 'BLOQUANT', id_regle, ");
+				requete.append("\n  'Echec du contrôle de '||id_classe||case when rubrique_fils is null then ' sur '||substring(rubrique_pere,3) else ' entre '||substring(rubrique_pere,3)||' et '||substring(rubrique_fils,3) end");
+				requete.append("\n  FROM tmp_regle a where entete is not null");
+				requete.append("\n ");
+				requete.append("\n  UNION ALL");
+				requete.append("\n 	(");
+				requete.append("\n  SELECT * FROM (");
+				requete.append("\n  SELECT 3 as type_reponse, null, numero_declaration, evenementDeclaration, null, null, null, null from tmp_declaration a ");
+				requete.append("\n  UNION ALL ");
+				requete.append("\n  SELECT 4, null, numero_declaration, evenement_declaration, id_classe, 'BLOQUANT', id_regle, ");
+				requete.append("\n  'Echec du contrôle de '||id_classe||case when rubrique_fils is null then ' sur '||substring(rubrique_pere,3) else ' entre '||substring(rubrique_pere,3)||' et '||substring(rubrique_fils,3) end");
+				requete.append("\n  FROM tmp_regle a");
+				requete.append("\n  , lateral (");
+				requete.append("\n  select distinct numero_declaration, evenement_declaration from tmp_data b");
+				requete.append("\n 		WHERE b.brokenrules @>  array[a.id_regle::text]");
+				requete.append("\n  ) v");
+				requete.append("\n   where entete is null");
+				requete.append("\n   ) w");
+				requete.append("\n order by numero_declaration, type_reponse");
+				requete.append("\n  )");
+
+				
+
+				HashMap<String,ArrayList<String>> mapResultat=new GenericBean(UtilitaireDao.get("arc").executeRequest(c,
+						requete)).mapContent();
+				
+
+				List<AnomalieView> anomaliesEntete = new ArrayList<>();
+				EnteteAnomalieView enteteAnomalieView=new EnteteAnomalieView();
+				enteteAnomalieView.setAnomalies(anomaliesEntete);
+		    	EnteteView enteteView = new EnteteView();
+				enteteView.setEnteteAnomalie(enteteAnomalieView);
+				envoiView.setEntete(enteteView);
+
+				DeclarationIdentificationView declarationIdentificationView=null;
+				DeclarationView declarationView=null;
+				DeclarationAnomalieView declarationAnomalieView=null;
+				List<AnomalieView> anomaliesDeclaration =null;
+						
+				List<DeclarationView> declarations =new ArrayList<>();
+				envoiView.setDeclarations(declarations);
+
+				for (int i=0;i<mapResultat.get("type_reponse").size();i++)
+				{
+					String typeReponse = mapResultat.get("type_reponse").get(i);
+					if (typeReponse.equals("1"))
+					{
+						envoiView.setNombreDeclarations(Integer.parseInt(mapResultat.get("nb_liasse").get(i)));
+					}
+					if (typeReponse.equals("2"))
+					{
+						anomaliesEntete.add(new AnomalieView(mapResultat.get("code").get(i),
+								EnumCategorie.valueOf(mapResultat.get("categorie").get(i)),
+								mapResultat.get("message").get(i)
+								, Integer.parseInt(mapResultat.get("id_regle").get(i)), 0));
+					}
+					if (typeReponse.equals("3"))
+					{
+
+						if (declarationIdentificationView==null
+								|| !declarationIdentificationView.getNumeroDeclaration()
+								.equals(mapResultat.get("numero_declaration").get(i)))
+						{
+							
+						
+							declarationView=new DeclarationView();
+							declarationIdentificationView=new DeclarationIdentificationView();
+							declarationIdentificationView.setNumeroDeclaration(mapResultat.get("numero_declaration").get(i));
+							declarationIdentificationView.setEvenementDeclaration(mapResultat.get("evenement_declaration").get(i));
+							
+							declarationAnomalieView=new DeclarationAnomalieView();
+							anomaliesDeclaration=new ArrayList<AnomalieView>();
+							declarationAnomalieView.setAnomalies(anomaliesDeclaration);
+
+							declarationView.setDeclarationIdentification(declarationIdentificationView);
+							declarationView.setDeclarationAnomalie(declarationAnomalieView);
+							declarations.add(declarationView);
+
+						}
+					}
+					if (typeReponse.equals("4"))
+					{
+						anomaliesDeclaration.add(new AnomalieView(
+								mapResultat.get("code").get(i)
+								, EnumCategorie.valueOf(mapResultat.get("categorie").get(i))
+								, mapResultat.get("message").get(i)
+								, Integer.parseInt(mapResultat.get("id_regle").get(i)), 0));
+					}
+				}
 
 
 			} finally {
-				// asynchron : clean and release sanbdox
-//				new Thread() {
-//					public void run() {
-//
-//						StringBuilder requete = new StringBuilder();
-//						requete.append("DELETE FROM arc.service_env_locked where id_env='" + env + "';");
-//						requete.append("vacuum freeze arc.service_env_locked;");
-//
-//						try {
-//							UtilitaireDao.get("arc").executeImmediate(null, requete);
-//						} catch (Exception e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-//
-//					}
-//				}.start();
 			}
 
 		} catch (Exception e) {

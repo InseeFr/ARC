@@ -2,6 +2,7 @@ package fr.insee.arc.utils.structure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 // TODO add documentation of the purpose of this class
 public class GenericBean {
@@ -10,6 +11,8 @@ public class GenericBean {
 	public ArrayList<String> types;
 	public ArrayList<ArrayList<String>> content;
 
+	
+	
 	/**
 	 * @param headers
 	 * @param types
@@ -87,6 +90,26 @@ public class GenericBean {
 		}
 		return r;
 	}
+	
+	public HashMap<String, Record> mapRecord() {
+		if (this.content == null || this.content.size() == 0) {
+			return new HashMap<String, Record>();
+		}
+		
+		HashMap<String, Record> r = new HashMap<String, Record>();
+		
+		for (int i = 0; i < this.content.size(); i++) {
+
+			for (int j = 0; j < this.content.get(i).size(); j++) {
+				if (r.get(this.headers.get(j)) == null) {
+						r.put(this.headers.get(j), new Record(this.types.get(j), new ArrayList<String>()));
+				}
+				r.get(this.headers.get(j)).data.add(this.content.get(i).get(j));
+			}
+		}
+		return r;
+	}
+	
 
     public int size() {
         return this.content.size();

@@ -28,7 +28,7 @@ public enum TraitementPhase {
      *            , numéro d'ordre dans l'énumération (premier=1)
      * @return
      */
-    public TraitementPhase getPhase(int ordre) {
+    public static TraitementPhase getPhase(int ordre) {
         for (TraitementPhase phase : TraitementPhase.values()) {
             if (phase.getOrdre() == ordre) {
                 return phase;
