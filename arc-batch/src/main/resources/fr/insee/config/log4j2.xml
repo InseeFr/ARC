@@ -11,11 +11,11 @@
 	<!-- LOGGER LIST -->
 
 	<Loggers>
-		<Logger name="fr.insee.arc" level="trace" additivity="false">
+		<Logger name="fr.insee.arc" level="${env:ARC_LOGLEVEL:-trace}" additivity="false">
             <AppenderRef ref="Console" />
         </Logger>
 	    
-		<Root level="error">
+		<Root level="${env:ARC_LOGLEVEL:-error}">
             <AppenderRef ref="Console" />
         </Root>
 

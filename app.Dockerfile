@@ -13,9 +13,8 @@ ARG DATABASE_USER
 ARG DATABASE_PASSWORD
 
 # Log properties
-ARG LOG_PATH=logs/log-arc.log
-ARG LOG_LEVEL=ERROR
-ARG LOG_SETTINGS=fr/insee/config/log4j.xml
+ARG LOG_SETTINGS=fr/insee/config/log4j2.xml
+
 
 COPY . /usr/src/app/
 
@@ -27,6 +26,9 @@ FROM tomcat:8.5
 
 # Clean it
 RUN rm -rf $CATALINA_HOME/webapps/*
+
+ARG LOG_LEVEL=ERROR
+ENV ARC_LOGLEVEL=$LOG_LEVEL
 
 # Copy the war file
 COPY --from=build usr/src/app/arc-web/target/*.war $CATALINA_HOME/webapps/ROOT.war
