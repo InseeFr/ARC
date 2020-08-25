@@ -7,6 +7,9 @@
 	prefix="s"
 	uri="/struts-tags"
 %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 
@@ -81,7 +84,7 @@
 	<div class="col-md-8">
 				<div class="jumbotron jumbotron-fluid">
 					<div class="container">
-						<h1 class="display-4"><s:text name="home.welcome" /></h1>
+						<h1 class="display-4"><spring:message code="home.welcome"/></h1>
 						<p class="lead">Version 20191025a</p>
 					</div>
 				</div>

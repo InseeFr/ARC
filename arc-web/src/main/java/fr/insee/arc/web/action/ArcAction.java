@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.convention.annotation.ParentPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -57,6 +58,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ParentPackage("PremierPackage")
 public abstract class ArcAction extends Authentifier implements IConstanteCaractere {
     private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);
     public static final String NONE = "none";

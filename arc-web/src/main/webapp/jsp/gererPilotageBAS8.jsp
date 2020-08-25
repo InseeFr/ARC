@@ -1,6 +1,9 @@
 ﻿﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@ taglib prefix="s" uri="/struts-tags"%>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
@@ -48,7 +51,7 @@
 						<div class="row">
 							<div class="col-md-8">
 								<h3>
-									<s:text name="managementSandbox.loadFile" />
+									<spring:message code="managementSandbox.loadFile"/>
 								</h3>
 								<div class="input-group my-3">
 									<div class="custom-file">
@@ -62,11 +65,10 @@
 										/> <label
 											class="custom-file-label"
 											for="ActionsBAS8.selectFiles"
-										><s:text name="managementSandbox.fileToLoad"/></label>
+										><spring:message code="managementSandbox.fileToLoad"/></label>
 									</div>
 									<div class="input-group-append">										
-										<label class="ml-4 mt-2 mr-1" for="entrepotCible"><s:text
-												name="managementSandbox.repository" /> :</label>
+										<label class="ml-4 mt-2 mr-1" for="entrepotCible"><spring:message code="managementSandbox.repository"/> :</label>
 										<s:select id="entrepotCible"
 											list="%{viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}"
 											value="%{viewEntrepotBAS8.customValues['entrepotEcriture']}"
@@ -81,18 +83,16 @@
 											multipart="true"
 											ajax="false"
 											onclick="updateConsoleState=true;"
-										><span class="fa fa-upload">&nbsp;</span> <s:text
-												name="managementSandbox.load"
-											/></button>
+										><span class="fa fa-upload">&nbsp;</span> <spring:message code="managementSandbox.load"/></button>
 									</div>
 								</div>
 							</div>
 
 							<div class="col-md-4 border-left">
 								<h3>
-									<s:text name="managementSandbox.download" />
+									<spring:message code="managementSandbox.download"/>
 								</h3>
-								<b><s:text name="managementSandbox.readingRepository" /></b>
+								<b><spring:message code="managementSandbox.readingRepository"/></b>
 								<s:select cssStyle="width:%{viewEntrepotBAS8.headersVSize[0]};"
 									list="%{viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}"
 									value="%{viewEntrepotBAS8.customValues['entrepotLecture']}"
@@ -137,7 +137,7 @@
 							<div class="card no-margin">
 								<div class="card-header bg-primary p-0">
 									<h3 class="text-white m-1">
-										<s:text name="managementSandbox.runModule" />
+										<spring:message code="managementSandbox.runModule"/>
 									</h3>
 								</div>
 
@@ -190,7 +190,7 @@
 									<div class="card no-margin">
 										<div class="card-header bg-primary p-0">
 											<h3 class="text-white m-1">
-												<s:text name="managementSandbox.console" />
+												<spring:message code="managementSandbox.console"/>
 											</h3>
 										</div>
 									</div>
@@ -198,7 +198,7 @@
 								<div class="col-md-6" style="justify-content: flex-end; display: flex;">
 									<button type="button" class="btn btn-secondary"
 										onclick="$('[name=&quot;consoleIhm&quot;]').html('')">
-										<s:text name="managementSandbox.emptyConsole" />
+										<spring:message code="managementSandbox.emptyConsole"/>
 									</button>
 								</div>
 							</div>
@@ -251,30 +251,30 @@
 					<s:param name="multiSelection">true</s:param>
 					<s:param name="otherButton">
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.downloadBd" value="<s:text name="gui.button.downloadDatabase"/>"
+							id="viewFichierBAS8.downloadBd" value="<spring:message code="gui.button.downloadDatabase"/>"
 							doAction="downloadBdBAS8" ajax="false" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.downloadFichier" value="<s:text name="gui.button.downloadFile"/>"
+							id="viewFichierBAS8.downloadFichier" value="<spring:message code="gui.button.downloadFile"/>"
 							doAction="downloadFichierBAS8" ajax="false" />
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS8.downloadEnveloppe"
-							value="<s:text name="gui.button.downloadArchive"/>" doAction="downloadEnveloppeBAS8"
+							value="<spring:message code="gui.button.downloadArchive"/>" doAction="downloadEnveloppeBAS8"
 							ajax="false" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.toDelete" value="<s:text name="gui.button.deleteFiles"/>"
+							id="viewFichierBAS8.toDelete" value="<spring:message code="gui.button.deleteFiles"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="toDeleteBAS8" onclick="updateConsoleState=true;" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.toRestore" value="<s:text name="gui.button.replayFiles"/>"
+							id="viewFichierBAS8.toRestore" value="<spring:message code="gui.button.replayFiles"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="toRestoreBAS8" onclick="updateConsoleState=true;" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.toRestoreArchive" value="<s:text name="gui.button.replayArchives"/>"
+							id="viewFichierBAS8.toRestoreArchive" value="<spring:message code="gui.button.replayArchives"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="toRestoreArchiveBAS8"
 							onclick="updateConsoleState=true;" />
 						<input class="btn btn-primary btn-sm" type="submit"
-							id="viewFichierBAS8.undoAction" value="<s:text name="gui.button.cancelTodo"/>"
+							id="viewFichierBAS8.undoAction" value="<spring:message code="gui.button.cancelTodo"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="undoActionBAS8" onclick="updateConsoleState=true;" />
 					</s:param>

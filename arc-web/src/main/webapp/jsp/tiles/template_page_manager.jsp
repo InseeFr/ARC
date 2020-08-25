@@ -1,4 +1,7 @@
 <%@ taglib prefix="s" uri="/struts-tags"%>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 
 <s:set
 	var="view"

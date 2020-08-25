@@ -27,6 +27,9 @@
 	prefix="s"
 	uri="/struts-tags"
 %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 
 <s:set
 	var="view"
@@ -65,7 +68,7 @@
 			<div class="col-md">
 				<div class="card  no-margin">
 					<div class="card-header bg-primary p-0">
-						<h3 class="text-white m-1"><s:text name="%{#view.title}" /></h3>
+						<h3 class="text-white m-1"><spring:message code="${view.title}"/></h3>
 					</div>
 					<div class="card-body p-0">
 						<s:hidden
@@ -93,7 +96,7 @@
 												class="sort"
 												scope="col"
 												style="width:<s:property value='%{#view.headersVSize[#incr.index]}'/>;"
-											><s:text name="%{#view.headersVLabel[#incr.index]}" />
+											><spring:message code="${view.headersVLabel[incr.index]}"/>
 											</th>
 										</s:if>
 										<s:else>
@@ -392,8 +395,8 @@
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;"
-							value="<s:text name="gui.button.refresh"/>"
-						><span class="fa fa-refresh">&nbsp;</span><s:text name="gui.button.refresh"/></button>
+							value="<spring:message code="gui.button.refresh"/>"
+						><span class="fa fa-refresh">&nbsp;</span><spring:message code="gui.button.refresh"/></button>
 					</s:if>
 					<s:if test="#btnSee.equals('true')">
 						<button
@@ -403,8 +406,8 @@
 							type="submit"
 							doAction="select<s:property value="#viewType"/>"
 							scope="${param.extraScopeSee}"
-							value="<s:text name="gui.button.see"/>"
-						><span class="fa fa-eye-open">&nbsp;</span><s:text name="gui.button.see"/></button>
+							value="<spring:message code="gui.button.see"/>"
+						><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.see"/></button>
 					</s:if>
 					<s:if test="#btnSort.equals('true')">
 						<button
@@ -414,8 +417,8 @@
 							type="submit"
 							doAction="sort<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;"
-							value="<s:text name="gui.button.sort"/>"
-						><span class="fa fa-sort">&nbsp;</span><s:text name="gui.button.sort"/></button>
+							value="<spring:message code="gui.button.sort"/>"
+						><span class="fa fa-sort">&nbsp;</span><spring:message code="gui.button.sort"/></button>
 					</s:if>
 					<s:if test="#btnAdd.equals('true')">
 						<button
@@ -424,8 +427,8 @@
 							type="submit"
 							doAction="add<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeAdd}"
-							value="<s:text name="gui.button.add"/>"
-						><span class="fa fa-check">&nbsp;</span><s:text name="gui.button.add"/></button>
+							value="<spring:message code="gui.button.add"/>"
+						><span class="fa fa-check">&nbsp;</span><spring:message code="gui.button.add"/></button>
 					</s:if>
 					<s:if test="#btnUpdate.equals('true')">
 						<button
@@ -434,8 +437,8 @@
 							type="submit"
 							doAction="update<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeUpdate}"
-							value="<s:text name="gui.button.update"/>"
-						><span class="fa fa-save">&nbsp;</span><s:text name="gui.button.update"/></button>
+							value="<spring:message code="gui.button.update"/>"
+						><span class="fa fa-save">&nbsp;</span><spring:message code="gui.button.update"/></button>
 					</s:if>
 					<s:if test="#btnDelete.equals('true')">
 						<button
@@ -444,8 +447,8 @@
 							type="submit"
 							doAction="delete<s:property value="#viewType"/>"
 							scope="<s:property value="#view.sessionName"/>;${param.extraScopeDelete}"
-							value="<s:text name="gui.button.delete"/>"
-						><span class="fa fa-remove">&nbsp;</span><s:text name="gui.button.delete"/></button>
+							value="<spring:message code="gui.button.delete"/>"
+						><span class="fa fa-remove">&nbsp;</span><spring:message code="gui.button.delete"/></button>
 					</s:if>
 
 					<s:if test="#otherButton != null">

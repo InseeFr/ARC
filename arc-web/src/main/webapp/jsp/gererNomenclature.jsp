@@ -8,11 +8,14 @@
 	prefix="s"
 	uri="/struts-tags"
 %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html>
 <html>
 <s:if test="scope==null">
 	<head>
-<title><s:text name="header.externalFile"/></title>
+<title><spring:message code="header.externalFile"/></title>
 <link
 	rel="stylesheet"
 	href="<s:url value='/css/bootstrap.min.css'/>"
@@ -103,7 +106,7 @@
 							/> <label
 								class="custom-file-label"
 								for="externalFile"
-							><s:text name="general.chooseFile" /></label>
+							><spring:message code="general.chooseFile"/></label>
 						</div>
 						<div class="input-group-append">
 							<button
@@ -115,9 +118,7 @@
 								multipart="true"
 								ajax="false"
 								onclick="submitForm()"
-							><span class="fa fa-upload">&nbsp;</span> <s:text
-									name="managementSandbox.load"
-								/></button>
+							><span class="fa fa-upload">&nbsp;</span> <spring:message code="managementSandbox.load"/></button>
 						</div>
 					</div>
 			</div>

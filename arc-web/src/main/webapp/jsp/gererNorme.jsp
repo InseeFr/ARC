@@ -8,11 +8,14 @@
 	prefix="s"
 	uri="/struts-tags"
 %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html>
 <html>
 <s:if test="scope==null">
 	<head>
-<title><s:text name="header.normManagement"/></title>
+<title><spring:message code="header.normManagement"/></title>
 <link
 	rel="stylesheet"
 	href="<s:url value='/css/bootstrap.min.css'/>"
@@ -152,9 +155,7 @@
 										type="submit"
 										doAction="downloadJeuxDeRegles"
 										ajax="false"
-									><span class="fa fa-download">&nbsp;</span> <s:text
-											name="gui.button.downloadRuleset"
-										/></button>
+									><span class="fa fa-download">&nbsp;</span> <spring:message code="gui.button.downloadRuleset"/></button>
 								</s:param>
 							</s:include>
 						</div>
@@ -189,7 +190,7 @@
 										aria-selected="true"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.load" />
+										<spring:message code="normManagement.load"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -201,7 +202,7 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.structurize" />
+										<spring:message code="normManagement.structurize"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -213,7 +214,7 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.control" />
+										<spring:message code="normManagement.control"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -225,7 +226,7 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.filter" />
+										<spring:message code="normManagement.filter"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -237,7 +238,7 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.mapmodel" />
+										<spring:message code="normManagement.mapmodel"/>
 									</a></li>
 							</ul>
 						</s:if>
@@ -278,7 +279,7 @@
 												type="submit"
 												doAction="viderChargement"
 												scope="viewChargement;"
-												value="<s:text name="gui.button.deleteRuleset"/>"
+												value="<spring:message code="gui.button.deleteRuleset"/>"
 											/>
 											<input
 												class="btn btn-primary btn-sm"
@@ -286,7 +287,7 @@
 												type="submit"
 												doAction="selectJeuxDeReglesChargementCopie"
 												scope="viewChargement;viewJeuxDeReglesCopie;"
-												value="<s:text name="gui.button.replaceRuleset"/>"
+												value="<spring:message code="gui.button.replaceRuleset"/>"
 											/>
 											
 											<div class="input-group my-3">
@@ -300,7 +301,7 @@
 														class="custom-file-label"
 														for="inputGroupFileLoad"
 														aria-describedby="Choose file to upload for load module"
-													><s:text name="general.chooseFile" /></label>
+													><spring:message code="general.chooseFile"/></label>
 												</div>
 												<div class="input-group-append">
 													<button
@@ -310,9 +311,7 @@
 														doAction="importChargement"
 														scope="viewChargement;"
 														multipart="true"
-													><span class="fa fa-upload">&nbsp;</span> <s:text
-															name="gui.button.importRuleset"
-														/></button>
+													><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 												</div>
 											</div>
 
@@ -353,7 +352,7 @@
 													type="submit"
 													doAction="viderNormage"
 													scope="viewNormage;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												/>
 												<input
 													class="btn btn-primary btn-sm"
@@ -361,7 +360,7 @@
 													type="submit"
 													doAction="selectJeuxDeReglesNormageCopie"
 													scope="viewNormage;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												/>
 												<div class="input-group my-3">
 													<div class="custom-file">
@@ -374,7 +373,7 @@
 															class="custom-file-label"
 															for="inputGroupFilestructure"
 															aria-describedby="Choose file to upload for structure module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -384,9 +383,7 @@
 															doAction="importNormage"
 															scope="viewNormage;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
 											</s:if>
@@ -427,7 +424,7 @@
 													type="submit"
 													doAction="viderControle"
 													scope="viewControle;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												/>
 												<input
 													class="btn btn-primary btn-sm"
@@ -435,7 +432,7 @@
 													type="submit"
 													doAction="selectJeuxDeReglesControleCopie"
 													scope="viewControle;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												/>
 												<div class="input-group my-3">
 													<div class="custom-file">
@@ -448,7 +445,7 @@
 															class="custom-file-label"
 															for="inputGroupFileControle"
 															aria-describedby="Choose file to upload for control module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -457,9 +454,7 @@
 															doAction="importControle"
 															scope="viewControle;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
 											</s:if>
@@ -499,7 +494,7 @@
 													type="submit"
 													doAction="viderFiltrage"
 													scope="viewFiltrage;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												></input>
 												<input
 													class="btn btn-primary btn-sm"
@@ -507,7 +502,7 @@
 													type="submit"
 													doAction="selectJeuxDeReglesFiltrageCopie"
 													scope="viewFiltrage;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												></input>
 
 												<s:if test="viewFiltrage.content.t.size()==0">
@@ -517,7 +512,7 @@
 														type="submit"
 														doAction="preGenererRegleFiltrage"
 														scope="viewFiltrage;"
-														value="<s:text name="gui.button.generateRuleset"/>"
+														value="<spring:message code="gui.button.generateRuleset"/>"
 													></input>
 												</s:if>
 												<div class="input-group my-3">
@@ -531,7 +526,7 @@
 															class="custom-file-label"
 															for="inputGroupFileFilter"
 															aria-describedby="Choose file to upload for filter module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -541,9 +536,7 @@
 															doAction="importFiltrage"
 															scope="viewFiltrage;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
 											</s:if>
@@ -584,7 +577,7 @@
 													type="submit"
 													doAction="viderMapping"
 													scope="viewMapping;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												></input>
 												<input
 													class="btn btn-primary btn-sm"
@@ -592,7 +585,7 @@
 													type="submit"
 													doAction="selectJeuxDeReglesMappingCopie"
 													scope="viewMapping;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												></input>
 
 												<s:if test="viewMapping.content.t.size()==0">
@@ -602,7 +595,7 @@
 														type="submit"
 														doAction="preGenererRegleMapping"
 														scope="viewMapping;"
-														value="<s:text name="gui.button.generateRuleset"/>"
+														value="<spring:message code="gui.button.generateRuleset"/>"
 													></input>
 												</s:if>
 												<div class="input-group my-3">
@@ -616,7 +609,7 @@
 															class="custom-file-label"
 															for="inputGroupFileMap"
 															aria-describedby="Choose file to upload for map module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -626,9 +619,7 @@
 															doAction="importMapping"
 															scope="viewMapping;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
 											</s:if>
@@ -665,7 +656,7 @@
 														type="submit"
 														doAction="copieJeuxDeRegles"
 														scope="-viewJeuxDeReglesCopie;<s:property value="%{viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']}"/>;"
-														value="<s:text name="gui.button.copy"/>"
+														value="<spring:message code="gui.button.copy"/>"
 													></input>
 												</s:param>
 
