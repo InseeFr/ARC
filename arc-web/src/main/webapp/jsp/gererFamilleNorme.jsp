@@ -4,11 +4,8 @@
 	pageEncoding="UTF-8"
 	trimDirectiveWhitespaces="true"
 %>
-<%@ taglib
-	prefix="s"
-	uri="/struts-tags"
-%>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -18,44 +15,42 @@
 
 <link
 	rel="stylesheet"
-	href="<s:url value='/css/bootstrap.min.css'/>"
+	href="<c:url value='/css/bootstrap.min.css'/>"
 />
 <link
 	rel="stylesheet"
 	type="text/css"
-	href="<s:url value='/css/style.css' />"
+	href="<c:url value='/css/style.css' />"
 />
 <link
-	href="<s:url value='/css/font-awesome.min.css'/>"
+	href="<c:url value='/css/font-awesome.min.css'/>"
 	rel="stylesheet"
 />
 <script
 	type="text/javascript"
-	src="<s:url value='/js/jquery-2.1.3.min.js'/>"
+	src="<c:url value='/js/jquery-2.1.3.min.js'/>"
 ></script>
 
-<script	src="<s:url value='/js/lib/popper.min.js'/>" ></script>
-<script	src="<s:url value='/js/lib/bootstrap.min.js'/>"></script>
+<script	src="<c:url value='/js/lib/popper.min.js'/>" ></script>
+<script	src="<c:url value='/js/lib/bootstrap.min.js'/>"></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/arc.js'/>"
+	src="<c:url value='/js/arc.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/gererFamilleNorme.js'/>"
+	src="<c:url value='/js/gererFamilleNorme.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/component.js'/>"
+	src="<c:url value='/js/component.js'/>"
 ></script>
 </head>
 <body class="bg-light">
-<s:form
+<form id="selectFamilleNorme"
+	action="selectFamilleNorme.action"
 	spellcheck="false"
-	namespace="/"
-	method="POST"
-	theme="simple"
-	enctype="multipart/form-data"
+	method="post"
 >
 
 	<%@include file="tiles/header.jsp"%>
@@ -67,24 +62,20 @@
 					class="aside"
 				>
 					<div class="row">
-						<s:include value="tiles/templateVObject.jsp">
-							<s:set
-								var="view"
-								value="%{viewFamilleNorme}"
-								scope="request"
-							></s:set>
-							<s:param name="taille">col-md</s:param>
-							<s:param name="ligneAdd" >true</s:param>
-							<s:param name="btnSelect">true</s:param>
-							<s:param name="btnSee">true</s:param>
-							<s:param name="btnSort">true</s:param>
-							<s:param name="btnAdd">true</s:param>
-							<s:param name="btnUpdate">true</s:param>
-							<s:param name="btnDelete">true</s:param>
-							<s:param name="checkbox">true</s:param>
-							<s:param name="checkboxVisible">true</s:param>
-							<s:param name="extraScopeSee">viewClient;viewTableMetier;viewVariableMetier;</s:param>
-						</s:include>
+						<c:set var="view" value="${viewFamilleNorme}"  scope="request"/>
+						<c:import url="tiles/templateVObject.jsp">
+							<c:param name="taille" value ="col-md" />
+							<c:param name="ligneAdd" value="true" />
+							<c:param name="btnSelect" value="true" />
+							<c:param name="btnSee" value="true" />
+							<c:param name="btnSort" value="true" />
+							<c:param name="btnAdd" value="true" />
+							<c:param name="btnUpdate" value="true" />
+							<c:param name="btnDelete" value="true" />
+							<c:param name="checkbox" value="true" />
+							<c:param name="checkboxVisible" value="true" />
+							<c:param name="extraScopeSee" value="viewClient;viewTableMetier;viewVariableMetier;" />
+						</c:import>
 					</div>
 
 
@@ -92,48 +83,40 @@
 
 					<div class="row">
 						<!-- VIEW TABLE APPLI CLIENTE -->
-						<s:include value="tiles/templateVObject.jsp">
-							<s:set
-								var="view"
-								value="%{viewClient}"
-								scope="request"
-							></s:set>
-							<s:param name="taille">col-md</s:param>
-							<s:param name="ligneAdd" >true</s:param>
-							<s:param name="btnSelect">true</s:param>
-							<s:param name="btnSee">true</s:param>
-							<s:param name="btnSort">true</s:param>
-							<s:param name="btnAdd">true</s:param>
-							<s:param name="btnUpdate">true</s:param>
-							<s:param name="btnDelete">true</s:param>
-							<s:param name="checkbox">true</s:param>
-							<s:param name="checkboxVisible">true</s:param>
-						</s:include>
+						<c:set var="view" value="${viewClient}"  scope="request"/>
+						<c:import url="tiles/templateVObject.jsp">
+							<c:param name="taille" value ="col-md" />
+							<c:param name="ligneAdd" value="true" />
+							<c:param name="btnSelect" value ="true" />
+							<c:param name="btnSee" value ="true" />
+							<c:param name="btnSort" value ="true" />
+							<c:param name="btnAdd" value ="true" />
+							<c:param name="btnUpdate" value ="true" />
+							<c:param name="btnDelete" value ="true" />
+							<c:param name="checkbox" value ="true" />
+							<c:param name="checkboxVisible" value ="true" />
+						</c:import>
 					</div>
 
 
 					<div class="row">
 						<!-- VIEW TABLE METIER -->
-						<s:include value="tiles/templateVObject.jsp">
-							<s:set
-								var="view"
-								value="%{viewTableMetier}"
-								scope="request"
-							></s:set>
-							<s:param name="taille">col-md</s:param>
-							<s:param name="ligneAdd" >true</s:param>
-							<s:param name="btnSelect">true</s:param>
-							<s:param name="btnSee">true</s:param>
-							<s:param name="btnSort">true</s:param>
-							<s:param name="btnAdd">true</s:param>
-							<s:param name="btnUpdate">true</s:param>
-							<s:param name="btnDelete">true</s:param>
-							<s:param name="checkbox">true</s:param>
-							<s:param name="checkboxVisible">true</s:param>
-							<s:param name="extraScopeAdd">viewVariableMetier;</s:param>
-							<s:param name="extraScopeUpdate">viewVariableMetier;</s:param>
-							<s:param name="extraScopeDelete">viewVariableMetier;</s:param>
-						</s:include>
+						<c:set var="view" value="${viewTableMetier}"  scope="request"/>
+						<c:import url="tiles/templateVObject.jsp">
+							<c:param name="taille" value ="col-md" />
+							<c:param name="ligneAdd" value="true" />
+							<c:param name="btnSelect" value ="true" />
+							<c:param name="btnSee" value ="true" />
+							<c:param name="btnSort" value ="true" />
+							<c:param name="btnAdd" value ="true" />
+							<c:param name="btnUpdate" value ="true" />
+							<c:param name="btnDelete" value ="true" />
+							<c:param name="checkbox" value ="true" />
+							<c:param name="checkboxVisible" value ="true" />
+							<c:param name="extraScopeAdd" value ="viewVariableMetier;" />
+							<c:param name="extraScopeUpdate" value ="viewVariableMetier;" />
+							<c:param name="extraScopeDelete" value ="viewVariableMetier;" />
+						</c:import>
 					</div>
 				</div>
 
@@ -143,32 +126,28 @@
 				>
 					<div class="row">
 						<!-- VIEW VARIABLE METIER -->
-						<s:include value="tiles/templateVObject.jsp">
-							<s:set
-								var="view"
-								value="%{viewVariableMetier}"
-								scope="request"
-							></s:set>
-							<s:param name="taille">col-md</s:param>
-							<s:param name="ligneAdd" >true</s:param>
-							<s:param name="btnSelect">true</s:param>
-							<s:param name="btnSee">true</s:param>
-							<s:param name="btnSort">true</s:param>
-							<s:param name="btnAdd">true</s:param>
-							<s:param name="btnUpdate">true</s:param>
-							<s:param name="btnDelete">true</s:param>
-							<s:param name="checkbox">true</s:param>
-							<s:param name="checkboxVisible">true</s:param>
-							<s:param name="ligneFilter" >true</s:param>
-							<s:param name="ligneAdd">true</s:param>
-						</s:include>
+						<c:set var="view" value="${viewVariableMetier}" scope="request" />
+						<c:import url="tiles/templateVObject.jsp">
+							<c:param name="taille" value ="col-md" />
+							<c:param name="ligneAdd"  value="true" />
+							<c:param name="btnSelect" value ="true" />
+							<c:param name="btnSee" value ="true" />
+							<c:param name="btnSort" value ="true" />
+							<c:param name="btnAdd" value ="true" />
+							<c:param name="btnUpdate" value ="true" />
+							<c:param name="btnDelete" value ="true" />
+							<c:param name="checkbox" value ="true" />
+							<c:param name="checkboxVisible" value ="true" />
+							<c:param name="ligneFilter" value="true" />
+							<c:param name="ligneAdd" value ="true" />
+						</c:import>
 					</div>
 				</div>
 
 			</div>
 
 
-		</s:form>
+		</form>
 
 	</div>
 

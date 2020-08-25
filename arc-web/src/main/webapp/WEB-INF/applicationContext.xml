@@ -56,6 +56,7 @@
 		class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basename" value="global" />
 		<property name="defaultEncoding" value="UTF-8" />
+		<property name="alwaysUseMessageFormat" value="true" />
 	</bean>
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>

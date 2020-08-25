@@ -1,18 +1,19 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@ taglib prefix="s" uri="/struts-tags"%>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="<s:url value='/css/style.css' />" />
-<script type="text/javascript" src="<s:url value='/js/jquery-2.1.3.min.js'/>"></script>
-<script type="text/javascript" src="<s:url value='/js/arc.js'/>"></script>
-<script type="text/javascript" src="<s:url value='/js/gererPilotagePROD.js'/>"></script>
-<script type="text/javascript" src="<s:url value='/js/component.js'/>"></script>
+<link rel="stylesheet" type="text/css" href="<c:url value='/css/style.css' />" />
+<script type="text/javascript" src="<c:url value='/js/jquery-2.1.3.min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/js/arc.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/js/gererPilotagePROD.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/js/component.js'/>"></script>
 <!-- <link rel="stylesheet" href="./css/tablesorter.css" type="text/css" /> -->
-<%-- 	<script src="<s:url value='/js/util/noSelectionTexte.js" type="text/javascript' />"></script> --%>
+<%-- 	<script src="<c:url value='/js/util/noSelectionTexte.js" type="text/javascript' />"></script> --%>
 <%-- <script type="text/javascript" src="./js/jquery-1.11.1.min.js"></script> --%>
 <%-- <script type="text/javascript" src="./js/jquery.filtertable.js"></script> --%>
 </head>
@@ -20,19 +21,19 @@
 	<div>
 		<div style="float: left;" class="titre1">Suivi de Production</div>
 		<div style="position:relative;top:3px;left:100px;">
-			<s:a class="onglet" href="accueil.action">Accueil</s:a>
-			<s:a class="onglet" href="selectNorme.action">Gérer les Normes</s:a>
-			<s:a class="onglet" href="selectFamilleNorme.action">Gérer les familles</s:a>
+			<a class="onglet" href="<c:url value="accueil.action"/>">Accueil</a>
+			<a class="onglet" href="<c:url value="selectNorme.action"/>">Gérer les Normes</a>
+			<a class="onglet" href="<c:url value="selectFamilleNorme.action"/>">Gérer les familles</a>
 		</div>
 	</div>
 	<div style="position: absolute; top: 40px; left: 0px; width: 99.5%;">
 		<s:form spellcheck="false" namespace="/" method="POST" theme="simple" enctype="multipart/form-data">
 			<div class="container" id="viewPilotagePROD" style="float: left;">
-				<s:if test="viewPilotagePROD.isInitialized==true&&viewPilotagePROD.isScoped==true">
+				<c:if test="${viewPilotagePROD.isInitialized && viewPilotagePROD.isScoped}">
 					<div class="bandeau">
-						<s:property value="%{viewPilotagePROD.title}" />
+						${viewPilotagePROD.title}
 					</div>
-					<s:hidden name="viewPilotagePROD.headerSortDLabel" value="" />
+					<input type="hidden" name="viewPilotagePROD.headerSortDLabel" value="" />
 					<table class="fixedHeader">
 						<thead>
 							<tr>
@@ -130,7 +131,7 @@
 						</div>
 					</s:if>
 					<div style="margin-bottom: 30px;"></div>
-				</s:if>
+				</c:if>
 				
 				<div>
 					<input type="submit" id="ActionsProd.informationInitialisationPROD" value="Information sur la production" scope="viewPilotagePROD;" doAction="informationInitialisationPROD" onclick="" />

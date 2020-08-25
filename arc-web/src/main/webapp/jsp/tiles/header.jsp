@@ -1,4 +1,3 @@
-<%@ taglib prefix="s" uri="/struts-tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
@@ -22,10 +21,12 @@
 			<li class="nobullet mt-auto">
         		<label class="ml-5 mr-1" for="environnementTravail"><spring:message code="header.sandboxChoice"/> :</label>
       		</li>			
-			<li class="nobullet mt-auto"><s:select id="environnementTravail"
-					class="form-control mr-sm-2" list="envMap" name="bacASable"
-					value="%{session.ENV}" theme="simple" emptyOption="false"
-					required="true"></s:select></li>
+			<li class="nobullet mt-auto">
+				<select id="environnementTravail" class="form-control mr-sm-2" name="bacASable" required>
+					<c:forEach items="${envMap.keySet()}" var="bas">
+						<option value="${bas}" ${bas == sessionScope.ENV ? 'selected' : ''}>${envMap.get(bas)}</option>
+					</c:forEach>
+				</select></li>
 <!-- 			<li class="nobullet mt-auto"><input -->
 <!-- 				class="btn btn-secondary btn-sm" id="enterPilotageBAS8Button" -->
 <!-- 				type="submit" doAction="enterPilotageBAS8" ajax="false" value="" -->
@@ -38,13 +39,10 @@
 
 		<ul class="navbar-nav navbar-right ml-auto">
      	<li class="nobullet mr-auto mt-auto">
-	   		<s:if test="isDataBaseOK">
-	   		<button id="connectionCheck" class="btn btn-success btn-sm" type="button"><spring:message code="header.database.ok"/></button>
-	   		</s:if>
-		<s:else>
-		    <button id="connectionCheck"  class="btn btn-danger btn-sm" type="button"><spring:message code="header.database.ko"/></button>
-		</s:else>
-      </li>
+	   		<div id="connectionCheck" 
+	   			class="btn ${isDataBaseOK ? 'btn-success' : 'btn-danger'} btn-sm" 
+	   			><spring:message code="header.database.${isDataBaseOK ? 'ok' : 'ko'}"/></div>
+      	</li>
 
 
        <li class="nobullet mt-auto">
@@ -52,8 +50,8 @@
 	      		<c:choose>
 				<c:when test="${current_locale == 'en'}">
 					<li class="nobullet nav-link">	
-						<s:url action="locale" var="localeFR"><s:param name="request_locale" >fr</s:param></s:url>
-						<s:a href="%{localeFR}" >FR</s:a>
+						<c:url value="locale.action" var="localeFR"><c:param name="request_locale"  value="fr" /></c:url>
+						<a href="${localeFR}">FR</a>
 					</li>
 					<li class="nobullet btn-light nav-link" style="color:#000000;">
 	      				${current_locale.toString().toUpperCase()}
@@ -64,8 +62,8 @@
 	      				${current_locale.toString().toUpperCase()}
 	      			</li>
 					<li class="nobullet nav-link">
-						<s:url action="locale" var="localeEN"><s:param name="request_locale" >en</s:param></s:url>
-						<s:a href="%{localeEN}" >EN</s:a>
+						<c:url value="locale.action" var="localeEN"><c:param name="request_locale"  value="en" /></c:url>
+						<a href="${localeEN}">EN</a>
 					</li>
 				</c:otherwise>
 				</c:choose>

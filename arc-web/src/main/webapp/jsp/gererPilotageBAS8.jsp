@@ -1,7 +1,8 @@
 ﻿﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
-<%@ taglib prefix="s" uri="/struts-tags"%>
+
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -9,23 +10,24 @@
 <head>
 <title>Pilotage bac à sable</title>
 
-<link rel="stylesheet" href="<s:url value='/css/bootstrap.min.css'/>" />
+<link rel="stylesheet" href="<c:url value='/css/bootstrap.min.css'/>" />
 <link rel="stylesheet" type="text/css"
-	href="<s:url value='/css/style.css' />" />
-<link href="<s:url value='/css/font-awesome.min.css'/>" rel="stylesheet" />
+	href="<c:url value='/css/style.css' />" />
+<link href="<c:url value='/css/font-awesome.min.css'/>" rel="stylesheet" />
 <script type="text/javascript"
-	src="<s:url value='/js/jquery-2.1.3.min.js'/>"></script>
+	src="<c:url value='/js/jquery-2.1.3.min.js'/>"></script>
 
-<script src="<s:url value='/js/lib/popper.min.js'/>"></script>
-<script src="<s:url value='/js/lib/bootstrap.min.js'/>"></script>
-<script type="text/javascript" src="<s:url value='/js/arc.js'/>"></script>
+<script src="<c:url value='/js/lib/popper.min.js'/>"></script>
+<script src="<c:url value='/js/lib/bootstrap.min.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/js/arc.js'/>"></script>
 <script type="text/javascript"
-	src="<s:url value='/js/gererPilotage.js'/>"></script>
-<script type="text/javascript" src="<s:url value='/js/component.js'/>"></script>
+	src="<c:url value='/js/gererPilotage.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/js/component.js'/>"></script>
 </head>
 <body class="bg-light">
 
-	<s:form spellcheck="false" namespace="/" method="POST" theme="simple"
+	<form spellcheck="false" id="selectPilotageBAS8" action="selectPilotageBAS8.action"
+		method="post"
 		enctype="multipart/form-data">
 
 		<%@include file="tiles/header.jsp"%>
@@ -34,16 +36,16 @@
 			<div class="row">
 				<div class="col-md-7">
 					<div class="row">
-						<s:include value="tiles/templateVObject.jsp">
-							<s:set var="view" value="%{viewPilotageBAS8}" scope="request"></s:set>
-							<s:param name="taille">col-md</s:param>
-							<s:param name="btnSelect">true</s:param>
-							<s:param name="btnSee">true</s:param>
-							<s:param name="btnSort">true</s:param>
-							<s:param name="checkbox">true</s:param>
-							<s:param name="checkboxVisible">false</s:param>
-							<s:param name="extraScopeSee">viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;</s:param>
-						</s:include>
+						<c:set var="view" value="${viewPilotageBAS8}"  scope="request"/>
+						<c:import url="tiles/templateVObject.jsp">
+							<c:param name="taille" value ="col-md" />
+							<c:param name="btnSelect" value ="true" />
+							<c:param name="btnSee" value ="true" />
+							<c:param name="btnSort" value ="true" />
+							<c:param name="checkbox" value ="true" />
+							<c:param name="checkboxVisible" value ="false" />
+							<c:param name="extraScopeSee" value ="viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;" />
+						</c:import>
 					</div>
 
 					<div id="viewEntrepotBAS8">
@@ -69,11 +71,11 @@
 									</div>
 									<div class="input-group-append">										
 										<label class="ml-4 mt-2 mr-1" for="entrepotCible"><spring:message code="managementSandbox.repository"/> :</label>
-										<s:select id="entrepotCible"
-											list="%{viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}"
-											value="%{viewEntrepotBAS8.customValues['entrepotEcriture']}"
-											name="viewEntrepotBAS8.customValues['entrepotEcriture']"
-											theme="simple" emptyOption="false"></s:select>
+										<select id="entrepotCible" name="viewEntrepotBAS8.customValues['entrepotEcriture']">
+											<c:forEach items="${viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}" var="entrepot">
+												<option ${entrepot == viewEntrepotBAS8.customValues['entrepotEcriture'] ? 'selected' : ''}>${entrepot}</option>
+											</c:forEach>
+										</select>
 										<button
 											class="btn btn-primary btn-sm ml-4"
 											id="ActionsBAS8.load"
@@ -93,14 +95,15 @@
 									<spring:message code="managementSandbox.download"/>
 								</h3>
 								<b><spring:message code="managementSandbox.readingRepository"/></b>
-								<s:select cssStyle="width:%{viewEntrepotBAS8.headersVSize[0]};"
-									list="%{viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}"
-									value="%{viewEntrepotBAS8.customValues['entrepotLecture']}"
-									name="viewEntrepotBAS8.customValues['entrepotLecture']"
-									theme="simple" emptyOption="true"></s:select>
+								<select name="viewEntrepotBAS8.customValues['entrepotLecture']" style="width:${viewEntrepotBAS8.headersVSize[0]};">
+									<option></option>
+									<c:forEach items="${viewEntrepotBAS8.getV(0,viewEntrepotBAS8.content)}" var="entrepot">
+										<option ${entrepot == viewEntrepotBAS8.customValues['entrepotLecture'] ? 'selected' : ''}>${entrepot}</option>
+									</c:forEach>
+								</select>
 								<input class="btn btn-primary btn-sm" 
 									type="submit" id="ActionsBAS8.visualiserEntrepot"
-									value=<s:property value="getText('managementSandbox.seeRepository')" />
+									value="<spring:message code='managementSandbox.seeRepository'/>"
 									scope="viewEntrepotBAS8;viewRapportBAS8;viewPilotageBAS8;-viewFichierBAS8;viewArchiveBAS8;"
 									doAction="visualiserEntrepotBAS8"
 									onclick="updateConsoleState=true;" style="margin-left: 25px;" />
@@ -112,16 +115,16 @@
 				</div>
 				<div class="col-md-5 border-left">
 					<div class="row">
-						<s:include value="tiles/templateVObject.jsp">
-							<s:set var="view" value="%{viewRapportBAS8}" scope="request"></s:set>
-							<s:param name="taille">col-md</s:param>
-							<s:param name="btnSelect">true</s:param>
-							<s:param name="btnSee">true</s:param>
-							<s:param name="btnSort">true</s:param>
-							<s:param name="checkbox">true</s:param>
-							<s:param name="checkboxVisible">false</s:param>
-							<s:param name="extraScopeSee">viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;</s:param>
-						</s:include>
+						<c:set var="view" value="${viewRapportBAS8}"  scope="request"/>
+						<c:import url="tiles/templateVObject.jsp">
+							<c:param name="taille" value ="col-md" />
+							<c:param name="btnSelect" value ="true" />
+							<c:param name="btnSee" value ="true" />
+							<c:param name="btnSort" value ="true" />
+							<c:param name="checkbox" value ="true" />
+							<c:param name="checkboxVisible" value ="false" />
+							<c:param name="extraScopeSee" value ="viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;" />
+						</c:import>
 					</div>
 				</div>
 
@@ -149,17 +152,17 @@
 
 									<div class="btn-group d-flex btn-group-sm" role="group"
 										aria-label="action">
-										<s:iterator value="listePhase" var="phase" status="i">
+										<c:forEach items="${listePhase}" var="phase" varStatus="i">
 												<button ajax="true" doAction="executerBatch"
 													class="btn btn-primary w-100"
 													scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 													onclick="return alimenterPhase($(this));" type="submit"
-													label="<s:text name='%{#phase}'/>"
+													label="<spring:message code='${phase}'/>"
 													name="phaseAExecuter"
-													value='<s:property value="phase"/>'>
-													<s:text name='%{#phase}'/>
+													value="${phase}">
+													${phase}
 												</button>
-										</s:iterator>
+										</c:forEach>
 
 									</div>
 
@@ -167,17 +170,17 @@
 
 									<div class="btn-group d-flex btn-group-sm mt-1" role="group"
 										aria-label="RA action">
-										<s:iterator value="listePhase" var="phase" status="i">
+										<c:forEach items="${listePhase}" var="phase" varStatus="i">
 												<button ajax="true" doAction="undoBatch"
 													class="btn btn-primary w-100"
 													scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 													onclick="return alimenterPhase($(this));" type="submit"
-													label="<s:text name='RA_%{#phase}'/>"
+													label="<spring:message code='RA_${phase}'/>"
 													name="phaseAExecuter"
-													value='<s:property value="phase"/>'>
-													<s:text name='RA_%{#phase}'/>
+													value='${phase}'>
+													RA_${phase}
 												</button>
-										</s:iterator>
+										</c:forEach>
 									</div>
 								</div>
 							</div>
@@ -205,9 +208,9 @@
 							<div class="card-body p-0">
 								<div class="row">
 								<div class="col-md">
-									<s:textarea id="console" name="consoleIhm"
-										class="noselect w-100" readonly="true"
-										target="updateConsoleBAS8" theme="simple"></s:textarea>
+									<textarea id="console" name="consoleIhm" cols="" rows=""
+										class="noselect w-100" readonly
+										target="updateConsoleBAS8"></textarea>
 								</div>
 								</div>
 							</div>
@@ -227,29 +230,29 @@
 
 		<div class="col-md-12">
 			<div class="row">
-				<s:include value="tiles/templateVObject.jsp">
-					<s:set var="view" value="%{viewArchiveBAS8}" scope="request"></s:set>
-					<s:param name="taille">col-md</s:param>
-					<s:param name="checkbox">true</s:param>
-					<s:param name="otherButton">
+				<c:set var="view" value="${viewArchiveBAS8}"  scope="request"/>
+				<c:import url="tiles/templateVObject.jsp">
+					<c:param name="taille" value ="col-md" />
+					<c:param name="checkbox" value ="true" />
+					<c:param name="otherButton">
 						<input class="btn btn-primary btn-sm"
 							type="submit" id="viewArchiveBAS8.downloadEnveloppe"
 							value="Telecharger Enveloppe"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewEntrepotBAS8;"
 							doAction="downloadEnveloppeFromArchiveBAS8" ajax="false" />
-					</s:param>
-				</s:include>
+					</c:param>
+				</c:import>
 			</div>
 			<div class="row">
-				<s:include value="tiles/templateVObject.jsp">
-					<s:set var="view" value="%{viewFichierBAS8}" scope="request"></s:set>
-					<s:param name="taille">col-md</s:param>
-					<s:param name="btnSelect">true</s:param>
-					<s:param name="btnSort">true</s:param>
-					<s:param name="checkbox">true</s:param>
-					<s:param name="ligneFilter">true</s:param>
-					<s:param name="multiSelection">true</s:param>
-					<s:param name="otherButton">
+				<c:set var="view" value="${viewFichierBAS8}"  scope="request"/>
+				<c:import url="tiles/templateVObject.jsp">
+					<c:param name="taille" value ="col-md" />
+					<c:param name="btnSelect" value ="true" />
+					<c:param name="btnSort" value ="true" />
+					<c:param name="checkbox" value ="true" />
+					<c:param name="ligneFilter" value ="true" />
+					<c:param name="multiSelection" value ="true" />
+					<c:param name="otherButton">
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS8.downloadBd" value="<spring:message code="gui.button.downloadDatabase"/>"
 							doAction="downloadBdBAS8" ajax="false" />
@@ -277,12 +280,12 @@
 							id="viewFichierBAS8.undoAction" value="<spring:message code="gui.button.cancelTodo"/>"
 							scope="viewPilotageBAS8;viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;"
 							doAction="undoActionBAS8" onclick="updateConsoleState=true;" />
-					</s:param>
-				</s:include>
+					</c:param>
+				</c:import>
 			</div>
 		</div>
 		</div>
 
-	</s:form>
+	</form>
 </body>
 </html>

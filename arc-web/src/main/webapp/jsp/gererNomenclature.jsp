@@ -4,60 +4,57 @@
 	pageEncoding="UTF-8"
 	trimDirectiveWhitespaces="true"
 %>
-<%@ taglib
-	prefix="s"
-	uri="/struts-tags"
-%>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html>
 <html>
-<s:if test="scope==null">
+<c:if test="${scope==null}">
 	<head>
 <title><spring:message code="header.externalFile"/></title>
 <link
 	rel="stylesheet"
-	href="<s:url value='/css/bootstrap.min.css'/>"
+	href="<c:url value='/css/bootstrap.min.css'/>"
 />
 <link
 	rel="stylesheet"
 	type="text/css"
-	href="<s:url value='/css/style.css' />"
+	href="<c:url value='/css/style.css' />"
 />
 <link
-	href="<s:url value='/css/font-awesome.min.css'/>"
+	href="<c:url value='/css/font-awesome.min.css'/>"
 	rel="stylesheet"
 />
 <script
 	type="text/javascript"
-	src="<s:url value='/js/jquery-2.1.3.min.js'/>"
+	src="<c:url value='/js/jquery-2.1.3.min.js'/>"
 ></script>
 
-<script	src="<s:url value='/js/lib/popper.min.js'/>" ></script>
-<script	src="<s:url value='/js/lib/bootstrap.min.js'/>"></script>
+<script	src="<c:url value='/js/lib/popper.min.js'/>" ></script>
+<script	src="<c:url value='/js/lib/bootstrap.min.js'/>"></script>
 
 <script
 	type="text/javascript"
-	src="<s:url value='/js/arc.js'/>"
+	src="<c:url value='/js/arc.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/gererNomenclature.js'/>"
+	src="<c:url value='/js/gererNomenclature.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/component.js'/>"
+	src="<c:url value='/js/component.js'/>"
 ></script>
 	</head>
-</s:if>
+</c:if>
 <body class='bg-light'>
 
-<s:form
+<form
 	spellcheck="false"
-	namespace="/"
-	method="POST"
-	theme="simple"
+	action="selectListNomenclatures.action"
+	id="selectListNomenclatures"
+	method="post"
 	enctype="multipart/form-data"
 >
 	<%@include file="tiles/header.jsp"%>
@@ -71,28 +68,24 @@
 					<div class="row">
 						<div class="col-md">
 							<!-- norm list -->
-							<s:include value="tiles/templateVObject.jsp">
-								<s:set
-									var="view"
-									value="%{viewListNomenclatures}"
-									scope="request"
-								></s:set>
-								<s:param name="btnSelect">true</s:param>
-								<s:param name="btnSee">true</s:param>
-								<s:param name="btnSort">true</s:param>
-								<s:param name="btnAdd">true</s:param>
-								<s:param name="btnUpdate">true</s:param>
-								<s:param name="btnDelete">true</s:param>
-								<s:param name="ligneAdd">true</s:param>
-								<s:param name="ligneFilter">true</s:param>
-								<s:param name="checkbox">true</s:param>
-								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">viewListNomenclatures;viewSchemaNmcl;viewNomenclature;</s:param>
-								<s:param name="extraScopeDelete">viewListNomenclatures;viewSchemaNmcl;viewNomenclature;</s:param>
-								<s:param name="extraScopeUpdate">viewListNomenclatures;viewSchemaNmcl;viewNomenclature;</s:param>
-								<s:param name="extraScopeSee">viewListNomenclatures;viewSchemaNmcl;viewNomenclature;</s:param>
+							<c:set var="view" value="${viewListNomenclatures}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="btnAdd" value ="true" />
+								<c:param name="btnUpdate" value ="true" />
+								<c:param name="btnDelete" value ="true" />
+								<c:param name="ligneAdd" value ="true" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="true" />
+								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="extraScopeAdd" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
+								<c:param name="extraScopeDelete" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
+								<c:param name="extraScopeUpdate" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
+								<c:param name="extraScopeSee" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 
-							</s:include>
+							</c:import>
 						</div>
 					</div>
 					<div class="input-group my-3">
@@ -128,28 +121,24 @@
 					<div class="row">
 						<div class="col-md">
 							<!-- norm list -->
-							<s:include value="tiles/templateVObject.jsp">
-								<s:set
-									var="view"
-									value="%{viewSchemaNmcl}"
-									scope="request"
-								></s:set>
-								<s:param name="btnSelect">true</s:param>
-								<s:param name="btnSee">true</s:param>
-								<s:param name="btnSort">true</s:param>
-								<s:param name="btnAdd">true</s:param>
-								<s:param name="btnUpdate">true</s:param>
-								<s:param name="btnDelete">true</s:param>
-								<s:param name="ligneAdd">true</s:param>
-								<s:param name="ligneFilter">true</s:param>
-								<s:param name="checkbox">true</s:param>
-								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">viewSchemaNmcl;</s:param>
-								<s:param name="extraScopeDelete">viewSchemaNmcl;</s:param>
-								<s:param name="extraScopeUpdate">viewSchemaNmcl;</s:param>
-								<s:param name="extraScopeSee">viewSchemaNmcl;</s:param>
+							<c:set var="view" value="${viewSchemaNmcl}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="btnAdd" value ="true" />
+								<c:param name="btnUpdate" value ="true" />
+								<c:param name="btnDelete" value ="true" />
+								<c:param name="ligneAdd" value ="true" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="true" />
+								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="extraScopeAdd" value ="viewSchemaNmcl;" />
+								<c:param name="extraScopeDelete" value ="viewSchemaNmcl;" />
+								<c:param name="extraScopeUpdate" value ="viewSchemaNmcl;" />
+								<c:param name="extraScopeSee" value ="viewSchemaNmcl;" />
 
-							</s:include>
+							</c:import>
 						</div>
 					</div>
 			</div>
@@ -159,25 +148,21 @@
 					<div class="row">
 						<div class="col-md">
 							<!-- norm list -->
-							<s:include value="tiles/templateVObject.jsp">
-								<s:set
-									var="view"
-									value="%{viewNomenclature}"
-									scope="request"
-								></s:set>
-								<s:param name="btnSelect">true</s:param>
-								<s:param name="btnSee">true</s:param>
-								<s:param name="btnSort">true</s:param>
-								<s:param name="btnAdd">false</s:param>
-								<s:param name="btnUpdate">false</s:param>
-								<s:param name="btnDelete">false</s:param>
-								<s:param name="ligneAdd">false</s:param>
-								<s:param name="ligneFilter">true</s:param>
-								<s:param name="checkbox">false</s:param>
-								<s:param name="checkboxVisible">false</s:param>
-								<s:param name="extraScopeSee">viewNomenclature;</s:param>
+							<c:set var="view" value="${viewNomenclature}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="btnAdd" value ="false" />
+								<c:param name="btnUpdate" value ="false" />
+								<c:param name="btnDelete" value ="false" />
+								<c:param name="ligneAdd" value ="false" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="false" />
+								<c:param name="checkboxVisible" value ="false" />
+								<c:param name="extraScopeSee" value ="viewNomenclature;" />
 
-							</s:include>
+							</c:import>
 						</div>
 					</div>
 			</div>
@@ -186,7 +171,7 @@
 			</div>
 			
 	</div>	
-</s:form>
+</form>
 	
 
 </body>
