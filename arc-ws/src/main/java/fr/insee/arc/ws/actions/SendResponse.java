@@ -5,7 +5,8 @@ import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
 
@@ -91,7 +92,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  */
 public class SendResponse {
 
-    private static final Logger LOGGER = Logger.getLogger(SendResponse.class);
+    private static final Logger LOGGER = LogManager.getLogger(SendResponse.class);
 
 //	private GZIPOutputStream wr;
 	public ServletOutputStream wr;

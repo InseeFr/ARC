@@ -7,7 +7,8 @@ import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
 
@@ -15,7 +16,7 @@ public class FileUtils {
 
     public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_CSV = ".csv";
-    private static final Logger LOGGER = Logger.getLogger(FileUtils.class);
+    private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
     public static final char SEMICOLON = ';';
 
     private FileUtils() {

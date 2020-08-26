@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractXmlApplicationContext;
@@ -44,7 +45,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         super();
     }
 
-    protected static final Logger LOGGER = Logger.getLogger(ApiService.class);
+    protected static final Logger LOGGER = LogManager.getLogger(ApiService.class);
 
     public static final String SUFFIXE_TEMP_FILE_ORIADE = "_W";
     public static final String FICHIER_MISE_EN_PRODUCTION = "production.dummy";

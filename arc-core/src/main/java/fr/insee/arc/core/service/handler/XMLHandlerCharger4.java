@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
@@ -22,7 +23,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  * fichier XML
  */
 public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
-	private static final Logger LOGGER = Logger.getLogger(XMLHandlerCharger4.class);
+	private static final Logger LOGGER = LogManager.getLogger(XMLHandlerCharger4.class);
 
 	public XMLHandlerCharger4() {
 		super();

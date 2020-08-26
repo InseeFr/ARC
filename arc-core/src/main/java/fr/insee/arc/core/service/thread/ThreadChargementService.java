@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.ArchiveLoader.ArchiveChargerFactory;
 import fr.insee.arc.core.ArchiveLoader.FilesInputStreamLoad;
@@ -37,7 +38,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  *
  */
 public class ThreadChargementService extends ApiChargementService implements Runnable {
-    private static final Logger LOGGER = Logger.getLogger(ThreadChargementService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
     int indice;
     private Thread t;
     private String container;

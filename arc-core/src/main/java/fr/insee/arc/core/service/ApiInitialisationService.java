@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.TraitementEtat;
@@ -50,7 +51,7 @@ public class ApiInitialisationService extends ApiService {
     // indique combien de jour doivent etre conservé les fichiers apres avoir été récupérés par le web service
     private int Nb_Jour_A_Conserver;
 
-    private static final Logger LOGGER = Logger.getLogger(ApiInitialisationService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ApiInitialisationService.class);
     public String tablePilTemp2;
 
     public ApiInitialisationService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot,

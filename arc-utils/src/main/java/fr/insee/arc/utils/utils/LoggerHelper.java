@@ -1,8 +1,7 @@
 package fr.insee.arc.utils.utils;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
@@ -20,34 +19,34 @@ import fr.insee.arc.utils.textUtils.IConstanteCaractere;
  * équivaut à l'appel :<br/>
  * <code>if (LOGGER.isDebugEnabled())<br/>{LOGGER.debug("Problème"+" "+unObjet+" "+"est mal instancié", t);<br/>}</code>
  */
-public class LoggerHelper
-{
+public class LoggerHelper {
+	
     /**
      * @see Logger#log(Priority, Object)
      * @param aLogger
      * @param aPriority
      * @param tokens
      */
-    public static final void log(Logger aLogger, Priority aPriority, Object... tokens)
+    public static final void log(Logger aLogger, Level aLevel, Object... tokens)
     {
-        if (aLogger.isEnabledFor(aPriority))
+        if (aLogger.isEnabled(aLevel))
         {
-            aLogger.log(aPriority, concat(tokens));
+            aLogger.log(aLevel, concat(tokens));
         }
     }
 
     /**
-     * @see Logger#log(Priority, Object)
+     * @see Logger#log(Level, Object)
      * @param aLogger
-     * @param aPriority
+     * @param aLevel
      * @param t
      * @param tokens
      */
-    public static final void log(Logger aLogger, Priority aPriority, Throwable t, Object... tokens)
+    public static final void log(Logger aLogger, Level aLevel, Throwable t, Object... tokens)
     {
-        if (aLogger.isEnabledFor(aPriority))
+        if (aLogger.isEnabled(aLevel))
         {
-            aLogger.log(aPriority, concat(tokens), t);
+            aLogger.log(aLevel, concat(tokens), t);
         }
     }
 
@@ -68,33 +67,33 @@ public class LoggerHelper
     /**
      * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
-     * @see Logger#log(Priority, Object, Throwable)
+     * @see Logger#log(Level, Object, Throwable)
      * @param aLogger
-     * @param aPriority
+     * @param aLevel
      * @param tokens
      */
-    public static final void logAsComment(Logger aLogger, Priority aPriority, Object... tokens)
+    public static final void logAsComment(Logger aLogger, Level aLevel, Object... tokens)
     {
-        if (aLogger.isEnabledFor(aPriority))
+        if (aLogger.isEnabled(aLevel))
         {
-            log(aLogger, aPriority, "/* ", concat(tokens).toString(), " */");
+            log(aLogger, aLevel, "/* ", concat(tokens).toString(), " */");
         }
     }
 
     /**
      * Préférer le formattage du message dans les paramètres de
      *             configuration des appender dans log4j.xml
-     * @see Logger#log(Priority, Object, Throwable)
+     * @see Logger#log(Level, Object, Throwable)
      * @param aLogger
-     * @param aPriority
+     * @param aLevel
      * @param t
      * @param tokens
      */
-    public static final void logAsComment(Logger aLogger, Priority aPriority, Throwable t, Object... tokens)
+    public static final void logAsComment(Logger aLogger, Level aLevel, Throwable t, Object... tokens)
     {
-        if (aLogger.isEnabledFor(aPriority))
+        if (aLogger.isEnabled(aLevel))
         {
-            log(aLogger, aPriority, t, "/* ", concat(tokens).toString(), " */");
+            log(aLogger, aLevel, t, "/* ", concat(tokens).toString(), " */");
         }
     }
 

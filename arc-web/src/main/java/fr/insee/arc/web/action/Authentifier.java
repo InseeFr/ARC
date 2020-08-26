@@ -2,14 +2,15 @@ package fr.insee.arc.web.action;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.interceptor.SessionAware;
 
 
 public class Authentifier implements SessionAware
 {
     @SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(Authentifier.class);
+	private static final Logger LOGGER = LogManager.getLogger(Authentifier.class);
     private Map<String, Object> session;
     private String user;
 

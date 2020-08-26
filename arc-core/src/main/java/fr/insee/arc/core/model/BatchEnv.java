@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -15,7 +16,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  */
 public class BatchEnv {
 
-    private static final Logger LOGGER = Logger.getLogger(BatchEnv.class);
+    private static final Logger LOGGER = LogManager.getLogger(BatchEnv.class);
     /*
      * Répertoires en entrée
      */

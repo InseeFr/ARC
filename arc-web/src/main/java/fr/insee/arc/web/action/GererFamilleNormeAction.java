@@ -7,7 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -36,7 +37,7 @@ public class GererFamilleNormeAction extends ArcAction {
 
     private static final String IHM_MOD_VARIABLE_METIER = "ihm_mod_variable_metier";
 
-    private static final Logger LOGGER = Logger.getLogger(GererFamilleNormeAction.class);
+    private static final Logger LOGGER = LogManager.getLogger(GererFamilleNormeAction.class);
     private static final int numberOfColumnTableVariableMetier = 5;
     @Autowired
     @Qualifier("viewFamilleNorme")

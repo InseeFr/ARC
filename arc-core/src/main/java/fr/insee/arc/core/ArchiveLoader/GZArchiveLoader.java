@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 
@@ -18,7 +19,7 @@ public class GZArchiveLoader extends AbstractArchiveFileLoader {
 	super(fileChargement, idSource);
     }
 
-    private static final Logger LOGGER = Logger.getLogger(GZArchiveLoader.class);
+    private static final Logger LOGGER = LogManager.getLogger(GZArchiveLoader.class);
 
     public FilesInputStreamLoad readFileWithoutExtracting() throws Exception {
 	LoggerDispatcher.info("begin readFileWithoutExtracting() ", LOGGER);

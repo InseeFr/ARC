@@ -5,7 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleControleEntity;
@@ -16,7 +17,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 public class RegleDao {
 
-	private static final Logger logger = Logger.getLogger(RegleDao.class);
+	private static final Logger logger = LogManager.getLogger(RegleDao.class);
 
 	/**
 	 * Récupération des règles liés à un jeu de règle

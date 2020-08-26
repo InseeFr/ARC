@@ -3,8 +3,7 @@ package fr.insee.arc.utils.ressourceUtils;
 
 import java.net.URL;
 
-import org.apache.log4j.xml.DOMConfigurator;
-import org.springframework.context.support.GenericXmlApplicationContext;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -27,8 +26,6 @@ public class PropertiesHandler {
     private String ldapDirectoryIdent;
     private String ldapDirectoryPassword;
     /* Log */
-    private String logPath;
-    private String logLevel;
     private String logConfiguration;
     /* Batch */
     private String batchParametersDirectory;
@@ -50,7 +47,7 @@ public class PropertiesHandler {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
 
         // Using here an XML configuration
-        DOMConfigurator.configure(log4jprops);
+        Configurator.initialize(null, log4jprops.toString());
     }
 
 
@@ -147,27 +144,6 @@ public class PropertiesHandler {
     public void setLdapDirectoryPassword(String ldapDirectoryPassword) {
         this.ldapDirectoryPassword = ldapDirectoryPassword;
     }
-
-
-    public String getLogPath() {
-        return logPath;
-    }
-
-
-    public void setLogPath(String logPath) {
-        this.logPath = logPath;
-    }
-
-
-    public String getLogLevel() {
-        return logLevel;
-    }
-
-
-    public void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
-    }
-
 
     public String getLogConfiguration() {
         return logConfiguration;

@@ -3,7 +3,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
@@ -16,7 +17,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  */
 public class XMLHandlerAno extends org.xml.sax.helpers.DefaultHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(XMLHandlerAno.class);
+    private static final Logger LOGGER = LogManager.getLogger(XMLHandlerAno.class);
 
   public XMLHandlerAno() {
     super();

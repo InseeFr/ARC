@@ -3,7 +3,8 @@ package fr.insee.arc.core.service;
 import java.sql.Connection;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.TraitementEtat;
@@ -31,7 +32,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
 @Component
 public class ApiNormageService extends ApiService {
 
-    private static final Logger logger = Logger.getLogger(ApiNormageService.class);
+    private static final Logger logger = LogManager.getLogger(ApiNormageService.class);
     
     public ApiNormageService() {
         super();

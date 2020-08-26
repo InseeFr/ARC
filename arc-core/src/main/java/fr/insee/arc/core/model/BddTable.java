@@ -3,7 +3,8 @@ package fr.insee.arc.core.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.sqlengine.ContextName;
 import fr.insee.arc.utils.sqlengine.Naming;
@@ -19,7 +20,7 @@ public class BddTable {
 	this.names = names;
     }
 
-    protected static final Logger LOGGER = Logger.getLogger(BddTable.class);
+    protected static final Logger LOGGER = LogManager.getLogger(BddTable.class);
 
     private String schema;
 

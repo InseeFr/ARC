@@ -9,7 +9,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler;
 import fr.insee.arc.utils.sqlengine.CompoundName;
@@ -51,7 +52,7 @@ public abstract class AbstractDAO<T>
 		}
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(AbstractDAO.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractDAO.class);
 
 	public final Function<ResultSet, Long> getId = (res) -> {
 		try {

@@ -3,7 +3,8 @@ package fr.insee.arc.core.factory;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.ApiChargementService;
 import fr.insee.arc.core.service.engine.chargeur.ChargeurCSV;
@@ -23,7 +24,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 public class ChargeurFactory {
     private Map<TypeChargement, IChargeur> map = new HashMap<TypeChargement, IChargeur>();
-    private static final Logger LOGGER = Logger.getLogger(ChargeurFactory.class);
+    private static final Logger LOGGER = LogManager.getLogger(ChargeurFactory.class);
 
 
     public ChargeurFactory(ThreadChargementService threadChargementService, String fileName) {

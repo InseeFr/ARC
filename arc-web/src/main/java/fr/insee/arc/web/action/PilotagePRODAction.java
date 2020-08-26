@@ -13,7 +13,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
@@ -58,7 +59,7 @@ public class PilotagePRODAction extends ArcAction implements SessionAware {
         this.viewArchivePROD.setMessage("");
     }
 
-    private static final Logger logger = Logger.getLogger(PilotagePRODAction.class);
+    private static final Logger logger = LogManager.getLogger(PilotagePRODAction.class);
 
     @Autowired
     @Qualifier("viewPilotagePROD")

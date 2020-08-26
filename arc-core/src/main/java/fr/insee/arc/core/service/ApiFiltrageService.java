@@ -3,7 +3,8 @@ package fr.insee.arc.core.service;
 import java.sql.Connection;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.service.engine.mapping.IMappingServiceConstanteToken;
@@ -27,7 +28,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 @Component
 public class ApiFiltrageService extends ApiService implements IConstanteCaractere, IMappingServiceConstanteToken {
-    private static final Logger logger = Logger.getLogger(ApiFiltrageService.class);
+    private static final Logger logger = LogManager.getLogger(ApiFiltrageService.class);
 
         
     protected String seuilExclusion;

@@ -2,7 +2,7 @@ package fr.insee.arc.utils.utils;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 
 public class LoggerDispatcher {

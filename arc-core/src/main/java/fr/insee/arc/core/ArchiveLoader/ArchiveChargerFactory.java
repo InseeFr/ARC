@@ -4,7 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TypeArchive;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -15,7 +16,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  */
 public class ArchiveChargerFactory {
     private Map<TypeArchive, IArchiveFileLoader> map = new HashMap<TypeArchive, IArchiveFileLoader>();
-    private static final Logger LOGGER = Logger.getLogger(ArchiveChargerFactory.class);
+    private static final Logger LOGGER = LogManager.getLogger(ArchiveChargerFactory.class);
 
 
     public ArchiveChargerFactory(File fileChargement, String fileName) {

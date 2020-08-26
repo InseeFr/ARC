@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.model.TraitementEtat;
@@ -23,7 +24,7 @@ import fr.insee.arc.ws.actions.SendResponse;
 
 public class ClientDaoImpl implements ClientDao {
 
-    protected static final Logger LOGGER = Logger.getLogger(ClientDaoImpl.class);
+    protected static final Logger LOGGER = LogManager.getLogger(ClientDaoImpl.class);
 
     private static final char CHAR_SEPARATOR = (char) 1;
     private static final String FIELD_SEPARATOR = Character.toString(CHAR_SEPARATOR);

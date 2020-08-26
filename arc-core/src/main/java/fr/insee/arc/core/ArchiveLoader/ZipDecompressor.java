@@ -8,14 +8,15 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
 
 public class ZipDecompressor implements ArchiveExtractor {
 
-    private static final Logger LOGGER = Logger.getLogger(ZipDecompressor.class);
+    private static final Logger LOGGER = LogManager.getLogger(ZipDecompressor.class);
 
     @Override
     public void extract(File archiveFile) throws Exception {

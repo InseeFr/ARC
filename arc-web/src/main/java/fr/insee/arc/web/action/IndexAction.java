@@ -5,7 +5,8 @@ import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
@@ -20,7 +21,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 	@Result(name = "status", type = "stream", params = { "contentType", "text/plain" }) })
 public class IndexAction extends ArcAction {
 
-    private static final Logger LOGGER = Logger.getLogger(IndexAction.class);
+    private static final Logger LOGGER = LogManager.getLogger(IndexAction.class);
     private static final String ACTION_NAME = "Index";
 
 

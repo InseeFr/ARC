@@ -7,7 +7,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -21,7 +22,7 @@ public class ServletArc extends HttpServlet {
 
     public static final String CONF_DAO_FACTORY = "daofactory";
 
-    private static final Logger LOGGER = Logger.getLogger(ServletArc.class);
+    private static final Logger LOGGER = LogManager.getLogger(ServletArc.class);
 
 
     @Override

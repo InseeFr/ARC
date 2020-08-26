@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
@@ -28,7 +29,7 @@ import fr.insee.arc.utils.utils.Pair;
  */
 public class ThreadFiltrageService extends ApiFiltrageService implements Runnable{
 
-    private static final Logger logger = Logger.getLogger(ThreadFiltrageService.class);
+    private static final Logger logger = LogManager.getLogger(ThreadFiltrageService.class);
     int indice;
     public Thread t = null;
 

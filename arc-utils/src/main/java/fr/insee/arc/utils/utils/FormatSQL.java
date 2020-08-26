@@ -14,7 +14,8 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -44,7 +45,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final int _LONGUEUR_MAXIMALE_NOM_TABLE_RAW = _LONGUEUR_MAXIMALE_NOM_TABLE - 10 - 4;
     private static final String MAX_VALUE_BIGINT_SQL_POSTGRES = new BigInteger("2").pow(63).subtract(BigInteger.ONE)
             .toString();
-    private static final Logger LOGGER = Logger.getLogger(FormatSQL.class);
+    private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
     public static final boolean DROP_FIRST_FALSE = false;
     public static final boolean DROP_FIRST_TRUE = true;
     public static final int TAILLE_MAXIMAL_BLOC_SQL = 300000;

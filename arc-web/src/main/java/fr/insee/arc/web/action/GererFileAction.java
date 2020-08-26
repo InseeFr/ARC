@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -44,7 +45,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
     public static String REPERTOIRE_EFFACABLE="TO_DELETE";
 
     @SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(GererFileAction.class);
+	private static final Logger LOGGER = LogManager.getLogger(GererFileAction.class);
     @Autowired
     @Qualifier("viewDirIn")
     VObject viewDirIn;

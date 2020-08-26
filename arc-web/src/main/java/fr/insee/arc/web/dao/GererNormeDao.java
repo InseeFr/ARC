@@ -21,7 +21,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -52,7 +53,7 @@ import fr.insee.arc.web.util.VObject;
 public class GererNormeDao implements IDbConstant {
 	private static final String JDR = " jdr.";
 	private static final String MAPPING = "mapping.";
-	private static final Logger LOGGER = Logger.getLogger(GererNormeDao.class);
+	private static final Logger LOGGER = LogManager.getLogger(GererNormeDao.class);
 
 	private static final String CLEF_CONSOLIDATION = "{clef}";
 	public static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;

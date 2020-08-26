@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerDispatcher;
 
@@ -16,7 +17,7 @@ import fr.insee.arc.utils.utils.LoggerDispatcher;
  * carry all the necessary inputstram.
  */
 public class FilesInputStreamLoad {
-    private static final Logger LOGGER = Logger.getLogger(ZipDecompressor.class);
+    private static final Logger LOGGER = LogManager.getLogger(ZipDecompressor.class);
 
     
     private InputStream tmpInxChargement ;

@@ -8,7 +8,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dao.RegleControleDao;
@@ -34,7 +35,7 @@ public class ControleRegleService {
 	public static final String XSD_DATETIME_NAME = "xs:dateTime";
 	public static final String XSD_TIME_NAME = "xs:time";
 
-	private static final Logger logger = Logger.getLogger(ControleRegleService.class);
+	private static final Logger logger = LogManager.getLogger(ControleRegleService.class);
 
 	/**
 	 * Liste des modalités pour la classe de controle

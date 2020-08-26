@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
@@ -30,7 +31,7 @@ import fr.insee.arc.utils.utils.ManipString;
  *
  */
 public class ChargeurClefValeur implements IChargeur {
-    private static final Logger LOGGER = Logger.getLogger(ChargeurClefValeur.class);
+    private static final Logger LOGGER = LogManager.getLogger(ChargeurClefValeur.class);
 
     private Norme normeOk;
     private String separateur = ",";

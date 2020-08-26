@@ -86,13 +86,12 @@ To configure the web application to use your database just pass the url, user an
 
 #### Log configuration (optionnal)
 
-If you want to configure the log without modifying the code of the application, pass the output log file and it path, the log level and a custom log4j.xml file to the docker build phase like this :
+If you want to configure the log without modifying the code of the application, pass the log level or a custom log4j2.xml file to the docker build phase like this:
 
   ```shell
   docker build -f app.Dockerfile \
-    --build-arg LOG_PATH= the/path/to/output.log #logs/log-arc.log by default \
     --build-arg LOG_LEVEL= #ERROR by default \
-    --build-arg LOG_SETTINGS= #fr/insee/config/log4j.xml by default \
+    --build-arg LOG_SETTINGS= #fr/insee/config/log4j2.xml by default \
     -t arc \
     .
   ```
@@ -144,7 +143,7 @@ For example in catalina.bat, the JAVA_OPTS parameters may be changed as followed
 set "JAVA_OPTS=%JAVA_OPTS% -Djava.protocol.handler.pkgs=org.apache.catalina.webresources -Dproperties.file=D:\apache-tomcat-8.5.38\webapps\"
 ```
 
-Change the file resources-prod.properties to configure the database connections, the root directory of the filesystem used by ARC and eventually the path to log4j configuration files See "Java configuration parameters" for more informations
+Change the file resources-prod.properties to configure the database connections, the root directory of the filesystem used by ARC and eventually the path to log4j2 configuration files See "Java configuration parameters" for more informations
 
 #### Deploy or update the application
 
