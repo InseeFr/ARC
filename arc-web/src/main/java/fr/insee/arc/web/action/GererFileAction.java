@@ -3,6 +3,7 @@ package fr.insee.arc.web.action;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -115,8 +116,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
     @Action(value = "/selectDirIn")
     public String selectDirIn() {
-        System.out.println("selectDirIn " + this.scope);
-        return sessionSyncronize();
+        return seeDirIn();
     }
 
     @Action(value = "/seeDirIn")
@@ -128,7 +128,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
         {
             if(m.get("isdirectory").get(0).equals("true"))
             {
-                this.dirIn=this.dirIn+m.get("filename").get(0)+File.separator;
+                this.dirIn=  Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
             }
         }
 
@@ -249,7 +249,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
         return sessionSyncronize();
     }
 
-    @Action(value = "/delDirIn")
+    @Action(value = "/deleteDirIn")
     public String delDirIn() {
 
 
@@ -305,8 +305,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
     @Action(value = "/selectDirOut")
     public String selectDirOut() {
-        System.out.println("selectDirOut " + this.scope);
-        return sessionSyncronize();
+        return seeDirOut();
     }
 
     @Action(value = "/seeDirOut")
@@ -320,7 +319,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
         {
             if(m.get("isdirectory").get(0).equals("true"))
             {
-                this.dirOut=this.dirOut+m.get("filename").get(0)+File.separator;
+                this.dirOut= Paths.get(this.dirOut, m.get("filename").get(0)).toString() + File.separator;
             }
         }
 
@@ -446,7 +445,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
         return sessionSyncronize();
     }
 
-    @Action(value = "/delDirOut")
+    @Action(value = "/deleteDirOut")
     public String delDirOut() {
 
 
@@ -586,8 +585,40 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
     }
 
-    public void setScope(String scope) {
-		this.scope = scope;
-	}
+    public void setViewDirOut(VObject viewDirOut) {
+        this.viewDirOut = viewDirOut;
+    }
+
+
+    public String getDirIn() {
+        return this.dirIn;
+    }
+
+    public void setDirIn(String dirIn) {
+        this.dirIn = dirIn;
+    }
+
+    public String getDirOut() {
+        return this.dirOut;
+    }
+
+    public void setDirOut(String dirOut) {
+        this.dirOut = dirOut;
+    }
+
+    /**
+     * @return the scope
+     */
+    public final String getScope() {
+        return this.scope;
+    }
+
+    /**
+     * @param scope
+     *            the scope to set
+     */
+    public final void setScope(String scope) {
+        this.scope = scope;
+    }
 
 }

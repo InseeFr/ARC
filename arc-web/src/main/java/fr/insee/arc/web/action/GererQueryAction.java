@@ -158,6 +158,7 @@ public class GererQueryAction implements SessionAware, IConstanteCaractere {
     @Action(value = "/selectTable")
     public String selectTable() {
         System.out.println("selectTable " + this.scope);
+        this.myQuery="select * from "+this.mySchema+"."+this.viewTable.mapContentSelected().get("tablename").get(0)+" limit 10 ";
         return sessionSyncronize();
     }
 
@@ -189,19 +190,6 @@ public class GererQueryAction implements SessionAware, IConstanteCaractere {
     public void setViewTable(VObject viewTable) {
         this.viewTable = viewTable;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public String getMySchema() {
