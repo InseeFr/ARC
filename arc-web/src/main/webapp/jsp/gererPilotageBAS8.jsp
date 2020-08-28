@@ -46,6 +46,18 @@
 							<c:param name="checkboxVisible" value ="false" />
 							<c:param name="extraScopeSee" value ="viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;" />
 						</c:import>
+						
+						<c:if test="${isEnvProd}">
+							<div>
+								<input type="submit" id="ActionsProd.informationInitialisationPROD" value="<spring:message code="gui.button.prodInformation"/>" scope="viewPilotageBAS8;" doAction="informationInitialisationPROD" onclick="" />
+								<br/>
+								<input type="submit" id="ActionsProd.retarderBatchInitialisationPROD" value="<spring:message code="gui.button.delayInit"/>" scope="viewPilotageBAS8;" doAction="retarderBatchInitialisationPROD" onclick="return confirm('<spring:message code="gui.button.delayInit.confirm"/>');"/>
+								<input type="submit" id="ActionsProd.demanderBatchInitialisationPROD" value="<spring:message code="gui.button.requestInit"/>" scope="viewPilotageBAS8;" doAction="demanderBatchInitialisationPROD" onclick="return confirm('<spring:message code="gui.button.requestInit.confirm"/>');" />
+								<br/>
+								<input type="submit" id="ActionsProd.toggleOnPROD" value="<spring:message code="gui.button.startProd"/>" scope="viewPilotageBAS8;" doAction="toggleOnPROD" onclick="return confirm('<spring:message code="gui.button.startProd.confirm"/>');"/>
+								<input type="submit" id="ActionsProd.toggleOffPROD" value="<spring:message code="gui.button.stopProd"/>" scope="viewPilotageBAS8;" doAction="toggleOffPROD" onclick="return confirm('<spring:message code="gui.button.stopProd.confirm"/>');"/>
+							</div>
+						</c:if>
 					</div>
 
 					<div id="viewEntrepotBAS8">
@@ -132,6 +144,7 @@
 			</div>
 
 			<hr />
+			<c:if test="${!isEnvProd}">
 			<div class="row">
 				<div class="col-md-12">
 
@@ -221,29 +234,28 @@
 
 				</div>
 			</div>
-		</div>
+			</c:if>
 
 
-
-		</div>
 		<hr />
-
-		<div class="col-md-12">
-			<div class="row">
-				<c:set var="view" value="${viewArchiveBAS8}"  scope="request"/>
-				<c:import url="tiles/templateVObject.jsp">
-					<c:param name="taille" value ="col-md" />
-					<c:param name="checkbox" value ="true" />
-					<c:param name="otherButton">
-						<input class="btn btn-primary btn-sm"
-							type="submit" id="viewArchiveBAS8.downloadEnveloppe"
-							value="Telecharger Enveloppe"
-							scope="viewPilotageBAS8;viewRapportBAS8;viewEntrepotBAS8;"
-							doAction="downloadEnveloppeFromArchiveBAS8" ajax="false" />
-					</c:param>
-				</c:import>
+		<div class="row">
+			<div class="col-md-12">
+					<c:set var="view" value="${viewArchiveBAS8}"  scope="request"/>
+					<c:import url="tiles/templateVObject.jsp">
+						<c:param name="taille" value ="col-md" />
+						<c:param name="checkbox" value ="true" />
+						<c:param name="otherButton">
+							<input class="btn btn-primary btn-sm"
+								type="submit" id="viewArchiveBAS8.downloadEnveloppe"
+								value="Telecharger Enveloppe"
+								scope="viewPilotageBAS8;viewRapportBAS8;viewEntrepotBAS8;"
+								doAction="downloadEnveloppeFromArchiveBAS8" ajax="false" />
+						</c:param>
+					</c:import>
 			</div>
-			<div class="row">
+		</div>
+		<div class="row">
+			<div class="col-md-12">
 				<c:set var="view" value="${viewFichierBAS8}"  scope="request"/>
 				<c:import url="tiles/templateVObject.jsp">
 					<c:param name="taille" value ="col-md" />
@@ -284,8 +296,8 @@
 				</c:import>
 			</div>
 		</div>
-		</div>
 
+	</div>
 	</form>
 </body>
 </html>

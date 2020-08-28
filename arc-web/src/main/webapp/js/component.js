@@ -1,6 +1,5 @@
 ﻿//Modules disponibles
 //Render:Tree;
-//Render:Pilotage;
 //Render:AlertBox;
 //IHM:TableMultiCheckbox;
 //IHM:Onglet;

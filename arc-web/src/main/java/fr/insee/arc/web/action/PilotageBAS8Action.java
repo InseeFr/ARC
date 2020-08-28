@@ -13,7 +13,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
@@ -73,7 +72,7 @@ public class PilotageBAS8Action extends ArcAction {
 	VObject viewArchiveBAS8;
 
 	private List<TraitementPhase> listePhase;
-
+	
 	/**
 	 * Phase sélectionnée par l'utilisateur
 	 */
@@ -165,6 +164,93 @@ public class PilotageBAS8Action extends ArcAction {
 
 	}
 
+	@Action(value = "/informationInitialisationPROD")
+    public String informationInitialisationPROD() {
+		initialize();
+    	// demande l'initialisation : met au jour -1 à 22h
+    	try {
+			String heure=UtilitaireDao.get("arc").getString(null, "SELECT last_init from arc.pilotage_batch;");
+			String etat=UtilitaireDao.get("arc").getString(null, "SELECT case when operation='O' then 'actif' else 'inactif' end from arc.pilotage_batch;");
+			
+    		viewPilotageBAS8.setMessage("Le batch est "+etat+".\nLe prochain batch d'initialisation est programmé aprés : "+heure);
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return generateDisplay();
+    }
+
+    @Action(value = "/retarderBatchInitialisationPROD")
+    @SQLExecutor
+    public String retarderBatchInitialisationPROD() {
+    	initialize();
+    	// demande l'initialisation : met au jour -1 à 22h
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, "UPDATE arc.pilotage_batch set last_init=to_char(current_date + interval '7 days','yyyy-mm-dd')||':22';");
+
+			String heure=UtilitaireDao.get("arc").getString(null, "SELECT last_init from arc.pilotage_batch;");
+    		viewPilotageBAS8.setMessage("Le prochain batch d'initialisation aura lieu ce soir après : "+heure);
+
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return generateDisplay();
+    }
+    
+    @Action(value = "/demanderBatchInitialisationPROD")
+    @SQLExecutor
+    public String demanderBatchInitialisationPROD() {
+    	initialize();
+    	// demande l'initialisation : met au jour -1 à 22h
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, "UPDATE arc.pilotage_batch set last_init=to_char(current_date-interval '1 days','yyyy-mm-dd')||':22';");
+			
+			String heure=UtilitaireDao.get("arc").getString(null, "SELECT last_init from arc.pilotage_batch;");
+	    	viewPilotageBAS8.setMessage("Le prochain batch d'initialisation aura lieu dans quelques minutes (après "+heure+") ");
+
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return generateDisplay();
+    }
+    
+    @Action(value = "/toggleOnPROD")
+    @SQLExecutor
+    public String toggleOnPROD() {
+    	initialize();
+    	// demande l'initialisation : met au jour -1 à 22h
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, "UPDATE arc.pilotage_batch set operation='O'; ");
+    		viewPilotageBAS8.setMessage("Production activée ");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return generateDisplay();
+    }
+
+    @Action(value = "/toggleOffPROD")
+    @SQLExecutor
+    public String toggleOffPROD() {
+    	initialize();
+    	// demande l'initialisation : met au jour -1 à 22h
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, "UPDATE arc.pilotage_batch set operation='N'; ");
+    		viewPilotageBAS8.setMessage("Production arretée ");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return generateDisplay();
+    }
+	
 	// Actions du bac à sable
 
 	@Action(value = "/filesUploadBAS8")
@@ -853,45 +939,6 @@ public class PilotageBAS8Action extends ArcAction {
 	}
 
 	/**
-	 * Méthode qui écrit la requete SQL permettant de récuperer les règles
-	 * (controle, mapping ou filtrage) appliquées à un fichier
-	 *
-	 * @param phase , CONTROLE ou MAPPING (la phase de filtrage n'existe pas elle
-	 *              est dans MAPPING)
-	 * @param table
-	 * @return
-	 */
-	private String recupRegle(String phase, String table) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("WITH ");
-		requete.append("prep as (SELECT DISTINCT id_norme, periodicite, validite_inf, validite_sup, version ");
-		requete.append("    FROM " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
-		requete.append("    WHERE phase_traitement in('" + phase + "') AND rapport is null ");
-		if (!this.viewFichierBAS8.mapContentSelected().isEmpty()) {
-			ArrayList<String> filesSelected = this.viewFichierBAS8.mapContentSelected().get("id_source");
-			requete.append("AND id_source IN (");
-			for (int i = 0; i < filesSelected.size(); i++) {
-				if (i > 0) {
-					requete.append(",");
-				}
-				requete.append("'" + filesSelected.get(i) + "'");
-			}
-			requete.append(")");
-		}
-		requete.append("        ) ");// fin du WITH prep
-		requete.append("SELECT a.* ");
-		requete.append("FROM " + table + " a ");
-		requete.append("    INNER JOIN prep  ");
-		requete.append("        ON a.id_norme=prep.id_norme ");
-		requete.append("        AND a.periodicite=prep.periodicite ");
-		requete.append("        AND a.validite_inf=prep.validite_inf ");
-		requete.append("        AND a.validite_sup=prep.validite_sup ");
-		requete.append("        AND a.version=prep.version ");
-		LoggerDispatcher.trace("La requete portant sur : " + table + ", " + requete.toString(), LOGGER);
-		return requete.toString();
-	}
-
-	/**
 	 * retour arriere d'une phase
 	 *
 	 * @return
@@ -1034,8 +1081,9 @@ public class PilotageBAS8Action extends ArcAction {
 			List<TraitementPhase> listePhaseC = new ArrayList<>();
 			
 			for (TraitementPhase t : TraitementPhase.values()) {
-				if (t.getOrdre()>=0)
+				if (t.getOrdre()>=0) {
 					listePhaseC.add(t);
+				}
 			}
 			
 			this.setListePhase(listePhaseC);
@@ -1077,5 +1125,5 @@ public class PilotageBAS8Action extends ArcAction {
 	public void setPhaseAExecuter(String phaseAExecuter) {
 		this.phaseAExecuter = phaseAExecuter;
 	}
-
+	
 }
