@@ -1069,7 +1069,7 @@ public class ApiInitialisationService extends ApiService {
             requete.append("\n and table_name LIKE '" + ManipString.substringAfterFirst(ApiService.dbEnv(envExecution), ".").toLowerCase()
                     + "mapping\\_%' ");
             requete.append("\n and table_name LIKE '" + ManipString.substringAfterFirst(ApiService.dbEnv(envExecution), ".").toLowerCase()
-                    + "mapping\\_'||lower(id_famille)||'%';");
+                    + "mapping\\_'||lower(id_famille)||'\\_%';");
 
             List<List<String>> relationalView = Format.patch(UtilitaireDao.get(poolName).executeRequestWithoutMetadata(connexion, requete));
 
