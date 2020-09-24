@@ -1295,7 +1295,7 @@ public class ApiInitialisationService extends ApiService {
         // on continue jusqu'a ce qu'on ne trouve plus rien à effacer
         do {
          // récupérer le résultat de la requete
-         System.out.println("Archivage de "+NB_FICHIER_PER_ARCHIVE+" fichiers - Début");
+         LoggerDispatcher.info("Archivage de "+NB_FICHIER_PER_ARCHIVE+" fichiers - Début", LOGGER);
          n = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
          
          
@@ -1329,7 +1329,7 @@ public class ApiInitialisationService extends ApiService {
 	             
 	         }
         	}
-         System.out.println("Archivage Fin");
+         LoggerDispatcher.info("Archivage Fin", LOGGER);
          
         } while (UtilitaireDao.get("arc").hasResults(connexion, "select 1 from fichier_to_delete limit 1"))
         ;
