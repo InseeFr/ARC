@@ -71,6 +71,9 @@ public class GererFamilleNormeAction extends ArcAction {
 
     @Action(value = "/addFamilleNorme")
     public String addFamilleNorme() {
+    	//Clean up spaces
+    	String nomFamilleNorme = this.viewFamilleNorme.getInputFieldFor("id_famille");
+        this.viewFamilleNorme.setInputFieldFor("id_famille", nomFamilleNorme.trim());
         return addLineVobject(getViewFamilleNorme());
     }
 
