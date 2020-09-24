@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.engine.mapping.regles;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -105,7 +106,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
         @Override
         public void deriverTest() throws Exception {
             check();
-            String expressionSansAccolades = this.getExpression().substring(ONE, this.getExpression().length() - ONE);
+            String expressionSansAccolades = this.getExpression().substring(ONE, this.getExpression().length() - ONE).toLowerCase(Locale.FRENCH);
             this.expressionSQL = expressionSansAccolades;
             if (tokenIdSource.equalsIgnoreCase(expressionSansAccolades) || expressionSansAccolades.startsWith(regexDebutIdentifiant)) {
                 this.ensembleIdentifiantsRubriques.add(expressionSansAccolades);
