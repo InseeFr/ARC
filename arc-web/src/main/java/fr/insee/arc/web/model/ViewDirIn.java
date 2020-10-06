@@ -9,6 +9,9 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 public class ViewDirIn extends VObject {
     public ViewDirIn() {
         super();
+        
+        this.setTitle("view.dirIn");
+        
         this.constantVObject = new ConstantVObject(
 
         new HashMap<String, ColumnRendering>() {

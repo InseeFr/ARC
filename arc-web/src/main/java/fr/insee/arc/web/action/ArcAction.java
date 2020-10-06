@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.convention.annotation.ParentPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -57,6 +58,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ParentPackage("PremierPackage")
 public abstract class ArcAction extends Authentifier implements IConstanteCaractere {
     private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);
     public static final String NONE = "none";
@@ -120,8 +122,12 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
      */
     private boolean isDataBaseOK;
 
+    /** Selected environment.*/
     private String bacASable;
 
+    /** Is the current environment a production environment?*/
+	private boolean isEnvProd;
+    
     /**
      * In case of an action have to return an inputStream
      */
@@ -220,7 +226,7 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
 
 	// Update Bddtable to point on the right environnement
 	this.bddTable = new BddTable(getSession().get(SessionParameters.ENV).toString());
-	this.bddTable.export(getSession());	
+	this.bddTable.export(getSession());
 
     }
 
@@ -258,7 +264,7 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
      * 
      * Get all the {@link VObject} in the {@link ArcAction#listVObjectOrder} and generated the needed one
      * 
-     * @return 
+     * @return
      */
     public String generateDisplay() {
 	LoggerHelper.debug(LOGGER, "getScope()", getScope());
@@ -586,9 +592,15 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
    }
 
    public void setBacASable(String bacASable) {
-	this.bacASable = bacASable;
+	   this.bacASable = bacASable;
+	   this.isEnvProd = checkEnv(bacASable);
    }
 
+   /** Return true if the environment is a production environment.*/
+   private boolean checkEnv(String env) {
+	   // always false for now
+	   return false;
+   }
 
    public InputStream getInputStream() {
 	return inputStream;
@@ -606,5 +618,13 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
 		return properties.getLang();
 	}
 
+
+	public boolean getIsEnvProd() {
+		return isEnvProd;
+	}
+
+	public void setIsEnvProd(boolean isEnvProd) {
+		this.isEnvProd = isEnvProd;
+	}
 
 }

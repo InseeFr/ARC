@@ -9,6 +9,8 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 public class ViewQuery extends VObject {
     public ViewQuery() {
         super();
+        this.setTitle("view.query");
+
         this.constantVObject = new ConstantVObject(
 
         new HashMap<String, ColumnRendering>() {

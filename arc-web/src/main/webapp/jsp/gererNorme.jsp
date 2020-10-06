@@ -4,61 +4,63 @@
 	pageEncoding="UTF-8"
 	trimDirectiveWhitespaces="true"
 %>
-<%@ taglib
-	prefix="s"
-	uri="/struts-tags"
-%>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html>
 <html>
-<s:if test="scope==null">
+<c:if test="${scope==null}">
 	<head>
-<title><s:text name="header.normManagement"/></title>
+<title><spring:message code="header.normManagement"/></title>
 <link
 	rel="stylesheet"
-	href="<s:url value='/css/bootstrap.min.css'/>"
+	href="<c:url value='/css/bootstrap.min.css'/>"
 />
 <link
 	rel="stylesheet"
 	type="text/css"
-	href="<s:url value='/css/style.css' />"
+	href="<c:url value='/css/style.css' />"
 />
 <link
-	href="<s:url value='/css/font-awesome.min.css'/>"
+	href="<c:url value='/css/font-awesome.min.css'/>"
 	rel="stylesheet"
 />
 <script
 	type="text/javascript"
-	src="<s:url value='/js/jquery-2.1.3.min.js'/>"
+	src="<c:url value='/js/jquery-2.1.3.min.js'/>"
 ></script>
 
-<script	src="<s:url value='/js/lib/popper.min.js'/>" ></script>
-<script	src="<s:url value='/js/lib/bootstrap.min.js'/>"></script>
+<script	src="<c:url value='/js/lib/popper.min.js'/>" ></script>
+<script	src="<c:url value='/js/lib/bootstrap.min.js'/>"></script>
 
 <script
 	type="text/javascript"
-	src="<s:url value='/js/arc.js'/>"
+	src="<c:url value='/js/arc.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/gererNomenclature.js'/>"
+	src="<c:url value='/js/gererNomenclature.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/component.js'/>"
+	src="<c:url value='/js/component.js'/>"
 ></script>
 	</head>
-</s:if>
+</c:if>
 <body class='bg-light'>
 
-<s:form
+<form
 	spellcheck="false"
-	namespace="/"
-	method="POST"
-	theme="simple"
+	id="selectNorme"
+	action="selectNorme.action"
+	method="post"
 	enctype="multipart/form-data"
 >
 
-	<%@include file="tiles/header.jsp"%>
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="normManagement" />
+	</c:import>
 
 
 	<div class="container-fluid">
@@ -70,93 +72,79 @@
 					<div class="row">
 						<div class="col-md">
 							<!-- norm list -->
-							<s:include value="tiles/templateVObject.jsp">
-								<s:set
-									var="view"
-									value="%{viewNorme}"
-									scope="request"
-								></s:set>
-								<s:param name="btnSelect">true</s:param>
-								<s:param name="btnSee">true</s:param>
-								<s:param name="btnSort">true</s:param>
-								<s:param name="btnAdd">true</s:param>
-								<s:param name="btnUpdate">true</s:param>
-								<s:param name="btnDelete">true</s:param>
-								<s:param name="ligneAdd">true</s:param>
-								<s:param name="ligneFilter">true</s:param>
-								<s:param name="checkbox">true</s:param>
-								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeDelete">-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeUpdate">-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeSee">viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+							<c:set var="view" value="${viewNorme}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="btnAdd" value ="true" />
+								<c:param name="btnUpdate" value ="true" />
+								<c:param name="btnDelete" value ="true" />
+								<c:param name="ligneAdd" value ="true" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="true" />
+								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="extraScopeAdd" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeDelete" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeUpdate" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeSee" value ="viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
 
-							</s:include>
+							</c:import>
 						</div>
 					</div>
 
 					<div class="row">
 						<div class="col-md">
 							<!-- calendar list -->
-							<s:include value="tiles/templateVObject.jsp">
-								<s:set
-									var="view"
-									value="%{viewCalendrier}"
-									scope="request"
-								></s:set>
-								<s:param name="btnSelect">true</s:param>
-								<s:param name="btnSee">true</s:param>
-								<s:param name="btnSort">true</s:param>
-								<s:param name="btnAdd">true</s:param>
-								<s:param name="btnUpdate">true</s:param>
-								<s:param name="btnDelete">true</s:param>
-								<s:param name="ligneAdd">true</s:param>
-								<s:param name="ligneFilter">true</s:param>
-								<s:param name="checkbox">true</s:param>
-								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeDelete">-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeUpdate">-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeSee">viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
+							<c:set var="view" value="${viewCalendrier}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="btnAdd" value ="true" />
+								<c:param name="btnUpdate" value ="true" />
+								<c:param name="btnDelete" value ="true" />
+								<c:param name="ligneAdd" value ="true" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="true" />
+								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="extraScopeAdd" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeDelete" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeUpdate" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeSee" value ="viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
 
-							</s:include>
+							</c:import>
 						</div>
 					</div>
 
 					<!-- rule set list -->
 					<div class="row">
 						<div class="col-md">
-							<s:include value="tiles/templateVObject.jsp">
-								<s:set
-									var="view"
-									value="%{viewJeuxDeRegles}"
-									scope="request"
-								></s:set>
-								<s:param name="btnSelect">true</s:param>
-								<s:param name="btnSee">true</s:param>
-								<s:param name="btnSort">true</s:param>
-								<s:param name="btnAdd">true</s:param>
-								<s:param name="btnUpdate">true</s:param>
-								<s:param name="btnDelete">true</s:param>
-								<s:param name="ligneAdd">true</s:param>
-								<s:param name="ligneFilter">true</s:param>
-								<s:param name="checkbox">true</s:param>
-								<s:param name="checkboxVisible">true</s:param>
-								<s:param name="extraScopeAdd">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeUpdate">-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="extraScopeSee">viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;</s:param>
-								<s:param name="otherButton">
+							<c:set var="view" value="${viewJeuxDeRegles}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="btnAdd" value ="true" />
+								<c:param name="btnUpdate" value ="true" />
+								<c:param name="btnDelete" value ="true" />
+								<c:param name="ligneAdd" value ="true" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="true" />
+								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="extraScopeSee" value ="viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+								<c:param name="otherButton">
 									<button
 										class="btn btn-primary btn-sm"
 										id="viewJeuxDeRegles.download"
 										type="submit"
 										doAction="downloadJeuxDeRegles"
 										ajax="false"
-									><span class="fa fa-download">&nbsp;</span> <s:text
-											name="gui.button.downloadRuleset"
-										/></button>
-								</s:param>
-							</s:include>
+									><span class="fa fa-download">&nbsp;</span> <spring:message code="gui.button.downloadRuleset"/></button>
+								</c:param>
+							</c:import>
 						</div>
 					</div>
 
@@ -166,12 +154,12 @@
 					<div class="row">
 						<div  id="viewModuleButtons" class="col-md">
 							<!-- tab to choose the module -->
-						<s:if test="viewChargement.isInitialized==true&&viewChargement.isScoped==true
+						<c:if test="${viewChargement.isInitialized==true&&viewChargement.isScoped==true
 						|| viewNormage.isInitialized==true&&viewNormage.isScoped==true
 						|| viewControle.isInitialized==true&&viewControle.isScoped==true
 						|| viewFiltrage.isInitialized==true&&viewFiltrage.isScoped==true
 						|| viewMapping.isInitialized==true&&viewMapping.isScoped==true
-						">
+						 }">
 							<ul
 								class="nav nav-tabs mb-2"
 								id="chooseModule"
@@ -189,7 +177,7 @@
 										aria-selected="true"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.load" />
+										<spring:message code="normManagement.load"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -201,7 +189,7 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.structurize" />
+										<spring:message code="normManagement.structurize"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -213,7 +201,7 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.control" />
+										<spring:message code="normManagement.control"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -225,7 +213,7 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.filter" />
+										<spring:message code="normManagement.filter"/>
 									</a></li>
 								<li class="nav-item"><a
 										class="nav-link"
@@ -237,10 +225,10 @@
 										aria-selected="false"
 										onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 									>
-										<s:text name="normManagement.mapmodel" />
+										<spring:message code="normManagement.mapmodel"/>
 									</a></li>
 							</ul>
-						</s:if>
+						</c:if>
 
 							<!-- The content of the tab -->
 							<div
@@ -254,23 +242,19 @@
 									role="tabpanel"
 									aria-labelledby="load-tab"
 								>
-									<s:include value="tiles/templateVObject.jsp">
-										<s:set
-											var="view"
-											value="%{viewChargement}"
-											scope="request"
-										></s:set>
-										<s:param name="btnSelect">true</s:param>
-										<s:param name="btnSee">true</s:param>
-										<s:param name="btnSort">true</s:param>
-										<s:param name="btnAdd">true</s:param>
-										<s:param name="btnUpdate">true</s:param>
-										<s:param name="btnDelete">true</s:param>
-										<s:param name="ligneAdd">true</s:param>
-										<s:param name="ligneFilter">true</s:param>
-										<s:param name="checkbox">true</s:param>
-										<s:param name="checkboxVisible">true</s:param>
-										<s:param name="otherButton">
+									<c:set var="view" value="${viewChargement}"  scope="request"/>
+									<c:import url="tiles/templateVObject.jsp">
+										<c:param name="btnSelect" value ="true" />
+										<c:param name="btnSee" value ="true" />
+										<c:param name="btnSort" value ="true" />
+										<c:param name="btnAdd" value ="true" />
+										<c:param name="btnUpdate" value ="true" />
+										<c:param name="btnDelete" value ="true" />
+										<c:param name="ligneAdd" value ="true" />
+										<c:param name="ligneFilter" value ="true" />
+										<c:param name="checkbox" value ="true" />
+										<c:param name="checkboxVisible" value ="true" />
+										<c:param name="otherButton">
 
 											<input
 												class="btn btn-primary btn-sm"
@@ -278,7 +262,7 @@
 												type="submit"
 												doAction="viderChargement"
 												scope="viewChargement;"
-												value="<s:text name="gui.button.deleteRuleset"/>"
+												value="<spring:message code="gui.button.deleteRuleset"/>"
 											/>
 											<input
 												class="btn btn-primary btn-sm"
@@ -286,7 +270,7 @@
 												type="submit"
 												doAction="selectJeuxDeReglesChargementCopie"
 												scope="viewChargement;viewJeuxDeReglesCopie;"
-												value="<s:text name="gui.button.replaceRuleset"/>"
+												value="<spring:message code="gui.button.replaceRuleset"/>"
 											/>
 											
 											<div class="input-group my-3">
@@ -300,7 +284,7 @@
 														class="custom-file-label"
 														for="inputGroupFileLoad"
 														aria-describedby="Choose file to upload for load module"
-													><s:text name="general.chooseFile" /></label>
+													><spring:message code="general.chooseFile"/></label>
 												</div>
 												<div class="input-group-append">
 													<button
@@ -308,17 +292,15 @@
 														id="viewChargement.import"
 														type="submit"
 														doAction="importChargement"
-														scope="viewChargement;"
+														scope="viewModuleButtons;viewChargement;"
 														multipart="true"
-													><span class="fa fa-upload">&nbsp;</span> <s:text
-															name="gui.button.importRuleset"
-														/></button>
+													><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 												</div>
 											</div>
 
-										</s:param>
+										</c:param>
 
-									</s:include>
+									</c:import>
 								</div>
 
 								<%-- STRUCTURIZE PANEL --%>
@@ -327,25 +309,21 @@
 									role="tabpanel"
 									aria-labelledby="structurize-tab"
 								>
-									<s:include value="tiles/templateVObject.jsp">
-										<s:set
-											var="view"
-											value="%{viewNormage}"
-											scope="request"
-										></s:set>
-										<s:param name="btnSelect">true</s:param>
-										<s:param name="btnSee">true</s:param>
-										<s:param name="btnSort">true</s:param>
-										<s:param name="btnAdd">true</s:param>
-										<s:param name="btnUpdate">true</s:param>
-										<s:param name="btnDelete">true</s:param>
-										<s:param name="ligneAdd">true</s:param>
-										<s:param name="ligneFilter">true</s:param>
-										<s:param name="checkbox">true</s:param>
-										<s:param name="checkboxVisible">true</s:param>
-										<s:param name="otherButton">
-											<s:if
-												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
+									<c:set var="view" value="${viewNormage}"  scope="request"/>
+									<c:import url="tiles/templateVObject.jsp">
+										<c:param name="btnSelect" value ="true" />
+										<c:param name="btnSee" value ="true" />
+										<c:param name="btnSort" value ="true" />
+										<c:param name="btnAdd" value ="true" />
+										<c:param name="btnUpdate" value ="true" />
+										<c:param name="btnDelete" value ="true" />
+										<c:param name="ligneAdd" value ="true" />
+										<c:param name="ligneFilter" value ="true" />
+										<c:param name="checkbox" value ="true" />
+										<c:param name="checkboxVisible" value ="true" />
+										<c:param name="otherButton">
+											<c:if
+												test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
 											>
 												<input
 													class="btn btn-primary btn-sm"
@@ -353,7 +331,7 @@
 													type="submit"
 													doAction="viderNormage"
 													scope="viewNormage;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												/>
 												<input
 													class="btn btn-primary btn-sm"
@@ -361,7 +339,7 @@
 													type="submit"
 													doAction="selectJeuxDeReglesNormageCopie"
 													scope="viewNormage;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												/>
 												<div class="input-group my-3">
 													<div class="custom-file">
@@ -374,7 +352,7 @@
 															class="custom-file-label"
 															for="inputGroupFilestructure"
 															aria-describedby="Choose file to upload for structure module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -382,17 +360,15 @@
 															id="viewNormage.import"
 															type="submit"
 															doAction="importNormage"
-															scope="viewNormage;"
+															scope="viewModuleButtons;viewNormage;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
-											</s:if>
-										</s:param>
+											</c:if>
+										</c:param>
 
-									</s:include>
+									</c:import>
 								</div>
 
 								<%-- CONTROL TAB --%>
@@ -401,25 +377,22 @@
 									role="tabpanel"
 									aria-labelledby="control-tab"
 								>
-									<s:include value="tiles/templateVObject.jsp">
-										<s:set
-											var="view"
-											value="%{viewControle}"
-											scope="request"
-										></s:set>
-										<s:param name="btnSelect">true</s:param>
-										<s:param name="btnSee">true</s:param>
-										<s:param name="btnSort">true</s:param>
-										<s:param name="btnAdd">true</s:param>
-										<s:param name="btnUpdate">true</s:param>
-										<s:param name="btnDelete">true</s:param>
-										<s:param name="ligneAdd">true</s:param>
-										<s:param name="ligneFilter">true</s:param>
-										<s:param name="checkbox">true</s:param>
-										<s:param name="checkboxVisible">true</s:param>
-										<s:param name="otherButton">
-											<s:if
-												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
+									<c:set var="view" value="${viewControle}"  scope="request"/>
+									<c:import url="tiles/templateVObject.jsp">
+										<c:param name="btnSelect" value ="true" />
+										<c:param name="btnSee" value ="true" />
+										<c:param name="btnSort" value ="true" />
+										<c:param name="btnAdd" value ="true" />
+										<c:param name="btnUpdate" value ="true" />
+										<c:param name="btnDelete" value ="true" />
+										<c:param name="ligneAdd" value ="true" />
+										<c:param name="ligneFilter" value ="true" />
+										<c:param name="checkbox" value ="true" />
+										<c:param name="checkboxVisible" value ="true" />
+										<c:param name="allowResize" value ="true" />
+										<c:param name="otherButton">
+											<c:if
+												test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
 											>
 												<input
 													class="btn btn-primary btn-sm"
@@ -427,7 +400,7 @@
 													type="submit"
 													doAction="viderControle"
 													scope="viewControle;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												/>
 												<input
 													class="btn btn-primary btn-sm"
@@ -435,7 +408,7 @@
 													type="submit"
 													doAction="selectJeuxDeReglesControleCopie"
 													scope="viewControle;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												/>
 												<div class="input-group my-3">
 													<div class="custom-file">
@@ -448,24 +421,22 @@
 															class="custom-file-label"
 															for="inputGroupFileControle"
 															aria-describedby="Choose file to upload for control module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
 															class="btn btn-primary btn-sm"
 															type="submit"
 															doAction="importControle"
-															scope="viewControle;"
+															scope="viewModuleButtons;viewControle;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
-											</s:if>
-										</s:param>
+											</c:if>
+										</c:param>
 
-									</s:include>
+									</c:import>
 								</div>
 								<%-- FILTER TAB --%>
 								<div
@@ -473,25 +444,21 @@
 									role="tabpanel"
 									aria-labelledby="filter-tab"
 								>
-									<s:include value="tiles/templateVObject.jsp">
-										<s:set
-											var="view"
-											value="%{viewFiltrage}"
-											scope="request"
-										></s:set>
-										<s:param name="btnSelect">true</s:param>
-										<s:param name="btnSee">true</s:param>
-										<s:param name="btnSort">true</s:param>
-										<s:param name="btnAdd">true</s:param>
-										<s:param name="btnUpdate">true</s:param>
-										<s:param name="btnDelete">true</s:param>
-										<s:param name="ligneAdd">true</s:param>
-										<s:param name="ligneFilter">true</s:param>
-										<s:param name="checkbox">true</s:param>
-										<s:param name="checkboxVisible">true</s:param>
-										<s:param name="otherButton">
-											<s:if
-												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
+									<c:set var="view" value="${viewFiltrage}"  scope="request"/>
+									<c:import url="tiles/templateVObject.jsp">
+										<c:param name="btnSelect" value ="true" />
+										<c:param name="btnSee" value ="true" />
+										<c:param name="btnSort" value ="true" />
+										<c:param name="btnAdd" value ="true" />
+										<c:param name="btnUpdate" value ="true" />
+										<c:param name="btnDelete" value ="true" />
+										<c:param name="ligneAdd" value ="true" />
+										<c:param name="ligneFilter" value ="true" />
+										<c:param name="checkbox" value ="true" />
+										<c:param name="checkboxVisible" value ="true" />
+										<c:param name="otherButton">
+											<c:if
+												test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
 											>
 												<input
 													class="btn btn-primary btn-sm"
@@ -499,7 +466,7 @@
 													type="submit"
 													doAction="viderFiltrage"
 													scope="viewFiltrage;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												></input>
 												<input
 													class="btn btn-primary btn-sm"
@@ -507,19 +474,19 @@
 													type="submit"
 													doAction="selectJeuxDeReglesFiltrageCopie"
 													scope="viewFiltrage;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												></input>
 
-												<s:if test="viewFiltrage.content.t.size()==0">
+												<c:if test="${viewFiltrage.content.t.size()==0}">
 													<input
 														class="btn btn-primary btn-sm"
 														id="viewFiltrage.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleFiltrage"
 														scope="viewFiltrage;"
-														value="<s:text name="gui.button.generateRuleset"/>"
+														value="<spring:message code="gui.button.generateRuleset"/>"
 													></input>
-												</s:if>
+												</c:if>
 												<div class="input-group my-3">
 													<div class="custom-file">
 														<input
@@ -531,7 +498,7 @@
 															class="custom-file-label"
 															for="inputGroupFileFilter"
 															aria-describedby="Choose file to upload for filter module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -539,17 +506,15 @@
 															id="viewFiltrage.import"
 															type="submit"
 															doAction="importFiltrage"
-															scope="viewFiltrage;"
+															scope="viewModuleButtons;viewFiltrage;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
-											</s:if>
-										</s:param>
+											</c:if>
+										</c:param>
 
-									</s:include>
+									</c:import>
 								</div>
 
 								<%-- MAPPING TAB --%>
@@ -558,25 +523,22 @@
 									role="tabpanel"
 									aria-labelledby="mapmodel-tab"
 								>
-									<s:include value="tiles/templateVObject.jsp">
-										<s:set
-											var="view"
-											value="%{viewMapping}"
-											scope="request"
-										></s:set>
-										<s:param name="btnSelect">true</s:param>
-										<s:param name="btnSee">true</s:param>
-										<s:param name="btnSort">true</s:param>
-										<s:param name="btnAdd">true</s:param>
-										<s:param name="btnUpdate">true</s:param>
-										<s:param name="btnDelete">true</s:param>
-										<s:param name="ligneAdd">true</s:param>
-										<s:param name="ligneFilter">true</s:param>
-										<s:param name="checkbox">true</s:param>
-										<s:param name="checkboxVisible">true</s:param>
-										<s:param name="otherButton">
-											<s:if
-												test='(viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas"))'
+									<c:set var="view" value="${viewMapping}"  scope="request"/>
+									<c:import url="tiles/templateVObject.jsp">
+										<c:param name="btnSelect" value ="true" />
+										<c:param name="btnSee" value ="true" />
+										<c:param name="btnSort" value ="true" />
+										<c:param name="btnAdd" value ="true" />
+										<c:param name="btnUpdate" value ="true" />
+										<c:param name="btnDelete" value ="true" />
+										<c:param name="ligneAdd" value ="true" />
+										<c:param name="ligneFilter" value ="true" />
+										<c:param name="checkbox" value ="true" />
+										<c:param name="checkboxVisible" value ="true" />
+										<c:param name="allowResize" value ="true" />
+										<c:param name="otherButton">
+											<c:if
+												test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
 											>
 												<input
 													class="btn btn-primary btn-sm"
@@ -584,7 +546,7 @@
 													type="submit"
 													doAction="viderMapping"
 													scope="viewMapping;"
-													value="<s:text name="gui.button.deleteRuleset"/>"
+													value="<spring:message code="gui.button.deleteRuleset"/>"
 												></input>
 												<input
 													class="btn btn-primary btn-sm"
@@ -592,19 +554,19 @@
 													type="submit"
 													doAction="selectJeuxDeReglesMappingCopie"
 													scope="viewMapping;viewJeuxDeReglesCopie;"
-													value="<s:text name="gui.button.replaceRuleset"/>"
+													value="<spring:message code="gui.button.replaceRuleset"/>"
 												></input>
 
-												<s:if test="viewMapping.content.t.size()==0">
+												<c:if test="${viewMapping.content.t.size()==0}">
 													<input
 														class="btn btn-primary btn-sm"
 														id="viewMapping.creerNouveau"
 														type="submit"
 														doAction="preGenererRegleMapping"
 														scope="viewMapping;"
-														value="<s:text name="gui.button.generateRuleset"/>"
+														value="<spring:message code="gui.button.generateRuleset"/>"
 													></input>
-												</s:if>
+												</c:if>
 												<div class="input-group my-3">
 													<div class="custom-file">
 														<input
@@ -616,7 +578,7 @@
 															class="custom-file-label"
 															for="inputGroupFileMap"
 															aria-describedby="Choose file to upload for map module"
-														><s:text name="general.chooseFile" /></label>
+														><spring:message code="general.chooseFile"/></label>
 													</div>
 													<div class="input-group-append">
 														<button
@@ -624,17 +586,15 @@
 															id="viewMapping.import"
 															type="submit"
 															doAction="importMapping"
-															scope="viewMapping;"
+															scope="viewModuleButtons;viewMapping;"
 															multipart="true"
-														><span class="fa fa-upload">&nbsp;</span> <s:text
-																name="gui.button.importRuleset"
-															/></button>
+														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
 												</div>
-											</s:if>
-										</s:param>
+											</c:if>
+										</c:param>
 
-									</s:include>
+									</c:import>
 								</div>
 							</div>
 
@@ -645,31 +605,26 @@
 							<%-- Modal to rule copy --%>
 										<div>
 
-
-											<s:include value="tiles/templateVObject.jsp">
-												<s:set
-													var="view"
-													value="%{viewJeuxDeReglesCopie}"
-													scope="request"
-												></s:set>
-												<s:param name="btnSee">true</s:param>
-												<s:param name="btnSelect">true</s:param>
-												<s:param name="btnSort">true</s:param>
-												<s:param name="ligneFilter">true</s:param>
-												<s:param name="checkbox">true</s:param>
-												<s:param name="checkboxVisible">true</s:param>
-												<s:param name="otherButton">
+											<c:set var="view" value="${viewJeuxDeReglesCopie}"  scope="request"/>
+											<c:import url="tiles/templateVObject.jsp">
+												<c:param name="btnSee" value ="true" />
+												<c:param name="btnSelect" value ="true" />
+												<c:param name="btnSort" value ="true" />
+												<c:param name="ligneFilter" value ="true" />
+												<c:param name="checkbox" value ="true" />
+												<c:param name="checkboxVisible" value ="true" />
+												<c:param name="otherButton">
 													<input
 														class="btn btn-primary btn-sm"
 														id="viewJeuxDeReglesCopie.copie"
 														type="submit"
 														doAction="copieJeuxDeRegles"
-														scope="-viewJeuxDeReglesCopie;<s:property value="%{viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']}"/>;"
-														value="<s:text name="gui.button.copy"/>"
+														scope="-viewJeuxDeReglesCopie;${viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']};"
+														value="<spring:message code="gui.button.copy"/>"
 													></input>
-												</s:param>
+												</c:param>
 
-											</s:include>
+											</c:import>
 
 
 										</div>
@@ -678,7 +633,7 @@
 				</div>
 			</div>
 	</div>
-</s:form>
+</form>
 	
 </body>
 </html>

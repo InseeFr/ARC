@@ -52,6 +52,12 @@
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 	</bean>
 
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="global" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="alwaysUseMessageFormat" value="true" />
+	</bean>
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>
 
@@ -275,7 +281,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewQuery" />
-		<property name="title" value="Résultat" />
 		<property name="paginationSize" value="10" />
 	</bean>
 	<bean id="viewTable" class="fr.insee.arc.web.model.ViewTable"
@@ -283,7 +288,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewTable" />
-		<property name="title" value="Tables du schéma" />
 		<property name="paginationSize" value="0" />
 	</bean>
 	<bean id="viewDirIn" class="fr.insee.arc.web.model.ViewDirIn"
@@ -291,7 +295,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewDirIn" />
-		<property name="title" value="Fichier du répertoire en entrée" />
 		<property name="paginationSize" value="0" />
 	</bean>
 	<bean id="viewDirOut" class="fr.insee.arc.web.model.ViewDirOut"
@@ -299,7 +302,6 @@
 		<aop:scoped-proxy />
 		<property name="pool" value="arc" />
 		<property name="sessionName" value="viewDirOut" />
-		<property name="title" value="Fichier du répertoire en sortie" />
 		<property name="paginationSize" value="0" />
 	</bean>
 </beans>

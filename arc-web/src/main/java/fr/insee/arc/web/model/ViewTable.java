@@ -9,6 +9,8 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 public class ViewTable extends VObject {
     public ViewTable() {
         super();
+        this.setTitle("view.schematable");
+        
         this.constantVObject = new ConstantVObject(
 
         new HashMap<String, ColumnRendering>() {

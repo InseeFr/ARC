@@ -1,7 +1,10 @@
 var configJS = "Render:FixedHeader;"
-		+ "ICS:AjaxDataSelector;" + "VObject:Sort;"
-		+ "Render:TextareaEllipsis;" + "IHM:TextareaHotkeys;"
-		+ "IHM:TableMultiCheckbox;" + "Render:AlertBox;";
+		+ "ICS:AjaxDataSelector;"
+		+ "VObject:Sort;"
+		+ "Render:TextareaEllipsis;"
+		+ "IHM:TextareaHotkeys;"
+		+ "IHM:TableMultiCheckbox;"
+		+ "Render:AlertBox;";
 
 function alimenterPhase(t){
 	console.log("savePhaseChoice :"+$("#savePhaseChoice").attr("value"));

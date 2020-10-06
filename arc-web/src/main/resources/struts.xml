@@ -23,7 +23,15 @@
 
 <package name="PremierPackage" namespace="/" extends="struts-default">
 
-<default-interceptor-ref name="basicStack"></default-interceptor-ref>
+    <interceptors>    
+		<interceptor name="localeInterceptor" class="fr.insee.arc.web.interceptor.LocaleInterceptor"></interceptor>
+                 <interceptor-stack name="customStack">
+                       <interceptor-ref name="localeInterceptor"/>
+                		<interceptor-ref name="defaultStack" />
+                 </interceptor-stack>
+    </interceptors>
+
+<default-interceptor-ref name="customStack"></default-interceptor-ref>
 </package>
 
 </struts>

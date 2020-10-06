@@ -3,10 +3,10 @@
 	contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"
 %>
-<%@ taglib
-	prefix="s"
-	uri="/struts-tags"
-%>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 
@@ -25,13 +25,13 @@
 <link
 	rel="stylesheet"
 	type="text/css"
-	href="<s:url value='/css/style.css' />"
+	href="<c:url value='/css/style.css' />"
 />
 
 
 <script
 	type="text/javascript"
-	src="<s:url value='/js/jquery-2.1.3.min.js'/>"
+	src="<c:url value='/js/jquery-2.1.3.min.js'/>"
 ></script>
 <script
 	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
@@ -45,15 +45,15 @@
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/arc.js'/>"
+	src="<c:url value='/js/arc.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/index.js'/>"
+	src="<c:url value='/js/index.js'/>"
 ></script>
 <script
 	type="text/javascript"
-	src="<s:url value='/js/component.js'/>"
+	src="<c:url value='/js/component.js'/>"
 ></script>
 
 <script>
@@ -66,14 +66,15 @@
 </head>
 
 <body class='bg-light'>
-<s:form
+<form
 	spellcheck="false"
-	namespace="/"
-	method="POST"
-	theme="simple"
+	action="index"
+	method="post"
 	enctype="multipart/form-data"
 >
-	<%@include file="tiles/header.jsp"%>
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="home" />
+	</c:import>
 
 	<div class="container-fluid">
 	
@@ -81,13 +82,13 @@
 	<div class="col-md-8">
 				<div class="jumbotron jumbotron-fluid">
 					<div class="container">
-						<h1 class="display-4"><s:text name="home.welcome" /></h1>
+						<h1 class="display-4"><spring:message code="home.welcome"/></h1>
 						<p class="lead">Version 20191025a</p>
 					</div>
 				</div>
 			</div>
 	</div>
 	</div>
-</s:form>
+</form>
 </body>
 </html>
