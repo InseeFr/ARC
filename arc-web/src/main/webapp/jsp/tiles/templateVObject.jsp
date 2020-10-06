@@ -166,7 +166,8 @@
 															name="${view.sessionName}.selectedLines[${incr1.index}]"
 															value="true"
 															id="${view.sessionName}_selectedLines_${incr1.index}_"
-															class="chooseLine"															
+															class="chooseLine"
+															${view.selectedLines[incr1.index] ? 'checked' : ''}														
 														/> <input type="hidden"
 															id="__checkbox_${view.sessionName}_selectedLines_${incr1.index}_"
 															name="__checkbox_${view.sessionName}.selectedLines[${incr1.index}]"
@@ -178,7 +179,8 @@
 															value="true"
 															id="${view.sessionName}_selectedLines_${incr1.index}_"
 															onclick="updateCheckBox('${view.sessionName}',$(this));"
-															class="chooseLine"								
+															class="chooseLine"
+															${view.selectedLines[incr1.index] ? 'checked' : ''}								
 														> <input type="hidden"
 															id="__checkbox_${view.sessionName}_selectedLines_${incr1.index}_"
 															name="__checkbox_${view.sessionName}.selectedLines[${incr1.index}]"
