@@ -20,10 +20,10 @@
 	        <td style="width: 25px;">
 	          ${view.nbPages}
 	        </td>
-	        <td class="smallButton" onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-999999999);">&lt;&lt;</td>
-	        <td class="smallButton" onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),-1);">&lt;</td>
-	        <td class="smallButton" onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),1);">&gt;</td>
-	        <td class="smallButton" onclick="gotoPage('<s:property value="#view.sessionName"/>',$(this),999999999);">&gt;&gt;</td>
+	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),-999999999);">&lt;&lt;</td>
+	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),-1);">&lt;</td>
+	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),1);">&gt;</td>
+	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),999999999);">&gt;&gt;</td>
 	      </tr>
 	    </table>
 	</c:if>

@@ -369,7 +369,6 @@
 					role="group"
 					style="float: left;"
 				>
-					<c:if test="${btnSelect.equals('true')}">
 						<button
 							id="${view.sessionName}.select"
 							class="btn btn-secondary btn-sm "
@@ -377,8 +376,8 @@
 							doAction="select${viewType}"
 							scope="${view.sessionName};"
 							value="<spring:message code="gui.button.refresh"/>"
+							${btnSelect.equals('true') ? '' : "style='display:none'"}
 						><span class="fa fa-refresh">&nbsp;</span><spring:message code="gui.button.refresh"/></button>
-					</c:if>
 					<c:if test="${btnSee.equals('true')}">
 						<button
 							id="${view.sessionName}.see"
