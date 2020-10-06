@@ -20,19 +20,19 @@
 	        <td style="width: 25px;">
 	          ${view.nbPages}
 	        </td>
-	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),-999999999);">&lt;&lt;</td>
+	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),${1 - view.idPage});">&lt;&lt;</td>
 	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),-1);">&lt;</td>
 	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),1);">&gt;</td>
-	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),999999999);">&gt;&gt;</td>
+	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),${view.nbPages - view.idPage});">&gt;&gt;</td>
 	      </tr>
 	    </table>
 	</c:if>
-	<c:if test="${allowResize.equals('true')}">
+	<c:if test="${allowResize}">
 		<table style="width: 200px;">
 	      <tr>
 	        <td style="width: 40px;">Nombre d'éléments par page&nbsp;:</td>
 	        <td style="width: 50px; background-color: #ffffff;">
-	          <textarea name="${view.sessionName}.paginationSize">${view.paginationSize}</textarea>
+	          <input type="number" name="${view.sessionName}.paginationSize" value="${view.paginationSize}" min="5" max="100" />
 	        </td>
 	      </tr>
 	    </table>

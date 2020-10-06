@@ -228,8 +228,8 @@
 																	<select class="w-100" 
 																		id="${view.sessionName}_content_t_${incr1.index}__d_${incr2.index}_"
 																		name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]">
-																		<c:forEach items="${view.headersVSelect[incr2.index]}" var="option">
-																			<option value="${option}" ${option == view.content.t[incr1.index].d[incr2.index] ? 'required' : ''}></option>
+																		<c:forEach items="${view.headersVSelect[incr2.index].keySet()}" var="option">
+																			<option value="${option}" ${option == view.content.t[incr1.index].d[incr2.index] ? 'selected' : ''}>${view.headersVSelect[incr2.index][option]}</option>
 																		</c:forEach>
 																	</select>
 																</c:otherwise>
@@ -254,8 +254,8 @@
 															</c:when> <c:otherwise>
 																<select class="w-100" id="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
 																	name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]">
-																	<c:forEach items="${view.headersVSelect[incr2.index]}" var="option">
-																		<option value="${option}" ${option == view.content.t[incr1.index].d[incr2.index] ? 'required' : ''}></option>
+																	<c:forEach items="${view.headersVSelect[incr2.index].keySet()}" var="option">
+																		<option value="${option}" ${option == view.content.t[incr1.index].d[incr2.index] ? 'selected' : ''}>${view.headersVSelect[incr2.index][option]}</option>
 																	</c:forEach>
 																</select>
 															</c:otherwise>
@@ -305,8 +305,8 @@
 															<select class="w-100" id="${view.sessionName}.inputFields[${incr.index}]"
 																name="${view.sessionName}.inputFields[${incr.index}]" multiple>
 																<option value=""></option>
-																<c:forEach items="${view.headersVSelect[incr.index]}" var="option">
-																	<option value="${option}"></option>
+																<c:forEach items="${view.headersVSelect[incr.index].keySet()}" var="option">
+																	<option value="${option}">${view.headersVSelect[incr.index][option]}</option>
 																</c:forEach>
 															</select>
 														</c:when>
@@ -315,8 +315,8 @@
 																id="${view.sessionName}.inputFields[${incr.index}]"
 																name="${view.sessionName}.inputFields[${incr.index}]">
 																<option value=""></option>
-																<c:forEach items="${view.headersVSelect[incr.index]}" var="option">
-																	<option value="${option}"></option>
+																<c:forEach items="${view.headersVSelect[incr.index].keySet()}" var="option">
+																	<option value="${option}">${view.headersVSelect[incr.index][option]}</option>
 																</c:forEach>
 															</select>
 														</c:otherwise>
@@ -337,8 +337,8 @@
 														<c:otherwise>
 															<select class="w-100" id="${view.sessionName}.inputFields[${incr.index}]"
 																name="${view.sessionName}.inputFields[${incr.index}]" required>
-																<c:forEach items="${view.headersVSelect[incr.index]}" var="option" varStatus="optionStatus">
-																	<option value="${option}" ${optionsStatus.index == 0 ? 'selected' : ''}></option>
+																<c:forEach items="${view.headersVSelect[incr.index].keySet()}" var="option" varStatus="optionStatus">
+																	<option value="${option}" ${optionsStatus.index == 0 ? 'selected' : ''}>${view.headersVSelect[incr.index][option]}</option>
 																</c:forEach>
 															</select>
 														</c:otherwise>
@@ -369,16 +369,16 @@
 					role="group"
 					style="float: left;"
 				>
-						<button
-							id="${view.sessionName}.select"
-							class="btn btn-secondary btn-sm "
-							type="submit"
-							doAction="select${viewType}"
-							scope="${view.sessionName};"
-							value="<spring:message code="gui.button.refresh"/>"
-							${btnSelect.equals('true') ? '' : "style='display:none'"}
-						><span class="fa fa-refresh">&nbsp;</span><spring:message code="gui.button.refresh"/></button>
-					<c:if test="${btnSee.equals('true')}">
+					<button
+						id="${view.sessionName}.select"
+						class="btn btn-secondary btn-sm "
+						type="submit"
+						doAction="select${viewType}"
+						scope="${view.sessionName};"
+						value="<spring:message code="gui.button.refresh"/>"
+						${btnSelect.equals('true') ? '' : "style='display:none'"}
+					><span class="fa fa-refresh">&nbsp;</span><spring:message code="gui.button.refresh"/></button>
+					<c:if test="${btnSee}">
 						<button
 							id="${view.sessionName}.see"
 							style="display: none;"
@@ -389,7 +389,7 @@
 							value="<spring:message code="gui.button.see"/>"
 						><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.see"/></button>
 					</c:if>
-					<c:if test="${btnSort.equals('true')}">
+					<c:if test="${btnSort}">
 						<button
 							id="${view.sessionName}.sort"
 							style="display: none;"
@@ -400,7 +400,7 @@
 							value="<spring:message code="gui.button.sort"/>"
 						><span class="fa fa-sort">&nbsp;</span><spring:message code="gui.button.sort"/></button>
 					</c:if>
-					<c:if test="${btnAdd.equals('true')}">
+					<c:if test="${btnAdd}">
 						<button
 							id="${view.sessionName}.add"
 							class="btn btn-primary btn-sm "
@@ -410,7 +410,7 @@
 							value="<spring:message code="gui.button.add"/>"
 						><span class="fa fa-check">&nbsp;</span><spring:message code="gui.button.add"/></button>
 					</c:if>
-					<c:if test="${btnUpdate.equals('true')}">
+					<c:if test="${btnUpdate}">
 						<button
 							id="${view.sessionName}.update"
 							class="btn btn-primary btn-sm "
@@ -420,7 +420,7 @@
 							value="<spring:message code="gui.button.update"/>"
 						><span class="fa fa-save">&nbsp;</span><spring:message code="gui.button.update"/></button>
 					</c:if>
-					<c:if test="${btnDelete.equals('true')}">
+					<c:if test="${btnDelete}">
 						<button
 							id="${view.sessionName}.delete"
 							class="btn btn-primary btn-sm "

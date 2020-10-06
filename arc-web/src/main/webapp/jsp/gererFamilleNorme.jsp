@@ -53,7 +53,9 @@
 	method="post"
 >
 
-	<%@include file="tiles/header.jsp"%>
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="familyManagement" />
+	</c:import>
 
 	<div class="container-fluid">
 			<div class="row">

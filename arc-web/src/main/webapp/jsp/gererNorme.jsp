@@ -58,7 +58,9 @@
 	enctype="multipart/form-data"
 >
 
-	<%@include file="tiles/header.jsp"%>
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="normManagement" />
+	</c:import>
 
 
 	<div class="container-fluid">
@@ -290,7 +292,7 @@
 														id="viewChargement.import"
 														type="submit"
 														doAction="importChargement"
-														scope="viewChargement;"
+														scope="viewModuleButtons;viewChargement;"
 														multipart="true"
 													><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 												</div>
@@ -358,7 +360,7 @@
 															id="viewNormage.import"
 															type="submit"
 															doAction="importNormage"
-															scope="viewNormage;"
+															scope="viewModuleButtons;viewNormage;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
@@ -387,6 +389,7 @@
 										<c:param name="ligneFilter" value ="true" />
 										<c:param name="checkbox" value ="true" />
 										<c:param name="checkboxVisible" value ="true" />
+										<c:param name="allowResize" value ="true" />
 										<c:param name="otherButton">
 											<c:if
 												test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
@@ -425,7 +428,7 @@
 															class="btn btn-primary btn-sm"
 															type="submit"
 															doAction="importControle"
-															scope="viewControle;"
+															scope="viewModuleButtons;viewControle;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
@@ -503,7 +506,7 @@
 															id="viewFiltrage.import"
 															type="submit"
 															doAction="importFiltrage"
-															scope="viewFiltrage;"
+															scope="viewModuleButtons;viewFiltrage;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>
@@ -532,6 +535,7 @@
 										<c:param name="ligneFilter" value ="true" />
 										<c:param name="checkbox" value ="true" />
 										<c:param name="checkboxVisible" value ="true" />
+										<c:param name="allowResize" value ="true" />
 										<c:param name="otherButton">
 											<c:if
 												test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
@@ -582,7 +586,7 @@
 															id="viewMapping.import"
 															type="submit"
 															doAction="importMapping"
-															scope="viewMapping;"
+															scope="viewModuleButtons;viewMapping;"
 															multipart="true"
 														><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 													</div>

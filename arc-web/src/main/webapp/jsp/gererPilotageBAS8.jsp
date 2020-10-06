@@ -30,7 +30,9 @@
 		method="post"
 		enctype="multipart/form-data">
 
-		<%@include file="tiles/header.jsp"%>
+		<c:import url="tiles/header.jsp">
+			<c:param name="currentPage" value="envManagement" />
+		</c:import>
 
 		<div class="container-fluid">
 			<div class="row">
@@ -42,6 +44,7 @@
 							<c:param name="btnSelect" value ="true" />
 							<c:param name="btnSee" value ="true" />
 							<c:param name="btnSort" value ="true" />
+							<c:param name="ligneFilter" value ="true" />
 							<c:param name="checkbox" value ="true" />
 							<c:param name="checkboxVisible" value ="false" />
 							<c:param name="extraScopeSee" value ="viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;" />
@@ -133,6 +136,7 @@
 							<c:param name="btnSelect" value ="true" />
 							<c:param name="btnSee" value ="true" />
 							<c:param name="btnSort" value ="true" />
+							<c:param name="ligneFilter" value ="true" />
 							<c:param name="checkbox" value ="true" />
 							<c:param name="checkboxVisible" value ="false" />
 							<c:param name="extraScopeSee" value ="viewRapportBAS8;viewFichierBAS8;-viewArchiveBAS8;viewEntrepotBAS8;" />
@@ -173,7 +177,7 @@
 													label="<spring:message code='${phase}'/>"
 													name="phaseAExecuter"
 													value="${phase}">
-													${phase}
+													<spring:message code="${phase}" />
 												</button>
 										</c:forEach>
 
@@ -191,7 +195,7 @@
 													label="<spring:message code='RA_${phase}'/>"
 													name="phaseAExecuter"
 													value='${phase}'>
-													RA_${phase}
+													<spring:message code="RA_${phase}" />
 												</button>
 										</c:forEach>
 									</div>
@@ -244,10 +248,11 @@
 					<c:import url="tiles/templateVObject.jsp">
 						<c:param name="taille" value ="col-md" />
 						<c:param name="checkbox" value ="true" />
+						<c:param name="ligneFilter" value ="true" />
 						<c:param name="otherButton">
 							<input class="btn btn-primary btn-sm"
 								type="submit" id="viewArchiveBAS8.downloadEnveloppe"
-								value="Telecharger Enveloppe"
+								value="<spring:message code="gui.button.downloadArchive"/>"
 								scope="viewPilotageBAS8;viewRapportBAS8;viewEntrepotBAS8;"
 								doAction="downloadEnveloppeFromArchiveBAS8" ajax="false" />
 						</c:param>
@@ -273,7 +278,7 @@
 							doAction="downloadFichierBAS8" ajax="false" />
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS8.downloadEnveloppe"
-							value="<spring:message code="gui.button.downloadArchive"/>" doAction="downloadEnveloppeBAS8"
+							value="<spring:message code="gui.button.downloadEnveloppe"/>" doAction="downloadEnveloppeBAS8"
 							ajax="false" />
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS8.toDelete" value="<spring:message code="gui.button.deleteFiles"/>"

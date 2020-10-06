@@ -72,7 +72,9 @@
 	method="post"
 	enctype="multipart/form-data"
 >
-	<%@include file="tiles/header.jsp"%>
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="home" />
+	</c:import>
 
 	<div class="container-fluid">
 	
