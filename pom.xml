@@ -12,6 +12,7 @@
 		<version>0.0.2-SNAPSHOT</version>
 		<project.struts2.version>2.5.20</project.struts2.version>
 		<project.log4j.version>2.13.3</project.log4j.version>
+		<project.spring.version>[5.2.9,)</project.spring.version>
 	</properties>
 	<url>https://github.com/InseeFr/ARC</url>
 
@@ -81,27 +82,27 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>[4.3.17,)</version>
+			<version>${project.spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>[4.3.17,)</version>
+			<version>${project.spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>[4.3.17,)</version>
+			<version>${project.spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
-			<version>[4.3.17,)</version>
+			<version>${project.spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>[4.3.17,)</version>
+			<version>${project.spring.version}</version>
 		</dependency>
 
 		<dependency>
