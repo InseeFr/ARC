@@ -2,9 +2,9 @@
 ## Workbench for acquisition and normalization of data sets
 [![Build Status](https://travis-ci.org/InseeFr/ARC.svg?branch=master)](https://travis-ci.org/InseeFr/ARC)
 
-![Sonar Quality Gate](https://img.shields.io/sonar/quality_gate/fr.insee:arc?server=https%3A%2F%2Fsonarcloud.io)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=fr.insee%3Aarc&metric=alert_status)](https://sonarcloud.io/dashboard?id=fr.insee%3Aarc)
 
-![GitHub](https://img.shields.io/github/license/inseefr/arc)
+[![License: MIT](https://img.shields.io/github/license/inseefr/arc)](https://opensource.org/licenses/MIT)
 
 - [General présentation of the application](#General-présentation-of-the-application)
 - [Running the application](#Running-the-application)
