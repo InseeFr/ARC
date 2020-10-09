@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/github/license/inseefr/arc)](https://opensource.org/licenses/MIT)
 
-- [General présentation of the application](#General-présentation-of-the-application)
+- [General presentation of the application](#General-presentation-of-the-application)
 - [Running the application](#Running-the-application)
   - [Running the web application with Docker](#Running-the-web-application-with-Docker)
     - [Maven build configuration (optionnal)](#Maven-build-configuration-optionnal)
@@ -20,7 +20,7 @@
     - [Deploy or update the application](#Deploy-or-update-the-application)
   - [Test the deployment](#Test-the-deployment)
 
-## General présentation of the application
+## General presentation of the application
 
 The ARC (from the French: Acquisition - Réception - Contrôles) software allows receiving (administrative) data supplied by the providers (several formats are supported, particularly XML), to control the compliance of the received files, and to transform administrative data to elementary statistical data. The software enables the statistician to define and apply controls and mappings, to test them in a sandbox environment (linked to the software), and to put them into production without frequently calling on a developer.
 
