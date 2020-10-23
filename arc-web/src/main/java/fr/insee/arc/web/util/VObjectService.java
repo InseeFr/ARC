@@ -26,7 +26,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
@@ -47,6 +51,8 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
  *
  */
 @Service
+@Qualifier("defaultVObjectService")
+@Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class VObjectService {
 
     private static final Logger LOGGER = LogManager.getLogger(VObjectService.class);
@@ -57,7 +63,7 @@ public class VObjectService {
     @Autowired
     private LoggerDispatcher loggerDispatcher;
     
-    private String pool;
+    private String pool = "arc";
 
     private boolean noOrder = false;
     private boolean noCount = false;

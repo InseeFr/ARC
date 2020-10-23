@@ -26,7 +26,7 @@ import fr.insee.arc.web.util.VObject;
 public class ExternalFilesManagementDao implements IDbConstant {
 
 	@Autowired
-	@Qualifier("viewObject")
+	@Qualifier("defaultVObjectService")
 	private VObjectService vObject;
 	
     @SuppressWarnings("unused")

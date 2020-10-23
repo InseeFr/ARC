@@ -40,7 +40,7 @@ import fr.insee.arc.web.model.viewobjects.ViewFichierBAS;
 import fr.insee.arc.web.model.viewobjects.ViewPilotageBAS;
 import fr.insee.arc.web.model.viewobjects.ViewRapportBAS;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectPilotage;
+import fr.insee.arc.web.util.VObjectEnvManagementService;
 
 @Controller
 public class PilotageBASAction extends ArcAction<EnvManagementModel> {
@@ -56,7 +56,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	private static final Logger LOGGER = LogManager.getLogger(PilotageBASAction.class);
 	
 	@Autowired
-	private VObjectPilotage viewObjectPilotage;
+	private VObjectEnvManagementService viewObjectPilotage;
 	
 	private VObject viewPilotageBAS = new ViewPilotageBAS();
 	
@@ -74,6 +74,10 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * Phase sélectionnée par l'utilisateur
 	 */
 	private String phaseAExecuter;
+
+	public PilotageBASAction() {	
+		this.setListePhase(TraitementPhase.getListPhaseC());	
+	}
 
 	@Override
 	public void putAllVObjects(EnvManagementModel arcModel) {
@@ -102,34 +106,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		putVObject(getViewRapportBAS(), t -> initializeRapportBAS());
 	
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
-	}
-
-	@Override
-	public void instantiateAllDAOs() {
-		loggerDispatcher.debug("instanciateAllDAOs()", LOGGER);
-	
-		try {
-			
-			List<TraitementPhase> listePhaseC = new ArrayList<>();
-			
-			for (TraitementPhase t : TraitementPhase.values()) {
-				if (t.getOrdre()>=0) {
-					listePhaseC.add(t);
-				}
-			}
-			
-			this.setListePhase(listePhaseC);
-	
-			
-		} catch (Exception e) {
-			loggerDispatcher.error("erreur lors de la récuparation des phases", e, LOGGER);
-		}
-	
-	}
-
-	@Override
-	protected void specificTraitementsPostDAO() {
-		// nothing to do here
 	}
 
 	public void initializeEntrepotBAS() {

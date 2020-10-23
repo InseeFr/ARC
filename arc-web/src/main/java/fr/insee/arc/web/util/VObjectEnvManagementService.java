@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import fr.insee.arc.core.model.TraitementEtat;
@@ -14,7 +15,8 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
 
 @Service
-public class VObjectPilotage extends VObjectService {
+@Qualifier("envManagementVObjectService")
+public class VObjectEnvManagementService extends VObjectService {
 
 	@Override
     public ArrayList<ArrayList<String>> reworkContent(ArrayList<ArrayList<String>> content) {

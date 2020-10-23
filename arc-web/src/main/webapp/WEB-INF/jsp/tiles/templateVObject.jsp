@@ -392,7 +392,7 @@
 						<button
 							id="${view.sessionName}.sort"
 							style="display: none;"
-							class="btn btn-secondary btn-sm""
+							class="btn btn-secondary btn-sm"
 							type="submit"
 							doAction="sort${viewType}"
 							scope="${view.sessionName};"

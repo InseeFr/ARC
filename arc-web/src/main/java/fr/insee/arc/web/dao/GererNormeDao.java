@@ -69,7 +69,7 @@ public class GererNormeDao implements IDbConstant {
     private WebLoggerDispatcher loggerDispatcher;
     
     @Autowired
-    @Qualifier("viewObject")
+	@Qualifier("defaultVObjectService")
     private VObjectService viewObject;
 
 	/**

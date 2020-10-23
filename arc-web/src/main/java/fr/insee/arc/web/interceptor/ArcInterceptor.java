@@ -23,6 +23,7 @@ public class ArcInterceptor extends HandlerInterceptorAdapter {
 		if (handler instanceof HandlerMethod) {
 			HandlerMethod springHandler = (HandlerMethod) handler;
 			if (springHandler.getBean() instanceof ArcAction) {
+				@SuppressWarnings("unchecked")
 				ArcAction<ArcModel> arcAction = (ArcAction<ArcModel>) springHandler.getBean();
 				// Adds all the vObjects to the model
 				for (VObject vObject : arcAction.getMapVObject().keySet()) {

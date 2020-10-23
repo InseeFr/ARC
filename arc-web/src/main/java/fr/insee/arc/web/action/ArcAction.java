@@ -72,6 +72,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	private Session session;
 
 	@Autowired
+	@Qualifier("defaultVObjectService")
 	protected VObjectService vObjectService;
 
 	@Autowired
@@ -122,22 +123,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	protected abstract void putAllVObjects(T model);
 
 	/**
-	 * Properly create the DAO.
-	 * By default, nothing happens. Can be overriden by a subclass.
-	 */
-	protected void instantiateAllDAOs() {
-		// nothing
-	}
-
-	/**
-	 * Run some traitements specific to each action class that need instanciated DAO.
-	 * By default, nothing happens. Can be overriden by a subclass.
-	 */
-	protected void specificTraitementsPostDAO() {
-		// nothing
-	}
-
-	/**
 	 * @return the name of the current controller
 	 */
 	protected abstract String getActionName();
@@ -175,8 +160,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 		mapVObject = new HashMap<>();
 		initializeArcActionWithProperties();
 		getDataBaseStatus();
-		instantiateAllDAOs();
-		specificTraitementsPostDAO();
 		putAllVObjects(arcModel);
 	}
 

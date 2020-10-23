@@ -7,7 +7,7 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html>
+<html lang="${pageContext.response.locale}">
 <c:if test="${scope==null}">
 	<head>
 <title><spring:message code="header.externalFile"/></title>

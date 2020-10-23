@@ -66,10 +66,4 @@
 		<constructor-arg value="${fr.insee.database.poolName}" />
 	</bean>
 
-	<bean id="viewObjectService" class="fr.insee.arc.web.util.VObjectService"
-		scope="session">
-		<aop:scoped-proxy />
-		<property name="pool" value="arc" />
-	</bean>
-
 </beans>
