@@ -12,8 +12,8 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Can decompress tarGZ archive file
@@ -26,7 +26,7 @@ public class TarGzDecompressor implements ArchiveExtractor {
 
     @Override
     public void extract(File archiveFile) throws Exception {
-	LoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
+	StaticLoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
 	FileInputStream archiveInputStream = null;
 
 	archiveInputStream = new FileInputStream(archiveFile);
@@ -43,7 +43,7 @@ public class TarGzDecompressor implements ArchiveExtractor {
 		    File f = new File(entry.getName());
 		    boolean created = f.mkdir();
 		    if (!created) {
-			LoggerDispatcher.info(String.format("Unable to create directory '%s', during extraction of archive contents.%n",
+			StaticLoggerDispatcher.info(String.format("Unable to create directory '%s', during extraction of archive contents.%n",
 				f.getAbsolutePath()), LOGGER);
 		    }
 		} else {
@@ -71,7 +71,7 @@ public class TarGzDecompressor implements ArchiveExtractor {
 
 	}
 
-	LoggerDispatcher.info("Untar completed successfully!", LOGGER);
+	StaticLoggerDispatcher.info("Untar completed successfully!", LOGGER);
 
     }
 

@@ -11,8 +11,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 public class ZipDecompressor implements ArchiveExtractor {
 
@@ -20,7 +20,7 @@ public class ZipDecompressor implements ArchiveExtractor {
 
     @Override
     public void extract(File archiveFile) throws Exception {
-	LoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
+	StaticLoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
 	FileInputStream archiveInputStream = null;
 
 	archiveInputStream = new FileInputStream(archiveFile);
@@ -35,7 +35,7 @@ public class ZipDecompressor implements ArchiveExtractor {
 		    File f = new File(entry.getName());
 		    boolean created = f.mkdir();
 		    if (!created) {
-			LoggerDispatcher.error("Unable to create directory '%s', during extraction of archive contents.\n",
+			StaticLoggerDispatcher.error("Unable to create directory '%s', during extraction of archive contents.\n",
 				LOGGER);
 		    }
 		} else {
@@ -64,7 +64,7 @@ public class ZipDecompressor implements ArchiveExtractor {
 
 	}
 
-	LoggerDispatcher.info("Untar completed successfully!", LOGGER);
+	StaticLoggerDispatcher.info("Untar completed successfully!", LOGGER);
 
     }
 

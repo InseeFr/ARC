@@ -19,8 +19,8 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.Pair;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Thread de filtrage. Comme pour le normage, on parallélise et chaque filtrage s'éxécute dans un thread
@@ -113,7 +113,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
     }
 
     public void start() {
-        LoggerDispatcher.debug("Starting ThreadFiltrageService", LOGGER);
+        StaticLoggerDispatcher.debug("Starting ThreadFiltrageService", LOGGER);
         if (t == null) {
             t = new Thread(this, indice + "");
             t.start();
@@ -148,12 +148,12 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 
 
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("Création de la table temporaire filtrage_ko", logger);
+            StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ko", logger);
         }
         UtilitaireDao.get("arc").executeBlock(this.connexion,FormatSQL.createAsSelectFrom(this.tableTempFiltrageKo, this.tableFiltrageDataTemp, "false"));
 
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("Création de la table temporaire filtrage_ok", logger);
+            StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ok", logger);
         }
         UtilitaireDao.get("arc").executeBlock(this.connexion,FormatSQL.createAsSelectFrom(this.tableTempFiltrageOk, this.tableFiltrageDataTemp, "false"));
 
@@ -161,7 +161,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 
         // PAS DELETE THIS
         // if (logger.isInfoEnabled()) {
-        // LoggerDispatcher.info("Création des indexes sur la table de contrôle temporaire", logger);
+        // StaticLoggerDispatcher.info("Création des indexes sur la table de contrôle temporaire", logger);
         // }
         // creerIndexTableControleTemporaire(this.connexion, this.tableTempControleOk);
     }
@@ -193,11 +193,11 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
      */
     public void filtrer() throws SQLException {
         // if (logger.isInfoEnabled()) {
-        // LoggerDispatcher.info("Nombre de lignes à traiter : " + UtilitaireDao.get("arc").getCount(this.connexion,
+        // StaticLoggerDispatcher.info("Nombre de lignes à traiter : " + UtilitaireDao.get("arc").getCount(this.connexion,
         // this.tableTempControleOk), logger);
         // }
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("Table des données à filtrer utilisée : " + this.tableFiltrageDataTemp, logger);
+            StaticLoggerDispatcher.info("Table des données à filtrer utilisée : " + this.tableFiltrageDataTemp, logger);
         }
         
         List<List<String>> regleActive = Format.patch(UtilitaireDao.get("arc").executeRequestWithoutMetadata(
@@ -214,11 +214,11 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
                 "expr_regle_filtre");
 
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("calculerListeColonnes", logger);
+            StaticLoggerDispatcher.info("calculerListeColonnes", logger);
         }
         Set<String> listeRubrique = ServiceCommunFiltrageMapping.calculerListeColonnes(this.connexion, this.tableFiltrageDataTemp);
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("Fin calculerListeColonnes", logger);
+            StaticLoggerDispatcher.info("Fin calculerListeColonnes", logger);
         }
 
 
@@ -227,15 +227,15 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
          */
 
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("parserRegleCorrespondanceFonctionnelle", logger);
+            StaticLoggerDispatcher.info("parserRegleCorrespondanceFonctionnelle", logger);
         }
         parserRegleCorrespondanceFonctionnelle(this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, listeRubrique, "expr_regle_filtre");
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("Fin parserRegleCorrespondanceFonctionnelle", logger);
+            StaticLoggerDispatcher.info("Fin parserRegleCorrespondanceFonctionnelle", logger);
         }
 
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("Exécution du filtrage : insertion dans les tables de travail.", logger);
+            StaticLoggerDispatcher.info("Exécution du filtrage : insertion dans les tables de travail.", logger);
         }
         
         StringBuilder requete = getRequeteFiltrageIntermediaire(this.envExecution, this.tableFiltrageDataTemp, this.tableTempFiltrageOk,
@@ -434,7 +434,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         returned = returned.replaceAll(regexSelectionRubrique, "null");
         onlyNull &= !returned.equals(exprRegle);
 //        if (logger.isTraceEnabled()) {
-//            LoggerDispatcher.trace("Valeur trouvée pour " + exprRegle + " : " + returned, logger);
+//            StaticLoggerDispatcher.trace("Valeur trouvée pour " + exprRegle + " : " + returned, logger);
 //        }
         return new Pair<Boolean, String>(onlyNull, returned);
     }

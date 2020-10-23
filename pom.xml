@@ -12,7 +12,7 @@
 		<version>0.0.2-SNAPSHOT</version>
 		<project.struts2.version>2.5.20</project.struts2.version>
 		<project.log4j.version>2.13.3</project.log4j.version>
-		<project.spring.version>[5.2.9,)</project.spring.version>
+		<project.spring.version>5.2.9.RELEASE</project.spring.version>
 	</properties>
 	<url>https://github.com/InseeFr/ARC</url>
 
@@ -73,10 +73,12 @@
 			<artifactId>h2</artifactId>
 			<version>1.4.186</version>
 		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.1</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -130,21 +132,21 @@
 			<version>2.5.0</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-	    	<artifactId>log4j-core</artifactId>
-	    	<version>${project.log4j.version}</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${project.log4j.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-	    	<artifactId>log4j-api</artifactId>
-	    	<version>${project.log4j.version}</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${project.log4j.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-jcl</artifactId>
-		    <version>${project.log4j.version}</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>${project.log4j.version}</version>
 		</dependency>
 
 
@@ -177,42 +179,34 @@
 			<version>2.7</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.8</version>
-			<scope>provided</scope>
-		</dependency>
-
 	</dependencies>
 	<packaging>pom</packaging>
 	<profiles>
 		<profile>
-		    <id>coverage</id>
-		    <build>
-			<plugins>
-			    <plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
-				<executions>
-				    <execution>
-					<id>prepare-agent</id>
-					<goals>
-					    <goal>prepare-agent</goal>
-					</goals>
-				    </execution>
-				    <execution>
-					<id>report</id>
-					<goals>
-					    <goal>report</goal>
-					</goals>
-				    </execution>
-				</executions>
-			    </plugin>
-			</plugins>
-		    </build>
+			<id>coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.5</version>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 	<modules>

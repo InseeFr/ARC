@@ -12,7 +12,7 @@ import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -53,7 +53,7 @@ public class ApiNormageService extends ApiService {
 
     @Override
     public void executer() throws Exception {
-        LoggerDispatcher.info("** executer **", LOGGER);
+        StaticLoggerDispatcher.info("** executer **", LOGGER);
         
         this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiNormageService.MAX_PARALLEL_WORKERS",4);
         
@@ -73,11 +73,11 @@ public class ApiNormageService extends ApiService {
         ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
         currentIndice = 0;
 
-        LoggerDispatcher.info("** Generation des threads pour le normage **", logger);
+        StaticLoggerDispatcher.info("** Generation des threads pour le normage **", logger);
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
             
             if (currentIndice%10 == 0) {
-                LoggerDispatcher.info("Normage fichier " + currentIndice + "/" + nbFichier, logger);
+                StaticLoggerDispatcher.info("Normage fichier " + currentIndice + "/" + nbFichier, logger);
             }
             
             connectionThread = chooseConnection(connectionThread, threadList, connexionList);
@@ -92,17 +92,17 @@ public class ApiNormageService extends ApiService {
 
         }
 
-        LoggerDispatcher.info("** Attente de la fin des threads **", logger);
+        StaticLoggerDispatcher.info("** Attente de la fin des threads **", logger);
         waitForThreads2(0, threadList, connexionList);
 
 
-        LoggerDispatcher.info("** Fermeture des connexions **", logger);
+        StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
         for (Connection connection : connexionList) {
             connection.close();
         }
 
         long dateFin= java.lang.System.currentTimeMillis() ;
-        LoggerDispatcher.info("Temp normage des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
+        StaticLoggerDispatcher.info("Temp normage des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
         
     }
 

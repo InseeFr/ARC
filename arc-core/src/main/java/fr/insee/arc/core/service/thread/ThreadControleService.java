@@ -19,7 +19,7 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Comme pour le normage et le filtrage, on parallélise en controlant chaque fichier dans des threads séparés.
@@ -121,7 +121,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     }
 
     public void start() {
-        LoggerDispatcher.debug("Starting ThreadContrôleService", LOGGER);
+        StaticLoggerDispatcher.debug("Starting ThreadContrôleService", LOGGER);
         if (t == null) {
             t = new Thread(this, indice + "");
             t.start();
@@ -149,12 +149,12 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      * @throws SQLException
      */
     public void preparation() throws SQLException {
-        LoggerDispatcher.info("** preparation **", LOGGER);
+        StaticLoggerDispatcher.info("** preparation **", LOGGER);
 
         StringBuilder blocPrep = new StringBuilder();
 
         // Marquage du jeux de règles appliqué
-        LoggerDispatcher.info("Récupération des rubrique de la table ", LOGGER);
+        StaticLoggerDispatcher.info("Récupération des rubrique de la table ", LOGGER);
 
         // fabrication de la table de pilotage controle lié au thread
         blocPrep.append("DISCARD TEMP;");
@@ -162,11 +162,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         blocPrep.append(resetTablePilotage(this.tableControlePilTemp));
 
         // Marquage du jeux de règles appliqué
-        LoggerDispatcher.info("Marquage du jeux de règles appliqué ", LOGGER);
+        StaticLoggerDispatcher.info("Marquage du jeux de règles appliqué ", LOGGER);
         blocPrep.append(marqueJeuDeRegleApplique(this.tableControlePilTemp));
         
         // Fabrication de la table de controle temporaire
-        LoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
+        StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
         blocPrep.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
         //blocPrep.append(createTableControle(this.getTablePrevious(), this.tableControleDataTemp, this.tableControlePilTemp, this.getCurrentPhase()));
@@ -198,7 +198,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      * @throws SQLException
      */
     public void execute() throws Exception {
-        LoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
+        StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
 
         this.sjdr.executeJeuDeRegle(this.connexion, jdr, this.tableControleDataTemp, this.structure);
 
@@ -295,7 +295,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      * @throws SQLException
      */
     public void finControle() throws Exception {
-        LoggerDispatcher.info("finControle", LOGGER);
+        StaticLoggerDispatcher.info("finControle", LOGGER);
 
         String tableOutOkTemp = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK + "$" +indice);
         String tableOutKoTemp = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO + "$" +indice);
@@ -305,7 +305,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
         StringBuilder blocFin = new StringBuilder();
         // Creation des tables temporaires ok et ko
-        LoggerDispatcher.info("Creation des tables temporaires ok et ko", LOGGER);
+        StaticLoggerDispatcher.info("Creation des tables temporaires ok et ko", LOGGER);
         blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
         blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
 
@@ -315,32 +315,32 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         blocFin.append(ApiService.creationTableResultat(this.tableControleDataTemp, tableOutKoTemp));
 
         // Calcul et maj du taux d'erreur
-        LoggerDispatcher.info("Calcul et maj du taux d'erreur", LOGGER);
+        StaticLoggerDispatcher.info("Calcul et maj du taux d'erreur", LOGGER);
         blocFin.append(calculTauxErreur(this.tableControleDataTemp, this.tableControlePilTemp));
 
         // Marquage etat controle_KO pour les seuils d'erreur trop elevé
-        LoggerDispatcher.info("Marquage etat controle_KO pour les seuils d'erreur trop elevé", LOGGER);
+        StaticLoggerDispatcher.info("Marquage etat controle_KO pour les seuils d'erreur trop elevé", LOGGER);
         blocFin.append(marquageControleKoSeuil(this.tableControlePilTemp, this.getTableSeuil()));
         UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
         UtilitaireDao.get("arc").executeImmediate(this.connexion, "vacuum analyze " + this.tableControlePilTemp + ";");
 
         // Ajout des enregistrements dans la table finale
-        LoggerDispatcher.info("Ajout des enregistrements dans la table finale", LOGGER);
+        StaticLoggerDispatcher.info("Ajout des enregistrements dans la table finale", LOGGER);
         String listColTableIn = this.listeColonne(this.connexion, tableOutOkTemp);
 
 
         // on insere dans la table OK que les fichiers pas déclarés complétement
         // KO à cause du seuil (etat_traitement is null)
         blocFin.setLength(0);
-        LoggerDispatcher.info("Insertion dans OK", LOGGER);
+        StaticLoggerDispatcher.info("Insertion dans OK", LOGGER);
         blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutOkTemp, this.tableControlePilTemp, "etat_traitement is null",
                 "controle='0' AND "));
         // blocFin.append("\n analyze "+tableOutOkTemp+"(id_source);");
 
         // on insere dans la table KO tous les enregistrements à controle!=0 et
         // tous ceux des fichiers déclarés en KO de seuil
-        LoggerDispatcher.info("Insertion dans KO", LOGGER);
+        StaticLoggerDispatcher.info("Insertion dans KO", LOGGER);
         blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutKoTemp, this.tableControlePilTemp, "etat_traitement='{"
                 + TraitementEtat.KO + "}'", "controle!='0' OR "));
         // blocFin.append("\n analyze "+tableOutKoTemp+"(id_source);");

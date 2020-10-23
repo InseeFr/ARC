@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TypeArchive;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -30,13 +30,13 @@ public class ArchiveChargerFactory {
     }
     
     public IArchiveFileLoader getChargeur(TypeArchive typeArchive){
-        LoggerDispatcher.info("** getLoader from type **", LOGGER);
+        StaticLoggerDispatcher.info("** getLoader from type **", LOGGER);
         return this.map.get(typeArchive);
     }
 
     
     public IArchiveFileLoader getChargeur(String container){
-        LoggerDispatcher.info("** getChargeur from container**", LOGGER);
+        StaticLoggerDispatcher.info("** getChargeur from container**", LOGGER);
         IArchiveFileLoader returned = null;
 	    if (container.endsWith(".tar.gz") || container.endsWith(".tgz")) {
 		returned = getChargeur(TypeArchive.TARGZ);

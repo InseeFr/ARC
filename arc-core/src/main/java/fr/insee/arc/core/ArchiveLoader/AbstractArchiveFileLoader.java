@@ -5,8 +5,8 @@ import java.io.File;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Loader have to inherit this class
@@ -69,14 +69,14 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 		try {
 		    if (dir.mkdir())
 		    {
-		    	LoggerDispatcher.debug("$$"+Thread.currentThread().getId()+" is decompressing "+dir.getAbsolutePath(),LOGGER);
+		    	StaticLoggerDispatcher.debug("$$"+Thread.currentThread().getId()+" is decompressing "+dir.getAbsolutePath(),LOGGER);
 		    	decompressor.extract(this.archiveChargement);
 		    	uncompressInProgress=true;
 		    }
 		}
 		 catch (Exception ex)
 		{
-			    LoggerDispatcher.error("extractArchive() " + ex, LOGGER);
+			    StaticLoggerDispatcher.error("extractArchive() " + ex, LOGGER);
 		}
 	}
 	
@@ -110,7 +110,7 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 	try {
 		filesInputStreamLoadReturned = new FilesInputStreamLoad (toRead);
 	} catch (Exception ex) {
-	    LoggerDispatcher.error("readFile() " + ex, LOGGER);
+	    StaticLoggerDispatcher.error("readFile() " + ex, LOGGER);
 	}
 	return filesInputStreamLoadReturned;
     }

@@ -28,7 +28,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -108,7 +108,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
     }
 
     public void start() {
-	LoggerDispatcher.debug("Starting ChargementService", LOGGER);
+	StaticLoggerDispatcher.debug("Starting ChargementService", LOGGER);
 	if (t == null) {
 	    t = new Thread(this, indice + "");
 	    t.start();
@@ -117,7 +117,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
     @Override
     public void run() {
-	LoggerDispatcher.info("Chargement des Fichiers", LOGGER);
+	StaticLoggerDispatcher.info("Chargement des Fichiers", LOGGER);
 
 	try {
 	    // nettoyer la connexion
@@ -132,12 +132,12 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    chargementFichiers(allCols, colData);
 
 	    // retirer de table tempTableA les ids marqués en erreur
-	    LoggerDispatcher.info("Retirer de table temporaire les fichiers marqués en erreur", LOGGER);
+	    StaticLoggerDispatcher.info("Retirer de table temporaire les fichiers marqués en erreur", LOGGER);
 	    clean();
 
 	    // Mettre à jour le nombre d'enregistrement dans la table de
 	    // pilotage temporaire
-	    LoggerDispatcher.info("Recopie dans les tables Résultats", LOGGER);
+	    StaticLoggerDispatcher.info("Recopie dans les tables Résultats", LOGGER);
 	    insertTableOK(this.connexion, this.tableChargementOK, this.idSource);
 
 	    // Nettoyage
@@ -149,7 +149,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
 	} catch (Exception e) {
-	    LoggerDispatcher.info("je suis catché", LOGGER);
+	    StaticLoggerDispatcher.info("je suis catché", LOGGER);
 	    e.printStackTrace();
 
 	    try {
@@ -177,7 +177,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @throws SQLException
      */
     public void clean() throws SQLException {
-	LoggerDispatcher.info("** clean **", LOGGER);
+	StaticLoggerDispatcher.info("** clean **", LOGGER);
 
 	try {
 
@@ -222,7 +222,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      */
     public void chargementFichiers(ArrayList<String> aAllCols, HashMap<String, Integer> aColData) throws Exception {
 
-	LoggerDispatcher.info("** chargementFichiers **", LOGGER);
+	StaticLoggerDispatcher.info("** chargementFichiers **", LOGGER);
 
 	java.util.Date beginDate = new java.util.Date();
 
@@ -243,7 +243,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	this.requeteBilan.setLength(0);
 
 	java.util.Date endDate = new java.util.Date();
-	LoggerDispatcher.info("** Fichier chargé en " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
+	StaticLoggerDispatcher.info("** Fichier chargé en " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
 
     }
 
@@ -282,7 +282,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @throws Exception
      */
     private void choixChargeur() throws Exception {
-	LoggerDispatcher.info("** choixChargeur : " + this.idSource + " **", LOGGER);
+	StaticLoggerDispatcher.info("** choixChargeur : " + this.idSource + " **", LOGGER);
 	// Si on a pas 1 seule norme alors le fichier est en erreur
 	ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
 	chgrBrtl.setConnexion(getConnexion());
@@ -350,7 +350,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	updateNbEnr(this.tableChargementPilTemp, this.getTableTempA());
 
-	LoggerDispatcher.info("** insertTableOK **", LOGGER);
+	StaticLoggerDispatcher.info("** insertTableOK **", LOGGER);
 	java.util.Date beginDate = new java.util.Date();
 
 	String tableIdSource = tableOfIdSource(tableName, this.idSource);
@@ -374,7 +374,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	
 
 	java.util.Date endDate = new java.util.Date();
-	LoggerDispatcher.info("** insertTableOK ** temps : " + (endDate.getTime() - beginDate.getTime()) + " ms",
+	StaticLoggerDispatcher.info("** insertTableOK ** temps : " + (endDate.getTime() - beginDate.getTime()) + " ms",
 		LOGGER);
 
     }
@@ -390,7 +390,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
     private boolean majPilotage(String idSource, Norme normeOk, String validite) throws Exception {
 	boolean erreur = false;
-	LoggerDispatcher.info("Mettre à jour la table de pilotage", LOGGER);
+	StaticLoggerDispatcher.info("Mettre à jour la table de pilotage", LOGGER);
 	java.util.Date beginDate = new java.util.Date();
 	StringBuilder bloc3 = new StringBuilder();
 
@@ -415,7 +415,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	UtilitaireDao.get(poolName).executeBlock(this.getConnexion(), bloc3);
 	java.util.Date endDate = new java.util.Date();
 
-	LoggerDispatcher.info(
+	StaticLoggerDispatcher.info(
 		"Mettre à jour la table de pilotage temps : " + (endDate.getTime() - beginDate.getTime()) + " ms",
 		LOGGER);
 	return erreur;

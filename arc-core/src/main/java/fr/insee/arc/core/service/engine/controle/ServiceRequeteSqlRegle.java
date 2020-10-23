@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 @Component
@@ -112,7 +112,7 @@ public class ServiceRequeteSqlRegle {
 //		sb.append("\n create index idx1_"+ManipString.substringAfterFirst(tableTempData,".")+" on "+tableTempData+" (id_source);");
 //		sb.append("\n analyze "+tableTempData+" (id_source);");
 
-	//	LoggerDispatcher.info("Ma requête pour la création d'une table temporaire spécifique à un jeu de règle: " + sb,logger);
+	//	StaticLoggerDispatcher.info("Ma requête pour la création d'une table temporaire spécifique à un jeu de règle: " + sb,logger);
 
 		return sb.toString();
 	}
@@ -402,9 +402,9 @@ public class ServiceRequeteSqlRegle {
 	 */
 	public String ctlCondition(RegleControleEntity reg, Map<String, RegleControleEntity> mapRubrique) {
 		String filtre = writeFiltre(mapRubrique);
-//		LoggerDispatcher.info("Ma condition avant : " + reg.getCondition(),logger);
+//		StaticLoggerDispatcher.info("Ma condition avant : " + reg.getCondition(),logger);
 		String cond = rewriteCondition(mapRubrique, reg.getCondition());
-//		LoggerDispatcher.info("Ma condition après : " + cond,logger);
+//		StaticLoggerDispatcher.info("Ma condition après : " + cond,logger);
 		String requete = "WITH " + " ctl AS ( select id_source, id from (SELECT id_source, id, "
 				+" CASE WHEN " + filtre + " THEN CASE WHEN " + cond + " THEN FALSE ELSE TRUE END ELSE FALSE END as condition_a_tester " + " FROM " + this.tableTempData + " "
 				+") ww where condition_a_tester ) "
@@ -413,7 +413,7 @@ public class ServiceRequeteSqlRegle {
 		// + "UPDATE {0} a SET  brokenrules=brokenrules||','||'{1}' "
 		// + "FROM ctl b WHERE a.id_source=b.id_source and a.id=b.id and exists (select 1 from ctl limit 1); ";
 		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle());
-//		LoggerDispatcher.info("Ma requete de CONDITION :" + requete,logger);
+//		StaticLoggerDispatcher.info("Ma requete de CONDITION :" + requete,logger);
 		return requete;
 	}
 
@@ -499,7 +499,7 @@ public class ServiceRequeteSqlRegle {
 	 * @return le résultat est en MAJUSCULE
 	 */
 	public String rewriteCondition(Map<String, RegleControleEntity> mapRubrique, String condition0) {
-		LoggerDispatcher.debug("Je rentre dans la méthode rewriteCondition", logger);
+		StaticLoggerDispatcher.debug("Je rentre dans la méthode rewriteCondition", logger);
 		// Passage en MAJUSCULE car la map contient des elements en majuscule
 		// bétonnage du code pour que le .uppercase ne lève pas de null pointerException
 		String cond;
@@ -511,21 +511,21 @@ public class ServiceRequeteSqlRegle {
 		String rubrique = "";
 		String format = "";
 		for (Entry<String, RegleControleEntity> entry : mapRubrique.entrySet()) {
-			LoggerDispatcher.debug("A l'intérieur de la boucle FOR", logger);
+			StaticLoggerDispatcher.debug("A l'intérieur de la boucle FOR", logger);
 			type = entry.getValue().getIdClasse().trim();
 			rubrique = entry.getKey().trim();
-			LoggerDispatcher.debug("Mon type : " + type + ", ma rubrique : " + rubrique, logger);
+			StaticLoggerDispatcher.debug("Mon type : " + type + ", ma rubrique : " + rubrique, logger);
 			switch (type) {
 			case "NUM":
 				cond = cond.replace("{" + rubrique + "}", "cast(" + rubrique + " as numeric)");
-				LoggerDispatcher.debug("la nouvelle condition : " + cond, logger);
+				StaticLoggerDispatcher.debug("la nouvelle condition : " + cond, logger);
 				break;
 			case "DATE":
 
 				format = entry.getValue().getCondition().trim();
-				LoggerDispatcher.debug("format vaut : " + format, logger);
+				StaticLoggerDispatcher.debug("format vaut : " + format, logger);
 				cond = cond.replace("{" + rubrique + "}", "to_date(" + rubrique + ",'" + format + "')");
-				LoggerDispatcher.debug("la nouvelle condition : " + cond, logger);
+				StaticLoggerDispatcher.debug("la nouvelle condition : " + cond, logger);
 				break;
 			default:
 				cond = cond.replace("{" + rubrique + "}", rubrique);
@@ -583,7 +583,7 @@ public class ServiceRequeteSqlRegle {
 			filtre = filtre + " TRUE ";
 		}
 
-		LoggerDispatcher.debug("Mon filtre est le suivant : " + filtre, logger);
+		StaticLoggerDispatcher.debug("Mon filtre est le suivant : " + filtre, logger);
 		return filtre;
 	}
 

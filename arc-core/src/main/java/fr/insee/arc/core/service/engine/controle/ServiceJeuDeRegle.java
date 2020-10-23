@@ -19,9 +19,9 @@ import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 @Component
@@ -56,7 +56,7 @@ public class ServiceJeuDeRegle {
 	 */
 	public ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableControle, String tableJeuDeRegle)
 			throws SQLException {
-		LoggerDispatcher.info("Récupération des Jeu de règle à appliquer sur la table à controler",logger);
+		StaticLoggerDispatcher.info("Récupération des Jeu de règle à appliquer sur la table à controler",logger);
 		ArrayList<JeuDeRegle> listCal = new ArrayList<>();
 		listCal = JeuDeRegleDao.recupJeuDeRegle(connexion, tableControle, tableJeuDeRegle);
 		return listCal;
@@ -73,7 +73,7 @@ public class ServiceJeuDeRegle {
 	 */
 	@Deprecated
 	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String espace) throws SQLException {
-		LoggerDispatcher.info("recherche de regle dans la table : " + espace,logger);
+		StaticLoggerDispatcher.info("recherche de regle dans la table : " + espace,logger);
 		ArrayList<RegleControleEntity> listRegleC = new ArrayList<RegleControleEntity>();
 		listRegleC = RegleDao.getRegle(connexion, jdr, espace);
 		jdr.setListRegleControle(listRegleC);
@@ -91,7 +91,7 @@ public class ServiceJeuDeRegle {
 	 * @throws SQLException
 	 */	
 	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String tableRegle, String tableIn) throws SQLException {
-		LoggerDispatcher.info("recherche de regle dans la table : " + tableRegle,logger);
+		StaticLoggerDispatcher.info("recherche de regle dans la table : " + tableRegle,logger);
 		ArrayList<RegleControleEntity> listRegleC = new ArrayList<RegleControleEntity>();
 		listRegleC = RegleDao.getRegle(connexion, tableRegle, tableIn);
 		jdr.setListRegleControle(listRegleC);
@@ -109,7 +109,7 @@ public class ServiceJeuDeRegle {
      * @throws SQLException
      */
 	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
-		LoggerDispatcher.debug("executeJeuDeRegle", logger);
+		StaticLoggerDispatcher.debug("executeJeuDeRegle", logger);
 
 //		ArrayList<QueryThread> threadList=new ArrayList<QueryThread>();
 //		ArrayList<Connection> connexionList=ApiService.prepareThreads(parallel, connexion);
@@ -127,7 +127,7 @@ public class ServiceJeuDeRegle {
 		}
 
 		// exécuter les préactions
-		LoggerDispatcher.info("Debut Pré-actions", logger);
+		StaticLoggerDispatcher.info("Debut Pré-actions", logger);
 
 		ArrayList<String> p=new ArrayList<String>();
 
@@ -165,9 +165,9 @@ public class ServiceJeuDeRegle {
 					);
 		}
 
-		LoggerDispatcher.debug("Fin Pré-actions", logger);
+		StaticLoggerDispatcher.debug("Fin Pré-actions", logger);
 
-		//		LoggerDispatcher.info("Les noms de colonne de la table : " + table + ", " + listRubTable.toString(),logger);
+		//		StaticLoggerDispatcher.info("Les noms de colonne de la table : " + table + ", " + listRubTable.toString(),logger);
 		StringBuilder blocRequete = new StringBuilder();
 		blocRequete.append(this.servSql.initTemporaryTable(jdr, table));
 //		UtilitaireDao.get("arc").executeBlock(connexion, blocRequete);
@@ -184,9 +184,9 @@ public class ServiceJeuDeRegle {
 			// message.append("/ regle : "+reg.getIdRegle() +
 			// " -> Ma classe de contrôle est : " + reg.getClasse_ctl()+" ");
 
-			LoggerDispatcher.info("n° " + reg.getIdRegle() + " / classe : " + reg.getIdClasse() + " / commentaire : "
+			StaticLoggerDispatcher.info("n° " + reg.getIdRegle() + " / classe : " + reg.getIdClasse() + " / commentaire : "
 					+ reg.getCommentaire(), logger);
-			// LoggerDispatcher.debug("sur l'idsource : "+reg.getIdSource());
+			// StaticLoggerDispatcher.debug("sur l'idsource : "+reg.getIdSource());
 			switch (reg.getIdClasse()) {
 			case "NUM":
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
@@ -216,7 +216,7 @@ public class ServiceJeuDeRegle {
 				}
 				else
 				{
-					LoggerDispatcher.info(
+					StaticLoggerDispatcher.info(
 							"la rubrique : " + reg.getRubriquePere() + " n'existe pas dans ce fichier", logger);
 				}
 				break;
@@ -245,11 +245,11 @@ public class ServiceJeuDeRegle {
 				}
 				break;
 			default:
-				LoggerDispatcher.info("Classe pas connue", logger);
+				StaticLoggerDispatcher.info("Classe pas connue", logger);
 			}
 
 			if (nbRegles % 1 == 0) {
-				LoggerDispatcher.info("Execution de " + nbRegles + "/" + nbTotalRegles, logger);
+				StaticLoggerDispatcher.info("Execution de " + nbRegles + "/" + nbTotalRegles, logger);
 			}
 
 //    		ApiService.waitForThreads(parallel,threadList,connexionList);
@@ -275,22 +275,22 @@ public class ServiceJeuDeRegle {
 //		ApiService.waitForThreads(0,threadList,connexionList);
 
 
-		LoggerDispatcher.info("Execution de " + nbRegles + "/" + nbTotalRegles, logger);
+		StaticLoggerDispatcher.info("Execution de " + nbRegles + "/" + nbTotalRegles, logger);
 		blocRequete.append(this.servSql.markTableResultat());
 		blocRequete.append(this.servSql.dropControleTemporaryTables());
-		// LoggerDispatcher.info("Mon bloc SQL d'execution de regles : " + blocRequete,logger);
+		// StaticLoggerDispatcher.info("Mon bloc SQL d'execution de regles : " + blocRequete,logger);
 		// System.out.println("Mon Stringbuilder : " + blocRequete);
 
 		UtilitaireDao.get("arc").executeImmediate(connexion, "SET enable_nestloop=off; "+blocRequete+"SET enable_nestloop=on; ");
-		LoggerDispatcher.info("Fin executeJeuDeRegle", logger);
-		LoggerDispatcher.info("Temps de controle : " + (new java.util.Date().getTime() - date.getTime()), logger);
+		StaticLoggerDispatcher.info("Fin executeJeuDeRegle", logger);
+		StaticLoggerDispatcher.info("Temps de controle : " + (new java.util.Date().getTime() - date.getTime()), logger);
 
 	}
 
 	/** Vérifie si la règle est à appliquer pour ces rubriques.*/
 	private boolean regleEstAAppliquer(List<String> listRubriques, RegleControleEntity reg) {
 		if (!listRubriques.contains(reg.getRubriquePere())){
-			LoggerDispatcher.info("la rubrique : " + reg.getRubriquePere() + " n'existe pas dans ce fichier",
+			StaticLoggerDispatcher.info("la rubrique : " + reg.getRubriquePere() + " n'existe pas dans ce fichier",
 					logger);
 			return false;
 		}
@@ -307,7 +307,7 @@ public class ServiceJeuDeRegle {
 	 * @throws SQLException
 	 */
 	public String executeRegleCondition(JeuDeRegle jdr, RegleControleEntity reg) throws SQLException {
-		LoggerDispatcher.info("Je lance executeRegleCondition()",logger);
+		StaticLoggerDispatcher.info("Je lance executeRegleCondition()",logger);
 		String requete = "";
 
 		ArrayList<String> listRubrique = ManipString.extractRubriques(reg.getCondition());
@@ -318,15 +318,15 @@ public class ServiceJeuDeRegle {
 		if (this.listRubTable.containsAll(listRubrique)) {
 			Map<String, RegleControleEntity> mapRubrique = new HashMap<String, RegleControleEntity>();
 			for (String rub : listRubrique) {
-				LoggerDispatcher.debug("Je parcours la liste listRubrique sur l'élément : " + rub, logger);
+				StaticLoggerDispatcher.debug("Je parcours la liste listRubrique sur l'élément : " + rub, logger);
 				RegleControleEntity regle = new RegleControleEntity();
 				regle = findType(jdr, rub);
 				mapRubrique.put(rub, regle);
 			}
-			LoggerDispatcher.debug("MapRubrique contient : " + mapRubrique.toString(), logger);
+			StaticLoggerDispatcher.debug("MapRubrique contient : " + mapRubrique.toString(), logger);
 			requete = this.servSql.ctlCondition(reg, mapRubrique);
 		} else {
-			LoggerDispatcher.info("Exécution de CONDITION non appliquée car il manque des rubriques",logger);
+			StaticLoggerDispatcher.info("Exécution de CONDITION non appliquée car il manque des rubriques",logger);
 		}
 		return requete;
 	}
@@ -342,7 +342,7 @@ public class ServiceJeuDeRegle {
 	 * @throws SQLException
 	 */
 	public String executeRegleCardinalite(JeuDeRegle jdr, RegleControleEntity reg) throws SQLException {
-		LoggerDispatcher.info("Je lance executeRegleCardinalite()",logger);
+		StaticLoggerDispatcher.info("Je lance executeRegleCardinalite()",logger);
 		String requete = "";
 
 		ArrayList<String> listRubrique = ManipString.extractRubriques(reg.getCondition());
@@ -366,17 +366,17 @@ public class ServiceJeuDeRegle {
 	private RegleControleEntity findType(JeuDeRegle jdr, String rub) {
 		RegleControleEntity reg = new RegleControleEntity();
 		boolean isFind = false;
-		LoggerDispatcher.debug("La rubrique dont on cherche le type : " + rub, logger);
+		StaticLoggerDispatcher.debug("La rubrique dont on cherche le type : " + rub, logger);
 		String rubriquePere = "";
 		String idClasse = "";
 		for (RegleControleEntity regC : jdr.getListRegleControle()) {
 			rubriquePere = regC.getRubriquePere();
 			idClasse = regC.getIdClasse();
-			LoggerDispatcher.debug("La rubrique de la regle testée : " + rubriquePere + " et le type : " + idClasse,
+			StaticLoggerDispatcher.debug("La rubrique de la regle testée : " + rubriquePere + " et le type : " + idClasse,
 					logger);
 			if (rub.equals(rubriquePere)
 					&& (idClasse.equals("NUM") || idClasse.equals("DATE") || idClasse.equals("ALPHANUM"))) {
-				LoggerDispatcher.debug("J'ai trouvé une règle de typage", logger);
+				StaticLoggerDispatcher.debug("J'ai trouvé une règle de typage", logger);
 				reg.setIdRegle(regC.getIdRegle());
 				reg.setIdClasse(regC.getIdClasse());
 				reg.setRubriquePere(rub);

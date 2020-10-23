@@ -20,12 +20,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<version>4.8.2</version>
-		</dependency>
-		<dependency>
 			<groupId>fr.insee.arc</groupId>
 			<artifactId>arc-utils</artifactId>
 			<version>${project.version}</version>

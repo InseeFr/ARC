@@ -412,7 +412,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 			// lineCols, lineIds, lineValues));
 
 			if (this.requete.length() > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
-				//LoggerDispatcher.info("Insertion :" + requete.length() + " caractères ", logger);
+				//StaticLoggerDispatcher.info("Insertion :" + requete.length() + " caractères ", logger);
 
 				try {
 					UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);

@@ -20,7 +20,7 @@ import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.RequeteMappingCalibree;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * @author S4LWO8
@@ -66,7 +66,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
     }
 
     public void start() {
-        LoggerDispatcher.debug("Starting ThreadmappingService", LOGGER);
+        StaticLoggerDispatcher.debug("Starting ThreadmappingService", LOGGER);
         if (t == null) {
             t = new Thread(this, indice + "");
             t.start();
@@ -128,17 +128,17 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                 // try{
                 // initializeMultiThread(2);
                 StringBuilder req = new StringBuilder();
-//                LoggerDispatcher.info("Connexions OK", LOGGER);
+//                StaticLoggerDispatcher.info("Connexions OK", LOGGER);
                 /*
                  * Exécution de la requête de mapping pour chaque fichier
                  */
-//                LoggerDispatcher.info("Exécution du mapping", LOGGER);
+//                StaticLoggerDispatcher.info("Exécution du mapping", LOGGER);
 
                 int j = 0;
                     // req.append(this.requeteSQLCalibree.buildMainQuery(requeteMapping.getRequete(listeFichier.get(j)),
                     // Arrays.asList(listeFichier.get(j))));
                     req.append(requeteMapping.getRequete(listeFichier.get(j)));
-                    LoggerDispatcher.info("Mapping : " + listeFichier.get(j), LOGGER);
+                    StaticLoggerDispatcher.info("Mapping : " + listeFichier.get(j), LOGGER);
 
                      UtilitaireDao.get(poolName).executeBlock(this.connexion,"set enable_nestloop=off;"+req.toString()+"set enable_nestloop=on;");
                     req.setLength(0);

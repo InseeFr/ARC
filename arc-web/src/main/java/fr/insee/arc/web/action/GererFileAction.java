@@ -10,83 +10,55 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
-import org.apache.struts2.interceptor.SessionAware;
 import org.h2.store.fs.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.web.model.FileSystemManagementModel;
 import fr.insee.arc.web.util.VObject;
-import lombok.Getter;
-import lombok.Setter;
 
-@Component
-@Results({ @Result(name = "success", location = "/jsp/gererFile.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-@Getter
-@Setter
-public class GererFileAction implements SessionAware, IConstanteCaractere {
-    @Override
-    public void setSession(Map<String, Object> session) {
-        this.viewDirIn.setMessage("");
-        this.viewDirOut.setMessage("");
-    }
-    
+@Controller
+public class GererFileAction extends ArcAction<FileSystemManagementModel> {
+	
+	private static final Logger LOGGER = LogManager.getLogger(GererFileAction.class);
+
+	private static final String RESULT_SUCCESS = "jsp/gererFile.jsp";
+	
     @Autowired
     public PropertiesHandler PROPERTIES;
 
-
-    public String dirIn ;
-    public String dirOut ;
-
     public static String REPERTOIRE_EFFACABLE="TO_DELETE";
 
-    @SuppressWarnings("unused")
-	private static final Logger LOGGER = LogManager.getLogger(GererFileAction.class);
-    @Autowired
-    @Qualifier("viewDirIn")
-    VObject viewDirIn;
+    private VObject viewDirIn;
 
-    @Autowired
-    @Qualifier("viewDirOut")
-    VObject viewDirOut;
+    private VObject viewDirOut;
 
-    // pour charger un fichier CSV
-        private String scope;
+    private String dirIn;
 
-    public String sessionSyncronize() {
-        this.viewDirIn.setActivation(this.scope);
-        this.viewDirOut.setActivation(this.scope);
-        Boolean defaultWhenNoScope = true;
-
-        if (this.viewDirIn.getIsScoped()) {
-            initializeDirIn();
-            defaultWhenNoScope = false;
-        }
-
-        if (this.viewDirOut.getIsScoped()) {
-            initializeDirOut();
-            defaultWhenNoScope = false;
-        }
+    private String dirOut;
 
 
-        if (defaultWhenNoScope) {
-            System.out.println("default");
+    @Override
+    public String getActionName() {
+    	return "fileSystemManagement";
+    }
+        
+    @Override
+    public void putAllVObjects(FileSystemManagementModel arcModel) {
+		loggerDispatcher.debug("putAllVObjects()", LOGGER);
+		
+		setViewDirIn(vObjectService.preInitialize(arcModel.getViewDirIn()));
+		setViewDirOut(vObjectService.preInitialize(arcModel.getViewDirOut()));
+		
+		putVObject(getViewDirIn(), t -> initializeDirIn());
+		putVObject(getViewDirOut(), t -> initializeDirOut());
+		
+		setDirIn(arcModel.getDirIn());
+		setDirOut(arcModel.getDirOut());
 
-            initializeDirIn();
-            this.viewDirIn.setIsActive(true);
-            this.viewDirIn.setIsScoped(true);
-
-            initializeDirOut();
-            this.viewDirOut.setIsActive(true);
-            this.viewDirOut.setIsScoped(true);
-        }
-        return "success";
-
+		loggerDispatcher.debug("putAllVObjects() end", LOGGER);	
     }
 
     // private SessionMap session;
@@ -95,56 +67,50 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
         System.out.println("/* initializeDirIn */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 
-
-        if (this.dirIn==null)
-        {
+        if (this.dirIn==null) {
             this.dirIn=PROPERTIES.getBatchParametersDirectory();
         }
 
-        ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.viewDirIn.mapFilterFields());
+        ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.vObjectService.mapFilterFields(viewDirIn));
 
-        this.viewDirIn.initializeByList(listeFichier, defaultInputFields);
+        this.vObjectService.initializeByList(viewDirIn, listeFichier, defaultInputFields);
 
     }
 
 
-    @Action(value = "/selectFile")
+    @RequestMapping("/selectFile")
     public String selectFile() {
-        System.out.println("selectFile " + this.scope);
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/selectDirIn")
+    @RequestMapping("/selectDirIn")
     public String selectDirIn() {
         return seeDirIn();
     }
 
-    @Action(value = "/seeDirIn")
+    @RequestMapping("/seeDirIn")
     public String seeDirIn() {
-        System.out.println("seeDirIn " + this.scope);
 
-        Map<String,ArrayList<String>> m=this.viewDirIn.mapContentSelected();
-        if (!m.isEmpty())
-        {
-            if(m.get("isdirectory").get(0).equals("true"))
-            {
+        Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirIn);
+        if (!m.isEmpty()) {
+            if(m.get("isdirectory").get(0).equals("true"))  {
                 this.dirIn=  Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
             }
         }
 
 
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortDirIn")
+    @RequestMapping("/sortDirIn")
     public String sortDirIn() {
-        this.viewDirIn.sort();
-        return sessionSyncronize();
+        this.vObjectService.sort(viewDirIn);
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/transferDirIn")
+    @RequestMapping("/transferDirIn")
     public String transferDirIn() {
-          Map<String,ArrayList<String>> m=this.viewDirIn.mapContentSelected();
+          Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirIn);
           if (!m.isEmpty())
           {
               for (String f:m.get("filename"))
@@ -156,7 +122,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
           }
           else
           {
-              m=this.viewDirIn.mapContent();
+              m=this.vObjectService.mapContent(viewDirIn);
               while (!m.isEmpty())
               {
                   for (int i=0;i<m.get("filename").size();i++)
@@ -168,17 +134,17 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
                         fileIn.renameTo(fileOut);
                       }
                   }
-                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.viewDirIn.mapFilterFields());
-                  this.viewDirIn.initializeByList(listeFichier, new HashMap<String, String>());
-                  m=this.viewDirIn.mapContent();
+                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.vObjectService.mapFilterFields(viewDirIn));
+                  this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<String, String>());
+                  m=this.vObjectService.mapContent(viewDirIn);
               }
           }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/copyDirIn")
+    @RequestMapping("/copyDirIn")
     public String copyDirIn() {
-          Map<String,ArrayList<String>> m=this.viewDirIn.mapContentSelected();
+          Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirIn);
           if (!m.isEmpty())
           {
               for (String f:m.get("filename"))
@@ -195,7 +161,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
           }
           else
           {
-              m=this.viewDirIn.mapContent();
+              m=this.vObjectService.mapContent(viewDirIn);
               while (!m.isEmpty())
               {
                   for (int i=0;i<m.get("filename").size();i++)
@@ -210,18 +176,18 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
                             }
                         }
                   }
-                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.viewDirIn.mapFilterFields());
-                  this.viewDirIn.initializeByList(listeFichier, new HashMap<String, String>());
-                  m=this.viewDirIn.mapContent();
+                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, this.vObjectService.mapFilterFields(viewDirIn));
+                  this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<String, String>());
+                  m=this.vObjectService.mapContent(viewDirIn);
               }
           }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/renameIn")
+    @RequestMapping("/renameIn")
     public String renameIn() {
-          Map<String,ArrayList<String>> m=this.viewDirIn.mapContentSelected();
-          Map<String,ArrayList<String>> n=this.viewDirIn.mapContentSelected();
+          Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirIn);
+          Map<String,ArrayList<String>> n=this.vObjectService.mapContentSelected(viewDirIn);
 
           if (!m.isEmpty())
           {
@@ -232,13 +198,13 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
                 fileIn.renameTo(fileOut);
               }
           }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
 
-    @Action(value = "/addDirIn")
+    @RequestMapping("/addDirIn")
     public String addDirIn() {
-      HashMap<String,ArrayList<String>> m=this.viewDirIn.mapInputFields();
+      HashMap<String,ArrayList<String>> m=this.vObjectService.mapInputFields(viewDirIn);
      if (!m.isEmpty())
      {
          if (m.get("filename").get(0)!=null && !m.get("filename").get(0).trim().equals(""))
@@ -246,10 +212,10 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
              FileUtils.createDirectory(this.dirIn+m.get("filename").get(0).trim());
          }
      }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/deleteDirIn")
+    @RequestMapping("/deleteDirIn")
     public String delDirIn() {
 
 
@@ -271,18 +237,8 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
             FileUtils.deleteRecursive(this.dirIn, true);
             this.dirIn=null;
         }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
-
-
-    public VObject getViewDirIn() {
-        return this.viewDirIn;
-    }
-
-    public void setViewDirIn(VObject viewDirIn) {
-        this.viewDirIn = viewDirIn;
-    }
-
 
 
     // private SessionMap session;
@@ -297,45 +253,40 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
             this.dirOut=PROPERTIES.getBatchParametersDirectory();
         }
 
-        ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.viewDirOut.mapFilterFields());
+        ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.vObjectService.mapFilterFields(viewDirOut));
 
-        this.viewDirOut.initializeByList(listeFichier, defaultInputFields);
+        this.vObjectService.initializeByList(viewDirOut, listeFichier, defaultInputFields);
 
     }
 
-    @Action(value = "/selectDirOut")
+    @RequestMapping("/selectDirOut")
     public String selectDirOut() {
         return seeDirOut();
     }
 
-    @Action(value = "/seeDirOut")
+    @RequestMapping("/seeDirOut")
     public String seeDirOut() {
-        System.out.println("seeDirOut " + this.scope);
-
-        Map<String,ArrayList<String>> m=this.viewDirOut.mapContentSelected();
+        Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirOut);
 
 //        System.out.println(m);
-        if (!m.isEmpty())
-        {
-            if(m.get("isdirectory").get(0).equals("true"))
-            {
+        if (!m.isEmpty()) {
+            if(m.get("isdirectory").get(0).equals("true")) {
                 this.dirOut= Paths.get(this.dirOut, m.get("filename").get(0)).toString() + File.separator;
             }
         }
 
-
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortDirOut")
+    @RequestMapping("/sortDirOut")
     public String sortDirOut() {
-        this.viewDirOut.sort();
-        return sessionSyncronize();
+        this.vObjectService.sort(viewDirOut);
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/transferDirOut")
+    @RequestMapping("/transferDirOut")
     public String transferDirOut() {
-          Map<String,ArrayList<String>> m=this.viewDirOut.mapContentSelected();
+          Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirOut);
           if (!m.isEmpty())
           {
               for (String f:m.get("filename"))
@@ -348,7 +299,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
           else
           {
 
-              m=this.viewDirOut.mapContent();
+              m=this.vObjectService.mapContent(viewDirOut);
               while (!m.isEmpty())
               {
                   for (int i=0;i<m.get("filename").size();i++)
@@ -360,18 +311,18 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
                         fileIn.renameTo(fileOut);
                       }
                   }
-                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.viewDirOut.mapFilterFields());
-                  this.viewDirOut.initializeByList(listeFichier, new HashMap<String, String>());
-                  m=this.viewDirOut.mapContent();
+                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.vObjectService.mapFilterFields(viewDirOut));
+                  this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<String, String>());
+                  m=this.vObjectService.mapContent(viewDirOut);
               }
           }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
 
-    @Action(value = "/copyDirOut")
+    @RequestMapping("/copyDirOut")
     public String copyDirOut() {
-          Map<String,ArrayList<String>> m=this.viewDirOut.mapContentSelected();
+          Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirOut);
           if (!m.isEmpty())
           {
               for (String f:m.get("filename"))
@@ -389,7 +340,7 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
           else
           {
 
-              m=this.viewDirOut.mapContent();
+              m=this.vObjectService.mapContent(viewDirOut);
               while (!m.isEmpty())
               {
                   for (int i=0;i<m.get("filename").size();i++)
@@ -403,19 +354,19 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
                             } catch (IOException e) {}
                     }
                   }
-                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.viewDirOut.mapFilterFields());
-                  this.viewDirOut.initializeByList(listeFichier, new HashMap<String, String>());
-                  m=this.viewDirOut.mapContent();
+                  ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, this.vObjectService.mapFilterFields(viewDirOut));
+                  this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<String, String>());
+                  m=this.vObjectService.mapContent(viewDirOut);
               }
           }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
 
-    @Action(value = "/renameOut")
+    @RequestMapping("/renameOut")
     public String renameOut() {
-          Map<String,ArrayList<String>> m=this.viewDirOut.mapContentSelected();
-          Map<String,ArrayList<String>> n=this.viewDirOut.mapContentSelected();
+          Map<String,ArrayList<String>> m=this.vObjectService.mapContentSelected(viewDirOut);
+          Map<String,ArrayList<String>> n=this.vObjectService.mapContentSelected(viewDirOut);
 
           if (!m.isEmpty())
           {
@@ -426,13 +377,13 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
                 fileIn.renameTo(fileOut);
               }
           }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
 
-    @Action(value = "/addDirOut")
+    @RequestMapping("/addDirOut")
     public String addDirOut() {
-      HashMap<String,ArrayList<String>> m=this.viewDirOut.mapInputFields();
+      HashMap<String,ArrayList<String>> m=this.vObjectService.mapInputFields(viewDirOut);
      if (!m.isEmpty())
      {
          if (m.get("filename").get(0)!=null && !m.get("filename").get(0).trim().equals(""))
@@ -442,10 +393,10 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
      }
 
 
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/deleteDirOut")
+    @RequestMapping("/deleteDirOut")
     public String delDirOut() {
 
 
@@ -467,13 +418,9 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
             FileUtils.deleteRecursive(this.dirOut, true);
             this.dirOut=null;
         }
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
     
-    public VObject getViewDirOut() {
-		return viewDirOut;
-	}
-
     public ArrayList<ArrayList<String>> getFilesFromDirectory(String dir, HashMap<String,ArrayList<String>> filter2)
     {
         HashMap<String,ArrayList<String>> filter=filter2;
@@ -585,12 +532,23 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
     }
 
-    public void setViewDirOut(VObject viewDirOut) {
-        this.viewDirOut = viewDirOut;
-    }
+    public VObject getViewDirIn() {
+	    return this.viewDirIn;
+	}
 
+	public void setViewDirIn(VObject viewDirIn) {
+	    this.viewDirIn = viewDirIn;
+	}
 
-    public String getDirIn() {
+	public VObject getViewDirOut() {
+		return viewDirOut;
+	}
+
+	public void setViewDirOut(VObject viewDirOut) {
+	    this.viewDirOut = viewDirOut;
+	}
+
+	public String getDirIn() {
         return this.dirIn;
     }
 
@@ -604,21 +562,6 @@ public class GererFileAction implements SessionAware, IConstanteCaractere {
 
     public void setDirOut(String dirOut) {
         this.dirOut = dirOut;
-    }
-
-    /**
-     * @return the scope
-     */
-    public final String getScope() {
-        return this.scope;
-    }
-
-    /**
-     * @param scope
-     *            the scope to set
-     */
-    public final void setScope(String scope) {
-        this.scope = scope;
     }
 
 }

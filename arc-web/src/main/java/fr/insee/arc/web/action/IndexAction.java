@@ -1,121 +1,48 @@
 package fr.insee.arc.web.action;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-
-import javax.servlet.http.HttpSession;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.ServletActionContext;
-import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONObject;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.web.model.NoModel;
 
-@Component
-@Results({ @Result(name = "success", location = "/jsp/index.jsp"),
-	@Result(name = "status", type = "stream", params = { "contentType", "text/plain" }) })
-public class IndexAction extends ArcAction {
+@Controller
+public class IndexAction extends ArcAction<NoModel> {
 
-    private static final Logger LOGGER = LogManager.getLogger(IndexAction.class);
     private static final String ACTION_NAME = "Index";
-
-
-    @Action(value = "/locale")
-    public String locale() {
-    	initialize();
-    	return generateDisplay();
-    }
+    private static final String RESULT_SUCCESS = "jsp/index.jsp";
     
-    
-    /**
-     * Pour récupérer le choix de la norme
-     **/
-
-    @Action(value = "/index")
+    @RequestMapping({"/", "/index"})
     public String index() {
-	LoggerHelper.trace(LOGGER, getActionName());
-	HttpSession session = ServletActionContext.getRequest().getSession(true);
-	session.setAttribute("console", "");
-	initialize();
-	return generateDisplay();
+		getSession().put("console", "");
+		return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/accueil")
-    public String accueil() {
-	LoggerHelper.trace(LOGGER, getActionName());
-	initialize();
-	return generateDisplay();
-    }
-
-    @Action(value = "/status")
-    public String status() {
-	getDataBaseStatus();
-	JSONObject status = new JSONObject();
-
-	if (this.getIsDataBaseOK()) {
-	    status.put("code", 0);
-	    status.put("commentary", "Database OK");
-
-	} else {
-	    status.put("code", 201);
-	    status.put("commentary", "Database connection failed");
-
-	}
-
-	this.inputStream = new ByteArrayInputStream(status.toString().getBytes(StandardCharsets.UTF_8));
-	return "status";
+	@RequestMapping("/status")
+    @ResponseBody
+    public String status() {		
+		JSONObject status = new JSONObject();	
+		if (getDataBaseStatus()) {
+		    status.put("code", 0);
+		    status.put("commentary", "Database OK");	
+		} else {
+		    status.put("code", 201);
+		    status.put("commentary", "Database connection failed");
+		}	
+		return status.toString();
     }
 
 
 
     @Override
-    public void putAllVObjects() {
-	// no Vobject in this page
-
-    }
-
-    @Override
-    public void instanciateAllDAOs() {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setProfilsAutorises() {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected void specificTraitementsPostDAO() {
-	// TODO Auto-generated method stub
-
+    public void putAllVObjects(NoModel arcModel) {
+    	// no vObject in this controller
     }
 
     @Override
     public String getActionName() {
-	return ACTION_NAME;
+    	return ACTION_NAME;
     }
-
-    
-    public String request_locale;
-
-
-	public String getRequest_locale() {
-		return request_locale;
-	}
-
-
-	public void setRequest_locale(String request_locale) {
-		this.request_locale = request_locale;
-	}
-    
-    
-    
     
 }

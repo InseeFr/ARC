@@ -10,15 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.insee.arc.core.dao.MappingRegleDao;
 import fr.insee.arc.core.model.BddTable;
@@ -32,18 +31,18 @@ import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.dao.GererNormeDao;
+import fr.insee.arc.web.model.NormManagementModel;
 import fr.insee.arc.web.util.ConstanteBD;
 import fr.insee.arc.web.util.VObject;
 
-@Component
-@Results({ @Result(name = "success", location = "/jsp/gererNorme.jsp"),
-		@Result(name = "index", location = "/jsp/index.jsp") })
-public class GererNormeAction extends ArcAction implements IDbConstant {
+@Controller
+public class GererNormeAction extends ArcAction<NormManagementModel> implements IDbConstant {
+	
+	private static final String RESULT_SUCCESS = "/jsp/gererNorme.jsp";
 
 	private static final String SELECTED_RULESET_TABLE = "SELECTED_RULESET_TABLE";
 	private static final String SELECTED_RULESET_NAME = "SELECTED_RULESET_NAME";
@@ -51,119 +50,81 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	private static final Logger LOGGER = LogManager.getLogger(GererNormeAction.class);
 
 	@Autowired
-	ControleRegleService service;
+	private ControleRegleService service;
+	
+	@Autowired
+	private GererNormeDao gererNormeDao;
 
 	// The norm view
-	@Autowired
-	@Qualifier("viewNorme")
-	VObject viewNorme;
+	private VObject viewNorme;
 
 	// The calendar view
-	@Autowired
-	@Qualifier("viewCalendrier")
-	VObject viewCalendar;
+	private VObject viewCalendar;
 
 	// The ruleset view
-	@Autowired
-	@Qualifier("viewJeuxDeRegles")
-	VObject viewRulesSet;
+	private VObject viewRulesSet;
 
 	// The load rules view
-	@Autowired
-	@Qualifier("viewChargement")
-	VObject viewChargement;
+	private VObject viewChargement;
 
 	// The structurize rules view
-	@Autowired
-	@Qualifier("viewNormage")
-	VObject viewNormage;
+	private VObject viewNormage;
 
 	// The control rules view
-	@Autowired
-	@Qualifier("viewControle")
-	VObject viewControle;
+	private VObject viewControle;
 
 	// The filter rules view
-	@Autowired
-	@Qualifier("viewFiltrage")
-	VObject viewFiltrage;
+	private VObject viewFiltrage;
 
 	// The map to format rules view
-	@Autowired
-	@Qualifier("viewMapping")
-	VObject viewMapping;
+	private VObject viewMapping;
 
 	// The on ruleset to copy rules
-	@Autowired
-	@Qualifier("viewJeuxDeReglesCopie")
-	VObject viewJeuxDeReglesCopie;
-
-	/*
-	 * All the file that the user can upload. The user cannot load multiple file at
-	 * one, so only one File object is really needed, but multiple files with
-	 * significant name are better
-	 */
-	private File fileUploadLoad;
-	private File fileUploadStructurize;
-	private File fileUploadControle;
-	private File fileUploadFilter;
-	private File fileUploadMap;
-
-	private String fileUploadContentType;
-	private String fileUploadFileName;
+	private VObject viewJeuxDeReglesCopie;
 
 	@Override
-	public void putAllVObjects() {
+	public void putAllVObjects(NormManagementModel model) {		
+		setViewNorme(vObjectService.preInitialize(model.getViewNorme()));
+		setViewCalendrier(vObjectService.preInitialize(model.getViewCalendar()));
+		setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewRulesSet()));
+		setViewChargement(vObjectService.preInitialize(model.getViewChargement()));
+		setViewNormage(vObjectService.preInitialize(model.getViewNormage()));
+		setViewControle(vObjectService.preInitialize(model.getViewControle()));
+		setViewFiltrage(vObjectService.preInitialize(model.getViewFiltrage()));
+		setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
+		setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
+		
 		putVObject(getViewNorme(),
-				t -> GererNormeDao.initializeViewNorme(t, getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORME)));
+				t -> gererNormeDao.initializeViewNorme(t, getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORME)));
 		//
-		putVObject(getViewCalendrier(), t -> GererNormeDao.initializeViewCalendar(t, getViewNorme(),
+		putVObject(getViewCalendrier(), t -> gererNormeDao.initializeViewCalendar(t, getViewNorme(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CALENDRIER)));
 		//
-		putVObject(getViewJeuxDeRegles(), t -> GererNormeDao.initializeViewRulesSet(t, getViewCalendrier(),
+		putVObject(getViewJeuxDeRegles(), t -> gererNormeDao.initializeViewRulesSet(t, getViewCalendrier(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS)));
 		//
-		putVObject(getViewChargement(), t -> GererNormeDao.initializeChargement(t, getViewJeuxDeRegles(),
+		putVObject(getViewChargement(), t -> gererNormeDao.initializeChargement(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE), getScope()));
 		//
-		putVObject(getViewNormage(), t -> GererNormeDao.initializeNormage(t, getViewJeuxDeRegles(),
+		putVObject(getViewNormage(), t -> gererNormeDao.initializeNormage(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE), getScope()));
 		//
-		putVObject(getViewControle(), t -> GererNormeDao.initializeControle(t, getViewJeuxDeRegles(),
+		putVObject(getViewControle(), t -> gererNormeDao.initializeControle(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE), getScope()));
 		//
-		putVObject(getViewFiltrage(), t -> GererNormeDao.initializeFiltrage(t, getViewJeuxDeRegles(),
+		putVObject(getViewFiltrage(), t -> gererNormeDao.initializeFiltrage(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE), getScope()));
 		//
-		putVObject(getViewMapping(), t -> GererNormeDao.initializeMapping(t, getViewJeuxDeRegles(),
+		putVObject(getViewMapping(), t -> gererNormeDao.initializeMapping(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE), getScope()));
 		//
-		putVObject(getViewJeuxDeReglesCopie(), t -> GererNormeDao.initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(),
+		putVObject(getViewJeuxDeReglesCopie(), t -> gererNormeDao.initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS), getScope()));
-
-	}
-
-	@Override
-	public void instanciateAllDAOs() {
-		// No DAO in this action class
-
-	}
-
-	@Override
-	public void setProfilsAutorises() {
-		// No profil handling
-
-	}
-
-	@Override
-	protected void specificTraitementsPostDAO() {
-		// nothing to do
-
 	}
 
 	@Override
 	public String getActionName() {
-		return null;
+		return "normManagement";
 	}
 
 	/**
@@ -171,9 +132,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/selectNorme")
+	@RequestMapping("/selectNorme")
 	public String selectNorme() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -181,9 +142,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/addNorme")
+	@RequestMapping("/addNorme")
 	public String addNorme() {
-		return addLineVobject(this.viewNorme);
+		return addLineVobject(RESULT_SUCCESS, this.viewNorme);
 	}
 
 	/**
@@ -191,41 +152,41 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 *
 	 * @return success
 	 */
-	@Action(value = "/deleteNorme")
+	@RequestMapping("/deleteNorme")
 	public String deleteNorme() {
-		initialize();
+		
 		// Get the gui selection
-		Map<String, ArrayList<String>> selection = this.viewNorme.mapContentSelected();
+		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewNorme);
 
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
-			LoggerDispatcher.info("Norm state : " + etat, LOGGER);
+			loggerDispatcher.info("Norm state : " + etat, LOGGER);
 			// Check actived norm (code 1)
 			if ("1".equals(etat)) {
 				this.viewNorme.setMessage("Caution, cannot delete a activated norm");
 			} else {
-				this.viewNorme.delete();
+				this.vObjectService.delete(viewNorme);
 			}
 		} else {
 			this.viewNorme.setMessage("You didn't select anything");
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
 	 * Action trigger by updating a norm in the GUI. Update the GUI
 	 */
-	@Action(value = "/updateNorme")
+	@RequestMapping("/updateNorme")
 	public String updateNorme() {
-		return updateVobject(this.viewNorme);
+		return updateVobject(RESULT_SUCCESS, this.viewNorme);
 	}
 
 	/**
 	 * Action trigger by sorting a norm in the GUI. Update the GUI
 	 */
-	@Action(value = "/sortNorme")
+	@RequestMapping("/sortNorme")
 	public String sortNorme() {
-		return sortVobject(this.viewNorme);
+		return sortVobject(RESULT_SUCCESS, this.viewNorme);
 	}
 
 	/**
@@ -233,9 +194,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/selectCalendrier")
+	@RequestMapping("/selectCalendrier")
 	public String selectCalendrier() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -244,9 +205,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/addCalendrier")
+	@RequestMapping("/addCalendrier")
 	public String addCalendrier() {
-		return addLineVobject(this.viewCalendar);
+		return addLineVobject(RESULT_SUCCESS, this.viewCalendar);
 	}
 
 	/**
@@ -255,24 +216,24 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/deleteCalendrier")
+	@RequestMapping("/deleteCalendrier")
 	public String deleteCalendrier() {
-		initialize();
+		
 		// get the selected calendar
-		Map<String, ArrayList<String>> selection = this.viewCalendar.mapContentSelected();
+		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewCalendar);
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
-			LoggerDispatcher.info("calendar state: " + etat, LOGGER);
+			loggerDispatcher.info("calendar state: " + etat, LOGGER);
 			// Check actived calendar (code 1)
 			if ("1".equals(etat)) {
 				this.viewCalendar.setMessage("Caution, cannot delete a active calendar");
 			} else {
-				this.viewCalendar.delete();
+				this.vObjectService.delete(viewCalendar);
 			}
 		} else {
 			this.viewRulesSet.setMessage("You didn't select anything");
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -281,14 +242,14 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/updateCalendrier")
+	@RequestMapping("/updateCalendrier")
 	public String updateCalendrier() {
-		return updateVobject(this.viewCalendar);
+		return updateVobject(RESULT_SUCCESS, this.viewCalendar);
 	}
 
-	@Action(value = "/sortCalendrier")
+	@RequestMapping("/sortCalendrier")
 	public String sortCalendrier() {
-		return sortVobject(this.viewCalendar);
+		return sortVobject(RESULT_SUCCESS, this.viewCalendar);
 	}
 
 	/**
@@ -296,9 +257,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/selectJeuxDeRegles")
+	@RequestMapping("/selectJeuxDeRegles")
 	public String selectRuleSet() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -307,20 +268,20 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/addJeuxDeRegles")
+	@RequestMapping("/addJeuxDeRegles")
 	public String addRuleSet() {
-		initialize();
-		HashMap<String, ArrayList<String>> selection = this.viewRulesSet.mapInputFields();
+		
+		HashMap<String, ArrayList<String>> selection = this.vObjectService.mapInputFields(viewRulesSet);
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
 				this.viewRulesSet.setMessage("Caution, cannot add a rule set in the PRODUCTION state");
 			} else {
-				this.viewRulesSet.insert();
+				this.vObjectService.insert(viewRulesSet);
 			}
 		}
 
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -329,26 +290,26 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return sucess
 	 */
-	@Action(value = "/deleteJeuxDeRegles")
+	@RequestMapping("/deleteJeuxDeRegles")
 	public String deleteRuleSet() {
-		initialize();
+		
 		// Get the selection
-		Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
+		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
-			LoggerDispatcher.info("State to delete : " + etat, LOGGER);
+			loggerDispatcher.info("State to delete : " + etat, LOGGER);
 			// Check production state. If yes cancel the delete and send a message to the
 			// user
 			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
 				this.viewRulesSet.setMessage("Caution, cannot delete a rule set in the PRODUCTION state");
 			} else {
-				this.viewRulesSet.delete();
+				this.vObjectService.delete(viewRulesSet);
 			}
 		} else {
 			this.viewRulesSet.setMessage("You didn't select anything");
 		}
 
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -360,10 +321,10 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/updateJeuxDeRegles")
+	@RequestMapping("/updateJeuxDeRegles")
 	public String updateRuleSet() {
-		initialize();
-		HashMap<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
+		
+		HashMap<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
 
 		// on les crée dans tous les environnements et tous les entrepots
 		// (ca evite les erreurs et car ca ne spécialise aucun environnement dans un
@@ -373,16 +334,16 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 			for (int i = 0; i < selection.get("etat").size(); i++) {
 				String etat = selection.get("etat").get(i);
 				if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-					GererNormeDao.sendRuleSetToProduction(this.viewRulesSet,
+					gererNormeDao.sendRuleSetToProduction(this.viewRulesSet,
 							getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_BATCH));
 				}
 			}
 
-			this.viewRulesSet.update();
+			this.vObjectService.update(viewRulesSet);
 
 		}
 
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -390,9 +351,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/sortJeuxDeRegles")
+	@RequestMapping("/sortJeuxDeRegles")
 	public String sortRuleSet() {
-		return sortVobject(this.viewRulesSet);
+		return sortVobject(RESULT_SUCCESS, this.viewRulesSet);
 	}
 
 	/**
@@ -400,25 +361,25 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/downloadJeuxDeRegles")
-	public String downloadJeuxDeRegles() {
-		initialize();
-		Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
+	@RequestMapping("/downloadJeuxDeRegles")
+	public String downloadJeuxDeRegles(HttpServletResponse response) {
+		
+		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
 		if (!selection.isEmpty()) {
 			StringBuilder requeteRegleChargement = new StringBuilder();
-			requeteRegleChargement.append(GererNormeDao.recupRegle(this.viewRulesSet,
+			requeteRegleChargement.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE)));
 			StringBuilder requeteRegleNormage = new StringBuilder();
-			requeteRegleNormage.append(GererNormeDao.recupRegle(this.viewRulesSet,
+			requeteRegleNormage.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE)));
 			StringBuilder requeteRegleControle = new StringBuilder();
-			requeteRegleControle.append(GererNormeDao.recupRegle(this.viewRulesSet,
+			requeteRegleControle.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE)));
 			StringBuilder requeteRegleMapping = new StringBuilder();
-			requeteRegleMapping.append(GererNormeDao.recupRegle(this.viewRulesSet,
+			requeteRegleMapping.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE)));
 			StringBuilder requeteRegleFiltrage = new StringBuilder();
-			requeteRegleFiltrage.append(GererNormeDao.recupRegle(this.viewRulesSet,
+			requeteRegleFiltrage.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE)));
 
 			ArrayList<String> fileNames = new ArrayList<>();
@@ -427,7 +388,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 			fileNames.add("Rules_control");
 			fileNames.add("Rules_mapping");
 			fileNames.add("Rules_filter");
-			this.viewRulesSet.download(fileNames//
+			this.vObjectService.download(viewRulesSet, response, fileNames//
 					, requeteRegleChargement.toString()//
 					, requeteRegleNormage.toString()//
 					, requeteRegleControle.toString()//
@@ -436,7 +397,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 			return "none";
 		} else {
 			this.viewRulesSet.setMessage("You didn't select anything");
-			return generateDisplay();
+			return generateDisplay(RESULT_SUCCESS);
 		}
 
 	}
@@ -447,9 +408,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/selectChargement")
+	@RequestMapping("/selectChargement")
 	public String selectChargement() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -458,9 +419,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/addChargement")
+	@RequestMapping("/addChargement")
 	public String addChargement() {
-		return addLineVobject(this.viewChargement);
+		return addLineVobject(RESULT_SUCCESS, this.viewChargement);
 	}
 
 	/**
@@ -469,9 +430,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 *
 	 * @return
 	 */
-	@Action(value = "/deleteChargement")
+	@RequestMapping("/deleteChargement")
 	public String deleteChargement() {
-		return deleteLineVobject(this.viewChargement);
+		return deleteLineVobject(RESULT_SUCCESS, this.viewChargement);
 	}
 
 	/**
@@ -480,9 +441,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/updateChargement")
+	@RequestMapping("/updateChargement")
 	public String updateChargement() {
-		return updateVobject(this.viewChargement);
+		return updateVobject(RESULT_SUCCESS, this.viewChargement);
 	}
 
 	/**
@@ -491,11 +452,11 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/sortChargement")
+	@RequestMapping("/sortChargement")
 	public String sortChargement() {
-		initialize();
-		this.viewChargement.sort();
-		return generateDisplay();
+		
+		this.vObjectService.sort(viewChargement);
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -504,11 +465,11 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/importChargement")
-	public String importChargement() {
-		initialize();
-		GererNormeDao.uploadFileRule(getViewChargement(), viewRulesSet, this.fileUploadLoad);
-		return generateDisplay();
+	@RequestMapping("/importChargement")
+	public String importChargement(File fileUploadLoad) {
+		
+		gererNormeDao.uploadFileRule(getViewChargement(), viewRulesSet, fileUploadLoad);
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -517,11 +478,11 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/importNormage")
-	public String importNormage() {
-		initialize();
-		GererNormeDao.uploadFileRule(getViewNormage(), viewRulesSet, this.fileUploadStructurize);
-		return generateDisplay();
+	@RequestMapping("/importNormage")
+	public String importNormage(File fileUploadStructurize) {
+		
+		gererNormeDao.uploadFileRule(getViewNormage(), viewRulesSet, fileUploadStructurize);
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -530,9 +491,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/selectNormage")
+	@RequestMapping("/selectNormage")
 	public String selectNormage() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -541,9 +502,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/addNormage")
+	@RequestMapping("/addNormage")
 	public String addNormage() {
-		return addLineVobject(this.viewNormage);
+		return addLineVobject(RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -552,9 +513,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/deleteNormage")
+	@RequestMapping("/deleteNormage")
 	public String deleteNormage() {
-		return deleteLineVobject(this.viewNormage);
+		return deleteLineVobject(RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -563,9 +524,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/updateNormage")
+	@RequestMapping("/updateNormage")
 	public String updateNormage() {
-		return updateVobject(this.viewNormage);
+		return updateVobject(RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -574,9 +535,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * @return
 	 */
 
-	@Action(value = "/sortNormage")
+	@RequestMapping("/sortNormage")
 	public String sortNormage() {
-		return sortVobject(this.viewNormage);
+		return sortVobject(RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -585,9 +546,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/selectControle")
+	@RequestMapping("/selectControle")
 	public String selectControle() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -597,12 +558,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * @return success
 	 */
 	@SQLExecutor
-	@Action(value = "/addControle")
+	@RequestMapping("/addControle")
 	public String addControle() {
-		initialize();
-		LoggerDispatcher.info(String.format("Add rule : %s ", this.viewControle.getInputFields().toString()), LOGGER);
+		
+		loggerDispatcher.info(String.format("Add rule : %s ", this.viewControle.getInputFields().toString()), LOGGER);
 		boolean isToInsert = true;
-		Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
+		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
 		/*
 		 * Fabrication d'un JeuDeRegle pour conserver les informations sur norme et
 		 * calendrier
@@ -616,32 +577,32 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
         
 		/* Fabrication de la règle à ajouter */
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
-		RegleControleEntity reg = new RegleControleEntity(this.viewControle.mapInputFields());
+		RegleControleEntity reg = new RegleControleEntity(this.vObjectService.mapInputFields(viewControle));
 		listRegle.add(reg);
 		try {
 			// Fabrication de la table temporaire pour tester l'insertion
 
 			UtilitaireDao.get("arc").executeRequest(null,
-					GererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
+					gererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
 			// Insertion de cette règle dans la table temporaire
 			isToInsert = this.service.ajouterRegles(jdr, "arc", listRegle);
 		} catch (Exception e) {
 			this.viewControle.setMessage(e.toString());
-			LoggerDispatcher.error(String.format("Error in addControle : %s", e.toString()), LOGGER);
+			loggerDispatcher.error(String.format("Error in addControle : %s", e.toString()), LOGGER);
 			isToInsert = false;
 		}
 		// if rule to insert
 		if (isToInsert) {
 
 			// Insert the rule
-			if (this.viewControle.insert()) {
+			if (this.vObjectService.insert(viewControle)) {
 				// if no exception
-				LoggerDispatcher.info("New rule inserted", LOGGER);
+				loggerDispatcher.info("New rule inserted", LOGGER);
 				this.viewControle.setMessage("New rule inserted");
 
 			}
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -650,18 +611,18 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/deleteControle")
+	@RequestMapping("/deleteControle")
 	@SQLExecutor
 	public String deleteControle() {
-		initialize();
+		
 		try {
-			this.viewControle.delete();
+			this.vObjectService.delete(viewControle);
 		} catch (Exception e) {
 			// else => error message
 			this.viewControle.setMessage("Delete a rule from the rule set make it incoherent : " + e.getMessage());
-			LoggerDispatcher.error(String.format("Error in deleteControle : %s", e.toString()), LOGGER);
+			loggerDispatcher.error(String.format("Error in deleteControle : %s", e.toString()), LOGGER);
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -671,36 +632,36 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/updateControle")
+	@RequestMapping("/updateControle")
 	@SQLExecutor
 	public String updateControle() {
-		initialize();
+		
 
-		JeuDeRegle jdr = GererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
-		LoggerDispatcher.info("Mes nouvelles données : " + this.viewControle.listContentAfterUpdate().toString(),
+		JeuDeRegle jdr = gererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
+		loggerDispatcher.info("Mes nouvelles données : " + this.vObjectService.listContentAfterUpdate(viewControle).toString(),
 				LOGGER);
 		ArrayList<RegleControleEntity> listRegleNouv = new ArrayList<>();
-		for (int i = 0; i < this.viewControle.listContentAfterUpdate().size(); i++) {
-			RegleControleEntity reg = new RegleControleEntity(this.viewControle.mapContentAfterUpdate(i));
+		for (int i = 0; i < this.vObjectService.listContentAfterUpdate(viewControle).size(); i++) {
+			RegleControleEntity reg = new RegleControleEntity(this.vObjectService.mapContentAfterUpdate(viewControle, i));
 			listRegleNouv.add(reg);
 		}
 		try {
 			// Fabrication de la table temporaire pour tester la modifcation
 			UtilitaireDao.get("arc").executeRequest(null,
-					GererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
+					gererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
 			// suppression des lignes modifiées
-			this.viewControle.deleteForUpdate("arc.test_ihm_" + TraitementTableParametre.CONTROLE_REGLE.toString());
+			this.vObjectService.deleteForUpdate(viewControle, "arc.test_ihm_" + TraitementTableParametre.CONTROLE_REGLE.toString());
 			// test du nouveau paquet en passant par la méthode ajouterRegles()
 			// afin de lancer la batterie de test (borne_inf<borne_sup etc.)
 			this.service.ajouterRegles(jdr, "arc", listRegleNouv);
 			this.viewControle.setMessage("Rules updated !");
-			this.viewControle.update();
+			this.vObjectService.update(viewControle);
 		} catch (Exception e) {
 			this.viewControle.setMessage("Updating the rule set make it incoherent : " + e.toString());
-			LoggerDispatcher.error(String.format("Error in updateControle : %s", e.toString()), LOGGER);
+			loggerDispatcher.error(String.format("Error in updateControle : %s", e.toString()), LOGGER);
 		}
 
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -708,9 +669,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/sortControle")
+	@RequestMapping("/sortControle")
 	public String sortControle() {
-		return sortVobject(this.viewControle);
+		return sortVobject(RESULT_SUCCESS, this.viewControle);
 	}
 
 	/**
@@ -719,25 +680,25 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * @return
 	 * @throws IOException
 	 */
-	@Action(value = "/importControle")
+	@RequestMapping("/importControle")
 	@SQLExecutor
-	public String importControle() {
-		initialize();
-		LoggerDispatcher.info("importControle", LOGGER);
+	public String importControle(File fileUploadControle) {
+		
+		loggerDispatcher.info("importControle", LOGGER);
 		String fichierRegle = "";
-		if (StringUtils.isBlank(this.fileUploadControle.getPath())) {
+		if (StringUtils.isBlank(fileUploadControle.getPath())) {
 			this.viewControle.setMessage("You should choose a file first");
 		} else {
 
 			try {
-				fichierRegle = ManipString.readFileAsString(this.fileUploadControle.getPath());
+				fichierRegle = ManipString.readFileAsString(fileUploadControle.getPath());
 			} catch (IOException e) {
-				LoggerDispatcher.error(String.format("Error with the file in importControle : %s", e.toString()),
+				loggerDispatcher.error(String.format("Error with the file in importControle : %s", e.toString()),
 						LOGGER);
 			}
-			LoggerDispatcher.info(String.format("I have a file %s character long", fichierRegle.length()), LOGGER);
+			loggerDispatcher.info(String.format("I have a file %s character long", fichierRegle.length()), LOGGER);
 			boolean isAjouter = true;
-			Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
+			Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
 			/*
 			 * Create a RuleSet to keep informations about the norm and calendar
 			 */
@@ -753,12 +714,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 			try {
 				// Create a temporary table to test the importing
 				UtilitaireDao.get("arc").executeRequest(null,
-						GererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
+						gererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
 				// Insert the rules in the temporary table
 				isAjouter = this.service.ajouterRegles(jdr, "arc", listRegle);
 			} catch (Exception e) {
 				this.viewControle.setMessage(e.toString());
-				LoggerDispatcher.error("Error when importing controle rules " + e.toString(), LOGGER);
+				loggerDispatcher.error("Error when importing controle rules " + e.toString(), LOGGER);
 				isAjouter = false;
 			}
 			// Import result
@@ -767,14 +728,14 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 					// Add the rule in database
 					this.service.ajouterReglesValidees(jdr, "arc", listRegle);
 				} catch (Exception e) {
-					LoggerDispatcher.error("Error when importing valid controle rules " + e.toString(), LOGGER);
+					loggerDispatcher.error("Error when importing valid controle rules " + e.toString(), LOGGER);
 
 				}
-				LoggerDispatcher.info("New rules inserted", LOGGER);
+				loggerDispatcher.info("New rules inserted", LOGGER);
 				this.viewControle.setMessage("New rules inserted");
 			}
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -782,12 +743,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/viderChargement")
+	@RequestMapping("/viderChargement")
 	public String viderChargement() {
-		initialize();
-		GererNormeDao.emptyRuleTable(this.viewRulesSet,
+		
+		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -795,12 +756,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/viderNormage")
+	@RequestMapping("/viderNormage")
 	public String viderNormage() {
-		initialize();
-		GererNormeDao.emptyRuleTable(this.viewRulesSet,
+		
+		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -808,12 +769,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/viderControle")
+	@RequestMapping("/viderControle")
 	public String viderControle() {
-		initialize();
-		GererNormeDao.emptyRuleTable(this.viewRulesSet,
+		
+		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE));
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -821,12 +782,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/viderFiltrage")
+	@RequestMapping("/viderFiltrage")
 	public String viderFiltrage() {
-		initialize();
-		GererNormeDao.emptyRuleTable(this.viewRulesSet,
+		
+		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE));
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 
 	}
 
@@ -835,12 +796,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/viderMapping")
+	@RequestMapping("/viderMapping")
 	public String viderMapping() {
-		initialize();
-		GererNormeDao.emptyRuleTable(this.viewRulesSet,
+		
+		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE));
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 
 	}
 
@@ -850,36 +811,36 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/updateFiltrage")
+	@RequestMapping("/updateFiltrage")
 	@SQLExecutor
 	public String updateFiltrage() {
-		initialize();
+		
 		boolean isRegleOk = true;
-        LoggerDispatcher.info("Contenu de l'update : " + this.viewFiltrage.listContentAfterUpdate(), LOGGER);
-        String exprRegleFiltre = this.viewFiltrage.listContentAfterUpdate().get(0).get(6);
+        loggerDispatcher.info("Contenu de l'update : " + this.vObjectService.listContentAfterUpdate(viewFiltrage), LOGGER);
+        String exprRegleFiltre = this.vObjectService.listContentAfterUpdate(viewFiltrage).get(0).get(6);
 
 		StringBuilder message = new StringBuilder();
 		try {
 			// Create test table
-			UtilitaireDao.get("arc").executeRequest(null, GererNormeDao.createTableTest("arc.test_ihm_controle_ok",
+			UtilitaireDao.get("arc").executeRequest(null, gererNormeDao.createTableTest("arc.test_ihm_controle_ok",
 					ManipString.extractRubriques(exprRegleFiltre)));
 
 			UtilitaireDao.get("arc").executeRequest(null,
 					"SELECT * FROM arc.test_ihm_controle_ok WHERE " + ManipString.extractAllRubrique(exprRegleFiltre));
-			LoggerDispatcher.info("La requete de test ? " + "SELECT * FROM arc.test_ihm_controle_ok WHERE "
+			loggerDispatcher.info("La requete de test ? " + "SELECT * FROM arc.test_ihm_controle_ok WHERE "
 					+ ManipString.extractAllRubrique(exprRegleFiltre), LOGGER);
 			message.append("Rules updated!");
 		} catch (Exception ex) {
 			isRegleOk = false;
 			message.append("Error when inserting the new rules : " + ex.getMessage());
-			LoggerDispatcher.error("Error when inserting the new rules : " + ex.getMessage(), LOGGER);
+			loggerDispatcher.error("Error when inserting the new rules : " + ex.getMessage(), LOGGER);
 		}
 
 		this.viewFiltrage.setMessage(message.toString());
 		if (isRegleOk) {
-			this.viewFiltrage.update();
+			this.vObjectService.update(viewFiltrage);
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 
 	}
 
@@ -889,9 +850,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return success
 	 */
-	@Action(value = "/selectMapping")
+	@RequestMapping("/selectMapping")
 	public String selectMapping() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -900,14 +861,14 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/addMapping")
+	@RequestMapping("/addMapping")
 	public String addMapping() {
-		return addLineVobject(this.viewMapping);
+		return addLineVobject(RESULT_SUCCESS, this.viewMapping);
 	}
 
-	@Action(value = "/deleteMapping")
+	@RequestMapping("/deleteMapping")
 	public String deleteMapping() {
-		return deleteLineVobject(this.viewMapping);
+		return deleteLineVobject(RESULT_SUCCESS, this.viewMapping);
 	}
 
 	/**
@@ -916,17 +877,17 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/updateMapping")
+	@RequestMapping("/updateMapping")
 	public String updateMapping() {
-		initialize();
-		Map<String, ArrayList<String>> afterUpdate = this.viewMapping.mapContentAfterUpdate();
-		boolean isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
+		
+		Map<String, ArrayList<String>> afterUpdate = this.vObjectService.mapContentAfterUpdate(viewMapping);
+		boolean isRegleOk = gererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
 				afterUpdate);
 		if (isRegleOk) {
-			this.viewMapping.update();
+			this.vObjectService.update(viewMapping);
 		}
 		LOGGER.info("Rules updated");
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -934,11 +895,11 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/importFiltrage")
-	public String importFiltrage() {
-		initialize();
-		GererNormeDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, this.fileUploadFilter);
-		return generateDisplay();
+	@RequestMapping("/importFiltrage")
+	public String importFiltrage(File fileUploadFilter) {
+		
+		gererNormeDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, fileUploadFilter);
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -946,11 +907,11 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/preGenererRegleFiltrage")
+	@RequestMapping("/preGenererRegleFiltrage")
 	public String preGenererRegleFiltrage() {
-		initialize();
+		
 		try {
-			Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
+			Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
 
 			 UtilitaireDao.get("arc").executeRequest(null, new StringBuilder("INSERT INTO " + this.viewFiltrage.getTable())//
 	                    .append("  " + Format.stringListe(this.viewFiltrage.getHeadersDLabel()))//
@@ -963,9 +924,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	                    .append("  null,")//
 	                    .append("  null;"));
 		} catch (SQLException e) {
-			LoggerDispatcher.error(String.format("Error in preGenererRegleFiltrage : %s", e.toString()), LOGGER);
+			loggerDispatcher.error(String.format("Error in preGenererRegleFiltrage : %s", e.toString()), LOGGER);
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -973,25 +934,25 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/importMapping")
-	public String importMapping() {
-		initialize();
-		if (StringUtils.isBlank(this.fileUploadMap.getPath())) {
+	@RequestMapping("/importMapping")
+	public String importMapping(File fileUploadMap) {
+		
+		if (StringUtils.isBlank(fileUploadMap.getPath())) {
 			this.viewMapping.setMessage("You should choose a file first");
 		} else {
 			boolean isRegleOk = false;
 			try {
 				Map<String, String> mapVariableToType = new HashMap<>();
 				Map<String, String> mapVariableToTypeConso = new HashMap<>();
-				GererNormeDao.calculerVariableToType(this.viewNorme, mapVariableToType, mapVariableToTypeConso);
+				gererNormeDao.calculerVariableToType(this.viewNorme, mapVariableToType, mapVariableToTypeConso);
 				Set<String> variablesAttendues = mapVariableToType.keySet();
 				String nomTable = "arc.ihm_mapping_regle";
 				List<RegleMappingEntity> listeRegle = new ArrayList<>();
 				EntityDao<RegleMappingEntity> dao = new MappingRegleDao();
 				dao.setTableName(nomTable);
 				dao.setEOLSeparator(true);
-				Map<String, ArrayList<String>> reglesAImporter = GererNormeDao.calculerReglesAImporter(
-						this.fileUploadMap, listeRegle, dao, mapVariableToType, mapVariableToTypeConso);
+				Map<String, ArrayList<String>> reglesAImporter = gererNormeDao.calculerReglesAImporter(
+						fileUploadMap, listeRegle, dao, mapVariableToType, mapVariableToTypeConso);
 				Set<String> variablesSoumises = new HashSet<>();
 				for (int i = 0; i < listeRegle.size(); i++) {
 					variablesSoumises.add(Format.toLowerCase(listeRegle.get(i).getVariableSortie()));
@@ -1006,12 +967,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 				if (!variablesSoumises.isEmpty()) {
 					throw new IllegalStateException("Variables " + variablesSoumises + " are not in the model.");
 				}
-				isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
+				isRegleOk = gererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
 						reglesAImporter);
-				Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
+				Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
 				Map<String, String> map = new HashMap<String, String>();
                 map.put("id_regle", "(SELECT max(id_regle)+1 FROM " + nomTable + ")");
-                map.put("id_norme", this.viewNorme.mapContentSelected().get("id_norme").get(0));
+                map.put("id_norme", this.vObjectService.mapContentSelected(viewNorme).get("id_norme").get(0));
                 map.put("validite_inf", selection.get("validite_inf").get(0));
                 map.put("validite_sup", selection.get("validite_sup").get(0));
                 map.put("version", selection.get("version").get(0));
@@ -1019,7 +980,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
                 
 				if (isRegleOk) {
 					// check if each varialbe have a rule
-					JeuDeRegle jdr = GererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
+					JeuDeRegle jdr = gererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
 					StringBuilder bloc = new StringBuilder();
 					/*
 					 * DELETE from
@@ -1035,7 +996,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 				this.viewMapping.setMessage("Erreur lors de l'import : " + ex.toString());
 			}
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -1044,9 +1005,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/preGenererRegleMapping")
+	@RequestMapping("/preGenererRegleMapping")
 	public String preGenererRegleMapping() {
-		initialize();
+		
 		try {
 
 			// List hard coded to be sure of the order in the select
@@ -1054,30 +1015,30 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 					"  (id_regle, id_norme, validite_inf, validite_sup,  version , periodicite, variable_sortie, expr_regle_col, commentaire) ")
 					.append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.viewMapping.getTable()
 							+ "),0)+row_number() over () ,")
-					.append("  '" + this.viewRulesSet.mapContentSelected().get(ConstanteBD.ID_NORME.getValue()).get(0)
+					.append("  '" + this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.ID_NORME.getValue()).get(0)
 							+ "', ")
 					.append("  '"
-							+ this.viewRulesSet.mapContentSelected().get(ConstanteBD.VALIDITE_INF.getValue()).get(0)
+							+ this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.VALIDITE_INF.getValue()).get(0)
 							+ "', ")
 					.append("  '"
-							+ this.viewRulesSet.mapContentSelected().get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)
+							+ this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)
 							+ "', ")
-					.append("  '" + this.viewRulesSet.mapContentSelected().get(ConstanteBD.VERSION.getValue()).get(0)
+					.append("  '" + this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.VERSION.getValue()).get(0)
 							+ "', ")
 					.append("  '"
-							+ this.viewRulesSet.mapContentSelected().get(ConstanteBD.PERIODICITE.getValue()).get(0)
+							+ this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.PERIODICITE.getValue()).get(0)
 							+ "', ")
 					.append("  liste_colonne.nom_variable_metier,").append("  null,").append(
 							"  null")
 					.append("  FROM ("
 							+ FormatSQL.listeColonneTableMetierSelonFamilleNorme("arc.ihm",
-									this.viewNorme.mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0))
+									this.vObjectService.mapContentSelected(viewNorme).get(ConstanteBD.ID_FAMILY.getValue()).get(0))
 							+ ") liste_colonne");
 			UtilitaireDao.get("arc").executeRequest(null, requete);
 		} catch (SQLException e) {
-			LoggerDispatcher.error("Error in preGenererRegleMapping", e, LOGGER);
+			loggerDispatcher.error("Error in preGenererRegleMapping", e, LOGGER);
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -1085,9 +1046,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/sortFiltrage")
+	@RequestMapping("/sortFiltrage")
 	public String sortFiltrage() {
-		return sortVobject(this.viewFiltrage);
+		return sortVobject(RESULT_SUCCESS, this.viewFiltrage);
 	}
 
 	/**
@@ -1095,9 +1056,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/sortMapping")
+	@RequestMapping("/sortMapping")
 	public String sortMapping() {
-		return sortVobject(this.viewMapping);
+		return sortVobject(RESULT_SUCCESS, this.viewMapping);
 	}
 
 	/**
@@ -1106,12 +1067,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "selectJeuxDeReglesChargementCopie")
+	@RequestMapping("selectJeuxDeReglesChargementCopie")
 	public String selectJeuxDeReglesChargementCopie() {
-		initialize();
+		
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -1120,12 +1081,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "selectJeuxDeReglesNormageCopie")
+	@RequestMapping("selectJeuxDeReglesNormageCopie")
 	public String selectJeuxDeReglesNormageCopie() {
-		initialize();
+		
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -1134,12 +1095,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "selectJeuxDeReglesControleCopie")
+	@RequestMapping("selectJeuxDeReglesControleCopie")
 	public String selectJeuxDeReglesControleCopie() {
-		initialize();
+		
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewControle.getTable());
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -1148,12 +1109,12 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "selectJeuxDeReglesFiltrageCopie")
+	@RequestMapping("selectJeuxDeReglesFiltrageCopie")
 	public String selectJeuxDeReglesFiltrageCopie() {
-		initialize();
+		
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	/**
@@ -1162,33 +1123,32 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 * 
 	 * @return
 	 */
-	@Action(value = "/selectJeuxDeReglesMappingCopie")
+	@RequestMapping("/selectJeuxDeReglesMappingCopie")
 	public String selectJeuxDeReglesMappingCopie() {
-		initialize();
+		
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
 		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
-	@Action(value = "/selectJeuxDeReglesCopie")
+	@RequestMapping("/selectJeuxDeReglesCopie")
 	public String selectJeuxDeReglesCopie() {
-		return basicAction();
+		return basicAction(RESULT_SUCCESS);
 	}
 
-	@Action(value = "/copieJeuxDeRegles")
+	@RequestMapping("/copieJeuxDeRegles")
 	public String copieJeuxDeRegles() {
-		initialize();
-		LoggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
+		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		// le jeu de regle à copier
-		Map<String, ArrayList<String>> selectionOut = this.viewRulesSet.mapContentSelected();
+		Map<String, ArrayList<String>> selectionOut = this.vObjectService.mapContentSelected(viewRulesSet);
 		// le nouveau jeu de regle
-		Map<String, ArrayList<String>> selectionIn = this.viewJeuxDeReglesCopie.mapContentSelected();
-		HashMap<String, String> type = this.viewJeuxDeReglesCopie.mapHeadersType();
+		Map<String, ArrayList<String>> selectionIn = this.vObjectService.mapContentSelected(viewJeuxDeReglesCopie);
+		HashMap<String, String> type = this.vObjectService.mapHeadersType(viewJeuxDeReglesCopie);
 		if (!selectionIn.isEmpty()) {
 			StringBuilder requete = new StringBuilder();
 			requete.append("INSERT INTO " + this.getSelectedJeuDeRegle() + " ");
 			if (this.getSelectedJeuDeRegle().equals("arc.ihm_normage_regle")) {
-				GererNormeDao.emptyRuleTable(this.viewRulesSet,
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
 						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
 				requete.append("(");
 				requete.append(String.join(",", ConstanteBD.ID_NORME.getValue()//
@@ -1214,7 +1174,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 						, ConstanteBD.COMMENTAIRE.getValue()));
 
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
-				GererNormeDao.emptyRuleTable(this.viewRulesSet,
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
 						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE));
 				requete.append("(");
 				requete.append(String.join(",", ConstanteBD.ID_NORME.getValue()//
@@ -1251,7 +1211,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 						, ConstanteBD.COMMENTAIRE.getValue()));
 
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
-				GererNormeDao.emptyRuleTable(this.viewRulesSet,
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
 						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE));
 				requete.append("(");
 				requete.append(String.join(",", ConstanteBD.ID_REGLE.getValue()//
@@ -1277,7 +1237,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 						, ConstanteBD.COMMENTAIRE.getValue()));
 
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
-				GererNormeDao.emptyRuleTable(this.viewRulesSet,
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
 						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE));
 
 				requete.append("(");
@@ -1304,7 +1264,7 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 						, ConstanteBD.EXPR_REGLE_COL.getValue(), ConstanteBD.COMMENTAIRE.getValue()));
 
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
-				GererNormeDao.emptyRuleTable(this.viewRulesSet,
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
 						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
 				requete.append("(");
 				requete.append(String.join(",", ConstanteBD.ID_REGLE.getValue()//
@@ -1367,23 +1327,23 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 			try {
 				UtilitaireDao.get("arc").executeRequest(getQueryHandler().getWrapped(), requete);
 			} catch (SQLException ex) {
-				LoggerDispatcher.error("Error in copieJeuxDeRegles", ex, LOGGER);
+				loggerDispatcher.error("Error in copieJeuxDeRegles", ex, LOGGER);
 			}
-			this.viewJeuxDeReglesCopie.destroy();
+			this.vObjectService.destroy(viewJeuxDeReglesCopie);
 		} else {
-			LoggerDispatcher.info("No rule set choosed", LOGGER);
+			loggerDispatcher.info("No rule set choosed", LOGGER);
 			this.viewRulesSet.setMessage("Please choose a ruleset");
 		}
-		return generateDisplay();
+		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	public VObject getViewNorme() {
 		return this.viewNorme;
 	}
 
-	public void setViewNorme(VObject viewNorme) {
-		LoggerHelper.debug(LOGGER, "viewNorme.getSelectedLines() h ", viewNorme.getSelectedLines());
-		this.viewNorme = viewNorme;
+	public void setViewNorme(VObject vObjectData) {
+		LoggerHelper.debug(LOGGER, "viewNorme.getSelectedLines() h ", vObjectData.getSelectedLines());
+		this.viewNorme = vObjectData;
 	}
 
 	public VObject getViewCalendrier() {
@@ -1434,30 +1394,6 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 		this.viewMapping = viewMapping;
 	}
 
-	public String getFileUploadContentType() {
-		return this.fileUploadContentType;
-	}
-
-	public void setFileUploadContentType(String fileUploadContentType) {
-		this.fileUploadContentType = fileUploadContentType;
-	}
-
-	public String getFileUploadFileName() {
-		return this.fileUploadFileName;
-	}
-
-	public void setFileUploadFileName(String fileUploadFileName) {
-		this.fileUploadFileName = fileUploadFileName;
-	}
-
-	public ControleRegleService getService() {
-		return this.service;
-	}
-
-	public void setService(ControleRegleService service) {
-		this.service = service;
-	}
-
 	public VObject getViewJeuxDeReglesCopie() {
 		return this.viewJeuxDeReglesCopie;
 	}
@@ -1485,46 +1421,6 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	 */
 	public String getSelectedJeuDeRegle() {
 		return this.viewJeuxDeReglesCopie.getCustomValues().get(SELECTED_RULESET_TABLE);
-	}
-
-	public File getFileUploadLoad() {
-		return fileUploadLoad;
-	}
-
-	public void setFileUploadLoad(File fileUploadLoad) {
-		this.fileUploadLoad = fileUploadLoad;
-	}
-
-	public File getFileUploadStructurize() {
-		return fileUploadStructurize;
-	}
-
-	public void setFileUploadStructurize(File fileUploadStructurize) {
-		this.fileUploadStructurize = fileUploadStructurize;
-	}
-
-	public File getFileUploadControle() {
-		return fileUploadControle;
-	}
-
-	public void setFileUploadControle(File fileUploadControle) {
-		this.fileUploadControle = fileUploadControle;
-	}
-
-	public File getFileUploadFilter() {
-		return fileUploadFilter;
-	}
-
-	public void setFileUploadFilter(File fileUploadFilter) {
-		this.fileUploadFilter = fileUploadFilter;
-	}
-
-	public File getFileUploadMap() {
-		return fileUploadMap;
-	}
-
-	public void setFileUploadMap(File fileUploadMap) {
-		this.fileUploadMap = fileUploadMap;
 	}
 
 }

@@ -21,8 +21,8 @@ import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Classe pour charger les fichier CSV. On lit les headers du fichier qu'on va sauvegarder. Puis ligne par ligne on va parser le fichier et
@@ -80,13 +80,13 @@ public class ChargeurCSV implements IChargeur {
      */
 
     public void csvtoBase() throws Exception {
-        LoggerDispatcher.info("** CSVtoBase **", LOGGER);
+        StaticLoggerDispatcher.info("** CSVtoBase **", LOGGER);
 
         java.util.Date beginDate = new java.util.Date();
 
         
-        LoggerDispatcher.debug(String.format("contenu delimiter %s",norme.getRegleChargement().getDelimiter() ), LOGGER);
-        LoggerDispatcher.debug(String.format("contenu format %s",norme.getRegleChargement().getFormat() ), LOGGER);
+        StaticLoggerDispatcher.debug(String.format("contenu delimiter %s",norme.getRegleChargement().getDelimiter() ), LOGGER);
+        StaticLoggerDispatcher.debug(String.format("contenu format %s",norme.getRegleChargement().getFormat() ), LOGGER);
         
         
         this.separateur = norme.getRegleChargement().getDelimiter().trim();
@@ -159,7 +159,7 @@ public class ChargeurCSV implements IChargeur {
 
         java.util.Date endDate = new java.util.Date();
 
-        LoggerDispatcher.info("** CSVtoBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
+        StaticLoggerDispatcher.info("** CSVtoBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
 
     }
 
@@ -522,7 +522,7 @@ public class ChargeurCSV implements IChargeur {
      */
     public List<String> controleFormat(ArbreFormat aFormat) {
 
-        LoggerDispatcher.info("** ControleFormat **", LOGGER);
+        StaticLoggerDispatcher.info("** ControleFormat **", LOGGER);
 
         ArrayList<String> colonneErreur = new ArrayList<String>();
         int i = 0;
@@ -539,7 +539,7 @@ public class ChargeurCSV implements IChargeur {
 
 
     public void flatBaseToIdedFlatBase() throws SQLException {
-        LoggerDispatcher.info("** FlatBaseToIdedFlatBase **", LOGGER);
+        StaticLoggerDispatcher.info("** FlatBaseToIdedFlatBase **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
         StringBuilder req = new StringBuilder();
@@ -589,7 +589,7 @@ public class ChargeurCSV implements IChargeur {
 
         
         java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** FlatBaseToIdedFlatBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
+        StaticLoggerDispatcher.info("** FlatBaseToIdedFlatBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
 
     }
 
@@ -606,7 +606,7 @@ public class ChargeurCSV implements IChargeur {
 
     @Override
     public void excecution() throws Exception {
-	LoggerDispatcher.info("excecution", LOGGER);
+	StaticLoggerDispatcher.info("excecution", LOGGER);
 
 	String rapport = "";
 	StringBuilder requeteBilan = new StringBuilder();

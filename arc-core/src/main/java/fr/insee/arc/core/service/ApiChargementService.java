@@ -14,7 +14,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.Norme;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -87,7 +87,7 @@ public class ApiChargementService extends ApiService {
 
     @Override
     public void executer() throws Exception {
-        LoggerDispatcher.info("** executer **", LOGGER);
+        StaticLoggerDispatcher.info("** executer **", LOGGER);
         
         this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiChargementService.MAX_PARALLEL_WORKERS",4);
         
@@ -98,7 +98,7 @@ public class ApiChargementService extends ApiService {
         // TraitementPhase.CHARGEMENT,TraitementPhase.CONTROLE,TraitementPhase.FILTRAGE);
 
         // Récupérer la liste des fichiers selectionnés
-        LoggerDispatcher.info("Récupérer la liste des fichiers selectionnés", LOGGER);
+        StaticLoggerDispatcher.info("Récupérer la liste des fichiers selectionnés", LOGGER);
         setListIdsource(pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString()));
 
         // récupère le nombre de fichier à traiter
@@ -109,12 +109,12 @@ public class ApiChargementService extends ApiService {
         ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
         currentIndice = 0;
 
-        LoggerDispatcher.info("** Generation des threads pour le chargement **", LOGGER);
+        StaticLoggerDispatcher.info("** Generation des threads pour le chargement **", LOGGER);
 
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
 
             if (currentIndice % 10 == 0) {
-                LoggerDispatcher.info("chargement fichier " + currentIndice + "/" + nbFichier + " en "+ (java.lang.System.currentTimeMillis()-dateDebut)+" ms ", LOGGER);
+                StaticLoggerDispatcher.info("chargement fichier " + currentIndice + "/" + nbFichier + " en "+ (java.lang.System.currentTimeMillis()-dateDebut)+" ms ", LOGGER);
             }
 
             chargementThread = chooseConnection(chargementThread, threadList, connexionList);
@@ -127,19 +127,19 @@ public class ApiChargementService extends ApiService {
 
         }
 
-        LoggerDispatcher.info("** Attente de la fin des threads **", LOGGER);
+        StaticLoggerDispatcher.info("** Attente de la fin des threads **", LOGGER);
         waitForThreads2(0, threadList, connexionList);
 
 
-        LoggerDispatcher.info("** Fermeture des connexions **", LOGGER);
+        StaticLoggerDispatcher.info("** Fermeture des connexions **", LOGGER);
         for (Connection connection : connexionList) {
             connection.close();
         }
 
-        LoggerDispatcher.info("****** Fin ApiChargementService *******", LOGGER);
+        StaticLoggerDispatcher.info("****** Fin ApiChargementService *******", LOGGER);
         long dateFin= java.lang.System.currentTimeMillis() ;
         
-        LoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
+        StaticLoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
 
     }
 

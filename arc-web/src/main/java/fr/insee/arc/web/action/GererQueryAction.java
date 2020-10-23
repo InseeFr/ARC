@@ -1,81 +1,46 @@
 package fr.insee.arc.web.action;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
-import org.apache.struts2.interceptor.SessionAware;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.web.model.DatabaseManagementModel;
 import fr.insee.arc.web.util.VObject;
 
-@Component
-@Results({ @Result(name = "success", location = "/jsp/gererQuery.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class GererQueryAction implements SessionAware, IConstanteCaractere {
+@Controller
+public class GererQueryAction extends ArcAction<DatabaseManagementModel> implements  IConstanteCaractere {
+	
+	private static final String RESULT_SUCCESS = "/jsp/gererQuery.jsp";
+
+    private String defaultSchema = "arc";
+    
+    private VObject viewQuery;
+
+    private VObject viewTable;
+    
+    private String myQuery;
+
+    private String mySchema;
+
     @Override
-    public void setSession(Map<String, Object> session) {
-    	this.viewTable.setMessage("");
-        this.viewQuery.setMessage("");
+    protected void putAllVObjects(DatabaseManagementModel model) {
+    	this.setViewQuery(vObjectService.preInitialize(model.getViewQuery()));
+    	this.setViewTable(vObjectService.preInitialize(model.getViewTable()));
+    	this.myQuery = model.getMyQuery();
+    	this.mySchema = model.getMySchema();
+    	
+    	putVObject(getViewQuery(), t -> initializeQuery());
+    	putVObject(getViewTable(), t -> initializeTable());
     }
 
-    public String myQuery;
-    public String mySchema;
-    public String defaultSchema="arc";
-
-    @SuppressWarnings("unused")
-	private static final Logger LOGGER = LogManager.getLogger(GererQueryAction.class);
-    @Autowired
-    @Qualifier("viewQuery")
-    VObject viewQuery;
-
-    @Autowired
-    @Qualifier("viewTable")
-    VObject viewTable;
-
-    // pour charger un fichier CSV
-        private String scope;
-
-    public String sessionSyncronize() {
-        this.viewQuery.setActivation(this.scope);
-        this.viewTable.setActivation(this.scope);
-        Boolean defaultWhenNoScope = true;
-
-        if (this.viewQuery.getIsScoped()) {
-            initializeQuery();
-            defaultWhenNoScope = false;
-        }
-
-        if (this.viewTable.getIsScoped()) {
-	        initializeTable();
-	        defaultWhenNoScope = false;
-	    }
-
-
-        if (defaultWhenNoScope) {
-            System.out.println("default");
-
-            initializeQuery();
-            this.viewQuery.setIsActive(true);
-            this.viewQuery.setIsScoped(true);
-
-            initializeTable();
-            this.viewTable.setIsActive(true);
-            this.viewTable.setIsScoped(true);
-        }
-        return "success";
-
+    @Override
+    protected String getActionName() {
+    	return "databaseManagement";
     }
-
-    // private SessionMap session;
-    // visual des Querys
+    
     public void initializeQuery() {
         System.out.println("/* initializeQuery */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
@@ -90,16 +55,16 @@ public class GererQueryAction implements SessionAware, IConstanteCaractere {
 
                 if (UtilitaireDao.get("arc").testResultRequest(null, m))
 		        {
-		            this.viewQuery.initialize(m, "arc.ihm_Query", defaultInputFields);
+		            this.vObjectService.initialize(m, "arc.ihm_Query", defaultInputFields, viewQuery);
 		        }
 		        else
 		        {
 		        	try {
 		                UtilitaireDao.get("arc").executeImmediate(null, this.myQuery);
-		                this.viewQuery.destroy();
+		                this.vObjectService.destroy(viewQuery);
 		                this.viewQuery.setMessage("Requete terminée !");
 	                } catch (Exception e) {
-	                	this.viewQuery.destroy();
+	                	this.vObjectService.destroy(viewQuery);
 		                this.viewQuery.setMessage(e.getMessage());
 	                }
 
@@ -108,31 +73,21 @@ public class GererQueryAction implements SessionAware, IConstanteCaractere {
 
     }
 
-    @Action(value = "/selectQuery")
+    @RequestMapping("/selectQuery")
     public String selectQuery() {
-        System.out.println("selectQuery " + this.scope);
-        return sessionSyncronize();
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/updateQuery")
+    @RequestMapping("/updateQuery")
     public String updateQuery() {
-        this.viewQuery.update();
-        return sessionSyncronize();
+        this.vObjectService.update(viewQuery);
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortQuery")
+    @RequestMapping("/sortQuery")
     public String sortQuery() {
-        this.viewQuery.sort();
-        return sessionSyncronize();
-    }
-
-
-    public VObject getViewQuery() {
-        return this.viewQuery;
-    }
-
-    public void setViewQuery(VObject viewQuery) {
-        this.viewQuery = viewQuery;
+        this.vObjectService.sort(viewQuery);
+        return generateDisplay(RESULT_SUCCESS);
     }
 
 
@@ -151,39 +106,45 @@ public class GererQueryAction implements SessionAware, IConstanteCaractere {
         		this.mySchema=this.defaultSchema;
         	}
 
-    		this.viewTable.initialize("select tablename from pg_tables where schemaname='"+this.mySchema+"'", "arc.ihm_Table", defaultInputFields);
+    		this.vObjectService.initialize("select tablename from pg_tables where schemaname='"+this.mySchema+"'", "arc.ihm_Table", defaultInputFields, viewTable);
 
     }
 
-    @Action(value = "/selectTable")
+    @RequestMapping("/selectTable")
     public String selectTable() {
-        System.out.println("selectTable " + this.scope);
-        this.myQuery="select * from "+this.mySchema+"."+this.viewTable.mapContentSelected().get("tablename").get(0)+" limit 10 ";
-        return sessionSyncronize();
+        this.myQuery="select * from "+this.mySchema+"."+this.vObjectService.mapContentSelected(viewTable).get("tablename").get(0)+" limit 10 ";
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/seeTable")
+    @RequestMapping("/seeTable")
     public String seeTable() {
-        System.out.println("seeTable " + this.scope);
-        this.myQuery="select * from "+this.mySchema+"."+this.viewTable.mapContentSelected().get("tablename").get(0)+" limit 10 ";
-        return sessionSyncronize();
+        this.myQuery="select * from "+this.mySchema+"."+this.vObjectService.mapContentSelected(viewTable).get("tablename").get(0)+" limit 10 ";
+        return generateDisplay(RESULT_SUCCESS);
     }
 
 
-    @Action(value = "/updateTable")
+    @RequestMapping("/updateTable")
     public String updateTable() {
-        this.viewTable.update();
-        return sessionSyncronize();
+        this.vObjectService.update(viewTable);
+        return generateDisplay(RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortTable")
+    @RequestMapping("/sortTable")
     public String sortTable() {
-        this.viewTable.sort();
-        return sessionSyncronize();
+        this.vObjectService.sort(viewTable);
+        return generateDisplay(RESULT_SUCCESS);
     }
 
 
-    public VObject getViewTable() {
+    public VObject getViewQuery() {
+	    return this.viewQuery;
+	}
+
+	public void setViewQuery(VObject viewQuery) {
+	    this.viewQuery = viewQuery;
+	}
+
+	public VObject getViewTable() {
         return this.viewTable;
     }
 
@@ -191,35 +152,4 @@ public class GererQueryAction implements SessionAware, IConstanteCaractere {
         this.viewTable = viewTable;
     }
 
-
-    public String getMySchema() {
-		return this.mySchema;
-	}
-
-	public void setMySchema(String mySchema) {
-		this.mySchema = mySchema;
-	}
-
-	public String getMyQuery() {
-		return this.myQuery;
-	}
-
-	public void setMyQuery(String myQuery) {
-		this.myQuery = myQuery;
-	}
-
-	/**
-     * @return the scope
-     */
-    public final String getScope() {
-        return this.scope;
-    }
-
-    /**
-     * @param scope
-     *            the scope to set
-     */
-    public final void setScope(String scope) {
-        this.scope = scope;
-    }
 }

@@ -25,9 +25,9 @@ import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Pair;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 
@@ -118,7 +118,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 
     @Override
     public void initialisation() {
-        LoggerDispatcher.info("** requeteCreateA **", LOGGER);
+        StaticLoggerDispatcher.info("** requeteCreateA **", LOGGER);
 
         java.util.Date beginDate = new java.util.Date();
 
@@ -178,7 +178,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 		}
         java.util.Date endDate = new java.util.Date();
         
-        LoggerDispatcher.info("** requeteCreateA en " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
+        StaticLoggerDispatcher.info("** requeteCreateA en " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
 
         
     }
@@ -203,7 +203,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 
     @Override
     public void excecution() throws Exception {
-        LoggerDispatcher.info("** excecution**", LOGGER);
+        StaticLoggerDispatcher.info("** excecution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
         // java.util.Date date= new java.util.Date();
@@ -255,7 +255,7 @@ public class ChargeurXmlComplexe implements IChargeur{
         this.jointure=handler.jointure;
         
         java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** excecution temps" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
+        StaticLoggerDispatcher.info("** excecution temps" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
 
         
 

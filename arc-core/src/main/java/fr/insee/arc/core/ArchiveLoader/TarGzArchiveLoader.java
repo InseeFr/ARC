@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.engine.SizeLimiterInputStream;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -34,14 +34,14 @@ public class TarGzArchiveLoader extends AbstractArchiveFileLoader {
 
     @Override
     public FilesInputStreamLoad loadArchive() throws Exception {
-	LoggerDispatcher.info("begin loadArchive() ", LOGGER);
+	StaticLoggerDispatcher.info("begin loadArchive() ", LOGGER);
 
 	// Mandatory for multithreading to decompress tar.gz archive
 	// as it is not possible to address a specific entry in targz
     extractArchive(fileDecompresor);
 	this.filesInputStreamLoad = readFile();
 
-	LoggerDispatcher.info("end loadArchive() ", LOGGER);
+	StaticLoggerDispatcher.info("end loadArchive() ", LOGGER);
 	return this.filesInputStreamLoad;
 
     }

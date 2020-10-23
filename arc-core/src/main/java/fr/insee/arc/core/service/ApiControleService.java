@@ -12,7 +12,7 @@ import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.core.service.thread.ThreadControleService;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -57,7 +57,7 @@ public class ApiControleService extends ApiService {
     @Override
     public void executer() throws Exception {
 
-        LoggerDispatcher.info("** executer **", LOGGER);
+        StaticLoggerDispatcher.info("** executer **", LOGGER);
 
         this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiControleService.MAX_PARALLEL_WORKERS",3);
 
@@ -75,12 +75,12 @@ public class ApiControleService extends ApiService {
         ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
         currentIndice = 0;
 
-        LoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
+        StaticLoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
 
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
 
             if (currentIndice % 10 == 0) {
-                LoggerDispatcher.info("contrôle fichier " + currentIndice + "/" + nbFichier, logger);
+                StaticLoggerDispatcher.info("contrôle fichier " + currentIndice + "/" + nbFichier, logger);
             }
 
             connextionThread = chooseConnection(connextionThread, threadList, connexionList);
@@ -93,18 +93,18 @@ public class ApiControleService extends ApiService {
 
         }
 
-        LoggerDispatcher.info("** Attente de la fin des threads **", logger);
+        StaticLoggerDispatcher.info("** Attente de la fin des threads **", logger);
         
         waitForThreads2(0, threadList, connexionList);
 
-        LoggerDispatcher.info("** Fermeture des connexions **", logger);
+        StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
         for (Connection connection : connexionList) {
             connection.close();
             
         }
         long dateFin= java.lang.System.currentTimeMillis() ;
 
-        LoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
+        StaticLoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
 
 
     }
@@ -120,7 +120,7 @@ public class ApiControleService extends ApiService {
      * @throws SQLException
      */
     public static void executeABlanc(Connection connexion, String env, String phase, String tableControle, ServiceJeuDeRegle sjdrA, ArrayList<JeuDeRegle> listJdrA) throws Exception {
-        LoggerDispatcher.info("** execute CONTROLE sur la table : " + tableControle + " **", logger);
+        StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + tableControle + " **", logger);
         for (JeuDeRegle jdr : listJdrA) {
             sjdrA.executeJeuDeRegle(connexion, jdr, tableControle, null);
         }

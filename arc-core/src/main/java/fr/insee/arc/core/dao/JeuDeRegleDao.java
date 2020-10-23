@@ -13,8 +13,8 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 public class JeuDeRegleDao {
 
     private static final Logger LOGGER = LogManager.getLogger(JeuDeRegleDao.class);
@@ -30,7 +30,7 @@ public class JeuDeRegleDao {
      * @throws SQLException
      */
     public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws SQLException {
-        LoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
+        StaticLoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
         ArrayList<JeuDeRegle> listJdr = new ArrayList<>();
 
         StringBuilder requete = new StringBuilder();
@@ -69,7 +69,7 @@ public class JeuDeRegleDao {
 	        }
 		}
 
-        LoggerDispatcher.info("J'ai trouvé " + listJdr.size() + " jeux de règle, utiles pour controler", LOGGER);
+        StaticLoggerDispatcher.info("J'ai trouvé " + listJdr.size() + " jeux de règle, utiles pour controler", LOGGER);
         return listJdr;
     }
 

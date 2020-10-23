@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 public class ServiceCommunFiltrageMapping {
     private static final Logger logger = LogManager.getLogger(ServiceCommunFiltrageMapping.class);
@@ -44,7 +44,7 @@ public class ServiceCommunFiltrageMapping {
             HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle, String aNomColonneRegle)
             throws SQLException {
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info(
+            StaticLoggerDispatcher.info(
                     "Début du parsing des règles portant sur des valeurs globales (count sur une table...)", logger);
         }
         // Pour chaque règle
@@ -63,7 +63,7 @@ public class ServiceCommunFiltrageMapping {
                             ServiceCommunFiltrageMapping.traiterRegleGlobale(aConnexion, expressionRegleInterprete,
                                     aEnvExecution));
             if (logger.isDebugEnabled()) {
-                LoggerDispatcher.debug("Le parsing valorise la règle "
+                StaticLoggerDispatcher.debug("Le parsing valorise la règle "
                         + expressionRegleInterprete
                         + " à : "
                         + aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle.getLevel(aNomColonneRegle)
@@ -71,7 +71,7 @@ public class ServiceCommunFiltrageMapping {
             }
         }
         if (logger.isInfoEnabled()) {
-            LoggerDispatcher.info("Fin du parsing des règles portant sur des valeurs globales", logger);
+            StaticLoggerDispatcher.info("Fin du parsing des règles portant sur des valeurs globales", logger);
         }
     }
 
@@ -138,7 +138,7 @@ public class ServiceCommunFiltrageMapping {
                         "  WHERE '" + aTable.toLowerCase() + "'=" + token + "schema_columns.table_name"));
         for (int i = 2; i < result.size(); i++) {
 //            if (logger.isTraceEnabled()) {
-//                LoggerDispatcher.trace("Rubrique trouvée : " + result.get(i).get(0), logger);
+//                StaticLoggerDispatcher.trace("Rubrique trouvée : " + result.get(i).get(0), logger);
 //            }
             returned.add(result.get(i).get(0));
         }

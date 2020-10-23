@@ -27,7 +27,7 @@ import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * ApiNormageService
@@ -93,7 +93,7 @@ public class ApiInitialisationService extends ApiService {
      * @throws Exception
      */
     public void rebuildFileSystem() throws Exception {
-        LoggerDispatcher.info("rebuildFileSystem", LOGGER);
+        StaticLoggerDispatcher.info("rebuildFileSystem", LOGGER);
 
         // parcourir toutes les archives dans le répertoire d'archive
     	String repertoire = properties.getBatchParametersDirectory();
@@ -985,7 +985,7 @@ public class ApiInitialisationService extends ApiService {
      * @throws SQLException
      */
     public void reinstate(Connection connexion, String tablePil) throws Exception {
-        LoggerDispatcher.info("reinstateWithRename", LOGGER);
+        StaticLoggerDispatcher.info("reinstateWithRename", LOGGER);
 
         // on cherche tous les containers contenant un fichier à rejouer
         // on remet l'archive à la racine
@@ -1029,11 +1029,11 @@ public class ApiInitialisationService extends ApiService {
     
     public static void mettreAJourSchemaTableMetier(Connection connexion, String envParameters, String envExecution) {
     	try{
-            LoggerDispatcher.info("Mettre à jour le schéma des tables métiers avec la famille", LOGGER);
+            StaticLoggerDispatcher.info("Mettre à jour le schéma des tables métiers avec la famille", LOGGER);
             mettreAJourSchemaTableMetierThrow(connexion, envParameters, envExecution);
     	} catch (Exception e)
     	{
-            LoggerDispatcher.info("Erreur mettreAJourSchemaTableMetier", LOGGER);
+            StaticLoggerDispatcher.info("Erreur mettreAJourSchemaTableMetier", LOGGER);
             e.printStackTrace();
     	}
     	
@@ -1042,7 +1042,7 @@ public class ApiInitialisationService extends ApiService {
     
     public static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution) throws Exception {
         try {
-            LoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
+            StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
             /*
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
              */
@@ -1190,7 +1190,7 @@ public class ApiInitialisationService extends ApiService {
      * @throws Exception
      */
     public void cleanToDelete(Connection connexion, String tablePil) throws Exception {
-        LoggerDispatcher.info("cleanToDelete", LOGGER);
+        StaticLoggerDispatcher.info("cleanToDelete", LOGGER);
 
         StringBuilder requete = new StringBuilder();
         requete.append("DELETE FROM " + tablePil + " a WHERE exists (select 1 from " + tablePil + " b where b.to_delete='1' and a.id_source=b.id_source and a.container=b.container); ");
@@ -1208,7 +1208,7 @@ public class ApiInitialisationService extends ApiService {
      */
     public void nettoyerTablePilotage(Connection connexion, String envExecution) throws Exception {
 
-        LoggerDispatcher.info("nettoyerTablePilotage", LOGGER);
+        StaticLoggerDispatcher.info("nettoyerTablePilotage", LOGGER);
         
         Nb_Jour_A_Conserver = BDParameters.getInt(this.connexion, "ApiInitialisationService.Nb_Jour_A_Conserver",365);
         
@@ -1295,7 +1295,7 @@ public class ApiInitialisationService extends ApiService {
         // on continue jusqu'a ce qu'on ne trouve plus rien à effacer
         do {
          // récupérer le résultat de la requete
-         LoggerDispatcher.info("Archivage de "+NB_FICHIER_PER_ARCHIVE+" fichiers - Début", LOGGER);
+         StaticLoggerDispatcher.info("Archivage de "+NB_FICHIER_PER_ARCHIVE+" fichiers - Début", LOGGER);
          n = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
          
          
@@ -1329,7 +1329,7 @@ public class ApiInitialisationService extends ApiService {
 	             
 	         }
         	}
-         LoggerDispatcher.info("Archivage Fin", LOGGER);
+         StaticLoggerDispatcher.info("Archivage Fin", LOGGER);
          
         } while (UtilitaireDao.get("arc").hasResults(connexion, "select 1 from fichier_to_delete limit 1"))
         ;
@@ -1382,17 +1382,17 @@ public class ApiInitialisationService extends ApiService {
     
     public static void copyTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) {
     	try{
-            LoggerDispatcher.info("Recopie des regles dans l'environnement", LOGGER);
+            StaticLoggerDispatcher.info("Recopie des regles dans l'environnement", LOGGER);
         	copyTablesToExecutionThrow(connexion, anParametersEnvironment, anExecutionEnvironment);
     	} catch (Exception e)
     	{
-            LoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
+            StaticLoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
             e.printStackTrace();
     	}
     }
     
     public static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
-        LoggerDispatcher.info("copyTablesToExecution", LOGGER);
+        StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
         try {
             StringBuilder requete = new StringBuilder();
             TraitementTableParametre[] r = TraitementTableParametre.values();
@@ -1547,8 +1547,8 @@ public class ApiInitialisationService extends ApiService {
             UtilitaireDao.get("arc").executeBlock(connexion, requete);
 
         } catch (Exception e) {
-            LoggerDispatcher.info("Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment, LOGGER);
-            LoggerDispatcher.info(e.getMessage().toString(), LOGGER);
+            StaticLoggerDispatcher.info("Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment, LOGGER);
+            StaticLoggerDispatcher.info(e.getMessage().toString(), LOGGER);
             e.printStackTrace();
             throw e;
         }
@@ -1592,13 +1592,13 @@ public class ApiInitialisationService extends ApiService {
             try {
 				UtilitaireDao.get("arc").executeImmediate(connexion, requete);
 			} catch (SQLException e) {
-				LoggerDispatcher.error(e, LOGGER);
+				StaticLoggerDispatcher.error(e, LOGGER);
 			}
             
             try {
                 reinstate(this.connexion, this.tablePil);
             } catch (Exception e) {
-            	LoggerDispatcher.error(e, LOGGER);
+            	StaticLoggerDispatcher.error(e, LOGGER);
             }
             
             nbLignes++;
@@ -1617,7 +1617,7 @@ public class ApiInitialisationService extends ApiService {
         try {
 	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
         } catch (Exception e) {
-        	LoggerDispatcher.error(e, LOGGER);
+        	StaticLoggerDispatcher.error(e, LOGGER);
         }
 
         if (nbLignes > 0) {
@@ -1632,7 +1632,7 @@ public class ApiInitialisationService extends ApiService {
 	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
 	        maintenancePilotage(this.connexion, this.envExecution, "");
         } catch (Exception e) {
-        	LoggerDispatcher.error(e, LOGGER);
+        	StaticLoggerDispatcher.error(e, LOGGER);
         }
     }
 
@@ -1705,11 +1705,11 @@ public class ApiInitialisationService extends ApiService {
      * @throws Exception
      */
     public void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws Exception {
-        LoggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
+        StaticLoggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
         try {
             // maintenance de la table de pilotage
             // retirer les "encours" de la table de pilotage
-            LoggerDispatcher.info("** Maintenance table de pilotage **", LOGGER);
+            StaticLoggerDispatcher.info("** Maintenance table de pilotage **", LOGGER);
             UtilitaireDao.get("arc").executeBlock(connexion,
                     "alter table " + this.tablePil + " alter column date_entree type text COLLATE pg_catalog.\"C\"; ");
             UtilitaireDao.get("arc").executeBlock(connexion, "delete from " + this.tablePil + " where etat_traitement='{ENCOURS}';");

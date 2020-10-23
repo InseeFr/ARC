@@ -21,8 +21,8 @@ import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Classe convertissant les fichier clef-valeurs en fichier xml
@@ -147,7 +147,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws Exception
      */
     public void clefValeurToXml(HashMap<String, String> arbreFormat, InputStream tmpInx2) throws Exception {
-        LoggerDispatcher.info("** Conversion du fichier clef valeur en XML **", LOGGER);
+        StaticLoggerDispatcher.info("** Conversion du fichier clef valeur en XML **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
         // contient la liste des pères pour l'élément précédent
         ArrayList<String> listePeresRubriquePrecedante = new ArrayList<String>();
@@ -181,7 +181,7 @@ public class ChargeurClefValeur implements IChargeur {
         bufferedReader.close();
 
         java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** clefValeurToXml temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
+        StaticLoggerDispatcher.info("** clefValeurToXml temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
     }
 
     /**
@@ -272,7 +272,7 @@ public class ChargeurClefValeur implements IChargeur {
 
         // On récupère la liste des pères.
         pere = rubrique;
-        // LoggerDispatcher.info("rubrique " + rubrique, LOGGER);
+        // StaticLoggerDispatcher.info("rubrique " + rubrique, LOGGER);
         // On verifi si la rubrique existe bien dans notre arbre format. Sinon on lance un exception
         if (!arbreFormat.containsKey(pere)) {
             throw new Exception("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
