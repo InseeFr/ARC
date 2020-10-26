@@ -83,8 +83,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
     @RequestMapping("/addListNomenclatures")
     public String addListNomenclatures() {
-    	
-        String nomTable = this.vObjectService.mapInputFields(viewListNomenclatures).get(NOM_TABLE).get(0);
+		String nomTable = viewListNomenclatures.mapInputFields().get(NOM_TABLE).get(0);
         if (validationNomTable(nomTable)) {
             this.vObjectService.insert(viewListNomenclatures);
         }
@@ -93,11 +92,10 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
     @RequestMapping("/updateListNomenclatures")
     public String updateListNomenclatures() {
-    	
         // vérification que tous les noms de tables updatés soient conformes
         boolean zeroErreur = true;
-        if (this.vObjectService.mapContentAfterUpdate(viewListNomenclatures).size() > 0) {
-            for (String nomTable : this.vObjectService.mapContentAfterUpdate(viewListNomenclatures).get(NOM_TABLE)) {
+        if (viewListNomenclatures.mapContentAfterUpdate().size() > 0) {
+			for (String nomTable : viewListNomenclatures.mapContentAfterUpdate().get(NOM_TABLE)) {
                 if (!validationNomTable(nomTable)) {
                     this.viewListNomenclatures.setMessage(nomTable + "n'est pas un nom de table valide.");
                     zeroErreur = false;
@@ -124,7 +122,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     public String deleteListNomenclatures() {
         try {
             // Suppression de la table nom table
-            String nomTable = this.vObjectService.mapContentSelected(viewListNomenclatures).get(NOM_TABLE).get(0);
+			String nomTable = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
             System.out.println("/* Delete nomenclature : " + nomTable + " */");
             UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropUniqueTable(nomTable));
             StringBuilder requete = new StringBuilder();
@@ -157,8 +155,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     @RequestMapping("/importListNomenclatures")
-    public String importListNomenclatures() {
-    	
+    public String importListNomenclatures() {    	
     	loggerDispatcher.debug("importListNomenclatures",LOGGER);
     	try {
             importNomenclatureDansBase();
@@ -172,7 +169,6 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     private boolean validationNomTable(String nomTable) {
-
         if (nomTable == null) {
             this.viewListNomenclatures.setMessage("Erreur - le nom de table n'est pas renseigné");
             return false;
@@ -209,9 +205,8 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
     @RequestMapping("/addSchemaNmcl")
     public String addSchemaNmcl() {
-    	
-        if (isColonneValide(this.vObjectService.mapInputFields(viewSchemaNmcl).get(NOM_COLONNE).get(0))
-                && isTypeValide(this.vObjectService.mapInputFields(viewSchemaNmcl).get(TYPE_COLONNE).get(0))) {
+		if (isColonneValide(viewSchemaNmcl.mapInputFields().get(NOM_COLONNE).get(0))
+                && isTypeValide(viewSchemaNmcl.mapInputFields().get(TYPE_COLONNE).get(0))) {
 
             this.vObjectService.insert(viewSchemaNmcl);
         }
@@ -222,7 +217,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     public String updateSchemaNmcl() {
         System.out.println("/* updateSchemaNmcl */");
         
-        HashMap<String, ArrayList<String>> selection = this.vObjectService.mapContentAfterUpdate(viewSchemaNmcl);
+        HashMap<String, ArrayList<String>> selection = viewSchemaNmcl.mapContentAfterUpdate();
         if (!selection.isEmpty()) {
             boolean zeroErreur = true;
             String nomColonne = "";
@@ -257,12 +252,12 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     private void importNomenclatureDansBase() throws Exception {
-        if (this.vObjectService.mapContentSelected(viewListNomenclatures).isEmpty()) {
+		if (viewListNomenclatures.mapContentSelected().isEmpty()) {
             this.viewListNomenclatures.setMessage("Vous devez selectionner une nomenclature pour l'importation.");
             return;
         }
 
-        String nouvelleNomenclature = this.vObjectService.mapContentSelected(viewListNomenclatures).get(NOM_TABLE).get(0);
+        String nouvelleNomenclature = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         System.out.println("/* Import de la nomenclature : " + nouvelleNomenclature + "*/");
 
         if (StringUtils.isEmpty(nouvelleNomenclature)) {
@@ -306,7 +301,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     private void creationTableDefinitif() throws SQLException {
-        String newNomenclatureName = this.vObjectService.mapContentSelected(viewListNomenclatures).get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         StringBuilder creationTableDef = new StringBuilder();
         creationTableDef.append("\n CREATE TABLE arc." + newNomenclatureName);
         creationTableDef.append("\n AS SELECT * FROM arc.temp_" + newNomenclatureName + ";");
@@ -315,12 +310,12 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     private void remplissageTableTemporaire(BufferedReader rd) throws Exception {
-        String newNomenclatureName = this.vObjectService.mapContentSelected(viewListNomenclatures).get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
     	UtilitaireDao.get(poolName).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
     }
 
     private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws SQLException {
-        String newNomenclatureName = this.vObjectService.mapContentSelected(viewListNomenclatures).get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         StringBuilder createTableRequest = new StringBuilder();
         createTableRequest.append("\n DROP TABLE IF EXISTS arc.temp_" + newNomenclatureName + ";");
         createTableRequest.append("\n CREATE TABLE arc.temp_" + newNomenclatureName + " (");
@@ -340,8 +335,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
      * @throws Exception
      */
     private void verificationColonnes(String[] colonnesFichier, String[] typesFichier) throws Exception {
-
-        String newNomenclatureName = this.vObjectService.mapContentSelected(viewListNomenclatures).get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         String typeNomenclature = typeNomenclature(newNomenclatureName);
 
         List<String> colonnesDansFichier = convertListToLowerTrim(colonnesFichier);

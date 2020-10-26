@@ -82,8 +82,8 @@ public class GererNormeDao implements IDbConstant {
 	 */
 	public String recupRegle(VObject viewRulesSet, String table) {
 		StringBuilder requete = new StringBuilder();
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
-		HashMap<String, String> type = viewObject.mapHeadersType(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
+		HashMap<String, String> type = viewRulesSet.mapHeadersType();
         requete.append("select * from " + table + " ");
         requete.append(" where id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
         requete.append(" and periodicite" + ManipString.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
@@ -115,11 +115,11 @@ public class GererNormeDao implements IDbConstant {
 		LoggerHelper.debug(LOGGER, "/* initializeCalendar */");
 
 		// get the norm selected
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewNorme);
+		Map<String, ArrayList<String>> selection = viewNorme.mapContentSelected();
 
 		if (!selection.isEmpty()) {
 			// Get the type of the column for casting
-			HashMap<String, String> type = viewObject.mapHeadersType(viewNorme);
+			HashMap<String, String> type = viewNorme.mapHeadersType();
 			// requete de la vue
 			StringBuilder requete = new StringBuilder();
 			requete.append("select id_norme, periodicite, validite_inf, validite_sup, etat from arc.ihm_calendrier");
@@ -152,9 +152,9 @@ public class GererNormeDao implements IDbConstant {
 		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
 
 		// Get the selected calendar for requesting the rule set
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewCalendar);
+		Map<String, ArrayList<String>> selection = viewCalendar.mapContentSelected();
 		if (!selection.isEmpty()) {
-			HashMap<String, String> type = viewObject.mapHeadersType(viewCalendar);
+			HashMap<String, String> type = viewCalendar.mapHeadersType();
 			StringBuilder requete = new StringBuilder();
 			requete.append(
 					"select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
@@ -189,9 +189,9 @@ public class GererNormeDao implements IDbConstant {
 	public void initializeChargement(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
 		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
-            HashMap<String, String> type = viewObject.mapHeadersType(viewRulesSet);
+            HashMap<String, String> type = viewRulesSet.mapHeadersType();
             StringBuilder requete = new StringBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,type_fichier, delimiter, format, commentaire from arc.ihm_chargement_regle");
             requete.append(" where id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
@@ -219,9 +219,9 @@ public class GererNormeDao implements IDbConstant {
 	public void initializeNormage(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
 		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
-            HashMap<String, String> type = viewObject.mapHeadersType(viewRulesSet);
+            HashMap<String, String> type = viewRulesSet.mapHeadersType();
             StringBuilder requete = new StringBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique,rubrique_nmcl,commentaire from arc.ihm_normage_regle");
             requete.append(" where id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
@@ -248,9 +248,9 @@ public class GererNormeDao implements IDbConstant {
 	public void initializeControle(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
 		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
-            HashMap<String, String> type = viewObject.mapHeadersType(viewRulesSet);
+            HashMap<String, String> type = viewRulesSet.mapHeadersType();
             StringBuilder requete = new StringBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
             requete.append(" where id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
@@ -278,9 +278,9 @@ public class GererNormeDao implements IDbConstant {
 	public void initializeFiltrage(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
 		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
-            HashMap<String, String> type = viewObject.mapHeadersType(viewRulesSet);
+            HashMap<String, String> type = viewRulesSet.mapHeadersType();
             StringBuilder requete = new StringBuilder();
             requete.append("select * from arc.ihm_filtrage_regle");
             requete.append(" where id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
@@ -306,10 +306,10 @@ public class GererNormeDao implements IDbConstant {
 	 */
 	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, String theTableName, String scope) {
 		System.out.println("/* initializeMapping */");
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
 			
-			HashMap<String, String> type = viewObject.mapHeadersType(viewRulesSet);
+			HashMap<String, String> type = viewRulesSet.mapHeadersType();
 
 			StringBuilder requete = new StringBuilder(
                     "SELECT mapping.id_regle, mapping.id_norme, mapping.validite_inf, mapping.validite_sup, mapping.version, mapping.periodicite, mapping.variable_sortie, mapping.expr_regle_col, mapping.commentaire, variables.type_variable_metier type_sortie /*, variables.nom_table_metier nom_table_metier */ ");
@@ -416,7 +416,7 @@ public class GererNormeDao implements IDbConstant {
 	 * @return
 	 */
 	public JeuDeRegle fetchJeuDeRegle(VObject viewRulesSet) {
-        HashMap<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
+        HashMap<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
         /*
          * Fabrication d'un JeuDeRegle pour conserver les informations sur norme et calendrier
          */
@@ -438,8 +438,8 @@ public class GererNormeDao implements IDbConstant {
 	 */
 	public void emptyRuleTable(VObject viewRulesSet, String table) {
 		loggerDispatcher.info("Empty all the rules of a module", LOGGER);
-		Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
-		HashMap<String, String> type = viewObject.mapHeadersType(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
+		HashMap<String, String> type = viewRulesSet.mapHeadersType();
 		StringBuilder requete = new StringBuilder();
         requete.append("DELETE FROM " + table);
         requete.append(" WHERE id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
@@ -537,7 +537,7 @@ public class GererNormeDao implements IDbConstant {
 				List<AbstractRegleMapping> listRegle = new ArrayList<>();
 				RegleMappingFactory regleMappingFactory = new RegleMappingFactory(null, envTarget,
 						new HashSet<String>(), new HashSet<String>());
-				String idFamille = viewObject.mapContentSelected(viewNorme).get("id_famille").get(0);
+				String idFamille = viewNorme.mapContentSelected().get("id_famille").get(0);
 				regleMappingFactory.setIdFamille(idFamille);
 				for (int i = 0; i < afterUpdate.get("expr_regle_col").size(); i++) {
 					String expression = afterUpdate.get("expr_regle_col").get(i);
@@ -694,7 +694,7 @@ public class GererNormeDao implements IDbConstant {
 			Map<String, String> mapVariableToTypeConso) throws SQLException {
 		ArrayList<ArrayList<String>> resultat = UtilitaireDao.get("arc").executeRequest(null, new StringBuilder(
 				"SELECT DISTINCT lower(nom_variable_metier) AS nom_variable_metier, type_variable_metier, type_consolidation AS type_sortie FROM arc.ihm_mod_variable_metier WHERE id_famille='"
-						+ viewObject.mapContentSelected(viewNorme).get("id_famille").get(0) + "'"));
+						+ viewNorme.mapContentSelected().get("id_famille").get(0) + "'"));
 		for (int i = 2; i < resultat.size(); i++) {
 			mapVariableToType.put(resultat.get(i).get(0), resultat.get(i).get(1));
 			mapVariableToTypeConso.put(resultat.get(i).get(0), resultat.get(i).get(2));
@@ -874,7 +874,7 @@ public class GererNormeDao implements IDbConstant {
 			}
 			LoggerHelper.debug(LOGGER, "Insert file in the " + nomTableImage + " table");
 
-			Map<String, ArrayList<String>> selection = viewObject.mapContentSelected(viewRulesSet);
+			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 
 			requete.setLength(0);
 

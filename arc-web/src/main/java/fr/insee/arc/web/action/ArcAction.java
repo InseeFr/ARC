@@ -269,7 +269,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * @throws ParseException
 	 */
 	protected void modifierContenuDateVObject(HttpSession session, VObject aVObject, String colonne) throws ParseException {
-		String contenu = vObjectService.mapInputFields(aVObject).get(colonne).get(0);
+		String contenu = aVObject.mapInputFields().get(colonne).get(0);
 		LoggerHelper.debug(LOGGER, "contenu de la colonne ", colonne, ": ", contenu, "test : ",
 				StringUtils.isNotBlank(contenu));
 		if (StringUtils.isNotBlank(contenu)) {
@@ -396,7 +396,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	protected String deleteLineVobject(String successUri, VObject theVObjectToUpdate) {
 		LoggerHelper.debug(LOGGER, String.join(" ** deleteLineVobject() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
-		Map<String, ArrayList<String>> selection = vObjectService.mapContentSelected(theVObjectToUpdate);
+		Map<String, ArrayList<String>> selection = theVObjectToUpdate.mapContentSelected();
 		if (!selection.isEmpty()) {
 			vObjectService.delete(theVObjectToUpdate);
 		} else {

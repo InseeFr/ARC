@@ -49,13 +49,8 @@
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 	</bean>
-
-	<bean id="messageSource"
-		class="org.springframework.context.support.ResourceBundleMessageSource">
-		<property name="basename" value="global" />
-		<property name="defaultEncoding" value="UTF-8" />
-		<property name="alwaysUseMessageFormat" value="true" />
-	</bean>
+	
+	<bean id="activeLoggerDispatcher" class="fr.insee.arc.web.util.WebLoggerDispatcher" />
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>
 

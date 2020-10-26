@@ -17,10 +17,10 @@ public class NormManagementModel implements ArcModel {
 	private VObject viewNorme;
 
 	// The calendar view
-	private VObject viewCalendar;
+	private VObject viewCalendrier;
 
 	// The ruleset view
-	private VObject viewRulesSet;
+	private VObject viewJeuxDeRegles;
 
 	// The load rules view
 	private VObject viewChargement;
@@ -42,8 +42,8 @@ public class NormManagementModel implements ArcModel {
 
 	public NormManagementModel() {
 		this.viewNorme = new ViewNorme();
-		this.viewCalendar = new ViewCalendrier();
-		this.viewRulesSet = new ViewJeuxDeRegles();
+		this.viewCalendrier = new ViewCalendrier();
+		this.viewJeuxDeRegles = new ViewJeuxDeRegles();
 		this.viewChargement = new ViewChargement();
 		this.viewNormage = new ViewNormage();
 		this.viewControle = new ViewControle();
@@ -60,19 +60,19 @@ public class NormManagementModel implements ArcModel {
 		this.viewNorme = viewNorme;
 	}
 
-	public VObject getViewCalendar() {
-		return viewCalendar;
+	public VObject getViewCalendrier() {
+		return viewCalendrier;
 	}
 
-	public void setViewCalendar(VObject viewCalendar) {
-		this.viewCalendar = viewCalendar;
+	public void setViewCalendrier(VObject viewCalendar) {
+		this.viewCalendrier = viewCalendar;
 	}
-	public VObject getViewRulesSet() {
-		return viewRulesSet;
+	public VObject getViewJeuxDeRegles() {
+		return viewJeuxDeRegles;
 	}
 
-	public void setViewRulesSet(VObject viewRulesSet) {
-		this.viewRulesSet = viewRulesSet;
+	public void setViewJeuxDeRegles(VObject viewRulesSet) {
+		this.viewJeuxDeRegles = viewRulesSet;
 	}
 
 	public VObject getViewChargement() {

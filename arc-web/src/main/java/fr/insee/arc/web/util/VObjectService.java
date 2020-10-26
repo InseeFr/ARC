@@ -72,8 +72,6 @@ public class VObjectService {
     private int filterPattern = 0;
     private String filterFunction = "upper";
 
-
-    
     
     /** Try to set some informations based on the data saved in session.
 	 * @returns the updated data*/
@@ -83,6 +81,7 @@ public class VObjectService {
 			currentData.setTitle(v0.getTitle());
 			currentData.setConstantVObject(v0.getConstantVObject());
 			currentData.setIsActive(v0.getIsActive());
+			currentData.setSavedContent(v0.getContent());
 			
 			if (currentData.getTable() == null) {
 				currentData.setTable(v0.getTable());
@@ -111,6 +110,9 @@ public class VObjectService {
 			if (currentData.getSelectedColumns() == null) {
 			    currentData.setSelectedColumns(v0.getSelectedColumns());
 			}
+			if (currentData.getSelectedLines() == null) {
+				currentData.setSelectedLines(v0.getSelectedLines());
+	        }
 			if (currentData.getPaginationSize() == 0) {
 				currentData.setPaginationSize(v0.getPaginationSize());
 			}
@@ -120,6 +122,9 @@ public class VObjectService {
 			            currentData.getInputFields().set(i, v0.getDefaultInputFields().get(v0.getHeadersDLabel().get(i)));
 			        }
 			    }
+			}
+			if (currentData.getCustomValues() == null) {
+				currentData.setCustomValues(v0.getCustomValues());
 			}
 			if (currentData.getAfterInsertQuery() == null) {
 			    currentData.setAfterInsertQuery(v0.getAfterInsertQuery());
@@ -148,15 +153,15 @@ public class VObjectService {
 	
 	        // on sauvegarde le contenu des lignes selectionnées avant la nouvelle
 	        // execution de la requete
-	        HashMap<String, ArrayList<String>> selectedContent = mapContentSelected(currentData);
+	        HashMap<String, ArrayList<String>> selectedContent = currentData.mapContentSelected();
 	        ArrayList<String> headersDLabel = new ArrayList<String>();
 	        ArrayList<String> headersDType = new ArrayList<String>();
 	        // on sauvegarde les headers des colonnes selectionnées avant la
 	        // nouvelle execution de la requete
-	        ArrayList<String> selectedHeaders = listHeadersSelected(currentData);
+	        ArrayList<String> selectedHeaders = currentData.listHeadersSelected();
 	
 	        // gestion du nombre de pages
-	        Integer indexPage = gestionPages(mainQuery, currentData);
+	        Integer indexPage = pageManagement(mainQuery, currentData);
 	
 	        // lancement de la requete principale et recupération du tableau
 	        StringBuilder requete = new StringBuilder();
@@ -240,6 +245,7 @@ public class VObjectService {
 	            }
 	        }
 	        currentData.setSelectedColumns(selectedColumns);
+	        currentData.setSavedContent(currentData.getContent());
 	
 	        // The data is saved in the session        
 	        session.put(currentData.getSessionName(), currentData.copy());
@@ -250,7 +256,7 @@ public class VObjectService {
 	
 	}
 
-	private Integer gestionPages(String mainQuery, VObject currentData) {
+	private Integer pageManagement(String mainQuery, VObject currentData) {
 		ArrayList<ArrayList<String>> aContent = new ArrayList<ArrayList<String>>();
 		if (currentData.getIdPage() == null) {
 		    currentData.setIdPage("1");
@@ -462,14 +468,6 @@ public class VObjectService {
         return inputFields;
     }
 
-    public static <T> ArrayList<T> copyList(ArrayList<T> source) {
-        ArrayList<T> dest = new ArrayList<T>();
-        for (T item : source) {
-            dest.add(item);
-        }
-        return dest;
-    }
-
     public ArrayList<ArrayList<String>> reworkContent(ArrayList<ArrayList<String>> z) {
         return z;
     }
@@ -651,50 +649,6 @@ public class VObjectService {
         }
     }
 
-    public ArrayList<ArrayList<String>> listContentBeforeUpdate(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        if (v0 == null) {
-            return new ArrayList<ArrayList<String>>();
-        }
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        // comparaison des lignes dans la table avant et aprés
-        // toBeUpdated contient l'identifiant des lignes à update
-        for (int i = 0; i < currentData.getContent().size(); i++) {
-            int j = 0;
-            boolean equals = true;
-            while (j < currentData.getContent().get(i).d.size() && equals) {
-                equals = ManipString.compareStringWithNull(v0.getContent().get(i).d.get(j), currentData.getContent().get(i).d.get(j));
-                j++;
-            }
-            if (!equals) {
-                r.add(v0.getContent().get(i).d);
-            }
-        }
-        return r;
-    }
-
-    public ArrayList<ArrayList<String>> listContentAfterUpdate(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        if (v0 == null) {
-            return new ArrayList<ArrayList<String>>();
-        }
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        // comparaison des lignes dans la table avant et aprés
-        // toBeUpdated contient l'identifiant des lignes à update
-        for (int i = 0; i < currentData.getContent().size(); i++) {
-            int j = 0;
-            boolean equals = true;
-            while (j < currentData.getContent().get(i).d.size() && equals) {
-                equals = ManipString.compareStringWithNull(v0.getContent().get(i).d.get(j), currentData.getContent().get(i).d.get(j));
-                j++;
-            }
-            if (!equals) {
-                r.add(currentData.getContent().get(i).d);
-            }
-        }
-        return r;
-    }
-
     public void update(VObject currentData) {
         LoggerHelper.traceAsComment(LOGGER, "update()", currentData.getSessionName());
         VObject v0 = fetchVObjectData(currentData.getSessionName());
@@ -784,201 +738,6 @@ public class VObjectService {
         } catch (SQLException e) {
             currentData.setMessage(e.getMessage());
         }
-    }
-
-    public HashMap<String, String> mapHeadersType(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        if (v0 == null) {
-            return new HashMap<String, String>();
-        }
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), null).mapTypes();
-    }
-
-    public ArrayList<ArrayList<String>> listInputFields(VObject currentData) {
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(currentData.getInputFields());
-        return r;
-    }
-
-    public HashMap<String, ArrayList<String>> mapInputFields(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), listInputFields(currentData)).mapContent();
-    }
-
-    /** Modifie la valeur d'input pour la colonne demandée.
-     * @param headerDLabel nom de la colonne en base
-     * @param value valeur à attribuer
-     * @throw IllegalArgumentException si le nom de colonne est invalide */
-    public void setInputFieldFor(VObject data, String headerDLabel, String value) {
-    	int index = data.getHeadersDLabel().indexOf(headerDLabel);
-    	if (index == -1) {
-    		throw new IllegalArgumentException("La colonne " + headerDLabel + " n'est pas trouvée.");
-    	}
-    	data.getInputFields().set(index, value);
-    }
-
-    /** Retourne la valeur d'input pour la colonne demandée.
-     * Forme abrégée de mapInputFields().get("ma_colonne").get(0).
-     * @param headerDLabel nom de la colonne en base
-     * @throw IllegalArgumentException si le nom de colonne est invalide */
-    public String getInputFieldFor(VObject data, String headerDLabel) {
-    	int index = data.getHeadersDLabel().indexOf(headerDLabel);
-    	if (index == -1) {
-    		throw new IllegalArgumentException("La colonne " + headerDLabel + " n'est pas trouvée.");
-    	}
-    	return mapInputFields(data).get(headerDLabel).get(0);
-    }
-
-    public ArrayList<ArrayList<String>> listLineContent(VObject data, int i) {
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(data.getContent().get(i).d);
-        return r;
-    }
-
-    public HashMap<String, ArrayList<String>> mapLineContent(VObject data, int i) {
-    	VObject v0 = fetchVObjectData(data.getSessionName());
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), listLineContent(data, i)).mapContent();
-    }
-
-    public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(VObject data, int i) {
-    	VObject v0 = fetchVObjectData(data.getSessionName());
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(listContentBeforeUpdate(data).get(i));
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), r).mapContent();
-    }
-
-    public HashMap<String, ArrayList<String>> mapContentAfterUpdate(VObject data, int i) {
-    	VObject v0 = fetchVObjectData(data.getSessionName());
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(listContentAfterUpdate(data).get(i));
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), r).mapContent();
-    }
-
-    public ArrayList<ArrayList<String>> listContentSelected(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        if (v0 == null) {
-            return new ArrayList<ArrayList<String>>();
-        }
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        // on récupère les lignes selectionnées
-        // soit de this.selectedLines (du formulaire), soit de v0.selectedLines
-        if (currentData.getSelectedLines() == null) {
-            currentData.setSelectedLines(v0.getSelectedLines());
-        }
-        // si rien dans la liste, return null
-        if (currentData.getSelectedLines() == null || currentData.getSelectedLines().size() == 0) {
-            return r;
-        }
-        for (int j = 0; j < currentData.getSelectedLines().size(); j++) {
-            if (currentData.getSelectedLines().get(j) != null && currentData.getSelectedLines().get(j)) {
-                r.add(v0.getContent().get(j).d);
-            }
-        }
-        if (r.size() == 0) {
-            return null;
-        }
-        return r;
-    }
-
-    /**
-     * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste de toutes les valeurs selectionnées
-     */
-    public HashMap<String, ArrayList<String>> mapContentSelected(VObject data) {
-    	VObject v0 = fetchVObjectData(data.getSessionName());
-        if (v0 == null) {
-            return new HashMap<String, ArrayList<String>>();
-        }
-        // on récupère les lignes selectionnées
-        // soit de this.selectedLines (du formulaire), soit de v0.selectedLines
-        if (data.getSelectedLines() == null) {
-            data.setSelectedLines(v0.getSelectedLines());
-        }
-        // si rien dans la liste, return null
-        // if (this.selectedLines == null || this.selectedLines.size() == 0) {
-        // return null;
-        // }
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), listContentSelected(data)).mapContent();
-    }
-
-    public ArrayList<ArrayList<String>> listContent(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        if (v0 == null) {
-            return new ArrayList<ArrayList<String>>();
-        }
-        ArrayList<ArrayList<String>> c = new ArrayList<ArrayList<String>>();
-        for (int i = 0; i < v0.getContent().size(); i++) {
-            ArrayList<String> l = new ArrayList<String>();
-            for (int j = 0; j < v0.getContent().get(i).d.size(); j++) {
-                l.add(v0.getContent().get(i).d.get(j));
-            }
-            c.add(l);
-        }
-        return c;
-    }
-
-    /**
-     * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste de toutes les valeurs
-     */
-    public HashMap<String, ArrayList<String>> mapContent(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        if (v0 == null) {
-            return new HashMap<String, ArrayList<String>>();
-        }
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), listContent(currentData)).mapContent();
-    }
-
-    public HashMap<String, ArrayList<String>> mapFilterFields(VObject currentData) {
-        if (currentData.getFilterFields()==null)
-        {
-        	return new HashMap<String, ArrayList<String>>();
-        }
-
-    	ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(currentData.getFilterFields());
-        return new GenericBean(currentData.getHeadersDLabel(), currentData.getHeadersDType(), r).mapContent();
-    }
-
-
-
-    /**
-     * Retourne la liste des entetes base de donnée selectionnés
-     */
-    public ArrayList<String> listHeadersSelected(VObject currentData) {
-    	VObject v0 = fetchVObjectData(currentData.getSessionName());
-        if (v0 == null) {
-            return new ArrayList<String>();
-        }
-        ArrayList<String> r = new ArrayList<String>();
-        // on récupère les lignes selectionnées
-        // soit de this.selectedLines (du formulaire), soit de v0.selectedLines
-        if (currentData.getSelectedColumns() == null) {
-            currentData.setSelectedColumns(v0.getSelectedColumns());
-        }
-        // si rien dans la liste, return null
-        if (currentData.getSelectedColumns() == null || currentData.getSelectedColumns().size() == 0) {
-            return r;
-        }
-        // pour chaque colonne, on va mettre le contenu selectionné dans une
-        // arraylist
-        // et ajouter cette arraylist dans la hash map avec pour clé le nom de
-        // la colonne
-        for (int i = 0; i < currentData.getSelectedColumns().size(); i++) {
-            if (currentData.getSelectedColumns().get(i) != null && currentData.getSelectedColumns().get(i)) {
-                r.add(v0.getHeadersDLabel().get(i));
-            }
-        }
-        if (r.size() == 0) {
-            return new ArrayList<String>();
-        }
-        return r;
-    }
-
-    public HashMap<String, String> mapHeadersSelected(VObject currentData) {
-        HashMap<String, String> r = new HashMap<String, String>();
-        for (String s : listHeadersSelected(currentData)) {
-            r.put(s, s);
-        }
-        return r;
     }
 
     public StringBuilder queryView(VObject currentData) {
@@ -1426,28 +1185,25 @@ public class VObjectService {
         }
     }
 
-    public ArrayList<String> upload(VObject data, String repertoireCible) {
-        if (data.getFileUploadFileName() != null) {
-            for (int i = 0; i < data.getFileUpload().size(); i++) {
-                String location = repertoireCible + File.separator + data.getFileUploadFileName().get(i);
-                // LoggerDispatcher.info("Repertoire Cible "+repertoireCible,logger);
-                // LoggerDispatcher.info("Existance ? "+newFile2.exists(),logger);
-                // LoggerDispatcher.info("Droit d'écriture "+newFile2.canWrite(),logger);
+    public ArrayList<String> upload(VObject data, String repertoireCible, 
+    		ArrayList<String> fileUploadFileName, ArrayList<File> fileUpload) {
+        if (fileUploadFileName != null) {
+            for (int i = 0; i < fileUpload.size(); i++) {
+                String location = repertoireCible + File.separator + fileUploadFileName.get(i);
                 loggerDispatcher.info( "Upload >> " + location, LOGGER);
                 File newFile = new File(location);
                 if (newFile.exists()) {
                     newFile.delete();
                 }
                 try {
-                    FileUtils.copyFile(data.getFileUpload().get(i), newFile);
+                    FileUtils.copyFile(fileUpload.get(i), newFile);
                 } catch (IOException ex) {
                     LoggerHelper.errorGenTextAsComment(getClass(), "upload()", LOGGER, ex);
                 }
-                // LoggerDispatcher.info("Fichier copié ? "+newFile.exists(),logger);
             }
         }
         data.setMessage("Upload terminé.");
-        return data.getFileUploadFileName();
+        return fileUploadFileName;
     }
 
     public ArrayList<String> getHeaderSortDLabels(VObject currentData) {
@@ -1494,20 +1250,10 @@ public class VObjectService {
 
     }
 
-    public HashMap<String, ArrayList<String>> mapContentAfterUpdate(VObject currentData) {
-        VObject v0 = fetchVObjectData(currentData.getSessionName());
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), listContentAfterUpdate(currentData)).mapContent();
-    }
-
-	private VObject fetchVObjectData(String sessionName) {
+    private VObject fetchVObjectData(String sessionName) {
         VObject v0 = (VObject) session.get(sessionName);
 		return v0;
 	}
-
-    public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(VObject currentData) {
-        VObject v0 = fetchVObjectData(currentData.getSessionName());
-        return new GenericBean(v0.getHeadersDLabel(), v0.getHeadersDType(), listContentBeforeUpdate(currentData)).mapContent();
-    }
 
     /**
      * @return the pool
@@ -1617,22 +1363,6 @@ public class VObjectService {
             }
         }
         return filterExist;
-    }
-
-    /**
-     * Renvoie le numéro d'une colonne
-     * @param aNomCol
-     * @return
-     */
-    public int getNumeroDLabel(VObject data, String aNomCol) {
-        LoggerHelper.debug(LOGGER, "aNomCol", aNomCol);
-        for(int i =0; i< data.getHeadersDLabel().size();i++){
-            LoggerHelper.debug(LOGGER, "this.headersDLabel.get(i)", data.getHeadersDLabel().get(i));
-            if(data.getHeadersDLabel().get(i).equals(aNomCol)){
-                return i;
-            }
-        }
-        return -1;
     }
 
 }

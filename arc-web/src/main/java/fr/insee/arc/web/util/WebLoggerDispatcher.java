@@ -2,11 +2,9 @@ package fr.insee.arc.web.util;
 
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 
-@Component
 public class WebLoggerDispatcher implements LoggerDispatcher {
 	
 	@Autowired
@@ -24,7 +22,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.error(message);
+			logger.error(sanitize(message));
 		}
 	}
 
@@ -40,7 +38,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.error(message, ex);
+			logger.error(sanitize(message), ex);
 		}
 	}
 
@@ -56,7 +54,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.warn(message);
+			logger.warn(sanitize(message));
 		}
 	}
 
@@ -72,7 +70,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.warn(message, ex);
+			logger.warn(sanitize(message), ex);
 		}
 	}
 
@@ -91,7 +89,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.info(message);
+			logger.info(sanitize(message));
 		}
 	}
 
@@ -110,7 +108,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.info(message, ex);
+			logger.info(sanitize(message), ex);
 		}
 	}
 
@@ -129,7 +127,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.debug(message);
+			logger.debug(sanitize(message));
 		}
 	}
 
@@ -148,7 +146,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.debug(message, ex);
+			logger.debug(sanitize(message), ex);
 		}
 	}
 
@@ -167,7 +165,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.trace(message);
+			logger.trace(sanitize(message));
 		}
 	}
 
@@ -186,7 +184,7 @@ public class WebLoggerDispatcher implements LoggerDispatcher {
 			registerMessage(message);
 		} catch (Exception e) {
 		} finally {
-			logger.trace(message, ex);
+			logger.trace(sanitize(message), ex);
 		}
 	}
 

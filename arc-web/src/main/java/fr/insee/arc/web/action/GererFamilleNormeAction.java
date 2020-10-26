@@ -81,8 +81,8 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     @RequestMapping("/addFamilleNorme")
     public String addFamilleNorme() {
     	//Clean up spaces
-    	String nomFamilleNorme = this.vObjectService.getInputFieldFor(viewFamilleNorme, "id_famille");
-        this.vObjectService.setInputFieldFor(viewFamilleNorme, "id_famille", nomFamilleNorme.trim());
+    	String nomFamilleNorme = viewFamilleNorme.getInputFieldFor("id_famille");
+    	viewFamilleNorme.setInputFieldFor("id_famille", nomFamilleNorme.trim());
         return addLineVobject(RESULT_SUCCESS, getViewFamilleNorme());
     }
 
@@ -107,7 +107,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     public void initializeClient() {
 	LoggerHelper.info(LOGGER, "/* initializeClient */");
         try {
-            Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewFamilleNorme);
+			Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
             if (!selection.isEmpty()) {
 
                 StringBuilder requete = new StringBuilder("SELECT id_famille, id_application FROM arc.ihm_client WHERE id_famille='"
@@ -164,9 +164,9 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     public void initializeTableMetier() {
         try {
             System.out.println("/* initializeTableMetier */");
-            Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewFamilleNorme);
+            Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
             if (!selection.isEmpty()) {
-                HashMap<String, String> type = this.vObjectService.mapHeadersType(viewFamilleNorme);
+				HashMap<String, String> type = viewFamilleNorme.mapHeadersType();
                 StringBuilder requete = new StringBuilder();
                 requete.append("select * from arc.ihm_mod_table_metier");
                 requete.append(" where id_famille" + ManipString.sqlEqual(selection.get("id_famille").get(0), type.get("id_famille")));
@@ -216,8 +216,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
     @RequestMapping("/updateTableMetier")
     public String updateTableMetier() {
-	
-        if (isNomTableMetierValide(this.vObjectService.mapInputFields(viewTableMetier).get("nom_table_metier").get(0))) {
+		if (isNomTableMetierValide(viewTableMetier.mapInputFields().get("nom_table_metier").get(0))) {
             StringBuilder message = new StringBuilder();
             this.deleteTableMetierWithoutSync(message);
             this.vObjectService.insert(viewTableMetier);
@@ -231,7 +230,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         System.out.println("Destruction de la table");
         boolean drop = true;
         
-        Map<String,ArrayList<String>> content=this.vObjectService.mapContentSelected(viewTableMetier);
+        Map<String,ArrayList<String>> content=viewTableMetier.mapContentSelected();
         
         for (int i = 0; (i < content.get("nom_table_metier").size()) && drop; i++) {
 
@@ -246,12 +245,12 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         	
         }
         if (drop) {
-            UtilitaireDao.get("arc").dropTable(null, this.vObjectService.mapContentSelected(viewTableMetier).get("nom_table_metier").toArray(new String[0]));
+			UtilitaireDao.get("arc").dropTable(null, viewTableMetier.mapContentSelected().get("nom_table_metier").toArray(new String[0]));
             message.append("Les tables sont supprimées avec succès.");
             return true;
         } else {
             message.append("La table ne doit plus avoir de colonne pour pouvoir etre supprimée");
-            if (this.vObjectService.mapContentSelected(viewTableMetier).get("nom_table_metier").size() > 1) {
+            if (viewTableMetier.mapContentSelected().get("nom_table_metier").size() > 1) {
                 message.append("\nRecommencez en supprimant une table à la fois.");
             }
         }
@@ -260,17 +259,17 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
 
     public void initializeVariableMetier() {
-	if (CollectionUtils.isNotEmpty(this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille"))) {
-	    List<String> listeTableFamille = getListeTableMetierFamille(this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille").get(0));
+	if (CollectionUtils.isNotEmpty(viewFamilleNorme.mapContentSelected().get("id_famille"))) {
+		List<String> listeTableFamille = getListeTableMetierFamille(viewFamilleNorme.mapContentSelected().get("id_famille").get(0));
 	    HashMap<String, ColumnRendering> rendering = ViewVariableMetier.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
 	    rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
 	    this.vObjectService.initialiserColumnRendering(viewVariableMetier, rendering);
 	    try {
 		System.out.println("/* initializeVariableMetier */");
 		StringBuilder requete = getRequeteListeVariableMetierTableMetier(listeTableFamille,
-			this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille").get(0));
+			viewFamilleNorme.mapContentSelected().get("id_famille").get(0));
 		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-		defaultInputFields.put("id_famille", this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille").get(0));
+		defaultInputFields.put("id_famille", viewFamilleNorme.mapContentSelected().get("id_famille").get(0));
 		// this.viewVariableMetier.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewVariableMetier.getSessionName()));
 		this.vObjectService.initialize(requete.toString(), "arc."+IHM_MOD_VARIABLE_METIER, defaultInputFields, viewVariableMetier);
 		
@@ -325,7 +324,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         StringBuilder message = new StringBuilder();
         StringBuilder bloc = new StringBuilder();
         bloc.append(addNonExistingVariableMetierWithoutSync(message));
-        bloc.append(synchronizeRegleWithVariableMetier(message, this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille").get(0)));
+        bloc.append(synchronizeRegleWithVariableMetier(message, viewFamilleNorme.mapContentSelected().get("id_famille").get(0)));
         executeRequeteMiseAjourTableMetier(message, bloc);
         this.viewVariableMetier.setMessage(message.toString());
         return generateDisplay(RESULT_SUCCESS);
@@ -341,9 +340,9 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 	
 	    StringBuilder message = new StringBuilder();
 	    StringBuilder bloc = new StringBuilder();
-	    bloc.append(deleteVariableMetierWithoutSync(message, this.vObjectService.mapContentSelected(viewVariableMetier),
-	            this.vObjectService.listContentSelected(viewVariableMetier), false));
-	    bloc.append(synchronizeRegleWithVariableMetier(message, this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille").get(0)));
+	    bloc.append(deleteVariableMetierWithoutSync(message, viewVariableMetier.mapContentSelected(),
+	            viewVariableMetier.listContentSelected(), false));
+	    bloc.append(synchronizeRegleWithVariableMetier(message, viewFamilleNorme.mapContentSelected().get("id_famille").get(0)));
 	    executeRequeteMiseAjourTableMetier(message, bloc);
 	    this.viewVariableMetier.setMessage(message.toString());
 	    return generateDisplay(RESULT_SUCCESS);
@@ -358,16 +357,16 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 	    StringBuilder message = new StringBuilder();
 	    StringBuilder requete = new StringBuilder();
 
-	    HashMap<String, ArrayList<String>> mBefore = this.vObjectService.mapContentBeforeUpdate(viewVariableMetier);
-	    List<ArrayList<String>> lBefore = this.vObjectService.listContentBeforeUpdate(viewVariableMetier);
+	    HashMap<String, ArrayList<String>> mBefore = viewVariableMetier.mapContentBeforeUpdate();
+	    List<ArrayList<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();
 	    
 	    for (LineObject line : this.viewVariableMetier.getContent().getT()) {
 	    	int indexOfVar = this.viewVariableMetier.getHeadersDLabel().indexOf("nom_variable_metier");
 	    	line.getD().set(indexOfVar, ArcStringUtils.cleanUpVariable(line.getD().get(indexOfVar)));
 	    }
 
-	    HashMap<String, ArrayList<String>> mAfter = this.vObjectService.mapContentAfterUpdate(viewVariableMetier);
-	    List<ArrayList<String>> lAfter = this.vObjectService.listContentAfterUpdate(viewVariableMetier);
+	    HashMap<String, ArrayList<String>> mAfter = viewVariableMetier.mapContentAfterUpdate();
+	    List<ArrayList<String>> lAfter = viewVariableMetier.listContentAfterUpdate();
 
 	    // partie 1 : update nom de variable
 	    // créer une map des noms avant aprés pour modifier les règles et les tables
@@ -437,7 +436,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 		requete.append(addExistingVariableMetierWithoutSync(message, lAfter));
 		requete.append(mettreAJourInformationsVariables(this.viewVariableMetier));
 		requete.append(synchronizeRegleWithVariableMetier(message,
-			this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille").get(0)));
+			viewFamilleNorme.mapContentSelected().get("id_famille").get(0)));
 		executeRequeteMiseAjourTableMetier(message, requete);
 	    }
 
@@ -467,8 +466,8 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                 	// au moins une table est renseignée
                 	blank=false;
 
-                	String nomVariableMetier = this.vObjectService.getInputFieldFor(viewVariableMetier, "nom_variable_metier");
-                    this.vObjectService.setInputFieldFor(viewVariableMetier, "nom_variable_metier", ArcStringUtils.cleanUpVariable(nomVariableMetier));
+                	String nomVariableMetier = this.viewVariableMetier.getInputFieldFor("nom_variable_metier");
+                    this.viewVariableMetier.setInputFieldFor("nom_variable_metier", ArcStringUtils.cleanUpVariable(nomVariableMetier));
                 	
                     if (checkIsValide(this.viewVariableMetier.getInputFields())) {
                         requete.append("INSERT INTO arc."+IHM_MOD_VARIABLE_METIER+" (");
@@ -533,12 +532,12 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                 /**
                  * Et pour l'ensemble des tables métier
                  */
-                for (int j = numberOfColumnTableVariableMetier; j < this.vObjectService.mapContentAfterUpdate(viewVariableMetier, i).size(); j++) {
+				for (int j = numberOfColumnTableVariableMetier; j < viewVariableMetier.mapContentAfterUpdate(i).size(); j++) {
                     /**
                      * Si une variable est à "oui" pour cette table alors qu'elle n'y était pas...
                      */
-                    if (StringUtils.isNotBlank(listContent.get(i).get(j))
-                            && StringUtils.isBlank(this.vObjectService.listContentBeforeUpdate(viewVariableMetier).get(i).get(j))) {
+					if (StringUtils.isNotBlank(listContent.get(i).get(j))
+                            && StringUtils.isBlank(viewVariableMetier.listContentBeforeUpdate().get(i).get(j))) {
                         /**
                          * ... on l'ajoute
                          */
@@ -730,18 +729,18 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
     private String mettreAJourInformationsVariables(VObject someViewVariableMetier) {
         StringBuilder requete = new StringBuilder();
-        for (int i = 0; i < vObjectService.listContentAfterUpdate(someViewVariableMetier).size(); i++) {
+        for (int i = 0; i < someViewVariableMetier.listContentAfterUpdate().size(); i++) {
             if (i > 0) {
                 requete.append("\n");
             }
             StringBuilder requeteLocale = new StringBuilder("UPDATE arc."+IHM_MOD_VARIABLE_METIER+"");
-            requeteLocale.append("\n  SET type_consolidation = '" + this.vObjectService.mapContentAfterUpdate(someViewVariableMetier).get("type_consolidation").get(i)
+            requeteLocale.append("\n  SET type_consolidation = '" + someViewVariableMetier.mapContentAfterUpdate().get("type_consolidation").get(i)
                     + "'");
             requeteLocale.append(",\n    description_variable_metier = '"
-                    + this.vObjectService.mapContentAfterUpdate(someViewVariableMetier).get("description_variable_metier").get(i).replace(quote, quotequote) + "'");
-            requeteLocale.append("\n  WHERE id_famille = '" + this.vObjectService.mapContentAfterUpdate(someViewVariableMetier).get("id_famille").get(i) + "'");
+                    + someViewVariableMetier.mapContentAfterUpdate().get("description_variable_metier").get(i).replace(quote, quotequote) + "'");
+            requeteLocale.append("\n  WHERE id_famille = '" + someViewVariableMetier.mapContentAfterUpdate().get("id_famille").get(i) + "'");
             requeteLocale.append("\n    AND nom_variable_metier = '"
-                    + this.vObjectService.mapContentAfterUpdate(someViewVariableMetier).get("nom_variable_metier").get(i) + "'");
+                    + someViewVariableMetier.mapContentAfterUpdate().get("nom_variable_metier").get(i) + "'");
             requete.append(requeteLocale).append(";");
         }
         return requete.toString();
@@ -759,13 +758,12 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     public final boolean isNomTableMetierValide(String nomTable) {
-        return nomTable.matches("(?i)^"+TraitementPhase.MAPPING.toString().toLowerCase()+"_" + this.vObjectService.mapContentSelected(viewFamilleNorme).get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
+		return nomTable.matches("(?i)^"+TraitementPhase.MAPPING.toString().toLowerCase()+"_" + viewFamilleNorme.mapContentSelected().get("id_famille").get(0) + "_([a-z]|_)*[a-z]+_ok$");
     }
 
     @RequestMapping("/addTableMetier")
     public String addTableMetier() {
-	
-        if (isNomTableMetierValide(this.vObjectService.mapInputFields(viewTableMetier).get("nom_table_metier").get(0))) {
+		if (isNomTableMetierValide(viewTableMetier.mapInputFields().get("nom_table_metier").get(0))) {
             this.vObjectService.insert(viewTableMetier);
         } else {
             setMessageNomTableMetierInvalide();
@@ -775,7 +773,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
     private void setMessageNomTableMetierInvalide() {
         this.viewTableMetier.setMessage("Un nom de table doit respecter la syntaxe :\n\"mapping_"
-                + this.vObjectService.mapContent(viewFamilleNorme).get("id_famille").get(0)
+                + this.viewFamilleNorme.mapContent().get("id_famille").get(0)
                 + "_<identifiant>_ok\"\nOù <identifiant> est un ensemble de mots séparés par des underscores (\"_\")");
     }
 

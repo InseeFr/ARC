@@ -85,8 +85,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@Override
 	public void putAllVObjects(NormManagementModel model) {		
 		setViewNorme(vObjectService.preInitialize(model.getViewNorme()));
-		setViewCalendrier(vObjectService.preInitialize(model.getViewCalendar()));
-		setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewRulesSet()));
+		setViewCalendrier(vObjectService.preInitialize(model.getViewCalendrier()));
+		setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewJeuxDeRegles()));
 		setViewChargement(vObjectService.preInitialize(model.getViewChargement()));
 		setViewNormage(vObjectService.preInitialize(model.getViewNormage()));
 		setViewControle(vObjectService.preInitialize(model.getViewControle()));
@@ -156,7 +156,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	public String deleteNorme() {
 		
 		// Get the gui selection
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewNorme);
+		Map<String, ArrayList<String>> selection = viewNorme.mapContentSelected();
 
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
@@ -220,7 +220,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	public String deleteCalendrier() {
 		
 		// get the selected calendar
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewCalendar);
+		Map<String, ArrayList<String>> selection = viewCalendar.mapContentSelected();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			loggerDispatcher.info("calendar state: " + etat, LOGGER);
@@ -270,8 +270,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/addJeuxDeRegles")
 	public String addRuleSet() {
-		
-		HashMap<String, ArrayList<String>> selection = this.vObjectService.mapInputFields(viewRulesSet);
+		HashMap<String, ArrayList<String>> selection = viewRulesSet.mapInputFields();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
@@ -294,7 +293,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	public String deleteRuleSet() {
 		
 		// Get the selection
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			loggerDispatcher.info("State to delete : " + etat, LOGGER);
@@ -323,8 +322,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/updateJeuxDeRegles")
 	public String updateRuleSet() {
-		
-		HashMap<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
+		HashMap<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 
 		// on les crée dans tous les environnements et tous les entrepots
 		// (ca evite les erreurs et car ca ne spécialise aucun environnement dans un
@@ -363,8 +361,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/downloadJeuxDeRegles")
 	public String downloadJeuxDeRegles(HttpServletResponse response) {
-		
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty()) {
 			StringBuilder requeteRegleChargement = new StringBuilder();
 			requeteRegleChargement.append(gererNormeDao.recupRegle(this.viewRulesSet,
@@ -563,7 +560,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		
 		loggerDispatcher.info(String.format("Add rule : %s ", this.viewControle.getInputFields().toString()), LOGGER);
 		boolean isToInsert = true;
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		/*
 		 * Fabrication d'un JeuDeRegle pour conserver les informations sur norme et
 		 * calendrier
@@ -577,7 +574,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
         
 		/* Fabrication de la règle à ajouter */
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
-		RegleControleEntity reg = new RegleControleEntity(this.vObjectService.mapInputFields(viewControle));
+		RegleControleEntity reg = new RegleControleEntity(viewControle.mapInputFields());
 		listRegle.add(reg);
 		try {
 			// Fabrication de la table temporaire pour tester l'insertion
@@ -638,11 +635,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		
 
 		JeuDeRegle jdr = gererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
-		loggerDispatcher.info("Mes nouvelles données : " + this.vObjectService.listContentAfterUpdate(viewControle).toString(),
+		loggerDispatcher.info("Mes nouvelles données : " + viewControle.listContentAfterUpdate().toString(),
 				LOGGER);
 		ArrayList<RegleControleEntity> listRegleNouv = new ArrayList<>();
-		for (int i = 0; i < this.vObjectService.listContentAfterUpdate(viewControle).size(); i++) {
-			RegleControleEntity reg = new RegleControleEntity(this.vObjectService.mapContentAfterUpdate(viewControle, i));
+		for (int i = 0; i < viewControle.listContentAfterUpdate().size(); i++) {
+			RegleControleEntity reg = new RegleControleEntity(viewControle.mapContentAfterUpdate(i));
 			listRegleNouv.add(reg);
 		}
 		try {
@@ -698,7 +695,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			}
 			loggerDispatcher.info(String.format("I have a file %s character long", fichierRegle.length()), LOGGER);
 			boolean isAjouter = true;
-			Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
+			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 			/*
 			 * Create a RuleSet to keep informations about the norm and calendar
 			 */
@@ -816,8 +813,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	public String updateFiltrage() {
 		
 		boolean isRegleOk = true;
-        loggerDispatcher.info("Contenu de l'update : " + this.vObjectService.listContentAfterUpdate(viewFiltrage), LOGGER);
-        String exprRegleFiltre = this.vObjectService.listContentAfterUpdate(viewFiltrage).get(0).get(6);
+        loggerDispatcher.info("Contenu de l'update : " + viewFiltrage.listContentAfterUpdate(), LOGGER);
+        String exprRegleFiltre = viewFiltrage.listContentAfterUpdate().get(0).get(6);
 
 		StringBuilder message = new StringBuilder();
 		try {
@@ -879,8 +876,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/updateMapping")
 	public String updateMapping() {
-		
-		Map<String, ArrayList<String>> afterUpdate = this.vObjectService.mapContentAfterUpdate(viewMapping);
+		Map<String, ArrayList<String>> afterUpdate = viewMapping.mapContentAfterUpdate();
 		boolean isRegleOk = gererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
 				afterUpdate);
 		if (isRegleOk) {
@@ -909,9 +905,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/preGenererRegleFiltrage")
 	public String preGenererRegleFiltrage() {
-		
 		try {
-			Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
+			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 
 			 UtilitaireDao.get("arc").executeRequest(null, new StringBuilder("INSERT INTO " + this.viewFiltrage.getTable())//
 	                    .append("  " + Format.stringListe(this.viewFiltrage.getHeadersDLabel()))//
@@ -969,10 +964,10 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 				}
 				isRegleOk = gererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
 						reglesAImporter);
-				Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(viewRulesSet);
+				Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 				Map<String, String> map = new HashMap<String, String>();
                 map.put("id_regle", "(SELECT max(id_regle)+1 FROM " + nomTable + ")");
-                map.put("id_norme", this.vObjectService.mapContentSelected(viewNorme).get("id_norme").get(0));
+                map.put("id_norme", viewNorme.mapContentSelected().get("id_norme").get(0));
                 map.put("validite_inf", selection.get("validite_inf").get(0));
                 map.put("validite_sup", selection.get("validite_sup").get(0));
                 map.put("version", selection.get("version").get(0));
@@ -1015,24 +1010,24 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 					"  (id_regle, id_norme, validite_inf, validite_sup,  version , periodicite, variable_sortie, expr_regle_col, commentaire) ")
 					.append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.viewMapping.getTable()
 							+ "),0)+row_number() over () ,")
-					.append("  '" + this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.ID_NORME.getValue()).get(0)
+					.append("  '" + viewRulesSet.mapContentSelected().get(ConstanteBD.ID_NORME.getValue()).get(0)
 							+ "', ")
 					.append("  '"
-							+ this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.VALIDITE_INF.getValue()).get(0)
+							+ viewRulesSet.mapContentSelected().get(ConstanteBD.VALIDITE_INF.getValue()).get(0)
 							+ "', ")
 					.append("  '"
-							+ this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)
+							+ viewRulesSet.mapContentSelected().get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)
 							+ "', ")
-					.append("  '" + this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.VERSION.getValue()).get(0)
+					.append("  '" + viewRulesSet.mapContentSelected().get(ConstanteBD.VERSION.getValue()).get(0)
 							+ "', ")
 					.append("  '"
-							+ this.vObjectService.mapContentSelected(viewRulesSet).get(ConstanteBD.PERIODICITE.getValue()).get(0)
+							+ viewRulesSet.mapContentSelected().get(ConstanteBD.PERIODICITE.getValue()).get(0)
 							+ "', ")
 					.append("  liste_colonne.nom_variable_metier,").append("  null,").append(
 							"  null")
 					.append("  FROM ("
 							+ FormatSQL.listeColonneTableMetierSelonFamilleNorme("arc.ihm",
-									this.vObjectService.mapContentSelected(viewNorme).get(ConstanteBD.ID_FAMILY.getValue()).get(0))
+									viewNorme.mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0))
 							+ ") liste_colonne");
 			UtilitaireDao.get("arc").executeRequest(null, requete);
 		} catch (SQLException e) {
@@ -1070,8 +1065,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesChargementCopie")
 	public String selectJeuxDeReglesChargementCopie() {
 		
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1084,8 +1079,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesNormageCopie")
 	public String selectJeuxDeReglesNormageCopie() {
 		
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1098,8 +1093,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesControleCopie")
 	public String selectJeuxDeReglesControleCopie() {
 		
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewControle.getTable());
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewControle.getTable());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1112,8 +1107,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesFiltrageCopie")
 	public String selectJeuxDeReglesFiltrageCopie() {
 		
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1126,8 +1121,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/selectJeuxDeReglesMappingCopie")
 	public String selectJeuxDeReglesMappingCopie() {
 		
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
-		this.viewJeuxDeReglesCopie.getCustomValues().put(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
+		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1140,10 +1135,10 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	public String copieJeuxDeRegles() {
 		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		// le jeu de regle à copier
-		Map<String, ArrayList<String>> selectionOut = this.vObjectService.mapContentSelected(viewRulesSet);
+		Map<String, ArrayList<String>> selectionOut = viewRulesSet.mapContentSelected();
 		// le nouveau jeu de regle
-		Map<String, ArrayList<String>> selectionIn = this.vObjectService.mapContentSelected(viewJeuxDeReglesCopie);
-		HashMap<String, String> type = this.vObjectService.mapHeadersType(viewJeuxDeReglesCopie);
+		Map<String, ArrayList<String>> selectionIn = viewJeuxDeReglesCopie.mapContentSelected();
+		HashMap<String, String> type = viewJeuxDeReglesCopie.mapHeadersType();
 		if (!selectionIn.isEmpty()) {
 			StringBuilder requete = new StringBuilder();
 			requete.append("INSERT INTO " + this.getSelectedJeuDeRegle() + " ");

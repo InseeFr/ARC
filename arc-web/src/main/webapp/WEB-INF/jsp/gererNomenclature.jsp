@@ -130,6 +130,7 @@
 								<c:param name="btnDelete" value ="false" />
 								<c:param name="ligneAdd" value ="false" />
 								<c:param name="ligneFilter" value ="true" />
+								<c:param name="allowResize" value ="true" />
 								<c:param name="checkbox" value ="false" />
 								<c:param name="checkboxVisible" value ="false" />
 								<c:param name="extraScopeSee" value ="viewNomenclature;" />

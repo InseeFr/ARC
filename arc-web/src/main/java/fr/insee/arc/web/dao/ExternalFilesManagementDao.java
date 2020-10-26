@@ -49,7 +49,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
     public void initializeViewNomenclature(VObject viewNomenclature, VObject viewListNomenclatures) {
         System.out.println("/* initializeNomenclature */");
 
-        Map<String, ArrayList<String>> selection = vObject.mapContentSelected(viewListNomenclatures);
+        Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
         if (!selection.isEmpty() && UtilitaireDao.get(poolName).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0))) {
             StringBuilder requete = new StringBuilder();
@@ -67,7 +67,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
     
     public void intializeViewSchemaNmcl(VObject viewSchemaNmcl, VObject viewListNomenclatures) {
         System.out.println("/* initializeSchemaNmcl */");
-        Map<String, ArrayList<String>> selection = vObject.mapContentSelected(viewListNomenclatures);
+        Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
         if (!selection.isEmpty()) {
             StringBuilder requete = new StringBuilder();

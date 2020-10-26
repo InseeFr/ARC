@@ -52,6 +52,6 @@
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 	</bean>
 	
-	<bean id="loggerDispatcher" class="fr.insee.arc.core.util.DefaultLoggerDispatcher"></bean>
+	<bean id="activeLoggerDispatcher" class="fr.insee.arc.core.util.DefaultLoggerDispatcher"></bean>
 
 </beans>

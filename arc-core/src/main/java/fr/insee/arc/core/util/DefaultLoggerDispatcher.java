@@ -8,7 +8,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 
 	@Override
 	public void error(Object message, Logger logger) {
-		logger.error(message);		
+		logger.error(sanitize(message));		
 	}
 
 	@Override
@@ -21,7 +21,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isWarnEnabled()) {
 			return;
 		}
-		logger.warn(message);		
+		logger.warn(sanitize(message));		
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isWarnEnabled()) {
 			return;
 		}
-		logger.warn(message, ex);
+		logger.warn(sanitize(message), ex);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isInfoEnabled()) {
 			return;
 		}
-		logger.info(message);
+		logger.info(sanitize(message));
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isInfoEnabled()) {
 			return;
 		}
-		logger.info(message, ex);
+		logger.info(sanitize(message), ex);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isDebugEnabled()) {
 			return;
 		}
-		logger.debug(message);
+		logger.debug(sanitize(message));
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isDebugEnabled()) {
 			return;
 		}
-		logger.debug(message, ex);
+		logger.debug(sanitize(message), ex);
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isTraceEnabled()) {
 			return;
 		}
-		logger.trace(message);
+		logger.trace(sanitize(message));
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class DefaultLoggerDispatcher implements LoggerDispatcher {
 		if (!logger.isTraceEnabled()) {
 			return;
 		}
-		logger.trace(message, ex);
+		logger.trace(sanitize(message), ex);
 	}
 
 }

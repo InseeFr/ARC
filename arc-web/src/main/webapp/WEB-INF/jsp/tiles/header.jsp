@@ -44,14 +44,21 @@
 
        <li class="nobullet mt-auto">
      		<ul style="margin: 0; padding-inline-start: 0.5rem;">
-				<li class="nobullet nav-link">	
-					<c:url value="" var="localeFR"><c:param name="lang"  value="fr" /></c:url>
-					<a href="${localeFR}">FR</a>
-				</li>
-				<li class="nobullet nav-link">
-					<c:url value="" var="localeEN"><c:param name="lang"  value="en" /></c:url>
-					<a href="${localeEN}">EN</a>
-				</li>
+     		<c:forEach items="en,fr" var="lang" >
+     			<c:choose>
+     				<c:when test="${pageContext.response.locale == lang}">
+     					<li class="nobullet">	
+							<a class="btn-sm font-weight-bold">${lang}</a>
+						</li>
+     				</c:when>
+		     		<c:otherwise>
+						<li class="nobullet">								
+							<c:url value="" var="localeUrl"><c:param name="lang"  value="${lang}" /></c:url>
+							<a class="btn-sm text-dark" href="${localeUrl}">${lang}</a>
+						</li>
+					</c:otherwise>
+     			</c:choose>
+			</c:forEach>
    			</ul>
       	</li>
     </ul>

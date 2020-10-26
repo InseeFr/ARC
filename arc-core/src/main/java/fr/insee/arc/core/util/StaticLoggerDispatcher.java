@@ -1,12 +1,20 @@
 package fr.insee.arc.core.util;
 
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 /** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 @Deprecated
+@Component
 public class StaticLoggerDispatcher {
-
-	private static LoggerDispatcher loggerDispatcher = new DefaultLoggerDispatcher();
+	
+	private static LoggerDispatcher loggerDispatcher;
+	
+	public StaticLoggerDispatcher(@Autowired @Qualifier("activeLoggerDispatcher") LoggerDispatcher loggerDispatcherInstance) {
+		loggerDispatcher = loggerDispatcherInstance;
+	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void error(Object message, Logger logger) {

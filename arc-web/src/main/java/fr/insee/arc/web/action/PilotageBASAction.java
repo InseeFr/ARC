@@ -203,8 +203,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
     		this.getViewPilotageBAS().setMessage("Le batch est "+etat+".\nLe prochain batch d'initialisation est programmé aprés : "+heure);
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loggerDispatcher.error("Error in informationInitialisationPROD", e, LOGGER);
 		}
     	return generateDisplay(RESULT_SUCCESS);
     }
@@ -222,8 +221,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loggerDispatcher.error("Error in retarderInitialisationPROD", e, LOGGER);
 		}
     	
     	return generateDisplay(RESULT_SUCCESS);
@@ -242,8 +240,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loggerDispatcher.error("Error in demanderBatchInitialisationPROD", e, LOGGER);
 		}
     	
     	return generateDisplay(RESULT_SUCCESS);
@@ -258,8 +255,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			UtilitaireDao.get("arc").executeRequest(null, "UPDATE arc.pilotage_batch set operation='O'; ");
 			this.getViewPilotageBAS().setMessage("Production activée ");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loggerDispatcher.error("Error in toggleOnPROD", e, LOGGER);
 		}
     	return generateDisplay(RESULT_SUCCESS);
     }
@@ -273,8 +269,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			UtilitaireDao.get("arc").executeRequest(null, "UPDATE arc.pilotage_batch set operation='N'; ");
 			this.getViewPilotageBAS().setMessage("Production arretée ");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loggerDispatcher.error("Error in toggleOffPROD", e, LOGGER);
 		}
     	return generateDisplay(RESULT_SUCCESS);
     }
@@ -282,20 +277,20 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	// Actions du bac à sable
 
 	@RequestMapping("/filesUploadBAS")
-	public String filesUploadBAS() {
+	public String filesUploadBAS(ArrayList<String> fileUploadFileName, ArrayList<File> fileUpload) {
 		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : " + this.getViewEntrepotBAS().getCustomValues() + " */ *");
 		
 		if (this.getViewEntrepotBAS().getCustomValues() != null
 				&& !this.getViewEntrepotBAS().getCustomValues().get(WRITING_REPO).equals("")
-				&& this.getViewPilotageBAS().getFileUploadFileName() != null) {
+				&& fileUploadFileName != null) {
 			String repertoireUpload = this.repertoire + getBacASable().toUpperCase()
 					+ File.separator + TraitementPhase.RECEPTION + "_"
 					+ this.getViewEntrepotBAS().getCustomValues().get(WRITING_REPO);
 			LoggerHelper.trace(LOGGER, "repertoireUpload :", repertoireUpload);
-			this.vObjectService.upload(getViewPilotageBAS(), repertoireUpload);
+			this.vObjectService.upload(getViewPilotageBAS(), repertoireUpload, fileUploadFileName, fileUpload);
 		} else {
 			String msg = "";
-			if (this.getViewPilotageBAS().getFileUploadFileName() == null) {
+			if (fileUploadFileName == null) {
 				msg = "Erreur : aucun fichier selectionné\n";
 				this.getViewPilotageBAS().setMessage("Erreur : aucun fichier selectionné.");
 			}
@@ -307,7 +302,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 			this.getViewPilotageBAS().setMessage(msg);
 		}
-		this.getViewEntrepotBAS().getCustomValues().put(WRITING_REPO, null);
+		this.getViewEntrepotBAS().addCustomValue(WRITING_REPO, null);
 		// Lancement de l'initialisation dans la foulée
 		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), "arc.ihm",
 				getBacASable(), this.repertoire,
@@ -366,7 +361,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		
 		loggerDispatcher.trace("*** Téléchargement des enveloppes à partir de l'archive ***", LOGGER);
 		// récupération de la liste des noms d'enloppe
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewArchiveBAS());
+		Map<String, ArrayList<String>> selection = getViewArchiveBAS().mapContentSelected();
 
 		StringBuilder querySelection = new StringBuilder();
 		querySelection.append("select distinct alias_de_table.nom_archive as nom_fichier from ("
@@ -418,7 +413,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		String selectedSrc = null;
 
 		HashMap<String, ArrayList<String>> m = new HashMap<String, ArrayList<String>>(
-				this.vObjectService.mapContentSelected(getViewFichierBAS()));
+				getViewFichierBAS().mapContentSelected());
 
 		if (m != null && !m.isEmpty() && m.get("id_source") != null) {
 			for (int i = 0; i < m.get("id_source").size(); i++) {
@@ -483,10 +478,10 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	// visual des Fichiers
 	public void initializeFichierBAS() {
 		LoggerHelper.debug(LOGGER, "initializeFichierBAS");
-		Map<String, ArrayList<String>> selectionLigne = this.vObjectService.mapContentSelected(getViewPilotageBAS());
-		ArrayList<String> selectionColonne = this.vObjectService.listHeadersSelected(getViewPilotageBAS());
+		Map<String, ArrayList<String>> selectionLigne = getViewPilotageBAS().mapContentSelected();
+		ArrayList<String> selectionColonne = getViewPilotageBAS().listHeadersSelected();
 
-		Map<String, ArrayList<String>> selectionLigneRapport = this.vObjectService.mapContentSelected(getViewRapportBAS());
+		Map<String, ArrayList<String>> selectionLigneRapport = getViewRapportBAS().mapContentSelected();
 
 		if (!selectionLigne.isEmpty() && !selectionColonne.isEmpty()) {
 
@@ -505,8 +500,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			
 			this.vObjectService.initialize(requete.toString(), null, defaultInputFields, getViewFichierBAS());
 		} else if (!selectionLigneRapport.isEmpty()) {
-
-			HashMap<String, String> type = this.vObjectService.mapHeadersType(getViewRapportBAS());
+			HashMap<String, String> type = getViewRapportBAS().mapHeadersType();
 			HashMap<String, String> defaultInputFields = new HashMap<>();
 		
             StringBuilder requete = new StringBuilder();
@@ -546,7 +540,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		loggerDispatcher.trace("*** Téléchargement des fichiers ***", LOGGER);
 		// récupération de la liste des id_source
 
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewFichierBAS());
+		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 		StringBuilder querySelection = this.vObjectService.queryView(getViewFichierBAS());
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// sélectionner
@@ -573,18 +567,30 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/toRestoreBAS")
-	public String toRestoreBAS() {
-		
+	public String toRestoreBAS() {		
+		return restore("'R'", "Fichier(s) à rejouer");
+	}
+
+	/**
+	 * Marquage des archives à rejouer lors de la prochaine initialisation
+	 *
+	 * @return
+	 */
+	@RequestMapping("/toRestoreArchiveBAS")
+	public String toRestoreArchiveBAS() {
+		return restore("'RA'", "Archives(s) à rejouer");
+	}
+
+	private String restore(String code, String messageOk) {
 		loggerDispatcher.trace("*** Marquage de fichier à rejouer ***", LOGGER);
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewFichierBAS());
-		
+		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
+	
 		// Récupération de la sélection de l'utilisateur
 		StringBuilder querySelection = new StringBuilder();
 		querySelection.append("select distinct container, id_source from (" + this.getViewFichierBAS().getMainQuery()
 				+ ") alias_de_table ");
 		querySelection.append(this.vObjectService.buildFilter(this.getViewFichierBAS().getFilterFields(),
 				this.getViewFichierBAS().getHeadersDLabel()));
-		
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// sélectionnés
 		if (!selection.isEmpty()) {
@@ -598,14 +604,13 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			}
 			querySelection.append(" AND container||'+'||id_source IN " + Format.sqlListe(infoConcatenee) + " ");
 		}
-		// loggerDispatcher.info("Ma requete de selection : " + querySelection, logger);
 	
-		StringBuilder updateToDelete = requeteUpdateToDelete(querySelection, "'R'");
+		StringBuilder updateToDelete = requeteUpdateToDelete(querySelection, code);
 		String message;
 		try {
 	
 			UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			message = "Fichier(s) à rejouer";
+			message = messageOk;
 		} catch (SQLException e) {
 			loggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
@@ -632,9 +637,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 	@RequestMapping("/downloadBdBAS")
 	public String downloadBdBAS(HttpServletResponse response) throws Exception {
-
-		Map<String, ArrayList<String>> selectionLigne = this.vObjectService.mapContentSelected(getViewPilotageBAS());
-		ArrayList<String> selectionColonne = this.vObjectService.listHeadersSelected(getViewPilotageBAS());
+		Map<String, ArrayList<String>> selectionLigne = getViewPilotageBAS().mapContentSelected();
+		ArrayList<String> selectionColonne = getViewPilotageBAS().listHeadersSelected();
 
 		String phase = selectionColonne.get(0).split("_")[0].toUpperCase();
 		String etat = selectionColonne.get(0).split("_")[1].toUpperCase();
@@ -690,8 +694,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
 				// fichiers
-				if (!this.vObjectService.mapContentSelected(getViewFichierBAS()).isEmpty()) {
-					ArrayList<String> filesSelected = this.vObjectService.mapContentSelected(getViewFichierBAS()).get("id_source");
+				if (!getViewFichierBAS().mapContentSelected().isEmpty()) {
+					ArrayList<String> filesSelected = getViewFichierBAS().mapContentSelected().get("id_source");
 					requete.append("AND id_source IN (");
 					for (int i = 0; i < filesSelected.size(); i++) {
 						if (i > 0) {
@@ -725,8 +729,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
 				// fichiers
-				if (!this.vObjectService.mapContentSelected(getViewFichierBAS()).isEmpty()) {
-					ArrayList<String> filesSelected = this.vObjectService.mapContentSelected(getViewFichierBAS()).get("id_source");
+				if (!getViewFichierBAS().mapContentSelected().isEmpty()) {
+					ArrayList<String> filesSelected = getViewFichierBAS().mapContentSelected().get("id_source");
 					requete.append("AND id_source IN (");
 					for (int i = 0; i < filesSelected.size(); i++) {
 						if (i > 0) {
@@ -755,7 +759,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 		loggerDispatcher.trace("*** Téléchargement des enveloppes ***", LOGGER);
 		// récupération de la liste des noms d'enloppe
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewFichierBAS());
+		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 
 		StringBuilder querySelection = new StringBuilder();
 		querySelection.append("select distinct alias_de_table.container as nom_fichier from ("
@@ -790,7 +794,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	public String toDeleteBAS() {
 		
 		loggerDispatcher.trace("*** Marquage de fichier à supprimer ***", LOGGER);
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewFichierBAS());
+		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 
 		// Récupération de la sélection de l'utilisateur
 		StringBuilder querySelection = new StringBuilder();
@@ -848,7 +852,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	public String undoActionBAS() {
 		
 		loggerDispatcher.trace("*** Suppression du marquage de fichier à supprimer ***", LOGGER);
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewFichierBAS());
+		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 		// Récupération de la sélection de l'utilisateur
 		StringBuilder querySelection = new StringBuilder();
 		querySelection.append("select distinct container, id_source from (" + this.getViewFichierBAS().getMainQuery()
@@ -883,67 +887,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
-	/**
-	 * Marquage des archives à rejouer lors de la prochaine initialisation
-	 *
-	 * @return
-	 */
-	@RequestMapping("/toRestoreArchiveBAS")
-	public String toRestoreArchiveBAS() {
-		
-		loggerDispatcher.trace("*** Marquage de fichier à rejouer ***", LOGGER);
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewFichierBAS());
-
-		// Récupération de la sélection de l'utilisateur
-		StringBuilder querySelection = new StringBuilder();
-		querySelection.append("select distinct container, id_source from (" + this.getViewFichierBAS().getMainQuery()
-				+ ") alias_de_table ");
-		querySelection.append(this.vObjectService.buildFilter(this.getViewFichierBAS().getFilterFields(),
-				this.getViewFichierBAS().getHeadersDLabel()));
-		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
-		// sélectionnés
-		if (!selection.isEmpty()) {
-			// concaténation des informations
-			ArrayList<String> infoConcatenee = new ArrayList<>();
-			ArrayList<String> listContainer = selection.get("container");
-			ArrayList<String> listIdSource = selection.get("id_source");
-
-			for (int i = 0; i < selection.get("id_source").size(); i++) {
-				infoConcatenee.add(listContainer.get(i) + "+" + listIdSource.get(i));
-			}
-			querySelection.append(" AND container||'+'||id_source IN " + Format.sqlListe(infoConcatenee) + " ");
-		}
-
-		StringBuilder updateToDelete = requeteUpdateToDelete(querySelection, "'RA'");
-		String message;
-		try {
-
-			UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			message = "Archives(s) à rejouer";
-		} catch (SQLException e) {
-			loggerDispatcher
-					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
-							+ updateToDelete, LOGGER);
-			e.printStackTrace();
-			message = "Problème lors de la restauration des fichiers";
-		}
-
-		// Attention bout de code spécifique aux bacs à sable, ne surtout pas copier en
-		// production
-		// Lancement de l'initialisation dans la foulée
-		loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), "arc.ihm",
-				getBacASable(), this.repertoire,
-				String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), "arc.ihm",
-				getBacASable(), this.repertoire,
-				String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter())).invokeApi();
-		// Fin du code spécifique aux bacs à sable
-		this.getViewPilotageBAS().setMessage(message);
-
-		return generateDisplay(RESULT_SUCCESS);
-	}
-
 	private StringBuilder requeteUpdateToDelete(StringBuilder querySelection, String valeur) {
 		StringBuilder updateToDelete = new StringBuilder();
 		updateToDelete.append("WITH ");
@@ -964,8 +907,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 */
 	@RequestMapping("/resetPhaseBAS")
 	public String resetPhaseBAS() {
-		
-		Map<String, ArrayList<String>> selection = this.vObjectService.mapContentSelected(getViewFichierBAS());
+		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 		StringBuilder querySelection = this.vObjectService.queryView(getViewFichierBAS());
 
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
@@ -976,7 +918,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		}
 
 		// On recupere la phase
-		String phase = this.vObjectService.mapContent(getViewFichierBAS()).get("phase_traitement").get(0);
+		String phase = getViewFichierBAS().mapContent().get("phase_traitement").get(0);
 
 		// Lancement du retour arrière
 		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
@@ -1016,8 +958,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			out.close();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loggerDispatcher.error("Error in updateConsoleBAS", e, LOGGER);
 		}
 		getSession().put("console", "");
 

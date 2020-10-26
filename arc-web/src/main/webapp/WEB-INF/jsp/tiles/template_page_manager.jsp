@@ -1,34 +1,32 @@
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <c:set var="allowResize" value="${param.allowResize}" />
-  <div style="float: left; margin-left: 20px;">  	
-	<c:if test='${1!=view.nbPages}'>
-	    <table style="width: 200px;">
-	      <tr>
-	        <td style="width: 40px;">Page&nbsp;:</td>
-	        <td style="width: 50px; background-color: #ffffff;">
-	          <textarea name="${view.sessionName}.idPage" cols="" rows="">${view.idPage}</textarea>
-	        </td>
-	        <td style="width: 10px;">/</td>
-	        <td style="width: 25px;">
-	          ${view.nbPages}
-	        </td>
-	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),${1 - view.idPage});">&lt;&lt;</td>
-	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),-1);">&lt;</td>
-	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),1);">&gt;</td>
-	        <td class="smallButton" onclick="gotoPage('${view.sessionName}',$(this),${view.nbPages - view.idPage});">&gt;&gt;</td>
-	      </tr>
-	    </table>
-	</c:if>
-	<c:if test="${allowResize}">
-		<table style="width: 200px;">
-	      <tr>
-	        <td style="width: 40px;">Nombre d'éléments par page&nbsp;:</td>
-	        <td style="width: 50px; background-color: #ffffff;">
-	          <input type="number" name="${view.sessionName}.paginationSize" value="${view.paginationSize}" min="5" max="100" />
-	        </td>
-	      </tr>
-	    </table>
-	</c:if>
-  </div>
+<div style="float: left; margin-left: 20px;">
+	<div class="row">
+		<c:if test="${allowResize}">
+			<div class="col-xs-6">
+				<label><spring:message code="page.size" />:&nbsp;
+					<input type="number" class="input-sm w-25"
+					name="${view.sessionName}.paginationSize"
+					value="${view.paginationSize}" min="5" max="100" />
+				</label>
+			</div>
+		</c:if>
+		<c:if test='${1!=view.nbPages}'>
+			<div class="col">
+				<label>Page&nbsp;<input class="input-sm w-25" type="number"
+					min="1" max="${view.nbPages}" name="${view.sessionName}.idPage"
+					value="${view.idPage}" />/${view.nbPages}
+				</label>
+				<span class="smallButton"
+					onclick="gotoPage('${view.sessionName}',${1 - view.idPage});">&lt;&lt;</span>
+				<span class="smallButton"
+					onclick="gotoPage('${view.sessionName}',-1);">&lt;</span> <span
+					class="smallButton" onclick="gotoPage('${view.sessionName}',1);">&gt;</span>
+				<span class="smallButton"
+					onclick="gotoPage('${view.sessionName}',${view.nbPages - view.idPage});">&gt;&gt;</span>
+				</div>
+		</c:if>
+	</div>
+</div>

@@ -1,9 +1,11 @@
 package fr.insee.arc.web.util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+
+import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.ManipString;
 
 public class VObject {
 
@@ -30,6 +32,9 @@ public class VObject {
 
 	/** Tableau du contenu de la requete (ligne, colonne) */
 	private TableObject content;
+
+	/** Previous state of the content (from session)*/
+	private TableObject savedContent;
 
 	/** Rendering for this */
 	private ConstantVObject constantVObject;
@@ -79,29 +84,342 @@ public class VObject {
 
 	private String message;
 
-	private HashMap<String, String> customValues = new HashMap<>();
-	private HashMap<String, HashMap<String, String>> mapCustomValues = new HashMap<>();
+	private HashMap<String, String> customValues;
 
-	// upload
-	private ArrayList<File> fileUpload;
-	private ArrayList<String> fileUploadFileName;
+	public ArrayList<ArrayList<String>> listContent() {
+        if (getSavedContent() == null) {
+            return new ArrayList<ArrayList<String>>();
+        }
+        ArrayList<ArrayList<String>> c = new ArrayList<ArrayList<String>>();
+        for (int i = 0; i < getSavedContent().size(); i++) {
+            ArrayList<String> l = new ArrayList<String>();
+            for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
+                l.add(getSavedContent().get(i).d.get(j));
+            }
+            c.add(l);
+        }
+        return c;
+    }
 
+	/**
+     * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste de toutes les valeurs
+     */
+    public HashMap<String, ArrayList<String>> mapContent() {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContent()).mapContent();
+    }
 	
-	public boolean getIsInitialized() {
-		return isInitialized;
+	public ArrayList<ArrayList<String>> listContentBeforeUpdate() {
+        if (getSavedContent() == null) {
+            return new ArrayList<ArrayList<String>>();
+        }
+        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+        // comparaison des lignes dans la table avant et aprés
+        // toBeUpdated contient l'identifiant des lignes à update
+        for (int i = 0; i < getContent().size(); i++) {
+            int j = 0;
+            boolean equals = true;
+            while (j < getContent().get(i).d.size() && equals) {
+                equals = getContent().get(i).d.get(j) == null 
+                		|| ManipString.compareStringWithNull(getSavedContent().get(i).d.get(j), getContent().get(i).d.get(j));
+                j++;
+            }
+            if (!equals) {
+                r.add(getSavedContent().get(i).d);
+            }
+        }
+        return r;
+    }
+
+	public HashMap<String, ArrayList<String>> mapContentBeforeUpdate() {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentBeforeUpdate()).mapContent();
+    }
+
+    public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(int i) {
+	    ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+	    r.add(listContentBeforeUpdate().get(i));
+	    return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
 
-	public void setIsInitialized(boolean isInitialized) {
-		this.isInitialized = isInitialized;
+	public ArrayList<ArrayList<String>> listContentAfterUpdate() {
+    	if (getSavedContent() == null) {
+            return new ArrayList<ArrayList<String>>();
+        }
+        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+        // comparaison des lignes dans la table avant et aprés
+        // toBeUpdated contient l'identifiant des lignes à update
+        for (int i = 0; i < getContent().size(); i++) {
+            int j = 0;
+            boolean equals = true;
+            while (j < getContent().get(i).d.size() && equals) {
+                equals = getContent().get(i).d.get(j) == null 
+                		|| ManipString.compareStringWithNull(getSavedContent().get(i).d.get(j), getContent().get(i).d.get(j));
+                j++;
+            }
+            if (!equals) {
+                r.add(getContent().get(i).d);
+            }
+        }
+        return r;
+    }
+
+    public HashMap<String, ArrayList<String>> mapContentAfterUpdate() {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentAfterUpdate()).mapContent();
+    }
+    
+	public HashMap<String, ArrayList<String>> mapContentAfterUpdate(int i) {
+	    ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+	    r.add(listContentAfterUpdate().get(i));
+	    return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
+	}
+
+	public ArrayList<ArrayList<String>> listContentSelected() {
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		// si rien dans la liste, return null
+		if (getSelectedLines() == null || getSelectedLines().size() == 0) {
+			return r;
+		}
+		for (int j = 0; j < getSelectedLines().size(); j++) {
+			if (Boolean.TRUE.equals(getSelectedLines().get(j))) {
+				r.add(getSavedContent().get(j).d);
+			}
+		}
+		return r;
+	}
+
+	/**
+	 * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste de toutes les valeurs selectionnées
+	 */
+	public HashMap<String, ArrayList<String>> mapContentSelected() {
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentSelected()).mapContent();
+	}
+
+    /**
+     * Retourne la liste des entetes base de donnée selectionnés
+     */
+    public ArrayList<String> listHeadersSelected() {
+        if (getSavedContent() == null) {
+            return new ArrayList<String>();
+        }
+        ArrayList<String> r = new ArrayList<String>();
+        if (getSelectedColumns() == null || getSelectedColumns().size() == 0) {
+            return r;
+        }
+        for (int i = 0; i < getSelectedColumns().size(); i++) {
+            if (Boolean.TRUE.equals(getSelectedColumns().get(i))) {
+                r.add(getHeadersDLabel().get(i));
+            }
+        }
+        return r;
+    }
+
+    public HashMap<String, String> mapHeadersSelected() {
+        HashMap<String, String> r = new HashMap<String, String>();
+        for (String s : listHeadersSelected()) {
+            r.put(s, s);
+        }
+        return r;
+    }
+	
+	public HashMap<String, String> mapHeadersType() {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), null).mapTypes();
+    }
+
+	public ArrayList<ArrayList<String>> listInputFields() {
+        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+        r.add(getInputFields());
+        return r;
+    }
+
+    public HashMap<String, ArrayList<String>> mapInputFields() {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listInputFields()).mapContent();
+    }
+
+    /** Modifie la valeur d'input pour la colonne demandée.
+     * @param headerDLabel nom de la colonne en base
+     * @param value valeur à attribuer
+     * @throw IllegalArgumentException si le nom de colonne est invalide */
+    public void setInputFieldFor(String headerDLabel, String value) {
+    	int index = getHeadersDLabel().indexOf(headerDLabel);
+    	if (index == -1) {
+    		throw new IllegalArgumentException("Field " + headerDLabel + " was not found.");
+    	}
+    	getInputFields().set(index, value);
+    }
+
+    /** Retourne la valeur d'input pour la colonne demandée.
+     * Forme abrégée de mapInputFields().get("ma_colonne").get(0).
+     * @param headerDLabel nom de la colonne en base
+     * @throw IllegalArgumentException si le nom de colonne est invalide */
+    public String getInputFieldFor(String headerDLabel) {
+    	int index = getHeadersDLabel().indexOf(headerDLabel);
+    	if (index == -1) {
+    		throw new IllegalArgumentException("Field " + headerDLabel + " was not found.");
+    	}
+    	return mapInputFields().get(headerDLabel).get(0);
+    }
+    
+    public ArrayList<ArrayList<String>> listLineContent(int i) {
+        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+        r.add(getContent().get(i).d);
+        return r;
+    }
+
+    public HashMap<String, ArrayList<String>> mapLineContent(int i) {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listLineContent(i)).mapContent();
+    }
+
+    public HashMap<String, ArrayList<String>> mapFilterFields() {
+        if (getFilterFields()==null)
+        {
+        	return new HashMap<String, ArrayList<String>>();
+        }
+
+    	ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+        r.add(getFilterFields());
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
+    }
+    
+
+	@SuppressWarnings("unchecked")
+	public VObject copy() {
+		VObject v0 = new VObject();
+		v0.setTitle(this.getTitle());
+		v0.setSessionName(this.getSessionName());
+		v0.setPaginationSize(this.getPaginationSize());
+		v0.setIsInitialized(this.getIsInitialized());
+		v0.setMainQuery(this.getMainQuery());
+		v0.setBeforeSelectQuery(this.getBeforeSelectQuery());
+		v0.setAfterUpdateQuery(this.getAfterUpdateQuery());
+		v0.setAfterInsertQuery(this.getAfterInsertQuery());
+		v0.setTable(this.getTable());
+		v0.setMessage(this.getMessage());
+		if (this.getContent() != null) {
+			v0.setContent(this.getContent().clone());
+		} else {
+			v0.setContent(null);
+		}
+		if (this.getHeadersDLabel() != null) {
+			v0.setHeadersDLabel((ArrayList<String>) this.getHeadersDLabel().clone());
+		} else {
+			v0.setHeadersDLabel(null);
+		}
+		if (this.getHeadersDType() != null) {
+			v0.setHeadersDType((ArrayList<String>) this.getHeadersDType().clone());
+		} else {
+			v0.setHeadersDType(null);
+		}
+		if (this.getHeadersVLabel() != null) {
+			v0.setHeadersVLabel((ArrayList<String>) this.getHeadersVLabel().clone());
+		} else {
+			v0.setHeadersVLabel(null);
+		}
+		if (this.getHeadersVSize() != null) {
+			v0.setHeadersVSize((ArrayList<String>) this.getHeadersVSize().clone());
+		} else {
+			v0.setHeadersVSize(null);
+		}
+		if (this.getHeadersVType() != null) {
+			v0.setHeadersVType((ArrayList<String>) this.getHeadersVType().clone());
+		} else {
+			v0.setHeadersVType(null);
+		}
+		if (this.getHeadersVSelect() != null) {
+			v0.setHeadersVSelect((ArrayList<LinkedHashMap<String, String>>) this.getHeadersVSelect().clone());
+		} else {
+			v0.setHeadersVSelect(null);
+		}
+		if (this.getHeadersVisible() != null) {
+			v0.setHeadersVisible((ArrayList<Boolean>) this.getHeadersVisible().clone());
+		} else {
+			v0.setHeadersVisible(null);
+		}
+		if (this.getHeadersUpdatable() != null) {
+			v0.setHeadersUpdatable((ArrayList<Boolean>) this.getHeadersUpdatable().clone());
+		} else {
+			v0.setHeadersUpdatable(null);
+		}
+		if (this.getHeadersRequired() != null) {
+			v0.setHeadersRequired((ArrayList<Boolean>) this.getHeadersRequired().clone());
+		} else {
+			v0.setHeadersRequired(null);
+		}
+		if (this.getHeaderSortDLabels() != null) {
+			v0.setHeaderSortDLabels((ArrayList<String>) this.getHeaderSortDLabels().clone());
+		} else {
+			v0.setHeaderSortDLabels(null);
+		}
+		if (this.getHeaderSortDOrders() != null) {
+			v0.setHeaderSortDOrders((ArrayList<Boolean>) this.getHeaderSortDOrders().clone());
+		} else {
+			v0.setHeaderSortDOrders(null);
+		}
+		v0.setHeaderSortDLabel(this.getHeaderSortDLabel());
+		if (this.getSelectedLines() != null) {
+			v0.setSelectedLines((ArrayList<Boolean>) this.getSelectedLines().clone());
+		} else {
+			v0.setSelectedLines(null);
+		}
+		if (this.getSelectedColumns() != null) {
+			v0.setSelectedColumns((ArrayList<Boolean>) this.getSelectedColumns().clone());
+		} else {
+			v0.setSelectedColumns(null);
+		}
+		v0.setHeaderSortDLabel(this.getHeaderSortDLabel());
+		if (this.getDefaultInputFields() != null) {
+			v0.setDefaultInputFields((HashMap<String, String>) this.getDefaultInputFields().clone());
+		} else {
+			v0.setDefaultInputFields(null);
+		}
+		if (this.getInputFields() != null) {
+			v0.setInputFields((ArrayList<String>) this.getInputFields().clone());
+		} else {
+			v0.setInputFields(null);
+		}
+		v0.setNbPages(this.getNbPages());
+		v0.setIdPage(this.getIdPage());
+		if (this.getFilterFields() != null) {
+			v0.setFilterFields((ArrayList<String>) this.getFilterFields().clone());
+		} else {
+			v0.setFilterFields(null);
+		}
+		if (this.getConstantVObject() != null) {
+			v0.setConstantVObject(this.getConstantVObject());
+		}
+		if (this.getCustomValues() != null) {
+			v0.setCustomValues((HashMap<String, String>) this.getCustomValues().clone());
+		}
+		return v0;
+	}
+
+	public ArrayList<String> getV(int j, TableObject content) {
+		ArrayList<String> h = new ArrayList<String>();
+		for (int i = 0; i < content.t.size(); i++) {
+			h.add(content.t.get(i).d.get(j));
+		}
+		return h;
+	}
+
+	/**
+	 *
+	 *
+	 * @return le nombre de lignes de ceci
+	 */
+	public int getNombreLigne() {
+		return this.getContent().size();
 	}
 
 
-	public int getPaginationSize() {
-		return paginationSize;
+	/**
+	 *
+	 *
+	 * @return {@code true} si aucune ligne dans {@code this}
+	 */
+	public boolean isEmpty() {
+		return this.getNombreLigne() <= 0;
 	}
 
-	public void setPaginationSize(int paginationSize) {
-		this.paginationSize = paginationSize;
+	public void clear() {
+		setIsInitialized(false);		
 	}
 
 	public String getTitle() {
@@ -118,6 +436,14 @@ public class VObject {
 
 	public void setSessionName(String sessionName) {
 		this.sessionName = sessionName;
+	}
+
+	public int getPaginationSize() {
+		return paginationSize;
+	}
+
+	public void setPaginationSize(int paginationSize) {
+		this.paginationSize = paginationSize;
 	}
 
 	public String getMainQuery() {
@@ -168,12 +494,44 @@ public class VObject {
 		this.content = content;
 	}
 
+	public TableObject getSavedContent() {
+		return savedContent;
+	}
+
+	public void setSavedContent(TableObject savedContent) {
+		this.savedContent = savedContent;
+	}
+
 	public ConstantVObject getConstantVObject() {
 		return constantVObject;
 	}
 
 	public void setConstantVObject(ConstantVObject constantVObject) {
 		this.constantVObject = constantVObject;
+	}
+
+	public boolean getIsInitialized() {
+		return isInitialized;
+	}
+
+	public void setIsInitialized(boolean isInitialized) {
+		this.isInitialized = isInitialized;
+	}
+
+	public boolean getIsScoped() {
+		return isScoped;
+	}
+
+	public void setIsScoped(boolean isScoped) {
+		this.isScoped = isScoped;
+	}
+
+	public boolean getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
 	public ArrayList<String> getHeadersDLabel() {
@@ -296,14 +654,6 @@ public class VObject {
 		this.idPage = idPage;
 	}
 
-	public ArrayList<String> getFilterFields() {
-		return filterFields;
-	}
-
-	public void setFilterFields(ArrayList<String> filterFields) {
-		this.filterFields = filterFields;
-	}
-
 	public ArrayList<String> getHeaderSortDLabels() {
 		return headerSortDLabels;
 	}
@@ -328,118 +678,12 @@ public class VObject {
 		this.headerSortDLabel = headerSortDLabel;
 	}
 
-	@SuppressWarnings("unchecked")
-	public VObject copy() {
-		VObject v0 = new VObject();
-		v0.setTitle(this.getTitle());
-		v0.setSessionName(this.getSessionName());
-		v0.setPaginationSize(this.getPaginationSize());
-		v0.setIsInitialized(this.getIsInitialized());
-		v0.setMainQuery(this.getMainQuery());
-		v0.setBeforeSelectQuery(this.getBeforeSelectQuery());
-		v0.setAfterUpdateQuery(this.getAfterUpdateQuery());
-		v0.setAfterInsertQuery(this.getAfterInsertQuery());
-		v0.setTable(this.getTable());
-		v0.setMessage(this.getMessage());
-		if (this.getContent() != null) {
-			v0.setContent(this.getContent().clone());
-		} else {
-			v0.setContent(null);
-		}
-		if (this.getHeadersDLabel() != null) {
-			v0.setHeadersDLabel((ArrayList<String>) this.getHeadersDLabel().clone());
-		} else {
-			v0.setHeadersDLabel(null);
-		}
-		if (this.getHeadersDType() != null) {
-			v0.setHeadersDType((ArrayList<String>) this.getHeadersDType().clone());
-		} else {
-			v0.setHeadersDType(null);
-		}
-		if (this.getHeadersVLabel() != null) {
-			v0.setHeadersVLabel((ArrayList<String>) this.getHeadersVLabel().clone());
-		} else {
-			v0.setHeadersVLabel(null);
-		}
-		if (this.getHeadersVSize() != null) {
-			v0.setHeadersVSize((ArrayList<String>) this.getHeadersVSize().clone());
-		} else {
-			v0.setHeadersVSize(null);
-		}
-		if (this.getHeadersVType() != null) {
-			v0.setHeadersVType((ArrayList<String>) this.getHeadersVType().clone());
-		} else {
-			v0.setHeadersVType(null);
-		}
-		if (this.getHeadersVSelect() != null) {
-			v0.setHeadersVSelect((ArrayList<LinkedHashMap<String, String>>) this.getHeadersVSelect().clone());
-		} else {
-			v0.setHeadersVSelect(null);
-		}
-		if (this.getHeadersVisible() != null) {
-			v0.setHeadersVisible((ArrayList<Boolean>) this.getHeadersVisible().clone());
-		} else {
-			v0.setHeadersVisible(null);
-		}
-		if (this.getHeadersUpdatable() != null) {
-			v0.setHeadersUpdatable((ArrayList<Boolean>) this.getHeadersUpdatable().clone());
-		} else {
-			v0.setHeadersUpdatable(null);
-		}
-		if (this.getHeadersRequired() != null) {
-			v0.setHeadersRequired((ArrayList<Boolean>) this.getHeadersRequired().clone());
-		} else {
-			v0.setHeadersRequired(null);
-		}
-		if (this.getHeaderSortDLabels() != null) {
-			v0.setHeaderSortDLabels((ArrayList<String>) this.getHeaderSortDLabels().clone());
-		} else {
-			v0.setHeaderSortDLabels(null);
-		}
-		if (this.getHeaderSortDOrders() != null) {
-			v0.setHeaderSortDOrders((ArrayList<Boolean>) this.getHeaderSortDOrders().clone());
-		} else {
-			v0.setHeaderSortDOrders(null);
-		}
-		v0.setHeaderSortDLabel(this.getHeaderSortDLabel());
-		if (this.getSelectedLines() != null) {
-			v0.setSelectedLines((ArrayList<Boolean>) this.getSelectedLines().clone());
-		} else {
-			v0.setSelectedLines(null);
-		}
-		if (this.getSelectedColumns() != null) {
-			v0.setSelectedColumns((ArrayList<Boolean>) this.getSelectedColumns().clone());
-		} else {
-			v0.setSelectedColumns(null);
-		}
-		v0.setHeaderSortDLabel(this.getHeaderSortDLabel());
-		if (this.getDefaultInputFields() != null) {
-			v0.setDefaultInputFields((HashMap<String, String>) this.getDefaultInputFields().clone());
-		} else {
-			v0.setDefaultInputFields(null);
-		}
-		if (this.getInputFields() != null) {
-			v0.setInputFields((ArrayList<String>) this.getInputFields().clone());
-		} else {
-			v0.setInputFields(null);
-		}
-		v0.setNbPages(this.getNbPages());
-		v0.setIdPage(this.getIdPage());
-		if (this.getFilterFields() != null) {
-			v0.setFilterFields((ArrayList<String>) this.getFilterFields().clone());
-		} else {
-			v0.setFilterFields(null);
-		}
-		if (this.getConstantVObject() != null) {
-			v0.setConstantVObject(this.getConstantVObject());
-		}
-		if (this.getCustomValues() != null) {
-			v0.setCustomValues((HashMap<String, String>) this.getCustomValues().clone());
-		}
-		if (this.getMapCustomValues() != null) {
-			v0.setMapCustomValues((HashMap<String, HashMap<String, String>>) this.getMapCustomValues().clone());
-		}
-		return v0;
+	public ArrayList<String> getFilterFields() {
+		return filterFields;
+	}
+
+	public void setFilterFields(ArrayList<String> filterFields) {
+		this.filterFields = filterFields;
 	}
 
 	public String getMessage() {
@@ -450,27 +694,6 @@ public class VObject {
 		this.message = message;
 	}
 
-	public Boolean getIsScoped() {
-		return isScoped;
-	}
-
-	public void setIsScoped(boolean isScoped) {
-		this.isScoped = isScoped;
-	}
-
-	public void setInitialized(boolean isInitialized) {
-		this.isInitialized = isInitialized;
-	}
-
-
-	public ArrayList<String> getV(int j, TableObject content) {
-		ArrayList<String> h = new ArrayList<String>();
-		for (int i = 0; i < content.t.size(); i++) {
-			h.add(content.t.get(i).d.get(j));
-		}
-		return h;
-	}
-
 	public HashMap<String, String> getCustomValues() {
 		return customValues;
 	}
@@ -479,70 +702,11 @@ public class VObject {
 		this.customValues = customValues;
 	}
 
-	public HashMap<String, HashMap<String, String>> getMapCustomValues() {
-		return mapCustomValues;
+	public void addCustomValue(String key, String value) {
+		if (getCustomValues() == null) {
+			setCustomValues(new HashMap<String, String>());
+		}
+		getCustomValues().put(key, value);
 	}
-
-	public void setMapCustomValues(HashMap<String, HashMap<String, String>> mapCustomValues) {
-		this.mapCustomValues = mapCustomValues;
-	}
-
-	public void setScoped(boolean isScoped) {
-		this.isScoped = isScoped;
-	}
-
-	public boolean getIsActive() {
-		return isActive;
-	}
-
-	public void setIsActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-
-	/**
-	 *
-	 *
-	 * @return le nombre de lignes de ceci
-	 */
-	public int getNombreLigne() {
-		return this.getContent().size();
-	}
-
-
-	/**
-	 *
-	 *
-	 * @return {@code true} si aucune ligne dans {@code this}
-	 */
-	public boolean isEmpty() {
-		return this.getNombreLigne() <= 0;
-	}
-
-	public ArrayList<File> getFileUpload() {
-		return fileUpload;
-	}
-
-	public void setFileUpload(ArrayList<File> fileUpload) {
-		this.fileUpload = fileUpload;
-	}
-
-	public ArrayList<String> getFileUploadFileName() {
-		return fileUploadFileName;
-	}
-
-	public void setFileUploadFileName(ArrayList<String> fileUploadFileName) {
-		this.fileUploadFileName = fileUploadFileName;
-	}
-
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-
-	public void clear() {
-		getCustomValues().clear();
-        getMapCustomValues().clear();
-        setIsInitialized(false);		
-	}
-
 
 }

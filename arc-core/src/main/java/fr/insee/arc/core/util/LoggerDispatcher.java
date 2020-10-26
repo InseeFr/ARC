@@ -4,6 +4,11 @@ import org.apache.logging.log4j.Logger;
 
 public interface LoggerDispatcher {
 
+	/** Prevention against log injection.*/
+	default String sanitize(Object message) {
+		return message.toString().replaceAll("[\n|\r|\t]", "_");
+	}
+
 	/**
 	 * Log a message as error. Might perform one or more additional actions.
 	 *

@@ -15,9 +15,7 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.web.interceptor.ArcInterceptor;
-import fr.insee.arc.web.util.WebLoggerDispatcher;
 
 @EnableWebMvc
 @Configuration
@@ -45,20 +43,17 @@ public class WebConfig implements WebMvcConfigurer {
 		return new SessionLocaleResolver();
 	}
 	
-	@Bean
+	@Bean(name = "messageSource")
 	public MessageSource getMessageSource() {
 		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-		messageSource.addBasenames("global");
+		messageSource.addBasenames("messages");
+		messageSource.setDefaultEncoding("UTF-8");
+		messageSource.setAlwaysUseMessageFormat(true);
 		return messageSource;
 	}
 
 	@Bean
 	public ViewResolver getViewResolver() {
 		return new InternalResourceViewResolver("/WEB-INF/", ""); 
-	}
-	
-	@Bean
-	public LoggerDispatcher loggerDispatcher() {
-		return new WebLoggerDispatcher();
 	}
 }
