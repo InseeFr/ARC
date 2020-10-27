@@ -178,6 +178,45 @@ $BODY$
   LANGUAGE sql IMMUTABLE STRICT
   COST 100;
 
+CREATE OR REPLACE FUNCTION public.array_agg_distinct_gather(
+    tab cle_valeur[],
+    src cle_valeur)
+  RETURNS cle_valeur[] AS
+$BODY$
+DECLARE
+BEGIN
+
+if (src.i is null) then return tab; end if;
+if (tab is null) then return array[src]; end if;
+for k in 1..array_length(tab,1) loop
+if (tab[k]).i=src.i then return tab; end if;
+end loop;
+
+return tab||src;
+
+END;
+$BODY$
+  LANGUAGE plpgsql IMMUTABLE
+  COST 100;
+
+
+CREATE OR REPLACE FUNCTION public.array_agg_distinct_result(cle_valeur[])
+  RETURNS text[] AS
+$BODY$ 
+ -- select array_agg(v) from (select m.v from unnest($1) m where m.i is not null order by m.i, m.v ) t0 
+  select array_agg(v) from (select m.v from unnest($1) m order by m.i, m.v ) t0 
+ $BODY$
+  LANGUAGE sql IMMUTABLE STRICT
+  COST 100;
+
+CREATE AGGREGATE public.array_agg_distinct(cle_valeur) (
+  SFUNC=array_agg_distinct_gather,
+  STYPE=cle_valeur[],
+  FINALFUNC=array_agg_distinct_result
+);
+
+  
+  
 do $$ begin CREATE SEQUENCE arc.number_generator cycle; exception when others then end; $$; 
 
 CREATE OR REPLACE FUNCTION public.curr_val(text) 
