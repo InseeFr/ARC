@@ -74,6 +74,18 @@ $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
 
+-- multi dimensionnal array decomposition  
+CREATE OR REPLACE FUNCTION decompose(ANYARRAY, OUT a ANYARRAY)
+  RETURNS SETOF ANYARRAY AS
+$func$
+BEGIN
+   FOREACH a SLICE 1 IN ARRAY $1 LOOP
+      RETURN NEXT;
+   END LOOP;
+END
+$func$  LANGUAGE plpgsql IMMUTABLE;  
+  
+  
 -- Function: arc.transpose_pilotage_fin()
 
 -- DROP FUNCTION arc.transpose_pilotage_fin();
