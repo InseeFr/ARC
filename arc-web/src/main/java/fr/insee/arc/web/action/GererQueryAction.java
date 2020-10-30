@@ -55,7 +55,7 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 
 			if (UtilitaireDao.get("arc").testResultRequest(null, m))
 			{
-				this.vObjectService.initialize(m, "arc.ihm_Query", defaultInputFields, viewQuery);
+				this.vObjectService.initialize(viewQuery, m, "arc.ihm_Query", defaultInputFields);
 			}
 			else
 			{
@@ -106,7 +106,7 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 			this.mySchema=this.defaultSchema;
 		}
 
-		this.vObjectService.initialize("select tablename from pg_tables where schemaname='"+this.mySchema+"'", "arc.ihm_Table", defaultInputFields, viewTable);
+		this.vObjectService.initialize(viewTable, "select tablename from pg_tables where schemaname='"+this.mySchema+"'", "arc.ihm_Table", defaultInputFields);
 
 	}
 

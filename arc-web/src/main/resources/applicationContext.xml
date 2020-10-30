@@ -8,9 +8,6 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
 		http://www.springframework.org/schema/tool http://www.springframework.org/schema/tool/spring-tool-4.3.xsd
 		">
-
-	<context:annotation-config></context:annotation-config>
-	<context:component-scan base-package="fr.insee.arc.web,fr.insee.arc.core,fr.insee.arc.utils"></context:component-scan>	
 	
 	<bean id="utilitaireDao" class="fr.insee.arc.utils.dao.UtilitaireDao">
   		<constructor-arg index="0" value="arc" />
@@ -50,7 +47,6 @@
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 	</bean>
 	
-	<bean id="activeLoggerDispatcher" class="fr.insee.arc.web.util.WebLoggerDispatcher" />
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>
 

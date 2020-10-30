@@ -42,7 +42,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
         StringBuilder requete = new StringBuilder();
         requete.append("\n SELECT " + NOM_TABLE + ", description FROM "+table+" ");
 
-        vObject.initialize(requete.toString(), table, defaultInputFields, viewListNomenclatures);
+        vObject.initialize(viewListNomenclatures, requete.toString(), table, defaultInputFields);
     }
 
     
@@ -58,7 +58,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
             defaultInputFields.put(NOM_TABLE, selection.get(NOM_TABLE).get(0));
 
-            vObject.initialize(requete.toString(), "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields, viewNomenclature);
+            vObject.initialize(viewNomenclature, requete.toString(), "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
         } else {
             vObject.destroy(viewNomenclature);
         }
@@ -76,7 +76,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 
             defaultInputFields.put("type_nmcl", typeNomenclature(selection.get(NOM_TABLE).get(0)));
-            vObject.initialize(requete.toString(), "arc.ihm_schema_nmcl", defaultInputFields, viewSchemaNmcl);
+            vObject.initialize(viewSchemaNmcl, requete.toString(), "arc.ihm_schema_nmcl", defaultInputFields);
             
         } else {
             vObject.destroy(viewSchemaNmcl);

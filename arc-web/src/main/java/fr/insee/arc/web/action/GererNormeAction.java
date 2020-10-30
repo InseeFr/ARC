@@ -1,6 +1,5 @@
 package fr.insee.arc.web.action;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,12 +11,12 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dao.MappingRegleDao;
 import fr.insee.arc.core.model.BddTable;
@@ -463,8 +462,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importChargement")
-	public String importChargement(File fileUploadLoad) {
-		
+	public String importChargement(MultipartFile fileUploadLoad) {		
 		gererNormeDao.uploadFileRule(getViewChargement(), viewRulesSet, fileUploadLoad);
 		return generateDisplay(RESULT_SUCCESS);
 	}
@@ -476,7 +474,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importNormage")
-	public String importNormage(File fileUploadStructurize) {
+	public String importNormage(MultipartFile fileUploadStructurize) {
 		
 		gererNormeDao.uploadFileRule(getViewNormage(), viewRulesSet, fileUploadStructurize);
 		return generateDisplay(RESULT_SUCCESS);
@@ -679,16 +677,16 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/importControle")
 	@SQLExecutor
-	public String importControle(File fileUploadControle) {
+	public String importControle(MultipartFile fileUploadControle) {
 		
 		loggerDispatcher.info("importControle", LOGGER);
 		String fichierRegle = "";
-		if (StringUtils.isBlank(fileUploadControle.getPath())) {
+		if (fileUploadControle == null || fileUploadControle.isEmpty()) {
 			this.viewControle.setMessage("You should choose a file first");
 		} else {
 
 			try {
-				fichierRegle = ManipString.readFileAsString(fileUploadControle.getPath());
+				fichierRegle = new String(fileUploadControle.getBytes());
 			} catch (IOException e) {
 				loggerDispatcher.error(String.format("Error with the file in importControle : %s", e.toString()),
 						LOGGER);
@@ -892,7 +890,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importFiltrage")
-	public String importFiltrage(File fileUploadFilter) {
+	public String importFiltrage(MultipartFile fileUploadFilter) {
 		
 		gererNormeDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, fileUploadFilter);
 		return generateDisplay(RESULT_SUCCESS);
@@ -930,9 +928,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importMapping")
-	public String importMapping(File fileUploadMap) {
+	public String importMapping(MultipartFile fileUploadMap) {
 		
-		if (StringUtils.isBlank(fileUploadMap.getPath())) {
+		if (fileUploadMap == null || fileUploadMap.isEmpty()) {
 			this.viewMapping.setMessage("You should choose a file first");
 		} else {
 			boolean isRegleOk = false;
@@ -1065,8 +1063,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesChargementCopie")
 	public String selectJeuxDeReglesChargementCopie() {
 		
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1079,8 +1077,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesNormageCopie")
 	public String selectJeuxDeReglesNormageCopie() {
 		
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1093,8 +1091,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesControleCopie")
 	public String selectJeuxDeReglesControleCopie() {
 		
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewControle.getTable());
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewControle.getTable());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1107,8 +1105,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("selectJeuxDeReglesFiltrageCopie")
 	public String selectJeuxDeReglesFiltrageCopie() {
 		
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1121,8 +1119,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/selectJeuxDeReglesMappingCopie")
 	public String selectJeuxDeReglesMappingCopie() {
 		
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
-		this.viewJeuxDeReglesCopie.addCustomValue(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -1415,7 +1413,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return the selectedJeuDeRegle
 	 */
 	public String getSelectedJeuDeRegle() {
-		return this.viewJeuxDeReglesCopie.getCustomValues().get(SELECTED_RULESET_TABLE);
+		return this.viewJeuxDeReglesCopie.getCustomValue(SELECTED_RULESET_TABLE);
 	}
 
 }

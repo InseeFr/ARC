@@ -93,7 +93,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		Map<String,ArrayList<String>> m=viewDirIn.mapContentSelected();
 		if (!m.isEmpty()) {
 			if(m.get("isdirectory").get(0).equals("true"))  {
-				this.dirIn=  Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
+				this.dirIn= Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
 			}
 		}
 

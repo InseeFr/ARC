@@ -2,6 +2,7 @@ package fr.insee.arc.core.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -27,7 +29,6 @@ import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * ApiNormageService
@@ -93,7 +94,7 @@ public class ApiInitialisationService extends ApiService {
      * @throws Exception
      */
     public void rebuildFileSystem() throws Exception {
-        StaticLoggerDispatcher.info("rebuildFileSystem", LOGGER);
+        loggerDispatcher.info("rebuildFileSystem", LOGGER);
 
         // parcourir toutes les archives dans le répertoire d'archive
     	String repertoire = properties.getBatchParametersDirectory();
@@ -112,16 +113,22 @@ public class ApiInitialisationService extends ApiService {
             if (entrepotList!=null)
             {
             for (String s : entrepotList) {
-                String dirIn = repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + s + "_ARCHIVE";
-                String dirOut = repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + s;
+            	String fullEnvDir = Paths.get(
+                		repertoire, 
+                		envDir).toString();
+            	File envDirFile = new File(fullEnvDir);
+            	makeDir(envDirFile);
+            	
+                String dirIn = Paths.get(
+                		fullEnvDir,
+                		TraitementPhase.RECEPTION + "_" + s + "_ARCHIVE").toString();
+                String dirOut = Paths.get(
+                		fullEnvDir,
+                		TraitementPhase.RECEPTION + "_" + s).toString();
 
                 // on itère sur les fichiers trouvé dans le répertoire d'archive
                 File f = new File(dirIn);
-                
-                if (!f.exists())
-                {
-                	f.mkdir();
-                }
+                makeDir(f);
                 
                 File[] fichiers = f.listFiles();
 
@@ -169,10 +176,7 @@ public class ApiInitialisationService extends ApiService {
                 // Traitement des # dans le repertoire de reception
                 // on efface les # dont le fichier existe déjà avec un autre nom sans # ou un numéro # inférieur
                 f = new File(dirOut);
-                if (!f.exists())
-                {
-                	f.mkdir();
-                }
+                makeDir(f);
                 
                 fichiers = f.listFiles();
                 
@@ -225,6 +229,13 @@ public class ApiInitialisationService extends ApiService {
             
         }
     }
+
+	private void makeDir(File f) {
+		if (!f.exists())
+		{
+			f.mkdir();
+		}
+	}
 
     /**
      * Méthode pour implémenter des maintenances sur la base de donnée
@@ -985,7 +996,7 @@ public class ApiInitialisationService extends ApiService {
      * @throws SQLException
      */
     public void reinstate(Connection connexion, String tablePil) throws Exception {
-        StaticLoggerDispatcher.info("reinstateWithRename", LOGGER);
+        loggerDispatcher.info("reinstateWithRename", LOGGER);
 
         // on cherche tous les containers contenant un fichier à rejouer
         // on remet l'archive à la racine
@@ -1033,7 +1044,7 @@ public class ApiInitialisationService extends ApiService {
             mettreAJourSchemaTableMetierThrow(connexion, envParameters, envExecution);
     	} catch (Exception e)
     	{
-            StaticLoggerDispatcher.info("Erreur mettreAJourSchemaTableMetier", LOGGER);
+    		StaticLoggerDispatcher.info("Erreur mettreAJourSchemaTableMetier", LOGGER);
             e.printStackTrace();
     	}
     	
@@ -1042,7 +1053,7 @@ public class ApiInitialisationService extends ApiService {
     
     public static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution) throws Exception {
         try {
-            StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
+        	StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
             /*
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
              */
@@ -1190,7 +1201,7 @@ public class ApiInitialisationService extends ApiService {
      * @throws Exception
      */
     public void cleanToDelete(Connection connexion, String tablePil) throws Exception {
-        StaticLoggerDispatcher.info("cleanToDelete", LOGGER);
+        loggerDispatcher.info("cleanToDelete", LOGGER);
 
         StringBuilder requete = new StringBuilder();
         requete.append("DELETE FROM " + tablePil + " a WHERE exists (select 1 from " + tablePil + " b where b.to_delete='1' and a.id_source=b.id_source and a.container=b.container); ");
@@ -1208,7 +1219,7 @@ public class ApiInitialisationService extends ApiService {
      */
     public void nettoyerTablePilotage(Connection connexion, String envExecution) throws Exception {
 
-        StaticLoggerDispatcher.info("nettoyerTablePilotage", LOGGER);
+        loggerDispatcher.info("nettoyerTablePilotage", LOGGER);
         
         Nb_Jour_A_Conserver = BDParameters.getInt(this.connexion, "ApiInitialisationService.Nb_Jour_A_Conserver",365);
         
@@ -1295,7 +1306,7 @@ public class ApiInitialisationService extends ApiService {
         // on continue jusqu'a ce qu'on ne trouve plus rien à effacer
         do {
          // récupérer le résultat de la requete
-         StaticLoggerDispatcher.info("Archivage de "+NB_FICHIER_PER_ARCHIVE+" fichiers - Début", LOGGER);
+         loggerDispatcher.info("Archivage de "+NB_FICHIER_PER_ARCHIVE+" fichiers - Début", LOGGER);
          n = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
          
          
@@ -1329,7 +1340,7 @@ public class ApiInitialisationService extends ApiService {
 	             
 	         }
         	}
-         StaticLoggerDispatcher.info("Archivage Fin", LOGGER);
+         loggerDispatcher.info("Archivage Fin", LOGGER);
          
         } while (UtilitaireDao.get("arc").hasResults(connexion, "select 1 from fichier_to_delete limit 1"))
         ;
@@ -1352,9 +1363,7 @@ public class ApiInitialisationService extends ApiService {
                 // création du répertoire "OLD" s'il n'existe pas
                 if (!entrepotSav.equals(entrepot)) {
                     File f = new File(dirOut);
-                    if (!f.exists()) {
-                        f.mkdir();
-                    }
+                    makeDir(f);
                     entrepotSav = entrepot;
                 }
 
@@ -1382,17 +1391,17 @@ public class ApiInitialisationService extends ApiService {
     
     public static void copyTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) {
     	try{
-            StaticLoggerDispatcher.info("Recopie des regles dans l'environnement", LOGGER);
+    		StaticLoggerDispatcher.info("Recopie des regles dans l'environnement", LOGGER);
         	copyTablesToExecutionThrow(connexion, anParametersEnvironment, anExecutionEnvironment);
     	} catch (Exception e)
     	{
-            StaticLoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
+    		StaticLoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
             e.printStackTrace();
     	}
     }
     
     public static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
-        StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
+    	StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
         try {
             StringBuilder requete = new StringBuilder();
             TraitementTableParametre[] r = TraitementTableParametre.values();
@@ -1547,8 +1556,8 @@ public class ApiInitialisationService extends ApiService {
             UtilitaireDao.get("arc").executeBlock(connexion, requete);
 
         } catch (Exception e) {
-            StaticLoggerDispatcher.info("Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment, LOGGER);
-            StaticLoggerDispatcher.info(e.getMessage().toString(), LOGGER);
+        	StaticLoggerDispatcher.info("Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment, LOGGER);
+        	StaticLoggerDispatcher.info(e.getMessage().toString(), LOGGER);
             e.printStackTrace();
             throw e;
         }
@@ -1592,13 +1601,13 @@ public class ApiInitialisationService extends ApiService {
             try {
 				UtilitaireDao.get("arc").executeImmediate(connexion, requete);
 			} catch (SQLException e) {
-				StaticLoggerDispatcher.error(e, LOGGER);
+				loggerDispatcher.error(e, LOGGER);
 			}
             
             try {
                 reinstate(this.connexion, this.tablePil);
             } catch (Exception e) {
-            	StaticLoggerDispatcher.error(e, LOGGER);
+            	loggerDispatcher.error(e, LOGGER);
             }
             
             nbLignes++;
@@ -1617,7 +1626,7 @@ public class ApiInitialisationService extends ApiService {
         try {
 	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
         } catch (Exception e) {
-        	StaticLoggerDispatcher.error(e, LOGGER);
+        	loggerDispatcher.error(e, LOGGER);
         }
 
         if (nbLignes > 0) {
@@ -1632,7 +1641,7 @@ public class ApiInitialisationService extends ApiService {
 	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
 	        maintenancePilotage(this.connexion, this.envExecution, "");
         } catch (Exception e) {
-        	StaticLoggerDispatcher.error(e, LOGGER);
+        	loggerDispatcher.error(e, LOGGER);
         }
     }
 
@@ -1705,11 +1714,11 @@ public class ApiInitialisationService extends ApiService {
      * @throws Exception
      */
     public void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws Exception {
-        StaticLoggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
+        loggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
         try {
             // maintenance de la table de pilotage
             // retirer les "encours" de la table de pilotage
-            StaticLoggerDispatcher.info("** Maintenance table de pilotage **", LOGGER);
+            loggerDispatcher.info("** Maintenance table de pilotage **", LOGGER);
             UtilitaireDao.get("arc").executeBlock(connexion,
                     "alter table " + this.tablePil + " alter column date_entree type text COLLATE pg_catalog.\"C\"; ");
             UtilitaireDao.get("arc").executeBlock(connexion, "delete from " + this.tablePil + " where etat_traitement='{ENCOURS}';");
@@ -1884,16 +1893,16 @@ public class ApiInitialisationService extends ApiService {
                 if (entrepotList!=null)
                 {
 	                for (String s : entrepotList) {
-	                    FileUtils.cleanDirectory(new File(repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + s));
-	                    FileUtils.cleanDirectory(new File(repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + s + "_ARCHIVE"));
+	                    FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + s).toFile());
+	                    FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + s + "_ARCHIVE").toFile());
 	                }
                 }
             }
-            FileUtils.cleanDirectory(new File(repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + TraitementEtat.ENCOURS));
-            FileUtils.cleanDirectory(new File(repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + TraitementEtat.OK));
-            FileUtils.cleanDirectory(new File(repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + TraitementEtat.KO));
+            FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + TraitementEtat.ENCOURS).toFile());
+            FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + TraitementEtat.OK).toFile());
+            FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + TraitementEtat.KO).toFile());
             try {
-                FileUtils.cleanDirectory(new File(repertoire + envDir + File.separator + "EXPORT"));
+                FileUtils.cleanDirectory(Paths.get(repertoire, envDir, "EXPORT").toFile());
             } catch (Exception e) {}
 
         } catch (IOException ex) {

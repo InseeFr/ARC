@@ -96,8 +96,10 @@ public class ApiReceptionService extends ApiService {
 		GenericBean archiveContent=null;
 		
 		StaticLoggerDispatcher.info("moveClientFiles", LOGGER);
-		String receptionDirectoryRoot = this.directoryRoot + this.envExecution.toUpperCase().replace(".", "_") + File.separator
-				+ TraitementPhase.RECEPTION;
+		String receptionDirectoryRoot = Paths.get(
+				this.directoryRoot, 
+				this.envExecution.toUpperCase().replace(".", "_"),
+				TraitementPhase.RECEPTION.toString()).toString();
 		
 		try {
 			// vérifier que les répertoires cible existent; sinon les créer
@@ -269,8 +271,10 @@ public class ApiReceptionService extends ApiService {
 	 */
 	public void registerFiles(Connection connexion, String anExecutionEnvironment, String directoryRoot, GenericBean archiveContent) {
 		StaticLoggerDispatcher.info("registerFiles", LOGGER);
-		String receptionDirectoryRoot = directoryRoot + anExecutionEnvironment.toUpperCase().replace(".", "_") + File.separator
-				+ TraitementPhase.RECEPTION;
+		String receptionDirectoryRoot = Paths.get(
+				directoryRoot,
+				anExecutionEnvironment.toUpperCase().replace(".", "_"),
+				TraitementPhase.RECEPTION.toString()).toString();
 		// on considère tous les fichiers du repertoire reception en cours
 		File folder = new File(receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS);
 		File[] filesIn = folder.listFiles();

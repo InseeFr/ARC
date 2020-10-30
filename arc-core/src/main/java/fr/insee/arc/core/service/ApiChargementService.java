@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,8 +66,10 @@ public class ApiChargementService extends ApiService {
             String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 
-        this.directoryIn = this.getDirectoryRoot() + aEnvExecution.toUpperCase().replace(".", "_") + File.separator + previousPhase + "_"
-                + TraitementEtat.OK + File.separator;
+        this.directoryIn = Paths.get(
+        		this.getDirectoryRoot(), 
+        		aEnvExecution.toUpperCase().replace(".", "_"),
+        		previousPhase + "_" + TraitementEtat.OK).toString() + File.separator;
         
         // Noms des table temporaires utiles au chargement
         // nom court pour les perfs

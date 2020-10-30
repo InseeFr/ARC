@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.thread;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
@@ -81,8 +82,10 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	this.setTablePil(aApi.getTablePil());
 	this.paramBatch = aApi.getParamBatch();
 
-	this.directoryIn = aApi.getDirectoryRoot() + this.envExecution.toUpperCase().replace(".", "_") + File.separator
-		+ aApi.getPreviousPhase() + "_" + TraitementEtat.OK + File.separator;
+	this.directoryIn = Paths.get(
+			aApi.getDirectoryRoot(),
+			this.envExecution.toUpperCase().replace(".", "_"),
+			aApi.getPreviousPhase() + "_" + TraitementEtat.OK).toString() + File.separator;
 
 	// Noms des table temporaires utiles au chargement
 	// nom court pour les perfs

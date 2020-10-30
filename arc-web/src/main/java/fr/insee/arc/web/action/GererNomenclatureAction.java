@@ -1,8 +1,7 @@
 package fr.insee.arc.web.action;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,11 +14,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.dao.ExternalFilesManagementDao;
 import fr.insee.arc.web.model.ExternalFilesModel;
 import fr.insee.arc.web.util.VObject;
@@ -41,12 +42,6 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     private VObject viewListNomenclatures;
 	private VObject viewNomenclature;
 	private VObject viewSchemaNmcl;
-
-    
-    private File fileUpload;
-    private String fileUploadContentType;
-    private String fileUploadFileName;
-    private String commentaire;
 
     private ArrayList<String> nomenclaturesList;
     private ArrayList<ArrayList<String>> nomenclatureTable;
@@ -155,10 +150,10 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     @RequestMapping("/importListNomenclatures")
-    public String importListNomenclatures() {    	
+    public String importListNomenclatures(MultipartFile fileUpload) {    	
     	loggerDispatcher.debug("importListNomenclatures",LOGGER);
     	try {
-            importNomenclatureDansBase();
+            importNomenclatureDansBase(fileUpload);
         } catch (Exception ex) {
             ex.printStackTrace();
             this.viewListNomenclatures.setMessage(ex.toString());
@@ -251,7 +246,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         return basicAction(RESULT_SUCCESS);
     }
 
-    private void importNomenclatureDansBase() throws Exception {
+    private void importNomenclatureDansBase(MultipartFile fileUpload) throws Exception {
 		if (viewListNomenclatures.mapContentSelected().isEmpty()) {
             this.viewListNomenclatures.setMessage("Vous devez selectionner une nomenclature pour l'importation.");
             return;
@@ -266,12 +261,11 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         }
 
         // Ouverture du fichier
-        if (this.fileUpload == null) {
-            this.viewListNomenclatures.setMessage("Vous devez choisir un fichier pour l'importation.");
+        if (fileUpload == null || fileUpload.isEmpty()) {
+            this.viewListNomenclatures.setMessage("You must select a file for import.");
             return;
         }
-        FileInputStream in = new FileInputStream(this.fileUpload);
-        try(BufferedReader rd = new BufferedReader(new InputStreamReader(in))){
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))){
             
             // Verification des colonnes
             String[] colonnes = rd.readLine().split(";");
@@ -279,7 +273,6 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
             verificationColonnes(colonnes, types);
             
             // Verification du nombre de colonnes
-            try {
         	// Création de la table temporaire
         	creationTableDeNomenclatureTemporaire(colonnes, types);
         	
@@ -288,15 +281,10 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         	
         	// Création de la table définitive
         	creationTableDefinitif();
-            
-            } finally {
-        	/*
-        	 * Pour que les champs de saisie ne soit pas prérempli des anciennes valeurs
-        	 */
-        	this.commentaire = "";
-            }
-        }
-        
+        } catch (IOException e) {
+			LoggerHelper.error(LOGGER, e, "Error during import");
+			this.viewListNomenclatures.setMessage("An error occurred while reading the file.");
+		}
 
     }
 
@@ -438,40 +426,9 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
      * Setters et getters
      */
 
-    public File getFileUpload() {
-        return fileUpload;
-    }
-
-    public void setFileUpload(File fileUpload) {
-        this.fileUpload = fileUpload;
-    }
-
-    public String getFileUploadContentType() {
-        return fileUploadContentType;
-    }
-
-    public void setFileUploadContentType(String fileUploadContentType) {
-        this.fileUploadContentType = fileUploadContentType;
-    }
-
-    public String getFileUploadFileName() {
-        return fileUploadFileName;
-    }
-
-    public void setFileUploadFileName(String fileUploadFileName) {
-        this.fileUploadFileName = fileUploadFileName;
-    }
 
     public ArrayList<String> getNomenclaturesList() {
         return nomenclaturesList;
-    }
-
-    public String getCommentaire() {
-        return commentaire;
-    }
-
-    public void setCommentaire(String commentaire) {
-        this.commentaire = commentaire;
     }
 
     public void setNomenclaturesList(ArrayList<String> nomenclaturesList) {

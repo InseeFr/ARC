@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -22,7 +26,6 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
@@ -138,49 +142,62 @@ public class VObjectService {
 
 	/**
 	 *
+	 * @param VObject data
 	 * @param mainQuery ne doit pas se terminer par des {@code ;}
 	 * @param table
 	 * @param defaultInputFields
 	 */
-	public void initialize(String mainQuery, String table, HashMap<String, String> defaultInputFields, VObject currentData) {
+	public void initialize(VObject data, String mainQuery, String table, HashMap<String, String> defaultInputFields) {
+		initialize(data, mainQuery, table, defaultInputFields, (content) -> content);
+	}
 
+	/**
+	 *
+	 * @param VObject data
+	 * @param mainQuery ne doit pas se terminer par des {@code ;}
+	 * @param table
+	 * @param defaultInputFields
+	 * @param reworkContent function to rewrite the fetched content
+	 */
+	public void initialize(VObject data, String mainQuery, String table, HashMap<String, String> defaultInputFields, 
+			Function<ArrayList<ArrayList<String>>, ArrayList<ArrayList<String>>> reworkContent) {
 	    try {
-	        LoggerHelper.debugAsComment(LOGGER, "initialize", currentData.getSessionName());
+	        LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
 	
-	        if (currentData.getBeforeSelectQuery() != null) {
-	            UtilitaireDao.get(this.pool).executeRequest(null, currentData.getBeforeSelectQuery());
+	        if (data.getBeforeSelectQuery() != null) {
+	            UtilitaireDao.get(this.pool).executeRequest(null, data.getBeforeSelectQuery());
 	        }
 	
 	        // on sauvegarde le contenu des lignes selectionnées avant la nouvelle
 	        // execution de la requete
-	        HashMap<String, ArrayList<String>> selectedContent = currentData.mapContentSelected();
+	        HashMap<String, ArrayList<String>> selectedContent = data.mapContentSelected();
 	        ArrayList<String> headersDLabel = new ArrayList<String>();
 	        ArrayList<String> headersDType = new ArrayList<String>();
 	        // on sauvegarde les headers des colonnes selectionnées avant la
 	        // nouvelle execution de la requete
-	        ArrayList<String> selectedHeaders = currentData.listHeadersSelected();
+	        ArrayList<String> selectedHeaders = data.listHeadersSelected();
 	
 	        // gestion du nombre de pages
-	        Integer indexPage = pageManagement(mainQuery, currentData);
+	        Integer indexPage = pageManagement(mainQuery, data);
 	
 	        // lancement de la requete principale et recupération du tableau
 	        StringBuilder requete = new StringBuilder();
-	        requete.append("select alias_de_table.* from (" + mainQuery + ") alias_de_table " + buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel()));
+	        requete.append("select alias_de_table.* from (" + mainQuery + ") alias_de_table " + buildFilter(data.getFilterFields(), data.getHeadersDLabel()));
 	
 	        if (this.noOrder == false) {
-	            requete.append(buildOrderBy(currentData.getHeaderSortDLabels(), currentData.getHeaderSortDOrders()));
+	            requete.append(buildOrderBy(data.getHeaderSortDLabels(), data.getHeaderSortDOrders()));
 	        }
 	
-	        if (currentData.getPaginationSize() > 0) {
-	            requete.append(" limit " + currentData.getPaginationSize() + " offset " + ((indexPage - 1) * currentData.getPaginationSize()));
+	        if (data.getPaginationSize() > 0) {
+	            requete.append(" limit " + data.getPaginationSize() + " offset " + ((indexPage - 1) * data.getPaginationSize()));
 	        }
 	
 
 	        ArrayList<ArrayList<String>> aContent = new ArrayList<ArrayList<String>>();
 	        try {
-	            aContent = reworkContent(UtilitaireDao.get(this.pool).executeRequest(null, requete,  ModeRequete.IHM_INDEXED));
+	            aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(null, requete,  ModeRequete.IHM_INDEXED));
 	        } catch (SQLException ex) {
-	        	currentData.setMessage(ex.getMessage());
+	        	data.setMessage(ex.getMessage());
 	            LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
 	        }
 	        if (aContent != null && aContent.size() > 0) {
@@ -192,40 +209,40 @@ public class VObjectService {
 	        }
 	
 	        // on set l'objet
-	        if (currentData.getConstantVObject() == null) {
-	        	currentData.setConstantVObject(new ConstantVObject());
+	        if (data.getConstantVObject() == null) {
+	        	data.setConstantVObject(new ConstantVObject());
 	        }
-	        currentData.setIsInitialized(true);
-	        currentData.setMainQuery(mainQuery);
-	        currentData.setTable(table);
-	        currentData.setHeadersDLabel(headersDLabel);
-	        currentData.setHeadersDType(headersDType);
-	        currentData.setHeadersVLabel(buildHeadersVLabel(currentData, headersDLabel));
-	        currentData.setHeadersVSize(buildHeadersVSize(currentData, headersDLabel));
-	        currentData.setHeadersVType(buildHeadersVType(currentData, headersDLabel));
-	        currentData.setHeadersVSelect(buildHeadersVSelect(currentData, headersDLabel));
-	        currentData.setHeadersVisible(buildHeadersVisible(currentData, headersDLabel));
-	        currentData.setHeadersUpdatable(buildHeadersUpdatable(currentData, headersDLabel));
-	        currentData.setHeadersRequired(buildHeadersRequired(currentData, headersDLabel));
-	        currentData.setContent(TableObject.as(aContent));
-	        currentData.setDefaultInputFields(defaultInputFields);
-	        currentData.setInputFields(eraseInputFields(headersDLabel, defaultInputFields));
+	        data.setIsInitialized(true);
+	        data.setMainQuery(mainQuery);
+	        data.setTable(table);
+	        data.setHeadersDLabel(headersDLabel);
+	        data.setHeadersDType(headersDType);
+	        data.setHeadersVLabel(buildHeadersVLabel(data, headersDLabel));
+	        data.setHeadersVSize(buildHeadersVSize(data, headersDLabel));
+	        data.setHeadersVType(buildHeadersVType(data, headersDLabel));
+	        data.setHeadersVSelect(buildHeadersVSelect(data, headersDLabel));
+	        data.setHeadersVisible(buildHeadersVisible(data, headersDLabel));
+	        data.setHeadersUpdatable(buildHeadersUpdatable(data, headersDLabel));
+	        data.setHeadersRequired(buildHeadersRequired(data, headersDLabel));
+	        data.setContent(TableObject.as(aContent));
+	        data.setDefaultInputFields(defaultInputFields);
+	        data.setInputFields(eraseInputFields(headersDLabel, defaultInputFields));
 	        // recalcule de la selection des lignes par rapport au contenu
 	        ArrayList<Boolean> selectedLines = new ArrayList<Boolean>();
 	        if (!selectedContent.isEmpty()) {
-	            for (int i = 0; i < currentData.getContent().size(); i++) {
+	            for (int i = 0; i < data.getContent().size(); i++) {
 	                int k = 0;
 	                boolean equals = false;
-	                while (k < selectedContent.get(currentData.getHeadersDLabel().get(0)).size() && !equals) {
+	                while (k < selectedContent.get(data.getHeadersDLabel().get(0)).size() && !equals) {
 	                    equals = true;
 	                    int j = 0;
-	                    while (j < currentData.getContent().get(i).d.size() && equals) {
+	                    while (j < data.getContent().get(i).d.size() && equals) {
 	                        // test si la colonne existe dans le contenu précédent;
 	                        // sinon on l'ignore
-	                        if (selectedContent.get(currentData.getHeadersDLabel().get(j)) != null) {
+	                        if (selectedContent.get(data.getHeadersDLabel().get(j)) != null) {
 	                            equals = equals
-	                                    && ManipString.compareStringWithNull(currentData.getContent().get(i).d.get(j),
-	                                            selectedContent.get(currentData.getHeadersDLabel().get(j)).get(k));
+	                                    && ManipString.compareStringWithNull(data.getContent().get(i).d.get(j),
+	                                            selectedContent.get(data.getHeadersDLabel().get(j)).get(k));
 	                        }
 	                        j++;
 	                    }
@@ -234,21 +251,21 @@ public class VObjectService {
 	                selectedLines.add(equals);
 	            }
 	        }
-	        currentData.setSelectedLines(selectedLines);
+	        data.setSelectedLines(selectedLines);
 	        // recalcule de la selection des colonnes
 	        ArrayList<Boolean> selectedColumns = new ArrayList<Boolean>();
-	        for (int i = 0; i < currentData.getHeadersDLabel().size(); i++) {
-	            if (selectedHeaders.contains(currentData.getHeadersDLabel().get(i))) {
+	        for (int i = 0; i < data.getHeadersDLabel().size(); i++) {
+	            if (selectedHeaders.contains(data.getHeadersDLabel().get(i))) {
 	                selectedColumns.add(true);
 	            } else {
 	                selectedColumns.add(false);
 	            }
 	        }
-	        currentData.setSelectedColumns(selectedColumns);
-	        currentData.setSavedContent(currentData.getContent());
+	        data.setSelectedColumns(selectedColumns);
+	        data.setSavedContent(data.getContent());
 	
 	        // The data is saved in the session        
-	        session.put(currentData.getSessionName(), currentData.copy());
+	        session.put(data.getSessionName(), data.copy());
 	
 	    } catch (Exception ex) {
 	        LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
@@ -468,9 +485,6 @@ public class VObjectService {
         return inputFields;
     }
 
-    public ArrayList<ArrayList<String>> reworkContent(ArrayList<ArrayList<String>> z) {
-        return z;
-    }
 
     /**
      * On peut avoir envie d'insérer une valeur calculable de façon déterministe mais non renseignée dans les valeurs insérées.
@@ -1186,17 +1200,17 @@ public class VObjectService {
     }
 
     public ArrayList<String> upload(VObject data, String repertoireCible, 
-    		ArrayList<String> fileUploadFileName, ArrayList<File> fileUpload) {
+    		ArrayList<String> fileUploadFileName, ArrayList<MultipartFile> fileUpload) {
         if (fileUploadFileName != null) {
             for (int i = 0; i < fileUpload.size(); i++) {
-                String location = repertoireCible + File.separator + fileUploadFileName.get(i);
+                Path location = Paths.get(repertoireCible, fileUploadFileName.get(i));
                 loggerDispatcher.info( "Upload >> " + location, LOGGER);
-                File newFile = new File(location);
-                if (newFile.exists()) {
-                    newFile.delete();
-                }
+                File newFile = location.toFile();
                 try {
-                    FileUtils.copyFile(fileUpload.get(i), newFile);
+	                if (newFile.exists()) {
+	                	Files.delete(newFile.toPath());
+	                }
+	                fileUpload.get(i).transferTo(newFile);
                 } catch (IOException ex) {
                     LoggerHelper.errorGenTextAsComment(getClass(), "upload()", LOGGER, ex);
                 }
@@ -1315,7 +1329,7 @@ public class VObjectService {
             LOGGER.debug(" initializeByList requete : " + requete.toString());
         }
         // on ne gere pas les autres cas: ca doit planter
-        this.initialize(requete.toString(), data.getTable(), defaultInputFields, data);
+        this.initialize(data, requete.toString(), data.getTable(), defaultInputFields);
     }
 
     public void setFilterPattern(int filterPattern) {

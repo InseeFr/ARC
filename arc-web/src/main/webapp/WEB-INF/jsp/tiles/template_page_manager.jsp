@@ -6,7 +6,7 @@
 	<div class="row">
 		<c:if test="${allowResize}">
 			<div class="col-xs-6">
-				<label><spring:message code="page.size" />:&nbsp;
+				<label><spring:message code="gui.page.size" />:&nbsp;
 					<input type="number" class="input-sm w-25"
 					name="${view.sessionName}.paginationSize"
 					value="${view.paginationSize}" min="5" max="100" />

@@ -70,7 +70,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     private void initializeFamilleNorme() {
         System.out.println("/* initializeFamilleNorme */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-        this.vObjectService.initialize("select id_famille from arc.ihm_famille order by id_famille", "arc.ihm_famille", defaultInputFields, viewFamilleNorme);
+        this.vObjectService.initialize(viewFamilleNorme, "select id_famille from arc.ihm_famille order by id_famille", "arc.ihm_famille", defaultInputFields);
     }
 
     @RequestMapping("/selectFamilleNorme")
@@ -116,7 +116,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                 HashMap<String, String> defaultInputFields = new HashMap<>();
                 defaultInputFields.put("id_famille", selection.get("id_famille").get(0));
 
-                this.vObjectService.initialize(requete.toString(), "arc.ihm_client", defaultInputFields, viewClient);
+                this.vObjectService.initialize(viewClient, requete.toString(), "arc.ihm_client", defaultInputFields);
             } else {
                 this.vObjectService.destroy(viewClient);
 
@@ -173,7 +173,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                 HashMap<String, String> defaultInputFields = new HashMap<String, String>();
                 defaultInputFields.put("id_famille", selection.get("id_famille").get(0));
 
-                this.vObjectService.initialize(requete.toString(), "arc.ihm_mod_table_metier", defaultInputFields, viewTableMetier);
+                this.vObjectService.initialize(viewTableMetier, requete.toString(), "arc.ihm_mod_table_metier", defaultInputFields);
             } else {
                 this.vObjectService.destroy(viewTableMetier);
             }
@@ -271,7 +271,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 		defaultInputFields.put("id_famille", viewFamilleNorme.mapContentSelected().get("id_famille").get(0));
 		// this.viewVariableMetier.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewVariableMetier.getSessionName()));
-		this.vObjectService.initialize(requete.toString(), "arc."+IHM_MOD_VARIABLE_METIER, defaultInputFields, viewVariableMetier);
+		this.vObjectService.initialize(viewVariableMetier, requete.toString(), "arc."+IHM_MOD_VARIABLE_METIER, defaultInputFields);
 		
 	    } catch (Exception ex) {
 		ex.printStackTrace();

@@ -1,8 +1,10 @@
 package fr.insee.arc.utils.ressourceUtils;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Wrapper to always return a reference to the Spring Application Context from
@@ -12,7 +14,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class SpringApplicationContext implements ApplicationContextAware {
 
-  private static ApplicationContext springContext;
+  private static ConfigurableApplicationContext springContext;
 
   /**
    * This method is called from within the ApplicationContext once it is 
@@ -20,7 +22,11 @@ public class SpringApplicationContext implements ApplicationContextAware {
    * @param context a reference to the ApplicationContext.
    */
   public void setApplicationContext(ApplicationContext context) throws BeansException {
-    springContext = context;
+    springContext = (ConfigurableApplicationContext) context;
+  }
+  
+  public static ConfigurableApplicationContext getApplicationContext() {
+	  return springContext;
   }
 
   /**
@@ -35,6 +41,11 @@ public class SpringApplicationContext implements ApplicationContextAware {
    */
   public static Object getBean(String beanName, Object... args) {
     return springContext.getBean(beanName, args);
+  }
+  
+  public static void autowire(Object toAutowire) {
+    AutowireCapableBeanFactory acbFactory = springContext.getAutowireCapableBeanFactory();
+    acbFactory.autowireBean(toAutowire);
   }
 
 }

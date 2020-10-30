@@ -393,6 +393,9 @@ public class VObject {
 
 	public ArrayList<String> getV(int j, TableObject content) {
 		ArrayList<String> h = new ArrayList<String>();
+		if (content == null) {
+			return h;
+		}
 		for (int i = 0; i < content.t.size(); i++) {
 			h.add(content.t.get(i).d.get(j));
 		}
@@ -698,11 +701,18 @@ public class VObject {
 		return customValues;
 	}
 
-	public void setCustomValues(HashMap<String, String> customValues) {
+	void setCustomValues(HashMap<String, String> customValues) {
 		this.customValues = customValues;
 	}
+	
+	public String getCustomValue(String key) {
+		if (getCustomValues() == null){
+			return null;
+		}
+		return getCustomValues().get(key);
+	}
 
-	public void addCustomValue(String key, String value) {
+	public void setCustomValue(String key, String value) {
 		if (getCustomValues() == null) {
 			setCustomValues(new HashMap<String, String>());
 		}

@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.util.EDateFormat;
+import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.files.FileUtils;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler;
@@ -42,9 +43,8 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.model.ArcModel;
 import fr.insee.arc.web.model.SessionParameters;
 import fr.insee.arc.web.util.Session;
-import fr.insee.arc.web.util.VObjectService;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.WebLoggerDispatcher;
+import fr.insee.arc.web.util.VObjectService;
 
 /**
  * An abstract class that all the action class must extends. Contain general
@@ -76,7 +76,8 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	protected VObjectService vObjectService;
 
 	@Autowired
-    protected WebLoggerDispatcher loggerDispatcher;
+    @Qualifier("activeLoggerDispatcher")
+    protected LoggerDispatcher loggerDispatcher;
 
 	protected String repertoire;
 
@@ -110,10 +111,9 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	private String bacASable;
 
 	/** Is the current environment a production environment?*/
-	private boolean isEnvProd;   
+	private boolean isEnvProd;
 
 	protected boolean isRefreshMonitoring = false;
-	
 
     /**
 	 * Liste de tous les VObject sur lesquels des opérations standard seront
@@ -129,16 +129,21 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	/** Run the generic initialization (status, VObject, ...) and add the relevant objects to the model.*/
 	@ModelAttribute
-    public void initializeModel(@ModelAttribute T arcModel, Model model, 
+    public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
 			@RequestParam(required = false) String scope) {
 		LoggerHelper.trace(LOGGER, getActionName());
-		if (bacASable != null) {
-			setBacASable(bacASable);
+		if (this.bacASable == null) {
+			this.bacASable = properties.getSchemaReference() + "_BAS1";
 		}
-		if (scope != null) {
-			setScope(scope);
+		if (bacASable != null && !bacASable.equals(this.bacASable)) {
+			loggerDispatcher.info(String.format("env selected %s", bacASable), LOGGER);
+			this.bacASable = bacASable;
 		}
+		this.isEnvProd = checkEnv(this.bacASable);
+		this.bddTable = new BddTable(this.bacASable);
+		this.bddTable.export(getSession().asMap());
+		this.scope = scope;
 		
     	initialize(arcModel, model);
     	refreshGenericModelAttributes(model);
@@ -516,15 +521,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 	
 	public void setBacASable(String bacASable) {
-		if (bacASable != null && !bacASable.equals(this.bacASable)) {
-			loggerDispatcher.info(String.format("env selected %s", bacASable), LOGGER);		
-			//this.isRefreshMonitoring = true;	
-			// Update Bddtable to point on the right environnement
-			this.bddTable = new BddTable(bacASable);
-			this.bddTable.export(getSession().asMap());
-		}
 		this.bacASable = bacASable;
-		this.isEnvProd = checkEnv(bacASable);
 	}
 
 	public boolean isEnvProd() {

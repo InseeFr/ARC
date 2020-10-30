@@ -1,11 +1,13 @@
 package fr.insee.arc.web.action;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +16,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.BddTable;
@@ -40,7 +44,6 @@ import fr.insee.arc.web.model.viewobjects.ViewFichierBAS;
 import fr.insee.arc.web.model.viewobjects.ViewPilotageBAS;
 import fr.insee.arc.web.model.viewobjects.ViewRapportBAS;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectEnvManagementService;
 
 @Controller
 public class PilotageBASAction extends ArcAction<EnvManagementModel> {
@@ -48,15 +51,10 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	private static final String ACTION_NAME = "EnvManagement";
 
 	private static final String RESULT_SUCCESS = "jsp/gererPilotageBAS.jsp";
-	
-	private static final String ARC = "ARC_";
 
 	private static final String WRITING_REPO = "entrepotEcriture";
 
 	private static final Logger LOGGER = LogManager.getLogger(PilotageBASAction.class);
-	
-	@Autowired
-	private VObjectEnvManagementService viewObjectPilotage;
 	
 	private VObject viewPilotageBAS = new ViewPilotageBAS();
 	
@@ -70,13 +68,13 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 	private List<TraitementPhase> listePhase;
 
-	/**
-	 * Phase sélectionnée par l'utilisateur
-	 */
-	private String phaseAExecuter;
-
 	public PilotageBASAction() {	
 		this.setListePhase(TraitementPhase.getListPhaseC());	
+	}
+	
+	@ModelAttribute
+	public void specificModelAttributes(Model model) {
+		model.addAttribute("listePhase", listePhase);
 	}
 
 	@Override
@@ -94,7 +92,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			vObjectService.destroy(getViewArchiveBAS());
 			vObjectService.destroy(getViewEntrepotBAS());
 			vObjectService.destroy(getViewFichierBAS());
-			viewObjectPilotage.destroy(getViewPilotageBAS());
+			vObjectService.destroy(getViewPilotageBAS());
 			vObjectService.destroy(getViewRapportBAS());
 			this.isRefreshMonitoring = false;
 		}
@@ -124,7 +122,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			LoggerHelper.error(LOGGER, "error when initialize repository", e);
 		}
 
-		this.vObjectService.initialize(requete.toString(), null, defaultInputFields, this.getViewEntrepotBAS());
+		this.vObjectService.initialize(this.getViewEntrepotBAS(), requete.toString(), null, defaultInputFields);
 	}
 
 	// visual des Pilotages du bac à sable
@@ -135,8 +133,106 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		StringBuilder requete = new StringBuilder();
         requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T)+" order by date_entree desc");
 		
-		this.viewObjectPilotage.initialize(requete.toString(),
-				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields, getViewPilotageBAS());
+		this.vObjectService.initialize(
+				getViewPilotageBAS(), requete.toString(), 
+				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields,
+				content -> reworkPilotageContent(content));
+	}
+	
+	private ArrayList<ArrayList<String>> reworkPilotageContent(ArrayList<ArrayList<String>> content) {
+		GenericBean g = new GenericBean(content);
+		HashMap<String, ArrayList<String>> mapContent = g.mapContent();
+		HashMap<String, String> mt = g.mapTypes();
+
+		ArrayList<String> newHeaders = new ArrayList<>();
+
+		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
+
+		// ne garder les colonnes avec au moins un enregistrements dedans
+
+		newHeaders.add("date_entree");
+
+		for (Map.Entry<String, ArrayList<String>> entry : mapContent.entrySet()) {
+			boolean toKeep = false;
+			int i = 0;
+
+			while (i < entry.getValue().size() && !entry.getKey().equals("date_entree")) {
+
+				if (Integer.parseInt(entry.getValue().get(i)) > 0) {
+					toKeep = true;
+				}
+				i++;
+			}
+
+			if (toKeep) {
+				newHeaders.add(entry.getKey());
+			}
+		}
+
+		// ordonner les colonnes selon la phase et l'etat
+		Collections.sort(newHeaders, new Comparator<String>() {
+			public int compare(String a, String b) {
+				String phaseA = ManipString.substringBeforeLast(a, "_").toUpperCase();
+				String etatA = ManipString.substringAfterLast(a, "_").toUpperCase();
+
+				String phaseB = ManipString.substringBeforeLast(b, "_").toUpperCase();
+				String etatB = ManipString.substringAfterLast(b, "_").toUpperCase();
+
+				//Check if one of the two headers is date_entree. Because date_entree is not a TypeTraitementPhase
+				try {
+					TraitementPhase.valueOf(phaseA);
+				} catch (Exception e) {
+					return -1;
+				}
+
+				try {
+					TraitementPhase.valueOf(phaseB);
+				} catch (Exception e) {
+					return 1;
+				}
+
+				if (TraitementPhase.valueOf(phaseA).getOrdre() > TraitementPhase.valueOf(phaseB).getOrdre()) {
+					return 1;
+				}
+				if (TraitementPhase.valueOf(phaseA).getOrdre() < TraitementPhase.valueOf(phaseB).getOrdre()) {
+					return -1;
+				}
+				if (TraitementEtat.valueOf(etatA).getOrdre() > TraitementEtat.valueOf(etatB).getOrdre()) {
+					return 1;
+				}
+				if (TraitementEtat.valueOf(etatA).getOrdre() < TraitementEtat.valueOf(etatB).getOrdre()) {
+					return -1;
+				}
+				return 0;
+
+			}
+		});
+
+		// ajouter les coloonnes
+		newContent.add(newHeaders);
+
+		// ajout des types des colonnes
+		ArrayList<String> newTypes = new ArrayList<String>();
+
+		for (int j = 0; j < newHeaders.size(); j++) {
+			newTypes.add(mt.get(newHeaders.get(j)));
+		}
+
+		newContent.add(newTypes);
+
+		// ajout du contenu relatifs aux colonnes
+		if (!mapContent.isEmpty()) {
+			for (int k = 0; k < mapContent.get(newHeaders.get(0)).size(); k++) {
+				ArrayList<String> newLine = new ArrayList<String>();
+				for (int j = 0; j < newHeaders.size(); j++) {
+					newLine.add(mapContent.get(newHeaders.get(j)).get(k));
+				}
+
+				newContent.add(newLine);
+			}
+		}
+
+		return newContent;
 	}
 
 	/**
@@ -175,7 +271,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		requete.append(" where rapport is not null ");
 		requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
 		requete.append("order by date_entree asc ");
-		this.vObjectService.initialize(requete.toString(), null, defaultInputFields, getViewRapportBAS());
+		this.vObjectService.initialize(getViewRapportBAS(), requete.toString(), null, defaultInputFields);
 	}
 
 	@RequestMapping("/selectRapportBAS")
@@ -277,15 +373,17 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	// Actions du bac à sable
 
 	@RequestMapping("/filesUploadBAS")
-	public String filesUploadBAS(ArrayList<String> fileUploadFileName, ArrayList<File> fileUpload) {
-		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : " + this.getViewEntrepotBAS().getCustomValues() + " */ *");
+	public String filesUploadBAS(ArrayList<String> fileUploadFileName, ArrayList<MultipartFile> fileUpload) {
+		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : */ *");
 		
-		if (this.getViewEntrepotBAS().getCustomValues() != null
-				&& !this.getViewEntrepotBAS().getCustomValues().get(WRITING_REPO).equals("")
+		String writingRepo = this.getViewEntrepotBAS().getCustomValue(WRITING_REPO);
+		if (writingRepo != null
+				&& !writingRepo.equals("")
 				&& fileUploadFileName != null) {
-			String repertoireUpload = this.repertoire + getBacASable().toUpperCase()
-					+ File.separator + TraitementPhase.RECEPTION + "_"
-					+ this.getViewEntrepotBAS().getCustomValues().get(WRITING_REPO);
+			String repertoireUpload = Paths.get(
+					this.repertoire + getBacASable().toUpperCase(), 
+					TraitementPhase.RECEPTION + "_" + writingRepo)
+					.toString();
 			LoggerHelper.trace(LOGGER, "repertoireUpload :", repertoireUpload);
 			this.vObjectService.upload(getViewPilotageBAS(), repertoireUpload, fileUploadFileName, fileUpload);
 		} else {
@@ -295,14 +393,13 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				this.getViewPilotageBAS().setMessage("Erreur : aucun fichier selectionné.");
 			}
 
-			if (this.getViewEntrepotBAS().getCustomValues() == null
-					|| this.getViewEntrepotBAS().getCustomValues().get(WRITING_REPO).equals("")) {
+			if (writingRepo == null || writingRepo.equals("")) {
 				msg += "Erreur : aucun entrepot selectionné\n";
 			}
 
 			this.getViewPilotageBAS().setMessage(msg);
 		}
-		this.getViewEntrepotBAS().addCustomValue(WRITING_REPO, null);
+		this.getViewEntrepotBAS().setCustomValue(WRITING_REPO, null);
 		// Lancement de l'initialisation dans la foulée
 		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), "arc.ihm",
 				getBacASable(), this.repertoire,
@@ -323,15 +420,16 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 */
 	public void initializeArchiveBAS() {
 		LoggerHelper.debug(LOGGER, "* /* initializeArchiveBAS  */ *");
-		if (this.getViewEntrepotBAS().getCustomValues().containsKey("entrepotLecture")
-				&& !this.getViewEntrepotBAS().getCustomValues().get("entrepotLecture").equals("")) {
+		String entrepotLecture = this.getViewEntrepotBAS().getCustomValue("entrepotLecture");
+		if (entrepotLecture != null
+				&& !entrepotLecture.equals("")) {
 			HashMap<String, String> defaultInputFields = new HashMap<>();
 			
 			 StringBuilder requete = new StringBuilder();
 			 requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_ARCHIVE)+" where entrepot='"
-	                    + this.getViewEntrepotBAS().getCustomValues().get("entrepotLecture") + "'");
+	                    + entrepotLecture + "'");
 
-			this.vObjectService.initialize(requete.toString(), null, defaultInputFields, getViewArchiveBAS());
+			this.vObjectService.initialize(getViewArchiveBAS(), requete.toString(), null, defaultInputFields);
 		} else {
 
 			this.vObjectService.destroy(getViewArchiveBAS());
@@ -387,21 +485,20 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			e.printStackTrace();
 		}
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE");
-		String chemin = this.repertoire + File.separator
-				+ getBacASable().toString().toUpperCase();
+		String chemin = Paths.get(this.repertoire, getBacASable().toString().toUpperCase()).toString();
 		this.vObjectService.downloadEnveloppe(getViewArchiveBAS(), response, querySelection.toString(), chemin, listRepertoire);
 		return "none";
 	}
 
 	@RequestMapping("/executerBatch")
-	public String executerBatch() {
+	public String executerBatch(String phaseAExecuter) {
 		loggerDispatcher.debug("executerBatch", LOGGER);
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
 		
 		ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm",
 				(String) getBacASable());
 
-		ApiServiceFactory.getService(this.phaseAExecuter, "arc.ihm", (String) getBacASable(),
+		ApiServiceFactory.getService(phaseAExecuter, "arc.ihm", (String) getBacASable(),
 				this.repertoire, "10000000").invokeApi();
 		return generateDisplay(RESULT_SUCCESS);
 	}
@@ -429,12 +526,12 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/undoBatch")
-	public String undoBatch() {
+	public String undoBatch(String phaseAExecuter) {
 		loggerDispatcher.debug("undoBatch", LOGGER);
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 		
 		
-		if (TraitementPhase.valueOf(this.phaseAExecuter).getOrdre()==0)
+		if (TraitementPhase.valueOf(phaseAExecuter).getOrdre()==0)
 		{
 			resetBAS();
 			return generateDisplay(RESULT_SUCCESS);
@@ -444,7 +541,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				"arc.ihm", (String) getBacASable(), this.repertoire,
 				TraitementPhase.INITIALISATION.getNbLigneATraiter());
 		try {
-			serv.retourPhasePrecedente(TraitementPhase.valueOf(this.phaseAExecuter), undoFilesSelection(),
+			serv.retourPhasePrecedente(TraitementPhase.valueOf(phaseAExecuter), undoFilesSelection(),
 					new ArrayList<TraitementEtat>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
 		} finally {
             serv.finaliser();
@@ -498,7 +595,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	            requete.append(" and array_to_string(etat_traitement,'$')" + ManipString.sqlEqual(etat, "text"));
 	            requete.append(" and phase_traitement" + ManipString.sqlEqual(phase, "text"));
 			
-			this.vObjectService.initialize(requete.toString(), null, defaultInputFields, getViewFichierBAS());
+			this.vObjectService.initialize(getViewFichierBAS(), requete.toString(), null, defaultInputFields);
 		} else if (!selectionLigneRapport.isEmpty()) {
 			HashMap<String, String> type = getViewRapportBAS().mapHeadersType();
 			HashMap<String, String> defaultInputFields = new HashMap<>();
@@ -514,7 +611,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
             requete.append(" and rapport" + ManipString.sqlEqual(selectionLigneRapport.get("rapport").get(0), type.get("rapport")));
 			
 
-			this.vObjectService.initialize(requete.toString(), null, defaultInputFields, getViewFichierBAS());
+			this.vObjectService.initialize(getViewFichierBAS(), requete.toString(), null, defaultInputFields);
 		} else {
 			this.vObjectService.destroy(getViewFichierBAS());
 		}
@@ -777,8 +874,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		ArrayList<String> listRepertoire = new ArrayList<>();
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.OK);
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.KO);
-		String chemin = this.repertoire + File.separator + ARC
-				+ getBacASable().toString().toUpperCase();
+		String chemin = Paths.get(this.repertoire, getBacASable().toString().toUpperCase()).toString();
 		this.vObjectService.downloadEnveloppe(getViewFichierBAS(), response, querySelection.toString(), chemin, listRepertoire);
 		loggerDispatcher.trace("*** Fin du téléchargement des enveloppes ***", LOGGER);
 
@@ -976,14 +1072,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 	public void setListePhase(List<TraitementPhase> listePhase) {
 		this.listePhase = listePhase;
-	}
-
-	public String getPhaseAExecuter() {
-		return phaseAExecuter;
-	}
-
-	public void setPhaseAExecuter(String phaseAExecuter) {
-		this.phaseAExecuter = phaseAExecuter;
 	}
 
 	private VObject getViewPilotageBAS() {

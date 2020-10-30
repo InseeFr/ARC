@@ -22,6 +22,10 @@ public class EnvManagementModel implements ArcModel {
 
 	private VObject viewArchiveBAS;
 	
+	private String entrepotLecture;
+	
+	private String entrepotEcriture;
+	
 	public EnvManagementModel() {
 		this.viewArchiveBAS = new ViewArchiveBAS();
 		this.viewEntrepotBAS = new ViewEntrepotBAS();
@@ -69,6 +73,23 @@ public class EnvManagementModel implements ArcModel {
 	public void setViewArchiveBAS(VObject viewArchiveBAS) {
 		this.viewArchiveBAS = viewArchiveBAS;
 	}
+
+	public String getEntrepotLecture() {
+		return entrepotLecture;
+	}
+
+	public void setEntrepotLecture(String entrepotLecture) {
+		this.entrepotLecture = entrepotLecture;
+	}
+
+	public String getEntrepotEcriture() {
+		return entrepotEcriture;
+	}
+
+	public void setEntrepotEcriture(String entrepotEcriture) {
+		this.entrepotEcriture = entrepotEcriture;
+	}
+
 
 
 }

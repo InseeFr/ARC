@@ -60,12 +60,12 @@
 			<div class="col-md">
 				<div class="card  no-margin">
 					<div class="card-header bg-primary p-0">
-						<h3 class="text-white m-1"><spring:message code="${view.title}"/></h3>
+						<h3 class="text-white m-1" id="${view.sessionName}_description"><spring:message code="${view.title}"/></h3>
 					</div>
 					<div class="card-body p-0">
 						<input name="${view.sessionName}.headerSortDLabel" type="hidden"
 						id="${view.sessionName}_headerSortDLabel" />
-						<table class="fixedHeader w-100 ">
+						<table class="fixedHeader w-100 " aria-describedby="${view.sessionName}_description">
 							<thead>
 								<tr>
 									<c:if test="${checkbox.equals('true')}">
@@ -109,10 +109,7 @@
 												name="${view.sessionName}.selectedColumns[${incr.index}]"
 												value="true"
 												id="${view.sessionName}_selectedColumns_${incr.index}_" 
-												/> <input type="hidden"
-												id="__checkbox_${view.sessionName}.selectedColumns_${incr.index}_"
-												name="__checkbox_${view.sessionName}_selectedColumns[${incr.index}]"
-												value="__checkbox_${view.selectedColumns[incr.index] ? 'true' : 'false'}"/>
+												/>
 										</th>
 									</c:forEach>
 							</tr>
@@ -165,10 +162,7 @@
 															id="${view.sessionName}_selectedLines_${incr1.index}_"
 															class="chooseLine"
 															${view.selectedLines[incr1.index] ? 'checked' : ''}														
-														/> <input type="hidden"
-															id="__checkbox_${view.sessionName}_selectedLines_${incr1.index}_"
-															name="__checkbox_${view.sessionName}.selectedLines[${incr1.index}]"
-															value="__checkbox_${view.selectedLines[incr1.index] ? 'true' : 'false'}">
+														/>
 													</c:when>
 													<c:otherwise>
 														<input type="checkbox"
@@ -178,10 +172,6 @@
 															onclick="updateCheckBox('${view.sessionName}',$(this));"
 															class="chooseLine"
 															${view.selectedLines[incr1.index] ? 'checked' : ''}								
-														> <input type="hidden"
-															id="__checkbox_${view.sessionName}_selectedLines_${incr1.index}_"
-															name="__checkbox_${view.sessionName}.selectedLines[${incr1.index}]"
-															value="__checkbox_${view.selectedLines[incr1.index] ? 'true' : 'false'}"												
 														>
 													</c:otherwise>
 												</c:choose>

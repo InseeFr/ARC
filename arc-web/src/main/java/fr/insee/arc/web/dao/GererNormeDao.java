@@ -1,12 +1,9 @@
 package fr.insee.arc.web.dao;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,12 +17,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -42,9 +39,10 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
+import fr.insee.arc.web.action.GererNormeAction;
 import fr.insee.arc.web.util.EAlphaNumConstante;
-import fr.insee.arc.web.util.VObjectService;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.util.VObjectService;
 import fr.insee.arc.web.util.WebLoggerDispatcher;
 
 /**
@@ -103,8 +101,8 @@ public class GererNormeDao implements IDbConstant {
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 
 		viewObject.initialize(
-				"SELECT id_famille, id_norme, periodicite, def_norme, def_validite, etat FROM arc.ihm_norme order by id_norme",
-				theTableName, defaultInputFields, viewNorme);
+				viewNorme,
+				"SELECT id_famille, id_norme, periodicite, def_norme, def_validite, etat FROM arc.ihm_norme order by id_norme", theTableName, defaultInputFields);
 	}
 
 	/**
@@ -137,7 +135,7 @@ public class GererNormeDao implements IDbConstant {
 			viewCalendar.setAfterUpdateQuery("select arc.fn_check_calendrier(); ");
 
 			// Create the vobject
-			viewObject.initialize(requete.toString(), theTableName, defaultInputFields, viewCalendar);
+			viewObject.initialize(viewCalendar, requete.toString(), theTableName, defaultInputFields);
 
 		} else {
 			viewObject.destroy(viewCalendar);
@@ -176,7 +174,7 @@ public class GererNormeDao implements IDbConstant {
 			viewRulesSet.setAfterInsertQuery("select arc.fn_check_jeuderegle(); ");
 			viewRulesSet.setAfterUpdateQuery("select arc.fn_check_jeuderegle(); ");
 
-			viewObject.initialize(requete.toString(), theTableName, defaultInputFields, viewRulesSet);
+			viewObject.initialize(viewRulesSet, requete.toString(), theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(viewRulesSet);
 		}
@@ -205,7 +203,7 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(requete.toString(), theTableName, defaultInputFields, moduleView);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(moduleView);
 		}
@@ -235,7 +233,7 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(requete.toString(), theTableName, defaultInputFields, moduleView);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(moduleView);
 		}
@@ -264,7 +262,7 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(requete.toString(), theTableName, defaultInputFields, moduleView);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(moduleView);
 		}
@@ -294,7 +292,7 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(requete.toString(), theTableName, defaultInputFields, moduleView);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(moduleView);
 		}
@@ -331,7 +329,7 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
             
-			viewObject.initialize(requete.toString(),theTableName,defaultInputFields, viewMapping);
+			viewObject.initialize(viewMapping,requete.toString(),theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(viewMapping);
 		}
@@ -350,7 +348,7 @@ public class GererNormeDao implements IDbConstant {
 			StringBuilder requete = new StringBuilder();
 	        requete.append("select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
 			HashMap<String, String> defaultInputFields = new HashMap<>();
-			viewObject.initialize(requete.toString(), theTableName, defaultInputFields, viewJeuxDeReglesCopie);
+			viewObject.initialize(viewJeuxDeReglesCopie, requete.toString(), theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(viewJeuxDeReglesCopie);
 		}
@@ -593,6 +591,7 @@ public class GererNormeDao implements IDbConstant {
 				}
 			} catch (Exception ex) {
 				isRegleOk = false;
+				LoggerHelper.error(LOGGER, ex, "");
 				viewMapping.setMessage((zeVariable == null ? EAlphaNumConstante.EMPTY.getValue()
 						: "La règle " + zeVariable + " ::= " + zeExpression + " est erronée.\n") + "Exception levée : "
 						+ ex.getMessage());
@@ -701,49 +700,38 @@ public class GererNormeDao implements IDbConstant {
 		}
 	}
 
-	public Map<String, ArrayList<String>> calculerReglesAImporter(File aFileUpload,
+	public Map<String, ArrayList<String>> calculerReglesAImporter(MultipartFile aFileUpload,
 			List<RegleMappingEntity> listeRegle, EntityDao<RegleMappingEntity> dao,
 			Map<String, String> mapVariableToType, Map<String, String> mapVariableToTypeConso) throws IOException {
 		Map<String, ArrayList<String>> returned = new HashMap<>();
 		returned.put("type_sortie", new ArrayList<String>());
 		returned.put("type_consolidation", new ArrayList<String>());
-		if (!aFileUpload.exists()) {
-			throw new FileNotFoundException(aFileUpload.getAbsolutePath());
-		}
-		if (aFileUpload.isDirectory()) {
-			throw new IOException(aFileUpload.getAbsolutePath() + " n'est pas un chemin de fichier valide.");
-		}
-		try {
-			BufferedReader br = Files.newBufferedReader(aFileUpload.toPath(), Charset.forName("UTF-8"));
-			try {
-				dao.setSeparator(";");
-				String line = br.readLine();
-				String someNames = line;
-				dao.setNames(someNames);
-				line = br.readLine();
-				String someTypes = line;
-				dao.setTypes(someTypes);
-				while ((line = br.readLine()) != null) {
-					RegleMappingEntity entity = dao.get(line);
-					listeRegle.add(entity);
-					for (String colName : entity.colNames()) {
-						if (!returned.containsKey(colName)) {
-							/*
-							 * La colonne n'existe pas encore ? Je l'ajoute.
-							 */
-							returned.put(colName, new ArrayList<String>());
-						}
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(aFileUpload.getInputStream(), StandardCharsets.UTF_8));){
+			dao.setSeparator(";");
+			String line = br.readLine();
+			String someNames = line;
+			dao.setNames(someNames);
+			line = br.readLine();
+			String someTypes = line;
+			dao.setTypes(someTypes);
+			while ((line = br.readLine()) != null) {
+				RegleMappingEntity entity = dao.get(line);
+				listeRegle.add(entity);
+				for (String colName : entity.colNames()) {
+					if (!returned.containsKey(colName)) {
 						/*
-						 * J'ajoute la valeur en fin de colonne.
+						 * La colonne n'existe pas encore ? Je l'ajoute.
 						 */
-						returned.get(colName).add(entity.get(colName));
+						returned.put(colName, new ArrayList<String>());
 					}
-					returned.get("type_sortie").add(mapVariableToType.get(entity.getVariableSortie()));
-					returned.get("type_consolidation").add(mapVariableToTypeConso.get(entity.getVariableSortie()));
+					/*
+					 * J'ajoute la valeur en fin de colonne.
+					 */
+					returned.get(colName).add(entity.get(colName));
 				}
-			} finally {
-				br.close();
-			}
+				returned.get("type_sortie").add(mapVariableToType.get(entity.getVariableSortie()));
+				returned.get("type_consolidation").add(mapVariableToTypeConso.get(entity.getVariableSortie()));
+			}			
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER, "error in calculerReglesAImporter", ex.getStackTrace());
 		}
@@ -817,13 +805,13 @@ public class GererNormeDao implements IDbConstant {
 	 * @param tableName       the
 	 */
 	@SQLExecutor
-	public void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, File theFileToUpload) {
+	public void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, MultipartFile theFileToUpload) {
 		StringBuilder requete = new StringBuilder();
 
 		// Check if there is file
-		if (theFileToUpload == null || StringUtils.isBlank(theFileToUpload.getPath())) {
+		if (theFileToUpload == null || theFileToUpload.isEmpty()) {
 			// No file -> ko
-			vObjectToUpdate.setMessage("Please choose a file !!");
+			vObjectToUpdate.setMessage("Please select a file.");
 		} else {
 			// A file -> can process it
 			LoggerHelper.debug(LOGGER, " filesUpload  : " + theFileToUpload);
@@ -831,10 +819,8 @@ public class GererNormeDao implements IDbConstant {
 			// before inserting in the final table, the rules will be inserted in a table to
 			// test them
 			String nomTableImage = FormatSQL.temporaryTableName(vObjectToUpdate.getTable() + "_img" + 0);
-			BufferedReader bufferedReader = null;
-			try {
-				bufferedReader = Files.newBufferedReader(theFileToUpload.toPath(), StandardCharsets.UTF_8);
-
+			
+			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));) {
 				// Get headers
 				List<String> listHeaders = getHeaderFromFile(bufferedReader);
 
@@ -864,13 +850,6 @@ public class GererNormeDao implements IDbConstant {
 				// After the exception, the methode cant go further, so the better thing to do
 				// is to quit it
 				return;
-
-			} finally {
-				try {
-					bufferedReader.close();
-				} catch (IOException e) {
-					LoggerHelper.error(LOGGER, e, "uploadOutils()", "\n");
-				}
 			}
 			LoggerHelper.debug(LOGGER, "Insert file in the " + nomTableImage + " table");
 
