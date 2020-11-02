@@ -175,7 +175,7 @@ public class VObject {
 	public ArrayList<ArrayList<String>> listContentSelected() {
 		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
 		// si rien dans la liste, return null
-		if (getSelectedLines() == null || getSelectedLines().size() == 0) {
+		if (getSelectedLines() == null || getSelectedLines().isEmpty()) {
 			return r;
 		}
 		for (int j = 0; j < getSelectedLines().size(); j++) {
@@ -201,7 +201,7 @@ public class VObject {
             return new ArrayList<String>();
         }
         ArrayList<String> r = new ArrayList<String>();
-        if (getSelectedColumns() == null || getSelectedColumns().size() == 0) {
+        if (getSelectedColumns() == null || getSelectedColumns().isEmpty()) {
             return r;
         }
         for (int i = 0; i < getSelectedColumns().size(); i++) {
@@ -701,7 +701,7 @@ public class VObject {
 		return customValues;
 	}
 
-	void setCustomValues(HashMap<String, String> customValues) {
+	public void setCustomValues(HashMap<String, String> customValues) {
 		this.customValues = customValues;
 	}
 	
@@ -714,7 +714,7 @@ public class VObject {
 
 	public void setCustomValue(String key, String value) {
 		if (getCustomValues() == null) {
-			setCustomValues(new HashMap<String, String>());
+			setCustomValues(new HashMap<>());
 		}
 		getCustomValues().put(key, value);
 	}

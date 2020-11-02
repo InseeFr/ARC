@@ -217,7 +217,7 @@
 								<div class="col-md">
 									<textarea id="console" name="consoleIhm" cols="" rows=""
 										class="noselect w-100" readonly
-										target="updateConsoleBAS"></textarea>
+										target="updateConsole"></textarea>
 								</div>
 								</div>
 							</div>

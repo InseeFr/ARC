@@ -46,7 +46,7 @@ public class ViewVariableMetier  extends VObject {
      * business columns
      */
     public static final HashMap<String, ColumnRendering> getInitialRendering(List<String> aVariableListe) {
-        HashMap<String, ColumnRendering> returned = new HashMap<String, ColumnRendering>();
+        HashMap<String, ColumnRendering> returned = new HashMap<>();
         String size = "100px";
         String type = "text";
         String query = null;

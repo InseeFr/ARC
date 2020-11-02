@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
-@Deprecated
+/** Transition class. Try to use a LoggerDispatcher as an @Autowired attribute instead. */
 @Component
 public class StaticLoggerDispatcher {
 	

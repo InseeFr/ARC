@@ -82,7 +82,7 @@ public final class ConstantVObject {
     }
 
     public ConstantVObject() {
-        this.columnRender =  new HashMap<String, ColumnRendering>();
+        this.columnRender =  new HashMap<>();
     }
 
     public ConstantVObject(Map<String, ColumnRendering> someColumnRendering) {

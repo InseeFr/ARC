@@ -23,9 +23,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.util.EDateFormat;
@@ -56,6 +59,9 @@ import fr.insee.arc.web.util.VObjectService;
  * @author Pépin Rémi
  *
  */
+// some attributes (scope, mapVObject, listVObject) are request-dependant  
+// and must not be altered by another simultaneous request by the same user
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public abstract class ArcAction<T extends ArcModel> implements IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);

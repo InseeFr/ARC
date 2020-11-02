@@ -65,7 +65,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 	// visual des Files
 	public void initializeDirIn() {
 		System.out.println("/* initializeDirIn */");
-		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
+		HashMap<String, String> defaultInputFields = new HashMap<>();
 
 		if (this.dirIn==null) {
 			this.dirIn=PROPERTIES.getBatchParametersDirectory();
@@ -134,7 +134,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 					}
 				}
 				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, viewDirIn.mapFilterFields());
-				this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<String, String>());
+				this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<>());
 				m=viewDirIn.mapContent();
 			}
 		}
@@ -176,7 +176,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 					}
 				}
 				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, viewDirIn.mapFilterFields());
-				this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<String, String>());
+				this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<>());
 				m=viewDirIn.mapContent();
 			}
 		}
@@ -311,7 +311,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 					}
 				}
 				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, viewDirOut.mapFilterFields());
-				this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<String, String>());
+				this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<>());
 				m=viewDirOut.mapContent();
 			}
 		}
@@ -353,7 +353,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 					}
 				}
 				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, viewDirOut.mapFilterFields());
-				this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<String, String>());
+				this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<>());
 				m=viewDirOut.mapContent();
 			}
 		}

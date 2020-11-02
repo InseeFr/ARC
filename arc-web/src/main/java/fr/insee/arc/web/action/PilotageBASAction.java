@@ -1,7 +1,5 @@
 package fr.insee.arc.web.action;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -106,25 +104,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
 	}
 
-	public void initializeEntrepotBAS() {
-		LoggerHelper.debug(LOGGER, "* initializeEntrepotBAS *");
-
-		HashMap<String, String> defaultInputFields = new HashMap<>();
-		StringBuilder requete = new StringBuilder();
-
-		try {
-			if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
-				requete.append("select id_entrepot from arc.ihm_entrepot");
-			} else {
-				requete.append("select ''::text as id_entrepot");
-			}
-		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, "error when initialize repository", e);
-		}
-
-		this.vObjectService.initialize(this.getViewEntrepotBAS(), requete.toString(), null, defaultInputFields);
-	}
-
 	// visual des Pilotages du bac à sable
 	public void initializePilotageBAS() {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS *");
@@ -212,7 +191,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		newContent.add(newHeaders);
 
 		// ajout des types des colonnes
-		ArrayList<String> newTypes = new ArrayList<String>();
+		ArrayList<String> newTypes = new ArrayList<>();
 
 		for (int j = 0; j < newHeaders.size(); j++) {
 			newTypes.add(mt.get(newHeaders.get(j)));
@@ -223,7 +202,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		// ajout du contenu relatifs aux colonnes
 		if (!mapContent.isEmpty()) {
 			for (int k = 0; k < mapContent.get(newHeaders.get(0)).size(); k++) {
-				ArrayList<String> newLine = new ArrayList<String>();
+				ArrayList<String> newLine = new ArrayList<>();
 				for (int j = 0; j < newHeaders.size(); j++) {
 					newLine.add(mapContent.get(newHeaders.get(j)).get(k));
 				}
@@ -436,6 +415,25 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		}
 	}
 
+	public void initializeEntrepotBAS() {
+		LoggerHelper.debug(LOGGER, "* initializeEntrepotBAS *");
+	
+		HashMap<String, String> defaultInputFields = new HashMap<>();
+		StringBuilder requete = new StringBuilder();
+	
+		try {
+			if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
+				requete.append("select id_entrepot from arc.ihm_entrepot");
+			} else {
+				requete.append("select ''::text as id_entrepot");
+			}
+		} catch (Exception e) {
+			LoggerHelper.error(LOGGER, "error when initialize repository", e);
+		}
+	
+		this.vObjectService.initialize(this.getViewEntrepotBAS(), requete.toString(), null, defaultInputFields);
+	}
+
 	/**
 	 * Fabrication d'une table temporaire avec comme contenu le nom des archives
 	 * d'un entrepot donné puis Ouverture d'un VObject sur cette table
@@ -443,9 +441,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/visualiserEntrepotBAS")
-	public String visualiserEntrepotBAS() {
-		
-		return generateDisplay(RESULT_SUCCESS);
+	public String visualiserEntrepotBAS() {		
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	/**
@@ -509,7 +506,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	public String undoFilesSelection() {
 		String selectedSrc = null;
 
-		HashMap<String, ArrayList<String>> m = new HashMap<String, ArrayList<String>>(
+		HashMap<String, ArrayList<String>> m = new HashMap<>(
 				getViewFichierBAS().mapContentSelected());
 
 		if (m != null && !m.isEmpty() && m.get("id_source") != null) {
@@ -542,7 +539,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				TraitementPhase.INITIALISATION.getNbLigneATraiter());
 		try {
 			serv.retourPhasePrecedente(TraitementPhase.valueOf(phaseAExecuter), undoFilesSelection(),
-					new ArrayList<TraitementEtat>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
+					new ArrayList<>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
 		} finally {
             serv.finaliser();
 		}
@@ -770,7 +767,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		}
 		
 		// List of queries that will be executed to download
-		List<String> tableauRequete=new ArrayList<String>();
+		List<String> tableauRequete=new ArrayList<>();
 		// Name of the file containing the data download
 		List<String> fileNames = new ArrayList<>();
 
@@ -1026,39 +1023,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			serv.finaliser();
 		}
 		return generateDisplay(RESULT_SUCCESS);
-	}
-
-	/**
-	 * Mise à jour de la console dans l'objet struts2
-	 */
-	@RequestMapping("/resetConsoleBAS")
-	public String resetConsoleBAS() {
-		
-		getSession().put("console", "");
-		return generateDisplay(RESULT_SUCCESS);
-	}
-
-	@RequestMapping("/updateConsoleBAS")
-	public void updateConsoleBAS(HttpServletResponse response) {
-		
-
-		if (getSession().get("console") == null) {
-			getSession().put("console", "");
-		}
-
-		response.setCharacterEncoding("UTF-8");
-		PrintWriter out;
-		try {
-			out = response.getWriter();
-			out.write((String) getSession().get("console"));
-			out.close();
-
-		} catch (IOException e) {
-			loggerDispatcher.error("Error in updateConsoleBAS", e, LOGGER);
-		}
-		getSession().put("console", "");
-
-
 	}
 
 	@Override

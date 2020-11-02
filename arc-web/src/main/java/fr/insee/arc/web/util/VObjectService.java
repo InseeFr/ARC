@@ -171,8 +171,8 @@ public class VObjectService {
 	        // on sauvegarde le contenu des lignes selectionnées avant la nouvelle
 	        // execution de la requete
 	        HashMap<String, ArrayList<String>> selectedContent = data.mapContentSelected();
-	        ArrayList<String> headersDLabel = new ArrayList<String>();
-	        ArrayList<String> headersDType = new ArrayList<String>();
+	        ArrayList<String> headersDLabel = new ArrayList<>();
+	        ArrayList<String> headersDType = new ArrayList<>();
 	        // on sauvegarde les headers des colonnes selectionnées avant la
 	        // nouvelle execution de la requete
 	        ArrayList<String> selectedHeaders = data.listHeadersSelected();
@@ -193,19 +193,19 @@ public class VObjectService {
 	        }
 	
 
-	        ArrayList<ArrayList<String>> aContent = new ArrayList<ArrayList<String>>();
+	        ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 	        try {
 	            aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(null, requete,  ModeRequete.IHM_INDEXED));
 	        } catch (SQLException ex) {
 	        	data.setMessage(ex.getMessage());
 	            LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
 	        }
-	        if (aContent != null && aContent.size() > 0) {
+	        if (aContent != null && !aContent.isEmpty()) {
 	            headersDLabel = aContent.remove(0);
 	            headersDType = aContent.remove(0);
 	        } else {
-	            headersDLabel = new ArrayList<String>();
-	            headersDType = new ArrayList<String>();
+	            headersDLabel = new ArrayList<>();
+	            headersDType = new ArrayList<>();
 	        }
 	
 	        // on set l'objet
@@ -227,8 +227,8 @@ public class VObjectService {
 	        data.setContent(TableObject.as(aContent));
 	        data.setDefaultInputFields(defaultInputFields);
 	        data.setInputFields(eraseInputFields(headersDLabel, defaultInputFields));
-	        // recalcule de la selection des lignes par rapport au contenu
-	        ArrayList<Boolean> selectedLines = new ArrayList<Boolean>();
+	        // (Re-)determine selectedLines based on content
+	        ArrayList<Boolean> selectedLines = new ArrayList<>();
 	        if (!selectedContent.isEmpty()) {
 	            for (int i = 0; i < data.getContent().size(); i++) {
 	                int k = 0;
@@ -252,8 +252,8 @@ public class VObjectService {
 	            }
 	        }
 	        data.setSelectedLines(selectedLines);
-	        // recalcule de la selection des colonnes
-	        ArrayList<Boolean> selectedColumns = new ArrayList<Boolean>();
+	        // (Re-)determine selectedColums from selectedHeaders
+	        ArrayList<Boolean> selectedColumns = new ArrayList<>();
 	        for (int i = 0; i < data.getHeadersDLabel().size(); i++) {
 	            if (selectedHeaders.contains(data.getHeadersDLabel().get(i))) {
 	                selectedColumns.add(true);
@@ -274,7 +274,7 @@ public class VObjectService {
 	}
 
 	private Integer pageManagement(String mainQuery, VObject currentData) {
-		ArrayList<ArrayList<String>> aContent = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 		if (currentData.getIdPage() == null) {
 		    currentData.setIdPage("1");
 		}
@@ -340,7 +340,7 @@ public class VObjectService {
      * Sinon on garde le nom de colonne de la base de données
      */
     public ArrayList<String> buildHeadersVLabel(VObject data, ArrayList<String> headers) {
-        ArrayList<String> headersVLabel = new ArrayList<String>();
+        ArrayList<String> headersVLabel = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject()//
                     .getColumnRender()//
@@ -358,7 +358,7 @@ public class VObjectService {
      * Sinon on ne met rien.
      */
     public ArrayList<String> buildHeadersVSize(VObject data, ArrayList<String> headers) {
-        ArrayList<String> headersVSize = new ArrayList<String>();
+        ArrayList<String> headersVSize = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
                 headersVSize.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).size);
@@ -374,7 +374,7 @@ public class VObjectService {
      * Sinon on met text.
      */
     public ArrayList<String> buildHeadersVType(VObject data, ArrayList<String> headers) {
-        ArrayList<String> headersVType = new ArrayList<String>();
+        ArrayList<String> headersVType = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
                 headersVType.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).type);
@@ -390,7 +390,7 @@ public class VObjectService {
      * Sinon on met visible par défaut.
      */
     public ArrayList<Boolean> buildHeadersVisible(VObject data, ArrayList<String> headers) {
-        ArrayList<Boolean> headersVisible = new ArrayList<Boolean>();
+        ArrayList<Boolean> headersVisible = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
                 headersVisible.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).visible);
@@ -407,7 +407,7 @@ public class VObjectService {
      * Sinon on met modifiable par défaut.
      */
     public ArrayList<Boolean> buildHeadersUpdatable(VObject data, ArrayList<String> headers) {
-        ArrayList<Boolean> headersUpdatable = new ArrayList<Boolean>();
+        ArrayList<Boolean> headersUpdatable = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
                 headersUpdatable.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).isUpdatable);
@@ -424,7 +424,7 @@ public class VObjectService {
      * Sinon on met obligatoire par défaut.
      */
     public ArrayList<Boolean> buildHeadersRequired(VObject data, ArrayList<String> headers) {
-        ArrayList<Boolean> headersRequired = new ArrayList<Boolean>();
+        ArrayList<Boolean> headersRequired = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
                 headersRequired.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).isRequired);
@@ -437,8 +437,8 @@ public class VObjectService {
 
 
     public ArrayList<LinkedHashMap<String, String>> buildHeadersVSelect(VObject data, ArrayList<String> headers) {
-        ArrayList<ArrayList<String>> arrayVSelect = new ArrayList<ArrayList<String>>();
-        ArrayList<LinkedHashMap<String, String>> headerVSelect = new ArrayList<LinkedHashMap<String, String>>();
+        ArrayList<ArrayList<String>> arrayVSelect = new ArrayList<>();
+        ArrayList<LinkedHashMap<String, String>> headerVSelect = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null
                     && data.getConstantVObject().getColumnRender().get(headers.get(i)).query != null) {
@@ -447,7 +447,7 @@ public class VObjectService {
                             .executeRequest(null, data.getConstantVObject().getColumnRender().get(headers.get(i)).query);
                     arrayVSelect.remove(0);
                     arrayVSelect.remove(0);
-                    LinkedHashMap<String, String> m = new LinkedHashMap<String, String>();
+                    LinkedHashMap<String, String> m = new LinkedHashMap<>();
                     for (int j = 0; j < arrayVSelect.size(); j++) {
                         m.put(arrayVSelect.get(j).get(0), arrayVSelect.get(j).get(1));
                     }
@@ -457,7 +457,7 @@ public class VObjectService {
                     LoggerHelper.errorGenTextAsComment(getClass(), "buildHeadersVSelect()", LOGGER, ex);
                 }
             } else {
-                LinkedHashMap<String, String> m = new LinkedHashMap<String, String>();
+                LinkedHashMap<String, String> m = new LinkedHashMap<>();
                 headerVSelect.add(m);
             }
         }
@@ -470,7 +470,7 @@ public class VObjectService {
     public ArrayList<String> eraseInputFields(ArrayList<String> headersDLabel,
             HashMap<String, String> defaultInputFields)
     {
-        ArrayList<String> inputFields = new ArrayList<String>();
+        ArrayList<String> inputFields = new ArrayList<>();
         for (int i = 0; i < headersDLabel.size(); i++)
         {
             if (defaultInputFields.get(headersDLabel.get(i)) != null)
@@ -499,7 +499,7 @@ public class VObjectService {
             Arrays.asList(attributeValues).forEach((t)->map.put(t.getFirst().toLowerCase(),t.getSecond()));            
 
             // Récupération des colonnes de la table cible
-            List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<String>(), currentData.getTable());
+            List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
             Boolean allNull = true;
             StringBuilder reqInsert = new StringBuilder();
@@ -571,7 +571,7 @@ public class VObjectService {
         LoggerHelper.traceAsComment(LOGGER, "delete()", currentData.getSessionName());
         VObject v0 = fetchVObjectData(currentData.getSessionName());
 
-        ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<String>(), currentData.getTable());
+        ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
         StringBuilder reqDelete = new StringBuilder();
         reqDelete.append("BEGIN; ");
@@ -619,7 +619,7 @@ public class VObjectService {
         VObject v0 = fetchVObjectData(currentData.getSessionName());
         // comparaison des lignes dans la table avant et aprés
         // toBeUpdated contient l'identifiant des lignes à update
-        ArrayList<Integer> toBeUpdated = new ArrayList<Integer>();
+        ArrayList<Integer> toBeUpdated = new ArrayList<>();
         for (int i = 0; i < currentData.getContent().size(); i++) {
             int j = 0;
             boolean equals = true;
@@ -668,7 +668,7 @@ public class VObjectService {
         VObject v0 = fetchVObjectData(currentData.getSessionName());
         // Compares new and old values line by line
         // Stocks the modified line number in toBeUpdated
-        ArrayList<Integer> toBeUpdated = new ArrayList<Integer>();
+        ArrayList<Integer> toBeUpdated = new ArrayList<>();
         for (int i = 0; i < currentData.getContent().size(); i++) {
             LineObject line = currentData.getContent().get(i);
 			if (line != null) {
@@ -682,7 +682,7 @@ public class VObjectService {
             }
         }
         
-        ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<String>(), currentData.getTable());
+        ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
         // SQL update query
         StringBuilder reqUpdate = new StringBuilder();
@@ -745,7 +745,7 @@ public class VObjectService {
         }
         reqUpdate.append("END;");
         try {
-            if (toBeUpdated.size() > 0) {
+            if (!toBeUpdated.isEmpty()) {
                 UtilitaireDao.get(this.pool).executeRequest(null, "" + reqUpdate);
             }
             session.put(currentData.getSessionName(), v0);
@@ -1000,7 +1000,7 @@ public class VObjectService {
         }
         String requete = "select alias_de_table.* from (" + v0.getMainQuery() + ") alias_de_table " + buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel())
                 + buildOrderBy(v0.getHeaderSortDLabels(), v0.getHeaderSortDOrders());
-        ArrayList<String> fileNames = new ArrayList<String>();
+        ArrayList<String> fileNames = new ArrayList<>();
         fileNames.add("Vue");
         this.download(currentData, response, fileNames, requete);
     }
