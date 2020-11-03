@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,12 +22,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.util.EDateFormat;
@@ -59,9 +55,6 @@ import fr.insee.arc.web.util.VObjectService;
  * @author Pépin Rémi
  *
  */
-// some attributes (scope, mapVObject, listVObject) are request-dependant  
-// and must not be altered by another simultaneous request by the same user
-@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public abstract class ArcAction<T extends ArcModel> implements IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);
@@ -84,7 +77,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	@Autowired
     @Qualifier("activeLoggerDispatcher")
     protected LoggerDispatcher loggerDispatcher;
-
+	
 	protected String repertoire;
 
 	private Map<String, String> envMap;
@@ -126,14 +119,16 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * effectuées au chargement de la page.
 	 *
 	 */
-	protected abstract void putAllVObjects(T model);
+	protected abstract void putAllVObjects(T arcModel);
 
 	/**
 	 * @return the name of the current controller
 	 */
 	protected abstract String getActionName();
 
-	/** Run the generic initialization (status, VObject, ...) and add the relevant objects to the model.*/
+	/** Runs the generic initialization (status, VObject, ...) 
+	 * and adds some generic info to the model.
+	 * (VObject themselves are added to the model by ArcInterceptor)*/
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
@@ -153,6 +148,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 		
     	initialize(arcModel, model);
     	refreshGenericModelAttributes(model);
+    	extraModelAttributes(model);
     }
 
 	protected void refreshGenericModelAttributes(Model model) {
@@ -162,6 +158,11 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     	model.addAttribute("version", getVersion());
     	model.addAttribute("isEnvProd", isEnvProd());
     	model.addAttribute("application", getApplication());
+	}
+	
+	/** Adds more controller-specific attributes the model.*/
+	public void extraModelAttributes(Model model) {
+		// nothing by default
 	}
 
 	private void initialize(T arcModel, Model model) {
@@ -214,12 +215,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	protected Consumer<? super VObject> putVObject(VObject vObject, Consumer<? super VObject> initialize) {
 		this.listVObjectOrder.add(vObject);
 		return this.mapVObject.put(vObject, initialize);
-	}
-
-	//TODO: move somewhere else, if used
-	public static String convertLongToDate(Long l) {
-		Date d = new Date(l);
-		return new SimpleDateFormat(EDateFormat.YYYY_MM_DD_HH_MM_SS.getValue()).format(d);
 	}
 
 	/**

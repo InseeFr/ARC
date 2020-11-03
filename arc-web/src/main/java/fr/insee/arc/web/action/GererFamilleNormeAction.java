@@ -9,8 +9,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -25,6 +28,7 @@ import fr.insee.arc.web.util.LineObject;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
 	private static final String RESULT_SUCCESS = "jsp/gererFamilleNorme.jsp";

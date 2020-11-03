@@ -16,10 +16,18 @@
 
 <div class="container-fluid">
 
- <div class="row">
+<div class="row">
+	<div class="col-4 border-right">
+ 		<textarea cols="30" rows="1" type="text" m="" name="mySchema">${mySchema}</textarea>
+	</div>
+	<div class="col-8" id="viewQuerySql">
+	   	<textarea m="" name="myQuery" cols="500" aria-label="Query">${myQuery}</textarea>
+	   	<input id="viewQuery.select" type="submit" doAction="selectQuery" scope="viewQuery;viewTable;" value="Execute query"></input>
+	</div>
+</div>
+ <div class="row  align-items-start">
  
  	<div class="col-md-4 border-right">
- 		<textarea m="" cols="" rows="" name="mySchema" style="width:150px; height:20px;">${mySchema}</textarea>
 	 	<c:set var="view" value="${viewTable}"  scope="request"/>
 		<c:import url="tiles/templateVObject.jsp">
 			<c:param name="taille" value ="col-md4" />
@@ -33,12 +41,7 @@
 			<c:param name="extraScopeSee" value="viewQuerySql;viewQuery;" />
 		</c:import>
 	</div>
-
-	<div class="col-md-4" id="viewQuerySql">
-	   <input id="viewQuery.select" type="submit" doAction="selectQuery" scope="viewQuery;viewTable;" value="Executer"></input>
-	   	<textarea m="" name="myQuery" cssStyle="width:300px;height:500px;">${myQuery}</textarea>
-	</div>
-	<div class="col-md-4">
+	<div class="col-md-8">
 	  <c:set var="view" value="${viewQuery}"  scope="request"/>
 		<c:import url="tiles/templateVObject.jsp">
 			<c:param name="taille" value ="col-md" />

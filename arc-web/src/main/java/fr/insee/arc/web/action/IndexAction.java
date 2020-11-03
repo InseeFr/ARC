@@ -1,13 +1,17 @@
 package fr.insee.arc.web.action;
 
 import org.json.JSONObject;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.web.model.NoModel;
 
 @Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class IndexAction extends ArcAction<NoModel> {
 
     private static final String ACTION_NAME = "Index";

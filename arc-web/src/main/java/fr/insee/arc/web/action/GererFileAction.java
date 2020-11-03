@@ -12,14 +12,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.h2.store.fs.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.web.model.FileSystemManagementModel;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	private static final Logger LOGGER = LogManager.getLogger(GererFileAction.class);
@@ -54,88 +59,76 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 		putVObject(getViewDirIn(), t -> initializeDirIn());
 		putVObject(getViewDirOut(), t -> initializeDirOut());
-
-		setDirIn(arcModel.getDirIn());
-		setDirOut(arcModel.getDirOut());
+		
+		setDirIn(arcModel.getDirIn() == null ? 
+				PROPERTIES.getBatchParametersDirectory() : arcModel.getDirIn() );
+		setDirOut(arcModel.getDirOut() == null ? 
+				PROPERTIES.getBatchParametersDirectory() : arcModel.getDirOut() );
 
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);	
+	}
+	
+	@Override
+	public void extraModelAttributes(Model model) {
+		model.addAttribute("dirIn", dirIn);
+		model.addAttribute("dirOut", dirOut);
 	}
 
 	// private SessionMap session;
 	// visual des Files
 	public void initializeDirIn() {
-		System.out.println("/* initializeDirIn */");
+		loggerDispatcher.debug("/* initializeDirIn */", LOGGER);
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 
-		if (this.dirIn==null) {
-			this.dirIn=PROPERTIES.getBatchParametersDirectory();
-		}
-
-		ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, viewDirIn.mapFilterFields());
-
+		ArrayList<ArrayList<String>> listeFichier = getDirFiles(this.dirIn, this.viewDirIn);
 		this.vObjectService.initializeByList(viewDirIn, listeFichier, defaultInputFields);
-
 	}
-
 
 	@RequestMapping("/selectFile")
 	public String selectFile() {
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
-	@RequestMapping("/selectDirIn")
-	public String selectDirIn() {
-		return seeDirIn();
-	}
-
-	@RequestMapping("/seeDirIn")
-	public String seeDirIn() {
+	@RequestMapping({"/seeDirIn", "/selectDirIn"})
+	public String seeDirIn(Model model) {
 		Map<String,ArrayList<String>> m=viewDirIn.mapContentSelected();
 		if (!m.isEmpty()) {
 			if(m.get("isdirectory").get(0).equals("true"))  {
 				this.dirIn= Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
+				model.addAttribute("dirIn", this.dirIn);
 			}
 		}
-
-
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/sortDirIn")
 	public String sortDirIn() {
-		this.vObjectService.sort(viewDirIn);
-		return generateDisplay(RESULT_SUCCESS);
+		return sortVobject(RESULT_SUCCESS, viewDirIn);
 	}
 
 	@RequestMapping("/transferDirIn")
 	public String transferDirIn() {
-		Map<String,ArrayList<String>> m=viewDirIn.mapContentSelected();
-		if (!m.isEmpty())
-		{
-			for (String f:m.get("filename"))
-			{
-				File fileIn = new File(this.dirIn + f);
-				File fileOut = new File(this.dirOut + f);
+		Map<String,ArrayList<String>> m = viewDirIn.mapContentSelected();
+		if (!m.isEmpty()) {
+			for (String f: m.get("filename")) {
+				File fileIn = Paths.get(this.dirIn, f).toFile();
+				File fileOut = Paths.get(this.dirOut, f).toFile();
 				fileIn.renameTo(fileOut);
 			}
-		}
-		else
-		{
-			m=viewDirIn.mapContent();
-			while (!m.isEmpty())
-			{
-				for (int i=0;i<m.get("filename").size();i++)
-				{
+		} else {
+			m = viewDirIn.mapContent();
+			while (!m.isEmpty()) {
+				for (int i=0;i<m.get("filename").size();i++) {
 					if (m.get("isdirectory").get(i).equals("false"))
 					{
-						File fileIn = new File(this.dirIn + m.get("filename").get(i));
-						File fileOut = new File(this.dirOut + m.get("filename").get(i));
+						File fileIn = Paths.get(this.dirIn, m.get("filename").get(i)).toFile();
+						File fileOut = Paths.get(this.dirOut, m.get("filename").get(i)).toFile();
 						fileIn.renameTo(fileOut);
 					}
 				}
-				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, viewDirIn.mapFilterFields());
+				ArrayList<ArrayList<String>> listeFichier = getDirFiles(this.dirIn, this.viewDirIn);
 				this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<>());
-				m=viewDirIn.mapContent();
+				m = viewDirIn.mapContent();
 			}
 		}
 		return generateDisplay(RESULT_SUCCESS);
@@ -143,43 +136,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	@RequestMapping("/copyDirIn")
 	public String copyDirIn() {
-		Map<String,ArrayList<String>> m=viewDirIn.mapContentSelected();
-		if (!m.isEmpty())
-		{
-			for (String f:m.get("filename"))
-			{
-				File fileIn = new File(this.dirIn + f);
-				File fileOut = new File(this.dirOut + f);
-				try {
-					Files.copy(fileIn.toPath(), fileOut.toPath());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		else
-		{
-			m=viewDirIn.mapContent();
-			while (!m.isEmpty())
-			{
-				for (int i=0;i<m.get("filename").size();i++)
-				{
-					if (m.get("isdirectory").get(i).equals("false"))
-					{
-						File fileIn = new File(this.dirIn + m.get("filename").get(i));
-						File fileOut = new File(this.dirOut + m.get("filename").get(i));
-						try {
-							Files.copy(fileIn.toPath(), fileOut.toPath());
-						} catch (IOException e) {
-						}
-					}
-				}
-				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirIn, viewDirIn.mapFilterFields());
-				this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<>());
-				m=viewDirIn.mapContent();
-			}
-		}
+		copy(viewDirIn, this.dirIn, this.dirOut);
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -215,9 +172,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 	}
 
 	@RequestMapping("/deleteDirIn")
-	public String delDirIn() {
-
-
+	public String delDirIn(Model model) {
 		if (!this.dirIn.contains(REPERTOIRE_EFFACABLE))
 		{
 			File f=new File(this.dirIn);
@@ -236,6 +191,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			FileUtils.deleteRecursive(this.dirIn, true);
 			this.dirIn=null;
 		}
+		model.addAttribute("dirIn", this.dirIn);
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -243,34 +199,23 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 	// private SessionMap session;
 	// visual des Files
 	public void initializeDirOut() {
-		System.out.println("/* initializeDirOut */");
+		loggerDispatcher.debug("/* initializeDirOut */", LOGGER);
 		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 
-
-		if (this.dirOut==null)
-		{
-			this.dirOut=PROPERTIES.getBatchParametersDirectory();
-		}
-
-		ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, viewDirOut.mapFilterFields());
+		ArrayList<ArrayList<String>> listeFichier = getDirFiles(this.dirOut, this.viewDirOut);
 
 		this.vObjectService.initializeByList(viewDirOut, listeFichier, defaultInputFields);
 
 	}
 
-	@RequestMapping("/selectDirOut")
-	public String selectDirOut() {
-		return seeDirOut();
-	}
-
-	@RequestMapping("/seeDirOut")
-	public String seeDirOut() {
+	@RequestMapping({"/selectDirOut", "/seeDirOut"})
+	public String seeDirOut(Model model) {
 		Map<String,ArrayList<String>> m=viewDirOut.mapContentSelected();
 
-		//        System.out.println(m);
 		if (!m.isEmpty()) {
 			if(m.get("isdirectory").get(0).equals("true")) {
-				this.dirOut= Paths.get(this.dirOut, m.get("filename").get(0)).toString() + File.separator;
+				this.dirOut = Paths.get(this.dirOut, m.get("filename").get(0)).toString() + File.separator;
+				model.addAttribute("dirOut", this.dirOut);
 			}
 		}
 
@@ -310,7 +255,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 						fileIn.renameTo(fileOut);
 					}
 				}
-				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, viewDirOut.mapFilterFields());
+				ArrayList<ArrayList<String>> listeFichier = getDirFiles(this.dirOut, this.viewDirOut);
 				this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<>());
 				m=viewDirOut.mapContent();
 			}
@@ -321,45 +266,9 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	@RequestMapping("/copyDirOut")
 	public String copyDirOut() {
-		Map<String,ArrayList<String>> m=viewDirOut.mapContentSelected();
-		if (!m.isEmpty())
-		{
-			for (String f:m.get("filename"))
-			{
-				File fileIn = new File(this.dirOut + f);
-				File fileOut = new File(this.dirIn + f);
-				try {
-					Files.copy(fileIn.toPath(), fileOut.toPath());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		else
-		{
-			m=viewDirOut.mapContent();
-			while (!m.isEmpty())
-			{
-				for (int i=0;i<m.get("filename").size();i++)
-				{
-					if (m.get("isdirectory").get(i).equals("false"))
-					{
-						File fileIn = new File(this.dirOut + m.get("filename").get(i));
-						File fileOut = new File(this.dirIn + m.get("filename").get(i));
-						try {
-							Files.copy(fileIn.toPath(), fileOut.toPath());
-						} catch (IOException e) {}
-					}
-				}
-				ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(this.dirOut, viewDirOut.mapFilterFields());
-				this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<>());
-				m=viewDirOut.mapContent();
-			}
-		}
+		copy(viewDirOut, this.dirOut, this.dirIn);
 		return generateDisplay(RESULT_SUCCESS);
 	}
-
 
 	@RequestMapping("/renameOut")
 	public String renameOut() {
@@ -397,7 +306,6 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 	@RequestMapping("/deleteDirOut")
 	public String delDirOut() {
 
-
 		if (!this.dirOut.contains(REPERTOIRE_EFFACABLE))
 		{
 			File f=new File(this.dirOut);
@@ -419,112 +327,122 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
-	public ArrayList<ArrayList<String>> getFilesFromDirectory(String dir, HashMap<String,ArrayList<String>> filter2)
-	{
-		HashMap<String,ArrayList<String>> filter=filter2;
-		ArrayList<ArrayList<String>> result=new ArrayList<ArrayList<String>>();
+	private void copy(VObject viewSource, String dirSource, String dirTarget) {
+		Map<String,ArrayList<String>> m = viewSource.mapContentSelected();
+		if (!m.isEmpty())
+		{
+			for (String f:m.get("filename"))
+			{
+				File fileIn = new File(dirSource + f);
+				File fileOut = new File(dirTarget + f);
+				try {
+					Files.copy(fileIn.toPath(), fileOut.toPath());
+				} catch (IOException e) {
+					String errorMessage = "An error occured while copying the file";
+					loggerDispatcher.error(errorMessage, e, LOGGER);
+					viewSource.setMessage(errorMessage);
+				}
+			}
+		}
+		else
+		{
+			m=viewSource.mapContent();
+			while (!m.isEmpty())
+			{
+				for (int i=0;i<m.get("filename").size();i++)
+				{
+					if (m.get("isdirectory").get(i).equals("false"))
+					{
+						File fileIn = new File(dirSource + m.get("filename").get(i));
+						File fileOut = new File(dirTarget + m.get("filename").get(i));
+						try {
+							Files.copy(fileIn.toPath(), fileOut.toPath());
+						} catch (IOException e) {
+							String errorMessage = "An error occured while copying a file";
+							loggerDispatcher.error(errorMessage, e, LOGGER);
+							viewSource.setMessage(errorMessage);
+						}
+					}
+				}
+				ArrayList<ArrayList<String>> listeFichier = getDirFiles(dirSource, this.viewDirOut);
+				this.vObjectService.initializeByList(viewSource, listeFichier, new HashMap<>());
+				m = viewSource.mapContent();
+			}
+		}
+	}
 
-		ArrayList<String> entete = new ArrayList<String>();
+	private ArrayList<ArrayList<String>> getDirFiles(String dirUri, VObject dirVobject) {
+		File dirFile = Paths.get(dirUri).toFile();
+		ArrayList<ArrayList<String>> listeFichier = new ArrayList<>();
+		if (!dirFile.exists() || !dirFile.isDirectory()) {
+			this.viewDirIn.setMessage("Invalid input directory");
+		} else {
+			listeFichier = getFilesFromDirectory(dirFile, dirVobject.mapFilterFields());
+		}
+		return listeFichier;
+	}
+
+	private ArrayList<ArrayList<String>> getFilesFromDirectory(File dir, HashMap<String,ArrayList<String>> filter) {
+		ArrayList<ArrayList<String>> result=new ArrayList<>();
+
+		ArrayList<String> entete = new ArrayList<>();
 		entete.add("filename");
 		entete.add("isdirectory");
 		result.add(entete);
 
-		ArrayList<String> format = new ArrayList<String>();
+		ArrayList<String> format = new ArrayList<>();
 		format.add("text");
 		format.add("text");
 		result.add(format);
 
-
-		//      if (dir.substring(dir.length()-1, dir.length()).equals("\\"))
-		//      {
-		//          System.out.println("yoooo");
-		//          dir=dir.substring(0,dir.length()-1);
-		//      }
-		//
-		File files=new File(dir);
-		//      System.out.println(dir);
 		int nb=0;
 
 
-		// java de merde...
-		if (filter==null)
-		{
-			filter=new  HashMap<String,ArrayList<String>>();
+		if (filter==null) {
+			filter=new  HashMap<>();
 		}
+		
+		filter.putIfAbsent("filename", new ArrayList<String>());
+		filter.putIfAbsent("isdirectory", new ArrayList<String>());
 
-		if (filter.isEmpty())
-		{
-			filter.put("filename", new ArrayList<String>());
-			filter.put("isdirectory", new ArrayList<String>());
-		}
-
-		if (filter.get("filename")==null)
-		{
-			filter.put("filename", new ArrayList<String>());
-		}
-
-		if (filter.get("isdirectory")==null)
-		{
-			filter.put("isdirectory", new ArrayList<String>());
-		}
-
-
-		if (filter.get("filename").size()==0)
-		{
+		if (filter.get("filename").isEmpty()) {
 			filter.get("filename").add("");
-		}
-
-		if (filter.get("isdirectory").size()==0)
-		{
-			filter.get("isdirectory").add("");
-		}
-
-		if (filter.get("filename").get(0)==null)
-		{
+		} else if (filter.get("filename").get(0) == null) {
 			filter.get("filename").set(0, "");
 		}
 
-		if (filter.get("isdirectory").get(0)==null)
-		{
+		if (filter.get("isdirectory").isEmpty()) {
+			filter.get("isdirectory").add("");
+		} else if (filter.get("isdirectory").get(0) == null) {
 			filter.get("isdirectory").set(0, "");
 		}
 
-		System.out.println(filter);
 
-
-		for (File f:files.listFiles())
-		{
+		for (File f: dir.listFiles()) {
 			boolean toInsert=true;
-			if (!filter.get("filename").get(0).equals("") && !f.getName().contains(filter.get("filename").get(0)))
-			{
+			if (!filter.get("filename").get(0).equals("") && !f.getName().contains(filter.get("filename").get(0))) {
 				toInsert=false;
 			}
 
-			if (!filter.get("isdirectory").get(0).equals("") && "true".startsWith(filter.get("isdirectory").get(0)) && !f.isDirectory())
-			{
+			if (!filter.get("isdirectory").get(0).equals("") && "true".startsWith(filter.get("isdirectory").get(0)) && !f.isDirectory()) {
 				toInsert=false;
 			}
 
-			if (!filter.get("isdirectory").get(0).equals("") && "false".startsWith(filter.get("isdirectory").get(0)) && f.isDirectory())
-			{
+			if (!filter.get("isdirectory").get(0).equals("") && "false".startsWith(filter.get("isdirectory").get(0)) && f.isDirectory()) {
 				toInsert=false;
 			}
 
-			if (toInsert)
-			{
+			if (toInsert) {
 				ArrayList<String> fileAttribute = new ArrayList<String>();
 				fileAttribute.add(f.getName());
 				fileAttribute.add(""+f.isDirectory());
 				result.add(fileAttribute);
 				nb++;
-				if (nb>50)
-				{
+				if (nb>50) {
 					break;
 				}
 			}
 		}
-
-
 
 		return result;
 

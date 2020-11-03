@@ -84,6 +84,8 @@ public class VObject {
 
 	private String message;
 
+	private Object[] messageArgs;
+
 	private HashMap<String, String> customValues;
 
 	public ArrayList<ArrayList<String>> listContent() {
@@ -695,6 +697,14 @@ public class VObject {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public Object[] getMessageArgs() {
+		return messageArgs;
+	}
+
+	public void setMessageArgs(Object... messageArgs) {
+		this.messageArgs = messageArgs;
 	}
 
 	public HashMap<String, String> getCustomValues() {

@@ -29,7 +29,7 @@
 				<c:param name="checkboxVisible" value="true" />
 				<c:param name="extraScopeSee" value ="viewDirIn;viewDirOut;" />
 				<c:param name="otherButton">
-					<textarea m="" action='select' name="dirIn" style="width:500px;height:20px;">${dirIn}</textarea>
+					<input type="text" m="" action='select' name="dirIn" value="${dirIn}" />
 					<input id="viewDirIn.transfer" type="submit" doAction="transferDirIn" scope="viewDirIn;viewDirOut;" value="Transférer"></input>
 					<input id="viewDirIn.update" type="submit" doAction="renameIn" scope="viewDirIn;viewDirOut;" value="Mettre à jour" style="display:none;"></input>
 					<input id="viewDirIn.copy" type="submit" doAction="copyDirIn" scope="viewDirIn;viewDirOut;" value="Copier"></input>
@@ -45,6 +45,7 @@
 			<c:import url="tiles/templateVObject.jsp">
 				<c:param name="taille" value ="col-md4" />
 				<c:param name="ligneAdd" value="true" />
+				<c:param name="btnSee" value="true" />
 				<c:param name="btnSelect" value="true" />
 				<c:param name="btnAdd" value="true" />
 				<c:param name="btnDelete" value="true" />
@@ -52,7 +53,7 @@
 				<c:param name="checkboxVisible" value="true" />
 				<c:param name="extraScopeSee" value ="viewDirIn;viewDirOut;" />
 				<c:param name="otherButton">
-					<textarea m="" action='select' name="dirOut" style="width:500px;height:20px;">${dirOut}</textarea>
+					<input type="text" m="" action='select' name="dirOut" value="${dirOut}" />
 					<input id="viewDirOut.transfer" type="submit" doAction="transferDirOut" scope="viewDirIn;viewDirOut;" value="Transférer"></input>
 					<input id="viewDirOut.update" type="submit" doAction="renameOut" scope="viewDirIn;viewDirOut;" value="Mettre à jour" style="display:none;"></input>
 					<input id="viewDirOut.copy" type="submit" doAction="copyDirOut" scope="viewDirOut;viewDirOut;" value="Copier"></input>

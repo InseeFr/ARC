@@ -12,6 +12,8 @@ public class ViewTable extends VObject {
         this.setTitle("view.schematable");
         
         this.setSessionName("viewTable");
+
+        this.setPaginationSize(25);
         
         this.setConstantVObject(new ConstantVObject(
 

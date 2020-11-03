@@ -3,7 +3,7 @@
 
 <c:set var="allowResize" value="${param.allowResize}" />
 <div style="float: left; margin-left: 20px;">
-	<div class="row">
+	<div class="row no-gutters">
 		<c:if test="${allowResize}">
 			<div class="col-xs-6">
 				<label><spring:message code="gui.page.size" />:&nbsp;
@@ -14,11 +14,13 @@
 			</div>
 		</c:if>
 		<c:if test='${1!=view.nbPages}'>
-			<div class="col">
+			<div class="col-xs-2">
 				<label>Page&nbsp;<input class="input-sm w-25" type="number"
 					min="1" max="${view.nbPages}" name="${view.sessionName}.idPage"
 					value="${view.idPage}" />/${view.nbPages}
 				</label>
+			</div>
+			<div class="col-xs-2">
 				<span class="smallButton"
 					onclick="gotoPage('${view.sessionName}',${1 - view.idPage});">&lt;&lt;</span>
 				<span class="smallButton"

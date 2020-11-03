@@ -1,9 +1,14 @@
 package fr.insee.arc.web.action;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -11,11 +16,12 @@ import fr.insee.arc.web.model.DatabaseManagementModel;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class GererQueryAction extends ArcAction<DatabaseManagementModel> implements  IConstanteCaractere {
 
 	private static final String RESULT_SUCCESS = "/jsp/gererQuery.jsp";
 
-	private String defaultSchema = "arc";
+	private static final String DEFAULT_SCHEMA = "arc";
 
 	private VObject viewQuery;
 
@@ -29,11 +35,22 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 	protected void putAllVObjects(DatabaseManagementModel model) {
 		this.setViewQuery(vObjectService.preInitialize(model.getViewQuery()));
 		this.setViewTable(vObjectService.preInitialize(model.getViewTable()));
+
+		if (model.getMySchema() != null && !model.getMySchema().trim().isEmpty()) {
+			this.mySchema = model.getMySchema().trim().toLowerCase();
+		} else {
+			this.mySchema = DEFAULT_SCHEMA;
+		}
 		this.myQuery = model.getMyQuery();
-		this.mySchema = model.getMySchema();
 
 		putVObject(getViewQuery(), t -> initializeQuery());
 		putVObject(getViewTable(), t -> initializeTable());
+	}
+	
+	@Override
+	public void extraModelAttributes(Model model) {
+		model.addAttribute("myQuery", myQuery);
+		model.addAttribute("mySchema", mySchema);
 	}
 
 	@Override
@@ -43,10 +60,9 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 
 	public void initializeQuery() {
 		System.out.println("/* initializeQuery */");
-		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
+		HashMap<String, String> defaultInputFields = new HashMap<>();
 
-		if (this.myQuery!=null && !this.myQuery.trim().equals(""))
-		{
+		if (this.myQuery!=null){
 			String m=this.myQuery.trim();
 			if (m.endsWith(";"))
 			{
@@ -75,64 +91,47 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 
 	@RequestMapping("/selectQuery")
 	public String selectQuery() {
-		return generateDisplay(RESULT_SUCCESS);
+		return basicAction(RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/updateQuery")
 	public String updateQuery() {
-		this.vObjectService.update(viewQuery);
-		return generateDisplay(RESULT_SUCCESS);
+		return updateVobject(RESULT_SUCCESS, viewQuery);
 	}
 
 	@RequestMapping("/sortQuery")
 	public String sortQuery() {
-		this.vObjectService.sort(viewQuery);
-		return generateDisplay(RESULT_SUCCESS);
+		return sortVobject(RESULT_SUCCESS, viewQuery);
 	}
 
 
-	// private SessionMap session;
-	// visual des Tables
+	// Table list
 	public void initializeTable() {
 		System.out.println("/* initializeTable */");
-		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-
-		if (this.mySchema!=null && !this.mySchema.trim().equals(""))
-		{
-			this.mySchema=this.mySchema.trim().toLowerCase();
-		}
-		else
-		{
-			this.mySchema=this.defaultSchema;
-		}
-
-		this.vObjectService.initialize(viewTable, "select tablename from pg_tables where schemaname='"+this.mySchema+"'", "arc.ihm_Table", defaultInputFields);
+		HashMap<String, String> defaultInputFields = new HashMap<>();
+		this.vObjectService.initialize(viewTable, "select tablename from pg_tables where schemaname='" + this.mySchema+"'", "arc.ihm_Table", defaultInputFields);
 
 	}
 
-	@RequestMapping("/selectTable")
-	public String selectTable() {
-		this.myQuery="select * from "+this.mySchema+"."+viewTable.mapContentSelected().get("tablename").get(0)+" limit 10 ";
-		return generateDisplay(RESULT_SUCCESS);
-	}
-
-	@RequestMapping("/seeTable")
-	public String seeTable() {
-		this.myQuery="select * from "+this.mySchema+"."+viewTable.mapContentSelected().get("tablename").get(0)+" limit 10 ";
-		return generateDisplay(RESULT_SUCCESS);
+	@RequestMapping({"/selectTable", "/seeTable"})
+	public String seeTable(Model model) {
+		HashMap<String, ArrayList<String>> mapContentSelected = viewTable.mapContentSelected();
+		if (!mapContentSelected.isEmpty()) {
+			this.myQuery = "select * from " + this.mySchema+"." + mapContentSelected.get("tablename").get(0) + " limit 10 ";
+			model.addAttribute("myQuery", myQuery);
+		}
+		return basicAction(RESULT_SUCCESS);
 	}
 
 
 	@RequestMapping("/updateTable")
 	public String updateTable() {
-		this.vObjectService.update(viewTable);
-		return generateDisplay(RESULT_SUCCESS);
+		return updateVobject(RESULT_SUCCESS, viewTable);
 	}
 
 	@RequestMapping("/sortTable")
 	public String sortTable() {
-		this.vObjectService.sort(viewTable);
-		return generateDisplay(RESULT_SUCCESS);
+		return sortVobject(RESULT_SUCCESS, viewTable);
 	}
 
 

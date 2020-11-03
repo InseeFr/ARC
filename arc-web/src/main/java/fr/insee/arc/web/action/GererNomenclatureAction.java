@@ -12,8 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.IDbConstant;
@@ -21,11 +24,13 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.dao.ExternalFilesManagementDao;
 import fr.insee.arc.web.model.ExternalFilesModel;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> implements IDbConstant{
 
 	private static final String RESULT_SUCCESS = "/jsp/gererNomenclature.jsp";
@@ -156,9 +161,11 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
             importNomenclatureDansBase(fileUpload);
         } catch (Exception ex) {
             ex.printStackTrace();
-            this.viewListNomenclatures.setMessage(ex.toString());
+            if (ManipString.isStringNull(this.viewListNomenclatures.getMessage())) {
+            	this.viewListNomenclatures.setMessage(ex.toString());
+            }
             loggerDispatcher.error(ex,LOGGER);
-          }
+        }
 
         return generateDisplay(RESULT_SUCCESS);
     }
@@ -333,13 +340,13 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         String selectNomColonne = "SELECT nom_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> colonnesDansTableIhmSchemaNmcl = new ArrayList<String>();
         UtilitaireDao.get(poolName).getList(null, selectNomColonne, colonnesDansTableIhmSchemaNmcl);
-        isListesIdentiques(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl);
+        areListsEquals(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl, "field");
 
         // Verification des types
         String selectTypeColonne = "SELECT type_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> typesDansTableIhmSchemaNmcl = new ArrayList<String>();
         UtilitaireDao.get(poolName).getList(null, selectTypeColonne, typesDansTableIhmSchemaNmcl);
-        isListesIdentiques(typesDansFichier, typesDansTableIhmSchemaNmcl);
+        areListsEquals(typesDansFichier, typesDansTableIhmSchemaNmcl, "type");
 
     }
 
@@ -351,11 +358,12 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         return list;
     }
 
-    private void isListesIdentiques(List<String> listeFichier, List<String> listIhmSchemaNmcl) {
+    private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl, String elementDescription) {
         for (String e : listeFichier) {
             if (!listIhmSchemaNmcl.contains(e)) {
-                String message = "L'element du fichier de nomenclature '" + e + "' n'est pas dans la table arc.ihm_schema_nmcl.";
-                this.viewSchemaNmcl.setMessage(message);
+                String message = "externalFilesManagement.import.error.extraImport";
+                this.viewListNomenclatures.setMessage(message);
+                this.viewListNomenclatures.setMessageArgs(elementDescription, e);
                 throw new IllegalStateException(message);
             }
         }

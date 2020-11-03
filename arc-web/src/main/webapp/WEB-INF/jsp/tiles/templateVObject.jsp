@@ -58,7 +58,7 @@
 	<c:if test="${view.isInitialized && view.isScoped}">
 		<div class="row">
 			<div class="col-md">
-				<div class="card  no-margin">
+				<div class="card  no-margin overflow-auto">
 					<div class="card-header bg-primary p-0">
 						<h3 class="text-white m-1" id="${view.sessionName}_description"><spring:message code="${view.title}"/></h3>
 					</div>
@@ -95,6 +95,7 @@
 									</c:forEach>
 							</tr>
 							<tr style="display: none;">
+								<th scope="col"></th>
 									<c:forEach items="${view.headersDLabel}" var="head" varStatus="incr"> 
 										<th scope="col">${head}</th>
 									</c:forEach>
@@ -345,7 +346,11 @@
 			</div>
 		</div>
 		<div class="alert">
-			${view.message}
+			<c:set var="viewMessage"><spring:message code="${view.message}" arguments="${view.messageArgs}" text="" /></c:set>
+			<c:choose>
+				<c:when test="${viewMessage != ''}">${viewMessage}</c:when>
+				<c:otherwise>${view.message}</c:otherwise>
+			</c:choose>
 		</div>
 		<!--            Les boutons pour faire défiler les pages de résultat -->
 

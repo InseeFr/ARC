@@ -1283,9 +1283,10 @@ function triggerAction(view,action)
 	$('[id="'+view+'.'+action+'"]').trigger('click');	
 }
 
-function gotoPage(view,t,delta)
+function gotoPage(view,delta)
 {
-	$("[name='"+view+".idPage']").val(parseInt($("[name='"+view+".idPage']").val())+parseInt(delta));
+	var newVal = parseInt($("[name='"+view+".idPage']").val()) + parseInt(delta);
+	$("[name='"+view+".idPage']").val(newVal);
 	$("[name='"+view+".idPage']").attr('m','js');
 
 	$('[id="'+view+'.select"]').trigger('click');

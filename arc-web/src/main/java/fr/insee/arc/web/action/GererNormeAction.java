@@ -14,8 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dao.MappingRegleDao;
@@ -39,6 +42,7 @@ import fr.insee.arc.web.util.ConstanteBD;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class GererNormeAction extends ArcAction<NormManagementModel> implements IDbConstant {
 	
 	private static final String RESULT_SUCCESS = "/jsp/gererNorme.jsp";
