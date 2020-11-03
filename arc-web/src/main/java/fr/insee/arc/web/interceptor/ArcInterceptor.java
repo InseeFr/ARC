@@ -38,9 +38,11 @@ public class ArcInterceptor extends HandlerInterceptorAdapter {
 				@SuppressWarnings("unchecked")
 				ArcAction<ArcModel> arcAction = (ArcAction<ArcModel>) springHandler.getBean();
 				// Adds all the vObjects to the model
-				for (VObject vObject : arcAction.getMapVObject().keySet()) {
-					if (vObject != null) {
-						modelAndView.getModel().put(vObject.getSessionName(), vObject);
+				if (arcAction.getMapVObject() != null) {
+					for (VObject vObject : arcAction.getMapVObject().keySet()) {
+						if (vObject != null) {
+							modelAndView.getModel().put(vObject.getSessionName(), vObject);
+						}
 					}
 				}
 			}
