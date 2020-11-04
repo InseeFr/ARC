@@ -50,6 +50,8 @@ import fr.insee.arc.web.util.VObject;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
+	private static final String ENTRY_DATE = "date_entree";
+
 	private static final String ACTION_NAME = "EnvManagement";
 
 	private static final String RESULT_SUCCESS = "jsp/gererPilotageBAS.jsp";
@@ -119,7 +121,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		this.vObjectService.initialize(
 				getViewPilotageBAS(), requete.toString(), 
 				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields,
-				content -> reworkPilotageContent(content));
+				this::reworkPilotageContent);
 	}
 	
 	private ArrayList<ArrayList<String>> reworkPilotageContent(ArrayList<ArrayList<String>> content) {
@@ -133,13 +135,13 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 		// ne garder les colonnes avec au moins un enregistrements dedans
 
-		newHeaders.add("date_entree");
+		newHeaders.add(ENTRY_DATE);
 
 		for (Map.Entry<String, ArrayList<String>> entry : mapContent.entrySet()) {
 			boolean toKeep = false;
 			int i = 0;
 
-			while (i < entry.getValue().size() && !entry.getKey().equals("date_entree")) {
+			while (i < entry.getValue().size() && !entry.getKey().equals(ENTRY_DATE)) {
 
 				if (Integer.parseInt(entry.getValue().get(i)) > 0) {
 					toKeep = true;
@@ -486,7 +488,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			e.printStackTrace();
 		}
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE");
-		String chemin = Paths.get(this.repertoire, getBacASable().toString().toUpperCase()).toString();
+		String chemin = Paths.get(this.repertoire, getBacASable().toUpperCase()).toString();
 		this.vObjectService.downloadEnveloppe(getViewArchiveBAS(), response, querySelection.toString(), chemin, listRepertoire);
 		return "none";
 	}
@@ -497,9 +499,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
 		
 		ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm",
-				(String) getBacASable());
+				getBacASable());
 
-		ApiServiceFactory.getService(phaseAExecuter, "arc.ihm", (String) getBacASable(),
+		ApiServiceFactory.getService(phaseAExecuter, "arc.ihm", getBacASable(),
 				this.repertoire, "10000000").invokeApi();
 		return generateDisplay(RESULT_SUCCESS);
 	}
@@ -513,7 +515,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		HashMap<String, ArrayList<String>> m = new HashMap<>(
 				getViewFichierBAS().mapContentSelected());
 
-		if (m != null && !m.isEmpty() && m.get("id_source") != null) {
+		if (!m.isEmpty() && m.get("id_source") != null) {
 			for (int i = 0; i < m.get("id_source").size(); i++) {
 				if (selectedSrc != null) {
 					selectedSrc += "\n UNION ALL SELECT ";
@@ -592,7 +594,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			 StringBuilder requete = new StringBuilder();
 	            requete.append("select container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
 	            requete.append(" FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
-	            requete.append(" where date_entree" + ManipString.sqlEqual(selectionLigne.get("date_entree").get(0), "text"));
+	            requete.append(" where date_entree" + ManipString.sqlEqual(selectionLigne.get(ENTRY_DATE).get(0), "text"));
 	            requete.append(" and array_to_string(etat_traitement,'$')" + ManipString.sqlEqual(etat, "text"));
 	            requete.append(" and phase_traitement" + ManipString.sqlEqual(phase, "text"));
 			
@@ -604,7 +606,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
             StringBuilder requete = new StringBuilder();
             requete.append("select container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
             requete.append(" from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
-            requete.append(" where date_entree" + ManipString.sqlEqual(selectionLigneRapport.get("date_entree").get(0), "text"));
+            requete.append(" where date_entree" + ManipString.sqlEqual(selectionLigneRapport.get(ENTRY_DATE).get(0), "text"));
             requete.append(" and array_to_string(etat_traitement,'$')"
                     + ManipString.sqlEqual(selectionLigneRapport.get("etat_traitement").get(0), type.get("etat_traitement")));
             requete.append(" and phase_traitement"
@@ -740,7 +742,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 		String phase = selectionColonne.get(0).split("_")[0].toUpperCase();
 		String etat = selectionColonne.get(0).split("_")[1].toUpperCase();
-		String date = selectionLigne.get("date_entree").get(0);
+		String date = selectionLigne.get(ENTRY_DATE).get(0);
 
 		String[] etatList = etat.split("\\$");
 		String etatBdd = "{" + etat.replace("$", ",") + "}";

@@ -592,7 +592,6 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		}
 		// if rule to insert
 		if (isToInsert) {
-
 			// Insert the rule
 			if (this.vObjectService.insert(viewControle)) {
 				// if no exception

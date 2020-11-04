@@ -73,7 +73,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	}
 
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	public void configureGlobal(AuthenticationManagerBuilder auth) {
 		auth.authenticationProvider(keycloakAuthenticationProvider());
 	}
 

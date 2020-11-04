@@ -1173,26 +1173,14 @@ public class VObjectService {
         response.reset();
         response.setHeader("Content-Disposition", "attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar");
 
-        TarArchiveOutputStream taos = null;
-        try {
-            taos = new TarArchiveOutputStream(response.getOutputStream());
+        try (TarArchiveOutputStream taos = new TarArchiveOutputStream(response.getOutputStream());){ 
             UtilitaireDao.get(this.pool).copieFichiers(null, requete, taos, repertoire, listRepertoire);
-
         } catch (IOException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
         } finally {
-
             try {
-                if (taos != null) {
-                    try {
-                        taos.close();
-                    } catch (IOException ioe) {
-                        // Silent catch
-                    }
-                }
                 response.getOutputStream().flush();
                 response.getOutputStream().close();
-
             } catch (IOException ex) {
                 LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
             }
@@ -1265,8 +1253,7 @@ public class VObjectService {
     }
 
     private VObject fetchVObjectData(String sessionName) {
-        VObject v0 = (VObject) session.get(sessionName);
-		return v0;
+        return (VObject) session.get(sessionName);
 	}
 
     /**
@@ -1325,9 +1312,7 @@ public class VObjectService {
             requete.append("WHERE false ");
 
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(" initializeByList requete : " + requete.toString());
-        }
+        loggerDispatcher.debug(" initializeByList requete : " + requete.toString(), LOGGER);
         // on ne gere pas les autres cas: ca doit planter
         this.initialize(data, requete.toString(), data.getTable(), defaultInputFields);
     }

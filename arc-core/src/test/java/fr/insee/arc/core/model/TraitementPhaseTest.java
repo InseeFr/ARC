@@ -1,5 +1,6 @@
 package fr.insee.arc.core.model;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -8,7 +9,7 @@ public class TraitementPhaseTest {
 	
 	@Test
 	public void getListPhaseCShouldNotBeNull() {
-		assertTrue(TraitementPhase.getListPhaseC() != null);
+		assertNotNull(TraitementPhase.getListPhaseC());
 	}
 
 	@Test

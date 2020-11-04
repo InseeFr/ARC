@@ -100,7 +100,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 */
 	private String scope;
 
-	private Map<VObject, Consumer<? super VObject>> mapVObject = new HashMap<>();
+	private Map<VObject, Consumer<VObject>> mapVObject = new HashMap<>();
 	private List<VObject> listVObjectOrder = new ArrayList<>();
 
 	/** State of the database */
@@ -146,7 +146,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 		this.bddTable.export(getSession().asMap());
 		this.scope = scope;
 		
-    	initialize(arcModel, model);
+    	initialize(arcModel);
     	refreshGenericModelAttributes(model);
     	extraModelAttributes(model);
     }
@@ -165,7 +165,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 		// nothing by default
 	}
 
-	private void initialize(T arcModel, Model model) {
+	private void initialize(T arcModel) {
 		LoggerHelper.debug(LOGGER, String.join(" ** initialize() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
 		listVObjectOrder = new ArrayList<>();
@@ -202,7 +202,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 			// we only want one try
 			queryHandler.setMaxRetry(1);
 			queryHandler.executeUpdate("select true", UtilitaireDAOQueryHandler.OnException.THROW);
-			queryHandler.restsetMaxRetry();
+			queryHandler.resetMaxRetry();
 			setDataBaseOk(true);
 	
 		} catch (Exception e) {
@@ -212,7 +212,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	
 	}
 
-	protected Consumer<? super VObject> putVObject(VObject vObject, Consumer<? super VObject> initialize) {
+	protected Consumer<VObject> putVObject(VObject vObject, Consumer<VObject> initialize) {
 		this.listVObjectOrder.add(vObject);
 		return this.mapVObject.put(vObject, initialize);
 	}
@@ -467,7 +467,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	/**
 	 * @return the mapVObject
 	 */
-	public final Map<VObject, Consumer<? super VObject>> getMapVObject() {
+	public final Map<VObject, Consumer<VObject>> getMapVObject() {
 		return this.mapVObject;
 	}
 

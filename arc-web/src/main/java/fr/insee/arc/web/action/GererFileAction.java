@@ -27,12 +27,15 @@ import fr.insee.arc.web.util.VObject;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
+	private static final String IS_DIRECTORY = "isdirectory";
+
+	private static final String DIR_OUT = "dirOut";
+
+	private static final String DIR_IN = "dirIn";
+
 	private static final Logger LOGGER = LogManager.getLogger(GererFileAction.class);
 
 	private static final String RESULT_SUCCESS = "jsp/gererFile.jsp";
-
-	@Autowired
-	public PropertiesHandler PROPERTIES;
 
 	public static String REPERTOIRE_EFFACABLE="TO_DELETE";
 
@@ -61,17 +64,17 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		putVObject(getViewDirOut(), t -> initializeDirOut());
 		
 		setDirIn(arcModel.getDirIn() == null ? 
-				PROPERTIES.getBatchParametersDirectory() : arcModel.getDirIn() );
+				properties.getBatchParametersDirectory() : arcModel.getDirIn() );
 		setDirOut(arcModel.getDirOut() == null ? 
-				PROPERTIES.getBatchParametersDirectory() : arcModel.getDirOut() );
+				properties.getBatchParametersDirectory() : arcModel.getDirOut() );
 
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);	
 	}
 	
 	@Override
 	public void extraModelAttributes(Model model) {
-		model.addAttribute("dirIn", dirIn);
-		model.addAttribute("dirOut", dirOut);
+		model.addAttribute(DIR_IN, dirIn);
+		model.addAttribute(DIR_OUT, dirOut);
 	}
 
 	// private SessionMap session;
@@ -91,12 +94,10 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	@RequestMapping({"/seeDirIn", "/selectDirIn"})
 	public String seeDirIn(Model model) {
-		Map<String,ArrayList<String>> m=viewDirIn.mapContentSelected();
-		if (!m.isEmpty()) {
-			if(m.get("isdirectory").get(0).equals("true"))  {
-				this.dirIn= Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
-				model.addAttribute("dirIn", this.dirIn);
-			}
+		Map<String,ArrayList<String>> m= viewDirIn.mapContentSelected();
+		if (!m.isEmpty() && m.get(IS_DIRECTORY).get(0).equals("true"))  {
+			this.dirIn= Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
+			model.addAttribute(DIR_IN, this.dirIn);
 		}
 		return generateDisplay(RESULT_SUCCESS);
 	}
@@ -119,7 +120,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			m = viewDirIn.mapContent();
 			while (!m.isEmpty()) {
 				for (int i=0;i<m.get("filename").size();i++) {
-					if (m.get("isdirectory").get(i).equals("false"))
+					if (m.get(IS_DIRECTORY).get(i).equals("false"))
 					{
 						File fileIn = Paths.get(this.dirIn, m.get("filename").get(i)).toFile();
 						File fileOut = Paths.get(this.dirOut, m.get("filename").get(i)).toFile();
@@ -191,7 +192,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			FileUtils.deleteRecursive(this.dirIn, true);
 			this.dirIn=null;
 		}
-		model.addAttribute("dirIn", this.dirIn);
+		model.addAttribute(DIR_IN, this.dirIn);
 		return generateDisplay(RESULT_SUCCESS);
 	}
 
@@ -213,9 +214,9 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		Map<String,ArrayList<String>> m=viewDirOut.mapContentSelected();
 
 		if (!m.isEmpty()) {
-			if(m.get("isdirectory").get(0).equals("true")) {
+			if(m.get(IS_DIRECTORY).get(0).equals("true")) {
 				this.dirOut = Paths.get(this.dirOut, m.get("filename").get(0)).toString() + File.separator;
-				model.addAttribute("dirOut", this.dirOut);
+				model.addAttribute(DIR_OUT, this.dirOut);
 			}
 		}
 
@@ -248,7 +249,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			{
 				for (int i=0;i<m.get("filename").size();i++)
 				{
-					if (m.get("isdirectory").get(i).equals("false"))
+					if (m.get(IS_DIRECTORY).get(i).equals("false"))
 					{
 						File fileIn = new File(this.dirOut + m.get("filename").get(i));
 						File fileOut = new File(this.dirIn + m.get("filename").get(i));
@@ -351,7 +352,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			{
 				for (int i=0;i<m.get("filename").size();i++)
 				{
-					if (m.get("isdirectory").get(i).equals("false"))
+					if (m.get(IS_DIRECTORY).get(i).equals("false"))
 					{
 						File fileIn = new File(dirSource + m.get("filename").get(i));
 						File fileOut = new File(dirTarget + m.get("filename").get(i));
@@ -387,7 +388,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 		ArrayList<String> entete = new ArrayList<>();
 		entete.add("filename");
-		entete.add("isdirectory");
+		entete.add(IS_DIRECTORY);
 		result.add(entete);
 
 		ArrayList<String> format = new ArrayList<>();
@@ -402,8 +403,8 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			filter=new  HashMap<>();
 		}
 		
-		filter.putIfAbsent("filename", new ArrayList<String>());
-		filter.putIfAbsent("isdirectory", new ArrayList<String>());
+		filter.putIfAbsent("filename", new ArrayList<>());
+		filter.putIfAbsent(IS_DIRECTORY, new ArrayList<>());
 
 		if (filter.get("filename").isEmpty()) {
 			filter.get("filename").add("");
@@ -411,10 +412,10 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			filter.get("filename").set(0, "");
 		}
 
-		if (filter.get("isdirectory").isEmpty()) {
-			filter.get("isdirectory").add("");
-		} else if (filter.get("isdirectory").get(0) == null) {
-			filter.get("isdirectory").set(0, "");
+		if (filter.get(IS_DIRECTORY).isEmpty()) {
+			filter.get(IS_DIRECTORY).add("");
+		} else if (filter.get(IS_DIRECTORY).get(0) == null) {
+			filter.get(IS_DIRECTORY).set(0, "");
 		}
 
 
@@ -424,11 +425,11 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 				toInsert=false;
 			}
 
-			if (!filter.get("isdirectory").get(0).equals("") && "true".startsWith(filter.get("isdirectory").get(0)) && !f.isDirectory()) {
+			if (!filter.get(IS_DIRECTORY).get(0).equals("") && "true".startsWith(filter.get(IS_DIRECTORY).get(0)) && !f.isDirectory()) {
 				toInsert=false;
 			}
 
-			if (!filter.get("isdirectory").get(0).equals("") && "false".startsWith(filter.get("isdirectory").get(0)) && f.isDirectory()) {
+			if (!filter.get(IS_DIRECTORY).get(0).equals("") && "false".startsWith(filter.get(IS_DIRECTORY).get(0)) && f.isDirectory()) {
 				toInsert=false;
 			}
 
