@@ -1,0 +1,11 @@
+{
+  "realm": "${fr.insee.keycloak.realm}",
+  "auth-server-url": "${fr.insee.keycloak.server}",
+  "ssl-required": "none",
+  "resource": "${fr.insee.keycloak.resource}",
+  "credentials": {
+    "secret": "${fr.insee.keycloak.credentials.secret}"
+  },
+  "confidential-port": 0,
+  "principal-attribute": "preferred_username"
+}

@@ -12,7 +12,7 @@
 		<version>0.0.2-SNAPSHOT</version>
 		<project.struts2.version>2.5.20</project.struts2.version>
 		<project.log4j.version>2.13.3</project.log4j.version>
-		<project.spring.version>5.2.9.RELEASE</project.spring.version>
+		<project.spring.version>5.2.10.RELEASE</project.spring.version>
 	</properties>
 	<url>https://github.com/InseeFr/ARC</url>
 

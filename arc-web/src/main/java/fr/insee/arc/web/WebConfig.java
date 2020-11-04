@@ -30,8 +30,8 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry
-			.addResourceHandler("/js/**", "/css/**", "fonts/**", "html/**", "img/**")
-			.addResourceLocations("/js/", "/css/", "fonts/", "html/", "img/");
+			.addResourceHandler("/js/**", "/css/**", "fonts/**", "img/**")
+			.addResourceLocations("/js/", "/css/", "fonts/", "img/");
 	}
 	
 	@Override
@@ -73,4 +73,5 @@ public class WebConfig implements WebMvcConfigurer {
 	public ViewResolver getViewResolver() {
 		return new InternalResourceViewResolver("/WEB-INF/", ""); 
 	}
+
 }
