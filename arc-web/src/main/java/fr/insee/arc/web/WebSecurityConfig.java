@@ -16,6 +16,8 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
+
 @KeycloakConfiguration
 public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	
@@ -24,6 +26,9 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 
 	@Value("${keycloak.resource:}")
 	private String keycloakResource;
+
+	@Autowired
+	private PropertiesHandler properties;
 
 
 	/** Overrides KeycloakWebSecurityConfigurerAdapter 
@@ -48,17 +53,26 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.requiresChannel().anyRequest().requiresSecure();
 		if (isKeycloakActive()) {
+			String[] authorizedRoles = properties.getAuthorizedRoles();
 			super.configure(http);
 			http
 			// public
 			.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
 			.antMatchers("/", "/index").permitAll()
-			.antMatchers("/css/**", "fonts/**", "img/**", "/js/**").permitAll()
-			// authenticated
-			.antMatchers(HttpMethod.GET, "/*").authenticated()
-			.antMatchers(HttpMethod.POST, "/*").authenticated()
+			.antMatchers("/css/**", "fonts/**", "img/**", "/js/**").permitAll();
+			if (authorizedRoles.length == 0) {
+				// authenticated
+				http.authorizeRequests()
+				.antMatchers(HttpMethod.GET, "/*").authenticated()
+				.antMatchers(HttpMethod.POST, "/*").authenticated();		
+			} else {
+				// role restriction
+				http.authorizeRequests()
+				.antMatchers(HttpMethod.GET, "/*").hasAnyAuthority(authorizedRoles)
+				.antMatchers(HttpMethod.POST, "/*").hasAnyAuthority(authorizedRoles);
+			}
 			// everything else
-			.anyRequest().denyAll();
+			http.authorizeRequests().anyRequest().denyAll();
 		}
 	}
 

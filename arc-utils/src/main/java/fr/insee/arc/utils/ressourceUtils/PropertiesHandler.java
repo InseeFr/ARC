@@ -36,6 +36,8 @@ public class PropertiesHandler {
     private String loadingDirectory;
     private String storageDirectory;
 
+    private String authorizedRoles;
+
     public void initializeLog() {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
 
@@ -247,5 +249,15 @@ public class PropertiesHandler {
         this.storageDirectory = storageDirectory;
     }
   
+    public void setAuthorizedRoles(String authorizedRoles) {
+    	this.authorizedRoles = authorizedRoles;
+    }
+    
+    public String[] getAuthorizedRoles() {
+		if (authorizedRoles == null || authorizedRoles.isEmpty()) {
+			return new String[0];
+		}
+		return authorizedRoles.split(",");
+	}
     
 }

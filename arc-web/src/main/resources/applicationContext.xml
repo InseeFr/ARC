@@ -45,6 +45,7 @@
 		<property name="version" value="${fr.insee.arc.version}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
+		<property name="authorizedRoles" value="${fr.insee.arc.roles.admin:}"></property>
 	</bean>
 	
 
