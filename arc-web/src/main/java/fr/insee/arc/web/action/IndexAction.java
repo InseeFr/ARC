@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.WebApplicationContext;
@@ -18,9 +19,9 @@ public class IndexAction extends ArcAction<NoModel> {
     private static final String RESULT_SUCCESS = "jsp/index.jsp";
     
     @RequestMapping({"/", "/index"})
-    public String index() {
+    public String index(Model model) {
 		getSession().put("console", "");
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
     }
 
 	@RequestMapping("/status")

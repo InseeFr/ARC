@@ -224,8 +224,9 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * 
 	 * @return
 	 */
-	public String generateDisplay(String successUri) {
-		LoggerHelper.debug(LOGGER, "getScope()", getScope());
+	public String generateDisplay(Model model, String successUri) {
+		LoggerHelper.debug(LOGGER, "generateDisplay()", getScope());
+		// Initialize required VObjects
 		Boolean defaultWhenNoScope = true;
 		for (VObject vObject : getListVObjectOrder()) {
 			LoggerHelper.debug(LOGGER, "entry.getKey()", vObject.getTable());
@@ -244,6 +245,13 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 			LoggerHelper.debug(LOGGER, "getListVObjectOrder().size() ", getListVObjectOrder().size());
 			for (VObject vObject : getListVObjectOrder()) {
 				getMapVObject().get(vObject).accept(vObject);
+			}
+		}
+
+		// Stores VObject in model
+		for (VObject vObject : getMapVObject().keySet()) {
+			if (vObject != null) {
+				model.addAttribute(vObject.getSessionName(), vObject);
 			}
 		}
 		return successUri;
@@ -356,10 +364,10 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * 
 	 * @return
 	 */
-	protected String basicAction(String successUri) {
+	protected String basicAction(Model model, String successUri) {
 		LoggerHelper.debug(LOGGER, String.join(" ** basicAction() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
-		return generateDisplay(successUri);
+		return generateDisplay(model, successUri);
 	}
 
 	/**
@@ -369,11 +377,11 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * 
 	 * @return
 	 */
-	protected String updateVobject(String successUri, VObject theVObjectToUpdate) {
+	protected String updateVobject(Model model, String successUri, VObject theVObjectToUpdate) {
 		LoggerHelper.debug(LOGGER, String.join(" ** updateVobject() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
 		vObjectService.update(theVObjectToUpdate);
-		return generateDisplay(successUri);
+		return generateDisplay(model, successUri);
 	}
 
 	/**
@@ -384,11 +392,11 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 *            theVObjectToUpdate
 	 * @return
 	 */
-	protected String addLineVobject(String successUri, VObject theVObjectToUpdate, AttributeValue... attributeValues) {
+	protected String addLineVobject(Model model, String successUri, VObject theVObjectToUpdate, AttributeValue... attributeValues) {
 		LoggerHelper.debug(LOGGER, String.join(" ** addLineVobject() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
 		vObjectService.insert(theVObjectToUpdate, attributeValues);
-		return generateDisplay(successUri);
+		return generateDisplay(model, successUri);
 	}
 
 	/**
@@ -399,7 +407,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * 
 	 * @return
 	 */
-	protected String deleteLineVobject(String successUri, VObject theVObjectToUpdate) {
+	protected String deleteLineVobject(Model model, String successUri, VObject theVObjectToUpdate) {
 		LoggerHelper.debug(LOGGER, String.join(" ** deleteLineVobject() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
 		Map<String, ArrayList<String>> selection = theVObjectToUpdate.mapContentSelected();
@@ -408,7 +416,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 		} else {
 			theVObjectToUpdate.setMessage("Please select some lines to delete");
 		}
-		return generateDisplay(successUri);
+		return generateDisplay(model, successUri);
 	}
 
 	/**
@@ -418,11 +426,11 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * 
 	 * @return
 	 */
-	protected String sortVobject(String successUri, VObject theVObjectToSort) {
+	protected String sortVobject(Model model, String successUri, VObject theVObjectToSort) {
 		LoggerHelper.debug(LOGGER, String.join(" ** sortVobject() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
 		vObjectService.sort(theVObjectToSort);
-		return generateDisplay(successUri);
+		return generateDisplay(model, successUri);
 	}
 
 	/**

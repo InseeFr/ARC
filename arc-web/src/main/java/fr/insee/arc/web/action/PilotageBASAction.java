@@ -227,21 +227,21 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/enterPilotageBAS")
-	public String enterPilotageBAS(EnvManagementModel viewObjects) {
+	public String enterPilotageBAS(Model model) {
 		ApiInitialisationService.bddScript(getBacASable(), null);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@PostMapping(value = {"/selectPilotageBAS"}, 
 			consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-	public String selectPilotageBAS() {
-		return generateDisplay(RESULT_SUCCESS);
+	public String selectPilotageBAS(Model model) {
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/sortPilotageBAS")
-	public String sortPilotageBAS() {		
+	public String sortPilotageBAS(Model model) {		
 		this.vObjectService.sort(getViewPilotageBAS());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
@@ -260,21 +260,21 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/selectRapportBAS")
-	public String selectRapportBAS() {
+	public String selectRapportBAS(Model model) {
 		
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/sortRapportBAS")
-	public String sortRapportBAS() {
+	public String sortRapportBAS(Model model) {
 		
 		this.vObjectService.sort(getViewRapportBAS());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
 	@RequestMapping("/informationInitialisationPROD")
-    public String informationInitialisationPROD() {
+    public String informationInitialisationPROD(Model model) {
 		
     	// demande l'initialisation : met au jour -1 à 22h
     	try {
@@ -286,12 +286,12 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		} catch (SQLException e) {
 			loggerDispatcher.error("Error in informationInitialisationPROD", e, LOGGER);
 		}
-    	return generateDisplay(RESULT_SUCCESS);
+    	return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/retarderBatchInitialisationPROD")
     @SQLExecutor
-    public String retarderBatchInitialisationPROD() {
+    public String retarderBatchInitialisationPROD(Model model) {
     	
     	// demande l'initialisation : met au jour -1 à 22h
     	try {
@@ -305,12 +305,12 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			loggerDispatcher.error("Error in retarderInitialisationPROD", e, LOGGER);
 		}
     	
-    	return generateDisplay(RESULT_SUCCESS);
+    	return generateDisplay(model, RESULT_SUCCESS);
     }
     
     @RequestMapping("/demanderBatchInitialisationPROD")
     @SQLExecutor
-    public String demanderBatchInitialisationPROD() {
+    public String demanderBatchInitialisationPROD(Model model) {
     	
     	// demande l'initialisation : met au jour -1 à 22h
     	try {
@@ -324,12 +324,12 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			loggerDispatcher.error("Error in demanderBatchInitialisationPROD", e, LOGGER);
 		}
     	
-    	return generateDisplay(RESULT_SUCCESS);
+    	return generateDisplay(model, RESULT_SUCCESS);
     }
     
     @RequestMapping("/toggleOnPROD")
     @SQLExecutor
-    public String toggleOnPROD() {
+    public String toggleOnPROD(Model model) {
     	
     	// demande l'initialisation : met au jour -1 à 22h
     	try {
@@ -338,12 +338,12 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		} catch (SQLException e) {
 			loggerDispatcher.error("Error in toggleOnPROD", e, LOGGER);
 		}
-    	return generateDisplay(RESULT_SUCCESS);
+    	return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/toggleOffPROD")
     @SQLExecutor
-    public String toggleOffPROD() {
+    public String toggleOffPROD(Model model) {
     	
     	// demande l'initialisation : met au jour -1 à 22h
     	try {
@@ -352,19 +352,22 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		} catch (SQLException e) {
 			loggerDispatcher.error("Error in toggleOffPROD", e, LOGGER);
 		}
-    	return generateDisplay(RESULT_SUCCESS);
+    	return generateDisplay(model, RESULT_SUCCESS);
     }
 	
 	// Actions du bac à sable
 
 	@RequestMapping("/filesUploadBAS")
-	public String filesUploadBAS(ArrayList<String> fileUploadFileName, ArrayList<MultipartFile> fileUpload) {
+	public String filesUploadBAS(Model model, ArrayList<String> fileUploadFileName, ArrayList<MultipartFile> fileUpload) {
 		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : */ *");
 		
 		String writingRepo = this.getViewEntrepotBAS().getCustomValue(WRITING_REPO);
 		if (writingRepo != null
 				&& !writingRepo.equals("")
 				&& fileUploadFileName != null) {
+			if (fileUploadFileName.contains("../")) {
+				
+			}
 			String repertoireUpload = Paths.get(
 					this.repertoire + getBacASable().toUpperCase(), 
 					TraitementPhase.RECEPTION + "_" + writingRepo)
@@ -395,7 +398,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 		
 		
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
@@ -447,8 +450,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/visualiserEntrepotBAS")
-	public String visualiserEntrepotBAS() {		
-		return basicAction(RESULT_SUCCESS);
+	public String visualiserEntrepotBAS(Model model) {		
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -494,7 +497,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/executerBatch")
-	public String executerBatch(String phaseAExecuter) {
+	public String executerBatch(Model model, String phaseAExecuter) {
 		loggerDispatcher.debug("executerBatch", LOGGER);
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
 		
@@ -503,7 +506,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 		ApiServiceFactory.getService(phaseAExecuter, "arc.ihm", getBacASable(),
 				this.repertoire, "10000000").invokeApi();
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/*
@@ -529,15 +532,15 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/undoBatch")
-	public String undoBatch(String phaseAExecuter) {
+	public String undoBatch(Model model, String phaseAExecuter) {
 		loggerDispatcher.debug("undoBatch", LOGGER);
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 		
 		
 		if (TraitementPhase.valueOf(phaseAExecuter).getOrdre()==0)
 		{
-			resetBAS();
-			return generateDisplay(RESULT_SUCCESS);
+			resetBAS(model);
+			return generateDisplay(model, RESULT_SUCCESS);
 		}
 		
 		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
@@ -549,13 +552,13 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		} finally {
             serv.finaliser();
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	// Bouton undo
 
 	@RequestMapping("/resetBAS")
-	public String resetBAS() {
+	public String resetBAS(Model model) {
 		
 		try {
 			ApiInitialisationService.clearPilotageAndDirectories(this.repertoire,
@@ -572,7 +575,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		} finally {
 			service.finaliser();
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	// visual des Fichiers
@@ -621,21 +624,21 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/selectFichierBAS")
-	public String selectFichierBAS() {
+	public String selectFichierBAS(Model model) {
 		
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/sortFichierBAS")
-	public String sortFichierBAS() {
+	public String sortFichierBAS(Model model) {
 		
 		this.vObjectService.sort(getViewFichierBAS());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
 	@RequestMapping("/downloadFichierBAS")
-	public String downloadFichierBAS(HttpServletResponse response) {
+	public String downloadFichierBAS(Model model, HttpServletResponse response) {
 
 		loggerDispatcher.trace("*** Téléchargement des fichiers ***", LOGGER);
 		// récupération de la liste des id_source
@@ -657,7 +660,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				TraitementEtat.OK.toString(), TraitementEtat.KO.toString());
 
 		loggerDispatcher.trace("*** Fin du téléchargement des fichiers XML ***", LOGGER);
-		generateDisplay(RESULT_SUCCESS);
+		generateDisplay(model, RESULT_SUCCESS);
 		return "none";
 	}
 
@@ -667,8 +670,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/toRestoreBAS")
-	public String toRestoreBAS() {		
-		return restore("'R'", "Fichier(s) à rejouer");
+	public String toRestoreBAS(Model model) {		
+		return restore(model, "'R'", "Fichier(s) à rejouer");
 	}
 
 	/**
@@ -677,11 +680,11 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/toRestoreArchiveBAS")
-	public String toRestoreArchiveBAS() {
-		return restore("'RA'", "Archives(s) à rejouer");
+	public String toRestoreArchiveBAS(Model model) {
+		return restore(model, "'RA'", "Archives(s) à rejouer");
 	}
 
-	private String restore(String code, String messageOk) {
+	private String restore(Model model, String code, String messageOk) {
 		loggerDispatcher.trace("*** Marquage de fichier à rejouer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 	
@@ -732,7 +735,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		// Fin du code spécifique aux bacs à sable
 		this.getViewPilotageBAS().setMessage(message);
 	
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/downloadBdBAS")
@@ -890,7 +893,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/toDeleteBAS")
-	public String toDeleteBAS() {
+	public String toDeleteBAS(Model model) {
 		
 		loggerDispatcher.trace("*** Marquage de fichier à supprimer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
@@ -938,7 +941,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		// Fin du code spécifique aux bacs à sable
 		this.getViewPilotageBAS().setMessage(message);
 
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -948,7 +951,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/undoActionBAS")
-	public String undoActionBAS() {
+	public String undoActionBAS(Model model) {
 		
 		loggerDispatcher.trace("*** Suppression du marquage de fichier à supprimer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
@@ -983,7 +986,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 							+ updateToDelete, LOGGER);
 			e.printStackTrace();
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	private StringBuilder requeteUpdateToDelete(StringBuilder querySelection, String valeur) {
@@ -1005,7 +1008,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 * @return
 	 */
 	@RequestMapping("/resetPhaseBAS")
-	public String resetPhaseBAS() {
+	public String resetPhaseBAS(Model model) {
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 		StringBuilder querySelection = this.vObjectService.queryView(getViewFichierBAS());
 
@@ -1028,7 +1031,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		} finally {
 			serv.finaliser();
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@Override

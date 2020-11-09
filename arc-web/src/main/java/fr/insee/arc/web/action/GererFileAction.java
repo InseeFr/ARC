@@ -11,7 +11,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.h2.store.fs.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
@@ -19,7 +18,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.web.model.FileSystemManagementModel;
 import fr.insee.arc.web.util.VObject;
 
@@ -88,8 +86,8 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 	}
 
 	@RequestMapping("/selectFile")
-	public String selectFile() {
-		return generateDisplay(RESULT_SUCCESS);
+	public String selectFile(Model model) {
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping({"/seeDirIn", "/selectDirIn"})
@@ -99,16 +97,16 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			this.dirIn= Paths.get(this.dirIn, m.get("filename").get(0)).toString() + File.separator;
 			model.addAttribute(DIR_IN, this.dirIn);
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/sortDirIn")
-	public String sortDirIn() {
-		return sortVobject(RESULT_SUCCESS, viewDirIn);
+	public String sortDirIn(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, viewDirIn);
 	}
 
 	@RequestMapping("/transferDirIn")
-	public String transferDirIn() {
+	public String transferDirIn(Model model) {
 		Map<String,ArrayList<String>> m = viewDirIn.mapContentSelected();
 		if (!m.isEmpty()) {
 			for (String f: m.get("filename")) {
@@ -132,17 +130,17 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 				m = viewDirIn.mapContent();
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/copyDirIn")
-	public String copyDirIn() {
+	public String copyDirIn(Model model) {
 		copy(viewDirIn, this.dirIn, this.dirOut);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/renameIn")
-	public String renameIn() {
+	public String renameIn(Model model) {
 		Map<String,ArrayList<String>> m=viewDirIn.mapContentSelected();
 		Map<String,ArrayList<String>> n=viewDirIn.mapContentSelected();
 
@@ -155,12 +153,12 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 				fileIn.renameTo(fileOut);
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 
 	@RequestMapping("/addDirIn")
-	public String addDirIn() {
+	public String addDirIn(Model model) {
 		HashMap<String,ArrayList<String>> m=viewDirIn.mapInputFields();
 		if (!m.isEmpty())
 		{
@@ -169,7 +167,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 				FileUtils.createDirectory(this.dirIn+m.get("filename").get(0).trim());
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/deleteDirIn")
@@ -193,7 +191,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			this.dirIn=null;
 		}
 		model.addAttribute(DIR_IN, this.dirIn);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 
@@ -220,17 +218,17 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			}
 		}
 
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/sortDirOut")
-	public String sortDirOut() {
+	public String sortDirOut(Model model) {
 		this.vObjectService.sort(viewDirOut);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/transferDirOut")
-	public String transferDirOut() {
+	public String transferDirOut(Model model) {
 		Map<String,ArrayList<String>> m=viewDirOut.mapContentSelected();
 		if (!m.isEmpty())
 		{
@@ -261,18 +259,18 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 				m=viewDirOut.mapContent();
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 
 	@RequestMapping("/copyDirOut")
-	public String copyDirOut() {
+	public String copyDirOut(Model model) {
 		copy(viewDirOut, this.dirOut, this.dirIn);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/renameOut")
-	public String renameOut() {
+	public String renameOut(Model model) {
 		Map<String,ArrayList<String>> m=viewDirOut.mapContentSelected();
 		Map<String,ArrayList<String>> n=viewDirOut.mapContentSelected();
 
@@ -285,12 +283,12 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 				fileIn.renameTo(fileOut);
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 
 	@RequestMapping("/addDirOut")
-	public String addDirOut() {
+	public String addDirOut(Model model) {
 		HashMap<String,ArrayList<String>> m=viewDirOut.mapInputFields();
 		if (!m.isEmpty())
 		{
@@ -301,11 +299,11 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		}
 
 
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/deleteDirOut")
-	public String delDirOut() {
+	public String delDirOut(Model model) {
 
 		if (!this.dirOut.contains(REPERTOIRE_EFFACABLE))
 		{
@@ -325,7 +323,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			FileUtils.deleteRecursive(this.dirOut, true);
 			this.dirOut=null;
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	private void copy(VObject viewSource, String dirSource, String dirTarget) {

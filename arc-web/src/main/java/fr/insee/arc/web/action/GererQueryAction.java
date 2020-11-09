@@ -90,18 +90,18 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 	}
 
 	@RequestMapping("/selectQuery")
-	public String selectQuery() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectQuery(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/updateQuery")
-	public String updateQuery() {
-		return updateVobject(RESULT_SUCCESS, viewQuery);
+	public String updateQuery(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, viewQuery);
 	}
 
 	@RequestMapping("/sortQuery")
-	public String sortQuery() {
-		return sortVobject(RESULT_SUCCESS, viewQuery);
+	public String sortQuery(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, viewQuery);
 	}
 
 
@@ -120,18 +120,18 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 			this.myQuery = "select * from " + this.mySchema+"." + mapContentSelected.get("tablename").get(0) + " limit 10 ";
 			model.addAttribute("myQuery", myQuery);
 		}
-		return basicAction(RESULT_SUCCESS);
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 
 	@RequestMapping("/updateTable")
-	public String updateTable() {
-		return updateVobject(RESULT_SUCCESS, viewTable);
+	public String updateTable(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, viewTable);
 	}
 
 	@RequestMapping("/sortTable")
-	public String sortTable() {
-		return sortVobject(RESULT_SUCCESS, viewTable);
+	public String sortTable(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, viewTable);
 	}
 
 

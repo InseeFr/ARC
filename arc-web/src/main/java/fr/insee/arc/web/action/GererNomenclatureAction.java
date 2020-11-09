@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,21 +78,21 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
  
     @RequestMapping("/selectListNomenclatures")
-    public String selectListNomenclatures() {
-        return basicAction(RESULT_SUCCESS);
+    public String selectListNomenclatures(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/addListNomenclatures")
-    public String addListNomenclatures() {
+    public String addListNomenclatures(Model model) {
 		String nomTable = viewListNomenclatures.mapInputFields().get(NOM_TABLE).get(0);
         if (validationNomTable(nomTable)) {
             this.vObjectService.insert(viewListNomenclatures);
         }
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/updateListNomenclatures")
-    public String updateListNomenclatures() {
+    public String updateListNomenclatures(Model model) {
         // vérification que tous les noms de tables updatés soient conformes
         boolean zeroErreur = true;
         if (viewListNomenclatures.mapContentAfterUpdate().size() > 0) {
@@ -109,17 +110,17 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
             this.vObjectService.update(viewListNomenclatures);
         }
 
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/sortListNomenclatures")
-    public String sortListNomenclatures() {
+    public String sortListNomenclatures(Model model) {
         this.vObjectService.sort(viewListNomenclatures);
-        return basicAction(RESULT_SUCCESS);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/deleteListNomenclatures")
-    public String deleteListNomenclatures() {
+    public String deleteListNomenclatures(Model model) {
         try {
             // Suppression de la table nom table
 			String nomTable = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
@@ -142,7 +143,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return basicAction(RESULT_SUCCESS);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     private String typeNomenclature(String nomTable) {
@@ -155,7 +156,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     @RequestMapping("/importListNomenclatures")
-    public String importListNomenclatures(MultipartFile fileUpload) {    	
+    public String importListNomenclatures(Model model, MultipartFile fileUpload) {    	
     	loggerDispatcher.debug("importListNomenclatures",LOGGER);
     	try {
             importNomenclatureDansBase(fileUpload);
@@ -167,7 +168,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
             loggerDispatcher.error(ex,LOGGER);
         }
 
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     private boolean validationNomTable(String nomTable) {
@@ -201,22 +202,22 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
 
     @RequestMapping("/selectSchemaNmcl")
-    public String selectSchemaNmcl() {
-        return basicAction(RESULT_SUCCESS);
+    public String selectSchemaNmcl(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/addSchemaNmcl")
-    public String addSchemaNmcl() {
+    public String addSchemaNmcl(Model model) {
 		if (isColonneValide(viewSchemaNmcl.mapInputFields().get(NOM_COLONNE).get(0))
                 && isTypeValide(viewSchemaNmcl.mapInputFields().get(TYPE_COLONNE).get(0))) {
 
             this.vObjectService.insert(viewSchemaNmcl);
         }
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/updateSchemaNmcl")
-    public String updateSchemaNmcl() {
+    public String updateSchemaNmcl(Model model) {
         System.out.println("/* updateSchemaNmcl */");
         
         HashMap<String, ArrayList<String>> selection = viewSchemaNmcl.mapContentAfterUpdate();
@@ -238,19 +239,19 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
                 this.vObjectService.update(viewSchemaNmcl);
             }
         }
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/sortSchemaNmcl")
-    public String sortSchemaNmcl() {
+    public String sortSchemaNmcl(Model model) {
         this.vObjectService.sort(viewSchemaNmcl);
-        return basicAction(RESULT_SUCCESS);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/deleteSchemaNmcl")
-    public String deleteSchemaNmcl() {
+    public String deleteSchemaNmcl(Model model) {
         this.vObjectService.delete(viewSchemaNmcl);
-        return basicAction(RESULT_SUCCESS);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     private void importNomenclatureDansBase(MultipartFile fileUpload) throws Exception {
@@ -419,14 +420,14 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     @RequestMapping("/selectNomenclature")
-    public String selectNomenclature() {
-        return basicAction(RESULT_SUCCESS);
+    public String selectNomenclature(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/sortNomenclature")
-    public String sortNomenclature() {
+    public String sortNomenclature(Model model) {
         this.vObjectService.sort(viewNomenclature);
-        return basicAction(RESULT_SUCCESS);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
   

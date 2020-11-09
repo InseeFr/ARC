@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -82,31 +83,31 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     @RequestMapping("/selectFamilleNorme")
-    public String selectFamilleNorme() {
-        return basicAction(RESULT_SUCCESS);
+    public String selectFamilleNorme(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/addFamilleNorme")
-    public String addFamilleNorme() {
+    public String addFamilleNorme(Model model) {
     	//Clean up spaces
     	String nomFamilleNorme = viewFamilleNorme.getInputFieldFor(ID_FAMILLE);
     	viewFamilleNorme.setInputFieldFor(ID_FAMILLE, nomFamilleNorme.trim());
-        return addLineVobject(RESULT_SUCCESS, getViewFamilleNorme());
+        return addLineVobject(model, RESULT_SUCCESS, getViewFamilleNorme());
     }
 
     @RequestMapping("/deleteFamilleNorme")
-    public String deleteFamilleNorme() {
-        return deleteLineVobject(RESULT_SUCCESS, getViewFamilleNorme());
+    public String deleteFamilleNorme(Model model) {
+        return deleteLineVobject(model, RESULT_SUCCESS, getViewFamilleNorme());
     }
 
     @RequestMapping("/updateFamilleNorme")
-    public String updateFamilleNorme() {
-        return updateVobject(RESULT_SUCCESS, getViewFamilleNorme());
+    public String updateFamilleNorme(Model model) {
+        return updateVobject(model, RESULT_SUCCESS, getViewFamilleNorme());
     }
 
     @RequestMapping("/sortFamilleNorme")
-    public String sortFamilleNorme() {
-        return sortVobject(RESULT_SUCCESS, getViewFamilleNorme());
+    public String sortFamilleNorme(Model model) {
+        return sortVobject(model, RESULT_SUCCESS, getViewFamilleNorme());
     }
 
     /*
@@ -136,13 +137,13 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     @RequestMapping("/selectClient")
-    public String selectClient() {
-        return basicAction(RESULT_SUCCESS);
+    public String selectClient(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/addClient")
-    public String addClient() {
-        return addLineVobject(RESULT_SUCCESS, getViewClient());
+    public String addClient(Model model) {
+        return addLineVobject(model, RESULT_SUCCESS, getViewClient());
     }
 
     /**
@@ -151,18 +152,18 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
      * @return
      */
     @RequestMapping("/deleteClient")
-    public String deleteClient() {
-        return deleteLineVobject(RESULT_SUCCESS, getViewClient());
+    public String deleteClient(Model model) {
+        return deleteLineVobject(model, RESULT_SUCCESS, getViewClient());
     }
 
     @RequestMapping("/updateClient")
-    public String updateClient() {
-        return updateVobject(RESULT_SUCCESS, getViewClient());
+    public String updateClient(Model model) {
+        return updateVobject(model, RESULT_SUCCESS, getViewClient());
     }
 
     @RequestMapping("/sortClient")
-    public String sortClient() {
-        return sortVobject(RESULT_SUCCESS, getViewClient());
+    public String sortClient(Model model) {
+        return sortVobject(model, RESULT_SUCCESS, getViewClient());
     }
 
     /*
@@ -190,24 +191,24 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     @RequestMapping("/selectTableMetier")
-    public String selectTableMetier() {
-        return basicAction(RESULT_SUCCESS);
+    public String selectTableMetier(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/deleteTableMetier")
-    public String deleteTableMetier() {
+    public String deleteTableMetier(Model model) {
 	
         StringBuilder message = new StringBuilder();
         if (deleteTableMetierWithoutSync(message)) {
             this.vObjectService.delete(viewTableMetier);
         }
         this.viewTableMetier.setMessage(message.toString());
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/sortTableMetier")
-    public String sortTableMetier() {
-        return sortVobject(RESULT_SUCCESS, getViewTableMetier());
+    public String sortTableMetier(Model model) {
+        return sortVobject(model, RESULT_SUCCESS, getViewTableMetier());
     }
 
     /**
@@ -222,7 +223,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     @RequestMapping("/updateTableMetier")
-    public String updateTableMetier() {
+    public String updateTableMetier(Model model) {
 		if (isNomTableMetierValide(viewTableMetier.mapInputFields().get(NOM_TABLE_METIER).get(0))) {
             StringBuilder message = new StringBuilder();
             this.deleteTableMetierWithoutSync(message);
@@ -230,7 +231,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         } else {
             setMessageNomTableMetierInvalide();
         }
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     private boolean deleteTableMetierWithoutSync(StringBuilder message) {
@@ -321,12 +322,12 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     @RequestMapping("/selectVariableMetier")
-    public String selectVariableMetier() {
-        return basicAction(RESULT_SUCCESS);
+    public String selectVariableMetier(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/addVariableMetier")
-    public String addVariableMetier() {
+    public String addVariableMetier(Model model) {
 	
         StringBuilder message = new StringBuilder();
         StringBuilder bloc = new StringBuilder();
@@ -334,16 +335,16 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         bloc.append(synchronizeRegleWithVariableMetier(message, viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
         executeRequeteMiseAjourTableMetier(message, bloc);
         this.viewVariableMetier.setMessage(message.toString());
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/sortVariableMetier")
-    public String sortVariableMetier() {
-        return sortVobject(RESULT_SUCCESS, getViewVariableMetier());
+    public String sortVariableMetier(Model model) {
+        return sortVobject(model, RESULT_SUCCESS, getViewVariableMetier());
     }
 
     @RequestMapping("/deleteVariableMetier")
-	public String deleteVariableMetier() {
+	public String deleteVariableMetier(Model model) {
 	
 	    StringBuilder message = new StringBuilder();
 	    StringBuilder bloc = new StringBuilder();
@@ -352,11 +353,11 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 	    bloc.append(synchronizeRegleWithVariableMetier(message, viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
 	    executeRequeteMiseAjourTableMetier(message, bloc);
 	    this.viewVariableMetier.setMessage(message.toString());
-	    return generateDisplay(RESULT_SUCCESS);
+	    return generateDisplay(model, RESULT_SUCCESS);
 	}
 
     @RequestMapping("/updateVariableMetier")
-    public String updateVariableMetier() {
+    public String updateVariableMetier(Model model) {
 	
 
 	try {
@@ -453,7 +454,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 	    e.printStackTrace();
 	    this.viewVariableMetier.setMessage(e.getMessage());
 	}
-	return generateDisplay(RESULT_SUCCESS);
+	return generateDisplay(model, RESULT_SUCCESS);
     }
 
 	/**
@@ -769,13 +770,13 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     @RequestMapping("/addTableMetier")
-    public String addTableMetier() {
+    public String addTableMetier(Model model) {
 		if (isNomTableMetierValide(viewTableMetier.mapInputFields().get(NOM_TABLE_METIER).get(0))) {
             this.vObjectService.insert(viewTableMetier);
         } else {
             setMessageNomTableMetierInvalide();
         }
-        return generateDisplay(RESULT_SUCCESS);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     private void setMessageNomTableMetierInvalide() {

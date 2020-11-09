@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -136,8 +137,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/selectNorme")
-	public String selectNorme() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectNorme(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -146,8 +147,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/addNorme")
-	public String addNorme() {
-		return addLineVobject(RESULT_SUCCESS, this.viewNorme);
+	public String addNorme(Model model) {
+		return addLineVobject(model, RESULT_SUCCESS, this.viewNorme);
 	}
 
 	/**
@@ -156,7 +157,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/deleteNorme")
-	public String deleteNorme() {
+	public String deleteNorme(Model model) {
 		
 		// Get the gui selection
 		Map<String, ArrayList<String>> selection = viewNorme.mapContentSelected();
@@ -173,23 +174,23 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		} else {
 			this.viewNorme.setMessage("You didn't select anything");
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
 	 * Action trigger by updating a norm in the GUI. Update the GUI
 	 */
 	@RequestMapping("/updateNorme")
-	public String updateNorme() {
-		return updateVobject(RESULT_SUCCESS, this.viewNorme);
+	public String updateNorme(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, this.viewNorme);
 	}
 
 	/**
 	 * Action trigger by sorting a norm in the GUI. Update the GUI
 	 */
 	@RequestMapping("/sortNorme")
-	public String sortNorme() {
-		return sortVobject(RESULT_SUCCESS, this.viewNorme);
+	public String sortNorme(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewNorme);
 	}
 
 	/**
@@ -198,8 +199,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/selectCalendrier")
-	public String selectCalendrier() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectCalendrier(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -209,8 +210,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/addCalendrier")
-	public String addCalendrier() {
-		return addLineVobject(RESULT_SUCCESS, this.viewCalendar);
+	public String addCalendrier(Model model) {
+		return addLineVobject(model, RESULT_SUCCESS, this.viewCalendar);
 	}
 
 	/**
@@ -220,7 +221,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/deleteCalendrier")
-	public String deleteCalendrier() {
+	public String deleteCalendrier(Model model) {
 		
 		// get the selected calendar
 		Map<String, ArrayList<String>> selection = viewCalendar.mapContentSelected();
@@ -236,7 +237,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		} else {
 			this.viewRulesSet.setMessage("You didn't select anything");
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -246,13 +247,13 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/updateCalendrier")
-	public String updateCalendrier() {
-		return updateVobject(RESULT_SUCCESS, this.viewCalendar);
+	public String updateCalendrier(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, this.viewCalendar);
 	}
 
 	@RequestMapping("/sortCalendrier")
-	public String sortCalendrier() {
-		return sortVobject(RESULT_SUCCESS, this.viewCalendar);
+	public String sortCalendrier(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewCalendar);
 	}
 
 	/**
@@ -261,8 +262,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/selectJeuxDeRegles")
-	public String selectRuleSet() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectRuleSet(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -272,7 +273,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/addJeuxDeRegles")
-	public String addRuleSet() {
+	public String addRuleSet(Model model) {
 		HashMap<String, ArrayList<String>> selection = viewRulesSet.mapInputFields();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
@@ -283,7 +284,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			}
 		}
 
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -293,7 +294,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return sucess
 	 */
 	@RequestMapping("/deleteJeuxDeRegles")
-	public String deleteRuleSet() {
+	public String deleteRuleSet(Model model) {
 		
 		// Get the selection
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
@@ -311,7 +312,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			this.viewRulesSet.setMessage("You didn't select anything");
 		}
 
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -324,7 +325,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/updateJeuxDeRegles")
-	public String updateRuleSet() {
+	public String updateRuleSet(Model model) {
 		HashMap<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 
 		// on les crée dans tous les environnements et tous les entrepots
@@ -344,7 +345,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 
 		}
 
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -353,8 +354,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/sortJeuxDeRegles")
-	public String sortRuleSet() {
-		return sortVobject(RESULT_SUCCESS, this.viewRulesSet);
+	public String sortRuleSet(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewRulesSet);
 	}
 
 	/**
@@ -363,7 +364,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/downloadJeuxDeRegles")
-	public String downloadJeuxDeRegles(HttpServletResponse response) {
+	public String downloadJeuxDeRegles(Model model, HttpServletResponse response) {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty()) {
 			StringBuilder requeteRegleChargement = new StringBuilder();
@@ -397,7 +398,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			return "none";
 		} else {
 			this.viewRulesSet.setMessage("You didn't select anything");
-			return generateDisplay(RESULT_SUCCESS);
+			return generateDisplay(model, RESULT_SUCCESS);
 		}
 
 	}
@@ -409,8 +410,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/selectChargement")
-	public String selectChargement() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectChargement(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -420,8 +421,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/addChargement")
-	public String addChargement() {
-		return addLineVobject(RESULT_SUCCESS, this.viewChargement);
+	public String addChargement(Model model) {
+		return addLineVobject(model, RESULT_SUCCESS, this.viewChargement);
 	}
 
 	/**
@@ -431,8 +432,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/deleteChargement")
-	public String deleteChargement() {
-		return deleteLineVobject(RESULT_SUCCESS, this.viewChargement);
+	public String deleteChargement(Model model) {
+		return deleteLineVobject(model, RESULT_SUCCESS, this.viewChargement);
 	}
 
 	/**
@@ -442,8 +443,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/updateChargement")
-	public String updateChargement() {
-		return updateVobject(RESULT_SUCCESS, this.viewChargement);
+	public String updateChargement(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, this.viewChargement);
 	}
 
 	/**
@@ -453,10 +454,10 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/sortChargement")
-	public String sortChargement() {
+	public String sortChargement(Model model) {
 		
 		this.vObjectService.sort(viewChargement);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -466,9 +467,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importChargement")
-	public String importChargement(MultipartFile fileUploadLoad) {		
+	public String importChargement(Model model, MultipartFile fileUploadLoad) {		
 		gererNormeDao.uploadFileRule(getViewChargement(), viewRulesSet, fileUploadLoad);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -478,10 +479,10 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importNormage")
-	public String importNormage(MultipartFile fileUploadStructurize) {
+	public String importNormage(Model model, MultipartFile fileUploadStructurize) {
 		
 		gererNormeDao.uploadFileRule(getViewNormage(), viewRulesSet, fileUploadStructurize);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -491,8 +492,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/selectNormage")
-	public String selectNormage() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectNormage(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -502,8 +503,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/addNormage")
-	public String addNormage() {
-		return addLineVobject(RESULT_SUCCESS, this.viewNormage);
+	public String addNormage(Model model) {
+		return addLineVobject(model, RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -513,8 +514,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/deleteNormage")
-	public String deleteNormage() {
-		return deleteLineVobject(RESULT_SUCCESS, this.viewNormage);
+	public String deleteNormage(Model model) {
+		return deleteLineVobject(model, RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -524,8 +525,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/updateNormage")
-	public String updateNormage() {
-		return updateVobject(RESULT_SUCCESS, this.viewNormage);
+	public String updateNormage(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -535,8 +536,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 
 	@RequestMapping("/sortNormage")
-	public String sortNormage() {
-		return sortVobject(RESULT_SUCCESS, this.viewNormage);
+	public String sortNormage(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewNormage);
 	}
 
 	/**
@@ -546,8 +547,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/selectControle")
-	public String selectControle() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectControle(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -558,7 +559,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@SQLExecutor
 	@RequestMapping("/addControle")
-	public String addControle() {
+	public String addControle(Model model) {
 		
 		loggerDispatcher.info(String.format("Add rule : %s ", this.viewControle.getInputFields().toString()), LOGGER);
 		boolean isToInsert = true;
@@ -600,7 +601,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -611,7 +612,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/deleteControle")
 	@SQLExecutor
-	public String deleteControle() {
+	public String deleteControle(Model model) {
 		
 		try {
 			this.vObjectService.delete(viewControle);
@@ -620,7 +621,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			this.viewControle.setMessage("Delete a rule from the rule set make it incoherent : " + e.getMessage());
 			loggerDispatcher.error(String.format("Error in deleteControle : %s", e.toString()), LOGGER);
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -632,7 +633,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/updateControle")
 	@SQLExecutor
-	public String updateControle() {
+	public String updateControle(Model model) {
 		
 
 		JeuDeRegle jdr = gererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
@@ -659,7 +660,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			loggerDispatcher.error(String.format("Error in updateControle : %s", e.toString()), LOGGER);
 		}
 
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -668,8 +669,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/sortControle")
-	public String sortControle() {
-		return sortVobject(RESULT_SUCCESS, this.viewControle);
+	public String sortControle(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewControle);
 	}
 
 	/**
@@ -680,7 +681,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/importControle")
 	@SQLExecutor
-	public String importControle(MultipartFile fileUploadControle) {
+	public String importControle(Model model, MultipartFile fileUploadControle) {
 		
 		loggerDispatcher.info("importControle", LOGGER);
 		String fichierRegle = "";
@@ -733,7 +734,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 				this.viewControle.setMessage("New rules inserted");
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -742,11 +743,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/viderChargement")
-	public String viderChargement() {
+	public String viderChargement(Model model) {
 		
 		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -755,11 +756,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/viderNormage")
-	public String viderNormage() {
+	public String viderNormage(Model model) {
 		
 		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -768,11 +769,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/viderControle")
-	public String viderControle() {
+	public String viderControle(Model model) {
 		
 		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE));
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -781,11 +782,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/viderFiltrage")
-	public String viderFiltrage() {
+	public String viderFiltrage(Model model) {
 		
 		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE));
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
@@ -795,11 +796,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/viderMapping")
-	public String viderMapping() {
+	public String viderMapping(Model model) {
 		
 		gererNormeDao.emptyRuleTable(this.viewRulesSet,
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE));
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
@@ -811,7 +812,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/updateFiltrage")
 	@SQLExecutor
-	public String updateFiltrage() {
+	public String updateFiltrage(Model model) {
 		
 		boolean isRegleOk = true;
         loggerDispatcher.info("Contenu de l'update : " + viewFiltrage.listContentAfterUpdate(), LOGGER);
@@ -838,7 +839,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		if (isRegleOk) {
 			this.vObjectService.update(viewFiltrage);
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
@@ -849,8 +850,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return success
 	 */
 	@RequestMapping("/selectMapping")
-	public String selectMapping() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectMapping(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -860,13 +861,13 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/addMapping")
-	public String addMapping() {
-		return addLineVobject(RESULT_SUCCESS, this.viewMapping);
+	public String addMapping(Model model) {
+		return addLineVobject(model, RESULT_SUCCESS, this.viewMapping);
 	}
 
 	@RequestMapping("/deleteMapping")
-	public String deleteMapping() {
-		return deleteLineVobject(RESULT_SUCCESS, this.viewMapping);
+	public String deleteMapping(Model model) {
+		return deleteLineVobject(model, RESULT_SUCCESS, this.viewMapping);
 	}
 
 	/**
@@ -876,7 +877,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/updateMapping")
-	public String updateMapping() {
+	public String updateMapping(Model model) {
 		Map<String, ArrayList<String>> afterUpdate = viewMapping.mapContentAfterUpdate();
 		boolean isRegleOk = gererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
 				afterUpdate);
@@ -884,7 +885,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			this.vObjectService.update(viewMapping);
 		}
 		LOGGER.info("Rules updated");
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -893,10 +894,10 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importFiltrage")
-	public String importFiltrage(MultipartFile fileUploadFilter) {
+	public String importFiltrage(Model model, MultipartFile fileUploadFilter) {
 		
 		gererNormeDao.uploadFileRule(this.viewFiltrage, this.viewRulesSet, fileUploadFilter);
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -905,7 +906,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/preGenererRegleFiltrage")
-	public String preGenererRegleFiltrage() {
+	public String preGenererRegleFiltrage(Model model) {
 		try {
 			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 
@@ -922,7 +923,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		} catch (SQLException e) {
 			loggerDispatcher.error(String.format("Error in preGenererRegleFiltrage : %s", e.toString()), LOGGER);
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -931,7 +932,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/importMapping")
-	public String importMapping(MultipartFile fileUploadMap) {
+	public String importMapping(Model model, MultipartFile fileUploadMap) {
 		
 		if (fileUploadMap == null || fileUploadMap.isEmpty()) {
 			this.viewMapping.setMessage("You should choose a file first");
@@ -992,7 +993,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 				this.viewMapping.setMessage("Erreur lors de l'import : " + ex.toString());
 			}
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -1002,7 +1003,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/preGenererRegleMapping")
-	public String preGenererRegleMapping() {
+	public String preGenererRegleMapping(Model model) {
 		
 		try {
 
@@ -1034,7 +1035,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		} catch (SQLException e) {
 			loggerDispatcher.error("Error in preGenererRegleMapping", e, LOGGER);
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -1043,8 +1044,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/sortFiltrage")
-	public String sortFiltrage() {
-		return sortVobject(RESULT_SUCCESS, this.viewFiltrage);
+	public String sortFiltrage(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewFiltrage);
 	}
 
 	/**
@@ -1053,8 +1054,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/sortMapping")
-	public String sortMapping() {
-		return sortVobject(RESULT_SUCCESS, this.viewMapping);
+	public String sortMapping(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewMapping);
 	}
 
 	/**
@@ -1064,11 +1065,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("selectJeuxDeReglesChargementCopie")
-	public String selectJeuxDeReglesChargementCopie() {
+	public String selectJeuxDeReglesChargementCopie(Model model) {
 		
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -1078,11 +1079,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("selectJeuxDeReglesNormageCopie")
-	public String selectJeuxDeReglesNormageCopie() {
+	public String selectJeuxDeReglesNormageCopie(Model model) {
 		
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -1092,11 +1093,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("selectJeuxDeReglesControleCopie")
-	public String selectJeuxDeReglesControleCopie() {
+	public String selectJeuxDeReglesControleCopie(Model model) {
 		
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewControle.getTable());
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -1106,11 +1107,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("selectJeuxDeReglesFiltrageCopie")
-	public String selectJeuxDeReglesFiltrageCopie() {
+	public String selectJeuxDeReglesFiltrageCopie(Model model) {
 		
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -1120,20 +1121,20 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 * @return
 	 */
 	@RequestMapping("/selectJeuxDeReglesMappingCopie")
-	public String selectJeuxDeReglesMappingCopie() {
+	public String selectJeuxDeReglesMappingCopie(Model model) {
 		
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/selectJeuxDeReglesCopie")
-	public String selectJeuxDeReglesCopie() {
-		return basicAction(RESULT_SUCCESS);
+	public String selectJeuxDeReglesCopie(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	@RequestMapping("/copieJeuxDeRegles")
-	public String copieJeuxDeRegles() {
+	public String copieJeuxDeRegles(Model model) {
 		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		// le jeu de regle à copier
 		Map<String, ArrayList<String>> selectionOut = viewRulesSet.mapContentSelected();
@@ -1330,7 +1331,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			loggerDispatcher.info("No rule set choosed", LOGGER);
 			this.viewRulesSet.setMessage("Please choose a ruleset");
 		}
-		return generateDisplay(RESULT_SUCCESS);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	public VObject getViewNorme() {
