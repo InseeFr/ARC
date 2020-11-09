@@ -5,13 +5,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="${pageContext.response.locale}">
 <head>
-<title>Filesystem Management</title>
-<c:import url="tiles/defaultcss.jsp" />
-<c:import url="tiles/defaultjs.jsp">
-	<c:param name="pageJs" value="/js/gererFile.js" />
-</c:import>
-	
+	<title>Filesystem Management</title>
+	<c:import url="tiles/defaulthead.jsp">
+		<c:param name="pageJs" value="/js/gererFile.js" />
+	</c:import>	
 </head>
+
 <body class='bg-light'>
 <form action="gererFile" spellcheck="false"method="post">
 <div class="container-fluid">

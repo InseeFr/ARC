@@ -10,14 +10,13 @@
 <html lang="${pageContext.response.locale}">
 <c:if test="${scope==null}">
 	<head>
-<title><spring:message code="header.externalFile"/></title>
-<c:import url="tiles/defaultcss.jsp" />
-<c:import url="tiles/defaultjs.jsp">
-	<c:param name="pageJs" value="/js/gererNomenclature.js" />
-</c:import>
-
+		<title><spring:message code="header.externalFile"/></title>
+		<c:import url="tiles/defaulthead.jsp">
+			<c:param name="pageJs" value="/js/gererNomenclature.js" />
+		</c:import>
 	</head>
 </c:if>
+
 <body class='bg-light'>
 
 <form

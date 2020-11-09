@@ -839,6 +839,11 @@ function ajaxConfigurationCall()
 					data: formdata,
 					processData: false,
 					contentType: false,
+		            beforeSend: function(xhr) {
+		                var token = $("meta[name='_csrf']").attr("content");
+		                var header = $("meta[name='_csrf_header']").attr("content");
+		                xhr.setRequestHeader(header, token);
+		            },
 					success: function(xml) {
 						xml="<root>"+xml+"</root>";
 						var scope=splitAndEvalArray($this.attr('scope'));
@@ -880,6 +885,11 @@ function ajaxConfigurationCall()
 				$.ajax({
 					url: $this.attr('action'),
 					type: $this.attr('method'),
+		            beforeSend: function(xhr) {
+		                var token = $("meta[name='_csrf']").attr("content");
+		                var header = $("meta[name='_csrf_header']").attr("content");
+		                xhr.setRequestHeader(header, token);
+		            },
 					data: $this.serialize2()+"&scope="+splitAndEval($this.attr('scope')),
 					dataType: 'text',
 					success: function(xml) {
@@ -1230,9 +1240,16 @@ function updateConsole()
 	{
 
 		var view=$('[name="consoleIhm"]').attr("target");
-		jQuery.post(
-				serverUrl+view+".action",null
-				, function(data, textStatus) {
+		$.ajax({
+		  	type: "POST",
+		  	url: serverUrl+view+".action",
+		  	data: null,
+	        beforeSend: function(xhr) {
+	            var token = $("meta[name='_csrf']").attr("content");
+	            var header = $("meta[name='_csrf_header']").attr("content");
+	            xhr.setRequestHeader(header, token);
+	        },
+		  	success: function(data, textStatus) {
 					$('[name="consoleIhm"]').append(data);
 
 
@@ -1259,7 +1276,7 @@ function updateConsole()
 						setTimeout(function(){ updateConsole();},1000);
 					}
 				}
-		);
+		});
 
 	}
 }

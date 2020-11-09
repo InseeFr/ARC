@@ -8,10 +8,9 @@
 <head>
 
 	<title>Index</title>
-	<c:import url="tiles/defaultcss.jsp" />
-	<c:import url="tiles/defaultjs.jsp" />
-	<script type="text/javascript" src="<c:url value='/js/index.js'/>"></script>
-	<script type="text/javascript" src="<c:url value='/js/component.js'/>"></script>
+	<c:import url="tiles/defaulthead.jsp">
+		<c:param name="pageJs" value="/js/index.js" />
+	</c:import>
 	
 	<script>
 		$(document).ready(function() {
