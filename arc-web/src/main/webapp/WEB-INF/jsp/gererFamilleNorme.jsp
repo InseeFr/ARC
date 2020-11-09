@@ -10,13 +10,11 @@
 <html lang="${pageContext.response.locale}">
 <head>
 	<title><spring:message code="header.familyManagement"/></title>	
-	<c:import url="tiles/csrf.jsp" />
-	<c:import url="tiles/defaultcss.jsp" />
-	<c:import url="tiles/defaultjs.jsp">
+	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/gererFamilleNorme.js" />
 	</c:import>
-
 </head>
+
 <body class="bg-light">
 <form id="selectFamilleNorme"
 	action="selectFamilleNorme.action"
