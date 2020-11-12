@@ -268,7 +268,7 @@ public abstract class ArcAction extends Authentifier implements IConstanteCaract
      */
     public String generateDisplay() {
 	LoggerHelper.debug(LOGGER, "getScope()", getScope());
-	Boolean defaultWhenNoScope = true;
+	boolean defaultWhenNoScope = true;
 	for (VObject vObject : getListVObjectOrder()) {
 	    LoggerHelper.debug(LOGGER, "entry.getKey()", vObject.getTable());
 	    vObject.setActivation(getScope());
