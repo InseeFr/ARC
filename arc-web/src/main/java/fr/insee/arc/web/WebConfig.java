@@ -1,5 +1,7 @@
 package fr.insee.arc.web;
 
+import java.util.Locale;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -61,6 +63,7 @@ public class WebConfig implements WebMvcConfigurer {
 		messageSource.addBasenames("messages");
 		messageSource.setDefaultEncoding("UTF-8");
 		messageSource.setAlwaysUseMessageFormat(true);
+		messageSource.setDefaultLocale(Locale.ENGLISH);
 		return messageSource;
 	}
 	
