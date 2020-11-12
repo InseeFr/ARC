@@ -13,39 +13,9 @@
 <c:if test="${scope==null}">
 	<head>
 <title><spring:message code="header.export"/></title>
-<link
-	rel="stylesheet"
-	href="<c:url value='/css/bootstrap.min.css'/>"
-/>
-<link
-	rel="stylesheet"
-	type="text/css"
-	href="<c:url value='/css/style.css' />"
-/>
-<link
-	href="<c:url value='/css/font-awesome.min.css'/>"
-	rel="stylesheet"
-/>
-<script
-	type="text/javascript"
-	src="<c:url value='/js/jquery-2.1.3.min.js'/>"
-></script>
-
-<script	src="<c:url value='/js/lib/popper.min.js'/>" ></script>
-<script	src="<c:url value='/js/lib/bootstrap.min.js'/>"></script>
-
-<script
-	type="text/javascript"
-	src="<c:url value='/js/arc.js'/>"
-></script>
-<script
-	type="text/javascript"
-	src="<c:url value='/js/gererExport.js'/>"
-></script>
-<script
-	type="text/javascript"
-	src="<c:url value='/js/component.js'/>"
-></script>
+	<c:import url="tiles/defaulthead.jsp">
+		<c:param name="pageJs" value="/js/gererExport.js" />
+	</c:import>
 	</head>
 </c:if>
 <body class='bg-light'>
@@ -93,8 +63,7 @@
 										type="submit"
 										doAction="startExport"
 										scope="viewExport;viewFileExport;"
-										value="<spring:message code="gui.button.exportStart"/>"
-										value="Lancer les exports"></input>
+										value="<spring:message code="gui.button.exportStart"/>"></input>
 								</c:param>
 							</c:import>
 						</div>
