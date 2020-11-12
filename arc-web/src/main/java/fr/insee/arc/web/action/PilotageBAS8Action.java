@@ -551,8 +551,10 @@ public class PilotageBAS8Action extends ArcAction {
 
 		Map<String, ArrayList<String>> selectionLigne = this.viewPilotageBAS8.mapContentSelected();
 		ArrayList<String> selectionColonne = this.viewPilotageBAS8.listHeadersSelected();
+		ArrayList<Integer> selectionIndexColonne = this.viewPilotageBAS8.indexHeadersSelected();
 
-		String phase = selectionColonne.get(0).split("_")[0].toUpperCase();
+		
+		String phase = TraitementPhase.getPhase(selectionIndexColonne.get(0)).toString();
 		String etat = selectionColonne.get(0).split("_")[1].toUpperCase();
 		String date = selectionLigne.get("date_entree").get(0);
 
@@ -572,7 +574,8 @@ public class PilotageBAS8Action extends ArcAction {
 				for (String table : envTables) {
 					// selection des tables qui contiennent la phase dans leur nom
 					for (int i = 0; i < etatList.length; i++) {
-						if (table.toUpperCase().contains("." + phase.toUpperCase() + "_" + etatList[i].toUpperCase())
+						if (table.toUpperCase().startsWith(((String) getSession().get(SessionParameters.ENV)).toUpperCase()+"." + phase.toUpperCase())
+								&& table.toUpperCase().endsWith("_" + etatList[i].toUpperCase())
 								&& !tableDownload.contains(table)) {
 							tableDownload.add(table);
 

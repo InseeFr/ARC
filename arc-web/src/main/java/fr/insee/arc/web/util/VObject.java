@@ -1290,6 +1290,28 @@ public class VObject {
         }
         return r;
     }
+    
+    // return the index of headers selected
+    public ArrayList<Integer> indexHeadersSelected() {
+    	 HttpSession session = ServletActionContext.getRequest().getSession(false);
+         VObjectOld v0 = (VObjectOld) session.getAttribute(this.sessionName);
+         if (v0 == null) {
+             return new ArrayList<Integer>();
+         }
+         
+         ArrayList<String> listHeadersSelected = listHeadersSelected();
+         ArrayList<Integer> indexHeadersSelected = new ArrayList<>();
+
+         for (Integer i = 0; i< v0.headersDLabel.size(); i++)
+         {
+        	 if (listHeadersSelected.contains(v0.headersDLabel.get(i)))
+        			 {
+        		 		indexHeadersSelected.add(i);
+        			 }
+        			 
+         }
+         return indexHeadersSelected;
+    }
 
     public HashMap<String, String> mapHeadersSelected() {
         HashMap<String, String> r = new HashMap<String, String>();
