@@ -880,7 +880,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		ArrayList<String> listRepertoire = new ArrayList<>();
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.OK);
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.KO);
-		String chemin = Paths.get(this.repertoire, getBacASable().toString().toUpperCase()).toString();
+		String chemin = Paths.get(this.repertoire, getBacASable().toUpperCase()).toString();
 		this.vObjectService.downloadEnveloppe(getViewFichierBAS(), response, querySelection.toString(), chemin, listRepertoire);
 		loggerDispatcher.trace("*** Fin du téléchargement des enveloppes ***", LOGGER);
 

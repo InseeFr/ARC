@@ -2,12 +2,11 @@ package fr.insee.arc.batch;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -495,85 +494,60 @@ public class BatchARC {
 	
 	/**
 	 * Effacer les répertoires de chargement OK KO et ENCOURS
-	 * @param repertoire
+	 * @param directory
 	 * @param envExecution
 	 * @throws Exception 
 	 */
-	public static void effacerRepertoireChargement(String repertoire, String envExecution) throws Exception
+	public static void effacerRepertoireChargement(String directory, String envExecution) throws Exception
 	{
 		
 		// Effacer les fichiers des répertoires OK et KO
-		File f=new File(repertoire + envExecution.replace(".", "_").toUpperCase() + File.separator + TraitementPhase.RECEPTION+"_"+TraitementEtat.OK);
-		File[] fs= f.listFiles();
-		for (File z:fs)
-		{
-			if (z.isDirectory())
-			{
-				FileUtils.deleteDirectory(z);
-			}
-			else
-			{
-				// ajout d'un garde fou : si le fichier n'est pas archivé : pas touche
-				File fCheck=new File(repertoire + envExecution.replace(".", "_").toUpperCase() + File.separator 
-						+ TraitementPhase.RECEPTION + "_"+ ManipString.substringBeforeFirst(z.getName(),"_")
-						+ "_ARCHIVE"
-						+ File.separator
-						+ ManipString.substringAfterFirst(z.getName(),"_")
-						);
-				if (fCheck.exists())
-				{
-					z.delete();
-				}
-				else
-				{
-					z.renameTo(fCheck);
+		String envDirectory = envExecution.replace(".", "_").toUpperCase();
+		File f= Paths.get(directory, envDirectory, TraitementPhase.RECEPTION + "_" + TraitementEtat.OK).toFile();
+		if (f.exists()) {
+			File[] fs= f.listFiles();
+			for (File z:fs) {
+				if (z.isDirectory()) {
+					FileUtils.deleteDirectory(z);
+				} else {
+					deleteIfArchived(directory, envExecution, z);
 				}
 			}
 		}
 
 		// Effacer les fichiers du répertoire KO
-		f=new File(repertoire + envExecution.replace(".", "_").toUpperCase() + File.separator + TraitementPhase.RECEPTION+"_"+TraitementEtat.KO);
-		fs= f.listFiles();
-		for (File z:fs)
-		{
-			// ajout d'un garde fou : si le fichier n'est pas archivé : pas touche
-			File fCheck=new File(repertoire + envExecution.replace(".", "_").toUpperCase() + File.separator 
-					+ TraitementPhase.RECEPTION + "_"+ ManipString.substringBeforeFirst(z.getName(),"_")
-					+ "_ARCHIVE"
-					+ File.separator
-					+ ManipString.substringAfterFirst(z.getName(),"_")
-					);
-			if (fCheck.exists())
-			{
-				z.delete();
-			}
-			else
-			{
-				z.renameTo(fCheck);
-			}
-		}
+		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.KO);
 		
-		f=new File(repertoire + envExecution.replace(".", "_").toUpperCase() + File.separator + TraitementPhase.RECEPTION+"_"+TraitementEtat.ENCOURS);
-		fs= f.listFiles();
-		for (File z:fs)
-		{
-			// ajout d'un garde fou : si le fichier n'est pas archivé : pas touche
-			File fCheck=new File(repertoire + envExecution.replace(".", "_").toUpperCase() + File.separator 
-					+ TraitementPhase.RECEPTION + "_"+ ManipString.substringBeforeFirst(z.getName(),"_")
-					+ "_ARCHIVE"
-					+ File.separator
-					+ ManipString.substringAfterFirst(z.getName(),"_")
-					);
-			if (fCheck.exists())
-			{
-				z.delete();
-			}
-			else
-			{
-				z.renameTo(fCheck);
-			}
-		}
+		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.ENCOURS);
 		
+	}
+
+	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat) {
+		File f= Paths.get(directory, envDirectory, TraitementPhase.RECEPTION+"_" + etat).toFile();
+		if (!f.exists()) {
+			return;
+		}
+		File[] fs= f.listFiles();
+		for (File z:fs) {
+			deleteIfArchived(directory, envExecution, z);
+		}
+	}
+
+	private static void deleteIfArchived(String repertoire, String envExecution, File z) {
+		// ajout d'un garde fou : si le fichier n'est pas archivé : pas touche
+		File fCheck = Paths.get(repertoire, envExecution.replace(".", "_").toUpperCase(), 
+				TraitementPhase.RECEPTION + "_"+ ManipString.substringBeforeFirst(z.getName(),"_")
+				+ "_ARCHIVE",
+				ManipString.substringAfterFirst(z.getName(),"_")
+				).toFile();
+		if (fCheck.exists())
+		{
+			z.delete();
+		}
+		else
+		{
+			z.renameTo(fCheck);
+		}
 	}
 	
 

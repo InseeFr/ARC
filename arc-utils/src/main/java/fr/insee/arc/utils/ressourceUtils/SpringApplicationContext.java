@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Component;
 
 /**
  * Wrapper to always return a reference to the Spring Application Context from
@@ -12,6 +13,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * we do not need a reference to the Servlet context for this. All we need is
  * for this bean to be initialized during application startup.
  */
+@Component
 public class SpringApplicationContext implements ApplicationContextAware {
 
   private static ConfigurableApplicationContext springContext;
