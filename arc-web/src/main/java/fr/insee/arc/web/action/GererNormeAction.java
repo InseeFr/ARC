@@ -920,8 +920,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 	public String updateMapping() {
 		initialize();
 		Map<String, ArrayList<String>> afterUpdate = this.viewMapping.mapContentAfterUpdate();
-		boolean isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
-				afterUpdate);
+//		boolean isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
+//				afterUpdate);
+		boolean isRegleOk=true;
 		if (isRegleOk) {
 			this.viewMapping.update();
 		}
@@ -1006,8 +1007,9 @@ public class GererNormeAction extends ArcAction implements IDbConstant {
 				if (!variablesSoumises.isEmpty()) {
 					throw new IllegalStateException("Variables " + variablesSoumises + " are not in the model.");
 				}
-				isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
-						reglesAImporter);
+				// isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
+				//		reglesAImporter);
+				isRegleOk=true;
 				Map<String, ArrayList<String>> selection = this.viewRulesSet.mapContentSelected();
 				Map<String, String> map = new HashMap<String, String>();
                 map.put("id_regle", "(SELECT max(id_regle)+1 FROM " + nomTable + ")");
