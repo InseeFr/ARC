@@ -742,8 +742,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	public String downloadBdBAS(HttpServletResponse response) throws Exception {
 		Map<String, ArrayList<String>> selectionLigne = getViewPilotageBAS().mapContentSelected();
 		ArrayList<String> selectionColonne = getViewPilotageBAS().listHeadersSelected();
+		ArrayList<Integer> selectionIndexColonne = getViewPilotageBAS().indexHeadersSelected();
 
-		String phase = selectionColonne.get(0).split("_")[0].toUpperCase();
+		String phase = TraitementPhase.getPhase(selectionIndexColonne.get(0)).toString();
 		String etat = selectionColonne.get(0).split("_")[1].toUpperCase();
 		String date = selectionLigne.get(ENTRY_DATE).get(0);
 

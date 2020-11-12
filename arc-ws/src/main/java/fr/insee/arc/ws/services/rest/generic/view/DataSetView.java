@@ -1,12 +1,10 @@
 package fr.insee.arc.ws.services.rest.generic.view;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import fr.insee.arc.utils.structure.Record;
+
+
 
 public class DataSetView {
 
@@ -15,6 +13,16 @@ public class DataSetView {
 	private String datasetName;
 
 	private Map<String,Record> content;
+
+	
+	
+	
+	public DataSetView(int datasetId, String datasetName, Map<String, Record> content) {
+		super();
+		this.datasetId = datasetId;
+		this.datasetName = datasetName;
+		this.content = content;
+	}
 
 	public int getDatasetId() {
 		return datasetId;

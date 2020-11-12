@@ -430,10 +430,46 @@ CREATE TABLE IF NOT EXISTS arc.ihm_mod_variable_metier (
   ),
   CONSTRAINT fk_ihm_mod_variable_table_metier FOREIGN KEY (id_famille, nom_table_metier) REFERENCES arc.ihm_mod_table_metier (id_famille, nom_table_metier) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION
 );
-
 alter table arc.ihm_mod_variable_metier alter column type_consolidation set default '{exclus}';
-
-
+CREATE TABLE IF NOT EXISTS arc.ihm_ws_context
+(
+  service_name text NOT NULL,
+  service_type integer,
+  call_id integer NOT NULL,
+  environment text,
+  target_phase text,
+  norme text,
+  validite text,
+  periodicite text,
+  CONSTRAINT ws_engine_context_pkey PRIMARY KEY (service_name, call_id)
+);
+CREATE TABLE IF NOT EXISTS arc.ihm_ws_query
+(
+  query_id integer NOT NULL,
+  query_name text NOT NULL,
+  expression text,
+  query_view integer,
+  service_name text NOT NULL,
+  call_id integer NOT NULL,
+  CONSTRAINT ws_engine_queries_pkey PRIMARY KEY (service_name, call_id, query_id),
+  CONSTRAINT ws_engine_queries_fkey FOREIGN KEY (service_name, call_id)
+      REFERENCES arc.ihm_ws_context (service_name, call_id) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS arc.ext_webservice_type
+(
+  id text NOT NULL,
+  val text,
+  CONSTRAINT ext_webservice_type_pkey PRIMARY KEY (id)
+);
+INSERT INTO arc.ext_webservice_type VALUES ('1','ENGINE'), ('2','SERVICE') ON CONFLICT DO NOTHING;
+CREATE TABLE IF NOT EXISTS arc.ext_webservice_queryview
+(
+  id text NOT NULL,
+  val text,
+  CONSTRAINT ext_webservice_queryview_pkey PRIMARY KEY (id)
+);
+INSERT INTO arc.ext_webservice_type VALUES ('1','COLUMN'), ('2','LINE') ON CONFLICT DO NOTHING;
 CREATE TABLE IF NOT EXISTS arc.ihm_nmcl (
   nom_table text NOT NULL,
   description text,
@@ -469,10 +505,7 @@ CREATE TABLE IF NOT EXISTS arc.ihm_entrepot (
   CONSTRAINT ihm_entrepot_pkey PRIMARY KEY (id_entrepot)
 );
 do $$ begin
-INSERT INTO
-  arc.ihm_entrepot
-values
-  ('DEFAULT', 'DEFAULT');
+INSERT INTO  arc.ihm_entrepot values ('DEFAULT', 'DEFAULT');
 exception
   when others then
 end;

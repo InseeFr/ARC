@@ -629,7 +629,55 @@ public class ApiInitialisationService extends ApiService {
         requete.append("\n alter table " + dbEnv(envExecution)
                 + "pilotage_fichier_t set (autovacuum_enabled = false, toast.autovacuum_enabled = false); ");
         requete.append("\n ");
+        
+        
+        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_ws_context ");
+        requete.append("\n ( ");
+        requete.append("\n   service_name text NOT NULL, ");
+        requete.append("\n   service_type integer, ");
+        requete.append("\n call_id integer NOT NULL, ");
+        requete.append("\n environment text, ");
+        requete.append("\n target_phase text, ");
+        requete.append("\n norme text, ");
+        requete.append("\n validite text, ");
+        requete.append("\n periodicite text, ");
+        requete.append("\n CONSTRAINT ws_engine_context_pkey PRIMARY KEY (service_name, call_id) ");
+        requete.append("\n ); ");
 
+
+        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_ws_query ");
+        requete.append("\n ( ");
+        requete.append("\n query_id integer NOT NULL, ");
+        requete.append("\n query_name text NOT NULL, ");
+        requete.append("\n expression text, ");
+        requete.append("\n query_view integer, ");
+        requete.append("\n service_name text NOT NULL, ");
+        requete.append("\n call_id integer NOT NULL, ");
+        requete.append("\n CONSTRAINT ws_engine_queries_pkey PRIMARY KEY (service_name, call_id, query_id), ");
+        requete.append("\n CONSTRAINT ws_engine_queries_fkey FOREIGN KEY (service_name, call_id) ");
+        requete.append("\n REFERENCES arc.ihm_ws_context (service_name, call_id) MATCH SIMPLE ");
+        requete.append("\n ON UPDATE CASCADE ON DELETE CASCADE ");
+        requete.append("\n ); ");
+
+
+        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_webservice_type ");
+        requete.append("\n ( ");
+        requete.append("\n id text NOT NULL, ");
+        requete.append("\n val text, ");
+        requete.append("\n CONSTRAINT ext_webservice_type_pkey PRIMARY KEY (id) ");
+        requete.append("\n ); ");
+
+        requete.append("\n INSERT INTO arc.ext_webservice_type VALUES ('1','ENGINE'), ('2','SERVICE') ON CONFLICT DO NOTHING; ");
+
+        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_webservice_queryview ");
+        requete.append("\n ( ");
+        requete.append("\n id text NOT NULL, ");
+        requete.append("\n val text, ");
+        requete.append("\n CONSTRAINT ext_webservice_queryview_pkey PRIMARY KEY (id) ");
+        requete.append("\n );");
+
+        requete.append("\n INSERT INTO arc.ext_webservice_queryview VALUES ('1','COLUMN'), ('2','LINE') ON CONFLICT DO NOTHING; ");
+        
         // script fonctions
         
         // fonction pour pouvoir exporter simplement des tables sans préciser le schéma de façon annexe

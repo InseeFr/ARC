@@ -59,8 +59,7 @@ public class JeuDeRegle {
     }
 
     public String getValiditeInfString() {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        return formatter.format(this.validiteInf);
+        return sdf.format(this.validiteInf);
     }
 
     public void setValiditeInf(Date validiteInf) {
@@ -82,8 +81,7 @@ public class JeuDeRegle {
     }
 
     public String getValiditeSupString() {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        return formatter.format(this.validiteSup);
+        return sdf.format(this.validiteSup);
     }
 
     public void setValiditeSup(Date validiteSup) {

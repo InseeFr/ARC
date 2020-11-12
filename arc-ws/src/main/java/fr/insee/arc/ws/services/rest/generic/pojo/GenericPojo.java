@@ -1,16 +1,37 @@
 package fr.insee.arc.ws.services.rest.generic.pojo;
 
+import java.util.List;
+
 public class GenericPojo {
+
+	// nom du fichier
+	public String fileName;
+	
+	// contenu du fichier
+	public String fileContent;
+	
+	// environnement d'execution
 	public String sandbox;
 	
+	// n° de la phase à atteindre
 	public String targetPhase;
 
-	public String fileName;
-	public String version;
+	// Type d'invoquation : SERVICE ou ENGINE
+	public String serviceType;
+	
+	// norme (~version)
+	public String norme;
+	
+	// validite
 	public String validite;
+	
+	// periodicite
 	public String periodicite;
-	public String query;
-	public String fileContent;
+	
+	// liste des requete
+	public List<QueryPojo> queries;
+
+
 	
 	
 	public String getSandbox() {
@@ -32,10 +53,10 @@ public class GenericPojo {
 		this.fileName = fileName;
 	}
 	public String getVersion() {
-		return version;
+		return norme;
 	}
 	public void setVersion(String version) {
-		this.version = version;
+		this.norme = version;
 	}
 	public String getValidite() {
 		return validite;
@@ -49,17 +70,23 @@ public class GenericPojo {
 	public void setPeriodicite(String periodicite) {
 		this.periodicite = periodicite;
 	}
-	public String getQuery() {
-		return query;
+	public List<QueryPojo> getQueries() {
+		return queries;
 	}
-	public void setQuery(String query) {
-		this.query = query;
+	public void setQueries(List<QueryPojo> queries) {
+		this.queries = queries;
 	}
 	public String getFileContent() {
 		return fileContent;
 	}
 	public void setFileContent(String fileContent) {
 		this.fileContent = fileContent;
+	}
+	public String getServiceType() {
+		return serviceType;
+	}
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
 	}
 
 	

@@ -879,8 +879,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/updateMapping")
 	public String updateMapping(Model model) {
 		Map<String, ArrayList<String>> afterUpdate = viewMapping.mapContentAfterUpdate();
-		boolean isRegleOk = gererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
-				afterUpdate);
+		//		boolean isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
+//		afterUpdate);
+		boolean isRegleOk=true;
 		if (isRegleOk) {
 			this.vObjectService.update(viewMapping);
 		}

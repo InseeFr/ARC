@@ -112,6 +112,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         this.ensembleGroupes = new TreeSet<>();
     }
 
+    
     public RequeteMapping(Connection aConnexion, RegleMappingFactory aRegleMappingFactory, String anIdFamille,
             JeuDeRegle aJeuDeRegle, String anEnvironnement, String aNomTablePrecedente, int threadId) {
         this();
@@ -159,13 +160,13 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
                 .append("\nWHERE ").append(this.jeuDeRegle.getSqlEquals()).append(";");
         List<List<String>> resultTemp = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
         
-        ArrayList<ArrayList<String>> result= new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> result= new ArrayList<>();
 
         
         // mise en minuscule des rubriques
         for (int i = 0; i < resultTemp.size(); i++) {
 
-            ArrayList<String> temp=new ArrayList<String>();
+            ArrayList<String> temp=new ArrayList<>();
             temp.add(resultTemp.get(i).get(0).toLowerCase());
             
             String exprCol=resultTemp.get(i).get(1);
@@ -240,7 +241,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
     private void construireListeRubriqueParTable()
     {
 
-        this.ensembleRubriqueIdentifianteTable=new HashMap<TableMapping,HashSet<String>>();
+        this.ensembleRubriqueIdentifianteTable=new HashMap<>();
 
         
 //      Set <String> identifiantsTable=new HashSet<String>();
@@ -255,7 +256,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 //          System.out.println(table.getPrimaryKey()+ " " +table.getEnsembleVariableMapping());
 
             
-            HashSet<String> s=new HashSet<String>();
+            HashSet<String> s=new HashSet<>();
             
             for (VariableMapping var : this.ensembleVariableMapping) {
                 
@@ -378,17 +379,29 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @return la requête de mapping pour le fichier {@code aNomFichier}
 	 */
 	public String getRequete(String aNomFichier) {
+		return getRequete(aNomFichier, true);
+	}
 
+	/**
+	 *
+	 * @param aNomFichier
+	 * @return la requête de mapping pour le fichier {@code aNomFichier}
+	 */
+	public String getRequete(String aNomFichier, boolean discardTemp) {
 
 		if (!this.isRequeteCalculee) {
-			StringBuilder requeteGlobale = new StringBuilder("DISCARD TEMP; SET ENABLE_HASHAGG=ON; SET ENABLE_BITMAPSCAN=OFF; \n");
+			StringBuilder requeteGlobale = new StringBuilder("");
+			if(discardTemp) {
+				requeteGlobale.append("DISCARD TEMP; ");
+			}
+			requeteGlobale.append("SET ENABLE_HASHAGG=ON; SET ENABLE_BITMAPSCAN=OFF; \n");
 
 			construireTablePrecedente(requeteGlobale);
 
 			Map<String, String> nomsVariablesIdentifiantes = new HashMap<>();
 			Map<String, String> reglesIdentifiantes = new HashMap<>();
 			Map<String, String> nomsVariablesGroupe  = new HashMap<>();
-			HashMap<String,String>  linkedIds  = new  HashMap<String,String> ();
+			HashMap<String,String>  linkedIds  = new  HashMap<> ();
 
 			construireListeIdentifiants(nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
 			construireTableFiltrageCalculIdentifiantsFichierCourant(requeteGlobale, nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds, tokenId);
@@ -483,12 +496,12 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		// Correctif modèle métier à une seule table
 		if (this.ensembleTableMapping.size()==1)
 		{
-			return new HashMap<TableMapping,ArrayList<TableMapping>>();
+			return new HashMap<>();
 		}
 			
 		// initialisation
-		HashMap<TableMapping,Integer> order=new HashMap<TableMapping,Integer>();
-		HashMap<TableMapping,ArrayList<TableMapping>> son=new HashMap<TableMapping,ArrayList<TableMapping>>();
+		HashMap<TableMapping,Integer> order=new HashMap<>();
+		HashMap<TableMapping,ArrayList<TableMapping>> son=new HashMap<>();
 
 		do {
 			for (TableMapping table : this.ensembleTableMapping) {
@@ -557,7 +570,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		}
 		
 		/* Put ordered tables into a linkedhashmap */
-		Set<TableMapping> r=new LinkedHashSet<TableMapping>();
+		Set<TableMapping> r=new LinkedHashSet<>();
 		for (Integer i=k;i>Integer.MIN_VALUE;i--)
 		{
 //			System.out.println(i);
@@ -619,7 +632,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	//	Set<String> ensembleNomsRubriquesGroupes = new HashSet<String>(table.getEnsembleNomsRubriques(groupe));
 
 		// on concatene i_g et v_g
-		Set<String> keys = new HashSet<String>();
+		Set<String> keys = new HashSet<>();
 		keys.addAll(ensembleIdentifiantsGroupesRetenus);
 	//	keys.addAll(ensembleNomsRubriquesGroupes);
 
@@ -789,7 +802,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 //		StringBuilder requeteIndex=new StringBuilder();
 
 
-		HashSet<String> alreadyAdded=new HashSet<String>();
+		HashSet<String> alreadyAdded=new HashSet<>();
 
 
 		returned.append("\n DROP TABLE IF EXISTS "+nomTableFichierCourant+" CASCADE;");
@@ -814,7 +827,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		}
 
 		// bloc 2 : on met les variables non groupe et les variables subalternes identifiantes de groupes
-		alreadyAdded=new HashSet<String>();
+		alreadyAdded=new HashSet<>();
 		returned.append("\n FROM ( SELECT id AS id_table");
 		for (String nomVariable : reglesIdentifiantes.keySet()) {
 			String expressionVariable = reglesIdentifiantes.get(nomVariable);

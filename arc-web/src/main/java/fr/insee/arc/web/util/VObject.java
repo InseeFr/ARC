@@ -195,6 +195,23 @@ public class VObject {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentSelected()).mapContent();
 	}
 
+	/** Return the index of headers selected */
+	public ArrayList<Integer> indexHeadersSelected() {
+		if (getSavedContent() == null) {
+			return new ArrayList<Integer>();
+		}
+
+		ArrayList<String> listHeadersSelected = listHeadersSelected();
+		ArrayList<Integer> indexHeadersSelected = new ArrayList<>();
+		for (Integer i = 0; i< getHeadersDLabel().size(); i++) {
+			if (listHeadersSelected.contains(getHeadersDLabel().get(i))){
+				indexHeadersSelected.add(i);
+			}
+
+		}
+		return indexHeadersSelected;
+	}
+	
     /**
      * Retourne la liste des entetes base de donnée selectionnés
      */

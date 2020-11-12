@@ -19,6 +19,8 @@
 				href="selectNorme"><spring:message code="header.normManagement"/></a></li>
 			<li class="nav-item mt-auto"><a class="nav-link${param.currentPage == 'externalFile' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectListNomenclatures"><spring:message code="header.externalFile"/></a></li>
+			<li class="nav-item mt-auto"><a class="nav-link${param.currentPage == 'webserviceManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+				href="selectWebserviceContext"><spring:message code="header.webserviceManagement"/></a></li>
 			<li class="nobullet mt-auto">
         		<label class="ml-5 mr-1" for="environnementTravail"><spring:message code="header.sandboxChoice"/> :</label>
       		</li>			
@@ -30,6 +32,9 @@
 				</select></li>
 			<li class="nav-item mt-auto"><a class="nav-link${param.currentPage == 'envManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse" href="enterPilotageBAS"
 				onclick="$(this).attr('href', 'enterPilotageBAS?bacASable='+$('#environnementTravail option:selected').val());console.log($(this).attr('href'));"><spring:message code="header.manageEnvironment"/></a></li>
+			<li class="nav-item mt-auto"><a class="nav-link${param.currentPage == 'envManagement' ? ' font-weight-bold' : ''}"" data-target=".navbar-collapse" href="selectExport"
+				onclick="$(this).attr('href', 'selectExport?bacASable='+$('#environnementTravail option:selected').val());console.log($(this).attr('href'));"><spring:message code="header.export"/></a></li>
+				
 		</ul>
 		
 
