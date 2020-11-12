@@ -3,9 +3,7 @@ package fr.insee.arc.core.service.thread;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,10 +12,10 @@ import fr.insee.arc.core.dao.JeuDeRegleDao;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiMappingService;
-import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.RequeteMappingCalibree;
+import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerDispatcher;
@@ -74,7 +72,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
 
     }
 
-    public void run() {
+    @Override
+	public void run() {
         try {
             this.preparerExecution();
             /*
@@ -85,7 +84,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
             /*
              * Construction de la factory pour les règles de mapping
              */
-            this.regleMappingFactory = this.construireRegleMappingFactory();
+            ServiceMapping serviceMapping = new ServiceMapping();
+			this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion, this.getEnvExecution(), this.tableTempFiltrageOk, getPrefixidentifiantrubrique());
             /*
              * Pour chaque jeu de règles
              */
@@ -93,8 +93,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                 /*
                  * Récupération de l'id_famille
                  */
-                String idFamille = this.fetchIdFamille(listeJeuxDeRegles.get(i));
-
+                String idFamille = serviceMapping.fetchIdFamille(this.connexion, listeJeuxDeRegles.get(i),	this.getTableNorme());
                 /*
                  * Instancier une requête de mapping générique pour ce jeu de règles.
                  */
@@ -111,7 +110,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
 
                 // List<String> listeFichier = construireListeFichiers(listeJeuxDeRegles.get(i));
 
-                List<String> listeFichier = new ArrayList<String>();
+                List<String> listeFichier = new ArrayList<>();
                 listeFichier.add(idSource);
 
                 /*
@@ -241,50 +240,16 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
 
     }
 
-    /**
-     *
-     * @param aJeuDeRegle
-     * @return Le bon id_famille
-     * @throws SQLException
-     */
-    private String fetchIdFamille(JeuDeRegle aJeuDeRegle) throws SQLException {
-        StringBuilder requete = new StringBuilder("SELECT id_famille FROM " + this.getTableNorme())//
-                .append("\n WHERE id_norme    = '" + aJeuDeRegle.getIdNorme() + "'")//
-                .append("\n AND periodicite = '" + aJeuDeRegle.getPeriodicite() + "';");
-        return UtilitaireDao.get(poolName).getString(this.connexion, requete);
-    }
 
 
-    /**
-     * Récupère l'ensemble des colonnes de la table de la phase précédente, et les répartit dans deux containers :<br/>
-     * 1. Un pour les identifiants de rubriques<br/>
-     * 2. Un pour les autres types de colonnes<br/>
-     *
-     * @return
-     *
-     * @return
-     *
-     * @throws SQLException
-     */
-    public RegleMappingFactory construireRegleMappingFactory() throws SQLException {
-        Set<String> ensembleIdentifiantRubriqueExistante = new HashSet<>();
-        Set<String> ensembleNomRubriqueExistante = new HashSet<>();
-        for (String nomColonne : ServiceCommunFiltrageMapping.calculerListeColonnes(this.connexion, this.tableTempFiltrageOk)) {
-            if (nomColonne.startsWith(this.getPrefixidentifiantrubrique())) {
-                ensembleIdentifiantRubriqueExistante.add(nomColonne);
-            } else {
-                ensembleNomRubriqueExistante.add(nomColonne);
-            }
-        }
-        return new RegleMappingFactory(this.connexion, this.getEnvExecution(), ensembleIdentifiantRubriqueExistante, ensembleNomRubriqueExistante);
-    }
 
-  
-    public Connection getConnexion() {
+    @Override
+	public Connection getConnexion() {
         return connexion;
     }
 
-    public Thread getT() {
+    @Override
+	public Thread getT() {
         return t;
     }
 }

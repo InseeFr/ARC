@@ -304,4 +304,31 @@
 		<property name="sessionName" value="viewDirOut" />
 		<property name="paginationSize" value="0" />
 	</bean>
+	<bean id="viewExport" class="fr.insee.arc.web.model.ViewExport" scope="session">
+    <aop:scoped-proxy />
+    <property name="pool" value="arc" />
+    <property name="sessionName" value="viewExport" />
+    <property name="paginationSize" value="0" />
+ 	</bean>
+    <bean id="viewFileExport" class="fr.insee.arc.web.model.ViewFileExport" scope="session">
+    <aop:scoped-proxy />
+    <property name="pool" value="arc" />
+    <property name="sessionName" value="viewFileExport" />
+    <property name="paginationSize" value="0" />
+  </bean>
+  <bean id="viewWebserviceContext" class="fr.insee.arc.web.model.ViewWebserviceContext" scope="session">
+    <aop:scoped-proxy />
+    <property name="pool" value="arc" />
+    <property name="sessionName" value="viewWebserviceContext" />
+    <property name="paginationSize" value="0" />
+  </bean>
+    <bean id="viewWebserviceQuery" class="fr.insee.arc.web.model.ViewWebserviceQuery" scope="session">
+    <aop:scoped-proxy />
+    <property name="pool" value="arc" />
+    <property name="sessionName" value="viewWebserviceQuery" />
+    <property name="paginationSize" value="0" />
+  </bean>
+  
+	
+	
 </beans>

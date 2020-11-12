@@ -13,7 +13,7 @@ public class ReturnView {
     @JsonFormat(pattern = "YYYY-MM-DD'T'HH:mm:ss")
     private Date returnTime;
     
-    private List<DataSetView> dataSetView;
+    public List<DataSetView> dataSetView;
 
 	public Date getReceptionTime() {
 		return receptionTime;
