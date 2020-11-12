@@ -1,4 +1,4 @@
-package fr.insee.arc.web.model;
+package fr.insee.arc.web.model.viewobjects;
 
 import java.util.HashMap;
 
@@ -12,9 +12,10 @@ public class ViewExport extends VObject {
         super();
         
         this.setTitle("view.export");
+        this.setSessionName("viewExport");
     	this.setPaginationSize(0);
         
-        this.constantVObject = new ConstantVObject(
+        this.setConstantVObject(new ConstantVObject(
 
         new HashMap<String, ColumnRendering>() {
             /**
@@ -37,6 +38,6 @@ public class ViewExport extends VObject {
 
                 
              }
-        });
+        }));
     }
 }

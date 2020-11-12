@@ -1,4 +1,4 @@
-package fr.insee.arc.web.model;
+package fr.insee.arc.web.model.viewobjects;
 
 import java.util.HashMap;
 
@@ -12,9 +12,10 @@ public class ViewFileExport extends VObject {
         super();
         
         this.setTitle("view.exportFile");
+        this.setSessionName("viewFileExport");
     	this.setPaginationSize(0);
         
-        this.constantVObject = new ConstantVObject(
+        this.setConstantVObject(new ConstantVObject(
 
         new HashMap<String, ColumnRendering>() {
             /**
@@ -26,6 +27,6 @@ public class ViewFileExport extends VObject {
                 put("filename", new ColumnRendering(true, "Nom du fichier", "400px", "text", null, false));
                 put("isdirectory", new ColumnRendering(false, "Répertoire", "350px", "text", null, false));
              }
-        });
+        }));
     }
 }

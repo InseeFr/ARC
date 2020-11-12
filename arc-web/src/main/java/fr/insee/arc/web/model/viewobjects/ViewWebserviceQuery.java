@@ -1,4 +1,4 @@
-package fr.insee.arc.web.model;
+package fr.insee.arc.web.model.viewobjects;
 
 import java.util.HashMap;
 
@@ -11,10 +11,11 @@ public class ViewWebserviceQuery extends VObject {
         super();
         
         this.setTitle("view.webserviceQuery");
+        this.setSessionName("viewWebserviceQuery");
 		this.setPaginationSize(15);
 
         
-        this.constantVObject = new ConstantVObject(new HashMap<String, ColumnRendering>() {
+        this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**
 			 * 
 			 */
@@ -29,7 +30,6 @@ public class ViewWebserviceQuery extends VObject {
                 put("call_id", new ColumnRendering(false, "Id du service", "0", "text", null, false));
             }
         }
-
-        );
+        ));
     }
 }
