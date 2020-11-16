@@ -1,5 +1,6 @@
 package fr.insee.arc.web.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +31,9 @@ public class Session {
 
 	public Map<String,Object> asMap(){
 		Map<String,Object> map = new HashMap<>();
-		httpSession.getAttributeNames().asIterator()
-			.forEachRemaining(name -> map.put(name, httpSession.getAttribute(name)));
+
+		Collections.list(httpSession.getAttributeNames()).forEach(name -> map.put(name, httpSession.getAttribute(name)));
+		
 		return map;
 	}
 	
