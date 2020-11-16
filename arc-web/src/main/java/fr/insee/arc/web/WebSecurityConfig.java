@@ -51,28 +51,36 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.requiresChannel().anyRequest().requiresSecure();
-		if (isKeycloakActive()) {
-			String[] authorizedRoles = properties.getAuthorizedRoles();
-			super.configure(http);
-			http
-			// public
-			.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
-			.antMatchers("/", "/index").permitAll()
-			.antMatchers("/css/**", "/fonts/**", "/img/**", "/js/**").permitAll();
-			if (authorizedRoles.length == 0) {
-				// authenticated
-				http.authorizeRequests()
-				.antMatchers(HttpMethod.GET, "/*").authenticated()
-				.antMatchers(HttpMethod.POST, "/*").authenticated();		
-			} else {
-				// role restriction
-				http.authorizeRequests()
-				.antMatchers(HttpMethod.GET, "/*").hasAnyAuthority(authorizedRoles)
-				.antMatchers(HttpMethod.POST, "/*").hasAnyAuthority(authorizedRoles);
+		
+		// disable https when keycloak file doesn't exist
+		if (keycloakFile.isEmpty()) {
+			http.authorizeRequests().antMatchers("/").permitAll();
+		}
+		else
+		{
+			http.requiresChannel().anyRequest().requiresSecure();
+			if (isKeycloakActive()) {
+				String[] authorizedRoles = properties.getAuthorizedRoles();
+				super.configure(http);
+				http
+				// public
+				.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
+				.antMatchers("/", "/index").permitAll()
+				.antMatchers("/css/**", "/fonts/**", "/img/**", "/js/**").permitAll();
+				if (authorizedRoles.length == 0) {
+					// authenticated
+					http.authorizeRequests()
+					.antMatchers(HttpMethod.GET, "/*").authenticated()
+					.antMatchers(HttpMethod.POST, "/*").authenticated();		
+				} else {
+					// role restriction
+					http.authorizeRequests()
+					.antMatchers(HttpMethod.GET, "/*").hasAnyAuthority(authorizedRoles)
+					.antMatchers(HttpMethod.POST, "/*").hasAnyAuthority(authorizedRoles);
+				}
+				// everything else
+				http.authorizeRequests().anyRequest().denyAll();
 			}
-			// everything else
-			http.authorizeRequests().anyRequest().denyAll();
 		}
 	}
 
