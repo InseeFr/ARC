@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public final class ConstantVObject {
 
-    public Map<String, ColumnRendering> columnRender = new HashMap<String, ColumnRendering>();
+    public Map<String, ColumnRendering> columnRender;
     public static int logSize = 10000;
 
     public static class ColumnRendering {
@@ -79,6 +79,10 @@ public final class ConstantVObject {
             this.columnName = aColumnName;
             this.columnRendering = aColumnRendering;
         }
+    }
+
+    public ConstantVObject() {
+        this.columnRender =  new HashMap<>();
     }
 
     public ConstantVObject(Map<String, ColumnRendering> someColumnRendering) {

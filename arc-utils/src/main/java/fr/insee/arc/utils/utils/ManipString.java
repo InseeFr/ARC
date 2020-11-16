@@ -236,8 +236,9 @@ public class ManipString implements IConstanteCaractere {
 
     }
 
+    /** Returns true if a String object is either null or strictly empty.*/
     public static boolean isStringNull(String a) {
-        return (a == null || a.length() == 0);
+        return (a == null || a.isEmpty());
     }
 
     public static boolean compareStringWithNull(String a, String b) {

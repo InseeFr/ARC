@@ -13,7 +13,7 @@ import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 public class RegleDao {
 
@@ -30,7 +30,7 @@ public class RegleDao {
 	 */
 	@Deprecated
 	public static ArrayList<RegleControleEntity> getRegle(Connection connexion, JeuDeRegle jdr, String espace) throws SQLException {
-		LoggerDispatcher.debug("getRegle", logger);
+		StaticLoggerDispatcher.debug("getRegle", logger);
 
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
 
@@ -48,7 +48,7 @@ public class RegleDao {
 		StringBuilder requete = new StringBuilder();
 		requete.append(FormatSQL.getRequete(sb.toString(), espace, jdr.getIdNorme(), jdr.getPeriodicite(),
 				jdr.getValiditeInfString(), jdr.getValiditeSupString(), jdr.getVersion()));
-//		LoggerDispatcher.debug("Ma requête : " + requete, logger);
+//		StaticLoggerDispatcher.debug("Ma requête : " + requete, logger);
 
 			HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
 		
@@ -73,13 +73,13 @@ public class RegleDao {
 				}
 			}
 
-		LoggerDispatcher.debug("J'ai trouvé " + listRegle.size() + " rattaché à ce jeu de règle", logger);
+		StaticLoggerDispatcher.debug("J'ai trouvé " + listRegle.size() + " rattaché à ce jeu de règle", logger);
 		return listRegle;
 	}
 
 	
 	public static ArrayList<RegleControleEntity> getRegle(Connection connexion, String tableRegle, String tableIn) throws SQLException {
-		LoggerDispatcher.debug("getRegle", logger);
+		StaticLoggerDispatcher.debug("getRegle", logger);
 
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
 
@@ -96,7 +96,7 @@ public class RegleDao {
 
 		StringBuilder requete = new StringBuilder();
 		requete.append(FormatSQL.getRequete(sb.toString(), tableRegle, tableIn));
-//		LoggerDispatcher.debug("Ma requête : " + requete, logger);
+//		StaticLoggerDispatcher.debug("Ma requête : " + requete, logger);
 
 			HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
 		
@@ -121,7 +121,7 @@ public class RegleDao {
 				}
 			}
 
-		LoggerDispatcher.debug("J'ai trouvé " + listRegle.size() + " rattaché à ce jeu de règle", logger);
+		StaticLoggerDispatcher.debug("J'ai trouvé " + listRegle.size() + " rattaché à ce jeu de règle", logger);
 		return listRegle;
 	}
 

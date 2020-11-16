@@ -6,8 +6,8 @@ import java.util.zip.ZipFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * The Zip archive loader
@@ -24,16 +24,16 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 
     @Override
 	public FilesInputStreamLoad loadArchive() throws Exception {
-		LoggerDispatcher.info("begin loadArchive() ", LOGGER);
+		StaticLoggerDispatcher.info("begin loadArchive() ", LOGGER);
 		readFileWithoutExtracting();
-		LoggerDispatcher.info("end loadArchive() ", LOGGER);
+		StaticLoggerDispatcher.info("end loadArchive() ", LOGGER);
 		return this.filesInputStreamLoad;
 	}
 
     @SuppressWarnings("resource")
     @Override
     public FilesInputStreamLoad readFileWithoutExtracting() throws Exception {
-	LoggerDispatcher.info("begin readFileWithoutExtracting() ", LOGGER);
+	StaticLoggerDispatcher.info("begin readFileWithoutExtracting() ", LOGGER);
 	ZipFile zipFileChargement = new ZipFile(this.archiveChargement);
 	ZipFile zipFileNormage = new ZipFile(this.archiveChargement);
 	ZipFile zipFileCSV = new ZipFile(this.archiveChargement);
@@ -50,7 +50,7 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 	this.filesInputStreamLoad.setTmpInxNormage(
 		zipFileCSV.getInputStream(zipFileCSV.getEntry(ManipString.substringAfterFirst(this.idSource, "_"))));
 
-	LoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);
+	StaticLoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);
 	return filesInputStreamLoad;
 
     }

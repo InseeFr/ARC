@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import fr.insee.arc.core.dao.JeuDeRegleDao;
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -34,9 +33,9 @@ import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
+import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.ws.services.rest.generic.pojo.GenericPojo;
 import fr.insee.arc.ws.services.rest.generic.pojo.QueryPojo;
 import fr.insee.arc.ws.services.rest.generic.view.DataSetView;
@@ -44,6 +43,9 @@ import fr.insee.arc.ws.services.rest.generic.view.ReturnView;
 
 @RestController
 public class GenericEngineController {
+	
+	@Autowired
+	private LoggerDispatcher loggerDispatcher;
 	
     private static final Logger LOGGER = LogManager.getLogger(GenericEngineController.class);
 	
@@ -59,7 +61,7 @@ public class GenericEngineController {
 		
 		String identifiantLog = "(" + serviceName + ", " + serviceId + ")";
 		
-		LoggerDispatcher.info(identifiantLog + " received", LOGGER);
+		loggerDispatcher.info(identifiantLog + " received", LOGGER);
 
 		try (Connection c = UtilitaireDao.get("arc").getDriverConnexion()) {
 			
@@ -101,7 +103,7 @@ public class GenericEngineController {
 
 			
 			
-			LoggerDispatcher.info(identifiantLog + " launching phases", LOGGER);
+			loggerDispatcher.info(identifiantLog + " launching phases", LOGGER);
 			String env = p.sandbox;
 
 
@@ -209,7 +211,7 @@ public class GenericEngineController {
 				// searchpath to the current sandbow to be able to query rules of the sandbox simply and without any risk of confusion with user rules
 				UtilitaireDao.get("arc").executeRequest(c,"SET search_path=public, "+p.sandbox+", arc; ");
 				
-				LoggerDispatcher.info(identifiantLog + " executing queries", LOGGER);
+				loggerDispatcher.info(identifiantLog + " executing queries", LOGGER);
 				for (int i=0;i<p.queries.size();i++)
 				{
 				
@@ -223,10 +225,10 @@ public class GenericEngineController {
 				
 
 		} catch (Exception e) {
-			LoggerDispatcher.error(identifiantLog, e, LOGGER);
+			loggerDispatcher.error(identifiantLog, e, LOGGER);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(r);
 		}
-		LoggerDispatcher.info(identifiantLog + " done", LOGGER);
+		loggerDispatcher.info(identifiantLog + " done", LOGGER);
 		return ResponseEntity.status(HttpStatus.OK).body(r);
 
 	}

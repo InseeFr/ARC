@@ -6,12 +6,7 @@ import java.net.URL;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.springframework.stereotype.Component;
 
-import lombok.Getter;
-import lombok.Setter;
-
 @Component("properties")
-@Getter
-@Setter
 public class PropertiesHandler {
 	
     /* Database */
@@ -40,8 +35,8 @@ public class PropertiesHandler {
     private String registrationDirectory;
     private String loadingDirectory;
     private String storageDirectory;
-    /* lang */
-    private String lang;
+
+    private String authorizedRoles;
 
     public void initializeLog() {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
@@ -253,16 +248,16 @@ public class PropertiesHandler {
     public void setStorageDirectory(String storageDirectory) {
         this.storageDirectory = storageDirectory;
     }
-
-
-	public String getLang() {
-		return lang;
-	}
-
-	public void setLang(String lang) {
-		this.lang = lang;
-	}
-
+  
+    public void setAuthorizedRoles(String authorizedRoles) {
+    	this.authorizedRoles = authorizedRoles;
+    }
     
+    public String[] getAuthorizedRoles() {
+		if (authorizedRoles == null || authorizedRoles.isEmpty()) {
+			return new String[0];
+		}
+		return authorizedRoles.split(",");
+	}
     
 }

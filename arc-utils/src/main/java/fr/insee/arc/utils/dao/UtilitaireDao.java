@@ -1294,7 +1294,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * Verifie que l'archive zip existe, lit les fichiers de la listIdSource et les
 	 * copie dans un TarArchiveOutputStream
 	 *
-	 * @param repertoire
+	 * @param receptionDirectoryRoot
 	 * @param phase
 	 * @param etat
 	 * @param currentContainer
@@ -1302,7 +1302,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public static void generateEntryFromFile(String receptionDirectoryRoot, String idSource,
 			TarArchiveOutputStream taos) {
-		File fileIn = new File(receptionDirectoryRoot + "/" + idSource);
+		File fileIn = Paths.get(receptionDirectoryRoot,idSource).toFile();
 		if (fileIn.exists()) {
 			try {
 				TarArchiveEntry entry = new TarArchiveEntry(fileIn.getName());
@@ -1321,7 +1321,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * Verifie que l'archive zip existe, lit les fichiers de la listIdSource et les
 	 * copie dans un TarArchiveOutputStream
 	 *
-	 * @param repertoire
+	 * @param receptionDirectoryRoot
 	 * @param phase
 	 * @param etat
 	 * @param currentContainer
@@ -1329,7 +1329,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public static void generateEntryFromZip(String receptionDirectoryRoot, String currentContainer,
 			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
-		File fileIn = new File(receptionDirectoryRoot + "/" + currentContainer);
+		File fileIn = Paths.get(receptionDirectoryRoot, currentContainer).toFile();
 		if (fileIn.exists()) {
 			try {
 				ZipInputStream tarInput = new ZipInputStream(new FileInputStream(fileIn));
@@ -1495,7 +1495,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				// boucle sur l'ensemble des dossiers de recherche
 				find = false;
 				for (int j = 0; j < listRepertoireIn.size() && !find; j++) {
-					receptionDirectoryRoot = path + File.separator + listRepertoireIn.get(j);
+					receptionDirectoryRoot = Paths.get(path, listRepertoireIn.get(j)).toString();
 					fileIn = new File(receptionDirectoryRoot + File.separator + listFichier.get(i));
 					if (fileIn.exists()) {// le fichier existe dans le dossier OK
 						find = true;
@@ -1719,8 +1719,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			// Ajout des fichiers à l'archive
 			int i = 0;
 			while (i < listIdSource.size()) {
-				String receptionDirectoryRoot = repertoire + nomPhase + "_"
-						+ ManipString.substringBeforeFirst(listIdSource.get(i), "_") + "_" + dirSuffix;
+				String receptionDirectoryRoot = Paths.get(repertoire, nomPhase + "_"
+						+ ManipString.substringBeforeFirst(listIdSource.get(i), "_") + "_" + dirSuffix).toString();
 				// fichier non archivé
 				if (isNotArchive(listContainer.get(i))) {
 					generateEntryFromFile(receptionDirectoryRoot,

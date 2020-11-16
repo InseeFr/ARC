@@ -10,7 +10,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Just a map with inputstream in it. We have to read throught the file multiple time, this object is here to
@@ -35,7 +35,7 @@ public class FilesInputStreamLoad {
 	    this.tmpInxNormage =  new GZIPInputStream(new FileInputStream(theFileToRead));
 	    this.tmpInxCSV =  new GZIPInputStream(new FileInputStream(theFileToRead));
 	} catch (FileNotFoundException e) {
-	    LoggerDispatcher.error("Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
+	    StaticLoggerDispatcher.error("Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
 	    throw e;
 	}
 	this.theFileToRead = theFileToRead;
@@ -60,7 +60,7 @@ public class FilesInputStreamLoad {
 			 this.tmpInxCSV.close();
 		 }
 	} catch (IOException e) {
-	    LoggerDispatcher.error("Can't close all FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
+	    StaticLoggerDispatcher.error("Can't close all FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
 	    throw e;
 	}
     }

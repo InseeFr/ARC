@@ -6,35 +6,34 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.web.model.WebServiceManagementModel;
 import fr.insee.arc.web.util.VObject;
 
-@Component
-@Results({ @Result(name = "success", location = "/jsp/gererWebservice.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class GererWebserviceAction extends ArcAction implements IDbConstant {
+@Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class GererWebserviceAction extends ArcAction<WebServiceManagementModel> implements IDbConstant {
 
-	
+	private static final String RESULT_SUCCESS = "/jsp/gererWebservice.jsp";
 	private static final Logger LOGGER = LogManager.getLogger(GererWebserviceAction.class);
 
-	
-    @Autowired
-    @Qualifier("viewWebserviceContext")
-    VObject viewWebserviceContext;
+    private VObject viewWebserviceContext;
 
-    @Autowired
-    @Qualifier("viewWebserviceQuery")
-    VObject viewWebserviceQuery;
+    private VObject viewWebserviceQuery;
     
 	@Override
-	public void putAllVObjects() {
+	public void putAllVObjects(WebServiceManagementModel model) {
+		setViewWebserviceContext(vObjectService.preInitialize(model.getViewWebserviceContext()));
+		setViewWebserviceQuery(vObjectService.preInitialize(model.getViewWebserviceQuery()));
+		
 		putVObject(getViewWebserviceContext(),
 				t -> initializeWebserviceContext(t, "arc.ihm_ws_context"));
 		//
@@ -47,51 +46,47 @@ public class GererWebserviceAction extends ArcAction implements IDbConstant {
     /**
      * Retourne le nom des tables de WebserviceQuery présentes dans la base ainsi que le descriptif associé à chaque table
      */
-    public static void initializeWebserviceContext(VObject c, String t) {
-        System.out.println("/* initializeWebserviceContext */");
+    public void initializeWebserviceContext(VObject c, String t) {
+        loggerDispatcher.debug("/* initializeWebserviceContext */", LOGGER);
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
         StringBuilder requete = new StringBuilder();
         requete.append("\n SELECT * FROM "+t+" ");
 
-        c.initialize(requete.toString(), t, defaultInputFields);
+        vObjectService.initialize(c, requete.toString(), t, defaultInputFields);
 
     }
 
-    @Action(value = "/selectWebserviceContext")
-    public String selectWebserviceContext() {
-        return basicAction();
+    @RequestMapping("/selectWebserviceContext")
+    public String selectWebserviceContext(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/addWebserviceContext")
-    public String addWebserviceContext() {
-    	initialize();
-        this.viewWebserviceContext.insert();
-        return generateDisplay();
+    @RequestMapping("/addWebserviceContext")
+    public String addWebserviceContext(Model model) {
+        this.vObjectService.insert(viewWebserviceContext);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/updateWebserviceContext")
-    public String updateWebserviceContext() {
-    	initialize();
-    	this.viewWebserviceContext.update();
-    	return generateDisplay();
+    @RequestMapping("/updateWebserviceContext")
+    public String updateWebserviceContext(Model model) {
+    	this.vObjectService.update(viewWebserviceContext);
+    	return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortWebserviceContext")
-    public String sortWebserviceContext() {
-    	initialize();
-        this.viewWebserviceContext.sort();
-        return generateDisplay();
+    @RequestMapping("/sortWebserviceContext")
+    public String sortWebserviceContext(Model model) {
+        this.vObjectService.sort(viewWebserviceContext);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/deleteWebserviceContext")
-    public String deleteWebserviceContext() {
-    	initialize();
-        this.viewWebserviceContext.delete();
-        return generateDisplay();
+    @RequestMapping("/deleteWebserviceContext")
+    public String deleteWebserviceContext(Model model) {
+        this.vObjectService.delete(viewWebserviceContext);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
 
-    private static void initializeWebserviceQuery(VObject c, VObject d, String t) {
+    private void initializeWebserviceQuery(VObject c, VObject d, String t) {
         // visual des Calendriers
         System.out.println("/* initializeWebserviceQuery */");
 
@@ -112,48 +107,40 @@ public class GererWebserviceAction extends ArcAction implements IDbConstant {
             defaultInputFields.put("service_name", selection.get("service_name").get(0));
             defaultInputFields.put("call_id", selection.get("call_id").get(0));
 
-            c.initialize(requete.toString(), "arc.ihm_ws_query", defaultInputFields);
+            this.vObjectService.initialize(c, requete.toString(), "arc.ihm_ws_query", defaultInputFields);
         } else {
-            c.destroy();
+        	this.vObjectService.destroy(c);
         }
     }
 
-    @Action(value = "/selectWebserviceQuery")
-    public String selectWebserviceQuery() {
-        return basicAction();
+    @RequestMapping("/selectWebserviceQuery")
+    public String selectWebserviceQuery(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/addWebserviceQuery")
-    public String addWebserviceQuery() {
-    	initialize();
-        this.viewWebserviceQuery.insert();
-        return generateDisplay();
+    @RequestMapping("/addWebserviceQuery")
+    public String addWebserviceQuery(Model model) {
+        this.vObjectService.insert(viewWebserviceQuery);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/updateWebserviceQuery")
-    public String updateWebserviceQuery() {
-    	initialize();
-    	this.viewWebserviceQuery.update();
-    	return generateDisplay();
+    @RequestMapping("/updateWebserviceQuery")
+    public String updateWebserviceQuery(Model model) {
+    	this.vObjectService.update(viewWebserviceQuery);
+    	return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortWebserviceQuery")
-    public String sortWebserviceQuery() {
-    	initialize();
-        this.viewWebserviceQuery.sort();
-        return generateDisplay();
+    @RequestMapping("/sortWebserviceQuery")
+    public String sortWebserviceQuery(Model model) {
+        this.vObjectService.sort(viewWebserviceQuery);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/deleteWebserviceQuery")
-    public String deleteWebserviceQuery() {
-    	initialize();
-        this.viewWebserviceQuery.delete();
-        return generateDisplay();
+    @RequestMapping("/deleteWebserviceQuery")
+    public String deleteWebserviceQuery(Model model) {
+        this.vObjectService.delete(viewWebserviceQuery);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
-    
-    
-    
-    
 
 	public VObject getViewWebserviceContext() {
 		return viewWebserviceContext;
@@ -171,30 +158,10 @@ public class GererWebserviceAction extends ArcAction implements IDbConstant {
 		this.viewWebserviceQuery = viewWebserviceQuery;
 	}
 
-	@Override
-	public void instanciateAllDAOs() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setProfilsAutorises() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void specificTraitementsPostDAO() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public String getActionName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "webServiceManagement";
 	}
 
-    
-    
 }

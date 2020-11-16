@@ -12,13 +12,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.support.AbstractXmlApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.IDbConstant;
@@ -29,21 +29,20 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
+import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.textUtils.IConstanteNumerique;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 
 
 @Component
 public abstract class ApiService implements IDbConstant, IConstanteNumerique {
-    public ApiService() {
-        super();
-    }
 
     protected static final Logger LOGGER = LogManager.getLogger(ApiService.class);
 
@@ -59,6 +58,10 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
     @Autowired
 	protected PropertiesHandler properties;
+
+    @Autowired
+    @Qualifier("activeLoggerDispatcher")
+    protected LoggerDispatcher loggerDispatcher;
 
     
     protected Connection connexion;
@@ -195,9 +198,15 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         return env.replace(".", "_")+".";
     }
 
+    public ApiService() {
+        super();
+        springInit();
+    }
+    
     public ApiService(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String... paramBatch) {
-        LoggerDispatcher.info("** initialiserVariable **", LOGGER);
+    	this();
+        loggerDispatcher.info("** initialiserVariable **", LOGGER);
         try {
             this.connexion = UtilitaireDao.get(poolName).getDriverConnexion();
         } catch (Exception ex) {
@@ -234,14 +243,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         this.setTableOutKo((dbEnv(aEnvExecution) + this.getCurrentPhase() + "_" + TraitementEtat.KO).toLowerCase());
         this.setNbEnr(aNbEnr);
 
-        LoggerDispatcher.info("** Fin constructeur ApiService **", LOGGER);
+        loggerDispatcher.info("** Fin constructeur ApiService **", LOGGER);
     }
 
     /**
      * Compteur simple pour tester la boucle d'execution
      */
     protected Integer cptBoucle = 0;
-    private AbstractXmlApplicationContext context;
     private String tableOutKo;
 
 
@@ -257,7 +265,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @param aNbEnr
      */
     public boolean initialiser() {
-        LoggerDispatcher.info("** initialiser **", LOGGER);
+        loggerDispatcher.info("** initialiser **", LOGGER);
         // Vérifie si y'a des sources à traiter
         if (this.todo) {
             try {
@@ -267,22 +275,19 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             }
             register(this.connexion, this.getPreviousPhase(), this.getCurrentPhase(), this.getTablePil(), this.tablePilTemp, this.getNbEnr());
         }
-        // on est obligé de lancer le context d'autowire manuellement a cause de
-        // la factory
-        
-        // fix a cause de spring mvc : le context peut venir de springmvc quand on fait du rest avec spring et qu'on invoke les api
-        // y'a surement mieux comme fix mais pour faire vite
-        try {
-		    this.context = new ClassPathXmlApplicationContext("classpath*:/applicationContext.xml");
-		    AutowireCapableBeanFactory acbFactory = this.context.getAutowireCapableBeanFactory();
-		    acbFactory.autowireBean(this);
-        }
-        catch(Exception e)
-        {
-        	
-        }
+
         return this.todo;
     }
+
+
+    /** Manually autowire the factory-produced instance. */
+	private void springInit() {
+        try {
+		    SpringApplicationContext.autowire(this);
+        } catch(Exception e) {
+        	//
+        }
+	}
 
     /**
      * Permet de configurer la connexion Mettre un timeout par exemple
@@ -338,7 +343,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @throws SQLException
      */
     public void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp, Integer nbEnr) {
-        LoggerDispatcher.info("** register **", LOGGER);
+        loggerDispatcher.info("** register **", LOGGER);
         try {
             // System.out.println(new java.util.Date());
             StringBuilder blocInit = new StringBuilder();
@@ -352,7 +357,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             }
             blocInit.append(copieTablePilotage(phase, tablePil, tablePilTemp));
 
-            // LoggerDispatcher.info("Selection et copie de la table de pilotage : "
+            // loggerDispatcher.info("Selection et copie de la table de pilotage : "
             // + blocInit.toString(),logger);
 
             UtilitaireDao.get(poolName).executeBlock(connexion, blocInit);
@@ -583,7 +588,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * Efface les objets temporaires (tables, type, ...)
      */
     public void finaliser() {
-        LoggerDispatcher.info("finaliser", LOGGER);
+        loggerDispatcher.info("finaliser", LOGGER);
 
         try {
         if (this.todo) {
@@ -618,10 +623,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	        } catch (Exception ex) {
 	            LoggerHelper.error(LOGGER,ApiService.class, "finaliser()", ex);
 	        }
-        
-	        if (this.context != null) {
-	            this.context.close();
-	        }
+
         }
     }
 
@@ -636,7 +638,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         try {
         	
             // LOCK OBLIGATOIRE POUR NE PAS PERDRE DE DONNER LORS DES EXECUTIONS EN PARALLELE
-//            LoggerDispatcher.info("** nettoyage todo **", LOGGER);
+//            loggerDispatcher.info("** nettoyage todo **", LOGGER);
 //            UtilitaireDao.get(poolName).executeBlock(
 //                    connexion,
 //                    "LOCK TABLE "
@@ -680,7 +682,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
     public static void maintenancePilotage(Connection connexion, String envExecution, String type) {
         String tablePil = dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
-        LoggerDispatcher.info("** Maintenance Pilotage **", LOGGER);
+        StaticLoggerDispatcher.info("** Maintenance Pilotage **", LOGGER);
 
         try {
             UtilitaireDao.get(poolName).executeImmediate(connexion,"vacuum " +type + " "+ tablePil + ";");
@@ -700,7 +702,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     	// table de pilotage transposée par date d'entrée
     	String tablePilT = dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER+"_t";
         
-        LoggerDispatcher.info("** Maintenance Pilotage T **", LOGGER);
+    	StaticLoggerDispatcher.info("** Maintenance Pilotage T **", LOGGER);
 
         try {
             UtilitaireDao.get(poolName).executeImmediate(connexion,FormatSQL.vacuumSecured(tablePilT, type));
@@ -716,7 +718,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	public static void maintenancePgCatalog(Connection connexion, String type)	{
         // postgres libere mal l'espace sur ces tables qaund on fait trop d'opération sur les colonnes
 		// vaccum full sinon ca fait quasiment rien ...
-            LoggerDispatcher.info("** Maintenance Catalogue **", LOGGER);
+			StaticLoggerDispatcher.info("** Maintenance Catalogue **", LOGGER);
             UtilitaireDao.get(poolName).maintenancePgCatalog(connexion, type);
 	}
 
@@ -731,7 +733,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public static void maintenance(Connection connexion, String envExecution, String typeMaintenance)       {
 //        maintenancePilotage(connexion, envExecution, typeMaintenance);
 //		maintenancePgCatalog(connexion, typeMaintenance);
-        LoggerDispatcher.info("** Fin de maintenance **", LOGGER);
+    	StaticLoggerDispatcher.info("** Fin de maintenance **", LOGGER);
 
     }
 
@@ -766,7 +768,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @return
      */
     public HashMap<String, ArrayList<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase, String etat) {
-        LoggerDispatcher.info("pilotageListIdsource", LOGGER);
+        loggerDispatcher.info("pilotageListIdsource", LOGGER);
         StringBuilder requete = new StringBuilder();
         requete.append("SELECT container, id_source FROM " + tablePilotage + " ");
         requete.append("WHERE phase_traitement='" + aCurrentPhase + "' ");
@@ -989,7 +991,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         }
         // System.out.println(cols);
 
-        // LoggerDispatcher.info("Liste des colonnes de la table " + tableTemp +
+        // loggerDispatcher.info("Liste des colonnes de la table " + tableTemp +
         // " : " + cols,logger);
         if (tableFinale != null) {
             requete.append("\n INSERT INTO " + tableFinale + " (" + cols + ") select " + cols + " from " + tableTemp + " ; ");
@@ -1142,7 +1144,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     	
         StringBuilder query = new StringBuilder();
         
-    	LoggerDispatcher.info("** createTableOK ** : "+tableIdSource, LOGGER);
+    	loggerDispatcher.info("** createTableOK ** : "+tableIdSource, LOGGER);
     	java.util.Date beginDate = new java.util.Date();
     	        
         query.append("DROP TABLE IF EXISTS " + tableIdSource + ";");
@@ -1152,7 +1154,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         UtilitaireDao.get("arc").executeBlock(connexion, query);
         
         java.util.Date endDate = new java.util.Date();
-        LoggerDispatcher.info("** createTableOK ** temps : " + (endDate.getTime()-beginDate.getTime()) + " ms", LOGGER);
+        loggerDispatcher.info("** createTableOK ** temps : " + (endDate.getTime()-beginDate.getTime()) + " ms", LOGGER);
     	}
     	
     }
@@ -1208,7 +1210,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         StringBuilder query = new StringBuilder();
 
         // mise à jour du nombre d'enregistrement et du type composite
-        LoggerDispatcher.info("** updateNbEnr **", LOGGER);
+        loggerDispatcher.info("** updateNbEnr **", LOGGER);
         query.append("\n UPDATE " + tablePilTemp + " a ");
         query.append("\n \t SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
         
@@ -1255,7 +1257,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         double start = System.currentTimeMillis();
         int nbLignes = 0;
 
-        LoggerDispatcher.info("****** Execution " + this.getCurrentPhase() + " *******", LOGGER);
+        loggerDispatcher.info("****** Execution " + this.getCurrentPhase() + " *******", LOGGER);
         try {
 
             // set schema
@@ -1269,13 +1271,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             } else {
                 this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase(), this.getCurrentPhase());
             }
-            LoggerDispatcher.info("A faire - " + this.getCurrentPhase() + " : " + this.todo, LOGGER);
+            loggerDispatcher.info("A faire - " + this.getCurrentPhase() + " : " + this.todo, LOGGER);
 
             if (this.initialiser()) {
                 try {
                     this.executer();
                 } catch (Exception ex) {
-                    LoggerDispatcher.error("Erreur dans " + this.getCurrentPhase() + ". ", ex, LOGGER);
+                    loggerDispatcher.error("Erreur dans " + this.getCurrentPhase() + ". ", ex, LOGGER);
                     try {
                         ex.printStackTrace();
 
@@ -1306,7 +1308,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             this.finaliser();
         }
 
-        LoggerDispatcher.info("****** Fin " + this.getCurrentPhase() + " *******", LOGGER);
+        loggerDispatcher.info("****** Fin " + this.getCurrentPhase() + " *******", LOGGER);
 
         return new ServiceReporting(nbLignes, System.currentTimeMillis() - start);
 

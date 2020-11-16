@@ -1,5 +1,6 @@
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-	xmlns="http://maven.apache.org/POM/4.0.0" 
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -14,48 +15,26 @@
 	<name>ARC-WEB</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.struts2.version>2.5.22</project.struts2.version>
 	</properties>
 
 	<profiles>
 		<profile>
 			<id>docker</id>
 		</profile>
-
-		<profile>
-			<id>dev</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<plateforme>Dev</plateforme>
-				<env.urlDatabase>***REMOVED***</env.urlDatabase>
-				<env.usernameDatabase>***REMOVED***</env.usernameDatabase>
-				<env.passwordDatabase>***REMOVED***</env.passwordDatabase>
-
-				<!-- Settings for War files -->
-				<war.local.dir>${basedir}/target</war.local.dir>
-				<!-- Insert the remote target directory path for war file -->
-				<war.remote.dir>depot</war.remote.dir>
-				<war.remote.server.id>arc.cts.dv</war.remote.server.id>
-				<!-- Insert the url address of FTP server for war file -->
-				<war.remote.url></war.remote.url>
-			</properties>
-		</profile>
 	</profiles>
 
-	<!-- *************************************** LA GESTION DES DEPENDANCES
+	<!-- *************************************** LA GESTION DES DEPENDANCES 
 		COMMENCE ICI *************************************** -->
 	<dependencies>
-		<!-- C'est ici que seront declarées toutes les dépendances du projet. La
-			déclaration d'une dépendance se fait de la manière suivante : <dependency>
-			<groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.8.2</version>
-			<scope>test</scope> </dependency> Les tags <groupId>, <artifactId> et <version>
-			servent à identifier la librairie que vous souhaitez ajouter en dépendance.
-			Le tag <scope> correspond à la portée des dépendances : - compile (valeur
-			par defaut si le tag est omis) : pour la compilation ET l'exécution - runtime
-			: pour l'exécution uniquement - test : pour l'exécution des tests - provided
-			: librairie déjà présente sur l'environnement d'exécution (exemple : la librairie
+		<!-- C'est ici que seront declarées toutes les dépendances du projet. La 
+			déclaration d'une dépendance se fait de la manière suivante : <dependency> 
+			<groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.8.2</version> 
+			<scope>test</scope> </dependency> Les tags <groupId>, <artifactId> et <version> 
+			servent à identifier la librairie que vous souhaitez ajouter en dépendance. 
+			Le tag <scope> correspond à la portée des dépendances : - compile (valeur 
+			par defaut si le tag est omis) : pour la compilation ET l'exécution - runtime 
+			: pour l'exécution uniquement - test : pour l'exécution des tests - provided 
+			: librairie déjà présente sur l'environnement d'exécution (exemple : la librairie 
 			servlet-api, qui sera portée par le serveur d'application) -->
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -93,31 +72,27 @@
 			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts2-core</artifactId>
-			<version>${project.struts2.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${project.spring.version}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts2-convention-plugin</artifactId>
-			<version>${project.struts2.version}</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
 		</dependency>
+
 		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts2-javatemplates-plugin</artifactId>
-			<version>${project.struts2.version}</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
 		</dependency>
+
+		<!-- Keycloak -->
 		<dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts2-spring-plugin</artifactId>
-			<version>${project.struts2.version}</version>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-security-adapter</artifactId>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
@@ -132,13 +107,32 @@
 			<artifactId>commons-configuration2</artifactId>
 			<version>2.7</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+	    <dependencies>
+	        <dependency>
+	            <groupId>org.springframework.security</groupId>
+	            <artifactId>spring-security-bom</artifactId>
+	            <version>5.3.5.RELEASE</version>
+	            <type>pom</type>
+	            <scope>import</scope>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.keycloak.bom</groupId>
+	            <artifactId>keycloak-adapter-bom</artifactId>
+	            <version>6.0.1</version>
+	            <type>pom</type>
+	            <scope>import</scope>
+	        </dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<finalName>arc-web</finalName>
@@ -150,19 +144,7 @@
 				</excludes>
 				<filtering>true</filtering>
 			</resource>
-			<resource>
-				<directory>src/main/webapp/WEB-INF</directory>
-			</resource>
 		</resources>
-
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ftp</artifactId>
-				<version>3.0.0</version>
-			</extension>
-		</extensions>
-
 
 		<plugins>
 			<plugin>
@@ -178,6 +160,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.6</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
 			</plugin>
 
 		</plugins>

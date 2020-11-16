@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Chargement brutalement d'un fichier pour déterminer la norme et la validité associées.
@@ -39,7 +39,7 @@ public class ChargementBrutalTable {
      * @param nb_boucle étape dans la lecture
      * */
     private String requeteFichierBrutalement(String idSource, BufferedReader br, int nb_boucle) throws Exception {
-        LoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
+        StaticLoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
 
     	
     	StringBuilder requete=new StringBuilder();
@@ -72,7 +72,7 @@ public class ChargementBrutalTable {
      * @throws Exception si aucune norme ou plus d'une norme trouvée */
     public void calculeNormeAndValiditeFichiers(String idSource, InputStream file, Norme[] normeOk, String[] validiteOk)
     		throws Exception {
-    	LoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
+    	StaticLoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
     	
 	    normeOk[0] = new Norme();
 	    validiteOk[0]= null;
@@ -113,7 +113,7 @@ public class ChargementBrutalTable {
      * @throws SQLException
      * @throws Exception si aucune norme ou plus d'une norme trouvée*/
     private void calculerNormeAndValidite(Norme[] normeOk, String[] validiteOk, String requeteFichier) throws Exception {
-        LoggerDispatcher.info("** calculerNorme **", LOGGER);
+        StaticLoggerDispatcher.info("** calculerNorme **", LOGGER);
 
         StringBuilder query=new StringBuilder();
         query.append("\n WITH alias_table AS ("+requeteFichier+" )");

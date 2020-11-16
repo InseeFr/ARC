@@ -6,10 +6,13 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.web.action.GererNormeAction;
+import fr.insee.arc.web.util.VObjectService;
 import fr.insee.arc.web.util.VObject;
 
 
@@ -19,30 +22,31 @@ import fr.insee.arc.web.util.VObject;
  * @author Manuel Soulier
  *
  */
+@Component
 public class ExternalFilesManagementDao implements IDbConstant {
 
+	@Autowired
+	@Qualifier("defaultVObjectService")
+	private VObjectService vObject;
+	
     @SuppressWarnings("unused")
-	private static final Logger LOGGER = LogManager.getLogger(ExternalFilesManagementDao.class);
+	private final Logger LOGGER = LogManager.getLogger(ExternalFilesManagementDao.class);
 
-    private static final String NOM_TABLE = "nom_table";
+    private final String NOM_TABLE = "nom_table";
     
-    private ExternalFilesManagementDao() {
-	throw new IllegalStateException("Utility class");
-    }
 
-    public static void initializeViewListNomenclatures(VObject viewListNomenclatures, String table) {
+    public void initializeViewListNomenclatures(VObject viewListNomenclatures, String table) {
         System.out.println("/* initializeListeNomenclatures */");
         
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
         StringBuilder requete = new StringBuilder();
         requete.append("\n SELECT " + NOM_TABLE + ", description FROM "+table+" ");
 
-        viewListNomenclatures.initialize(requete.toString(), table, defaultInputFields);
-
+        vObject.initialize(viewListNomenclatures, requete.toString(), table, defaultInputFields);
     }
 
     
-    public static void initializeViewNomenclature(VObject viewNomenclature, VObject viewListNomenclatures) {
+    public void initializeViewNomenclature(VObject viewNomenclature, VObject viewListNomenclatures) {
         System.out.println("/* initializeNomenclature */");
 
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
@@ -54,17 +58,14 @@ public class ExternalFilesManagementDao implements IDbConstant {
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
             defaultInputFields.put(NOM_TABLE, selection.get(NOM_TABLE).get(0));
 
-            viewNomenclature.initialize(requete.toString(), "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
-
-            System.out.println(viewNomenclature.mapContent());
-
+            vObject.initialize(viewNomenclature, requete.toString(), "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
         } else {
-            viewNomenclature.destroy();
+            vObject.destroy(viewNomenclature);
         }
 
     }
     
-    public static void intializeViewSchemaNmcl(VObject viewSchemaNmcl, VObject viewListNomenclatures) {
+    public void intializeViewSchemaNmcl(VObject viewSchemaNmcl, VObject viewListNomenclatures) {
         System.out.println("/* initializeSchemaNmcl */");
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
@@ -75,14 +76,14 @@ public class ExternalFilesManagementDao implements IDbConstant {
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 
             defaultInputFields.put("type_nmcl", typeNomenclature(selection.get(NOM_TABLE).get(0)));
-            viewSchemaNmcl.initialize(requete.toString(), "arc.ihm_schema_nmcl", defaultInputFields);
+            vObject.initialize(viewSchemaNmcl, requete.toString(), "arc.ihm_schema_nmcl", defaultInputFields);
             
         } else {
-            viewSchemaNmcl.destroy();
+            vObject.destroy(viewSchemaNmcl);
         }
     }
 
-    private static String typeNomenclature(String nomTable) {
+    private String typeNomenclature(String nomTable) {
         String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore);
         StringBuilder typeNomenclature = new StringBuilder();
         for (int i = 0; i < tokens.length - 1; i++) {

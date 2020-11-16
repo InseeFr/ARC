@@ -1,10 +1,10 @@
 package fr.insee.arc.utils.webutils;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.struts2.ServletActionContext;
 
 public class WebUtils {
     
@@ -12,10 +12,10 @@ public class WebUtils {
 	throw new IllegalStateException("Utility class");
     }
 
-    public static String getCookie(String key) {
+    public static String getCookie(HttpServletRequest request, String key) {
         String value = "";
 
-        Cookie[] c = ServletActionContext.getRequest().getCookies();
+        Cookie[] c = request.getCookies();
 
         if (c == null) {
             return value;
@@ -35,8 +35,8 @@ public class WebUtils {
      * @param key
      * @param value
      */
-    public static void setCookie(HttpServletResponse response, String key, String value) {
-        Cookie[] cookies = ServletActionContext.getRequest().getCookies();
+    public static void setCookie(HttpServletRequest request, HttpServletResponse response, String key, String value) {
+        Cookie[] cookies = request.getCookies();
 
         boolean foundCookie = false;
 
@@ -75,13 +75,13 @@ public class WebUtils {
      * @param key
      * @param value
      */
-    public static void setCookieAdditive(HttpServletResponse response, String key, String value) {
-        String s = getCookie(key);
+    public static void setCookieAdditive(HttpServletRequest request, HttpServletResponse response, String key, String value) {
+        String s = getCookie(request, key);
 
         String separator = ":";
 
         if (s.equals("")) {
-            setCookie(response, key, value);
+            setCookie(request, response, key, value);
         } else {
             int i = 0;
             String[] t = s.split(separator);
@@ -100,7 +100,7 @@ public class WebUtils {
         	target.append(value);
             }
 
-            setCookie(response, key, target.toString());
+            setCookie(request, response, key, target.toString());
         }
     }
 

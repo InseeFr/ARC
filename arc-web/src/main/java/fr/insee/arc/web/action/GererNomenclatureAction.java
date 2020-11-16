@@ -1,8 +1,7 @@
 package fr.insee.arc.web.action;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,94 +11,92 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.dao.ExternalFilesManagementDao;
+import fr.insee.arc.web.model.ExternalFilesModel;
 import fr.insee.arc.web.util.VObject;
 
-@Component
-@Results({ @Result(name = "success", location = "/jsp/gererNomenclature.jsp"), @Result(name = "index", location = "/jsp/index.jsp") })
-public class GererNomenclatureAction extends ArcAction implements IDbConstant{
+@Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> implements IDbConstant{
 
+	private static final String RESULT_SUCCESS = "/jsp/gererNomenclature.jsp";
+	
     private static final String NMCL_ = "nmcl_";
     private static final String NOM_TABLE = "nom_table";
     private static final String TYPE_COLONNE = "type_colonne";
     private static final String NOM_COLONNE = "nom_colonne";
-    private static final Logger LOGGER = LogManager.getLogger(GererNormeAction.class);
-    @Autowired
-    @Qualifier("viewListNomenclatures")
-    VObject viewListNomenclatures;
+    private static final Logger LOGGER = LogManager.getLogger(GererNomenclatureAction.class);
 
     @Autowired
-    @Qualifier("viewNomenclature")
-    VObject viewNomenclature;
+    private ExternalFilesManagementDao externalFilesManagementDao;
 
-    @Autowired
-    @Qualifier("viewSchemaNmcl")
-    VObject viewSchemaNmcl;
-
-    
-    @Override
-    public void putAllVObjects() {
-	putVObject(viewListNomenclatures, t -> ExternalFilesManagementDao.initializeViewListNomenclatures(t,
-"arc.ihm_nmcl"));
-	//
-	putVObject(viewNomenclature, t -> ExternalFilesManagementDao.initializeViewNomenclature(t,
-			viewListNomenclatures));
-	//
-	putVObject(viewSchemaNmcl, t -> ExternalFilesManagementDao.intializeViewSchemaNmcl(t, viewListNomenclatures));
-	//
-    }
-    
-    private File fileUpload;
-    private String fileUploadContentType;
-    private String fileUploadFileName;
-    private String commentaire;
+    private VObject viewListNomenclatures;
+	private VObject viewNomenclature;
+	private VObject viewSchemaNmcl;
 
     private ArrayList<String> nomenclaturesList;
     private ArrayList<ArrayList<String>> nomenclatureTable;
 
-//    @Override
-//    public void setSession(Map<String, Object> session) {
-//        this.viewListNomenclatures.setMessage("");
-//        this.viewNomenclature.setMessage("");
-//        this.viewSchemaNmcl.setMessage("");
-//
-//    }
+    
+    @Override
+    public void putAllVObjects(ExternalFilesModel model) {
+    	loggerDispatcher.debug("putAllVObjects()", LOGGER);
+    	setViewListNomenclatures(vObjectService.preInitialize(model.getViewListNomenclatures()));
+    	setViewNomenclature(vObjectService.preInitialize(model.getViewNomenclature()));
+    	setViewSchemaNmcl(vObjectService.preInitialize(model.getViewSchemaNmcl()));
+
+    	putVObject(getViewListNomenclatures(), t -> externalFilesManagementDao.initializeViewListNomenclatures(t,
+    			"arc.ihm_nmcl"));
+
+    	putVObject(getViewNomenclature(), t -> externalFilesManagementDao.initializeViewNomenclature(t,
+    			viewListNomenclatures));
+
+    	putVObject(getViewSchemaNmcl(), t -> externalFilesManagementDao.intializeViewSchemaNmcl(t, viewListNomenclatures));
+
+    	loggerDispatcher.debug("putAllVObjects() end", LOGGER);
+    }
+    
+    @Override
+	public String getActionName() {
+		return "externalFileManagement";
+	}
 
  
-    @Action(value = "/selectListNomenclatures")
-    public String selectListNomenclatures() {
-        return basicAction();
+    @RequestMapping("/selectListNomenclatures")
+    public String selectListNomenclatures(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/addListNomenclatures")
-    public String addListNomenclatures() {
-    	initialize();
-        String nomTable = this.viewListNomenclatures.mapInputFields().get(NOM_TABLE).get(0);
+    @RequestMapping("/addListNomenclatures")
+    public String addListNomenclatures(Model model) {
+		String nomTable = viewListNomenclatures.mapInputFields().get(NOM_TABLE).get(0);
         if (validationNomTable(nomTable)) {
-            this.viewListNomenclatures.insert();
+            this.vObjectService.insert(viewListNomenclatures);
         }
-        return generateDisplay();
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/updateListNomenclatures")
-    public String updateListNomenclatures() {
-    	initialize();
+    @RequestMapping("/updateListNomenclatures")
+    public String updateListNomenclatures(Model model) {
         // vérification que tous les noms de tables updatés soient conformes
         boolean zeroErreur = true;
-        if (this.viewListNomenclatures.mapContentAfterUpdate().size() > 0) {
-            for (String nomTable : this.viewListNomenclatures.mapContentAfterUpdate().get(NOM_TABLE)) {
+        if (viewListNomenclatures.mapContentAfterUpdate().size() > 0) {
+			for (String nomTable : viewListNomenclatures.mapContentAfterUpdate().get(NOM_TABLE)) {
                 if (!validationNomTable(nomTable)) {
                     this.viewListNomenclatures.setMessage(nomTable + "n'est pas un nom de table valide.");
                     zeroErreur = false;
@@ -110,23 +107,23 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
             this.viewListNomenclatures.setMessage("Pas de nomenclature renseignée.");
         }
         if (zeroErreur) {
-            this.viewListNomenclatures.update();
+            this.vObjectService.update(viewListNomenclatures);
         }
 
-        return generateDisplay();
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortListNomenclatures")
-    public String sortListNomenclatures() {
-        this.viewListNomenclatures.sort();
-        return basicAction();
+    @RequestMapping("/sortListNomenclatures")
+    public String sortListNomenclatures(Model model) {
+        this.vObjectService.sort(viewListNomenclatures);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/deleteListNomenclatures")
-    public String deleteListNomenclatures() {
+    @RequestMapping("/deleteListNomenclatures")
+    public String deleteListNomenclatures(Model model) {
         try {
             // Suppression de la table nom table
-            String nomTable = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
+			String nomTable = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
             System.out.println("/* Delete nomenclature : " + nomTable + " */");
             UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropUniqueTable(nomTable));
             StringBuilder requete = new StringBuilder();
@@ -142,11 +139,11 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
                 UtilitaireDao.get(poolName).executeImmediate(null, requete.toString());
             }
 
-            this.viewListNomenclatures.delete();
+            this.vObjectService.delete(viewListNomenclatures);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return basicAction();
+        return basicAction(model, RESULT_SUCCESS);
     }
 
     private String typeNomenclature(String nomTable) {
@@ -158,23 +155,23 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
         return typeNomenclature.toString();
     }
 
-    @Action(value = "/importListNomenclatures")
-    public String importListNomenclatures() {
-    	initialize();
-    	LoggerDispatcher.debug("importListNomenclatures",LOGGER);
+    @RequestMapping("/importListNomenclatures")
+    public String importListNomenclatures(Model model, MultipartFile fileUpload) {    	
+    	loggerDispatcher.debug("importListNomenclatures",LOGGER);
     	try {
-            importNomenclatureDansBase();
+            importNomenclatureDansBase(fileUpload);
         } catch (Exception ex) {
             ex.printStackTrace();
-            this.viewListNomenclatures.setMessage(ex.toString());
-            LoggerDispatcher.error(ex,LOGGER);
-          }
+            if (ManipString.isStringNull(this.viewListNomenclatures.getMessage())) {
+            	this.viewListNomenclatures.setMessage(ex.toString());
+            }
+            loggerDispatcher.error(ex,LOGGER);
+        }
 
-        return generateDisplay();
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
     private boolean validationNomTable(String nomTable) {
-
         if (nomTable == null) {
             this.viewListNomenclatures.setMessage("Erreur - le nom de table n'est pas renseigné");
             return false;
@@ -204,27 +201,26 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
     }
 
 
-    @Action(value = "/selectSchemaNmcl")
-    public String selectSchemaNmcl() {
-        return basicAction();
+    @RequestMapping("/selectSchemaNmcl")
+    public String selectSchemaNmcl(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/addSchemaNmcl")
-    public String addSchemaNmcl() {
-    	initialize();
-        if (isColonneValide(this.viewSchemaNmcl.mapInputFields().get(NOM_COLONNE).get(0))
-                && isTypeValide(this.viewSchemaNmcl.mapInputFields().get(TYPE_COLONNE).get(0))) {
+    @RequestMapping("/addSchemaNmcl")
+    public String addSchemaNmcl(Model model) {
+		if (isColonneValide(viewSchemaNmcl.mapInputFields().get(NOM_COLONNE).get(0))
+                && isTypeValide(viewSchemaNmcl.mapInputFields().get(TYPE_COLONNE).get(0))) {
 
-            this.viewSchemaNmcl.insert();
+            this.vObjectService.insert(viewSchemaNmcl);
         }
-        return generateDisplay();
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/updateSchemaNmcl")
-    public String updateSchemaNmcl() {
+    @RequestMapping("/updateSchemaNmcl")
+    public String updateSchemaNmcl(Model model) {
         System.out.println("/* updateSchemaNmcl */");
-        initialize();
-        HashMap<String, ArrayList<String>> selection = this.viewSchemaNmcl.mapContentAfterUpdate();
+        
+        HashMap<String, ArrayList<String>> selection = viewSchemaNmcl.mapContentAfterUpdate();
         if (!selection.isEmpty()) {
             boolean zeroErreur = true;
             String nomColonne = "";
@@ -240,31 +236,31 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
                 }
             }
             if (zeroErreur) {
-                this.viewSchemaNmcl.update();
+                this.vObjectService.update(viewSchemaNmcl);
             }
         }
-        return generateDisplay();
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortSchemaNmcl")
-    public String sortSchemaNmcl() {
-        this.viewSchemaNmcl.sort();
-        return basicAction();
+    @RequestMapping("/sortSchemaNmcl")
+    public String sortSchemaNmcl(Model model) {
+        this.vObjectService.sort(viewSchemaNmcl);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/deleteSchemaNmcl")
-    public String deleteSchemaNmcl() {
-        this.viewSchemaNmcl.delete();
-        return basicAction();
+    @RequestMapping("/deleteSchemaNmcl")
+    public String deleteSchemaNmcl(Model model) {
+        this.vObjectService.delete(viewSchemaNmcl);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    private void importNomenclatureDansBase() throws Exception {
-        if (this.viewListNomenclatures.mapContentSelected().isEmpty()) {
+    private void importNomenclatureDansBase(MultipartFile fileUpload) throws Exception {
+		if (viewListNomenclatures.mapContentSelected().isEmpty()) {
             this.viewListNomenclatures.setMessage("Vous devez selectionner une nomenclature pour l'importation.");
             return;
         }
 
-        String nouvelleNomenclature = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
+        String nouvelleNomenclature = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         System.out.println("/* Import de la nomenclature : " + nouvelleNomenclature + "*/");
 
         if (StringUtils.isEmpty(nouvelleNomenclature)) {
@@ -273,12 +269,11 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
         }
 
         // Ouverture du fichier
-        if (this.fileUpload == null) {
-            this.viewListNomenclatures.setMessage("Vous devez choisir un fichier pour l'importation.");
+        if (fileUpload == null || fileUpload.isEmpty()) {
+            this.viewListNomenclatures.setMessage("You must select a file for import.");
             return;
         }
-        FileInputStream in = new FileInputStream(this.fileUpload);
-        try(BufferedReader rd = new BufferedReader(new InputStreamReader(in))){
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))){
             
             // Verification des colonnes
             String[] colonnes = rd.readLine().split(";");
@@ -286,7 +281,6 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
             verificationColonnes(colonnes, types);
             
             // Verification du nombre de colonnes
-            try {
         	// Création de la table temporaire
         	creationTableDeNomenclatureTemporaire(colonnes, types);
         	
@@ -295,20 +289,15 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
         	
         	// Création de la table définitive
         	creationTableDefinitif();
-            
-            } finally {
-        	/*
-        	 * Pour que les champs de saisie ne soit pas prérempli des anciennes valeurs
-        	 */
-        	this.commentaire = "";
-            }
-        }
-        
+        } catch (IOException e) {
+			LoggerHelper.error(LOGGER, e, "Error during import");
+			this.viewListNomenclatures.setMessage("An error occurred while reading the file.");
+		}
 
     }
 
     private void creationTableDefinitif() throws SQLException {
-        String newNomenclatureName = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         StringBuilder creationTableDef = new StringBuilder();
         creationTableDef.append("\n CREATE TABLE arc." + newNomenclatureName);
         creationTableDef.append("\n AS SELECT * FROM arc.temp_" + newNomenclatureName + ";");
@@ -317,12 +306,12 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
     }
 
     private void remplissageTableTemporaire(BufferedReader rd) throws Exception {
-        String newNomenclatureName = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
     	UtilitaireDao.get(poolName).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
     }
 
     private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws SQLException {
-        String newNomenclatureName = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         StringBuilder createTableRequest = new StringBuilder();
         createTableRequest.append("\n DROP TABLE IF EXISTS arc.temp_" + newNomenclatureName + ";");
         createTableRequest.append("\n CREATE TABLE arc.temp_" + newNomenclatureName + " (");
@@ -342,8 +331,7 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
      * @throws Exception
      */
     private void verificationColonnes(String[] colonnesFichier, String[] typesFichier) throws Exception {
-
-        String newNomenclatureName = this.viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
+		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         String typeNomenclature = typeNomenclature(newNomenclatureName);
 
         List<String> colonnesDansFichier = convertListToLowerTrim(colonnesFichier);
@@ -353,13 +341,13 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
         String selectNomColonne = "SELECT nom_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> colonnesDansTableIhmSchemaNmcl = new ArrayList<String>();
         UtilitaireDao.get(poolName).getList(null, selectNomColonne, colonnesDansTableIhmSchemaNmcl);
-        isListesIdentiques(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl);
+        areListsEquals(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl, "field");
 
         // Verification des types
         String selectTypeColonne = "SELECT type_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> typesDansTableIhmSchemaNmcl = new ArrayList<String>();
         UtilitaireDao.get(poolName).getList(null, selectTypeColonne, typesDansTableIhmSchemaNmcl);
-        isListesIdentiques(typesDansFichier, typesDansTableIhmSchemaNmcl);
+        areListsEquals(typesDansFichier, typesDansTableIhmSchemaNmcl, "type");
 
     }
 
@@ -371,11 +359,12 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
         return list;
     }
 
-    private void isListesIdentiques(List<String> listeFichier, List<String> listIhmSchemaNmcl) {
+    private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl, String elementDescription) {
         for (String e : listeFichier) {
             if (!listIhmSchemaNmcl.contains(e)) {
-                String message = "L'element du fichier de nomenclature '" + e + "' n'est pas dans la table arc.ihm_schema_nmcl.";
-                this.viewSchemaNmcl.setMessage(message);
+                String message = "externalFilesManagement.import.error.extraImport";
+                this.viewListNomenclatures.setMessage(message);
+                this.viewListNomenclatures.setMessageArgs(elementDescription, e);
                 throw new IllegalStateException(message);
             }
         }
@@ -430,15 +419,15 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
         return true;
     }
 
-    @Action(value = "/selectNomenclature")
-    public String selectNomenclature() {
-        return basicAction();
+    @RequestMapping("/selectNomenclature")
+    public String selectNomenclature(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortNomenclature")
-    public String sortNomenclature() {
-        this.viewNomenclature.sort();
-        return basicAction();
+    @RequestMapping("/sortNomenclature")
+    public String sortNomenclature(Model model) {
+        this.vObjectService.sort(viewNomenclature);
+        return basicAction(model, RESULT_SUCCESS);
     }
 
   
@@ -446,40 +435,9 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
      * Setters et getters
      */
 
-    public File getFileUpload() {
-        return fileUpload;
-    }
-
-    public void setFileUpload(File fileUpload) {
-        this.fileUpload = fileUpload;
-    }
-
-    public String getFileUploadContentType() {
-        return fileUploadContentType;
-    }
-
-    public void setFileUploadContentType(String fileUploadContentType) {
-        this.fileUploadContentType = fileUploadContentType;
-    }
-
-    public String getFileUploadFileName() {
-        return fileUploadFileName;
-    }
-
-    public void setFileUploadFileName(String fileUploadFileName) {
-        this.fileUploadFileName = fileUploadFileName;
-    }
 
     public ArrayList<String> getNomenclaturesList() {
         return nomenclaturesList;
-    }
-
-    public String getCommentaire() {
-        return commentaire;
-    }
-
-    public void setCommentaire(String commentaire) {
-        this.commentaire = commentaire;
     }
 
     public void setNomenclaturesList(ArrayList<String> nomenclaturesList) {
@@ -517,23 +475,5 @@ public class GererNomenclatureAction extends ArcAction implements IDbConstant{
     public void setViewSchemaNmcl(VObject viewSchemaNmcl) {
         this.viewSchemaNmcl = viewSchemaNmcl;
     }
-
-	@Override
-	public void instanciateAllDAOs() {	
-	}
-
-	@Override
-	public void setProfilsAutorises() {
-	}
-
-	@Override
-	protected void specificTraitementsPostDAO() {		
-	}
-
-	@Override
-	public String getActionName() {
-		return null;
-	}
-
 
 }

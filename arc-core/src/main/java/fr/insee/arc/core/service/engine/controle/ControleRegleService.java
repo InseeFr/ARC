@@ -20,9 +20,9 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.ManipString;
 
 
@@ -58,7 +58,7 @@ public class ControleRegleService {
 //		String lineSeparator = System.getProperty("line.separator");
 		String lineSeparator = "\n";
 		String[] tabLines = fichierRegle.split(lineSeparator);
-		LoggerDispatcher.info("Mon nombre de ligne dans mon fichier : " + tabLines.length,logger);
+		StaticLoggerDispatcher.info("Mon nombre de ligne dans mon fichier : " + tabLines.length,logger);
 
 		String someNames=tabLines[0];
 		String someTypes=tabLines[1];
@@ -88,14 +88,14 @@ public class ControleRegleService {
 	 */
 	public boolean ajouterRegles(JeuDeRegle jdr, String env, ArrayList<RegleControleEntity> listRegle) throws Exception {
 		
-		LoggerDispatcher.info("Je lance l'ajout du fichier de règle",logger);
+		StaticLoggerDispatcher.info("Je lance l'ajout du fichier de règle",logger);
 		boolean isAjouter = true;
 		boolean isFirstRegle = true;
 
 		// Récupération de la liste des classe de controle
 		listClasseCtl = new ArrayList<>();
 		listClasseCtl = recupListClasseCtl();
-		LoggerDispatcher.info("Nombre de classe de controle : " + listClasseCtl.size(),logger);
+		StaticLoggerDispatcher.info("Nombre de classe de controle : " + listClasseCtl.size(),logger);
 
 		// preparer le debut de la requete SQL
 		StringBuilder blocInsert = new StringBuilder();
@@ -143,22 +143,22 @@ public class ControleRegleService {
 				if (i>0 && (i%chunk==0 || i==listRegle.size()))
 				{
 					// execution du bloc d'insert
-					LoggerDispatcher.info("Mon ordre SQL vaut : " + blocInsert.toString(),logger);
+					StaticLoggerDispatcher.info("Mon ordre SQL vaut : " + blocInsert.toString(),logger);
 					UtilitaireDao.get("arc").executeBlock(null, blocInsert.append("; COMMIT;"));
 					// Execution pour verifier la syntaxe
 					executeABlanc(jdr, env, TraitementPhase.CONTROLE.toString());
 					UtilitaireDao.get("arc").executeBlock(null, "COMMIT;");
 				}
-				LoggerDispatcher.info(i+" règles insérées",logger);
+				StaticLoggerDispatcher.info(i+" règles insérées",logger);
 			}
-			LoggerDispatcher.info("Fin de la vérification des règles!!!",logger);
+			StaticLoggerDispatcher.info("Fin de la vérification des règles!!!",logger);
 
 			// Si on arrive jusqu'ici c'est que tout est OK
 			// je remets le marqueur todo à null
 			// UtilitaireDao.get("arc").executeBlock(null, "UPDATE arc.ihm_controle_regle SET todo=null");
 
 		} catch (Exception e) {
-			LoggerDispatcher.info("L'insertion de règles n'a pas abouti",logger);
+			StaticLoggerDispatcher.info("L'insertion de règles n'a pas abouti",logger);
 			// deleteTodo(jdr,"arc.ihm_controle_regle");
 			throw e;
 		}
@@ -166,13 +166,13 @@ public class ControleRegleService {
 	}
 
 	public boolean ajouterReglesValidees(JeuDeRegle jdr, String env, ArrayList<RegleControleEntity> listRegle) throws Exception {
-		LoggerDispatcher.info("Je lance l'ajout du fichier de règle",logger);
+		StaticLoggerDispatcher.info("Je lance l'ajout du fichier de règle",logger);
 		boolean isFirstRegle = true;
 
 		// Récupération de la liste des classe de controle
 		listClasseCtl = new ArrayList<>();
 		listClasseCtl = recupListClasseCtl();
-		LoggerDispatcher.info("Nombre de classe de controle : " + listClasseCtl.size(),logger);
+		StaticLoggerDispatcher.info("Nombre de classe de controle : " + listClasseCtl.size(),logger);
 
 		// preparer le debut de la requete SQL
 		StringBuilder blocInsert = new StringBuilder();
@@ -197,11 +197,11 @@ public class ControleRegleService {
 			}
 
 			// execution du bloc d'insert
-			LoggerDispatcher.info("Mon ordre SQL vaut : " + blocInsert.toString(),logger);
+			StaticLoggerDispatcher.info("Mon ordre SQL vaut : " + blocInsert.toString(),logger);
 			UtilitaireDao.get("arc").executeBlock(null, blocInsert.append(";"));
 
 		} catch (Exception e) {
-			LoggerDispatcher.info("L'insertion de règles n'a pas abouti",logger);
+			StaticLoggerDispatcher.info("L'insertion de règles n'a pas abouti",logger);
 			throw e;
 		}
 		return true;
@@ -245,7 +245,7 @@ public class ControleRegleService {
 	        String emptyTable = ApiService.dbEnv(env) + phase + "_" + TraitementEtat.ENCOURS;
 
 			// récupération de l'ensemble de règle à tester
-			LoggerDispatcher.info("récupération de l'ensemble de règle à tester",logger);
+			StaticLoggerDispatcher.info("récupération de l'ensemble de règle à tester",logger);
 			
 			String nomTableRCTestComplet = nomTableRegleControle(env, true);
 			
@@ -254,16 +254,16 @@ public class ControleRegleService {
 			sjdrA.fillRegleControle(connexion, jdr, nomTableRCTestComplet);
 			
 			// Fabrication de la table vide
-			LoggerDispatcher.info("Fabrication de la table vide",logger);
+			StaticLoggerDispatcher.info("Fabrication de la table vide",logger);
 			createTableTest(jdr, emptyTable,  nomTableRCTestComplet);
 			
 			// execution
-			LoggerDispatcher.info("execution",logger);
+			StaticLoggerDispatcher.info("execution",logger);
 			// bidouille pour pouvoir lancer la méthode execute
 			ArrayList<JeuDeRegle> listJdr = new ArrayList<>();
 			listJdr.add(jdr);
 			
-			LoggerDispatcher.info("Execution sur la table vide : " + emptyTable,logger);
+			StaticLoggerDispatcher.info("Execution sur la table vide : " + emptyTable,logger);
 			ApiControleService.executeABlanc(connexion, env, phase, emptyTable, sjdrA, listJdr);
 	        }
 	         finally
@@ -321,7 +321,7 @@ public class ControleRegleService {
 			}
 		}
 		sb.append(") with (autovacuum_enabled = false, toast.autovacuum_enabled = false);");
-//		LoggerDispatcher.info("Ma requete de création de table vide: " + sb.toString(),logger);
+//		StaticLoggerDispatcher.info("Ma requete de création de table vide: " + sb.toString(),logger);
 		UtilitaireDao.get("arc").executeBlock(null, sb.toString());
 	}
 
@@ -369,7 +369,7 @@ public class ControleRegleService {
 			}
 			listRubrique.add(res.get(i).get(0));
 		}
-		LoggerDispatcher.info("Ma requête pour récupérer la liste des rubriques: " + sb.toString(),logger);
+		StaticLoggerDispatcher.info("Ma requête pour récupérer la liste des rubriques: " + sb.toString(),logger);
 
 		return listRubrique;
 	}
@@ -463,7 +463,7 @@ public class ControleRegleService {
 					&& remplissageBorne(reg);
 			break;
 		case "CONDITION":
-			LoggerDispatcher.debug("je vérifie l'exactitude d'une règle de type CONDITION", logger);
+			StaticLoggerDispatcher.debug("je vérifie l'exactitude d'une règle de type CONDITION", logger);
 			reg.setRubriquePere(null);
 			reg.setRubriqueFils(null);
 			reg.setBorneInf(null);
@@ -538,7 +538,7 @@ public class ControleRegleService {
 			return isLegal;
 		}
 		try {
-			LoggerDispatcher.debug("Le format à tester est : " + format, logger);
+			StaticLoggerDispatcher.debug("Le format à tester est : " + format, logger);
 			new SimpleDateFormat(format);
 			return isLegal;
 		} catch (Exception e) {
@@ -581,12 +581,12 @@ public class ControleRegleService {
 
 		try {
 			if (!StringUtils.isNotBlank(reg.getBorneInf()) && !StringUtils.isNotBlank(reg.getBorneSup())) {
-				LoggerDispatcher.debug("les deux sont null", logger);
+				StaticLoggerDispatcher.debug("les deux sont null", logger);
 				reg.setBorneInf(null);
 				reg.setBorneSup(null);
 				return true;
 			} else if (!StringUtils.isNotBlank(reg.getBorneInf())) {
-				LoggerDispatcher.debug("borneInf est null", logger);
+				StaticLoggerDispatcher.debug("borneInf est null", logger);
 				reg.setBorneInf(null);
 				j = Integer.parseInt(reg.getBorneSup());
 				if (j < 0) {
@@ -595,7 +595,7 @@ public class ControleRegleService {
 				}
 				return true;
 			} else if (!StringUtils.isNotBlank(reg.getBorneSup())) {
-				LoggerDispatcher.debug("borneSup est null", logger);
+				StaticLoggerDispatcher.debug("borneSup est null", logger);
 				reg.setBorneSup(null);
 				i = Integer.parseInt(reg.getBorneInf());
 				if (i < 0) {
@@ -613,7 +613,7 @@ public class ControleRegleService {
 			}
 			return isValide;
 		} catch (Exception e) {
-			LoggerDispatcher.debug("le parseInt a levé une exception", logger);
+			StaticLoggerDispatcher.debug("le parseInt a levé une exception", logger);
 			msgErreur = "Les bornes doivent être des entiers positifs et croissants";
 			return false;
 		}

@@ -14,7 +14,7 @@ import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -94,7 +94,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     }
 
     public void start() {
-        LoggerDispatcher.debug("Starting ThreadNormageService", LOGGER);
+        StaticLoggerDispatcher.debug("Starting ThreadNormageService", LOGGER);
         if (t == null) {
             t = new Thread(this, indice + "");
             t.start();
@@ -140,7 +140,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
      * @throws SQLException
      */
     private void creerTableTravail() throws SQLException {
-        LoggerDispatcher.info("Créer les tables images", LOGGER);
+        StaticLoggerDispatcher.info("Créer les tables images", LOGGER);
         // Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
         StringBuilder bloc1 = new StringBuilder("DISCARD TEMP;");
         
@@ -148,7 +148,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
         bloc1.append(createTablePilotageIdSource(this.tablePilTemp, this.tableNormagePilTemp, this.idSource));
         bloc1.append(createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
 
-        LoggerDispatcher.debug("requete créer table travail" + bloc1, LOGGER);
+        StaticLoggerDispatcher.debug("requete créer table travail" + bloc1, LOGGER);
 
        
         //On met que le normage s'est bien passé
@@ -178,7 +178,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
      */
     private void jointureBlocXML() throws Exception {
 
-        LoggerDispatcher.info("jointureBlocXML()", LOGGER);
+        StaticLoggerDispatcher.info("jointureBlocXML()", LOGGER);
 
         // on parcours les fichiers pour effectuer la requete de jointure avec les regles de normage
         // c'est une des requete la plus couteuse de l'application (reconstitution de la structure plate à partir du modele xml)

@@ -326,7 +326,7 @@ public abstract class UtilitaireDAOQueryHandler
 	this.maxRetry = maxRetry;
     }
     
-    public void restsetMaxRetry() {
+    public void resetMaxRetry() {
 	setMaxRetry(DEFAULT_MAX_RETRY);
     }
 }

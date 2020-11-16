@@ -1,6 +1,7 @@
 package fr.insee.arc.core.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public enum TraitementPhase {
     DUMMY(-1, 1), INITIALISATION(0, 1000000), RECEPTION(1, 1000000), CHARGEMENT(2, 1000000), NORMAGE(3, 1000000)
@@ -75,5 +76,16 @@ public enum TraitementPhase {
         phase = getPhase(i + 1);
         return phase;
     }
+
+	
+	public static List<TraitementPhase> getListPhaseC() {
+		List<TraitementPhase> listePhaseC = new ArrayList<>();
+		for (TraitementPhase t : values()) {
+			if (t.getOrdre()>=0) {
+				listePhaseC.add(t);
+			}
+		}
+		return listePhaseC;
+	}
     
 }

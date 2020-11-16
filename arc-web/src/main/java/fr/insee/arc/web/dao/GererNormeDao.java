@@ -1,12 +1,9 @@
 package fr.insee.arc.web.dao;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,9 +17,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -36,13 +36,14 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.action.GererNormeAction;
 import fr.insee.arc.web.util.EAlphaNumConstante;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.util.VObjectService;
+import fr.insee.arc.web.util.WebLoggerDispatcher;
 
 /**
  * Will own all the utilitary methode used in the {@link GererNormeAction}
@@ -50,21 +51,24 @@ import fr.insee.arc.web.util.VObject;
  * @author Pépin Rémi
  *
  */
+@Component
 public class GererNormeDao implements IDbConstant {
-	private static final String JDR = " jdr.";
-	private static final String MAPPING = "mapping.";
+
 	private static final Logger LOGGER = LogManager.getLogger(GererNormeDao.class);
 
 	private static final String CLEF_CONSOLIDATION = "{clef}";
-	public static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
+	public final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
 
 	private static final String TOKEN_NOM_VARIABLE = "{tokenNomVariable}";
 
 	private static final String MESSAGE_VARIABLE_CLEF_NULL = "La variable {tokenNomVariable} est une variable clef pour la consolidation.\nVous devez vous assurer qu'elle ne soit jamais null.";
 
-	private GererNormeDao() {
-		throw new IllegalStateException("Utility class");
-	}
+    @Autowired
+    private WebLoggerDispatcher loggerDispatcher;
+    
+    @Autowired
+	@Qualifier("defaultVObjectService")
+    private VObjectService viewObject;
 
 	/**
 	 * Return the SQL to get all the rules bond to a rule set. It suppose the a rule
@@ -74,7 +78,7 @@ public class GererNormeDao implements IDbConstant {
 	 * @param table        : the sql to get the rules in the database
 	 * @return an sql query to get all the rules bond to a rule set
 	 */
-	public static String recupRegle(VObject viewRulesSet, String table) {
+	public String recupRegle(VObject viewRulesSet, String table) {
 		StringBuilder requete = new StringBuilder();
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
@@ -84,7 +88,7 @@ public class GererNormeDao implements IDbConstant {
         requete.append(" and validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
         requete.append(" and validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
         requete.append(" and version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
-		LoggerDispatcher.info("donwload request : " + requete.toString(), LOGGER);
+		loggerDispatcher.info("donwload request : " + requete.toString(), LOGGER);
 		return requete.toString();
 	}
 
@@ -92,20 +96,20 @@ public class GererNormeDao implements IDbConstant {
 	 * Initialize the {@value GererNormeAction#viewNorme}. Request the full general
 	 * norm table.
 	 */
-	public static void initializeViewNorme(VObject viewNorme, String theTableName) {
+	public void initializeViewNorme(VObject viewNorme, String theTableName) {
 		LoggerHelper.debug(LOGGER, "/* initializeNorme */");
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 
-		viewNorme.initialize(
-				"SELECT id_famille, id_norme, periodicite, def_norme, def_validite, etat FROM arc.ihm_norme order by id_norme",
-				theTableName, defaultInputFields);
+		viewObject.initialize(
+				viewNorme,
+				"SELECT id_famille, id_norme, periodicite, def_norme, def_validite, etat FROM arc.ihm_norme order by id_norme", theTableName, defaultInputFields);
 	}
 
 	/**
 	 * Initialize the {@value GererNormeAction#viewCalendar}. Only get the calendar
 	 * link to the selected norm.
 	 */
-	public static void initializeViewCalendar(VObject viewCalendar, VObject viewNorme, String theTableName) {
+	public void initializeViewCalendar(VObject viewCalendar, VObject viewNorme, String theTableName) {
 		LoggerHelper.debug(LOGGER, "/* initializeCalendar */");
 
 		// get the norm selected
@@ -131,10 +135,10 @@ public class GererNormeDao implements IDbConstant {
 			viewCalendar.setAfterUpdateQuery("select arc.fn_check_calendrier(); ");
 
 			// Create the vobject
-			viewCalendar.initialize(requete.toString(), theTableName, defaultInputFields);
+			viewObject.initialize(viewCalendar, requete.toString(), theTableName, defaultInputFields);
 
 		} else {
-			viewCalendar.destroy();
+			viewObject.destroy(viewCalendar);
 		}
 	}
 
@@ -142,8 +146,8 @@ public class GererNormeDao implements IDbConstant {
 	 * Initialize the {@value GererNormeAction#viewRulesSet}. Only get the rulesset
 	 * link to the selected norm and calendar.
 	 */
-	public static void initializeViewRulesSet(VObject viewRulesSet, VObject viewCalendar, String theTableName) {
-		LoggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
+	public void initializeViewRulesSet(VObject viewRulesSet, VObject viewCalendar, String theTableName) {
+		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
 
 		// Get the selected calendar for requesting the rule set
 		Map<String, ArrayList<String>> selection = viewCalendar.mapContentSelected();
@@ -170,19 +174,19 @@ public class GererNormeDao implements IDbConstant {
 			viewRulesSet.setAfterInsertQuery("select arc.fn_check_jeuderegle(); ");
 			viewRulesSet.setAfterUpdateQuery("select arc.fn_check_jeuderegle(); ");
 
-			viewRulesSet.initialize(requete.toString(), theTableName, defaultInputFields);
+			viewObject.initialize(viewRulesSet, requete.toString(), theTableName, defaultInputFields);
 		} else {
-			viewRulesSet.destroy();
+			viewObject.destroy(viewRulesSet);
 		}
 	}
 
 	/**
-	 * Initialize the the {@link VObject} of a load ruleset. Only
+	 * Initialize the the {@link VObjectService} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public static void initializeChargement(VObject moduleView, VObject viewRulesSet, String theTableName,
+	public void initializeChargement(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
-		LoggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
@@ -199,20 +203,20 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			moduleView.initialize(requete.toString(), theTableName, defaultInputFields);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
-			moduleView.destroy();
+			viewObject.destroy(moduleView);
 		}
 	}
 	
 	
 	/**
-	 * Initialize the the {@link VObject} of a load ruleset. Only
+	 * Initialize the the {@link VObjectService} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public static void initializeNormage(VObject moduleView, VObject viewRulesSet, String theTableName,
+	public void initializeNormage(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
-		LoggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
@@ -229,19 +233,19 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			moduleView.initialize(requete.toString(), theTableName, defaultInputFields);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
-			moduleView.destroy();
+			viewObject.destroy(moduleView);
 		}
 	}
 	
 	/**
-	 * Initialize the the {@link VObject} of a control ruleset. Only
+	 * Initialize the the {@link VObjectService} of a control ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public static void initializeControle(VObject moduleView, VObject viewRulesSet, String theTableName,
+	public void initializeControle(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
-		LoggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
@@ -258,20 +262,20 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			moduleView.initialize(requete.toString(), theTableName, defaultInputFields);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
-			moduleView.destroy();
+			viewObject.destroy(moduleView);
 		}
 	}
 
 	
 	/**
-	 * Initialize the the {@link VObject} of a filter ruleset. Only
+	 * Initialize the the {@link VObjectService} of a filter ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public static void initializeFiltrage(VObject moduleView, VObject viewRulesSet, String theTableName,
+	public void initializeFiltrage(VObject moduleView, VObject viewRulesSet, String theTableName,
 			String scope) {
-		LoggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
@@ -288,17 +292,17 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
-			moduleView.initialize(requete.toString(), theTableName, defaultInputFields);
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
 		} else {
-			moduleView.destroy();
+			viewObject.destroy(moduleView);
 		}
 	}
 	
 	/**
-	 * Initialize the the {@link VObject} of the mapping rule. Only get the load
+	 * Initialize the the {@link VObjectService} of the mapping rule. Only get the load
 	 * rule link to the selected rule set.
 	 */
-	public static void initializeMapping(VObject viewMapping, VObject viewRulesSet, String theTableName, String scope) {
+	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, String theTableName, String scope) {
 		System.out.println("/* initializeMapping */");
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty() && scope != null) {
@@ -325,9 +329,9 @@ public class GererNormeDao implements IDbConstant {
             defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
             defaultInputFields.put("version", selection.get("version").get(0));
             
-			viewMapping.initialize(requete.toString(),theTableName,defaultInputFields);
+			viewObject.initialize(viewMapping,requete.toString(),theTableName, defaultInputFields);
 		} else {
-			viewMapping.destroy();
+			viewObject.destroy(viewMapping);
 		}
 	}
 
@@ -337,16 +341,16 @@ public class GererNormeDao implements IDbConstant {
 	 * 
 	 * @param viewJeuxDeReglesCopie
 	 */
-	public static void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, VObject viewRulesSet,
+	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, VObject viewRulesSet,
 			String theTableName, String scope) {
 		LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
 		if (scope != null) {
 			StringBuilder requete = new StringBuilder();
 	        requete.append("select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
 			HashMap<String, String> defaultInputFields = new HashMap<>();
-			viewJeuxDeReglesCopie.initialize(requete.toString(), theTableName, defaultInputFields);
+			viewObject.initialize(viewJeuxDeReglesCopie, requete.toString(), theTableName, defaultInputFields);
 		} else {
-			viewJeuxDeReglesCopie.destroy();
+			viewObject.destroy(viewJeuxDeReglesCopie);
 		}
 
 	}
@@ -355,10 +359,10 @@ public class GererNormeDao implements IDbConstant {
 	 * Send a rule set to production.
 	 */
 	@SQLExecutor
-	public static void sendRuleSetToProduction(VObject viewRulesSet, String theTable) {
+	public void sendRuleSetToProduction(VObject viewRulesSet, String theTable) {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
 		Date dNow = new Date();
-		LoggerDispatcher.warn("Rule set send to production", LOGGER);
+		loggerDispatcher.warn("Rule set send to production", LOGGER);
 
 		try {
 			UtilitaireDao.get("arc").executeRequest(null, "update " + theTable + " set last_init='"
@@ -379,7 +383,7 @@ public class GererNormeDao implements IDbConstant {
 	 * @param table
 	 * @return
 	 */
-	public static String createTableTempTest(String tableACopier) {
+	public String createTableTempTest(String tableACopier) {
 
 		String nomTableTest = "arc.test_ihm_" + tableACopier;
 
@@ -409,7 +413,7 @@ public class GererNormeDao implements IDbConstant {
 	 * @param viewRulesSet
 	 * @return
 	 */
-	public static JeuDeRegle fetchJeuDeRegle(VObject viewRulesSet) {
+	public JeuDeRegle fetchJeuDeRegle(VObject viewRulesSet) {
         HashMap<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
         /*
          * Fabrication d'un JeuDeRegle pour conserver les informations sur norme et calendrier
@@ -430,8 +434,8 @@ public class GererNormeDao implements IDbConstant {
 	 * @param table
 	 * @return
 	 */
-	public static void emptyRuleTable(VObject viewRulesSet, String table) {
-		LoggerDispatcher.info("Empty all the rules of a module", LOGGER);
+	public void emptyRuleTable(VObject viewRulesSet, String table) {
+		loggerDispatcher.info("Empty all the rules of a module", LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
 		StringBuilder requete = new StringBuilder();
@@ -451,7 +455,7 @@ public class GererNormeDao implements IDbConstant {
 		}
 	}
 
-	public static String createTableTest(String aNomTable, List<String> listRubrique) {
+	public String createTableTest(String aNomTable, List<String> listRubrique) {
 		 StringBuilder sb = new StringBuilder();
 	        sb.append("DROP TABLE IF EXISTS " + aNomTable + ";");
 	        sb.append("CREATE TABLE " + aNomTable);
@@ -478,7 +482,7 @@ public class GererNormeDao implements IDbConstant {
 	        }
 	        sb.append(");");
 
-		LoggerDispatcher.info("Creation test table request : " + sb, LOGGER);
+		loggerDispatcher.info("Creation test table request : " + sb, LOGGER);
 		return sb.toString();
 	}
 
@@ -501,7 +505,7 @@ public class GererNormeDao implements IDbConstant {
 	 * @param isRegleOk
 	 * @return
 	 */
-	public static boolean testerReglesMapping(VObject viewMapping, VObject viewRulesSet, VObject viewNorme,
+	public boolean testerReglesMapping(VObject viewMapping, VObject viewRulesSet, VObject viewNorme,
 			Map<String, ArrayList<String>> afterUpdate) {
 		boolean isRegleOk = true;
 		List<String> tableADropper = new ArrayList<>();
@@ -513,7 +517,7 @@ public class GererNormeDao implements IDbConstant {
 				/*
 				 * Récupération du jeu de règle
 				 */
-				JeuDeRegle jdr = GererNormeDao.fetchJeuDeRegle(viewRulesSet);
+				JeuDeRegle jdr = fetchJeuDeRegle(viewRulesSet);
 				/*
 				 * recopie des tables de l'environnement
 				 */
@@ -587,6 +591,7 @@ public class GererNormeDao implements IDbConstant {
 				}
 			} catch (Exception ex) {
 				isRegleOk = false;
+				LoggerHelper.error(LOGGER, ex, "");
 				viewMapping.setMessage((zeVariable == null ? EAlphaNumConstante.EMPTY.getValue()
 						: "La règle " + zeVariable + " ::= " + zeExpression + " est erronée.\n") + "Exception levée : "
 						+ ex.getMessage());
@@ -684,7 +689,7 @@ public class GererNormeDao implements IDbConstant {
 		UtilitaireDao.get(poolName).executeRequest(null, requete);
 	}
 
-	public static void calculerVariableToType(VObject viewNorme, Map<String, String> mapVariableToType,
+	public void calculerVariableToType(VObject viewNorme, Map<String, String> mapVariableToType,
 			Map<String, String> mapVariableToTypeConso) throws SQLException {
 		ArrayList<ArrayList<String>> resultat = UtilitaireDao.get("arc").executeRequest(null, new StringBuilder(
 				"SELECT DISTINCT lower(nom_variable_metier) AS nom_variable_metier, type_variable_metier, type_consolidation AS type_sortie FROM arc.ihm_mod_variable_metier WHERE id_famille='"
@@ -695,56 +700,45 @@ public class GererNormeDao implements IDbConstant {
 		}
 	}
 
-	public static Map<String, ArrayList<String>> calculerReglesAImporter(File aFileUpload,
+	public Map<String, ArrayList<String>> calculerReglesAImporter(MultipartFile aFileUpload,
 			List<RegleMappingEntity> listeRegle, EntityDao<RegleMappingEntity> dao,
 			Map<String, String> mapVariableToType, Map<String, String> mapVariableToTypeConso) throws IOException {
 		Map<String, ArrayList<String>> returned = new HashMap<>();
 		returned.put("type_sortie", new ArrayList<String>());
 		returned.put("type_consolidation", new ArrayList<String>());
-		if (!aFileUpload.exists()) {
-			throw new FileNotFoundException(aFileUpload.getAbsolutePath());
-		}
-		if (aFileUpload.isDirectory()) {
-			throw new IOException(aFileUpload.getAbsolutePath() + " n'est pas un chemin de fichier valide.");
-		}
-		try {
-			BufferedReader br = Files.newBufferedReader(aFileUpload.toPath(), Charset.forName("UTF-8"));
-			try {
-				dao.setSeparator(";");
-				String line = br.readLine();
-				String someNames = line;
-				dao.setNames(someNames);
-				line = br.readLine();
-				String someTypes = line;
-				dao.setTypes(someTypes);
-				while ((line = br.readLine()) != null) {
-					RegleMappingEntity entity = dao.get(line);
-					listeRegle.add(entity);
-					for (String colName : entity.colNames()) {
-						if (!returned.containsKey(colName)) {
-							/*
-							 * La colonne n'existe pas encore ? Je l'ajoute.
-							 */
-							returned.put(colName, new ArrayList<String>());
-						}
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(aFileUpload.getInputStream(), StandardCharsets.UTF_8));){
+			dao.setSeparator(";");
+			String line = br.readLine();
+			String someNames = line;
+			dao.setNames(someNames);
+			line = br.readLine();
+			String someTypes = line;
+			dao.setTypes(someTypes);
+			while ((line = br.readLine()) != null) {
+				RegleMappingEntity entity = dao.get(line);
+				listeRegle.add(entity);
+				for (String colName : entity.colNames()) {
+					if (!returned.containsKey(colName)) {
 						/*
-						 * J'ajoute la valeur en fin de colonne.
+						 * La colonne n'existe pas encore ? Je l'ajoute.
 						 */
-						returned.get(colName).add(entity.get(colName));
+						returned.put(colName, new ArrayList<String>());
 					}
-					returned.get("type_sortie").add(mapVariableToType.get(entity.getVariableSortie()));
-					returned.get("type_consolidation").add(mapVariableToTypeConso.get(entity.getVariableSortie()));
+					/*
+					 * J'ajoute la valeur en fin de colonne.
+					 */
+					returned.get(colName).add(entity.get(colName));
 				}
-			} finally {
-				br.close();
-			}
+				returned.get("type_sortie").add(mapVariableToType.get(entity.getVariableSortie()));
+				returned.get("type_consolidation").add(mapVariableToTypeConso.get(entity.getVariableSortie()));
+			}			
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER, "error in calculerReglesAImporter", ex.getStackTrace());
 		}
 		return returned;
 	}
 
-	public static boolean testerConsistanceRegleMapping(List<List<String>> data, String anEnvironnement,
+	public boolean testerConsistanceRegleMapping(List<List<String>> data, String anEnvironnement,
 			String anIdFamille, StringBuilder aMessage) {
 		Set<String> variableRegleCharge = new HashSet<String>();
 		for (int i = 0; i < data.size(); i++) {
@@ -756,7 +750,7 @@ public class GererNormeDao implements IDbConstant {
 						new StringBuilder("SELECT DISTINCT nom_variable_metier FROM " + anEnvironnement
 								+ "_mod_variable_metier WHERE id_famille='" + anIdFamille + "'"),
 						new ArrayList<String>()));
-		LoggerDispatcher.info(
+		loggerDispatcher.info(
 				"La requete de construction de variableTableMetier : \n" + "SELECT DISTINCT nom_variable_metier FROM "
 						+ anEnvironnement + "_mod_variable_metier WHERE id_famille='" + anIdFamille + "'",
 				LOGGER);
@@ -764,8 +758,8 @@ public class GererNormeDao implements IDbConstant {
 		variableToute.addAll(variableRegleCharge);
 		variableToute.addAll(variableTableModele);
 		boolean ok = true;
-		LoggerDispatcher.info("Les variables du modèle : " + variableTableModele, LOGGER);
-		LoggerDispatcher.info("Les variables des règles chargées : " + variableRegleCharge, LOGGER);
+		loggerDispatcher.info("Les variables du modèle : " + variableTableModele, LOGGER);
+		loggerDispatcher.info("Les variables des règles chargées : " + variableRegleCharge, LOGGER);
 		for (String variable : variableToute) {
 			if (!variableRegleCharge.contains(variable)) {
 				ok = false;
@@ -782,7 +776,7 @@ public class GererNormeDao implements IDbConstant {
 		return ok;
 	}
 
-	public static String getIdFamille(String anEnvironnement, String anIdNorme) throws SQLException {
+	public String getIdFamille(String anEnvironnement, String anIdNorme) throws SQLException {
 		return UtilitaireDao.get("arc").getString(null, "SELECT id_famille FROM " + anEnvironnement + "_norme"
 				+ " WHERE AbstractRuleDAO.ID_NORME='" + anIdNorme + "'");
 	}
@@ -796,7 +790,7 @@ public class GererNormeDao implements IDbConstant {
 	 * @param args
 	 * @return
 	 */
-	public static List<List<String>> ajouterInformationTableau(List<List<String>> returned, int index, String... args) {
+	public List<List<String>> ajouterInformationTableau(List<List<String>> returned, int index, String... args) {
 		for (int i = 0; i < returned.size(); i++) {
 			for (int j = 0; j < args.length; j++) {
 				returned.get(i).add((index == -1 ? returned.get(i).size() : index + j), args[j]);
@@ -811,13 +805,13 @@ public class GererNormeDao implements IDbConstant {
 	 * @param tableName       the
 	 */
 	@SQLExecutor
-	public static void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, File theFileToUpload) {
+	public void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, MultipartFile theFileToUpload) {
 		StringBuilder requete = new StringBuilder();
 
 		// Check if there is file
-		if (theFileToUpload == null || StringUtils.isBlank(theFileToUpload.getPath())) {
+		if (theFileToUpload == null || theFileToUpload.isEmpty()) {
 			// No file -> ko
-			vObjectToUpdate.setMessage("Please choose a file !!");
+			vObjectToUpdate.setMessage("Please select a file.");
 		} else {
 			// A file -> can process it
 			LoggerHelper.debug(LOGGER, " filesUpload  : " + theFileToUpload);
@@ -825,10 +819,8 @@ public class GererNormeDao implements IDbConstant {
 			// before inserting in the final table, the rules will be inserted in a table to
 			// test them
 			String nomTableImage = FormatSQL.temporaryTableName(vObjectToUpdate.getTable() + "_img" + 0);
-			BufferedReader bufferedReader = null;
-			try {
-				bufferedReader = Files.newBufferedReader(theFileToUpload.toPath(), StandardCharsets.UTF_8);
-
+			
+			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));) {
 				// Get headers
 				List<String> listHeaders = getHeaderFromFile(bufferedReader);
 
@@ -858,13 +850,6 @@ public class GererNormeDao implements IDbConstant {
 				// After the exception, the methode cant go further, so the better thing to do
 				// is to quit it
 				return;
-
-			} finally {
-				try {
-					bufferedReader.close();
-				} catch (IOException e) {
-					LoggerHelper.error(LOGGER, e, "uploadOutils()", "\n");
-				}
 			}
 			LoggerHelper.debug(LOGGER, "Insert file in the " + nomTableImage + " table");
 

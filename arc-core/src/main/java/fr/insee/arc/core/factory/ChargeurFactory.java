@@ -14,7 +14,7 @@ import fr.insee.arc.core.service.engine.chargeur.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.engine.chargeur.IChargeur;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.TypeChargement;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -40,7 +40,7 @@ public class ChargeurFactory {
     }
     
     public IChargeur getChargeur(TypeChargement typeChargement){
-        LoggerDispatcher.info("** getChargeur **", LOGGER);
+        StaticLoggerDispatcher.info("** getChargeur **", LOGGER);
         return this.map.get(typeChargement);
     }
 

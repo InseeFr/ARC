@@ -35,7 +35,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -95,9 +95,11 @@ public class ApiReceptionService extends ApiService {
 		
 		GenericBean archiveContent=null;
 		
-		LoggerDispatcher.info("moveClientFiles", LOGGER);
-		String receptionDirectoryRoot = this.directoryRoot + this.envExecution.toUpperCase().replace(".", "_") + File.separator
-				+ TraitementPhase.RECEPTION;
+		StaticLoggerDispatcher.info("moveClientFiles", LOGGER);
+		String receptionDirectoryRoot = Paths.get(
+				this.directoryRoot, 
+				this.envExecution.toUpperCase().replace(".", "_"),
+				TraitementPhase.RECEPTION.toString()).toString();
 		
 		try {
 			// vérifier que les répertoires cible existent; sinon les créer
@@ -119,7 +121,7 @@ public class ApiReceptionService extends ApiService {
 			int fileSize = 0;
 			int fileNb = 0;
 			
-			LoggerDispatcher.info("Taille limite de fichiers à charger : " + fileSizeLimit,LOGGER);
+			StaticLoggerDispatcher.info("Taille limite de fichiers à charger : " + fileSizeLimit,LOGGER);
 
 			for (String d : entrepotList.get("id_entrepot")) {
 
@@ -268,15 +270,17 @@ public class ApiReceptionService extends ApiService {
 	 * fichiers déjà existants de la table de pilotage Marquer les fichiers dans la table de pilotage
 	 */
 	public void registerFiles(Connection connexion, String anExecutionEnvironment, String directoryRoot, GenericBean archiveContent) {
-		LoggerDispatcher.info("registerFiles", LOGGER);
-		String receptionDirectoryRoot = directoryRoot + anExecutionEnvironment.toUpperCase().replace(".", "_") + File.separator
-				+ TraitementPhase.RECEPTION;
+		StaticLoggerDispatcher.info("registerFiles", LOGGER);
+		String receptionDirectoryRoot = Paths.get(
+				directoryRoot,
+				anExecutionEnvironment.toUpperCase().replace(".", "_"),
+				TraitementPhase.RECEPTION.toString()).toString();
 		// on considère tous les fichiers du repertoire reception en cours
 		File folder = new File(receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS);
 		File[] filesIn = folder.listFiles();
 		// la bean (fileName,type, etat) contient pour chaque fichier, le type
 		// du fichier et l'action à réaliser
-		LoggerDispatcher.info("dispatchFiles", LOGGER);
+		StaticLoggerDispatcher.info("dispatchFiles", LOGGER);
 		GenericBean g = findDuplicates(archiveContent);
 		
 		try {
@@ -444,7 +448,7 @@ public class ApiReceptionService extends ApiService {
 	 *            , nom du fichier
 	 */
 	public static void deplacerFichier(String dirIn, String dirOut, String FileNameIn, String fileNameOut) {
-//		LoggerDispatcher.info("Mes paramètres de déplacement de fichier : \n dirIn : " + dirIn + " \n, dirOut : " + dirOut + " \n, FilenameIn :"
+//		StaticLoggerDispatcher.info("Mes paramètres de déplacement de fichier : \n dirIn : " + dirIn + " \n, dirOut : " + dirOut + " \n, FilenameIn :"
 //				+ FileNameIn + " \n, FilenameOut :" + fileNameOut, logger);
 		if (!dirIn.equals(dirOut)) {
 			File fileIn = new File(dirIn + "/" + FileNameIn);
@@ -737,7 +741,7 @@ public class ApiReceptionService extends ApiService {
 				l.add(TraitementEtat.OK.toString());
 				l.add(null);
 				l.add(null);
-				LoggerDispatcher.info("Insertion du cas rebus : " + l.toString(), LOGGER);
+				StaticLoggerDispatcher.info("Insertion du cas rebus : " + l.toString(), LOGGER);
 				content.add(l);
 			}
 		}
@@ -760,7 +764,7 @@ public class ApiReceptionService extends ApiService {
 		// Localiser les doublons
 		// Note : l'insertion est redondante mais au niveau métier, c'est
 		// beaucoup plus logique
-		LoggerDispatcher.info("Recherche de doublons de fichiers", LOGGER);
+		StaticLoggerDispatcher.info("Recherche de doublons de fichiers", LOGGER);
 
 		StringBuilder requete = new StringBuilder();
 		requete.append(FormatSQL.dropTable(this.tablePilTemp));
@@ -905,7 +909,7 @@ public class ApiReceptionService extends ApiService {
 		requete.setLength(0);
 		requete.append(FormatSQL.dropTable(this.tablePilTemp));
 		soumettreRequete(requete);
-	//	LoggerDispatcher.info("Contenu de content juste avant le retour: " + content.toString(), logger);
+	//	StaticLoggerDispatcher.info("Contenu de content juste avant le retour: " + content.toString(), logger);
 		GenericBean g = new GenericBean(headers, types, content);
 		return g;
 	}

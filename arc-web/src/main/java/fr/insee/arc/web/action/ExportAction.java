@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -15,76 +17,47 @@ import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
 import org.apache.tools.ant.util.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.web.model.SessionParameters;
+import fr.insee.arc.web.model.ExportModel;
 import fr.insee.arc.web.util.VObject;
 
 
-@Component
-@Results({ @Result(name = "success", location = "/jsp/gererExport.jsp"), @Result(name = "index", location = "/jsp/gererExport.jsp") })
-public class ExportAction extends ArcAction implements IDbConstant  {
+@Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class ExportAction extends ArcAction<ExportModel>  {
 
-	
-    public String export;
-
+	private static final String RESULT_SUCCESS = "/jsp/gererExport.jsp";
 
 	private static final Logger LOGGER = LogManager.getLogger(ExportAction.class);
-    @Autowired
-    @Qualifier("viewExport")
-    VObject viewExport;
 
-    @Autowired
-    @Qualifier("viewFileExport")
-    VObject viewFileExport;
+    private VObject viewExport;
 
-    // pour charger un fichier CSV
-        private String scope;
+    private VObject viewFileExport;
 
-    public String sessionSyncronize() {
-        this.viewExport.setActivation(this.scope);
-        this.viewFileExport.setActivation(this.scope);
-        
-        Boolean defaultWhenNoScope = true;
 
-        if (this.viewExport.getIsScoped()) {
-            initializeExport();
-            defaultWhenNoScope = false;
-        }
-
-        if (this.viewFileExport.getIsScoped()) {
-            initializeFileExport();
-            defaultWhenNoScope = false;
-        }
-
-        
-        if (defaultWhenNoScope) {
-            System.out.println("default");
-
-            initializeExport();
-            this.viewExport.setIsActive(true);
-            this.viewExport.setIsScoped(true);
-            
-            initializeFileExport();
-            this.viewFileExport.setIsActive(true);
-            this.viewFileExport.setIsScoped(true);
-        }
-        return "success";
-
-    }
+	@Override
+	protected void putAllVObjects(ExportModel arcModel) {
+		setViewExport(this.vObjectService.preInitialize(arcModel.getViewExport()));
+		setViewFileExport(this.vObjectService.preInitialize(arcModel.getViewFileExport()));
+		
+		putVObject(getViewExport(), t -> initializeExport());
+		putVObject(getViewFileExport(), t -> initializeFileExport());
+	}
 
     // private SessionMap session;
     // visual des Files
@@ -95,14 +68,14 @@ public class ExportAction extends ArcAction implements IDbConstant  {
 
         // création de la table d'export si elle n'existe pas
         StringBuilder query=new StringBuilder();
-        query.append("CREATE SCHEMA IF NOT EXISTS "+((String) getSession().get(SessionParameters.ENV))+"; " );
-        query.append("\n CREATE TABLE IF NOT EXISTS "+((String) getSession().get(SessionParameters.ENV))+".export"+" " );
+        query.append("CREATE SCHEMA IF NOT EXISTS " + getBacASable() +"; " );
+        query.append("\n CREATE TABLE IF NOT EXISTS "+ getBacASable() +".export"+" " );
         query.append("\n (file_name text, table_to_export text, nomenclature_export text, filter_table text, columns_array_header text, columns_array_value text, etat text); ");
         
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+((String) getSession().get(SessionParameters.ENV))+".export add nulls text;"));
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+((String) getSession().get(SessionParameters.ENV))+".export add headers text;"));
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+((String) getSession().get(SessionParameters.ENV))+".export add order_table text;"));
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+((String) getSession().get(SessionParameters.ENV))+".export add zip text;"));
+        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add nulls text;"));
+        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add headers text;"));
+        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add order_table text;"));
+        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add zip text;"));
 
         try {
 			UtilitaireDao.get("arc").executeRequest(null, query);
@@ -111,42 +84,42 @@ public class ExportAction extends ArcAction implements IDbConstant  {
 			e.printStackTrace();
 		}
 
-        this.viewExport.initialize("SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+((String) getSession().get(SessionParameters.ENV))+".export", ((String) getSession().get(SessionParameters.ENV))+".export", defaultInputFields);
+        this.vObjectService.initialize(viewExport, "SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export",  getBacASable() +".export", defaultInputFields);
 
     }
 
-    @Action(value = "/selectExport")
-    public String selectExport() {
-		initialize();
-		return sessionSyncronize();
+    @RequestMapping("/selectExport")
+    public String selectExport(Model model) {
+
+		return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/addExport")
-    public String addExport() {
-        this.viewExport.insert();
-        return sessionSyncronize();
+    @RequestMapping("/addExport")
+    public String addExport(Model model) {
+        this.vObjectService.insert(viewExport);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/deleteExport")
-    public String deleteExport() {
-         this.viewExport.delete();
-        return sessionSyncronize();
+    @RequestMapping("/deleteExport")
+    public String deleteExport(Model model) {
+         this.vObjectService.delete(viewExport);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/updateExport")
-    public String updateExport() {
-        this.viewExport.update();
-        return sessionSyncronize();
+    @RequestMapping("/updateExport")
+    public String updateExport(Model model) {
+        this.vObjectService.update(viewExport);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortExport")
-    public String sortExport() {
-        this.viewExport.sort();
-        return sessionSyncronize();
+    @RequestMapping("/sortExport")
+    public String sortExport(Model model) {
+        this.vObjectService.sort(viewExport);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/startExport")
-    public String startExport() throws Exception {
+    @RequestMapping("/startExport")
+    public String startExport(Model model) throws Exception {
         
     	String fileSelected="";
     	if (!viewExport.mapContentSelected().isEmpty())
@@ -158,7 +131,7 @@ public class ExportAction extends ArcAction implements IDbConstant  {
     	
     	// Requeter les export à réaliser
     	HashMap<String,ArrayList<String>> h=new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-				"select * from "+((String) getSession().get(SessionParameters.ENV))+".export"+" "+fileSelected))
+				"select * from "+ getBacASable() +".export"+" "+fileSelected))
 				.mapContent();
 
     	ArrayList<String> fileName=h.get("file_name");
@@ -179,7 +152,7 @@ public class ExportAction extends ArcAction implements IDbConstant  {
     	// itérer sur les exports à réaliser
     	for (int n=0;n<tablesToExport.size();n++)
     	{
-    		UtilitaireDao.get("arc").executeRequest(null,"UPDATE "+((String) getSession().get(SessionParameters.ENV))+".export set etat='EN COURS' where file_name='"+fileName.get(n)+"' ");
+    		UtilitaireDao.get("arc").executeRequest(null,"UPDATE "+ getBacASable() +".export set etat='EN COURS' where file_name='"+fileName.get(n)+"' ");
 
     		File fOut;
     		if (!StringUtils.isEmpty(zip.get(n)))
@@ -215,7 +188,7 @@ public class ExportAction extends ArcAction implements IDbConstant  {
     		String howToExportReworked;
     		if (howToExport.get(n)==null)
     		{
-    			howToExportReworked="(select column_name as varbdd, ordinal_position as pos from information_schema.columns where table_schema||'.'||table_name = '"+((String) getSession().get(SessionParameters.ENV)).toLowerCase()+"."+tablesToExport.get(n)+"') ww ";
+    			howToExportReworked="(select column_name as varbdd, ordinal_position as pos from information_schema.columns where table_schema||'.'||table_name = '"+ getBacASable() .toLowerCase()+"."+tablesToExport.get(n)+"') ww ";
     		}
     		else
     		{
@@ -253,10 +226,10 @@ public class ExportAction extends ArcAction implements IDbConstant  {
     		Connection c=UtilitaireDao.get("arc").getDriverConnexion();
     		c.setAutoCommit(false);
     		// if the 
-    	    System.out.println("SELECT * FROM "+((String) getSession().get(SessionParameters.ENV))+"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
+    	    System.out.println("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
     	    Statement stmt = c.createStatement();
     	    stmt.setFetchSize(5000);
-    		ResultSet res=stmt.executeQuery("SELECT * FROM "+((String) getSession().get(SessionParameters.ENV))+"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
+    		ResultSet res=stmt.executeQuery("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
             ResultSetMetaData rsmd=res.getMetaData();
 
 
@@ -341,24 +314,24 @@ public class ExportAction extends ArcAction implements IDbConstant  {
             bw.close();
             fw.close();
             
-            UtilitaireDao.get("arc").executeRequest(null,"UPDATE "+((String) getSession().get(SessionParameters.ENV))+".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') where file_name='"+fileName.get(n)+"' ");
+            UtilitaireDao.get("arc").executeRequest(null,"UPDATE "+ getBacASable() +".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') where file_name='"+fileName.get(n)+"' ");
     	}
     	
     	
-        return sessionSyncronize();
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
 	public String initExportDir()
 	{
     	String repertoire = properties.getBatchParametersDirectory();
-		String envDir = ((String) getSession().get(SessionParameters.ENV)).replace(".", "_").toUpperCase();
-		String dirOut = repertoire + envDir + File.separator + "EXPORT";
-		File f = new File(dirOut);
+		String envDir =  getBacASable() .replace(".", "_").toUpperCase();
+		Path dirOut = Paths.get(repertoire, envDir, "EXPORT");
+		File f = dirOut.toFile();
 	
 		if (!f.exists()) {
-		    f.mkdir();
+		    f.mkdirs();
 		}
-		return dirOut;
+		return dirOut.toString();
 	}
     
     // private SessionMap session;
@@ -367,47 +340,29 @@ public class ExportAction extends ArcAction implements IDbConstant  {
         System.out.println("/* initializeFileExport */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 
-        String dirOut=initExportDir();
+        String dirOut = initExportDir();
 
         ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(dirOut, this.viewFileExport.mapFilterFields());
 
-        this.viewFileExport.initializeByList(listeFichier, defaultInputFields);
+        this.vObjectService.initializeByList(viewFileExport, listeFichier, defaultInputFields);
 
     }
-    @Action(value = "/selectFileExport")
-    public String selectFileExport() {
-        System.out.println("selectFileExport " + this.scope);
-        return sessionSyncronize();
+    @RequestMapping({"/selectFileExport", "/seeFileExport"})
+    public String selectFileExport(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/seeFileExport")
-    public String seeFileExport() {
-        System.out.println("seeFileExport " + this.scope);
-
-//        HashMap<String,ArrayList<String>> m=this.viewFileExport.mapContentSelected();
-//        if (!m.isEmpty())
-//        {
-//            if(m.get("isdirectory").get(0).equals("true"))
-//            {
-//                this.FileExport=this.FileExport+m.get("filename").get(0)+File.separator;
-//            }
-//        }
-
-
-        return sessionSyncronize();
+    @RequestMapping("/sortFileExport")
+    public String sortFileExport(Model model) {
+        this.vObjectService.sort(viewFileExport);
+        return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @Action(value = "/sortFileExport")
-    public String sortFileExport() {
-        this.viewFileExport.sort();
-        return sessionSyncronize();
-    }
-
-    @Action(value = "/deleteFileExport")
-    public String deleteFileExport() {
+    @RequestMapping("/deleteFileExport")
+    public String deleteFileExport(Model model) {
     	String dirOut=initExportDir();
     	HashMap<String, ArrayList<String>> selection = this.viewFileExport.mapContentSelected();
-    	System.out.println(selection);
+    	loggerDispatcher.debug(selection, LOGGER);
     	if (!selection.isEmpty())
     	{
     		for (String s:selection.get("filename"))
@@ -415,11 +370,11 @@ public class ExportAction extends ArcAction implements IDbConstant  {
     			FileUtils.delete(new File(dirOut + File.separator + s));
     		}
     	}
-        return sessionSyncronize();
+        return generateDisplay(model, RESULT_SUCCESS);
     }
     
-    @Action(value = "/updateFileExport")
-    public String updateFileExport() {
+    @RequestMapping("/updateFileExport")
+    public String updateFileExport(Model model) {
     	String dirOut=initExportDir();
 
     	 HashMap<String,ArrayList<String>> m=this.viewFileExport.mapContentBeforeUpdate();
@@ -434,11 +389,11 @@ public class ExportAction extends ArcAction implements IDbConstant  {
                fileIn.renameTo(fileOut);
              }
          }
-       return sessionSyncronize();
+       return generateDisplay(model, RESULT_SUCCESS);
     }
     
-    @Action(value = "/downloadFileExport")
-    public String downloadFileExport() {
+    @RequestMapping("/downloadFileExport")
+    public String downloadFileExport(Model model, HttpServletResponse response) {
     	HashMap<String, ArrayList<String>> selection = this.viewFileExport.mapContentSelected();
     	System.out.println(selection);
     	if (!selection.isEmpty())
@@ -459,12 +414,12 @@ public class ExportAction extends ArcAction implements IDbConstant  {
     		}
     		
         	String repertoire = properties.getBatchParametersDirectory();
-       		String envDir = ((String) getSession().get(SessionParameters.ENV)).replace(".", "_").toUpperCase();
+       		String envDir =  getBacASable() .replace(".", "_").toUpperCase();
     		String dirOut = repertoire + envDir;
     		
     		ArrayList<String> r=new ArrayList<String>(Arrays.asList("EXPORT"));
     		
-            this.viewFileExport.downloadEnveloppe(requete.toString(), dirOut, r);
+            this.vObjectService.downloadEnveloppe(viewFileExport, response, requete.toString(), dirOut, r);
 
     	}
         return "none";
@@ -605,43 +560,9 @@ public class ExportAction extends ArcAction implements IDbConstant  {
 		this.viewFileExport = viewFileExport;
 	}
 
-	public String getExport() {
-        return this.export;
-    }
-
-    public void setExport(String export) {
-        this.export = export;
-    }
-
-
-	@Override
-	public void putAllVObjects() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void instanciateAllDAOs() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setProfilsAutorises() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void specificTraitementsPostDAO() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	@Override
 	public String getActionName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "export";
 	}
 
     

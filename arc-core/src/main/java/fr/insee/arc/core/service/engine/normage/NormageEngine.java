@@ -17,7 +17,7 @@ import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.LoggerDispatcher;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 
@@ -104,8 +104,8 @@ public class NormageEngine {
 			List<String> listeRubriqueSource = new ArrayList<String>();
 			UtilitaireDao.get("arc").getColumns(connection, listeRubriqueSource, tableSource);
 
-			LoggerDispatcher.trace("listeRubrique fichier " + listeRubriqueSource, LOGGER);
-			LoggerDispatcher.trace("listeRubrique règles " + ((paramBatch != null) ? rubriqueUtiliseeDansRegles.get("var"):"NULL (MODE IHM)"), LOGGER);
+			StaticLoggerDispatcher.trace("listeRubrique fichier " + listeRubriqueSource, LOGGER);
+			StaticLoggerDispatcher.trace("listeRubrique règles " + ((paramBatch != null) ? rubriqueUtiliseeDansRegles.get("var"):"NULL (MODE IHM)"), LOGGER);
 
 			HashSet<String> alreadyAdded = new HashSet<String>();
 
@@ -223,7 +223,7 @@ public class NormageEngine {
 
 	@SuppressWarnings("unused")
 	private String optimisation96(String jointure, int subjoinNumber) {
-		LoggerDispatcher.info("optimisation96()", LOGGER);
+		StaticLoggerDispatcher.info("optimisation96()", LOGGER);
 
 		// on enleve l'id
 		String r = jointure;
@@ -322,7 +322,7 @@ public class NormageEngine {
 	 */
 	private void ajouterRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws Exception {
-		LoggerDispatcher.info("ajouterRegleDuplication()", LOGGER);
+		StaticLoggerDispatcher.info("ajouterRegleDuplication()", LOGGER);
 
 		// pour toutes les règles de relation,
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -386,7 +386,7 @@ public class NormageEngine {
 	private String appliquerRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws Exception {
 
-		LoggerDispatcher.info("appliquerRegleDuplication()", LOGGER);
+		StaticLoggerDispatcher.info("appliquerRegleDuplication()", LOGGER);
 
 		String returned = jointure;
 
@@ -561,7 +561,7 @@ public class NormageEngine {
 	 */
 	private void ajouterRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws Exception {
-		LoggerDispatcher.info("ajouterRegleIndependance()", LOGGER);
+		StaticLoggerDispatcher.info("ajouterRegleIndependance()", LOGGER);
 
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
 		HashSet<String> rubriqueExclusion = new HashSet<String>();
@@ -810,7 +810,7 @@ public class NormageEngine {
 	private String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws Exception {
 
-		LoggerDispatcher.info("appliquerRegleSuppression()", LOGGER);
+		StaticLoggerDispatcher.info("appliquerRegleSuppression()", LOGGER);
 
 		String returned = jointure;
 		int max = 0;
@@ -984,7 +984,7 @@ public class NormageEngine {
 	private String appliquerRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws Exception {
 
-		LoggerDispatcher.info("appliquerRegleIndependance()", LOGGER);
+		StaticLoggerDispatcher.info("appliquerRegleIndependance()", LOGGER);
 
 		String returned = jointure;
 
@@ -1010,7 +1010,7 @@ public class NormageEngine {
 						// si on trouve la rubrique mais qu'elle n'est pas identifiant de bloc (m_), on
 						// sort
 						if (!blocCreate.contains(m_rubrique)) {
-							LoggerDispatcher.info("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc",
+							StaticLoggerDispatcher.info("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc",
 									LOGGER);
 							throw new Exception("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc");
 						}
@@ -1027,7 +1027,7 @@ public class NormageEngine {
 //                                     System.out.println(rubriqueRegle[i]+"->"+getFatherM(blocCreate,rubriqueRegle[i]));
 
 							if (!fatherSav.equals(getFatherM(blocCreate, rubriqueRegle[i]))) {
-								LoggerDispatcher.info(
+								StaticLoggerDispatcher.info(
 										"La rubrique " + rubriqueRegle[i] + " n'a pas le même pere que les autres",
 										LOGGER);
 								throw new Exception(
@@ -1240,7 +1240,7 @@ public class NormageEngine {
 	 */
 	private String appliquerRegleUnicite(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws Exception {
-		LoggerDispatcher.info("appliquerRegleUnicite()", LOGGER);
+		StaticLoggerDispatcher.info("appliquerRegleUnicite()", LOGGER);
 
 		String returned = jointure;
 		// extraction de la clause select
@@ -1258,7 +1258,7 @@ public class NormageEngine {
 
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 
-				// LoggerDispatcher.info("Filtrage relationnel : "+rubrique+" - "+rubriqueNmcl,
+				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" - "+rubriqueNmcl,
 				// logger);
 
 				// vérifier l'existance des rubriques
@@ -1336,7 +1336,7 @@ public class NormageEngine {
 	private String appliquerRegleRelation(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws Exception {
 
-		LoggerDispatcher.info("appliquerRegleRelation()", LOGGER);
+		StaticLoggerDispatcher.info("appliquerRegleRelation()", LOGGER);
 
 		String returned = jointure;
 		// extraction de la clause select
@@ -1364,7 +1364,7 @@ public class NormageEngine {
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
 
-				// LoggerDispatcher.info("Filtrage relationnel : "+rubrique+" - "+rubriqueNmcl,
+				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" - "+rubriqueNmcl,
 				// logger);
 
 				// cérifier l'existance des rubriques

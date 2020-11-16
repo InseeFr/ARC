@@ -7,13 +7,3 @@ var configJS="Render:FixedHeader;" +
 		"Render:AlertBox;" +
 		"IHM:Onglet;" + 
 		"Render:ChooseFileWithName;";
-
-$( document ).on('ready readyAgain',function() {
-	
-	$('#chooseModule a').on('click', function (e) {
-		  e.preventDefault()
-		  $(this).tab('show')
-		})
-		
-}
-);
