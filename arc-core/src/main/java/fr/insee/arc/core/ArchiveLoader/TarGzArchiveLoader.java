@@ -1,16 +1,10 @@
 package fr.insee.arc.core.ArchiveLoader;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.engine.SizeLimiterInputStream;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 

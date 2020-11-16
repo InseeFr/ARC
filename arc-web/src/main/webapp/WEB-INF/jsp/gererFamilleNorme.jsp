@@ -119,9 +119,5 @@
 
 
 		</form>
-
-	</div>
-
-
 </body>
 </html>
