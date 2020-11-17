@@ -1144,7 +1144,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     	
         StringBuilder query = new StringBuilder();
         
-    	loggerDispatcher.info("** createTableOK ** : "+tableIdSource, LOGGER);
+        StaticLoggerDispatcher.info("** createTableOK ** : "+tableIdSource, LOGGER);
     	java.util.Date beginDate = new java.util.Date();
     	        
         query.append("DROP TABLE IF EXISTS " + tableIdSource + ";");
@@ -1154,7 +1154,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         UtilitaireDao.get("arc").executeBlock(connexion, query);
         
         java.util.Date endDate = new java.util.Date();
-        loggerDispatcher.info("** createTableOK ** temps : " + (endDate.getTime()-beginDate.getTime()) + " ms", LOGGER);
+        StaticLoggerDispatcher.info("** createTableOK ** temps : " + (endDate.getTime()-beginDate.getTime()) + " ms", LOGGER);
     	}
     	
     }
@@ -1210,7 +1210,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         StringBuilder query = new StringBuilder();
 
         // mise à jour du nombre d'enregistrement et du type composite
-        loggerDispatcher.info("** updateNbEnr **", LOGGER);
+        StaticLoggerDispatcher.info("** updateNbEnr **", LOGGER);
         query.append("\n UPDATE " + tablePilTemp + " a ");
         query.append("\n \t SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
         
