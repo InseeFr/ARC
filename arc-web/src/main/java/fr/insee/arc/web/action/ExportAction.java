@@ -163,157 +163,156 @@ public class ExportAction extends ArcAction<ExportModel>  {
     		{
         		fOut=new File(dirOut+ File.separator +fileName.get(n));
     		}
-    		FileOutputStream fw = new FileOutputStream(fOut);
-   		
-    		BufferedWriter bw;
-    		ZipOutputStream zos=null;
-    		
-    		if (!StringUtils.isEmpty(zip.get(n)))
+    		try (FileOutputStream fw = new FileOutputStream(fOut))
     		{
-	    		zos = new ZipOutputStream(fw);
-	    		ZipEntry ze = new ZipEntry(fileName.get(n));
-	    		zos.putNextEntry(ze);
-	   			bw = new BufferedWriter(new OutputStreamWriter(zos,"UTF-8"));
+	    		
+	    		try (ZipOutputStream zos=!StringUtils.isEmpty(zip.get(n))?new ZipOutputStream(fw):null)
+	    		{
+	    		
+			    		if (!StringUtils.isEmpty(zip.get(n)))
+			    		{
+				    		ZipEntry ze = new ZipEntry(fileName.get(n));
+				    		zos.putNextEntry(ze);
+				   		}
+			    		
+			    		try(BufferedWriter bw = !StringUtils.isEmpty(zip.get(n))?new BufferedWriter(new OutputStreamWriter(zos,"UTF-8")):new BufferedWriter(new OutputStreamWriter(fw,"UTF-8")))
+			    		{
+			    		
+			    		HashMap<String,Integer> pos= new HashMap<String,Integer>();
+			    		ArrayList<String> headerLine=new ArrayList<String>();
+			    		
+			    		// if columns,orders table is specified, get the information from database metadata
+			    		String howToExportReworked;
+			    		if (howToExport.get(n)==null)
+			    		{
+			    			howToExportReworked="(select column_name as varbdd, ordinal_position as pos from information_schema.columns where table_schema||'.'||table_name = '"+ getBacASable() .toLowerCase()+"."+tablesToExport.get(n)+"') ww ";
+			    		}
+			    		else
+			    		{
+			    			// TODO : check with esane
+			    			howToExportReworked="arc."+howToExport.get(n);
+			    		}
+			    		
+			    		// lire la table how to export pour voir comment on va s'y prendre
+			    		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
+			    		h=new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+			    				"SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "+howToExportReworked+" order by pos::int "))
+			    				.mapContent();
+			    		
+			    		
+			    		for (int i=0;i<h.get("varbdd").size();i++)
+			    		{
+			    			pos.put(h.get("varbdd").get(i), Integer.parseInt(h.get("pos").get(i)));
+			    			headerLine.add(h.get("varbdd").get(i));
+			    		}
+			    		
+			    		// write header line if required
+				    	if (!StringUtils.isEmpty(headers.get(n)))	
+				    	{
+					        for (String o:headerLine)
+					        {
+				    	        bw.write(o+";");   	        	
+					        }
+					        bw.write("\n");
+				    	}
+				    	
+				    		    	
+			    		int maxPos=Integer.parseInt(h.get("maxp").get(0));
+			    		
+			    	
+			    		Connection c=UtilitaireDao.get("arc").getDriverConnexion();
+			    		c.setAutoCommit(false);
+			    		// if the 
+			    	    System.out.println("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
+			    	    Statement stmt = c.createStatement();
+			    	    stmt.setFetchSize(5000);
+			    		ResultSet res=stmt.executeQuery("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
+			            ResultSetMetaData rsmd=res.getMetaData();
+			
+			
+			            ArrayList<String> output;
+			            String[] tabH;
+			            String[] tabV;
+			            String colName;
+			            while (res.next())
+			            {
+			    	        // reinitialiser l'arraylist de sortie
+			    			output=new ArrayList<String>();
+			    			for (int k=0;k<maxPos;k++)
+			    			{
+			    				output.add("");
+			    			}
+			    			
+			    	        boolean todo=false;
+			    	        tabH=null;
+			    	        tabV=null;
+			    	        for (int i = 1; i <= rsmd.getColumnCount(); i++)
+			    	        {
+			    	        	colName=rsmd.getColumnLabel(i).toLowerCase();
+			    	        	
+			    	        	todo=true;
+			    	        	// cas ou on est dans un tableau
+			    	    			if (todo && colName.equals(headersToScan.get(n)))
+			    	    			{
+			    	    				todo=false;
+			    	    				tabH=(String[]) res.getArray(i).getArray();
+			    	    			}
+			    	    			if (todo && colName.equals(valuesToScan.get(n)))
+			    	    			{
+			    	    				todo=false;
+			    	    				tabV=(String[]) res.getArray(i).getArray();
+			    	    			}
+			    	    			if (todo)
+			    	    			{
+			    	    				todo=false;
+			    	    				if (pos.get(colName)!=null)
+			    	    				{
+			    	    					// if nulls value musn't be quoted as "null" and element is null then don't write
+			    	    					if (!( StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(res.getString(i)) ))
+			    	    					{
+			    	    						output.set(pos.get(colName), res.getString(i));
+			    	    					}
+			    	    				}
+			    	    			}	
+			    	        }
+			    	        
+			    	        // traitement des variables tableaux
+			    	        if (tabH!=null && tabV!=null)
+			    	        {
+			    	        	for (int k=0;k<tabH.length;k++)
+			    	        	{
+			    	        		if (pos.get(tabH[k].toLowerCase())!=null)
+			    	        		{
+				    					// if nulls value musn't be quoted as "null" and element is null then don't write
+				    					if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(tabV[k])))
+				    					{
+				    						output.set(pos.get(tabH[k].toLowerCase()), tabV[k]);
+				    					}
+			    	        		}
+			    	        	}
+			    	        }
+			    	        
+			    	        for (String o:output)
+			    	        {
+			        	        bw.write(o+";");   	        	
+			    	        }
+			    	        bw.write("\n");
+			    	    }
+			            c.close();
+			            bw.flush();
+			            fw.flush();
+			            
+			    		}
+			    		
+		            if (!StringUtils.isEmpty(zip.get(n)))
+		    		{
+			            zos.flush();
+			            zos.flush();
+			            zos.closeEntry();
+		    		} 
+	    		}
+	    		
     		}
-    		else
-    		{
-	   			bw = new BufferedWriter(new OutputStreamWriter(fw,"UTF-8"));
-    		}
-    		
-    		
-    		HashMap<String,Integer> pos= new HashMap<String,Integer>();
-    		ArrayList<String> headerLine=new ArrayList<String>();
-    		
-    		// if columns,orders table is specified, get the information from database metadata
-    		String howToExportReworked;
-    		if (howToExport.get(n)==null)
-    		{
-    			howToExportReworked="(select column_name as varbdd, ordinal_position as pos from information_schema.columns where table_schema||'.'||table_name = '"+ getBacASable() .toLowerCase()+"."+tablesToExport.get(n)+"') ww ";
-    		}
-    		else
-    		{
-    			// TODO : check with esane
-    			howToExportReworked="arc."+howToExport.get(n);
-    		}
-    		
-    		// lire la table how to export pour voir comment on va s'y prendre
-    		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
-    		h=new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-    				"SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "+howToExportReworked+" order by pos::int "))
-    				.mapContent();
-    		
-    		
-    		for (int i=0;i<h.get("varbdd").size();i++)
-    		{
-    			pos.put(h.get("varbdd").get(i), Integer.parseInt(h.get("pos").get(i)));
-    			headerLine.add(h.get("varbdd").get(i));
-    		}
-    		
-    		// write header line if required
-	    	if (!StringUtils.isEmpty(headers.get(n)))	
-	    	{
-		        for (String o:headerLine)
-		        {
-	    	        bw.write(o+";");   	        	
-		        }
-		        bw.write("\n");
-	    	}
-	    	
-	    		    	
-    		int maxPos=Integer.parseInt(h.get("maxp").get(0));
-    		
-    	
-    		Connection c=UtilitaireDao.get("arc").getDriverConnexion();
-    		c.setAutoCommit(false);
-    		// if the 
-    	    System.out.println("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
-    	    Statement stmt = c.createStatement();
-    	    stmt.setFetchSize(5000);
-    		ResultSet res=stmt.executeQuery("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
-            ResultSetMetaData rsmd=res.getMetaData();
-
-
-            ArrayList<String> output;
-            String[] tabH;
-            String[] tabV;
-            String colName;
-            while (res.next())
-            {
-    	        // reinitialiser l'arraylist de sortie
-    			output=new ArrayList<String>();
-    			for (int k=0;k<maxPos;k++)
-    			{
-    				output.add("");
-    			}
-    			
-    	        boolean todo=false;
-    	        tabH=null;
-    	        tabV=null;
-    	        for (int i = 1; i <= rsmd.getColumnCount(); i++)
-    	        {
-    	        	colName=rsmd.getColumnLabel(i).toLowerCase();
-    	        	
-    	        	todo=true;
-    	        	// cas ou on est dans un tableau
-    	    			if (todo && colName.equals(headersToScan.get(n)))
-    	    			{
-    	    				todo=false;
-    	    				tabH=(String[]) res.getArray(i).getArray();
-    	    			}
-    	    			if (todo && colName.equals(valuesToScan.get(n)))
-    	    			{
-    	    				todo=false;
-    	    				tabV=(String[]) res.getArray(i).getArray();
-    	    			}
-    	    			if (todo)
-    	    			{
-    	    				todo=false;
-    	    				if (pos.get(colName)!=null)
-    	    				{
-    	    					// if nulls value musn't be quoted as "null" and element is null then don't write
-    	    					if (!( StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(res.getString(i)) ))
-    	    					{
-    	    						output.set(pos.get(colName), res.getString(i));
-    	    					}
-    	    				}
-    	    			}	
-    	        }
-    	        
-    	        // traitement des variables tableaux
-    	        if (tabH!=null && tabV!=null)
-    	        {
-    	        	for (int k=0;k<tabH.length;k++)
-    	        	{
-    	        		if (pos.get(tabH[k].toLowerCase())!=null)
-    	        		{
-	    					// if nulls value musn't be quoted as "null" and element is null then don't write
-	    					if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(tabV[k])))
-	    					{
-	    						output.set(pos.get(tabH[k].toLowerCase()), tabV[k]);
-	    					}
-    	        		}
-    	        	}
-    	        }
-    	        
-    	        for (String o:output)
-    	        {
-        	        bw.write(o+";");   	        	
-    	        }
-    	        bw.write("\n");
-    	    }
-            c.close();
-            bw.flush();
-            fw.flush();
-            if (!StringUtils.isEmpty(zip.get(n)))
-    		{
-	            zos.flush();
-	            zos.flush();
-	            zos.closeEntry();
-	            zos.close();
-    		}    
-            bw.close();
-            fw.close();
-            
             UtilitaireDao.get("arc").executeRequest(null,"UPDATE "+ getBacASable() +".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') where file_name='"+fileName.get(n)+"' ");
     	}
     	
