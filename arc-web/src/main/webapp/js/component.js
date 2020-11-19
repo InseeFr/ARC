@@ -820,6 +820,13 @@ function ajaxConfigurationCall()
 		if ($this.attr('ajax')=="false")
 		{
 			console.log("pas d'ajax");
+			if ( $("meta[name='_csrf']").length ) {
+				$('<input>').attr({
+	    			type: 'hidden',
+	    			name: '_csrf',
+	    			value: $("meta[name='_csrf']").attr("content")
+				}).appendTo($(this));
+			}
 		}
 		else
 		{
@@ -840,9 +847,11 @@ function ajaxConfigurationCall()
 					processData: false,
 					contentType: false,
 		            beforeSend: function(xhr) {
-		                var token = $("meta[name='_csrf']").attr("content");
-		                var header = $("meta[name='_csrf_header']").attr("content");
-		                xhr.setRequestHeader(header, token);
+		            	if ( $("meta[name='_csrf']").length ) { 
+		                	var token = $("meta[name='_csrf']").attr("content");
+		                	var header = $("meta[name='_csrf_header']").attr("content");
+		                	xhr.setRequestHeader(header, token);
+		                }
 		            },
 					success: function(xml) {
 						xml="<root>"+xml+"</root>";
@@ -886,9 +895,11 @@ function ajaxConfigurationCall()
 					url: $this.attr('action'),
 					type: $this.attr('method'),
 		            beforeSend: function(xhr) {
-		                var token = $("meta[name='_csrf']").attr("content");
-		                var header = $("meta[name='_csrf_header']").attr("content");
-		                xhr.setRequestHeader(header, token);
+		            	if ( $("meta[name='_csrf']").length ) { 
+		                	var token = $("meta[name='_csrf']").attr("content");
+		                	var header = $("meta[name='_csrf_header']").attr("content");
+		                	xhr.setRequestHeader(header, token);
+		                }
 		            },
 					data: $this.serialize2()+"&scope="+splitAndEval($this.attr('scope')),
 					dataType: 'text',
