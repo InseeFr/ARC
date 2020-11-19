@@ -226,7 +226,9 @@ public class ExportAction extends ArcAction<ExportModel>  {
 			    	    System.out.println("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
 			    	    Statement stmt = c.createStatement();
 			    	    stmt.setFetchSize(5000);
-			    		ResultSet res=stmt.executeQuery("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
+			    		
+			    	    try (ResultSet res=stmt.executeQuery("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" ")))
+			    	    {
 			            ResultSetMetaData rsmd=res.getMetaData();
 			
 			
@@ -297,6 +299,7 @@ public class ExportAction extends ArcAction<ExportModel>  {
 			        	        bw.write(o+";");   	        	
 			    	        }
 			    	        bw.write("\n");
+			    	    }
 			    	    }
 			            c.close();
 			            bw.flush();
