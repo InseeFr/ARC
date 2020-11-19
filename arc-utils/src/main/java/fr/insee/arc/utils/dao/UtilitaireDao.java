@@ -249,7 +249,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					properties.getDatabasePassword());
 				connectionOk = true;
 			} catch (Exception e) {
-				int sleep = 60000;
+				int sleep = 5000;
 				LoggerHelper.error(LOGGER,
 						"Connection failure. Tentative de reconnexion dans " + (sleep / 1000) + " secondes", nbTry);
 				Thread.sleep(sleep);
