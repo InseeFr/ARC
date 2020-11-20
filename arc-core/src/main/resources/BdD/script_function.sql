@@ -75,7 +75,7 @@ $BODY$
   COST 100;
 
 -- multi dimensionnal array decomposition  
-CREATE OR REPLACE FUNCTION decompose(ANYARRAY, OUT a ANYARRAY)
+CREATE OR REPLACE FUNCTION public.decompose(ANYARRAY, OUT a ANYARRAY)
   RETURNS SETOF ANYARRAY AS
 $func$
 BEGIN
