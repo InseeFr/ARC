@@ -37,7 +37,7 @@
 							<h1 class="display-4">
 								<spring:message code="home.welcome" />
 							</h1>
-							<p class="lead">Version 20191025a</p>
+							<p class="lead">Version 20201120a</p>
 						</div>
 					</div>
 				</div>

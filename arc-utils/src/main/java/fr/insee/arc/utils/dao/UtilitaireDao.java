@@ -245,6 +245,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		while (!connectionOk && nbTry < nbTryMax) {
 			// renvoie la connexion relative au driver
 			try {
+			
+			System.out.println("properties");
+			System.out.println(properties.getDatabaseUrl());
+			System.out.println(properties.getDatabaseUsername());
+			System.out.println(properties.getDatabasePassword())	;
+				
 			c = DriverManager.getConnection(properties.getDatabaseUrl(), properties.getDatabaseUsername(),
 					properties.getDatabasePassword());
 				connectionOk = true;
