@@ -358,25 +358,23 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	// Actions du bac à sable
 
 	@RequestMapping("/filesUploadBAS")
-	public String filesUploadBAS(Model model, ArrayList<String> fileUploadFileName, ArrayList<MultipartFile> fileUpload) {
+	public String filesUploadBAS(Model model) {
 		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : */ *");
 		
 		String writingRepo = this.getViewEntrepotBAS().getCustomValue(WRITING_REPO);
 		if (writingRepo != null
 				&& !writingRepo.equals("")
-				&& fileUploadFileName != null) {
-			if (fileUploadFileName.contains("../")) {
-				
-			}
+				&& viewPilotageBAS.getFileUpload() != null) {
+
 			String repertoireUpload = Paths.get(
 					this.repertoire + getBacASable().toUpperCase(), 
 					TraitementPhase.RECEPTION + "_" + writingRepo)
 					.toString();
 			LoggerHelper.trace(LOGGER, "repertoireUpload :", repertoireUpload);
-			this.vObjectService.upload(getViewPilotageBAS(), repertoireUpload, fileUploadFileName, fileUpload);
+			this.vObjectService.upload(getViewPilotageBAS(), repertoireUpload);
 		} else {
 			String msg = "";
-			if (fileUploadFileName == null) {
+			if (viewPilotageBAS.getFileUpload() == null) {
 				msg = "Erreur : aucun fichier selectionné\n";
 				this.getViewPilotageBAS().setMessage("Erreur : aucun fichier selectionné.");
 			}
@@ -461,12 +459,14 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 */
 	@SQLExecutor
 	@RequestMapping("/downloadEnveloppeFromArchiveBAS")
-	public String downloadEnveloppeFromArchiveBAS(HttpServletResponse response) {
+	public void downloadEnveloppeFromArchiveBAS(HttpServletResponse response) {
 		
 		loggerDispatcher.trace("*** Téléchargement des enveloppes à partir de l'archive ***", LOGGER);
 		// récupération de la liste des noms d'enloppe
 		Map<String, ArrayList<String>> selection = getViewArchiveBAS().mapContentSelected();
 
+		initializeArchiveBAS();
+		
 		StringBuilder querySelection = new StringBuilder();
 		querySelection.append("select distinct alias_de_table.nom_archive as nom_fichier from ("
 				+ this.getViewArchiveBAS().getMainQuery() + ") alias_de_table ");
@@ -493,7 +493,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE");
 		String chemin = Paths.get(this.repertoire, getBacASable().toUpperCase()).toString();
 		this.vObjectService.downloadEnveloppe(getViewArchiveBAS(), response, querySelection.toString(), chemin, listRepertoire);
-		return "none";
 	}
 
 	@RequestMapping("/executerBatch")
@@ -638,7 +637,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/downloadFichierBAS")
-	public String downloadFichierBAS(Model model, HttpServletResponse response) {
+	public void downloadFichierBAS(HttpServletResponse response) {
 
 		loggerDispatcher.trace("*** Téléchargement des fichiers ***", LOGGER);
 		// récupération de la liste des id_source
@@ -660,8 +659,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				TraitementEtat.OK.toString(), TraitementEtat.KO.toString());
 
 		loggerDispatcher.trace("*** Fin du téléchargement des fichiers XML ***", LOGGER);
-		generateDisplay(model, RESULT_SUCCESS);
-		return "none";
 	}
 
 	/**
@@ -739,7 +736,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/downloadBdBAS")
-	public String downloadBdBAS(HttpServletResponse response) throws Exception {
+	public void downloadBdBAS(HttpServletResponse response) throws Exception {
 		Map<String, ArrayList<String>> selectionLigne = getViewPilotageBAS().mapContentSelected();
 		ArrayList<String> selectionColonne = getViewPilotageBAS().listHeadersSelected();
 		ArrayList<Integer> selectionIndexColonne = getViewPilotageBAS().indexHeadersSelected();
@@ -760,11 +757,11 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 					.requeteListAllTablesEnv(getBacASable())));
 			if (!g.mapContent().isEmpty()) {
 				ArrayList<String> envTables = g.mapContent().get("table_name");
-				System.out.println("Le contenu de ma envTables : " + envTables);
 				for (String table : envTables) {
 					// selection des tables qui contiennent la phase dans leur nom
 					for (int i = 0; i < etatList.length; i++) {
-						if (table.toUpperCase().contains("." + phase.toUpperCase() + "_" + etatList[i].toUpperCase())
+						if (ManipString.substringAfterFirst(table.toUpperCase(),".").startsWith(phase.toUpperCase() + "_")
+								&& table.toUpperCase().endsWith("_" + etatList[i].toUpperCase())
 								&& !tableDownload.contains(table)) {
 							tableDownload.add(table);
 
@@ -853,9 +850,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		}
 		
 		this.vObjectService.download(getViewFichierBAS(), response, fileNames, tableauRequete);
-
-		return "none";
-
 	}
 
 	@RequestMapping("/downloadEnveloppeBAS")
@@ -864,7 +858,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		loggerDispatcher.trace("*** Téléchargement des enveloppes ***", LOGGER);
 		// récupération de la liste des noms d'enloppe
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
-
+		
+		initializeFichierBAS();
+		
 		StringBuilder querySelection = new StringBuilder();
 		querySelection.append("select distinct alias_de_table.container as nom_fichier from ("
 				+ this.getViewFichierBAS().getMainQuery() + ") alias_de_table ");

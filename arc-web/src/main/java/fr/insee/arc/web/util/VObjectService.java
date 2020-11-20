@@ -1187,25 +1187,24 @@ public class VObjectService {
         }
     }
 
-    public ArrayList<String> upload(VObject data, String repertoireCible, 
-    		ArrayList<String> fileUploadFileName, ArrayList<MultipartFile> fileUpload) {
-        if (fileUploadFileName != null) {
-            for (int i = 0; i < fileUpload.size(); i++) {
-                Path location = Paths.get(repertoireCible, fileUploadFileName.get(i));
+    public ArrayList<String> upload(VObject data, String repertoireCible) {
+        if (data.getFileUpload() != null) {
+            for (int i = 0; i < data.getFileUpload().size(); i++) {
+                Path location = Paths.get(repertoireCible, data.getFileUpload().get(i).getOriginalFilename());
                 loggerDispatcher.info( "Upload >> " + location, LOGGER);
                 File newFile = location.toFile();
                 try {
 	                if (newFile.exists()) {
 	                	Files.delete(newFile.toPath());
 	                }
-	                fileUpload.get(i).transferTo(newFile);
+	                data.getFileUpload().get(i).transferTo(newFile);
                 } catch (IOException ex) {
                     LoggerHelper.errorGenTextAsComment(getClass(), "upload()", LOGGER, ex);
                 }
             }
         }
         data.setMessage("Upload terminé.");
-        return fileUploadFileName;
+        return new ArrayList<String>();
     }
 
     public ArrayList<String> getHeaderSortDLabels(VObject currentData) {

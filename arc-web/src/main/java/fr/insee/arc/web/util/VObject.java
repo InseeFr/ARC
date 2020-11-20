@@ -1,8 +1,12 @@
 package fr.insee.arc.web.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
@@ -745,5 +749,18 @@ public class VObject {
 		}
 		getCustomValues().put(key, value);
 	}
+
+
+	
+	private List<MultipartFile> fileUpload;
+
+	public List<MultipartFile> getFileUpload() {
+		return fileUpload;
+	}
+
+	public void setFileUpload(List<MultipartFile> fileUpload) {
+		this.fileUpload = fileUpload;
+	}
+
 
 }
