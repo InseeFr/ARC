@@ -827,6 +827,8 @@ function ajaxConfigurationCall()
 	    			value: $("meta[name='_csrf']").attr("content")
 				}).appendTo($(this));
 			}
+			// default is ajax
+			$this.attr('ajax','true');
 		}
 		else
 		{
