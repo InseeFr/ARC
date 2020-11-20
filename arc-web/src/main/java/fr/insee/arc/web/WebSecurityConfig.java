@@ -54,8 +54,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 		
 		// disable https when keycloak file doesn't exist
 		if (!isKeycloakActive()) {
-			http.csrf().disable()
-			.authorizeRequests().antMatchers("/**").permitAll();
+			http.authorizeRequests().antMatchers("/**").permitAll();
 		} else {
 			http.requiresChannel().anyRequest().requiresSecure();
 			String[] authorizedRoles = properties.getAuthorizedRoles();
