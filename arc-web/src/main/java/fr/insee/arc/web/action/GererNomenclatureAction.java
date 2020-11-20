@@ -299,6 +299,9 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     private void creationTableDefinitif() throws SQLException {
 		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         StringBuilder creationTableDef = new StringBuilder();
+
+        creationTableDef.append("\n DROP TABLE IF EXISTS arc." + newNomenclatureName+";");
+
         creationTableDef.append("\n CREATE TABLE arc." + newNomenclatureName);
         creationTableDef.append("\n AS SELECT * FROM arc.temp_" + newNomenclatureName + ";");
         creationTableDef.append("\n DROP TABLE arc.temp_" + newNomenclatureName + ";");
