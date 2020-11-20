@@ -33,7 +33,7 @@ public class ViewVariableMetier  extends VObject {
      * @return
      */
     public static HashMap<String, ColumnRendering> getInitialRenderingViewVariableMetier(HashMap<String, ColumnRendering> returned) {
-        returned.put("id_famille", new ColumnRendering(false, "Id.", "20px", "text", null, true));
+        returned.put("id_famille", new ColumnRendering(false, "Id.", "20px", "text", null, false));
         returned.put("nom_variable_metier", new ColumnRendering(true, "label.mapmodel.field", "200px", "text", null, true));
         returned.put("description_variable_metier", new ColumnRendering(true, "label.comment", "200px", "text", null, true));
         returned.put("type_variable_metier", new ColumnRendering(true, "label.mapmodel.field.type", "100px", "select",

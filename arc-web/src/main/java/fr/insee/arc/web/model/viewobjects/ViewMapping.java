@@ -20,7 +20,7 @@ public class ViewMapping extends VObject {
             private static final long serialVersionUID = -6829848051813971382L;
             {
                 put("id_regle", new ColumnRendering(true, "label.id", "5%", "text", null, false));
-                put("id_norme", new ColumnRendering(false, "label.norm", "0", "text", null, false));
+                put("id_norme", new ColumnRendering(false, "label.norm", "0", "text", null, true));
                 put("validite_inf", new ColumnRendering(false, "label.validity.min", "0", "text", null, false));
                 put("validite_sup", new ColumnRendering(false, "label.validity.max", "0", "text", null, false));
                 put("version", new ColumnRendering(false, "label.version", "0", "text", null, false));
