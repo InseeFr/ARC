@@ -13,14 +13,14 @@ deploy:
   - provider: script
     skip_cleanup: true
     script:
-      docker build -f app.Dockerfile -t inseefr/arc:latest . && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      && docker push inseefr/arc:latest
+      - docker build -f app.Dockerfile -t inseefr/arc:latest . && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push inseefr/arc:latest
+      - docker build -f app-ws.Dockerfile -t inseefr/arc-ws:latest . && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push inseefr/arc-ws:latest
     on:
       branch: master
   - provider: script
     skip_cleanup: true
     script:
-      docker build -f app.Dockerfile -t inseefr/arc:$TRAVIS_TAG . && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      && docker push inseefr/arc:$TRAVIS_TAG
+      - docker build -f app.Dockerfile -t inseefr/arc:$TRAVIS_TAG . && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push inseefr/arc:$TRAVIS_TAG
+      - docker build -f app-ws.Dockerfile -t inseefr/arc-ws:$TRAVIS_TAG . && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push inseefr/arc-ws:$TRAVIS_TAG
     on:
       tags: true
