@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.ws.actions.HealthCheck;
 import fr.insee.arc.ws.actions.InitiateRequest;
 import fr.insee.arc.ws.actions.SendResponse;
 import fr.insee.arc.ws.dao.DAOException;
@@ -27,13 +28,17 @@ public class ServletArc extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-
+    	// nothing
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) {
         try {
-            this.getServletContext().getRequestDispatcher("/jsp/testPost.jsp").forward(request, response);
+        	if (request.getRequestURI().endsWith("/status")) {
+        		HealthCheck.status(response);
+        	} else {
+        		this.getServletContext().getRequestDispatcher("/jsp/testPost.jsp").forward(request, response);
+        	}
         } catch (ServletException |IOException ex) {
             LoggerHelper.error(LOGGER, "index()", ex);
         }
