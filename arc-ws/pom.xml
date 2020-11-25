@@ -113,6 +113,7 @@
 				<excludes>
 					<exclude>prod/*.properties</exclude>
 				</excludes>
+				<filtering>true</filtering>
 			</resource>
 			<resource>
 				<directory>src/main/webapp/WEB-INF</directory>

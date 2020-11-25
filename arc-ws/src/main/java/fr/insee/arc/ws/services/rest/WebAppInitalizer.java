@@ -3,34 +3,29 @@ package fr.insee.arc.ws.services.rest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-import fr.insee.arc.core.util.DefaultLoggerDispatcher;
-import fr.insee.arc.core.util.LoggerDispatcher;
-
 @Configuration
 @EnableWebMvc
-@ComponentScan("fr.insee.arc.ws.services.rest")
+@ImportResource("/WEB-INF/applicationContext.xml")
+@ComponentScan({ "fr.insee.arc.ws.services.rest", "fr.insee.arc.utils" })
 public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
     @Override
     protected String[] getServletMappings() {
-        return new String[]{"/*"};
+        return new String[] { "/*" };
     }
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class<?>[]{WebAppInitalizer.class};
+        return new Class<?>[] { WebAppInitalizer.class };
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
         return new Class[0];
     }
-    
-    @Bean
-    public LoggerDispatcher loggerDispatcher() {
-    	return new DefaultLoggerDispatcher();
-    }
+
 }
