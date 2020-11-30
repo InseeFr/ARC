@@ -1,0 +1,15 @@
+repo:
+  - ./*
+
+core:
+  - arc-core/**/*
+  
+batchs:
+  - arc-batchs/**/*
+  
+web:
+  - arc-web/**/*
+  
+ws:
+  - arc-ws/**/*
+  
