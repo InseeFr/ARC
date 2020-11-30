@@ -8,4 +8,4 @@ echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin &&
 
 #Build and deploy inseefr/arc-ws
 docker build -f app-ws.Dockerfile -t inseefr/arc-ws:$DEPLOY_TAG . 
-#echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push inseefr/arc-ws:$DEPLOY_TAG
+echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker push inseefr/arc-ws:$DEPLOY_TAG
