@@ -1,5 +1,6 @@
 package fr.insee.arc.web;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
@@ -7,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.utils.ressourceUtils.PropertySourcesHelper;
 import fr.insee.arc.web.interceptor.ArcInterceptor;
 import fr.insee.arc.web.util.WebLoggerDispatcher;
 
@@ -29,6 +32,11 @@ import fr.insee.arc.web.util.WebLoggerDispatcher;
 @ImportResource("classpath:applicationContext.xml")
 @ComponentScan(basePackages = {"fr.insee.arc.web", "fr.insee.arc.core", "fr.insee.arc.utils"})
 public class WebConfig implements WebMvcConfigurer {
+	
+	@Bean
+	public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() throws IOException {
+		return PropertySourcesHelper.defaultWebappPropertySourcesConfigurer();
+	}
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
