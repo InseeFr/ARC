@@ -26,7 +26,10 @@
 		<c:param name="currentPage" value="familyManagement" />
 	</c:import>
 
-	<div class="container-fluid">
+	<div class="container-fluid">	
+	<c:import url="tiles/template_help.jsp">
+		<c:param name="helpPage" value="/html/selectNormFamily.html" />
+	</c:import>
 			<div class="row">
 				<div
 					class="col-md-4"
