@@ -1,4 +1,4 @@
-@CHARSET "UTF-8";
+@charset "UTF-8";
 
 
 /* Override bootstrap css */
@@ -1038,4 +1038,20 @@ li.edition {
 	background-color: white;
 	border: thick;
 	font-size: 12px;
+}
+
+body.help {
+	font-size: large;
+}
+
+.help p {
+	text-indent: 1.5em;
+}
+
+.help h1 {
+	margin-bottom:1em;
+}
+
+.help h2 {
+	margin:.75em;
 }
