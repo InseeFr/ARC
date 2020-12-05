@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.generic;
+package fr.insee.arc.ws.services.rest.execute;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,22 +8,22 @@ import java.util.HashMap;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.ws.services.rest.generic.pojo.GenericPojo;
-import fr.insee.arc.ws.services.rest.generic.pojo.QueryPojo;
-import fr.insee.arc.ws.services.rest.generic.view.DataSetView;
-import fr.insee.arc.ws.services.rest.generic.view.ReturnView;
+import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteParameterPojo;
+import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteQueryPojo;
+import fr.insee.arc.ws.services.rest.execute.view.DataSetView;
+import fr.insee.arc.ws.services.rest.execute.view.ReturnView;
 
-public class GenericRulesDao {
+public class ExecuteRulesDao {
 
 /**
- * get the rules from the database
+ * get the webService rules from the database
  * @param p
  * @param serviceName
  * @param serviceId
  * @return
  * @throws SQLException 
  */
-public static void fillRules(Connection c, GenericPojo p, String serviceName, int serviceId) throws SQLException
+public static void fillRules(Connection c, ExecuteParameterPojo p, String serviceName, int serviceId) throws SQLException
 {
 	StringBuilder requete;
 	GenericBean gb;
@@ -52,17 +52,17 @@ public static void fillRules(Connection c, GenericPojo p, String serviceName, in
 
 	p.fileName = p.fileName == null ? "f.xml" : p.fileName;
 
-	p.queries=new ArrayList<QueryPojo>();
+	p.queries=new ArrayList<ExecuteQueryPojo>();
 	
 	for (int i=0;i<m.get("service_name").size();i++)
 	{
-		QueryPojo e=new QueryPojo(m.get("query_id").get(i), m.get("query_name").get(i), m.get("expression").get(i), m.get("query_view").get(i));
+		ExecuteQueryPojo e=new ExecuteQueryPojo(m.get("query_id").get(i), m.get("query_name").get(i), m.get("expression").get(i), m.get("query_view").get(i));
 		
 		p.queries.add(e);
 	}
 }
 
-public static void buildResponse(Connection c, GenericPojo p, ReturnView r, Date firstContactDate) throws SQLException
+public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnView r, Date firstContactDate) throws SQLException
 {
 	r.setReceptionTime(firstContactDate);
 	r.setReturnTime(new Date());

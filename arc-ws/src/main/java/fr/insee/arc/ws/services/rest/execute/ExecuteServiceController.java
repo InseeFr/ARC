@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.generic;
+package fr.insee.arc.ws.services.rest.execute;
 
 import java.sql.Connection;
 import java.util.Date;
@@ -21,17 +21,13 @@ import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.ws.services.rest.generic.pojo.GenericPojo;
-import fr.insee.arc.ws.services.rest.generic.view.ReturnView;
+import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteParameterPojo;
+import fr.insee.arc.ws.services.rest.execute.view.ReturnView;
 
 @RestController
-public class GenericServiceController {
+public class ExecuteServiceController {
 	
-    private static final Logger LOGGER = LogManager.getLogger(GenericServiceController.class);
-
-    @Autowired
-    @Qualifier("properties")
-    public  PropertiesHandler properties;
+    private static final Logger LOGGER = LogManager.getLogger(ExecuteServiceController.class);
 
 	@Autowired
 	private LoggerDispatcher loggerDispatcher;
@@ -40,7 +36,7 @@ public class GenericServiceController {
 	public ResponseEntity<ReturnView> executeEngineClient(
 			@PathVariable String serviceName,
 			@PathVariable int serviceId,
-			@RequestBody(required = true) GenericPojo p
+			@RequestBody(required = true) ExecuteParameterPojo bodyPojo
 	)
 	{
 		Date firstContactDate=new Date();
@@ -53,24 +49,22 @@ public class GenericServiceController {
 	
 		try {
 		
-		try (Connection c = UtilitaireDao.get("arc").getDriverConnexion()) {
+		try (Connection connection = UtilitaireDao.get("arc").getDriverConnexion()) {
 						
-			GenericRulesDao.fillRules(c, p, serviceName, serviceId);
-			
-			StringBuilder requete;
-			
-			String env = p.sandbox;
-			String repertoire = properties.getBatchParametersDirectory();
+			ExecuteRulesDao.fillRules(connection, bodyPojo, serviceName, serviceId);
+						
+			String env = bodyPojo.sandbox;
+			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
 	
 			ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm", env);
 			
-			for (int i = 2; i <= Integer.parseInt(p.targetPhase); i++) {
+			for (int i = 2; i <= Integer.parseInt(bodyPojo.targetPhase); i++) {
 				ApiServiceFactory.getService(TraitementPhase.getPhase(i).toString(), "arc.ihm", env,
-							repertoire, "10000000").invokeApi();
+							repertoire, Integer.MAX_VALUE+"").invokeApi();
 				}
 			
 			
-			GenericRulesDao.buildResponse(c, p, returnView, firstContactDate);
+			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
 
 		}
 	} catch (Exception e) {

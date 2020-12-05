@@ -1,6 +1,6 @@
-package fr.insee.arc.ws.services.rest.generic.pojo;
+package fr.insee.arc.ws.services.rest.execute.pojo;
 
-public class QueryPojo {
+public class ExecuteQueryPojo {
 	
 	// numéro de requete de sortie
 	public String query_id;
@@ -11,12 +11,12 @@ public class QueryPojo {
 	// expression sql de la requete
 	public String expression;
 
-	// rendu de la reuqtee de sortie : LINE ou COLUMN
+	// rendu de la requete de sortie : LINE ou COLUMN
 	public String query_view;
 
 	
 	
-	public QueryPojo(String query_id, String query_name, String expression, String query_view) {
+	public ExecuteQueryPojo(String query_id, String query_name, String expression, String query_view) {
 		super();
 		this.query_id = query_id;
 		this.query_name = query_name;
