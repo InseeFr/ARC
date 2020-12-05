@@ -3,6 +3,7 @@ package fr.insee.arc.utils.format;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.postgresql.core.Utils;
 
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
@@ -544,6 +546,17 @@ public class Format implements IConstanteCaractere {
     @SafeVarargs
     public static <T> T coalesce(T... objects) {
         return Arrays.asList(objects).stream().filter((t) -> t != null).findFirst().orElse(null);
+    }
+    
+    /**
+     * escape quote return value through function
+     * @param s
+     * @return
+     * @throws SQLException 
+     */
+    public static String quoteText(String s) throws SQLException
+    {
+    	return "'" + Utils.escapeLiteral(null, s, true) + "'";
     }
 
 }

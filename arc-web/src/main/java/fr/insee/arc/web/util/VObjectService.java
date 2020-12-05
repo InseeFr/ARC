@@ -39,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -520,18 +521,12 @@ public class VObjectService {
                     if (attributeValues != null && attributeValues.length > j
                             &&
                             map.containsKey(currentData.getHeadersDLabel().get(i).toLowerCase() )
-                            
-                            // attributeValues[j].getFirst().equalsIgnoreCase(v0.headersDLabel.get(i))
                             ) {
                         insertValue =
-                                map.get(currentData.getHeadersDLabel().get(i).toLowerCase())
-                                
-                                //attributeValues[j].getSecond()
-                                ;
-                        //j++;
+                                map.get(currentData.getHeadersDLabel().get(i).toLowerCase());
                     } else if (currentData.getInputFields().get(i) != null && currentData.getInputFields().get(i).length() > 0) {
                         allNull = false;
-                        insertValue = "'" + currentData.getInputFields().get(i).replace("'", "''") + "'::" + currentData.getHeadersDType().get(i);
+                        insertValue = Format.quoteText(currentData.getInputFields().get(i))+ "::" + currentData.getHeadersDType().get(i);
                     } else {
                         insertValue = "null";
                     }
@@ -563,6 +558,8 @@ public class VObjectService {
         }
         return true;
     }
+    
+  
 
     /*
      *
@@ -594,7 +591,11 @@ public class VObjectService {
                         reqDelete.append(v0.getHeadersDLabel().get(j));
 
                         if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
-                            reqDelete.append("='" + v0.getContent().get(i).d.get(j).replace("'", "''") + "'::" + v0.getHeadersDType().get(j));
+                            try {
+								reqDelete.append("="+ Format.quoteText(v0.getContent().get(i).d.get(j))+ "::" + v0.getHeadersDType().get(j));
+							} catch (SQLException e) {
+						        LoggerHelper.error(LOGGER, "delete()", e.getMessage());
+							}
                         } else {
                             reqDelete.append(" is null");
                         }
@@ -647,7 +648,11 @@ public class VObjectService {
                     }
                     reqDelete.append(v0.getHeadersDLabel().get(j));
                     if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
-                        reqDelete.append("='" + v0.getContent().get(i).d.get(j).replace("'", "''") + "'::" + v0.getHeadersDType().get(j));
+                        try {
+							reqDelete.append("=" + Format.quoteText(v0.getContent().get(i).d.get(j)) + "::" + v0.getHeadersDType().get(j));
+						} catch (SQLException e) {
+					        LoggerHelper.error(LOGGER, "deleteForUpdate()", e.getMessage());
+						}
                     } else {
                         reqDelete.append(" is null");
                     }
@@ -708,7 +713,11 @@ public class VObjectService {
                     } else {
                         //Serial type is set as int4
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
-                        reqUpdate.append(label + "='" + newValue.replace("'", "''") + "'::" + type);
+                        try {
+							reqUpdate.append(label + "=" + Format.quoteText(newValue) + "::" + type);
+						} catch (SQLException e) {
+					        LoggerHelper.error(LOGGER, "update()", e.getMessage());
+						}
                     }
                 }
             }
@@ -728,7 +737,11 @@ public class VObjectService {
                         reqUpdate.append(label + " IS NULL");
                     } else{
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
-                        reqUpdate.append(label + "='" + oldValue.replace("'", "''") + "'::" + type);
+                        try {
+							reqUpdate.append(label + "=" + Format.quoteText(oldValue) + "::" + type);
+						} catch (SQLException e) {
+					        LoggerHelper.error(LOGGER, "update()", e.getMessage());
+						}
                     }
 					
 					// Updates value in v0
@@ -1294,7 +1307,11 @@ public class VObjectService {
                 if (j > 0) {
                     requete.append(",");
                 }
-                requete.append("'" + liste.get(i).get(j).replace("'", "''") + "'::" + type.get(j) + " as " + header.get(j));
+                try {
+					requete.append("" + Format.quoteText(liste.get(i).get(j)) + "::" + type.get(j) + " as " + header.get(j));
+				} catch (SQLException e) {
+			        LoggerHelper.error(LOGGER, "initializeByList()", e.getMessage());
+				}
             }
         }
 
