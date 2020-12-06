@@ -693,7 +693,7 @@ public class VObjectService {
             boolean comma = false;
 
             int lineToBeUpdated = toBeUpdated.get(i);
-			for (int j = 0; j < v0.getHeadersDLabel().size(); j++) {
+			for (int j = 0; j < currentData.getContent().get(lineToBeUpdated).d.size(); j++) {
                 // If the field exists in the bdd and has any value
                 String label = v0.getHeadersDLabel().get(j);
 				String newValue = currentData.getContent().get(lineToBeUpdated).d.get(j);
@@ -715,7 +715,7 @@ public class VObjectService {
             reqUpdate.append(" WHERE ");
 
             comma = false;
-            for (int j = 0; j < v0.getHeadersDLabel().size(); j++) {
+            for (int j = 0; j < currentData.getContent().get(lineToBeUpdated).d.size(); j++) {
                 String label = v0.getHeadersDLabel().get(j);
 				if (nativeFieldsList.contains(label)) {
                     if (comma) {
