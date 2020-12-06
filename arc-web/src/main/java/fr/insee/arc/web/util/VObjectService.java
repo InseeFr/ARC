@@ -42,6 +42,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
@@ -526,7 +527,7 @@ public class VObjectService {
                                 map.get(currentData.getHeadersDLabel().get(i).toLowerCase());
                     } else if (currentData.getInputFields().get(i) != null && currentData.getInputFields().get(i).length() > 0) {
                         allNull = false;
-                        insertValue = Format.quoteText(currentData.getInputFields().get(i))+ "::" + currentData.getHeadersDType().get(i);
+                        insertValue = FormatSQL.quoteText(currentData.getInputFields().get(i))+ "::" + currentData.getHeadersDType().get(i);
                     } else {
                         insertValue = "null";
                     }
@@ -592,7 +593,7 @@ public class VObjectService {
 
                         if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
                             try {
-								reqDelete.append("="+ Format.quoteText(v0.getContent().get(i).d.get(j))+ "::" + v0.getHeadersDType().get(j));
+								reqDelete.append("="+ FormatSQL.quoteText(v0.getContent().get(i).d.get(j))+ "::" + v0.getHeadersDType().get(j));
 							} catch (SQLException e) {
 						        LoggerHelper.error(LOGGER, "delete()", e.getMessage());
 							}
@@ -649,7 +650,7 @@ public class VObjectService {
                     reqDelete.append(v0.getHeadersDLabel().get(j));
                     if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
                         try {
-							reqDelete.append("=" + Format.quoteText(v0.getContent().get(i).d.get(j)) + "::" + v0.getHeadersDType().get(j));
+							reqDelete.append("=" + FormatSQL.quoteText(v0.getContent().get(i).d.get(j)) + "::" + v0.getHeadersDType().get(j));
 						} catch (SQLException e) {
 					        LoggerHelper.error(LOGGER, "deleteForUpdate()", e.getMessage());
 						}
@@ -696,9 +697,8 @@ public class VObjectService {
         for (int i = 0; i < toBeUpdated.size(); i++) {
             reqUpdate.append("\nUPDATE " + v0.getTable() + " SET ");
             boolean comma = false;
-
             int lineToBeUpdated = toBeUpdated.get(i);
-			for (int j = 0; j < v0.getHeadersDLabel().size(); j++) {
+			for (int j = 0; j < currentData.getContent().get(lineToBeUpdated).d.size(); j++) {
                 // If the field exists in the bdd and has any value
                 String label = v0.getHeadersDLabel().get(j);
 				String newValue = currentData.getContent().get(lineToBeUpdated).d.get(j);
@@ -714,7 +714,7 @@ public class VObjectService {
                         //Serial type is set as int4
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
                         try {
-							reqUpdate.append(label + "=" + Format.quoteText(newValue) + "::" + type);
+							reqUpdate.append(label + "=" + FormatSQL.quoteText(newValue) + "::" + type);
 						} catch (SQLException e) {
 					        LoggerHelper.error(LOGGER, "update()", e.getMessage());
 						}
@@ -724,7 +724,7 @@ public class VObjectService {
             reqUpdate.append(" WHERE ");
 
             comma = false;
-            for (int j = 0; j < v0.getHeadersDLabel().size(); j++) {
+            for (int j = 0; j < currentData.getContent().get(lineToBeUpdated).d.size(); j++) {
                 String label = v0.getHeadersDLabel().get(j);
 				if (nativeFieldsList.contains(label)) {
                     if (comma) {
@@ -738,7 +738,7 @@ public class VObjectService {
                     } else{
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
                         try {
-							reqUpdate.append(label + "=" + Format.quoteText(oldValue) + "::" + type);
+							reqUpdate.append(label + "=" + FormatSQL.quoteText(oldValue) + "::" + type);
 						} catch (SQLException e) {
 					        LoggerHelper.error(LOGGER, "update()", e.getMessage());
 						}
@@ -1308,7 +1308,7 @@ public class VObjectService {
                     requete.append(",");
                 }
                 try {
-					requete.append("" + Format.quoteText(liste.get(i).get(j)) + "::" + type.get(j) + " as " + header.get(j));
+					requete.append("" + FormatSQL.quoteText(liste.get(i).get(j)) + "::" + type.get(j) + " as " + header.get(j));
 				} catch (SQLException e) {
 			        LoggerHelper.error(LOGGER, "initializeByList()", e.getMessage());
 				}

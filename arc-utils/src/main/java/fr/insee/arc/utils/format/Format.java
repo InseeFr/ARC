@@ -548,15 +548,5 @@ public class Format implements IConstanteCaractere {
         return Arrays.asList(objects).stream().filter((t) -> t != null).findFirst().orElse(null);
     }
     
-    /**
-     * escape quote return value through function
-     * @param s
-     * @return
-     * @throws SQLException 
-     */
-    public static String quoteText(String s) throws SQLException
-    {
-    	return "'" + Utils.escapeLiteral(null, s, true) + "'";
-    }
 
 }

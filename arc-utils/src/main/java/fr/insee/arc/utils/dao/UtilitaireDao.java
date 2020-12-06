@@ -864,11 +864,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, String requete, ModeRequete... modes)
 			throws SQLException {
-
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
-
 	}
 
+	
+	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, String requete, List<String> parameters, ModeRequete... modes)
+			throws SQLException {
+		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), parameters, modes);
+
+	}
+	
 	/**
 	 * Exécution de requêtes ramenant des enregistrements
 	 *
@@ -891,6 +896,14 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return executeRequest(connexion, requete, EntityProvider.getTypedListProvider(orm), modes);
 	}
 
+	
+	public <T> T executeRequest(Connection connexion, String requete, EntityProvider<T> entityProvider,
+			ModeRequete... modes) throws SQLException {
+		
+		return executeRequest(connexion, requete, entityProvider, new ArrayList<String>(), modes);
+		
+	}
+	
 	/**
 	 * Exécution de requêtes ramenant des enregistrements
 	 *
@@ -909,6 +922,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 */
 	public <T> T executeRequest(Connection connexion, String requete, EntityProvider<T> entityProvider,
+			List<String> parameters,
 			ModeRequete... modes) throws SQLException {
 		if (modes != null && modes.length > 0) {
 			LoggerHelper.trace(LOGGER, "\n" + untokenize(modes));
@@ -923,33 +937,42 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
 			try {
 				connexionWrapper.getConnexion().setAutoCommit(false);
-				PreparedStatement stmt;
 				if (modes != null && modes.length > 0) {
-					stmt = connexionWrapper.getConnexion()
-							.prepareStatement(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr());
-					stmt.execute();
+					try(PreparedStatement stmt = connexionWrapper.getConnexion()
+							.prepareStatement(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr());)
+					{
+						stmt.execute();
+					}
 				} else {
-					stmt = connexionWrapper.getConnexion().prepareStatement(ModeRequete.EXTRA_FLOAT_DIGIT.expr());
-					stmt.execute();
+					try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(ModeRequete.EXTRA_FLOAT_DIGIT.expr());)
+					{
+						stmt.execute();
+					}
 				}
-				stmt = connexionWrapper.getConnexion().prepareStatement(updatedQuery);
-				LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
-
-				try {
-					Boolean isresult = stmt.execute();
-					if (isresult) {
-						ResultSet res = stmt.getResultSet();
-						return entityProvider.apply(res);
+				try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(updatedQuery);)
+				{
+					for (int i=0;i<parameters.size();i++)
+					{
+						stmt.setString(i+1, parameters.get(i));
 					}
-					return null;
-				} catch (Exception e) {
-					if (!this.silent) {
-						LoggerHelper.error(LOGGER, stmt.toString());
+					
+					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
+	
+					try {
+						Boolean isresult = stmt.execute();
+						if (isresult) {
+							ResultSet res = stmt.getResultSet();
+							return entityProvider.apply(res);
+						}
+						return null;
+					} catch (Exception e) {
+						if (!this.silent) {
+							LoggerHelper.error(LOGGER, stmt.toString());
+						}
+						throw e;
+					} finally {
+						connexionWrapper.getConnexion().commit();
 					}
-					throw e;
-				} finally {
-					stmt.close();
-					connexionWrapper.getConnexion().commit();
 				}
 			} catch (Exception e) {
 				if (!this.silent) {

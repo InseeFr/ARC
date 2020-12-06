@@ -1,6 +1,7 @@
 package fr.insee.arc.utils.utils;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.postgresql.core.Utils;
 
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -58,6 +60,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String EXPRESSION_TYPE_SQL = EXPRESSION_TYPE_SQL_SEUL + " AS data_type";
     private static final String BEGIN_COMMENTARY = "/*";
     private static final String END_COMMENTARY = "*/";
+    
     
     public static enum ObjectType
     {
@@ -2083,4 +2086,16 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 
     }
 
+    
+    /**
+     * escape quote return value through function
+     * @param s
+     * @return
+     * @throws SQLException 
+     */
+    public static String quoteText(String s) throws SQLException
+    {
+    	return "'" + Utils.escapeLiteral(null, s, true) + "'";
+    }
+    
 }
