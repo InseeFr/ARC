@@ -28,7 +28,7 @@
 
 	<div class="container-fluid">	
 	<c:import url="tiles/template_help.jsp">
-		<c:param name="helpPage" value="/html/selectNormFamily.html" />
+		<c:param name="helpPage" value="/html/en/selectNormFamily.html" />
 	</c:import>
 			<div class="row">
 				<div

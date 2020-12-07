@@ -1,4 +1,5 @@
 # Norm family management
+{lang=en}
 
 ## Norm family presentation
 
