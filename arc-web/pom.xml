@@ -15,11 +15,26 @@
 	<name>ARC-WEB</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <webresources.directory>${project.build.directory}/${build.finalName}/</webresources.directory>
 	</properties>
 
 	<profiles>
 		<profile>
 			<id>docker</id>
+		</profile>
+	<!-- Profile executed by the m2e (Maven to Eclipse) plugin -->
+		<profile>
+			<id>m2e</id>
+			<activation>
+		        <property>
+		          <name>m2e.version</name>
+		        </property>
+		    </activation>
+		    <properties>
+				<!-- (Eclipse fix) m2e-wtp fetches the resources before Maven process them, 
+				so we need to put them directly into the m2e-wtp directory-->
+        		<webresources.directory>${project.build.directory}/m2e-wtp/web-resources/</webresources.directory>
+      		</properties>
 		</profile>
 	</profiles>
 
@@ -122,6 +137,7 @@
 				<directory>${basedir}/src/main/resources</directory>
 				<excludes>
 					<exclude>prod/*.properties</exclude>
+					<exclude>help/**</exclude>
 				</excludes>
 				<filtering>true</filtering>
 			</resource>
@@ -146,7 +162,64 @@
 				</configuration>
 			</plugin>
 
+			<plugin>
+			    <groupId>com.ruleoftech</groupId>
+			    <artifactId>markdown-page-generator-plugin</artifactId>
+			    <version>2.2.0</version>
+			    <executions>
+	                <execution>
+	                    <phase>process-resources</phase>
+	                    <goals>
+	                        <goal>generate</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+			    <configuration>
+			    	<inputDirectory>${project.basedir}/src/main/resources/help/</inputDirectory>
+			    	<applyFiltering>true</applyFiltering>
+			    	<recursiveInput>true</recursiveInput>
+			    	<outputDirectory>${webresources.directory}/html/</outputDirectory>
+			    	<headerHtmlFile>${project.basedir}/src/main/resources/help/header.html</headerHtmlFile>
+			    </configuration>
+			</plugin>
 		</plugins>
 
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.ruleoftech
+										</groupId>
+										<artifactId>
+											markdown-page-generator-plugin
+										</artifactId>
+										<versionRange>
+											[2.2.0,)
+										</versionRange>
+										<goals>
+											<goal>generate</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+                 							<runOnIncremental>true</runOnIncremental>
+										</execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>
