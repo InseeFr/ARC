@@ -137,6 +137,7 @@
 				<directory>${basedir}/src/main/resources</directory>
 				<excludes>
 					<exclude>prod/*.properties</exclude>
+					<exclude>help/*</exclude>
 				</excludes>
 				<filtering>true</filtering>
 			</resource>
@@ -174,9 +175,9 @@
 	                </execution>
 	            </executions>
 			    <configuration>
-			    	<inputDirectory>${project.basedir}/src/main/resources/guide/</inputDirectory>
+			    	<inputDirectory>${project.basedir}/src/main/resources/help/</inputDirectory>
 			    	<outputDirectory>${webresources.directory}/html/</outputDirectory>
-			    	<headerHtmlFile>${project.basedir}/src/main/resources/guide/header.html</headerHtmlFile>
+			    	<headerHtmlFile>${project.basedir}/src/main/resources/help/header.html</headerHtmlFile>
 			    </configuration>
 			</plugin>
 		</plugins>
