@@ -23,6 +23,7 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
 
@@ -136,8 +137,7 @@ public class ControleRegleService {
 						blocInsert.append(insertRegle(jdr, reg));
 					}
 				} else {
-					Exception e = new Exception(msgErreur);
-					throw e;
+					throw new Exception(msgErreur);
 				}
 				
 				if (i>0 && (i%chunk==0 || i==listRegle.size()))
@@ -153,13 +153,9 @@ public class ControleRegleService {
 			}
 			StaticLoggerDispatcher.info("Fin de la vérification des règles!!!",logger);
 
-			// Si on arrive jusqu'ici c'est que tout est OK
-			// je remets le marqueur todo à null
-			// UtilitaireDao.get("arc").executeBlock(null, "UPDATE arc.ihm_controle_regle SET todo=null");
 
 		} catch (Exception e) {
 			StaticLoggerDispatcher.info("L'insertion de règles n'a pas abouti",logger);
-			// deleteTodo(jdr,"arc.ihm_controle_regle");
 			throw e;
 		}
 		return isAjouter;
@@ -380,46 +376,29 @@ public class ControleRegleService {
 	 * @param jdr
 	 * @param reg
 	 * @return
+	 * @throws SQLException 
 	 */
-	private String insertRegle(JeuDeRegle jdr, RegleControleEntity reg) {
+	private String insertRegle(JeuDeRegle jdr, RegleControleEntity reg) throws SQLException {
 		StringBuilder requete = new StringBuilder();
 		// les données issues du JeuDeRegle
-		requete.append("(" + preparaStringSql(jdr.getIdNorme()));
-		requete.append("," + preparaStringSql(jdr.getPeriodicite()));
-		requete.append("," + preparaStringSql(jdr.getValiditeInfString()));
-		requete.append("," + preparaStringSql(jdr.getValiditeSupString()));
-		requete.append("," + preparaStringSql(jdr.getVersion()));
+		requete.append("(" + FormatSQL.quoteText(jdr.getIdNorme()));
+		requete.append("," + FormatSQL.quoteText(jdr.getPeriodicite()));
+		requete.append("," + FormatSQL.quoteText(jdr.getValiditeInfString()));
+		requete.append("," + FormatSQL.quoteText(jdr.getValiditeSupString()));
+		requete.append("," + FormatSQL.quoteText(jdr.getVersion()));
 		// les données issue de la règle
-		requete.append("," + preparaStringSql(reg.getIdRegle()));
-		requete.append("," + preparaStringSql(reg.getIdClasse()));
-		requete.append("," + preparaStringSql(reg.getRubriquePere()));
-		requete.append("," + preparaStringSql(reg.getRubriqueFils()));
-		requete.append("," + preparaStringSql(reg.getBorneInf()));
-		requete.append("," + preparaStringSql(reg.getBorneSup()));
-		requete.append("," + preparaStringSql(reg.getCondition()));
-		requete.append("," + preparaStringSql(reg.getPreAction()));
-		requete.append("," + preparaStringSql(reg.getCommentaire()));
+		requete.append("," + FormatSQL.quoteText(reg.getIdRegle()));
+		requete.append("," + FormatSQL.quoteText(reg.getIdClasse()));
+		requete.append("," + FormatSQL.quoteText(reg.getRubriquePere()));
+		requete.append("," + FormatSQL.quoteText(reg.getRubriqueFils()));
+		requete.append("," + FormatSQL.quoteText(reg.getBorneInf()));
+		requete.append("," + FormatSQL.quoteText(reg.getBorneSup()));
+		requete.append("," + FormatSQL.quoteText(reg.getCondition()));
+		requete.append("," + FormatSQL.quoteText(reg.getPreAction()));
+		requete.append("," + FormatSQL.quoteText(reg.getCommentaire()));
 		requete.append(",'1'");
 		requete.append(")");
 		return requete.toString();
-	}
-
-	/**
-	 * Méthode pour mettre entre cote et doubler les cotes internes Cela fonctionne même pour id_regle qui est un integer, car postgresql
-	 * semble faire un cast implicite
-	 *
-	 * @param champ
-	 * @return
-	 */
-	private String preparaStringSql(String champ) {
-		String s;
-		if (StringUtils.isNotBlank(champ)) {
-			s = "'" + champ.replace("'", "''") + "'";
-		} else {
-			s = null;
-		}
-		;
-		return s;
 	}
 
 	/**

@@ -34,13 +34,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
+import fr.insee.arc.utils.dao.PreparedStatementParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
@@ -501,6 +502,8 @@ public class VObjectService {
             // Récupération des colonnes de la table cible
             List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
+            PreparedStatementParameters psp=new PreparedStatementParameters();
+            
             Boolean allNull = true;
             StringBuilder reqInsert = new StringBuilder();
             StringBuilder reqValues = new StringBuilder();
@@ -520,18 +523,12 @@ public class VObjectService {
                     if (attributeValues != null && attributeValues.length > j
                             &&
                             map.containsKey(currentData.getHeadersDLabel().get(i).toLowerCase() )
-                            
-                            // attributeValues[j].getFirst().equalsIgnoreCase(v0.headersDLabel.get(i))
                             ) {
                         insertValue =
-                                map.get(currentData.getHeadersDLabel().get(i).toLowerCase())
-                                
-                                //attributeValues[j].getSecond()
-                                ;
-                        //j++;
+                                map.get(currentData.getHeadersDLabel().get(i).toLowerCase());
                     } else if (currentData.getInputFields().get(i) != null && currentData.getInputFields().get(i).length() > 0) {
                         allNull = false;
-                        insertValue = "'" + currentData.getInputFields().get(i).replace("'", "''") + "'::" + currentData.getHeadersDType().get(i);
+                        insertValue = psp.quoteText(currentData.getInputFields().get(i))+ "::" + currentData.getHeadersDType().get(i);
                     } else {
                         insertValue = "null";
                     }
@@ -550,7 +547,7 @@ public class VObjectService {
             requete.append("END;");
             try {
                 if (!allNull) {
-                    UtilitaireDao.get(this.pool).executeRequest(null, requete.toString());
+                    UtilitaireDao.get(this.pool).executeRequest(null, requete.toString(), psp.getParameters());
                 }
             } catch (SQLException e) {
                 currentData.setMessage(e.getMessage());
@@ -563,6 +560,8 @@ public class VObjectService {
         }
         return true;
     }
+    
+  
 
     /*
      *
@@ -573,6 +572,8 @@ public class VObjectService {
 
         ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
+        PreparedStatementParameters psp=new PreparedStatementParameters();
+        
         StringBuilder reqDelete = new StringBuilder();
         reqDelete.append("BEGIN; ");
         for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
@@ -594,7 +595,7 @@ public class VObjectService {
                         reqDelete.append(v0.getHeadersDLabel().get(j));
 
                         if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
-                            reqDelete.append("='" + v0.getContent().get(i).d.get(j).replace("'", "''") + "'::" + v0.getHeadersDType().get(j));
+								reqDelete.append("="+ psp.quoteText(v0.getContent().get(i).d.get(j))+ "::" + v0.getHeadersDType().get(j));
                         } else {
                             reqDelete.append(" is null");
                         }
@@ -605,7 +606,7 @@ public class VObjectService {
         }
         reqDelete.append("END; ");
         try {
-            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete);
+            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete, psp.getParameters());
         } catch (SQLException e) {
         	currentData.setMessage(e.getMessage());
         }
@@ -632,6 +633,9 @@ public class VObjectService {
             }
         }
         LoggerHelper.traceAsComment(LOGGER, "toBeUpdated : ", toBeUpdated);
+        
+        PreparedStatementParameters psp=new PreparedStatementParameters();
+        
         StringBuilder reqDelete = new StringBuilder();
         reqDelete.append("BEGIN; ");
         for (int i = 0; i < v0.getContent().size(); i++) {
@@ -647,7 +651,7 @@ public class VObjectService {
                     }
                     reqDelete.append(v0.getHeadersDLabel().get(j));
                     if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
-                        reqDelete.append("='" + v0.getContent().get(i).d.get(j).replace("'", "''") + "'::" + v0.getHeadersDType().get(j));
+							reqDelete.append("=" + psp.quoteText(v0.getContent().get(i).d.get(j)) + "::" + v0.getHeadersDType().get(j));
                     } else {
                         reqDelete.append(" is null");
                     }
@@ -657,7 +661,7 @@ public class VObjectService {
         }
         reqDelete.append("END; ");
         try {
-            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete);
+            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete, psp.getParameters());
         } catch (SQLException e) {
         	currentData.setMessage(e.getMessage());
         }
@@ -685,13 +689,13 @@ public class VObjectService {
         ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
         // SQL update query
+        PreparedStatementParameters psp=new PreparedStatementParameters();
         StringBuilder reqUpdate = new StringBuilder();
         reqUpdate.append("BEGIN; ");
 
         for (int i = 0; i < toBeUpdated.size(); i++) {
             reqUpdate.append("\nUPDATE " + v0.getTable() + " SET ");
             boolean comma = false;
-
             int lineToBeUpdated = toBeUpdated.get(i);
 			for (int j = 0; j < currentData.getContent().get(lineToBeUpdated).d.size(); j++) {
                 // If the field exists in the bdd and has any value
@@ -708,7 +712,7 @@ public class VObjectService {
                     } else {
                         //Serial type is set as int4
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
-                        reqUpdate.append(label + "='" + newValue.replace("'", "''") + "'::" + type);
+							reqUpdate.append(label + "=" + psp.quoteText(newValue) + "::" + type);
                     }
                 }
             }
@@ -728,7 +732,7 @@ public class VObjectService {
                         reqUpdate.append(label + " IS NULL");
                     } else{
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
-                        reqUpdate.append(label + "='" + oldValue.replace("'", "''") + "'::" + type);
+							reqUpdate.append(label + "=" + psp.quoteText(oldValue) + "::" + type);
                     }
 					
 					// Updates value in v0
@@ -746,7 +750,7 @@ public class VObjectService {
         reqUpdate.append("END;");
         try {
             if (!toBeUpdated.isEmpty()) {
-                UtilitaireDao.get(this.pool).executeRequest(null, "" + reqUpdate);
+                UtilitaireDao.get(this.pool).executeRequest(null, "" + reqUpdate, psp.getParameters());
             }
             session.put(currentData.getSessionName(), v0);
         } catch (SQLException e) {
@@ -762,8 +766,6 @@ public class VObjectService {
         StringBuilder requete = new StringBuilder();
         requete.append("select alias_de_table.* from (" + v0.getMainQuery() + ") alias_de_table ");
         requete.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()));
-        // requete.append(buildOrderBy(v0.headerSortDLabels,
-        // v0.headerSortDOrders));
         return requete;
     }
 
@@ -1279,7 +1281,10 @@ public class VObjectService {
     }
 
     public void initializeByList(VObject data, ArrayList<ArrayList<String>> liste, HashMap<String, String> defaultInputFields) {
-        StringBuilder requete = new StringBuilder();
+
+    	PreparedStatementParameters psp=new PreparedStatementParameters();
+    	
+    	StringBuilder requete = new StringBuilder();
         ArrayList<String> header = liste.get(0);
         ArrayList<String> type = liste.get(1);
 
@@ -1294,7 +1299,11 @@ public class VObjectService {
                 if (j > 0) {
                     requete.append(",");
                 }
-                requete.append("'" + liste.get(i).get(j).replace("'", "''") + "'::" + type.get(j) + " as " + header.get(j));
+                try {
+					requete.append("" + FormatSQL.quoteText(liste.get(i).get(j)) + "::" + type.get(j) + " as " + header.get(j));
+				} catch (SQLException e) {
+			        LoggerHelper.error(LOGGER, "initializeByList()", e.getMessage());
+				}
             }
         }
 
