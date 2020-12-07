@@ -7,10 +7,10 @@ public class PreparedStatementParameters {
 
 private List<String> parameters=new ArrayList<String>();
 
-public int quoteText(String s)
+public String quoteText(String s)
 {
 	parameters.add(s);
-	return parameters.size();
+	return "?";
 }
 
 public List<String> getParameters() {

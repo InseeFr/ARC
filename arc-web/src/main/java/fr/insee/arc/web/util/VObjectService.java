@@ -34,12 +34,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
+import fr.insee.arc.utils.dao.PreparedStatementParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -503,6 +502,8 @@ public class VObjectService {
             // Récupération des colonnes de la table cible
             List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
+            PreparedStatementParameters psp=new PreparedStatementParameters();
+            
             Boolean allNull = true;
             StringBuilder reqInsert = new StringBuilder();
             StringBuilder reqValues = new StringBuilder();
@@ -527,7 +528,7 @@ public class VObjectService {
                                 map.get(currentData.getHeadersDLabel().get(i).toLowerCase());
                     } else if (currentData.getInputFields().get(i) != null && currentData.getInputFields().get(i).length() > 0) {
                         allNull = false;
-                        insertValue = FormatSQL.quoteText(currentData.getInputFields().get(i))+ "::" + currentData.getHeadersDType().get(i);
+                        insertValue = psp.quoteText(currentData.getInputFields().get(i))+ "::" + currentData.getHeadersDType().get(i);
                     } else {
                         insertValue = "null";
                     }
@@ -546,7 +547,7 @@ public class VObjectService {
             requete.append("END;");
             try {
                 if (!allNull) {
-                    UtilitaireDao.get(this.pool).executeRequest(null, requete.toString());
+                    UtilitaireDao.get(this.pool).executeRequest(null, requete.toString(), psp.getParameters());
                 }
             } catch (SQLException e) {
                 currentData.setMessage(e.getMessage());
@@ -571,6 +572,8 @@ public class VObjectService {
 
         ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
+        PreparedStatementParameters psp=new PreparedStatementParameters();
+        
         StringBuilder reqDelete = new StringBuilder();
         reqDelete.append("BEGIN; ");
         for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
@@ -592,11 +595,7 @@ public class VObjectService {
                         reqDelete.append(v0.getHeadersDLabel().get(j));
 
                         if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
-                            try {
-								reqDelete.append("="+ FormatSQL.quoteText(v0.getContent().get(i).d.get(j))+ "::" + v0.getHeadersDType().get(j));
-							} catch (SQLException e) {
-						        LoggerHelper.error(LOGGER, "delete()", e.getMessage());
-							}
+								reqDelete.append("="+ psp.quoteText(v0.getContent().get(i).d.get(j))+ "::" + v0.getHeadersDType().get(j));
                         } else {
                             reqDelete.append(" is null");
                         }
@@ -607,7 +606,7 @@ public class VObjectService {
         }
         reqDelete.append("END; ");
         try {
-            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete);
+            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete, psp.getParameters());
         } catch (SQLException e) {
         	currentData.setMessage(e.getMessage());
         }
@@ -634,6 +633,9 @@ public class VObjectService {
             }
         }
         LoggerHelper.traceAsComment(LOGGER, "toBeUpdated : ", toBeUpdated);
+        
+        PreparedStatementParameters psp=new PreparedStatementParameters();
+        
         StringBuilder reqDelete = new StringBuilder();
         reqDelete.append("BEGIN; ");
         for (int i = 0; i < v0.getContent().size(); i++) {
@@ -649,11 +651,7 @@ public class VObjectService {
                     }
                     reqDelete.append(v0.getHeadersDLabel().get(j));
                     if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
-                        try {
-							reqDelete.append("=" + FormatSQL.quoteText(v0.getContent().get(i).d.get(j)) + "::" + v0.getHeadersDType().get(j));
-						} catch (SQLException e) {
-					        LoggerHelper.error(LOGGER, "deleteForUpdate()", e.getMessage());
-						}
+							reqDelete.append("=" + psp.quoteText(v0.getContent().get(i).d.get(j)) + "::" + v0.getHeadersDType().get(j));
                     } else {
                         reqDelete.append(" is null");
                     }
@@ -663,7 +661,7 @@ public class VObjectService {
         }
         reqDelete.append("END; ");
         try {
-            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete);
+            UtilitaireDao.get(this.pool).executeRequest(null, "" + reqDelete, psp.getParameters());
         } catch (SQLException e) {
         	currentData.setMessage(e.getMessage());
         }
@@ -691,6 +689,7 @@ public class VObjectService {
         ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
         // SQL update query
+        PreparedStatementParameters psp=new PreparedStatementParameters();
         StringBuilder reqUpdate = new StringBuilder();
         reqUpdate.append("BEGIN; ");
 
@@ -713,11 +712,7 @@ public class VObjectService {
                     } else {
                         //Serial type is set as int4
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
-                        try {
-							reqUpdate.append(label + "=" + FormatSQL.quoteText(newValue) + "::" + type);
-						} catch (SQLException e) {
-					        LoggerHelper.error(LOGGER, "update()", e.getMessage());
-						}
+							reqUpdate.append(label + "=" + psp.quoteText(newValue) + "::" + type);
                     }
                 }
             }
@@ -737,11 +732,7 @@ public class VObjectService {
                         reqUpdate.append(label + " IS NULL");
                     } else{
                     	String type = v0.getHeadersDType().get(j).equals("serial") ? "int4" : v0.getHeadersDType().get(j);
-                        try {
-							reqUpdate.append(label + "=" + FormatSQL.quoteText(oldValue) + "::" + type);
-						} catch (SQLException e) {
-					        LoggerHelper.error(LOGGER, "update()", e.getMessage());
-						}
+							reqUpdate.append(label + "=" + psp.quoteText(oldValue) + "::" + type);
                     }
 					
 					// Updates value in v0
@@ -759,7 +750,7 @@ public class VObjectService {
         reqUpdate.append("END;");
         try {
             if (!toBeUpdated.isEmpty()) {
-                UtilitaireDao.get(this.pool).executeRequest(null, "" + reqUpdate);
+                UtilitaireDao.get(this.pool).executeRequest(null, "" + reqUpdate, psp.getParameters());
             }
             session.put(currentData.getSessionName(), v0);
         } catch (SQLException e) {
@@ -775,8 +766,6 @@ public class VObjectService {
         StringBuilder requete = new StringBuilder();
         requete.append("select alias_de_table.* from (" + v0.getMainQuery() + ") alias_de_table ");
         requete.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()));
-        // requete.append(buildOrderBy(v0.headerSortDLabels,
-        // v0.headerSortDOrders));
         return requete;
     }
 
@@ -1292,7 +1281,10 @@ public class VObjectService {
     }
 
     public void initializeByList(VObject data, ArrayList<ArrayList<String>> liste, HashMap<String, String> defaultInputFields) {
-        StringBuilder requete = new StringBuilder();
+
+    	PreparedStatementParameters psp=new PreparedStatementParameters();
+    	
+    	StringBuilder requete = new StringBuilder();
         ArrayList<String> header = liste.get(0);
         ArrayList<String> type = liste.get(1);
 
