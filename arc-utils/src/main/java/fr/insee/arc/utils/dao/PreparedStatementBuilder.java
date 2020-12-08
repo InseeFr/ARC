@@ -47,4 +47,12 @@ public String toString() {
 }
 
 
+public PreparedStatementBuilder append(PreparedStatementBuilder s)
+{
+	query.append(s.query);
+	parameters.addAll(s.parameters);
+	return this;
+}
+
+
 }
