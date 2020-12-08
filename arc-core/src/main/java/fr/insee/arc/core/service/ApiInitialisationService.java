@@ -21,6 +21,7 @@ import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -108,7 +109,7 @@ public class ApiInitialisationService extends ApiService {
 
         if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
             ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc")
-                    .executeRequest(null, "select id_entrepot from arc.ihm_entrepot")).mapContent().get("id_entrepot");
+                    .executeRequest(null, new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent().get("id_entrepot");
 
             if (entrepotList!=null)
             {
@@ -142,7 +143,7 @@ public class ApiInitialisationService extends ApiService {
                     if (!fichier.isDirectory()) {
 	                	if (first || requete.length()>FormatSQL.TAILLE_MAXIMAL_BLOC_SQL)
 	                	{
-	                		UtilitaireDao.get("arc").executeRequest(this.connexion, requete + ";");
+	                		UtilitaireDao.get("arc").executeImmediate(this.connexion, requete + ";");
 	                        requete=new StringBuilder();
 	                		requete.append("INSERT INTO t_files values ('"+fichier.getName().replace("'", "''")+"')");
 	                		first=false;
@@ -153,16 +154,16 @@ public class ApiInitialisationService extends ApiService {
 	                	}
                     }
                 }
-        		UtilitaireDao.get("arc").executeRequest(this.connexion, requete + ";");
+        		UtilitaireDao.get("arc").executeImmediate(this.connexion, requete + ";");
 
         		// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table archive
         		// Si on en trouve ce n'est pas cohérent et on doit remettre ces fichiers dans le répertoire de reception
         		// pour être rechargé
-                requete=new StringBuilder();
-                requete.append(" SELECT fname FROM t_files a ");
-                requete.append(" WHERE NOT EXISTS (SELECT * FROM " + nomTableArchive + " b WHERE b.nom_archive=a.fname) ");
+                PreparedStatementBuilder requete2=new PreparedStatementBuilder();
+                requete2.append(" SELECT fname FROM t_files a ");
+                requete2.append(" WHERE NOT EXISTS (SELECT * FROM " + nomTableArchive + " b WHERE b.nom_archive=a.fname) ");
 
-                ArrayList<String> fileToBeMoved=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,requete)).mapContent().get("fname");
+                ArrayList<String> fileToBeMoved=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,requete2)).mapContent().get("fname");
                 
                 if (fileToBeMoved!=null)
                 {
@@ -247,7 +248,7 @@ public class ApiInitialisationService extends ApiService {
 
         String user = "arc";
         try {
-            user = UtilitaireDao.get("arc").getString(null, "select user ");
+            user = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select user "));
         } catch (SQLException ex) {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "bddScript()", LOGGER, ex);
         }
@@ -266,7 +267,7 @@ public class ApiInitialisationService extends ApiService {
         requete.append("\n ); ");
         
         // création des table de modalités IHM
-        int n=UtilitaireDao.get("arc").getInt(null, "select count(*) from arc.ext_etat");
+        int n=UtilitaireDao.get("arc").getInt(null, new PreparedStatementBuilder("select count(*) from arc.ext_etat"));
         if (n>2)
         {
         	requete.append("\n DROP TABLE IF EXISTS arc.ext_etat; ");
@@ -1014,7 +1015,7 @@ public class ApiInitialisationService extends ApiService {
 				{
 					UtilitaireDao.get(poolName).executeImmediate(connexion, "CREATE TABLE IF NOT EXISTS "+ t + dataDef);
 					
-					if (!UtilitaireDao.get(poolName).hasResults(connexion, "select 1 FROM "+t+" limit 1"))
+					if (!UtilitaireDao.get(poolName).hasResults(connexion, new PreparedStatementBuilder("select 1 FROM "+t+" limit 1")))
 					{
 						UtilitaireDao.get(poolName).executeImmediate(connexion, "DROP TABLE IF EXISTS "+ t +" CASCADE; CREATE TABLE IF NOT EXISTS "+ t + dataDef);
 					}
@@ -1049,8 +1050,10 @@ public class ApiInitialisationService extends ApiService {
         // on cherche tous les containers contenant un fichier à rejouer
         // on remet l'archive à la racine
 
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+
         ArrayList<String> containerList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-                "select distinct container from " + tablePil + " where to_delete in ('R','RA')")).mapContent().get("container");
+        		new PreparedStatementBuilder("select distinct container from " + tablePil + " where to_delete in ('R','RA')"))).mapContent().get("container");
 
         if (containerList != null) {
         	String repertoire = properties.getBatchParametersDirectory();
@@ -1105,7 +1108,8 @@ public class ApiInitialisationService extends ApiService {
             /*
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
              */
-            StringBuilder requeteRef = new StringBuilder("SELECT lower(id_famille), lower('" + ApiService.dbEnv(envExecution)
+        	PreparedStatementBuilder requeteRef = new PreparedStatementBuilder();
+        	requeteRef.append("SELECT lower(id_famille), lower('" + ApiService.dbEnv(envExecution)
                     + "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM " + envParameters + "_mod_variable_metier");
 
             List<List<String>> relationalViewRef = Format.patch(UtilitaireDao.get(poolName).executeRequestWithoutMetadata(connexion, requeteRef));
@@ -1115,8 +1119,8 @@ public class ApiInitialisationService extends ApiService {
             /*
              * Récupérer dans le méta-modèle de la base les tables métiers correspondant à la famille chargée
              */
-            StringBuilder requete = new StringBuilder(
-                    "SELECT lower(id_famille), lower(table_schema||'.'||table_name) nom_table_metier, lower(column_name) nom_variable_metier");
+            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            requete.append("SELECT lower(id_famille), lower(table_schema||'.'||table_name) nom_table_metier, lower(column_name) nom_variable_metier");
             
             // les types dans postgres sont horribles :(
             // udt_name : float8 = float, int8=bigint, int4=int
@@ -1276,9 +1280,9 @@ public class ApiInitialisationService extends ApiService {
         String nomTablePilotage = dbEnv(envExecution) + "pilotage_fichier";
         String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
 
-        StringBuilder requete = new StringBuilder();
+        PreparedStatementBuilder requete;
         
-
+        requete = new PreparedStatementBuilder();
         
         requete.append("DROP TABLE IF EXISTS fichier_to_delete; ");
         requete.append("CREATE TEMPORARY TABLE fichier_to_delete AS ");
@@ -1322,7 +1326,7 @@ public class ApiInitialisationService extends ApiService {
                 
                 
                 // requete sur laquelle on va itérer : on selectionne un certain nombre de fichier et on itere
-                requete = new StringBuilder();
+                requete = new PreparedStatementBuilder();
                 
                 // 3b. on selectionne les fichiers éligibles et on limite le nombre de retour pour que l'update ne soit pas trop massif (perf)
                 requete.append("WITH fichier_to_delete_limit AS ( ")
@@ -1390,7 +1394,7 @@ public class ApiInitialisationService extends ApiService {
         	}
          loggerDispatcher.info("Archivage Fin", LOGGER);
          
-        } while (UtilitaireDao.get("arc").hasResults(connexion, "select 1 from fichier_to_delete limit 1"))
+        } while (UtilitaireDao.get("arc").hasResults(connexion, new PreparedStatementBuilder("select 1 from fichier_to_delete limit 1")))
         ;
         
         // y'a-til des choses à faire ?
@@ -1420,10 +1424,10 @@ public class ApiInitialisationService extends ApiService {
 
             }
 
-            requete.setLength(0);
+            StringBuilder requeteMaintenance = new StringBuilder();
             requete.append("vacuum analyze " + nomTablePilotage + "; ");
             requete.append("vacuum analyze " + nomTableArchive + "; ");
-            UtilitaireDao.get("arc").executeImmediate(connexion, requete);
+            UtilitaireDao.get("arc").executeImmediate(connexion, requeteMaintenance);
         }
 
     }
@@ -1503,66 +1507,6 @@ public class ApiInitialisationService extends ApiService {
                 requete.append("CREATE TABLE " + tableImage
                         + " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT a.* FROM " + anParametersEnvironment + "_"
                         + r[i] + " AS a " + condition + ";\n");
-                // Identifier les changements en comparant la table image et la
-                // table courante dans l'environnement
-                // Marquer les changement dans la norme (changement de nom,
-                // changement de définition ou disparition)
-//                if (!UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists(tableCurrent))) {
-//                    requete.append("CREATE TABLE " + tableCurrent
-//                            + " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT a.* FROM " + anParametersEnvironment
-//                            + "_" + r[i] + " AS a " + condition + ";\n");
-//                }
-//                if (r[i] == TraitementTableParametre.NORME) {
-//                    requete.append("with prep as ( ");
-//                    requete.append("	select * from ( ");
-//                    requete.append("		select b.id_norme as id_norme_new, b.def_validite as def_validite_new, b.def_norme as def_norme_new, a.id_norme, a.def_validite, a.def_norme ");
-//                    requete.append("		,case when a.id_norme!=b.id_norme then 1 else 0 end as chgt_norme ");
-//                    requete.append("		,case when a.def_norme!=b.def_norme or a.def_validite!=b.def_validite then 1 else 0 end as chgt_def ");
-//                    requete.append("		,case when a.id_norme is not null and b.id_norme is null then 1 else 0 end as erase_norme ");
-//                    requete.append("		FROM " + tableImage + " b FULL OUTER JOIN " + tableCurrent + " a ");
-//                    requete.append("		ON a.id=b.id ");
-//                    requete.append(") u ");
-//                    requete.append("where chgt_norme+chgt_def+erase_norme>0 ) ");
-//                    requete.append("UPDATE " + tablePil + " a ");
-//                    requete.append("set id_norme=case when chgt_norme=1 then b.id_norme_new else a.id_norme end ");
-//                    requete.append(",rapport=case when chgt_def=1 and phase_traitement='" + TraitementPhase.NORMAGE + "' then '"
-//                            + TraitementRapport.INITIALISATION_CHGT_DEF_NORME + "' ");
-//                    requete.append("when erase_norme='1'  and phase_traitement='" + TraitementPhase.NORMAGE + "' then '"
-//                            + TraitementRapport.INITIALISATION_NORME_OBSOLETE + "' ");
-//                    requete.append("else a.rapport end ");
-//                    requete.append("FROM prep b ");
-//                    requete.append("WHERE a.id_norme=b.id_norme ");
-//                    requete.append("and exists (select 1 from prep); \n");
-//                }
-//                // Marquer les changement dans le calendrier (hors validite)
-//                if (r[i] == TraitementTableParametre.CALENDRIER) {
-//                    requete.append("with prep as ( ");
-//                    requete.append("select * from (");
-//                    requete.append("select b.id_norme as id_norme_new, b.periodicite as periodicite_new, b.validite_inf as validite_inf_new, b.validite_sup as validite_sup_new ");
-//                    requete.append(",a.id_norme, a.periodicite, a.validite_inf, a.validite_sup ");
-//                    requete.append(",case when a.validite_inf!=b.validite_inf or a.validite_sup!=b.validite_sup then 1 else 0 end as chgt_cal ");
-//                    requete.append(",case when a.id_norme is not null and b.id_norme is null then 1 else 0 end as erase_cal ");
-//                    requete.append("FROM " + tableImage + " b FULL OUTER JOIN " + tableCurrent + " a ");
-//                    requete.append("ON a.id=b.id ");
-//                    requete.append(") u ");
-//                    requete.append("where chgt_cal+erase_cal>0 ");
-//                    requete.append(") ");
-//                    requete.append("UPDATE " + tablePil + " a ");
-//                    requete.append("set rapport= ");
-//                    requete.append("case when erase_cal=1 then '" + TraitementRapport.CONTROLE_CALENDRIER_OBSOLETE + "' ");
-//                    requete.append("when a.validite::date>b.validite_sup_new or a.validite::date<b.validite_inf_new then '"
-//                            + TraitementRapport.CONTROLE_VALIDITE_HORS_CALENDRIER + "' ");
-//                    requete.append("else a.rapport end ");
-//                    requete.append("from prep b ");
-//                    requete.append("where a.id_norme=b.id_norme ");
-//                    requete.append("and a.periodicite=b.periodicite ");
-//                    requete.append("and a.validite_inf=b.validite_inf ");
-//                    requete.append("and a.validite_sup=b.validite_sup ");
-//                    requete.append("and a.phase_traitement='" + TraitementPhase.CONTROLE + "' ");
-//                    requete.append("and exists (select 1 from prep); \n ");
-//                }
-//                // Une fois que c'est fait, on drop la table courante et on la
-//                // remplace par la table image
                 requete.append(FormatSQL.dropTable(tableCurrent).toString());
                 requete.append("ALTER TABLE " + tableImage + " rename to " + ManipString.substringAfterLast(tableCurrent, ".") + "; \n");
             }
@@ -1574,9 +1518,10 @@ public class ApiInitialisationService extends ApiService {
            
             //1.Préparation des requêtes de suppression des tables nmcl_ et ext_ du schéma courant
             
-            String requeteSelectDrop = 	" SELECT 'DROP TABLE IF EXISTS '||schemaname||'.'||tablename||';'  AS requete_drop"+
-            							" FROM pg_tables where schemaname = '"+ anExecutionEnvironment.toLowerCase()+"'"+
-            							" AND tablename SIMILAR TO '%nmcl%|%ext%'";
+            PreparedStatementBuilder requeteSelectDrop = new PreparedStatementBuilder();
+            requeteSelectDrop.append(" SELECT 'DROP TABLE IF EXISTS '||schemaname||'.'||tablename||';'  AS requete_drop");
+            requeteSelectDrop.append(" FROM pg_tables where schemaname = "+ requeteSelectDrop.quoteText(anExecutionEnvironment.toLowerCase())+" ");
+            requeteSelectDrop.append(" AND tablename SIMILAR TO '%nmcl%|%ext%'");
             							
             
             ArrayList<String> requetesDeSuppressionTablesNmcl = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requeteSelectDrop)).mapContent().get("requete_drop");
@@ -1591,7 +1536,7 @@ public class ApiInitialisationService extends ApiService {
             
             //2.Préparation des requêtes de création des tables
             ArrayList<String> requetesDeCreationTablesNmcl = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
-                    "select tablename from pg_tables where (tablename like 'nmcl\\_%' OR tablename like 'ext\\_%') and schemaname='arc'")).mapContent().get("tablename");
+            		new PreparedStatementBuilder("select tablename from pg_tables where (tablename like 'nmcl\\_%' OR tablename like 'ext\\_%') and schemaname='arc'"))).mapContent().get("tablename");
             
             if (requetesDeCreationTablesNmcl!=null){
 	            for (String tableName : requetesDeCreationTablesNmcl) {
@@ -1619,19 +1564,21 @@ public class ApiInitialisationService extends ApiService {
      * @param querySelection
      * @param listEtat
      */
-    public void retourPhasePrecedente(TraitementPhase phase, String querySelection, ArrayList<TraitementEtat> listEtat) {
+    public void retourPhasePrecedente(TraitementPhase phase, PreparedStatementBuilder querySelection, ArrayList<TraitementEtat> listEtat) {
         LOGGER.info("Retour arrière pour la phase :" + phase);
-        StringBuilder requete = new StringBuilder();
+        PreparedStatementBuilder requete;
         // MAJ de la table de pilotage
         Integer nbLignes = 0;
 
         
         // Delete the selected file entries from the pilotage table from all the phases after the undo phase
         for (TraitementPhase phaseNext : phase.nextPhases()) {
-            requete.setLength(0);
-            requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = '" + phaseNext + "' ");
+        	requete = new PreparedStatementBuilder();
+            requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phaseNext.toString()) + " ");
             if (querySelection != null) {
-                requete.append("AND " + FormatSQL.writeInQuery("id_source", querySelection));
+                requete.append("AND id_source IN (SELECT distinct id_source FROM (");
+                requete.append(querySelection);
+                requete.append(") q1 ) ");               
             }
             requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
             nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion, requete);
@@ -1641,13 +1588,15 @@ public class ApiInitialisationService extends ApiService {
         // Mark the selected file entries to be reload then rebuild the file system for the reception phase
         if (phase.equals(TraitementPhase.RECEPTION))
         {
-        	requete.setLength(0);
-            requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = '" + phase + "' ");
+        	requete = new PreparedStatementBuilder();
+            requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = '" + requete.quoteText(phase.toString()) + "' ");
             if (querySelection != null) {
-                requete.append("AND " + FormatSQL.writeInQuery("id_source", querySelection));
+            	 requete.append("AND id_source IN (SELECT distinct id_source FROM (");
+                 requete.append(querySelection);
+                 requete.append(") q1 ) ");
             }
             try {
-				UtilitaireDao.get("arc").executeImmediate(connexion, requete);
+				UtilitaireDao.get("arc").executeRequest(connexion, requete);
 			} catch (SQLException e) {
 				loggerDispatcher.error(e, LOGGER);
 			}
@@ -1662,11 +1611,13 @@ public class ApiInitialisationService extends ApiService {
         }
 
         // Delete the selected file entries from the pilotage table from the undo phase
-        requete.setLength(0);
+    	requete = new PreparedStatementBuilder();
         requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = '" + phase + "' ");
         if (querySelection != null) {
-            requete.append("AND " + FormatSQL.writeInQuery("id_source", querySelection));
-        }
+       	 	requete.append("AND id_source IN (SELECT distinct id_source FROM (");
+            requete.append(querySelection);
+            requete.append(") q1 ) ");
+       }
         requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
         nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion, requete);
 
@@ -1699,8 +1650,8 @@ public class ApiInitialisationService extends ApiService {
      * @param env
      * @return
      */
-    public StringBuilder requeteListAllTablesEnvTmp(String env) {
-        StringBuilder requete = new StringBuilder();
+    public PreparedStatementBuilder requeteListAllTablesEnvTmp(String env) {
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
         TraitementPhase[] phase = TraitementPhase.values();
         // on commence après la phase "initialisation". i=2
         for (int i = 2; i < phase.length; i++) {
@@ -1720,29 +1671,26 @@ public class ApiInitialisationService extends ApiService {
      * @param env
      * @return
      */
-    public static StringBuilder requeteListAllTablesEnv(String env) {
-        StringBuilder requete = new StringBuilder();
+    public static PreparedStatementBuilder requeteListAllTablesEnv(String env) {
+    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
         TraitementPhase[] phase = TraitementPhase.values();
-        Boolean insert = false;
-        String r;
+        boolean insert = false;
 
         for (int i = 0; i < phase.length; i++) {
             if (insert) {
                 requete.append(" UNION ALL ");
             }
-            r = requeteListTableEnv(env, phase[i].toString()).toString();
-            insert = !(r.length() == 0);
+            PreparedStatementBuilder r = requeteListTableEnv(env, phase[i].toString());
+            insert = (r.length() > 0);
             requete.append(r);
         }
-       // System.out.println(requete);
-
         return requete;
     }
 
-    public static StringBuilder requeteListTableEnv(String env, String phase) {
+    public static PreparedStatementBuilder requeteListTableEnv(String env, String phase) {
         // Les tables dans l'environnement sont de la forme
         TraitementEtat[] etat = TraitementEtat.values();
-        StringBuilder requete = new StringBuilder();
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
         for (int j = 0; j < etat.length; j++) {
             if (!etat[j].equals(TraitementEtat.ENCOURS)) {
                 if (j > 0) {
@@ -1806,10 +1754,10 @@ public class ApiInitialisationService extends ApiService {
    		 			// Only MAX_LOCK_PER_TRANSACTION tables can be proceed at the same time so iteration is required
                     HashMap<String, ArrayList<String>> m;
                     do {
-           		 	m=new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-           		 					"\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_"+CHILD_TABLE_TOKEN+"\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION+" ) "
+                    	m=new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
+                    			new PreparedStatementBuilder("\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_"+CHILD_TABLE_TOKEN+"\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION+" ) "
            		 					+"\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
-           		 					+"\n SELECT tablename from TMP_SELECT "
+           		 					+"\n SELECT tablename from TMP_SELECT ")
            		 					)).mapContent();
            		 	
 	           		 	StringBuilder query=new StringBuilder();
@@ -1822,7 +1770,7 @@ public class ApiInitialisationService extends ApiService {
 		           		 	{
 		           		 		// on récupère la variable etape dans la phase
 		           		 		// si on ne trouve la source de la table dans la phase, on drop !
-		           		 		String etape=UtilitaireDao.get(poolName).getString(connexion, "SELECT etape FROM "+tablePil+" WHERE phase_traitement='" + phase + "' AND '" + etat + "'=ANY(etat_traitement) AND id_source=(select id_source from "+t+" limit 1)");
+		           		 		String etape=UtilitaireDao.get(poolName).getString(connexion, new PreparedStatementBuilder("SELECT etape FROM "+tablePil+" WHERE phase_traitement='" + phase + "' AND '" + etat + "'=ANY(etat_traitement) AND id_source=(select id_source from "+t+" limit 1)"));
 		           		 		
 		           		 		if (etape==null)
 		           		 		{
@@ -1937,7 +1885,7 @@ public class ApiInitialisationService extends ApiService {
 
             if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
                 ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-                        "select id_entrepot from arc.ihm_entrepot")).mapContent().get("id_entrepot");
+                		new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent().get("id_entrepot");
                 if (entrepotList!=null)
                 {
 	                for (String s : entrepotList) {

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -23,13 +24,13 @@ public class VObject {
 	private int paginationSize;
 
 	/** Requête de génération du tableau */
-	private String mainQuery;
+	private PreparedStatementBuilder mainQuery;
 
-	public String beforeSelectQuery;
+	public PreparedStatementBuilder beforeSelectQuery;
 
-	public String afterUpdateQuery;
+	public PreparedStatementBuilder afterUpdateQuery;
 
-	public String afterInsertQuery;
+	public PreparedStatementBuilder afterInsertQuery;
 
 	/** Table utilisée pour les update/insert/delete */
 	public String table;
@@ -472,36 +473,48 @@ public class VObject {
 		this.paginationSize = paginationSize;
 	}
 
-	public String getMainQuery() {
+	public PreparedStatementBuilder getMainQuery() {
 		return mainQuery;
 	}
 
-	public void setMainQuery(String mainQuery) {
+	public void setMainQuery(PreparedStatementBuilder mainQuery) {
 		this.mainQuery = mainQuery;
 	}
 
-	public String getBeforeSelectQuery() {
+	public PreparedStatementBuilder getBeforeSelectQuery() {
 		return beforeSelectQuery;
 	}
 
-	public void setBeforeSelectQuery(String beforeSelectQuery) {
+	public void setBeforeSelectQuery(PreparedStatementBuilder beforeSelectQuery) {
 		this.beforeSelectQuery = beforeSelectQuery;
 	}
 
-	public String getAfterUpdateQuery() {
+	public PreparedStatementBuilder getAfterUpdateQuery() {
 		return afterUpdateQuery;
 	}
 
-	public void setAfterUpdateQuery(String afterUpdateQuery) {
+	public void setAfterUpdateQuery(PreparedStatementBuilder afterUpdateQuery) {
 		this.afterUpdateQuery = afterUpdateQuery;
 	}
 
-	public String getAfterInsertQuery() {
+	public PreparedStatementBuilder getAfterInsertQuery() {
 		return afterInsertQuery;
 	}
 
-	public void setAfterInsertQuery(String afterInsertQuery) {
+	public void setAfterInsertQuery(PreparedStatementBuilder afterInsertQuery) {
 		this.afterInsertQuery = afterInsertQuery;
+	}
+
+	public void setInitialized(boolean isInitialized) {
+		this.isInitialized = isInitialized;
+	}
+
+	public void setScoped(boolean isScoped) {
+		this.isScoped = isScoped;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
 	public String getTable() {

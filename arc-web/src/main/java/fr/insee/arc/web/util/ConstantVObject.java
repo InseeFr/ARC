@@ -3,6 +3,8 @@ package fr.insee.arc.web.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+
 /**
  * FIXME isUpdatable l'étiquette ne correspond pas au produit false<-/->true
  *
@@ -18,7 +20,7 @@ public final class ConstantVObject {
         public String label;
         public String size;
         public String type;
-        public String query;
+        public PreparedStatementBuilder query;
         public Boolean isUpdatable;
         public Boolean isRequired;
 
@@ -37,7 +39,7 @@ public final class ConstantVObject {
          * @param isUpdatable
          *            est-ce que je peux modifier la colonne ?
          */
-        public ColumnRendering(Boolean visible, String label, String size, String type, String query, Boolean isUpdatable) {
+        public ColumnRendering(Boolean visible, String label, String size, String type, PreparedStatementBuilder query, Boolean isUpdatable) {
             this.visible = visible;
             this.label = label;
             this.size = size;
@@ -63,7 +65,7 @@ public final class ConstantVObject {
         * @param isRequired
         *           est-ce un champ qui doit absolument être saisi?
         */
-        public ColumnRendering(Boolean visible, String label, String size, String type, String query, Boolean isUpdatable, Boolean isRequired) {
+        public ColumnRendering(Boolean visible, String label, String size, String type, PreparedStatementBuilder query, Boolean isUpdatable, Boolean isRequired) {
             this(visible, label, size, type, query, isUpdatable);
             this.isRequired = isRequired;
         }

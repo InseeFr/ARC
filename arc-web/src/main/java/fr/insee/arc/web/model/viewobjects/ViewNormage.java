@@ -2,6 +2,7 @@ package fr.insee.arc.web.model.viewobjects;
 
 import java.util.HashMap;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.util.ConstantVObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.VObject;
@@ -30,7 +31,7 @@ public class ViewNormage extends VObject {
                 put("version", new ColumnRendering(false, "label.version", "0", "text", null, true));
                 put("id_regle", new ColumnRendering(true, "label.id", "5%", "text", null, true));
                 put("id_classe", new ColumnRendering(true, "label.structure.type", "23%", "select",
-                        "select id, id from arc.ext_type_normage order by ordre", true));
+                        new PreparedStatementBuilder("select id, id from arc.ext_type_normage order by ordre"), true));
                 put("rubrique", new ColumnRendering(true, "label.element.main", "24%", "text", null, true));
                 put("rubrique_nmcl", new ColumnRendering(true, "label.element.child", "24%", "text", null, true));
                 put("commentaire", new ColumnRendering(true, "label.comment", "24%", "text", null, true));

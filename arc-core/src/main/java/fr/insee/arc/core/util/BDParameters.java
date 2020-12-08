@@ -3,6 +3,7 @@ package fr.insee.arc.core.util;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 
@@ -18,7 +19,7 @@ public class BDParameters {
 	public static String getString(Connection c, String key) {
 		String r = null;
 		try {
-			r = UtilitaireDao.get("arc").getString(c, parameterQuery(key));
+			r = UtilitaireDao.get("arc").getString(c, new PreparedStatementBuilder(parameterQuery(key)));
 //			System.out.println(">>>>> " + key + " : " + r);
 		} catch (Exception e) {
 	        // Création de la table de parametre
