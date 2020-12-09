@@ -18,6 +18,7 @@ import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -155,9 +156,15 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
      * @throws SQLException
      */
     private void attribuerExpressionRegleMapping(Map<String, VariableMapping> mapVariable) throws Exception {
-        StringBuilder requete = new StringBuilder("SELECT DISTINCT variable_sortie as variable_sortie, expr_regle_col as expr_regle_col FROM "
-                + this.nomTableRegleMapping)//
-                .append("\nWHERE ").append(this.jeuDeRegle.getSqlEquals()).append(";");
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        requete
+        	.append("SELECT DISTINCT variable_sortie as variable_sortie, expr_regle_col as expr_regle_col FROM ")
+        	.append(this.nomTableRegleMapping)
+        	.append("\n WHERE ")
+        	.append(this.jeuDeRegle.getSqlEquals())
+        	.append(";")
+        ;
+        
         List<List<String>> resultTemp = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
         
         ArrayList<ArrayList<String>> result= new ArrayList<>();
@@ -240,22 +247,10 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
      */
     private void construireListeRubriqueParTable()
     {
-
         this.ensembleRubriqueIdentifianteTable=new HashMap<>();
 
-        
-//      Set <String> identifiantsTable=new HashSet<String>();
-//      for (TableMapping table : this.ensembleTableMapping) {
-//          identifiantsTable.add(table.getPrimaryKey());
-//      }
-//      identifiantsTable.add(varIdSource);
-        
         for (TableMapping table : this.ensembleTableMapping) {
-//          System.out.println("*********");
 
-//          System.out.println(table.getPrimaryKey()+ " " +table.getEnsembleVariableMapping());
-
-            
             HashSet<String> s=new HashSet<>();
             
             for (VariableMapping var : this.ensembleVariableMapping) {
@@ -263,63 +258,16 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
                 if (table.getEnsembleVariableMapping().contains(var) 
                         && !var.toString().startsWith(idKeyPrefix)
                         && !var.toString().startsWith(foreignKeyPrefix) 
-//                      && !identifiantsTable.contains(var.toString()
                     ||  var.toString().equals(table.getPrimaryKey())
                     )
 
                 {
                     s.addAll(var.getEnsembleIdentifiantsRubriques());
-                    
-//                  System.out.println(var.getNomVariable() + var.getEnsembleIdentifiantsRubriques());
-
                 }
-                
-//              for (String var: variable.getEnsembleIdentifiantsRubriques())
-//              {
-//                      s.add(e)
-//              }
-            }
-            
-//          System.out.println(table.getNomTable());
-//          System.out.println(s);
-            this.ensembleRubriqueIdentifianteTable.put(table,s);
-//          System.out.println(this.ensembleRubriqueIdentifianteTable);
 
-            
+            }
+            this.ensembleRubriqueIdentifianteTable.put(table,s);
         }
-        
-//      // passage 2 : on ajoute les feuilles
-//      // faire l'arbre
-//      HashMap<TableMapping,TableMapping> tree=new HashMap<TableMapping,TableMapping>();
-//      
-//      for (TableMapping table : this.ensembleTableMapping) {
-//          for (TableMapping table0 : this.ensembleTableMapping) {
-//              
-//              if (!table.equals(table0) && table.getEnsembleVarMapping().contains(table0.getPrimaryKey()))
-//              {
-//                  tree.put(table, table0);
-//              }
-//              
-//          }
-//      }
-//      
-//      
-//      // parcours de l'arbre pour ajouter aux peres les rubriques des filles
-//      HashMap<TableMapping,TableMapping> tree2=(HashMap<TableMapping, TableMapping>) tree.clone();
-//      
-//      while (!tree.isEmpty())
-//      {
-//          for (TableMapping fils : tree.keySet()) {
-//              if (!tree.containsValue(fils))
-//              {
-//                  this.ensembleRubriqueIdentifianteTable.get(tree.get(fils)).addAll(this.ensembleRubriqueIdentifianteTable.get(fils));
-//                  tree2.remove(fils);
-//              }
-//          }
-//          tree=(HashMap<TableMapping, TableMapping>) tree2.clone();
-//      }
-        
-        
     }
     
     
@@ -335,11 +283,14 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
     private Map<String, VariableMapping> construireTablesEtVariablesMapping() throws SQLException {
         Map<String, VariableMapping> mapVariable = new HashMap<>();
         Map<String, TableMapping> mapTable = new HashMap<>();
-        StringBuilder requete = new StringBuilder(
-                "SELECT DISTINCT nom_variable_metier, nom_table_metier, type_variable_metier FROM "
-                        + this.nomTableModVariableMetier)//
-                .append("\nWHERE id_famille = '" + this.idFamille + "';");
+        
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        requete.append("SELECT DISTINCT nom_variable_metier, nom_table_metier, type_variable_metier FROM ");
+        requete.append(this.nomTableModVariableMetier);
+        requete.append("\n WHERE id_famille = " + requete.quoteText(this.idFamille) + ";");
+        
         List<List<String>> result = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
+        
         for (int i = ARRAY_THIRD_COLUMN_INDEX; i < result.size(); i++) {
             /*
              * Mise à jour de mes variables

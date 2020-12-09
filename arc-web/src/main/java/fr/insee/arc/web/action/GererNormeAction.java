@@ -987,15 +987,19 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 				if (isRegleOk) {
 					// check if each varialbe have a rule
 					JeuDeRegle jdr = gererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
-					StringBuilder bloc = new StringBuilder();
+					PreparedStatementBuilder bloc = new PreparedStatementBuilder();
 					/*
 					 * DELETE from
 					 */
-					bloc.append("DELETE FROM " + nomTable + " WHERE " + jdr.getSqlEquals() + ";");
+					bloc
+						.append("DELETE FROM " + nomTable + " WHERE ")
+						.append(jdr.getSqlEquals())
+						.append(";");
+					
 					for (int i = 0; i < listeRegle.size(); i++) {
 						bloc.append(dao.getInsert(listeRegle.get(i), map));
 					}
-					UtilitaireDao.get(poolName).executeBlock(null, bloc);
+					UtilitaireDao.get(poolName).executeRequest(null, bloc);
 				}
 			} catch (Exception ex) {
 				LoggerHelper.error(LOGGER, "importMapping()", ex.getStackTrace());

@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SQLExecutor;
@@ -45,12 +46,12 @@ public class QueryDaoImpl implements QueryDao {
             LoggerHelper.debugAsComment(LOGGER, timestamp, ": QueryDaoImpl.doRequest() : Connection Done - ", time1, "ms");
 
             long beginning2 = System.currentTimeMillis();
-            result = UtilitaireDao.get("arc").executeRequest(connection, "SELECT * FROM " + id + ";");
+            result = UtilitaireDao.get("arc").executeRequest(connection, new PreparedStatementBuilder("SELECT * FROM " + id + ";"));
             long time2 = System.currentTimeMillis() - beginning2;
             LoggerHelper.debugAsComment(LOGGER, timestamp + "QueryDaoImpl.doRequest() : ExecuteQuery(Get ", id, ") Done -", time2, "ms");
 
             long beginning3 = System.currentTimeMillis();
-            UtilitaireDao.get("arc").executeRequest(connection, "DROP TABLE " + id + ";");
+            UtilitaireDao.get("arc").executeImmediate(connection, "DROP TABLE " + id + ";");
             long time3 = System.currentTimeMillis() - beginning3;
             LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.doRequest() : DropTable(", id, ") Done - ", time3, "ms");
 

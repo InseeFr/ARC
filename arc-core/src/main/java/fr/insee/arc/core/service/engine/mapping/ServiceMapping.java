@@ -8,6 +8,7 @@ import java.util.Set;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 
 public class ServiceMapping implements IDbConstant {
@@ -43,11 +44,12 @@ public class ServiceMapping implements IDbConstant {
      * @return Le bon id_famille
      * @throws SQLException
      */
-    //TODO : à placer ailleurs, utile plus généralement que pour le mapping
     public String fetchIdFamille(Connection connexion, JeuDeRegle aJeuDeRegle, String tableNorme) throws SQLException {
-        StringBuilder requete = new StringBuilder("SELECT id_famille FROM " + tableNorme)//
-                .append("\n WHERE id_norme    = '" + aJeuDeRegle.getIdNorme() + "'")//
-                .append("\n AND periodicite = '" + aJeuDeRegle.getPeriodicite() + "';");
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        requete
+        	.append("SELECT id_famille FROM " + tableNorme)
+        	.append("\n WHERE id_norme = " + requete.quoteText(aJeuDeRegle.getIdNorme()))
+        	.append("\n AND periodicite = '" + requete.quoteText(aJeuDeRegle.getPeriodicite()));
         return UtilitaireDao.get(poolName).getString(connexion, requete);
     }
     

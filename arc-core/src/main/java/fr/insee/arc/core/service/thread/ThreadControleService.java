@@ -15,6 +15,7 @@ import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 
@@ -166,12 +167,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
         blocPrep.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
-        //blocPrep.append(createTableControle(this.getTablePrevious(), this.tableControleDataTemp, this.tableControlePilTemp, this.getCurrentPhase()));
         UtilitaireDao.get("arc").executeBlock(this.connexion, blocPrep);
 
         // Récupération des Jeux de règles associés
         this.sjdr.fillRegleControle(this.connexion, jdr, this.getTableControleRegle(), this.tableControleDataTemp);
-        this.structure=UtilitaireDao.get("arc").getString(this.connexion, "SELECT jointure FROM "+this.tableControlePilTemp);
+        this.structure=UtilitaireDao.get("arc").getString(this.connexion, new PreparedStatementBuilder("SELECT jointure FROM "+this.tableControlePilTemp));
     }
 
     

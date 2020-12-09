@@ -27,6 +27,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -252,7 +253,7 @@ public class BatchARC {
 		
 		
 		// des archives n'ont elles pas été traitées jusqu'au bout ?
-		ArrayList<String> aBouger= new GenericBean(UtilitaireDao.get("arc").executeRequest(null,"select distinct container from "+envExecution+".pilotage_fichier where etape=1")).mapContent().get("container");
+		ArrayList<String> aBouger= new GenericBean(UtilitaireDao.get("arc").executeRequest(null,new PreparedStatementBuilder("select distinct container from "+envExecution+".pilotage_fichier where etape=1"))).mapContent().get("container");
 		
 		boolean dejaEnCours=(aBouger!=null);
 
@@ -300,7 +301,7 @@ public class BatchARC {
 		 DateFormat dateFormatHeure = new SimpleDateFormat("HH");
 
 		 String lastInitialize=null;
-         lastInitialize=UtilitaireDao.get("arc").getString(null, "select last_init from arc.pilotage_batch ");
+         lastInitialize=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select last_init from arc.pilotage_batch "));
 
 
 		 Date dNow = new Date();
@@ -319,7 +320,7 @@ public class BatchARC {
 	    	 initialiser.run();
 			 message("Initialisation terminée : "+(int)initialiser.report.nbLines+" e : "+initialiser.report.duree+" ms");
 			
-			UtilitaireDao.get("arc").executeRequest(null, "update arc.pilotage_batch set last_init=to_char(current_date+interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+HEURE_INITIALISATION_PRODUCTION+"' , operation=case when operation='R' then 'O' else operation end;");
+			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("update arc.pilotage_batch set last_init=to_char(current_date+interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+HEURE_INITIALISATION_PRODUCTION+"' , operation=case when operation='R' then 'O' else operation end;"));
 			
 			// on met la date d'initialsiation à la date courante
 			// si la production a demandée à etre réactivée, on la réactive
@@ -394,7 +395,7 @@ public class BatchARC {
 			sleep(delay);
 			
 			if (
-					UtilitaireDao.get("arc").getInt(null,"select count(*) from (select 1 from "+envExecution+".pilotage_fichier where etape=1 limit 1) ww")==0
+					UtilitaireDao.get("arc").getInt(null,new PreparedStatementBuilder("select count(*) from (select 1 from "+envExecution+".pilotage_fichier where etape=1 limit 1) ww"))==0
 					)
 			{
 					exit=true;
@@ -419,7 +420,6 @@ public class BatchARC {
 				effacerRepertoireChargement(repertoire, envExecution);
 			}
 
-//		Files.deleteIfExists(f.toPath());
 		}
 
 		 // Maintenance du catalog
@@ -469,7 +469,7 @@ public class BatchARC {
 	 */
 	public static void creerTablePilotageBatch() throws Exception
 	{
-		StringBuilder requete=new StringBuilder();
+		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text collate \"C\", operation text collate \"C\"); ");
 		requete.append("\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
         UtilitaireDao.get("arc").executeRequest(null, requete);
@@ -483,7 +483,7 @@ public class BatchARC {
 	 */
 	public static boolean productionOn() throws Exception {
 		if (production) {
-			return UtilitaireDao.get("arc").hasResults(null, "select 1 from arc.pilotage_batch where operation='O'");
+			return UtilitaireDao.get("arc").hasResults(null, new PreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 		}
 		else
 		{

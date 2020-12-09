@@ -199,7 +199,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
 			    if (paramBatch!=null)
 			    {
 				    String tableTmpRubriqueDansregles="TMP_RUBRIQUE_DANS_REGLES";
-			        UtilitaireDao.get("arc").executeRequest(
+			        UtilitaireDao.get("arc").executeImmediate(
 			        		this.connexion,
 			        		"\n DROP TABLE IF EXISTS "+tableTmpRubriqueDansregles+"; "
 			        		+ "\n CREATE TEMPORARY TABLE "+tableTmpRubriqueDansregles+" AS "

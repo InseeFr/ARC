@@ -13,7 +13,7 @@ import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.ws.actions.SendResponse;
-
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -171,7 +171,7 @@ public class ExecuteProcessService {
     		query.append("\n where etat='"+this.environnement+"' ; ");
     		
     		try {
-				UtilitaireDao.get("arc").executeRequest(null, query);
+				UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder(query));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

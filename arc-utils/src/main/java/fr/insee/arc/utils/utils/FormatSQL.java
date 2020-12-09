@@ -1738,15 +1738,15 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @param table
      * @return
      */
-    public static String modeleDeDonneesTable(String tableSchema, String tableName)
+    public static PreparedStatementBuilder modeleDeDonneesTable(String tableSchema, String tableName)
     {
-        StringBuilder requete = new StringBuilder();
+    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
         requete.append("\n SELECT lower(column_name) as attname");
         requete.append("\n   , "+EXPRESSION_TYPE_SQL_SEUL+" as typname");
         requete.append("\n FROM INFORMATION_SCHEMA.COLUMNS ");
-        requete.append("\n WHERE table_name = '" + tableName.toLowerCase() + "' ");
-        requete.append(" AND table_schema = '" + tableSchema.toLowerCase() + "'; ");
-        return requete.toString();
+        requete.append("\n WHERE table_name = " + requete.quoteText(tableName.toLowerCase()) + " ");
+        requete.append(" AND table_schema = " + requete.quoteText(tableSchema.toLowerCase()) + "; ");
+        return requete;
     }
     
     /**
@@ -1756,7 +1756,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @param table
      * @return
      */
-    public static String modeleDeDonneesTable(String tableSchemaName)
+    public static PreparedStatementBuilder modeleDeDonneesTable(String tableSchemaName)
     {
     	String tableSchema = tableSchemaName.split("\\.")[0];
 		String tableName = tableSchemaName.split("\\.")[1];

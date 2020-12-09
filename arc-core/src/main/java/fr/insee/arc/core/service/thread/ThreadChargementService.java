@@ -24,6 +24,7 @@ import fr.insee.arc.core.util.ChargementBrutalTable;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.RegleChargement;
 import fr.insee.arc.core.util.TypeChargement;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -186,8 +187,8 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	    // Check if the source loaded in not in a KO state
 	    if (UtilitaireDao.get("arc").hasResults(this.connexion,
-		    "select id_source from  " + this.tableChargementPilTemp + " where  etat_traitement='{"
-			    + TraitementEtat.KO + "}' ")) {
+	    		new PreparedStatementBuilder("select id_source from  " + this.tableChargementPilTemp + " where  etat_traitement='{"
+			    + TraitementEtat.KO + "}' "))) {
 		UtilitaireDao.get("arc").executeBlock(this.connexion, "TRUNCATE TABLE " + this.getTableTempA() + ";");
 	    }
 
@@ -330,9 +331,14 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @throws Exception si aucune règle n'est trouvée
      */
     private Norme calculerTypeFichier(Norme norme) throws Exception {
-		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion(),
-			"SELECT type_fichier, delimiter, format FROM " + this.getTableChargementRegle() + " WHERE id_norme ='"
-				+ norme.getIdNorme() + "';"));
+    	
+    	PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    	requete
+    		.append("SELECT type_fichier, delimiter, format ")
+    		.append(" FROM "+this.getTableChargementRegle())
+    		.append(" WHERE id_norme =" + requete.quoteText(norme.getIdNorme()) + ";");
+
+		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion(), requete));
 		if (g.mapContent().isEmpty()) {
 			throw new Exception("La norme n'a pas de règle de chargement associée.");
 		}

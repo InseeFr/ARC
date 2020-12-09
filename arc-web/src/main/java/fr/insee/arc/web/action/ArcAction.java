@@ -333,7 +333,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 			 */
 			if (withTypes) {
 				GenericBean gb = getQueryHandler().execute(UtilitaireDao.EntityProvider.getGenericBeanProvider(),
-						FormatSQL.modeleDeDonneesTable(aNomTableImage).toString(),
+						FormatSQL.modeleDeDonneesTable(aNomTableImage),
 						UtilitaireDAOQueryHandler.OnException.THROW);
 				Map<String, ArrayList<String>> mapModeleDonnees = gb.mapContent();
 				StringBuilder headers = new StringBuilder();

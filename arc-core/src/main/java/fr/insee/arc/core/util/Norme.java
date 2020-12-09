@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 
@@ -82,9 +83,8 @@ public class Norme implements IDbConstant{
         ArrayList<ArrayList<String>> normes = new ArrayList<ArrayList<String>>();
         try {
             normes = new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-                    "select id_norme, periodicite, def_norme, def_validite from " + tableNorme + ";")).content;
+            		new PreparedStatementBuilder( "select id_norme, periodicite, def_norme, def_validite from " + tableNorme + ";"))).content;
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

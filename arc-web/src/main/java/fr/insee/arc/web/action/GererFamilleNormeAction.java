@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -79,7 +80,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     private void initializeFamilleNorme() {
         System.out.println("/* initializeFamilleNorme */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-        this.vObjectService.initialize(viewFamilleNorme, "select id_famille from arc.ihm_famille order by id_famille", "arc.ihm_famille", defaultInputFields);
+        this.vObjectService.initialize(viewFamilleNorme, new PreparedStatementBuilder("select id_famille from arc.ihm_famille order by id_famille"), "arc.ihm_famille", defaultInputFields);
     }
 
     @RequestMapping("/selectFamilleNorme")
@@ -119,13 +120,14 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 			Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
             if (!selection.isEmpty()) {
 
-                StringBuilder requete = new StringBuilder("SELECT id_famille, id_application FROM arc.ihm_client WHERE id_famille='"
-                        + selection.get(ID_FAMILLE).get(0) + "'");
+                PreparedStatementBuilder requete = new PreparedStatementBuilder();
+                requete.append("SELECT id_famille, id_application FROM arc.ihm_client ");
+                requete.append("WHERE id_famille=" + requete.quoteText(selection.get(ID_FAMILLE).get(0)));
 
                 HashMap<String, String> defaultInputFields = new HashMap<>();
                 defaultInputFields.put(ID_FAMILLE, selection.get(ID_FAMILLE).get(0));
 
-                this.vObjectService.initialize(viewClient, requete.toString(), "arc.ihm_client", defaultInputFields);
+                this.vObjectService.initialize(viewClient, requete, "arc.ihm_client", defaultInputFields);
             } else {
                 this.vObjectService.destroy(viewClient);
 
@@ -175,13 +177,13 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
             Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
             if (!selection.isEmpty()) {
 				HashMap<String, String> type = viewFamilleNorme.mapHeadersType();
-                StringBuilder requete = new StringBuilder();
+                PreparedStatementBuilder requete = new PreparedStatementBuilder();
                 requete.append("select * from arc.ihm_mod_table_metier");
-                requete.append(" where id_famille" + ManipString.sqlEqual(selection.get(ID_FAMILLE).get(0), type.get(ID_FAMILLE)));
-                HashMap<String, String> defaultInputFields = new HashMap<String, String>();
+                requete.append(" where id_famille" + requete.sqlEqual(selection.get(ID_FAMILLE).get(0), type.get(ID_FAMILLE)));
+                HashMap<String, String> defaultInputFields = new HashMap<>();
                 defaultInputFields.put(ID_FAMILLE, selection.get(ID_FAMILLE).get(0));
 
-                this.vObjectService.initialize(viewTableMetier, requete.toString(), "arc.ihm_mod_table_metier", defaultInputFields);
+                this.vObjectService.initialize(viewTableMetier, requete, "arc.ihm_mod_table_metier", defaultInputFields);
             } else {
                 this.vObjectService.destroy(viewTableMetier);
             }
@@ -246,10 +248,13 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         	// on ne doit plus avoir de variable dans la table arc.ihm_mod_variable_metier pour la famille et la table a dropper
         	// le drop de la table en elle meme est faite à l'initialisation !!!!!!!!!!!!!
         	
-        	drop = (UtilitaireDao.get("arc").getInt(null, "SELECT count(1) from "+this.viewVariableMetier.getTable()
-        					+" where id_famille='"+content.get(ID_FAMILLE).get(i)+"' "
-        					+ "and nom_table_metier='"+content.get(NOM_TABLE_METIER).get(i)+"' ")
-        					==0);
+        	PreparedStatementBuilder requete= new PreparedStatementBuilder();
+        	requete
+        		.append("SELECT count(1) from "+this.viewVariableMetier.getTable())
+        		.append(" where id_famille="+requete.quoteText(content.get(ID_FAMILLE).get(i)))
+        		.append(" and nom_table_metier="+requete.quoteText(content.get(NOM_TABLE_METIER).get(i)));
+        	
+        	drop = (UtilitaireDao.get("arc").getInt(null, requete) == 0);
         	
         }
         if (drop) {
@@ -274,12 +279,12 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 	    this.vObjectService.initialiserColumnRendering(viewVariableMetier, rendering);
 	    try {
 		System.out.println("/* initializeVariableMetier */");
-		StringBuilder requete = getRequeteListeVariableMetierTableMetier(listeTableFamille,
+		PreparedStatementBuilder requete = getRequeteListeVariableMetierTableMetier(listeTableFamille,
 			viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
 		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 		defaultInputFields.put(ID_FAMILLE, viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
 		// this.viewVariableMetier.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewVariableMetier.getSessionName()));
-		this.vObjectService.initialize(viewVariableMetier, requete.toString(), "arc."+IHM_MOD_VARIABLE_METIER, defaultInputFields);
+		this.vObjectService.initialize(viewVariableMetier, requete, "arc."+IHM_MOD_VARIABLE_METIER, defaultInputFields);
 		
 	    } catch (Exception ex) {
 		ex.printStackTrace();
@@ -298,26 +303,35 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
      * @param idFamille
      * @return La requête permettant d'obtenir le croisement variable*table pour les variables de la famille
      */
-    public static StringBuilder getRequeteListeVariableMetierTableMetier(List<String> listeTableMetier, String idFamille) {
-        StringBuilder left = new StringBuilder("(SELECT nom_variable_metier");
+    public static PreparedStatementBuilder getRequeteListeVariableMetierTableMetier(List<String> listeTableMetier, String idFamille) {
+        
+    	PreparedStatementBuilder left = new PreparedStatementBuilder("\n (SELECT nom_variable_metier");
         for (int i = 0; i < listeTableMetier.size(); i++) {
             left.append(",\n  CASE WHEN '['||string_agg(nom_table_metier,'][' ORDER BY nom_table_metier)||']' LIKE '%['||'" + listeTableMetier.get(i)
                     + "'||']%' then 'x' else '' end " + listeTableMetier.get(i));
         }
-        left.append("\nFROM arc."+IHM_MOD_VARIABLE_METIER+" WHERE id_famille='" + idFamille + "'\n");
-        left.append("GROUP BY nom_variable_metier) left_side");
-        StringBuilder right = new StringBuilder(
-                "(SELECT id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier\n");
-        right.append("FROM arc."+IHM_MOD_VARIABLE_METIER+"\n");
-        right.append("WHERE id_famille='" + idFamille + "'\n");
-        right.append("GROUP BY id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier) right_side");
-        StringBuilder returned = new StringBuilder(
+        left.append("\n FROM arc."+IHM_MOD_VARIABLE_METIER+" ");
+        left.append("\n WHERE id_famille=" + left.quoteText(idFamille));
+        left.append("\n GROUP BY nom_variable_metier) left_side");
+        
+        PreparedStatementBuilder right = new PreparedStatementBuilder();
+        right.append("\n (SELECT id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier\n");
+        right.append("\n FROM arc."+IHM_MOD_VARIABLE_METIER+"\n");
+        right.append("\n WHERE id_famille=" + right.quoteText(idFamille));
+        right.append("\n GROUP BY id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier) right_side");
+        
+        PreparedStatementBuilder returned = new PreparedStatementBuilder(
                 "SELECT right_side.id_famille, right_side.nom_variable_metier, right_side.type_variable_metier, right_side.type_consolidation, right_side.description_variable_metier");
         for (int i = 0; i < listeTableMetier.size(); i++) {
             returned.append(", " + listeTableMetier.get(i));
         }
-        returned.append("\nFROM \n" + left.toString() + "\nINNER JOIN \n" + right.toString());
-        returned.append("\nON left_side.nom_variable_metier = right_side.nom_variable_metier");
+        returned.append("\n FROM ");
+        returned.append(left);
+        returned.append(" INNER JOIN ");
+        returned.append(right);
+        
+        returned.append("\n ON left_side.nom_variable_metier = right_side.nom_variable_metier");
+        
         return returned;
     }
 
@@ -517,9 +531,11 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     private static boolean checkIsValide(List<String> inputFields) {
-        StringBuilder requete = new StringBuilder("SELECT count(1) FROM arc."+IHM_MOD_VARIABLE_METIER+"\n")//
-                .append("WHERE id_famille='" + inputFields.get(0) + "'\n")//
-                .append("  AND nom_variable_metier='" + inputFields.get(1) + "';");
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        requete
+        	.append("SELECT count(1) FROM arc."+IHM_MOD_VARIABLE_METIER)//
+        	.append("\n WHERE id_famille=" + requete.quoteText(inputFields.get(0)))//
+        	.append("\n AND nom_variable_metier=" + requete.quoteText(inputFields.get(1)) + ";");
         return UtilitaireDao.get("arc").getInt(null, requete) == 0;
     }
 

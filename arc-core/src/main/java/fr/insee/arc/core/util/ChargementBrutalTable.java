@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
@@ -134,7 +135,7 @@ public class ChargementBrutalTable {
         query.append("\n where norme is not null ");
         
         
-        ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, query);
+        ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, new PreparedStatementBuilder(query));
         if (result.size()>1)
         {
         	throw new Exception("More than one norm match the expression");
