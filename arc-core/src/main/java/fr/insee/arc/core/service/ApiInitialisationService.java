@@ -539,7 +539,22 @@ public class ApiInitialisationService extends ApiService {
         requete.append("\n ON UPDATE CASCADE ON DELETE CASCADE ");
         requete.append("\n ); ");
         
-        
+        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_expression ");
+        requete.append("\n ( ");
+        requete.append("\n id_regle bigint NOT NULL, ");
+        requete.append("\n id_norme text NOT NULL, ");
+        requete.append("\n validite_inf date NOT NULL, ");
+        requete.append("\n validite_sup date NOT NULL, ");
+        requete.append("\n version text NOT NULL, ");
+        requete.append("\n periodicite text NOT NULL, ");
+        requete.append("\n expr_nom text, ");
+        requete.append("\n expr_valeur text, ");
+        requete.append("\n commentaire text, ");
+        requete.append("\n CONSTRAINT pk_ihm_expression PRIMARY KEY (id_regle, id_norme, validite_inf, validite_sup, version, periodicite), ");
+        requete.append("\n CONSTRAINT ihm_expression_jeuderegle_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) ");
+        requete.append("\n REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE ");
+        requete.append("\n ON UPDATE CASCADE ON DELETE CASCADE ");
+        requete.append("\n ); ");
         
         requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_mod_table_metier ");
         requete.append("\n ( ");
@@ -977,6 +992,7 @@ public class ApiInitialisationService extends ApiService {
         requete.append(FormatSQL.tryQuery("CREATE TRIGGER tg_insert_chargement BEFORE INSERT ON arc.ihm_chargement_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle();"));
         requete.append(FormatSQL.tryQuery("CREATE TRIGGER tg_insert_controle BEFORE INSERT ON arc.ihm_controle_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle();"));
         requete.append(FormatSQL.tryQuery("CREATE TRIGGER tg_insert_filtrage BEFORE INSERT ON arc.ihm_filtrage_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle();"));
+        requete.append(FormatSQL.tryQuery("CREATE TRIGGER tg_insert_expression BEFORE INSERT ON arc.ihm_expression FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle();"));
         
         
         
@@ -1455,28 +1471,26 @@ public class ApiInitialisationService extends ApiService {
             TraitementTableParametre[] r = TraitementTableParametre.values();
             StringBuilder condition = new StringBuilder();
             String modaliteEtat = anExecutionEnvironment.replace("_", ".");
-            String tablePil = ApiService.dbEnv(anExecutionEnvironment) + TraitementTableExecution.PILOTAGE_FICHIER;
             String tableImage;
             String tableCurrent;
             for (int i = 0; i < r.length; i++) {
                 // on créé une table image de la table venant de l'ihm
                 // (environnement de parametre)
-                tableCurrent = ApiService.dbEnv(anExecutionEnvironment) + r[i];
-                tableImage = FormatSQL.temporaryTableName(ApiService.dbEnv(anExecutionEnvironment) + r[i]);
+                TraitementTableParametre parameterTable = r[i];
+				tableCurrent = ApiService.dbEnv(anExecutionEnvironment) + parameterTable;
+                tableImage = FormatSQL.temporaryTableName(ApiService.dbEnv(anExecutionEnvironment) + parameterTable);
 
                 // recopie partielle (en fonction de l'environnement
                 // d'exécution)
                 // pour les tables JEUDEREGLE, CONTROLE_REGLE et MAPPING_REGLE
                 condition.setLength(0);
-                if (r[i] == TraitementTableParametre.NORME) {
+                if (parameterTable == TraitementTableParametre.NORME) {
                     condition.append(" WHERE etat='1'");
-                }
-                if (r[i] == TraitementTableParametre.CALENDRIER) {
+                } else if (parameterTable == TraitementTableParametre.CALENDRIER) {
                     condition.append(" WHERE etat='1' ");
                     condition
                             .append(" and exists (select 1 from " + anParametersEnvironment + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
-                }
-                if (r[i] == TraitementTableParametre.JEUDEREGLE) {
+                } else if (parameterTable == TraitementTableParametre.JEUDEREGLE) {
                     condition.append(" WHERE etat=lower('" + modaliteEtat + "')");
                     condition
                             .append(" and exists (select 1 from " + anParametersEnvironment + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
@@ -1484,9 +1498,7 @@ public class ApiInitialisationService extends ApiService {
                             .append(" and exists (select 1 from "
                                     + anParametersEnvironment
                                     + "_calendrier b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup and b.etat='1')");
-                }
-                if (r[i] == TraitementTableParametre.CHARGEMENT_REGLE || r[i] == TraitementTableParametre.NORMAGE_REGLE || r[i] == TraitementTableParametre.CONTROLE_REGLE
-                        || r[i] == TraitementTableParametre.MAPPING_REGLE || r[i] == TraitementTableParametre.FILTRAGE_REGLE) {
+                } else if (parameterTable.isPartOfRuleset()) {
                     condition.append(" WHERE exists (select 1 from " + anParametersEnvironment
                             + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
                     condition
@@ -1499,10 +1511,10 @@ public class ApiInitialisationService extends ApiService {
                                     + "_jeuderegle b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup AND a.version=b.version and b.etat=lower('"
                                     + modaliteEtat + "'))");
                 }
-                requete.append(FormatSQL.dropTable(tableImage).toString());
+                requete.append(FormatSQL.dropTable(tableImage));
                 requete.append("CREATE TABLE " + tableImage
                         + " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT a.* FROM " + anParametersEnvironment + "_"
-                        + r[i] + " AS a " + condition + ";\n");
+                        + parameterTable + " AS a " + condition + ";\n");
                 // Identifier les changements en comparant la table image et la
                 // table courante dans l'environnement
                 // Marquer les changement dans la norme (changement de nom,

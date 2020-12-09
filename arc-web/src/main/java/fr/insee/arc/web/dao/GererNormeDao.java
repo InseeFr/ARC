@@ -181,7 +181,7 @@ public class GererNormeDao implements IDbConstant {
 	}
 
 	/**
-	 * Initialize the the {@link VObjectService} of a load ruleset. Only
+	 * Initialize the {@link VObject} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
 	public void initializeChargement(VObject moduleView, VObject viewRulesSet, String theTableName,
@@ -211,7 +211,7 @@ public class GererNormeDao implements IDbConstant {
 	
 	
 	/**
-	 * Initialize the the {@link VObjectService} of a load ruleset. Only
+	 * Initialize the {@link VObject} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
 	public void initializeNormage(VObject moduleView, VObject viewRulesSet, String theTableName,
@@ -240,7 +240,7 @@ public class GererNormeDao implements IDbConstant {
 	}
 	
 	/**
-	 * Initialize the the {@link VObjectService} of a control ruleset. Only
+	 * Initialize the {@link VObject} of a control ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
 	public void initializeControle(VObject moduleView, VObject viewRulesSet, String theTableName,
@@ -270,7 +270,7 @@ public class GererNormeDao implements IDbConstant {
 
 	
 	/**
-	 * Initialize the the {@link VObjectService} of a filter ruleset. Only
+	 * Initialize the {@link VObject} of a filter ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
 	public void initializeFiltrage(VObject moduleView, VObject viewRulesSet, String theTableName,
@@ -299,7 +299,7 @@ public class GererNormeDao implements IDbConstant {
 	}
 	
 	/**
-	 * Initialize the the {@link VObjectService} of the mapping rule. Only get the load
+	 * Initialize the {@link VObject} of the mapping rule. Only get the load
 	 * rule link to the selected rule set.
 	 */
 	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, String theTableName, String scope) {
@@ -332,6 +332,35 @@ public class GererNormeDao implements IDbConstant {
 			viewObject.initialize(viewMapping,requete.toString(),theTableName, defaultInputFields);
 		} else {
 			viewObject.destroy(viewMapping);
+		}
+	}
+
+	/**
+	 * Initialize the {@link VObject} of the expression. Only
+	 * get the load rule link to the selected rule set.
+	 */
+	public void initializeExpression(VObject moduleView, VObject viewRulesSet, String theTableName,
+			String scope) {
+		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
+		if (!selection.isEmpty() && scope != null) {
+            HashMap<String, String> type = viewRulesSet.mapHeadersType();
+            StringBuilder requete = new StringBuilder();
+            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,expr_nom, expr_valeur, commentaire from arc.ihm_expression");
+            requete.append(" where id_norme" + ManipString.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
+            requete.append(" and periodicite" + ManipString.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
+            requete.append(" and validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
+            requete.append(" and validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
+            requete.append(" and version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
+            HashMap<String, String> defaultInputFields = new HashMap<>();
+            defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
+            defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
+            defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
+            defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
+            defaultInputFields.put("version", selection.get("version").get(0));
+			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
+		} else {
+			viewObject.destroy(moduleView);
 		}
 	}
 

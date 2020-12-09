@@ -82,6 +82,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 
 	// The map to format rules view
 	private VObject viewMapping;
+	
+	// Expression to use in mapping
+	private VObject viewExpression;
 
 	// The on ruleset to copy rules
 	private VObject viewJeuxDeReglesCopie;
@@ -96,6 +99,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		setViewControle(vObjectService.preInitialize(model.getViewControle()));
 		setViewFiltrage(vObjectService.preInitialize(model.getViewFiltrage()));
 		setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
+		setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
 		setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
 		
 		putVObject(getViewNorme(),
@@ -121,6 +125,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		//
 		putVObject(getViewMapping(), t -> gererNormeDao.initializeMapping(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE), getScope()));
+		//
+		putVObject(getViewExpression(), t -> gererNormeDao.initializeExpression(t, getViewJeuxDeRegles(),
+				getBddTable().getQualifedName((BddTable.ID_TABLE_IHM_EXPRESSION)), getScope()));
 		//
 		putVObject(getViewJeuxDeReglesCopie(), t -> gererNormeDao.initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS), getScope()));
@@ -889,6 +896,31 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
+	@RequestMapping("/selectExpression")
+	public String selectExpression(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
+	}
+	
+	@RequestMapping("/addExpression")
+	public String addExpression(Model model) {
+		return addLineVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+
+	@RequestMapping("/updateExpression")
+	public String updateExpression(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+
+	@RequestMapping("/sortExpression")
+	public String sortExpression(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+	
+	@RequestMapping("/deleteExpression")
+	public String deleteExpression(Model model) {
+		return deleteLineVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+	
 	/**
 	 * Action trigger by uploading a filter rule file
 	 * 
@@ -1394,6 +1426,14 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 
 	public void setViewMapping(VObject viewMapping) {
 		this.viewMapping = viewMapping;
+	}
+	
+	public VObject getViewExpression() {
+		return viewExpression;
+	}
+
+	public void setViewExpression(VObject viewExpression) {
+		this.viewExpression = viewExpression;
 	}
 
 	public VObject getViewJeuxDeReglesCopie() {

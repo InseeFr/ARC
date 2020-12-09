@@ -3,6 +3,7 @@ package fr.insee.arc.web.model;
 import fr.insee.arc.web.model.viewobjects.ViewCalendrier;
 import fr.insee.arc.web.model.viewobjects.ViewChargement;
 import fr.insee.arc.web.model.viewobjects.ViewControle;
+import fr.insee.arc.web.model.viewobjects.ViewExpression;
 import fr.insee.arc.web.model.viewobjects.ViewFiltrage;
 import fr.insee.arc.web.model.viewobjects.ViewJeuxDeRegles;
 import fr.insee.arc.web.model.viewobjects.ViewJeuxDeReglesCopie;
@@ -36,6 +37,9 @@ public class NormManagementModel implements ArcModel {
 
 	// The map to format rules view
 	private VObject viewMapping;
+	
+	// Expression to use in mapping
+	private VObject viewExpression;
 
 	// The on ruleset to copy rules
 	private VObject viewJeuxDeReglesCopie;
@@ -49,6 +53,7 @@ public class NormManagementModel implements ArcModel {
 		this.viewControle = new ViewControle();
 		this.viewFiltrage = new ViewFiltrage();
 		this.viewMapping = new ViewMapping();
+		this.viewExpression = new ViewExpression();
 		this.viewJeuxDeReglesCopie = new ViewJeuxDeReglesCopie();
 	}
 	
@@ -113,6 +118,14 @@ public class NormManagementModel implements ArcModel {
 
 	public void setViewMapping(VObject viewMapping) {
 		this.viewMapping = viewMapping;
+	}
+	
+	public VObject getViewExpression() {
+		return viewExpression;
+	}
+
+	public void setViewExpression(VObject viewExpression) {
+		this.viewExpression = viewExpression;
 	}
 
 	public VObject getViewJeuxDeReglesCopie() {

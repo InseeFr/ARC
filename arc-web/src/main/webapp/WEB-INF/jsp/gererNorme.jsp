@@ -33,7 +33,7 @@
 
 
 <div class="container-fluid">
-	<div class="row">
+	<div class="d-flex flex-column flex-md-row">
 		<div class="col-md-6 align-self-center">
 			<!-- norm list -->
 			<c:set var="view" value="${viewNorme}"  scope="request"/>
@@ -117,7 +117,7 @@
 				|| viewMapping.isInitialized==true&&viewMapping.isScoped==true
 				 }">
 					<ul
-						class="nav nav-tabs mb-2"
+						class="nav nav-tabs mb-2 flex-column flex-md-row"
 						id="chooseModule"
 						role="tablist"
 					>
@@ -131,7 +131,7 @@
 								role="tab"
 								aria-controls="load"
 								aria-selected="true"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 							>
 								<spring:message code="normManagement.load"/>
 							</a></li>
@@ -143,7 +143,7 @@
 								role="tab"
 								aria-controls="structurize"
 								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 							>
 								<spring:message code="normManagement.structurize"/>
 							</a></li>
@@ -155,7 +155,7 @@
 								role="tab"
 								aria-controls="control"
 								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 							>
 								<spring:message code="normManagement.control"/>
 							</a></li>
@@ -167,7 +167,7 @@
 								role="tab"
 								aria-controls="filter"
 								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 							>
 								<spring:message code="normManagement.filter"/>
 							</a></li>
@@ -179,10 +179,25 @@
 								role="tab"
 								aria-controls="mapmodel"
 								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
 							>
 								<spring:message code="normManagement.mapmodel"/>
 							</a></li>
+					<!-- 								TODO -->
+							<li class="nav-item font-smaller" style="margin-left:auto"><a
+								class="nav-link"
+								id="expressions-tab"
+								data-toggle="tab"
+								href="#expressions"
+								role="tab"
+								aria-controls="expressions"
+								aria-selected="false"
+								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
+							>
+								<spring:message code="normManagement.expression"/>
+							</a></li>
+					</ul>
+					
 					</ul>
 				</c:if>
 
@@ -552,6 +567,27 @@
 
 							</c:import>
 						</div>
+						<%-- EXPRESSIONS TAB --%>
+						<div
+							id="expressions"
+							role="tabpanel"
+							aria-labelledby="expressions-tab"
+						>
+						</div>
+						<c:set var="view" value="${viewExpression}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="btnAdd" value ="true" />
+								<c:param name="btnUpdate" value ="true" />
+								<c:param name="btnDelete" value ="true" />
+								<c:param name="ligneAdd" value ="true" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="true" />
+								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="allowResize" value ="true" />
+							</c:import>
 					</div>
 
 

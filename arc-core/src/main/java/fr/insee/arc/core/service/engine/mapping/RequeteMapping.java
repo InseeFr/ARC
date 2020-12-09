@@ -20,6 +20,7 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
+import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -162,10 +163,12 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         
         ArrayList<ArrayList<String>> result= new ArrayList<>();
 
+        ExpressionService expressionService = new ExpressionService(this.connexion, this.environnement);
         
-        // mise en minuscule des rubriques
-        for (int i = 0; i < resultTemp.size(); i++) {
+        GenericBean expressions = expressionService.fetchExpressions(this.jeuDeRegle);
 
+        for (int i = 0; i < resultTemp.size(); i++) {
+            // mise en minuscule des rubriques
             ArrayList<String> temp=new ArrayList<>();
             temp.add(resultTemp.get(i).get(0).toLowerCase());
             
@@ -174,6 +177,9 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
             {
                 exprCol="";
             }
+
+        	// Apply expression
+        	expressionService.applyTo(exprCol, expressions);
             
             Matcher m = Pattern.compile("\\{[^\\{\\} ]*\\}").matcher(exprCol);
             
