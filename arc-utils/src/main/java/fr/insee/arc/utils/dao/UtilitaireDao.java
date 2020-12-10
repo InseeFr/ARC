@@ -87,6 +87,14 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * Format des données utilisées dans la commande copy
 	 */
 	public static final String FORMAT_CSV = "CSV";
+	/**
+	 * execute request returns a table with headers, type and data
+	 * provide the indexes of these elements
+	 */
+	public static final int EXECUTE_REQUEST_HEADERS_START_INDEX = 0;
+	public static final int EXECUTE_REQUEST_TYPES_START_INDEX = 1;
+	public static final int EXECUTE_REQUEST_DATA_START_INDEX = 2;
+
 
 	private String pool;
 	private static Map<String, UtilitaireDao> map;
@@ -286,8 +294,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public Boolean isTableExiste(Connection connexion, String table) {
 		Boolean b = null;
 		try {
-			b = getBoolean(connexion, FormatSQL.isTableExists(table).toString(), table);
+			b = getBoolean(connexion, FormatSQL.isTableExists(table));
 		} catch (Exception e) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "isTableExiste()", LOGGER, e);
 		}
 		return b;
 	}
@@ -389,19 +398,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
-	/**
-	 * Exécute une requête {@code sql} avec des arguments {@code args}, renvoie le
-	 * booléen (unique) que cette requête est censée rendre<br/>
-	 *
-	 *
-	 * @param sql
-	 * @param args
-	 * @return
-	 * @throws Exception
-	 */
-	public Boolean getBoolean(Connection aConnexion, StringBuilder sql, String... args) throws Exception {
-		return getBoolean(aConnexion, sql.toString(), args);
-	}
 
 	/**
 	 * Exécute une requête {@code sql} avec des arguments {@code args}, renvoie le
@@ -412,32 +408,26 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param args
 	 * @return
 	 */
-	public Boolean getBoolean(Connection connexion, String sql, String... args) throws Exception {
-		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
-		String updatedQuery = FormatSQL.addCommentaryHeaderToQuery(sql, constructorMethodsAndClasses);
-
-		try {
-			ConnectionWrapper connexionWrapper = initConnection(connexion);
-			try {
-				Statement stmt = connexionWrapper.getConnexion().createStatement();
-				try {
-					stmt.execute(ModeRequete.EXTRA_FLOAT_DIGIT.expr());
-					String requete = Format.parseStringAvecArguments(updatedQuery, args);
-					LoggerHelper.trace(LOGGER, requete);
-					ResultSet rset = stmt.executeQuery(requete);
-					if (rset.next()) {
-						return rset.getBoolean(FIRST_COLUMN_INDEX);
-					}
-				} finally {
-					stmt.close();
-				}
-			} finally {
-				connexionWrapper.close();
-			}
-		} catch (Exception e) {
-			LoggerHelper.errorAsComment(LOGGER, e, sql, Arrays.asList(args));
-			throw e;
+	public Boolean getBoolean(Connection connexion, PreparedStatementBuilder sql, String... args) throws Exception {
+		
+		String returned;
+		returned = getString(connexion,sql,args);
+		
+		if (returned==null)
+		{
+			return null;
 		}
+		
+		if (returned.equals("f"))
+		{
+			return false;
+		}
+		
+		if (returned.equals("t"))
+		{
+			return true;
+		}
+		
 		return null;
 	}
 
@@ -468,8 +458,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public String getString(Connection connexion, PreparedStatementBuilder requete, String... args) throws SQLException {
 			requete.setQuery(new StringBuilder(Format.parseStringAvecArguments(requete.getQuery().toString(), args)));
-			String returned = executeRequest(connexion, requete , ModeRequete.EXTRA_FLOAT_DIGIT).get(2).get(0);
-			return (returned == null ? null : returned);
+			ArrayList<ArrayList<String>> returned=executeRequest(connexion, requete , ModeRequete.EXTRA_FLOAT_DIGIT);
+			return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? null : returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
 
 	}
 
@@ -497,8 +487,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			returned = getString(connexion,sql,args);
 			return (returned == null ? Long.MIN_VALUE : Long.parseLong(returned));
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LoggerHelper.errorGenTextAsComment(getClass(), "getInt()", LOGGER, e);
 		}
 		return Long.MIN_VALUE;
 	}
@@ -514,8 +503,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public int getInt(Connection connexion, PreparedStatementBuilder sql, ModeRequete... modes) {
 		try {
-			String returned = executeRequest(connexion, sql, modes).get(2).get(0);
-			return (returned == null ? ZERO : Integer.parseInt(returned));
+			ArrayList<ArrayList<String>> returned = executeRequest(connexion, sql, modes);
+			return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? ZERO : Integer.parseInt(returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0)));
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "getInt()", LOGGER, ex);
 		}
@@ -707,12 +696,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public Boolean checkAgainstRegex(Connection aConnexion, String string, String regex) {
 		Boolean b = null;
 		try {
-			b = getBoolean(aConnexion, "select '"//
-					+ string.replace(quote, quotequote) //
-					// + "' similar to '" //
-					+ "' ~ '" //
-					+ regex.replace(quote, quotequote) //
-					+ "'");
+			PreparedStatementBuilder requete=new PreparedStatementBuilder();
+			requete.append("SELECT ").append(requete.quoteText(string)).append(" ~ ").append(requete.quoteText(regex));
+			b = getBoolean(aConnexion, requete);
 		} catch (Exception e) {
 		}
 		return b;
@@ -842,7 +828,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
 		String updatedQuery = FormatSQL.addCommentaryHeaderToQuery(requete.getQuery().toString(), constructorMethodsAndClasses);
 		LoggerHelper.trace(LOGGER, updatedQuery);
-
+		LoggerHelper.trace(LOGGER, requete.getParameters());
+		
 		try {
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
 			try {
@@ -1119,72 +1106,74 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param out
 	 * @throws SQLException
 	 */
-	public void outStreamRequeteSelect(Connection connexion, String requete, OutputStream out) throws SQLException {
+	public void outStreamRequeteSelect(Connection connexion, PreparedStatementBuilder requete, OutputStream out) throws SQLException {
 		StringBuilder str = new StringBuilder();
-		// String lineSeparator = System.getProperty("line.separator");
 		String lineSeparator = "\n";
-		StringBuilder requeteLimit = new StringBuilder();
 		int k = 0;
 		int fetchSize = 5000;
 		boolean endLoop = false;
-		try {
-			ConnectionWrapper connexionWrapper = initConnection(connexion);
-			try {
+		try (ConnectionWrapper connexionWrapper = initConnection(connexion))
+			{
 				while (!endLoop) {
 					try {
-						requeteLimit.setLength(0);
+						PreparedStatementBuilder requeteLimit=new PreparedStatementBuilder();
 						requeteLimit.append(requete);
 						requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
-						PreparedStatement stmt = connexionWrapper.getConnexion()
-								.prepareStatement(requeteLimit.toString());
-						try {
-							ResultSet res = stmt.executeQuery();
-							ResultSetMetaData rsmd = res.getMetaData();
-							if (k == 0) {
-								// Noms des colonnes
-								for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-									str.append(rsmd.getColumnLabel(i));
-									if (i < rsmd.getColumnCount()) {
-										str.append(";");
-									}
-								}
-								str.append(lineSeparator);
-								// Types des colonnes
-								for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-									str.append(rsmd.getColumnTypeName(i));
-									if (i < rsmd.getColumnCount()) {
-										str.append(";");
-									}
-								}
-								str.append(lineSeparator);
+						
+						try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(requeteLimit.getQuery().toString()))
+						{
+						
+							// bind parameters
+							for (int i=0;i<requete.getParameters().size();i++)
+							{
+								stmt.setString(i+1, requete.getParameters().get(i));
 							}
-							while (res.next()) {
-								for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-									if (res.getString(i) != null) {
-										str.append(res.getString(i).replace("\n", " ").replace("\r", ""));
-									} else {
-//                                        str.append("null");
+							
+							// build file output
+							try (ResultSet res = stmt.executeQuery())
+								{
+								ResultSetMetaData rsmd = res.getMetaData();
+								if (k == 0) {
+									// Noms des colonnes
+									for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+										str.append(rsmd.getColumnLabel(i));
+										if (i < rsmd.getColumnCount()) {
+											str.append(";");
+										}
 									}
-									if (i < rsmd.getColumnCount()) {
-										str.append(";");
+									str.append(lineSeparator);
+									// Types des colonnes
+									for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+										str.append(rsmd.getColumnTypeName(i));
+										if (i < rsmd.getColumnCount()) {
+											str.append(";");
+										}
 									}
+									str.append(lineSeparator);
 								}
-								str.append(lineSeparator);
+								while (res.next()) {
+									for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+										if (res.getString(i) != null) {
+											str.append(res.getString(i).replace("\n", " ").replace("\r", ""));
+										} else {
+										}
+										if (i < rsmd.getColumnCount()) {
+											str.append(";");
+										}
+									}
+									str.append(lineSeparator);
+								}
+								out.write(str.toString().getBytes());
+								endLoop = (str.length() == 0);
+								k++;
+								str.setLength(0);
 							}
-							out.write(str.toString().getBytes());
-							endLoop = (str.length() == 0);
-							k++;
-							str.setLength(0);
-						} finally {
-							stmt.close();
 						}
 					} catch (Exception e) {
+						LoggerHelper.trace(LOGGER, e.getMessage());
 						throw e;
 					}
 				}
-			} finally {
-				connexionWrapper.close();
-			}
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "outStreamRequeteSelect()", LOGGER, ex);
 		}
@@ -1210,15 +1199,17 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public static void generateTarGzFromFile(File fileIn, File fileOut, String entryName) throws IOException {
 
-		FileInputStream fis = new FileInputStream(fileIn);
-		TarArchiveOutputStream taos = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(fileOut)));
-		TarArchiveEntry entry = new TarArchiveEntry(entryName);
-		entry.setSize(fileIn.length());
-		taos.putArchiveEntry(entry);
-		copy(fis, taos);
-		taos.closeArchiveEntry();
-		taos.close();
-		fis.close();
+		try (FileInputStream fis = new FileInputStream(fileIn);)
+		{
+			try(TarArchiveOutputStream taos = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(fileOut)));)
+			{
+				TarArchiveEntry entry = new TarArchiveEntry(entryName);
+				entry.setSize(fileIn.length());
+				taos.putArchiveEntry(entry);
+				copy(fis, taos);
+				taos.closeArchiveEntry();
+			}
+		}
 	}
 
 	/**
@@ -1263,22 +1254,23 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		File fileIn = Paths.get(receptionDirectoryRoot, currentContainer).toFile();
 		if (fileIn.exists()) {
 			try {
-				ZipInputStream tarInput = new ZipInputStream(new FileInputStream(fileIn));
-				ZipEntry currentEntry = tarInput.getNextEntry();
-				// si le fichier est trouvé, on ajoute
-				while (currentEntry != null) {
-					if (listIdSourceContainer.contains(currentEntry.getName())) {
-						TarArchiveEntry entry = new TarArchiveEntry(currentEntry.getName());
-						entry.setSize(currentEntry.getSize());
-						taos.putArchiveEntry(entry);
-						for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
-							taos.write(c);
+				try(ZipInputStream tarInput = new ZipInputStream(new FileInputStream(fileIn));)
+				{
+					ZipEntry currentEntry = tarInput.getNextEntry();
+					// si le fichier est trouvé, on ajoute
+					while (currentEntry != null) {
+						if (listIdSourceContainer.contains(currentEntry.getName())) {
+							TarArchiveEntry entry = new TarArchiveEntry(currentEntry.getName());
+							entry.setSize(currentEntry.getSize());
+							taos.putArchiveEntry(entry);
+							for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
+								taos.write(c);
+							}
+							taos.closeArchiveEntry();
 						}
-						taos.closeArchiveEntry();
+						currentEntry = tarInput.getNextEntry();
 					}
-					currentEntry = tarInput.getNextEntry();
 				}
-				tarInput.close();
 			} catch (IOException ex) {
 				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromZip()", LOGGER, ex);
 			}
@@ -1297,26 +1289,28 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public static void generateEntryFromTarGz(String receptionDirectoryRoot, String currentContainer,
 			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
-		File fileIn = new File(receptionDirectoryRoot + "/" + currentContainer);
+		File fileIn = new File(receptionDirectoryRoot + File.separator + currentContainer);
 		LoggerHelper.traceAsComment(LOGGER, "#generateEntryFromTarGz()", receptionDirectoryRoot, "/", currentContainer);
+				
 		if (fileIn.exists()) {
 			// on crée le stream pour lire à l'interieur de
 			// l'archive
 			try {
-				TarInputStream tarInput = new TarInputStream(new GZIPInputStream(new FileInputStream(fileIn)));
-				TarEntry currentEntry = tarInput.getNextEntry();
-				// si le fichier est trouvé, on ajoute
-				while (currentEntry != null) {
-					if (listIdSourceContainer.contains(currentEntry.getName())) {
-						TarArchiveEntry entry = new TarArchiveEntry(currentEntry.getName());
-						entry.setSize(currentEntry.getSize());
-						taos.putArchiveEntry(entry);
-						tarInput.copyEntryContents(taos);
-						taos.closeArchiveEntry();
+				try(TarInputStream tarInput = new TarInputStream(new GZIPInputStream(new FileInputStream(fileIn)));)
+				{
+					TarEntry currentEntry = tarInput.getNextEntry();
+					// si le fichier est trouvé, on ajoute
+					while (currentEntry != null) {
+						if (listIdSourceContainer.contains(currentEntry.getName())) {
+							TarArchiveEntry entry = new TarArchiveEntry(currentEntry.getName());
+							entry.setSize(currentEntry.getSize());
+							taos.putArchiveEntry(entry);
+							tarInput.copyEntryContents(taos);
+							taos.closeArchiveEntry();
+						}
+						currentEntry = tarInput.getNextEntry();
 					}
-					currentEntry = tarInput.getNextEntry();
 				}
-				tarInput.close();
 			} catch (IOException ex) {
 				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromTarGz()", LOGGER, ex);
 			}
@@ -1340,23 +1334,27 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			try {
 				// on crée le stream pour lire à l'interieur de
 				// l'archive
-				GZIPInputStream tarInput = new GZIPInputStream(new FileInputStream(fileIn));
 				long size = 0;
-				// on recupere d'abord la taille du stream; gzip ne permet pas
-				// de le faire directement
-				for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
-					size++;
+				
+				try(GZIPInputStream tarInput = new GZIPInputStream(new FileInputStream(fileIn));)
+				{
+					// on recupere d'abord la taille du stream; gzip ne permet pas
+					// de le faire directement
+					for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
+						size++;
+					}
 				}
-				tarInput.close();
+				
 				TarArchiveEntry entry = new TarArchiveEntry(listIdSourceContainer.get(0));
 				entry.setSize(size);
 				taos.putArchiveEntry(entry);
-				tarInput = new GZIPInputStream(new FileInputStream(fileIn));
-				for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
-					taos.write(c);
+				try(GZIPInputStream tarInput = new GZIPInputStream(new FileInputStream(fileIn));)
+				{
+					for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
+						taos.write(c);
+					}
+					taos.closeArchiveEntry();
 				}
-				taos.closeArchiveEntry();
-				tarInput.close();
 			} catch (IOException ex) {
 				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromGz()", LOGGER, ex);
 			}
@@ -1564,11 +1562,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		int k = 0;
 		int fetchSize = 5000;
 		GenericBean g;
-		ArrayList<String> listIdSource = new ArrayList<>();
-		ArrayList<String> listIdSourceEtat = new ArrayList<>();
-		ArrayList<String> listIdSourceContainer = new ArrayList<>();
-		ArrayList<String> listIdSourceEtatContainer = new ArrayList<>();
-		ArrayList<String> listContainer = new ArrayList<>();
+		ArrayList<String> listIdSource;
+		ArrayList<String> listIdSourceEtat;
+		ArrayList<String> listContainer;
 		String repertoire = repertoireIn + anEnvExcecution.toUpperCase().replace(".", "_") + File.separator;
 
 		String currentContainer;
@@ -1586,12 +1582,18 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				listIdSourceEtat = m.get("etat_traitement");
 			} catch (SQLException ex) {
 				LoggerHelper.errorGenTextAsComment(getClass(), "zipOutStreamRequeteSelect()", LOGGER, ex);
+				break;
 			}
 			if (listIdSource == null) {
 				LoggerHelper.traceAsComment(LOGGER, "listIdSource est null, sortie");
 				break;
 			}
+			
 			LoggerHelper.traceAsComment(LOGGER, " listIdSource.size() =", listIdSource.size());
+			
+			ArrayList<String> listIdSourceContainer = new ArrayList<>();
+			ArrayList<String> listIdSourceEtatContainer = new ArrayList<>();
+			
 			// Ajout des fichiers à l'archive
 			int i = 0;
 			while (i < listIdSource.size()) {

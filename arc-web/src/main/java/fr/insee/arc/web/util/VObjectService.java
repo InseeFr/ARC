@@ -767,7 +767,9 @@ public class VObjectService {
             currentData.setFilterFields(v0.getFilterFields());
         }
         PreparedStatementBuilder requete = new PreparedStatementBuilder();
-        requete.append("select alias_de_table.* from (" + v0.getMainQuery() + ") alias_de_table ");
+        requete.append("select alias_de_table.* from (");
+        requete.append(v0.getMainQuery());
+        requete.append(") alias_de_table ");
         requete.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()));
         return requete;
     }
@@ -952,11 +954,13 @@ public class VObjectService {
      * @param headerSortDOrders ordres du tri des colonnes
      * @return
      */
-    public String buildOrderBy(ArrayList<String> headerSortLabels, ArrayList<Boolean> headerSortDOrders) {
-        StringBuilder s = new StringBuilder();
+    public PreparedStatementBuilder buildOrderBy(ArrayList<String> headerSortLabels, ArrayList<Boolean> headerSortDOrders) {
         if (headerSortLabels == null) {
-            return "order by alias_de_table ";
+            return new PreparedStatementBuilder("order by alias_de_table ");
         }
+
+        PreparedStatementBuilder s = new PreparedStatementBuilder();
+
         for (int i = 0; i < headerSortLabels.size(); i++) {
             if (i > 0) {
                 s.append(",");
@@ -969,7 +973,7 @@ public class VObjectService {
             }
         }
         s.append(", alias_de_table ");
-        return s.toString();
+        return s;
     }
 
     /**
@@ -1014,15 +1018,29 @@ public class VObjectService {
         if (currentData.getFilterFields() == null) {
             currentData.setFilterFields(v0.getFilterFields());
         }
-        String requete = "select alias_de_table.* from (" + v0.getMainQuery() + ") alias_de_table " + buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel())
-                + buildOrderBy(v0.getHeaderSortDLabels(), v0.getHeaderSortDOrders());
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        requete
+        	.append("select alias_de_table.* from (" )
+        	.append(v0.getMainQuery())
+        	.append(") alias_de_table ")
+        	.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()))
+        	.append(buildOrderBy(v0.getHeaderSortDLabels(), v0.getHeaderSortDOrders()))
+        	;
         ArrayList<String> fileNames = new ArrayList<>();
         fileNames.add("Vue");
         this.download(currentData, response, fileNames, requete);
     }
 
-    public void download(VObject currentData, HttpServletResponse response, List<String> fileNames, List<String> requetes) {
-        download(currentData, response, fileNames, requetes.toArray(new String[0]));
+    public void download(VObject currentData, HttpServletResponse response, List<String> fileNames, List<PreparedStatementBuilder> requetes) {
+    	
+    	
+    	PreparedStatementBuilder[] array=new PreparedStatementBuilder[requetes.size()];
+    	for (int i=0;i<requetes.size();i++)
+    	{
+    		array[i]=requetes.get(i);
+    	}
+    	
+        download(currentData, response, fileNames, array);
 
     }
 
@@ -1034,7 +1052,7 @@ public class VObjectService {
      * @param requetes
      *            , liste des requetes SQL
      */
-    public void download(VObject currentData, HttpServletResponse response, List<String> fileNames, String... requetes) {
+    public void download(VObject currentData, HttpServletResponse response, List<String> fileNames, PreparedStatementBuilder... requetes) {
     	VObject v0 = fetchVObjectData(currentData.getSessionName());
         if (currentData.getFilterFields() == null) {
             currentData.setFilterFields(v0.getFilterFields());
@@ -1130,7 +1148,7 @@ public class VObjectService {
         SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
         response.reset();
         response.setHeader("Content-Disposition", "attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar.gz");
-        // Rattachement du zip à la réponse de Struts2
+
         TarArchiveOutputStream taos = null;
         try {
             taos = new TarArchiveOutputStream(new GZIPOutputStream(response.getOutputStream()));

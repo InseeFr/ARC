@@ -897,7 +897,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @param table
      * @return
      */
-    public static StringBuilder isTableExists(String table)
+    public static PreparedStatementBuilder isTableExists(String table)
     {
         String tokenJoin = table.contains(".") ?
         /*
@@ -917,10 +917,10 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
                  * Sinon, la condition d'égalité porte sur le nom de la table
                  */
                 "pg_class.relname";
-        StringBuilder requete = new StringBuilder(
+        PreparedStatementBuilder requete = new PreparedStatementBuilder(
                 "SELECT CASE WHEN count(1)>0 THEN TRUE ELSE FALSE END table_existe\n");
         requete.append("  FROM pg_class" + tokenJoin);
-        requete.append("  WHERE " + tokenCond + " = lower('" + table + "')");
+        requete.append("  WHERE " + tokenCond + " = lower(" + requete.quoteText(table) + ")");
         return requete;
     }
 

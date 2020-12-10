@@ -81,7 +81,7 @@ public class GererNormeDao implements IDbConstant {
 	 * @param table        : the sql to get the rules in the database
 	 * @return an sql query to get all the rules bond to a rule set
 	 */
-	public String recupRegle(VObject viewRulesSet, String table) {
+	public PreparedStatementBuilder recupRegle(VObject viewRulesSet, String table) {
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
@@ -92,7 +92,7 @@ public class GererNormeDao implements IDbConstant {
         requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
         requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
 		loggerDispatcher.info("donwload request : " + requete.toString(), LOGGER);
-		return requete.toString();
+		return requete;
 	}
 
 	/**
@@ -643,11 +643,10 @@ public class GererNormeDao implements IDbConstant {
 	private static Boolean createRequeteSelect(String anEnvTarget, AbstractRegleMapping regleMapping) throws Exception {
 		StringBuilder requete = new StringBuilder("SELECT CASE WHEN ")//
 				.append("(" + regleMapping.getExpressionSQL() + ")::" + regleMapping.getVariableMapping().getType())//
-				// .append(" IS NULL THEN true ELSE false END")//
 				.append(" IS NULL THEN false ELSE false END")//
 				.append(" AS " + regleMapping.getVariableMapping().getNomVariable());
 		requete.append("\n  FROM " + anEnvTarget + EAlphaNumConstante.UNDERSCORE.getValue() + "filtrage_ok ;");
-		return UtilitaireDao.get(poolName).getBoolean(null, requete);
+		return UtilitaireDao.get(poolName).getBoolean(null, new PreparedStatementBuilder(requete));
 	}
 
 	private static Boolean createRequeteSelect(String anEnvTarget, AbstractRegleMapping regleMapping, Integer groupe)
@@ -655,11 +654,10 @@ public class GererNormeDao implements IDbConstant {
 		StringBuilder requete = new StringBuilder("SELECT CASE WHEN ");//
 		requete.append("(" + regleMapping.getExpressionSQL(groupe) + ")::"
 				+ regleMapping.getVariableMapping().getType().replace("[]", ""))//
-				// .append(" IS NULL THEN true ELSE false END")//
 				.append(" IS NULL THEN false ELSE false END")//
 				.append(" AS " + regleMapping.getVariableMapping().getNomVariable());
 		requete.append("\n  FROM " + anEnvTarget + EAlphaNumConstante.UNDERSCORE.getValue() + "filtrage_ok ;");
-		return UtilitaireDao.get(poolName).getBoolean(null, requete);
+		return UtilitaireDao.get(poolName).getBoolean(null, new PreparedStatementBuilder(requete));
 	}
 
 	/**

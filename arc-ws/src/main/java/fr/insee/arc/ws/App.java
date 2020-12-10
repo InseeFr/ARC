@@ -11,6 +11,8 @@ import java.util.HashMap;
 
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.Record;
 import fr.insee.arc.ws.services.rest.changerules.pojo.ChangeRulesPojo;
 
@@ -22,9 +24,7 @@ public class App {
     public static void main(String[] args) throws Exception {
 
     	testUpdateNorme();
-    	
-    	
-    	
+
     }
     
     

@@ -1575,7 +1575,7 @@ public class ApiInitialisationService extends ApiService {
         for (TraitementPhase phaseNext : phase.nextPhases()) {
         	requete = new PreparedStatementBuilder();
             requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phaseNext.toString()) + " ");
-            if (querySelection != null) {
+            if (querySelection.length()>0) {
                 requete.append("AND id_source IN (SELECT distinct id_source FROM (");
                 requete.append(querySelection);
                 requete.append(") q1 ) ");               

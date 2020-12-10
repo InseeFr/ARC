@@ -3,6 +3,7 @@ package fr.insee.arc.web.action;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -368,19 +369,19 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	public String downloadJeuxDeRegles(Model model, HttpServletResponse response) {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty()) {
-			StringBuilder requeteRegleChargement = new StringBuilder();
+			PreparedStatementBuilder requeteRegleChargement = new PreparedStatementBuilder();
 			requeteRegleChargement.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE)));
-			StringBuilder requeteRegleNormage = new StringBuilder();
+			PreparedStatementBuilder requeteRegleNormage = new PreparedStatementBuilder();
 			requeteRegleNormage.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE)));
-			StringBuilder requeteRegleControle = new StringBuilder();
+			PreparedStatementBuilder requeteRegleControle = new PreparedStatementBuilder();
 			requeteRegleControle.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE)));
-			StringBuilder requeteRegleMapping = new StringBuilder();
+			PreparedStatementBuilder requeteRegleMapping = new PreparedStatementBuilder();
 			requeteRegleMapping.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE)));
-			StringBuilder requeteRegleFiltrage = new StringBuilder();
+			PreparedStatementBuilder requeteRegleFiltrage = new PreparedStatementBuilder();
 			requeteRegleFiltrage.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE)));
 
@@ -390,12 +391,17 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			fileNames.add("Rules_control");
 			fileNames.add("Rules_mapping");
 			fileNames.add("Rules_filter");
-			this.vObjectService.download(viewRulesSet, response, fileNames//
-					, requeteRegleChargement.toString()//
-					, requeteRegleNormage.toString()//
-					, requeteRegleControle.toString()//
-					, requeteRegleMapping.toString()//
-					, requeteRegleFiltrage.toString());
+			this.vObjectService.download(viewRulesSet, response, fileNames
+					, new ArrayList<PreparedStatementBuilder>(
+							Arrays.asList(
+									requeteRegleChargement
+									, requeteRegleNormage
+									, requeteRegleControle
+									, requeteRegleMapping
+									, requeteRegleFiltrage
+									)
+							)
+					);
 			return "none";
 		} else {
 			this.viewRulesSet.setMessage("You didn't select anything");
