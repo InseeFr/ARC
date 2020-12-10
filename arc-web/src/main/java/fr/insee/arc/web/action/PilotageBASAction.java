@@ -810,7 +810,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				requete.append(
 						"SELECT id_source FROM " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
 				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
-				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + " ");
+				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + "::text[] ");
 				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
 
 				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
