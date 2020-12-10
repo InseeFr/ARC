@@ -127,8 +127,8 @@ public class JeuDeRegle {
     	PreparedStatementBuilder requete=new PreparedStatementBuilder();
     	requete
 		.append("id_norme = " + requete.quoteText(this.idNorme))
-        .append("\n  AND validite_inf = " + requete.quoteText(this.getValiditeInfString()))
-        .append("\n  AND validite_sup = " + requete.quoteText(this.getValiditeSupString()))
+        .append("\n  AND validite_inf = " + requete.quoteText(this.getValiditeInfString())  + "::date")
+        .append("\n  AND validite_sup = " + requete.quoteText(this.getValiditeSupString()) + "::date")
     	.append("\n  AND periodicite = " + requete.quoteText(this.getPeriodicite()))
 		.append("\n  AND version = " + requete.quoteText(this.getVersion()));
     	

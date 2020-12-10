@@ -527,7 +527,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 		HashMap<String, ArrayList<String>> m = new HashMap<>(
 				getViewFichierBAS().mapContentSelected());
-
+		
 		if (!m.isEmpty() && m.get("id_source") != null) {
 			for (int i = 0; i < m.get("id_source").size(); i++) {
 				if (selectedSrc.length()>0) {

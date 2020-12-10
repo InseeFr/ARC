@@ -49,7 +49,7 @@ public class ServiceMapping implements IDbConstant {
         requete
         	.append("SELECT id_famille FROM " + tableNorme)
         	.append("\n WHERE id_norme = " + requete.quoteText(aJeuDeRegle.getIdNorme()))
-        	.append("\n AND periodicite = '" + requete.quoteText(aJeuDeRegle.getPeriodicite()));
+        	.append("\n AND periodicite = " + requete.quoteText(aJeuDeRegle.getPeriodicite()));
         return UtilitaireDao.get(poolName).getString(connexion, requete);
     }
     
