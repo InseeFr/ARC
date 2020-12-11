@@ -95,7 +95,7 @@ public class ApiMappingService extends ApiService {
     @Override
     public void executer() throws Exception {
     	
-        this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "MappingService.MAX_PARALLEL_WORKERS",4);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "MappingService.MAX_PARALLEL_WORKERS",4);
         
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
@@ -105,7 +105,7 @@ public class ApiMappingService extends ApiService {
         
         Connection connextionThread = null;
         ArrayList<ThreadMappingService> threadList = new ArrayList<ThreadMappingService>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution);
         currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le mapping **", logger);
@@ -121,7 +121,7 @@ public class ApiMappingService extends ApiService {
             ThreadMappingService r = new ThreadMappingService( connextionThread, currentIndice, this);
             threadList.add(r);
             r.start();
-            waitForThreads2(MAX_PARALLEL_WORKERS, threadList, connexionList);
+            waitForThreads2(maxParallelWorkers, threadList, connexionList);
 
 
         }

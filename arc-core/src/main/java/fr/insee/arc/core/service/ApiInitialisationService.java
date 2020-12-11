@@ -610,7 +610,7 @@ public class ApiInitialisationService extends ApiService {
         if (!envExecution.contains(".")) {
             requete.append("\n CREATE SCHEMA IF NOT EXISTS " + envExecution + " AUTHORIZATION " + user + "; ");
             requete.append("\n GRANT ALL ON SCHEMA " + envExecution + " TO " + user + "; ");
-            requete.append("\n GRANT ALL ON SCHEMA " + envExecution + " TO public; ");
+            requete.append("\n REVOKE ALL ON SCHEMA " + envExecution + " FROM public; ");
         }
 
         

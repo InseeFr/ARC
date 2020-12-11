@@ -324,27 +324,19 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         return mapVariable;
     }
 
+
 	/**
 	 *
 	 * @param aNomFichier
 	 * @return la requête de mapping pour le fichier {@code aNomFichier}
 	 */
 	public String getRequete(String aNomFichier) {
-		return getRequete(aNomFichier, true);
-	}
-
-	/**
-	 *
-	 * @param aNomFichier
-	 * @return la requête de mapping pour le fichier {@code aNomFichier}
-	 */
-	public String getRequete(String aNomFichier, boolean discardTemp) {
 
 		if (!this.isRequeteCalculee) {
 			StringBuilder requeteGlobale = new StringBuilder("");
-			if(discardTemp) {
-				requeteGlobale.append("DISCARD TEMP; ");
-			}
+//			if(discardTemp) {
+//				requeteGlobale.append("DISCARD TEMP; ");
+//			}
 			requeteGlobale.append("SET ENABLE_HASHAGG=ON; SET ENABLE_BITMAPSCAN=OFF; \n");
 
 			construireTablePrecedente(requeteGlobale);

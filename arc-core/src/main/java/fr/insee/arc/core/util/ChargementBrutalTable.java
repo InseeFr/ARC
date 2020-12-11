@@ -85,7 +85,6 @@ public class ChargementBrutalTable {
 	    		BufferedReader br = new BufferedReader(isr);) {
 
 			// On boucle tant que l'on a pas une norme ou une exception
-			// TODO: en l'état on ne boucle jamais qu'une fois. Dès la première boucle :
 			// - soit la norme est trouvée et on sort
 			// - soit aucune/trop de normes est/sont trouvé(s) et on sort de calculerNormeAndValidite avec une exception
 			// nbBoucle<LIMIT_BOUCLE n'entre jamais en jeu.

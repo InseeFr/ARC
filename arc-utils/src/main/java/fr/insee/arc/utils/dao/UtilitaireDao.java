@@ -130,10 +130,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return get(aPool);
 	}
 
-	public static final String getMethode(String methode) {
-		return UtilitaireDao.class.getCanonicalName() + " " + methode;
-	}
-
 	private final static String untokenize(ModeRequete... modes) {
 		StringBuilder returned = new StringBuilder();
 		for (int i = 0; i < modes.length; i++) {
@@ -142,99 +138,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return returned.toString();
 	}
 
-	public boolean dropSomeSchema(Connection connexion, Collection<String> listeSchemaConserver) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(
-				"\n SELECT string_agg('DROP SCHEMA IF EXISTS '||schema_name||' CASCADE;', '' ORDER BY schema_name)::text");
-		sb.append("\n FROM information_schema.schemata \n");
-		sb.append("\n WHERE schema_owner IN ");
-		sb.append("\n (SELECT role_name FROM information_schema.enabled_roles)");
-		if (listeSchemaConserver != null && listeSchemaConserver.size() > 0) {
-			sb.append("\n AND schema_name NOT IN " + Format.sqlListe(listeSchemaConserver));
-		}
-		try {
-			this.executeImmediate(connexion, sb);
-		} catch (SQLException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "dropSomeSchema()", LOGGER, ex);
-			return false;
-		}
-		return true;
-	}
-
-	public boolean prepareTablePartition(Connection aConnexion, String aTable, String aTableTempName, String aPartition,
-			List<String> listColonnes) {
-		try {
-			List<String> listePartition = ManipString.splitAndCleanList(aPartition, ",");
-			String expressionPartition = "abs(hashtext("//
-					+ listePartition.stream()//
-							.map(t -> "coalesce(" + t + ",'')")//
-							.collect(Collectors.joining("||"))//
-					+ "))";//
-			String idHashName = "id_hash";
-			int idHashModulo = 1000000000;
-			String idRowName = "id_row";
-			StringBuilder sb = new StringBuilder();
-			sb.append("\n CREATE TABLE " + aTableTempName + " ");
-			sb.append("\n AS  ");
-			sb.append("\n WITH tmp_count AS ( ");
-			sb.append("\n 		SELECT (count(*)*10000) + 1 AS n  ");
-			sb.append("\n 		FROM " + aTable + " tablesample system(0.01) ");
-			sb.append("\n 	), nb_partition AS ( ");
-			sb.append("\n 	SELECT CASE 	WHEN log(n) <= 5 THEN 2 ");
-			sb.append("\n 					WHEN log(n) <= 6 THEN 8 ");
-			sb.append("\n 					WHEN log(n) <= 7 THEN 64 ");
-			sb.append("\n 					ELSE 1024 ");
-			sb.append("\n 			END AS n ");
-			sb.append("\n 	FROM tmp_count ");
-			sb.append("\n 	)  ");
-			sb.append("\n SELECT " + listColonnes.stream()
-					.filter(t -> !t.equalsIgnoreCase(idRowName) && !t.equalsIgnoreCase(idHashName)).map(t -> "foo." + t)
-					.collect(Collectors.joining(",")));
-			sb.append(", foo." + idHashName);
-			if (!listColonnes.contains(idRowName)) {
-				sb.append("\n , " + idHashName + "::bigint" + "*" + idHashModulo + "::bigint"
-						+ " + ROW_NUMBER() OVER() AS " + idRowName);
-			} else {
-				sb.append("\n , CASE WHEN " + idRowName + "::bigint<" + idHashModulo + "::bigint");
-				sb.append("\n 			THEN " + idRowName + "::bigint+" + idHashModulo + "::bigint" + "*" + idHashName
-						+ "::bigint");
-				sb.append("\n 			ELSE " + idRowName + "::bigint");
-				sb.append("\n 			END AS " + idRowName);
-			}
-			sb.append("\n FROM ( ");
-
-			sb.append("\n 		SELECT " + listColonnes.stream().filter(t -> !t.equalsIgnoreCase(idHashName))
-					.map(t -> "tab." + t).collect(Collectors.joining(",")));
-			sb.append("\n 		, " + expressionPartition + "% nb_partition.n + 1 AS " + idHashName);
-			sb.append("\n 		FROM " + aTable + " tab, nb_partition ");
-
-			sb.append("\n ) foo ");
-			sb.append("\n ; ");
-			sb.append(FormatSQL.dropUniqueTable(aTable));
-			sb.append(FormatSQL.renameTableTo(aTableTempName, aTable));
-			this.executeImmediate(aConnexion, sb);
-		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, e, "Erreur lors de l'ajout du id_hash");
-			return false;
-		}
-		return true;
-	}
-
-	public boolean createSchema(Connection aConnexion, String schema, String anAuthorization, String... someGrantAlls) {
-		StringBuilder sb = new StringBuilder("BEGIN;");
-		sb.append("CREATE SCHEMA " + schema + " AUTHORIZATION " + anAuthorization + ";");
-		for (int i = 0; i < someGrantAlls.length; i++) {
-			sb.append("GRANT ALL ON SCHEMA " + schema + " TO " + someGrantAlls[i] + ";");
-		}
-		sb.append("END;");
-		try {
-			this.executeImmediate(aConnexion, sb);
-		} catch (SQLException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "createSchema()", LOGGER, ex);
-			return false;
-		}
-		return true;
-	}
 
 	/**
 	 * Retourne une connexion hors contexte (sans pooling)
@@ -287,6 +190,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return null;
 	}
 
+	
 	/**
 	 * Vérifier qu'une table existe <br/>
 	 *
@@ -301,21 +205,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return b;
 	}
 
-	/**
-	 * <br/>
-	 *
-	 *
-	 * @param connexion la connexion à la base
-	 * @param table     le nom de la table
-	 * @return
-	 */
-	public void dropUniqueTable(Connection connexion, String table) {
-		try {
-			executeImmediate(connexion, "DROP TABLE IF EXISTS " + table + ";");
-		} catch (SQLException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "dropUniqueTable()", LOGGER, ex);
-		}
-	}
 
 	/**
 	 * @param connexion  la connexion à la base
@@ -343,44 +232,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public void dropTable(Connection connexion, String... someTables) {
 		dropTable(connexion, Arrays.asList(someTables));
-	}
-
-	/**
-	 * <br/>
-	 *
-	 *
-	 * @param connexion
-	 * @param table
-	 */
-	public void truncateTable(Connection connexion, String table) {
-		try {
-			executeImmediate(connexion, "TRUNCATE TABLE " + table);
-		} catch (SQLException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "truncateTable()", LOGGER, ex);
-		}
-	}
-
-	public void grantToRole(String droit, String role) {
-		try {
-			GenericBean gb = new GenericBean(executeRequest(null,
-					new PreparedStatementBuilder("select 'do $$ begin GRANT " + droit + " ON TABLE '||schemaname||'.'||tablename||' TO " + role
-							+ "; exception when others then end; $$;' as query from pg_tables ")
-					));
-			ArrayList<String> allReq = gb.mapContent().get("query");
-			
-			
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
-			for (String req : allReq) {
-				requete.append(req + "\n");
-				if (requete.length() > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
-					executeRequest(null, requete);
-					requete.setLength(0);
-				}
-			}
-			executeRequest(null, requete);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -551,14 +402,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		sql.append("\n    AND attisdropped=false ");
 		sql.append("\n ORDER BY attname ");
 		sql.append(";");
-		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
 
 		
 		try {
 			liste.addAll(new GenericBean(executeRequest(null, sql, ModeRequete.EXTRA_FLOAT_DIGIT)).mapContent().get("attname"));
 		} catch (SQLException e) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "getColumns()", LOGGER, e);
-			e.printStackTrace();
 		}
 		
 		return liste;
@@ -595,11 +444,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				}
 		return getLong(connexion, requete );
 	}
-
-	public Boolean testResultRequest(Connection connexion, StringBuilder requete) throws SQLException {
-		return testResultRequest(connexion, requete.toString());
-	}
-
 	
 	/**
 	 * <br/>
@@ -624,33 +468,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		executeImmediate(connexion, requete.toString(), modes);
 	}
 
-	public String insertAndGetLastInserted(Connection connexion, String requete, String column, ModeRequete... modes)
-			throws SQLException {
-		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
-
-		String updatedQuery = FormatSQL.addCommentaryHeaderToQuery(requete, constructorMethodsAndClasses);
-		LoggerHelper.trace(LOGGER, updatedQuery);
-		ConnectionWrapper connexionWrapper = initConnection(connexion);
-		try {
-			connexionWrapper.getConnexion().setAutoCommit(true);
-			Statement st = connexionWrapper.getConnexion().createStatement();
-			try {
-				st.execute(ModeRequete.EXTRA_FLOAT_DIGIT.expr());
-				st.execute(untokenize(modes) + updatedQuery, Statement.RETURN_GENERATED_KEYS);
-				ResultSet rs = st.getGeneratedKeys();
-				if (rs.next()) {
-					return String.valueOf(rs.getLong(FIRST_COLUMN_INDEX));
-				}
-			} finally {
-				st.close();
-			}
-		} finally {
-			if (connexionWrapper.isLocal()) {
-				connexionWrapper.close();
-			}
-		}
-		throw new SQLException("La requête n'était pas une insertion ou la récupération de la ligne insérée a échoué");
-	}
 
 	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes) throws SQLException {
 		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
@@ -661,21 +478,21 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		LoggerHelper.trace(LOGGER, updatedQuery.trim());
 
 		ConnectionWrapper connexionWrapper = initConnection(connexion);
-		try {
+		try {		
 			connexionWrapper.getConnexion().setAutoCommit(true);
-			Statement st = connexionWrapper.getConnexion().createStatement();
-			try {
-				st.execute(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr() + updatedQuery);
-				LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
-			} catch (Exception e) {
-				st.cancel();
-				LoggerHelper.error(LOGGER, "executeRequest()", e);
-				throw e;
-			} finally {
-				st.close();
+			try(Statement st = connexionWrapper.getConnexion().createStatement();)
+			{
+				try {
+					st.execute(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr() + updatedQuery);
+					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
+				} catch (Exception e) {
+					st.cancel();
+					LoggerHelper.error(LOGGER, e);
+					throw e;
+				}
 			}
 		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, "executeRequest()", e);
+			LoggerHelper.error(LOGGER, e);
 			throw e;
 		} finally {
 			if (connexionWrapper.isLocal()) {
@@ -684,67 +501,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
-	/**
-	 * <br/>
-	 *
-	 *
-	 * @param aConnexion
-	 * @param string
-	 * @param regex
-	 * @return
-	 */
-	public Boolean checkAgainstRegex(Connection aConnexion, String string, String regex) {
-		Boolean b = null;
-		try {
-			PreparedStatementBuilder requete=new PreparedStatementBuilder();
-			requete.append("SELECT ").append(requete.quoteText(string)).append(" ~ ").append(requete.quoteText(regex));
-			b = getBoolean(aConnexion, requete);
-		} catch (Exception e) {
-		}
-		return b;
-	}
-
-	/**
-	 * Permet de savoir si une requete renvoie des résultats ou non
-	 *
-	 * @param connexion
-	 * @param requete
-	 * @return
-	 * @throws SQLException
-	 */
-	public Boolean testResultRequest(Connection connexion, String requete) {
-		Boolean isresult = false;
-		LoggerHelper.trace(LOGGER, requete);
-		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
-
-		String updatedQuery = FormatSQL.addCommentaryHeaderToQuery(requete, constructorMethodsAndClasses);
-		try {
-			ConnectionWrapper connexionWrapper = initConnection(connexion);
-			try {
-				connexionWrapper.getConnexion().setAutoCommit(false);
-				PreparedStatement stmt;
-				stmt = connexionWrapper.getConnexion().prepareStatement("set extra_float_digits=3;");
-				stmt.execute();
-				stmt = connexionWrapper.getConnexion()
-						.prepareStatement("SELECT * from (" + updatedQuery + ") dummyTable0000000 LIMIT 1 ");
-				try {
-					isresult = stmt.execute();
-					return isresult;
-				} finally {
-					stmt.close();
-					connexionWrapper.getConnexion().commit();
-				}
-			} catch (Exception e) {
-				connexionWrapper.getConnexion().rollback();
-				return isresult;
-			} finally {
-				connexionWrapper.close();
-			}
-		} catch (SQLException e) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "testResultRequest()", LOGGER, e);
-			return isresult;
-		}
-	}
 
 	/**
 	 * Exécution de requêtes ramenant des enregistrements
@@ -763,38 +519,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 *
 	 */
-//	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, String requete, ModeRequete... modes)
-//			throws SQLException {
-//		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
-//	}
-
-
-//	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, StringBuilder requete,
-//			ModeRequete... modes) throws SQLException {
-//		return executeRequest(connexion, requete.toString(), modes);
-//	}
-
-//	public ArrayList<ArrayList<String>> executeRequestWithoutMetadata(Connection connexion, StringBuilder requete,
-//			ModeRequete... modes) throws SQLException {
-//		return executeRequestWithoutMetadata(connexion, requete.toString(), modes);
-//	}
-
-//	public <T> List<T> executeRequest(Connection connexion, String requete, Function<ResultSet, T> orm,
-//			ModeRequete... modes) throws SQLException {
-//		return executeRequest(connexion, requete, EntityProvider.getTypedListProvider(orm), modes);
-//	}
-
-	
-//	public <T> T executeRequest(Connection connexion, String requete, EntityProvider<T> entityProvider,
-//			ModeRequete... modes) throws SQLException {
-//		
-//		return executeRequest(connexion, new PreparedStatementBuilder(requete), entityProvider, modes);
-//		
-//	}
-	
-	
-
-	
 	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, PreparedStatementBuilder requete,  ModeRequete... modes)
 			throws SQLException {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
@@ -1682,13 +1406,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 			executeImmediate(connexion, requete.toString());
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			LoggerHelper.error(LOGGER, ex);
 		} finally {
 			try {
 				executeImmediate(connexion, FormatSQL.resetTimeOutMaintenance());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LoggerHelper.error(LOGGER, e);
 			}
 		}
 	}
@@ -1785,10 +1508,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 		requete.append("\n FROM " + tableName + " ");
 		requete.append("\n WHERE " + where + ";");
-		// requete.append("\n create index idx1_" +
-		// ManipString.substringAfterFirst(tableName, ".") + " on " +
-		// tableFastUpdate +
-		// "("+keys+");");
+
 		requete.append("\n drop table if exists " + tableImage + ";");
 		requete.append("\n set enable_nestloop=off; ");
 		requete.append("\n create ");
@@ -1814,26 +1534,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			requete.append("a." + colKeyList.get(i) + "=b." + colKeyList.get(i) + " ");
 		}
 		requete.append("\n) ");
-		//
-		// requete.append("\n WHERE (");
-		// for (int i = 0; i < colKeyList.size(); i++)
-		// {
-		// if (i > 0)
-		// {
-		// requete.append(" , ");
-		// }
-		// requete.append(colKeyList.get(i));
-		// }
-		// requete.append("\n) NOT IN (select distinct ");
-		// for (int i = 0; i < colKeyList.size(); i++)
-		// {
-		// if (i > 0)
-		// {
-		// requete.append(", ");
-		// }
-		// requete.append(colKeyList.get(i));
-		// }
-		// requete.append("\n from " + tableFastUpdate + " b)");
 		requete.append("\n UNION ALL ");
 		requete.append("\n SELECT ");
 		for (int i = 0; i < colList.size(); i++) {
@@ -1865,153 +1565,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 * Fast update qui accepte les fonctions d'aggregation
-	 *
-	 * @param poolName
-	 * @param aConnexion
-	 * @param tableName
-	 * @param keys
-	 * @param where
-	 * @param set
-	 * @throws SQLException
-	 */
-	public void fastUpdateAggr(String poolName, Connection aConnexion, String tableName, String keys, String where,
-			String... set) throws SQLException {
-		// récupérer la liste des colonnes
-		// liste de toutes les colonnes
-		ArrayList<String> colList = listeCol(poolName, aConnexion, tableName);
-		// liste des colonnes à mettre à jour
-		ArrayList<String> colSetList = new ArrayList<String>();
-		ArrayList<String> setList = new ArrayList<String>();
-		for (int i = 0; i < set.length; i++) {
-			String col = ManipString.substringAfterLast(set[i].trim(), "as ").toUpperCase();
-			if (colList.contains(col)) {
-				colSetList.add(col);
-				setList.add(set[i]);
-			}
-		}
-		// liste des colonnes de la jointure (clé primaire de la table initiale)
-		ArrayList<String> colKeyList = new ArrayList<String>();
-		for (int i = 0; i < keys.split(",").length; i++) {
-			colKeyList.add(keys.split(",")[i].trim().toUpperCase());
-		}
-		// construction de la requete
-		StringBuilder requete = new StringBuilder();
-		String tableFastUpdate = FormatSQL.temporaryTableName(tableName, "FA");
-		String tableImage = FormatSQL.temporaryTableName(tableName, "IA");
-		// reecriture pour prendre en compte les fonction d'aggregation
-		// set titi=max() over () se fait avant la clause where
-		requete.append("analyze " + tableName + "(");
-		for (int i = 0; i < colKeyList.size(); i++) {
-			if (i > 0) {
-				requete.append(" , ");
-			}
-			requete.append(colKeyList.get(i));
-		}
-		requete.append(");");
-		requete.append(" drop table if exists " + tableFastUpdate + " ;");
-		requete.append("\n create table " + tableFastUpdate + " " + FormatSQL.WITH_NO_VACUUM + " as ");
-		requete.append("\n select * from (select " + keys + " ");
-		for (int i = 0; i < setList.size(); i++) {
-			requete.append("," + setList.get(i));
-		}
-		requete.append("\n from " + tableName + " ");
-		requete.append("\n ) a ");
-		requete.append(" WHERE EXISTS (select 1 from " + tableName + " b ");
-		requete.append("\n WHERE ");
-		for (int i = 0; i < colKeyList.size(); i++) {
-			if (i > 0) {
-				requete.append("AND ");
-			}
-			requete.append("a." + colKeyList.get(i) + "=b." + colKeyList.get(i) + " ");
-		}
-		requete.append("\n AND " + where + " ");
-		requete.append("\n ); ");
-		// requete.append("\n ) u WHERE (");
-		// for (int i = 0; i < colKeyList.size(); i++) {
-		// if (i > 0) {
-		// requete.append(" , ");
-		// }
-		// requete.append(colKeyList.get(i));
-		// }
-		// requete.append(") IN (SELECT distinct ");
-		// for (int i = 0; i < colKeyList.size(); i++) {
-		// if (i > 0) {
-		// requete.append(" , ");
-		// }
-		// requete.append(colKeyList.get(i));
-		// }
-		// requete.append(" FROM " + tableName + " WHERE " + where + ") ;");
-		// requete.append("\n create index idx1_" +
-		// ManipString.substringAfterFirst(tableFastUpdate, ".") + " on " +
-		// tableFastUpdate +
-		// "("+keys+");");
-		requete.append("\n drop table if exists " + tableImage + ";");
-		requete.append("\n create table " + tableImage + " " + FormatSQL.WITH_NO_VACUUM + " as ");
-		requete.append("\n SELECT ");
-		for (int i = 0; i < colList.size(); i++) {
-			if (i > 0) {
-				requete.append(",");
-			}
-			requete.append("a." + colList.get(i));
-		}
-		requete.append("\n FROM " + tableName + " a");
-		// requete.append("\n WHERE NOT EXISTS (select 1 from " +
-		// tableFastUpdate + " b ");
-		// requete.append("\n WHERE ");
-		// for (int i = 0; i < colKeyList.size(); i++) {
-		// if (i > 0) {
-		// requete.append("AND ");
-		// }
-		// requete.append("a."+colKeyList.get(i)+"=b."+colKeyList.get(i)+" ");
-		// }
-		//
-		// requete.append("\n) ");
-		requete.append("\n WHERE (");
-		for (int i = 0; i < colKeyList.size(); i++) {
-			if (i > 0) {
-				requete.append(" , ");
-			}
-			requete.append(colKeyList.get(i));
-		}
-		requete.append("\n) NOT IN (select distinct ");
-		for (int i = 0; i < colKeyList.size(); i++) {
-			if (i > 0) {
-				requete.append(" , ");
-			}
-			requete.append(colKeyList.get(i));
-		}
-		requete.append("\n from  " + tableFastUpdate + " b)");
-		requete.append("\n UNION ALL ");
-		requete.append("\n SELECT ");
-		for (int i = 0; i < colList.size(); i++) {
-			if (i > 0) {
-				requete.append(",");
-			}
-			if (colSetList.contains(colList.get(i))) {
-				requete.append("b." + colList.get(i));
-			} else {
-				requete.append("a." + colList.get(i));
-			}
-		}
-		requete.append("\n FROM " + tableName + " a, " + tableFastUpdate + " b WHERE ");
-		for (int i = 0; i < colKeyList.size(); i++) {
-			if (i > 0) {
-				requete.append(" AND ");
-			}
-			requete.append("a." + colKeyList.get(i) + "=b." + colKeyList.get(i));
-		}
-		requete.append(";");
-		requete.append("\n drop table if exists " + tableFastUpdate + ";");
-		requete.append("\n drop table if exists " + tableName + ";");
-		requete.append(
-				"\n alter table " + tableImage + " rename to " + ManipString.substringAfterFirst(tableName, ".") + ";");
-		requete.append("analyze " + tableName + " (" + keys + ");");
-		this.executeBlockNoError(aConnexion, requete);
-		requete.setLength(0);
-	}
-
-	/**
 	 *
 	 * @param connexion
 	 * @param directoryOut
@@ -2035,7 +1588,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		 * Copy dans le fichier
 		 */
 		OutputStream os = new FileOutputStream(fName);
-		GZIPOutputStream gzos = new GZIPOutputStream(os) {
+		GZIPOutputStream gzos = new GZIPOutputStream(os)
+		{
 			{
 				this.def.setLevel(Deflater.BEST_SPEED);
 			}
@@ -2127,7 +1681,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 * TODO à mutualiser avec exporting export de table postgres dans un stream
 	 *
 	 * @param connexion
 	 * @param table
@@ -2205,8 +1758,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 			conn.getConnexion().commit();
 		} catch (Exception e) {
-			e.printStackTrace();
 			conn.getConnexion().rollback();
+			LoggerHelper.error(LOGGER, e);
 		} finally {
 			conn.close();
 		}
@@ -2238,8 +1791,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 			conn.getConnexion().commit();
 		} catch (Exception e) {
-			e.printStackTrace();
 			conn.getConnexion().rollback();
+			LoggerHelper.error(LOGGER, e);
 		} finally {
 			conn.close();
 		}
@@ -2346,7 +1899,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			LoggerHelper.info(LOGGER, "importing done");
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			LoggerHelper.error(LOGGER, e);
 
 			if (e.getMessage().startsWith("ERROR: missing data for column")) {
 
@@ -2363,64 +1916,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		} finally {
 			conn.close();
 		}
-	}
-
-	/**
-	 * On passe une table et une liste de colonne pour voir si un index avec ces
-	 * colonnes existe déjà
-	 * 
-	 * @param aConnection
-	 * @param aListeColonnes
-	 * @param aTable
-	 * @param aSchema
-	 * @return
-	 */
-	public boolean isIndexAlreadyExists(Connection aConnection, List<String> aListeColonnes, String aTable,
-			String aSchema) {
-		boolean returned = false;
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT unnest(REGEXP_MATCHES(indexdef, '\\((.*)\\)')) ");
-		requete.append("\n FROM pg_indexes ");
-		requete.append("\n WHERE tablename = " + FormatSQL.textToSql(aTable) + " and schemaname = "
-				+ FormatSQL.textToSql(aSchema) + ";");
-		List<String> listeColonnesIndexs = getList(aConnection, requete.toString(), new ArrayList<>());
-		LoggerHelper.debug(LOGGER, "listeColonnesIndexs : ", listeColonnesIndexs.toString());
-		System.out.println("aListeColonnes : " + aListeColonnes.toString());
-		System.out.println("listeColonnesIndexs : " + listeColonnesIndexs.toString());
-
-		for (String index : listeColonnesIndexs) {
-			List<String> colonnesIndex = ManipString.stringToList(index, ",");
-			if (colonnesIndex.containsAll(aListeColonnes) && aListeColonnes.containsAll(colonnesIndex))
-				returned = true;
-		}
-		return returned;
-	}
-
-	/**
-	 * Recherche dans un schema donné l'existence d'au moins un index dons le nom
-	 * correspond au pattern donné. Si plusieurs index sont trouvés un warning est
-	 * ajouté dans les logs.
-	 * 
-	 * @param aConnection
-	 * @param aSchema
-	 * @param idxNamePattern
-	 * @return
-	 */
-	public boolean isIndexAlreadyExists(Connection cnx, String aSchema, String idxNamePattern) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("\n SELECT 1 ");
-		sql.append("\n FROM pg_indexes ");
-		sql.append("\n WHERE schemaname = " + FormatSQL.textToSql(aSchema));
-		sql.append("\n AND indexName ilike " + FormatSQL.textToSql(idxNamePattern));
-		long nb = getCountFromRequest(cnx, sql.toString());
-
-		if (nb > 1) {
-			LoggerHelper.warn(LOGGER,
-					"Plusieurs index trouvée dans le schéma " + aSchema + " pour le pattern " + idxNamePattern);
-		}
-
-		return (nb >= 1);
 	}
 
 	public void importing(Connection connexion, String table, InputStream is, boolean csv, String aDelim)
@@ -2468,115 +1963,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return getList(aConnexion, requete, new ArrayList<String>());
 	}
 
-	/**
-	 *
-	 * @param aConnexion
-	 * @param schema
-	 * @param pattern
-	 * @return la liste des tables telles que {@code pg_namespace.nspname = schema}
-	 *         et {@code pg_class.relname LIKE pattern}
-	 */
-	public List<String> listeTablesFromConditions(Connection aConnexion, String schema, String... conditions) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT nspname||'.'||relname AS nom_qualifie");
-		requete.append("\n FROM pg_class INNER JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid");
-		requete.append("\n WHERE pg_namespace.nspname = '" + schema + "'");
-		for (String condition : conditions) {
-			requete.append("\n   AND pg_class.relname " + condition);
-		}
-		requete.append("\n   AND pg_class.relkind = 'r'");
-		requete.append(";");
-		return getList(aConnexion, requete, new ArrayList<String>());
-	}
-
-	public List<String> listeContraintes(Connection connexion, String aSchema, String aTable, String aTypeContrainte) {
-		return getList(connexion, FormatSQL.listeContraintes(aSchema, aTable, aTypeContrainte),
-				new ArrayList<String>());
-	}
-
-	public List<String> listeAllContraintes(Connection connexion, String aSchema, String aTable) {
-		List<String> returned = new ArrayList<>();
-		List<String> listeTypeConstraint = new ArrayList<>(Arrays.asList("c", "f", "p", "u", "t", "x"));
-		for (String type : listeTypeConstraint) {
-			returned.addAll(
-					getList(connexion, FormatSQL.listeContraintes(aSchema, aTable, type), new ArrayList<String>()));
-		}
-		return returned;
-	}
-
-	/**
-	 *
-	 * @param aConnexion
-	 * @param schema
-	 * @param pattern
-	 * @return la liste des tables telles que {@code pg_namespace.nspname = schema}
-	 *         et {@code pg_class.relname LIKE pattern}
-	 */
-	public List<String> listeTablesFromPattern(Connection aConnexion, String schema, Collection<String> patterns) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT schemaname||'.'||tablename AS nom_qualifie");
-		requete.append("\n FROM pg_tables ");
-		requete.append("\n WHERE schemaname='" + schema + "'");
-		requete.append("\n AND ( ");
-		boolean isFirst = true;
-		for (String pattern : patterns) {
-			if (isFirst) {
-				isFirst = false;
-			} else {
-				requete.append("\n   OR ");
-			}
-			requete.append("tablename LIKE '" + pattern + "'");
-		}
-		requete.append(");");
-		return getList(aConnexion, requete, new ArrayList<String>());
-	}
-
-	/**
-	 * Quand postgresql 9.5 arrive, virer cette méthode et faire des create index if
-	 * not exists
-	 *
-	 * @param aConnexion
-	 * @param nomIndex
-	 * @param nomSchema
-	 * @param nomTable
-	 * @return
-	 */
-	@Deprecated
-	public boolean isIndexExist(Connection aConnexion, String nomIndex, String nomSchema, String nomTable) {
-		return getCountFromRequest(aConnexion, "SELECT * FROM pg_indexes WHERE indexname = '" + nomIndex
-				+ "' AND tablename = '" + nomTable + "' AND schemaname = '" + nomSchema + "'") > 0;
-	}
-
 	public boolean isSilent() {
 		return this.silent;
 	}
 
 	public void setSilent(boolean silent) {
 		this.silent = silent;
-	}
-
-	public static Connection getConnectionFromProperties(String aPool, String aCheminAcces) {
-		try {
-		    // get some properties manually
-		    PropertiesHandler properties = PropertiesHandler.getInstance();
-		    return DriverManager.getConnection(properties.getDatabaseUrl()//
-			    , properties.getDatabaseUsername()//
-			    , properties.getDatabasePassword()//
-		    );
-		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, e, e.getMessage());
-		}
-		return null;
-	}
-
-	public static void setConnectionName(Connection connection, String connectioName) {
-		Properties props = new Properties();
-		props.setProperty("ApplicationName ", "connectioName");
-		try {
-			connection.setClientInfo(props);
-		} catch (SQLClientInfoException e) {
-			LoggerHelper.error(LOGGER, "error in setConnectionName()");
-		}
 	}
 
 }

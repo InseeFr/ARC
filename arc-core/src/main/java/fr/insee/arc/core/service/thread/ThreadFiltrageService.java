@@ -57,11 +57,12 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
             e.printStackTrace();
         }
         
-        this.tableFiltrageDataTemp = FormatSQL.temporaryTableName("filtrage_data_temp");
-        this.tableFiltragePilTemp = FormatSQL.temporaryTableName("filtrage_pil_Temp");
+        this.tableFiltrageDataTemp = "filtrage_data_temp";
+        this.tableFiltragePilTemp = "filtrage_pil_Temp";
         
-        this.tableTempFiltrageKo = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO + "$" +indice);
-        this.tableTempFiltrageOk = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK + "$" +indice);
+        this.tableTempFiltrageKo = "tableTempFiltrageKo";
+        this.tableTempFiltrageOk = "tableTempFiltrageOk";
+        
         this.tableFiltrageKo=ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ko");
         this.tableFiltrageOk=ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ok");
         
@@ -260,7 +261,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
      */
     public void insertionFinale() throws Exception
     {
-
+    	// promote the application user account to full right
+    	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+    	
     	// créer les tables héritées
     	String tableIdSourceOK=tableOfIdSource(this.tableFiltrageOk ,this.idSource);
     	createTableInherit(connexion, this.tableTempFiltrageOk, tableIdSourceOK);
@@ -278,7 +281,6 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         {
             requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableFiltrageOk + "_todo;"));
             requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
-//            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ this.tableFiltrageKo +";"));
         }
         
         requete.append(this.marquageFinal(this.tablePil, this.tableFiltragePilTemp));

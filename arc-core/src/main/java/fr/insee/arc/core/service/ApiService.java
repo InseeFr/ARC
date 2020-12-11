@@ -49,7 +49,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
     public static final String SUFFIXE_TEMP_FILE_ORIADE = "_W";
     public static final String FICHIER_MISE_EN_PRODUCTION = "production.dummy";
-    public int MAX_PARALLEL_WORKERS;
+    
+    protected int maxParallelWorkers;
+    
     public static final String CHILD_TABLE_TOKEN="child";
 
     // Nom du fichier
@@ -57,6 +59,10 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     // racine xml
     public static final String ROOT="root";
 
+    // restricted user
+    private static final String RESTRICTED_USER="arc_restricted";
+
+    
     @Autowired
 	protected PropertiesHandler properties;
 
@@ -116,7 +122,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				Connection connexionTemp = UtilitaireDao.get(poolName).getDriverConnexion();
 				connexionList.add(connexionTemp);
 
-				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution));
+				// demote application user account to temporary restricted operations and readonly or non-tempoary schema
+				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution)+ FormatSQL.changeRole(RESTRICTED_USER));
 			}
 
 		} catch (Exception ex) {
@@ -130,7 +137,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public  void waitForThreads2(int parallel, ArrayList<? extends ApiService> threadList, ArrayList<Connection> connexionList)
             throws Exception {
         
-//        System.out.println("threadList.size() "+threadList.size());
         while (threadList.size() >= parallel && threadList.size() > 0) {
             Iterator<? extends ApiService> it = threadList.iterator();
             
@@ -1404,6 +1410,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         UtilitaireDao.get(poolName).executeBlock(connexion, requete);
     }
 
+    
     /**
      * permet de récupérer un tableau de la forme id_source | id1 , id2, id3 ... type_comp | comp1,comp2, comp3 ...
      * 

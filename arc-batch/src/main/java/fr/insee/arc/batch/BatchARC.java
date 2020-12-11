@@ -431,13 +431,6 @@ public class BatchARC {
 		// si on n'est pas en production, on itere tant qu'il y a des fichiers dans le repertoire.
 		}
 		while (!production && recevoir.report.nbLines>0 && productionOn);
-
-		
-		// paliatif production pour ARC
-        UtilitaireDao.get("arc").grantToRole("SELECT","comptelecture");
-        // paliatif production pour ARC-DADS
-        UtilitaireDao.get("arc").grantToRole("SELECT","lecture");
-		
         
         if (args!=null && args.length>0 && args[0].equals("noExit"))
         {

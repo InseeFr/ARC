@@ -63,7 +63,8 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
         this.ensembleVariableMapping = new TreeSet<>();
         this.environnement = anEnvironnement;
         this.ensembleRegleMappingClefPrimaire = new HashSet<RegleMappingClePrimaire>();
-        this.nomTableTemporaire=FormatSQL.temporaryTableName(ApiService.dbEnv(this.environnement) + this.nomTableCourt+"_" + encours + "$" + threadId);
+       // this.nomTableTemporaire=FormatSQL.temporaryTableName(ApiService.dbEnv(this.environnement) + this.nomTableCourt+"_" + encours + "$" + threadId);
+        this.nomTableTemporaire="tableMappingTemp_"+this.nomTableCourt;
         this.ensembleIdentifiantsRubriques = new HashSet<>();
         this.mapGroupeToEnsembleIdentifiantsRubriques = new TreeMap<>();
         this.mapGroupeToEnsembleNomsRubriques = new TreeMap<>();
@@ -240,7 +241,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
 
     public String requeteCreation() {
         StringBuilder returned = new StringBuilder(FormatSQL.dropUniqueTable(this.getNomTableTemporaire()));
-        returned.append("CREATE UNLOGGED TABLE " + this.getNomTableTemporaire() + " (");
+        returned.append("CREATE "+(this.getNomTableTemporaire().contains(".")?"UNLOGGED":"TEMPORARY")+" TABLE " + this.getNomTableTemporaire() + " (");
         boolean isFirst = true;
         for (VariableMapping variable : this.getEnsembleVariableMapping()) {
             if (isFirst) {

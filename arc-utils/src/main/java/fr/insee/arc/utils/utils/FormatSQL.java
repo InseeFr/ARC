@@ -262,6 +262,17 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     }
 
 
+    /**
+     * Switch the database user
+     * @param roleName
+     * @return
+     * @throws SQLException
+     */
+	public static String changeRole(String roleName)
+	{
+		return "SET role='"+roleName+"'";
+	}
+    
 
     public static String getIdColumns(String tempTableA)
     {

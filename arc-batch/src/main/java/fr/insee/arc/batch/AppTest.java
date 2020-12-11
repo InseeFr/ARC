@@ -22,17 +22,11 @@ public class AppTest {
 	PreparedStatementBuilder requete=new PreparedStatementBuilder();
 	requete.append("SELECT ");
 	requete.append(requete.quoteText("salut"));
-	
-	
+
 	System.out.println(UtilitaireDao.get("arc").getString(null, requete));
 
 	
-	requete=new PreparedStatementBuilder();
-	requete.append("SELECT ");
-	requete.append(requete.quoteText("145"));
-	
-	
-	System.out.println(UtilitaireDao.get("arc").getLong(null, requete));
+	System.out.println(UtilitaireDao.get("arc").getLong(null, new PreparedStatementBuilder(("SELECT  145"))));
 	
 	
 	System.out.println(UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select 'aa'")));
@@ -44,6 +38,10 @@ public class AppTest {
 
 	
 	System.out.println(UtilitaireDao.get("arc").isTableExiste(null, "arc.ext_etat"));
+	
+	UtilitaireDao.get("arc").executeImmediate(null, "DROP TABLE IF EXISTS arc_bas2.toto; CREATE TABLE arc_bas2.toto(a text); DROP TABLE IF EXISTS arc_bas2.toto;");
+	
+	
 	}
 	
 }
