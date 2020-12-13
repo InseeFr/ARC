@@ -229,7 +229,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 */
 	@RequestMapping("/enterPilotageBAS")
 	public String enterPilotageBAS(Model model) {
-		ApiInitialisationService.bddScript(getBacASable(), null);
+		ApiInitialisationService.bddScript(null, getBacASable());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

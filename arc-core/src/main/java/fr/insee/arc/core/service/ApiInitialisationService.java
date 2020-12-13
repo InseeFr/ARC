@@ -2,6 +2,7 @@ package fr.insee.arc.core.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -238,794 +240,95 @@ public class ApiInitialisationService extends ApiService {
 		}
 	}
 
+	
+	/**
+	 * inject in sql database initialization scripts the input parameters
+	 * @param query
+	 * @param user
+	 * @param nbSandboxes
+	 * @param envExecution
+	 * @return
+	 */
+	private static String applyBddScriptParameters (String query, String user, Integer nbSandboxes, String envExecution)
+	{
+		if (user!=null)
+		{
+			query=query.replace("{{user}}", user);
+		}
+		if (nbSandboxes!=null)
+		{
+			query=query.replace("{{nbSandboxes}}", String.valueOf(nbSandboxes));
+		}
+		if (envExecution!=null)
+		{
+			query=query.replace("{{envExecution}}", envExecution);
+		}
+		return query;
+	}
+	
+	private static String readBddScript (String scriptName, String user, Integer nbSandboxes, String envExecution)
+	{
+		try {
+			if (ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName)!=null)
+			{
+				return applyBddScriptParameters(IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName), StandardCharsets.UTF_8), user, nbSandboxes, envExecution);
+			}
+		} catch (IOException e) {
+			LOGGER.error(e);
+		}
+		return null;
+	}
+	
+	private static void executeBddScript (Connection connexion, String scriptName, String user, Integer nbSandboxes, String envExecution)
+	{
+		String query;
+
+		if ((query=readBddScript(scriptName, user, nbSandboxes, envExecution))!=null)
+		{
+			try {
+				UtilitaireDao.get("arc").executeImmediate(connexion,query);
+			} catch (SQLException e) {
+	            LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "bddScript()", LOGGER, e);
+			}
+		}
+	}
+	
     /**
-     * Méthode pour implémenter des maintenances sur la base de donnée
-     *
+     * Méthode pour initialiser ou patcher la base de données la base de donnée. 
+     * Passer à LIQUIBASE ??
      * @param connexion
      * @throws Exception
      */
-    public static void bddScript(String envExecution, Connection connexion) {
+    public static void bddScript(Connection connexion, String... envExecutions) {
 
-        String user = "arc";
         try {
-            user = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select user "));
+        	String user = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select user "));
+        	
+            Integer nbSandboxes=BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes",8);
+
+            executeBddScript(connexion, "BdD/script_global.sql", user, nbSandboxes, null);
+            executeBddScript(connexion, "BdD/script_function.sql", user, nbSandboxes, null);
+            
+            Arrays.asList(TraitementPhase.values())
+            .forEach(t -> executeBddScript(connexion, "BdD/script_global_phase_"+t.toString().toLowerCase()+".sql", user, nbSandboxes, null));
+            
+            Arrays.asList(envExecutions)
+            .forEach(envExecution -> executeBddScript(connexion, "BdD/script_sandbox.sql", user, nbSandboxes, envExecution));
+            
+            Arrays.asList(envExecutions)
+            .forEach(envExecution -> 
+	            {
+	            	Arrays.asList(TraitementPhase.values())
+	                .forEach(t -> executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", user, nbSandboxes, envExecution));	
+	            }
+            );
+            
+            
+            
         } catch (SQLException ex) {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "bddScript()", LOGGER, ex);
         }
-
-        StringBuilder requete = new StringBuilder();
-
-        // création des tables si elles n'xistent pas
-        requete.append("\n CREATE SCHEMA IF NOT EXISTS arc; ");
         
-        // Création de la table de parametres
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.parameter ");
-        requete.append("\n ( ");
-        requete.append("\n key text, ");
-        requete.append("\n val text, ");
-        requete.append("\n CONSTRAINT parameter_pkey PRIMARY KEY (key) ");
-        requete.append("\n ); ");
-        
-        // création des table de modalités IHM
-        int n=UtilitaireDao.get("arc").getInt(null, new PreparedStatementBuilder("select count(*) from arc.ext_etat"));
-        if (n>2)
-        {
-        	requete.append("\n DROP TABLE IF EXISTS arc.ext_etat; ");
-        }
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_etat ");
-        requete.append("\n ( ");
-        requete.append("\n id text, ");
-        requete.append("\n val text, ");
-        requete.append("\n CONSTRAINT ext_etat_pkey PRIMARY KEY (id) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_etat values ('0','INACTIF'),('1','ACTIF'); "));
-        
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_etat_jeuderegle ");
-        requete.append("\n ( ");
-        requete.append("\n id text NOT NULL, ");
-        requete.append("\n val text, ");
-        requete.append("\n isenv boolean, ");
-        requete.append("\n mise_a_jour_immediate boolean, ");
-        requete.append("\n CONSTRAINT ext_etat_jeuderegle_pkey PRIMARY KEY (id) ");
-        requete.append("\n ); ");
-    	requete.append(FormatSQL.tryQuery("\n DELETE FROM arc.ext_etat_jeuderegle where id='arc.bas';"));
-    	
-    	int nbSandboxes=BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes",8);
-    	
-    	for (int i=1;i<=nbSandboxes;i++)
-        {
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_etat_jeuderegle values ('arc.bas"+i+"','BAC A SABLE "+i+"','TRUE','TRUE');"));
-        }
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_etat_jeuderegle values ('arc.prod','PRODUCTION','TRUE','FALSE');"));
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_etat_jeuderegle values ('inactif','INACTIF','FALSE','FALSE');"));
-
-
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_mod_periodicite ");
-        requete.append("\n ( ");
-        requete.append("\n id text, ");
-        requete.append("\n val text, ");
-        requete.append("\n CONSTRAINT ext_mod_periodicite_pkey PRIMARY KEY (id) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_mod_periodicite values ('M','MENSUEL'),('A','ANNUEL'); "));
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_mod_type_autorise ");
-        requete.append("\n ( ");
-        requete.append("\n  nom_type name NOT NULL, ");
-        requete.append("\n  description_type text NOT NULL, ");
-        requete.append("\n  CONSTRAINT pk_ext_mod_type_autorise PRIMARY KEY (nom_type) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_mod_type_autorise values ('bigint','Entier'),('bigint[]','Tableau d''entier long'),('boolean','Vrai (t ou true) ou faux (f ou false)'),('date','Date'),('date[]','Tableau de date'),('float','Nombre décimal virgule flottante'),('float[]','Tableau de nombre décimaux'),('interval','Durée (différence de deux dates)'),('text','Texte sans taille limite'),('text[]','Tableau de texte sans limite'),('timestamp without time zone','Date et heure'); "));
-
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_type_controle ");
-        requete.append("\n ( ");
-        requete.append("\n   id text NOT NULL, ");
-        requete.append("\n   ordre integer, ");
-        requete.append("\n   CONSTRAINT ext_type_controle_pkey PRIMARY KEY (id) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_controle values ('ALPHANUM','2'),('CARDINALITE','1'),('CONDITION','5'),('DATE','4'),('NUM','3'); "));
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_controle values ('REGEXP', '6');"));
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_controle values ('ENUM_BRUTE', '7');"));
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_controle values ('ENUM_TABLE', '8');"));
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_controle values ('STRUCTURE', '8');"));
-        
-        requete.append("\n DELETE FROM arc.ext_type_controle WHERE id='ALIAS';");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_type_fichier_chargement ");
-        requete.append("\n ( ");
-        requete.append("\n   id text NOT NULL, ");
-        requete.append("\n   ordre integer, ");
-        requete.append("\n   CONSTRAINT ext_type_fichier_chargement_pkey PRIMARY KEY (id) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_fichier_chargement values ('xml','1'),('clef-valeur','2'),('plat','3'); "));
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_fichier_chargement values ('xml-complexe','4'); "));
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_type_normage ");
-        requete.append("\n ( ");
-        requete.append("\n   id text NOT NULL, ");
-        requete.append("\n   ordre integer, ");
-        requete.append("\n   CONSTRAINT ext_type_normage_pkey PRIMARY KEY (id) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ext_type_normage values ('relation','1'),('cartesian','2'),('suppression','3'),('unicité','4'); "));
-
-        
-        // fonctions
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.update_list_param( ");
-        requete.append("\n 	    n text, ");
-        requete.append("\n dt text) ");
-        requete.append("\n RETURNS boolean AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n DECLARE p text; ");
-        requete.append("\n BEGIN ");
-        requete.append("\n begin ");
-        requete.append("\n p:=current_setting(n); ");
-        requete.append("\n exception when others then ");
-        requete.append("\n perform set_config(n,';'||dt||';',true ); ");
-        requete.append("\n return false; ");
-        requete.append("\n end; ");
-        requete.append("\n if (p='') then ");
-        requete.append("\n perform set_config(n,';'||dt||';',true ); ");
-        requete.append("\n return false; ");
-        requete.append("\n end if; ");
-        requete.append("\n if (p not like '%;'||dt||';%') then ");
-        requete.append("\n perform set_config(n,p||dt||';',true ); ");
-        requete.append("\n end if; ");
-        requete.append("\n return true; ");
-        requete.append("\n END; ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_famille ");
-        requete.append("\n ( ");
-        requete.append("\n   id_famille text NOT NULL, ");
-        requete.append("\n   CONSTRAINT ihm_famille_pkey PRIMARY KEY (id_famille) ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_client ");
-        requete.append("\n (id_famille text NOT NULL, ");
-        requete.append("\n id_application text NOT NULL, ");
-        requete.append("\n CONSTRAINT pk_ihm_client PRIMARY KEY (id_famille, id_application), ");
-        requete.append("\n CONSTRAINT fk_client_famille FOREIGN KEY (id_famille) ");
-        requete.append("\n REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE ");
-        requete.append("\n ON UPDATE NO ACTION ON DELETE NO ACTION ");
-        requete.append("\n ); ");
-        
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_norme ");
-        requete.append("\n ( ");
-        requete.append("\n   id_norme text NOT NULL, ");
-        requete.append("\n   periodicite text  NOT NULL, ");
-        requete.append("\n   def_norme text  NOT NULL, ");
-        requete.append("\n   def_validite text  NOT NULL, ");
-        requete.append("\n   id serial NOT NULL, ");
-        requete.append("\n   etat text , ");
-        requete.append("\n   id_famille text , ");
-        requete.append("\n   CONSTRAINT ihm_norme_pkey PRIMARY KEY (id_norme, periodicite), ");
-        requete.append("\n   CONSTRAINT ihm_norme_id_famille_fkey FOREIGN KEY (id_famille) ");
-        requete.append("\n       REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE ");
-        requete.append("\n       ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_calendrier ");
-        requete.append("\n ( ");
-        requete.append("\n   id_norme text NOT NULL, ");
-        requete.append("\n   periodicite text NOT NULL, ");
-        requete.append("\n   validite_inf date NOT NULL, ");
-        requete.append("\n   validite_sup date NOT NULL, ");
-        requete.append("\n   id serial NOT NULL, ");
-        requete.append("\n   etat text, ");
-        requete.append("\n   CONSTRAINT ihm_calendrier_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup), ");
-        requete.append("\n   CONSTRAINT ihm_calendrier_norme_fkey FOREIGN KEY (id_norme, periodicite) ");
-        requete.append("\n       REFERENCES arc.ihm_norme (id_norme, periodicite) MATCH SIMPLE ");
-        requete.append("\n       ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle ");
-        requete.append("\n ( ");
-        requete.append("\n   id_norme text NOT NULL, ");
-        requete.append("\n   periodicite text NOT NULL, ");
-        requete.append("\n   validite_inf date NOT NULL, ");
-        requete.append("\n   validite_sup date NOT NULL, ");
-        requete.append("\n   version text NOT NULL, ");
-        requete.append("\n   etat text, ");
-        requete.append("\n   date_production date, ");
-        requete.append("\n   date_inactif date, ");
-        requete.append("\n   CONSTRAINT ihm_jeuderegle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version), ");
-        requete.append("\n   CONSTRAINT ihm_jeuderegle_calendrier_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup) ");
-        requete.append("\n       REFERENCES arc.ihm_calendrier (id_norme, periodicite, validite_inf, validite_sup) MATCH SIMPLE ");
-        requete.append("\n       ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        requete.append(FormatSQL.tryQuery("\n UPDATE arc.ihm_jeuderegle set etat='arc.bas1' where etat='arc.bas'; "));
-
-        
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_chargement_regle ");
-        requete.append("\n ( ");
-        requete.append("\n id_regle bigint NOT NULL, ");
-        requete.append("\n id_norme text NOT NULL, ");
-        requete.append("\n validite_inf date NOT NULL, ");
-        requete.append("\n validite_sup date NOT NULL, ");
-        requete.append("\n version text NOT NULL, ");
-        requete.append("\n periodicite text NOT NULL, ");
-        requete.append("\n type_fichier text, ");
-        requete.append("\n delimiter text, ");
-        requete.append("\n format text, ");
-        requete.append("\n commentaire text, ");
-        requete.append("\n CONSTRAINT pk_ihm_chargement_regle PRIMARY KEY (id_regle, id_norme, validite_inf, validite_sup, version, periodicite), ");
-        requete.append("\n CONSTRAINT ihm_chargement_regle_jeuderegle_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) ");
-        requete.append("\n REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE ");
-        requete.append("\n ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_normage_regle ");
-        requete.append("\n ( ");
-        requete.append("\n  id_norme text NOT NULL, ");
-        requete.append("\n periodicite text NOT NULL, ");
-        requete.append("\n validite_inf date NOT NULL, ");
-        requete.append("\n validite_sup date NOT NULL, ");
-        requete.append("\n version text NOT NULL, ");
-        requete.append("\n  id_classe text NOT NULL, ");
-        requete.append("\n rubrique text, ");
-        requete.append("\n rubrique_nmcl text, ");
-        requete.append("\n id_regle integer NOT NULL, ");
-        requete.append("\n todo text, ");
-        requete.append("\n commentaire text, ");
-        requete.append("\n CONSTRAINT ihm_normage_regle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version, id_regle), ");
-        requete.append("\n CONSTRAINT ihm_normage_regle_jeuderegle_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) ");
-        requete.append("\n       REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE ");
-        requete.append("\n      ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_controle_regle ");
-        requete.append("\n ( ");
-        requete.append("\n   id_norme text NOT NULL, ");
-        requete.append("\n   periodicite text NOT NULL, ");
-        requete.append("\n   validite_inf date NOT NULL, ");
-        requete.append("\n   validite_sup date NOT NULL, ");
-        requete.append("\n   version text NOT NULL, ");
-        requete.append("\n   id_classe text, ");
-        requete.append("\n   rubrique_pere text, ");
-        requete.append("\n   rubrique_fils text, ");
-        requete.append("\n   borne_inf text, ");
-        requete.append("\n   borne_sup text, ");
-        requete.append("\n   condition text, ");
-        requete.append("\n   pre_action text, ");
-        requete.append("\n   id_regle integer NOT NULL, ");
-        requete.append("\n   todo text, ");
-        requete.append("\n   commentaire text, ");
-        requete.append("\n   CONSTRAINT ihm_controle_regle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version, id_regle), ");
-        requete.append("\n   CONSTRAINT ihm_controle_regle_jeuderegle_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) ");
-        requete.append("\n       REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE ");
-        requete.append("\n       ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        requete.append(FormatSQL.tryQuery("\n ALTER TABLE arc.ihm_controle_regle ADD xsd_ordre int; "));
-        requete.append(FormatSQL.tryQuery("\n ALTER TABLE arc.ihm_controle_regle ADD xsd_label_fils text; "));
-        requete.append(FormatSQL.tryQuery("\n ALTER TABLE arc.ihm_controle_regle ADD xsd_role text; "));
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_filtrage_regle ");
-        requete.append("\n ( ");
-        requete.append("\n   id_regle bigint NOT NULL, ");
-        requete.append("\n   id_norme text NOT NULL, ");
-        requete.append("\n   validite_inf date NOT NULL, ");
-        requete.append("\n   validite_sup date NOT NULL, ");
-        requete.append("\n   version text NOT NULL, ");
-        requete.append("\n   periodicite text NOT NULL, ");
-        requete.append("\n   expr_regle_filtre text, ");
-        requete.append("\n   commentaire text, ");
-        requete.append("\n   CONSTRAINT pk_ihm_mapping_filtrage_regle PRIMARY KEY (id_regle, id_norme, validite_inf, validite_sup, version, periodicite), ");
-        requete.append("\n CONSTRAINT fk_ihm_mapping_filtrage_regle_jeuderegle FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) ");
-        requete.append("\n REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE ");
-        requete.append("\n ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_mapping_regle ");
-        requete.append("\n ( ");
-        requete.append("\n id_regle bigint, ");
-        requete.append("\n id_norme text NOT NULL, ");
-        requete.append("\n validite_inf date NOT NULL, ");
-        requete.append("\n validite_sup date NOT NULL, ");
-        requete.append("\n version text NOT NULL, ");
-        requete.append("\n periodicite text NOT NULL, ");
-        requete.append("\n variable_sortie character varying(63) NOT NULL, ");
-        requete.append("\n expr_regle_col text, ");
-        requete.append("\n commentaire text, ");
-        requete.append("\n CONSTRAINT pk_ihm_mapping_regle PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version, variable_sortie), ");
-        requete.append("\n CONSTRAINT fk_ihm_mapping_regle_jeuderegle FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) ");
-        requete.append("\n REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE ");
-        requete.append("\n ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-        
-        
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_mod_table_metier ");
-        requete.append("\n ( ");
-        requete.append("\n id_famille text NOT NULL, ");
-        requete.append("\n nom_table_metier text NOT NULL, ");
-        requete.append("\n description_table_metier text, ");
-        requete.append("\n CONSTRAINT pk_ihm_mod_table_metier PRIMARY KEY (id_famille, nom_table_metier), ");
-        requete.append("\n CONSTRAINT fk_ihm_table_metier_famille FOREIGN KEY (id_famille) ");
-        requete.append("\n REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE ");
-        requete.append("\n ON UPDATE NO ACTION ON DELETE NO ACTION ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_mod_variable_metier ");
-        requete.append("\n ( ");
-        requete.append("\n id_famille text NOT NULL, ");
-        requete.append("\n nom_table_metier text NOT NULL, ");
-        requete.append("\n nom_variable_metier text NOT NULL, ");
-        requete.append("\n type_variable_metier name NOT NULL, ");
-        requete.append("\n description_variable_metier text, ");
-        requete.append("\n type_consolidation text, ");
-        requete.append("\n CONSTRAINT pk_ihm_mod_variable_metier PRIMARY KEY (id_famille, nom_table_metier, nom_variable_metier), ");
-        requete.append("\n CONSTRAINT fk_ihm_mod_variable_table_metier FOREIGN KEY (id_famille, nom_table_metier) ");
-        requete.append("\n REFERENCES arc.ihm_mod_table_metier (id_famille, nom_table_metier) MATCH SIMPLE ");
-        requete.append("\n ON UPDATE NO ACTION ON DELETE NO ACTION ");
-        requete.append("\n ); ");
-
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_nmcl ");
-        requete.append("\n ( ");
-        requete.append("\n nom_table text NOT NULL, ");
-        requete.append("\n description text, ");
-        requete.append("\n CONSTRAINT ihm_nmcl_pkey PRIMARY KEY (nom_table) ");
-        requete.append("\n ); ");
-        
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_schema_nmcl ");
-        requete.append("\n ( ");
-        requete.append("\n type_nmcl text, ");
-        requete.append("\n nom_colonne text, ");
-        requete.append("\n type_colonne text ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_seuil ");
-        requete.append("\n ( ");
-        requete.append("\n nom text, ");
-        requete.append("\n valeur numeric, ");
-        requete.append("\n CONSTRAINT ihm_seuil_pkey PRIMARY KEY (nom) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ihm_seuil values ('filtrage_taux_exclusion_accepte',1.0) ,('s_taux_erreur',0.5); "));
-
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_user ");
-        requete.append("\n ( ");
-        requete.append("\n idep text NOT NULL, ");
-        requete.append("\n profil text, ");
-        requete.append("\n CONSTRAINT ihm_user_pkey PRIMARY KEY (idep) ");
-        requete.append("\n ); ");
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_entrepot ");
-        requete.append("\n ( ");
-        requete.append("\n   id_entrepot text NOT NULL, ");
-        requete.append("\n   id_loader text, ");
-        requete.append("\n   CONSTRAINT ihm_entrepot_pkey PRIMARY KEY (id_entrepot) ");
-        requete.append("\n ); ");
-        requete.append(FormatSQL.tryQuery("\n INSERT INTO arc.ihm_entrepot values ('DEFAULT','DEFAULT'); "));
-        
-        if (!envExecution.contains(".")) {
-            requete.append("\n CREATE SCHEMA IF NOT EXISTS " + envExecution + " AUTHORIZATION " + user + "; ");
-            requete.append("\n GRANT ALL ON SCHEMA " + envExecution + " TO " + user + "; ");
-            requete.append("\n REVOKE ALL ON SCHEMA " + envExecution + " FROM public; ");
-        }
-
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS "
-                + dbEnv(envExecution)
-                + "pilotage_fichier_t (date_entree text COLLATE pg_catalog.\"C\") "+FormatSQL.WITH_NO_VACUUM+"; ");
-        requete.append("\n CREATE TABLE IF NOT EXISTS "
-                + dbEnv(envExecution)
-                + "pilotage_fichier (id_source text COLLATE pg_catalog.\"C\",  id_norme text COLLATE pg_catalog.\"C\",  validite text COLLATE pg_catalog.\"C\",  periodicite text COLLATE pg_catalog.\"C\",  phase_traitement text COLLATE pg_catalog.\"C\",  etat_traitement text[] COLLATE pg_catalog.\"C\",  date_traitement timestamp without time zone,  rapport text COLLATE pg_catalog.\"C\",  taux_ko numeric,  nb_enr integer,  nb_essais integer,  etape integer,  validite_inf date,  validite_sup date,  version text COLLATE pg_catalog.\"C\",  date_entree text,  container text COLLATE pg_catalog.\"C\",  v_container text COLLATE pg_catalog.\"C\",  o_container text COLLATE pg_catalog.\"C\",  to_delete text COLLATE pg_catalog.\"C\",  client text[],  date_client timestamp without time zone[],  jointure text, generation_composite text COLLATE pg_catalog.\"C\") "+FormatSQL.WITH_NO_VACUUM+"; ");
-        requete.append(FormatSQL.tryQuery("\n ALTER TABLE "+ dbEnv(envExecution) + "pilotage_fichier ADD generation_composite text COLLATE pg_catalog.\"C\"; "));
-
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS "
-                + dbEnv(envExecution)
-                + "pilotage_archive (  entrepot text COLLATE pg_catalog.\"C\",  nom_archive text COLLATE pg_catalog.\"C\") "+FormatSQL.WITH_NO_VACUUM+"; ");
-
-        requete.append("\n alter table " + dbEnv(envExecution)
-                + "pilotage_fichier_t set (autovacuum_enabled = false, toast.autovacuum_enabled = false); ");
-        requete.append("\n ");
-        
-        
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_ws_context ");
-        requete.append("\n ( ");
-        requete.append("\n   service_name text NOT NULL, ");
-        requete.append("\n   service_type integer, ");
-        requete.append("\n call_id integer NOT NULL, ");
-        requete.append("\n environment text, ");
-        requete.append("\n target_phase text, ");
-        requete.append("\n norme text, ");
-        requete.append("\n validite text, ");
-        requete.append("\n periodicite text, ");
-        requete.append("\n CONSTRAINT ws_engine_context_pkey PRIMARY KEY (service_name, call_id) ");
-        requete.append("\n ); ");
-
-
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ihm_ws_query ");
-        requete.append("\n ( ");
-        requete.append("\n query_id integer NOT NULL, ");
-        requete.append("\n query_name text NOT NULL, ");
-        requete.append("\n expression text, ");
-        requete.append("\n query_view integer, ");
-        requete.append("\n service_name text NOT NULL, ");
-        requete.append("\n call_id integer NOT NULL, ");
-        requete.append("\n CONSTRAINT ws_engine_queries_pkey PRIMARY KEY (service_name, call_id, query_id), ");
-        requete.append("\n CONSTRAINT ws_engine_queries_fkey FOREIGN KEY (service_name, call_id) ");
-        requete.append("\n REFERENCES arc.ihm_ws_context (service_name, call_id) MATCH SIMPLE ");
-        requete.append("\n ON UPDATE CASCADE ON DELETE CASCADE ");
-        requete.append("\n ); ");
-
-
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_webservice_type ");
-        requete.append("\n ( ");
-        requete.append("\n id text NOT NULL, ");
-        requete.append("\n val text, ");
-        requete.append("\n CONSTRAINT ext_webservice_type_pkey PRIMARY KEY (id) ");
-        requete.append("\n ); ");
-
-        requete.append("\n INSERT INTO arc.ext_webservice_type VALUES ('1','ENGINE'), ('2','SERVICE') ON CONFLICT DO NOTHING; ");
-
-        requete.append("\n CREATE TABLE IF NOT EXISTS arc.ext_webservice_queryview ");
-        requete.append("\n ( ");
-        requete.append("\n id text NOT NULL, ");
-        requete.append("\n val text, ");
-        requete.append("\n CONSTRAINT ext_webservice_queryview_pkey PRIMARY KEY (id) ");
-        requete.append("\n );");
-
-        requete.append("\n INSERT INTO arc.ext_webservice_queryview VALUES ('1','COLUMN'), ('2','LINE') ON CONFLICT DO NOTHING; ");
-        
-        // script fonctions
-        
-        // fonction pour pouvoir exporter simplement des tables sans préciser le schéma de façon annexe
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.export_model (tname text) "); 
-        requete.append("\n RETURNS TABLE ( ");
-        requete.append("\n varbdd text ");
-        requete.append("\n ,pos int ");
-        requete.append("\n ) ");
-        requete.append("\n AS $$ ");
-        requete.append("\n BEGIN ");
-        requete.append("\n RETURN QUERY select distinct column_name::text as varbdd, ordinal_position::int as pos from information_schema.columns where case when tname like '%.%' then table_schema||'.'||table_name else table_name end=tname; ");
-        requete.append("\n END; $$ ");
-        requete.append("\n LANGUAGE 'plpgsql'; ");
-        
-        
-        requete.append("\n DROP FUNCTION IF EXISTS arc.finalize_todo(); ");
-        requete.append("\n ");
-
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.transpose_pilotage_calcul() ");
-        requete.append("\n RETURNS trigger AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n DECLARE dt text; ");
-        requete.append("\n DECLARE b boolean; ");
-        requete.append("\n DECLARE c integer; ");
-        requete.append("\n BEGIN ");
-        requete.append("\n ");
-        requete.append("\n if (TG_OP='UPDATE') then ");
-        requete.append("\n if (old.phase_traitement=new.phase_traitement and old.etat_traitement=new.etat_traitement) then ");
-        requete.append("\n return null; ");
-        requete.append("\n end if; ");
-        requete.append("\n end if; ");
-        requete.append("\n ");
-        requete.append("\n if (TG_OP in ('UPDATE','DELETE')) then ");
-        requete.append("\n dt:='p.'||old.date_entree||'_'||old.phase_traitement||'_'||array_to_string(old.etat_traitement,'$'); ");
-        requete.append("\n b:=arc.update_list_param('p.pilotage',dt); ");
-        requete.append("\n begin ");
-        requete.append("\n if (current_setting(dt)='') then c=-1; else c:=current_setting(dt)::integer-1; end if; ");
-        requete.append("\n exception when others then  ");
-        requete.append("\n c:=-1; ");
-        requete.append("\n end; ");
-        requete.append("\n perform set_config(dt,c::text,true ); ");
-        requete.append("\n end if; ");
-        requete.append("\n ");
-        requete.append("\n if (TG_OP in ('UPDATE','INSERT')) then ");
-        requete.append("\n dt:='p.'||new.date_entree||'_'||new.phase_traitement||'_'||array_to_string(new.etat_traitement,'$'); ");
-        requete.append("\n b:=arc.update_list_param('p.pilotage',dt); ");
-        requete.append("\n begin ");
-        requete.append("\n if (current_setting(dt)='') then c=1; else c:=current_setting(dt)::integer+1; end if; ");
-        requete.append("\n exception when others then  ");
-        requete.append("\n c:=1; ");
-        requete.append("\n end; ");
-        requete.append("\n perform set_config(dt,c::text,true); ");
-        requete.append("\n end if; ");
-        requete.append("\n ");
-        requete.append("\n return null; ");
-        requete.append("\n ");
-        requete.append("\n END; ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-        
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.transpose_pilotage_fin() ");
-        requete.append("\n RETURNS trigger AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n DECLARE bac text; ");
-        requete.append("\n DECLARE env text; ");
-        requete.append("\n DECLARE query text; ");
-        requete.append("\n DECLARE cols text[]; ");
-        requete.append("\n DECLARE cols_t text[]; ");
-        requete.append("\n DECLARE date_entree text; ");
-        requete.append("\n DECLARE dt text; ");
-        requete.append("\n declare b boolean:=false; ");
-        requete.append("\n BEGIN ");
-        requete.append("\n query:=''; ");
-        requete.append("\n ");
-        requete.append("\n -- récupération des données d'environnement ");
-        requete.append("\n if (strpos(TG_TABLE_SCHEMA,'_')=0) then ");
-        requete.append("\n bac:=substr(TG_TABLE_NAME,1,strpos(TG_TABLE_NAME,'_')); ");
-        requete.append("\n env:=TG_TABLE_SCHEMA||'.'||bac; ");
-        requete.append("\n else ");
-        requete.append("\n bac:=''; ");
-        requete.append("\n env:=TG_TABLE_SCHEMA||'.'; ");
-        requete.append("\n end if; ");
-        requete.append("\n ");
-        requete.append("\n ");
-        requete.append("\n begin ");
-        requete.append("\n cols:=string_to_array(trim(current_setting('p.pilotage'),';'),';'); ");
-        requete.append("\n exception when others then ");
-        requete.append("\n return null; ");
-        requete.append("\n end; ");
-        requete.append("\n ");
-        requete.append("\n if (current_setting('p.pilotage')='') then return null; end if; ");
-        requete.append("\n ");
-        requete.append("\n ");
-        requete.append("\n -- récupération des colonnes de la table de pilotage_t  ");
-        requete.append("\n SELECT array_agg(column_name::text) into cols_t ");
-        requete.append("\n FROM   information_schema.columns ");
-        requete.append("\n WHERE  table_schema = TG_TABLE_SCHEMA ");
-        requete.append("\n AND    table_name = bac||'pilotage_fichier_t'; ");
-        requete.append("\n ");
-        requete.append("\n --raise notice '%',cols_t; ");
-        requete.append("\n -- créer la table de pilotage si elle n'existe pas ");
-        requete.append("\n if (cols_t is null) then ");
-        requete.append("\n query:=query||' ");
-        requete.append("\n create table '||env||'pilotage_fichier_t(date_entree text) "+FormatSQL.WITH_NO_VACUUM+";'; ");
-        requete.append("\n cols_t=array_append(cols_t, 'date_entree'); ");
-        requete.append("\n end if; ");
-        requete.append("\n ");
-        requete.append("\n -- création de la requete qui va mettre à jour la table pilotage_t  ");
-        requete.append("\n for i in 1..array_length(cols, 1) loop  ");
-        requete.append("\n --raise notice '%',cols[i]; ");
-        requete.append("\n date_entree:=substr(cols[i],3,13); ");
-        requete.append("\n dt:=substr(cols[i],17); ");
-        requete.append("\n ");
-        requete.append("\n -- si la colonne n'existe pas dans la table pilotage_t, on la crée  ");
-        requete.append("\n if (not(lower(dt)= ANY (cols_t))) then ");
-        requete.append("\n query:=query||' ");
-        requete.append("\n alter table '||env||'pilotage_fichier_t add column '||dt||' integer default 0;'; ");
-        requete.append("\n cols_t=array_append(cols_t, lower(dt)); end if; ");
-        requete.append("\n ");
-        requete.append("\n if (current_setting(cols[i])::integer!=0) then  ");
-        requete.append("\n query:=query||'WITH upsert AS (update '||env||'pilotage_fichier_t set '||dt||'='||dt||'+'||current_setting(cols[i])||'  ");
-        requete.append("\n where date_entree='''||date_entree||''' returning *)  ");
-        requete.append("\n INSERT INTO '||env||'pilotage_fichier_t (date_entree, '||dt||') SELECT '''||date_entree||''', '||current_setting(cols[i])||'  ");
-        requete.append("\n WHERE NOT EXISTS (SELECT * FROM upsert); ';  ");
-        requete.append("\n b:=true;  ");
-        requete.append("\n perform set_config(cols[i],'0',true );  ");
-        requete.append("\n end if; ");
-        requete.append("\n ");
-        requete.append("\n end loop; ");
-        requete.append("\n ");
-        requete.append("\n if (b) then ");
-        requete.append("\n query:=query||'delete from '||env||'pilotage_fichier_t where 0'; for i in 1..array_length(cols_t,1) loop ");
-        requete.append("\n if (cols_t[i]!='date_entree') then query:=query||'+coalesce('||cols_t[i]||',0)'; end if; end loop; query:=query||'=0;'; end if; ");
-        requete.append("\n ");
-        requete.append("\n --raise notice '%',query; ");
-        requete.append("\n execute query; ");
-        requete.append("\n ");
-        requete.append("\n return null; ");
-        requete.append("\n END; ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-        
-        requete.append("\n do $$ begin create type public.cle_valeur as (i bigint, v text collate \"C\"); exception when others then end; $$; ");
-        requete.append("\n CREATE OR REPLACE FUNCTION public.distinct_on_array(public.cle_valeur[]) ");
-        requete.append("\n   RETURNS text[] AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n select array_agg(v) from (select distinct m.i, m.v from unnest($1) m where m.i is not null order by m.i, m.v ) t0 ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE sql IMMUTABLE STRICT ");
-        requete.append("\n COST 100; ");
-
-        requete.append("\n do $$ begin CREATE SEQUENCE arc.number_generator cycle; exception when others then end; $$; ");
-        requete.append("\n CREATE OR REPLACE FUNCTION public.curr_val(text) ");
-        requete.append("\n   RETURNS bigint AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n BEGIN ");
-        requete.append("\n return currval($1); ");
-        requete.append("\n exception when others then ");
-        requete.append("\n return nextval($1); ");
-        requete.append("\n END; ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-        
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.fn_check_calendrier() ");
-        requete.append("\n RETURNS boolean AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n DECLARE ");
-        requete.append("\n n integer; ");
-        requete.append("\n BEGIN  ");
-        requete.append("\n select count(1) into n from arc.ihm_calendrier a ");
-        requete.append("\n where exists (select 1 from arc.ihm_calendrier b ");
-        requete.append("\n where a.validite_inf>=b.validite_inf  ");
-        requete.append("\n and a.validite_inf<=b.validite_sup  ");
-        requete.append("\n and a.id_norme=b.id_norme  ");
-        requete.append("\n and a.periodicite=b.periodicite ");
-        requete.append("\n and a.etat='1' ");
-        requete.append("\n and a.etat=b.etat ");
-        requete.append("\n and a.id<>b.id); ");
-        requete.append("\n       	if n>0 then  ");
-        requete.append("\n RAISE EXCEPTION 'Chevauchement de calendrier'; ");
-        requete.append("\n end if; ");
-        requete.append("\n select count(1) into n from arc.ihm_calendrier a ");
-        requete.append("\n where a.validite_inf>a.validite_sup; ");
-        requete.append("\n       	if n>0 then  ");
-        requete.append("\n RAISE EXCEPTION 'Intervalle non valide. Date inf >= Date sup'; ");
-        requete.append("\n end if; ");
-        requete.append("\n return true; ");
-        requete.append("\n END;  ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-        
-        
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.fn_check_jeuderegle() ");
-        requete.append("\n RETURNS boolean AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n DECLARE ");
-        requete.append("\n   n integer; ");
-        requete.append("\n BEGIN  ");
-        requete.append("\n SELECT count(1) into n ");
-        requete.append("\n FROM 	( ");
-        requete.append("\n SELECT id_norme, periodicite, validite_inf, validite_sup, etat, count(etat) ");
-        requete.append("\n FROM arc.ihm_jeuderegle  b ");
-        requete.append("\n WHERE b.etat != 'inactif' ");
-        requete.append("\n GROUP BY id_norme, periodicite, validite_inf, validite_sup, etat ");
-        requete.append("\n HAVING count(etat)>1 ");
-        requete.append("\n ) AS foo; ");
-        requete.append("\n if n>0 then  ");
-        requete.append("\n RAISE EXCEPTION 'Un seul jeu de règle en production ou par bac à sable pour un calendrier'; ");
-        requete.append("\n end if; ");
-        requete.append("\n return true; ");
-        requete.append("\n END;  ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-        
-        
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.isdate( ");
-        requete.append("\n text, ");
-        requete.append("\n text) ");
-        requete.append("\n RETURNS boolean AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n BEGIN ");
-        requete.append("\n IF TO_CHAR(TO_TIMESTAMP($1,$2), $2) != $1 THEN ");
-        requete.append("\n RETURN FALSE; ");
-        requete.append("\n END IF; ");
-        requete.append("\n RETURN TRUE; ");
-        requete.append("\n EXCEPTION WHEN others THEN ");
-        requete.append("\n RETURN FALSE; ");
-        requete.append("\n END; ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql IMMUTABLE ");
-        requete.append("\n COST 100; ");
-
-        
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.verif_doublon() ");
-        requete.append("\n RETURNS trigger AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n DECLARE ");
-        requete.append("\n n integer; ");
-        requete.append("\n k integer; ");
-        requete.append("\n nom_table text := quote_ident(TG_TABLE_SCHEMA) || '.'|| quote_ident(TG_TABLE_NAME); ");
-        requete.append("\n query text; ");
-        requete.append("\n BEGIN  ");
-        requete.append("\n --RAISE NOTICE 'Nom de la table : %', nom_table; ");
-        requete.append("\n query := 'SELECT count(1) FROM (SELECT count(1)	FROM '|| nom_table ||' b WHERE id_classe=''CARDINALITE'' ");
-        requete.append("\n GROUP BY id_norme, periodicite, validite_inf, validite_sup, version, lower(rubrique_pere), lower(rubrique_fils), condition ");
-        requete.append("\n HAVING count(1)>1) AS foo'; ");
-        requete.append("\n --RAISE NOTICE 'Query vaut : %', query; ");
-        requete.append("\n EXECUTE query INTO n; ");
-        requete.append("\n query := 'SELECT count(1) FROM 	(SELECT count(1) FROM '|| nom_table ||' b WHERE id_classe IN(''NUM'',''DATE'',''ALPHANUM'',''REGEXP'') ");
-        requete.append("\n GROUP BY id_norme, periodicite, validite_inf, validite_sup, version, lower(rubrique_pere), condition ");
-        requete.append("\n HAVING count(1)>1) AS foo'; ");
-        requete.append("\n --RAISE NOTICE 'Query vaut : %', query; ");
-        requete.append("\n EXECUTE query INTO k; ");
-        requete.append("\n RAISE NOTICE 'Variable de comptage n : %', n; ");
-        requete.append("\n RAISE NOTICE 'Variable de comptage k : %', k; ");
-        requete.append("\n if n>0 then  ");
-        requete.append("\n RAISE EXCEPTION 'Règles de CARDINALITE en doublon'; ");
-        requete.append("\n end if; ");
-        requete.append("\n if k>0 then  ");
-        requete.append("\n RAISE EXCEPTION 'Règles de TYPE en doublon'; ");
-        requete.append("\n end if; ");
-        requete.append("\n RETURN NEW; ");
-        requete.append("\n END; ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-
-        requete.append("\n CREATE OR REPLACE FUNCTION arc.insert_controle() ");
-        requete.append("\n RETURNS trigger AS ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n DECLARE i integer; ");
-        requete.append("\n nom_table text := quote_ident(TG_TABLE_SCHEMA) || '.'|| quote_ident(TG_TABLE_NAME); ");
-        requete.append("\n query text; ");
-        requete.append("\n   BEGIN ");
-        requete.append("\n if (new.id_regle is null) then ");
-        requete.append("\n query:='select coalesce(max(id_regle),0)+1 from '||nom_table||' ");
-        requete.append("\n where id_norme='''||NEW.id_norme||'''  ");
-        requete.append("\n and periodicite='''||NEW.periodicite||'''  ");
-        requete.append("\n and validite_inf='''||NEW.validite_inf||'''  ");
-        requete.append("\n and validite_sup='''||NEW.validite_sup||'''   ");
-        requete.append("\n and version='''||NEW.version||''' '; ");
-        requete.append("\n EXECUTE query INTO i; ");
-        requete.append("\n NEW.id_regle:=i; ");
-        requete.append("\n end if; ");
-        requete.append("\n RETURN NEW; ");
-        requete.append("\n   END; ");
-        requete.append("\n $BODY$ ");
-        requete.append("\n LANGUAGE plpgsql VOLATILE ");
-        requete.append("\n COST 100; ");
-
-        
-        requete.append(FormatSQL.tryQuery("CREATE TRIGGER tg_insert_chargement BEFORE INSERT ON arc.ihm_chargement_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle();"));
-        requete.append(FormatSQL.tryQuery("CREATE TRIGGER tg_insert_controle BEFORE INSERT ON arc.ihm_controle_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle();"));
-        requete.append(FormatSQL.tryQuery("CREATE TRIGGER tg_insert_filtrage BEFORE INSERT ON arc.ihm_filtrage_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle();"));
-        
-        
-        
-        
-        try {
-            UtilitaireDao.get(poolName).executeBlock(connexion, requete);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        
-        ArrayList<String> lTable = new ArrayList<String>(Arrays.asList(
-        		 dbEnv(envExecution) + TraitementPhase.CHARGEMENT + "_" + TraitementEtat.OK
-        		 ,dbEnv(envExecution) + TraitementPhase.NORMAGE + "_" + TraitementEtat.OK
-        		 ,dbEnv(envExecution) + TraitementPhase.NORMAGE + "_" + TraitementEtat.KO
-        		 ,dbEnv(envExecution) + TraitementPhase.CONTROLE + "_" + TraitementEtat.OK
-        		 ,dbEnv(envExecution) + TraitementPhase.CONTROLE + "_" + TraitementEtat.KO
-        		 ,dbEnv(envExecution) + TraitementPhase.FILTRAGE + "_" + TraitementEtat.OK
-        		 ,dbEnv(envExecution) + TraitementPhase.FILTRAGE + "_" + TraitementEtat.KO
-        		 ,dbEnv(envExecution) + TraitementPhase.MAPPING + "_" + TraitementEtat.KO
-        		 ,dbEnv(envExecution) + TraitementPhase.CHARGEMENT + "_" + TraitementEtat.OK + "_TODO"
-        		 ,dbEnv(envExecution) + TraitementPhase.NORMAGE + "_" + TraitementEtat.OK + "_TODO"
-        		 ,dbEnv(envExecution) + TraitementPhase.CONTROLE + "_" + TraitementEtat.OK + "_TODO"
-        		 ,dbEnv(envExecution) + TraitementPhase.FILTRAGE + "_" + TraitementEtat.OK + "_TODO"
-        		))
-        		;
-        
-        String dataDef="(id_source text COLLATE pg_catalog.\"C\", id integer, date_integration text COLLATE pg_catalog.\"C\", id_norme text COLLATE pg_catalog.\"C\",  periodicite text COLLATE pg_catalog.\"C\", validite text COLLATE pg_catalog.\"C\")"+FormatSQL.WITH_NO_VACUUM+";";
-        
-		 	HashMap<String, ArrayList<String>> m;
-			try {
-
-				// si les tables sont vide, on les recrée
-				for (String t:lTable)
-				{
-					UtilitaireDao.get(poolName).executeImmediate(connexion, "CREATE TABLE IF NOT EXISTS "+ t + dataDef);
-					
-					if (!UtilitaireDao.get(poolName).hasResults(connexion, new PreparedStatementBuilder("select 1 FROM "+t+" limit 1")))
-					{
-						UtilitaireDao.get(poolName).executeImmediate(connexion, "DROP TABLE IF EXISTS "+ t +" CASCADE; CREATE TABLE IF NOT EXISTS "+ t + dataDef);
-					}
-				}
-
-      		 
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
     }
 
     /**
@@ -1459,7 +762,6 @@ public class ApiInitialisationService extends ApiService {
             TraitementTableParametre[] r = TraitementTableParametre.values();
             StringBuilder condition = new StringBuilder();
             String modaliteEtat = anExecutionEnvironment.replace("_", ".");
-            String tablePil = ApiService.dbEnv(anExecutionEnvironment) + TraitementTableExecution.PILOTAGE_FICHIER;
             String tableImage;
             String tableCurrent;
             for (int i = 0; i < r.length; i++) {
@@ -1503,11 +805,13 @@ public class ApiInitialisationService extends ApiService {
                                     + "_jeuderegle b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup AND a.version=b.version and b.etat=lower('"
                                     + modaliteEtat + "'))");
                 }
-                requete.append(FormatSQL.dropTable(tableImage).toString());
+                requete.append(FormatSQL.dropTable(tableImage));
+                
                 requete.append("CREATE TABLE " + tableImage
                         + " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT a.* FROM " + anParametersEnvironment + "_"
                         + r[i] + " AS a " + condition + ";\n");
-                requete.append(FormatSQL.dropTable(tableCurrent).toString());
+                
+                requete.append(FormatSQL.dropTable(tableCurrent));
                 requete.append("ALTER TABLE " + tableImage + " rename to " + ManipString.substringAfterLast(tableCurrent, ".") + "; \n");
             }
             UtilitaireDao.get("arc").executeBlock(connexion, requete);
@@ -1814,8 +1118,9 @@ public class ApiInitialisationService extends ApiService {
             throw ex;
         }
 
-        // maintenance des tables de catalogue car postgres ne semble pas être foutu de le faire soit même... 12G de catalogue au bout de 6
-        // mois o_O
+        // maintenance des tables de catalogue car postgres ne le réalise pas correctement sans mettre en oeuvre
+        // une stratégie de vacuum hyper agressive et donc ajouter une spécificité pour les DBAs
+        // 12G de catalogue au bout de 6 mois o_O
         UtilitaireDao.get(poolName).maintenancePgCatalog(this.connexion, "full");
 
     }

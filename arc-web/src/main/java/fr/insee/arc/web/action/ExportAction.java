@@ -337,7 +337,6 @@ public class ExportAction extends ArcAction<ExportModel>  {
 		return dirOut.toString();
 	}
     
-    // private SessionMap session;
     // visual des Files
     public void initializeFileExport() {
         System.out.println("/* initializeFileExport */");
