@@ -306,18 +306,23 @@ public class ApiInitialisationService extends ApiService {
         	
             Integer nbSandboxes=BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes",8);
 
+            // global script. Mainly to build the arc schema
             executeBddScript(connexion, "BdD/script_global.sql", user, nbSandboxes, null);
             executeBddScript(connexion, "BdD/script_function.sql", user, nbSandboxes, null);
             
+            // iterate over each phase and try to load its global script
             Arrays.asList(TraitementPhase.values())
             .forEach(t -> executeBddScript(connexion, "BdD/script_global_phase_"+t.toString().toLowerCase()+".sql", user, nbSandboxes, null));
             
+            // iterate over each sandbox environment and try to load its script
             Arrays.asList(envExecutions)
             .forEach(envExecution -> executeBddScript(connexion, "BdD/script_sandbox.sql", user, nbSandboxes, envExecution));
             
+            // iterate over each sandbox environment
             Arrays.asList(envExecutions)
             .forEach(envExecution -> 
 	            {
+	                // iterate over each phase for its sandbox relating script
 	            	Arrays.asList(TraitementPhase.values())
 	                .forEach(t -> executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", user, nbSandboxes, envExecution));	
 	            }
