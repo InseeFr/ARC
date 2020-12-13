@@ -1347,7 +1347,6 @@ public class VObjectService {
             requete.append("WHERE false ");
 
         }
-        loggerDispatcher.debug(" initializeByList requete : " + requete.toString(), LOGGER);
         // on ne gere pas les autres cas: ca doit planter
         this.initialize(data, requete, data.getTable(), defaultInputFields);
     }
