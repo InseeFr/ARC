@@ -135,16 +135,16 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 
     public  void waitForThreads2(int parallel, ArrayList<? extends ApiService> threadList, ArrayList<Connection> connexionList)
-            throws Exception {
+            throws SQLException {
         
-        while (threadList.size() >= parallel && threadList.size() > 0) {
+        while (threadList.size() >= parallel && !threadList.isEmpty()) {
             Iterator<? extends ApiService> it = threadList.iterator();
             
             while (it.hasNext()) {
                 ApiService px = it.next();
                 if (!px.getT().isAlive()) {
 
-                    if (!(px.getError()==null)) {
+                    if (px.getError()!=null) {
                         error = px.error;
                     }
                     px = null;
@@ -158,13 +158,14 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             for (int i = 1; i < connexionList.size(); i++) {
                 try {
                     connexionList.get(i).close();
-                } catch (SQLException ex) {}
+                } catch (SQLException ex) {
+                    throw new SQLException("Error in multithread close connection");
+                }
             }
         }
 
         if (error != null) {
-            
-//            throw error;
+            throw new SQLException("Error in multithread execution");
         }
 
     }
@@ -1273,9 +1274,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
             // set schema
             // Méthode pour implémenter des maintenances sur la base de donnée
-            if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString())) {
-                ApiInitialisationService.bddScript(this.getEnvExecution(), this.connexion);
-            }
+//            if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString())) {
+//                ApiInitialisationService.bddScript(this.connexion, this.getEnvExecution());
+//            }
 
             if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString()) || this.getCurrentPhase().equals(TraitementPhase.RECEPTION.toString())) {
                 this.todo = true;
