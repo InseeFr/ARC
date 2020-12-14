@@ -60,7 +60,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
      */
     public void executer() throws Exception {
         
-        this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
     	
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         int nbFichier = getTabIdSource().get(ID_SOURCE).size();
@@ -68,7 +68,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
         // long dateDebut = java.lang.System.currentTimeMillis() ;
         Connection connextionThread = null;
         ArrayList<ThreadFiltrageService> threadList = new ArrayList<ThreadFiltrageService>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution);
         currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le filtrage **", logger);
@@ -85,7 +85,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
             ThreadFiltrageService r = new ThreadFiltrageService(connextionThread, currentIndice, this);
             threadList.add(r);
             r.start();
-            waitForThreads2(MAX_PARALLEL_WORKERS, threadList, connexionList);
+            waitForThreads2(maxParallelWorkers, threadList, connexionList);
 
         }
 

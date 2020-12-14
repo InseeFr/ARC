@@ -7,16 +7,17 @@ public class Sleep {
 
     private static final Logger LOGGER = LogManager.getLogger(Sleep.class);
 
-    public static final void sleep(int millis) {
-        sleep(millis, 0);
-    }
+    private Sleep() {
+        throw new IllegalStateException("Utility class");
+      }
 
-    public static void sleep(int millis, int nanos) {
-        try {
-            Thread.sleep(millis, nanos);
-        } catch (InterruptedException ex) {
-            LoggerHelper.errorGenTextAsComment(Sleep.class, "sleep(int, int)", LOGGER, ex);
-        }
+    public static final void sleep(int millis) {
+    	 try {
+             Thread.sleep(millis);
+         } catch (InterruptedException ex) {
+             LoggerHelper.errorGenTextAsComment(Sleep.class, "sleep(int)", LOGGER, ex);
+        	 Thread.currentThread().interrupt();
+         }
     }
 
 }

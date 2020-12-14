@@ -11,6 +11,8 @@ import java.util.HashMap;
 
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.Record;
 import fr.insee.arc.ws.services.rest.changerules.pojo.ChangeRulesPojo;
 
@@ -21,12 +23,38 @@ import fr.insee.arc.ws.services.rest.changerules.pojo.ChangeRulesPojo;
 public class App {
     public static void main(String[] args) throws Exception {
 
-    	testUpdateNorme();
-    	
-    	
-    	
+    	testHello();
+
     }
     
+    public static void testHello() throws Exception
+    {
+    	URL url = new URL("http://localhost:8080/arc-ws/hello/");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		String charset = "UTF-8";
+		
+		conn.setDoOutput(true);
+		conn.setRequestMethod("GET");
+		conn.setRequestProperty("Accept-Charset", charset);
+		conn.setRequestProperty("Content-Type", "application/json; utf-8"); 
+		
+		if (conn.getResponseCode() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : "
+				+ conn.getResponseCode());
+		}
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				(conn.getInputStream())));
+
+		String output;
+//		System.out.println("Output from Server .... \n");
+		while ((output = br.readLine()) != null) {
+			System.out.println(output);
+		}
+
+		conn.disconnect();
+		
+    }
     
     public static void testUpdateNorme() throws Exception
     {

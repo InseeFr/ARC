@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS {{envExecution}}.mapping_ko (id_source text COLLATE pg_catalog."C", id integer, date_integration text COLLATE pg_catalog."C", id_norme text COLLATE pg_catalog."C",  periodicite text COLLATE pg_catalog."C", validite text COLLATE pg_catalog."C") WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);

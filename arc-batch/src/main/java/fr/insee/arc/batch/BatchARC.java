@@ -27,11 +27,13 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.utils.utils.Sleep;
 
 /**
  * Classe lanceur de l'application Accueil Reception Contrôle
@@ -64,44 +66,30 @@ public class BatchARC {
 	
 	// keepInDatabase = est-ce qu'on garde les données intermédiaire en base ou est-ce qu'on les export sous forme de fichiers dans le repertoire export ?
 	// false en production 
-	private static boolean keepInDatabase= Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase","false"));
+	private static boolean keepInDatabase;
 	
 	// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas excéder une certaine taille
-	protected static int tailleMaxReceptionEnMb=BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb",10);
+	protected static int tailleMaxReceptionEnMb;
 
 	// Maximum number of files to load
-	protected static int maxFilesToLoad=BDParameters.getInt(null, "LanceurARC.maxFilesToLoad",101);
+	protected static int maxFilesToLoad;
 
 	// Maximum number of files processed in each phase iteration
-	protected static int maxFilesPerPhase=BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase",1000000);
+	protected static int maxFilesPerPhase;
 
 	// retard permis entre chaque phase : si une phase a deltaStepAllowed coups d'avance
 	// elle attend que la suivant est terminée avant de reprendre
-	private static int deltaStepAllowed=BDParameters.getInt(null, "LanceurARC.deltaStepAllowed",10000);
+	private static int deltaStepAllowed;
 
 	// fréquence à laquelle les phases sont démarrées
-	private static int poolingDelay=BDParameters.getInt(null, "LanceurARC.poolingDelay",1000);
+	private static int poolingDelay;
 
 	// heure d'initalisation en production
-	private static int HEURE_INITIALISATION_PRODUCTION=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
+	private static int HEURE_INITIALISATION_PRODUCTION;
 	
 	// interval entre chaque initialisation en nb de jours
-	private static Integer INTERVAL_JOUR_INITIALISATION = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
-	
+	private static Integer INTERVAL_JOUR_INITIALISATION;
 
-	/**
-	 * dodo
-	 * @param duree en ms
-	 */
-	public static void sleep(int duree)
-	{
-
-		 try {
-			Thread.sleep(duree);
-		} catch (InterruptedException ex) {
-			LoggerHelper.errorGenTextAsComment(BatchARC.class, "sleep()", LOGGER, ex);
-		}
-	}
 
 	public static class DateUtil
 	{
@@ -116,10 +104,9 @@ public class BatchARC {
 
 
 
-	public static class InitialiserThread extends Thread {
+	public static class InitialiserThread {
 		public ServiceReporting report=new ServiceReporting();
 
-		  @Override
 		  public void run() {
 			  InitialiserBatch c=new InitialiserBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get("numlot"));
 			  c.execute();
@@ -183,12 +170,45 @@ public class BatchARC {
 		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())+"  "+msg);
 	}
 
+	
+	private void initParameters()
+	{
+
+		keepInDatabase= Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase","false"));
+		
+		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas excéder une certaine taille
+		tailleMaxReceptionEnMb=BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb",10);
+
+		// Maximum number of files to load
+		maxFilesToLoad=BDParameters.getInt(null, "LanceurARC.maxFilesToLoad",101);
+
+		// Maximum number of files processed in each phase iteration
+		maxFilesPerPhase=BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase",1000000);
+
+		// retard permis entre chaque phase : si une phase a deltaStepAllowed coups d'avance
+		// elle attend que la suivant est terminée avant de reprendre
+		deltaStepAllowed=BDParameters.getInt(null, "LanceurARC.deltaStepAllowed",10000);
+
+		// fréquence à laquelle les phases sont démarrées
+		poolingDelay=BDParameters.getInt(null, "LanceurARC.poolingDelay",1000);
+
+		// heure d'initalisation en production
+		HEURE_INITIALISATION_PRODUCTION=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
+		
+		// interval entre chaque initialisation en nb de jours
+		INTERVAL_JOUR_INITIALISATION = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
+	}
+	
+	
 	/**
 	 * Lanceur MAIN arc
 	 * @param args
 	 */
 	public void execute(String[] args) {
 
+		// fill the parameters
+		initParameters();
+				
 		boolean fichierRestant=false;
 
 		message ("Main");
@@ -252,7 +272,7 @@ public class BatchARC {
 		
 		
 		// des archives n'ont elles pas été traitées jusqu'au bout ?
-		ArrayList<String> aBouger= new GenericBean(UtilitaireDao.get("arc").executeRequest(null,"select distinct container from "+envExecution+".pilotage_fichier where etape=1")).mapContent().get("container");
+		ArrayList<String> aBouger= new GenericBean(UtilitaireDao.get("arc").executeRequest(null,new PreparedStatementBuilder("select distinct container from "+envExecution+".pilotage_fichier where etape=1"))).mapContent().get("container");
 		
 		boolean dejaEnCours=(aBouger!=null);
 
@@ -300,7 +320,7 @@ public class BatchARC {
 		 DateFormat dateFormatHeure = new SimpleDateFormat("HH");
 
 		 String lastInitialize=null;
-         lastInitialize=UtilitaireDao.get("arc").getString(null, "select last_init from arc.pilotage_batch ");
+         lastInitialize=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select last_init from arc.pilotage_batch "));
 
 
 		 Date dNow = new Date();
@@ -319,7 +339,7 @@ public class BatchARC {
 	    	 initialiser.run();
 			 message("Initialisation terminée : "+(int)initialiser.report.nbLines+" e : "+initialiser.report.duree+" ms");
 			
-			UtilitaireDao.get("arc").executeRequest(null, "update arc.pilotage_batch set last_init=to_char(current_date+interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+HEURE_INITIALISATION_PRODUCTION+"' , operation=case when operation='R' then 'O' else operation end;");
+			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("update arc.pilotage_batch set last_init=to_char(current_date+interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+HEURE_INITIALISATION_PRODUCTION+"' , operation=case when operation='R' then 'O' else operation end;"));
 			
 			// on met la date d'initialsiation à la date courante
 			// si la production a demandée à etre réactivée, on la réactive
@@ -360,14 +380,14 @@ public class BatchARC {
 				charger.start();
 			}
 
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (!normer.isAlive())
 			{
 				normer=new NormerThread();
 				normer.start();
 			}
-			sleep(delay);
+			Sleep.sleep(delay);
 
 			if (!controler.isAlive())
 			{
@@ -375,7 +395,7 @@ public class BatchARC {
 				controler.start();
 			}
 
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (!filtrer.isAlive())
 			{
@@ -383,7 +403,7 @@ public class BatchARC {
 				filtrer.start();
 			}
 
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (!mapper.isAlive())
 			{
@@ -391,10 +411,10 @@ public class BatchARC {
 				mapper.start();
 			}
 			
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (
-					UtilitaireDao.get("arc").getInt(null,"select count(*) from (select 1 from "+envExecution+".pilotage_fichier where etape=1 limit 1) ww")==0
+					UtilitaireDao.get("arc").getInt(null,new PreparedStatementBuilder("select count(*) from (select 1 from "+envExecution+".pilotage_fichier where etape=1 limit 1) ww"))==0
 					)
 			{
 					exit=true;
@@ -408,7 +428,7 @@ public class BatchARC {
 				break;
 			}
 			
-			sleep(delay);
+			Sleep.sleep(delay);
 		}
 			while (!exit);
 
@@ -419,7 +439,6 @@ public class BatchARC {
 				effacerRepertoireChargement(repertoire, envExecution);
 			}
 
-//		Files.deleteIfExists(f.toPath());
 		}
 
 		 // Maintenance du catalog
@@ -431,13 +450,6 @@ public class BatchARC {
 		// si on n'est pas en production, on itere tant qu'il y a des fichiers dans le repertoire.
 		}
 		while (!production && recevoir.report.nbLines>0 && productionOn);
-
-		
-		// paliatif production pour ARC
-        UtilitaireDao.get("arc").grantToRole("SELECT","comptelecture");
-        // paliatif production pour ARC-DADS
-        UtilitaireDao.get("arc").grantToRole("SELECT","lecture");
-		
         
         if (args!=null && args.length>0 && args[0].equals("noExit"))
         {
@@ -469,7 +481,7 @@ public class BatchARC {
 	 */
 	public static void creerTablePilotageBatch() throws Exception
 	{
-		StringBuilder requete=new StringBuilder();
+		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text collate \"C\", operation text collate \"C\"); ");
 		requete.append("\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
         UtilitaireDao.get("arc").executeRequest(null, requete);
@@ -483,7 +495,7 @@ public class BatchARC {
 	 */
 	public static boolean productionOn() throws Exception {
 		if (production) {
-			return UtilitaireDao.get("arc").hasResults(null, "select 1 from arc.pilotage_batch where operation='O'");
+			return UtilitaireDao.get("arc").hasResults(null, new PreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 		}
 		else
 		{

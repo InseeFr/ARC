@@ -15,11 +15,13 @@ import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiFiltrageService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Pair;
+import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
@@ -53,15 +55,15 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         try {
             this.connexion.setClientInfo("ApplicationName", "Filtrage fichier "+idSource);
         } catch (SQLClientInfoException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+			StaticLoggerDispatcher.error(e,LOGGER);
         }
         
-        this.tableFiltrageDataTemp = FormatSQL.temporaryTableName("filtrage_data_temp");
-        this.tableFiltragePilTemp = FormatSQL.temporaryTableName("filtrage_pil_Temp");
+        this.tableFiltrageDataTemp = "filtrage_data_temp";
+        this.tableFiltragePilTemp = "filtrage_pil_Temp";
         
-        this.tableTempFiltrageKo = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO + "$" +indice);
-        this.tableTempFiltrageOk = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK + "$" +indice);
+        this.tableTempFiltrageKo = "tableTempFiltrageKo";
+        this.tableTempFiltrageOk = "tableTempFiltrageOk";
+        
         this.tableFiltrageKo=ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ko");
         this.tableFiltrageOk=ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ok");
         
@@ -94,20 +96,14 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
             
             
         } catch (Exception e) {
-            e.printStackTrace();
+			StaticLoggerDispatcher.error(e,LOGGER);
 	    try {
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
-			"aucuneTableADroper");
-	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
-	    }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+			this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+				"aucuneTableADroper");
+		    } catch (SQLException e2) {
+				StaticLoggerDispatcher.error(e2,LOGGER);
+		    }
+            Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
 
     }
@@ -139,8 +135,11 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 
         
         UtilitaireDao.get("arc").dropTable(this.connexion, this.tableTempFiltrageOk, this.tableFiltrageDataTemp, this.tableTempFiltrageKo);
-        this.seuilExclusion = UtilitaireDao.get("arc").getString(this.connexion,
-                new StringBuilder("SELECT valeur FROM " + this.tableSeuil + " WHERE NOM = 'filtrage_taux_exclusion_accepte'"));
+        
+        
+        PreparedStatementBuilder requete=new PreparedStatementBuilder();
+        requete.append("SELECT valeur FROM " + this.tableSeuil + " WHERE nom = "+requete.quoteText("filtrage_taux_exclusion_accepte"));
+        this.seuilExclusion = UtilitaireDao.get("arc").getString(this.connexion,requete);
 
         
         // Fabrication de la table de filtrage temporaire
@@ -205,7 +204,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
                 /**
                  * La requête de sélection de la relation
                  */
-                getRegles(this.tableFiltrageRegle, this.tableFiltragePilTemp)
+                new PreparedStatementBuilder(getRegles(this.tableFiltrageRegle, this.tableFiltragePilTemp))
                 ));
 
         this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle = calculerNormeToPeriodiciteToValiditeInfToValiditeSupToRegle(regleActive);
@@ -259,7 +258,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
      */
     public void insertionFinale() throws Exception
     {
-
+    	// promote the application user account to full right
+    	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+    	
     	// créer les tables héritées
     	String tableIdSourceOK=tableOfIdSource(this.tableFiltrageOk ,this.idSource);
     	createTableInherit(connexion, this.tableTempFiltrageOk, tableIdSourceOK);
@@ -277,7 +278,6 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         {
             requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableFiltrageOk + "_todo;"));
             requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
-//            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ this.tableFiltrageKo +";"));
         }
         
         requete.append(this.marquageFinal(this.tablePil, this.tableFiltragePilTemp));

@@ -15,8 +15,10 @@ import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.Sleep;
 
 /**
  * Comme pour le normage et le filtrage, on parallélise en controlant chaque fichier dans des threads séparés.
@@ -34,6 +36,10 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     public String tableControleDataTemp;
     protected String tableControlePilTemp;
     public String tableTempControleFoo;
+    protected String tableOutOkTemp="tableOutOkTemp";
+    protected String tableOutKoTemp="tableOutKoTemp";
+    String tableOutOk;
+    String tableOutKo;
 
     public ServiceJeuDeRegle sjdr;
 
@@ -73,9 +79,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         this.setTableJeuDeRegle(theApi.getTableJeuDeRegle());
         this.setTableControleRegle(theApi.getTableControleRegle());
 
-//        this.setListJdr(theApi.getListJdr());
-
-//        this.sjdr = new ServiceJeuDeRegle((ArrayList<String>) theApi.sjdr.getListRubTable());
         
         this.sjdr = new ServiceJeuDeRegle(theApi.getTableControleRegle());
         this.jdr =new JeuDeRegle();
@@ -86,7 +89,12 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         // Nom des tables temporaires      
         this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
         this.tableControlePilTemp= FormatSQL.temporaryTableName("controle_pil_temp");
-        this.tableTempControleFoo = FormatSQL.temporaryTableName("controle_foo_temp");        
+        this.tableTempControleFoo = FormatSQL.temporaryTableName("controle_foo_temp");
+        
+        // tables finales
+        this.tableOutOk = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK;
+        this.tableOutKo = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO;
+
     }
 
     @Override
@@ -97,23 +105,19 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
             execute();          
 
-            finControle();
+            calculSeuilControle();
+            
+            insertionFinale();
             
         } catch (Exception e) {
-            e.printStackTrace();
-	    try {
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
-			"aucuneTableADroper");
-	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
-	    }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+			StaticLoggerDispatcher.error(e,LOGGER);
+		    try {
+				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+					"aucuneTableADroper");
+			    } catch (SQLException e2) {
+					StaticLoggerDispatcher.error(e2,LOGGER);
+			    }
+		    Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
     }
 
@@ -166,12 +170,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
         blocPrep.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
-        //blocPrep.append(createTableControle(this.getTablePrevious(), this.tableControleDataTemp, this.tableControlePilTemp, this.getCurrentPhase()));
         UtilitaireDao.get("arc").executeBlock(this.connexion, blocPrep);
 
         // Récupération des Jeux de règles associés
         this.sjdr.fillRegleControle(this.connexion, jdr, this.getTableControleRegle(), this.tableControleDataTemp);
-        this.structure=UtilitaireDao.get("arc").getString(this.connexion, "SELECT jointure FROM "+this.tableControlePilTemp);
+        this.structure=UtilitaireDao.get("arc").getString(this.connexion, new PreparedStatementBuilder("SELECT jointure FROM "+this.tableControlePilTemp));
     }
 
     
@@ -291,14 +294,9 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la table des seuils
      * @throws SQLException
      */
-    public void finControle() throws Exception {
+    public void calculSeuilControle() throws Exception {
         StaticLoggerDispatcher.info("finControle", LOGGER);
 
-        String tableOutOkTemp = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK + "$" +indice);
-        String tableOutKoTemp = FormatSQL.temporaryTableName(dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO + "$" +indice);
-
-        String tableOutOk = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK;
-        String tableOutKo = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO;
 
         StringBuilder blocFin = new StringBuilder();
         // Creation des tables temporaires ok et ko
@@ -333,14 +331,12 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         StaticLoggerDispatcher.info("Insertion dans OK", LOGGER);
         blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutOkTemp, this.tableControlePilTemp, "etat_traitement is null",
                 "controle='0' AND "));
-        // blocFin.append("\n analyze "+tableOutOkTemp+"(id_source);");
 
         // on insere dans la table KO tous les enregistrements à controle!=0 et
         // tous ceux des fichiers déclarés en KO de seuil
         StaticLoggerDispatcher.info("Insertion dans KO", LOGGER);
         blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutKoTemp, this.tableControlePilTemp, "etat_traitement='{"
                 + TraitementEtat.KO + "}'", "controle!='0' OR "));
-        // blocFin.append("\n analyze "+tableOutKoTemp+"(id_source);");
 
         // Reset de la table de pilotage : on remet tout les états à null
         blocFin.append(resetTablePilotage(this.tableControlePilTemp));
@@ -348,43 +344,48 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         blocFin.append(passageEtat(this.tableControlePilTemp, TraitementEtat.KO.toString(), tableOutKoTemp));
         UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
-        // Insertion des table temp dans les vraies tables
-
-
-        // Créer les tables héritées
-        String tableIdSourceOK=tableOfIdSource(tableOutOk ,this.idSource);
-        createTableInherit(connexion, tableOutOkTemp, tableIdSourceOK);
-        String tableIdSourceKO=tableOfIdSource(tableOutKo ,this.idSource);
-        createTableInherit(connexion, tableOutKoTemp, tableIdSourceKO);
-        
-        StringBuilder requete = new StringBuilder();
-        
-        if (paramBatch == null) {
-        	requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk +";"));
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ tableOutKo +";"));
-        }
-        else
-        {
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
-            requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
-//            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ tableOutKo +";"));
-        }
-        
-        requete.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp));
-        UtilitaireDao.get("arc").executeBlock(connexion, requete);
-        
-        blocFin.setLength(0);
-        // Vidage des tables temporaires
-        blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
-        blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
-        blocFin.append(FormatSQL.dropTable(this.tableControleDataTemp).toString());
-        blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
-        
-	    UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
-
     }
 
+    /**
+     * Insertion dans les vraies tables
+     * @throws Exception
+     */
+    private void insertionFinale() throws Exception {
+
+	// promote the application user account to full right
+	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+    	
+    // Créer les tables héritées
+    String tableIdSourceOK=tableOfIdSource(tableOutOk ,this.idSource);
+    createTableInherit(connexion, tableOutOkTemp, tableIdSourceOK);
+    String tableIdSourceKO=tableOfIdSource(tableOutKo ,this.idSource);
+    createTableInherit(connexion, tableOutKoTemp, tableIdSourceKO);
+    
+    StringBuilder requete = new StringBuilder();
+    
+    if (paramBatch == null) {
+    	requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
+        requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk +";"));
+        requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ tableOutKo +";"));
+    }
+    else
+    {
+        requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
+        requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
+    }
+    
+    requete.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp));
+    
+    requete.append(FormatSQL.dropTable(tableOutOkTemp).toString());
+    requete.append(FormatSQL.dropTable(tableOutKoTemp).toString());
+    requete.append(FormatSQL.dropTable(this.tableControleDataTemp).toString());
+    requete.append("\n DISCARD SEQUENCES; DISCARD TEMP;");
+    
+    UtilitaireDao.get("arc").executeBlock(this.connexion, requete);
+    }
+    
+    
+    
     /**
      * Mise en CONTROLE_KO des fichiers avec trop d'erreur
      *

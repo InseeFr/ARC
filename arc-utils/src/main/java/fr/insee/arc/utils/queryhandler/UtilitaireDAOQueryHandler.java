@@ -17,6 +17,7 @@ import fr.insee.arc.utils.dao.AbstractQueryHandler;
 import fr.insee.arc.utils.dao.IQueryExecutor;
 import fr.insee.arc.utils.dao.IQueryHandler;
 import fr.insee.arc.utils.dao.IWrapper;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
@@ -231,7 +232,7 @@ public abstract class UtilitaireDAOQueryHandler
         this.poolName = poolName;
     }
 
-    protected <T> T execute(Function<ResultSet, T> onResult, String query, BiConsumer<Throwable, String> onException,
+    protected <T> T execute(Function<ResultSet, T> onResult, PreparedStatementBuilder query, BiConsumer<Throwable, String> onException,
             Consumer<? super Connection> howToClose)
     {
         T returned = null;
@@ -243,13 +244,13 @@ public abstract class UtilitaireDAOQueryHandler
                     UtilitaireDao.EntityProvider.getDefaultEntityProvider(onResult));
         } catch (SQLException ex)
         {
-            onException.accept(ex, query);
+            onException.accept(ex, query.getQuery().toString());
         }
 
         return returned;
     }
 
-    protected <T> List<T> executeQuery(Function<ResultSet, T> onRecord, String query,
+    protected <T> List<T> executeQuery(Function<ResultSet, T> onRecord, PreparedStatementBuilder query,
             BiConsumer<Throwable, String> onException, Consumer<? super Connection> howToClose)
     {
          LoggerHelper.trace(LOGGER, query);
@@ -261,7 +262,7 @@ public abstract class UtilitaireDAOQueryHandler
                     UtilitaireDao.EntityProvider.getTypedListProvider(onRecord));
         } catch (SQLException ex)
         {
-            onException.accept(ex, query);
+            onException.accept(ex, query.getQuery().toString());
         }
         return returned;
     }

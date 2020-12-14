@@ -17,6 +17,9 @@
 
 	<bean id="batchARC" class="fr.insee.arc.batch.BatchARC">
 	</bean>
+
+	<bean id="AppTest" class="fr.insee.arc.batch.AppTestTemp">
+	</bean>
 	 	 
 	<bean id="utilitaireDao" class="fr.insee.arc.utils.dao.UtilitaireDao">
   	<constructor-arg index="0" value="arc" />

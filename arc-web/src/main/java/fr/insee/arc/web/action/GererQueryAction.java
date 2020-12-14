@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.web.model.DatabaseManagementModel;
@@ -69,9 +70,11 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 				m=m.substring(0, m.length()-1);
 			}
 
-			if (UtilitaireDao.get("arc").testResultRequest(null, m))
+			PreparedStatementBuilder requete=new PreparedStatementBuilder(m);
+			
+			if (UtilitaireDao.get("arc").testResultRequest(null, requete))
 			{
-				this.vObjectService.initialize(viewQuery, m, "arc.ihm_Query", defaultInputFields);
+				this.vObjectService.initialize(viewQuery, requete, "arc.ihm_Query", defaultInputFields);
 			}
 			else
 			{
@@ -109,7 +112,7 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 	public void initializeTable() {
 		System.out.println("/* initializeTable */");
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-		this.vObjectService.initialize(viewTable, "select tablename from pg_tables where schemaname='" + this.mySchema+"'", "arc.ihm_Table", defaultInputFields);
+		this.vObjectService.initialize(viewTable, new PreparedStatementBuilder("select tablename from pg_tables where schemaname='" + this.mySchema+"'"), "arc.ihm_Table", defaultInputFields);
 
 	}
 

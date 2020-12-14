@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleControleEntity;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -34,23 +35,18 @@ public class RegleDao {
 
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
 
-		StringBuilder sb = new StringBuilder();
+		PreparedStatementBuilder sb = new PreparedStatementBuilder();
 		sb.append("SELECT 	id_regle, id_classe, ");
 		sb.append("		rubrique_pere, rubrique_fils, borne_inf, borne_sup, condition, pre_action  ");
-		sb.append("FROM {0} ");
-		sb.append("WHERE id_norme='{1}'::text ");
-		sb.append("		AND periodicite='{2}'::text ");
-		sb.append("		AND validite_inf='{3}'::date ");
-		sb.append("		AND validite_sup='{4}'::date ");
-		sb.append("		AND version='{5}'::text ");
+		sb.append("FROM "+espace+" ");
+		sb.append("WHERE id_norme='"+jdr.getIdNorme()+"'::text ");
+		sb.append("		AND periodicite='"+jdr.getPeriodicite()+"'::text ");
+		sb.append("		AND validite_inf='"+jdr.getValiditeInfString()+"'::date ");
+		sb.append("		AND validite_sup='"+jdr.getValiditeSupString()+"'::date ");
+		sb.append("		AND version='"+jdr.getVersion()+"'::text ");
 		sb.append("; ");
 
-		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.getRequete(sb.toString(), espace, jdr.getIdNorme(), jdr.getPeriodicite(),
-				jdr.getValiditeInfString(), jdr.getValiditeSupString(), jdr.getVersion()));
-//		StaticLoggerDispatcher.debug("Ma requête : " + requete, logger);
-
-			HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
+		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, sb)).mapContent();
 		
 			if (!g.isEmpty())
 			{
@@ -83,22 +79,20 @@ public class RegleDao {
 
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
 
-		StringBuilder sb = new StringBuilder();
+		PreparedStatementBuilder sb = new PreparedStatementBuilder();
 		sb.append("SELECT 	id_regle, id_classe, ");
 		sb.append("		rubrique_pere, rubrique_fils, borne_inf, borne_sup, condition, pre_action  ");
-		sb.append("FROM {0} a ");
-		sb.append(" WHERE EXISTS (SELECT 1 FROM (SELECT id_norme, periodicite, validite FROM {1} LIMIT 1) b "); 
+		sb.append("FROM "+tableRegle+" a ");
+		sb.append(" WHERE EXISTS (SELECT 1 FROM (SELECT id_norme, periodicite, validite FROM "+tableIn+" LIMIT 1) b "); 
 		sb.append("		WHERE a.id_norme=b.id_norme ");
 		sb.append("		AND a.periodicite=b.periodicite "); 
 		sb.append("		AND to_date(b.validite,'YYYY-MM-DD')>=a.validite_inf "); 
 		sb.append("		AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup) ");
 		sb.append("; ");
 
-		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.getRequete(sb.toString(), tableRegle, tableIn));
 //		StaticLoggerDispatcher.debug("Ma requête : " + requete, logger);
 
-			HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
+			HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, sb)).mapContent();
 		
 			if (!g.isEmpty())
 			{

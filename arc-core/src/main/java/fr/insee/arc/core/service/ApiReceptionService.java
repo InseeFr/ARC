@@ -30,6 +30,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -108,7 +109,7 @@ public class ApiReceptionService extends ApiService {
 			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.KO);
 			// déplacer les fichiers du répertoire de l'entrepot vers le répertoire encours
 			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,
-					"select id_entrepot from arc.ihm_entrepot")).mapContent();
+					new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
 					
 			if (!entrepotList.isEmpty())
 			{
@@ -333,7 +334,7 @@ public class ApiReceptionService extends ApiService {
 			requete.append(";");
 			soumettreRequete(requete);
 
-	        boolean fichierARejouer=UtilitaireDao.get("arc").hasResults(connexion, "select 1 from " + this.tablePil + " where phase_traitement='RECEPTION' and to_delete in ('R','F') limit 1;");
+	        boolean fichierARejouer=UtilitaireDao.get("arc").hasResults(connexion, new PreparedStatementBuilder("select 1 from " + this.tablePil + " where phase_traitement='RECEPTION' and to_delete in ('R','F') limit 1;"));
 
 			if (fichierARejouer)
 			{
@@ -798,7 +799,7 @@ public class ApiReceptionService extends ApiService {
 		
 		// récupérer les doublons pour mettre à jour le dispatcher
 		try {
-			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, requete)).mapContent().get("id_source");
+			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent().get("id_source");
 			
 			// on va parcourir la liste des fichiers
 			// si on retrouve l'id_source dans la liste, on le marque en erreur
@@ -826,7 +827,7 @@ public class ApiReceptionService extends ApiService {
 
 		ArrayList<ArrayList<String>> content2 = new ArrayList<ArrayList<String>>();
 		try {
-			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, requete)).mapContent();
+			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent();
 			ArrayList<String> listContainerARejouer = m.get("container");
 			ArrayList<String> listIdsourceARejouer = m.get("id_source");
 
@@ -892,7 +893,7 @@ public class ApiReceptionService extends ApiService {
 				+ " b where a.container=b.o_container),1)::text as v_container ");
 		requete.append("from (select distinct container from " + this.tablePilTemp + " where container is not null) a ");
 		try {
-			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, requete)).mapContent();
+			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent();
 			ArrayList<String> listContainerDoublons = m.get("container");
 			ArrayList<String> listVersionContainerDoublons = m.get("v_container");
 			if (listContainerDoublons != null) {

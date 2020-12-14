@@ -19,8 +19,10 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
+import fr.insee.arc.utils.textUtils.XMLUtil;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
@@ -90,31 +92,22 @@ public class ChargeurCSV implements IChargeur {
         
         
         this.separateur = norme.getRegleChargement().getDelimiter().trim();
-        
-        if (norme.getRegleChargement().getFormat()!=null && norme.getRegleChargement().getFormat().contains("<encoding>"))
-        {
-        	this.encoding=ManipString.substringBeforeFirst(ManipString.substringAfterFirst(norme.getRegleChargement().getFormat(),"<encoding>"),"</encoding>");
-        }
-        if (norme.getRegleChargement().getFormat()!=null && norme.getRegleChargement().getFormat().contains("<headers>"))
-        {
-        	this.userDefinedHeaders=ManipString.substringBeforeFirst(ManipString.substringAfterFirst(norme.getRegleChargement().getFormat(),"<headers>"),"</headers>");
-        }
-        if (norme.getRegleChargement().getFormat()!=null && norme.getRegleChargement().getFormat().contains("<quote>"))
-        {
-        	this.quote=ManipString.substringBeforeFirst(ManipString.substringAfterFirst(norme.getRegleChargement().getFormat(),"<quote>"),"</quote>");
-        	
-            if (this.quote.length()>1)
+        this.encoding=XMLUtil.parseXML(norme.getRegleChargement().getFormat(),"encoding");
+    	this.userDefinedHeaders=XMLUtil.parseXML(norme.getRegleChargement().getFormat(),"headers");
+    	this.quote=XMLUtil.parseXML(norme.getRegleChargement().getFormat(),"quote");
+    	
+        // si le quote est une expression complexe, l'interpreter par postgres
+    	if (this.quote!=null && this.quote.length()>1 && this.quote.length()<8)
             {
-                StringBuilder req = new StringBuilder();
-                req.append("select "+this.quote+" ");
+                PreparedStatementBuilder req = new PreparedStatementBuilder();
+                req.append("SELECT "+this.quote+" ");
                 this.quote = UtilitaireDao.get("arc").executeRequest(this.connexion, req).get(2).get(0);
             }
-        }
         
         // si le séparateur est une expression complexe, l'interpreter par postgres
-        if (this.separateur.length()>1)
+        if (this.separateur!=null && this.separateur.length()>1 && this.separateur.length()<8)
         {
-            StringBuilder req = new StringBuilder();
+        	PreparedStatementBuilder req = new PreparedStatementBuilder();
             req.append("select "+this.separateur+" ");
             this.separateur = UtilitaireDao.get("arc").executeRequest(this.connexion, req).get(2).get(0);
         }
@@ -148,14 +141,9 @@ public class ChargeurCSV implements IChargeur {
         
         // On crée la table dans laquelle on va COPYer le tout
         initialiserTable();
-
-        
         
         copyerFile();
-        
-        // Application des règles de format
-//        applyFormat();
-        
+
 
         java.util.Date endDate = new java.util.Date();
 
@@ -207,15 +195,15 @@ public class ChargeurCSV implements IChargeur {
     		format=format.trim();
     		String[] lines=format.split("\n");
     		
-    		ArrayList<String> cols=new ArrayList<String>();
-    		ArrayList<String> exprs=new ArrayList<String>();
-    		ArrayList<String> wheres=new ArrayList<String>();
+    		ArrayList<String> cols=new ArrayList<>();
+    		ArrayList<String> exprs=new ArrayList<>();
+    		ArrayList<String> wheres=new ArrayList<>();
 
-    		ArrayList<String> joinTable=new ArrayList<String>();
-    		ArrayList<String> joinType=new ArrayList<String>();
-    		ArrayList<String> joinClause=new ArrayList<String>();
-    		ArrayList<String> joinSelect=new ArrayList<String>();
-    		ArrayList<String> partitionExpression=new ArrayList<String>();
+    		ArrayList<String> joinTable=new ArrayList<>();
+    		ArrayList<String> joinType=new ArrayList<>();
+    		ArrayList<String> joinClause=new ArrayList<>();
+    		ArrayList<String> joinSelect=new ArrayList<>();
+    		ArrayList<String> partitionExpression=new ArrayList<>();
 
     		for (String line:lines)
     		{
@@ -296,7 +284,7 @@ public class ChargeurCSV implements IChargeur {
 					// récupération des colonnes de la table
 					List<String> colsIn = new ArrayList<String>();
 					colsIn = UtilitaireDao.get("arc")
-							.executeRequest(this.connexion, "select "+joinSelect.get(i)+" from " + joinTable.get(i) + " limit 0").get(0);
+							.executeRequest(this.connexion, new PreparedStatementBuilder("select "+joinSelect.get(i)+" from " + joinTable.get(i) + " limit 0")).get(0);
 
 					// join type
 					req.append("\n " + joinType.get(i) + " ");
@@ -337,7 +325,7 @@ public class ChargeurCSV implements IChargeur {
     		if (!cols.isEmpty())
     		{
 	            List<String> colsIn = new ArrayList <String>();
-	            colsIn=UtilitaireDao.get("arc").executeRequest(this.connexion, "select * from "+this.tableTempA+" limit 0").get(0);
+	            colsIn=UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder("select * from "+this.tableTempA+" limit 0")).get(0);
 	    		
 	    		String renameSuffix="$new$";
 	    		String partitionNumberPLaceHolder="#pn#";
@@ -396,7 +384,7 @@ public class ChargeurCSV implements IChargeur {
 	    			req=new StringBuilder();
 
 	    			// comptage rapide su échantillon à 1/10000 pour trouver le nombre de partiton
-	    			nbPartition=UtilitaireDao.get("arc").getInt(connexion, "select ((count(*)*10000)/"+partition_size+")+1 from "+this.tableTempA+" tablesample system(0.01)");
+	    			nbPartition=UtilitaireDao.get("arc").getInt(connexion, new PreparedStatementBuilder("select ((count(*)*10000)/"+partition_size+")+1 from "+this.tableTempA+" tablesample system(0.01)"));
 	    			
 	    			req=new StringBuilder();
 		    		req.append("\n CREATE INDEX idx_a on "+this.tableTempA+" ((abs(hashtext("+partitionExpression.get(0)+"::text)) % "+nbPartition+"));");

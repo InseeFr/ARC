@@ -24,11 +24,13 @@ import fr.insee.arc.core.util.ChargementBrutalTable;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.RegleChargement;
 import fr.insee.arc.core.util.TypeChargement;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
@@ -68,8 +70,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	try {
 	    this.connexion.setClientInfo("ApplicationName", "Chargement fichier " + idSource);
 	} catch (SQLClientInfoException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
+		LOGGER.error(e);
 	}
 
 	this.tableChargementPilTemp = "chargement_pil_temp";
@@ -141,7 +142,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    // Mettre à jour le nombre d'enregistrement dans la table de
 	    // pilotage temporaire
 	    StaticLoggerDispatcher.info("Recopie dans les tables Résultats", LOGGER);
-	    insertTableOK(this.connexion, this.tableChargementOK, this.idSource);
+	    insertionFinale(this.connexion, this.tableChargementOK, this.idSource);
 
 	    // Nettoyage
 	    StringBuilder blocFin = new StringBuilder();
@@ -152,25 +153,17 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
 	} catch (Exception e) {
-	    StaticLoggerDispatcher.info("je suis catché", LOGGER);
-	    e.printStackTrace();
-
+		StaticLoggerDispatcher.error(e,LOGGER);
 	    try {
 
 		// En acs d'erreur on met le fichier en KO avec l'erreur obtenu.
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
+			StaticLoggerDispatcher.error(e2,LOGGER);
 	    }
 
-	    try {
-		Thread.sleep(100);
-	    } catch (InterruptedException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	    }
+	    Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
 	}
     }
 
@@ -186,8 +179,8 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	    // Check if the source loaded in not in a KO state
 	    if (UtilitaireDao.get("arc").hasResults(this.connexion,
-		    "select id_source from  " + this.tableChargementPilTemp + " where  etat_traitement='{"
-			    + TraitementEtat.KO + "}' ")) {
+	    		new PreparedStatementBuilder("select id_source from  " + this.tableChargementPilTemp + " where  etat_traitement='{"
+			    + TraitementEtat.KO + "}' "))) {
 		UtilitaireDao.get("arc").executeBlock(this.connexion, "TRUNCATE TABLE " + this.getTableTempA() + ";");
 	    }
 
@@ -330,9 +323,14 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @throws Exception si aucune règle n'est trouvée
      */
     private Norme calculerTypeFichier(Norme norme) throws Exception {
-		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion(),
-			"SELECT type_fichier, delimiter, format FROM " + this.getTableChargementRegle() + " WHERE id_norme ='"
-				+ norme.getIdNorme() + "';"));
+    	
+    	PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    	requete
+    		.append("SELECT type_fichier, delimiter, format ")
+    		.append(" FROM "+this.getTableChargementRegle())
+    		.append(" WHERE id_norme =" + requete.quoteText(norme.getIdNorme()) + ";");
+
+		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion(), requete));
 		if (g.mapContent().isEmpty()) {
 			throw new Exception("La norme n'a pas de règle de chargement associée.");
 		}
@@ -349,7 +347,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @param tableName
      * @throws SQLException
      */
-    private void insertTableOK(Connection connexion, String tableName, String idSource) throws Exception {
+    private void insertionFinale(Connection connexion, String tableName, String idSource) throws Exception {
 
 	updateNbEnr(this.tableChargementPilTemp, this.getTableTempA());
 
@@ -358,6 +356,10 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	String tableIdSource = tableOfIdSource(tableName, this.idSource);
 
+	// promote the application user account to full right
+	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+
+	
 	// Créer la table des données de la table des donénes chargées
 	createTableInherit(connexion, getTableTempA(), tableIdSource);
 

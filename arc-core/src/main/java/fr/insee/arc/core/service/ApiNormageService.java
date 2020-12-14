@@ -55,7 +55,7 @@ public class ApiNormageService extends ApiService {
     public void executer() throws Exception {
         StaticLoggerDispatcher.info("** executer **", LOGGER);
         
-        this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiNormageService.MAX_PARALLEL_WORKERS",4);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiNormageService.MAX_PARALLEL_WORKERS",4);
         
         long dateDebut = java.lang.System.currentTimeMillis() ;
         
@@ -70,7 +70,7 @@ public class ApiNormageService extends ApiService {
         ArrayList<ThreadNormageService> threadList = new ArrayList<ThreadNormageService>();
         
         // Pool de connexion
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution);
         currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le normage **", logger);
@@ -87,7 +87,7 @@ public class ApiNormageService extends ApiService {
             threadList.add(r);
             r.start();
             
-            waitForThreads2(MAX_PARALLEL_WORKERS, threadList, connexionList);
+            waitForThreads2(maxParallelWorkers, threadList, connexionList);
 
 
         }

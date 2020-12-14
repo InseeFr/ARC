@@ -14,6 +14,7 @@ import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
@@ -58,8 +59,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
         try {
             this.connexion.setClientInfo("ApplicationName", "Normage fichier "+idSource);
         } catch (SQLClientInfoException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	LOGGER.error(e);
         }
 
         // tables du thread
@@ -115,20 +115,14 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
             insertionFinale();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            StaticLoggerDispatcher.error(e, LOGGER);
 	    try {
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
+            StaticLoggerDispatcher.error(e2, LOGGER);
 	    }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+            Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
     }
 
@@ -199,7 +193,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
 			    if (paramBatch!=null)
 			    {
 				    String tableTmpRubriqueDansregles="TMP_RUBRIQUE_DANS_REGLES";
-			        UtilitaireDao.get("arc").executeRequest(
+			        UtilitaireDao.get("arc").executeImmediate(
 			        		this.connexion,
 			        		"\n DROP TABLE IF EXISTS "+tableTmpRubriqueDansregles+"; "
 			        		+ "\n CREATE TEMPORARY TABLE "+tableTmpRubriqueDansregles+" AS "
@@ -238,6 +232,9 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     private void insertionFinale() throws Exception {
     	
     	updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure);
+    	
+    	// promote the application user account to full right
+    	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
     	
     	String tableIdSourceOK=tableOfIdSource(this.tableNormageOK ,this.idSource);
         createTableInherit(connexion, this.tableNormageOKTemp, tableIdSourceOK);

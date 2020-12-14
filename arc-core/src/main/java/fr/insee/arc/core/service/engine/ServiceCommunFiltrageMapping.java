@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -113,7 +114,7 @@ public class ServiceCommunFiltrageMapping {
                                 + nomGeneriqueTableMetierTrouve.substring(longueurDebutRequeteResultatUnique,
                                         nomGeneriqueTableMetierTrouve.length() - longueurFinRequeteResultatUnique));
             }
-            String valeurRequete = UtilitaireDao.get("arc").getString(aConnexion, requeteValeurGlobaleAvecVraiNomTableMetier);
+            String valeurRequete = UtilitaireDao.get("arc").getString(aConnexion, new PreparedStatementBuilder(requeteValeurGlobaleAvecVraiNomTableMetier));
             returned = returned.replace(expressionRequeteValeurGlobaleAvecAccolades,
                     valeurRequete == null ? "null" : valeurRequete);
         }
@@ -131,11 +132,15 @@ public class ServiceCommunFiltrageMapping {
     public static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) throws SQLException {
         Set<String> returned = new HashSet<String>();
         String token = (aTable.contains(".") ? ("schema_columns.table_schema||'.'||") : "");
+        
+        PreparedStatementBuilder requete= new PreparedStatementBuilder();
+        requete.append("SELECT DISTINCT column_name")
+        .append(" FROM information_schema.columns schema_columns")
+        .append(" WHERE " + requete.quoteText(aTable.toLowerCase()) + "=" + token + "schema_columns.table_name");
+        
         ArrayList<ArrayList<String>> result = UtilitaireDao.get("arc").executeRequest(
                 aConnexion,
-                new StringBuilder("SELECT DISTINCT column_name").append(
-                        "  FROM information_schema.columns schema_columns").append(
-                        "  WHERE '" + aTable.toLowerCase() + "'=" + token + "schema_columns.table_name"));
+                requete);
         for (int i = 2; i < result.size(); i++) {
 //            if (logger.isTraceEnabled()) {
 //                StaticLoggerDispatcher.trace("Rubrique trouvée : " + result.get(i).get(0), logger);

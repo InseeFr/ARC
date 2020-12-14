@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import fr.insee.arc.utils.utils.ManipString;
+
 public class XMLUtil
 {
     public static final int DEFAULT_INDENT_SIZE = 2;
@@ -101,4 +103,15 @@ public class XMLUtil
     {
         return this.level;
     }
+    
+    
+    public static String parseXML(String inputString, String tag)
+    {
+        if (inputString!=null && inputString.contains("<"+tag+">"))
+        {
+        	return ManipString.substringBeforeFirst(ManipString.substringAfterFirst(inputString,"<"+tag+">"),"</"+tag+">");
+        }
+        return null;
+    }
+    
 }

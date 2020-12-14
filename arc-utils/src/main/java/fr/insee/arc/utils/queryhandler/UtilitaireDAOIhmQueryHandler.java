@@ -8,6 +8,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import fr.insee.arc.utils.dao.IQueryHandler;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 
 public class UtilitaireDAOIhmQueryHandler extends UtilitaireDAOQueryHandler implements IQueryHandler
 {
@@ -26,14 +27,14 @@ public class UtilitaireDAOIhmQueryHandler extends UtilitaireDAOQueryHandler impl
      * .Function, java.lang.String, java.util.function.BiConsumer)
      */
     @Override
-    public <T> List<T> executeQuery(Function<ResultSet, T> onRecord, String query,
+    public <T> List<T> executeQuery(Function<ResultSet, T> onRecord, PreparedStatementBuilder query,
             BiConsumer<Throwable, String> onException) throws SQLException
     {
         return executeQuery(onRecord, query, onException, getOnClose());
     }
 
     @Override
-    public <T> T execute(Function<ResultSet, T> onResult, String query, BiConsumer<Throwable, String> onException)
+    public <T> T execute(Function<ResultSet, T> onResult, PreparedStatementBuilder query, BiConsumer<Throwable, String> onException)
             throws SQLException
     {
         return execute(onResult, query, onException, getOnClose());

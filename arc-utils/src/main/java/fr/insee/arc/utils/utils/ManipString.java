@@ -261,14 +261,13 @@ public class ManipString implements IConstanteCaractere {
         return r;
     }
 
-    public static String sqlEqual(String val, String type) {
-        if (val == null) {
-            return "is null";
-        } else {
-            return "='" + val.replace("'", "''") + "'::" + type;
-        }
-
-    }
+//    public static String sqlEqual(String val, String type) {
+//        if (val == null) {
+//            return "is null";
+//        } else {
+//            return "='" + val.replace("'", "''") + "'::" + type;
+//        }
+//    }
 
     /**
      * Gets the substring before the first occurrence of a separator

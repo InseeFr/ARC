@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.files.FileUtils;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler;
@@ -61,7 +62,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	protected static final String NONE = "none";
 	protected static final String POOLNAME = "arc"; 
-	protected static final int NUMBER_OF_SANDBOXES = 8;
+	protected int NUMBER_OF_SANDBOXES;
 
 	@Autowired
 	@Qualifier("properties")
@@ -178,10 +179,17 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	@SuppressWarnings("unchecked")
 	private void initializeArcActionWithProperties() {	    
 		if (getSession().get(SessionParameters.ENV_MAP) == null) {
-			this.envMap = new LinkedHashMap<String, String>();
+			
+			NUMBER_OF_SANDBOXES= UtilitaireDao.get("arc").getInt(null, 
+					new PreparedStatementBuilder("SELECT count(*) FROM arc.ext_etat_jeuderegle where isenv and mise_a_jour_immediate")
+					);
+			
+			this.envMap = new LinkedHashMap<>();
 			for (int i = 1; i <= NUMBER_OF_SANDBOXES; i++) {
 				this.envMap.put(properties.getSchemaReference() + "_BAS" + i, "BAS" + i);
 			}
+			
+			// adding production sandbox
 			this.envMap.put(properties.getSchemaReference() + "_PROD", "PROD");
 			getSession().put(SessionParameters.ENV_MAP, this.envMap);
 		}
@@ -333,7 +341,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 			 */
 			if (withTypes) {
 				GenericBean gb = getQueryHandler().execute(UtilitaireDao.EntityProvider.getGenericBeanProvider(),
-						FormatSQL.modeleDeDonneesTable(aNomTableImage).toString(),
+						FormatSQL.modeleDeDonneesTable(aNomTableImage),
 						UtilitaireDAOQueryHandler.OnException.THROW);
 				Map<String, ArrayList<String>> mapModeleDonnees = gb.mapContent();
 				StringBuilder headers = new StringBuilder();

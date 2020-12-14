@@ -14,17 +14,17 @@ import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler.OnException;
 public interface IQueryExecutor
 {
     /**
-     * Exécute une requête qui renvoie un résultat, et transforme chaque
-     * enregistrement du résultat dans un objet de type {@link T}, en utilisant
+     * Exï¿½cute une requï¿½te qui renvoie un rï¿½sultat, et transforme chaque
+     * enregistrement du rï¿½sultat dans un objet de type {@link T}, en utilisant
      * une factory <i>ad hoc</i>.<br/>
-     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dépendant
-     * de l'erreur et de la requête.
+     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dï¿½pendant
+     * de l'erreur et de la requï¿½te.
      *
      * @param onRecord
      *            La fonction qui transforme un enregistrement en un objet de
      *            type {@code T}
      * @param query
-     *            la requête textuelle en SQL
+     *            la requï¿½te textuelle en SQL
      * @param onException
      *            le gestionnaire d'exception
      * @return
@@ -33,21 +33,21 @@ public interface IQueryExecutor
      * @see {@link OnException#LOG}
      * @see {@link OnException#THROW}
      */
-      <T> List<T> executeQuery(Function<ResultSet, T> onRecord, String query,
+      <T> List<T> executeQuery(Function<ResultSet, T> onRecord, PreparedStatementBuilder query,
             BiConsumer<Throwable, String> onException) throws SQLException;
     
     /**
-     * Exécute une requête qui renvoie un résultat, et transforme chaque
-     * enregistrement du résultat dans un objet de type {@link T}, en utilisant
+     * Exï¿½cute une requï¿½te qui renvoie un rï¿½sultat, et transforme chaque
+     * enregistrement du rï¿½sultat dans un objet de type {@link T}, en utilisant
      * une factory <i>ad hoc</i>.<br/>
-     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dépendant
-     * de l'erreur et de la requête.
+     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dï¿½pendant
+     * de l'erreur et de la requï¿½te.
      *
      * @param onResult
      *            La fonction qui transforme un enregistrement en un objet de
      *            type {@code T}
      * @param query
-     *            la requête textuelle en SQL
+     *            la requï¿½te textuelle en SQL
      * @param onException
      *            le gestionnaire d'exception
      * @return
@@ -56,16 +56,16 @@ public interface IQueryExecutor
      * @see {@link OnException#LOG}
      * @see {@link OnException#THROW}
      */
-     <T> T execute(Function<ResultSet, T> onResult, String query,
+     <T> T execute(Function<ResultSet, T> onResult, PreparedStatementBuilder query,
             BiConsumer<Throwable, String> onException) throws SQLException;
 
     /**
-     * Exécute une requête ne renvoyant aucun résultat.<br/>
-     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dépendant
-     * de l'erreur et de la requête.
+     * Exï¿½cute une requï¿½te ne renvoyant aucun rï¿½sultat.<br/>
+     * En cas d'erreur, le {@link BiConsumer} effectue un traitement dï¿½pendant
+     * de l'erreur et de la requï¿½te.
      *
      * @param query
-     *            la requête textuelle en SQL
+     *            la requï¿½te textuelle en SQL
      * @param onException
      *            le gestionnaire d'exception
      * @return
@@ -81,7 +81,7 @@ public interface IQueryExecutor
     /**
      *
      * @param howToClose
-     *            doit gérer la clôture de la connection.
+     *            doit gï¿½rer la clï¿½ture de la connection.
      * @see HowToClose#JUST_CLOSE
      * @see HowToClose#ASSERT_CLOSE
      * @see HowToClose#COMMIT

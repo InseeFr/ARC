@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.web.util.VObjectService;
 import fr.insee.arc.web.util.VObject;
@@ -32,17 +33,17 @@ public class ExternalFilesManagementDao implements IDbConstant {
     @SuppressWarnings("unused")
 	private final Logger LOGGER = LogManager.getLogger(ExternalFilesManagementDao.class);
 
-    private final String NOM_TABLE = "nom_table";
+    private static final String NOM_TABLE = "nom_table";
     
 
     public void initializeViewListNomenclatures(VObject viewListNomenclatures, String table) {
         System.out.println("/* initializeListeNomenclatures */");
         
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-        StringBuilder requete = new StringBuilder();
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
         requete.append("\n SELECT " + NOM_TABLE + ", description FROM "+table+" ");
 
-        vObject.initialize(viewListNomenclatures, requete.toString(), table, defaultInputFields);
+        vObject.initialize(viewListNomenclatures, requete, table, defaultInputFields);
     }
 
     
@@ -52,13 +53,13 @@ public class ExternalFilesManagementDao implements IDbConstant {
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
         if (!selection.isEmpty() && UtilitaireDao.get(poolName).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0))) {
-            StringBuilder requete = new StringBuilder();
+        	PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select * from arc." + selection.get(NOM_TABLE).get(0) + " ");
 
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
             defaultInputFields.put(NOM_TABLE, selection.get(NOM_TABLE).get(0));
 
-            vObject.initialize(viewNomenclature, requete.toString(), "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
+            vObject.initialize(viewNomenclature, requete, "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
         } else {
             vObject.destroy(viewNomenclature);
         }
@@ -70,13 +71,13 @@ public class ExternalFilesManagementDao implements IDbConstant {
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
         if (!selection.isEmpty()) {
-            StringBuilder requete = new StringBuilder();
+        	PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("\n SELECT type_nmcl, nom_colonne, type_colonne FROM arc.ihm_schema_nmcl ");
-            requete.append("\n WHERE type_nmcl = '" + typeNomenclature(selection.get(NOM_TABLE).get(0)) + "'");
+            requete.append("\n WHERE type_nmcl = " + requete.quoteText(typeNomenclature(selection.get(NOM_TABLE).get(0))) + " ");
             HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 
             defaultInputFields.put("type_nmcl", typeNomenclature(selection.get(NOM_TABLE).get(0)));
-            vObject.initialize(viewSchemaNmcl, requete.toString(), "arc.ihm_schema_nmcl", defaultInputFields);
+            vObject.initialize(viewSchemaNmcl, requete, "arc.ihm_schema_nmcl", defaultInputFields);
             
         } else {
             vObject.destroy(viewSchemaNmcl);

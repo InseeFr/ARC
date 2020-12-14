@@ -3,6 +3,7 @@ package fr.insee.arc.web.model.viewobjects;
 import java.util.HashMap;
 import java.util.Map;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 
 public class ViewControle extends AbstractViewRule {
@@ -14,7 +15,7 @@ public class ViewControle extends AbstractViewRule {
 	protected Map<String, ColumnRendering> extraFields() {
 		HashMap<String, ColumnRendering> columnRenderings = new HashMap<>();
         columnRenderings.put("id_classe", new ColumnRendering(true, "label.control.type", "13%", "select",
-                "select id, id from arc.ext_type_controle order by ordre", true));
+        		new PreparedStatementBuilder("select id, id from arc.ext_type_controle order by ordre"), true));
         columnRenderings.put("rubrique_pere", new ColumnRendering(true, "label.element.main", "10%", "text", null, true));
         columnRenderings.put("rubrique_fils", new ColumnRendering(true, "label.element.child", "10%", "text", null, true));
         columnRenderings.put("borne_inf", new ColumnRendering(true, "label.min", "5%", "text", null, true));

@@ -92,13 +92,9 @@ public class ApiChargementService extends ApiService {
     public void executer() throws Exception {
         StaticLoggerDispatcher.info("** executer **", LOGGER);
         
-        this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiChargementService.MAX_PARALLEL_WORKERS",4);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiChargementService.MAX_PARALLEL_WORKERS",4);
         
         long dateDebut = java.lang.System.currentTimeMillis() ;
-
-        // maintenance tables : on efface les enregistrement arrivé en mapping ok
-        // effacerApresMappingOk(TraitementPhase.MAPPING,
-        // TraitementPhase.CHARGEMENT,TraitementPhase.CONTROLE,TraitementPhase.FILTRAGE);
 
         // Récupérer la liste des fichiers selectionnés
         StaticLoggerDispatcher.info("Récupérer la liste des fichiers selectionnés", LOGGER);
@@ -108,8 +104,8 @@ public class ApiChargementService extends ApiService {
         int nbFichier = getListIdsource().get(ID_SOURCE).size();
         
         Connection chargementThread = null;
-        ArrayList<ThreadChargementService> threadList = new ArrayList<ThreadChargementService>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
+        ArrayList<ThreadChargementService> threadList = new ArrayList<>();
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution);
         currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le chargement **", LOGGER);
@@ -126,7 +122,7 @@ public class ApiChargementService extends ApiService {
             
             threadList.add(r);
             r.start();
-            waitForThreads2(MAX_PARALLEL_WORKERS, threadList, connexionList);
+            waitForThreads2(maxParallelWorkers, threadList, connexionList);
 
         }
 

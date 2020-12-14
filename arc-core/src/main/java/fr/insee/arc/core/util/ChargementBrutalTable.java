@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
@@ -84,7 +85,6 @@ public class ChargementBrutalTable {
 	    		BufferedReader br = new BufferedReader(isr);) {
 
 			// On boucle tant que l'on a pas une norme ou une exception
-			// TODO: en l'état on ne boucle jamais qu'une fois. Dès la première boucle :
 			// - soit la norme est trouvée et on sort
 			// - soit aucune/trop de normes est/sont trouvé(s) et on sort de calculerNormeAndValidite avec une exception
 			// nbBoucle<LIMIT_BOUCLE n'entre jamais en jeu.
@@ -134,7 +134,7 @@ public class ChargementBrutalTable {
         query.append("\n where norme is not null ");
         
         
-        ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, query);
+        ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, new PreparedStatementBuilder(query));
         if (result.size()>1)
         {
         	throw new Exception("More than one norm match the expression");
