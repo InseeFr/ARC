@@ -501,7 +501,25 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
-
+	
+	/**
+	 * CHeck if a query will give result or not
+	 * @param connexion
+	 * @param requete
+	 * @return
+	 * @throws SQLException
+	 */
+	public Boolean testResultRequest(Connection connexion, PreparedStatementBuilder requete) {
+		PreparedStatementBuilder requeteLimit = new PreparedStatementBuilder();
+		requeteLimit.append("SELECT * from (").append(requete).append(") dummyTable0000000 LIMIT 1");		
+		try {
+			return hasResults(null, requeteLimit);
+		} catch (Exception e) {
+			LoggerHelper.error(LOGGER, e);
+			return false;
+		}
+	}
+	
 	/**
 	 * Exécution de requêtes ramenant des enregistrements
 	 *
