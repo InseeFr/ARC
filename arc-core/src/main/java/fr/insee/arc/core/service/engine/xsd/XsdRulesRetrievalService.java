@@ -145,7 +145,7 @@ public class XsdRulesRetrievalService {
 		if (ManipString.isStringNull(columnName)) {
 			return null;
 		}
-		return columnName.replaceFirst("^(i_)|(v_)", "");
+		return columnName.replaceFirst("^(i_)|^(v_)", "");
 	}
 
 }
