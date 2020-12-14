@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arc-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: arc-db
+  template:
+    metadata:
+      labels:
+        app: arc-db
+    spec:
+      containers:
+      - name: arc-db
+        image: postgres:11
+        env:
+            - name: POSTGRES_PASSWORD
+              value: toto
+        ports:
+        - containerPort: 5432
