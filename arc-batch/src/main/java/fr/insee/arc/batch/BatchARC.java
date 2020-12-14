@@ -65,29 +65,29 @@ public class BatchARC {
 	
 	// keepInDatabase = est-ce qu'on garde les données intermédiaire en base ou est-ce qu'on les export sous forme de fichiers dans le repertoire export ?
 	// false en production 
-	private static boolean keepInDatabase= Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase","false"));
+	private static boolean keepInDatabase;
 	
 	// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas excéder une certaine taille
-	protected static int tailleMaxReceptionEnMb=BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb",10);
+	protected static int tailleMaxReceptionEnMb;
 
 	// Maximum number of files to load
-	protected static int maxFilesToLoad=BDParameters.getInt(null, "LanceurARC.maxFilesToLoad",101);
+	protected static int maxFilesToLoad;
 
 	// Maximum number of files processed in each phase iteration
-	protected static int maxFilesPerPhase=BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase",1000000);
+	protected static int maxFilesPerPhase;
 
 	// retard permis entre chaque phase : si une phase a deltaStepAllowed coups d'avance
 	// elle attend que la suivant est terminée avant de reprendre
-	private static int deltaStepAllowed=BDParameters.getInt(null, "LanceurARC.deltaStepAllowed",10000);
+	private static int deltaStepAllowed;
 
 	// fréquence à laquelle les phases sont démarrées
-	private static int poolingDelay=BDParameters.getInt(null, "LanceurARC.poolingDelay",1000);
+	private static int poolingDelay;
 
 	// heure d'initalisation en production
-	private static int HEURE_INITIALISATION_PRODUCTION=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
+	private static int HEURE_INITIALISATION_PRODUCTION;
 	
 	// interval entre chaque initialisation en nb de jours
-	private static Integer INTERVAL_JOUR_INITIALISATION = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
+	private static Integer INTERVAL_JOUR_INITIALISATION;
 	
 
 	/**
@@ -184,12 +184,45 @@ public class BatchARC {
 		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())+"  "+msg);
 	}
 
+	
+	private void initParameters()
+	{
+
+		keepInDatabase= Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase","false"));
+		
+		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas excéder une certaine taille
+		tailleMaxReceptionEnMb=BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb",10);
+
+		// Maximum number of files to load
+		maxFilesToLoad=BDParameters.getInt(null, "LanceurARC.maxFilesToLoad",101);
+
+		// Maximum number of files processed in each phase iteration
+		maxFilesPerPhase=BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase",1000000);
+
+		// retard permis entre chaque phase : si une phase a deltaStepAllowed coups d'avance
+		// elle attend que la suivant est terminée avant de reprendre
+		deltaStepAllowed=BDParameters.getInt(null, "LanceurARC.deltaStepAllowed",10000);
+
+		// fréquence à laquelle les phases sont démarrées
+		poolingDelay=BDParameters.getInt(null, "LanceurARC.poolingDelay",1000);
+
+		// heure d'initalisation en production
+		HEURE_INITIALISATION_PRODUCTION=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
+		
+		// interval entre chaque initialisation en nb de jours
+		INTERVAL_JOUR_INITIALISATION = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
+	}
+	
+	
 	/**
 	 * Lanceur MAIN arc
 	 * @param args
 	 */
 	public void execute(String[] args) {
 
+		// fill the parameters
+		initParameters();
+				
 		boolean fichierRestant=false;
 
 		message ("Main");
