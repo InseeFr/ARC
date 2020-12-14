@@ -1397,13 +1397,14 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         this.connexion.setAutoCommit(false);
         this.connexion.rollback();
         StringBuilder requete = new StringBuilder();
-        // Date date = new Date();
-        // SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+
+        // promote user for rollback and pilotage tables update
+        requete.append(FormatSQL.changeRole(properties.getDatabaseUsername()));
+        
         for (int i = 0; i < tableDrop.length; i++) {
             requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");
         }
 
-        // requete.append("UPDATE "+tablePil+"  SET phase_traitement='"+phaseAvant+"', etat_traitement='{"+TraitementEtat.OK+"}' ");
         requete.append("UPDATE " + tablePil + " set etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport='"
                 + exception.toString().replace("'", "''").replaceAll("\r", "") + "' ");
         requete.append("WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}'"

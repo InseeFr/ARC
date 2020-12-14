@@ -270,7 +270,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
 	public static String changeRole(String roleName)
 	{
-		return "SET role='"+roleName+"'";
+		return "SET role='"+roleName+"'; ";
 	}
     
 

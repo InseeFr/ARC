@@ -242,8 +242,12 @@ CONSTRAINT ext_webservice_queryview_pkey PRIMARY KEY (id)
 INSERT INTO arc.ext_webservice_queryview VALUES ('1','COLUMN'), ('2','LINE') ON CONFLICT DO NOTHING; 
         
 
+-- grant / revoke
+REVOKE ALL ON SCHEMA public FROM public;
+REVOKE ALL ON SCHEMA arc FROM public; 
+
 -- restricted role for service execution
 do $$ begin CREATE ROLE arc_restricted with NOINHERIT; exception when others then end; $$;
 
-REVOKE ALL ON SCHEMA public FROM public;
-REVOKE ALL ON SCHEMA arc FROM public; 
+GRANT USAGE ON SCHEMA public TO arc_restricted;
+GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public to arc_restricted;
