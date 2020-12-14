@@ -65,8 +65,16 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		// Do not apply Spring Security to the other webservice
-		web.ignoring().antMatchers("/webservice/**");
+		
+		// Temporary fix to allow post on http without keycloak on
+		if (!isKeycloakActive()) {
+			web.ignoring().antMatchers("/**");
+		}
+		else
+		{
+			// Do not apply Spring Security to the other webservice
+			web.ignoring().antMatchers("/webservice/**");
+		}
 	}
 	
 	@Override
