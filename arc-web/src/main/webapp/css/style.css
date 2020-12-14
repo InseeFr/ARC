@@ -160,6 +160,10 @@ li.nobullet
 	left: -9999px !important;
 }
 
+.font-smaller {
+	font-size:smaller;
+}
+
 th.sort {
 	width: 18px;
 }

@@ -163,9 +163,9 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         
         ArrayList<ArrayList<String>> result= new ArrayList<>();
 
-        ExpressionService expressionService = new ExpressionService(this.connexion, this.environnement);
+        ExpressionService expressionService = new ExpressionService();
         
-        GenericBean expressions = expressionService.fetchExpressions(this.jeuDeRegle);
+        GenericBean expressions = expressionService.fetchExpressions(this.connexion, this.environnement, this.jeuDeRegle);
 
         for (int i = 0; i < resultTemp.size(); i++) {
             // mise en minuscule des rubriques

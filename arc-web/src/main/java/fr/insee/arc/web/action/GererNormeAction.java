@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,7 @@ import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.core.model.RegleMappingEntity;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.engine.controle.ControleRegleService;
+import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
@@ -903,11 +905,42 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	
 	@RequestMapping("/addExpression")
 	public String addExpression(Model model) {
+		ExpressionService expressionService = new ExpressionService();
+		String exprNameHeader = "expr_nom";
+		String exprValueHeader = "expr_valeur";
+
+		// Name validity
+		viewExpression.setInputFieldFor(exprNameHeader, viewExpression.getInputFieldFor(exprNameHeader).trim());
+		if (!expressionService.validateExpressionName(viewExpression.getInputFieldFor(exprNameHeader))) {
+			viewExpression.setMessage("normManagement.addExpression.error.name");
+			return basicAction(model, RESULT_SUCCESS);
+		}
+
+		// Check for loops
+		HashMap<String, ArrayList<String>> mapContent = viewExpression.mapContent();
+		ArrayList<String> names = mapContent.get(exprNameHeader);
+		names.add(viewExpression.getInputFieldFor(exprNameHeader));
+		ArrayList<String> values = mapContent.get(exprValueHeader);
+		values.add(viewExpression.getInputFieldFor(exprValueHeader));
+		Optional<String> loop = expressionService.loopInExpressionSet(names, values);
+		if (loop.isPresent()) {
+			viewExpression.setMessage("normManagement.addExpression.error.loop");
+			viewExpression.setMessageArgs(loop.get());
+			return basicAction(model, RESULT_SUCCESS);
+		}
+
 		return addLineVobject(model, RESULT_SUCCESS, this.viewExpression);
 	}
 
 	@RequestMapping("/updateExpression")
 	public String updateExpression(Model model) {
+		HashMap<String, ArrayList<String>> mapContent = viewExpression.mapUpdatedContent();
+		Optional<String> loop = new ExpressionService().loopInExpressionSet(mapContent.get("expr_nom"), mapContent.get("expr_valeur"));
+		if (loop.isPresent()) {
+			viewExpression.setMessage("normManagement.addExpression.error.loop");
+			viewExpression.setMessageArgs(loop.get());
+			return basicAction(model, RESULT_SUCCESS);
+		}
 		return updateVobject(model, RESULT_SUCCESS, this.viewExpression);
 	}
 

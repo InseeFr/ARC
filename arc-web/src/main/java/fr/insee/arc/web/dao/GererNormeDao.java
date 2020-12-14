@@ -197,16 +197,20 @@ public class GererNormeDao implements IDbConstant {
             requete.append(" and validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
             requete.append(" and validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append(" and version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
-            HashMap<String, String> defaultInputFields = new HashMap<>();
-            defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-            defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-            defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-            defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-            defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
+            viewObject.initialize(moduleView, requete.toString(), theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(moduleView);
 		}
+	}
+
+	private HashMap<String, String> defaultRuleInputFields(Map<String, ArrayList<String>> selection) {
+		HashMap<String, String> defaultInputFields = new HashMap<>();
+		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
+		defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
+		defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
+		defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
+		defaultInputFields.put("version", selection.get("version").get(0));
+		return defaultInputFields;
 	}
 	
 	
@@ -227,13 +231,7 @@ public class GererNormeDao implements IDbConstant {
             requete.append(" and validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
             requete.append(" and validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append(" and version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
-            HashMap<String, String> defaultInputFields = new HashMap<>();
-            defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-            defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-            defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-            defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-            defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
+            viewObject.initialize(moduleView, requete.toString(), theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(moduleView);
 		}
@@ -256,13 +254,7 @@ public class GererNormeDao implements IDbConstant {
             requete.append(" and validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
             requete.append(" and validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append(" and version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-            defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-            defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-            defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-            defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-            defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
+            viewObject.initialize(moduleView, requete.toString(), theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(moduleView);
 		}
@@ -286,13 +278,7 @@ public class GererNormeDao implements IDbConstant {
             requete.append(" and validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
             requete.append(" and validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append(" and version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-            defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-            defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-            defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-            defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-            defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
+            viewObject.initialize(moduleView, requete.toString(), theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(moduleView);
 		}
@@ -322,14 +308,8 @@ public class GererNormeDao implements IDbConstant {
             requete.append("\n  AND mapping.validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
             requete.append("\n  AND mapping.validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append("\n  AND mapping.version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-            defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-            defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-            defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-            defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-            defaultInputFields.put("version", selection.get("version").get(0));
             
-			viewObject.initialize(viewMapping,requete.toString(),theTableName, defaultInputFields);
+			viewObject.initialize(viewMapping,requete.toString(),theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(viewMapping);
 		}
@@ -352,13 +332,7 @@ public class GererNormeDao implements IDbConstant {
             requete.append(" and validite_inf" + ManipString.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
             requete.append(" and validite_sup" + ManipString.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append(" and version" + ManipString.sqlEqual(selection.get("version").get(0), type.get("version")));
-            HashMap<String, String> defaultInputFields = new HashMap<>();
-            defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-            defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-            defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-            defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-            defaultInputFields.put("version", selection.get("version").get(0));
-			viewObject.initialize(moduleView, requete.toString(), theTableName, defaultInputFields);
+            viewObject.initialize(moduleView, requete.toString(), theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(moduleView);
 		}

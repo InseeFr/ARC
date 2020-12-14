@@ -71,6 +71,23 @@ public class VObjectTest {
 		newContent.get(1).add("first_field_new");
 		newContent.get(1).add("second_field_value2");
 		this.defaultTestVobject.setContent(TableObject.as(newContent));
+		assertThat(defaultTestVobject.listUpdatedContent().get(0).get(0), equalTo("first_field_value1"));
+		assertThat(defaultTestVobject.listUpdatedContent().get(0).get(1), equalTo("second_field_value1"));
+		assertThat(defaultTestVobject.listUpdatedContent().get(1).get(0), equalTo("first_field_new"));
+		assertThat(defaultTestVobject.listUpdatedContent().get(1).get(1), equalTo("second_field_value2"));
+		assertThat(defaultTestVobject.listUpdatedContent().size(), equalTo(2));
+	}
+
+	@Test
+	public void listContentUpdatedOk() {
+		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
+		newContent.add(new ArrayList<>());
+		newContent.get(0).add(null);
+		newContent.get(0).add(null);
+		newContent.add(new ArrayList<>());
+		newContent.get(1).add("first_field_new");
+		newContent.get(1).add("second_field_value2");
+		this.defaultTestVobject.setContent(TableObject.as(newContent));
 		assertThat(defaultTestVobject.listContentAfterUpdate().get(0).get(0), equalTo("first_field_new"));
 		assertThat(defaultTestVobject.listContentAfterUpdate().size(), equalTo(1));
 	}
