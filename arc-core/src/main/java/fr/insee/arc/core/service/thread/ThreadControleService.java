@@ -18,6 +18,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.Sleep;
 
 /**
  * Comme pour le normage et le filtrage, on parallélise en controlant chaque fichier dans des threads séparés.
@@ -109,20 +110,14 @@ public class ThreadControleService extends ApiControleService implements Runnabl
             insertionFinale();
             
         } catch (Exception e) {
-            e.printStackTrace();
-	    try {
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
-			"aucuneTableADroper");
-	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
-	    }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+			StaticLoggerDispatcher.error(e,LOGGER);
+		    try {
+				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+					"aucuneTableADroper");
+			    } catch (SQLException e2) {
+					StaticLoggerDispatcher.error(e2,LOGGER);
+			    }
+		    Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
     }
 

@@ -21,6 +21,7 @@ import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Pair;
+import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
@@ -54,7 +55,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         try {
             this.connexion.setClientInfo("ApplicationName", "Filtrage fichier "+idSource);
         } catch (SQLClientInfoException e) {
-            e.printStackTrace();
+			StaticLoggerDispatcher.error(e,LOGGER);
         }
         
         this.tableFiltrageDataTemp = "filtrage_data_temp";
@@ -95,18 +96,14 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
             
             
         } catch (Exception e) {
-            e.printStackTrace();
+			StaticLoggerDispatcher.error(e,LOGGER);
 	    try {
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
-			"aucuneTableADroper");
-	    } catch (SQLException e2) {
-	    	e2.printStackTrace();
-	    }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
+			this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+				"aucuneTableADroper");
+		    } catch (SQLException e2) {
+				StaticLoggerDispatcher.error(e2,LOGGER);
+		    }
+            Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
 
     }

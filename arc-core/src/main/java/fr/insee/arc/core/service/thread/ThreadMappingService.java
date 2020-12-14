@@ -18,6 +18,7 @@ import fr.insee.arc.core.service.engine.mapping.RequeteMappingCalibree;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
@@ -165,20 +166,16 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
              */
             UtilitaireDao.get(poolName).dropTable(this.connexion, this.tableTempFiltrageOk);
         } catch (Exception e) {
-            StaticLoggerDispatcher.trace(e, LOGGER);
+            StaticLoggerDispatcher.error(e, LOGGER);
 
 	    try {
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
-			"aucuneTableADroper");
-	    } catch (SQLException e2) {
-            StaticLoggerDispatcher.trace(e, LOGGER);
-
-	    }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                StaticLoggerDispatcher.trace(e1, LOGGER);
-            }
+			this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+				"aucuneTableADroper");
+		    } catch (SQLException e2) {
+	            StaticLoggerDispatcher.error(e, LOGGER);
+	
+		    }
+            Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
     }
 

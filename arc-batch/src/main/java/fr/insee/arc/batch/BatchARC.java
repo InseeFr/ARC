@@ -33,6 +33,7 @@ import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.utils.utils.Sleep;
 
 /**
  * Classe lanceur de l'application Accueil Reception Contrôle
@@ -88,21 +89,7 @@ public class BatchARC {
 	
 	// interval entre chaque initialisation en nb de jours
 	private static Integer INTERVAL_JOUR_INITIALISATION;
-	
 
-	/**
-	 * dodo
-	 * @param duree en ms
-	 */
-	public static void sleep(int duree)
-	{
-
-		 try {
-			Thread.sleep(duree);
-		} catch (InterruptedException ex) {
-			LoggerHelper.errorGenTextAsComment(BatchARC.class, "sleep()", LOGGER, ex);
-		}
-	}
 
 	public static class DateUtil
 	{
@@ -394,14 +381,14 @@ public class BatchARC {
 				charger.start();
 			}
 
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (!normer.isAlive())
 			{
 				normer=new NormerThread();
 				normer.start();
 			}
-			sleep(delay);
+			Sleep.sleep(delay);
 
 			if (!controler.isAlive())
 			{
@@ -409,7 +396,7 @@ public class BatchARC {
 				controler.start();
 			}
 
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (!filtrer.isAlive())
 			{
@@ -417,7 +404,7 @@ public class BatchARC {
 				filtrer.start();
 			}
 
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (!mapper.isAlive())
 			{
@@ -425,7 +412,7 @@ public class BatchARC {
 				mapper.start();
 			}
 			
-			sleep(delay);
+			Sleep.sleep(delay);
 			
 			if (
 					UtilitaireDao.get("arc").getInt(null,new PreparedStatementBuilder("select count(*) from (select 1 from "+envExecution+".pilotage_fichier where etape=1 limit 1) ww"))==0
@@ -442,7 +429,7 @@ public class BatchARC {
 				break;
 			}
 			
-			sleep(delay);
+			Sleep.sleep(delay);
 		}
 			while (!exit);
 

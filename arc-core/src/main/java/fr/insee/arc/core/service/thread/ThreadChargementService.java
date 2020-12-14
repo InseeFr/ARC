@@ -30,6 +30,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
@@ -152,25 +153,17 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
 	} catch (Exception e) {
-	    StaticLoggerDispatcher.info("je suis catché", LOGGER);
-	    e.printStackTrace();
-
+		StaticLoggerDispatcher.error(e,LOGGER);
 	    try {
 
 		// En acs d'erreur on met le fichier en KO avec l'erreur obtenu.
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
+			StaticLoggerDispatcher.error(e2,LOGGER);
 	    }
 
-	    try {
-		Thread.sleep(100);
-	    } catch (InterruptedException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	    }
+	    Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
 	}
     }
 

@@ -14,6 +14,7 @@ import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
@@ -114,20 +115,14 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
             insertionFinale();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            StaticLoggerDispatcher.error(e, LOGGER);
 	    try {
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
+            StaticLoggerDispatcher.error(e2, LOGGER);
 	    }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
+            Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
     }
 

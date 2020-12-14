@@ -62,6 +62,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     // restricted user
     private static final String RESTRICTED_USER="arc_restricted";
 
+    // anti-spam delay when thread chain error
+    protected static final int PREVENT_ERROR_SPAM_DELAY=100;
     
     @Autowired
 	protected PropertiesHandler properties;
