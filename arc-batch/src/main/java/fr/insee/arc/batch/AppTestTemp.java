@@ -8,7 +8,7 @@ import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
-public class AppTest {
+public class AppTestTemp {
 
 
 	@Autowired
@@ -35,12 +35,12 @@ public class AppTest {
 	System.out.println(UtilitaireDao.get("arc").getBoolean(null, new PreparedStatementBuilder("select 1=0")));
 	// assert false
 	System.out.println(UtilitaireDao.get("arc").getBoolean(null, new PreparedStatementBuilder("select 1=1")));
+	// assert true
 
 	
 	System.out.println(UtilitaireDao.get("arc").isTableExiste(null, "arc.ext_etat"));
-	
-	UtilitaireDao.get("arc").executeImmediate(null, "DROP TABLE IF EXISTS arc_bas2.toto; CREATE TABLE arc_bas2.toto(a text); DROP TABLE IF EXISTS arc_bas2.toto;");
-	
+	// assert true
+
 	
 	}
 	
