@@ -105,7 +105,6 @@ public class LoggerHelper {
     public static final void trace(Logger aLogger, Object... tokens)
     {
         log(aLogger, Level.TRACE, tokens);
-        System.out.println(tokens[0]);
     }
 
     /**
@@ -118,7 +117,6 @@ public class LoggerHelper {
     public static final void traceAsComment(Logger aLogger, Object... tokens)
     {
         logAsComment(aLogger, Level.TRACE, tokens);
-        System.out.println(tokens[0]);
     }
 
     /**
