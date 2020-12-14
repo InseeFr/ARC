@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 
@@ -60,7 +61,7 @@ public class ExpressionService implements IDbConstant {
 	
 	public GenericBean fetchExpressions(Connection connexion, String environnement, JeuDeRegle ruleSet) 
 			throws SQLException {
-		StringBuilder request = new StringBuilder();
+		PreparedStatementBuilder request = new PreparedStatementBuilder();
 		request.append("select expr_nom, expr_value from ");
 		request.append(environnement);
 		request.append(".expression where ");

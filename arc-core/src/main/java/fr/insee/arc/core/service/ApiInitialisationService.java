@@ -772,22 +772,21 @@ public class ApiInitialisationService extends ApiService {
             for (int i = 0; i < r.length; i++) {
                 // on créé une table image de la table venant de l'ihm
                 // (environnement de parametre)
-                tableCurrent = ApiService.dbEnv(anExecutionEnvironment) + r[i];
-                tableImage = FormatSQL.temporaryTableName(ApiService.dbEnv(anExecutionEnvironment) + r[i]);
+                TraitementTableParametre parameterTable = r[i];
+				tableCurrent = ApiService.dbEnv(anExecutionEnvironment) + parameterTable;
+                tableImage = FormatSQL.temporaryTableName(ApiService.dbEnv(anExecutionEnvironment) + parameterTable);
 
                 // recopie partielle (en fonction de l'environnement
                 // d'exécution)
                 // pour les tables JEUDEREGLE, CONTROLE_REGLE et MAPPING_REGLE
                 condition.setLength(0);
-                if (r[i] == TraitementTableParametre.NORME) {
+                if (parameterTable == TraitementTableParametre.NORME) {
                     condition.append(" WHERE etat='1'");
-                }
-                if (r[i] == TraitementTableParametre.CALENDRIER) {
+                } else if (parameterTable == TraitementTableParametre.CALENDRIER) {
                     condition.append(" WHERE etat='1' ");
                     condition
                             .append(" and exists (select 1 from " + anParametersEnvironment + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
-                }
-                if (r[i] == TraitementTableParametre.JEUDEREGLE) {
+                } else if (parameterTable == TraitementTableParametre.JEUDEREGLE) {
                     condition.append(" WHERE etat=lower('" + modaliteEtat + "')");
                     condition
                             .append(" and exists (select 1 from " + anParametersEnvironment + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
@@ -795,9 +794,7 @@ public class ApiInitialisationService extends ApiService {
                             .append(" and exists (select 1 from "
                                     + anParametersEnvironment
                                     + "_calendrier b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup and b.etat='1')");
-                }
-                if (r[i] == TraitementTableParametre.CHARGEMENT_REGLE || r[i] == TraitementTableParametre.NORMAGE_REGLE || r[i] == TraitementTableParametre.CONTROLE_REGLE
-                        || r[i] == TraitementTableParametre.MAPPING_REGLE || r[i] == TraitementTableParametre.FILTRAGE_REGLE) {
+                } else if (parameterTable.isPartOfRuleset()) {
                     condition.append(" WHERE exists (select 1 from " + anParametersEnvironment
                             + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
                     condition
