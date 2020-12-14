@@ -37,10 +37,6 @@ public class AppTestTemp {
 	
 	System.out.println(UtilitaireDao.get("arc").isTableExiste(null, "arc.ext_etat"));
 	// assert true
-
-	
-	System.out.println("v_52eza".replaceFirst("^(i_)|^(v_)", ""));
-	// assert 52eza
 	
 	System.out.println("eaza v_52xd".replaceFirst("^(i_)|^(v_)", ""));
 	// assert  "eaza v_52xd"
