@@ -30,6 +30,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -59,8 +61,6 @@ public class ExportAction extends ArcAction<ExportModel>  {
 		putVObject(getViewFileExport(), t -> initializeFileExport());
 	}
 
-    // private SessionMap session;
-    // visual des Files
     public void initializeExport() {
     	
         System.out.println("/* initializeExport */");
@@ -78,13 +78,12 @@ public class ExportAction extends ArcAction<ExportModel>  {
         query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add zip text;"));
 
         try {
-			UtilitaireDao.get("arc").executeRequest(null, query);
+			UtilitaireDao.get("arc").executeImmediate(null, query);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-        this.vObjectService.initialize(viewExport, "SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export",  getBacASable() +".export", defaultInputFields);
+        this.vObjectService.initialize(viewExport, new PreparedStatementBuilder("SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export"),  getBacASable() +".export", defaultInputFields);
 
     }
 
@@ -121,17 +120,14 @@ public class ExportAction extends ArcAction<ExportModel>  {
     @RequestMapping("/startExport")
     public String startExport(Model model) throws Exception {
         
-    	String fileSelected="";
-    	if (!viewExport.mapContentSelected().isEmpty())
-    	{
-    		fileSelected="WHERE file_name IN ";
-    		fileSelected+="('"+String.join("','", viewExport.mapContentSelected().get("file_name"))+"')";
-    	}
     	
+    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+    	requete.append("SELECT * FROM "+ getBacASable() +".export ");
+    	requete.append("WHERE file_name IN ("+requete.sqlListe(viewExport.mapContentSelected().get("file_name"))+") ");
     	
     	// Requeter les export à réaliser
     	HashMap<String,ArrayList<String>> h=new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-				"select * from "+ getBacASable() +".export"+" "+fileSelected))
+    			requete))
 				.mapContent();
 
     	ArrayList<String> fileName=h.get("file_name");
@@ -147,12 +143,13 @@ public class ExportAction extends ArcAction<ExportModel>  {
     	
     	// Initialiser le répertoire de sortie 	
     	String dirOut=initExportDir();
-    	
-    	
+
     	// itérer sur les exports à réaliser
     	for (int n=0;n<tablesToExport.size();n++)
     	{
-    		UtilitaireDao.get("arc").executeRequest(null,"UPDATE "+ getBacASable() +".export set etat='EN COURS' where file_name='"+fileName.get(n)+"' ");
+    		requete=new PreparedStatementBuilder();
+    		requete.append("UPDATE "+ getBacASable() +".export set etat="+requete.quoteText(TraitementEtat.ENCOURS.toString())+" where file_name="+requete.quoteText(fileName.get(n))+" ");
+    		UtilitaireDao.get("arc").executeRequest(null,requete);
 
     		File fOut;
     		if (!StringUtils.isEmpty(zip.get(n)))
@@ -189,14 +186,13 @@ public class ExportAction extends ArcAction<ExportModel>  {
 			    		}
 			    		else
 			    		{
-			    			// TODO : check with esane
 			    			howToExportReworked="arc."+howToExport.get(n);
 			    		}
 			    		
 			    		// lire la table how to export pour voir comment on va s'y prendre
 			    		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
 			    		h=new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-			    				"SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "+howToExportReworked+" order by pos::int "))
+			    				new PreparedStatementBuilder("SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "+howToExportReworked+" order by pos::int ")))
 			    				.mapContent();
 			    		
 			    		
@@ -316,7 +312,12 @@ public class ExportAction extends ArcAction<ExportModel>  {
 	    		}
 	    		
     		}
-            UtilitaireDao.get("arc").executeRequest(null,"UPDATE "+ getBacASable() +".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') where file_name='"+fileName.get(n)+"' ");
+    		
+    		requete=new PreparedStatementBuilder();
+    		requete.append("UPDATE "+ getBacASable() +".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') ");
+    		requete.append("WHERE file_name="+requete.quoteText(fileName.get(n))+" ");
+    		
+            UtilitaireDao.get("arc").executeRequest(null,requete);
     	}
     	
     	
@@ -336,7 +337,6 @@ public class ExportAction extends ArcAction<ExportModel>  {
 		return dirOut.toString();
 	}
     
-    // private SessionMap session;
     // visual des Files
     public void initializeFileExport() {
         System.out.println("/* initializeFileExport */");
@@ -397,10 +397,9 @@ public class ExportAction extends ArcAction<ExportModel>  {
     @RequestMapping("/downloadFileExport")
     public String downloadFileExport(Model model, HttpServletResponse response) {
     	HashMap<String, ArrayList<String>> selection = this.viewFileExport.mapContentSelected();
-    	System.out.println(selection);
     	if (!selection.isEmpty())
     	{
-    		StringBuilder requete=new StringBuilder();
+    		PreparedStatementBuilder requete=new PreparedStatementBuilder();
     		boolean first=true;
     		for (String s:selection.get("filename"))
     		{
@@ -412,7 +411,7 @@ public class ExportAction extends ArcAction<ExportModel>  {
     			{
     				requete.append("\n UNION ALL ");
     			}
-    			requete.append("SELECT '"+s+"' as nom_fichier ");
+    			requete.append("SELECT "+requete.quoteText(s)+" as nom_fichier ");
     		}
     		
         	String repertoire = properties.getBatchParametersDirectory();
@@ -421,7 +420,7 @@ public class ExportAction extends ArcAction<ExportModel>  {
     		
     		ArrayList<String> r=new ArrayList<String>(Arrays.asList("EXPORT"));
     		
-            this.vObjectService.downloadEnveloppe(viewFileExport, response, requete.toString(), dirOut, r);
+            this.vObjectService.downloadEnveloppe(viewFileExport, response, requete, dirOut, r);
 
     	}
         return "none";

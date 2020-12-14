@@ -58,8 +58,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
         try {
             this.connexion.setClientInfo("ApplicationName", "Normage fichier "+idSource);
         } catch (SQLClientInfoException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	LOGGER.error(e);
         }
 
         // tables du thread
@@ -199,7 +198,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
 			    if (paramBatch!=null)
 			    {
 				    String tableTmpRubriqueDansregles="TMP_RUBRIQUE_DANS_REGLES";
-			        UtilitaireDao.get("arc").executeRequest(
+			        UtilitaireDao.get("arc").executeImmediate(
 			        		this.connexion,
 			        		"\n DROP TABLE IF EXISTS "+tableTmpRubriqueDansregles+"; "
 			        		+ "\n CREATE TEMPORARY TABLE "+tableTmpRubriqueDansregles+" AS "
@@ -238,6 +237,9 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     private void insertionFinale() throws Exception {
     	
     	updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure);
+    	
+    	// promote the application user account to full right
+    	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
     	
     	String tableIdSourceOK=tableOfIdSource(this.tableNormageOK ,this.idSource);
         createTableInherit(connexion, this.tableNormageOKTemp, tableIdSourceOK);

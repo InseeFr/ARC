@@ -59,7 +59,7 @@ public class ApiControleService extends ApiService {
 
         StaticLoggerDispatcher.info("** executer **", LOGGER);
 
-        this.MAX_PARALLEL_WORKERS = BDParameters.getInt(this.connexion, "ApiControleService.MAX_PARALLEL_WORKERS",3);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiControleService.MAX_PARALLEL_WORKERS",3);
 
         
         long dateDebut = java.lang.System.currentTimeMillis() ;
@@ -72,7 +72,7 @@ public class ApiControleService extends ApiService {
         // long dateDebut = java.lang.System.currentTimeMillis() ;
         Connection connextionThread = null;
         ArrayList<ThreadControleService> threadList = new ArrayList<ThreadControleService>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(MAX_PARALLEL_WORKERS, null, this.envExecution);
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution);
         currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
@@ -89,7 +89,7 @@ public class ApiControleService extends ApiService {
             ThreadControleService r = new ThreadControleService(connextionThread, currentIndice, this);
             threadList.add(r);
             r.start();
-            waitForThreads2(MAX_PARALLEL_WORKERS, threadList, connexionList);
+            waitForThreads2(maxParallelWorkers, threadList, connexionList);
 
         }
 

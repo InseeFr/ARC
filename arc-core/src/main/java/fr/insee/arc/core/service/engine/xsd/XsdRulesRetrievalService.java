@@ -18,6 +18,7 @@ import fr.insee.arc.core.service.engine.xsd.controls.EnumForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.IntForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.RegexForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.TimeForXsd;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
@@ -29,7 +30,7 @@ public class XsdRulesRetrievalService {
 	}
 
 	public XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr, String filter) throws SQLException, InvalidStateForXsdException {
-		StringBuilder request= new StringBuilder(
+		PreparedStatementBuilder request= new PreparedStatementBuilder(
 				"select id_classe, "
 				+ "rubrique_pere, rubrique_fils, "
 				+ "borne_inf, borne_sup, condition, pre_action, "
@@ -40,13 +41,13 @@ public class XsdRulesRetrievalService {
 		} else {
 			request.append(" where true ");
 		}
-		request.append(" and id_norme" + ManipString.sqlEqual(jdr.getIdNorme(), "text"));
-        request.append(" and periodicite" + ManipString.sqlEqual(jdr.getPeriodicite(), "text"));
-        request.append(" and validite_inf" + ManipString.sqlEqual(jdr.getValiditeInfString(), "date"));
-        request.append(" and validite_sup" + ManipString.sqlEqual(jdr.getValiditeSupString(), "date"));
-        request.append(" and version" + ManipString.sqlEqual(jdr.getVersion(), "text"));
+		request.append(" and id_norme" + request.sqlEqual(jdr.getIdNorme(), "text"));
+        request.append(" and periodicite" + request.sqlEqual(jdr.getPeriodicite(), "text"));
+        request.append(" and validite_inf" + request.sqlEqual(jdr.getValiditeInfString(), "date"));
+        request.append(" and validite_sup" + request.sqlEqual(jdr.getValiditeSupString(), "date"));
+        request.append(" and version" + request.sqlEqual(jdr.getVersion(), "text"));
 
-		ArrayList<ArrayList<String>> executeRequest = UtilitaireDao.get("arc").executeRequest(connection,request.toString());
+		ArrayList<ArrayList<String>> executeRequest = UtilitaireDao.get("arc").executeRequest(connection,request);
 		return parseSqlResults(executeRequest, connection);
 	}
 
@@ -113,7 +114,7 @@ public class XsdRulesRetrievalService {
 				builder.addRuleTo(rubriquePere, new EnumForXsd(enumList));
 			break;
 			case "ENUM_TABLE":
-				GenericBean enumAsSqlResults = new GenericBean(UtilitaireDao.get("arc").executeRequest(connection, condition));
+				GenericBean enumAsSqlResults = new GenericBean(UtilitaireDao.get("arc").executeRequest(connection, new PreparedStatementBuilder(condition)));
 				String columNameInResult = enumAsSqlResults.headers.get(0);
 				builder.addRuleTo(rubriquePere, new EnumForXsd(enumAsSqlResults.mapContent().get(columNameInResult)));
 			break;

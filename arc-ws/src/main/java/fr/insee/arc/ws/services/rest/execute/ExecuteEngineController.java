@@ -145,7 +145,7 @@ public class ExecuteEngineController {
 			            UtilitaireDao.get("arc").executeBlock(connection, requeteMapping.requeteCreationTablesTemporaires());
 
 			            StringBuilder req = new StringBuilder();
-			            req.append(requeteMapping.getRequete(bodyPojo.fileName, false));
+			            req.append(requeteMapping.getRequete(bodyPojo.fileName));
 			            UtilitaireDao.get("arc").executeBlock(connection,"set enable_nestloop=off;"+req.toString()+"set enable_nestloop=on;");
 			            req.setLength(0);
 

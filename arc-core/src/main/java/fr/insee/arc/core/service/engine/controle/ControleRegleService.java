@@ -22,6 +22,7 @@ import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.EntityDao;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
@@ -317,12 +318,11 @@ public class ControleRegleService {
 			}
 		}
 		sb.append(") with (autovacuum_enabled = false, toast.autovacuum_enabled = false);");
-//		StaticLoggerDispatcher.info("Ma requete de création de table vide: " + sb.toString(),logger);
 		UtilitaireDao.get("arc").executeBlock(null, sb.toString());
 	}
 
 	/**
-	 * Récupération de la liste des variables d'un jeu de regle TODO un autre DAO serait peut être plus pertinent
+	 * Récupération de la liste des variables d'un jeu de regle un autre DAO serait peut être plus pertinent
 	 * Attention la liste en sortie ne doit pas avoir de doublon (d'où le select disctinct sur lower)
 	 * @param jdr
 	 * @param nomtableJeuDeRegle : nom de la table contenant les jeux de règles
@@ -331,16 +331,16 @@ public class ControleRegleService {
 	 */
 	private ArrayList<String> rubriqueInJeuDeRegle(JeuDeRegle jdr, String nomtableJeuDeRegle) throws SQLException {
 		ArrayList<String> listRubrique = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
+		
+		PreparedStatementBuilder sb = new PreparedStatementBuilder();
 		sb.append("WITH ");
 		sb.append("prep AS (SELECT 	id_classe, rubrique_pere, rubrique_fils, condition ");
-//		sb.append("			FROM " + ApiService.dbEnv(env) + TraitementTableParametre.CONTROLE_REGLE + " ");
 		sb.append("			FROM " +nomtableJeuDeRegle+ " ");
-		sb.append("			WHERE id_norme='" + jdr.getIdNorme() + "'::text ");
-		sb.append("				AND periodicite='" + jdr.getPeriodicite() + "'::text ");
-		sb.append("				AND validite_inf='" + jdr.getValiditeInfString() + "'::date ");
-		sb.append("				AND validite_sup='" + jdr.getValiditeSupString() + "'::date ");
-		sb.append("				AND version='" + jdr.getVersion() + "'::text ), ");
+		sb.append("			WHERE id_norme=" + sb.quoteText(jdr.getIdNorme()) + "::text ");
+		sb.append("				AND periodicite=" + sb.quoteText(jdr.getPeriodicite()) + "::text ");
+		sb.append("				AND validite_inf=" + sb.quoteText(jdr.getValiditeInfString()) + "::date ");
+		sb.append("				AND validite_sup=" + sb.quoteText(jdr.getValiditeSupString()) + "::date ");
+		sb.append("				AND version=" + sb.quoteText(jdr.getVersion()) + "::text ), ");
 		sb.append("sel AS ( ");
 		sb.append("		SELECT rubrique_pere as rubrique ");
 		sb.append("		FROM prep ");
@@ -357,8 +357,7 @@ public class ControleRegleService {
 		sb.append("	SELECT DISTINCT lower(rubrique) ");
 		sb.append("	FROM sel; ");
 
-		ArrayList<ArrayList<String>> res = new ArrayList<>();
-		res = UtilitaireDao.get("arc").executeRequest(null, sb.toString());
+		ArrayList<ArrayList<String>> res = UtilitaireDao.get("arc").executeRequest(null, sb);
 		for (int i = 0; i < res.size(); i++) {
 			if (i == 0 || i == 1) {
 				continue;
@@ -608,7 +607,7 @@ public class ControleRegleService {
 	private ArrayList<String> recupListClasseCtl() throws SQLException {
 		ArrayList<String> listClasseCtl = new ArrayList<>();
 		ArrayList<ArrayList<String>> res = new ArrayList<ArrayList<String>>();
-		res = UtilitaireDao.get("arc").executeRequest(null, "SELECT id FROM arc.ext_type_controle;");
+		res = UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("SELECT id FROM arc.ext_type_controle;"));
 		for (int i = 0; i < res.size(); i++) {
 			if (i == 0 || i == 1) {
 				continue;

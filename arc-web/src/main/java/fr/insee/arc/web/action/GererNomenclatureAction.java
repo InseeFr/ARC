@@ -326,7 +326,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         }
         createTableRequest.append(");");
 
-        UtilitaireDao.get(poolName).executeRequest(null, createTableRequest);
+        UtilitaireDao.get(poolName).executeImmediate(null, createTableRequest);
     }
 
     /**

@@ -52,8 +52,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
 
         this.setParamBatch(anApi.getParamBatch());
         
-        this.tableTempFiltrageOk = temporaryTableName(this.getEnvExecution(), this.getCurrentPhase(), "temp_filtrage_ok", Integer.toString(indice));
-        this.tableMappingPilTemp = temporaryTableName(this.getEnvExecution(), this.getCurrentPhase(), "pil_temp", Integer.toString(indice));
+        this.tableTempFiltrageOk = "tableTempFiltrageOk";
+        this.tableMappingPilTemp = "tableMappingPilTemp";
         
         this.requeteSQLCalibree = new RequeteMappingCalibree(this.connexion, FormatSQL.TAILLE_MAXIMAL_BLOC_SQL, this.tableMappingPilTemp);
         this.jdrDAO = new JeuDeRegleDao();
@@ -107,9 +107,6 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                 /*
                  * Récupérer la liste des fichiers concernés
                  */
-
-                // List<String> listeFichier = construireListeFichiers(listeJeuxDeRegles.get(i));
-
                 List<String> listeFichier = new ArrayList<>();
                 listeFichier.add(idSource);
 
@@ -118,29 +115,13 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                  */
                 UtilitaireDao.get(poolName).executeBlock(this.connexion, requeteMapping.requeteCreationTablesTemporaires());
 
-//            requeteMapping.showAllrubrique();
-//
-                /*
-                 * Multithread - Initialisation
-                 */
-
-                // try{
-                // initializeMultiThread(2);
+                
                 StringBuilder req = new StringBuilder();
-//                StaticLoggerDispatcher.info("Connexions OK", LOGGER);
-                /*
-                 * Exécution de la requête de mapping pour chaque fichier
-                 */
-//                StaticLoggerDispatcher.info("Exécution du mapping", LOGGER);
-
-                int j = 0;
-                    // req.append(this.requeteSQLCalibree.buildMainQuery(requeteMapping.getRequete(listeFichier.get(j)),
-                    // Arrays.asList(listeFichier.get(j))));
-                    req.append(requeteMapping.getRequete(listeFichier.get(j)));
-                    StaticLoggerDispatcher.info("Mapping : " + listeFichier.get(j), LOGGER);
-
-                     UtilitaireDao.get(poolName).executeBlock(this.connexion,"set enable_nestloop=off;"+req.toString()+"set enable_nestloop=on;");
-                    req.setLength(0);
+                req.append(requeteMapping.getRequete(listeFichier.get(0)));
+	            StaticLoggerDispatcher.trace("Mapping : " + listeFichier.get(0), LOGGER);
+	            
+	            UtilitaireDao.get(poolName).executeBlock(this.connexion,"set enable_nestloop=off;"+req.toString()+"set enable_nestloop=on;");
+	            req.setLength(0);
 
 
                 /**
@@ -161,13 +142,10 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                  */
                 requeteMAJFinale.append(requeteMapping.requeteTransfertVersTablesMetierDefinitives());
 
-                /*
-                 * Mettre à jour le dessin de la table mapping_ko Insertion dans la table de mapping_ko des éléments en erreur.
-                 */
-//                requeteMAJFinale.append(this.getMiseANiveauSchemaTable(this.tableTempFiltrageOk, this.getTableOutKo()));
-//                requeteMAJFinale.append(requeteInsertMappingKo(this.getTableOutKo()));
-                
-//                requeteMAJFinale.append(requeteInsertMappingKo(this.getTableOutKo()));
+
+            	// promote the application user account to full right
+            	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+                	
 
                 /*
                  * Transfert de la table mapping_ko temporaire vers la table mapping_ko définitive
@@ -187,19 +165,19 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
              */
             UtilitaireDao.get(poolName).dropTable(this.connexion, this.tableTempFiltrageOk);
         } catch (Exception e) {
-            e.printStackTrace();
+            StaticLoggerDispatcher.trace(e, LOGGER);
+
 	    try {
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (SQLException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
+            StaticLoggerDispatcher.trace(e, LOGGER);
+
 	    }
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                StaticLoggerDispatcher.trace(e1, LOGGER);
             }
         }
     }

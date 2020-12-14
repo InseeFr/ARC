@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.ws.actions.SendResponse;
@@ -63,7 +64,7 @@ public class ImportStep2GetTableNameService {
 			} else {
 				// récupération du type
 				ArrayList<ArrayList<String>> l = UtilitaireDao.get("arc").executeRequest(null,
-						"select * from " + tableName + " where false ");
+						new PreparedStatementBuilder("select * from " + tableName + " where false "));
 
 				for (int j = 0; j < l.get(0).size(); j++) {
 					if (j > 0) {

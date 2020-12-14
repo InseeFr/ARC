@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.model.WebServiceManagementModel;
 import fr.insee.arc.web.util.VObject;
@@ -49,10 +50,12 @@ public class GererWebserviceAction extends ArcAction<WebServiceManagementModel> 
     public void initializeWebserviceContext(VObject c, String t) {
         loggerDispatcher.debug("/* initializeWebserviceContext */", LOGGER);
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-        StringBuilder requete = new StringBuilder();
+        
+        
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
         requete.append("\n SELECT * FROM "+t+" ");
-
-        vObjectService.initialize(c, requete.toString(), t, defaultInputFields);
+        
+        vObjectService.initialize(c, requete, t, defaultInputFields);
 
     }
 
@@ -96,10 +99,10 @@ public class GererWebserviceAction extends ArcAction<WebServiceManagementModel> 
             HashMap<String, String> type = d.mapHeadersType();
 
             // requete de la vue
-            StringBuilder requete = new StringBuilder();
+            PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("\n SELECT * FROM "+t+" ");
-            requete.append("\n WHERE service_name " + ManipString.sqlEqual(selection.get("service_name").get(0), type.get("service_name")) + " ");
-            requete.append("\n AND call_id " + ManipString.sqlEqual(selection.get("call_id").get(0), type.get("call_id")) + " ");
+            requete.append("\n WHERE service_name " + requete.sqlEqual(selection.get("service_name").get(0), type.get("service_name")) + " ");
+            requete.append("\n AND call_id " + requete.sqlEqual(selection.get("call_id").get(0), type.get("call_id")) + " ");
             requete.append("\n ");
 
             // // construction des valeurs par défaut pour les ajouts
@@ -107,7 +110,7 @@ public class GererWebserviceAction extends ArcAction<WebServiceManagementModel> 
             defaultInputFields.put("service_name", selection.get("service_name").get(0));
             defaultInputFields.put("call_id", selection.get("call_id").get(0));
 
-            this.vObjectService.initialize(c, requete.toString(), "arc.ihm_ws_query", defaultInputFields);
+            this.vObjectService.initialize(c, requete, "arc.ihm_ws_query", defaultInputFields);
         } else {
         	this.vObjectService.destroy(c);
         }

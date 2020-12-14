@@ -2,6 +2,7 @@ package fr.insee.arc.web.model.viewobjects;
 
 import java.util.HashMap;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.util.ConstantVObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.VObject;
@@ -29,7 +30,7 @@ public class ViewCalendrier extends VObject {
 		put("validite_inf", new ColumnRendering(true, "label.validity.min", "30%", "text", null, true));
 		put("validite_sup", new ColumnRendering(true, "label.validity.max", "30%", "text", null, true));
 		put("etat", new ColumnRendering(true, "label.state", "30%", "select",
-			"select id, val from arc.ext_etat order by id desc", true));
+			new PreparedStatementBuilder("select id, val from arc.ext_etat order by id desc"), true));
 
 	    }
 	}

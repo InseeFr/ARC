@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="DEBUG">
+<Configuration status="TRACE">
 
 	<!-- APPENDERS LIST -->
 	<Appenders>
@@ -15,9 +15,9 @@
             <AppenderRef ref="Console" />
         </Logger>
 
-<!-- 		<Logger name="fr.insee.arc.utils.dao.UtilitaireDao" level="${env:ARC_LOGLEVEL:-trace}" additivity="false"> -->
-<!--             <AppenderRef ref="Console" /> -->
-<!--         </Logger> -->
+	<Logger name="fr.insee.arc.utils.dao.UtilitaireDao" level="${env:ARC_LOGLEVEL:-trace}" additivity="false">
+            <AppenderRef ref="Console" />
+    </Logger>
 
 		<Root level="${env:ARC_LOGLEVEL:-info}">
             <AppenderRef ref="Console" />

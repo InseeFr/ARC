@@ -1,6 +1,9 @@
 package fr.insee.arc.core.model;
 
 import java.util.Date;
+
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -120,13 +123,16 @@ public class JeuDeRegle {
                 + this.validiteSup + ", version=" + this.version + "]";
     }
 
-    public String getSqlEquals() {
-        return new StringBuilder("id_norme = '" + this.idNorme + "'")//
-                .append("\n  AND validite_inf = '" + this.getValiditeInfString() + "'")//
-                .append("\n  AND validite_sup = '" + this.getValiditeSupString() + "'")//
-                .append("\n  AND periodicite = '" + this.getPeriodicite() + "'")//
-                .append("\n  AND version = '" + this.getVersion() + "'")//
-                .toString();
+    public PreparedStatementBuilder getSqlEquals() {
+    	PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    	requete
+		.append("id_norme = " + requete.quoteText(this.idNorme))
+        .append("\n  AND validite_inf = " + requete.quoteText(this.getValiditeInfString())  + "::date")
+        .append("\n  AND validite_sup = " + requete.quoteText(this.getValiditeSupString()) + "::date")
+    	.append("\n  AND periodicite = " + requete.quoteText(this.getPeriodicite()))
+		.append("\n  AND version = " + requete.quoteText(this.getVersion()));
+    	
+        return requete;
     }
 
     public String getSqlEquals(String alias) {

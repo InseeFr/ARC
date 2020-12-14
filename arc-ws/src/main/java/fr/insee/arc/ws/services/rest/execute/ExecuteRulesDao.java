@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteParameterPojo;
@@ -25,16 +26,15 @@ public class ExecuteRulesDao {
  */
 public static void fillRules(Connection c, ExecuteParameterPojo p, String serviceName, int serviceId) throws SQLException
 {
-	StringBuilder requete;
 	GenericBean gb;
 	
 	// récupération des règles de retour du webservice
-	requete = new StringBuilder();
+	PreparedStatementBuilder requete = new PreparedStatementBuilder();
 	requete.append("select a.service_name, a.call_id, a.service_type, replace(a.environment,'.','_') as environment, a.target_phase, a.norme, a.validite, a.periodicite, b.query_id, b.query_name, b.expression, b.query_view");
 	requete.append("\n from arc.ihm_ws_context a, arc.ihm_ws_query b ");
 	requete.append("\n where a.service_name=b.service_name and a.call_id=b.call_id ");
-	requete.append("\n and a.service_name='"+serviceName+"' ");
-	requete.append("\n and a.call_id="+serviceId+" ");
+	requete.append("\n and a.service_name=" + requete.quoteText(serviceName) + " ");
+	requete.append("\n and a.call_id= " + serviceId + " ");
 	requete.append("\n order by query_id ");
 	requete.append("\n ;");
 
@@ -70,7 +70,7 @@ public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnVie
 	r.setDataSetView(new ArrayList<DataSetView>());
 	
 	// searchpath to the current sandbow to be able to query rules of the sandbox simply and without any risk of confusion with user rules
-	UtilitaireDao.get("arc").executeRequest(c,"SET search_path=public, "+p.sandbox+", arc; ");
+	UtilitaireDao.get("arc").executeImmediate(c,"SET search_path=public, "+p.sandbox+", arc; ");
 	
 	for (int i=0;i<p.queries.size();i++)
 	{
@@ -78,7 +78,7 @@ public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnVie
 	DataSetView ds=new DataSetView(
 			Integer.parseInt(p.queries.get(i).query_id)
 			,p.queries.get(i).query_name
-			,new GenericBean(UtilitaireDao.get("arc").executeRequest(c, p.queries.get(i).expression)).mapRecord()
+			,new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new PreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
 			);
 		r.getDataSetView().add(ds);
 	}

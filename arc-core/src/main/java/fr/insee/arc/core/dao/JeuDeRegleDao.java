@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.JeuDeRegle;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -44,7 +45,7 @@ public class JeuDeRegleDao {
         requete.append("\n    AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup); ");
 
 
-		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
+		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new PreparedStatementBuilder(requete))).mapContent();
 
 		SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
 

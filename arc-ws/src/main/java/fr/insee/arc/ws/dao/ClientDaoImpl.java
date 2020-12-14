@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -39,8 +40,12 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#verificationClientFamille()");
         Connection connection = null;
 
-        String request = new String("SELECT EXISTS (SELECT 1 FROM arc.ihm_client WHERE id_application='" + client + "' AND id_famille='" + idFamille
-                + "' LIMIT 1);");
+        PreparedStatementBuilder request=new PreparedStatementBuilder();
+        request
+        	.append("SELECT EXISTS (SELECT 1 FROM arc.ihm_client")
+        	.append(" WHERE id_application=" + request.quoteText(client))
+        	.append(" AND id_famille=" + request.quoteText(idFamille))
+        	.append(" LIMIT 1);");
 
         try {
             long beginning1 = System.currentTimeMillis();
@@ -110,8 +115,8 @@ public class ClientDaoImpl implements ClientDao {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             UtilitaireDao.get("arc").executeBlock(connection, request);
             tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
-                    "SELECT nom_table_metier FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;");
-            UtilitaireDao.get("arc").executeRequest(connection,
+                    new PreparedStatementBuilder("SELECT nom_table_metier FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;"));
+            UtilitaireDao.get("arc").executeImmediate(connection,
                     "DROP TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;");
         } catch (Exception ex) {
             throw new DAOException(ex);
@@ -230,8 +235,8 @@ public class ClientDaoImpl implements ClientDao {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             UtilitaireDao.get("arc").executeBlock(connection, request);
             tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
-                    "SELECT nom_table_metier FROM " + env + client + "_" + timestamp + "_mod_table_metier;");
-            UtilitaireDao.get("arc").executeRequest(connection, "DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_mod_table_metier;");
+            		 new PreparedStatementBuilder("SELECT nom_table_metier FROM " + env + client + "_" + timestamp + "_mod_table_metier;"));
+            UtilitaireDao.get("arc").executeImmediate(connection, "DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_mod_table_metier;");
         } catch (Exception e) {
             throw new DAOException(e);
         } finally {
@@ -313,15 +318,15 @@ public class ClientDaoImpl implements ClientDao {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
 
             nbLines = UtilitaireDao.get("arc").getInt(connection,
-                    "select max(rowid) FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName);
+            		 new PreparedStatementBuilder("select max(rowid) FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName));
             nbBlock = (nbLines - 1) / blockSize + 1;
 
             for (int i = 0; i < nbBlock; i++) {
                 LoggerHelper.debugAsComment(LOGGER, "Traitement du bloc ", i, "/", (nbBlock - 1));
                 result = UtilitaireDao.get("arc").executeRequest(
                         connection,
-                        "SELECT * FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName + " u where rowid>" + i
-                                * blockSize + " and rowid<=" + blockSize * (i + 1));
+                        new PreparedStatementBuilder("SELECT * FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName + " u where rowid>" + i
+                                * blockSize + " and rowid<=" + blockSize * (i + 1)));
                 resp.send("{\"" + JsonKeys.ID.getKey() + "\":\"" + ManipString.substringAfterFirst(ApiService.dbEnv(environnement), ".")
                         + tableMetierName + "\",\"" + JsonKeys.TABLE.getKey() + "\":");
                 mapJsonResponse(result, resp);
@@ -384,9 +389,14 @@ public class ClientDaoImpl implements ClientDao {
 
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
-            // System.out.println("SHOW client_encoding; "+UtilitaireDao.get("arc").executeRequest(connection, "SHOW client_encoding;"));
-            nmclNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
-                    "SELECT tablename FROM pg_tables WHERE schemaname = '" + schema + "' AND tablename LIKE 'nmcl_%'");
+            
+            PreparedStatementBuilder requete=new PreparedStatementBuilder();
+            requete.append("SELECT tablename FROM pg_tables ")
+            .append(" WHERE schemaname = " + requete.quoteText(schema))
+            .append(" AND tablename LIKE "+ requete.quoteText("nmcl_%"))
+            ;
+            
+            nmclNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,requete);
 
             String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
@@ -396,7 +406,7 @@ public class ClientDaoImpl implements ClientDao {
                 i++;
                 String nomTableImage = prefixeNomTableImage + nmcl.get(0);
 
-                UtilitaireDao.get("arc").executeRequest(connection,
+                UtilitaireDao.get("arc").executeImmediate(connection,
                         "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM " + schema + "." + nmcl.get(0) + ";");
             }
         } catch (Exception e) {
@@ -414,8 +424,6 @@ public class ClientDaoImpl implements ClientDao {
     public void createVarMetier(long timestamp, String client, String idFamille, String environnement) {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createVarMetier()");
         Connection connection = null;
-        // resp.send("{\"" + JsonKeys.ID.getKey() + "\":\"var_" + ManipString.substringAfterFirst(environnement, ".") + "\",\""
-        // + JsonKeys.TABLE.getKey() + "\":");
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
 
@@ -423,13 +431,12 @@ public class ClientDaoImpl implements ClientDao {
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "mod_variable_metier";
 
-            StringBuilder requete = new StringBuilder("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
-            requete.append("\n SELECT * FROM " + ApiService.dbEnv(environnement)+"mod_variable_metier");
-            requete.append("\n WHERE lower(id_famille) = lower('" + idFamille + "')");
+            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            requete.append("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
+            requete.append("\n SELECT * FROM " + ApiService.dbEnv(environnement) + "mod_variable_metier");
+            requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
-            UtilitaireDao.get("arc").executeRequest(
-                    connection,
-                    requete);
+            UtilitaireDao.get("arc").executeRequest(connection,requete);
         } catch (Exception e) {
             throw new DAOException(e);
         } finally {
@@ -454,11 +461,12 @@ public class ClientDaoImpl implements ClientDao {
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_famille";
 
-            UtilitaireDao.get("arc").executeRequest(
-                    connection,
-                    "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
-                            + " AS SELECT DISTINCT f.id_famille FROM arc.ihm_famille f INNER JOIN  "
-                            + "arc.ihm_client c ON f.id_famille = c.id_famille WHERE lower(c.id_application) = lower('" + client + "');");
+            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            requete.append( "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
+                    + " AS SELECT DISTINCT f.id_famille FROM arc.ihm_famille f INNER JOIN  "
+                    + "arc.ihm_client c ON f.id_famille = c.id_famille WHERE lower(c.id_application) = lower(" + requete.quoteText(client) + ");"
+                    );
+            UtilitaireDao.get("arc").executeRequest(connection,requete);
         } catch (Exception e) {
             throw new DAOException(e);
         } finally {
@@ -482,7 +490,7 @@ public class ClientDaoImpl implements ClientDao {
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_periodicite";
             String schema = ManipString.substringBeforeFirst(ApiService.dbEnv(environnement), ".");
-            UtilitaireDao.get("arc").executeRequest(connection,
+            UtilitaireDao.get("arc").executeImmediate(connection,
                     "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS SELECT DISTINCT id, val FROM " + "arc.ext_mod_periodicite;");
         } catch (Exception e) {
             throw new DAOException(e);
@@ -506,9 +514,9 @@ public class ClientDaoImpl implements ClientDao {
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "mod_table_metier";
 
-            StringBuilder requete = new StringBuilder("\n CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
+            PreparedStatementBuilder requete = new PreparedStatementBuilder("\n CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
             requete.append("\n SELECT * FROM " + ApiService.dbEnv(environnement) + "mod_table_metier");
-            requete.append("\n WHERE lower(id_famille) = lower('" + idFamille + "')");
+            requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
             UtilitaireDao.get("arc").executeRequest(connection, requete);
         } catch (Exception e) {
@@ -527,8 +535,7 @@ public class ClientDaoImpl implements ClientDao {
      *            Flux où écrire la réponse une fois mise en forme.
      */
     private void mapJsonResponse(ArrayList<ArrayList<String>> result, SendResponse resp) {
-        // JSONArray table = new JSONArray();
-        List<String> table = new ArrayList<String>();
+        List<String> table = new ArrayList<>();
         StringBuilder row = new StringBuilder("\"");
         String cell;
 
@@ -537,12 +544,10 @@ public class ClientDaoImpl implements ClientDao {
                 cell = result.get(i).get(j);
                 row.append(cell + FIELD_SEPARATOR);
             }
-            // table.put(row.toString());
             table.add(row.append("\"").toString());
             row.delete(0, row.length());
             row.append("\"");
         }
-        // System.out.println("LALALALA " + "[" + Format.untokenize(table, ",") + "]");
         resp.send("[" + Format.untokenize(table, ",") + "]");
     }
 
@@ -569,10 +574,15 @@ public class ClientDaoImpl implements ClientDao {
 
         String realClient = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(client, "."), "_");
 
-        String r = UtilitaireDao.get("arc").getString(
-                null,
-                "SELECT schemaname||'.'||tablename FROM pg_tables WHERE tablename like '" + clientDb + "' and schemaname='" + schema
-                        + "' and tablename not like '%id\\_source%'");
+        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        requete
+        	.append("SELECT schemaname||'.'||tablename FROM pg_tables")
+        	.append(" WHERE tablename like " + requete.quoteText(clientDb))
+        	.append(" AND schemaname=" + requete.quoteText(schema))
+        	.append(" AND tablename not like "+requete.quoteText("%id\\_source%"));
+        
+        
+        String r = UtilitaireDao.get("arc").getString(null,requete);
         if (r != null) {
             r = r.replace(realClient.toLowerCase(), realClient);
         }
@@ -581,20 +591,7 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     public String getIdTable(String client) throws Exception {
-        String clientLc = client.toLowerCase();
-        String schema = ManipString.substringBeforeFirst(clientLc, ".");
-        String clientDb = ManipString.substringAfterFirst(clientLc, ".").replace("_", "\\_") + "%";
-
-        String realClient = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(client, "."), "_");
-
-        String r = UtilitaireDao.get("arc").getString(
-                null,
-                "SELECT schemaname||'.'||tablename FROM pg_tables WHERE tablename like '" + clientDb + "' and schemaname='" + schema
-                        + "' and tablename like '%id\\_source%'");
-        if (r != null) {
-            r = r.replace(realClient.toLowerCase(), realClient);
-        }
-        return r;
+        return getAClientTable(client);
     }
 
     public void dropTable(String clientTable) throws Exception {
