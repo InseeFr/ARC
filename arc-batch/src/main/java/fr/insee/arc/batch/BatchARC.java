@@ -104,10 +104,9 @@ public class BatchARC {
 
 
 
-	public static class InitialiserThread extends Thread {
+	public static class InitialiserThread {
 		public ServiceReporting report=new ServiceReporting();
 
-		  @Override
 		  public void run() {
 			  InitialiserBatch c=new InitialiserBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get("numlot"));
 			  c.execute();
