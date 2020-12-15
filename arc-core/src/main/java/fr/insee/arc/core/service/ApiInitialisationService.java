@@ -299,7 +299,7 @@ public class ApiInitialisationService extends ApiService {
      * @param connexion
      * @throws Exception
      */
-    public static void bddScript(Connection connexion, String... envExecutions) {
+    public static void bddScript(Connection connexion) {
 
         try {
         	String user = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select user "));
@@ -314,6 +314,21 @@ public class ApiInitialisationService extends ApiService {
             Arrays.asList(TraitementPhase.values())
             .forEach(t -> executeBddScript(connexion, "BdD/script_global_phase_"+t.toString().toLowerCase()+".sql", user, nbSandboxes, null));
             
+        } catch (SQLException ex) {
+            LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "bddScript()", LOGGER, ex);
+        }
+        
+    }
+
+    
+    public static void bddScript(Connection connexion, String[] envExecutions) {
+
+        try {
+        	
+        	String user = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select user "));
+        	
+            Integer nbSandboxes=BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes",8);
+        	
             // iterate over each sandbox environment and try to load its script
             Arrays.asList(envExecutions)
             .forEach(envExecution -> executeBddScript(connexion, "BdD/script_sandbox.sql", user, nbSandboxes, envExecution));
@@ -329,13 +344,12 @@ public class ApiInitialisationService extends ApiService {
             );
             
             
-            
         } catch (SQLException ex) {
-            LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "bddScript()", LOGGER, ex);
+            LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "bddScript(envExecutions)", LOGGER, ex);
         }
         
     }
-
+    
     /**
      * Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans l'environnement d'excécution courant
      * @throws Exception

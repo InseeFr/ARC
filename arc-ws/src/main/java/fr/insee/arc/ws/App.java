@@ -29,7 +29,7 @@ public class App {
     
     public static void testHello() throws Exception
     {
-    	URL url = new URL("http://localhost:8080/arc-ws/hello/");
+    	URL url = new URL("http://localhost:28080/arc-ws/hello");
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		String charset = "UTF-8";
 		

@@ -174,6 +174,12 @@ nom_colonne text,
 type_colonne text 
 ); 
 
+CREATE TABLE IF NOT EXISTS arc.ihm_seuil (
+	nom text NOT NULL,
+	valeur numeric NULL,
+	CONSTRAINT ihm_seuil_pkey PRIMARY KEY (nom)
+);
+
 INSERT INTO arc.ihm_seuil values ('filtrage_taux_exclusion_accepte',1.0) ,('s_taux_erreur',0.5) ON CONFLICT DO NOTHING;
 
 -- table des users
