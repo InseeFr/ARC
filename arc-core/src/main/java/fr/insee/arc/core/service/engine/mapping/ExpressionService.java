@@ -62,7 +62,7 @@ public class ExpressionService implements IDbConstant {
 	public GenericBean fetchExpressions(Connection connexion, String environnement, JeuDeRegle ruleSet) 
 			throws SQLException {
 		PreparedStatementBuilder request = new PreparedStatementBuilder();
-		request.append("select expr_nom, expr_value from ");
+		request.append("select expr_nom, expr_valeur from ");
 		request.append(environnement);
 		request.append(".expression where ");
 		request.append(ruleSet.getSqlEquals());

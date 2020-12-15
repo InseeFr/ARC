@@ -788,15 +788,17 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 
 		// Check for loops
 		HashMap<String, ArrayList<String>> mapContent = viewExpression.mapContent();
-		ArrayList<String> names = mapContent.get(exprNameHeader);
-		names.add(viewExpression.getInputFieldFor(exprNameHeader));
-		ArrayList<String> values = mapContent.get(exprValueHeader);
-		values.add(viewExpression.getInputFieldFor(exprValueHeader));
-		Optional<String> loop = expressionService.loopInExpressionSet(names, values);
-		if (loop.isPresent()) {
-			viewExpression.setMessage("normManagement.addExpression.error.loop");
-			viewExpression.setMessageArgs(loop.get());
-			return basicAction(model, RESULT_SUCCESS);
+		if (!mapContent.isEmpty()) {
+			ArrayList<String> names = mapContent.get(exprNameHeader);
+			names.add(viewExpression.getInputFieldFor(exprNameHeader));
+			ArrayList<String> values = mapContent.get(exprValueHeader);
+			values.add(viewExpression.getInputFieldFor(exprValueHeader));
+			Optional<String> loop = expressionService.loopInExpressionSet(names, values);
+			if (loop.isPresent()) {
+				viewExpression.setMessage("normManagement.addExpression.error.loop");
+				viewExpression.setMessageArgs(loop.get());
+				return basicAction(model, RESULT_SUCCESS);
+			}
 		}
 
 		return addLineVobject(model, RESULT_SUCCESS, this.viewExpression);

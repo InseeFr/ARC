@@ -86,13 +86,19 @@ public class GererNormeDao implements IDbConstant {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
         requete.append("select * from " + table + " ");
-        requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
+        whereRuleSetEquals(requete, selection, type);
+		loggerDispatcher.info("download request : " + requete.toString(), LOGGER);
+		return requete;
+	}
+
+	/** Appends a where clause for rulesets. */
+	private void whereRuleSetEquals(PreparedStatementBuilder requete, Map<String, ArrayList<String>> selection,
+			HashMap<String, String> type) {
+		requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
         requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
         requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
         requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
         requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
-		loggerDispatcher.info("donwload request : " + requete.toString(), LOGGER);
-		return requete;
 	}
 
 	/**
@@ -195,11 +201,7 @@ public class GererNormeDao implements IDbConstant {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,type_fichier, delimiter, format, commentaire from arc.ihm_chargement_regle");
-            requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-            requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-            requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-            requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-            requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
+            whereRuleSetEquals(requete, selection, type);
             
             viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
@@ -230,11 +232,7 @@ public class GererNormeDao implements IDbConstant {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique,rubrique_nmcl,commentaire from arc.ihm_normage_regle");
-            requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-            requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-            requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-            requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-            requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
+            whereRuleSetEquals(requete, selection, type);
             
             viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
@@ -254,11 +252,7 @@ public class GererNormeDao implements IDbConstant {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
-            requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-            requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-            requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-            requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-            requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
+            whereRuleSetEquals(requete, selection, type);
             
             viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
@@ -280,11 +274,7 @@ public class GererNormeDao implements IDbConstant {
             
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select * from arc.ihm_filtrage_regle");
-            requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-            requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-            requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-            requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-            requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
+            whereRuleSetEquals(requete, selection, type);
             
             viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
@@ -336,11 +326,7 @@ public class GererNormeDao implements IDbConstant {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();;
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,expr_nom, expr_valeur, commentaire from arc.ihm_expression");
-            requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-            requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-            requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-            requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-            requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
+            whereRuleSetEquals(requete, selection, type);
             viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(moduleView);

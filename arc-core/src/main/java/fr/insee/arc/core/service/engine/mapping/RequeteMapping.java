@@ -186,7 +186,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
             }
 
         	// Apply expression
-        	expressionService.applyTo(exprCol, expressions);
+            exprCol = expressionService.applyTo(exprCol, expressions);
             
             Matcher m = Pattern.compile("\\{[^\\{\\} ]*\\}").matcher(exprCol);
             
