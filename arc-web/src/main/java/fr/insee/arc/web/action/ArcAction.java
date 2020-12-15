@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.LoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.files.FileUtils;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler;
@@ -62,7 +61,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	protected static final String NONE = "none";
 	protected static final String POOLNAME = "arc"; 
-	protected int NUMBER_OF_SANDBOXES;
 
 	@Autowired
 	@Qualifier("properties")
@@ -81,7 +79,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	
 	protected String repertoire;
 
-	private Map<String, String> envMap;
+	protected Map<String, String> envMap;
 
 
 	/**
@@ -108,7 +106,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	private boolean isDataBaseOK;
 
 	/** Selected environment.*/
-	private String bacASable;
+	protected String bacASable;
 
 	/** Is the current environment a production environment?*/
 	private boolean isEnvProd;
@@ -130,14 +128,13 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	/** Runs the generic initialization (status, VObject, ...) 
 	 * and adds some generic info to the model.
 	 * (VObject themselves are added to the model by ArcInterceptor)*/
+	@SuppressWarnings("unchecked")
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
 			@RequestParam(required = false) String scope) {
 		LoggerHelper.trace(LOGGER, getActionName());
-		if (this.bacASable == null) {
-			this.bacASable = properties.getSchemaReference() + "_BAS1";
-		}
+
 		if (bacASable != null && !bacASable.equals(this.bacASable)) {
 			loggerDispatcher.info(String.format("env selected %s", bacASable), LOGGER);
 			this.bacASable = bacASable;
@@ -177,24 +174,8 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	@SuppressWarnings("unchecked")
-	private void initializeArcActionWithProperties() {	    
-		if (getSession().get(SessionParameters.ENV_MAP) == null) {
-			
-			NUMBER_OF_SANDBOXES= UtilitaireDao.get("arc").getInt(null, 
-					new PreparedStatementBuilder("SELECT count(*) FROM arc.ext_etat_jeuderegle where isenv and mise_a_jour_immediate")
-					);
-			
-			this.envMap = new LinkedHashMap<>();
-			for (int i = 1; i <= NUMBER_OF_SANDBOXES; i++) {
-				this.envMap.put(properties.getSchemaReference() + "_BAS" + i, "BAS" + i);
-			}
-			
-			// adding production sandbox
-			this.envMap.put(properties.getSchemaReference() + "_PROD", "PROD");
-			getSession().put(SessionParameters.ENV_MAP, this.envMap);
-		}
-
-		this.envMap=(Map<String, String>) getSession().get(SessionParameters.ENV_MAP);
+	private void initializeArcActionWithProperties() {	 
+		this.envMap=(LinkedHashMap<String, String>) getSession().get(SessionParameters.ENV_MAP);
 		this.repertoire = properties.getBatchParametersDirectory();
 	}
 

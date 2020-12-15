@@ -20,7 +20,6 @@ public class BDParameters {
 		String r = null;
 		try {
 			r = UtilitaireDao.get("arc").getString(c, new PreparedStatementBuilder(parameterQuery(key)));
-//			System.out.println(">>>>> " + key + " : " + r);
 		} catch (Exception e) {
 	        // Création de la table de parametre
 			StringBuilder requete=new StringBuilder();

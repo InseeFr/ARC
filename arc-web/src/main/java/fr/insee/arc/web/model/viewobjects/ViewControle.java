@@ -24,7 +24,9 @@ public class ViewControle extends AbstractViewRule {
         columnRenderings.put("pre_action", new ColumnRendering(true, "label.sql.pretreatment", "21%", "text", null, true));
         columnRenderings.put("commentaire", new ColumnRendering(true, "label.comment", "15%", "text", null, true));
         columnRenderings.put("todo", new ColumnRendering(false, "label.todo", "0%", "text", null, true));
-
+        columnRenderings.put("xsd_ordre", new ColumnRendering(true, "label.xsd.order", "5%", "text", null, true));
+        columnRenderings.put("xsd_label_fils", new ColumnRendering(true, "label.xsd.child", "21%", "text", null, true));
+        columnRenderings.put("xsd_role", new ColumnRendering(true, "label.xsd.role", "21%", "text", null, true));
 		return columnRenderings;
 	}
 }
