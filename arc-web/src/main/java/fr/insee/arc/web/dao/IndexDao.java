@@ -25,13 +25,13 @@ public class IndexDao {
 	public static Map<String, String> getSandboxList()
 	{
 		PreparedStatementBuilder requete= new PreparedStatementBuilder();
-		requete.append("SELECT replace(id,'.','_') as id, upper(substring(id from '\\.(.*)')) as val FROM arc.ext_etat_jeuderegle where isenv");
+		requete.append("SELECT replace(id,'.','_') as id, upper(substring(id from '\\.(.*)')) as val FROM arc.ext_etat_jeuderegle where isenv order by nullif(substring(id from '[0123456789]+'),'')::int");
 		
 		HashMap<String, ArrayList<String>> m;
 		try {
 			m = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, requete)).mapContent();
 			
-			Map<String, String> envMap=new LinkedHashMap<>();
+			LinkedHashMap<String, String> envMap=new LinkedHashMap<>();
 			
 			for (int i=0;i<m.get("id").size();i++)
 			{
