@@ -392,37 +392,6 @@ public class GererNormeDao implements IDbConstant {
 		}
 	}
 
-	/**
-	 * Create a table to check the update of a rule. Caution to database constrainte
-	 *
-	 * @param env
-	 * @param table
-	 * @return
-	 */
-	public String createTableTempTest(String tableACopier) {
-
-		String nomTableTest = "arc.test_ihm_" + tableACopier;
-
-		StringBuilder create = new StringBuilder();
-
-		create.append("DROP TABLE IF EXISTS " + nomTableTest + "; ");
-		create.append("CREATE TABLE " + nomTableTest + " AS SELECT * FROM arc.ihm_" + tableACopier + ";");
-		
-		create.append("ALTER TABLE " +nomTableTest + " ADD PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version, id_regle);");
-
-		create.append("CREATE CONSTRAINT TRIGGER doublon ");
-		create.append("AFTER INSERT OR UPDATE OF rubrique_pere, rubrique_fils ");
-		create.append("ON " + nomTableTest + " DEFERRABLE INITIALLY DEFERRED ");
-		create.append("FOR EACH ROW ");
-		create.append("EXECUTE PROCEDURE arc.verif_doublon(); ");
-
-		create.append("CREATE TRIGGER tg_insert_controle ");
-		create.append("before INSERT ON " + nomTableTest + " ");
-		create.append("FOR EACH ROW ");
-		create.append("EXECUTE PROCEDURE arc.insert_controle(); ");
-
-		return create.toString();
-	}
 
 	/**
 	 * 

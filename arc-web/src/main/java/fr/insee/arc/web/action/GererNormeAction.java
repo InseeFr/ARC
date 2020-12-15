@@ -567,48 +567,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@SQLExecutor
 	@RequestMapping("/addControle")
 	public String addControle(Model model) {
-		
-		loggerDispatcher.info(String.format("Add rule : %s ", this.viewControle.getInputFields().toString()), LOGGER);
-		boolean isToInsert = true;
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		/*
-		 * Fabrication d'un JeuDeRegle pour conserver les informations sur norme et
-		 * calendrier
-		 */
-		JeuDeRegle jdr = new JeuDeRegle();
-        jdr.setIdNorme(selection.get("id_norme").get(0));
-        jdr.setPeriodicite(selection.get("periodicite").get(0));
-        jdr.setValiditeInfString(selection.get("validite_inf").get(0), "yyyy-MM-dd");
-        jdr.setValiditeSupString(selection.get("validite_sup").get(0), "yyyy-MM-dd");
-        jdr.setVersion(selection.get("version").get(0));
-        
-		/* Fabrication de la règle à ajouter */
-		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
-		RegleControleEntity reg = new RegleControleEntity(viewControle.mapInputFields());
-		listRegle.add(reg);
-		try {
-			// Fabrication de la table temporaire pour tester l'insertion
-
-			UtilitaireDao.get("arc").executeImmediate(null,
-					gererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
-			// Insertion de cette règle dans la table temporaire
-			isToInsert = this.service.ajouterRegles(jdr, "arc", listRegle);
-		} catch (Exception e) {
-			this.viewControle.setMessage(e.toString());
-			loggerDispatcher.error(String.format("Error in addControle : %s", e.toString()), LOGGER);
-			isToInsert = false;
-		}
-		// if rule to insert
-		if (isToInsert) {
-			// Insert the rule
-			if (this.vObjectService.insert(viewControle)) {
-				// if no exception
-				loggerDispatcher.info("New rule inserted", LOGGER);
-				this.viewControle.setMessage("New rule inserted");
-
-			}
-		}
-		return generateDisplay(model, RESULT_SUCCESS);
+		return addLineVobject(model, RESULT_SUCCESS, this.viewControle);
 	}
 
 	/**
@@ -620,15 +579,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/deleteControle")
 	@SQLExecutor
 	public String deleteControle(Model model) {
-		
-		try {
-			this.vObjectService.delete(viewControle);
-		} catch (Exception e) {
-			// else => error message
-			this.viewControle.setMessage("Delete a rule from the rule set make it incoherent : " + e.getMessage());
-			loggerDispatcher.error(String.format("Error in deleteControle : %s", e.toString()), LOGGER);
-		}
-		return generateDisplay(model, RESULT_SUCCESS);
+		return deleteLineVobject(model, RESULT_SUCCESS, this.viewControle);
 	}
 
 	/**
@@ -641,33 +592,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/updateControle")
 	@SQLExecutor
 	public String updateControle(Model model) {
-		
-
-		JeuDeRegle jdr = gererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
-		loggerDispatcher.info("Mes nouvelles données : " + viewControle.listContentAfterUpdate().toString(),
-				LOGGER);
-		ArrayList<RegleControleEntity> listRegleNouv = new ArrayList<>();
-		for (int i = 0; i < viewControle.listContentAfterUpdate().size(); i++) {
-			RegleControleEntity reg = new RegleControleEntity(viewControle.mapContentAfterUpdate(i));
-			listRegleNouv.add(reg);
-		}
-		try {
-			// Fabrication de la table temporaire pour tester la modifcation
-			UtilitaireDao.get("arc").executeImmediate(null,
-					gererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
-			// suppression des lignes modifiées
-			this.vObjectService.deleteForUpdate(viewControle, "arc.test_ihm_" + TraitementTableParametre.CONTROLE_REGLE.toString());
-			// test du nouveau paquet en passant par la méthode ajouterRegles()
-			// afin de lancer la batterie de test (borne_inf<borne_sup etc.)
-			this.service.ajouterRegles(jdr, "arc", listRegleNouv);
-			this.viewControle.setMessage("Rules updated !");
-			this.vObjectService.update(viewControle);
-		} catch (Exception e) {
-			this.viewControle.setMessage("Updating the rule set make it incoherent : " + e.toString());
-			loggerDispatcher.error(String.format("Error in updateControle : %s", e.toString()), LOGGER);
-		}
-
-		return generateDisplay(model, RESULT_SUCCESS);
+		return updateVobject(model, RESULT_SUCCESS, this.viewControle);
 	}
 
 	/**
@@ -689,58 +614,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/importControle")
 	@SQLExecutor
 	public String importControle(Model model, MultipartFile fileUploadControle) {
-		
-		loggerDispatcher.info("importControle", LOGGER);
-		String fichierRegle = "";
-		if (fileUploadControle == null || fileUploadControle.isEmpty()) {
-			this.viewControle.setMessage("You should choose a file first");
-		} else {
-
-			try {
-				fichierRegle = new String(fileUploadControle.getBytes());
-			} catch (IOException e) {
-				loggerDispatcher.error(String.format("Error with the file in importControle : %s", e.toString()),
-						LOGGER);
-			}
-			loggerDispatcher.info(String.format("I have a file %s character long", fichierRegle.length()), LOGGER);
-			boolean isAjouter = true;
-			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-			/*
-			 * Create a RuleSet to keep informations about the norm and calendar
-			 */
-			JeuDeRegle jdr = new JeuDeRegle();
-	        jdr.setIdNorme(selection.get("id_norme").get(0));
-	        jdr.setPeriodicite(selection.get("periodicite").get(0));
-	        jdr.setValiditeInfString(selection.get("validite_inf").get(0), "yyyy-MM-dd");
-	        jdr.setValiditeSupString(selection.get("validite_sup").get(0), "yyyy-MM-dd");
-	        jdr.setVersion(selection.get("version").get(0));
-	        
-			ArrayList<RegleControleEntity> listRegle = this.service
-					.miseEnRegleC(ControleRegleService.nomTableRegleControle("arc.test_ihm", true), fichierRegle);
-			try {
-				// Create a temporary table to test the importing
-				UtilitaireDao.get("arc").executeImmediate(null,
-						gererNormeDao.createTableTempTest(TraitementTableParametre.CONTROLE_REGLE.toString()));
-				// Insert the rules in the temporary table
-				isAjouter = this.service.ajouterRegles(jdr, "arc", listRegle);
-			} catch (Exception e) {
-				this.viewControle.setMessage(e.toString());
-				loggerDispatcher.error("Error when importing controle rules " + e.toString(), LOGGER);
-				isAjouter = false;
-			}
-			// Import result
-			if (isAjouter) {
-				try {
-					// Add the rule in database
-					this.service.ajouterReglesValidees(jdr, "arc", listRegle);
-				} catch (Exception e) {
-					loggerDispatcher.error("Error when importing valid controle rules " + e.toString(), LOGGER);
-
-				}
-				loggerDispatcher.info("New rules inserted", LOGGER);
-				this.viewControle.setMessage("New rules inserted");
-			}
-		}
+		gererNormeDao.uploadFileRule(getViewControle(), viewRulesSet, fileUploadControle);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -812,6 +686,17 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	}
 
 	/**
+	 * Action trigger when the table of map rules is request or refresh. Update the
+	 * GUI
+	 * 
+	 * @return success
+	 */
+	@RequestMapping("/selectFiltrage")
+	public String selectFiltrage(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
+	}
+	
+	/**
 	 * Action trigger by updating a filter rule in the GUI. Update the GUI and the
 	 * database. Before inserting, the rules are checked
 	 * 
@@ -820,35 +705,22 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/updateFiltrage")
 	@SQLExecutor
 	public String updateFiltrage(Model model) {
-		
-		boolean isRegleOk = true;
-        loggerDispatcher.info("Contenu de l'update : " + viewFiltrage.listContentAfterUpdate(), LOGGER);
-        String exprRegleFiltre = viewFiltrage.listContentAfterUpdate().get(0).get(6);
-
-		StringBuilder message = new StringBuilder();
-		try {
-			// Create test table
-			UtilitaireDao.get("arc").executeImmediate(null, gererNormeDao.createTableTest("arc.test_ihm_controle_ok",
-					ManipString.extractRubriques(exprRegleFiltre)));
-			
-			UtilitaireDao.get("arc").executeImmediate(null,
-					"SELECT * FROM arc.test_ihm_controle_ok WHERE " + ManipString.extractAllRubrique(exprRegleFiltre));
-
-			message.append("Rules updated!");
-		} catch (Exception ex) {
-			isRegleOk = false;
-			message.append("Error when inserting the new rules : " + ex.getMessage());
-			loggerDispatcher.error("Error when inserting the new rules : " + ex.getMessage(), LOGGER);
-		}
-
-		this.viewFiltrage.setMessage(message.toString());
-		if (isRegleOk) {
-			this.vObjectService.update(viewFiltrage);
-		}
-		return generateDisplay(model, RESULT_SUCCESS);
-
+		return updateVobject(model, RESULT_SUCCESS, this.viewFiltrage);
 	}
 
+	
+	/**
+	 * Action trigger by deleting a structurize rule in the GUI. Update the GUI and
+	 * the database
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/deleteFiltrage")
+	public String deleteFiltrage(Model model) {
+		return deleteLineVobject(model, RESULT_SUCCESS, this.viewFiltrage);
+	}
+
+	
 	/**
 	 * Action trigger when the table of map rules is request or refresh. Update the
 	 * GUI
@@ -884,15 +756,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/updateMapping")
 	public String updateMapping(Model model) {
-		Map<String, ArrayList<String>> afterUpdate = viewMapping.mapContentAfterUpdate();
-		//		boolean isRegleOk = GererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
-//		afterUpdate);
-		boolean isRegleOk=true;
-		if (isRegleOk) {
-			this.vObjectService.update(viewMapping);
-		}
-		LOGGER.info("Rules updated");
-		return generateDisplay(model, RESULT_SUCCESS);
+		return updateVobject(model, RESULT_SUCCESS, this.viewMapping);
 	}
 
 	/**
@@ -944,74 +808,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/importMapping")
 	public String importMapping(Model model, MultipartFile fileUploadMap) {
-		
-		if (fileUploadMap == null || fileUploadMap.isEmpty()) {
-			this.viewMapping.setMessage("You should choose a file first");
-		} else {
-			boolean isRegleOk = false;
-			try {
-				Map<String, String> mapVariableToType = new HashMap<>();
-				Map<String, String> mapVariableToTypeConso = new HashMap<>();
-				gererNormeDao.calculerVariableToType(this.viewNorme, mapVariableToType, mapVariableToTypeConso);
-				Set<String> variablesAttendues = mapVariableToType.keySet();
-				String nomTable = "arc.ihm_mapping_regle";
-				List<RegleMappingEntity> listeRegle = new ArrayList<>();
-				EntityDao<RegleMappingEntity> dao = new MappingRegleDao();
-				dao.setTableName(nomTable);
-				dao.setEOLSeparator(true);
-				Map<String, ArrayList<String>> reglesAImporter = gererNormeDao.calculerReglesAImporter(
-						fileUploadMap, listeRegle, dao, mapVariableToType, mapVariableToTypeConso);
-				Set<String> variablesSoumises = new HashSet<>();
-				for (int i = 0; i < listeRegle.size(); i++) {
-					variablesSoumises.add(Format.toLowerCase(listeRegle.get(i).getVariableSortie()));
-				}
-				Set<String> variablesAttenduesTemp = new HashSet<>(variablesAttendues);
-				variablesAttenduesTemp.removeAll(variablesSoumises);
-				if (!variablesAttenduesTemp.isEmpty()) {
-					throw new IllegalStateException(
-							"Variables " + variablesAttenduesTemp + " do not have format rules.");
-				}
-				variablesSoumises.removeAll(variablesAttendues);
-				if (!variablesSoumises.isEmpty()) {
-					throw new IllegalStateException("Variables " + variablesSoumises + " are not in the model.");
-				}
-//				isRegleOk = gererNormeDao.testerReglesMapping(this.viewMapping, this.viewRulesSet, this.viewNorme,
-//						reglesAImporter);
-				
-				// TODO : mapping
-				isRegleOk=true;
-				
-				Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-				Map<String, String> map = new HashMap<String, String>();
-                map.put("id_regle", "(SELECT max(id_regle)+1 FROM " + nomTable + ")");
-                map.put("id_norme", viewNorme.mapContentSelected().get("id_norme").get(0));
-                map.put("validite_inf", selection.get("validite_inf").get(0));
-                map.put("validite_sup", selection.get("validite_sup").get(0));
-                map.put("version", selection.get("version").get(0));
-                map.put("periodicite", selection.get("periodicite").get(0));
-                
-				if (isRegleOk) {
-					// check if each varialbe have a rule
-					JeuDeRegle jdr = gererNormeDao.fetchJeuDeRegle(this.viewRulesSet);
-					PreparedStatementBuilder bloc = new PreparedStatementBuilder();
-					/*
-					 * DELETE from
-					 */
-					bloc
-						.append("DELETE FROM " + nomTable + " WHERE ")
-						.append(jdr.getSqlEquals())
-						.append(";");
-					
-					for (int i = 0; i < listeRegle.size(); i++) {
-						bloc.append(dao.getInsert(listeRegle.get(i), map));
-					}
-					UtilitaireDao.get(poolName).executeRequest(null, bloc);
-				}
-			} catch (Exception ex) {
-				LoggerHelper.error(LOGGER, "importMapping()", ex.getStackTrace());
-				this.viewMapping.setMessage("Erreur lors de l'import : " + ex.toString());
-			}
-		}
+		gererNormeDao.uploadFileRule(getViewMapping(), viewRulesSet, fileUploadMap);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

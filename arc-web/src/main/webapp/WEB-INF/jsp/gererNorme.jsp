@@ -405,10 +405,8 @@
 								<c:param name="btnSelect" value ="true" />
 								<c:param name="btnSee" value ="true" />
 								<c:param name="btnSort" value ="true" />
-								<c:param name="btnAdd" value ="true" />
 								<c:param name="btnUpdate" value ="true" />
 								<c:param name="btnDelete" value ="true" />
-								<c:param name="ligneAdd" value ="true" />
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
@@ -484,10 +482,8 @@
 								<c:param name="btnSelect" value ="true" />
 								<c:param name="btnSee" value ="true" />
 								<c:param name="btnSort" value ="true" />
-								<c:param name="btnAdd" value ="true" />
 								<c:param name="btnUpdate" value ="true" />
 								<c:param name="btnDelete" value ="true" />
-								<c:param name="ligneAdd" value ="true" />
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
