@@ -38,6 +38,9 @@ public class ViewControle extends VObject {
                 put("borne_sup", new ColumnRendering(true, "label.max", "5%", "text", null, true));
                 put("condition", new ColumnRendering(true, "label.sql.predicate", "21%", "text", null, true));
                 put("pre_action", new ColumnRendering(true, "label.sql.pretreatment", "21%", "text", null, true));
+                put("xsd_ordre", new ColumnRendering(true, "label.xsd.order", "5%", "text", null, true));
+                put("xsd_label_fils", new ColumnRendering(true, "label.xsd.child", "21%", "text", null, true));
+                put("xsd_role", new ColumnRendering(true, "label.xsd.role", "21%", "text", null, true));
                 put("commentaire", new ColumnRendering(true, "label.comment", "15%", "text", null, true));
                 put("todo", new ColumnRendering(false, "label.todo", "0%", "text", null, true));
 
