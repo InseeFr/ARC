@@ -96,8 +96,8 @@ public class ExpressionServiceTest {
 		content.add(new ArrayList<String>());
 		content.get(0).add("wolf");
 		content.get(0).add("dog");
-		assertEquals("the @cat@ and the @duck@", 
-				expressionService.applyTo("the @cat@ and the @duck@", new GenericBean(headers, types, content)));
+		assertEquals("the {@cat@} and the {@duck@}", 
+				expressionService.applyTo("the {@cat@} and the {@duck@}", new GenericBean(headers, types, content)));
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class ExpressionServiceTest {
 		content.get(0).add("wolf");
 		content.get(0).add("dog");
 		assertEquals("the dog", 
-				expressionService.applyTo("the @wolf@", new GenericBean(headers, types, content)));
+				expressionService.applyTo("the {@wolf@}", new GenericBean(headers, types, content)));
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class ExpressionServiceTest {
 		content.get(1).add("lion");
 		content.get(1).add("cat");
 		assertEquals("the cat and the dog", 
-				expressionService.applyTo("the @lion@ and the @wolf@", new GenericBean(headers, types, content)));
+				expressionService.applyTo("the {@lion@} and the {@wolf@}", new GenericBean(headers, types, content)));
 	}
 	
 	@Test
@@ -136,7 +136,7 @@ public class ExpressionServiceTest {
 		content.get(2).add("andthe");
 		content.get(2).add("orthe");
 		assertEquals("thecatandthedog", 
-				expressionService.applyTo("the@lion@andthe@wolf@", new GenericBean(headers, types, content)));
+				expressionService.applyTo("the{@lion@}andthe{@wolf@}", new GenericBean(headers, types, content)));
 	}
 
 	@Test
@@ -144,7 +144,7 @@ public class ExpressionServiceTest {
 		ArrayList<ArrayList<String>> content = new ArrayList<>();
 		content.add(new ArrayList<String>());
 		content.get(0).add("animals");
-		content.get(0).add("@lion@ and the @wolf@");
+		content.get(0).add("{@lion@} and the {@wolf@}");
 		content.add(new ArrayList<String>());
 		content.get(1).add("wolf");
 		content.get(1).add("dog");
@@ -152,7 +152,7 @@ public class ExpressionServiceTest {
 		content.get(2).add("lion");
 		content.get(2).add("cat");
 		assertEquals("the cat and the dog", 
-				expressionService.applyTo("the @animals@", new GenericBean(headers, types, content)));
+				expressionService.applyTo("the {@animals@}", new GenericBean(headers, types, content)));
 	}
 
 	@Test
@@ -166,8 +166,8 @@ public class ExpressionServiceTest {
 		content.get(1).add("cat");
 		content.add(new ArrayList<String>());
 		content.get(2).add("animals");
-		content.get(2).add("@lion@ and the @wolf@");
+		content.get(2).add("{@lion@} and the {@wolf@}");
 		assertEquals("the cat and the dog", 
-				expressionService.applyTo("the @animals@", new GenericBean(headers, types, content)));
+				expressionService.applyTo("the {@animals@}", new GenericBean(headers, types, content)));
 	}
 }

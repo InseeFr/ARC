@@ -76,17 +76,15 @@ public class ExpressionService implements IDbConstant {
 	 * @param evaluatedString the String where the expressions will be apply
 	 * @param expressions a set of expressions (two fields : "expr_nom", expr_valeur")*/
 	public String applyTo(String evaluatedString, GenericBean expressions) {
-		Pattern pattern = Pattern.compile("(?<=@)(.+?)@");
+		Pattern pattern = Pattern.compile("(?<=\\{@)(.+?)(?=@\\})");
 		Matcher matcher = pattern.matcher(evaluatedString);
 		HashMap<String, ArrayList<String>> mapContent = expressions.mapContent();
 		while (matcher.find()) {
-			String group = matcher.group();
-			String exprName = group.substring(0, group.length() - 1);
-			int i = mapContent.get("expr_nom").indexOf(exprName);
+			int i = mapContent.get("expr_nom").indexOf(matcher.group());
 			if (i != -1) {
 				String exprValue = mapContent.get("expr_valeur").get(i);
 				evaluatedString = new StringBuilder(evaluatedString)
-							.replace(matcher.start() - 1, matcher.end(), exprValue)
+							.replace(matcher.start() - 2, matcher.end() + 2, exprValue)
 							.toString();
 				// Reset on change
 				matcher = pattern.matcher(evaluatedString);
