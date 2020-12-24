@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.execute;
+package fr.insee.arc.ws.services.restServices.execute;
 
 import java.sql.Connection;
 import java.util.Date;
@@ -21,8 +21,8 @@ import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteParameterPojo;
-import fr.insee.arc.ws.services.rest.execute.view.ReturnView;
+import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
+import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 
 @RestController
 public class ExecuteServiceController {

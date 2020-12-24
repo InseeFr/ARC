@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.execute;
+package fr.insee.arc.ws.services.restServices.execute;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,10 +9,10 @@ import java.util.HashMap;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteParameterPojo;
-import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteQueryPojo;
-import fr.insee.arc.ws.services.rest.execute.view.DataSetView;
-import fr.insee.arc.ws.services.rest.execute.view.ReturnView;
+import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
+import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteQueryPojo;
+import fr.insee.arc.ws.services.restServices.execute.view.DataSetView;
+import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 
 public class ExecuteRulesDao {
 

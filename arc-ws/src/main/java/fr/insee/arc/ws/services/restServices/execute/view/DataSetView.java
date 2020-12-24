@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.execute.view;
+package fr.insee.arc.ws.services.restServices.execute.view;
 
 import java.util.Map;
 

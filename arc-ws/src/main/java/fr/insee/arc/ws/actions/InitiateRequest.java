@@ -9,11 +9,11 @@ import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Services;
 import fr.insee.arc.ws.dao.DAOException;
-import fr.insee.arc.ws.services.ExecuteProcessService;
-import fr.insee.arc.ws.services.GetQueryResultService;
-import fr.insee.arc.ws.services.ImportStep1InitializeClientTablesService;
-import fr.insee.arc.ws.services.ImportStep2GetTableNameService;
-import fr.insee.arc.ws.services.ImportStep3GetTableDataService;
+import fr.insee.arc.ws.services.importServlet.ExecuteProcessService;
+import fr.insee.arc.ws.services.importServlet.GetQueryResultService;
+import fr.insee.arc.ws.services.importServlet.ImportStep1InitializeClientTablesService;
+import fr.insee.arc.ws.services.importServlet.ImportStep2GetTableNameService;
+import fr.insee.arc.ws.services.importServlet.ImportStep3GetTableDataService;
 
 /**
  * Cette classe permet d'initier le requêtage auprès de la base de données.

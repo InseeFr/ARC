@@ -1,6 +1,6 @@
-package fr.insee.arc.ws.services.rest.changerules.pojo;
+package fr.insee.arc.ws.services.restServices.setRules.pojo;
 
-public enum ChangeRulesActionEnum {
+public enum SetRulesActionEnum {
 
 	// add or update some rules with the provided ones
 	U("UPDATE")
@@ -18,7 +18,7 @@ public enum ChangeRulesActionEnum {
 	
 	private String action;
 
-	ChangeRulesActionEnum(String action) {
+	SetRulesActionEnum(String action) {
 		this.action=action;
 	}
 

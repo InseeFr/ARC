@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.changerules;
+package fr.insee.arc.ws.services.restServices.setRules;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,37 +16,43 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.ws.services.rest.changerules.pojo.ChangeRulesPojo;
+import fr.insee.arc.ws.services.restServices.setRules.pojo.SetRulesPojo;
 
 @RestController
-public class ChangeRulesController {
+public class SetRulesController {
 	
 	@Autowired
 	private LoggerDispatcher loggerDispatcher;
 	
-    private static final Logger LOGGER = LogManager.getLogger(ChangeRulesController.class);
+    private static final Logger LOGGER = LogManager.getLogger(SetRulesController.class);
 	
-	@RequestMapping(value = "/changeRules/{sandbox}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/setRules/{sandbox}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> changeRulesClient(
-			@RequestBody(required = true) ChangeRulesPojo bodyPojo
+			@RequestBody(required = true) SetRulesPojo bodyPojo
 	) throws SQLException
 	{
 		
+		if (bodyPojo.targetRule.equals("WAREHOUSE"))
+		{
+			replaceRulesDAO(bodyPojo,"arc.ihm_entrepot", "id_entrepot");
+		}
+		
 		if (bodyPojo.targetRule.equals("NORM"))
 		{
-			replaceRulesDAO(bodyPojo,"arc.norme","id_norme");
+			replaceRulesDAO(bodyPojo,"arc.ihm_norme","id_norme","periodicite");
 		}
 
 		
 		if (bodyPojo.targetRule.equals("CALENDAR"))
 		{
-			replaceRulesDAO(bodyPojo,"arc.calendrier","id_norme","periodicite","validite_inf","validite_sup");
+			replaceRulesDAO(bodyPojo,"arc.ihm_calendrier","id_norme","periodicite","validite_inf","validite_sup");
 		}
 		
 		if (bodyPojo.targetRule.equals("RULESET"))
 		{
-			replaceRulesDAO(bodyPojo,"arc.calendrier", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
+			replaceRulesDAO(bodyPojo,"arc.ihm_jeuderegle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
 		if (bodyPojo.targetRule.equals("LOAD"))
@@ -84,14 +90,14 @@ public class ChangeRulesController {
 	 * @param bodyPojo
 	 * @throws SQLException 
 	 */
-	public void replaceRulesDAO(ChangeRulesPojo bodyPojo, String tablename, String...primaryKeys) throws SQLException
+	public void replaceRulesDAO(SetRulesPojo bodyPojo, String tablename, String...primaryKeys) throws SQLException
 	{
-		StringBuilder requete=new StringBuilder();
+		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 	
 		requete.append(deleteRulesQuery(bodyPojo, tablename, primaryKeys));
 		requete.append(insertRulesQuery(bodyPojo, tablename, primaryKeys));
 		
-		UtilitaireDao.get("arc").executeBlock(null, requete);
+		UtilitaireDao.get("arc").executeRequest(null, requete);
 	}
 	
 	
@@ -102,9 +108,9 @@ public class ChangeRulesController {
 	 * @param primaryKeys
 	 * @return
 	 */
-	public StringBuilder insertRulesQuery(ChangeRulesPojo bodyPojo, String tablename, String...primaryKeys)
+	public PreparedStatementBuilder insertRulesQuery(SetRulesPojo bodyPojo, String tablename, String...primaryKeys)
 	{
-		StringBuilder requete=new StringBuilder();
+		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		List<String> columns=new ArrayList<>(bodyPojo.content.keySet());
 
 		
@@ -114,19 +120,24 @@ public class ChangeRulesController {
 			requete.append("\n INSERT INTO "+tablename+" (");
 			requete.append(String.join(", ", columns));
 			requete.append(")");
-			requete.append("\n  VALUES ");
+			requete.append("\n  VALUES (");
 			
-			List<String> s=new ArrayList<>();
+			boolean first=true;
 			
 			for (String col:columns)
 			{
-				s.add(bodyPojo.content.get(col).getData().get(i));
+				if (first)
+				{
+					first=false;
+				}
+				else
+				{
+					requete.append(",");
+				}
+				requete.append(requete.quoteText(bodyPojo.content.get(col).getData().get(i)));
 			}
 			
-			requete.append("\n ('");
-			requete.append(String.join("','", s));
-			requete.append("'); ");
-			
+			requete.append(");");
 		}
 		return requete;
 	}
@@ -138,33 +149,21 @@ public class ChangeRulesController {
 	 * @param primaryKeys
 	 * @return
 	 */
-	public StringBuilder deleteRulesQuery(ChangeRulesPojo bodyPojo, String tablename, String...primaryKeys)
+	public PreparedStatementBuilder deleteRulesQuery(SetRulesPojo bodyPojo, String tablename, String...primaryKeys)
 	{
-		StringBuilder requete=new StringBuilder();
+		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		List<String> columns=new ArrayList<>(bodyPojo.content.keySet());
 		
-		// delete
-		HashSet<String> distinct=new HashSet<String>();
-
 		for (int i=0;i<bodyPojo.content.get(columns.get(0)).getData().size();i++)
 		{
-		StringBuilder requete1=new StringBuilder();
-		
-		requete1.append("\n DELETE FROM "+tablename+" ");
-		
-		for (String pk:primaryKeys)
-		{
-			requete1.append("\n WHERE "+pk+" ='"+bodyPojo.content.get(pk).getData().get(i)+"';");
+			requete.append("\n DELETE FROM "+tablename+" ");
+			
+			for (String pk:primaryKeys)
+			{
+				requete.append("\n WHERE "+pk+" ="+requete.quoteText(bodyPojo.content.get(pk).getData().get(i))+";");
+			}
 		}
-		
-		
-		distinct.add(requete1.toString());
-		}
-		
-		for (String req:distinct)
-		{
-			requete.append(req);
-		}
+
 		return requete;
 	}
 	

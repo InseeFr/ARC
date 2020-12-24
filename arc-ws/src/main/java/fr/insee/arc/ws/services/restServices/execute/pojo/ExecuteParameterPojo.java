@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.execute.pojo;
+package fr.insee.arc.ws.services.restServices.execute.pojo;
 
 import java.util.List;
 

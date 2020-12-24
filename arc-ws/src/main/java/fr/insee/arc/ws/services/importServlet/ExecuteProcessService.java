@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services;
+package fr.insee.arc.ws.services.importServlet;
 
 import java.io.File;
 import java.io.FileOutputStream;

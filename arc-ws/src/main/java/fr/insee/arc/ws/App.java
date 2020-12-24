@@ -14,7 +14,7 @@ import org.json.JSONObject;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.Record;
-import fr.insee.arc.ws.services.rest.changerules.pojo.ChangeRulesPojo;
+import fr.insee.arc.ws.services.restServices.setRules.pojo.SetRulesPojo;
 
 /**
  * Hello world!
@@ -59,7 +59,7 @@ public class App {
     public static void testUpdateNorme() throws Exception
     {
     	
-    	URL url = new URL("http://localhost:8080/arc-ws/changeRules/arc_bas2/");
+    	URL url = new URL("http://localhost:8080/arc-ws/setRules/arc_bas2/");
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		String charset = "UTF-8";
 		
@@ -69,7 +69,7 @@ public class App {
 		conn.setRequestProperty("Content-Type", "application/json; utf-8"); 
 
 		
-		ChangeRulesPojo rules=new ChangeRulesPojo();
+		SetRulesPojo rules=new SetRulesPojo();
 		rules.content= new HashMap<String, Record>();
 		
 		rules.content.put("id_norme", new Record("text",  new ArrayList<String>( Arrays.asList("v002"))));

@@ -488,6 +488,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				} catch (Exception e) {
 					st.cancel();
 					LoggerHelper.error(LOGGER, e);
+					LoggerHelper.error(LOGGER, updatedQuery);
 					throw e;
 				}
 			}
@@ -516,6 +517,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			return hasResults(null, requeteLimit);
 		} catch (Exception e) {
 			LoggerHelper.error(LOGGER, e);
+			LoggerHelper.error(LOGGER, requeteLimit);
 			return false;
 		}
 	}
