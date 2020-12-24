@@ -22,7 +22,7 @@ public class ViewEntrepotBAS extends VObject {
 
             {
 
-                put("id_entrepot", new ColumnRendering(true, "Entrepot", "60px", "text", null, true));
+                put("id_entrepot", new ColumnRendering(true, "Entrepot", "100%q", "text", null, true));
             }
         }
 

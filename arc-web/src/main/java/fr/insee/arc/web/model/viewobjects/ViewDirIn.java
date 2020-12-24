@@ -23,7 +23,7 @@ public class ViewDirIn extends VObject {
             private static final long serialVersionUID = -3124381932840827423L;
 
             {
-                put("aaa", new ColumnRendering(true, "aaa", "80px", "text", null, false));
+                put("aaa", new ColumnRendering(true, "aaa", "100%", "text", null, false));
              }
         }));
     }

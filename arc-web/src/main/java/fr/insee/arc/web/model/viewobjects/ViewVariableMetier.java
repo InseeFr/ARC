@@ -34,12 +34,12 @@ public class ViewVariableMetier  extends VObject {
      * @return
      */
     public static HashMap<String, ColumnRendering> getInitialRenderingViewVariableMetier(HashMap<String, ColumnRendering> returned) {
-        returned.put("id_famille", new ColumnRendering(false, "Id.", "20px", "text", null, false));
-        returned.put("nom_variable_metier", new ColumnRendering(true, "label.mapmodel.field", "200px", "text", null, true));
-        returned.put("description_variable_metier", new ColumnRendering(true, "label.comment", "200px", "text", null, true));
-        returned.put("type_variable_metier", new ColumnRendering(true, "label.mapmodel.field.type", "100px", "select",
-        		new PreparedStatementBuilder("SELECT nom_type id, nom_type val FROM arc.ext_mod_type_autorise ORDER BY nom_type"), true));
-        returned.put("type_consolidation", new ColumnRendering(false, "label.mapmodel.field.aggregate", "200px", "text", null, true));
+        returned.put("id_famille", new ColumnRendering(false, "Id.", "", "text", null, false));
+        returned.put("nom_variable_metier", new ColumnRendering(true, "label.mapmodel.field", "33%", "text", null, true));
+        returned.put("description_variable_metier", new ColumnRendering(true, "label.comment", "33%", "text", null, true));
+        returned.put("type_variable_metier", new ColumnRendering(true, "label.mapmodel.field.type", "33%", "select",
+        		new PreparedStatementBuilder("SELECT nom_type id, nom_type val FROM arc.ext_mod_type_autorise ORDER BY nom_type"), true, true));
+        returned.put("type_consolidation", new ColumnRendering(false, "label.mapmodel.field.aggregate", "", "text", null, true));
         return returned;
     }
     
@@ -48,7 +48,7 @@ public class ViewVariableMetier  extends VObject {
      */
     public static final HashMap<String, ColumnRendering> getInitialRendering(List<String> aVariableListe) {
         HashMap<String, ColumnRendering> returned = new HashMap<>();
-        String size = "100px";
+        String size = "10%";
         String type = "text";
         for (int i = 0; i < aVariableListe.size(); i++) {
             returned.put(aVariableListe.get(i),
