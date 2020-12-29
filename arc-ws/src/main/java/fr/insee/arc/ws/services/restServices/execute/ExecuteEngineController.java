@@ -71,7 +71,7 @@ public class ExecuteEngineController {
 
 
 			String structure = "";
-				for (int i = 2; i <= Integer.parseInt(bodyPojo.targetPhase); i++) {
+				for (int i = 2; i <= TraitementPhase.getPhase(bodyPojo.targetPhase).getOrdre(); i++) {
 
 					switch (TraitementPhase.getPhase(i)) {
 					case CHARGEMENT:

@@ -546,22 +546,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		loggerDispatcher.debug("undoBatch", LOGGER);
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 		
-		
-		if (TraitementPhase.valueOf(phaseAExecuter).getOrdre()==0)
-		{
-			resetBAS(model);
-			return generateDisplay(model, RESULT_SUCCESS);
-		}
-		
-		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-				"arc.ihm", (String) getBacASable(), this.repertoire,
-				TraitementPhase.INITIALISATION.getNbLigneATraiter());
-		try {
-			serv.retourPhasePrecedente(TraitementPhase.valueOf(phaseAExecuter), undoFilesSelection(),
-					new ArrayList<>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
-		} finally {
-            serv.finaliser();
-		}
+		ApiService.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
+
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -570,21 +556,8 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	@RequestMapping("/resetBAS")
 	public String resetBAS(Model model) {
 		
-		try {
-			ApiInitialisationService.clearPilotageAndDirectories(this.repertoire,
-					(String) getBacASable());
-		} catch (Exception e) {
-			e.printStackTrace();
-			this.getViewPilotageBAS().setMessage("Problème : " + e.getMessage());
-		}
-		ApiInitialisationService service = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-				"arc.ihm", (String) getBacASable(), this.repertoire,
-				TraitementPhase.INITIALISATION.getNbLigneATraiter());
-		try {
-			service.resetEnvironnement();
-		} finally {
-			service.finaliser();
-		}
+		ApiService.resetBAS(getBacASable(), this.repertoire);
+
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

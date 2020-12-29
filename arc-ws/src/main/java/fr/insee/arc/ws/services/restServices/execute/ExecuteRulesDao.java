@@ -31,9 +31,9 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 	// récupération des règles de retour du webservice
 	PreparedStatementBuilder requete = new PreparedStatementBuilder();
 	requete.append("select a.service_name, a.call_id, a.service_type, replace(a.environment,'.','_') as environment, a.target_phase, a.norme, a.validite, a.periodicite, b.query_id, b.query_name, b.expression, b.query_view");
-	requete.append("\n from arc.ihm_ws_context a, arc.ihm_ws_query b ");
-	requete.append("\n where a.service_name=b.service_name and a.call_id=b.call_id ");
-	requete.append("\n and a.service_name=" + requete.quoteText(serviceName) + " ");
+	requete.append("\n from arc.ihm_ws_context a left outer join arc.ihm_ws_query b ");
+	requete.append("\n on a.service_name=b.service_name and a.call_id=b.call_id ");
+	requete.append("\n where a.service_name=" + requete.quoteText(serviceName) + " ");
 	requete.append("\n and a.call_id= " + serviceId + " ");
 	requete.append("\n order by query_id ");
 	requete.append("\n ;");
@@ -44,7 +44,6 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 				
 	p.serviceType = p.serviceType == null ? m.get("service_type").get(0) : p.serviceType;
 	p.sandbox = p.sandbox == null ? m.get("environment").get(0) : p.sandbox;
-	p.targetPhase = p.targetPhase == null ? m.get("target_phase").get(0) : p.targetPhase;
 	p.targetPhase = p.targetPhase == null ? m.get("target_phase").get(0) : p.targetPhase;
 	p.norme = p.norme == null ? m.get("norme").get(0) : p.norme;
 	p.validite = p.validite == null ? m.get("validite").get(0) : p.validite;

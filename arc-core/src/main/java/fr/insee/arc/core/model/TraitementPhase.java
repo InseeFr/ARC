@@ -37,6 +37,21 @@ public enum TraitementPhase {
         }
         return null;
     }
+    
+    
+	
+	public static TraitementPhase getPhase(String s)
+	{
+		try {
+			int p=Integer.parseInt(s);
+			return getPhase(p);
+		}
+		catch(Exception e)
+		{
+			return TraitementPhase.valueOf(s);
+		}
+	}
+	
 
     /**
      * Renvoie une liste des phases qui sont postérieures à une phase donnée
@@ -87,5 +102,5 @@ public enum TraitementPhase {
 		}
 		return listePhaseC;
 	}
-    
+
 }

@@ -1,8 +1,17 @@
 package fr.insee.arc.ws.services.restServices.execute;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +27,14 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
+import fr.insee.arc.core.service.ApiReceptionService;
+import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
+import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteQueryPojo;
 import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 
 @RestController
@@ -33,7 +46,7 @@ public class ExecuteServiceController {
 	private LoggerDispatcher loggerDispatcher;
     
 	@RequestMapping(value = "/execute/service/{serviceName}/{serviceId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ReturnView> executeEngineClient(
+	public ResponseEntity<ReturnView> executeServiceClient(
 			@PathVariable String serviceName,
 			@PathVariable int serviceId,
 			@RequestBody(required = true) ExecuteParameterPojo bodyPojo
@@ -55,13 +68,21 @@ public class ExecuteServiceController {
 						
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
-	
-			ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm", env);
+			String warehouse=bodyPojo.warehouse==null?"DEFAULT":bodyPojo.warehouse;
 			
-			for (int i = 2; i <= Integer.parseInt(bodyPojo.targetPhase); i++) {
-				ApiServiceFactory.getService(TraitementPhase.getPhase(i).toString(), "arc.ihm", env,
-							repertoire, Integer.MAX_VALUE+"").invokeApi();
+			if (TraitementPhase.getPhase(bodyPojo.targetPhase).equals(TraitementPhase.RECEPTION))
+			{
+				try(FileOutputStream fos=new FileOutputStream(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, warehouse) + File.separator + bodyPojo.fileName))
+				{
+					IOUtils.write(bodyPojo.fileContent, fos, StandardCharsets.UTF_8);
 				}
+
+			}
+			
+			ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm", env);
+
+			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), "arc.ihm", env,
+							repertoire, Integer.MAX_VALUE+"").invokeApi();
 			
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
@@ -75,5 +96,64 @@ public class ExecuteServiceController {
 	return ResponseEntity.status(HttpStatus.OK).body(returnView);		
 	
 	}
+	
+	
+	@RequestMapping(value = "/execute/reset/{serviceName}/{serviceId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ReturnView> resetServiceClient(
+			@PathVariable String serviceName,
+			@PathVariable int serviceId,
+			@RequestBody(required = true) ExecuteParameterPojo bodyPojo
+	)
+	{
+		Date firstContactDate=new Date();
+		ReturnView returnView=new ReturnView();
+		
+		
+		String identifiantLog = "(" + serviceName + ", " + serviceId + ")";
+		
+		loggerDispatcher.info(identifiantLog + " received", LOGGER);
+	
+		try {
+		
+		try (Connection connection = UtilitaireDao.get("arc").getDriverConnexion()) {
+						
+			ExecuteRulesDao.fillRules(connection, bodyPojo, serviceName, serviceId);
+						
+			String env = bodyPojo.sandbox;
+			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
+
+			ApiService.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), env, repertoire, new PreparedStatementBuilder());
+
+			bodyPojo.queries=new ArrayList<ExecuteQueryPojo>();
+			
+			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
+
+		}
+	} catch (Exception e) {
+		loggerDispatcher.error(identifiantLog, e, LOGGER);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(returnView);
+	}
+	loggerDispatcher.info(identifiantLog + " done", LOGGER);
+	return ResponseEntity.status(HttpStatus.OK).body(returnView);		
+	
+	}
+	
+	
+	
+	@RequestMapping(value = "/execute/service/build/{env}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ReturnView> synchronize(
+			@PathVariable String env
+	)
+	{
+		ReturnView returnView=new ReturnView();
+		
+		ApiInitialisationService.bddScript(null);
+		ApiInitialisationService.bddScript(null, new String[] {env});
+		ApiInitialisationService.buildFileSystem(null,new String[] {env});
+
+		return ResponseEntity.status(HttpStatus.OK).body(returnView);		
+
+	}
+	
 
 }

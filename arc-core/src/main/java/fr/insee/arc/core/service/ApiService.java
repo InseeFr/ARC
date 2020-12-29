@@ -1,6 +1,8 @@
 package fr.insee.arc.core.service;
 
+import java.io.File;
 import java.math.BigInteger;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -8,6 +10,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.NormeFichier;
@@ -355,7 +359,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp, Integer nbEnr) {
         loggerDispatcher.info("** register **", LOGGER);
         try {
-            // System.out.println(new java.util.Date());
             StringBuilder blocInit = new StringBuilder();
 
             // si il n'y a pas de sources déjà marquées en cours, on procède à la selection
@@ -370,9 +373,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
                 blocInit.append(selectionSource(tablePil, phaseIn, phase, nbEnr));
             }
             blocInit.append(copieTablePilotage(phase, tablePil, tablePilTemp));
-
-            // loggerDispatcher.info("Selection et copie de la table de pilotage : "
-            // + blocInit.toString(),logger);
 
             UtilitaireDao.get(poolName).executeBlock(connexion, blocInit);
         } catch (Exception ex) {
@@ -650,17 +650,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      */
     public static void deleteTodo(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch) {
         try {
-        	
-            // LOCK OBLIGATOIRE POUR NE PAS PERDRE DE DONNER LORS DES EXECUTIONS EN PARALLELE
-//            loggerDispatcher.info("** nettoyage todo **", LOGGER);
-//            UtilitaireDao.get(poolName).executeBlock(
-//                    connexion,
-//                    "LOCK TABLE "
-//                            + tablePrevious
-//                            + " IN ACCESS EXCLUSIVE MODE;"
-//                            + FormatSQL.rebuildTableAsSelectWhere(tablePrevious, " id_source not in (SELECT distinct id_source from "
-//                                    + tablePilTemp + " b) ", "analyze " + tablePrevious + "(id_source); "
-//                                    ));
+
             // Si on est en batch, on drop les tables source
         	// sinon on retire le lien avec la table héritée
         	StringBuilder query=new StringBuilder();
@@ -1098,6 +1088,71 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
         return requete.toString();
     }
+    
+    
+	/**
+	 * Directory management
+	 */
+	private static final String DIRECTORY_EXPORT_QUALIFIIER="EXPORT";
+
+	private static final String DIRECTORY_TOKEN="_";
+
+	private static final String DIRECTORY_ARCHIVE_QUALIFIIER="ARCHIVE";
+
+	private static final String DIRECTORY_OLD_QUALIFIIER="OLD";
+	
+    
+	public static String directoryEnvRoot(String rootDirectory, String env)
+	{
+		return rootDirectory + File.separator + env.replace(".", "_").toUpperCase();
+	}
+    
+	public static String directoryPhaseRoot(String rootDirectory, String env, TraitementPhase t)
+	{
+		return directoryEnvRoot(rootDirectory, env) + File.separator + t.toString();
+	}
+    
+	public static String directoryEnvExport(String rootDirectory, String env)
+	{
+		return directoryEnvRoot(rootDirectory, env) + File.separator + DIRECTORY_EXPORT_QUALIFIIER;
+	}
+    
+	public static String directoryPhaseEntrepot(String rootDirectory, String env, TraitementPhase t, String entrepot)
+	{
+		return directoryPhaseRoot(rootDirectory, env, t) + DIRECTORY_TOKEN + entrepot;
+	}
+	
+	public static String directoryPhaseEntrepotArchive(String rootDirectory, String env, TraitementPhase t, String entrepot)
+	{
+		return directoryPhaseRoot(rootDirectory, env, t) + DIRECTORY_TOKEN + DIRECTORY_ARCHIVE_QUALIFIIER;
+	}
+
+	public static String directoryPhaseEntrepotArchiveOld(String rootDirectory, String env, TraitementPhase t, String entrepot)
+	{
+		return directoryPhaseEntrepotArchive(rootDirectory, env, t, entrepot) + File.separator + DIRECTORY_OLD_QUALIFIIER;
+	}
+	
+	public static String directoryPhaseEtat(String rootDirectory, String env, TraitementPhase t, TraitementEtat e)
+	{
+		return directoryPhaseRoot(rootDirectory, env, t) + DIRECTORY_TOKEN + e.toString();
+	}
+	
+	public static String directoryPhaseEtatOK(String rootDirectory, String env, TraitementPhase t)
+	{
+		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.OK);
+	}
+	
+	public static String directoryPhaseEtatKO(String rootDirectory, String env, TraitementPhase t)
+	{
+		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.KO);
+	}
+	
+	public static String directoryPhaseEtatEnCours(String rootDirectory, String env, TraitementPhase t)
+	{
+		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.ENCOURS);
+	}
+	
+	
 
     /**
      * Création filtre sur les id_source marqué en état KO
@@ -1146,8 +1201,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         return requete.toString();
     }
     
-    
-    
+  
 
     public void createTableInherit(Connection connexion, String tableIn, String tableIdSource) throws Exception
     {
@@ -1174,7 +1228,12 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
     
     
-    
+    /**
+     * Generate the filename
+     * @param tableName
+     * @param idSource
+     * @return
+     */
     public static String tableOfIdSource(String tableName, String idSource)
     {
     	String hashText="";
@@ -1189,6 +1248,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		}
         return tableName + "_"+CHILD_TABLE_TOKEN+"_" + hashText;
     }
+
     
     /**
      * Créer la copie d'une table selectionnée sur un id_source particulier
@@ -1259,9 +1319,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
          requete.append("\n FROM "+tableOfIdSource(tableIn,idSource)+"; ");
          
          return requete.toString();
-    }
-
-    
+    }   
 
     /**
      *
@@ -1273,12 +1331,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
         loggerDispatcher.info("****** Execution " + this.getCurrentPhase() + " *******", LOGGER);
         try {
-
-            // set schema
-            // Méthode pour implémenter des maintenances sur la base de donnée
-//            if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString())) {
-//                ApiInitialisationService.bddScript(this.connexion, this.getEnvExecution());
-//            }
 
             if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString()) || this.getCurrentPhase().equals(TraitementPhase.RECEPTION.toString())) {
                 this.todo = true;
@@ -1327,6 +1379,58 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
     }
 
+    /**
+     * Retour arriere vers une phase
+     * @param phaseAExecuter
+     * @param env
+     * @param rootDirectory
+     * @param undoFilesSelection
+     */
+    public static void backToTargetPhase(String phaseAExecuter, String env, String rootDirectory, PreparedStatementBuilder undoFilesSelection)
+    {
+		if (TraitementPhase.valueOf(phaseAExecuter).getOrdre()==TraitementPhase.INITIALISATION.getOrdre())
+		{
+			resetBAS(env, rootDirectory);
+		}
+		else
+		{
+		    ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
+					"arc.ihm", env, rootDirectory,
+					TraitementPhase.INITIALISATION.getNbLigneATraiter());
+			try {
+				serv.retourPhasePrecedente(TraitementPhase.valueOf(phaseAExecuter), undoFilesSelection,
+						new ArrayList<>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
+			} finally {
+		        serv.finaliser();
+			}
+		}
+    }
+    
+    
+    /**
+     * reset data in the sandbox
+     * @param model
+     * @param env
+     * @param rootDirectory
+     */
+    public static void resetBAS(String env, String rootDirectory) {
+	    try {
+			ApiInitialisationService.clearPilotageAndDirectories(rootDirectory,
+					env);
+		} catch (Exception e) {
+	        StaticLoggerDispatcher.info(e, LOGGER);
+		}
+		ApiInitialisationService service = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
+				"arc.ihm", env, rootDirectory,
+				TraitementPhase.INITIALISATION.getNbLigneATraiter());
+		try {
+			service.resetEnvironnement();
+		} finally {
+			service.finaliser();
+		}
+    }
+    
+    
     public String getTablePilTemp() {
         return this.tablePilTemp;
     }

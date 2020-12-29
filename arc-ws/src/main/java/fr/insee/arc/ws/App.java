@@ -5,12 +5,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import org.json.JSONObject;
 
+import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.Record;
@@ -23,7 +25,11 @@ import fr.insee.arc.ws.services.restServices.setRules.pojo.SetRulesPojo;
 public class App {
     public static void main(String[] args) throws Exception {
 
-    	testHello();
+    	//testHello();
+
+    	System.out.println(Paths.get(ApiReceptionService.directoryReceptionEntrepot("a","b","c")));
+    	
+    	System.out.println(Paths.get("a","b","RECEPTION_c"));
 
     }
     

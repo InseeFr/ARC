@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,56 +32,78 @@ public class SetRulesController {
 	@RequestMapping(value = "/setRules/{sandbox}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> changeRulesClient(
 			@RequestBody(required = true) SetRulesPojo bodyPojo
-	) throws SQLException
+	)
 	{
+		 JSONObject response = new JSONObject();
+
+		try {
 		
-		if (bodyPojo.targetRule.equals("WAREHOUSE"))
+		if (bodyPojo.targetRule.equals("model"))
+		{
+			replaceRulesDAO(bodyPojo,"arc.ihm_famille", "id_famille");
+		}
+		
+		if (bodyPojo.targetRule.equals("warehouse"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_entrepot", "id_entrepot");
 		}
 		
-		if (bodyPojo.targetRule.equals("NORM"))
+		if (bodyPojo.targetRule.equals("sandbox"))
+		{
+			replaceRulesDAO(bodyPojo,"arc.ext_etat_jeuderegle", "id");
+		}
+		
+		if (bodyPojo.targetRule.equals("norm"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_norme","id_norme","periodicite");
 		}
-
 		
-		if (bodyPojo.targetRule.equals("CALENDAR"))
+		if (bodyPojo.targetRule.equals("calendar"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_calendrier","id_norme","periodicite","validite_inf","validite_sup");
 		}
 		
-		if (bodyPojo.targetRule.equals("RULESET"))
+		if (bodyPojo.targetRule.equals("ruleset"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_jeuderegle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
-		if (bodyPojo.targetRule.equals("LOAD"))
+		if (bodyPojo.targetRule.equals("load"))
 		{
-			replaceRulesDAO(bodyPojo,"arc.ihm_chargement_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version", "id_regle");
+			replaceRulesDAO(bodyPojo,"arc.ihm_chargement_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
-		if (bodyPojo.targetRule.equals("CONTROL"))
+		if (bodyPojo.targetRule.equals("control"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_controle_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
-		if (bodyPojo.targetRule.equals("STRUCTURIZE"))
+		if (bodyPojo.targetRule.equals("structure"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_normage_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
-		if (bodyPojo.targetRule.equals("FILTER"))
+		if (bodyPojo.targetRule.equals("filter"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_filtrage_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
-		if (bodyPojo.targetRule.equals("MAPPING"))
+		if (bodyPojo.targetRule.equals("map"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_mapping_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
-		return ResponseEntity.status(HttpStatus.OK).body("OK");
+
+		response.put("status", "OK");
+
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			response.put("status", "KO");
+		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(response.toString());
 
 	}
 	
@@ -97,6 +120,9 @@ public class SetRulesController {
 		requete.append(deleteRulesQuery(bodyPojo, tablename, primaryKeys));
 		requete.append(insertRulesQuery(bodyPojo, tablename, primaryKeys));
 		
+		System.out.println(requete.getQuery());
+		System.out.println(requete.getParameters());
+
 		UtilitaireDao.get("arc").executeRequest(null, requete);
 	}
 	
@@ -135,6 +161,8 @@ public class SetRulesController {
 					requete.append(",");
 				}
 				requete.append(requete.quoteText(bodyPojo.content.get(col).getData().get(i)));
+				requete.append("::");
+				requete.append(bodyPojo.content.get(col).getDataType());
 			}
 			
 			requete.append(");");
@@ -153,17 +181,20 @@ public class SetRulesController {
 	{
 		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		List<String> columns=new ArrayList<>(bodyPojo.content.keySet());
-		
+				
 		for (int i=0;i<bodyPojo.content.get(columns.get(0)).getData().size();i++)
 		{
-			requete.append("\n DELETE FROM "+tablename+" ");
+			requete.append("\n DELETE FROM "+tablename+" WHERE true ");
 			
 			for (String pk:primaryKeys)
 			{
-				requete.append("\n WHERE "+pk+" ="+requete.quoteText(bodyPojo.content.get(pk).getData().get(i))+";");
+				requete.append("\n AND "+pk+" ="+requete.quoteText(bodyPojo.content.get(pk).getData().get(i))+"");
+				requete.append("::");
+				requete.append(bodyPojo.content.get(pk).getDataType());
 			}
 		}
-
+		requete.append("\n ;");
+		
 		return requete;
 	}
 	
