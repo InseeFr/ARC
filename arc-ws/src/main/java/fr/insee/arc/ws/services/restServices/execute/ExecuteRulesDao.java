@@ -41,23 +41,26 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 	// Récupération des parametres
 	gb=new GenericBean(UtilitaireDao.get("arc").executeRequest(c, requete));
 	HashMap<String, ArrayList<String>> m=gb.mapContent();
-				
-	p.serviceType = p.serviceType == null ? m.get("service_type").get(0) : p.serviceType;
-	p.sandbox = p.sandbox == null ? m.get("environment").get(0) : p.sandbox;
-	p.targetPhase = p.targetPhase == null ? m.get("target_phase").get(0) : p.targetPhase;
-	p.norme = p.norme == null ? m.get("norme").get(0) : p.norme;
-	p.validite = p.validite == null ? m.get("validite").get(0) : p.validite;
-	p.periodicite = p.periodicite == null ? m.get("periodicite").get(0) : p.periodicite;
 
-	p.fileName = p.fileName == null ? "f.xml" : p.fileName;
-
-	p.queries=new ArrayList<ExecuteQueryPojo>();
-	
-	for (int i=0;i<m.get("service_name").size();i++)
+	if (!m.isEmpty())
 	{
-		ExecuteQueryPojo e=new ExecuteQueryPojo(m.get("query_id").get(i), m.get("query_name").get(i), m.get("expression").get(i), m.get("query_view").get(i));
+		p.serviceType = p.serviceType == null ? m.get("service_type").get(0) : p.serviceType;
+		p.sandbox = p.sandbox == null ? m.get("environment").get(0) : p.sandbox;
+		p.targetPhase = p.targetPhase == null ? m.get("target_phase").get(0) : p.targetPhase;
+		p.norme = p.norme == null ? m.get("norme").get(0) : p.norme;
+		p.validite = p.validite == null ? m.get("validite").get(0) : p.validite;
+		p.periodicite = p.periodicite == null ? m.get("periodicite").get(0) : p.periodicite;
+	
+		p.fileName = p.fileName == null ? "f.xml" : p.fileName;
+	
+		p.queries=new ArrayList<ExecuteQueryPojo>();
 		
-		p.queries.add(e);
+		for (int i=0;i<m.get("service_name").size();i++)
+		{
+			ExecuteQueryPojo e=new ExecuteQueryPojo(m.get("query_id").get(i), m.get("query_name").get(i), m.get("expression").get(i), m.get("query_view").get(i));
+			
+			p.queries.add(e);
+		}
 	}
 }
 
@@ -69,17 +72,20 @@ public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnVie
 	r.setDataSetView(new ArrayList<DataSetView>());
 	
 	// searchpath to the current sandbow to be able to query rules of the sandbox simply and without any risk of confusion with user rules
-	UtilitaireDao.get("arc").executeImmediate(c,"SET search_path=public, "+p.sandbox+", arc; ");
+	UtilitaireDao.get("arc").executeImmediate(c,"SET search_path=public, "+p.sandbox.replace(".", "_")+", arc; ");
 	
-	for (int i=0;i<p.queries.size();i++)
+	if (p.queries!=null)
 	{
-	
-	DataSetView ds=new DataSetView(
-			Integer.parseInt(p.queries.get(i).query_id)
-			,p.queries.get(i).query_name
-			,new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new PreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
-			);
-		r.getDataSetView().add(ds);
+		for (int i=0;i<p.queries.size();i++)
+		{
+		
+		DataSetView ds=new DataSetView(
+				Integer.parseInt(p.queries.get(i).query_id)
+				,p.queries.get(i).query_name
+				,new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new PreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
+				);
+			r.getDataSetView().add(ds);
+		}
 	}
 }
 

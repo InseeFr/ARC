@@ -15,13 +15,16 @@ public class DataSetView {
 	private Map<String,Record> content;
 
 	
-	
-	
 	public DataSetView(int datasetId, String datasetName, Map<String, Record> content) {
 		super();
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.content = content;
+	}
+	
+	public DataSetView()
+	{
+		super();
 	}
 
 	public int getDatasetId() {

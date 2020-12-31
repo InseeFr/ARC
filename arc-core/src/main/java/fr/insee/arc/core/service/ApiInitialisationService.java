@@ -125,9 +125,9 @@ public class ApiInitialisationService extends ApiService {
             	makeDir(envDirFile);
  
             	
-                String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, repertoire, entrepot);
-                String dirOut =  ApiReceptionService.directoryReceptionEntrepot(repertoire, repertoire, entrepot);
-                
+                String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, this.envExecution, entrepot);
+                String dirOut =  ApiReceptionService.directoryReceptionEntrepot(repertoire, this.envExecution, entrepot);
+
                 // on itère sur les fichiers trouvé dans le répertoire d'archive
                 File f = new File(dirIn);
                 makeDir(f);
@@ -260,7 +260,7 @@ public class ApiInitialisationService extends ApiService {
 		}
 		if (envExecution!=null)
 		{
-			query=query.replace("{{envExecution}}", envExecution);
+			query=query.replace("{{envExecution}}", envExecution.replace(".","_"));
 		}
 		return query;
 	}
@@ -368,23 +368,18 @@ public class ApiInitialisationService extends ApiService {
     	
     	for (String envExecution:Arrays.asList(envExecutions))
     	{
-        	
-    		String receptionDirectoryRoot = Paths.get(
-    				properties.getBatchParametersDirectory(), 
-    				envExecution.toUpperCase().replace(".", "_"),
-    				TraitementPhase.RECEPTION.toString()).toString();
 			
     		if (!entrepotList.isEmpty())
 			{
     			for (String d : entrepotList.get("id_entrepot")) {
-    				UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + d);
+    				UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepot(properties.getBatchParametersDirectory(), envExecution, d));
+    				UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepotArchive(properties.getBatchParametersDirectory(), envExecution, d));
     			}
 			}
-			
-			
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS);
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.OK);
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.KO);
+    		
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatEnCours(properties.getBatchParametersDirectory(), envExecution));
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
     	}
 
     }
@@ -949,7 +944,7 @@ public class ApiInitialisationService extends ApiService {
         if (phase.equals(TraitementPhase.RECEPTION))
         {
         	requete = new PreparedStatementBuilder();
-            requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = '" + requete.quoteText(phase.toString()) + "' ");
+            requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
             if (querySelection != null) {
             	 requete.append("AND id_source IN (SELECT distinct id_source FROM (");
                  requete.append(querySelection);
@@ -972,7 +967,7 @@ public class ApiInitialisationService extends ApiService {
 
         // Delete the selected file entries from the pilotage table from the undo phase
     	requete = new PreparedStatementBuilder();
-        requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = '" + requete.quoteText(phase.toString()) + "' ");
+        requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
         if (querySelection.length()>0) {
        	 	requete.append("AND id_source IN (SELECT distinct id_source FROM (");
             requete.append(querySelection);
