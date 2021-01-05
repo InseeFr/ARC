@@ -29,7 +29,7 @@ public class SetRulesController {
 	
     private static final Logger LOGGER = LogManager.getLogger(SetRulesController.class);
 	
-	@RequestMapping(value = "/setRules/{sandbox}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/setRules", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> changeRulesClient(
 			@RequestBody(required = true) SetRulesPojo bodyPojo
 	)
