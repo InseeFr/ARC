@@ -389,10 +389,10 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		}
 		this.getViewEntrepotBAS().setCustomValue(WRITING_REPO, null);
 		// Lancement de l'initialisation dans la foulée
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), "arc.ihm",
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
 				getBacASable(), this.repertoire,
 				String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), "arc.ihm",
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA,
 				getBacASable(), this.repertoire,
 				String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter())).invokeApi();
 
@@ -511,10 +511,10 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		loggerDispatcher.debug("executerBatch", LOGGER);
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
 		
-		ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm",
+		ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA,
 				getBacASable());
 
-		ApiServiceFactory.getService(phaseAExecuter, "arc.ihm", getBacASable(),
+		ApiServiceFactory.getService(phaseAExecuter, ApiService.IHM_SCHEMA, getBacASable(),
 				this.repertoire, "10000000").invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -709,10 +709,10 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		// production
 		// Lancement de l'initialisation dans la foulée
 		loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), "arc.ihm",
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
 				getBacASable(), this.repertoire,
 				String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), "arc.ihm",
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA,
 				getBacASable(), this.repertoire,
 				String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter())).invokeApi();
 		// Fin du code spécifique aux bacs à sable
@@ -920,7 +920,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		// Attention bout de code spécifique aux bacs à sable, ne surtout pas copier en
 		// production
 		loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), "arc.ihm",
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
 				getBacASable(), this.repertoire,
 				String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
 
@@ -1010,7 +1010,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 		// Lancement du retour arrière
 		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-				"arc.ihm", getBacASable(), this.repertoire,
+				ApiService.IHM_SCHEMA, getBacASable(), this.repertoire,
 				TraitementPhase.INITIALISATION.getNbLigneATraiter());
 		try {
 			serv.retourPhasePrecedente(TraitementPhase.valueOf(phase), querySelection, null);

@@ -809,7 +809,10 @@ public class ApiInitialisationService extends ApiService {
     public static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
     	StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
         try {
-            StringBuilder requete = new StringBuilder();
+        	
+        	anExecutionEnvironment=anExecutionEnvironment.replace(".", "_");
+        	
+        	StringBuilder requete = new StringBuilder();
             TraitementTableParametre[] r = TraitementTableParametre.values();
             StringBuilder condition = new StringBuilder();
             String modaliteEtat = anExecutionEnvironment.replace("_", ".");

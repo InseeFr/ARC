@@ -103,6 +103,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
     protected String bdDateFormat="DD/MM/YYYY H24:MI:SS";
 
+    public final static String IHM_SCHEMA="arc.ihm";
     
     protected String idSource;
 
@@ -1243,8 +1244,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			m.update(idSource.getBytes(),0,idSource.length());
 			hashText=String.format("%1$032x",new BigInteger(1,m.digest()));
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return null;
 		}
         return tableName + "_"+CHILD_TABLE_TOKEN+"_" + hashText;
     }
@@ -1395,7 +1395,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		else
 		{
 		    ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-					"arc.ihm", env, rootDirectory,
+		    		IHM_SCHEMA, env, rootDirectory,
 					TraitementPhase.INITIALISATION.getNbLigneATraiter());
 			try {
 				serv.retourPhasePrecedente(TraitementPhase.valueOf(phaseAExecuter), undoFilesSelection,
@@ -1421,7 +1421,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	        StaticLoggerDispatcher.info(e, LOGGER);
 		}
 		ApiInitialisationService service = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-				"arc.ihm", env, rootDirectory,
+				IHM_SCHEMA, env, rootDirectory,
 				TraitementPhase.INITIALISATION.getNbLigneATraiter());
 		try {
 			service.resetEnvironnement();

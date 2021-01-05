@@ -30,6 +30,7 @@ import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.core.model.RegleMappingEntity;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ControleRegleService;
 import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
@@ -836,7 +837,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 					.append("  liste_colonne.nom_variable_metier,").append("  null,").append(
 							"  null")
 					.append("  FROM (")
-					.append(FormatSQL.listeColonneTableMetierSelonFamilleNorme("arc.ihm",
+					.append(FormatSQL.listeColonneTableMetierSelonFamilleNorme(ApiService.IHM_SCHEMA,
 									viewNorme.mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0)))
 					.append(") liste_colonne");
 				

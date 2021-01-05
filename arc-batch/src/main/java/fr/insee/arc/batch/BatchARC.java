@@ -226,7 +226,7 @@ public class BatchARC {
 		// default is from properties
 		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase","false")))
 		{
-			env=BDParameters.getString(null, "LanceurARC.env","arc.ihm");
+			env=BDParameters.getString(null, "LanceurARC.env",ApiService.IHM_SCHEMA);
 			envExecution=BDParameters.getString(null, "LanceurARC.envExecution","arc.prod");
 		}	
 		else

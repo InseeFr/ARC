@@ -74,9 +74,7 @@ public class ExecuteServiceController {
 
 			}
 			
-			ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm", env);
-
-			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), "arc.ihm", env,
+			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), ApiService.IHM_SCHEMA, env,
 							repertoire, Integer.MAX_VALUE+"").invokeApi();
 			
 			
@@ -135,6 +133,8 @@ public class ExecuteServiceController {
 		bodyPojo.sandbox=bodyPojo.sandbox!=null?bodyPojo.sandbox.replace(".", "_"):bodyPojo.sandbox;
 		bodyPojo.queries=bodyPojo.queries==null?new ArrayList<ExecuteQueryPojo>():bodyPojo.queries;
 
+		System.out.println(bodyPojo.queries);
+		
 		try {
 		
 		try (Connection connection = UtilitaireDao.get("arc").getDriverConnexion()) {
@@ -153,9 +153,7 @@ public class ExecuteServiceController {
 
 			}
 			
-			ApiInitialisationService.synchroniserSchemaExecution(null, "arc.ihm", env);
-
-			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), "arc.ihm", env,
+			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), ApiService.IHM_SCHEMA, env,
 							repertoire, Integer.MAX_VALUE+"").invokeApi();
 			
 			
@@ -169,8 +167,8 @@ public class ExecuteServiceController {
 	
 	}
 	
-	@RequestMapping(value = "/execute/service/build/{env}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ReturnView> synchronize(
+	@RequestMapping(value = "/execute/service/build/{env}/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ReturnView> build(
 			@PathVariable String env
 	)
 	{
@@ -185,6 +183,15 @@ public class ExecuteServiceController {
 		return ResponseEntity.status(HttpStatus.OK).body(returnView);		
 
 	}
-	
+
+	@RequestMapping(value = "/execute/service/synchonize/{env}/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ReturnView> synchronize(
+			@PathVariable String env
+	)
+	{
+		ReturnView returnView=new ReturnView();
+		ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA, env);		
+		return ResponseEntity.status(HttpStatus.OK).body(returnView);		
+	}
 
 }
