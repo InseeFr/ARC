@@ -600,7 +600,22 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
 	
 					try {
-						Boolean isresult = stmt.execute();
+						// the first result found will be output
+						boolean isresult = stmt.execute();
+						if (!isresult)
+						{
+							do {
+								isresult=stmt.getMoreResults();
+								if (isresult) {
+									break;
+								}
+								if (stmt.getUpdateCount() == -1)
+								{
+									break;
+								}
+							} while (true);
+						}
+						
 						if (isresult) {
 							ResultSet res = stmt.getResultSet();
 							return entityProvider.apply(res);

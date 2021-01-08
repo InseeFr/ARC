@@ -1125,7 +1125,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	
 	public static String directoryPhaseEntrepotArchive(String rootDirectory, String env, TraitementPhase t, String entrepot)
 	{
-		return directoryPhaseRoot(rootDirectory, env, t) + DIRECTORY_TOKEN + DIRECTORY_ARCHIVE_QUALIFIIER;
+		return directoryPhaseEntrepot(rootDirectory, env, t, entrepot) + DIRECTORY_TOKEN + DIRECTORY_ARCHIVE_QUALIFIIER;
 	}
 
 	public static String directoryPhaseEntrepotArchiveOld(String rootDirectory, String env, TraitementPhase t, String entrepot)

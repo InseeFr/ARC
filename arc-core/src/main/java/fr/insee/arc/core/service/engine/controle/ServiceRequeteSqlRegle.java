@@ -655,7 +655,7 @@ public class ServiceRequeteSqlRegle {
 			// si l'identifiant est null on check pas et on marque pas
 			// si la valeur est null, on marque pas (on ne dépassera jamais une borne sup)
 			// sinon on fait la vérification habituelle
-			cond = "OR case when {2} is null then false when {0} is null then false else char_length(regexp_replace({0}, '^-', ''))>{1}";
+			cond = "OR case when {2} is null then false when {0} is null then false else char_length(regexp_replace({0}, '^-', ''))>{1} end";
 			cond = getRequete(cond, rubrique, borneSup, "i_"+ManipString.substringAfterFirst(rubrique,"_"));
 		} else if (borneInf != null && borneSup == null) {
 			//cond = "OR char_length(regexp_replace({0}, '^-', ''))<{1}";
@@ -664,7 +664,7 @@ public class ServiceRequeteSqlRegle {
 			// si l'identifiant est null on check pas et marque pas
 			// si la valeur est null on marque : on est forcément en dessous la bornInf
 			// sinon on fait la vérification habituelle
-			cond = "OR case when {1}=0 then false when case when {2} is null then false when {0} is null then true else char_length(regexp_replace({0}, '^-', ''))<{1}";
+			cond = "OR case when {1}=0 then false when {2} is null then false when {0} is null then true else char_length(regexp_replace({0}, '^-', ''))<{1} end";
 			cond = getRequete(cond, rubrique, borneInf, "i_"+ManipString.substringAfterFirst(rubrique,"_"));
 		}
 		return cond;

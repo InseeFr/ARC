@@ -132,8 +132,6 @@ public class ExecuteServiceController {
 	
 		bodyPojo.sandbox=bodyPojo.sandbox!=null?bodyPojo.sandbox.replace(".", "_"):bodyPojo.sandbox;
 		bodyPojo.queries=bodyPojo.queries==null?new ArrayList<ExecuteQueryPojo>():bodyPojo.queries;
-
-		System.out.println(bodyPojo.queries);
 		
 		try {
 		

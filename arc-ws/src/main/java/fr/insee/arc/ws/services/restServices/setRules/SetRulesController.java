@@ -43,6 +43,16 @@ public class SetRulesController {
 			replaceRulesDAO(bodyPojo,"arc.ihm_famille", "id_famille");
 		}
 		
+		if (bodyPojo.targetRule.equals("model_tables"))
+		{
+			replaceRulesDAO(bodyPojo,"arc.ihm_mod_table_metier", "id_famille", "nom_table_metier");
+		}
+		
+		if (bodyPojo.targetRule.equals("model_variables"))
+		{
+			replaceRulesDAO(bodyPojo,"arc.ihm_mod_variable_metier", "id_famille", "nom_table_metier", "nom_variable_metier");
+		}
+		
 		if (bodyPojo.targetRule.equals("warehouse"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_entrepot", "id_entrepot");
@@ -138,7 +148,6 @@ public class SetRulesController {
 	{
 		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		List<String> columns=new ArrayList<>(bodyPojo.content.keySet());
-
 		
 		// fetch data to insert
 		for (int i=0;i<bodyPojo.content.get(columns.get(0)).getData().size();i++)
@@ -160,12 +169,18 @@ public class SetRulesController {
 				{
 					requete.append(",");
 				}
+				
+				if (bodyPojo.content.get(col).getData().isEmpty())
+				{
+					return new PreparedStatementBuilder();
+				}
+				
 				requete.append(requete.quoteText(bodyPojo.content.get(col).getData().get(i)));
 				requete.append("::");
 				requete.append(bodyPojo.content.get(col).getDataType());
 			}
 			
-			requete.append(");");
+			requete.append(") ON CONFLICT DO NOTHING ; ");
 		}
 		return requete;
 	}
@@ -188,12 +203,13 @@ public class SetRulesController {
 			
 			for (String pk:primaryKeys)
 			{
+				System.out.println(pk);
 				requete.append("\n AND "+pk+" ="+requete.quoteText(bodyPojo.content.get(pk).getData().get(i))+"");
 				requete.append("::");
 				requete.append(bodyPojo.content.get(pk).getDataType());
 			}
+			requete.append("\n ;");
 		}
-		requete.append("\n ;");
 		
 		return requete;
 	}
