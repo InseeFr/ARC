@@ -141,7 +141,7 @@ description_table_metier text,
 CONSTRAINT pk_ihm_mod_table_metier PRIMARY KEY (id_famille, nom_table_metier), 
 CONSTRAINT fk_ihm_table_metier_famille FOREIGN KEY (id_famille) 
 REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE 
-ON UPDATE NO ACTION ON DELETE NO ACTION 
+ON UPDATE CASCADE ON DELETE CASCADE
 ); 
         
 CREATE TABLE IF NOT EXISTS arc.ihm_mod_variable_metier 
@@ -155,7 +155,7 @@ type_consolidation text,
 CONSTRAINT pk_ihm_mod_variable_metier PRIMARY KEY (id_famille, nom_table_metier, nom_variable_metier), 
 CONSTRAINT fk_ihm_mod_variable_table_metier FOREIGN KEY (id_famille, nom_table_metier) 
 REFERENCES arc.ihm_mod_table_metier (id_famille, nom_table_metier) MATCH SIMPLE 
-ON UPDATE NO ACTION ON DELETE NO ACTION 
+ON UPDATE CASCADE ON DELETE CASCADE
 ); 
 
         
