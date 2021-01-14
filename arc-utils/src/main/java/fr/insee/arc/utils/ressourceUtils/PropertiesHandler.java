@@ -110,6 +110,17 @@ public class PropertiesHandler {
         this.databaseSchema = databaseSchema;
     }
 
+    
+    public boolean isLdapActive() {
+    	return !ldapDirectoryUri.isEmpty();
+    }
+    
+    public String getLdapApplicatioName() {
+    	if (ldapDirectoryIdent.isEmpty()){
+    		return "";
+    	}
+    	return ldapDirectoryIdent.substring("appli_".length());
+    }
 
     public String getLdapDirectoryUri() {
         return ldapDirectoryUri;

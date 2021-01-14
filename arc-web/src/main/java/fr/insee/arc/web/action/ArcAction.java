@@ -156,6 +156,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     	model.addAttribute("version", getVersion());
     	model.addAttribute("isEnvProd", isEnvProd());
     	model.addAttribute("application", getApplication());
+    	model.addAttribute("userManagementActive", properties.isLdapActive());
 	}
 	
 	/** Adds more controller-specific attributes the model.*/

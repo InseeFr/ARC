@@ -33,7 +33,7 @@
 				>
 					<div class="row">
 						<!-- affichage de la liste des utilisateurs -->
-						<c:set var="view" value="${viewListProfils}"  scope="request"/>
+						<c:set var="view" value="${viewUserProfiles}"  scope="request"/>
 						<c:import url="tiles/templateVObject.jsp">
 							<c:param name="taille" value ="col-md" />
 							<c:param name="ligneAdd" value="true" />
@@ -41,17 +41,17 @@
 							<c:param name="btnSee" value="true" />
 							<c:param name="btnSort" value="true" />
 							<c:param name="btnAdd" value="true" />
-							<c:param name="btnUpdate" value="true" />
+							<c:param name="btnUpdate" value="false" />
 							<c:param name="btnDelete" value="true" />
 							<c:param name="checkbox" value="true" />
 							<c:param name="checkboxVisible" value="true" />
-							<c:param name="extraScopeSee" value="viewListUtilisateursDuProfil;" />
+							<c:param name="extraScopeSee" value="viewUserList;" />
 						</c:import>
 					</div>
 
 					<div class="row">
 						<!-- VIEW TABLE UTILISATEURS -->
-						<c:set var="view" value="${viewListUtilisateursDuProfil}"  scope="request"/>
+						<c:set var="view" value="${viewUserList}"  scope="request"/>
 						<c:import url="tiles/templateVObject.jsp">
 							<c:param name="taille" value ="col-md" />
 							<c:param name="ligneAdd" value="true" />
@@ -59,7 +59,7 @@
 							<c:param name="btnSee" value ="true" />
 							<c:param name="btnSort" value ="true" />
 							<c:param name="btnAdd" value ="true" />
-							<c:param name="btnUpdate" value ="true" />
+							<c:param name="btnUpdate" value ="false" />
 							<c:param name="btnDelete" value ="true" />
 							<c:param name="checkbox" value ="true" />
 							<c:param name="checkboxVisible" value ="true" />

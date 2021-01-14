@@ -34,7 +34,11 @@
 				onclick="$(this).attr('href', 'enterPilotageBAS?bacASable='+$('#environnementTravail option:selected').val());console.log($(this).attr('href'));"><spring:message code="header.manageEnvironment"/></a></li>
 			<li class="nav-item mt-auto"><a class="nav-link${param.currentPage == 'envManagement' ? ' font-weight-bold' : ''}"" data-target=".navbar-collapse" href="selectExport"
 				onclick="$(this).attr('href', 'selectExport?bacASable='+$('#environnementTravail option:selected').val());console.log($(this).attr('href'));"><spring:message code="header.export"/></a></li>
-				
+			<c:if test="${userManagementActive}">
+				<li class="nav-item mt-auto"><a class="nav-link${param.currentPage == 'userManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+				href="selectGererUtilisateurs"><spring:message code="header.userManagement"/></a>
+			</li>
+			</c:if>
 		</ul>
 		
 

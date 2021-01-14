@@ -93,6 +93,18 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${project.spring.version}</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-webflux</artifactId>
+		    <version>2.3.7.RELEASE</version>
+		    <exclusions>
+		    	<exclusion>
+		    		<groupId>org.springframework.boot</groupId>
+		    		<artifactId>spring-boot-starter-logging</artifactId>
+		    	</exclusion>
+		    </exclusions>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -128,6 +140,26 @@
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
+
+		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-annotations</artifactId>
+		    <version>2.12.1</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>2.12.1</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.12.1</version>
+		</dependency>
+	
 	</dependencies>
 
 	<build>
