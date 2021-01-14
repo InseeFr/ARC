@@ -37,9 +37,9 @@
 		<property name="databaseUsername" value="#{systemEnvironment['DATABASE_USER'] ?: '${fr.insee.database.arc.username}' }"></property>
 		<property name="databasePassword" value="#{systemEnvironment['DATABASE_PASSWORD'] ?: '${fr.insee.database.arc.password}' }"></property>
 		<property name="databaseDriverClassName" value="${fr.insee.database.arc.driverClassName}"></property>
-		<property name="ldapDirectoryUri" value="${fr.insee.annuaire.arc.uri}"></property>
-		<property name="ldapDirectoryIdent" value="${fr.insee.annuaire.arc.ident}"></property>
-		<property name="ldapDirectoryPassword" value="${fr.insee.annuaire.arc.password}"></property>
+		<property name="ldapDirectoryUri" value="${fr.insee.annuaire.arc.uri:}"></property>
+		<property name="ldapDirectoryIdent" value="${fr.insee.annuaire.arc.ident:}"></property>
+		<property name="ldapDirectoryPassword" value="${fr.insee.annuaire.arc.password:}"></property>
 		<property name="logConfiguration" value="${fr.insee.arc.log.configuration:fr/insee/config/log4j2.xml}"></property>
 		<property name="batchParametersDirectory" value="#{systemEnvironment['APPLICATION_DIRECTORY'] ?: '${fr.insee.arc.batch.parametre.repertoire}' }"></property>
 		<property name="version" value="${fr.insee.arc.version}"></property>
