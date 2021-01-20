@@ -146,7 +146,7 @@ public class GererUtilisateursAction extends ArcAction<UserManagementModel>{
 		Optional<String> selectedProfile = selectedProfile(viewListProfils);
 		if (!selectedProfile.isPresent()|| userId == null) {
 			viewListUtilisateursDuProfil.setMessage("userManagement.addUser.invalid");
-		} else if (userManagementDao.addUser(userId, selectedProfile.get())) {
+		} else if (userManagementDao.addUser(userId.trim(), selectedProfile.get())) {
 			viewListUtilisateursDuProfil.setMessage("userManagement.addUser");
 		} else {
 			viewListUtilisateursDuProfil.setMessage("userManagement.addUser.error");
@@ -162,7 +162,7 @@ public class GererUtilisateursAction extends ArcAction<UserManagementModel>{
 			viewListUtilisateursDuProfil.setMessage("userManagement.removeUser.invalid");
 		} else {
 			for (String userId : selectedId) {
-				if (userManagementDao.removeUser(userId, selectedProfile.get())) {
+				if (userManagementDao.removeUser(userId.trim(), selectedProfile.get())) {
 					viewListUtilisateursDuProfil.setMessage("userManagement.removeUser");
 				} else {
 					viewListUtilisateursDuProfil.setMessage("userManagement.removeUser.error");
