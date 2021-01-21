@@ -39,6 +39,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.web.dao.IndexDao;
 import fr.insee.arc.web.model.ArcModel;
 import fr.insee.arc.web.model.SessionParameters;
 import fr.insee.arc.web.util.Session;
@@ -78,6 +79,9 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     protected LoggerDispatcher loggerDispatcher;
 	
 	protected String repertoire;
+	
+	@Autowired
+	private IndexDao indexDao;
 
 	protected Map<String, String> envMap;
 
@@ -128,13 +132,24 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	/** Runs the generic initialization (status, VObject, ...) 
 	 * and adds some generic info to the model.
 	 * (VObject themselves are added to the model by ArcInterceptor)*/
-	@SuppressWarnings("unchecked")
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
 			@RequestParam(required = false) String scope) {
 		LoggerHelper.trace(LOGGER, getActionName());
 
+		// adding production sandbox to session
+		if (this.envMap == null) {
+			this.envMap= indexDao.getSandboxList();
+			getSession().put(SessionParameters.ENV_MAP, this.envMap);
+		}
+		if (this.bacASable == null) {
+			// by default bacASable is the first element of the linkedhashmap
+			List<String> keys=new ArrayList<>(((LinkedHashMap<String,String>) this.envMap).keySet());
+			this.bacASable = keys.get(0);
+		}
+
+		// updating current sandbox from request
 		if (bacASable != null && !bacASable.equals(this.bacASable)) {
 			loggerDispatcher.info(String.format("env selected %s", bacASable), LOGGER);
 			this.bacASable = bacASable;
@@ -217,7 +232,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	public String generateDisplay(Model model, String successUri) {
 		LoggerHelper.debug(LOGGER, "generateDisplay()", getScope());
 		// Initialize required VObjects
-		Boolean defaultWhenNoScope = true;
+		boolean defaultWhenNoScope = true;
 		for (VObject vObject : getListVObjectOrder()) {
 			LoggerHelper.debug(LOGGER, "entry.getKey()", vObject.getTable());
 			vObjectService.setActivation(vObject, getScope());

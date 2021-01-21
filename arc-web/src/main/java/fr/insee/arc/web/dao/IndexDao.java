@@ -8,21 +8,22 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 
+@Component
 public class IndexDao {
 	
 	private static final Logger LOGGER = LogManager.getLogger(IndexDao.class);
-
 	
 	/**
-	 * Get the sandbox list to be show in GUI
+	 * Get the sandbox list to be show in GUI.
 	 */
-	public static Map<String, String> getSandboxList()
+	public Map<String, String> getSandboxList()
 	{
 		PreparedStatementBuilder requete= new PreparedStatementBuilder();
 		requete.append("SELECT replace(id,'.','_') as id, upper(substring(id from '\\.(.*)')) as val FROM arc.ext_etat_jeuderegle where isenv order by nullif(substring(id from '[0123456789]+'),'')::int");
