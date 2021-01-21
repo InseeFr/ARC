@@ -41,10 +41,15 @@ public class PropertySourcesHelper {
 	public static PropertySourcesPlaceholderConfigurer defaultWebappPropertySourcesConfigurer() throws IOException {
 		PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 		PropertySourcesHelper fetcher = new PropertySourcesHelper();
-		fetcher.configure(configurer, 
-				"file:${catalina.base}/webapps/*.properties",
-				"file:${catalina.base}/wtpwebapps/*.properties",
-				"classpath*:fr/insee/config/*.properties");
+		String tomcatDir = System.getProperty("catalina.base");
+		if (tomcatDir != null) {
+			fetcher.configure(configurer, 
+					"file:" + tomcatDir + "/webapps/*.properties",
+					"file:" + tomcatDir + "/wtpwebapps/*.properties",
+					"classpath*:fr/insee/config/*.properties");
+		} else {
+			fetcher.configure(configurer, "classpath*:fr/insee/config/*.properties");
+		}
 		configurer.setIgnoreUnresolvablePlaceholders(true);
 		configurer.setIgnoreResourceNotFound(true);
 		return configurer;

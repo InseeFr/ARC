@@ -218,6 +218,9 @@
 																	<select class="w-100" 
 																		id="${view.sessionName}_content_t_${incr1.index}__d_${incr2.index}_"
 																		name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]">
+																		<c:if test="${!view.headersRequired[incr2.index]}">
+																			<option value=""></option>
+																		</c:if>
 																		<c:forEach items="${view.headersVSelect[incr2.index].keySet()}" var="option">
 																			<option value="${option}" ${option == view.content.t[incr1.index].d[incr2.index] ? 'selected' : ''}>${view.headersVSelect[incr2.index][option]}</option>
 																		</c:forEach>
@@ -304,7 +307,9 @@
 															<select class="w-100" 
 																id="${view.sessionName}.inputFields[${incr.index}]"
 																name="${view.sessionName}.inputFields[${incr.index}]">
-																<option value=""></option>
+																<c:if test="${!view.headersRequired[incr.index]}">
+																	<option value=""></option>
+																</c:if>
 																<c:forEach items="${view.headersVSelect[incr.index].keySet()}" var="option">
 																	<option value="${option}">${view.headersVSelect[incr.index][option]}</option>
 																</c:forEach>

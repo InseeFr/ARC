@@ -106,9 +106,9 @@ $(document).on('ready readyAgain',function() {
 		// met une dimension au th sans width des tableaux à largeur fixe
 		$(".fixedHeader th,.light th").each(
 				function() {
-					if ($(this).attr('style')!=null &&  $(this).attr('style').indexOf("width:/**/;")>-1)
+					if ($(this).attr('style')!=null &&  $(this).attr('style').indexOf("width:/**/;") > -1)
 					{
-						$(this).css("width",$(this).text().trim().split(" ")[0].length*9+20);
+						$(this).css("width",$(this).text().trim().split(" ")[0].length + 5 + '%');
 					}
 				}
 		);

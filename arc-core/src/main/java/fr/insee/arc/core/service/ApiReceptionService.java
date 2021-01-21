@@ -62,7 +62,7 @@ public class ApiReceptionService extends ApiService {
 	//Expression régulière correspondant au nom des fichiers temporaires 
 	//transmis via le flux Oriade (soit XXXXXX-W, avec X dans [A-Z])
 	private static final Pattern p = Pattern.compile("^[A-Z]{6}-W.*");
-	
+		
 	
 	public ApiReceptionService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
 		super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
@@ -87,7 +87,7 @@ public class ApiReceptionService extends ApiService {
 		GenericBean archiveContent =  moveClientFiles(this.nbEnr, maxNumberOfFiles);
 		if (archiveContent!=null)
 		{
-			registerFiles(this.connexion, this.envExecution, this.directoryRoot,archiveContent);
+			registerFiles(this.connexion, archiveContent);
 		}
 	}
 
@@ -97,16 +97,12 @@ public class ApiReceptionService extends ApiService {
 		GenericBean archiveContent=null;
 		
 		StaticLoggerDispatcher.info("moveClientFiles", LOGGER);
-		String receptionDirectoryRoot = Paths.get(
-				this.directoryRoot, 
-				this.envExecution.toUpperCase().replace(".", "_"),
-				TraitementPhase.RECEPTION.toString()).toString();
 		
 		try {
 			// vérifier que les répertoires cible existent; sinon les créer
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS);
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.OK);
-			UtilitaireDao.createDirIfNotexist(receptionDirectoryRoot + "_" + TraitementEtat.KO);
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution));
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatOK(this.directoryRoot, this.envExecution));
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatKO(this.directoryRoot, this.envExecution));
 			// déplacer les fichiers du répertoire de l'entrepot vers le répertoire encours
 			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,
 					new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
@@ -117,7 +113,7 @@ public class ApiReceptionService extends ApiService {
 			String dirIn;
 			String dirArchive;
 			File fDirIn;
-			String dirOut = receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS;
+			String dirOut = directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution);
 
 			int fileSize = 0;
 			int fileNb = 0;
@@ -131,8 +127,9 @@ public class ApiReceptionService extends ApiService {
 					break;
 				}
 
-				dirIn = receptionDirectoryRoot + "_" + d;
-				dirArchive = receptionDirectoryRoot + "_" + d + "_ARCHIVE";
+				dirIn = ApiReceptionService.directoryReceptionEntrepot(this.directoryRoot, this.envExecution, d);
+				dirArchive = ApiReceptionService.directoryReceptionEntrepotArchive(this.directoryRoot, this.envExecution, d);
+				
 				fDirIn = new File(dirIn);
 				// créer le répertoire de l'entrepot et son repertoire archive
 				UtilitaireDao.createDirIfNotexist(dirArchive);
@@ -176,7 +173,7 @@ public class ApiReceptionService extends ApiService {
 							String fname;
 							
 
-								for (int i=1;i<1000000;i++)
+								for (int i=1;i<Integer.MAX_VALUE;i++)
 								{
 
 									// on reprend le nom du fichier
@@ -270,14 +267,11 @@ public class ApiReceptionService extends ApiService {
 	 * Enregistrer les fichiers en entrée Déplacer les fichier reçus dans les repertoires OK ou pas OK selon le bordereau Supprimer les
 	 * fichiers déjà existants de la table de pilotage Marquer les fichiers dans la table de pilotage
 	 */
-	public void registerFiles(Connection connexion, String anExecutionEnvironment, String directoryRoot, GenericBean archiveContent) {
+	public void registerFiles(Connection connexion, GenericBean archiveContent) {
 		StaticLoggerDispatcher.info("registerFiles", LOGGER);
-		String receptionDirectoryRoot = Paths.get(
-				directoryRoot,
-				anExecutionEnvironment.toUpperCase().replace(".", "_"),
-				TraitementPhase.RECEPTION.toString()).toString();
+
 		// on considère tous les fichiers du repertoire reception en cours
-		File folder = new File(receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS);
+		File folder = new File(ApiReceptionService.directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution));
 		File[] filesIn = folder.listFiles();
 		// la bean (fileName,type, etat) contient pour chaque fichier, le type
 		// du fichier et l'action à réaliser
@@ -292,7 +286,7 @@ public class ApiReceptionService extends ApiService {
 		soumettreRequete(requete);
 
 		if (!g.content.isEmpty()) {
-			String dirIn = receptionDirectoryRoot + "_" + TraitementEtat.ENCOURS;
+			String dirIn = ApiReceptionService.directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution);
 			for (int i = 0; i < g.content.size(); i++) {
 				String container = g.content.get(i).get(g.headers.indexOf("container"));
 				String v_container = g.content.get(i).get(g.headers.indexOf("v_container"));
@@ -305,22 +299,21 @@ public class ApiReceptionService extends ApiService {
 					insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName, etat, rapport);
 				}
 				if (type.equals(TraitementTypeFichier.A.toString())) {
-					String dirOut = receptionDirectoryRoot + "_" + etat;
+					String dirOut = ApiReceptionService.directoryReceptionEtat(this.directoryRoot, this.envExecution, TraitementEtat.valueOf(etat));
 					deplacerFichier(dirIn, dirOut, container, containerNewName);
 				}
 				if (type.equals(TraitementTypeFichier.AC.toString())) {
-					String dirOut = receptionDirectoryRoot + "_" + etat;
+					String dirOut = ApiReceptionService.directoryReceptionEtat(this.directoryRoot, this.envExecution, TraitementEtat.valueOf(etat));
 					deplacerFichier(dirIn, dirOut, container, containerNewName);
 					insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName, etat, rapport);
 				}
 				// pour les fichier seul, on en fait une archive
 				if (type.equals(TraitementTypeFichier.D.toString())) {
-					// String dirOut = receptionDirectoryRoot + "_" + etat;
 					// en termes de destination, les fichiers seuls vont tout le temps dans RECEPTION_OK, même s'ils sont KO pour la table
 					// de pilotage
-					String dirOut = receptionDirectoryRoot + "_" + TraitementEtat.OK;
-					File fileIn = new File(dirIn + "/" + fileName);
-					File fileOut = new File(dirOut + "/" + containerNewName);
+					String dirOut = ApiReceptionService.directoryReceptionEtatOK(this.directoryRoot, this.envExecution);
+					File fileIn = new File(dirIn + File.separator + fileName);
+					File fileOut = new File(dirOut + File.separator + containerNewName);
 				    
 					if (fileOut.exists()) {
 						fileOut.delete();
@@ -747,8 +740,7 @@ public class ApiReceptionService extends ApiService {
 			}
 		}
 		
-		GenericBean g = new GenericBean(headers, types, content);
-		return g;
+		return new GenericBean(headers, types, content);
 	}
 	
 	
@@ -914,4 +906,55 @@ public class ApiReceptionService extends ApiService {
 		GenericBean g = new GenericBean(headers, types, content);
 		return g;
 	}
+	
+	
+    /**
+     * Methods to provide directories paths
+     * @param rootDirectory
+     * @param env
+     * @return
+     */
+
+
+
+	public static String directoryReceptionRoot(String rootDirectory, String env)
+	{
+		return ApiService.directoryPhaseRoot(rootDirectory, env, TraitementPhase.RECEPTION);
+	}
+	
+	public static String directoryReceptionEntrepot(String rootDirectory, String env, String entrepot)
+	{
+		return directoryPhaseEntrepot(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
+	}
+	
+	public static String directoryReceptionEntrepotArchive(String rootDirectory, String env, String entrepot)
+	{
+		return directoryPhaseEntrepotArchive(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
+	}
+
+	public static String directoryReceptionEntrepotArchiveOld(String rootDirectory, String env, String entrepot)
+	{
+		return directoryPhaseEntrepotArchiveOld(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
+	}
+	
+	public static String directoryReceptionEtat(String rootDirectory, String env, TraitementEtat e)
+	{
+		return directoryPhaseEtat(rootDirectory, env, TraitementPhase.RECEPTION, e);
+	}
+	
+	public static String directoryReceptionEtatOK(String rootDirectory, String env)
+	{
+		return directoryPhaseEtatOK(rootDirectory, env, TraitementPhase.RECEPTION);
+	}
+	
+	public static String directoryReceptionEtatKO(String rootDirectory, String env)
+	{
+		return directoryPhaseEtatKO(rootDirectory, env, TraitementPhase.RECEPTION);
+	}
+	
+	public static String directoryReceptionEtatEnCours(String rootDirectory, String env)
+	{
+		return directoryPhaseEtatEnCours(rootDirectory, env, TraitementPhase.RECEPTION);
+	}
+
 }

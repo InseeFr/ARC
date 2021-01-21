@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.Norme;
@@ -65,11 +66,9 @@ public class ApiChargementService extends ApiService {
     public ApiChargementService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
-
-        this.directoryIn = Paths.get(
-        		this.getDirectoryRoot(), 
-        		aEnvExecution.toUpperCase().replace(".", "_"),
-        		previousPhase + "_" + TraitementEtat.OK).toString() + File.separator;
+        
+        this.directoryIn = ApiService.directoryPhaseEtatOK(this.getDirectoryRoot(), aEnvExecution, TraitementPhase.valueOf(previousPhase)) + File.separator;
+        
         
         // Noms des table temporaires utiles au chargement
         // nom court pour les perfs

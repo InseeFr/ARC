@@ -23,11 +23,11 @@ public class ViewRapportBAS extends VObject {
             private static final long serialVersionUID = -4191692347748388055L;
 
             {
-                put("date_entree", new ColumnRendering(true, "label.date.entry", "80px", "text", null, true));
-                put("phase_traitement", new ColumnRendering(true, "label.step.name", "90px", "text", null, true));
-                put("etat_traitement", new ColumnRendering(true, "label.step.status", "60px", "text", null, true));
-                put("rapport", new ColumnRendering(true, "label.step.report", "200px", "text", null, true));
-                put("nb", new ColumnRendering(true, "label.step.count.file", "55px", "text", null, true));
+                put("date_entree", new ColumnRendering(true, "label.date.entry", "17%", "text", null, true));
+                put("phase_traitement", new ColumnRendering(true, "label.step.name", "19%", "text", null, true));
+                put("etat_traitement", new ColumnRendering(true, "label.step.status", "12%", "text", null, true));
+                put("rapport", new ColumnRendering(true, "label.step.report", "41%", "text", null, true));
+                put("nb", new ColumnRendering(true, "label.step.count.file", "11%", "text", null, true));
 
             }
         }

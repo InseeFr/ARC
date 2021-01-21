@@ -61,7 +61,7 @@ public class GererUtilisateursAction extends ArcAction<UserManagementModel>{
 
 	private void initializeListUtilisateursDuProfil(VObject viewListProfils) {
 		Optional<String> selectedProfile = selectedProfile(viewListProfils);
-		if (selectedProfile.isEmpty()) {
+		if (!selectedProfile.isPresent()) {
 			vObjectService.destroy(viewListUtilisateursDuProfil);
 		} else {
 			ArrayList<ArrayList<String>> users = new ArrayList<>();
@@ -144,7 +144,7 @@ public class GererUtilisateursAction extends ArcAction<UserManagementModel>{
 	public String addUser(Model model) {
 		String userId = viewListUtilisateursDuProfil.getInputFieldFor("idep");
 		Optional<String> selectedProfile = selectedProfile(viewListProfils);
-		if (selectedProfile.isEmpty()|| userId == null) {
+		if (!selectedProfile.isPresent()|| userId == null) {
 			viewListUtilisateursDuProfil.setMessage("userManagement.addUser.invalid");
 		} else if (userManagementDao.addUser(userId, selectedProfile.get())) {
 			viewListUtilisateursDuProfil.setMessage("userManagement.addUser");
@@ -158,7 +158,7 @@ public class GererUtilisateursAction extends ArcAction<UserManagementModel>{
 	public String deleteUser(Model model) {
 		ArrayList<String> selectedId = viewListUtilisateursDuProfil.mapContentSelected().get("idep");
 		Optional<String> selectedProfile = selectedProfile(viewListProfils);
-		if (selectedId.isEmpty()|| selectedProfile.isEmpty()) {
+		if (selectedId.isEmpty()|| !selectedProfile.isPresent()) {
 			viewListUtilisateursDuProfil.setMessage("userManagement.removeUser.invalid");
 		} else {
 			for (String userId : selectedId) {

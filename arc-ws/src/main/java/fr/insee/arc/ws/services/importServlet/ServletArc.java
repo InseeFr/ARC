@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.servlet;
+package fr.insee.arc.ws.services.importServlet;
 
 import java.io.IOException;
 

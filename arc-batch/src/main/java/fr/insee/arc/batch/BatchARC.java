@@ -1,6 +1,7 @@
 package fr.insee.arc.batch;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -24,7 +25,7 @@ import fr.insee.arc.batch.unitaryLauncher.NormerBatch;
 import fr.insee.arc.batch.unitaryLauncher.RecevoirBatch;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
@@ -171,7 +172,7 @@ public class BatchARC {
 	}
 
 	
-	private void initParameters()
+	private static void initParameters()
 	{
 
 		keepInDatabase= Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase","false"));
@@ -226,7 +227,7 @@ public class BatchARC {
 		// default is from properties
 		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase","false")))
 		{
-			env=BDParameters.getString(null, "LanceurARC.env","arc.ihm");
+			env=BDParameters.getString(null, "LanceurARC.env",ApiService.IHM_SCHEMA);
 			envExecution=BDParameters.getString(null, "LanceurARC.envExecution","arc.prod");
 		}	
 		else
@@ -253,7 +254,6 @@ public class BatchARC {
 		ControlerThread controler=new ControlerThread();
 		FiltrerThread filtrer=new FiltrerThread();
 		MapperThread mapper=new MapperThread();
-//		VacuumThread vacuum=new VacuumThread(); 
 
 		
 		// opération de maintenance
@@ -265,7 +265,7 @@ public class BatchARC {
 
 		boolean productionOn=productionOn();
 
-		if (productionOn())
+		if (productionOn)
 		{
 		// on vide les repertoires de chargement OK, KO, ENCOURS
 		effacerRepertoireChargement(repertoire, envExecution);
@@ -285,22 +285,17 @@ public class BatchARC {
 				String entrepotContainer=ManipString.substringBeforeFirst(container, "_");
 				String originalContainer=ManipString.substringAfterFirst(container, "_");
 				
-				File fIn=new File(repertoire + envExecution.replace(".", "_").toUpperCase()
-						+ File.separator + TraitementPhase.RECEPTION+ "_"+ entrepotContainer + "_ARCHIVE"
-						+ File.separator + originalContainer);
-				File fOut=new File(repertoire + envExecution.replace(".", "_").toUpperCase() 
-						+ File.separator + TraitementPhase.RECEPTION+ "_"+TraitementEtat.OK
-						+ File.separator + container);
+				File fIn= Paths.get(
+						ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepotContainer)
+						, originalContainer
+						).toFile();
+				
+				File fOut= Paths.get(
+						ApiReceptionService.directoryReceptionEtatOK(repertoire, envExecution)
+						, container
+						).toFile();
 
-				try{
 				Files.copy(fIn.toPath(), fOut.toPath());
-				}
-				catch(Exception e) 
-				{
-					message("Fichier "+container+" inexistant dans Archive");
-				}
-				
-				
 			}
 			
 		}
@@ -317,7 +312,6 @@ public class BatchARC {
 
 		 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
 		 DateFormat dateFormat2 = new SimpleDateFormat("yyyyMMddHH");
-		 DateFormat dateFormatHeure = new SimpleDateFormat("HH");
 
 		 String lastInitialize=null;
          lastInitialize=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select last_init from arc.pilotage_batch "));
@@ -340,10 +334,6 @@ public class BatchARC {
 			 message("Initialisation terminée : "+(int)initialiser.report.nbLines+" e : "+initialiser.report.duree+" ms");
 			
 			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("update arc.pilotage_batch set last_init=to_char(current_date+interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+HEURE_INITIALISATION_PRODUCTION+"' , operation=case when operation='R' then 'O' else operation end;"));
-			
-			// on met la date d'initialsiation à la date courante
-			// si la production a demandée à etre réactivée, on la réactive
-//			UtilitaireDao.get("arc").executeRequest(null, "update arc.pilotage_batch set last_init='"+dateFormat.format(dNow)+"', operation=case when operation='R' then 'O' else operation end;");
 		}
 		 productionOn=productionOn();
 
@@ -515,50 +505,47 @@ public class BatchARC {
 		
 		// Effacer les fichiers des répertoires OK et KO
 		String envDirectory = envExecution.replace(".", "_").toUpperCase();
-		File f= Paths.get(directory, envDirectory, TraitementPhase.RECEPTION + "_" + TraitementEtat.OK).toFile();
-		if (f.exists()) {
-			File[] fs= f.listFiles();
-			for (File z:fs) {
-				if (z.isDirectory()) {
-					FileUtils.deleteDirectory(z);
-				} else {
-					deleteIfArchived(directory, envExecution, z);
-				}
-			}
-		}
 
-		// Effacer les fichiers du répertoire KO
+		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.OK);
+		
 		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.KO);
 		
 		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.ENCOURS);
 		
 	}
 
-	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat) {
-		File f= Paths.get(directory, envDirectory, TraitementPhase.RECEPTION+"_" + etat).toFile();
+	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat) throws IOException {
+		File f= Paths.get(ApiReceptionService.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
 		if (!f.exists()) {
 			return;
 		}
 		File[] fs= f.listFiles();
 		for (File z:fs) {
-			deleteIfArchived(directory, envExecution, z);
+			if (z.isDirectory()) {
+				FileUtils.deleteDirectory(z);
+			} else {
+				deleteIfArchived(directory, envExecution, z);
+			}
 		}
 	}
 
-	private static void deleteIfArchived(String repertoire, String envExecution, File z) {
+	private static boolean deleteIfArchived(String repertoire, String envExecution, File z) {
+		
+		String entrepot =  ManipString.substringBeforeFirst(z.getName(),"_");
+		String filename = ManipString.substringAfterFirst(z.getName(),"_");
+		
 		// ajout d'un garde fou : si le fichier n'est pas archivé : pas touche
-		File fCheck = Paths.get(repertoire, envExecution.replace(".", "_").toUpperCase(), 
-				TraitementPhase.RECEPTION + "_"+ ManipString.substringBeforeFirst(z.getName(),"_")
-				+ "_ARCHIVE",
-				ManipString.substringAfterFirst(z.getName(),"_")
+		File fCheck = Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepot)
+				, filename
 				).toFile();
+		
 		if (fCheck.exists())
 		{
-			z.delete();
+			return z.delete();
 		}
 		else
 		{
-			z.renameTo(fCheck);
+			return z.renameTo(fCheck);
 		}
 	}
 	

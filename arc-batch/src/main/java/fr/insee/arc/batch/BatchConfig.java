@@ -20,8 +20,9 @@ public class BatchConfig {
 		PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 		PropertySourcesHelper fetcher = new PropertySourcesHelper();
 		List<String> expectedPaths = new ArrayList<>();
-		if (System.getProperty("properties.path") != null) {
-			expectedPaths.add("file:${properties.path}/*.properties");
+		String propertyPathVar = System.getProperty("properties.path");
+		if (propertyPathVar != null) {
+			expectedPaths.add("file:" + propertyPathVar  + "/*.properties");
 		}
 		expectedPaths.add("classpath*:fr/insee/config/*.properties");
 		fetcher.configure(configurer, expectedPaths.toArray(new String[0]));

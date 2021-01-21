@@ -24,8 +24,8 @@ public class ViewFileExport extends VObject {
             private static final long serialVersionUID = -3124381932840827423L;
 
             {
-                put("filename", new ColumnRendering(true, "Nom du fichier", "400px", "text", null, false));
-                put("isdirectory", new ColumnRendering(false, "Répertoire", "350px", "text", null, false));
+                put("filename", new ColumnRendering(true, "Nom du fichier", "53%", "text", null, false));
+                put("isdirectory", new ColumnRendering(false, "Répertoire", "47%", "text", null, false));
              }
         }));
     }

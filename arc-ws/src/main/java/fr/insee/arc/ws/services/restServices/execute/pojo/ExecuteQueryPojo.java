@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.execute.pojo;
+package fr.insee.arc.ws.services.restServices.execute.pojo;
 
 public class ExecuteQueryPojo {
 	
@@ -14,6 +14,9 @@ public class ExecuteQueryPojo {
 	// rendu de la requete de sortie : LINE ou COLUMN
 	public String query_view;
 
+	public ExecuteQueryPojo() {
+		super();
+	}
 	
 	
 	public ExecuteQueryPojo(String query_id, String query_name, String expression, String query_view) {

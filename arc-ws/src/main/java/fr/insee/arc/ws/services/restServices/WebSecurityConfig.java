@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest;
+package fr.insee.arc.ws.services.restServices;
 
 import java.io.IOException;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.hello;
+package fr.insee.arc.ws.services.restServices.hello;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

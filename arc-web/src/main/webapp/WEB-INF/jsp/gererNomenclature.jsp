@@ -34,9 +34,9 @@
 	<div class="container-fluid">
 		<div class="row">
 				<!-- left column -->
-				<div class="col-md-3 border-right" style="margin-top: 2.25rem;"
-				>
+				<div class="col-md-5 border-right" style="margin-top: 2.25rem;">
 					<div class="row">
+					<div class="col-sm-12 col-xl-7 border-right">
 						<div class="col-md">
 							<!-- norm list -->
 							<c:set var="view" value="${viewListNomenclatures}"  scope="request"/>
@@ -55,22 +55,19 @@
 								<c:param name="extraScopeDelete" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 								<c:param name="extraScopeUpdate" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 								<c:param name="extraScopeSee" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
-
-							</c:import>
-						</div>
-					</div>
-					<div class="input-group my-3">
-						<div class="custom-file">
-							<input
-								name="fileUpload"
-								type="file"
-								class="custom-file-input"
-								id="externalFileLoad"
-								size="40"
-							/> <label
-								class="custom-file-label"
-								for="externalFile"
-							><spring:message code="general.chooseFile"/></label>
+								<c:param name="otherButton">
+							<div class="input-group my-3">
+									<div class="custom-file">
+								<input
+									name="fileUpload"
+									type="file"
+									class="custom-file-input"
+									id="externalFileLoad"
+									size="40"
+								/> <label
+									class="custom-file-label"
+									for="externalFile"
+								><spring:message code="general.chooseFile"/></label>
 						</div>
 						<div class="input-group-append">
 							<button
@@ -84,13 +81,15 @@
 								onclick="submitForm()"
 							><span class="fa fa-upload">&nbsp;</span> <spring:message code="managementSandbox.load"/></button>
 						</div>
+							</div>
+								</c:param>
+							</c:import>
+						</div>
 					</div>
-			</div>
 
-				<div class="col-md-2 border-right" style="margin-top: 2.25rem;"
-				>
+				<div class="col-sm-12 col-xl-5 border-right">
 					<div class="row">
-						<div class="col-md">
+						<div class="col-xl">
 							<!-- norm list -->
 							<c:set var="view" value="${viewSchemaNmcl}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">
@@ -112,8 +111,9 @@
 							</c:import>
 						</div>
 					</div>
+				</div>
 			</div>
-			
+			</div>
 						<div class="col-md-7 border-right" style="margin-top: 2.25rem;"
 				>
 					<div class="row">

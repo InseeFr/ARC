@@ -26,6 +26,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
@@ -101,8 +102,9 @@ public class ApiInitialisationService extends ApiService {
 
         // parcourir toutes les archives dans le répertoire d'archive
     	String repertoire = properties.getBatchParametersDirectory();
-        String envDir = this.envExecution.replace(".", "_").toUpperCase();
-        String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
+
+    	
+    	String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
 
         // pour chaque en trepot de données,
         // Comparer les archives du répertoire aux archives enregistrées dans la table d'archive :
@@ -115,19 +117,16 @@ public class ApiInitialisationService extends ApiService {
 
             if (entrepotList!=null)
             {
-            for (String s : entrepotList) {
-            	String fullEnvDir = Paths.get(
-                		repertoire, 
-                		envDir).toString();
+            for (String entrepot : entrepotList) {
+            	
+            	
+            	String fullEnvDir = ApiService.directoryEnvRoot(repertoire, this.envExecution);
             	File envDirFile = new File(fullEnvDir);
             	makeDir(envDirFile);
+ 
             	
-                String dirIn = Paths.get(
-                		fullEnvDir,
-                		TraitementPhase.RECEPTION + "_" + s + "_ARCHIVE").toString();
-                String dirOut = Paths.get(
-                		fullEnvDir,
-                		TraitementPhase.RECEPTION + "_" + s).toString();
+                String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, this.envExecution, entrepot);
+                String dirOut =  ApiReceptionService.directoryReceptionEntrepot(repertoire, this.envExecution, entrepot);
 
                 // on itère sur les fichiers trouvé dans le répertoire d'archive
                 File f = new File(dirIn);
@@ -201,7 +200,7 @@ public class ApiInitialisationService extends ApiService {
                     		// tester ce qu'on doit en faire
                         	
                         	// comparer au fichier sans index
-                    		File autreFichier=new File (dirOut+ File.separator + name_source + ext);
+                    		File autreFichier=new File (dirOut + File.separator + name_source + ext);
                     		if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
                     		{
                     			fichier.delete();
@@ -210,7 +209,7 @@ public class ApiInitialisationService extends ApiService {
                     		// comparer aux fichier avec un index précédent
                     		for (int i=2;i<number;i++)
                     		{
-                    			autreFichier=new File (dirOut+ File.separator + name_source + "#" + i + ext);
+                    			autreFichier=new File (dirOut + File.separator + name_source + "#" + i + ext);
                         		
                         		if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
                         		{
@@ -236,7 +235,7 @@ public class ApiInitialisationService extends ApiService {
 	private void makeDir(File f) {
 		if (!f.exists())
 		{
-			f.mkdir();
+			f.mkdirs();
 		}
 	}
 
@@ -261,7 +260,7 @@ public class ApiInitialisationService extends ApiService {
 		}
 		if (envExecution!=null)
 		{
-			query=query.replace("{{envExecution}}", envExecution);
+			query=query.replace("{{envExecution}}", envExecution.replace(".","_"));
 		}
 		return query;
 	}
@@ -326,12 +325,10 @@ public class ApiInitialisationService extends ApiService {
         try {
         	
         	String user = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select user "));
-        	
-            Integer nbSandboxes=BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes",8);
-        	
+        	        	
             // iterate over each sandbox environment and try to load its script
             Arrays.asList(envExecutions)
-            .forEach(envExecution -> executeBddScript(connexion, "BdD/script_sandbox.sql", user, nbSandboxes, envExecution));
+            .forEach(envExecution -> executeBddScript(connexion, "BdD/script_sandbox.sql", user, null, envExecution));
             
             // iterate over each sandbox environment
             Arrays.asList(envExecutions)
@@ -339,7 +336,7 @@ public class ApiInitialisationService extends ApiService {
 	            {
 	                // iterate over each phase for its sandbox relating script
 	            	Arrays.asList(TraitementPhase.values())
-	                .forEach(t -> executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", user, nbSandboxes, envExecution));	
+	                .forEach(t -> executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", user, null, envExecution));	
 	            }
             );
             
@@ -348,6 +345,43 @@ public class ApiInitialisationService extends ApiService {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "bddScript(envExecutions)", LOGGER, ex);
         }
         
+    }
+    
+    /**
+     * Build directories for the sandbox
+     * @param envExecutions
+     */
+    public static void buildFileSystem(Connection connexion, String[] envExecutions)
+    {
+    	PropertiesHandler properties = PropertiesHandler.getInstance();
+
+		HashMap<String, ArrayList<String>> entrepotList = new HashMap<>();
+		
+    	try {
+			entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
+					new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
+
+		} catch (SQLException ex) {
+            LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "buildFileSystem(envExecutions)", LOGGER, ex);
+		}
+    	
+    	
+    	for (String envExecution:Arrays.asList(envExecutions))
+    	{
+			
+    		if (!entrepotList.isEmpty())
+			{
+    			for (String d : entrepotList.get("id_entrepot")) {
+    				UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepot(properties.getBatchParametersDirectory(), envExecution, d));
+    				UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepotArchive(properties.getBatchParametersDirectory(), envExecution, d));
+    			}
+			}
+    		
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatEnCours(properties.getBatchParametersDirectory(), envExecution));
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
+			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
+    	}
+
     }
     
     /**
@@ -385,9 +419,9 @@ public class ApiInitialisationService extends ApiService {
 
                 String entrepot = ManipString.substringBeforeFirst(s, "_");
                 String archive = ManipString.substringAfterFirst(s, "_");
-
-                String dirIn = repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE";
-                String dirOut = repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + entrepot;
+                
+                String dirIn= ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envDir, entrepot);
+                String dirOut= ApiReceptionService.directoryReceptionEntrepot(repertoire, envDir, entrepot);
 
                 ApiReceptionService.deplacerFichier(dirIn, dirOut, archive, archive);
 
@@ -724,15 +758,13 @@ public class ApiInitialisationService extends ApiService {
 
             // 7. Déplacer les archives effacées dans le répertoire de sauvegarde "OLD"
         	String repertoire = properties.getBatchParametersDirectory();
-            String envDir = this.envExecution.replace(".", "_").toUpperCase();
 
             String entrepotSav = "";
             for (int i = 0; i < m.get("entrepot").size(); i++) {
                 String entrepot = m.get("entrepot").get(i);
                 String archive = m.get("nom_archive").get(i);
-                String dirIn = repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE";
-                String dirOut = repertoire + envDir + File.separator + TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE" + File.separator
-                        + "OLD";
+                String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, this.envExecution, entrepot);
+                String dirOut = ApiReceptionService.directoryReceptionEntrepotArchiveOld(repertoire, this.envExecution, entrepot);
 
                 // création du répertoire "OLD" s'il n'existe pas
                 if (!entrepotSav.equals(entrepot)) {
@@ -777,7 +809,10 @@ public class ApiInitialisationService extends ApiService {
     public static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
     	StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
         try {
-            StringBuilder requete = new StringBuilder();
+        	
+        	anExecutionEnvironment=anExecutionEnvironment.replace(".", "_");
+        	
+        	StringBuilder requete = new StringBuilder();
             TraitementTableParametre[] r = TraitementTableParametre.values();
             StringBuilder condition = new StringBuilder();
             String modaliteEtat = anExecutionEnvironment.replace("_", ".");
@@ -909,7 +944,7 @@ public class ApiInitialisationService extends ApiService {
         if (phase.equals(TraitementPhase.RECEPTION))
         {
         	requete = new PreparedStatementBuilder();
-            requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = '" + requete.quoteText(phase.toString()) + "' ");
+            requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
             if (querySelection != null) {
             	 requete.append("AND id_source IN (SELECT distinct id_source FROM (");
                  requete.append(querySelection);
@@ -932,7 +967,7 @@ public class ApiInitialisationService extends ApiService {
 
         // Delete the selected file entries from the pilotage table from the undo phase
     	requete = new PreparedStatementBuilder();
-        requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = '" + phase + "' ");
+        requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
         if (querySelection.length()>0) {
        	 	requete.append("AND id_source IN (SELECT distinct id_source FROM (");
             requete.append(querySelection);
@@ -1202,7 +1237,6 @@ public class ApiInitialisationService extends ApiService {
         	 UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_fichier_t; ");
              UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_archive; ");
 
-            String envDir = env.replace(".", "_").toUpperCase();
 
             if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
                 ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
@@ -1210,16 +1244,17 @@ public class ApiInitialisationService extends ApiService {
                 if (entrepotList!=null)
                 {
 	                for (String s : entrepotList) {
-	                    FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + s).toFile());
-	                    FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + s + "_ARCHIVE").toFile());
+	                	
+	                    FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
+	                    FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
 	                }
                 }
             }
-            FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + TraitementEtat.ENCOURS).toFile());
-            FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + TraitementEtat.OK).toFile());
-            FileUtils.cleanDirectory(Paths.get(repertoire, envDir, TraitementPhase.RECEPTION + "_" + TraitementEtat.KO).toFile());
+            FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
+            FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
+            FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
             try {
-                FileUtils.cleanDirectory(Paths.get(repertoire, envDir, "EXPORT").toFile());
+                FileUtils.cleanDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
             } catch (Exception e) {}
 
         } catch (IOException ex) {

@@ -122,8 +122,11 @@ public class VObjectService {
 				currentData.setPaginationSize(v0.getPaginationSize());
 			}
 			if (currentData.getInputFields() != null && v0.getDefaultInputFields() != null) {
-				for (int i = 0; i < v0.getHeadersDLabel().size(); i++) {
+				for (int i = 0; i < v0.getHeadersDLabel().size(); i++) {					
 			        if (v0.getDefaultInputFields().get(v0.getHeadersDLabel().get(i)) != null) {
+			        	// complete arraylist so that "i" will be in bound for the set command
+			        	for (int k=currentData.getInputFields().size(); k<=i;k++)
+			        			currentData.getInputFields().add(null);
 			            currentData.getInputFields().set(i, v0.getDefaultInputFields().get(v0.getHeadersDLabel().get(i)));
 			        }
 			    }

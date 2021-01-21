@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.execute;
+package fr.insee.arc.ws.services.restServices.execute;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,8 +34,8 @@ import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.ws.services.rest.execute.pojo.ExecuteParameterPojo;
-import fr.insee.arc.ws.services.rest.execute.view.ReturnView;
+import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
+import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 import fr.insee.arc.core.util.LoggerDispatcher;
 
 @RestController
@@ -71,7 +71,7 @@ public class ExecuteEngineController {
 
 
 			String structure = "";
-				for (int i = 2; i <= Integer.parseInt(bodyPojo.targetPhase); i++) {
+				for (int i = 2; i <= TraitementPhase.getPhase(bodyPojo.targetPhase).getOrdre(); i++) {
 
 					switch (TraitementPhase.getPhase(i)) {
 					case CHARGEMENT:

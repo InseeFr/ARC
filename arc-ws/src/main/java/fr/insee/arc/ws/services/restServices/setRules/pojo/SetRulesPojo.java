@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.changerules.pojo;
+package fr.insee.arc.ws.services.restServices.setRules.pojo;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +10,7 @@ import fr.insee.arc.utils.structure.Record;
  * @author MS
  *
  */
-public class ChangeRulesPojo {
+public class SetRulesPojo {
 
 	
 	// environnement d'execution
@@ -20,7 +20,7 @@ public class ChangeRulesPojo {
 	public String targetRule;
 	
 	// action à réaliser
-	public ChangeRulesActionEnum actionType;
+	public SetRulesActionEnum actionType;
 	
 	// data content
 	public Map<String,Record> content;
@@ -41,11 +41,11 @@ public class ChangeRulesPojo {
 		this.targetRule = targetRule;
 	}
 
-	public ChangeRulesActionEnum getActionType() {
+	public SetRulesActionEnum getActionType() {
 		return actionType;
 	}
 
-	public void setActionType(ChangeRulesActionEnum actionType) {
+	public void setActionType(SetRulesActionEnum actionType) {
 		this.actionType = actionType;
 	}
 

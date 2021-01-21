@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.rest.execute.pojo;
+package fr.insee.arc.ws.services.restServices.execute.pojo;
 
 import java.util.List;
 
@@ -14,9 +14,12 @@ public class ExecuteParameterPojo {
 	
 	// contenu du fichier
 	public String fileContent;
-	
+
 	// environnement d'execution
 	public String sandbox;
+	
+	// repertoire de dépot de fichier
+	public String warehouse;
 	
 	// n° de la phase à atteindre
 	public String targetPhase;
@@ -93,8 +96,17 @@ public class ExecuteParameterPojo {
 	public void setServiceType(String serviceType) {
 		this.serviceType = serviceType;
 	}
+	public String getWarehouse() {
+		return warehouse;
+	}
+	public void setWarehouse(String warehouse) {
+		this.warehouse = warehouse;
+	}
+	public String getNorme() {
+		return norme;
+	}
+	public void setNorme(String norme) {
+		this.norme = norme;
+	}
 
-	
-	
-	
 }

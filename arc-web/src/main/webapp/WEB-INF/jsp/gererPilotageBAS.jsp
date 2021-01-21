@@ -58,7 +58,7 @@
 							<div class="col-md-8">
 								<input type="hidden" name="viewEntrepotBAS.sessionName" value="${viewEntrepotBAS.sessionName}" m="js" />
 								<h3>
-									<spring:message code="managementSandbox.loadFile"/>
+									<spring:message code="managementSandbox.loadFile"/> (${envMap[bacASable]})
 								</h3>
 								<div class="input-group my-3">
 									<div class="custom-file">

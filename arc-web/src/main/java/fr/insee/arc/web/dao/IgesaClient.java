@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -144,7 +144,8 @@ public class IgesaClient implements UserManagementDao {
 				+ properties.getLdapApplicatioName()
 				+ "/groupe/" + group
 				+ "/utilisateur/" + id)
-				.equals(HttpStatus.OK);
+				.equals(HttpStatus.OK)
+				&& isUserInGroup(id, group);
 	}
 
 	@Override
@@ -153,7 +154,8 @@ public class IgesaClient implements UserManagementDao {
 				+ properties.getLdapApplicatioName()
 				+ "/groupe/" + group
 				+ "/utilisateur/" + id)
-				.equals(HttpStatus.OK);
+				.equals(HttpStatus.OK)
+				&& !isUserInGroup(id, group);
 	}
 
 	private <T> T mapTo(String value, TypeReference<T> typeRef) {
@@ -163,6 +165,18 @@ public class IgesaClient implements UserManagementDao {
 			loggerDispatcher.error("An error occured when mapping a result from Igesa", e, LOGGER);
 		}
 		return null;
+	}
+	
+	private boolean isUserInGroup(String userId, String group) {
+		String response = get("/recherche/application/" + properties.getLdapApplicatioName() + "/groupe/" + group);
+		List<IgesaGroup> groupsFound = mapTo(response, new TypeReference<List<IgesaGroup>>(){});
+		if (groupsFound == null) {
+			return false;
+		}
+		return groupsFound.stream()
+				.filter(g -> g.cn.equalsIgnoreCase(group))
+				.anyMatch(g -> g.personnes.stream()
+						.anyMatch(p -> p.uid.equalsIgnoreCase(userId)));
 	}
 
 	private String get(String uri){
