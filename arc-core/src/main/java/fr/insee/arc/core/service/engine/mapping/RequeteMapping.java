@@ -21,7 +21,6 @@ import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -169,10 +168,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         List<List<String>> resultTemp = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
         
         ArrayList<ArrayList<String>> result= new ArrayList<>();
-
-        ExpressionService expressionService = new ExpressionService();
         
-        GenericBean expressions = expressionService.fetchExpressions(this.connexion, this.environnement, this.jeuDeRegle);
 
         for (int i = 0; i < resultTemp.size(); i++) {
             // mise en minuscule des rubriques
@@ -185,8 +181,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
                 exprCol="";
             }
 
-        	// Apply expression
-            exprCol = expressionService.applyTo(exprCol, expressions);
             
             Matcher m = Pattern.compile("\\{[^\\{\\} ]*\\}").matcher(exprCol);
             

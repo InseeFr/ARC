@@ -21,6 +21,26 @@ public class JeuDeRegleDao {
     private static final Logger LOGGER = LogManager.getLogger(JeuDeRegleDao.class);
 
     /**
+     * Fetch all the rulesets, without the rules.
+     *
+     * @param connexion
+     * @param nomTableATraiter
+     * @param tableJeuDeRegle
+     * @return
+     * @throws SQLException
+     */
+    public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableJeuDeRegle) throws SQLException {
+        StaticLoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
+
+        StringBuilder requete = new StringBuilder();
+        requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
+        requete.append("\n FROM " + tableJeuDeRegle + " a ");
+
+		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new PreparedStatementBuilder(requete))).mapContent();
+        return extractRuleSetObjects(g);
+    }
+    
+    /**
      * Récupération de l'ensemble des jeux de règles applicables à une table à controler Une même table peu contenir des validités
      * différentes attention, après il faudra les remplir avec les règles associées
      *
@@ -32,7 +52,6 @@ public class JeuDeRegleDao {
      */
     public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws SQLException {
         StaticLoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
-        ArrayList<JeuDeRegle> listJdr = new ArrayList<>();
 
         StringBuilder requete = new StringBuilder();
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
@@ -47,8 +66,15 @@ public class JeuDeRegleDao {
 
 		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new PreparedStatementBuilder(requete))).mapContent();
 
-		SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+		ArrayList<JeuDeRegle> listJdr = extractRuleSetObjects(g);
 
+        StaticLoggerDispatcher.info("J'ai trouvé " + listJdr.size() + " jeux de règle, utiles pour controler", LOGGER);
+        return listJdr;
+    }
+
+	private static ArrayList<JeuDeRegle> extractRuleSetObjects(HashMap<String, ArrayList<String>> g) {
+		SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+        ArrayList<JeuDeRegle> listJdr = new ArrayList<>();
 		if (!g.isEmpty())
 		{
 			for (int i=0;i<g.get("id_norme").size();i++)
@@ -69,9 +95,7 @@ public class JeuDeRegleDao {
 	                listJdr.add(jdr);
 	        }
 		}
-
-        StaticLoggerDispatcher.info("J'ai trouvé " + listJdr.size() + " jeux de règle, utiles pour controler", LOGGER);
-        return listJdr;
-    }
+		return listJdr;
+	}
 
 }

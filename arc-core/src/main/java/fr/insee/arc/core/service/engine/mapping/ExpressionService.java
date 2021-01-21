@@ -18,11 +18,20 @@ import fr.insee.arc.utils.structure.GenericBean;
 public class ExpressionService implements IDbConstant {
 
 
+	public static final String EXPR_NAME = "expr_nom";
+	public static final String EXPR_VALUE = "expr_valeur";
+	
 	/** Checks whether the name is a valid expression name.*/
 	public boolean validateExpressionName(String expressionValue) {
 		return !expressionValue.contains("@");
 	}
 
+	public Optional<String> loopInExpressionSet(GenericBean expressions){
+		return loopInExpressionSet(
+				expressions.mapContent().get(EXPR_NAME), 
+				expressions.mapContent().get(EXPR_VALUE));
+	}
+	
 	/** Checks whether the name is a valid expression name.
 	 * @param the list of expression names
 	 * @param the list of expression values, matching the other list order
@@ -72,26 +81,39 @@ public class ExpressionService implements IDbConstant {
 		
 	}
 
-	/** Apply a set of substitutable expressions to a rule.
-	 * @param evaluatedString the String where the expressions will be apply
-	 * @param expressions a set of expressions (two fields : "expr_nom", expr_valeur")*/
-	public String applyTo(String evaluatedString, GenericBean expressions) {
-		Pattern pattern = Pattern.compile("(?<=\\{@)(.+?)(?=@\\})");
-		Matcher matcher = pattern.matcher(evaluatedString);
-		HashMap<String, ArrayList<String>> mapContent = expressions.mapContent();
-		while (matcher.find()) {
-			int i = mapContent.get("expr_nom").indexOf(matcher.group());
-			if (i != -1) {
-				String exprValue = mapContent.get("expr_valeur").get(i);
-				evaluatedString = new StringBuilder(evaluatedString)
-							.replace(matcher.start() - 2, matcher.end() + 2, exprValue)
-							.toString();
-				// Reset on change
-				matcher = pattern.matcher(evaluatedString);
-			}
-		}
-		return evaluatedString;
+	/** Fetch the expressions in order so that if expression A includes expression B, then A comes before B.
+	 * It is highly recommended to check for loops beforehand.*/
+	public GenericBean fetchOrderedExpressions(Connection connexion, String environment,
+			JeuDeRegle ruleSet) throws SQLException {
+		PreparedStatementBuilder request = new PreparedStatementBuilder();
+		request.append("WITH recursive exprs (select expr_nom, expr_valeur from ");
+		request.append(environment);
+		request.append(".expression WHERE ");
+		request.append(ruleSet.getSqlEquals());
+		request.append("), \n tree (expr_nom, expr_valeur, level, path)\n");
+		request.append("AS (SELECT m.expr_nom, m.expr_valeur, 0, m.expr_nom \n");
+		request.append(" FROM exprs m \n");
+		request.append("WHERE 1 not in (select 1 from exprs \\n");
+		request.append(".expression where expr_valeur like '%{@'||m.expr_nom||'@}%') \n");
+		request.append(" UNION ALL \n");
+		request.append(" SELECT sub.expr_nom, sub.expr_valeur, t.level + 1, t.path||'>'||sub.EXPR_NOM \n");
+		request.append("    FROM exprs sub \n");
+		request.append("    INNER JOIN tree t \n");
+		request.append("    ON t.expr_valeur like '%@'||sub.expr_nom||'@%' )\n");
+		request.append("select expr_nom, expr_valeur, level from tree\n");
+		return new GenericBean(
+				UtilitaireDao.get(poolName).executeRequest(connexion, request)
+				);
+	}
 
+	public boolean isExpressionSyntaxPresent(Connection connexion, String environment, JeuDeRegle ruleSet) throws Exception {
+		PreparedStatementBuilder request = new PreparedStatementBuilder();
+		request.append("select 1 from ");
+		request.append(environment);
+		request.append(".mapping where ");
+		request.append(ruleSet.getSqlEquals());
+		request.append(" and expr_regle_col ~ '(?<=\\{@)(.+?)(?=@\\})'");
+		return 	UtilitaireDao.get(poolName).hasResults(connexion, request);
 	}
 
 }

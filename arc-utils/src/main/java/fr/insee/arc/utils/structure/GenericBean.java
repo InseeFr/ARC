@@ -2,7 +2,6 @@ package fr.insee.arc.utils.structure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 // TODO add documentation of the purpose of this class
 public class GenericBean {
@@ -111,6 +110,10 @@ public class GenericBean {
 	}
 	
 
+	public boolean isEmpty() {
+		return size() == 0;
+	}
+	
     public int size() {
         return this.content.size();
     }
