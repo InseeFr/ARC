@@ -5,11 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,23 +20,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.core.dao.MappingRegleDao;
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.core.model.JeuDeRegle;
-import fr.insee.arc.core.model.RegleControleEntity;
-import fr.insee.arc.core.model.RegleMappingEntity;
-import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ControleRegleService;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
-import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.dao.GererNormeDao;
 import fr.insee.arc.web.model.NormManagementModel;
@@ -776,44 +765,13 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	
 	@RequestMapping("/addExpression")
 	public String addExpression(Model model) {
-		ExpressionService expressionService = new ExpressionService();
-		String exprNameHeader = "expr_nom";
-		String exprValueHeader = "expr_valeur";
-
-		// Name validity
+		String exprNameHeader = ExpressionService.EXPR_NAME;
 		viewExpression.setInputFieldFor(exprNameHeader, viewExpression.getInputFieldFor(exprNameHeader).trim());
-		if (!expressionService.validateExpressionName(viewExpression.getInputFieldFor(exprNameHeader))) {
-			viewExpression.setMessage("normManagement.addExpression.error.name");
-			return basicAction(model, RESULT_SUCCESS);
-		}
-
-		// Check for loops
-		HashMap<String, ArrayList<String>> mapContent = viewExpression.mapContent();
-		if (!mapContent.isEmpty()) {
-			ArrayList<String> names = mapContent.get(exprNameHeader);
-			names.add(viewExpression.getInputFieldFor(exprNameHeader));
-			ArrayList<String> values = mapContent.get(exprValueHeader);
-			values.add(viewExpression.getInputFieldFor(exprValueHeader));
-			Optional<String> loop = expressionService.loopInExpressionSet(names, values);
-			if (loop.isPresent()) {
-				viewExpression.setMessage("normManagement.addExpression.error.loop");
-				viewExpression.setMessageArgs(loop.get());
-				return basicAction(model, RESULT_SUCCESS);
-			}
-		}
-
 		return addLineVobject(model, RESULT_SUCCESS, this.viewExpression);
 	}
 
 	@RequestMapping("/updateExpression")
 	public String updateExpression(Model model) {
-		HashMap<String, ArrayList<String>> mapContent = viewExpression.mapUpdatedContent();
-		Optional<String> loop = new ExpressionService().loopInExpressionSet(mapContent.get("expr_nom"), mapContent.get("expr_valeur"));
-		if (loop.isPresent()) {
-			viewExpression.setMessage("normManagement.addExpression.error.loop");
-			viewExpression.setMessageArgs(loop.get());
-			return basicAction(model, RESULT_SUCCESS);
-		}
 		return updateVobject(model, RESULT_SUCCESS, this.viewExpression);
 	}
 

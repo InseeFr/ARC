@@ -20,11 +20,6 @@ public class ExpressionService implements IDbConstant {
 
 	public static final String EXPR_NAME = "expr_nom";
 	public static final String EXPR_VALUE = "expr_valeur";
-	
-	/** Checks whether the name is a valid expression name.*/
-	public boolean validateExpressionName(String expressionValue) {
-		return !expressionValue.contains("@");
-	}
 
 	public Optional<String> loopInExpressionSet(GenericBean expressions){
 		return loopInExpressionSet(
