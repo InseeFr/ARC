@@ -210,8 +210,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @return
      */
     public static String dbEnv(String env) {
-        return env.replace(".", "_")+".";
+        return envWithUnderscore(env)+".";
     }
+
+
+	public static String envWithUnderscore(String env) {
+		return env.replace(".", "_");
+	}
 
     public ApiService() {
         super();
@@ -1105,7 +1110,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     
 	public static String directoryEnvRoot(String rootDirectory, String env)
 	{
-		return rootDirectory + File.separator + env.replace(".", "_").toUpperCase();
+		return rootDirectory + File.separator + envWithUnderscore(env).toUpperCase();
 	}
     
 	public static String directoryPhaseRoot(String rootDirectory, String env, TraitementPhase t)
