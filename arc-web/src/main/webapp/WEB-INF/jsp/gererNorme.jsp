@@ -48,10 +48,10 @@
 				<c:param name="ligneFilter" value ="true" />
 				<c:param name="checkbox" value ="true" />
 				<c:param name="checkboxVisible" value ="true" />
-				<c:param name="extraScopeAdd" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeDelete" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeUpdate" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeSee" value ="viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeAdd" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeDelete" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeUpdate" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeSee" value ="viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
 	
 			</c:import>
 		</div>
@@ -69,10 +69,10 @@
 				<c:param name="ligneFilter" value ="true" />
 				<c:param name="checkbox" value ="true" />
 				<c:param name="checkboxVisible" value ="true" />
-				<c:param name="extraScopeAdd" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeDelete" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeUpdate" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeSee" value ="viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeAdd" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeDelete" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeUpdate" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeSee" value ="viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
 	
 			</c:import>
 		</div>
@@ -90,9 +90,9 @@
 			<c:param name="ligneFilter" value ="true" />
 			<c:param name="checkbox" value ="true" />
 			<c:param name="checkboxVisible" value ="true" />
-			<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-			<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-			<c:param name="extraScopeSee" value ="viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+			<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+			<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+			<c:param name="extraScopeSee" value ="viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
 			<c:param name="otherButton">
 				<button
 					class="btn btn-primary btn-sm"
@@ -115,6 +115,7 @@
 				|| viewControle.isInitialized==true&&viewControle.isScoped==true
 				|| viewFiltrage.isInitialized==true&&viewFiltrage.isScoped==true
 				|| viewMapping.isInitialized==true&&viewMapping.isScoped==true
+				|| viewExpression.isInitialized==true&&viewExpression.isScoped==true
 				 }">
 					<ul
 						class="nav nav-tabs mb-2 flex-column flex-md-row"
@@ -183,7 +184,6 @@
 							>
 								<spring:message code="normManagement.mapmodel"/>
 							</a></li>
-					<!-- 								TODO -->
 							<li class="nav-item font-smaller" style="margin-left:auto"><a
 								class="nav-link"
 								id="expressions-tab"
@@ -583,6 +583,52 @@
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
 								<c:param name="allowResize" value ="true" />
+								<c:param name="otherButton">
+									<c:if
+										test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
+									>
+										<input
+											class="btn btn-primary btn-sm"
+											id="viewExpression.truncate"
+											type="submit"
+											doAction="viderExpression"
+											scope="viewExpression;"
+											value="<spring:message code="gui.button.deleteRuleset"/>"
+										></input>
+										<input
+											class="btn btn-primary btn-sm"
+											id="viewExpression.copie"
+											type="submit"
+											doAction="selectJeuxDeReglesExpressionCopie"
+											scope="viewExpression;viewJeuxDeReglesCopie;"
+											value="<spring:message code="gui.button.replaceRuleset"/>"
+										></input>
+										<div class="input-group my-3">
+											<div class="custom-file">
+												<input
+													name="fileUploadExpression"
+													type="file"
+													class="custom-file-input"
+													id="inputGroupFileExpression"
+												/> <label
+													class="custom-file-label"
+													for="inputGroupFileExpression"
+													aria-describedby="Choose file to upload for expressions"
+												><spring:message code="general.chooseFile"/></label>
+											</div>
+											<div class="input-group-append">
+												<button
+													class="btn btn-primary btn-sm"
+													id="viewExpression.import"
+													type="submit"
+													doAction="importExpression"
+													scope="viewModuleButtons;viewExpression;"
+													multipart="true"
+												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
+											</div>
+										</div>
+									</c:if>
+								</c:param>
 							</c:import>
 					</div>
 
