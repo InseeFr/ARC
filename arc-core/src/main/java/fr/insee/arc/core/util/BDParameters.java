@@ -75,5 +75,21 @@ public class BDParameters {
 			e.printStackTrace();
 		}
 	}
+
+	/** Insert or update the value for that key.*/
+	public static void setValue(Connection c, String key, String value) throws SQLException {
+		StringBuilder request = new StringBuilder();
+		request.append("INSERT INTO "+ parameterTable +" (key,val) VALUES ('");
+		request.append(key);
+		request.append("','");
+		request.append(value);
+		request.append("')");
+		request.append("  ON CONFLICT (key) DO UPDATE SET val ='");
+		request.append(value);
+		request.append("'  WHERE EXCLUDED.key='");
+		request.append(key);
+		request.append("';");
+		UtilitaireDao.get("arc").executeImmediate(c, request.toString());
+	}
 	
 }
