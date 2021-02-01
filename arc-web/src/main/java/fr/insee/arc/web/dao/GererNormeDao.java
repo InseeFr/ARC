@@ -846,18 +846,18 @@ public class GererNormeDao implements IDbConstant {
 
 			requete.append("\n UPDATE " + nomTableImage + " SET ");
 			requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));
-			requete.append("\n, periodicite='" + requete.quoteText(selection.get("periodicite").get(0)));
-			requete.append("\n, validite_inf='" + requete.quoteText(selection.get("validite_inf").get(0)));
-			requete.append("\n, validite_sup='" + requete.quoteText(selection.get("validite_sup").get(0)));
-			requete.append("\n, version='" + requete.quoteText(selection.get("version").get(0)));
+			requete.append("\n, periodicite=" + requete.quoteText(selection.get("periodicite").get(0)));
+			requete.append("\n, validite_inf=" + requete.quoteText(selection.get("validite_inf").get(0)) + "::date");
+			requete.append("\n, validite_sup=" + requete.quoteText(selection.get("validite_sup").get(0)) + "::date");
+			requete.append("\n, version=" + requete.quoteText(selection.get("version").get(0)));
 			requete.append("\n ; ");
 			
 			requete.append("\n DELETE FROM " + vObjectToUpdate.getTable());
 			requete.append("\n WHERE ");
 			requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));
 			requete.append("\n AND  periodicite=" + requete.quoteText(selection.get("periodicite").get(0)));
-			requete.append("\n AND  validite_inf=" + requete.quoteText(selection.get("validite_inf").get(0)));
-			requete.append("\n AND  validite_sup=" + requete.quoteText(selection.get("validite_sup").get(0)));
+			requete.append("\n AND  validite_inf=" + requete.quoteText(selection.get("validite_inf").get(0)) + "::date");
+			requete.append("\n AND  validite_sup=" + requete.quoteText(selection.get("validite_sup").get(0)) + "::date");
 			requete.append("\n AND  version=" + requete.quoteText(selection.get("version").get(0)));
 			requete.append("\n ; ");
 
