@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import fr.insee.arc.core.model.BddTable;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -439,15 +440,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	/**
-	 * renvoi si l'environnement est un de production
-	 * 
-	 * @return
-	 */
-	public boolean isProd() {
-		return BddTable.SCHEMA_ARC_PROD.equalsIgnoreCase(getBacASable());
-	}
-
-	/**
 	 * @return the bddTable
 	 */
 	public final BddTable getBddTable() {
@@ -515,7 +507,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	/** Return true if the environment is a production environment.*/
 	private boolean checkEnv(String env) {
 		// always false for now
-		return false;
+		return env != null && env.equalsIgnoreCase(BDParameters.getString(null, "LanceurARC.envExecution", null));
 	}
 	
 	public String getVersion() {

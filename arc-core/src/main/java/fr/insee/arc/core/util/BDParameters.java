@@ -5,7 +5,6 @@ import java.sql.SQLException;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.FormatSQL;
 
 public class BDParameters {
 
