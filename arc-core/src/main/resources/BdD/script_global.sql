@@ -253,7 +253,13 @@ REVOKE ALL ON SCHEMA public FROM public;
 REVOKE ALL ON SCHEMA arc FROM public; 
 
 -- restricted role for service execution
-do $$ begin CREATE ROLE arc_restricted with NOINHERIT; exception when others then end; $$;
+do $$ begin if ('{{userRestricted}}'!='{{user}}') then CREATE ROLE {{userRestricted}} with NOINHERIT; end if; exception when others then end; $$;
 
-GRANT USAGE ON SCHEMA public TO arc_restricted;
-GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public to arc_restricted;
+do $$ begin
+if ('{{userRestricted}}'!='{{user}}') then 
+GRANT USAGE ON SCHEMA public TO {{userRestricted}}; 
+GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public to {{userRestricted}};
+end if; 
+exception when others then end;
+$$;
+
