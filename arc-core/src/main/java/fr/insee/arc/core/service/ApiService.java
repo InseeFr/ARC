@@ -2,7 +2,6 @@ package fr.insee.arc.core.service;
 
 import java.io.File;
 import java.math.BigInteger;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -20,10 +19,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.Model;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.NormeFichier;
@@ -62,9 +59,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public static final String ID_SOURCE = "id_source";
     // racine xml
     public static final String ROOT="root";
-
-    // restricted user
-    private static final String RESTRICTED_USER="arc_restricted";
 
     // anti-spam delay when thread chain error
     protected static final int PREVENT_ERROR_SPAM_DELAY=100;
@@ -115,8 +109,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public Exception error = null;
     public Thread t = null;
     
-    public static ArrayList<Connection> prepareThreads(int parallel, Connection connexion, String anEnvExecution) {
-        ArrayList<Connection> connexionList = new ArrayList<Connection>();
+    public static ArrayList<Connection> prepareThreads(int parallel, Connection connexion, String anEnvExecution, String restrictedUsername) {
+        ArrayList<Connection> connexionList = new ArrayList<>();
 		try {
 			if (connexion != null) {
 				connexionList.add(connexion);
@@ -130,7 +124,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				connexionList.add(connexionTemp);
 
 				// demote application user account to temporary restricted operations and readonly or non-tempoary schema
-				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution)+ FormatSQL.changeRole(RESTRICTED_USER));
+				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution)+ FormatSQL.changeRole(restrictedUsername));
 			}
 
 		} catch (Exception ex) {

@@ -23,6 +23,7 @@
 		<property name="databasePoolName" value="${fr.insee.database.poolName}"></property>
 		<property name="databaseUrl" value="#{systemEnvironment['DATABASE_URL'] ?: '${fr.insee.database.arc.url}' }"></property>
 		<property name="databaseUsername" value="#{systemEnvironment['DATABASE_USER'] ?: '${fr.insee.database.arc.username}' }"></property>
+		<property name="databaseRestrictedUsername" value="#{systemEnvironment['DATABASE_RESTRICTED_USER'] ?: '${fr.insee.database.arc.restrictedUsername:}' }"></property>
 		<property name="databasePassword" value="#{systemEnvironment['DATABASE_PASSWORD'] ?: '${fr.insee.database.arc.password}' }"></property>
 		<property name="databaseDriverClassName" value="${fr.insee.database.arc.driverClassName}"></property>
 		<property name="ldapDirectoryUri" value="${fr.insee.annuaire.arc.uri}"></property>
@@ -32,7 +33,6 @@
 		<property name="batchParametersDirectory" value="#{systemEnvironment['APPLICATION_DIRECTORY'] ?: '${fr.insee.arc.batch.parametre.repertoire}' }"></property>
 		<property name="version" value="${fr.insee.arc.version}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
-		<property name="schemaReference" value="${fr.insee.arc.schema.reference}"></property>
 		<property name="authorizedRoles" value="${fr.insee.arc.roles.admin:}"></property>
 	</bean>
 	

@@ -5,9 +5,15 @@ CREATE SCHEMA IF NOT EXISTS {{envExecution}} AUTHORIZATION {{user}};
 -- TODO : secure arc_restricted to table level ??
 REVOKE ALL ON SCHEMA {{envExecution}} FROM public; 
 GRANT ALL ON SCHEMA {{envExecution}} TO {{user}};
-GRANT USAGE ON SCHEMA {{envExecution}} TO arc_restricted;
-GRANT SELECT on ALL TABLES IN schema {{envExecution}} TO arc_restricted;
-ALTER DEFAULT privileges IN SCHEMA {{envExecution}} GRANT SELECT ON TABLES to arc_restricted;
+
+do $$ begin
+if ('{{userRestricted}}'!='{{user}}') then 
+GRANT USAGE ON SCHEMA {{envExecution}} TO {{userRestricted}};
+GRANT SELECT on ALL TABLES IN schema {{envExecution}} TO {{userRestricted}};
+ALTER DEFAULT privileges IN SCHEMA {{envExecution}} GRANT SELECT ON TABLES to {{userRestricted}};
+end if;
+exception when others then end;
+$$;
 
 
 -- pilotage tables and view

@@ -67,16 +67,16 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 			if (authorizedRoles.length == 0) {
 				// authenticated
 				http.authorizeRequests()
-				.antMatchers(HttpMethod.GET, "/*").authenticated()
-				.antMatchers(HttpMethod.POST, "/*").authenticated();		
+				.antMatchers(HttpMethod.GET, "/**").authenticated()
+				.antMatchers(HttpMethod.POST, "/**").authenticated();		
 			} else {
 				// role restriction
 				http.authorizeRequests()
-				.antMatchers(HttpMethod.GET, "/*").hasAnyAuthority(authorizedRoles)
-				.antMatchers(HttpMethod.POST, "/*").hasAnyAuthority(authorizedRoles);
+				.antMatchers(HttpMethod.GET, "/**").hasAnyAuthority(authorizedRoles)
+				.antMatchers(HttpMethod.POST, "/**").hasAnyAuthority(authorizedRoles);
 			}
 			// everything else
-			http.authorizeRequests().anyRequest().denyAll();			
+			http.authorizeRequests().anyRequest().denyAll();
 		}
 	}
 

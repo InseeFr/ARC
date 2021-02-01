@@ -11,6 +11,7 @@ public class PropertiesHandler {
 	
     /* Database */
     private String databasePoolName;
+    private String databaseRestrictedUsername;
     private String databaseUrl;
     private String databaseUsername;
     private String databasePassword;
@@ -28,7 +29,6 @@ public class PropertiesHandler {
     private String batchArcEnvironment;
     /* Miscellaneous */
     private String version;
-    private String schemaReference;
     private String application;
     private String tn;
     /* Directories */
@@ -202,16 +202,6 @@ public class PropertiesHandler {
     }
 
 
-    public String getSchemaReference() {
-        return schemaReference;
-    }
-
-
-    public void setSchemaReference(String schemaReference) {
-        this.schemaReference = schemaReference;
-    }
-
-
     public String getApplication() {
         return application;
     }
@@ -269,6 +259,18 @@ public class PropertiesHandler {
 			return new String[0];
 		}
 		return authorizedRoles.split(",");
+	}
+
+	public String getDatabaseRestrictedUsername() {
+		if (databaseRestrictedUsername.equals(""))
+		{
+			return databaseUsername;
+		}
+		return databaseRestrictedUsername;
+	}
+
+	public void setDatabaseRestrictedUsername(String databaseRestrictedUsername) {
+		this.databaseRestrictedUsername = databaseRestrictedUsername;
 	}
     
 }

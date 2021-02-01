@@ -72,7 +72,7 @@ public class ApiControleService extends ApiService {
         // long dateDebut = java.lang.System.currentTimeMillis() ;
         Connection connextionThread = null;
         ArrayList<ThreadControleService> threadList = new ArrayList<ThreadControleService>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution);
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
         currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);

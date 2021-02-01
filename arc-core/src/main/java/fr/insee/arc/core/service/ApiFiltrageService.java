@@ -68,7 +68,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
         // long dateDebut = java.lang.System.currentTimeMillis() ;
         Connection connextionThread = null;
         ArrayList<ThreadFiltrageService> threadList = new ArrayList<ThreadFiltrageService>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution);
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
         currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le filtrage **", logger);
