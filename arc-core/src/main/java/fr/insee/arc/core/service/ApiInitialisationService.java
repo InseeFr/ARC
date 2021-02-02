@@ -933,11 +933,11 @@ public class ApiInitialisationService extends ApiService {
 		    		PreparedStatementBuilder request = new PreparedStatementBuilder();
 	    			request.append("UPDATE ");
 	    			request.append(anExecutionEnvironment);
-	    			request.append(".mapping\n set expr_regle_col=replace(expr_regle_col,{@");
-	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_NAME).get(0));
-	    			request.append("@},");
-	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(0));
-	    			request.append("where expr_regle_col like '%{@%@}%' and ");
+	    			request.append(".mapping_regle\n set expr_regle_col=replace(expr_regle_col,'{@");
+	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_NAME).get(i));
+	    			request.append("@}','");
+	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(i));
+	    			request.append("') where expr_regle_col like '%{@%@}%' and ");
 	    			request.append(ruleSet.getSqlEquals());
 	    			request.append(";");
 		    		UtilitaireDao.get(poolName).executeRequest(connexion, request);

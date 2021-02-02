@@ -81,20 +81,20 @@ public class ExpressionService implements IDbConstant {
 	public GenericBean fetchOrderedExpressions(Connection connexion, String environment,
 			JeuDeRegle ruleSet) throws SQLException {
 		PreparedStatementBuilder request = new PreparedStatementBuilder();
-		request.append("WITH recursive exprs (select expr_nom, expr_valeur from ");
+		request.append("WITH recursive exprs AS (select expr_nom, expr_valeur from ");
 		request.append(environment);
 		request.append(".expression WHERE ");
 		request.append(ruleSet.getSqlEquals());
 		request.append("), \n tree (expr_nom, expr_valeur, level, path)\n");
 		request.append("AS (SELECT m.expr_nom, m.expr_valeur, 0, m.expr_nom \n");
 		request.append(" FROM exprs m \n");
-		request.append("WHERE 1 not in (select 1 from exprs \\n");
-		request.append(".expression where expr_valeur like '%{@'||m.expr_nom||'@}%') \n");
+		request.append("WHERE 1 not in (select 1 from exprs \n");
+		request.append(" where expr_valeur like '%{@'||m.expr_nom||'@}%') \n");
 		request.append(" UNION ALL \n");
 		request.append(" SELECT sub.expr_nom, sub.expr_valeur, t.level + 1, t.path||'>'||sub.EXPR_NOM \n");
 		request.append("    FROM exprs sub \n");
 		request.append("    INNER JOIN tree t \n");
-		request.append("    ON t.expr_valeur like '%@'||sub.expr_nom||'@%' )\n");
+		request.append("    ON t.expr_valeur like '%{@'||sub.expr_nom||'@}%' )\n");
 		request.append("select expr_nom, expr_valeur, level from tree\n");
 		return new GenericBean(
 				UtilitaireDao.get(poolName).executeRequest(connexion, request)
@@ -105,7 +105,7 @@ public class ExpressionService implements IDbConstant {
 		PreparedStatementBuilder request = new PreparedStatementBuilder();
 		request.append("select 1 from ");
 		request.append(environment);
-		request.append(".mapping where ");
+		request.append(".mapping_regle where ");
 		request.append(ruleSet.getSqlEquals());
 		request.append(" and expr_regle_col ~ '(?<=\\{@)(.+?)(?=@\\})'");
 		return 	UtilitaireDao.get(poolName).hasResults(connexion, request);
