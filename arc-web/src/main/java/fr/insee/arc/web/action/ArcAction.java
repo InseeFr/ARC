@@ -64,7 +64,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);
 
-	private static final String DEFAULT_PRODUCTION_ENV="[\"arc_prod\"]";
+	private static final String DEFAULT_PRODUCTION_ENVIRONMENTS="[\"arc_prod\"]";
 	
 	protected static final String NONE = "none";
 	protected static final String POOLNAME = "arc"; 
@@ -511,7 +511,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	/** Return true if the environment is a production environment.*/
 	private boolean checkEnv(String env) {
-		JSONArray j=new JSONArray(BDParameters.getString(null, "ArcAction.productionEnv",DEFAULT_PRODUCTION_ENV));
+		JSONArray j=new JSONArray(BDParameters.getString(null, "ArcAction.productionEnvironments",DEFAULT_PRODUCTION_ENVIRONMENTS));
 		Set<String> found=new HashSet<>();
 		
 		j.forEach(item -> {
