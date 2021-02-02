@@ -6,9 +6,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.ui.Model;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import fr.insee.arc.core.model.BddTable;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -60,6 +64,8 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);
 
+	private static final String DEFAULT_PRODUCTION_ENV="[\"arc_prod\"]";
+	
 	protected static final String NONE = "none";
 	protected static final String POOLNAME = "arc"; 
 
@@ -439,15 +445,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	/**
-	 * renvoi si l'environnement est un de production
-	 * 
-	 * @return
-	 */
-	public boolean isProd() {
-		return BddTable.SCHEMA_ARC_PROD.equalsIgnoreCase(getBacASable());
-	}
-
-	/**
 	 * @return the bddTable
 	 */
 	public final BddTable getBddTable() {
@@ -514,8 +511,16 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	/** Return true if the environment is a production environment.*/
 	private boolean checkEnv(String env) {
-		// always false for now
-		return false;
+		JSONArray j=new JSONArray(BDParameters.getString(null, "ArcAction.productionEnv",DEFAULT_PRODUCTION_ENV));
+		Set<String> found=new HashSet<>();
+		
+		j.forEach(item -> {
+            if (item.toString().equals(env))
+            {
+            	found.add(item.toString());
+            }
+        });
+		return !found.isEmpty();
 	}
 	
 	public String getVersion() {
