@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.FormatSQL;
 
 public class BDParameters {
 
@@ -92,6 +91,29 @@ public class BDParameters {
 		} catch (SQLException e) {
 			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);
 		}
+	}
+
+	/** Insert or update the value for that key.*/
+	public static void setValue(Connection c, String key, String value) {
+		PreparedStatementBuilder request=new PreparedStatementBuilder();
+
+		request.append("INSERT INTO "+ parameterTable +" (key,val) VALUES (");
+		request.append(request.quoteText(key));
+		request.append(",");
+		request.append(request.quoteText(value));
+		request.append("')");
+		request.append("  ON CONFLICT (key) DO UPDATE SET val =");
+		request.append(request.quoteText(value));
+		request.append("  WHERE EXCLUDED.key=");
+		request.append(request.quoteText(key));
+		request.append(";");
+		
+		try {
+			UtilitaireDao.get("arc").executeRequest(c, request);
+		} catch (SQLException e) {
+			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);
+		}
+
 	}
 	
 }

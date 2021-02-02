@@ -233,7 +233,7 @@ public class BatchARC {
 		else
 		{
 			env= properties.getBatchArcEnvironment();
-			envExecution = properties.getBatchExecutionEnvironment();		
+			envExecution = properties.getBatchExecutionEnvironment();
 		}
 		
 		envExecution=envExecution.replace(".", "_");

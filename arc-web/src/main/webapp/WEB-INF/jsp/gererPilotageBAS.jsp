@@ -1,4 +1,4 @@
-﻿﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
+﻿f﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -41,13 +41,13 @@
 						
 						<c:if test="${isEnvProd}">
 							<div>
-								<input type="submit" id="ActionsProd.informationInitialisationPROD" value="<spring:message code="gui.button.prodInformation"/>" scope="viewPilotageBAS;" doAction="informationInitialisationPROD" onclick="" />
+								<input type="submit" class="btn btn-secondary btn-sm" id="ActionsProd.informationInitialisationPROD" value="<spring:message code="gui.button.prodInformation"/>" scope="viewPilotageBAS;" doAction="informationInitialisationPROD" onclick="" />
 								<br/>
-								<input type="submit" id="ActionsProd.retarderBatchInitialisationPROD" value="<spring:message code="gui.button.delayInit"/>" scope="viewPilotageBAS;" doAction="retarderBatchInitialisationPROD" onclick="return confirm('<spring:message code="gui.button.delayInit.confirm"/>');"/>
-								<input type="submit" id="ActionsProd.demanderBatchInitialisationPROD" value="<spring:message code="gui.button.requestInit"/>" scope="viewPilotageBAS;" doAction="demanderBatchInitialisationPROD" onclick="return confirm('<spring:message code="gui.button.requestInit.confirm"/>');" />
+								<input type="submit" class="btn btn-primary btn-sm" id="ActionsProd.retarderBatchInitialisationPROD" value="<spring:message code="gui.button.delayInit"/>" scope="viewPilotageBAS;" doAction="retarderBatchInitialisationPROD" onclick="return confirm('<spring:message code="gui.button.delayInit.confirm" javaScriptEscape="true"/>');"/>
+								<input type="submit" class="btn btn-primary btn-sm" id="ActionsProd.demanderBatchInitialisationPROD" value="<spring:message code="gui.button.requestInit"/>" scope="viewPilotageBAS;" doAction="demanderBatchInitialisationPROD" onclick="return confirm('<spring:message code="gui.button.requestInit.confirm" javaScriptEscape="true"/>');" />
 								<br/>
-								<input type="submit" id="ActionsProd.toggleOnPROD" value="<spring:message code="gui.button.startProd"/>" scope="viewPilotageBAS;" doAction="toggleOnPROD" onclick="return confirm('<spring:message code="gui.button.startProd.confirm"/>');"/>
-								<input type="submit" id="ActionsProd.toggleOffPROD" value="<spring:message code="gui.button.stopProd"/>" scope="viewPilotageBAS;" doAction="toggleOffPROD" onclick="return confirm('<spring:message code="gui.button.stopProd.confirm"/>');"/>
+								<input type="submit" class="btn btn-primary btn-sm" id="ActionsProd.toggleOnPROD" value="<spring:message code="gui.button.startProd"/>" scope="viewPilotageBAS;" doAction="toggleOnPROD" onclick="return confirm('<spring:message code="gui.button.startProd.confirm" javaScriptEscape="true"/>');"/>
+								<input type="submit" class="btn btn-primary btn-sm" id="ActionsProd.toggleOffPROD" value="<spring:message code="gui.button.stopProd"/>" scope="viewPilotageBAS;" doAction="toggleOffPROD" onclick="return confirm('<spring:message code="gui.button.stopProd.confirm" javaScriptEscape="true"/>');"/>
 							</div>
 						</c:if>
 					</div>
