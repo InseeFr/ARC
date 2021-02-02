@@ -1,4 +1,4 @@
-﻿<%@ page
+﻿﻿<%@ page
 	language="java"
 	contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"
@@ -33,8 +33,8 @@
 
 
 <div class="container-fluid">
-	<div class="d-flex flex-column flex-md-row">
-		<div class="col-md-6 align-self-center">
+	<div class="row">
+		<div class="col-md-6">
 			<!-- norm list -->
 			<c:set var="view" value="${viewNorme}"  scope="request"/>
 			<c:import url="tiles/templateVObject.jsp">
@@ -55,7 +55,7 @@
 	
 			</c:import>
 		</div>
-		<div class="col-md-3 align-self-center">
+		<div class="col-md-3">
 			<!-- calendar list -->
 			<c:set var="view" value="${viewCalendrier}"  scope="request"/>
 			<c:import url="tiles/templateVObject.jsp">
@@ -76,7 +76,7 @@
 	
 			</c:import>
 		</div>
-	<div class="col-md align-self-center">
+	<div class="col-md">
 		<!-- rule set list -->
 		<c:set var="view" value="${viewJeuxDeRegles}"  scope="request"/>
 		<c:import url="tiles/templateVObject.jsp">
@@ -118,7 +118,7 @@
 				|| viewExpression.isInitialized==true&&viewExpression.isScoped==true
 				 }">
 					<ul
-						class="nav nav-tabs mb-2 flex-column flex-md-row"
+						class="nav nav-tabs mb-2"
 						id="chooseModule"
 						role="tablist"
 					>
@@ -196,8 +196,6 @@
 							>
 								<spring:message code="normManagement.expression"/>
 							</a></li>
-					</ul>
-					
 					</ul>
 				</c:if>
 

@@ -126,14 +126,15 @@
 												</c:otherwise>
 											</c:choose>
 										</c:if>
-										<c:forEach items="${view.headersVLabel}" var="head" varStatus="incr"> 
+										<c:forEach items="${view.headersVLabel}" var="head" varStatus="incr">
+											<c:set var="emptyFilter" value="${empty view.filterFields[incr.index]}" /> 
 											<c:choose>
 												<c:when test="${view.headersVisible[incr.index]}">
 													<th scope="col">
 														<textarea 
 															name="${view.sessionName}.filterFields[${incr.index}]"
 															cols="" rows=""
-															id="${view.sessionName}.filterFields_${incr.index}_">${view.filterFields[incr.index]}</textarea>
+															id="${view.sessionName}.filterFields_${incr.index}_" ${!emptyFilter ? "m='js'" : ''}>${view.filterFields[incr.index]}</textarea>
 													</th>
 												</c:when>
 												<c:otherwise>
@@ -141,7 +142,7 @@
 														<textarea 
 															name="${view.sessionName}.filterFields[${incr.index}]"
 															cols="" rows=""
-															id="${view.sessionName}.filterFields_${incr.index}_">${view.filterFields[incr.index]}</textarea>
+															id="${view.sessionName}.filterFields_${incr.index}_" ${!emptyFilter ? "m='js'" : ''}>${view.filterFields[incr.index]}</textarea>
 													</th>
 												</c:otherwise>
 											</c:choose>

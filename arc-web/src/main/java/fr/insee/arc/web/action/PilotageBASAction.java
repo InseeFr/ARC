@@ -3,17 +3,19 @@ package fr.insee.arc.web.action;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.MediaType;
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.BddTable;
@@ -60,6 +61,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	private static final String WRITING_REPO = "entrepotEcriture";
 
 	private static final Logger LOGGER = LogManager.getLogger(PilotageBASAction.class);
+	
+	@Autowired
+	private MessageSource messageSource;
 	
 	private VObject viewPilotageBAS = new ViewPilotageBAS();
 	
@@ -274,88 +278,79 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
 	}
 
-//	@RequestMapping("/informationInitialisationPROD")
-//    public String informationInitialisationPROD(Model model) {
-//		
-//    	// demande l'initialisation : met au jour -1 à 22h
-//    	try {
-//			String heure=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
-//			String etat=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT case when operation='O' then 'actif' else 'inactif' end from arc.pilotage_batch;"));
-//			
-//    		this.getViewPilotageBAS().setMessage("Le batch est "+etat+".\nLe prochain batch d'initialisation est programmé aprés : "+heure);
-//
-//		} catch (SQLException e) {
-//			loggerDispatcher.error("Error in informationInitialisationPROD", e, LOGGER);
-//		}
-//    	return generateDisplay(model, RESULT_SUCCESS);
-//    }
-//
-//    @RequestMapping("/retarderBatchInitialisationPROD")
-//    @SQLExecutor
-//    public String retarderBatchInitialisationPROD(Model model) {
-//    	
-//    	// demande l'initialisation : met au jour -1 à 22h
-//    	try {
-//			UtilitaireDao.get("arc").executeRequest(null, 
-//					new PreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date + interval '7 days','yyyy-mm-dd')||':22';"));
-//
-//			String heure=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
-//			this.getViewPilotageBAS().setMessage("Le prochain batch d'initialisation aura lieu ce soir après : "+heure);
-//
-//			
-//		} catch (SQLException e) {
-//			loggerDispatcher.error("Error in retarderInitialisationPROD", e, LOGGER);
-//		}
-//    	
-//    	return generateDisplay(model, RESULT_SUCCESS);
-//    }
-//    
-//    @RequestMapping("/demanderBatchInitialisationPROD")
-//    @SQLExecutor
-//    public String demanderBatchInitialisationPROD(Model model) {
-//    	
-//    	// demande l'initialisation : met au jour -1 à 22h
-//    	try {
-//			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date-interval '1 days','yyyy-mm-dd')||':22';"));
-//			
-//			String heure=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
-//			this.getViewPilotageBAS().setMessage("Le prochain batch d'initialisation aura lieu dans quelques minutes (après "+heure+") ");
-//
-//			
-//		} catch (SQLException e) {
-//			loggerDispatcher.error("Error in demanderBatchInitialisationPROD", e, LOGGER);
-//		}
-//    	
-//    	return generateDisplay(model, RESULT_SUCCESS);
-//    }
-//    
-//    @RequestMapping("/toggleOnPROD")
-//    @SQLExecutor
-//    public String toggleOnPROD(Model model) {
-//    	
-//    	// demande l'initialisation : met au jour -1 à 22h
-//    	try {
-//			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='O'; "));
-//			this.getViewPilotageBAS().setMessage("Production activée ");
-//		} catch (SQLException e) {
-//			loggerDispatcher.error("Error in toggleOnPROD", e, LOGGER);
-//		}
-//    	return generateDisplay(model, RESULT_SUCCESS);
-//    }
-//
-//    @RequestMapping("/toggleOffPROD")
-//    @SQLExecutor
-//    public String toggleOffPROD(Model model) {
-//    	
-//    	// demande l'initialisation : met au jour -1 à 22h
-//    	try {
-//			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='N'; "));
-//			this.getViewPilotageBAS().setMessage("Production arretée ");
-//		} catch (SQLException e) {
-//			loggerDispatcher.error("Error in toggleOffPROD", e, LOGGER);
-//		}
-//    	return generateDisplay(model, RESULT_SUCCESS);
-//    }
+	@RequestMapping("/informationInitialisationPROD")
+    public String informationInitialisationPROD(Model model, HttpServletRequest request) {
+    	try {
+			String time = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
+			String state = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT case when operation='O' then 'active' else 'inactive' end from arc.pilotage_batch;"));
+			state = messageSource.getMessage("managementSandbox.batch.status." + state, null, request.getLocale());
+    		this.getViewPilotageBAS().setMessage("managementSandbox.batch.status");
+    		this.getViewPilotageBAS().setMessageArgs(state, time);
+
+		} catch (SQLException e) {
+			loggerDispatcher.error("Error in informationInitialisationPROD", e, LOGGER);
+		}
+    	return generateDisplay(model, RESULT_SUCCESS);
+    }
+
+    @RequestMapping("/retarderBatchInitialisationPROD")
+    public String retarderBatchInitialisationPROD(Model model) {
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, 
+					new PreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date + interval '7 days','yyyy-mm-dd')||':22';"));
+
+			String time = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
+			this.getViewPilotageBAS().setMessage("managementSandbox.batch.init.time");
+			this.getViewPilotageBAS().setMessageArgs(time);
+
+			
+		} catch (SQLException e) {
+			loggerDispatcher.error("Error in retarderInitialisationPROD", e, LOGGER);
+		}
+    	
+    	return generateDisplay(model, RESULT_SUCCESS);
+    }
+    
+    @RequestMapping("/demanderBatchInitialisationPROD")
+    public String demanderBatchInitialisationPROD(Model model) {
+    	
+    	// demande l'initialisation : met au jour -1 à 22h
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date-interval '1 days','yyyy-mm-dd')||':22';"));
+			
+			String time = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
+			this.getViewPilotageBAS().setMessage("managementSandbox.batch.init.time");
+			this.getViewPilotageBAS().setMessageArgs(time);
+
+			
+		} catch (SQLException e) {
+			loggerDispatcher.error("Error in demanderBatchInitialisationPROD", e, LOGGER);
+		}
+    	
+    	return generateDisplay(model, RESULT_SUCCESS);
+    }
+    
+    @RequestMapping("/toggleOnPROD")
+    public String toggleOnPROD(Model model) {
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='O'; "));
+			this.getViewPilotageBAS().setMessage("managementSandbox.batch.status.switch.on");
+		} catch (SQLException e) {
+			loggerDispatcher.error("Error in toggleOnPROD", e, LOGGER);
+		}
+    	return generateDisplay(model, RESULT_SUCCESS);
+    }
+
+    @RequestMapping("/toggleOffPROD")
+    public String toggleOffPROD(Model model) {
+    	try {
+			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='N'; "));
+			this.getViewPilotageBAS().setMessage("managementSandbox.batch.status.switch.off");
+		} catch (SQLException e) {
+			loggerDispatcher.error("Error in toggleOffPROD", e, LOGGER);
+		}
+    	return generateDisplay(model, RESULT_SUCCESS);
+    }
 	
 	// Actions du bac à sable
 

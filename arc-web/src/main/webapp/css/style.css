@@ -708,6 +708,7 @@ input.onglet_global {
 
 table td,table th {
 	padding: 0px; /* 'cellpadding' equivalent */
+	font-size: small;
 }
 
 .fieldset_header td {

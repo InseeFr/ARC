@@ -134,8 +134,6 @@ public class BddTable {
 	public static final String NOM_TABLE_SEUIL = "seuil";
 	public static final String ID_TABLE_SEUIL = "SEUIL";
 
-	public static final String SCHEMA_ARC_PROD = "arc_prod";
-
 	public static final String ID_TABLE_PREVIOUS_PHASE = "id_table_previous_phase";
 	public static final String ID_TABLE_PILOTAGE_TEMP = "ID_TABLE_PILOTAGE_TEMP";
 	public static final String ID_TABLE_PILOTAGE_TEMP_THREAD = "ID_TABLE_PILOTAGE_TEMP_THREAD";

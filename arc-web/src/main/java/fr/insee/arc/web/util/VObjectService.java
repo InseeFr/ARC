@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
@@ -41,7 +42,6 @@ import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
@@ -1224,24 +1224,30 @@ public class VObjectService {
         }
     }
 
-    public ArrayList<String> upload(VObject data, String repertoireCible) {
-        if (data.getFileUpload() != null) {
-            for (int i = 0; i < data.getFileUpload().size(); i++) {
-                Path location = Paths.get(repertoireCible, data.getFileUpload().get(i).getOriginalFilename());
-                loggerDispatcher.info( "Upload >> " + location, LOGGER);
-                File newFile = location.toFile();
-                try {
-	                if (newFile.exists()) {
-	                	Files.delete(newFile.toPath());
-	                }
-	                data.getFileUpload().get(i).transferTo(newFile);
-                } catch (IOException ex) {
-                    LoggerHelper.errorGenTextAsComment(getClass(), "upload()", LOGGER, ex);
-                }
-            }
-        }
-        data.setMessage("Upload terminé.");
-        return new ArrayList<String>();
+    public void upload(VObject data, String repertoireCible) {
+    	int nbUploaded = 0;
+    	if (data.getFileUpload() != null) {
+    		for (MultipartFile uploadedFile : data.getFileUpload()) {
+    			String fileName = uploadedFile.getOriginalFilename();
+    			// The file can be effectively empty (no name and no content)
+				if (fileName != null && !fileName.isEmpty()) {
+    				Path location = Paths.get(repertoireCible, fileName);
+    				loggerDispatcher.info( "Upload >> " + location, LOGGER);
+    				File newFile = location.toFile();
+    				try {
+    					if (newFile.exists()) {
+    						Files.delete(newFile.toPath());
+    					}
+    					uploadedFile.transferTo(newFile);
+    				} catch (IOException ex) {
+    					LoggerHelper.errorGenTextAsComment(getClass(), "upload()", LOGGER, ex);
+    				}
+    			}
+				nbUploaded++;
+    		}
+    	}
+        data.setMessage("managementSandbox.load.success");
+        data.setMessageArgs(nbUploaded);
     }
 
     public ArrayList<String> getHeaderSortDLabels(VObject currentData) {
