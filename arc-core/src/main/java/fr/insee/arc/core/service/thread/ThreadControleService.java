@@ -404,10 +404,10 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         requete.append("prep AS (   SELECT id_source,taux_ko,valeur ");
         requete.append("        FROM " + tableControlePilTemp + ", seuil ");
         requete.append("        WHERE taux_ko > valeur) ");
-        requete.append("UPDATE " + tableControlePilTemp + " ");
-        requete.append("\n\t SET etat_traitement='{" + TraitementEtat.KO.toString() + "}', ");
-        requete.append("\n\t\t rapport='Fichier avec trop d''erreur' ");
-        requete.append("\n\t WHERE id_source in (SELECT distinct id_source FROM prep); ");
+        requete.append("\n UPDATE " + tableControlePilTemp + " ");
+        requete.append("\n SET etat_traitement='{" + TraitementEtat.KO.toString() + "}', ");
+        requete.append("\n rapport='Fichier avec trop d''erreur' ");
+        requete.append("\n WHERE id_source in (SELECT distinct id_source FROM prep); ");
         return requete.toString();
     }
 

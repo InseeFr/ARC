@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS arc.ihm_controle_regle
       ON UPDATE CASCADE ON DELETE CASCADE 
 );
 
+ALTER TABLE arc.ihm_controle_regle add column IF NOT exists seuil_bloquant text check (seuil ~ '^(>|>=)[0123456789.]+(%|u)$');
+
 CREATE TABLE IF NOT EXISTS arc.ext_type_controle 
 ( 
   id text NOT NULL, 

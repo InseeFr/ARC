@@ -43,6 +43,7 @@ public class ViewControle extends VObject {
                 put("xsd_role", new ColumnRendering(true, "label.xsd.role", "21%", "text", null, true));
                 put("commentaire", new ColumnRendering(true, "label.comment", "15%", "text", null, true));
                 put("todo", new ColumnRendering(false, "label.todo", "0%", "text", null, true));
+                put("seuil_bloquant", new ColumnRendering(true, "label.threshold.blocking", "21%", "text", null, true));
 
             }
         }

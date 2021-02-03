@@ -376,7 +376,7 @@ public class VObjectService {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
                 headersVSize.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).size);
             } else {
-                headersVSize.add("/**/");
+                headersVSize.add("auto");
             }
         }
         return headersVSize;
