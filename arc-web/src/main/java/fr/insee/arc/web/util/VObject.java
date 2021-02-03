@@ -1,6 +1,5 @@
 package fr.insee.arc.web.util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -114,7 +113,9 @@ public class VObject {
     public HashMap<String, ArrayList<String>> mapContent() {
         return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContent()).mapContent();
     }
-	
+
+
+    /** Returns the old values for the lines with new content.*/
 	public ArrayList<ArrayList<String>> listContentBeforeUpdate() {
         if (getSavedContent() == null) {
             return new ArrayList<ArrayList<String>>();
@@ -126,8 +127,8 @@ public class VObject {
             int j = 0;
             boolean equals = true;
             while (j < getContent().get(i).d.size() && equals) {
-                equals = getContent().get(i).d.get(j) == null 
-                		|| ManipString.compareStringWithNull(getSavedContent().get(i).d.get(j), getContent().get(i).d.get(j));
+                equals = compareOldAndNew(getContent().get(i).d.get(j), 
+                		getSavedContent().get(i).d.get(j));
                 j++;
             }
             if (!equals) {
@@ -136,6 +137,11 @@ public class VObject {
         }
         return r;
     }
+
+	private boolean compareOldAndNew(String newContentValue, String oldContentValue) {
+		return newContentValue == null 
+				|| ManipString.compareStringWithNull(oldContentValue, newContentValue);
+	}
 
 	public HashMap<String, ArrayList<String>> mapContentBeforeUpdate() {
         return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentBeforeUpdate()).mapContent();
@@ -147,7 +153,8 @@ public class VObject {
 	    return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
 
-	public ArrayList<ArrayList<String>> listContentAfterUpdate() {
+    /** Returns the lines with the new content.*/
+    public ArrayList<ArrayList<String>> listContentAfterUpdate() {
     	if (getSavedContent() == null) {
             return new ArrayList<ArrayList<String>>();
         }
@@ -158,8 +165,8 @@ public class VObject {
             int j = 0;
             boolean equals = true;
             while (j < getContent().get(i).d.size() && equals) {
-                equals = getContent().get(i).d.get(j) == null 
-                		|| ManipString.compareStringWithNull(getSavedContent().get(i).d.get(j), getContent().get(i).d.get(j));
+                equals = compareOldAndNew(getContent().get(i).d.get(j), 
+                		getSavedContent().get(i).d.get(j));
                 j++;
             }
             if (!equals) {
@@ -178,6 +185,31 @@ public class VObject {
 	    r.add(listContentAfterUpdate().get(i));
 	    return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
+
+	/** Returns the content as it would be after the update.*/
+	public ArrayList<ArrayList<String>> listUpdatedContent() {
+		if (getSavedContent() == null) {
+			return new ArrayList<>();
+		}
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
+		for (int i = 0; i < getContent().size(); i++) {
+			r.add(new ArrayList<String>());
+			for (int j = 0; j < getContent().get(i).d.size(); j++) {
+				String newContentValue = getContent().get(i).d.get(j);
+				String oldContentValue = getSavedContent().get(i).d.get(j);
+				if (compareOldAndNew(newContentValue, oldContentValue)) {
+					r.get(i).add(oldContentValue);
+				} else {
+					r.get(i).add(newContentValue);
+				}
+			}
+		}
+		return r;
+	}
+
+    public HashMap<String, ArrayList<String>> mapUpdatedContent() {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listUpdatedContent()).mapContent();
+    }
 
 	public ArrayList<ArrayList<String>> listContentSelected() {
 		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();

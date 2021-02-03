@@ -168,11 +168,10 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         List<List<String>> resultTemp = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
         
         ArrayList<ArrayList<String>> result= new ArrayList<>();
-
         
-        // mise en minuscule des rubriques
-        for (int i = 0; i < resultTemp.size(); i++) {
 
+        for (int i = 0; i < resultTemp.size(); i++) {
+            // mise en minuscule des rubriques
             ArrayList<String> temp=new ArrayList<>();
             temp.add(resultTemp.get(i).get(0).toLowerCase());
             
@@ -181,6 +180,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
             {
                 exprCol="";
             }
+
             
             Matcher m = Pattern.compile("\\{[^\\{\\} ]*\\}").matcher(exprCol);
             
