@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -17,10 +18,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dao.JeuDeRegleDao;
+import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
@@ -791,6 +795,7 @@ public class ApiInitialisationService extends ApiService {
     	try{
     		StaticLoggerDispatcher.info("Recopie des regles dans l'environnement", LOGGER);
         	copyTablesToExecutionThrow(connexion, anParametersEnvironment, anExecutionEnvironment);
+        	applyExpressions(connexion, anExecutionEnvironment);
     	} catch (Exception e)
     	{
     		StaticLoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
@@ -813,22 +818,21 @@ public class ApiInitialisationService extends ApiService {
             for (int i = 0; i < r.length; i++) {
                 // on créé une table image de la table venant de l'ihm
                 // (environnement de parametre)
-                tableCurrent = ApiService.dbEnv(anExecutionEnvironment) + r[i];
-                tableImage = FormatSQL.temporaryTableName(ApiService.dbEnv(anExecutionEnvironment) + r[i]);
+                TraitementTableParametre parameterTable = r[i];
+				tableCurrent = ApiService.dbEnv(anExecutionEnvironment) + parameterTable;
+                tableImage = FormatSQL.temporaryTableName(ApiService.dbEnv(anExecutionEnvironment) + parameterTable);
 
                 // recopie partielle (en fonction de l'environnement
                 // d'exécution)
                 // pour les tables JEUDEREGLE, CONTROLE_REGLE et MAPPING_REGLE
                 condition.setLength(0);
-                if (r[i] == TraitementTableParametre.NORME) {
+                if (parameterTable == TraitementTableParametre.NORME) {
                     condition.append(" WHERE etat='1'");
-                }
-                if (r[i] == TraitementTableParametre.CALENDRIER) {
+                } else if (parameterTable == TraitementTableParametre.CALENDRIER) {
                     condition.append(" WHERE etat='1' ");
                     condition
                             .append(" and exists (select 1 from " + anParametersEnvironment + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
-                }
-                if (r[i] == TraitementTableParametre.JEUDEREGLE) {
+                } else if (parameterTable == TraitementTableParametre.JEUDEREGLE) {
                     condition.append(" WHERE etat=lower('" + modaliteEtat + "')");
                     condition
                             .append(" and exists (select 1 from " + anParametersEnvironment + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
@@ -836,9 +840,7 @@ public class ApiInitialisationService extends ApiService {
                             .append(" and exists (select 1 from "
                                     + anParametersEnvironment
                                     + "_calendrier b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup and b.etat='1')");
-                }
-                if (r[i] == TraitementTableParametre.CHARGEMENT_REGLE || r[i] == TraitementTableParametre.NORMAGE_REGLE || r[i] == TraitementTableParametre.CONTROLE_REGLE
-                        || r[i] == TraitementTableParametre.MAPPING_REGLE || r[i] == TraitementTableParametre.FILTRAGE_REGLE) {
+                } else if (parameterTable.isPartOfRuleset()) {
                     condition.append(" WHERE exists (select 1 from " + anParametersEnvironment
                             + "_norme b where a.id_norme=b.id_norme and b.etat='1')");
                     condition
@@ -906,7 +908,46 @@ public class ApiInitialisationService extends ApiService {
         }
     }
 
-    /**
+    private static void applyExpressions(Connection connexion, String anExecutionEnvironment) throws Exception {
+		// Checks expression validity
+    	ExpressionService expressionService = new ExpressionService();
+    	ArrayList<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion, anExecutionEnvironment + ".jeuderegle");
+		for (JeuDeRegle ruleSet : allRuleSets) {
+			// Check
+			GenericBean expressions = expressionService.fetchExpressions(connexion, anExecutionEnvironment, ruleSet);
+			if (expressions.isEmpty()) {
+				continue;
+			}
+
+	    	Optional<String> loopInExpressionSet = expressionService.loopInExpressionSet(expressions);
+	    	if (loopInExpressionSet.isPresent()) {
+	    		StaticLoggerDispatcher.info("A loop is present in the expression set : " + loopInExpressionSet.get(), LOGGER);
+	    		StaticLoggerDispatcher.info("The expression set is not applied", LOGGER);
+	    		continue;
+	    	}
+
+	    	// Apply
+	    	expressions = expressionService.fetchOrderedExpressions(connexion, anExecutionEnvironment, ruleSet);
+	    	if(expressionService.isExpressionSyntaxPresent(connexion, anExecutionEnvironment, ruleSet)) {
+	    		for (int i = 0; i < expressions.size(); i++) {
+		    		PreparedStatementBuilder request = new PreparedStatementBuilder();
+	    			request.append("UPDATE ");
+	    			request.append(anExecutionEnvironment);
+	    			request.append(".mapping_regle\n set expr_regle_col=replace(expr_regle_col,'{@");
+	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_NAME).get(i));
+	    			request.append("@}','");
+	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(i));
+	    			request.append("') where expr_regle_col like '%{@%@}%' and ");
+	    			request.append(ruleSet.getSqlEquals());
+	    			request.append(";");
+		    		UtilitaireDao.get(poolName).executeRequest(connexion, request);
+	    		}
+	    	}
+    	}
+		
+	}
+
+	/**
      * Méthode pour remettre le système d'information dans la phase précédente Nettoyage des tables _ok et _ko ainsi que mise à jour de la
      * table de pilotage de fichier
      *

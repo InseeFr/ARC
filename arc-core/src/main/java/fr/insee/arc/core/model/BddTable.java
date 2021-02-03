@@ -48,6 +48,9 @@ public class BddTable {
 	public static final String NOM_TABLE_IHM_ENTREPOT ="ihm_entrepot";
 	public static final String ID_TABLE_IHM_ENTREPOT ="IHM_ENTREPOT";
 
+	public static final String NOM_TABLE_IHM_EXPRESSION = "ihm_expression";
+	public static final String ID_TABLE_IHM_EXPRESSION = "IHM_EXPRESSION";
+	
 	public static final String NOM_TABLE_IHM_FAMILLE ="ihm_famille";
 	public static final String ID_TABLE_IHM_FAMILLE ="IHM_FAMILLE";
 
@@ -125,6 +128,9 @@ public class BddTable {
 	public static final String NOM_TABLE_MAPPING_REGLE = "mapping_regle";
 	public static final String ID_TABLE_MAPPING_REGLE = "MAPPING_REGLE";
 
+	public static final String NOM_TABLE_EXPRESSION = "expression";
+	public static final String ID_TABLE_EXPRESSION = "EXPRESSION";
+
 	public static final String NOM_TABLE_SEUIL = "seuil";
 	public static final String ID_TABLE_SEUIL = "SEUIL";
 
@@ -147,6 +153,7 @@ public class BddTable {
 
 	public static final String ID_TABLE_TEMP_ALL = "TEMP_ALL";
 	public static final String NOM_TABLE_TEMP_ALL = "temp_all";
+
 
 	/**
 	 * Map contenant les noms de tables qualifiées (c-a-d avec le schéma).
@@ -174,6 +181,7 @@ public class BddTable {
 		addTable(ID_TABLE_IHM_MAPPING_REGLE, Namings.GET_TABLE_NAME.apply(SCHEMA_DEFAUT, NOM_TABLE_IHM_MAPPING_REGLE));
 		addTable(ID_TABLE_IHM_MAPPING_REGLE_BIS, Namings.GET_TABLE_NAME.apply(SCHEMA_DEFAUT, NOM_TABLE_IHM_MAPPING_REGLE_BIS));
 		addTable(ID_TABLE_IHM_MAPPING_SAV, Namings.GET_TABLE_NAME.apply(SCHEMA_DEFAUT, NOM_TABLE_IHM_MAPPING_SAV));
+		addTable(ID_TABLE_IHM_EXPRESSION, Namings.GET_TABLE_NAME.apply(SCHEMA_DEFAUT, NOM_TABLE_IHM_EXPRESSION));
 		addTable(ID_TABLE_IHM_CLIENT, Namings.GET_TABLE_NAME.apply(SCHEMA_DEFAUT, NOM_TABLE_IHM_CLIENT));
 		addTable(ID_TABLE_IHM_ENTREPOT, Namings.GET_TABLE_NAME.apply(SCHEMA_DEFAUT, NOM_TABLE_IHM_ENTREPOT));
 		addTable(ID_TABLE_IHM_FAMILLE, Namings.GET_TABLE_NAME.apply(SCHEMA_DEFAUT, NOM_TABLE_IHM_FAMILLE));
@@ -201,6 +209,7 @@ public class BddTable {
 			addTable(ID_TABLE_CONTROLE_REGLE, Namings.GET_TABLE_NAME.apply(getSchema(), NOM_TABLE_CONTROLE_REGLE));
 			addTable(ID_TABLE_FILTRAGE_REGLE, Namings.GET_TABLE_NAME.apply(getSchema(), NOM_TABLE_FILTRAGE_REGLE));
 			addTable(ID_TABLE_MAPPING_REGLE, Namings.GET_TABLE_NAME.apply(getSchema(), NOM_TABLE_MAPPING_REGLE));
+			addTable(ID_TABLE_EXPRESSION, Namings.GET_TABLE_NAME.apply(getSchema(), NOM_TABLE_EXPRESSION));
 			addTable(ID_TABLE_SEUIL, Namings.GET_TABLE_NAME.apply(getSchema(), NOM_TABLE_SEUIL));
 		}
 

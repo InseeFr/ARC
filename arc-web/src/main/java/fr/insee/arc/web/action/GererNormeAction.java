@@ -5,10 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,22 +20,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.core.dao.MappingRegleDao;
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.core.model.JeuDeRegle;
-import fr.insee.arc.core.model.RegleControleEntity;
-import fr.insee.arc.core.model.RegleMappingEntity;
-import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ControleRegleService;
-import fr.insee.arc.utils.dao.EntityDao;
+import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.dao.GererNormeDao;
 import fr.insee.arc.web.model.NormManagementModel;
@@ -85,6 +76,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 
 	// The map to format rules view
 	private VObject viewMapping;
+	
+	// Expression to use in mapping
+	private VObject viewExpression;
 
 	// The on ruleset to copy rules
 	private VObject viewJeuxDeReglesCopie;
@@ -99,6 +93,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		setViewControle(vObjectService.preInitialize(model.getViewControle()));
 		setViewFiltrage(vObjectService.preInitialize(model.getViewFiltrage()));
 		setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
+		setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
 		setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
 		
 		putVObject(getViewNorme(),
@@ -124,6 +119,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		//
 		putVObject(getViewMapping(), t -> gererNormeDao.initializeMapping(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE), getScope()));
+		//
+		putVObject(getViewExpression(), t -> gererNormeDao.initializeExpression(t, getViewJeuxDeRegles(),
+				getBddTable().getQualifedName((BddTable.ID_TABLE_IHM_EXPRESSION)), getScope()));
 		//
 		putVObject(getViewJeuxDeReglesCopie(), t -> gererNormeDao.initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(),
 				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_RULESETS), getScope()));
@@ -385,6 +383,9 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			PreparedStatementBuilder requeteRegleFiltrage = new PreparedStatementBuilder();
 			requeteRegleFiltrage.append(gererNormeDao.recupRegle(this.viewRulesSet,
 					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE)));
+			PreparedStatementBuilder requeteRegleExpression = new PreparedStatementBuilder();
+			requeteRegleExpression.append(gererNormeDao.recupRegle(this.viewRulesSet,
+					getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_EXPRESSION)));
 
 			ArrayList<String> fileNames = new ArrayList<>();
 			fileNames.add("Rules_load");
@@ -392,14 +393,16 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			fileNames.add("Rules_control");
 			fileNames.add("Rules_mapping");
 			fileNames.add("Rules_filter");
+			fileNames.add("Rules_expression");
 			this.vObjectService.download(viewRulesSet, response, fileNames
-					, new ArrayList<PreparedStatementBuilder>(
+					, new ArrayList<>(
 							Arrays.asList(
 									requeteRegleChargement
 									, requeteRegleNormage
 									, requeteRegleControle
 									, requeteRegleMapping
 									, requeteRegleFiltrage
+									, requeteRegleExpression
 									)
 							)
 					);
@@ -685,6 +688,20 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
+	
+	/**
+	 * Clean the expressions. Update GUI and database
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/viderExpression")
+	public String viderExpression(Model model) {
+		
+		gererNormeDao.emptyRuleTable(this.viewRulesSet,
+				getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_EXPRESSION));
+		return generateDisplay(model, RESULT_SUCCESS);
+
+	}
 
 	/**
 	 * Action trigger when the table of map rules is request or refresh. Update the
@@ -760,6 +777,40 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		return updateVobject(model, RESULT_SUCCESS, this.viewMapping);
 	}
 
+	@RequestMapping("/selectExpression")
+	public String selectExpression(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
+	}
+	
+	@RequestMapping("/addExpression")
+	public String addExpression(Model model) {
+		String exprNameHeader = ExpressionService.EXPR_NAME;
+		viewExpression.setInputFieldFor(exprNameHeader, viewExpression.getInputFieldFor(exprNameHeader).trim());
+		return addLineVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+
+	@RequestMapping("/updateExpression")
+	public String updateExpression(Model model) {
+		return updateVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+
+	@RequestMapping("/sortExpression")
+	public String sortExpression(Model model) {
+		return sortVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+	
+	@RequestMapping("/deleteExpression")
+	public String deleteExpression(Model model) {
+		return deleteLineVobject(model, RESULT_SUCCESS, this.viewExpression);
+	}
+	
+	@RequestMapping("/importExpression")
+	@SQLExecutor
+	public String importExpression(Model model, MultipartFile fileUploadExpression) {
+		gererNormeDao.uploadFileRule(getViewExpression(), viewRulesSet, fileUploadExpression);
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+	
 	/**
 	 * Action trigger by uploading a filter rule file
 	 * 
@@ -935,6 +986,14 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
 		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+	
+	@RequestMapping("/selectJeuxDeReglesExpressionCopie")
+	public String selectJeuxDeReglesExpressionCopie(Model model) {
+		
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewExpression.getTable());
+		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewExpression.getSessionName());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -1204,6 +1263,14 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 
 	public void setViewMapping(VObject viewMapping) {
 		this.viewMapping = viewMapping;
+	}
+	
+	public VObject getViewExpression() {
+		return viewExpression;
+	}
+
+	public void setViewExpression(VObject viewExpression) {
+		this.viewExpression = viewExpression;
 	}
 
 	public VObject getViewJeuxDeReglesCopie() {

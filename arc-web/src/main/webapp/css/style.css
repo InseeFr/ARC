@@ -64,10 +64,20 @@ li.nav-item.active {
 li.nav-item {
     color: #000000;
     text-align: center;
-    width: 11rem;
     margin-bottom: auto;
 }
 
+@media (min-width:768px) {
+	li.nav-item {
+	    width: 8rem;
+	}
+}
+
+@media (min-width:992px) {
+	li.nav-item {
+	    width: 11rem;
+	}
+}
 .navbar-brand {
     font-size: 2rem;
 }
@@ -148,6 +158,10 @@ li.nobullet
 	position: absolute !important;
 	top: -9999px !important;
 	left: -9999px !important;
+}
+
+.font-smaller {
+	font-size:smaller;
 }
 
 th.sort {
