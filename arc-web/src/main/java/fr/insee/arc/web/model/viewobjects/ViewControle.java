@@ -31,3 +31,4 @@ public class ViewControle extends AbstractViewRule {
 		return columnRenderings;
 	}
 }
+
