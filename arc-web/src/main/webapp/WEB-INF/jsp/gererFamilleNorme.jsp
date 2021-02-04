@@ -106,6 +106,7 @@
 							<c:param name="checkboxVisible" value ="true" />
 							<c:param name="ligneFilter" value="true" />
 							<c:param name="ligneAdd" value ="true" />
+							<c:param name="allowResize" value ="true" />
 						</c:import>
 					</div>
 				</div>
