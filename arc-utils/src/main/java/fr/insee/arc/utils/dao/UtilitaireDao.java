@@ -470,12 +470,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 
 	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes) throws SQLException {
-		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
-
-		String updatedQuery = FormatSQL.addCommentaryHeaderToQuery(requete, constructorMethodsAndClasses);
 
 		long start = new Date().getTime();
-		LoggerHelper.trace(LOGGER, updatedQuery.trim());
+		
+		LoggerHelper.trace(LOGGER, "/* executeImmediate on */");
+		LoggerHelper.trace(LOGGER, requete.trim());
 
 		ConnectionWrapper connexionWrapper = initConnection(connexion);
 		try {		
@@ -483,12 +482,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			try(Statement st = connexionWrapper.getConnexion().createStatement();)
 			{
 				try {
-					st.execute(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr() + updatedQuery);
+					st.execute(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr() + requete);
 					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
 				} catch (Exception e) {
 					st.cancel();
 					LoggerHelper.error(LOGGER, e);
-					LoggerHelper.error(LOGGER, updatedQuery);
+					LoggerHelper.error(LOGGER, requete);
 					throw e;
 				}
 			}
@@ -569,10 +568,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 
 		long start = new Date().getTime();
-		List<String> constructorMethodsAndClasses = findSQLQueryContructor();
-		String updatedQuery = FormatSQL.addCommentaryHeaderToQuery(requete.getQuery().toString(), constructorMethodsAndClasses);
-		LoggerHelper.trace(LOGGER, updatedQuery);
+		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
+		LoggerHelper.trace(LOGGER, requete.getQueryWithParameters());
 		LoggerHelper.trace(LOGGER, requete.getParameters());
+		
+		this.silent=false;
 		
 		try {
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
@@ -590,7 +590,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 						stmt.execute();
 					}
 				}
-				try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(updatedQuery);)
+				try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(requete.getQuery().toString());)
 				{
 					for (int i=0;i<requete.getParameters().size();i++)
 					{
@@ -643,49 +643,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 		} catch (Exception ex) {
 			if (!this.silent) {
-				LoggerHelper.error(LOGGER, "Lors de l'exécution de", updatedQuery);
+				LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
 			}
 			throw ex;
 		}
-	}
-
-	/**
-	 * Search in the stackTrace methode with the {@link SQLExecutor} annotation
-	 * 
-	 * @return a list of string with the {@link Class} and {@link Method} of all
-	 *         method with the {@link SQLExecutor} in the statcktrace
-	 */
-	// TODO : totally bugged
-	private List<String> findSQLQueryContructor() {
-//		Set<Pair<Class<?>, Method>> methodsWithTheAnnotation = new HashSet<>();
-//		StackTraceElement[] stacktraces = Thread.currentThread().getStackTrace();
-//		for (StackTraceElement stackTraceElement : stacktraces) {
-//			Class<?> aClass;
-//			try {
-//				aClass = Class.forName(stackTraceElement.getClassName());
-//				Method[] methods = aClass.getMethods();
-//				String methodName = stackTraceElement.getMethodName();
-//				for (Method method : methods) {
-//					// Can't directly get the methiod, only it's name so have to check the name with
-//					// the methode in the stacktrace :(
-//					if (method.getName().equals(methodName)) {
-//						if (method.getAnnotation(SQLExecutor.class) != null) {
-//							methodsWithTheAnnotation.add(new Pair<Class<?>, Method>(aClass, method));
-//						}
-//					}
-//				}
-//			} catch (ClassNotFoundException e) {
-//				LoggerHelper.error(LOGGER, "Error when searching for annotation to better log");
-//			}
-//
-//		}
-//
-//		return methodsWithTheAnnotation.stream()
-//				.map(pair -> pair.getFirst().getSimpleName() + " " + pair.getSecond().getName())
-//				.collect(Collectors.toList());
-		
-		return new ArrayList<String>();
-		
 	}
 
 	/**

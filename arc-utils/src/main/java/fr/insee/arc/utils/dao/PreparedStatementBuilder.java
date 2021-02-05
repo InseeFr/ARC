@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class PreparedStatementBuilder {
 
 private StringBuilder query=new StringBuilder();
 	
 private List<String> parameters=new ArrayList<String>();
 
+private final static String BIND_VARIABLE_PLACEHOLDER="  ?  ";
 
 public PreparedStatementBuilder() {
 	super();
@@ -79,7 +82,7 @@ public String sqlEqual(String val, String type) {
 public String quoteText(String s)
 {
 	parameters.add(s);
-	return "?";
+	return BIND_VARIABLE_PLACEHOLDER;
 }
 
 /**
@@ -129,7 +132,16 @@ public void setParameters(List<String> parameters) {
 	this.parameters = parameters;
 }
 
-
+public String getQueryWithParameters() {
+	String q=this.query.toString();
+	
+	for (String p : this.parameters)
+	{
+		q = StringUtils.replaceOnce(q ,BIND_VARIABLE_PLACEHOLDER,"'"+p.replace("'", "''")+"'");
+	}
+	
+	return q;
+}
 
 
 }
