@@ -795,7 +795,6 @@ public class ApiInitialisationService extends ApiService {
     	try{
     		StaticLoggerDispatcher.info("Recopie des regles dans l'environnement", LOGGER);
         	copyTablesToExecutionThrow(connexion, anParametersEnvironment, anExecutionEnvironment);
-        	applyExpressions(connexion, anExecutionEnvironment);
     	} catch (Exception e)
     	{
     		StaticLoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
@@ -804,6 +803,18 @@ public class ApiInitialisationService extends ApiService {
     }
     
     public static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
+    	copyRulesTablesToExecution(connexion, anParametersEnvironment, anExecutionEnvironment);
+    	applyExpressions(connexion, anExecutionEnvironment);
+    }
+    
+    /**
+     * Copy the table containing user rules to the sandbox so they will be used by the sandbox process
+     * @param connexion
+     * @param anParametersEnvironment
+     * @param anExecutionEnvironment
+     * @throws Exception
+     */
+    public static void copyRulesTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
     	StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
         try {
         	
@@ -929,19 +940,20 @@ public class ApiInitialisationService extends ApiService {
 	    	// Apply
 	    	expressions = expressionService.fetchOrderedExpressions(connexion, anExecutionEnvironment, ruleSet);
 	    	if(expressionService.isExpressionSyntaxPresent(connexion, anExecutionEnvironment, ruleSet)) {
+	    		PreparedStatementBuilder request = new PreparedStatementBuilder();
 	    		for (int i = 0; i < expressions.size(); i++) {
-		    		PreparedStatementBuilder request = new PreparedStatementBuilder();
-	    			request.append("UPDATE ");
-	    			request.append(anExecutionEnvironment);
-	    			request.append(".mapping_regle\n set expr_regle_col=replace(expr_regle_col,'{@");
-	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_NAME).get(i));
-	    			request.append("@}','");
-	    			request.append(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(i));
-	    			request.append("') where expr_regle_col like '%{@%@}%' and ");
+	    			request.append("\n UPDATE "+anExecutionEnvironment+".mapping_regle ");
+	    			request.append("\n set expr_regle_col=replace(expr_regle_col, ");
+	    			request.append(request.quoteText("{@"+expressions.mapContent().get(ExpressionService.EXPR_NAME).get(i)+"@}"));
+	    			request.append(",");
+	    			request.append(request.quoteText(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(i)));
+	    			request.append(") ");
+	    			request.append("\n WHERE expr_regle_col like '%{@%@}%' ");
+	    			request.append("\n AND ");
 	    			request.append(ruleSet.getSqlEquals());
 	    			request.append(";");
-		    		UtilitaireDao.get(poolName).executeRequest(connexion, request);
 	    		}
+	    		UtilitaireDao.get(poolName).executeRequest(connexion, request);
 	    	}
     	}
 		
