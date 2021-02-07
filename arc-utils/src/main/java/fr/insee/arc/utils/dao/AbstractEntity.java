@@ -71,15 +71,7 @@ public abstract class AbstractEntity {
     }
 
     public String toString() {
-        // StringBuilder returned = new StringBuilder();
-        // boolean isFirst = true;
-        // for (String colName:colNames()) {
-        // if (isFirst) {
-        // returned.append(", ");
-        // isFirst=false;
-        // }
-        // returned.append(colName);
-        // }
-        return getMap().toString();// returned.toString();
+        return getMap().toString();
     }
+
 }

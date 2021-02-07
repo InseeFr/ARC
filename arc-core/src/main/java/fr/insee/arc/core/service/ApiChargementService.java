@@ -59,7 +59,6 @@ public class ApiChargementService extends ApiService {
     protected String fileName;
 
     protected List<Norme> listeNorme;
-    private int currentIndice;
 
     private HashMap<String, ArrayList<String>> listIdsource;
 
@@ -105,7 +104,7 @@ public class ApiChargementService extends ApiService {
         Connection chargementThread = null;
         ArrayList<ThreadChargementService> threadList = new ArrayList<>();
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
-        currentIndice = 0;
+        int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le chargement **", LOGGER);
 
@@ -196,4 +195,5 @@ public class ApiChargementService extends ApiService {
     public void setTableTempA(String tableTempA) {
         this.tableTempA = tableTempA;
     }
+    
 }

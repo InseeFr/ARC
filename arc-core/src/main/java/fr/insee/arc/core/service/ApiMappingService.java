@@ -46,15 +46,13 @@ public class ApiMappingService extends ApiService {
         super();
     }
     
-    private static final String prefixIdentifiantRubrique = "i_";
+    private static final String PREFIX_IDENTIFIANT_RUBRIQUE = "i_";
 
     protected RequeteMappingCalibree requeteSQLCalibree;
 
     protected JeuDeRegleDao jdrDAO;
     protected RegleMappingFactory regleMappingFactory;
     
-    private int currentIndice;
-
     /**
      * Liste des colonnes jamais null par construction dans ARC.<br/>
      * Permet un pseudo test fonctionnel des règles de mapping sur le critère "ma règle renvoie pas null".
@@ -101,12 +99,11 @@ public class ApiMappingService extends ApiService {
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         
         int nbFichier = getTabIdSource().get(ID_SOURCE).size();
-        long dateDebut =  java.lang.System.currentTimeMillis() ;  
         
         Connection connextionThread = null;
         ArrayList<ThreadMappingService> threadList = new ArrayList<ThreadMappingService>();
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
-        currentIndice = 0;
+        int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le mapping **", logger);
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
@@ -133,17 +130,10 @@ public class ApiMappingService extends ApiService {
         for (Connection connection : connexionList) {
             connection.close();
         }
-        
-//        StringBuilder bloc = new StringBuilder();
-//        bloc.append(this.marquageFinal(this.getTablePil(), this.tablePilTemp));
-//        UtilitaireDao.get(poolName).executeBlock(this.connexion, bloc);
-        
-
     }
 
     public static String getPrefixidentifiantrubrique() {
-        return prefixIdentifiantRubrique;
+        return PREFIX_IDENTIFIANT_RUBRIQUE;
     }
-    
 
 }

@@ -37,8 +37,6 @@ public class ApiNormageService extends ApiService {
     public ApiNormageService() {
         super();
     }
-
-    private int currentIndice;
     
     protected String separator = ",";
 
@@ -46,14 +44,11 @@ public class ApiNormageService extends ApiService {
             String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
         this.setTableNorme(dbEnv(this.getEnvExecution()) + TraitementTableParametre.NORME);
-
-//        this.tableNormageOK = ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), TraitementEtat.OK.toString());
-//        this.tableNormageKO = ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), TraitementEtat.KO.toString());
     }
 
     @Override
     public void executer() throws Exception {
-        StaticLoggerDispatcher.info("** executer **", LOGGER);
+        StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
         
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiNormageService.MAX_PARALLEL_WORKERS",4);
         
@@ -71,7 +66,7 @@ public class ApiNormageService extends ApiService {
         
         // Pool de connexion
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
-        currentIndice = 0;
+        int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le normage **", logger);
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
@@ -102,12 +97,8 @@ public class ApiNormageService extends ApiService {
         }
 
         long dateFin= java.lang.System.currentTimeMillis() ;
-        StaticLoggerDispatcher.info("Temp normage des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
+        StaticLoggerDispatcher.info("Temp normage des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER_APISERVICE);
         
     }
-
-
-
-   
 
 }

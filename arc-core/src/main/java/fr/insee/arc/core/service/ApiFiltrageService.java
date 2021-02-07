@@ -34,8 +34,6 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
     protected String seuilExclusion;
     protected HierarchicalView normeToPeriodiciteToValiditeInfToValiditeSupToRegle;
     
-    private int currentIndice;
-
     public ApiFiltrageService() {
         super();
     }
@@ -65,11 +63,10 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         int nbFichier = getTabIdSource().get(ID_SOURCE).size();
         
-        // long dateDebut = java.lang.System.currentTimeMillis() ;
         Connection connextionThread = null;
-        ArrayList<ThreadFiltrageService> threadList = new ArrayList<ThreadFiltrageService>();
+        ArrayList<ThreadFiltrageService> threadList = new ArrayList<>();
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
-        currentIndice = 0;
+        int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le filtrage **", logger);
         
@@ -102,6 +99,4 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
 
     }
 
-
-    
 }

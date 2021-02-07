@@ -34,8 +34,6 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 public class ApiControleService extends ApiService {
 	private static final Logger logger = LogManager.getLogger(ApiControleService.class);
 
-    private int currentIndice;
-
     public ApiControleService() {
         super();
     }
@@ -57,23 +55,21 @@ public class ApiControleService extends ApiService {
     @Override
     public void executer() throws Exception {
 
-        StaticLoggerDispatcher.info("** executer **", LOGGER);
+        StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
 
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiControleService.MAX_PARALLEL_WORKERS",3);
 
         
         long dateDebut = java.lang.System.currentTimeMillis() ;
         // Initilisation de la table de pilotage
-//        initialiserTablePilotage();
 
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         int nbFichier = getTabIdSource().get(ID_SOURCE).size();
-        // long dateDebut = java.lang.System.currentTimeMillis() ;
         Connection connextionThread = null;
         ArrayList<ThreadControleService> threadList = new ArrayList<ThreadControleService>();
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
-        currentIndice = 0;
+        int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
 
@@ -104,7 +100,7 @@ public class ApiControleService extends ApiService {
         }
         long dateFin= java.lang.System.currentTimeMillis() ;
 
-        StaticLoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
+        StaticLoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER_APISERVICE);
 
 
     }
@@ -126,4 +122,5 @@ public class ApiControleService extends ApiService {
         }
 
     }
+    
 }
