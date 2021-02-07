@@ -26,7 +26,8 @@ public class RegleControleEntity extends AbstractEntity {
     private static final String colIdRegle = "id_regle";
     private static final String colTodo = "todo";
     private static final String colCommentaire = "commentaire";
-
+    private static final String colBlockingThreshold = "blocking_threshold";
+    
     private static final Set<String> colNames = new HashSet<String>() {
         /**
          *
@@ -49,6 +50,7 @@ public class RegleControleEntity extends AbstractEntity {
             add(colIdRegle);
             add(colTodo);
             add(colCommentaire);
+            add(colBlockingThreshold);
         }
     };
 
@@ -90,6 +92,7 @@ public class RegleControleEntity extends AbstractEntity {
         result = prime * result + ((this.getPreAction() == null) ? 0 : this.getPreAction().hashCode());
         result = prime * result + ((this.getRubriqueFils() == null) ? 0 : this.getRubriqueFils().hashCode());
         result = prime * result + ((this.getRubriquePere() == null) ? 0 : this.getRubriquePere().hashCode());
+        result = prime * result + ((this.getBlockingThreshold() == null) ? 0 : this.getBlockingThreshold().hashCode());
         return result;
     }
 
@@ -166,6 +169,13 @@ public class RegleControleEntity extends AbstractEntity {
                 return false;
             }
         } else if (!this.getRubriquePere().equals(other.getRubriquePere())) {
+            return false;
+        }
+        if (this.getBlockingThreshold() == null) {
+            if (other.getBlockingThreshold() != null) {
+                return false;
+            }
+        } else if (!this.getBlockingThreshold().equals(other.getBlockingThreshold())) {
             return false;
         }
         return true;
@@ -411,8 +421,26 @@ public class RegleControleEntity extends AbstractEntity {
         this.getMap().put(colCommentaire, commentaire);
     }
 
+    /**
+    *
+    * @return
+    */
+   public String getBlockingThreshold() {
+       return this.getMap().get(colBlockingThreshold);
+   }
+
+   /**
+    * @param commentaire
+    *            the commentaire to set
+    */
+   public void setBlockingThreshold(String blockingThreshold) {
+       this.getMap().put(colBlockingThreshold, blockingThreshold);
+   }
+    
+    
     @Override
     public Set<String> colNames() {
         return colNames;
     }
+
 }

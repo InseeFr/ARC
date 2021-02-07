@@ -27,7 +27,7 @@ public class ViewControle extends AbstractViewRule {
         columnRenderings.put("xsd_ordre", new ColumnRendering(true, "label.xsd.order", "5%", "text", null, true));
         columnRenderings.put("xsd_label_fils", new ColumnRendering(true, "label.xsd.child", "21%", "text", null, true));
         columnRenderings.put("xsd_role", new ColumnRendering(true, "label.xsd.role", "21%", "text", null, true));
-        columnRenderings.put("seuil_bloquant", new ColumnRendering(true, "label.threshold.blocking", "21%", "text", null, true));
+        columnRenderings.put("blocking_threshold", new ColumnRendering(true, "label.threshold.blocking", "21%", "text", null, true));
 		return columnRenderings;
 	}
 }

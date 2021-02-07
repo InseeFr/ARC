@@ -14,6 +14,7 @@ import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
+import fr.insee.arc.core.service.engine.controle.ServiceRequeteSqlRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -26,8 +27,6 @@ import fr.insee.arc.utils.utils.Sleep;
  *
  */
 public class ThreadControleService extends ApiControleService implements Runnable {
-
-
 
     private static final Logger LOGGER = LogManager.getLogger(ThreadControleService.class);
 
@@ -111,6 +110,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
             
         } catch (Exception e) {
 			StaticLoggerDispatcher.error(e,LOGGER);
+			e.printStackTrace();
 		    try {
 				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 					"aucuneTableADroper");
@@ -160,7 +160,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         // fabrication de la table de pilotage controle lié au thread
         blocPrep.append("DISCARD TEMP;");
         blocPrep.append(createTablePilotageIdSource(this.tablePilTemp, this.tableControlePilTemp, this.idSource));
-        blocPrep.append(resetTablePilotage(this.tableControlePilTemp));
 
         // Marquage du jeux de règles appliqué
         StaticLoggerDispatcher.info("Marquage du jeux de règles appliqué ", LOGGER);
@@ -168,7 +167,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         
         // Fabrication de la table de controle temporaire
         StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
-        blocPrep.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
+        blocPrep.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
         UtilitaireDao.get("arc").executeBlock(this.connexion, blocPrep);
 
@@ -177,15 +176,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         this.structure=UtilitaireDao.get("arc").getString(this.connexion, new PreparedStatementBuilder("SELECT jointure FROM "+this.tableControlePilTemp));
     }
 
-    
-    protected String resetTablePilotage(String tableControlePilTemp) {
-        StringBuilder requete = new StringBuilder();
-        requete.append("\n UPDATE " + tableControlePilTemp + " set etat_traitement=NULL ");
-        requete.append(";");
-        return requete.toString();
-    }
-
-    
     
     /**
      * Méthode pour controler une table
@@ -202,79 +192,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
         this.sjdr.executeJeuDeRegle(this.connexion, jdr, this.tableControleDataTemp, this.structure);
 
-    }
-
-    /**
-     * Méthode pour marquer à controle='1' les enregistrements de la table controlée
-     *
-     * @param tableControle
-     * @return
-     */
-    public String marqueEnregistrementSansRegle(String tableControle) {
-        StringBuilder requete = new StringBuilder();
-        requete.append("UPDATE " + tableControle + " a ");
-        requete.append("\n SET controle='1' ");
-        requete.append("\n WHERE EXISTS(    SELECT 1 ");
-        requete.append("\n      FROM " + this.tableControlePilTemp + " b ");
-        requete.append("\n      WHERE phase_traitement='CONTROLE' ");
-        requete.append("\n          AND 'KO'=ANY(etat_traitement) ");
-        requete.append("\n          AND a.id_source=b.id_source); ");
-        return requete.toString();
-    }
-
-    /**
-     * Méthode pour marquer à KO les id_source de pilotage_fichier qui n'ont pas de règle associée
-     *
-     * @return
-     */
-    private String marqueFichierSansRegle() {
-        StringBuilder requete = new StringBuilder();
-        requete.append("\n WITH ");
-        requete.append("prep AS (   SELECT id_norme, periodicite, validite ");
-        requete.append("\n          FROM " + this.tableControlePilTemp + " ");
-        requete.append("\n          WHERE phase_traitement='" + TraitementPhase.CONTROLE + "') ");
-        // selection des jeux de règles applicables à la table
-        requete.append("\n ,jdr AS (    SELECT DISTINCT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version ");
-        requete.append("\n      FROM " + this.getTableJeuDeRegle() + " a ");
-        requete.append("\n          INNER JOIN prep ON a.id_norme=prep.id_norme AND a.periodicite = prep.periodicite ");
-        requete.append("\n      WHERE a.id_norme=prep.id_norme ");
-        requete.append("\n          AND a.periodicite = prep.periodicite ");
-        requete.append("\n          AND a.validite_inf<=prep.validite::date ");
-        requete.append("\n          AND a.validite_sup>=prep.validite::date) ");
-        // Comptage du nombre de règles associées à chaque JdR
-        requete.append("\n ,nb AS ( SELECT jdr.id_norme, jdr.periodicite, jdr.validite_inf, jdr.validite_sup, jdr.version, count(a.id_regle) as nb_regle ");
-        requete.append("\n  FROM " + this.getTableControleRegle() + " a ");
-        requete.append("\n  RIGHT JOIN jdr ON a.id_norme=jdr.id_norme AND a.periodicite=jdr.periodicite AND a.validite_inf=jdr.validite_inf AND a.validite_sup=jdr.validite_sup AND a.version=jdr.version ");
-        requete.append("\n  GROUP BY jdr.id_norme, jdr.periodicite, jdr.validite_inf, jdr.validite_sup, jdr.version), ");
-        requete.append("\n exclude AS (SELECT DISTINCT a.id_source ");
-        requete.append("\n          FROM " + this.tableControleDataTemp + " a ");
-        requete.append("\n          LEFT JOIN nb ON a.id_norme=nb.id_norme AND a.periodicite = nb.periodicite AND nb.validite_inf<=a.validite::date AND nb.validite_sup>=a.validite::date ");
-        requete.append("\n          WHERE nb_regle IS NULL OR nb_regle = 0) ");
-        requete.append("\n UPDATE " + this.tableControlePilTemp + " a \n \t SET etat_traitement=array['KO'],rapport='"
-                + TraitementRapport.TOUTE_PHASE_AUCUNE_REGLE
-                + "' \n \t WHERE phase_traitement='CONTROLE' AND EXISTS (SELECT 1 FROM exclude WHERE a.id_source=exclude.id_source); ");
-        return requete.toString();
-    }
-
-
-    /**
-     * Marquage d'un état pour un ensemble de fichier (on les prends tous pas de limitation) Méthode calibré pour notre table de pilotage
-     * temporaire pas de vérification sur la phase car la table de pilotage temporaire ne contient que des CONTROLE de même, la table de
-     * pilotage temporaire n'a pas d'état ENCOURS (il a été remis à NULL précédemment)
-     *
-     * @param tableControlePilTemp
-     * @param etatNouveau
-     * @param TableOut
-     * @param
-     * @return
-     */
-    public String passageEtat(String tablePilTemp, String etatNouveau, String TableOut) {
-        StringBuilder requete = new StringBuilder();
-        requete.append(" UPDATE " + tableControlePilTemp + " b ");
-        requete.append(" SET  etat_traitement=etat_traitement||'{" + etatNouveau + "}' ");
-        // requete.append(", date_traitement='"+ formatter.format(date) + "'::date");
-        requete.append(" WHERE exists (select 1 from " + TableOut + " a where a.id_source=b.id_source); ");
-        return requete.toString();
     }
 
     /**
@@ -301,47 +218,32 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         StringBuilder blocFin = new StringBuilder();
         // Creation des tables temporaires ok et ko
         StaticLoggerDispatcher.info("Creation des tables temporaires ok et ko", LOGGER);
-        blocFin.append(FormatSQL.dropTable(tableOutOkTemp).toString());
-        blocFin.append(FormatSQL.dropTable(tableOutKoTemp).toString());
+        blocFin.append(FormatSQL.dropTable(tableOutOkTemp));
+        blocFin.append(FormatSQL.dropTable(tableOutKoTemp));
 
         // Execution à mi parcours du bloc de requete afin que les tables tempo soit bien créées
         // ensuite dans le java on s'appuie sur le dessin de ces tables pour ecrire du SQL
         blocFin.append(ApiService.creationTableResultat(this.tableControleDataTemp, tableOutOkTemp));
         blocFin.append(ApiService.creationTableResultat(this.tableControleDataTemp, tableOutKoTemp));
 
-        // Calcul et maj du taux d'erreur
-        StaticLoggerDispatcher.info("Calcul et maj du taux d'erreur", LOGGER);
-        blocFin.append(calculTauxErreur(this.tableControleDataTemp, this.tableControlePilTemp));
-
-        // Marquage etat controle_KO pour les seuils d'erreur trop elevé
-        StaticLoggerDispatcher.info("Marquage etat controle_KO pour les seuils d'erreur trop elevé", LOGGER);
-        blocFin.append(marquageControleKoSeuil(this.tableControlePilTemp, this.getTableSeuil()));
-        UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
-
-        UtilitaireDao.get("arc").executeImmediate(this.connexion, "vacuum analyze " + this.tableControlePilTemp + ";");
-
-        // Ajout des enregistrements dans la table finale
-        StaticLoggerDispatcher.info("Ajout des enregistrements dans la table finale", LOGGER);
-        String listColTableIn = this.listeColonne(this.connexion, tableOutOkTemp);
-
-
-        // on insere dans la table OK que les fichiers pas déclarés complétement
-        // KO à cause du seuil (etat_traitement is null)
-        blocFin.setLength(0);
+        // Marquage des résultat du control dans la table de pilotage
+        StaticLoggerDispatcher.info("Marquage dans la table de pilotage", LOGGER);
+        blocFin.append(marquagePilotage());
+        
+        // insert in OK when
+        // etat traitement in OK or OK,KO
+        // AND records which have no error or errors that can be kept
         StaticLoggerDispatcher.info("Insertion dans OK", LOGGER);
-        blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutOkTemp, this.tableControlePilTemp, "etat_traitement is null",
-                "controle='0' AND "));
+        blocFin.append(ajoutTableControle(this.tableControleDataTemp, tableOutOkTemp, this.tableControlePilTemp, "etat_traitement in ('{"+TraitementEtat.OK+"}','{"+TraitementEtat.OK+","+TraitementEtat.KO+"}') ",
+                "controle in ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"') AND "));
 
-        // on insere dans la table KO tous les enregistrements à controle!=0 et
-        // tous ceux des fichiers déclarés en KO de seuil
+        // insert in OK when
+        // etat traitement in KO
+        // OR records which have errors that must be excluded
         StaticLoggerDispatcher.info("Insertion dans KO", LOGGER);
-        blocFin.append(ajoutTableControle(listColTableIn, this.tableControleDataTemp, tableOutKoTemp, this.tableControlePilTemp, "etat_traitement='{"
-                + TraitementEtat.KO + "}'", "controle!='0' OR "));
+        blocFin.append(ajoutTableControle(this.tableControleDataTemp, tableOutKoTemp, this.tableControlePilTemp, "etat_traitement ='{"+TraitementEtat.KO+"}' "
+        		, "controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"' OR "));
 
-        // Reset de la table de pilotage : on remet tout les états à null
-        blocFin.append(resetTablePilotage(this.tableControlePilTemp));
-        blocFin.append(passageEtat(this.tableControlePilTemp, TraitementEtat.OK.toString(), tableOutOkTemp));
-        blocFin.append(passageEtat(this.tableControlePilTemp, TraitementEtat.KO.toString(), tableOutKoTemp));
         UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
 
     }
@@ -387,69 +289,24 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     
     
     /**
-     * Mise en CONTROLE_KO des fichiers avec trop d'erreur
-     *
-     * @param tablePilTemp
-     *            , table de pilotage des fichiers
-     * @param tableSeuil
-     *            , table de seuil pour la comparaison
+     * Marque les résultats des contrôle dans la table de pilotage
      * @return
      */
-    public String marquageControleKoSeuil(String tableControlePilTemp, String tableSeuil) {
-        StringBuilder requete = new StringBuilder();
-        requete.append("WITH ");
-        requete.append("seuil AS (  SELECT valeur ");
-        requete.append("        FROM " + tableSeuil + " ");
-        requete.append("        WHERE nom='s_taux_erreur'), ");
-        requete.append("prep AS (   SELECT id_source,taux_ko,valeur ");
-        requete.append("        FROM " + tableControlePilTemp + ", seuil ");
-        requete.append("        WHERE taux_ko > valeur) ");
-        requete.append("\n UPDATE " + tableControlePilTemp + " ");
-        requete.append("\n SET etat_traitement='{" + TraitementEtat.KO.toString() + "}', ");
-        requete.append("\n rapport='Fichier avec trop d''erreur' ");
-        requete.append("\n WHERE id_source in (SELECT distinct id_source FROM prep); ");
-        return requete.toString();
+    public String marquagePilotage() {
+        StringBuilder blocFin = new StringBuilder();
+        blocFin.append("\n UPDATE "+this.tableControlePilTemp+" ");
+        blocFin.append("\n SET etat_traitement= ");
+        blocFin.append("\n case ");
+        blocFin.append("\n when exists (select from "+ServiceRequeteSqlRegle.tableTempMeta+" where blocking) then '{"+TraitementEtat.KO+"}'::text[] ");
+        blocFin.append("\n when exists (select from "+ServiceRequeteSqlRegle.tableTempMeta+" where controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"') then '{"+TraitementEtat.OK+","+TraitementEtat.KO+"}'::text[] "); 
+        blocFin.append("\n else '{OK}'::text[] ");
+        blocFin.append("\n end ");
+        blocFin.append("\n , rapport='Control failed on : '||(select array_agg(brokenrules||case when blocking then ' (blocking rules)' else '' end||case when controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"' then ' (exclusion rules)' else '' end)::text from "+ServiceRequeteSqlRegle.tableTempMeta+") ");
+        blocFin.append("\n WHERE exists (select from "+ServiceRequeteSqlRegle.tableTempMeta+") ");
+        blocFin.append(";");
+        return blocFin.toString();
     }
 
-    /**
-     * Calcul du taux d'erreur (ligne dont le controle est différent de 0) et mise à jour dans pilotage
-     *
-     * @param tableIn
-     *            , la table ayant subi des controles
-     * @param tablePil
-     *            , la table de pilotage des fichiers (à mettre à jour)
-     * @return
-     */
-    public String calculTauxErreur(String tableIn, String tablePil) {
-        StringBuilder requete = new StringBuilder();
-        requete.append("\n DROP TABLE IF EXISTS " + this.tableTempControleFoo + " CASCADE; ");
-        requete.append("\n CREATE ");
-        if (!this.tableTempControleFoo.contains("."))
-        {
-            requete.append("\n TEMPORARY ");
-        }
-        requete.append("\n TABLE " + this.tableTempControleFoo
-                + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) as select * FROM (");
-        requete.append("\n \t with erreur AS(   SELECT id_source, count(id_source)::numeric as nb_erreur ");
-        requete.append("\n          FROM " + tableIn + " ");
-        requete.append("\n          WHERE controle != '0' ");
-        requete.append("\n          GROUP BY id_source), ");
-        requete.append("\n tot AS (SELECT id_source, count(id_source)::numeric AS nb_enr ");
-        requete.append("\n      FROM " + tableIn + " ");
-        requete.append("\n      GROUP BY id_source), ");
-        requete.append("\n maj AS (SELECT   tot.id_source,");
-        requete.append("\n              (CASE   WHEN erreur.nb_erreur is null ");
-        requete.append("\n                  THEN 0 ");
-        requete.append("\n                  ELSE erreur.nb_erreur/tot.nb_enr ");
-        requete.append("\n              END)::numeric as taux_ko ");
-        requete.append("\n      FROM tot LEFT JOIN (SELECT * FROM erreur) AS erreur ON tot.id_source=erreur.id_source) ");
-        requete.append("\n select * from maj) foo; ");
-
-        requete.append("\n UPDATE " + tablePil + " a SET taux_ko = b.taux_ko from " + this.tableTempControleFoo
-                + " b WHERE a.id_source = b.id_source; ");
-        requete.append("\n DROP TABLE IF EXISTS " + this.tableTempControleFoo + " CASCADE; ");
-        return requete.toString();
-    }
 
     /**
      * Insertion des données d'une table dans une autre avec un critère de sélection
@@ -470,12 +327,12 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la condition pour filtrer la recopie
      * @return
      */
-    public String ajoutTableControle(String listColTableIn, String tableIn, String tableOut, String tableControlePilTemp, String condFichier,
+    public String ajoutTableControle(String tableIn, String tableOut, String tableControlePilTemp, String condFichier,
             String condEnregistrement) {
 
         StringBuilder requete = new StringBuilder();
-        requete.append("\n INSERT INTO " + tableOut + "(" + listColTableIn + ")");
-        requete.append("\n \t   SELECT " + listColTableIn + " ");
+        requete.append("\n INSERT INTO " + tableOut + " ");
+        requete.append("\n \t   SELECT * ");
         requete.append("\n \t   FROM " + tableIn + " a ");
         requete.append("\n \t   WHERE " + condEnregistrement + " ");
         requete.append("\n \t   EXISTS (select 1 from  " + tableControlePilTemp + " b where a.id_source=b.id_source and "
@@ -492,6 +349,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         this.sjdr = sjdr;
     }
 
+    @Override
     public Thread getT() {
         return t;
     }
@@ -500,6 +358,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         this.t = t;
     }
 
+    @Override
     public Connection getConnexion() {
         return connexion;
     }

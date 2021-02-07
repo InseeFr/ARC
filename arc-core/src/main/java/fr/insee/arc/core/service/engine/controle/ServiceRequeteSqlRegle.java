@@ -4,22 +4,29 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleControleEntity;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 @Component
 public class ServiceRequeteSqlRegle {
 
 	/** Translations in SQL of the XSD date format ([-]CCYY-MM-DD[Z|(+|-)hh:mm]).*/
+
+	public static final String RECORD_WITH_NOERROR="0";
+	public static final String RECORD_WITH_ERROR_TO_EXCLUDE="1";
+	public static final String RECORD_WITH_ERROR_TO_KEEP="2";
+	
+
 	
 	private static final HashMap<String,String[]> XSD_DATE_RULES
 	=new HashMap<String,String[]>() {
@@ -34,7 +41,6 @@ public class ServiceRequeteSqlRegle {
 					,new String[] {
 							"YYYY-MM-DD"
 							,"YYYY-MM-DD\"Z\""
-							// TODO : CHECK
 							// it is not really the absolute hour and minute but a relative time zone delta
 							// TZ parameter would be a better implementation but need more info and likely not needed
 							//				,"YYYY-MM-DD+HH24:MI"
@@ -61,9 +67,11 @@ public class ServiceRequeteSqlRegle {
 	};
 
 	
-	public String tableResultat;
-	public String tableTempData;
-	public String tableTempMark;
+	private String tableResultat;
+	private String tableTempData;
+	private static final String tableTempMark="t_mark";
+	public static final String tableTempMeta="t_meta";
+	private static final String tableRecordTotalCount="t_rtc";
 
 	private static final Logger logger = LogManager.getLogger(ServiceRequeteSqlRegle.class);
 
@@ -74,46 +82,26 @@ public class ServiceRequeteSqlRegle {
 	 * @param table
 	 * @return
 	 */
-	public String initTemporaryTable(JeuDeRegle jdr, String table) {
+	public String initTemporaryTable(String table) {
 		this.tableResultat = table;
-		this.tableTempData = table + "_data";
-		this.tableTempMark = table + "_mark";
+		this.tableTempData = table;
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(dropControleTemporaryTables());
 
 		// creation de la table de marquage
-		sb.append("CREATE ");
-		if (!this.tableTempMark.contains(".")) {
-			sb.append("TEMPORARY ");
-		}
-		else
-		{
-			sb.append(" ");
-		}
+		sb.append("CREATE TEMPORARY TABLE " + this.tableTempMark + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
+		sb.append("select id, null::text as brokenrules, null::text as controle from " + table + " where false ;\n");
 
-		sb.append("TABLE " + this.tableTempMark + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
-		sb.append("select id_source, id, null::text collate \"C\" as brokenrules from " + table + " where 1=0 ;\n");
+		
+		// creation de la table meta
+		sb.append("CREATE TEMPORARY TABLE " + this.tableTempMeta + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
+		sb.append("select null::text as brokenrules, null::boolean as blocking, null::text as controle where false;\n");
 
-		sb.append("CREATE ");
-		if (!this.tableTempData.contains(".")) {
-			sb.append("TEMPORARY ");
-		}
-		else
-		{
-			sb.append(" ");
-		}
-
-		sb.append("TABLE " + this.tableTempData + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
-		sb.append("(	SELECT * ");
-		sb.append("		FROM " + this.tableResultat + " ");
-		sb.append(");");
-
-//		sb.append("\n create index idx1_"+ManipString.substringAfterFirst(tableTempData,".")+" on "+tableTempData+" (id_source);");
-//		sb.append("\n analyze "+tableTempData+" (id_source);");
-
-	//	StaticLoggerDispatcher.info("Ma requête pour la création d'une table temporaire spécifique à un jeu de règle: " + sb,logger);
-
+		// total count of record in the table to evaluate the error ratio
+		sb.append("CREATE TEMPORARY TABLE " + this.tableRecordTotalCount + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
+		sb.append("select count(1)::numeric as n FROM " + table + ";\n");
+		
 		return sb.toString();
 	}
 
@@ -123,31 +111,88 @@ public class ServiceRequeteSqlRegle {
 	 * @return
 	 */
 	public String markTableResultat() {
-		// TODO Auto-generated method stub
 		StringBuilder sb = new StringBuilder();
 		
-		// On fait peter les watts; grosse requete en cas d'erreur
-//		sb.append("update " + this.tableResultat + " v set brokenrules=w.brokenrules, controle= '1' from ");
-//		sb.append("\n (select id_source, id, string_to_array(brokenrules,',') as brokenrules ");
-//		sb.append("\n  from ( select a.id_source, a.id, string_agg(b.brokenrules,',') as brokenrules ");
-//		sb.append("\n   from (select id_source, id from " + this.tableTempMark + " group by id_source, id) a,  ");
-//		sb.append("\n   " + this.tableTempMark + " b ");
-//		sb.append("\n  where a.id_source=b.id_source and a.id=b.id group by a.id_source, a.id ) u ) w ");
-//		sb.append("\n where v.id_source=w.id_source and v.id=w.id ; ");
-		
-		sb.append("\n UPDATE " + this.tableResultat + " v set brokenrules=w.brokenrules, controle= '1' FROM ");
-		sb.append("\n (SELECT id_source, id, array_agg(brokenrules) as brokenrules ");
-		sb.append("\n  FROM " + this.tableTempMark + " ");
-		sb.append("\n GROUP BY id_source, id ) w ");
-		sb.append("\n  WHERE v.id_source=w.id_source AND v.id=w.id ; ");
+		sb.append("\n UPDATE " + this.tableResultat + " v set brokenrules=w.brokenrules, controle= w.controle FROM ");
+		sb.append("\n (SELECT id, array_agg(brokenrules) as brokenrules, min(controle) as controle ");
+		sb.append("\n FROM " + this.tableTempMark + " ");
+		sb.append("\n GROUP BY id ) w ");
+		sb.append("\n WHERE v.id=w.id;");
 		
 		return sb.toString();
 	}
 
 	public String dropControleTemporaryTables() {
-		return FormatSQL.dropTable(this.tableTempData).toString() + FormatSQL.dropTable(this.tableTempMark).toString();
+		return 
+				FormatSQL.dropTable(this.tableTempMark).toString();
 	}
 
+
+	/**
+	 * insert the source file line and the rules number whom evaluation is false in the mark table
+	 * insert the count of line with false evaluation and the rules number in the meta table
+	 * @return
+	 */
+	public String insertBloc(String blockingThreshold, String regleId)
+	{
+    	StringBuilder requete=new StringBuilder();
+
+    	// tableTempMark contains the id of records with an error, the error id and the error type (keep or not the record in final output)
+    	// tableTempMeta contains the errors id, their types, and their results of the blockingThreshold evaluation (to know if the file must be fully rejected or not if a particular error occurs) 
+    	
+    	// case for no blocking threshold
+		if (blockingThreshold==null || blockingThreshold.isEmpty())
+		{
+	    	requete.append("\n, ins as (INSERT into "+this.tableTempMark+" select id, '"+regleId+"', '"+RECORD_WITH_ERROR_TO_KEEP+"' as controle from ctl returning true) ");
+	    	requete.append("\n INSERT into "+this.tableTempMeta+" SELECT '"+regleId+"', false, '"+RECORD_WITH_ERROR_TO_KEEP+"' as controle where EXISTS (SELECT FROM ins); ");
+			return 	requete.toString();
+		}
+		
+    	// case for threshold
+		// parse threshold
+    	Pattern pattern = Pattern.compile("^(>|>=)([0123456789.]+)([%u])([ke])$");
+    	Matcher matcher = pattern.matcher(blockingThreshold);
+    	matcher.find();
+		
+    	
+	    requete.append("\n, ins as (INSERT into "+this.tableTempMark+" ");
+	    requete.append("SELECT id, '"+regleId+"'");
+	    
+	    // mark record to keep or exclude
+	    requete.append(",'"+( matcher.group(4).equals("e") ? RECORD_WITH_ERROR_TO_EXCLUDE : RECORD_WITH_ERROR_TO_KEEP )+"'");
+	    
+	    requete.append("FROM ctl RETURNING true) ");
+	    
+	    
+	    // insert into meta table
+	    requete.append("\n INSERT into "+this.tableTempMeta+" SELECT '"+regleId+"',");
+    	
+    	// ratio or count evaluation
+    	requete.append("((count(*)::numeric");		
+    	if (matcher.group(3).equals("%"))
+    	{
+    		requete.append("*100.0/(select n from "+this.tableRecordTotalCount+")");
+    	}
+    	requete.append(")");
+    	
+    	// operator
+    	requete.append(matcher.group(1));
+    	
+    	// compare to threshold
+    	requete.append(matcher.group(2));
+
+    	requete.append(")");
+    	
+	    // any record to keep or exclude ?
+	    requete.append(",'"+( matcher.group(4).equals("e") ? RECORD_WITH_ERROR_TO_EXCLUDE : RECORD_WITH_ERROR_TO_KEEP )+"'");
+
+    	// calculate error only if there are any errors marked
+    	requete.append("\n FROM ins where EXISTS (SELECT FROM ins);");
+    	
+		return 	requete.toString();
+	}
+	
+	
 	/**
 	 * Controle si le contenu d'une rubrique est bien numérique
 	 * Cette méthode inscrit les erreurs trouvées dans une table spécifique tableTempMark
@@ -155,40 +200,13 @@ public class ServiceRequeteSqlRegle {
 	 * @return
 	 */
 	public String ctlIsNumeric(RegleControleEntity reg) {
-		String requete = "";
-		//requete = requete + preAction(reg);
 		String cond = conditionLongueur(reg);
-		requete = requete + "WITH " + "ctl AS (	SELECT id_source,id " + "			FROM " + this.tableTempData + " "
-				+ "			WHERE ({2} ~ '^-?\\d*(\\.\\d+)?$') IS FALSE " + cond + ") "
-				+ "INSERT into {0} select id_source, id, '{1}' from ctl; ";
-		// + "UPDATE {0} a SET  brokenrules=array_append(brokenrules,'{1}'::text) "
-		// + "UPDATE {0} a SET  brokenrules=brokenrules||','||'{1}' "
-		// + "FROM ctl b WHERE a.id_source=b.id_source and a.id=b.id and exists (select 1 from ctl limit 1); ";
+		String requete = "WITH ctl AS (	SELECT id FROM " + this.tableTempData + " "
+				+ " WHERE ({2} ~ '^-?\\d*(\\.\\d+)?$') IS FALSE " + cond + ") "
+				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
 		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere());
 		return requete;
 	}
-
-	/**
-	 * Permet une correction automatique de la table avant controle
-	 * Attention, la table contrôlée tableTempData ne sert qu'au controle pour alimenter la table tableTempMark,
-	 * toute modification sur celle ci ne sera pas répercuter sur les données en output
-	 * Pour cette raison, il faut deux UPDATE (une pour les données d'output et une pour les données qui servent de controle)
-	 * @param reg
-	 * @return
-	 */
-//	private String preAction(RegleControleEntity reg) {
-//		StringBuilder requete = new StringBuilder();
-//		if (!StringUtils.isEmpty(reg.getPreAction())) {
-//			// UPDATE sur la table des données
-//			requete.append(" UPDATE " + reg.getTable());
-//			requete.append(" SET " + reg.getRubriquePere() + "=" + ManipString.extractAllRubrique(reg.getPreAction())+ ";");
-//			// UPDATE sur la table sur laquelle les controles vont être réellement passés
-//			// tableTempData est une extrait de la table CONTROLE_ENCOURS
-//			requete.append("UPDATE " + this.tableTempData);
-//			requete.append(" SET " + reg.getRubriquePere() + "=" + ManipString.extractAllRubrique(reg.getPreAction())+ ";");
-//		}
-//		return requete.toString();
-//	}
 
 	/**
 	 * Requête de contrôle si le contenu d'une rubrique est une date conforme à un format.
@@ -198,48 +216,40 @@ public class ServiceRequeteSqlRegle {
 	 * @param reg la règle à appliquer
 	 * */
 	public String ctlIsDate(RegleControleEntity reg) {
-		StringBuilder reqBuilder = new StringBuilder("WITH " + "ctl AS (	SELECT id_source,id " + "			FROM " + this.tableTempData + " ");
+		StringBuilder reqBuilder = new StringBuilder("WITH ctl AS (SELECT id FROM " + this.tableTempData + " ");
 		String requete = "";
-		//requete = requete + preAction(reg);
 		if (reg.getCondition().equalsIgnoreCase(ControleRegleService.XSD_DATE_NAME)
 			||	reg.getCondition().equalsIgnoreCase(ControleRegleService.XSD_DATETIME_NAME)
 			||	reg.getCondition().equalsIgnoreCase(ControleRegleService.XSD_TIME_NAME)	
 				) {
-			reqBuilder.append("			WHERE 	CASE	WHEN (");
+			reqBuilder.append("\n WHERE CASE WHEN ( ");
 			for (int i = 0 ; i < XSD_DATE_RULES.get(reg.getCondition().toLowerCase()).length ; i++) {
 				if (i > 0) {
-					reqBuilder.append(" or ");
+					reqBuilder.append(" OR ");
 				}
 				reqBuilder.append("arc.isdate({2}, '" + XSD_DATE_RULES.get(reg.getCondition().toLowerCase())[i] + "')");
 			}
-			reqBuilder.append(") THEN false "
-					+ "							WHEN {2} is null THEN false"
-					+ "							ELSE true " + "					END) " + "INSERT into {0} select id_source, id, '{1}' from ctl; ");
-		requete = getRequete(reqBuilder.toString(), this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere());
+			reqBuilder.append(") THEN false ");
+			reqBuilder.append("\n WHEN {2} is null THEN false ");
+			reqBuilder.append("\n ELSE true END) ");
+			reqBuilder.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
+			requete = getRequete(reqBuilder.toString(), this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere());
 		} 
 		else {
-			reqBuilder.append(
-					// + "			WHERE 	CASE	WHEN {2}=to_char(to_date({2},'{3}'),'{3}') THEN false "
-					  "			WHERE 	CASE	WHEN arc.isdate({2},'{3}') THEN false " + "							WHEN {2} is null THEN false"
-					+ "							ELSE true " + "					END) " + "INSERT into {0} select id_source, id, '{1}' from ctl; ");
-			// + "UPDATE {0} a SET brokenrules=array_append(brokenrules,'{1}'::text) "
-			// + "UPDATE {0} a SET  brokenrules=brokenrules||','||'{1}' "
-			// + "FROM ctl b WHERE a.id_source=b.id_source and a.id=b.id and exists (select 1 from ctl limit 1); ";
-
+			reqBuilder.append("\n WHERE CASE WHEN arc.isdate({2},'{3}') THEN false");
+			reqBuilder.append("\n WHEN {2} is null THEN false ");
+			reqBuilder.append("\n ELSE true END) ");
+			reqBuilder.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
 			requete = getRequete(reqBuilder.toString(), this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
 		}
 		return requete;
 	}
 
 	public String ctlIsAlphanum(RegleControleEntity reg) {
-		String requete = "";
-		//requete = requete + preAction(reg);
 		String cond = conditionLongueur(reg);
-		requete = requete + "WITH " + "ctl AS (	SELECT id_source,id " + "			FROM " + this.tableTempData + " "
-				+ "			WHERE 1=2 " + cond + ") " + "INSERT into {0} select id_source, id, '{1}' from ctl; ";
-		// + "UPDATE {0} a SET brokenrules=array_append(brokenrules,'{1}'::text) "
-		// + "UPDATE {0} a SET  brokenrules=brokenrules||','||'{1}' "
-		// + "FROM ctl b WHERE a.id_source=b.id_source and a.id=b.id and exists (select 1 from ctl limit 1); ";
+		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData 
+				+ " WHERE false " + cond + ")" 
+				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
 		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle());
 		return requete;
 	}
@@ -283,8 +293,9 @@ public class ServiceRequeteSqlRegle {
 		requete.append("\n ) vv");
 		requete.append("\n where rk!=r");
 		requete.append("\n )");
-		requete.append("\n INSERT into "+this.tableTempMark+" SELECT id_source, id, "+reg.getIdRegle()+" FROM "+ this.tableTempData + " ");
-		requete.append("\n WHERE EXISTS (SELECT from tmp_check);");
+		requete.append("\n , ctl as (select id from this.tableTempData WHERE EXISTS (SELECT from tmp_check))");
+		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
+		
 		return requete.toString();
 	}
 	
@@ -300,8 +311,7 @@ public class ServiceRequeteSqlRegle {
 		
 		StringBuilder requete=new StringBuilder();
 		requete.append("WITH null_transform AS (");
-		requete.append("	SELECT id_source");
-		requete.append("	,"+reg.getRubriquePere());
+		requete.append("	SELECT "+reg.getRubriquePere());
 
 		// rubrique fille
 		// cas 1 : présente dans la table
@@ -327,9 +337,7 @@ public class ServiceRequeteSqlRegle {
 		for (String s:listRubriqueExpr)
 		{
 			if (ListRubriqueTable.contains(s))
-			{
-			// TODO faut vraiment qu'on fasse une méthode pour les i_, v_...
-				
+			{				
 				// on refait les identifiants pour que 
 				// la valeur -1 corresponde au fait que la rubrique n'existe pas (null sur tout le groupe ou inexistante)
 				// la valeur 0 corresponde au fait que c'est null
@@ -358,11 +366,11 @@ public class ServiceRequeteSqlRegle {
 		requete.append(" ) ");
 		
 		requete.append(" , trav AS (");
-		requete.append(" 	SELECT id_source, {2} FROM ");
-		requete.append(" 		(SELECT DISTINCT id_source, {2}, {3} FROM ");
+		requete.append(" 	SELECT {2} FROM ");
+		requete.append(" 		(SELECT DISTINCT {2}, {3} FROM ");
 		
 		
-		requete.append("		(SELECT id_source, {2}, {3}, {2} IS NOT NULL ");
+		requete.append("		(SELECT {2}, {3}, {2} IS NOT NULL ");
 		
 		// condition is written as a boolean inside select clause to be able to use windows aggregate functions
 		if (reg.getCondition()!=null)
@@ -382,13 +390,12 @@ public class ServiceRequeteSqlRegle {
 		requete.append(" WHERE condition ");
 				
 		requete.append(") foo ");
-		requete.append(" 	GROUP BY id_source,{2} HAVING " + cond + ") ");
+		requete.append(" 	GROUP BY {2} HAVING " + cond + ") ");
 		requete.append(" , ctl AS (");
-		requete.append("	SELECT a.id_source, a.id FROM " + this.tableTempData + " a ");
+		requete.append("	SELECT a.id FROM " + this.tableTempData + " a ");
 		requete.append(" 	INNER JOIN trav ON row(a.{2})::text collate \"C\"=row(trav.{2})::text collate \"C\" ");
-		requete.append(" 	AND a.id_source=trav.id_source ");
 		requete.append(" ) ");
-		requete.append(" INSERT into {0} select id_source, id, '{1}' from ctl; ");
+		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
 
 		return getRequete(requete.toString(), this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getRubriqueFils());
 	}
@@ -402,18 +409,12 @@ public class ServiceRequeteSqlRegle {
 	 */
 	public String ctlCondition(RegleControleEntity reg, Map<String, RegleControleEntity> mapRubrique) {
 		String filtre = writeFiltre(mapRubrique);
-//		StaticLoggerDispatcher.info("Ma condition avant : " + reg.getCondition(),logger);
 		String cond = rewriteCondition(mapRubrique, reg.getCondition());
-//		StaticLoggerDispatcher.info("Ma condition après : " + cond,logger);
-		String requete = "WITH " + " ctl AS ( select id_source, id from (SELECT id_source, id, "
+		String requete = "WITH ctl AS ( select id from (SELECT id, "
 				+" CASE WHEN " + filtre + " THEN CASE WHEN " + cond + " THEN FALSE ELSE TRUE END ELSE FALSE END as condition_a_tester " + " FROM " + this.tableTempData + " "
 				+") ww where condition_a_tester ) "
-				+ "INSERT into {0} select id_source, id, '{1}' from ctl; ";
-		// + "UPDATE {0} a SET brokenrules=array_append(brokenrules,'{1}'::text) "
-		// + "UPDATE {0} a SET  brokenrules=brokenrules||','||'{1}' "
-		// + "FROM ctl b WHERE a.id_source=b.id_source and a.id=b.id and exists (select 1 from ctl limit 1); ";
+				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
 		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle());
-//		StaticLoggerDispatcher.info("Ma requete de CONDITION :" + requete,logger);
 		return requete;
 	}
 
@@ -423,9 +424,9 @@ public class ServiceRequeteSqlRegle {
 	 * @param reg la règle à appliquer
 	 * */
 	public String ctlMatchesRegexp(RegleControleEntity reg) {
-		String requete = "WITH " + "ctl AS (	SELECT id_source,id " + "			FROM " + this.tableTempData + " "
-		+ "			WHERE ({2} ~ '{3}') IS FALSE ) "
-		+ "INSERT into {0} select id_source, id, '{1}' from ctl; ";
+		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData + " "
+		+ "WHERE ({2} ~ '{3}') IS FALSE ) "
+		+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
 		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
@@ -439,18 +440,18 @@ public class ServiceRequeteSqlRegle {
 	 * @param reg la règle à appliquer
 	 * */
 	public String ctlIsValueIn(RegleControleEntity reg) {
-		String requete = "WITH " + "ctl AS (	SELECT id_source,id " + "			FROM " + this.tableTempData + " "
+		String requete = "WITH " + "ctl AS (	SELECT id " + "			FROM " + this.tableTempData + " "
 		+ "			WHERE {2} not in ({3}) ) "
-		+ "INSERT into {0} select id_source, id, '{1}' from ctl; ";
+		+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
 		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
 
 	/** Requête de contrôle qui ne remonte jamais d'erreur.*/
 	public String ctlAlwaysTrue(RegleControleEntity reg) {
-		String requete = "WITH " + "ctl AS (	SELECT id_source,id " + "			FROM " + this.tableTempData + " "
+		String requete = "WITH " + "ctl AS (	SELECT id " + "			FROM " + this.tableTempData + " "
 				+ "			WHERE false ) "
-				+ "INSERT into {0} select id_source, id, '{1}' from ctl; ";
+				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
 		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle());
 		return requete;
 	}
@@ -531,7 +532,6 @@ public class ServiceRequeteSqlRegle {
 				cond = cond.replace("{" + rubrique + "}", rubrique);
 				break;
 			}
-			format = "";
 		}
 		return cond;
 	}
@@ -562,13 +562,10 @@ public class ServiceRequeteSqlRegle {
 
 			switch (type) {
 			case "NUM":
-				//filtre = filtre + " ({0} ~ '^-?\\d*(\\.\\d+)?$') ";
 				filtre = filtre + " (case when {1} IS NULL then true when {0} IS NULL then true else {0} ~ '^-?\\d*(\\.\\d+)?$' end) ";
 				filtre = getRequete(filtre, rubrique, "i_"+ManipString.substringAfterFirst(rubrique,"_"));
 				break;
 			case "DATE":
-				// filtre=filtre+" {0}=to_char(to_date({0},'{1}'),'{1}') ";
-				//filtre = filtre + " arc.isdate({0},'{1}') ";
 				filtre = filtre + " (case when {1} IS NULL then true when {0} IS NULL then true else arc.isdate({0},'{2}') end )";
 				filtre = getRequete(filtre, rubrique, "i_"+ManipString.substringAfterFirst(rubrique,"_"), format);
 				break;
@@ -646,11 +643,9 @@ public class ServiceRequeteSqlRegle {
 			// si l'identifiant est null on check pas et on marque pas
 			// si la valeur est null on check pas et on marque pas (la condition est forcément vérifiée dans ce cas
 			// sinon on fait la vérification habituelle
-			//cond = "OR char_length(regexp_replace({0}, '^-', ''))<{1} OR char_length(regexp_replace({0}, '^-', ''))>{2}";
 			cond = "OR case when {3} is null then false when {0} is null then false else (char_length(regexp_replace({0}, '^-', ''))<{1} OR char_length(regexp_replace({0}, '^-', ''))>{2}) end";
 			cond = getRequete(cond, rubrique, borneInf, borneSup, "i_"+ManipString.substringAfterFirst(rubrique,"_"));
 		} else if (borneInf == null && borneSup != null) {
-			//cond = "OR char_length(regexp_replace({0}, '^-', ''))>{1}";
 			
 			// si l'identifiant est null on check pas et on marque pas
 			// si la valeur est null, on marque pas (on ne dépassera jamais une borne sup)
@@ -658,7 +653,6 @@ public class ServiceRequeteSqlRegle {
 			cond = "OR case when {2} is null then false when {0} is null then false else char_length(regexp_replace({0}, '^-', ''))>{1} end";
 			cond = getRequete(cond, rubrique, borneSup, "i_"+ManipString.substringAfterFirst(rubrique,"_"));
 		} else if (borneInf != null && borneSup == null) {
-			//cond = "OR char_length(regexp_replace({0}, '^-', ''))<{1}";
 			
 			// si la borne inf vaut 0 : on check rien
 			// si l'identifiant est null on check pas et marque pas
@@ -685,16 +679,5 @@ public class ServiceRequeteSqlRegle {
 	public void setTableTempData(String tableTempData) {
 		this.tableTempData = tableTempData;
 	}
-
-	public String getTableTempMark() {
-		return this.tableTempMark;
-	}
-
-	public void setTableTempMark(String tableTempMark) {
-		this.tableTempMark = tableTempMark;
-	}
-
-
-
 
 }

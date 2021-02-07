@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.core.service.engine.controle.ControleRegleService;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -46,9 +45,6 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	private static final String SELECTED_RULESET_NAME = "SELECTED_RULESET_NAME";
 
 	private static final Logger LOGGER = LogManager.getLogger(GererNormeAction.class);
-
-	@Autowired
-	private ControleRegleService service;
 	
 	@Autowired
 	private GererNormeDao gererNormeDao;

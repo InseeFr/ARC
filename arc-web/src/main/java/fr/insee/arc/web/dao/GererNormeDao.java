@@ -251,7 +251,7 @@ public class GererNormeDao implements IDbConstant {
 		if (!selection.isEmpty() && scope != null) {
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
-            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
+            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,blocking_threshold,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
             whereRuleSetEquals(requete, selection, type);
             
             viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));

@@ -33,7 +33,7 @@ public class ServiceJeuDeRegle {
 	/**
 	 * Liste des rubriques de la table de données DSN
 	 */
-	List<String> listRubTable = new ArrayList<String>();
+	List<String> listRubTable = new ArrayList<>();
 	String tableControleRegle;
 
     public ServiceJeuDeRegle(){
@@ -44,40 +44,7 @@ public class ServiceJeuDeRegle {
     	this.servSql = new ServiceRequeteSqlRegle();
     	this.tableControleRegle=tableControleRegle;
     }
-    
-	/**
-	 * Récupération des Jeu de règle à appliquer sur la table à controler, la liste des (validité, norme) permet de sélectionner uniquement
-	 * les jeux de règles utiles
-	 *
-	 * @param tableControle
-	 * @param tableJeuDeRegle
-	 * @return
-	 * @throws SQLException
-	 */
-	public ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableControle, String tableJeuDeRegle)
-			throws SQLException {
-		StaticLoggerDispatcher.info("Récupération des Jeu de règle à appliquer sur la table à controler",logger);
-		ArrayList<JeuDeRegle> listCal = new ArrayList<>();
-		listCal = JeuDeRegleDao.recupJeuDeRegle(connexion, tableControle, tableJeuDeRegle);
-		return listCal;
-	}
 
-	/**
-	 * pour remplir un jeu de règle avec les règles y afférant
-	 *
-	 * @param jdr
-	 *            , le jeu de règle à "complèter"
-	 * @param espace
-	 *            , la table des règles de controle
-	 * @throws SQLException
-	 */
-	@Deprecated
-	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String espace) throws SQLException {
-		StaticLoggerDispatcher.info("recherche de regle dans la table : " + espace,logger);
-		ArrayList<RegleControleEntity> listRegleC = new ArrayList<RegleControleEntity>();
-		listRegleC = RegleDao.getRegle(connexion, jdr, espace);
-		jdr.setListRegleControle(listRegleC);
-	}
 
 	/**
 	 * pour remplir un jeu de règle avec les règles y afférant
@@ -92,8 +59,7 @@ public class ServiceJeuDeRegle {
 	 */	
 	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String tableRegle, String tableIn) throws SQLException {
 		StaticLoggerDispatcher.info("recherche de regle dans la table : " + tableRegle,logger);
-		ArrayList<RegleControleEntity> listRegleC = new ArrayList<RegleControleEntity>();
-		listRegleC = RegleDao.getRegle(connexion, tableRegle, tableIn);
+		ArrayList<RegleControleEntity> listRegleC = RegleDao.getRegle(connexion, tableRegle, tableIn);
 		jdr.setListRegleControle(listRegleC);
 	}
 	
@@ -111,82 +77,109 @@ public class ServiceJeuDeRegle {
 	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
 		StaticLoggerDispatcher.debug("executeJeuDeRegle", logger);
 
-//		ArrayList<QueryThread> threadList=new ArrayList<QueryThread>();
-//		ArrayList<Connection> connexionList=ApiService.prepareThreads(parallel, connexion);
-
-		// TODO il faut enlever le nom du schema de la table sinon la requete
-		// renvoie un ensemble null
-		// listRubTable=daoR.getColumnTable(table);
 		java.util.Date date = new java.util.Date();
+		
+		// register the columns from the source table
+		registerRubriquesFromSourceTable(connexion, table);
+		
+		// execute the correction rules (aka "preAction") before the control step
+		preAction(connexion, jdr, table);
+
+		// execute the control rules
+		control(connexion, jdr, table, structure);
+
+		StaticLoggerDispatcher.info("Temps de controle : " + (new java.util.Date().getTime() - date.getTime()), logger);
+
+	}
+	
+	/**
+	 * Get the columns (also named "rubriques") list from the table in order to know what controls must be evaluated
+	 * @param connexion
+	 * @param table
+	 * @throws SQLException
+	 */
+	private void registerRubriquesFromSourceTable(Connection connexion, String table) throws SQLException
+	{
 
 		this.listRubTable = UtilitaireDao.get("arc").listeCol(connexion, table);
 
 		if (this.listRubTable==null)
 		{
-			this.listRubTable = new ArrayList<String>();
+			this.listRubTable = new ArrayList<>();
 		}
-
+	}
+	
+	
+	/**
+	 * Execute the correction actions before control
+	 * @param connexion
+	 * @param jdr
+	 * @param table
+	 * @param structure
+	 * @throws SQLException 
+	 */
+	private void preAction(Connection connexion, JeuDeRegle jdr, String table) throws SQLException {
+		
 		// exécuter les préactions
-		StaticLoggerDispatcher.info("Debut Pré-actions", logger);
+				StaticLoggerDispatcher.info("Debut Pré-actions", logger);
 
-		ArrayList<String> p=new ArrayList<String>();
+				ArrayList<String> p=new ArrayList<>();
 
-		// récupérer les préactions du jeu de regle
-		/**
-		 * Attention, on suppose que la preaction ne contient qu'une seule rubrique et en plus celle de la règle
-		 */
-		for (RegleControleEntity reg : jdr.getListRegleControle()) {
-			if (reg.getPreAction()!=null && !StringUtils.isEmpty(reg.getPreAction())) {
-//				String rubrique = ManipString.extractAllRubrique(reg.getPreAction());
+				// récupérer les préactions du jeu de regle
 				/**
-				 * si la rubrique de la preaction n'est pas dans la table, il ne faut rien calculer
+				 * Attention, on suppose que la preaction ne contient qu'une seule rubrique et en plus celle de la règle
 				 */
-//				if(this.listRubTable.contains(rubrique)){
-					p.add(ManipString.extractAllRubrique(reg.getPreAction())+" as " + reg.getRubriquePere());
-//				}else{
-//					LoggerHelper.debugAsComment(logger,"la rubrique : ",rubrique, " n'est pas présente dans la table de travail");
-//				}
-			}
-		}
+				for (RegleControleEntity reg : jdr.getListRegleControle()) {
+					if (reg.getPreAction()!=null && !StringUtils.isEmpty(reg.getPreAction())) {
+						/**
+						 * si la rubrique de la preaction n'est pas dans la table, il ne faut rien calculer
+						 */
+						p.add(ManipString.extractAllRubrique(reg.getPreAction())+" as " + reg.getRubriquePere());
+					}
+				}
 
-		// appliquer les pré-actions ; modifier la table avec un fast update
-		if (p.size()>0)
-		{
-			String pa[]= p.toArray(new String[0]);
-			LoggerHelper.debug(logger, "Longueur de mon tableau de préaction :",pa.length);
-			LoggerHelper.debug(logger, "Contenu a priori :",p.toString());
-			UtilitaireDao.fastUpdate("arc",
-					connexion
-					, table
-					, "id_source,id"
-					// condition not needed anymore : one file at a time thread
-					, "true"
-					, pa
-					);
-		}
+				// appliquer les pré-actions ; modifier la table avec un fast update
+				if (!p.isEmpty())
+				{
+					String pa[]= p.toArray(new String[0]);
+					LoggerHelper.debug(logger, "Longueur de mon tableau de préaction :",pa.length);
+					LoggerHelper.debug(logger, "Contenu a priori :",p.toString());
+					UtilitaireDao.fastUpdate("arc",
+							connexion
+							, table
+							, "id"
+							, "true"
+							, pa
+							);
+				}
 
-		StaticLoggerDispatcher.debug("Fin Pré-actions", logger);
+				StaticLoggerDispatcher.debug("Fin Pré-actions", logger);
+	}
+	
+	
+	/**
+	 * Execute the control rules.
+	 * @param connexion
+	 * @param jdr
+	 * @param table
+	 * @param structure
+	 * @throws SQLException
+	 */
+	public void control(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
 
-		//		StaticLoggerDispatcher.info("Les noms de colonne de la table : " + table + ", " + listRubTable.toString(),logger);
 		StringBuilder blocRequete = new StringBuilder();
-		blocRequete.append(this.servSql.initTemporaryTable(jdr, table));
-//		UtilitaireDao.get("arc").executeBlock(connexion, blocRequete);
-//		blocRequete.setLength(0);
+		blocRequete.append(this.servSql.initTemporaryTable(table));
+
 
 		int nbRegles = 0;
 		int nbTotalRegles = jdr.getListRegleControle().size();
 
 		for (RegleControleEntity reg : jdr.getListRegleControle()) {
 			nbRegles++;
-
 			reg.setTable(table);
-			// reg.setIdSource(idSource);
-			// message.append("/ regle : "+reg.getIdRegle() +
-			// " -> Ma classe de contrôle est : " + reg.getClasse_ctl()+" ");
-
+			
 			StaticLoggerDispatcher.info("n° " + reg.getIdRegle() + " / classe : " + reg.getIdClasse() + " / commentaire : "
 					+ reg.getCommentaire(), logger);
-			// StaticLoggerDispatcher.debug("sur l'idsource : "+reg.getIdSource());
 			switch (reg.getIdClasse()) {
 			case "NUM":
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
@@ -252,13 +245,6 @@ public class ServiceJeuDeRegle {
 				StaticLoggerDispatcher.info("Execution de " + nbRegles + "/" + nbTotalRegles, logger);
 			}
 
-//    		ApiService.waitForThreads(parallel,threadList,connexionList);
-//    		QueryThread r=new QueryThread("SET enable_nestloop=off; "+blocRequete.toString()+"SET enable_nestloop=on; ",threadList,connexionList,ManipString.substringBeforeFirst(table, "."));
-//    		threadList.add(r);
-//    		r.start();
-//    		blocRequete.setLength(0);
-//
-//
 				if (blocRequete.length()>FormatSQL.TAILLE_MAXIMAL_BLOC_SQL)
 				{
 					UtilitaireDao.get("arc").executeImmediate(connexion, "SET enable_nestloop=off; "+blocRequete.toString()+"SET enable_nestloop=on; ");
@@ -268,23 +254,15 @@ public class ServiceJeuDeRegle {
 
 
 		}
-//
-//		UtilitaireDao.get("arc").executeBlock(connexion, "SET enable_nestloop=off; "+blocRequete.toString()+"SET enable_nestloop=on; ");
-//		blocRequete.setLength(0);
-
-//		ApiService.waitForThreads(0,threadList,connexionList);
 
 
 		StaticLoggerDispatcher.info("Execution de " + nbRegles + "/" + nbTotalRegles, logger);
 		blocRequete.append(this.servSql.markTableResultat());
 		blocRequete.append(this.servSql.dropControleTemporaryTables());
-		// StaticLoggerDispatcher.info("Mon bloc SQL d'execution de regles : " + blocRequete,logger);
-		// System.out.println("Mon Stringbuilder : " + blocRequete);
 
 		UtilitaireDao.get("arc").executeImmediate(connexion, "SET enable_nestloop=off; "+blocRequete+"SET enable_nestloop=on; ");
 		StaticLoggerDispatcher.info("Fin executeJeuDeRegle", logger);
-		StaticLoggerDispatcher.info("Temps de controle : " + (new java.util.Date().getTime() - date.getTime()), logger);
-
+		
 	}
 
 	/** Vérifie si la règle est à appliquer pour ces rubriques.*/
@@ -306,21 +284,18 @@ public class ServiceJeuDeRegle {
 	 * @param table
 	 * @throws SQLException
 	 */
-	public String executeRegleCondition(JeuDeRegle jdr, RegleControleEntity reg) throws SQLException {
+	public String executeRegleCondition(JeuDeRegle jdr, RegleControleEntity reg) {
 		StaticLoggerDispatcher.info("Je lance executeRegleCondition()",logger);
 		String requete = "";
 
 		ArrayList<String> listRubrique = ManipString.extractRubriques(reg.getCondition());
 		listRubrique.replaceAll(String::toUpperCase);
 		
-		// listRubrique = ManipString.extractRubriques(reg.getCondition());
-
 		if (this.listRubTable.containsAll(listRubrique)) {
-			Map<String, RegleControleEntity> mapRubrique = new HashMap<String, RegleControleEntity>();
+			Map<String, RegleControleEntity> mapRubrique = new HashMap<>();
 			for (String rub : listRubrique) {
 				StaticLoggerDispatcher.debug("Je parcours la liste listRubrique sur l'élément : " + rub, logger);
-				RegleControleEntity regle = new RegleControleEntity();
-				regle = findType(jdr, rub);
+				RegleControleEntity regle = findType(jdr, rub);
 				mapRubrique.put(rub, regle);
 			}
 			StaticLoggerDispatcher.debug("MapRubrique contient : " + mapRubrique.toString(), logger);
@@ -341,7 +316,7 @@ public class ServiceJeuDeRegle {
 	 * @param table
 	 * @throws SQLException
 	 */
-	public String executeRegleCardinalite(JeuDeRegle jdr, RegleControleEntity reg) throws SQLException {
+	public String executeRegleCardinalite(JeuDeRegle jdr, RegleControleEntity reg) {
 		StaticLoggerDispatcher.info("Je lance executeRegleCardinalite()",logger);
 		String requete = "";
 
