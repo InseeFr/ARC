@@ -208,14 +208,5 @@ public class ExecuteEngineController {
 	{
 		return generateTemporaryTableName(i-1);
 	}
-	
-	
 
-	/** Supprime le répertoire s'il existe. */
-	private void deleteDirectory(File f) throws IOException {
-		if (f.exists()) {
-			FileUtils.deleteDirectory(f);
-		}
-	}
-	
 }
