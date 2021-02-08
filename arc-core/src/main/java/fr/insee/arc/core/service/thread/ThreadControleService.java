@@ -297,12 +297,12 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         blocFin.append("\n UPDATE "+this.tableControlePilTemp+" ");
         blocFin.append("\n SET etat_traitement= ");
         blocFin.append("\n case ");
-        blocFin.append("\n when exists (select from "+ServiceRequeteSqlRegle.tableTempMeta+" where blocking) then '{"+TraitementEtat.KO+"}'::text[] ");
-        blocFin.append("\n when exists (select from "+ServiceRequeteSqlRegle.tableTempMeta+" where controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"') then '{"+TraitementEtat.OK+","+TraitementEtat.KO+"}'::text[] "); 
+        blocFin.append("\n when exists (select from "+ServiceRequeteSqlRegle.TABLE_TEMP_META+" where blocking) then '{"+TraitementEtat.KO+"}'::text[] ");
+        blocFin.append("\n when exists (select from "+ServiceRequeteSqlRegle.TABLE_TEMP_META+" where controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"') then '{"+TraitementEtat.OK+","+TraitementEtat.KO+"}'::text[] "); 
         blocFin.append("\n else '{OK}'::text[] ");
         blocFin.append("\n end ");
-        blocFin.append("\n , rapport='Control failed on : '||(select array_agg(brokenrules||case when blocking then ' (blocking rules)' else '' end||case when controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"' then ' (exclusion rules)' else '' end)::text from "+ServiceRequeteSqlRegle.tableTempMeta+") ");
-        blocFin.append("\n WHERE exists (select from "+ServiceRequeteSqlRegle.tableTempMeta+") ");
+        blocFin.append("\n , rapport='Control failed on : '||(select array_agg(brokenrules||case when blocking then ' (blocking rules)' else '' end||case when controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"' then ' (exclusion rules)' else '' end)::text from "+ServiceRequeteSqlRegle.TABLE_TEMP_META+") ");
+        blocFin.append("\n WHERE exists (select from "+ServiceRequeteSqlRegle.TABLE_TEMP_META+") ");
         blocFin.append(";");
         return blocFin.toString();
     }
@@ -332,11 +332,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
         StringBuilder requete = new StringBuilder();
         requete.append("\n INSERT INTO " + tableOut + " ");
-        requete.append("\n \t   SELECT * ");
-        requete.append("\n \t   FROM " + tableIn + " a ");
-        requete.append("\n \t   WHERE " + condEnregistrement + " ");
-        requete.append("\n \t   EXISTS (select 1 from  " + tableControlePilTemp + " b where a.id_source=b.id_source and "
-                + condFichier + ");");
+        requete.append("\n SELECT * ");
+        requete.append("\n FROM " + tableIn + " a ");
+        requete.append("\n WHERE " + condEnregistrement + " ");
+        requete.append("\n EXISTS (select 1 from  " + tableControlePilTemp + " b where "+ condFichier + ") ");
+        requete.append(";");
         return requete.toString();
     }
 

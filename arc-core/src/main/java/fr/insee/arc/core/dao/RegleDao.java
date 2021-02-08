@@ -30,7 +30,7 @@ public class RegleDao {
 
 		PreparedStatementBuilder sb = new PreparedStatementBuilder();
 		sb.append("SELECT 	id_regle, id_classe, ");
-		sb.append("		rubrique_pere, rubrique_fils, borne_inf, borne_sup, condition, pre_action, blocking_threshold  ");
+		sb.append("		rubrique_pere, rubrique_fils, borne_inf, borne_sup, condition, pre_action, blocking_threshold, error_row_processing  ");
 		sb.append("FROM " + tableRegle + " a ");
 		sb.append(" WHERE EXISTS (SELECT 1 FROM (SELECT id_norme, periodicite, validite FROM " + tableIn
 				+ " LIMIT 1) b ");
@@ -57,6 +57,7 @@ public class RegleDao {
 				reg.setCondition(g.get("condition").get(i));
 				reg.setPreAction(g.get("pre_action").get(i));
 				reg.setBlockingThreshold(g.get("blocking_threshold").get(i));
+				reg.setErrorRowProcessing(g.get("error_row_processing").get(i));
 
 				// Ajout à la liste de résultat
 				listRegle.add(reg);

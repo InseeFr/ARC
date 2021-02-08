@@ -26,7 +26,8 @@ public class ServiceRequeteSqlRegle {
 	public static final String RECORD_WITH_ERROR_TO_EXCLUDE="1";
 	public static final String RECORD_WITH_ERROR_TO_KEEP="2";
 	
-
+	public static final String ERROR_ROW_PROCESSING_KEEP="k";
+	public static final String ERROR_ROW_PROCESSING_EXCLUDE="e";
 	
 	private static final HashMap<String,String[]> XSD_DATE_RULES
 	=new HashMap<String,String[]>() {
@@ -69,9 +70,9 @@ public class ServiceRequeteSqlRegle {
 	
 	private String tableResultat;
 	private String tableTempData;
-	private static final String tableTempMark="t_mark";
-	public static final String tableTempMeta="t_meta";
-	private static final String tableRecordTotalCount="t_rtc";
+	private static final String TABLE_TEMP_MARK="t_mark";
+	public static final String TABLE_TEMP_META="t_meta";
+	private static final String TABLE_ROW_TOTAL_COUNT="t_rtc";
 
 	private static final Logger logger = LogManager.getLogger(ServiceRequeteSqlRegle.class);
 
@@ -90,16 +91,16 @@ public class ServiceRequeteSqlRegle {
 		sb.append(dropControleTemporaryTables());
 
 		// creation de la table de marquage
-		sb.append("CREATE TEMPORARY TABLE " + this.tableTempMark + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
+		sb.append("CREATE TEMPORARY TABLE " + TABLE_TEMP_MARK + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
 		sb.append("select id, null::text as brokenrules, null::text as controle from " + table + " where false ;\n");
 
 		
 		// creation de la table meta
-		sb.append("CREATE TEMPORARY TABLE " + this.tableTempMeta + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
+		sb.append("CREATE TEMPORARY TABLE " + TABLE_TEMP_META + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
 		sb.append("select null::text as brokenrules, null::boolean as blocking, null::text as controle where false;\n");
 
 		// total count of record in the table to evaluate the error ratio
-		sb.append("CREATE TEMPORARY TABLE " + this.tableRecordTotalCount + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
+		sb.append("CREATE TEMPORARY TABLE " + TABLE_ROW_TOTAL_COUNT + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
 		sb.append("select count(1)::numeric as n FROM " + table + ";\n");
 		
 		return sb.toString();
@@ -115,16 +116,22 @@ public class ServiceRequeteSqlRegle {
 		
 		sb.append("\n UPDATE " + this.tableResultat + " v set brokenrules=w.brokenrules, controle= w.controle FROM ");
 		sb.append("\n (SELECT id, array_agg(brokenrules) as brokenrules, min(controle) as controle ");
-		sb.append("\n FROM " + this.tableTempMark + " ");
+		sb.append("\n FROM " + TABLE_TEMP_MARK + " ");
 		sb.append("\n GROUP BY id ) w ");
-		sb.append("\n WHERE v.id=w.id;");
+		sb.append("\n WHERE v.id=w.id");
+		sb.append(";");
 		
+		// tag all record to exclude if file is blocked
+		sb.append("\n UPDATE " + this.tableResultat + " v set controle='"+RECORD_WITH_ERROR_TO_EXCLUDE+"'");
+		sb.append("\n WHERE EXISTS (SELECT FROM "+TABLE_TEMP_META+" where blocking)");
+		sb.append(";");
+
 		return sb.toString();
 	}
 
 	public String dropControleTemporaryTables() {
 		return 
-				FormatSQL.dropTable(this.tableTempMark).toString();
+				FormatSQL.dropTable(TABLE_TEMP_MARK).toString();
 	}
 
 
@@ -133,8 +140,14 @@ public class ServiceRequeteSqlRegle {
 	 * insert the count of line with false evaluation and the rules number in the meta table
 	 * @return
 	 */
-	public String insertBloc(String blockingThreshold, String regleId)
+	public String insertBloc(String blockingThreshold, String errorRowProcessing, String regleId)
 	{
+		// map from gui user action code to database control code
+		HashMap<String, String> mapRowProcessing=new HashMap<>();
+		mapRowProcessing.put(ERROR_ROW_PROCESSING_KEEP,RECORD_WITH_ERROR_TO_KEEP);
+		mapRowProcessing.put(ERROR_ROW_PROCESSING_EXCLUDE,RECORD_WITH_ERROR_TO_EXCLUDE);
+
+		
     	StringBuilder requete=new StringBuilder();
 
     	// tableTempMark contains the id of records with an error, the error id and the error type (keep or not the record in final output)
@@ -143,35 +156,35 @@ public class ServiceRequeteSqlRegle {
     	// case for no blocking threshold
 		if (blockingThreshold==null || blockingThreshold.isEmpty())
 		{
-	    	requete.append("\n, ins as (INSERT into "+this.tableTempMark+" select id, '"+regleId+"', '"+RECORD_WITH_ERROR_TO_KEEP+"' as controle from ctl returning true) ");
-	    	requete.append("\n INSERT into "+this.tableTempMeta+" SELECT '"+regleId+"', false, '"+RECORD_WITH_ERROR_TO_KEEP+"' as controle where EXISTS (SELECT FROM ins); ");
+	    	requete.append("\n, ins as (INSERT into "+TABLE_TEMP_MARK+" select id, '"+regleId+"', '"+ mapRowProcessing.get(errorRowProcessing) +"' as controle from ctl returning true) ");
+	    	requete.append("\n INSERT into "+TABLE_TEMP_META+" SELECT '"+regleId+"', false, '"+ mapRowProcessing.get(errorRowProcessing) +"' as controle where EXISTS (SELECT FROM ins); ");
 			return 	requete.toString();
 		}
 		
     	// case for threshold
 		// parse threshold
-    	Pattern pattern = Pattern.compile("^(>|>=)([0123456789.]+)([%u])([ke])$");
+    	Pattern pattern = Pattern.compile("^(>|>=)([0123456789.]+)([%u])$");
     	Matcher matcher = pattern.matcher(blockingThreshold);
     	matcher.find();
 		
     	
-	    requete.append("\n, ins as (INSERT into "+this.tableTempMark+" ");
+	    requete.append("\n, ins as (INSERT into "+TABLE_TEMP_MARK+" ");
 	    requete.append("SELECT id, '"+regleId+"'");
 	    
 	    // mark record to keep or exclude
-	    requete.append(",'"+( matcher.group(4).equals("e") ? RECORD_WITH_ERROR_TO_EXCLUDE : RECORD_WITH_ERROR_TO_KEEP )+"'");
+	    requete.append(",'"+ mapRowProcessing.get(errorRowProcessing) +"'");
 	    
 	    requete.append("FROM ctl RETURNING true) ");
 	    
 	    
 	    // insert into meta table
-	    requete.append("\n INSERT into "+this.tableTempMeta+" SELECT '"+regleId+"',");
+	    requete.append("\n INSERT into "+TABLE_TEMP_META+" SELECT '"+regleId+"',");
     	
     	// ratio or count evaluation
     	requete.append("((count(*)::numeric");		
     	if (matcher.group(3).equals("%"))
     	{
-    		requete.append("*100.0/(select n from "+this.tableRecordTotalCount+")");
+    		requete.append("*100.0/(select n from "+TABLE_ROW_TOTAL_COUNT+")");
     	}
     	requete.append(")");
     	
@@ -184,14 +197,14 @@ public class ServiceRequeteSqlRegle {
     	requete.append(")");
     	
 	    // any record to keep or exclude ?
-	    requete.append(",'"+( matcher.group(4).equals("e") ? RECORD_WITH_ERROR_TO_EXCLUDE : RECORD_WITH_ERROR_TO_KEEP )+"'");
+	    requete.append(",'"+ mapRowProcessing.get(errorRowProcessing) +"'");
 
     	// calculate error only if there are any errors marked
     	requete.append("\n FROM ins where EXISTS (SELECT FROM ins);");
     	
 		return 	requete.toString();
 	}
-	
+
 	
 	/**
 	 * Controle si le contenu d'une rubrique est bien numérique
@@ -203,8 +216,8 @@ public class ServiceRequeteSqlRegle {
 		String cond = conditionLongueur(reg);
 		String requete = "WITH ctl AS (	SELECT id FROM " + this.tableTempData + " "
 				+ " WHERE ({2} ~ '^-?\\d*(\\.\\d+)?$') IS FALSE " + cond + ") "
-				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
-		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere());
+				+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
+		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere());
 		return requete;
 	}
 
@@ -232,15 +245,15 @@ public class ServiceRequeteSqlRegle {
 			reqBuilder.append(") THEN false ");
 			reqBuilder.append("\n WHEN {2} is null THEN false ");
 			reqBuilder.append("\n ELSE true END) ");
-			reqBuilder.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
-			requete = getRequete(reqBuilder.toString(), this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere());
+			reqBuilder.append(insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle()));
+			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere());
 		} 
 		else {
 			reqBuilder.append("\n WHERE CASE WHEN arc.isdate({2},'{3}') THEN false");
 			reqBuilder.append("\n WHEN {2} is null THEN false ");
 			reqBuilder.append("\n ELSE true END) ");
-			reqBuilder.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
-			requete = getRequete(reqBuilder.toString(), this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
+			reqBuilder.append(insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle()));
+			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
 		}
 		return requete;
 	}
@@ -249,8 +262,8 @@ public class ServiceRequeteSqlRegle {
 		String cond = conditionLongueur(reg);
 		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData 
 				+ " WHERE false " + cond + ")" 
-				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
-		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle());
+				+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
+		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle());
 		return requete;
 	}
 
@@ -294,7 +307,7 @@ public class ServiceRequeteSqlRegle {
 		requete.append("\n where rk!=r");
 		requete.append("\n )");
 		requete.append("\n , ctl as (select id from this.tableTempData WHERE EXISTS (SELECT from tmp_check))");
-		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
+		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle()));
 		
 		return requete.toString();
 	}
@@ -395,9 +408,9 @@ public class ServiceRequeteSqlRegle {
 		requete.append("	SELECT a.id FROM " + this.tableTempData + " a ");
 		requete.append(" 	INNER JOIN trav ON row(a.{2})::text collate \"C\"=row(trav.{2})::text collate \"C\" ");
 		requete.append(" ) ");
-		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getIdRegle()));
+		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle()));
 
-		return getRequete(requete.toString(), this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getRubriqueFils());
+		return getRequete(requete.toString(), TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(), reg.getRubriqueFils());
 	}
 	
 	/**
@@ -413,8 +426,8 @@ public class ServiceRequeteSqlRegle {
 		String requete = "WITH ctl AS ( select id from (SELECT id, "
 				+" CASE WHEN " + filtre + " THEN CASE WHEN " + cond + " THEN FALSE ELSE TRUE END ELSE FALSE END as condition_a_tester " + " FROM " + this.tableTempData + " "
 				+") ww where condition_a_tester ) "
-				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
-		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle());
+				+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
+		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle());
 		return requete;
 	}
 
@@ -426,8 +439,8 @@ public class ServiceRequeteSqlRegle {
 	public String ctlMatchesRegexp(RegleControleEntity reg) {
 		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData + " "
 		+ "WHERE ({2} ~ '{3}') IS FALSE ) "
-		+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
-		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
+		+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
+		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
 
@@ -442,8 +455,8 @@ public class ServiceRequeteSqlRegle {
 	public String ctlIsValueIn(RegleControleEntity reg) {
 		String requete = "WITH " + "ctl AS (	SELECT id " + "			FROM " + this.tableTempData + " "
 		+ "			WHERE {2} not in ({3}) ) "
-		+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
-		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
+		+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
+		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
 
@@ -451,8 +464,8 @@ public class ServiceRequeteSqlRegle {
 	public String ctlAlwaysTrue(RegleControleEntity reg) {
 		String requete = "WITH " + "ctl AS (	SELECT id " + "			FROM " + this.tableTempData + " "
 				+ "			WHERE false ) "
-				+ insertBloc(reg.getBlockingThreshold(),reg.getIdRegle());
-		requete = getRequete(requete, this.tableTempMark, reg.getIdRegle());
+				+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
+		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle());
 		return requete;
 	}
 

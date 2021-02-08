@@ -27,7 +27,8 @@ public class RegleControleEntity extends AbstractEntity {
     private static final String colTodo = "todo";
     private static final String colCommentaire = "commentaire";
     private static final String colBlockingThreshold = "blocking_threshold";
-    
+    private static final String colErrorRowProcessing = "error_row_processing";
+
     private static final Set<String> colNames = new HashSet<String>() {
         /**
          *
@@ -51,6 +52,8 @@ public class RegleControleEntity extends AbstractEntity {
             add(colTodo);
             add(colCommentaire);
             add(colBlockingThreshold);
+            add(colErrorRowProcessing);
+
         }
     };
 
@@ -60,23 +63,6 @@ public class RegleControleEntity extends AbstractEntity {
 
     public RegleControleEntity(List<String> someNames, List<String> someValues) {
         super(someNames, someValues);
-    }
-
-    /**
-     * Constructeur spécific à la viewControle
-     *
-     * @param inputFields
-     */
-    public RegleControleEntity(HashMap<String, ArrayList<String>> mapInputFields) {
-        super(mapInputFields);
-        this.setIdRegle(mapInputFields.get(colIdRegle).get(0));
-        this.setIdClasse(mapInputFields.get(colIdClasse).get(0));
-        this.setRubriquePere(mapInputFields.get(colRubriquePere).get(0));
-        this.setRubriqueFils(mapInputFields.get(colRubriqueFils).get(0));
-        this.setBorneInf(mapInputFields.get(colBorneInf).get(0));
-        this.setBorneSup(mapInputFields.get(colBorneSup).get(0));
-        this.setCondition(mapInputFields.get(colCondition).get(0));
-        this.setPreAction(mapInputFields.get(colPreAction).get(0));
     }
 
     @Override
@@ -93,6 +79,8 @@ public class RegleControleEntity extends AbstractEntity {
         result = prime * result + ((this.getRubriqueFils() == null) ? 0 : this.getRubriqueFils().hashCode());
         result = prime * result + ((this.getRubriquePere() == null) ? 0 : this.getRubriquePere().hashCode());
         result = prime * result + ((this.getBlockingThreshold() == null) ? 0 : this.getBlockingThreshold().hashCode());
+        result = prime * result + ((this.getErrorRowProcessing() == null) ? 0 : this.getErrorRowProcessing().hashCode());
+
         return result;
     }
 
@@ -176,6 +164,13 @@ public class RegleControleEntity extends AbstractEntity {
                 return false;
             }
         } else if (!this.getBlockingThreshold().equals(other.getBlockingThreshold())) {
+            return false;
+        }
+        if (this.getErrorRowProcessing() == null) {
+            if (other.getErrorRowProcessing() != null) {
+                return false;
+            }
+        } else if (!this.getErrorRowProcessing().equals(other.getErrorRowProcessing())) {
             return false;
         }
         return true;
@@ -436,7 +431,24 @@ public class RegleControleEntity extends AbstractEntity {
    public void setBlockingThreshold(String blockingThreshold) {
        this.getMap().put(colBlockingThreshold, blockingThreshold);
    }
-    
+   
+   /**
+   *
+   * @return
+   */
+  public String getErrorRowProcessing() {
+      return this.getMap().get(colErrorRowProcessing);
+  }
+
+  /**
+   * @param commentaire
+   *            the commentaire to set
+   */
+  public void setErrorRowProcessing(String errorRowProcessing) {
+      this.getMap().put(colErrorRowProcessing, errorRowProcessing);
+  }
+   
+   
     
     @Override
     public Set<String> colNames() {
