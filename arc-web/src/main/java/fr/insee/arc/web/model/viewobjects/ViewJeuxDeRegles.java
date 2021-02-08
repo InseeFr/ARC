@@ -28,9 +28,9 @@ public class ViewJeuxDeRegles extends VObject {
                 put("periodicite", new ColumnRendering(false, "label.periodicity", "0", "text", null, true));
                 put("validite_inf", new ColumnRendering(false, "label.validity.min", "0", "text", null, true));
                 put("validite_sup", new ColumnRendering(false, "label.validity.max", "0", "text", null, true));
-                put("version", new ColumnRendering(true, "label.version", "17%", "text", null, true));
-                put("etat", new ColumnRendering(true, "label.state", "35%", "select", new PreparedStatementBuilder("select id, val from arc.ext_etat_jeuderegle order by id"), true));
-                put("date_production", new ColumnRendering(false, "label.date.production", "24%", "text", null, true));
+                put("version", new ColumnRendering(true, "label.version", "40%", "text", null, true));
+                put("etat", new ColumnRendering(true, "label.state", "60%", "select", new PreparedStatementBuilder("select id, val from arc.ext_etat_jeuderegle order by id"), true));
+                put("date_production", new ColumnRendering(false, "label.date.production", "33%", "text", null, true));
                 put("date_inactif", new ColumnRendering(false, "label.date.disable", "24%", "text", null, true));
 
             }
