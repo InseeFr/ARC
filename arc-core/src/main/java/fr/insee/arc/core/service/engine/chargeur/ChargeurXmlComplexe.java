@@ -100,9 +100,6 @@ public class ChargeurXmlComplexe implements IChargeur{
         this.validite = validite;
         this.f=f;
         this.tableChargementRegle=tableRegle;
-
-//        this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
-//        this.currentPhase = threadChargementService.getCurrentPhase();
     }
     
     

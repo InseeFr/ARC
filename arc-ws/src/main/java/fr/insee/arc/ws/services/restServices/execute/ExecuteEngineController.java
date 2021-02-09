@@ -29,6 +29,7 @@ import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.engine.chargeur.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
+import fr.insee.arc.core.service.engine.controle.ServiceRequeteSqlRegle;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
@@ -128,7 +129,7 @@ public class ExecuteEngineController {
 						sjdr.executeJeuDeRegle(connection, jdr, currentTemporaryTable(i), structure);
 						break;
 					case FILTRAGE:
-						UtilitaireDao.get("arc").executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+";");
+						UtilitaireDao.get("arc").executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"');");
 						//TODO
 						break;
 					case MAPPING:

@@ -78,7 +78,6 @@ public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnVie
 	{
 		for (int i=0;i<p.queries.size();i++)
 		{
-		
 		DataSetView ds=new DataSetView(
 				Integer.parseInt(p.queries.get(i).query_id)
 				,p.queries.get(i).query_name
