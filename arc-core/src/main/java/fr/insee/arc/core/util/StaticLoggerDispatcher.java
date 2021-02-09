@@ -6,62 +6,63 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /** Transition class. Try to use a LoggerDispatcher as an @Autowired attribute instead. */
+@Component
 public class StaticLoggerDispatcher {
 	
-//	private static LoggerDispatcher loggerDispatcher;
-//	
-//	public StaticLoggerDispatcher(@Autowired @Qualifier("activeLoggerDispatcher") LoggerDispatcher loggerDispatcherInstance) {
-//		loggerDispatcher = loggerDispatcherInstance;
-//	}
+	private static LoggerDispatcher loggerDispatcher;
+	
+	public StaticLoggerDispatcher(@Autowired @Qualifier("activeLoggerDispatcher") LoggerDispatcher loggerDispatcherInstance) {
+		loggerDispatcher = loggerDispatcherInstance;
+	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void error(Object message, Logger logger) {
-		System.out.println(message);//error(message, logger);		
+		loggerDispatcher.error(message, logger);		
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void error(Object message, Exception ex, Logger logger) {
-		System.out.println(message);//error(message, ex, logger);
+		loggerDispatcher.error(message, ex, logger);
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void warn(Object message, Logger logger) {
-		System.out.println(message);//warn(message, logger);		
+		loggerDispatcher.warn(message, logger);		
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void warn(Object message, Exception ex, Logger logger) {
-		System.out.println(message);//warn(message, ex, logger);
+		loggerDispatcher.warn(message, ex, logger);
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void info(Object message, Logger logger) {
-		System.out.println(message);//info(message, logger);
+		loggerDispatcher.info(message, logger);
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void info(Object message, Exception ex, Logger logger) {
-		System.out.println(message);//info(message, ex, logger);
+		loggerDispatcher.info(message, ex, logger);
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void debug(Object message, Logger logger) {
-		System.out.println(message);//debug(message, logger);
+		loggerDispatcher.debug(message, logger);
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void debug(Object message, Exception ex, Logger logger) {
-		System.out.println(message);//debug(message, ex, logger);
+		loggerDispatcher.debug(message, ex, logger);
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void trace(Object message, Logger logger) {
-		System.out.println(message);//trace(message, logger);
+		loggerDispatcher.trace(message, logger);
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void trace(Object message, Exception ex, Logger logger) {
-		System.out.println(message);//trace(message, ex, logger);
+		loggerDispatcher.trace(message, ex, logger);
 	}
 	
 }
