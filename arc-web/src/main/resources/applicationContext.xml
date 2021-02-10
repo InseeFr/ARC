@@ -12,22 +12,6 @@
 	<bean id="utilitaireDao" class="fr.insee.arc.utils.dao.UtilitaireDao">
   		<constructor-arg index="0" value="arc" />
 	</bean>
-	
-	<bean id="propertyConfigurer"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath:fr/insee/config/arc.properties
-				</value>
-				<value>file:${catalina.base}/webapps/arc.properties
-				</value>
-				<value>file:${catalina.base}/wtpwebapps/arc.properties
-				</value>
-			</list>
-		</property>
-		<property name="ignoreUnresolvablePlaceholders" value="true" />
-		<property name="ignoreResourceNotFound" value="true" />
-	</bean>
 
 	<!-- Gestion des properties -->
 	<bean id="properties"
