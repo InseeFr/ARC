@@ -124,7 +124,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				connexionList.add(connexionTemp);
 
 				// demote application user account to temporary restricted operations and readonly or non-tempoary schema
-				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution)+ FormatSQL.changeRole(restrictedUsername));
+				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution)+ 
+						(restrictedUsername.equals("")?"":FormatSQL.changeRole(restrictedUsername)));
 			}
 
 		} catch (Exception ex) {
@@ -524,6 +525,18 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     	return m;
     }
     
+    /**
+     *  promote the application to the full right user role if required.
+     *  required is true if the restrictedUserAccount exists
+     * @throws SQLException
+     */
+    protected void switchToFullRightRole() throws SQLException
+    {
+		if (!properties.getDatabaseRestrictedUsername().equals(""))
+		{
+			UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+		}
+    }
     
     /**
      * Selection d'un lot d'id_source pour appliquer le traitement
@@ -1494,10 +1507,11 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         // ERROR: current transaction is aborted, commands ignored until end of transaction block
         this.connexion.setAutoCommit(false);
         this.connexion.rollback();
+        
+    	// promote the application user account to full right
+    	switchToFullRightRole();
+        
         StringBuilder requete = new StringBuilder();
-
-        // promote user for rollback and pilotage tables update
-        requete.append(FormatSQL.changeRole(properties.getDatabaseUsername()));
         
         for (int i = 0; i < tableDrop.length; i++) {
             requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");

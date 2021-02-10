@@ -357,8 +357,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	String tableIdSource = tableOfIdSource(tableName, this.idSource);
 
 	// promote the application user account to full right
-	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
-
+	switchToFullRightRole();
 	
 	// Créer la table des données de la table des donénes chargées
 	createTableInherit(connexion, getTableTempA(), tableIdSource);

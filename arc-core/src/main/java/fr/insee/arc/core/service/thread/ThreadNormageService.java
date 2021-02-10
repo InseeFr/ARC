@@ -234,7 +234,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     	updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure);
     	
     	// promote the application user account to full right
-    	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+    	switchToFullRightRole();
     	
     	String tableIdSourceOK=tableOfIdSource(this.tableNormageOK ,this.idSource);
         createTableInherit(connexion, this.tableNormageOKTemp, tableIdSourceOK);

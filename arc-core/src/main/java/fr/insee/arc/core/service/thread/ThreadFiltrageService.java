@@ -245,7 +245,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
     public void insertionFinale() throws Exception
     {
     	// promote the application user account to full right
-    	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+    	switchToFullRightRole();
     	
     	// créer les tables héritées
     	String tableIdSourceOK=tableOfIdSource(this.tableFiltrageOk ,this.idSource);

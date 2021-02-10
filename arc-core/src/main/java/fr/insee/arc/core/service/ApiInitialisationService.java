@@ -252,12 +252,8 @@ public class ApiInitialisationService extends ApiService {
 	 * @param envExecution
 	 * @return
 	 */
-	private static String applyBddScriptParameters (String query, String user, String userRestricted, Integer nbSandboxes, String envExecution)
+	private static String applyBddScriptParameters (String query, String userRestricted, Integer nbSandboxes, String envExecution)
 	{
-		if (user!=null)
-		{
-			query=query.replace("{{user}}", user);
-		}
 		if (userRestricted!=null)
 		{
 			query=query.replace("{{userRestricted}}", userRestricted);
@@ -273,12 +269,12 @@ public class ApiInitialisationService extends ApiService {
 		return query;
 	}
 	
-	private static String readBddScript (String scriptName, String user, String userRestricted, Integer nbSandboxes, String envExecution)
+	private static String readBddScript (String scriptName, String userRestricted, Integer nbSandboxes, String envExecution)
 	{
 		try {
 			if (ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName)!=null)
 			{
-				return applyBddScriptParameters(IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName), StandardCharsets.UTF_8), user, userRestricted, nbSandboxes, envExecution);
+				return applyBddScriptParameters(IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName), StandardCharsets.UTF_8), userRestricted, nbSandboxes, envExecution);
 			}
 		} catch (IOException e) {
 			LOGGER.error(e);
@@ -286,11 +282,11 @@ public class ApiInitialisationService extends ApiService {
 		return null;
 	}
 	
-	private static void executeBddScript (Connection connexion, String scriptName, String user, String userRestricted, Integer nbSandboxes, String envExecution)
+	private static void executeBddScript (Connection connexion, String scriptName, String userRestricted, Integer nbSandboxes, String envExecution)
 	{
 		String query;
 
-		if ((query=readBddScript(scriptName, user, userRestricted, nbSandboxes, envExecution))!=null)
+		if ((query=readBddScript(scriptName, userRestricted, nbSandboxes, envExecution))!=null)
 		{
 			try {
 				UtilitaireDao.get("arc").executeImmediate(connexion,query);
@@ -313,12 +309,12 @@ public class ApiInitialisationService extends ApiService {
             Integer nbSandboxes=BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes",8);
 
             // global script. Mainly to build the arc schema
-            executeBddScript(connexion, "BdD/script_global.sql", p.getDatabaseUsername(), p.getDatabaseRestrictedUsername(), nbSandboxes, null);
-            executeBddScript(connexion, "BdD/script_function.sql", p.getDatabaseUsername(), p.getDatabaseRestrictedUsername(), nbSandboxes, null);
+            executeBddScript(connexion, "BdD/script_global.sql", p.getDatabaseRestrictedUsername(), nbSandboxes, null);
+            executeBddScript(connexion, "BdD/script_function.sql", p.getDatabaseRestrictedUsername(), nbSandboxes, null);
             
             // iterate over each phase and try to load its global script
             Arrays.asList(TraitementPhase.values())
-            .forEach(t -> executeBddScript(connexion, "BdD/script_global_phase_"+t.toString().toLowerCase()+".sql", p.getDatabaseUsername(), p.getDatabaseRestrictedUsername(), nbSandboxes, null));
+            .forEach(t -> executeBddScript(connexion, "BdD/script_global_phase_"+t.toString().toLowerCase()+".sql", p.getDatabaseRestrictedUsername(), nbSandboxes, null));
 
     }
 
@@ -329,7 +325,7 @@ public class ApiInitialisationService extends ApiService {
 
             // iterate over each sandbox environment and try to load its script
             Arrays.asList(envExecutions)
-            .forEach(envExecution -> executeBddScript(connexion, "BdD/script_sandbox.sql", p.getDatabaseUsername(), p.getDatabaseRestrictedUsername(), null, envExecution));
+            .forEach(envExecution -> executeBddScript(connexion, "BdD/script_sandbox.sql", p.getDatabaseRestrictedUsername(), null, envExecution));
             
             // iterate over each sandbox environment
             Arrays.asList(envExecutions)
@@ -337,7 +333,7 @@ public class ApiInitialisationService extends ApiService {
 	            {
 	                // iterate over each phase for its sandbox relating script
 	            	Arrays.asList(TraitementPhase.values())
-	                .forEach(t -> executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", p.getDatabaseUsername(), p.getDatabaseRestrictedUsername(), null, envExecution));	
+	                .forEach(t -> executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", p.getDatabaseRestrictedUsername(), null, envExecution));	
 	            }
             );
         

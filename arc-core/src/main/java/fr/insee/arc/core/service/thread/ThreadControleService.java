@@ -255,7 +255,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     private void insertionFinale() throws Exception {
 
 	// promote the application user account to full right
-	UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+    switchToFullRightRole();
     	
     // Créer les tables héritées
     String tableIdSourceOK=tableOfIdSource(tableOutOk ,this.idSource);

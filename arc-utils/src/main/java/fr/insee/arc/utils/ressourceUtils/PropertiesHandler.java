@@ -262,10 +262,6 @@ public class PropertiesHandler {
 	}
 
 	public String getDatabaseRestrictedUsername() {
-		if (databaseRestrictedUsername.equals(""))
-		{
-			return databaseUsername;
-		}
 		return databaseRestrictedUsername;
 	}
 
