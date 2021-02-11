@@ -1061,7 +1061,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 				requete.append(")");
 
 				requete.append("SELECT ");
-				requete.append(String.join(",", "'" + 
+				requete.append(String.join(",", 
 						requete.quoteText(selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0))
 						, requete.quoteText(selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0))
 						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0)) + "::date "
