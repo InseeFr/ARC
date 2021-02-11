@@ -552,7 +552,9 @@ public class VObjectService {
             requete.append(reqInsert);
             requete.append(reqValues);
             if (currentData.getAfterInsertQuery() != null) {
-                requete.append("\n" + currentData.getAfterInsertQuery() + "\n");
+                requete.append("\n");
+                requete.append(currentData.getAfterInsertQuery());
+                requete.append("\n");
             }
             requete.append("END;");
             try {
@@ -751,7 +753,9 @@ public class VObjectService {
             reqUpdate.append("; ");
         }
         if (v0.getAfterUpdateQuery() != null) {
-            reqUpdate.append("\n" + v0.getAfterUpdateQuery() + "\n");
+            reqUpdate.append("\n");
+            reqUpdate.append(v0.getAfterUpdateQuery());
+            reqUpdate.append("\n");
         }
         reqUpdate.append("END;");
         try {
