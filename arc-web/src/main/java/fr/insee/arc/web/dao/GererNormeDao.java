@@ -87,7 +87,6 @@ public class GererNormeDao implements IDbConstant {
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
         requete.append("select * from " + table + " ");
         whereRuleSetEquals(requete, selection, type);
-		loggerDispatcher.info("download request : " + requete.toString(), LOGGER);
 		return requete;
 	}
 
@@ -451,8 +450,6 @@ public class GererNormeDao implements IDbConstant {
 
 	        }
 	        sb.append(");");
-
-		loggerDispatcher.info("Creation test table request : " + sb, LOGGER);
 		return sb.toString();
 	}
 
@@ -726,10 +723,6 @@ public class GererNormeDao implements IDbConstant {
 						new StringBuilder("SELECT DISTINCT nom_variable_metier FROM " + anEnvironnement
 								+ "_mod_variable_metier WHERE id_famille='" + anIdFamille + "'"),
 						new ArrayList<String>()));
-		loggerDispatcher.info(
-				"La requete de construction de variableTableMetier : \n" + "SELECT DISTINCT nom_variable_metier FROM "
-						+ anEnvironnement + "_mod_variable_metier WHERE id_famille='" + anIdFamille + "'",
-				LOGGER);
 		Set<String> variableToute = new HashSet<String>();
 		variableToute.addAll(variableRegleCharge);
 		variableToute.addAll(variableTableModele);
