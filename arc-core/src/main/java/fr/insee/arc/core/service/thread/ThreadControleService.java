@@ -163,7 +163,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
         // Marquage du jeux de règles appliqué
         StaticLoggerDispatcher.info("Marquage du jeux de règles appliqué ", LOGGER);
-        blocPrep.append(marqueJeuDeRegleApplique(this.tableControlePilTemp));
+        blocPrep.append(marqueJeuDeRegleApplique(this.tableControlePilTemp, TraitementEtat.OK.toString()));
         
         // Fabrication de la table de controle temporaire
         StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);

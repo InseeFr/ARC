@@ -474,7 +474,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		long start = new Date().getTime();
 		
 		LoggerHelper.trace(LOGGER, "/* executeImmediate on */");
-		LoggerHelper.trace(LOGGER, requete.trim());
+		LoggerHelper.trace(LOGGER, "\n"+requete.trim());
 
 		ConnectionWrapper connexionWrapper = initConnection(connexion);
 		try {		
@@ -569,7 +569,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 		long start = new Date().getTime();
 		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
-		LoggerHelper.trace(LOGGER, requete.getQueryWithParameters());
+		LoggerHelper.trace(LOGGER, "\n"+requete.getQueryWithParameters());
 		LoggerHelper.trace(LOGGER, requete.getParameters());
 		
 		this.silent=false;
