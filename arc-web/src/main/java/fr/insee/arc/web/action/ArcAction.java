@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import fr.insee.arc.core.model.BddTable;
+import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.LoggerDispatcher;
@@ -143,6 +144,12 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     		@RequestParam(required = false) String bacASable,
 			@RequestParam(required = false) String scope) {
 		LoggerHelper.trace(LOGGER, getActionName());
+		
+		if (getActionName().equals(IndexAction.ACTION_NAME))
+		{
+	    	// run the initialization script
+			ApiInitialisationService.bddScript(null);
+		}
 
 		// adding production sandbox to session
 		if (this.envMap == null) {

@@ -16,15 +16,11 @@ import fr.insee.arc.web.model.NoModel;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class IndexAction extends ArcAction<NoModel> {
 
-    private static final String ACTION_NAME = "Index";
+    public static final String ACTION_NAME = "Index";
     private static final String RESULT_SUCCESS = "jsp/index.jsp";
     
     @RequestMapping({"/", "/index"})
     public String index(Model model) {
-    	
-    	// run the initialization script
-		ApiInitialisationService.bddScript(null);
-    	
 		getSession().put("console", "");
 		return generateDisplay(model, RESULT_SUCCESS);
     }
