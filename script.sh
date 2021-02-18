@@ -38,6 +38,6 @@ echo "maven settings.xml set to $MAVEN_SETTINGS";
 MAVEN_CONF="-s usr/src/app/$MAVEN_SETTINGS";
 fi
 
-echo "mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.logSettings=$LOG_SETTINGS -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD";
+echo "mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.logSettings=$LOG_SETTINGS -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD -Denv.restrictedUserDatabase=$DATABASE_RESTRICTED_USER";
 
-mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.logSettings=$LOG_SETTINGS -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD;
+mvn -f /usr/src/app/pom.xml clean package -DskipTests $MAVEN_CONF -Pdocker -Denv.logSettings=$LOG_SETTINGS -Denv.urlDatabase=$DATABASE_URL  -Denv.usernameDatabase=$DATABASE_USER  -Denv.passwordDatabase=$DATABASE_PASSWORD -Denv.restrictedUserDatabase=$DATABASE_RESTRICTED_USER;
