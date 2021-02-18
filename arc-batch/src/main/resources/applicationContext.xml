@@ -38,11 +38,11 @@
 		<property name="ldapDirectoryIdent" value="${fr.insee.annuaire.arc.ident}"></property>
 		<property name="ldapDirectoryPassword" value="${fr.insee.annuaire.arc.password}"></property>
 		<property name="logConfiguration" value="${fr.insee.arc.log.configuration:fr/insee/config/log4j2.xml}"></property>
-		<property name="batchParametersDirectory" value="${fr.insee.arc.batch.parametre.repertoire}"></property>
+		<property name="batchParametersDirectory" value="#{systemEnvironment['APPLICATION_DIRECTORY'] ?: '${fr.insee.arc.batch.parametre.repertoire}' }"></property>
 		<property name="version" value="${fr.insee.arc.version:v0}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
-		<property name="batchArcEnvironment" value="${fr.insee.arc.batch.parametre.env}"></property>
-		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution}"></property>
+		<property name="batchArcEnvironment" value="${fr.insee.arc.batch.parametre.env:arc.ihm}"></property>
+		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution:arc.prod}"></property>
 	</bean>
 	
 	<bean id="activeLoggerDispatcher" class="fr.insee.arc.core.util.DefaultLoggerDispatcher"></bean>

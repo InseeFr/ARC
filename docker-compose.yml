@@ -8,6 +8,8 @@ services:
         DATABASE_URL: jdbc:postgresql://db:5432/arc
         DATABASE_USER: postgres
         DATABASE_PASSWORD: password
+        DATABASE_RESTRICTED_USER: arc_restricted
+        APPLICATION_DIRECTORY: ./
     ports:
       - 8080:8080
     depends_on:
