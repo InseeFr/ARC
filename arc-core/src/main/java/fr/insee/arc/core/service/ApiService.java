@@ -382,6 +382,10 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @return
      */
     protected String marqueJeuDeRegleApplique(String pilTemp) {
+    	return marqueJeuDeRegleApplique(pilTemp, null);
+    }
+    
+    protected String marqueJeuDeRegleApplique(String pilTemp, String defaultEtatTraitement) {
         StringBuilder requete = new StringBuilder();
         requete.append("WITH ");
         requete.append("prep AS (SELECT a.id_source, a.id_norme, a.periodicite, b.validite_inf, b.validite_sup, b.version ");
@@ -392,8 +396,12 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         requete.append("	WHERE phase_traitement='" + this.getCurrentPhase() + "') ");
         requete.append("UPDATE " + pilTemp + " AS a ");
         requete.append("SET validite_inf=prep.validite_inf, validite_sup=prep.validite_sup, version=prep.version ");
+        if (defaultEtatTraitement!=null)
+        {
+        	requete.append(", etat_traitement='{"+defaultEtatTraitement+"}'");
+        }
         requete.append("FROM prep ");
-        requete.append("WHERE a.id_source=prep.id_source AND a.phase_traitement='" + this.getCurrentPhase() + "'; ");
+        requete.append("WHERE a.phase_traitement='" + this.getCurrentPhase() + "'; ");
         return requete.toString();
     }
 
