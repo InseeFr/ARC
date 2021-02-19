@@ -4,11 +4,23 @@
 
 replicaCount: 1
 
-image:
+imageWeb:
   repository: inseefr/arc
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+  port: 8080
+  
+imageWs:
+  repository: inseefr/arc-ws
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+  port: 8080
+
+imageDb:
+    repository: postgres
+    tag: 11
 
 imagePullSecrets: []
 nameOverride: ""
@@ -45,19 +57,6 @@ service:
   type: ClusterIP
   port: 80
 
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths: []
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -82,3 +81,34 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+  tls:
+    - hosts:
+        - arc-web.i3s.ninja
+        - arc-ws.i3s.ninja
+  hosts:
+    - host: arc-web.i3s.ninja
+      paths:
+        - path: /
+          serviceName: arc-web
+          servicePort: http
+    - host: arc-ws.i3s.ninja
+      paths:
+        - path: /
+          serviceName: arc-ws
+          servicePort: http
+
+
+arcWs:
+  applicationSuffix: ws
+
+arcWeb:
+  applicationSuffix: web
+
+arcDb:
+  applicationSuffix: db

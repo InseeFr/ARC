@@ -1,22 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: arc-db
+  name: {{ include "arcDb.fullname" . }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: arc-db
+      app: {{ include "arcDb.fullname" . }}
   template:
     metadata:
       labels:
-        app: arc-db
+        app: {{ include "arcDb.fullname" . }}
     spec:
       containers:
-      - name: arc-db
-        image: postgres:11
+      - name: {{ include "arcDb.fullname" . }}
+        image: {{ .Values.imageDb.repository }}:{{ .Values.imageDb.tag }}
         env:
-            - name: POSTGRES_PASSWORD
-              value: toto
+          {{- range $key, $val := .Values.envDb }}
+          - name: {{ $key }}
+            value: {{ $val }}
+          {{- end}}
         ports:
-        - containerPort: 5432
+        - containerPort: {{ .Values.imageDb.port }}

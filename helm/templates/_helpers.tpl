@@ -23,11 +23,63 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+{{- define "arcWs.fullname" -}}
+{{ include "arc.fullname" . }}-{{ .Values.arcWs.applicationSuffix }}
+{{- end }}
+
+{{- define "arcWeb.fullname" -}}
+{{ include "arc.fullname" . }}-{{ .Values.arcWeb.applicationSuffix }}
+{{- end }}
+
+{{- define "arcDb.fullname" -}}
+{{ include "arc.fullname" . }}-{{ .Values.arcDb.applicationSuffix }}
+{{- end }}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "arc.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "arcWeb.labels" -}}
+helm.sh/chart: {{ include "arc.chart" . }}
+{{ include "arcWeb.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "arcWeb.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "arc.name" . }}-{{ .Values.arcWeb.applicationSuffix }}
+app.kubernetes.io/instance: {{ .Release.Name }}-{{ .Values.arcWeb.applicationSuffix }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "arcWs.labels" -}}
+helm.sh/chart: {{ include "arc.chart" . }}
+{{ include "arcWs.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "arcWs.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "arc.name" . }}-{{ .Values.arcWs.applicationSuffix }}
+app.kubernetes.io/instance: {{ .Release.Name }}-{{ .Values.arcWs.applicationSuffix }}
 {{- end }}
 
 {{/*
@@ -48,15 +100,4 @@ Selector labels
 {{- define "arc.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "arc.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "arc.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "arc.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
 {{- end }}
