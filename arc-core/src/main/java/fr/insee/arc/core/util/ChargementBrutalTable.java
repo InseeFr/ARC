@@ -137,10 +137,10 @@ public class ChargementBrutalTable {
         ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, new PreparedStatementBuilder(query));
         if (result.size()>1)
         {
-        	throw new Exception("More than one norm match the expression");
+        	throw new Exception("More than one norm and/or validity match the expression");
         } else if (result.isEmpty())
         {
-        	throw new Exception("Zero norm match the expression");
+        	throw new Exception("Zero norm and/or validity match the expression");
         }
 
         normeOk[0]=listeNorme.get(Integer.parseInt(result.get(0).get(0)));
