@@ -1,5 +1,7 @@
 package fr.insee.arc.web.interceptor;
 
+import java.nio.charset.StandardCharsets;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,6 +19,8 @@ public class ArcInterceptor extends HandlerInterceptorAdapter {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		LoggerHelper.trace(LOGGER, "URL: " + request.getRequestURL());
+		request.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+		response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
 		return super.preHandle(request, response, handler);
 	}
 

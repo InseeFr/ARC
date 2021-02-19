@@ -25,6 +25,7 @@
 	action="selectNorme.action"
 	method="post"
 	enctype="multipart/form-data"
+	accept-charset="UTF-8"
 >
 
 	<c:import url="tiles/header.jsp">

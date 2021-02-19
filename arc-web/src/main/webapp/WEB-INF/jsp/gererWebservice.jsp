@@ -15,7 +15,7 @@
 <body>
 
 	<form id="selectWebserviceContext" action="selectWebserviceContext.action"
-	spellcheck="false" method="post" enctype="multipart/form-data">
+	spellcheck="false" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 
 		<div class="container-fluid">
 
