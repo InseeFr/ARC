@@ -140,6 +140,9 @@ public class VObjectService {
 			if (currentData.getAfterUpdateQuery() == null) {
 			    currentData.setAfterUpdateQuery(v0.getAfterUpdateQuery());
 			}
+			if (currentData.getMainQuery() == null) {
+			    currentData.setMainQuery(v0.getMainQuery());
+			}
 		}
 		return currentData;
 	}

@@ -383,14 +383,15 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			this.getViewPilotageBAS().setMessage(msg);
 		}
 		this.getViewEntrepotBAS().setCustomValue(WRITING_REPO, null);
-		// Lancement de l'initialisation dans la foulée
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
-				getBacASable(), this.repertoire,
-				String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA,
-				getBacASable(), this.repertoire,
-				String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter())).invokeApi();
-
+		if (!isEnvProd()) {
+			// Lancement de l'initialisation dans la foulée
+			ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
+					getBacASable(), this.repertoire,
+					String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
+			ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA,
+					getBacASable(), this.repertoire,
+					String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter())).invokeApi();
+		}
 		
 		
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -649,7 +650,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 */
 	@RequestMapping("/toRestoreBAS")
 	public String toRestoreBAS(Model model) {		
-		return restore(model, "'R'", "Fichier(s) à rejouer");
+		return restore(model, "'R'", "managementSandbox.batch.replay.files");
 	}
 
 	/**
@@ -659,58 +660,41 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	 */
 	@RequestMapping("/toRestoreArchiveBAS")
 	public String toRestoreArchiveBAS(Model model) {
-		return restore(model, "'RA'", "Archives(s) à rejouer");
+		return restore(model, "'RA'", "managementSandbox.batch.replay.archives");
 	}
 
 	private String restore(Model model, String code, String messageOk) {
 		loggerDispatcher.trace("*** Marquage de fichier à rejouer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 	
-		// Récupération de la sélection de l'utilisateur
-		StringBuilder querySelection = new StringBuilder();
-		querySelection.append("select distinct container, id_source from (" + this.getViewFichierBAS().getMainQuery()
-				+ ") alias_de_table ");
-		querySelection.append(this.vObjectService.buildFilter(this.getViewFichierBAS().getFilterFields(),
-				this.getViewFichierBAS().getHeadersDLabel()));
-		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
-		// sélectionnés
-		if (!selection.isEmpty()) {
-			// concaténation des informations
-			ArrayList<String> infoConcatenee = new ArrayList<>();
-			ArrayList<String> listContainer = selection.get("container");
-			ArrayList<String> listIdSource = selection.get("id_source");
+		PreparedStatementBuilder querySelection = requestSelectToMark(selection);
 	
-			for (int i = 0; i < selection.get("id_source").size(); i++) {
-				infoConcatenee.add(listContainer.get(i) + "+" + listIdSource.get(i));
-			}
-			querySelection.append(" AND container||'+'||id_source IN " + Format.sqlListe(infoConcatenee) + " ");
-		}
-	
-		StringBuilder updateToDelete = requeteUpdateToDelete(querySelection, code);
+		PreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, code);
 		String message;
 		try {
 	
-			UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
+			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
 			message = messageOk;
 		} catch (SQLException e) {
 			loggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
 							+ updateToDelete, LOGGER);
 			e.printStackTrace();
-			message = "Problème lors de la restauration des fichiers";
+			message = "managementSandbox.batch.replay.error";
 		}
 	
 		// Attention bout de code spécifique aux bacs à sable, ne surtout pas copier en
 		// production
+		if (!isEnvProd()) {
 		// Lancement de l'initialisation dans la foulée
-		loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
-				getBacASable(), this.repertoire,
-				String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA,
-				getBacASable(), this.repertoire,
-				String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter())).invokeApi();
-		// Fin du code spécifique aux bacs à sable
+			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
+			ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
+					getBacASable(), this.repertoire,
+					String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
+			ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA,
+					getBacASable(), this.repertoire,
+					String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter())).invokeApi();
+		}
 		this.getViewPilotageBAS().setMessage(message);
 	
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -879,47 +863,30 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		loggerDispatcher.trace("*** Marquage de fichier à supprimer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 
-		// Récupération de la sélection de l'utilisateur
-		StringBuilder querySelection = new StringBuilder();
-		querySelection.append("select distinct container, id_source from (" + this.getViewFichierBAS().getMainQuery()
-				+ ") alias_de_table ");
-		querySelection.append(this.vObjectService.buildFilter(this.getViewFichierBAS().getFilterFields(),
-				this.getViewFichierBAS().getHeadersDLabel()));
-		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
-		// sélectionné
-		if (!selection.isEmpty()) {
-			// concaténation des informations
-			ArrayList<String> infoConcatenee = new ArrayList<>();
-			ArrayList<String> listContainer = selection.get("container");
-			ArrayList<String> listIdSource = selection.get("id_source");
+		PreparedStatementBuilder querySelection = requestSelectToMark(selection);
 
-			for (int i = 0; i < selection.get("id_source").size(); i++) {
-				infoConcatenee.add(listContainer.get(i) + "+" + listIdSource.get(i));
-			}
-			querySelection.append(" AND container||'+'||id_source IN " + Format.sqlListe(infoConcatenee) + " ");
-		}
-
-		StringBuilder updateToDelete = requeteUpdateToDelete(querySelection, "'1'");
+		PreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "'1'");
 		String message;
 		try {
-			UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-			message = "Fichier(s) supprimé(s)";
+			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
+			message = "managementSandbox.batch.delete.ok";
 		} catch (SQLException e) {
 			loggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
 							+ updateToDelete, LOGGER);
 			e.printStackTrace();
-			message = "Problème lors de la suppression des fichiers";
+			message = "managementSandbox.batch.delete.error";
 		}
 
 		// Attention bout de code spécifique aux bacs à sable, ne surtout pas copier en
 		// production
-		loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
-				getBacASable(), this.repertoire,
-				String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
+		if (!isEnvProd()) {
+			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
+			ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA,
+					getBacASable(), this.repertoire,
+					String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter())).invokeApi();
+		}
 
-		// Fin du code spécifique aux bacs à sable
 		this.getViewPilotageBAS().setMessage(message);
 
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -936,10 +903,26 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		
 		loggerDispatcher.trace("*** Suppression du marquage de fichier à supprimer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
-		// Récupération de la sélection de l'utilisateur
-		StringBuilder querySelection = new StringBuilder();
-		querySelection.append("select distinct container, id_source from (" + this.getViewFichierBAS().getMainQuery()
-				+ ") alias_de_table ");
+		PreparedStatementBuilder querySelection = requestSelectToMark(selection);
+		PreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "null");
+		try {
+
+			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
+		} catch (SQLException e) {
+			loggerDispatcher
+					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
+							+ updateToDelete, LOGGER);
+			e.printStackTrace();
+		}
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+
+	/** Prepare a request selecting the line to change when marking files for deletion/replay.*/
+	private PreparedStatementBuilder requestSelectToMark(Map<String, ArrayList<String>> selection) {
+		PreparedStatementBuilder querySelection = new PreparedStatementBuilder();
+		querySelection.append("select distinct container, id_source from (");
+		querySelection.append(this.getViewFichierBAS().getMainQuery());
+		querySelection.append(") alias_de_table ");
 		querySelection.append(this.vObjectService.buildFilter(this.getViewFichierBAS().getFilterFields(),
 				this.getViewFichierBAS().getHeadersDLabel()));
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
@@ -955,29 +938,18 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			}
 			querySelection.append(" AND container||'+'||id_source IN " + Format.sqlListe(infoConcatenee) + " ");
 		}
-		// loggerDispatcher.info("Ma requete de selection : " + querySelection, logger);
-
-		StringBuilder updateToDelete = requeteUpdateToDelete(querySelection, "null");
-		try {
-
-			UtilitaireDao.get("arc").executeImmediate(null, updateToDelete);
-		} catch (SQLException e) {
-			loggerDispatcher
-					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
-							+ updateToDelete, LOGGER);
-			e.printStackTrace();
-		}
-		return generateDisplay(model, RESULT_SUCCESS);
+		return querySelection;
 	}
 
-	private StringBuilder requeteUpdateToDelete(StringBuilder querySelection, String valeur) {
-		StringBuilder updateToDelete = new StringBuilder();
+	/** Mark the line selected by querySelection for deletion/replay (depending on value).*/
+	private PreparedStatementBuilder requeteUpdateToMark(PreparedStatementBuilder querySelection, String value) {
+		PreparedStatementBuilder updateToDelete = new PreparedStatementBuilder();
 		updateToDelete.append("WITH ");
 		updateToDelete.append("prep AS ( ");
 		updateToDelete.append(querySelection);
 		updateToDelete.append("         ) ");
 		updateToDelete.append("UPDATE " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER) + " a ");
-		updateToDelete.append("SET to_delete=" + valeur + " ");
+		updateToDelete.append("SET to_delete=" + value + " ");
 		updateToDelete.append(
 				"WHERE EXISTS (SELECT 1 FROM prep WHERE a.container=prep.container AND a.id_source=prep.id_source); ");
 		return updateToDelete;

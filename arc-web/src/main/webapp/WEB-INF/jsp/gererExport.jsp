@@ -25,7 +25,8 @@
 	action="selectExport.action"
 	id="selectExport"
 	method="post"
-	enctype="multipart/form-data"
+	enctype="multipart/form-data"	
+	accept-charset="UTF-8"
 >
 	<c:import url="tiles/header.jsp">
 		<c:param name="currentPage" value="export" />

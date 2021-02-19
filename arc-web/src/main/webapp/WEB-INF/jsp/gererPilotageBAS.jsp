@@ -17,7 +17,8 @@
 
 	<form spellcheck="false" id="selectPilotageBAS" action="selectPilotageBAS.action"
 		method="post"
-		enctype="multipart/form-data">
+		enctype="multipart/form-data"
+		accept-charset="UTF-8">
 
 		<c:import url="tiles/header.jsp">
 			<c:param name="currentPage" value="envManagement" />

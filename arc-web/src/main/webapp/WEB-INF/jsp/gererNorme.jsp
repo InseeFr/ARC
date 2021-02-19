@@ -25,6 +25,7 @@
 	action="selectNorme.action"
 	method="post"
 	enctype="multipart/form-data"
+	accept-charset="UTF-8"
 >
 
 	<c:import url="tiles/header.jsp">
@@ -125,7 +126,7 @@
 					
 					
 						<li class="nav-item"><a
-								class="nav-link active"
+								class="nav-link ${viewChargement.isInitialized==true&&viewChargement.isScoped==true ? 'active' : '' }"
 								id="load-tab"
 								data-toggle="tab"
 								href="#load"
@@ -137,7 +138,7 @@
 								<spring:message code="normManagement.load"/>
 							</a></li>
 						<li class="nav-item"><a
-								class="nav-link"
+								class="nav-link ${viewNormage.isInitialized==true&&viewNormage.isScoped==true ? 'active' : '' }"
 								id="structurize-tab"
 								data-toggle="tab"
 								href="#structurize"
@@ -149,7 +150,7 @@
 								<spring:message code="normManagement.structurize"/>
 							</a></li>
 						<li class="nav-item"><a
-								class="nav-link"
+								class="nav-link ${viewControle.isInitialized==true&&viewControle.isScoped==true ? 'active' : '' }"
 								id="control-tab"
 								data-toggle="tab"
 								href="#control"
@@ -161,7 +162,7 @@
 								<spring:message code="normManagement.control"/>
 							</a></li>
 						<li class="nav-item"><a
-								class="nav-link"
+								class="nav-link ${viewFiltrage.isInitialized==true&&viewFiltrage.isScoped==true ? 'active' : '' }"
 								id="filter-tab"
 								data-toggle="tab"
 								href="#filter"
@@ -173,7 +174,7 @@
 								<spring:message code="normManagement.filter"/>
 							</a></li>
 						<li class="nav-item"><a
-								class="nav-link"
+								class="nav-link ${viewMapping.isInitialized==true&&viewMapping.isScoped==true ? 'active' : '' }"
 								id="mapmodel-tab"
 								data-toggle="tab"
 								href="#mapmodel"
@@ -185,7 +186,7 @@
 								<spring:message code="normManagement.mapmodel"/>
 							</a></li>
 							<li class="nav-item font-smaller" style="margin-left:auto"><a
-								class="nav-link"
+								class="nav-link ${viewExpression.isInitialized==true&&viewExpression.isScoped==true ? 'active' : '' }"
 								id="expressions-tab"
 								data-toggle="tab"
 								href="#expressions"
