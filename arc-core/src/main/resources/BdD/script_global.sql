@@ -37,7 +37,7 @@ CONSTRAINT ext_etat_jeuderegle_pkey PRIMARY KEY (id)
 do $$
 BEGIN
 for i in 1..{{nbSandboxes}} loop
-INSERT INTO arc.ext_etat_jeuderegle values ('arc.bas'||i,'BAC A SABLE "+i+"','TRUE','TRUE') ON CONFLICT DO NOTHING;
+INSERT INTO arc.ext_etat_jeuderegle values ('arc.bas'||i,'BAC A SABLE '||i,'TRUE','TRUE') ON CONFLICT DO NOTHING;
 end loop;
 end;
 $$;
