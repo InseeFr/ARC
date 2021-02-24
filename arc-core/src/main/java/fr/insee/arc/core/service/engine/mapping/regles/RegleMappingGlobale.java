@@ -57,7 +57,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
         /*
          * La requête doit contenir uniquement du SQL, sans "{" ni "}".
          */
-        if (!requete.matches(CodeSQL.regexRegleCodeSQL)) {
+        if (!requete.matches(CodeSQL.regexRegleCodeSQLrubriqueSeparator) || !requete.matches(CodeSQL.regexRegleCodeSQLrubriqueIgnoreIdSeparator)) {
             throw new IllegalStateException("La règle " + this.getExpression() + " contient des noms de tables inexistants.");
         }
         this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new PreparedStatementBuilder(requete));

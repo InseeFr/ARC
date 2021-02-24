@@ -41,8 +41,9 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
      */
     public static final class CodeSQL extends AbstractRegleMappingSimple {
 
-        public static final String regexRegleCodeSQL = "[^\\"+rubriqueSeparator0+"\\"+rubriqueSeparator1+"\\"+rubriqueIgnoreIdSeparator0+"\\"+rubriqueIgnoreIdSeparator1+"]+";
-
+        public static final String regexRegleCodeSQLrubriqueSeparator = "^((?!\\"+rubriqueSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueSeparator1+").)*$";
+        public static final String regexRegleCodeSQLrubriqueIgnoreIdSeparator = "^((?!\\"+rubriqueIgnoreIdSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueIgnoreIdSeparator1+").)*$";
+        
         public CodeSQL(String anExpression, VariableMapping aVariableMapping) {
             super(anExpression, aVariableMapping);
         }
@@ -103,13 +104,13 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
         private static final String sqlPseudoColumnIgnoreId="1";
         
 
-        public static final String regexRubriqueMapping = "((\\"+rubriqueSeparator0+"[a-zA-Z0-9_]*\\"+rubriqueSeparator1+")|(\\"+rubriqueIgnoreIdSeparator0+"[a-zA-Z0-9_]*\\"+rubriqueIgnoreIdSeparator1+"))";
+        public static final String regexRubriqueMapping = "((\\"+rubriqueSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueSeparator1+")|(\\"+rubriqueIgnoreIdSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueIgnoreIdSeparator1+"))";
         
         /**
          * Regex un peu plus permissive que nécessaire : la fabrique doit identifier {n'importe quoi} comme une rubrique, charge à la
          * méthode {@link #deriver()} et à la méthode {@link #deriverTest()} de lever les exceptions si besoin est.
          */
-        public static final String regexRubriqueMappingAcceptante = "((\\"+rubriqueSeparator0+"[^\\"+rubriqueSeparator0+"\\"+rubriqueSeparator1+"]*\\"+rubriqueSeparator1+")|(\\"+rubriqueIgnoreIdSeparator0+"[^\\"+rubriqueIgnoreIdSeparator0+"\\"+rubriqueIgnoreIdSeparator1+"]*\\"+rubriqueIgnoreIdSeparator1+"))";
+        public static final String regexRubriqueMappingAcceptante = "((\\"+rubriqueSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueSeparator1+")|(\\"+rubriqueIgnoreIdSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueIgnoreIdSeparator1+"))";
     
         
         /**
