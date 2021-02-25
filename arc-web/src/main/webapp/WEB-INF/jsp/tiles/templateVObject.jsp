@@ -180,6 +180,8 @@
 												</td>
 											</c:if>
 											<c:forEach items="${line.iterator()}" varStatus="incr2">
+												<c:set var="cellValue" value="${view.content.t[incr1.index].d[incr2.index]}" />
+												<c:set var="cellRequired" value="${view.headersRequired[incr2.index]}" />
 												<c:choose>
 												<c:when test="${view.headersVisible[incr2.index]}">
 													<td>
@@ -203,7 +205,7 @@
 																		dateFormat="yyyy-mm-dd"
 																		name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
 																		id="${view.sessionName}_content_t_${incr1.index}__d_${incr2.index}_"
-																		value="${view.content.t[incr1.index].d[incr2.index]}"
+																		value="${cellValue}"
 																		theme="simple"
 																	/>
 																</c:when>
@@ -213,17 +215,20 @@
 																	<textarea name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
 																		cols="" rows=""
 																		id="${view.sessionName}_content_t_${incr1.index}__d_${incr2.index}_"
-																		>${view.content.t[incr1.index].d[incr2.index]}</textarea>
+																		>${cellValue}</textarea>
 																</c:when>
 																<c:otherwise>
 																	<select class="w-100" 
 																		id="${view.sessionName}_content_t_${incr1.index}__d_${incr2.index}_"
 																		name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]">
-																		<c:if test="${!view.headersRequired[incr2.index]}">
+																		<c:if test="${!cellRequired}">
 																			<option value=""></option>
 																		</c:if>
+																		<c:if test="${cellRequired and cellValue == 'null'}">
+																			<option value="" selected></option>
+																		</c:if>
 																		<c:forEach items="${view.headersVSelect[incr2.index].keySet()}" var="option">
-																			<option value="${option}" ${option == view.content.t[incr1.index].d[incr2.index] ? 'selected' : ''}>${view.headersVSelect[incr2.index][option]}</option>
+																			<option value="${option}" ${option == cellValue ? 'selected' : ''}>${view.headersVSelect[incr2.index][option]}</option>
 																		</c:forEach>
 																	</select>
 																</c:otherwise>
@@ -232,7 +237,7 @@
 														<c:otherwise>
 															<textarea name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
 																cols="" rows=""
- 																id="${view.sessionName}_content_t_${incr1.index}__d_${incr2.index}_" readonly>${view.content.t[incr1.index].d[incr2.index]}</textarea>
+ 																id="${view.sessionName}_content_t_${incr1.index}__d_${incr2.index}_" readonly>${cellValue}</textarea>
 														</c:otherwise>
 														</c:choose>
 														</td>
@@ -244,7 +249,7 @@
 																test="${view.headersVType[incr2.index].equals('text')}'"
 															>
 																<textarea id="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
-																	name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]" >${view.content.t[incr1.index].d[incr2.index]}</textarea>
+																	name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]" >${cellValue}</textarea>
 															</c:when> <c:otherwise>
 																<select class="w-100" id="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
 																	name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]">
@@ -267,6 +272,7 @@
 											<td style="text-align:center; font-weight:bold;font-size:1.5em;">+</td>
 										</c:if>
 										<c:forEach items="${view.headersDLabel}" var="input" varStatus='incr'>
+													<c:set var="addCellRequired" value="${view.headersRequired[incr.index]}"/>
 											<c:choose>
 											<c:when test="${view.headersVisible[incr.index]}">
 												<c:choose>
@@ -307,12 +313,14 @@
 														<c:otherwise>
 															<select class="w-100" 
 																id="${view.sessionName}.inputFields[${incr.index}]"
-																name="${view.sessionName}.inputFields[${incr.index}]">
-																<c:if test="${!view.headersRequired[incr.index]}">
+																name="${view.sessionName}.inputFields[${incr.index}]"
+																${addCellRequired ? "m='js'" : ''}>
+																<c:if test="${!addCellRequired}">
 																	<option value=""></option>
 																</c:if>
-																<c:forEach items="${view.headersVSelect[incr.index].keySet()}" var="option">
-																	<option value="${option}">${view.headersVSelect[incr.index][option]}</option>
+																<c:forEach items="${view.headersVSelect[incr.index].keySet()}" var="option" varStatus="selectStatus">
+																	<option value="${option}"
+																	${addCellRequired and selectStatus.first ? 'selected' : ''}>${view.headersVSelect[incr.index][option]}</option>
 																</c:forEach>
 															</select>
 														</c:otherwise>
