@@ -11,7 +11,7 @@ public class ViewEntrepotBAS extends VObject {
         super();
         this.setSessionName("viewEntrepotBAS");
         this.setTitle("view.envManagement.fileStore");
-        this.setPaginationSize(15);
+        this.setDefaultPaginationSize(15);
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
 

@@ -13,7 +13,7 @@ public class ViewQuery extends VObject {
 
         this.setSessionName("viewQuery");
         
-        this.setPaginationSize(10);
+        this.setDefaultPaginationSize(10);
 
         this.setConstantVObject(new ConstantVObject(
 

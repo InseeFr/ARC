@@ -12,7 +12,7 @@ public class ViewFichierBAS extends VObject {
      	
 		this.setTitle("view.envManagement.detail");
 		this.setSessionName("viewFichierBAS");
-		this.setPaginationSize(10);
+		this.setDefaultPaginationSize(10);
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
         	

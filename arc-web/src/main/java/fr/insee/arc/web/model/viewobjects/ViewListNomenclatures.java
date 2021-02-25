@@ -11,7 +11,7 @@ public class ViewListNomenclatures extends VObject {
 		super();
 		
 		this.setTitle("view.nomenclatureList");
-		this.setPaginationSize(12);
+		this.setDefaultPaginationSize(12);
 		this.setSessionName("viewListNomenclatures");
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**

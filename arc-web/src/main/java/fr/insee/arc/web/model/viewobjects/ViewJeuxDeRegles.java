@@ -13,7 +13,7 @@ public class ViewJeuxDeRegles extends VObject {
         
         this.setTitle("view.ruleset");
 
-        this.setPaginationSize(15);
+        this.setDefaultPaginationSize(15);
         
         this.setSessionName("viewJeuxDeRegles");
 

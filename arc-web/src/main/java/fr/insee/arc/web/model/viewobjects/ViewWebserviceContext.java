@@ -13,7 +13,7 @@ public class ViewWebserviceContext extends VObject {
         
 		this.setTitle("view.webserviceContext");
 		this.setSessionName("viewWebserviceContext");
-		this.setPaginationSize(15);
+		this.setDefaultPaginationSize(15);
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**

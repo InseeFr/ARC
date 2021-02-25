@@ -19,8 +19,11 @@ public class VObject {
 	/** Nom dans la session */
 	private String sessionName;
 
+	/** Nombre de lignes par page par défaut. */
+	private int defaultPaginationSize;
+
 	/** Nombre de lignes par page */
-	private int paginationSize;
+	private Integer paginationSize;
 
 	/** Requête de génération du tableau */
 	private PreparedStatementBuilder mainQuery;
@@ -532,8 +535,16 @@ public class VObject {
 	public void setSessionName(String sessionName) {
 		this.sessionName = sessionName;
 	}
+	
+	public int getDefaultPaginationSize() {
+		return defaultPaginationSize;
+	}
 
-	public int getPaginationSize() {
+	public void setDefaultPaginationSize(int paginationSize) {
+		this.defaultPaginationSize = paginationSize;
+	}
+
+	public Integer getPaginationSize() {
 		return paginationSize;
 	}
 

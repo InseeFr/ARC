@@ -15,7 +15,7 @@ public class ViewVariableMetier  extends VObject {
         
 
         this.setTitle("view.mapmodel.fields");
-        this.setPaginationSize(15);
+        this.setDefaultPaginationSize(15);
         this.setSessionName("viewVariableMetier");
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
