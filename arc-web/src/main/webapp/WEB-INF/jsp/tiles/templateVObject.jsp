@@ -385,7 +385,7 @@
 							class="btn btn-secondary btn-sm"
 							type="submit"
 							doAction="select${viewType}"
-							scope="${param.extraScopeSee}"
+							scope="${view.sessionName};${param.extraScopeSee}"
 							value="<spring:message code="gui.button.see"/>"
 						><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.see"/></button>
 					</c:if>
