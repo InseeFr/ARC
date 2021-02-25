@@ -999,7 +999,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	}
 
 	@RequestMapping("/copieJeuxDeRegles")
-	public String copieJeuxDeRegles(Model model) {
+	public String copieJeuxDeRegles(Model model) throws SQLException {
 		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		// le jeu de regle à copier
 		Map<String, ArrayList<String>> selectionOut = viewRulesSet.mapContentSelected();
@@ -1007,158 +1007,43 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		Map<String, ArrayList<String>> selectionIn = viewJeuxDeReglesCopie.mapContentSelected();
 		HashMap<String, String> type = viewJeuxDeReglesCopie.mapHeadersType();
 		if (!selectionIn.isEmpty()) {
+
+			// columns found in all rules tables
+			String inCommonColumns=new StringBuilder()
+					.append(ConstanteBD.ID_NORME.getValue())
+					.append(","+ConstanteBD.PERIODICITE.getValue())
+					.append(","+ConstanteBD.VALIDITE_INF.getValue())
+					.append(","+ConstanteBD.VALIDITE_SUP.getValue())
+					.append(","+ConstanteBD.VERSION.getValue())
+					.toString();
+
+			// specific columns = column of the table minus common tables minus id_regle (rules generated id)
+			PreparedStatementBuilder getTableSpecificColumns=new PreparedStatementBuilder();
+			getTableSpecificColumns.append("\n SELECT string_agg(column_name,',') ");
+			getTableSpecificColumns.append("\n FROM information_schema.columns c ");
+			getTableSpecificColumns.append("\n WHERE table_schema||'.'||table_name ="+getTableSpecificColumns.quoteText(this.getSelectedJeuDeRegle()));
+			getTableSpecificColumns.append("\n AND column_name NOT IN ");
+			getTableSpecificColumns.append("\n ('"+inCommonColumns.replace(",", "','")+"','"+ConstanteBD.ID_REGLE.getValue()+"') ");
+
+			String specificColumns=UtilitaireDao.get(poolName).getString(null, getTableSpecificColumns);
 			
+			// Build the copy query
 			PreparedStatementBuilder requete = new PreparedStatementBuilder();
 			
 			requete.append("INSERT INTO " + this.getSelectedJeuDeRegle() + " ");
+			requete.append("(");
+			requete.append(inCommonColumns+","+specificColumns);
+			requete.append(")");
 			
-			if (this.getSelectedJeuDeRegle().equals("arc.ihm_normage_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewRulesSet,
-						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
-				requete.append("(");
-				requete.append(String.join(",", ConstanteBD.ID_NORME.getValue()//
-						, ConstanteBD.PERIODICITE.getValue()//
-						, ConstanteBD.VALIDITE_INF.getValue()//
-						, ConstanteBD.VALIDITE_SUP.getValue()//
-						, ConstanteBD.VERSION.getValue()//
-						, ConstanteBD.ID_CLASS.getValue()//
-						, ConstanteBD.RUBRIQUE_NMCL.getValue()//
-						, ConstanteBD.ID_REGLE.getValue()//
-						, ConstanteBD.COMMENTAIRE.getValue()));
+			requete.append("\n SELECT ");
+			requete.append(String.join(",", 
+					  requete.quoteText(selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0))
+					, requete.quoteText(selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0))
+					, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0)) + "::date "
+					, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)) + "::date "
+					, requete.quoteText(selectionOut.get(ConstanteBD.VERSION.getValue()).get(0))));
+			requete.append(","+specificColumns);
 
-				requete.append(")");
-				requete.append("SELECT ");
-				requete.append(String.join(",", 
-						  requete.quoteText(selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0))//
-						, requete.quoteText(selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0))//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0)) + "::date "//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)) + "::date "//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VERSION.getValue()).get(0))//
-						, ConstanteBD.ID_CLASS.getValue()//
-						, ConstanteBD.RUBRIQUE_NMCL.getValue()//
-						, ConstanteBD.ID_REGLE.getValue()//
-						, ConstanteBD.COMMENTAIRE.getValue()));
-
-			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewRulesSet,
-						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE));
-				requete.append("(");
-				requete.append(String.join(",", ConstanteBD.ID_NORME.getValue()
-						, ConstanteBD.PERIODICITE.getValue()//
-						, ConstanteBD.VALIDITE_INF.getValue()//
-						, ConstanteBD.VALIDITE_SUP.getValue()//
-						, ConstanteBD.VERSION.getValue()//
-						, ConstanteBD.ID_CLASS.getValue()//
-						, ConstanteBD.RUBRIQUE_PERE.getValue()//
-						, ConstanteBD.RUBRIQUE_FILS.getValue()//
-						, ConstanteBD.BORNE_INF.getValue()//
-						, ConstanteBD.BORNE_SUP.getValue()//
-						, ConstanteBD.CONDITION.getValue()//
-						, ConstanteBD.PRE_ACTION.getValue()//
-						, ConstanteBD.ID_REGLE.getValue()//
-						, ConstanteBD.COMMENTAIRE.getValue()));
-
-				requete.append(")");
-
-				requete.append("SELECT ");
-				requete.append(String.join(",", 
-						requete.quoteText(selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0)) + "::date "
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)) + "::date "
-						, requete.quoteText(selectionOut.get(ConstanteBD.VERSION.getValue()).get(0))
-						, ConstanteBD.ID_CLASS.getValue()//
-						, ConstanteBD.RUBRIQUE_PERE.getValue()//
-						, ConstanteBD.RUBRIQUE_FILS.getValue()//
-						, ConstanteBD.BORNE_INF.getValue()//
-						, ConstanteBD.BORNE_SUP.getValue()//
-						, ConstanteBD.CONDITION.getValue()//
-						, ConstanteBD.PRE_ACTION.getValue()//
-						, ConstanteBD.ID_REGLE.getValue()//
-						, ConstanteBD.COMMENTAIRE.getValue()));
-
-			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewRulesSet,
-						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE));
-				requete.append("(");
-				requete.append(String.join(",", ConstanteBD.ID_REGLE.getValue()//
-						, ConstanteBD.ID_NORME.getValue()//
-						, ConstanteBD.PERIODICITE.getValue()//
-						, ConstanteBD.VALIDITE_INF.getValue()//
-						, ConstanteBD.VALIDITE_SUP.getValue()//
-						, ConstanteBD.VERSION.getValue()//
-						, ConstanteBD.EXPR_REGLE_FILTRE.getValue()//
-						, ConstanteBD.COMMENTAIRE.getValue()));
-
-				requete.append(")");
-
-				requete.append("SELECT ");
-				requete.append(String.join(",",
-						"row_number() over () + COALESCE((SELECT max(id_regle) FROM " + this.getSelectedJeuDeRegle() + "),0)",
-						  requete.quoteText(selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0)) + "::date "//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)) + "::date "//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VERSION.getValue()).get(0))//
-						, ConstanteBD.EXPR_REGLE_FILTRE.getValue()//
-						, ConstanteBD.COMMENTAIRE.getValue()));
-
-			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewRulesSet,
-						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE));
-
-				requete.append("(");
-				requete.append(String.join(",", ConstanteBD.ID_REGLE.getValue()//
-						, ConstanteBD.ID_NORME.getValue()//
-						, ConstanteBD.PERIODICITE.getValue()//
-						, ConstanteBD.VALIDITE_INF.getValue()//
-						, ConstanteBD.VALIDITE_SUP.getValue()//
-						, ConstanteBD.VERSION.getValue()//
-						, ConstanteBD.VARIABLE_SORTIE.getValue()//
-						, ConstanteBD.EXPR_REGLE_COL.getValue(), ConstanteBD.COMMENTAIRE.getValue()));
-
-				requete.append(")");
-
-				requete.append("SELECT ");
-				requete.append(String.join(",",
-						"row_number() over () + coalesce((SELECT max(id_regle) FROM " + this.getSelectedJeuDeRegle() + "),0)",
-						  requete.quoteText(selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0)) + "::date "//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)) + "::date "//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VERSION.getValue()).get(0))
-						, ConstanteBD.VARIABLE_SORTIE.getValue()//
-						, ConstanteBD.EXPR_REGLE_COL.getValue(), ConstanteBD.COMMENTAIRE.getValue()));
-
-			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewRulesSet,
-						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
-				requete.append("(");
-				requete.append(String.join(",", ConstanteBD.ID_REGLE.getValue()//
-						, ConstanteBD.ID_NORME.getValue()//
-						, ConstanteBD.PERIODICITE.getValue()//
-						, ConstanteBD.VALIDITE_INF.getValue()//
-						, ConstanteBD.VALIDITE_SUP.getValue()//
-						, ConstanteBD.VERSION.getValue()//
-						, ConstanteBD.TYPE_FICHIER.getValue()//
-						, ConstanteBD.DELIMITER.getValue(), ConstanteBD.FORMAT.getValue(),
-						ConstanteBD.COMMENTAIRE.getValue()));
-
-				requete.append(")");
-
-				requete.append("SELECT ");
-				requete.append(String.join(" , ",
-						"row_number() over () + coalesce((SELECT max(id_regle) FROM " + this.getSelectedJeuDeRegle() + "),0)",
-						  requete.quoteText(selectionOut.get(ConstanteBD.ID_NORME.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.PERIODICITE.getValue()).get(0))
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_INF.getValue()).get(0)) + "::date"//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VALIDITE_SUP.getValue()).get(0)) + "::date"//
-						, requete.quoteText(selectionOut.get(ConstanteBD.VERSION.getValue()).get(0))
-						, ConstanteBD.TYPE_FICHIER.getValue()//
-						, ConstanteBD.DELIMITER.getValue(), ConstanteBD.FORMAT.getValue(),
-						ConstanteBD.COMMENTAIRE.getValue()));
-
-			}
 			requete.append(" FROM " + this.getSelectedJeuDeRegle() + "  ");
 
 			requete.append(" WHERE ");
@@ -1188,9 +1073,27 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 									type.get(ConstanteBD.VERSION.getValue()))
 
 			));
-
 			requete.append(" ;");
-
+			
+			// delete the current rules before the copy
+			if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
+						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CHARGEMENT_REGLE));
+			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_normage_regle")) {
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
+						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_NORMAGE_REGLE));
+			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
+						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_CONTROLE_REGLE));
+			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
+						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_FILTRAGE_REGLE));
+			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
+				gererNormeDao.emptyRuleTable(this.viewRulesSet,
+						getBddTable().getQualifedName(BddTable.ID_TABLE_IHM_MAPPING_REGLE));
+			}
+			
+			// excute the copy
 			try {
 				UtilitaireDao.get("arc").executeRequest(getQueryHandler().getWrapped(), requete);
 			} catch (SQLException ex) {
