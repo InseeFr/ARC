@@ -796,9 +796,8 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     private void setMessageNomTableMetierInvalide() {
-        this.viewTableMetier.setMessage("Un nom de table doit respecter la syntaxe :\n\"mapping_"
-                + this.viewFamilleNorme.mapContent().get(ID_FAMILLE).get(0)
-                + "_<identifiant>_ok\"\nOù <identifiant> est un ensemble de mots séparés par des underscores (\"_\")");
+        this.viewTableMetier.setMessage("familyManagement.table.error.invalidname");
+        this.viewTableMetier.setMessageArgs(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
     }
 
     /**
