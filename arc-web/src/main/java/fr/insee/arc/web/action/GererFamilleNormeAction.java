@@ -224,18 +224,6 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         return UtilitaireDao.get("arc").getList(null, requete, new ArrayList<String>());
     }
 
-    @RequestMapping("/updateTableMetier")
-    public String updateTableMetier(Model model) {
-		if (isNomTableMetierValide(viewTableMetier.mapInputFields().get(NOM_TABLE_METIER).get(0))) {
-            StringBuilder message = new StringBuilder();
-            this.deleteTableMetierWithoutSync(message);
-            this.vObjectService.insert(viewTableMetier);
-        } else {
-            setMessageNomTableMetierInvalide();
-        }
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-
     private boolean deleteTableMetierWithoutSync(StringBuilder message) {
         System.out.println("Destruction de la table");
         boolean drop = true;
