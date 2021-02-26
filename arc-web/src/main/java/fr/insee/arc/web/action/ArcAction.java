@@ -139,6 +139,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	/** Runs the generic initialization (status, VObject, ...) 
 	 * and adds some generic info to the model.
 	 * (VObject themselves are added to the model by ArcInterceptor)*/
+	@SuppressWarnings("unchecked")
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
@@ -151,6 +152,8 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 			ApiInitialisationService.bddScript(null);
 		}
 
+		this.envMap=(Map<String, String>) getSession().get(SessionParameters.ENV_MAP);
+		
 		// adding production sandbox to session
 		if (this.envMap == null) {
 			this.envMap= indexDao.getSandboxList();
