@@ -13,7 +13,7 @@ public abstract class AbstractViewRule extends VObject {
         super();
         
         this.setTitle(title);
-        this.setPaginationSize(paginationSize);
+        this.setDefaultPaginationSize(paginationSize);
         this.setSessionName(sessionName);
         
         Map<String, ColumnRendering> columnRenderings = new HashMap<>();

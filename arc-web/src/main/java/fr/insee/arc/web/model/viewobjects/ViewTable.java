@@ -13,7 +13,7 @@ public class ViewTable extends VObject {
         
         this.setSessionName("viewTable");
 
-        this.setPaginationSize(25);
+        this.setDefaultPaginationSize(25);
         
         this.setConstantVObject(new ConstantVObject(
 

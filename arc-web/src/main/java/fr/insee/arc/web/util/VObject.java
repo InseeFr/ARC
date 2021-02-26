@@ -19,8 +19,11 @@ public class VObject {
 	/** Nom dans la session */
 	private String sessionName;
 
+	/** Nombre de lignes par page par défaut. */
+	private int defaultPaginationSize;
+
 	/** Nombre de lignes par page */
-	private int paginationSize;
+	private Integer paginationSize;
 
 	/** Requête de génération du tableau */
 	private PreparedStatementBuilder mainQuery;
@@ -192,16 +195,21 @@ public class VObject {
 			return new ArrayList<>();
 		}
 		ArrayList<ArrayList<String>> r = new ArrayList<>();
-		for (int i = 0; i < getContent().size(); i++) {
-			r.add(new ArrayList<String>());
-			for (int j = 0; j < getContent().get(i).d.size(); j++) {
-				String newContentValue = getContent().get(i).d.get(j);
+		for (int i = 0; i < getSavedContent().size(); i++) {
+			r.add(new ArrayList<>());
+			for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
 				String oldContentValue = getSavedContent().get(i).d.get(j);
-				if (compareOldAndNew(newContentValue, oldContentValue)) {
+				if (i >= getContent().size() || j >= getContent().get(i).d.size()) {
 					r.get(i).add(oldContentValue);
-				} else {
-					r.get(i).add(newContentValue);
+				}  else {
+					String newContentValue = getContent().get(i).d.get(j);
+					if (compareOldAndNew(newContentValue, oldContentValue)) {
+						r.get(i).add(oldContentValue);
+					} else {
+						r.get(i).add(newContentValue);
+					}
 				}
+				
 			}
 		}
 		return r;
@@ -209,6 +217,37 @@ public class VObject {
 
     public HashMap<String, ArrayList<String>> mapUpdatedContent() {
         return new GenericBean(getHeadersDLabel(), getHeadersDType(), listUpdatedContent()).mapContent();
+    }
+    
+    /** Returns the content as it would be after the update, only on the changed lines.*/
+	public ArrayList<ArrayList<String>> listOnlyUpdatedContent() {
+		if (getSavedContent() == null) {
+			return new ArrayList<>();
+		}
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
+		for (int i = 0; i < getContent().size(); i++) {
+			ArrayList<String> line = new ArrayList<>();
+			boolean changed = false;
+			for (int j = 0; j < getContent().get(i).d.size(); j++) {
+				String oldContentValue = getSavedContent().get(i).d.get(j);
+
+				String newContentValue = getContent().get(i).d.get(j);
+				if (compareOldAndNew(newContentValue, oldContentValue)) {
+					line.add(oldContentValue);
+				} else {
+					line.add(newContentValue);
+					changed = true;
+				}				
+			}
+			if (changed) {
+				r.add(line);
+			}
+		}
+		return r;
+	}
+
+    public HashMap<String, ArrayList<String>> mapOnlyUpdatedContent() {
+        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listOnlyUpdatedContent()).mapContent();
     }
 
 	public ArrayList<ArrayList<String>> listContentSelected() {
@@ -496,8 +535,16 @@ public class VObject {
 	public void setSessionName(String sessionName) {
 		this.sessionName = sessionName;
 	}
+	
+	public int getDefaultPaginationSize() {
+		return defaultPaginationSize;
+	}
 
-	public int getPaginationSize() {
+	public void setDefaultPaginationSize(int paginationSize) {
+		this.defaultPaginationSize = paginationSize;
+	}
+
+	public Integer getPaginationSize() {
 		return paginationSize;
 	}
 

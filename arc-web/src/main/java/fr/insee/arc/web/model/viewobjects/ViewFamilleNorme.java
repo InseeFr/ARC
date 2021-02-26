@@ -12,7 +12,7 @@ public class ViewFamilleNorme extends VObject {
         super();
         
         this.setTitle("view.family");
-    	this.setPaginationSize(10);
+    	this.setDefaultPaginationSize(10);
     	this.setSessionName("viewFamilleNorme");
     	
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {

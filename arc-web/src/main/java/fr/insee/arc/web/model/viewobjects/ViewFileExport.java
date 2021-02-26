@@ -13,7 +13,7 @@ public class ViewFileExport extends VObject {
         
         this.setTitle("view.exportFile");
         this.setSessionName("viewFileExport");
-    	this.setPaginationSize(0);
+    	this.setDefaultPaginationSize(0);
         
         this.setConstantVObject(new ConstantVObject(
 

@@ -62,7 +62,7 @@ public class VObjectTest {
 	}
 
 	@Test
-	public void listContentAfterUpdateOk() {
+	public void listContentUpdatedContentOk() {
 		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
 		newContent.add(new ArrayList<>());
 		newContent.get(0).add(null);
@@ -76,6 +76,25 @@ public class VObjectTest {
 		assertThat(defaultTestVobject.listUpdatedContent().get(1).get(0), equalTo("first_field_new"));
 		assertThat(defaultTestVobject.listUpdatedContent().get(1).get(1), equalTo("second_field_value2"));
 		assertThat(defaultTestVobject.listUpdatedContent().size(), equalTo(2));
+	}
+	
+	@Test
+	public void listContentOnlyUpdatedContentOk() {
+		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
+		newContent.add(new ArrayList<>());
+		newContent.get(0).add(null);
+		newContent.get(0).add(null);
+		newContent.add(new ArrayList<>());
+		newContent.get(1).add("first_field_new");
+		newContent.get(1).add("second_field_value2");
+		this.defaultContent.add(new ArrayList<String>());
+		this.defaultContent.get(1).add("first_field_value3");
+		this.defaultContent.get(1).add("second_field_value3");
+		this.defaultTestVobject.setSavedContent(TableObject.as(this.defaultContent));
+		this.defaultTestVobject.setContent(TableObject.as(newContent));
+		assertThat(defaultTestVobject.listOnlyUpdatedContent().get(0).get(0), equalTo("first_field_new"));
+		assertThat(defaultTestVobject.listOnlyUpdatedContent().get(0).get(1), equalTo("second_field_value2"));
+		assertThat(defaultTestVobject.listOnlyUpdatedContent().size(), equalTo(1));
 	}
 
 	@Test

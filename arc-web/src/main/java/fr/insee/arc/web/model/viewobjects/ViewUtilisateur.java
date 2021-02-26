@@ -11,7 +11,7 @@ public class ViewUtilisateur extends VObject {
 	
 	public ViewUtilisateur() {
 		setSessionName("viewUserList");
-		setPaginationSize(15);
+		setDefaultPaginationSize(15);
 		setTitle("view.userlist");
 		
 		Map<String, ColumnRendering> fields = new HashMap<>();

@@ -13,7 +13,7 @@ public class ViewNorme extends VObject {
 
 	this.setTitle("view.norms");
 	
-	this.setPaginationSize(15);
+	this.setDefaultPaginationSize(15);
 	
 	this.setSessionName("viewNorme");
 

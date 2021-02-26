@@ -13,7 +13,7 @@ public class ViewWebserviceQuery extends VObject {
         
         this.setTitle("view.webserviceQuery");
         this.setSessionName("viewWebserviceQuery");
-		this.setPaginationSize(15);
+		this.setDefaultPaginationSize(15);
 
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {

@@ -13,7 +13,7 @@ public class ViewCalendrier extends VObject {
 	
 	this.setTitle("view.calendar");
 	
-	this.setPaginationSize(15);
+	this.setDefaultPaginationSize(15);
 	
 	this.setSessionName("viewCalendrier");
 	

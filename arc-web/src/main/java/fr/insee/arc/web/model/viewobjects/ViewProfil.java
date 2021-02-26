@@ -11,7 +11,7 @@ public class ViewProfil extends VObject {
 
 	public ViewProfil() {
 		setSessionName("viewUserProfiles");
-		setPaginationSize(15);
+		setDefaultPaginationSize(15);
 		setTitle("view.userprofiles");
 		Map<String, ColumnRendering> fields = new HashMap<>();
         fields.put("groupe", new ColumnRendering(true, "label.usergroup", "50%", "text", null, true));

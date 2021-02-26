@@ -13,7 +13,7 @@ public class ViewRapportBAS extends VObject {
         
 		this.setTitle("view.envManagement.report");
 		this.setSessionName("viewRapportBAS");
-		this.setPaginationSize(10);
+		this.setDefaultPaginationSize(10);
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
 

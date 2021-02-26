@@ -11,7 +11,7 @@ public class ViewNomenclature extends VObject {
 		super();
 		
 		this.setTitle("view.nomenclature");
-		this.setPaginationSize(15);
+		this.setDefaultPaginationSize(15);
 		this.setSessionName("viewNomenclature");
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
             /**

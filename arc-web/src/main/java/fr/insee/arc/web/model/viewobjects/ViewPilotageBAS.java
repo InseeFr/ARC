@@ -17,7 +17,7 @@ public class ViewPilotageBAS extends VObject {
     	this.setTitle("view.envManagement");
     	this.setSessionName("viewPilotageBAS");
     	
-    	this.setPaginationSize(5);
+    	this.setDefaultPaginationSize(5);
     	
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {

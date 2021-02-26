@@ -11,7 +11,7 @@ public class ViewTableMetier extends VObject {
     	super();
     	
     	this.setTitle("view.mapmodel.tables");
-    	this.setPaginationSize(10);
+    	this.setDefaultPaginationSize(10);
     	this.setSessionName("viewTableMetier");
     	    	
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {

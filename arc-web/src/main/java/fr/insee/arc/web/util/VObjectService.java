@@ -118,7 +118,7 @@ public class VObjectService {
 			if (currentData.getSelectedLines() == null) {
 				currentData.setSelectedLines(v0.getSelectedLines());
 	        }
-			if (currentData.getPaginationSize() == 0) {
+			if (currentData.getPaginationSize() == null) {
 				currentData.setPaginationSize(v0.getPaginationSize());
 			}
 			if (currentData.getInputFields() != null && v0.getDefaultInputFields() != null) {
@@ -199,7 +199,7 @@ public class VObjectService {
 	            requete.append(buildOrderBy(data.getHeaderSortDLabels(), data.getHeaderSortDOrders()));
 	        }
 	
-	        if (data.getPaginationSize() > 0) {
+	        if (data.getPaginationSize() != null && data.getPaginationSize() > 0) {
 	            requete.append(" limit " + data.getPaginationSize() + " offset " + ((indexPage - 1) * data.getPaginationSize()));
 	        }
 	
@@ -290,8 +290,14 @@ public class VObjectService {
 		if (currentData.getIdPage() == null) {
 		    currentData.setIdPage("1");
 		}
+		
+		if (currentData.getPaginationSize() == null) {
+			currentData.setPaginationSize(currentData.getDefaultPaginationSize());
+		}
+		
 		if (!this.noCount) {
-		    if (currentData.getPaginationSize() > 0 && this.noOrder == false) {
+		    if (currentData.getPaginationSize() > 0 
+		    		&& !this.noOrder) {
 		        try {
 		        	
 		        	PreparedStatementBuilder requete=new PreparedStatementBuilder();

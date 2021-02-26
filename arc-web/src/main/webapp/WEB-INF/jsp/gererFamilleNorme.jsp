@@ -78,7 +78,7 @@
 								<c:param name="btnSee" value ="true" />
 								<c:param name="btnSort" value ="true" />
 								<c:param name="btnAdd" value ="true" />
-								<c:param name="btnUpdate" value ="true" />
+								<c:param name="btnUpdate" value ="false" />
 								<c:param name="btnDelete" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />

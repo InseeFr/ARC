@@ -11,7 +11,7 @@ public class ViewClient extends VObject {
         super();
         
         this.setTitle("view.client.softwares");
-		this.setPaginationSize(5);
+		this.setDefaultPaginationSize(5);
 		this.setSessionName("viewClient");
 		
 		
