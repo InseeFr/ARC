@@ -53,8 +53,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
 
         this.setParamBatch(anApi.getParamBatch());
         
-        this.tableTempFiltrageOk = "tableTempFiltrageOk";
-        this.tableMappingPilTemp = "tableMappingPilTemp";
+        this.tableTempFiltrageOk = "tableTempFiltrageOk".toLowerCase();
+        this.tableMappingPilTemp = "tableMappingPilTemp".toLowerCase();
         
         this.requeteSQLCalibree = new RequeteMappingCalibree(this.connexion, FormatSQL.TAILLE_MAXIMAL_BLOC_SQL, this.tableMappingPilTemp);
         this.jdrDAO = new JeuDeRegleDao();
@@ -159,10 +159,6 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                 UtilitaireDao.get(poolName).dropTable(this.connexion, requeteMapping.tableauNomsTablesTemporaires());
                 UtilitaireDao.get(poolName).dropTable(this.connexion, this.tableMappingPilTemp);
             }
-            /*
-             * DROP des tables utilisées
-             */
-            UtilitaireDao.get(poolName).dropTable(this.connexion, this.tableTempFiltrageOk);
         } catch (Exception e) {
             StaticLoggerDispatcher.error(e, LOGGER);
 
@@ -188,28 +184,17 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
          * Insertion dans la table temporaire des fichiers marqués dans la table de pilotage
          */
         requete = new StringBuilder();
+        requete.append("DROP TABLE IF EXISTS "+this.tableMappingPilTemp+";");
         requete.append(createTablePilotageIdSource(this.tablePilTemp, this.tableMappingPilTemp, this.idSource));
-        UtilitaireDao.get(poolName).executeBlock(this.connexion, requete);
-
         /*
          * Marquer le jeu de règles
          */
-        requete = new StringBuilder();
         requete.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
-        UtilitaireDao.get(poolName).executeBlock(this.connexion, requete);
         
-        requete = new StringBuilder();
+        requete.append("DROP TABLE IF EXISTS "+this.tableTempFiltrageOk+";");
         requete.append(createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
         UtilitaireDao.get(poolName).executeBlock(this.connexion, requete);
 
-        /*
-         * Indexation de la table temporaire
-         */
-//        requete = new StringBuilder();
-//        requete.append("create unique index idx_" + ManipString.substringAfterFirst(this.tableTempFiltrageOk, ".") + " on "
-//                + this.tableTempFiltrageOk + "(id_source, id);");
-//        requete.append("\n analyze " + this.tableTempFiltrageOk + ";");
-//        UtilitaireDao.get(poolName).executeBlock(this.connexion, requete);
 
     }
 
