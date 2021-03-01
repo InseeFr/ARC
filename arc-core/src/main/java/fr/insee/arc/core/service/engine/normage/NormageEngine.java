@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -199,9 +200,10 @@ public class NormageEngine {
 				// retravaille de la requete pour éliminer UNION ALL
 				subJoin = optimisation96(subJoin,subJoinNumber);
 	
+				subJoin = appliquerRegleReduction(regle, norme, validite, periodicite, subJoin);
+				
 				// on ne fait le remplacement que maintenant (passage en minuscule avant pour le
 				// parsing)
-	//		            subJoin="DISCARD TEMP;\n"+subJoin;
 				subJoin = "set enable_nestloop=off;\n" + subJoin;
 				subJoin = subJoin.replace("{table_source}", tableSource);
 				subJoin = subJoin.replace("{table_destination}", tableDestination);
@@ -1511,6 +1513,125 @@ public class NormageEngine {
 		return returned;
 
 	}
+	
+	/**
+	 * Rules to reduce the cartesian products
+	 * For a given set, the method builds a new set
+	 * with the only constraint of containing all values for any of the column of the set
+	 */
+	private String appliquerRegleReduction(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+			String periodicite, String jointure) throws Exception {
+		
+		for (int j = 0; j < regle.get("id_regle").size(); j++) {
+			String type = regle.get("id_classe").get(j);
+			if (type.equals("reduction")) {
+
+				String[] rubriques = regle.get("rubrique").get(j).toLowerCase().split(",");
+				List<String> rubriquesUtiles=new ArrayList<String>();
+				List<String> rubriquesNull=new ArrayList<String>();
+
+				
+				String returned = jointure;
+				// extraction de la clause select
+				String[] bloc=returned.split("\n insert into \\{table_destination\\} ");
+				
+				String rubriquesDuSelect=ManipString.substringBeforeFirst(ManipString.substringAfterFirst(bloc[1],"select "),"\n from ")+",";
+
+				// regarder si les rubrique de la regles sont présentes
+				for (String r:rubriques)
+				{
+					if (rubriquesDuSelect.contains(",i_"+r+","))
+					{
+						rubriquesUtiles.add("i_"+r);
+						rubriquesNull.add("null");
+					}
+					if (rubriquesDuSelect.contains(",m_"+r+","))
+					{
+						rubriquesUtiles.add("m_"+r);
+						rubriquesNull.add("null");
+					}
+				}
+				
+				// si - de 2 rubriques présentes, on ne fait rien
+				if (rubriquesUtiles.size()<2)
+				{
+					return jointure;
+				}
+				
+				String rubriquesUtilesSelect = StringUtils.join(rubriquesUtiles,",");
+				
+				
+				// on initialise la requete avec le bloc 0 (bloc de préparation, calcul des tables temporaires, etc.)
+				StringBuilder requete=new StringBuilder(bloc[0]);
+
+				// nom de bases des vues dans l'enchainement de clause with qu'on va générer
+				String withBaseName="v";
+				
+				
+				// pour chaque bloc d'insert, on réécrit la requete
+				for (int i=1;i<bloc.length;i++)
+				{
+					requete.append("\n insert into {table_destination} ");
+					// récupération des colonnes de l'insert
+					requete.append(ManipString.substringBeforeFirst(bloc[i],"\n select "));
+
+					
+					String blocSelect = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(bloc[i],"\n select "),"\n from ");
+					String blocFrom = ManipString.substringBeforeLast(ManipString.substringAfterFirst(bloc[i],"\n from "),"\n;");
+					
+					// on matérialise les n-uplets distincts
+					requete.append("\n with "+withBaseName+0+" as ( ");
+					requete.append("\n select distinct "+rubriquesUtilesSelect+" ");
+					requete.append("\n from ");
+					requete.append(blocFrom);
+					requete.append("\n ) ");
+					
+					// on itére sur les rubriques utiles
+					for (int k=0;k<rubriquesUtiles.size();k++)
+					{
+						requete.append("\n , "+withBaseName+(k+1)+" as ( ");
+						
+						// on ajoute à la table générée avant
+						if (k>0)
+						{
+							requete.append("\n select * from "+withBaseName+k+" UNION ALL ");
+
+						}
+						
+						// les n uplet distinct sur la rubrique en cours
+						requete.append("\n select distinct on ("+rubriquesUtiles.get(k)+") * from "+withBaseName+0+" u ");
+						// dont on a pas déjà la valeur
+						if (k>0)
+						{
+							requete.append("\n where not exists (select from "+withBaseName+k+" v where u."+rubriquesUtiles.get(k)+"=v."+rubriquesUtiles.get(k)+") ");
+						}
+						
+//						// ajouter le n-uplet null, null, null ? cela semble sage
+//						if (k==(rubriquesUtiles.size()-1))
+//						{
+//							requete.append("\n UNION ALL select "+ StringUtils.join(rubriquesNull,",")+" ");
+//						}
+						requete.append("\n ) ");
+					}
+					requete.append("\n select ");
+					requete.append(blocSelect);
+					requete.append("\n from ");
+					requete.append(blocFrom);
+					requete.append("\n and row("+rubriquesUtilesSelect+")::text in (select row("+rubriquesUtilesSelect+")::text from "+withBaseName+rubriquesUtiles.size()+") ");
+					requete.append("\n;");
+					
+				}
+
+				// 1 seule regle de reduction prise en compte pour le moment 
+				return requete.toString();
+			}
+		}
+		
+		return jointure;
+	}
+	
+	
+	
 
 	/**
 	 * determine le pere d'une rubrique "m_<***>" dans un bloc
