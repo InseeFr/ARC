@@ -511,7 +511,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				getBacASable());
 
 		ApiServiceFactory.getService(phaseAExecuter, ApiService.IHM_SCHEMA, getBacASable(),
-				this.repertoire, "10000000").invokeApi();
+				this.repertoire, "10000000"
+				//,"1" // to set batch mode or not
+				).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
