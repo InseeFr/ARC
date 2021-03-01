@@ -517,6 +517,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
+	
 	/*
 	 * Allow the user to select files for the undoBatch fucntionnality
 	 */
