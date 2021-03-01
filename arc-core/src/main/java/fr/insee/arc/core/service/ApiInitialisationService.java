@@ -1215,8 +1215,7 @@ public class ApiInitialisationService extends ApiService {
 
         // maintenance des tables de catalogue car postgres ne le réalise pas correctement sans mettre en oeuvre
         // une stratégie de vacuum hyper agressive et donc ajouter une spécificité pour les DBAs
-        // 12G de catalogue au bout de 6 mois o_O
-        UtilitaireDao.get(poolName).maintenancePgCatalog(this.connexion, "full");
+        UtilitaireDao.get(poolName).maintenancePgCatalog(this.connexion, "freeze");
 
     }
 
