@@ -227,7 +227,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
                 this.tableTempFiltrageKo, this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, this.seuilExclusion, 
                 this.tableFiltragePilTemp);
         
-        UtilitaireDao.get("arc").executeBlock(this.connexion, "set enable_nestloop=off;"+requete+"set enable_nestloop=on;");
+        UtilitaireDao.get("arc").executeImmediate(this.connexion, "set enable_nestloop=off;"+requete+"set enable_nestloop=on;");
 
     }
     
@@ -284,6 +284,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         String aTableControleCount = aTableControleOk.replace(".", "_") + "_COUNT";
         requete.append(FormatSQL.dropTable(aTableControleCount));
 
+        requete.append("\n BEGIN; ");
         requete.append("\n create temporary table " + aTableControleCount + " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT id_source, id, (");
         requete.append("\n CASE ");
         boolean hasRegle=false;
@@ -303,6 +304,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         requete.append("\n from " + aTableControleOk + " ctrl; ");
         requete.append("\n COMMIT; ");
         
+        requete.append("\n BEGIN; ");
         requete.append("\n ANALYZE " + aTableControleCount + ";");
         /**
          * Calcul du taux de filtrage, id_norme, periodicite, validite_inf, validite_sup
@@ -311,11 +313,13 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         requete.append("\n FROM (SELECT id_source, avg(check_against_rule) as excluded_rate FROM " + aTableControleCount
                 + " GROUP BY id_source) rate ");
         requete.append("\n WHERE rate.id_source = pil.id_source;\n");
+        requete.append("\n COMMIT; ");
 
 
         /**
          * A partir du taux de filtrage écriture de l'état et du rapport
          */
+        requete.append("\n BEGIN; ");
         requete.append("\n UPDATE " + aTablePilotage + " ");
         requete.append("\n SET etat_traitement= CASE WHEN taux_ko = 0 THEN '{OK}'::text[] ");
         requete.append("\n              WHEN 0<taux_ko AND taux_ko<" + excludedRate + " THEN '{OK,KO}' ::text[] ");
@@ -329,11 +333,13 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
         /**
          * Vont en KO les fichiers sans aucun enregistrement
          */
+        requete.append("\n BEGIN; ");
         requete.append("\n UPDATE " + aTablePilotage + " pil SET etat_traitement='{KO}',");
         requete.append("\n rapport='" + TraitementRapport.TOUTE_PHASE_AUCUN_ENREGISTREMENT + "'");
         requete.append("\n  WHERE etat_traitement='{ENCOURS}';\n");
-        
         requete.append("\n COMMIT; ");
+        
+        requete.append("\n BEGIN; ");
         requete.append("\n ANALYZE " + aTablePilotage + ";");
         requete.append("\n ANALYZE " + aTableControleOk + ";");
         requete.append("\n COMMIT; ");

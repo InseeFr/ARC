@@ -332,12 +332,12 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static String setTimeOutMaintenance()
     {
-        return "set statement_timeout="+TIMEOUT_MAINTENANCE+"; COMMIT; ";
+        return "BEGIN;set statement_timeout="+TIMEOUT_MAINTENANCE+";COMMIT;";
     }
     
     public static String resetTimeOutMaintenance()
     {
-        return "reset statement_timeout; COMMIT; ";
+        return "BEGIN;reset statement_timeout;COMMIT;";
     }
     
     

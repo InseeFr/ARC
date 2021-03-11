@@ -1197,7 +1197,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws SQLException
 	 */
 	public void executeBlock(Connection connexion, StringBuilder requete) throws SQLException {
-		executeImmediate(connexion, "BEGIN;" + requete.toString() + " END;");
+		executeBlock(connexion, requete.toString());
 	}
 
 	/**
@@ -1207,7 +1207,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws SQLException
 	 */
 	public void executeBlock(Connection connexion, String requete) throws SQLException {
-		executeImmediate(connexion, "BEGIN;" + requete + " END;");
+		if (!requete.trim().isEmpty()) {
+			executeImmediate(connexion, "BEGIN;" + requete + "COMMIT;");
+		}
 	}
 
 

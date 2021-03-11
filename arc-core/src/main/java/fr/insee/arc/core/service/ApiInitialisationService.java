@@ -487,7 +487,7 @@ public class ApiInitialisationService extends ApiService {
             HierarchicalView familleToTableToVariableToType = HierarchicalView.asRelationalToHierarchical(
                     "(Phy) Famille -> Table -> Variable -> Type",
                     Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"), relationalView);
-            StringBuilder requeteMAJSchema = new StringBuilder("BEGIN;\n");
+            StringBuilder requeteMAJSchema = new StringBuilder();
             /*
              * AJOUT/MODIFICATION DES COLONNES DE REFERENCE
              */
@@ -585,7 +585,6 @@ public class ApiInitialisationService extends ApiService {
                     }
                 }
             }
-            requeteMAJSchema.append("END;");
             UtilitaireDao.get("arc").executeBlock(connexion, requeteMAJSchema);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -1173,7 +1172,7 @@ public class ApiInitialisationService extends ApiService {
 		           		 		
 		           		 		if (etape==null)
 		           		 		{
-		           		 			query.append("\n DROP TABLE IF EXISTS "+t+"; COMMIT;");
+		           		 			query.append("\n BEGIN; DROP TABLE IF EXISTS "+t+"; COMMIT;");
 		           		 		}
 		           		 		else
 		           		 		{
