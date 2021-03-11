@@ -1,5 +1,6 @@
 package fr.insee.arc.core.service;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -57,6 +58,8 @@ public class ApiReceptionService extends ApiService {
 		super();
 	}
 
+	private static final int READ_BUFFER_SIZE=131072;
+	
 	private static final Logger LOGGER = LogManager.getLogger(ApiReceptionService.class);
 	
 	//Expression régulière correspondant au nom des fichiers temporaires 
@@ -477,7 +480,7 @@ public class ApiReceptionService extends ApiService {
 				String etat = null;
 				// vérifier si l'archive est illisible dans son ensemble
 				try {
-					FileInputStream fis = new FileInputStream(f);
+					BufferedInputStream fis = new BufferedInputStream(new FileInputStream(f), READ_BUFFER_SIZE);
 					try {
 						GZIPInputStream gzis = new GZIPInputStream(fis);
 						try {
@@ -576,7 +579,7 @@ public class ApiReceptionService extends ApiService {
 				String etat = null;
 				// vérifier si l'archive est illisible dans son ensemble
 				try {
-					FileInputStream fis = new FileInputStream(f);
+					BufferedInputStream fis = new BufferedInputStream(new FileInputStream(f), READ_BUFFER_SIZE);
 					try {
 						ZipArchiveInputStream tarInput = new ZipArchiveInputStream(fis);
 						try {
@@ -660,7 +663,7 @@ public class ApiReceptionService extends ApiService {
 				String etat = null;
 				// vérifier si l'archive est illisible dans son ensemble
 				try {
-					FileInputStream fis = new FileInputStream(f);
+					BufferedInputStream fis = new BufferedInputStream(new FileInputStream(f), READ_BUFFER_SIZE);
 					try {
 						GZIPInputStream tarInput = new GZIPInputStream(fis);
 						try {
