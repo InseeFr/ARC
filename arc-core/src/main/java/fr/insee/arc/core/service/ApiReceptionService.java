@@ -58,7 +58,7 @@ public class ApiReceptionService extends ApiService {
 		super();
 	}
 
-	private static final int READ_BUFFER_SIZE=131072;
+	public static final int READ_BUFFER_SIZE=131072;
 	
 	private static final Logger LOGGER = LogManager.getLogger(ApiReceptionService.class);
 	

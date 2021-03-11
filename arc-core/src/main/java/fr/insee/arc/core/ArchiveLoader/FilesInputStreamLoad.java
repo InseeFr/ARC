@@ -1,5 +1,6 @@
 package fr.insee.arc.core.ArchiveLoader;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,6 +11,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
@@ -31,9 +33,9 @@ public class FilesInputStreamLoad {
     public FilesInputStreamLoad(File theFileToRead) throws Exception {
 	super();
 	try {
-	    this.tmpInxChargement =  new GZIPInputStream(new FileInputStream(theFileToRead));
-	    this.tmpInxNormage =  new GZIPInputStream(new FileInputStream(theFileToRead));
-	    this.tmpInxCSV =  new GZIPInputStream(new FileInputStream(theFileToRead));
+	    this.tmpInxChargement =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead), ApiReceptionService.READ_BUFFER_SIZE));
+	    this.tmpInxNormage =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead), ApiReceptionService.READ_BUFFER_SIZE));
+	    this.tmpInxCSV =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead), ApiReceptionService.READ_BUFFER_SIZE));
 	} catch (FileNotFoundException e) {
 	    StaticLoggerDispatcher.error("Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
 	    throw e;

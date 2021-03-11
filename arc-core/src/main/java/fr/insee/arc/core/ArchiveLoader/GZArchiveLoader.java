@@ -1,5 +1,6 @@
 package fr.insee.arc.core.ArchiveLoader;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
@@ -7,6 +8,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
@@ -26,9 +28,9 @@ public class GZArchiveLoader extends AbstractArchiveFileLoader {
 	this.filesInputStreamLoad = new FilesInputStreamLoad();
 
 	// Loading
-	this.filesInputStreamLoad.setTmpInxChargement(new GZIPInputStream(new FileInputStream(this.archiveChargement)));
-	this.filesInputStreamLoad.setTmpInxCSV(new GZIPInputStream(new FileInputStream(this.archiveChargement)));
-	this.filesInputStreamLoad.setTmpInxNormage(new GZIPInputStream(new FileInputStream(this.archiveChargement)));
+	this.filesInputStreamLoad.setTmpInxChargement(new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement), ApiReceptionService.READ_BUFFER_SIZE))));
+	this.filesInputStreamLoad.setTmpInxCSV(new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement), ApiReceptionService.READ_BUFFER_SIZE))));
+	this.filesInputStreamLoad.setTmpInxNormage(new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement), ApiReceptionService.READ_BUFFER_SIZE))));
 
 	StaticLoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);
 	return filesInputStreamLoad;
