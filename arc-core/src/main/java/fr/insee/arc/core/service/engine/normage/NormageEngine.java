@@ -3,6 +3,7 @@ package fr.insee.arc.core.service.engine.normage;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +17,9 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
@@ -94,7 +97,6 @@ public class NormageEngine {
 		String periodicite = pilotageIdSource.get("periodicite").get(0);
 		String validiteText = pilotageIdSource.get("validite").get(0);
 
-		StringBuilder bloc3 = new StringBuilder();
 
 		if (jointure == null || jointure.equals("")) {
 
@@ -138,10 +140,14 @@ public class NormageEngine {
 				}
 			}
 
+			StringBuilder bloc3 = new StringBuilder();
 			bloc3.append("\n CREATE TEMPORARY TABLE " + tableDestination + " ");
 			bloc3.append("\n  AS SELECT ");
 			bloc3.append(reqSelect);
 			bloc3.append(" from " + tableSource + " ;");
+			
+			UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
+
 
 		} else {
 			
@@ -202,24 +208,13 @@ public class NormageEngine {
 	
 				subJoin = appliquerRegleReduction(regle, norme, validite, periodicite, subJoin);
 				
-				// on ne fait le remplacement que maintenant (passage en minuscule avant pour le
-				// parsing)
-				subJoin = "set enable_nestloop=off;\n" + subJoin;
-				subJoin = subJoin.replace("{table_source}", tableSource);
-				subJoin = subJoin.replace("{table_destination}", tableDestination);
-				subJoin = subJoin.replace("{id_norme}", norme);
-				subJoin = subJoin.replace("{validite}", validiteText);
-				subJoin = subJoin.replace("{periodicite}", periodicite);
-				subJoin = subJoin.replace("{nom_fichier}", id_source);
-				subJoin = subJoin + "set enable_nestloop=on;\n ";
-				bloc3.append(subJoin);
-	
+				
+				executerJointure(regle, norme, validite, periodicite, subJoin, validiteText, id_source);
+
 				subJoinNumber++;
 
 			}
 		}
-		UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
-		bloc3.setLength(0);
 
 	}
 
@@ -1531,9 +1526,8 @@ public class NormageEngine {
 				List<String> rubriquesNull=new ArrayList<String>();
 
 				
-				String returned = jointure;
 				// extraction de la clause select
-				String[] bloc=returned.split("\n insert into \\{table_destination\\} ");
+				String[] bloc=jointure.split("\n insert into \\{table_destination\\} ");
 				
 				String rubriquesDuSelect=ManipString.substringBeforeFirst(ManipString.substringAfterFirst(bloc[1],"select "),"\n from ")+",";
 
@@ -1552,8 +1546,8 @@ public class NormageEngine {
 					}
 				}
 				
-				// si - de 2 rubriques présentes, on ne fait rien
-				if (rubriquesUtiles.size()<2)
+				// si - de 3 rubriques présentes, on ne fait rien
+				if (rubriquesUtiles.size()<3)
 				{
 					return jointure;
 				}
@@ -1606,11 +1600,6 @@ public class NormageEngine {
 							requete.append("\n where not exists (select from "+withBaseName+k+" v where u."+rubriquesUtiles.get(k)+"=v."+rubriquesUtiles.get(k)+") ");
 						}
 						
-//						// ajouter le n-uplet null, null, null ? cela semble sage
-//						if (k==(rubriquesUtiles.size()-1))
-//						{
-//							requete.append("\n UNION ALL select "+ StringUtils.join(rubriquesNull,",")+" ");
-//						}
 						requete.append("\n ) ");
 					}
 					requete.append("\n select ");
@@ -1630,7 +1619,132 @@ public class NormageEngine {
 		return jointure;
 	}
 	
+	/**
+	 * execute query with partition if needed
+	 * @param regle
+	 * @param norme
+	 * @param validite
+	 * @param periodicite
+	 * @param jointure
+	 * @param validiteText
+	 * @param id_source
+	 * @return
+	 * @throws Exception
+	 */
+	private void executerJointure(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+			String periodicite, String jointure, String validiteText, String id_source) throws Exception {
+
+		// only first partition rule is processed
+		for (int j = 0; j < regle.get("id_regle").size(); j++) {
+			String type = regle.get("id_classe").get(j);
+			if (type.equals("partition")) {
+
+				String element = regle.get("rubrique").get(j);
+				int minSize = Integer.parseInt(regle.get("rubrique_nmcl").get(j).split(",")[0]);
+				int chunkSize = Integer.parseInt(regle.get("rubrique_nmcl").get(j).split(",")[1]);
+				executerJointureWithPartition(regle, norme, validite, periodicite, jointure, validiteText, id_source,
+						element, minSize, chunkSize);
+				return;
+			}
+		}
+
+		// No partition found; normal execution
+		UtilitaireDao.get("arc").executeImmediate(connection,
+				"set enable_nestloop=off;\n"
+				+ replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, id_source)
+				+ "set enable_nestloop=on;\n"
+				);
+
+	}
 	
+	
+	/**
+	 * execute the query through the partition rubrique @element
+	 * if their is enough records @minSize
+	 * the query is executed by part, the number max of records is set by @chunkSize
+	 * @param regle
+	 * @param norme
+	 * @param validite
+	 * @param periodicite
+	 * @param jointure
+	 * @param validiteText
+	 * @param id_source
+	 * @param element
+	 * @param minSize
+	 * @param chunkSize
+	 * @throws Exception
+	 */
+	private void executerJointureWithPartition(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+			String periodicite, String jointure, String validiteText, String id_source, String element, int minSize, int chunkSize) throws Exception {
+	/* get the query blocks */
+	String blocCreate=ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
+	String blocInsert="\n insert into {table_destination} " +ManipString.substringAfterFirst(jointure, "\n insert into {table_destination} ");
+	
+	/* rework create block to get the number of record in partition if the rubrique is found */
+	if (blocCreate.contains("m_"+element))
+	{
+		blocCreate=blocCreate+"select max(m_"+element+") from t_"+element+"";
+	}
+	else
+	{
+		blocCreate=blocCreate+"select 0";
+	}
+	
+	blocCreate=replaceQueryParameters(blocCreate, norme, validite, periodicite, jointure, validiteText, id_source);
+	blocInsert=replaceQueryParameters(blocInsert, norme, validite, periodicite, jointure, validiteText, id_source);
+
+	int total=UtilitaireDao.get("arc").getInt(connection, new PreparedStatementBuilder(blocCreate));
+	
+	// partition if and only if enough records
+	if (total>=minSize)
+	{	
+		// rename the table to split
+		StringBuilder bloc3=new StringBuilder("alter table t_"+element+" rename to all_t_"+element+";");
+		UtilitaireDao.get("arc").executeImmediate(connection,bloc3);
+
+		PreparedStatementBuilder bloc4=new PreparedStatementBuilder();
+		bloc4.append("\n set enable_nestloop=off;\n");
+		bloc4.append("\n drop table if exists t_"+element+";");
+		bloc4.append("\n create temporary table t_"+element+" as select * from all_t_"+element+" where m_"+element+">=?::int and m_"+element+"<?::int;");
+
+		bloc4.append(blocInsert);
+		bloc4.append("\n set enable_nestloop=on;\n");
+
+		
+		int iterate=1;
+		do {
+		
+		bloc4.setParameters(Arrays.asList(""+(iterate),""+(iterate+chunkSize)));	
+			
+		iterate=iterate+chunkSize;
+
+		UtilitaireDao.get("arc").executeRequest(connection, bloc4);
+
+		} while (iterate<total);
+
+	}
+	else
+	{
+		StringBuilder bloc3=new StringBuilder();
+		
+		bloc3.append("\n set enable_nestloop=off;\n");
+		bloc3.append(blocInsert);
+		bloc3.append("\n set enable_nestloop=on;\n");
+		
+		UtilitaireDao.get("arc").executeImmediate(connection,bloc3);
+	}
+	}
+	
+	private String replaceQueryParameters(String query, String norme, Date validite,String periodicite, String jointure, String validiteText, String id_source)
+	{
+		return query.toString()
+				.replace("{table_source}", tableSource)
+				.replace("{table_destination}", tableDestination)
+				.replace("{id_norme}", norme)
+				.replace("{validite}", validiteText)
+				.replace("{periodicite}", periodicite)
+				.replace("{nom_fichier}", id_source);
+	}
 	
 
 	/**

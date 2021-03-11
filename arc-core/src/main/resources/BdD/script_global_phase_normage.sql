@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS arc.ext_type_normage
 ); 
 INSERT INTO arc.ext_type_normage values ('relation','1'),('cartesian','2'),('suppression','3'),('unicité','4') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_type_normage values ('reduction','5') ON CONFLICT DO NOTHING;
+INSERT INTO arc.ext_type_normage values ('partition','5') ON CONFLICT DO NOTHING;
 
 do $$ begin CREATE TRIGGER tg_insert_normage BEFORE INSERT ON arc.ihm_normage_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
 
