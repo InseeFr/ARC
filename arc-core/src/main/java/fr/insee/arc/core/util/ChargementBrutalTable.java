@@ -137,7 +137,17 @@ public class ChargementBrutalTable {
         ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, new PreparedStatementBuilder(query));
         if (result.size()>1)
         {
-        	throw new Exception("More than one norm and/or validity match the expression");
+        	StringBuilder normsFound = new StringBuilder();
+        	for (ArrayList<String> resultLine : result) 
+        	{
+	    		int index = Integer.parseInt(resultLine.get(0));
+	    		normsFound.append("{");
+	    		normsFound.append(listeNorme.get(index).getIdNorme());
+	    		normsFound.append(", ");
+	    		normsFound.append(resultLine.get(2));
+	    		normsFound.append("}");
+        	}
+        	throw new Exception("More than one norm and/or validity match the expression:" + normsFound);
         } else if (result.isEmpty())
         {
         	throw new Exception("Zero norm and/or validity match the expression");
