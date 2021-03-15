@@ -30,7 +30,7 @@
 				<c:param name="otherButton">
 					<input type="text" m="" action='select' name="dirIn" value="${dirIn}" />
 					<input id="viewDirIn.transfer" type="submit" doAction="transferDirIn" scope="viewDirIn;viewDirOut;" value="Transférer"></input>
-					<input id="viewDirIn.update" type="submit" doAction="renameIn" scope="viewDirIn;viewDirOut;" value="Mettre à jour" style="display:none;"></input>
+					<input id="viewDirIn.update" type="submit" doAction="renameDirIn" scope="viewDirIn;viewDirOut;" value="Mettre à jour" style="display:none;"></input>
 					<input id="viewDirIn.copy" type="submit" doAction="copyDirIn" scope="viewDirIn;viewDirOut;" value="Copier"></input>
 				</c:param>
 			</c:import>
@@ -54,7 +54,7 @@
 				<c:param name="otherButton">
 					<input type="text" m="" action='select' name="dirOut" value="${dirOut}" />
 					<input id="viewDirOut.transfer" type="submit" doAction="transferDirOut" scope="viewDirIn;viewDirOut;" value="Transférer"></input>
-					<input id="viewDirOut.update" type="submit" doAction="renameOut" scope="viewDirIn;viewDirOut;" value="Mettre à jour" style="display:none;"></input>
+					<input id="viewDirOut.update" type="submit" doAction="renameDirOut" scope="viewDirIn;viewDirOut;" value="Mettre à jour" style="display:none;"></input>
 					<input id="viewDirOut.copy" type="submit" doAction="copyDirOut" scope="viewDirOut;viewDirOut;" value="Copier"></input>
 				</c:param>
 			</c:import>

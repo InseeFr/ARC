@@ -139,8 +139,8 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	@RequestMapping("/renameIn")
-	public String renameIn(Model model) {
+	@RequestMapping("/renameDirIn")
+	public String renameDirIn(Model model) {
 		Map<String,ArrayList<String>> m=viewDirIn.mapContentSelected();
 		Map<String,ArrayList<String>> n=viewDirIn.mapContentSelected();
 
@@ -269,8 +269,8 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	@RequestMapping("/renameOut")
-	public String renameOut(Model model) {
+	@RequestMapping("/renameDirOut")
+	public String renameDirOut(Model model) {
 		Map<String,ArrayList<String>> m=viewDirOut.mapContentSelected();
 		Map<String,ArrayList<String>> n=viewDirOut.mapContentSelected();
 

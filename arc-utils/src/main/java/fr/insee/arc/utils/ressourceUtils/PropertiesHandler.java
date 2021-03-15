@@ -37,6 +37,7 @@ public class PropertiesHandler {
     private String storageDirectory;
 
     private String authorizedRoles;
+    private String disableDebugGui;
 
     public void initializeLog() {
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
@@ -267,6 +268,14 @@ public class PropertiesHandler {
 
 	public void setDatabaseRestrictedUsername(String databaseRestrictedUsername) {
 		this.databaseRestrictedUsername = databaseRestrictedUsername;
+	}
+
+	public String getDisableDebugGui() {
+		return disableDebugGui;
+	}
+
+	public void setDisableDebugGui(String disableDebugGui) {
+		this.disableDebugGui = disableDebugGui;
 	}
     
 }

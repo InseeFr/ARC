@@ -97,11 +97,6 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 		return basicAction(model, RESULT_SUCCESS);
 	}
 
-	@RequestMapping("/updateQuery")
-	public String updateQuery(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, viewQuery);
-	}
-
 	@RequestMapping("/sortQuery")
 	public String sortQuery(Model model) {
 		return sortVobject(model, RESULT_SUCCESS, viewQuery);
@@ -124,12 +119,6 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 			model.addAttribute("myQuery", myQuery);
 		}
 		return basicAction(model, RESULT_SUCCESS);
-	}
-
-
-	@RequestMapping("/updateTable")
-	public String updateTable(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, viewTable);
 	}
 
 	@RequestMapping("/sortTable")

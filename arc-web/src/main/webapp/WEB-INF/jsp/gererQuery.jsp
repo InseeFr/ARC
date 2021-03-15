@@ -31,7 +31,7 @@
 	 	<c:set var="view" value="${viewTable}"  scope="request"/>
 		<c:import url="tiles/templateVObject.jsp">
 			<c:param name="taille" value ="col-md4" />
-			<c:param name="ligneAdd" value="true" />
+			<c:param name="ligneAdd" value="false" />
 			<c:param name="btnSelect" value="true" />
 			<c:param name="btnSee" value="true" />
 			<c:param name="btnSort" value="true" />

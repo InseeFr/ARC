@@ -52,6 +52,15 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		
+		if (!properties.getDisableDebugGui().isEmpty())
+		{
+			// disable query debugging gui actions
+			http.authorizeRequests().antMatchers("/selectQuery/**","/sortQuery/**","/selectTable/**","/sortTable/**").denyAll();
+			
+			// disable file debugging gui actions
+			http.authorizeRequests().antMatchers("/selectFile/**","/**DirIn/**","/**DirOut**").denyAll();
+		}
+		
 		// disable https when keycloak file doesn't exist
 		if (!isKeycloakActive()) {
 			http.authorizeRequests().antMatchers("/**").permitAll();
