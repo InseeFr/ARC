@@ -30,7 +30,7 @@
 		<property name="version" value="${fr.insee.arc.version:v0}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="authorizedRoles" value="${fr.insee.arc.roles.admin:}"></property>
-		<property name="disableDebugGui" value="#{systemEnvironment['DISABLE_DEBUG_GUI'] ?: '${fr.insee.gui.debug.disable}' }"></property>
+		<property name="disableDebugGui" value="#{systemEnvironment['DISABLE_DEBUG_GUI'] ?: '${fr.insee.gui.debug.disable:}' }"></property>
 	</bean>
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>

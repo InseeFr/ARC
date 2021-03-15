@@ -52,6 +52,10 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>"+properties.getDisableDebugGui());
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>"+properties.getDatabaseUrl());
+		
+		
 		// disable debug gui if property is set
 		if (!properties.getDisableDebugGui().isEmpty())
 		{
