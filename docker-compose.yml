@@ -10,6 +10,7 @@ services:
         DATABASE_PASSWORD: password
         DATABASE_RESTRICTED_USER: arc_restricted
         APPLICATION_DIRECTORY: ./
+        DISABLE_DEBUG_GUI : y
     ports:
       - 8080:8080
     depends_on:
