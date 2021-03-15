@@ -32,7 +32,6 @@
 		<property name="authorizedRoles" value="${fr.insee.arc.roles.admin:}"></property>
 		<property name="disableDebugGui" value="#{systemEnvironment['DISABLE_DEBUG_GUI'] ?: '${fr.insee.gui.debug.disable}' }"></property>
 	</bean>
-	
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>
 
