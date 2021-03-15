@@ -28,9 +28,9 @@ public class GZArchiveLoader extends AbstractArchiveFileLoader {
 	this.filesInputStreamLoad = new FilesInputStreamLoad();
 
 	// Loading
-	this.filesInputStreamLoad.setTmpInxChargement(new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement), ApiReceptionService.READ_BUFFER_SIZE))));
-	this.filesInputStreamLoad.setTmpInxCSV(new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement), ApiReceptionService.READ_BUFFER_SIZE))));
-	this.filesInputStreamLoad.setTmpInxNormage(new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement), ApiReceptionService.READ_BUFFER_SIZE))));
+	this.filesInputStreamLoad.setTmpInxChargement(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
+	this.filesInputStreamLoad.setTmpInxCSV(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
+	this.filesInputStreamLoad.setTmpInxNormage(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
 
 	StaticLoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);
 	return filesInputStreamLoad;

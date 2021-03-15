@@ -19,7 +19,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
  * carry all the necessary inputstram.
  */
 public class FilesInputStreamLoad {
-    private static final Logger LOGGER = LogManager.getLogger(ZipDecompressor.class);
+    private static final Logger LOGGER = LogManager.getLogger(FilesInputStreamLoad.class);
 
     
     private InputStream tmpInxChargement ;
@@ -33,9 +33,9 @@ public class FilesInputStreamLoad {
     public FilesInputStreamLoad(File theFileToRead) throws Exception {
 	super();
 	try {
-	    this.tmpInxChargement =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead), ApiReceptionService.READ_BUFFER_SIZE));
-	    this.tmpInxNormage =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead), ApiReceptionService.READ_BUFFER_SIZE));
-	    this.tmpInxCSV =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead), ApiReceptionService.READ_BUFFER_SIZE));
+	    this.tmpInxChargement =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
+	    this.tmpInxNormage =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
+	    this.tmpInxCSV =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
 	} catch (FileNotFoundException e) {
 	    StaticLoggerDispatcher.error("Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
 	    throw e;

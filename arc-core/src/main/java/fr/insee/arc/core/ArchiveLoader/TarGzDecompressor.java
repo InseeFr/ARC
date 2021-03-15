@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -33,7 +32,7 @@ public class TarGzDecompressor implements ArchiveExtractor {
 	File dir = new File(archiveFile + ".dir");
 
 	
-	try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(archiveFile), ApiReceptionService.READ_BUFFER_SIZE)));
+	try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(archiveFile),ApiReceptionService.READ_BUFFER_SIZE));
 			TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
 	    TarArchiveEntry entry;
 

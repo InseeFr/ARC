@@ -1156,6 +1156,9 @@ public class NormageEngine {
 
 					}
 
+					// keep the record id r for partition ruels if needed
+					blocCreateNew.append(", "+table.get(rubrique.get(0)) + "$.r as r ");
+					
 					blocCreateNew.append("from ");
 
 					// bloc from
@@ -1599,6 +1602,11 @@ public class NormageEngine {
 						{
 							requete.append("\n where not exists (select from "+withBaseName+k+" v where u."+rubriquesUtiles.get(k)+"=v."+rubriquesUtiles.get(k)+") ");
 						}
+						// ajouter le n-uplet null, null, null
+						if (k==(rubriquesUtiles.size()-1))
+						{
+							requete.append("\n UNION ALL select "+ StringUtils.join(rubriquesNull,",")+" ");
+						}
 						
 						requete.append("\n ) ");
 					}
@@ -1680,10 +1688,29 @@ public class NormageEngine {
 	String blocCreate=ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
 	String blocInsert="\n insert into {table_destination} " +ManipString.substringAfterFirst(jointure, "\n insert into {table_destination} ");
 	
-	/* rework create block to get the number of record in partition if the rubrique is found */
-	if (blocCreate.contains("m_"+element))
+	// rework create block to get the number of record in partition if the rubrique is found
+	
+	// watch out the independance rules which can put the partition rubrique in another table than t_rubrique
+	String partitionTableName="";
+	String partitionIdentifier=" m_"+element+" ";
+	
+	if (blocCreate.contains(partitionIdentifier))
 	{
-		blocCreate=blocCreate+"select max(m_"+element+") from t_"+element+"";
+		// get the tablename
+		partitionTableName=
+				ManipString.substringBeforeFirst(
+						ManipString.substringAfterLast(
+								ManipString.substringBeforeLast(blocCreate, partitionIdentifier)
+						,"create temporary table ")
+					," as ");
+		
+		// if independance rule used for the element ($ sign), then use record id "r" as partition key
+		if (blocCreate.contains(" t_"+element+"$ "))
+		{
+			partitionIdentifier="r";
+		}
+		
+		blocCreate=blocCreate+"select max("+partitionIdentifier+") from "+partitionTableName;
 	}
 	else
 	{
@@ -1698,29 +1725,31 @@ public class NormageEngine {
 	// partition if and only if enough records
 	if (total>=minSize)
 	{	
-		// rename the table to split
-		StringBuilder bloc3=new StringBuilder("alter table t_"+element+" rename to all_t_"+element+";");
-		UtilitaireDao.get("arc").executeImmediate(connection,bloc3);
+		String partitionTableNameWithAllRecords="all_"+partitionTableName;
 
+		// rename the table to split
+		StringBuilder bloc3=new StringBuilder("alter table "+partitionTableName+" rename to "+partitionTableNameWithAllRecords+";");
+		UtilitaireDao.get("arc").executeImmediate(connection,bloc3);
+		
 		PreparedStatementBuilder bloc4=new PreparedStatementBuilder();
 		bloc4.append("\n set enable_nestloop=off;\n");
-		bloc4.append("\n drop table if exists t_"+element+";");
-		bloc4.append("\n create temporary table t_"+element+" as select * from all_t_"+element+" where m_"+element+">=?::int and m_"+element+"<?::int;");
-
+		bloc4.append("\n drop table if exists "+partitionTableName+";");
+		bloc4.append("\n create temporary table "+partitionTableName+" as select * from "+partitionTableNameWithAllRecords+" where "+partitionIdentifier+">=?::int and "+partitionIdentifier+"<?::int;");
 		bloc4.append(blocInsert);
 		bloc4.append("\n set enable_nestloop=on;\n");
 
 		
+		// iterate through chunks
 		int iterate=1;
 		do {
-		
-		bloc4.setParameters(Arrays.asList(""+(iterate),""+(iterate+chunkSize)));	
 			
-		iterate=iterate+chunkSize;
+			bloc4.setParameters(Arrays.asList(""+(iterate),""+(iterate+chunkSize)));	
 
-		UtilitaireDao.get("arc").executeRequest(connection, bloc4);
+			UtilitaireDao.get("arc").executeRequest(connection, bloc4);
 
-		} while (iterate<total);
+			iterate=iterate+chunkSize;
+			
+		} while (iterate<=total);
 
 	}
 	else
