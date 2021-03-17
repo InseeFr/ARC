@@ -52,10 +52,9 @@ import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
 
 /**
- * An abstract class that all the action class must extends. Contain general
- * method that all action class need ({@link ArcAction#initialize()} and
- * {@link ArcAction#generateDisplay()}), and specific one that all class have
- * to override
+ * An abstract class that all the controllers using VObject should extend. 
+ * Contains general methods called automatically before the controller (({@link ArcAction#initialize()}) or
+ * manually at the end ({@link ArcAction#generateDisplay()}).
  * 
  * 
  * @author Pépin Rémi
@@ -94,23 +93,26 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 
 	/**
-	 * The object htat will run the SQL query
+	 *  Used to execute SQL queries outside of VObjectService.
 	 */
 	@Autowired
 	@Qualifier("queryHandler")
 	private UtilitaireDAOIhmQueryHandler queryHandler;
 
 	/**
-	 * Contain a map with the table names
+	 * Contains a map with the table names
 	 */
 	protected BddTable bddTable;
 
 	/**
-	 * scope of the page, know which {@link VObjectService} is to display
+	 * The scope of the page defines the {@link VObject} to display
 	 */
 	private String scope;
 
+	/** Map linking the VObject and their initialization method.*/
 	private Map<VObject, Consumer<VObject>> mapVObject = new HashMap<>();
+
+	/** List listing the VObject in the order they should be initialized. */
 	private List<VObject> listVObjectOrder = new ArrayList<>();
 
 	/** State of the database */
@@ -125,20 +127,29 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	protected boolean isRefreshMonitoring = false;
 
     /**
-	 * Liste de tous les VObject sur lesquels des opérations standard seront
-	 * effectuées au chargement de la page.
+	 * Completes the received request parameters with the information 
+	 * that has been persisted in the session if available. 
+	 * Defines them as class attribute for convenience.
+	 * Associates each VObject with its initialization method in {@link mapVObject}.
+	 * 
+	 * <br/> Example :  
+	 * <pre>public void putAllVObjects(ClientModel arcModel) {
+	 * 	setViewClient(vObjectService.preInitialize(arcModel.getViewClient()));
+	 * 	putVObject(getViewClient(), t -> initializeClient());
+	 * }</pre>
 	 *
 	 */
 	protected abstract void putAllVObjects(T arcModel);
 
 	/**
-	 * @return the name of the current controller
+	 * @return the name of the current controller, mostly for logging
 	 */
 	protected abstract String getActionName();
 
-	/** Runs the generic initialization (status, VObject, ...) 
-	 * and adds some generic info to the model.
-	 * (VObject themselves are added to the model by ArcInterceptor)*/
+	/** Runs the generic initialization (status, scope, VObject,...) 
+	 * on all requests in ArcAction or ArcAction subclasses. 
+	 * Adds some generic information to the model.
+	 * VObject themselves are added to the model later by {@link ArcAction#generateDisplay()}.*/
 	@SuppressWarnings("unchecked")
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
@@ -180,6 +191,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     	extraModelAttributes(model);
     }
 
+	/** Fills the model with some attributes expected on (almost) all pages.*/
 	protected void refreshGenericModelAttributes(Model model) {
 		model.addAttribute("envMap", getEnvMap());
     	model.addAttribute("bacASable", getBacASable());
@@ -190,7 +202,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     	model.addAttribute("userManagementActive", properties.isLdapActive());
 	}
 	
-	/** Adds more controller-specific attributes the model.*/
+	/** Adds (if overridden) more attributes to the model.*/
 	public void extraModelAttributes(Model model) {
 		// nothing by default
 	}
@@ -247,7 +259,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 */
 	public String generateDisplay(Model model, String successUri) {
 		LoggerHelper.debug(LOGGER, "generateDisplay()", getScope());
-		// Initialize required VObjects
+		// Initialize required VObjects according to scope
 		boolean defaultWhenNoScope = true;
 		for (VObject vObject : getListVObjectOrder()) {
 			LoggerHelper.debug(LOGGER, "entry.getKey()", vObject.getTable());
@@ -279,124 +291,23 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	/**
-	 *
-	 * @param selection
-	 * @return true si une campagne est sélectionnée, false sinon
+	 * Finishes the request treatment by refreshing the {@link VObject} and returns the uri.
+	 * @param model the model that will be refreshed
+	 * @param uri URI to the JSP
+	 * @return uri
 	 */
-	protected boolean checkSizeOfSelection(VObject aVObect, HashMap<String, ArrayList<String>> selection) {
-		if (selection.size() > 0) {
-			LoggerHelper.debug(LOGGER, "La sélection est non vide.");
-			return true;
-		}
-		aVObect.setMessage("Aucune campagne sélectionnée. Sélectionnez une campagne.");
-		LoggerHelper.debug(LOGGER, "La sélection est vide.");
-		return false;
-	}
-
-	/**
-	 * Change le contenu d'une colonne de {@link #SIMPLE_DATE_FORMAT_IHM} vers
-	 * {@link #SIMPLE_DATE_FORMAT_SQL}.</br>
-	 * Attention, <code>colonne</code> peut être vide. TODO appelé la méthode
-	 * {@link #modifierContenuVObject(VObjectService, String, String)}
-	 * 
-	 * @param aVObject
-	 * @param colonne
-	 * @throws ParseException
-	 */
-	protected void modifierContenuDateVObject(HttpSession session, VObject aVObject, String colonne) throws ParseException {
-		String contenu = aVObject.mapInputFields().get(colonne).get(0);
-		LoggerHelper.debug(LOGGER, "contenu de la colonne ", colonne, ": ", contenu, "test : ",
-				StringUtils.isNotBlank(contenu));
-		if (StringUtils.isNotBlank(contenu)) {
-			String date = new SimpleDateFormat(EDateFormat.SIMPLE_DATE_FORMAT_SQL.getValue())
-					.format(new SimpleDateFormat(EDateFormat.SIMPLE_DATE_FORMAT_IHM.getValue()).parse(contenu));
-			((VObject) session.getAttribute(aVObject.getSessionName())).getDefaultInputFields().put(colonne, date);
-		}
-	}
-
-	/**
-	 * Change le contenu d'un VOject pour </br>
-	 * - remettre le contenu dans le bon format de la base.</br>
-	 * - mettre une valeur qui ne vient pas l'IHM
-	 * 
-	 * @param aVObject
-	 * @param colonne
-	 * @param val
-	 */
-	protected static void modifierContenuVObject(HttpSession session, VObject aVObject, String colonne, String val) {
-		LoggerHelper.debug(LOGGER, "mise de la valeur : ", val, "dans la colonne :", colonne);
-		((VObject) session.getAttribute(aVObject.getSessionName())).getDefaultInputFields().put(colonne, val);
-	}
-
-	/**
-	 * Méthode pour l'export d'une table en format csv zippé
-	 * 
-	 * @param aNomFichier
-	 * @param aNomTableImage
-	 * @param aMessageErreur
-	 *            en cas d'échec
-	 * @param withTypes
-	 *            défini si on met les types de données dans le header
-	 * @throws IOException
-	 */
-	public void downloadFichier(HttpServletResponse response, String aNomFichier, String aNomTableImage, String aMessageErreur, boolean withTypes)
-			throws IOException {
-		ZipOutputStream aZipOutputStream = null;
-		try {
-			response.reset();
-			response.setHeader("Content-Disposition", "attachment; filename=" + aNomFichier + "_export" + ".tar.gz");
-			aZipOutputStream = new ZipOutputStream(response.getOutputStream());
-			ZipEntry entry = new ZipEntry(aNomFichier + FileUtils.EXTENSION_CSV);
-			aZipOutputStream.putNextEntry(entry);
-			/*
-			 * Ecriture dans le fichier On écrit le header puis les types si @withTypes est
-			 * à true ensuite le contenu
-			 */
-			if (withTypes) {
-				GenericBean gb = getQueryHandler().execute(UtilitaireDao.EntityProvider.getGenericBeanProvider(),
-						FormatSQL.modeleDeDonneesTable(aNomTableImage),
-						UtilitaireDAOQueryHandler.OnException.THROW);
-				Map<String, ArrayList<String>> mapModeleDonnees = gb.mapContent();
-				StringBuilder headers = new StringBuilder();
-				headers.append(mapModeleDonnees.get("attname").stream().collect(Collectors.joining(";")) + "\n");
-				headers.append(mapModeleDonnees.get("typname").stream().collect(Collectors.joining(";")) + "\n");
-				byte[] bytes = headers.toString().getBytes(Charset.forName("UTF-8"));
-				aZipOutputStream.write(bytes);
-				UtilitaireDao.get(POOLNAME).exportingWithoutHeader(getQueryHandler().getWrapped(), aNomTableImage,
-						aZipOutputStream, true, false);
-			} else {
-				UtilitaireDao.get(POOLNAME).exporting(getQueryHandler().getWrapped(), aNomTableImage, aZipOutputStream,
-						true, false);
-			}
-			aZipOutputStream.closeEntry();
-		} catch (Exception ex) {
-			LoggerHelper.error(LOGGER, ex, aMessageErreur);
-		} finally {
-			if (aZipOutputStream != null) {
-				aZipOutputStream.close();
-			}
-			response.getOutputStream().flush();
-			response.getOutputStream().close();
-		}
-	}
-
-	/**
-	 * Methode which only update the {@link VObjectService}. Quit dummy.
-	 * 
-	 * @return
-	 */
-	protected String basicAction(Model model, String successUri) {
+	protected String basicAction(Model model, String uri) {
 		LoggerHelper.debug(LOGGER, String.join(" ** basicAction() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
-		return generateDisplay(model, successUri);
+		return generateDisplay(model, uri);
 	}
 
 	/**
-	 * Method to update a {@link VObjectService}. Change record in the database and the
-	 * gui
-	 * @param theVObjectToUpdate
-	 * 
-	 * @return
+	 * Updates a {@link VObject} in database, refreshes the info and finishes the request.
+	 * @param model 
+	 * @param successUri URI to the JSP
+	 * @param theVObjectToUpdate	 * 
+	 * @return 
 	 */
 	protected String updateVobject(Model model, String successUri, VObject theVObjectToUpdate) {
 		LoggerHelper.debug(LOGGER, String.join(" ** updateVobject() called by %s **",
@@ -406,9 +317,9 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	/**
-	 * Method to add a line in a {@link VObjectService}. Change record in the database and
-	 * the gui
-	 * 
+	 * Adds a line in a {@link VObject} in database, refreshes the info and finishes the request.
+	 * @param model 
+	 * @param successUri URI to the JSP	 * 
 	 * @param theVObjectToUpdate
 	 *            theVObjectToUpdate
 	 * @return
@@ -421,8 +332,9 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	/**
-	 * Method to delete a line in a {@link VObjectService}. Change reccord in the database
-	 * and the gui
+	 * Deletes a line in a {@link VObject} in database, refreshes the info and finishes the request.
+	 * @param model 
+	 * @param successUri URI to the JSP	
 	 * @param theVObjectToUpdate
 	 *            theVObjectToUpdate
 	 * 
@@ -441,9 +353,10 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	/**
-	 * Method to sort lines in a {@link VObjectService}. Change reccord order in the gui
-	 * @param theVObjectToUpdate
-	 *            theVObjectToUpdate
+	 * Sorts a {@link VObject} for display and finishes the request.
+	 * @param model 
+	 * @param successUri URI to the JSP	
+	 * @param theVObjectToSort
 	 * 
 	 * @return
 	 */
