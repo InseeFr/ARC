@@ -18,6 +18,6 @@ jobs:
       run: mvn package -Denv.arcVersion=${GITHUB_REF#refs/*/version-} -Denv.arcVersionDate=$(date +'%Y-%m-%d')
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "*/target/*.war,arc-batch/target/arc-batch.jar"
+        artifacts: "*/target/*.war,arc-batch/target/ArcMain.jar"
         body: "New automated release"
         token: ${{ secrets.GITHUB_TOKEN }}
