@@ -57,7 +57,6 @@ public class BatchARC {
 	 * - je lance initialisation
 	 * etc.
 	 */
-	private static String version="ARC 11.1.1 10/02/2020";
 	
 	@Autowired
 	PropertiesHandler properties;
@@ -216,7 +215,7 @@ public class BatchARC {
 		
 		do {
 		
-		message("Batch ARC "+version);
+		message("Batch ARC " + properties.getVersion() + " " + properties.getVersionDate());
 		
 		try{
 		
