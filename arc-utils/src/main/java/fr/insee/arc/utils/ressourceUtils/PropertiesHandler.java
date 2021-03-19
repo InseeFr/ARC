@@ -29,6 +29,7 @@ public class PropertiesHandler {
     private String batchArcEnvironment;
     /* Miscellaneous */
     private String version;
+    private String versionDate;
     private String application;
     private String tn;
     /* Directories */
@@ -201,6 +202,14 @@ public class PropertiesHandler {
     public void setVersion(String version) {
         this.version = version;
     }
+    
+    public String getVersionDate() {
+		return versionDate;
+	}
+    
+    public void setVersionDate(String versionDate) {
+		this.versionDate = versionDate;
+	}
 
 
     public String getApplication() {
