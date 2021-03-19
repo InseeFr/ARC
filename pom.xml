@@ -13,6 +13,8 @@
 		<project.struts2.version>2.5.20</project.struts2.version>
 		<project.log4j.version>2.13.3</project.log4j.version>
 		<project.spring.version>5.2.10.RELEASE</project.spring.version>
+		<env.arcVersion>${project.version}</env.arcVersion>
+		<env.arcVersionDate>unspecified</env.arcVersionDate>
 	</properties>
 	<url>https://github.com/InseeFr/ARC</url>
 
