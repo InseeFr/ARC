@@ -224,6 +224,7 @@
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="multiSelection" value ="true" />
 								<c:param name="otherButton">
 
 									<input
@@ -291,6 +292,7 @@
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="multiSelection" value ="true" />
 								<c:param name="otherButton">
 									<c:if
 										test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
@@ -359,6 +361,7 @@
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="multiSelection" value ="true" />
 								<c:param name="allowResize" value ="true" />
 								<c:param name="otherButton">
 									<c:if
@@ -424,6 +427,7 @@
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="multiSelection" value ="true" />
 								<c:param name="otherButton">
 									<c:if
 										test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
@@ -501,6 +505,7 @@
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="multiSelection" value ="true" />
 								<c:param name="allowResize" value ="true" />
 								<c:param name="otherButton">
 									<c:if
