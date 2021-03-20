@@ -178,7 +178,7 @@ public class ServiceRequeteSqlRegle {
 	    
 	    
 	    // insert into meta table
-	    requete.append("\n INSERT into "+TABLE_TEMP_META+" SELECT '"+regleId+"',");
+	    requete.append("\n INSERT into "+TABLE_TEMP_META+" SELECT * FROM (SELECT '"+regleId+"',");
     	
     	// ratio or count evaluation
     	requete.append("((count(*)::numeric");		
@@ -200,7 +200,7 @@ public class ServiceRequeteSqlRegle {
 	    requete.append(",'"+ mapRowProcessing.get(errorRowProcessing) +"'");
 
     	// calculate error only if there are any errors marked
-    	requete.append("\n FROM ins where EXISTS (SELECT FROM ins);");
+    	requete.append("\n FROM ins) zz WHERE EXISTS (SELECT FROM ins);");
     	
 		return 	requete.toString();
 	}
