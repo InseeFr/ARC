@@ -1073,7 +1073,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 									type.get(ConstanteBD.VERSION.getValue()))
 
 			));
-			requete.append(" ;");
+			requete.append(" order by "+ConstanteBD.ID_REGLE.getValue()+" ;");
 			
 			// delete the current rules before the copy
 			if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
