@@ -419,7 +419,7 @@ public class ChargeurClefValeur implements IChargeur {
     }
 
     @Override
-    public void excecution() throws Exception {
+    public void execution() throws Exception {
         chargerClefValeur();
 
     }
@@ -427,7 +427,7 @@ public class ChargeurClefValeur implements IChargeur {
     @Override
     public void charger() throws Exception {
         initialisation();
-        excecution();
+        execution();
         finalisation();
 
     }

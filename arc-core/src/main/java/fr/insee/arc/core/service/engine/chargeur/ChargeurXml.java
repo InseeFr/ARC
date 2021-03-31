@@ -98,7 +98,7 @@ public class ChargeurXml implements IChargeur{
      */
     public void executeEngine() throws Exception {
     	initialisation();
-    	excecution();
+    	execution();
     }
 
     @Override
@@ -171,8 +171,8 @@ public class ChargeurXml implements IChargeur{
     }
 
     @Override
-    public void excecution() throws Exception {
-        StaticLoggerDispatcher.info("** excecution**", LOGGER);
+    public void execution() throws Exception {
+        StaticLoggerDispatcher.info("** execution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
         // java.util.Date date= new java.util.Date();
@@ -232,7 +232,7 @@ public class ChargeurXml implements IChargeur{
     @Override
     public void charger() throws Exception {
         initialisation();
-        excecution();
+        execution();
         finalisation();
         
     }
