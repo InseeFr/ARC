@@ -934,21 +934,11 @@ public class ApiInitialisationService extends ApiService {
 
 	    	// Apply
 	    	expressions = expressionService.fetchOrderedExpressions(connexion, anExecutionEnvironment, ruleSet);
-	    	if(expressionService.isExpressionSyntaxPresent(connexion, anExecutionEnvironment, ruleSet)) {
-	    		PreparedStatementBuilder request = new PreparedStatementBuilder();
-	    		for (int i = 0; i < expressions.size(); i++) {
-	    			request.append("\n UPDATE "+anExecutionEnvironment+".mapping_regle ");
-	    			request.append("\n set expr_regle_col=replace(expr_regle_col, ");
-	    			request.append(request.quoteText("{@"+expressions.mapContent().get(ExpressionService.EXPR_NAME).get(i)+"@}"));
-	    			request.append(",");
-	    			request.append(request.quoteText(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(i)));
-	    			request.append(") ");
-	    			request.append("\n WHERE expr_regle_col like '%{@%@}%' ");
-	    			request.append("\n AND ");
-	    			request.append(ruleSet.getSqlEquals());
-	    			request.append(";");
-	    		}
-	    		UtilitaireDao.get(poolName).executeRequest(connexion, request);
+	    	if(expressionService.isExpressionSyntaxPresentInControl(connexion, anExecutionEnvironment, ruleSet)) {
+	    		UtilitaireDao.get(poolName).executeRequest(connexion, expressionService.applyExpressionsToControl(ruleSet, expressions, anExecutionEnvironment));
+	    	}
+	    	if(expressionService.isExpressionSyntaxPresentInMapping(connexion, anExecutionEnvironment, ruleSet)) {
+	    		UtilitaireDao.get(poolName).executeRequest(connexion, expressionService.applyExpressionsToMapping(ruleSet, expressions, anExecutionEnvironment));
 	    	}
     	}
 		

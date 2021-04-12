@@ -2,12 +2,8 @@ package fr.insee.arc.core.service.engine.mapping;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -101,14 +97,58 @@ public class ExpressionService implements IDbConstant {
 				);
 	}
 
-	public boolean isExpressionSyntaxPresent(Connection connexion, String environment, JeuDeRegle ruleSet) throws Exception {
+
+	public boolean isExpressionSyntaxPresentInControl(Connection connexion, String environment,
+			JeuDeRegle ruleSet) throws Exception {
+		return isExpressionSyntaxPresent(connexion, environment + ".controle_regle", "condition", ruleSet)
+				|| isExpressionSyntaxPresent(connexion, environment + ".controle_regle", "pre_action", ruleSet);
+	}
+
+
+	public boolean isExpressionSyntaxPresentInMapping(Connection connexion, String environment, JeuDeRegle ruleSet) throws Exception {
+		return isExpressionSyntaxPresent(connexion, environment + ".mapping_regle", "expr_regle_col", ruleSet);
+	}
+	
+
+
+	private boolean isExpressionSyntaxPresent(Connection connexion, String table, String field, JeuDeRegle ruleSet) throws Exception {
 		PreparedStatementBuilder request = new PreparedStatementBuilder();
 		request.append("select 1 from ");
-		request.append(environment);
-		request.append(".mapping_regle where ");
+		request.append(table);
+		request.append(" where ");
 		request.append(ruleSet.getSqlEquals());
-		request.append(" and expr_regle_col ~ '(?<=\\{@)(.+?)(?=@\\})'");
+		request.append(" and " + field + " ~ '(?<=\\{@)(.+?)(?=@\\})'");
 		return 	UtilitaireDao.get(poolName).hasResults(connexion, request);
+	}
+
+	/** Returns a request applying the given expressions to the control rules of the given ruleset.*/
+	public PreparedStatementBuilder applyExpressionsToControl(JeuDeRegle ruleSet, GenericBean expressions, String environment) {
+		return applyExpressionsTo(ruleSet, expressions, environment + ".controle_regle", "condition")
+				.append(applyExpressionsTo(ruleSet, expressions, environment + ".controle_regle", "pre_action"));
+	}
+
+
+	/** Returns a request applying the given expressions to the mapping rules of the given ruleset.*/
+	public PreparedStatementBuilder applyExpressionsToMapping(JeuDeRegle ruleSet, GenericBean expressions, String environment) {
+		return applyExpressionsTo(ruleSet, expressions, environment + ".mapping_regle", "expr_regle_col");
+	}
+
+
+	private PreparedStatementBuilder applyExpressionsTo(JeuDeRegle ruleSet, GenericBean expressions, String table, String field) {
+		PreparedStatementBuilder request = new PreparedStatementBuilder();
+		for (int i = 0; i < expressions.size(); i++) {
+			request.append("\n UPDATE "+ table + " ");
+			request.append("\n set " + field + "=replace(" + field + ", ");
+			request.append(request.quoteText("{@"+expressions.mapContent().get(ExpressionService.EXPR_NAME).get(i)+"@}"));
+			request.append(",");
+			request.append(request.quoteText(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(i)));
+			request.append(") ");
+			request.append("\n WHERE " + field + " like '%{@%@}%' ");
+			request.append("\n AND ");
+			request.append(ruleSet.getSqlEquals());
+			request.append(";");
+		}
+		return request;
 	}
 
 }
