@@ -510,6 +510,9 @@ public class ApiReceptionService extends ApiService {
 		for (ArrayList<String> fileInfo : archiveContent) {
 			if (erreur > 0) {
 				fileInfo.set(GENERIC_BEAN_HEADERS.indexOf(GB_STATE), TraitementEtat.KO.toString());
+				if (fileInfo.get(GENERIC_BEAN_HEADERS.indexOf(GB_REPORT)) == null){
+					fileInfo.set(GENERIC_BEAN_HEADERS.indexOf(GB_REPORT), TraitementRapport.INITIALISATION_FICHIER_OK_ARCHIVE_KO.toString());
+				}
 			} else {
 				fileInfo.set(GENERIC_BEAN_HEADERS.indexOf(GB_STATE), TraitementEtat.OK.toString());
 			}

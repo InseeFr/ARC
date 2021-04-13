@@ -14,17 +14,20 @@ public enum TraitementRapport {
     INITIALISATION_HORS_CALENDRIER("Validité hors calendrier. "), //
     INITIALISATION_CORRUPTED_ENTRY("Fichier corrompu. "), //
     INITIALISATION_CORRUPTED_ARCHIVE("Archive corrompue. "), //
+    INITIALISATION_FICHIER_OK_ARCHIVE_KO("Fichier OK dans archive KO."), //
     INITIALISATION_DUPLICATE("Doublon. "), //
     INITIALISATION_DUPLICATE_ARCHIVE("Archive contenant un doublon. "), //
     TOUTE_PHASE_ERREUR_SQL("Erreur SQL : "), TOUTE_PHASE_TAUX_ERREUR_SUPERIEUR_SEUIL(
             "Le fichier a été intégralement filtré"), TOUTE_PHASE_AUCUN_ENREGISTREMENT(
             "Le fichier ne possède aucun enregistrement pour cette phase. ");
+
     private TraitementRapport(String anExpression) {
         this.expression = anExpression;
     }
 
     private String expression;
 
+    @Override
     public String toString() {
         return this.expression;
     }
