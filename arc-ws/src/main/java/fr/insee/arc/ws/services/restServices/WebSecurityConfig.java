@@ -98,6 +98,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 			// Public
 			.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
 			// Semi-public
+			.antMatchers(HttpMethod.GET, "/healthcheck").authenticated()
 			.antMatchers(HttpMethod.GET, "/hello").authenticated()
 			.antMatchers(HttpMethod.GET, "/version").authenticated();
 			// Restricted
