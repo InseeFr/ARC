@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.servlet.LocaleResolver;
@@ -34,8 +35,8 @@ import fr.insee.arc.web.util.WebLoggerDispatcher;
 public class WebConfig implements WebMvcConfigurer {
 	
 	@Bean
-	public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() throws IOException {
-		return PropertySourcesHelper.defaultWebappPropertySourcesConfigurer();
+	public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(ConfigurableEnvironment env) throws IOException {
+		return PropertySourcesHelper.defaultWebappPropertySourcesConfigurer(env);
 	}
 
 	@Override
