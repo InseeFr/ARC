@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.restServices.hello;
+package fr.insee.arc.ws.services.restServices.misc;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +27,7 @@ public class HelloController {
 		
 		return new ResponseEntity<>("{\"msg\": \"Hello from ARC\"}", httpHeaders, HttpStatus.OK);
 	}
+	
 
 	
 }

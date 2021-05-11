@@ -6,23 +6,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
-import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.utils.ManipString;
 
 /**
  * Classe convertissant les fichier clef-valeurs en fichier xml
@@ -59,81 +57,62 @@ public class ChargeurClefValeur implements IChargeur {
         this.chargeurXml = new ChargeurXml(threadChargementService, fileName);
         this.envExecution = threadChargementService.getEnvExecution();
     }
+    
+    class KeyValueSubLoader implements Runnable {
+    	private Exception exceptionThrown = null;
+
+        @Override
+        public void run() {
+
+            try {
+                // On lit le fichier format et on en retire une map (rubrique, père)
+                ArbreFormat arbreFormat = new ArbreFormat(getNormeOk());
+                
+                // Lire le fichier d'entrée et le convertir en fichier XML. Pour ne pas écrire dans la mémoire on transforme un
+                // stream en un autre stream
+
+                clefValeurToXml(arbreFormat.getArbreFormat(), tmpInxChargement);
+            } catch (Exception e) {
+                exceptionThrown = e;
+            } finally {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        public Optional<Exception> getExceptionThrown() {
+        	return Optional.ofNullable(exceptionThrown);
+        }
+    }
 
     /**
-     * Méthode pour charger des fichiers clef-valeur
+     * Loads key-value files
      * 
-     * @param entrepot
-     * @param currentEntryChargementName
-     * @param tmpInxChargement
-     * @param normeOk
      * @throws Exception
      */
     private void chargerClefValeur() throws Exception {
-        String rapport = "";
-        StringBuilder requeteBilan = new StringBuilder();
-
         outputStream = new PipedOutputStream();
-        PipedInputStream input = null;
 
-        try {
-            input = new PipedInputStream(outputStream);
+        KeyValueSubLoader kRunnable = new KeyValueSubLoader();
+        try (PipedInputStream input = new PipedInputStream(outputStream)){
 
-            Thread KVtoXMLThread = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-
-
-
-                    try {
-                        // On lit le fichier format et on en retire une map (rubrique, père)
-                        ArbreFormat arbreFormat = new ArbreFormat(getNormeOk());
-                        
-                        // Lire le fichier d'entrée et le convertir en fichier XML. Pour ne pas écrire dans la mémoire on transforme un
-                        // stream en un autre stream
-
-                        clefValeurToXml(arbreFormat.getArbreFormat(), tmpInxChargement);
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            outputStream.close();
-                        } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
-
-            KVtoXMLThread.start();
+            Thread keyValtoXmlThread = new Thread(kRunnable);
+            keyValtoXmlThread.start();
             chargeurXml.setF(input);
 
             chargeurXml.charger();
-        } catch (Exception e) {
-
-            e.printStackTrace();
-            rapport = e.getMessage().replace("'", "''");
-            requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName, this.currentPhase, TraitementEtat.KO.toString(),
-                    rapport));
-            try {
-                UtilitaireDao.get("arc").executeBlock(this.connexion, requeteBilan);
-            } catch (SQLException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+        } catch (Exception e) {        	
+        	StaticLoggerDispatcher.error("An error occurred when loading a key value file", e, LOGGER);
+        	/** If an error occurred in the key-value to XML conversion, we assume this is the real error.*/
+            Optional<Exception> exceptionThrown = kRunnable.getExceptionThrown();
+            if (exceptionThrown.isPresent()) {
+            	 e = exceptionThrown.get();
             }
-        } finally {
-            try {
-                if(input!= null) input.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                rapport = e.getMessage().replace("'", "''");
-                requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName, this.currentPhase, TraitementEtat.KO.toString(),
-                        rapport));
-            }
+            throw e;
         }
     }
 
@@ -150,34 +129,34 @@ public class ChargeurClefValeur implements IChargeur {
         StaticLoggerDispatcher.info("** Conversion du fichier clef valeur en XML **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
         // contient la liste des pères pour l'élément précédent
-        ArrayList<String> listePeresRubriquePrecedante = new ArrayList<String>();
+        ArrayList<String> listePeresRubriquePrecedante = new ArrayList<>();
 
         // contient la liste des rubriques vues au niveau pour chaque balise encore ouverte.
         // clef : rubrique/ valeur : fils ouvert
-        HashMap<String, ArrayList<String>> mapRubriquesFilles = new HashMap<String, ArrayList<String>>();
+        HashMap<String, ArrayList<String>> mapRubriquesFilles = new HashMap<>();
 
         // Lecture du fichier contenant les données et écriture d'un fichier xml
-        InputStreamReader inputStreamReader = new InputStreamReader(tmpInx2, "ISO-8859-1");
+        InputStreamReader inputStreamReader = new InputStreamReader(tmpInx2, StandardCharsets.ISO_8859_1);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         // On lit le fichier ligne par ligne
         String ligne = bufferedReader.readLine();
 
         // initialisation du fichier
-        listePeresRubriquePrecedante = initialisationOutputStream(arbreFormat, mapRubriquesFilles, ligne, getOutputStream());
+        listePeresRubriquePrecedante = initialisationOutputStream(arbreFormat, mapRubriquesFilles, ligne);
 
         ligne = bufferedReader.readLine();
         // int nbLignesLues = 0;
         while (ligne != null) {
 
-            listePeresRubriquePrecedante = lectureLigne(arbreFormat, listePeresRubriquePrecedante, mapRubriquesFilles, ligne, getOutputStream());
+            listePeresRubriquePrecedante = lectureLigne(arbreFormat, listePeresRubriquePrecedante, mapRubriquesFilles, ligne);
             // nbLignesLues++;
             // System.out.println(ligne);
             ligne = bufferedReader.readLine();
 
         }
 
-        finaliserOutputStream(listePeresRubriquePrecedante, getOutputStream());
+        finaliserOutputStream(listePeresRubriquePrecedante);
         bufferedReader.close();
 
         java.util.Date endDate = new java.util.Date();
@@ -188,14 +167,14 @@ public class ChargeurClefValeur implements IChargeur {
      * Initialiser le xml + lit la première ligne pour ouvrir les premières balises
      * 
      * @param arbreFormat
-     * @param listePeresRubriqueCourante
      * @param mapRubriquesFilles
      * @param ligne
+     * @param listePeresRubriqueCourante
      * @param bw
      * @throws Exception
      */
     public ArrayList<String> initialisationOutputStream(HashMap<String, String> arbreFormat, HashMap<String, ArrayList<String>> mapRubriquesFilles,
-            String ligne, PipedOutputStream output) throws Exception {
+            String ligne) throws Exception {
         // ecriture de l'entete du fichier
 
         ecrireXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -214,7 +193,7 @@ public class ChargeurClefValeur implements IChargeur {
         if (!arbreFormat.containsKey(rubrique)) {
             throw new Exception("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
         }
-        ArrayList<String> listePeresRubriqueCourante = new ArrayList<String>();
+        ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
         // On remonte dans l'arbre des pères jusqu'à la racine
         while (rubrique != null) {
             listePeresRubriqueCourante.add(rubrique);
@@ -228,7 +207,7 @@ public class ChargeurClefValeur implements IChargeur {
             ecrireXML("<" + rubriqueCourante + ">\n");
 
             // on initialise la map des rubriques ouvertes
-            mapRubriquesFilles.put(rubriqueCourante, new ArrayList<String>());
+            mapRubriquesFilles.put(rubriqueCourante, new ArrayList<>());
         }
 
         String rubriqueCourante = listePeresRubriqueCourante.get(0);
@@ -245,16 +224,15 @@ public class ChargeurClefValeur implements IChargeur {
      * être ouvertes.
      * 
      * @param arbreFormat
-     * @param listePeresRubriqueCourante
      * @param listePeresRubriquePrecedante
      * @param mapRubriquesFilles
      * @param ligne
+     * @param listePeresRubriqueCourante
      * @param bw
      * @throws Exception
      */
     public ArrayList<String> lectureLigne(HashMap<String, String> arbreFormat,
-            ArrayList<String> listePeresRubriquePrecedante, HashMap<String, ArrayList<String>> mapRubriquesFilles, String ligne,
-            PipedOutputStream output)
+            ArrayList<String> listePeresRubriquePrecedante, HashMap<String, ArrayList<String>> mapRubriquesFilles, String ligne)
             throws Exception {
         String rubrique;
         String donnee;
@@ -277,7 +255,7 @@ public class ChargeurClefValeur implements IChargeur {
         if (!arbreFormat.containsKey(pere)) {
             throw new Exception("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
         }
-        ArrayList<String> listePeresRubriqueCourante = new ArrayList<String>();
+        ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
         while (pere != null) {
             listePeresRubriqueCourante.add(pere);
             pere = arbreFormat.get(pere);
@@ -294,7 +272,7 @@ public class ChargeurClefValeur implements IChargeur {
         // v <= <= v
         // listePereCourant (a.2.1, a.2, a, root)
 
-        if (listePeresRubriquePrecedante.size() != 0) {
+        if (!listePeresRubriquePrecedante.isEmpty()) {
             int i = 1;
 
             // on parcourt la listePerePrecedant pour fermer les balises
@@ -333,7 +311,7 @@ public class ChargeurClefValeur implements IChargeur {
                     mapRubriquesFilles.get(listePeresRubriqueCourante.get(j + 1)).add(rubriqueCourante);
                 } else {
                     // On ouvre la rubrique sans y mettre de donnée car ce n'est pas un fils "terminal"
-                    mapRubriquesFilles.put(rubriqueCourante, new ArrayList<String>());
+                    mapRubriquesFilles.put(rubriqueCourante, new ArrayList<>());
 
                     ecrireXML("<" + rubriqueCourante + ">\n");
 
@@ -351,7 +329,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @param bw
      * @throws IOException
      */
-    public void finaliserOutputStream(ArrayList<String> listePeresRubriqueCourante, PipedOutputStream output) throws IOException {
+    public void finaliserOutputStream(ArrayList<String> listePeresRubriqueCourante) throws IOException {
 
         String rubriqueCourante;
         for (int i = 1; i < listePeresRubriqueCourante.size(); i++) {
@@ -419,7 +397,7 @@ public class ChargeurClefValeur implements IChargeur {
     }
 
     @Override
-    public void excecution() throws Exception {
+    public void execution() throws Exception {
         chargerClefValeur();
 
     }
@@ -427,7 +405,7 @@ public class ChargeurClefValeur implements IChargeur {
     @Override
     public void charger() throws Exception {
         initialisation();
-        excecution();
+        execution();
         finalisation();
 
     }

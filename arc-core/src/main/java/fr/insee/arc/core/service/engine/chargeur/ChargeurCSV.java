@@ -593,8 +593,8 @@ public class ChargeurCSV implements IChargeur {
     }
 
     @Override
-    public void excecution() throws Exception {
-	StaticLoggerDispatcher.info("excecution", LOGGER);
+    public void execution() throws Exception {
+	StaticLoggerDispatcher.info("execution", LOGGER);
 
 	String rapport = "";
 	StringBuilder requeteBilan = new StringBuilder();
@@ -636,7 +636,7 @@ public class ChargeurCSV implements IChargeur {
     @Override
     public void charger() throws Exception {
         initialisation();
-        excecution();
+        execution();
         finalisation();
 
     }

@@ -10,7 +10,7 @@ public interface IChargeur {
      
     public void finalisation();
     
-    public void excecution() throws Exception;
+    public void execution() throws Exception;
     
     public void charger() throws Exception;
 

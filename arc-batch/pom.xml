@@ -24,6 +24,7 @@
 				<excludes>
 					<exclude>prod/*.properties</exclude>
 				</excludes>
+				<filtering>true</filtering>
 			</resource>
 		</resources>
 
@@ -41,30 +42,61 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>
-										fr.insee.arc.batch.ARCLauncher
-									</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-							<finalName>arc-batch</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>fr.insee.arc.batch.LanceurARC</mainClass>
+								</transformer>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<resource>META-INF/spring.handlers</resource>
+								</transformer>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<resource>META-INF/spring.schemas</resource>
+								</transformer>
+							</transformers>
+							<finalName>ArcMain</finalName>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
+
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-assembly-plugin</artifactId> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <phase>package</phase> -->
+			<!-- <goals> -->
+			<!-- <goal>single</goal> -->
+			<!-- </goals> -->
+			<!-- <configuration> -->
+			<!-- <archive> -->
+			<!-- <manifest> -->
+			<!-- <mainClass> -->
+			<!-- fr.insee.arc.batch.LanceurARC -->
+			<!-- </mainClass> -->
+			<!-- </manifest> -->
+			<!-- </archive> -->
+			<!-- <descriptorRefs> -->
+			<!-- <descriptorRef>jar-with-dependencies</descriptorRef> -->
+			<!-- </descriptorRefs> -->
+			<!-- <finalName>ArcMain</finalName> -->
+			<!-- <appendAssemblyId>false</appendAssemblyId> -->
+			<!-- </configuration> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- </plugin> -->
 		</plugins>
 	</build>
 

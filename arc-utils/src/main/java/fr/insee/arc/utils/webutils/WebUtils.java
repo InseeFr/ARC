@@ -1,17 +1,41 @@
 package fr.insee.arc.utils.webutils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fr.insee.arc.utils.dao.UtilitaireDao;
+
 public class WebUtils {
     
     private WebUtils() {
-	throw new IllegalStateException("Utility class");
+    	throw new IllegalStateException("Utility class");
     }
 
+    /** Returns a healthcheck description.*/
+    public static Map<String,Object> getHealthCheckStatus(){
+    	Map<String,Object> map = new HashMap<>();
+    	String status;
+    	if (UtilitaireDao.isConnectionOk("arc")) {
+    		status = "up";
+    	} else {
+    		status = "down";
+    	}
+    	map.put("status", status);
+
+    	Map<String, Object> details = new HashMap<>();
+    	map.put("details", details);
+    	HashMap<String, String> dbHealthCheck = new HashMap<>();
+		details.put("dataBaseHealthCheck", dbHealthCheck);
+		dbHealthCheck.put("status", status);
+		return map;
+    }
+    
     public static String getCookie(HttpServletRequest request, String key) {
         String value = "";
 

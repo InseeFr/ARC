@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 
 
@@ -21,12 +20,10 @@ public class HealthCheck {
 
 		StringBuilder responseContent=new StringBuilder();
 		
-		
-		try {
-			UtilitaireDao.get("arc", 1).executeRequest(null, new PreparedStatementBuilder("select true"));			
+		if (UtilitaireDao.isConnectionOk("arc")) {			
 			responseContent.append("Status : 0\n");
 			responseContent.append("Configuration is OK");
-		} catch (Exception e) {
+		} else {
 			responseContent.append("Status : 201\n");
 			responseContent.append("Database connection failed");
 		}

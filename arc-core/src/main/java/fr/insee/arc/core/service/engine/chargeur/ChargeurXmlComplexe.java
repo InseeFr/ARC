@@ -109,7 +109,7 @@ public class ChargeurXmlComplexe implements IChargeur{
      */
     public void executeEngine() throws Exception {
     	initialisation();
-    	excecution();
+    	execution();
     }
     
 
@@ -199,8 +199,8 @@ public class ChargeurXmlComplexe implements IChargeur{
     }
 
     @Override
-    public void excecution() throws Exception {
-        StaticLoggerDispatcher.info("** excecution**", LOGGER);
+    public void execution() throws Exception {
+        StaticLoggerDispatcher.info("** execution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
         // java.util.Date date= new java.util.Date();
@@ -252,7 +252,7 @@ public class ChargeurXmlComplexe implements IChargeur{
         this.jointure=handler.jointure;
         
         java.util.Date endDate = new java.util.Date();
-        StaticLoggerDispatcher.info("** excecution temps" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
+        StaticLoggerDispatcher.info("** execution temps" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
 
         
 
@@ -261,7 +261,7 @@ public class ChargeurXmlComplexe implements IChargeur{
     @Override
     public void charger() throws Exception {
         initialisation();
-        excecution();
+        execution();
         finalisation();
         
     }

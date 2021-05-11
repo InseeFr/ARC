@@ -197,6 +197,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     	model.addAttribute("bacASable", getBacASable());
     	model.addAttribute("isDataBaseOK", isDataBaseOk());
     	model.addAttribute("version", getVersion());
+    	model.addAttribute("versionDate", properties.getVersionDate());
     	model.addAttribute("isEnvProd", isEnvProd());
     	model.addAttribute("application", getApplication());
     	model.addAttribute("userManagementActive", properties.isLdapActive());

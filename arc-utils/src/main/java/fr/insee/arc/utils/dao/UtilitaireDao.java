@@ -7,14 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.lang.reflect.Method;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
@@ -27,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -40,7 +37,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.tar.TarEntry;
@@ -60,7 +56,6 @@ import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.SQLExecutor;
 
 /**
  *
@@ -188,6 +183,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			LoggerHelper.errorGenTextAsComment(getClass(), "initConnection()", LOGGER, e);
 		}
 		return null;
+	}
+
+	/** Returns true if the connection is valid. */
+	public static boolean isConnectionOk(String pool) {
+		try {
+			get(pool, 1).executeRequest(null, new PreparedStatementBuilder("select true"));
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	

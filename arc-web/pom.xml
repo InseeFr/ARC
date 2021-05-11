@@ -15,7 +15,7 @@
 	<name>ARC-WEB</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <webresources.directory>${project.build.directory}/${build.finalName}/</webresources.directory>
+        <webresources.directory>${project.build.directory}/${project.build.finalName}/</webresources.directory>
 	</properties>
 
 	<profiles>
