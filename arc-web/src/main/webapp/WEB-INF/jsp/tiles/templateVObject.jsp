@@ -197,7 +197,7 @@
 																</c:when>
 	
 																<c:when
-																	test="${view.headersVType[incr2.index].equals('datepicker')}'"
+																	test="${view.headersVType[incr2.index].equals('datepicker')}"
 																>
 																	<input type="text"
 																		class="datepicker full-width"
@@ -210,7 +210,7 @@
 																	/>
 																</c:when>
 																<c:when
-																	test="${view.headersVType[incr2.index].equals('multiSelect')}'"
+																	test="${view.headersVType[incr2.index].equals('multiSelect')}"
 																>
 																	<textarea name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
 																		cols="" rows=""
@@ -246,7 +246,7 @@
 													<td style="display: none;">
 														<c:choose>
 															<c:when
-																test="${view.headersVType[incr2.index].equals('text')}'"
+																test="${view.headersVType[incr2.index].equals('text')}"
 															>
 																<textarea id="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]"
 																	name="${view.sessionName}.content.t[${incr1.index}].d[${incr2.index}]" >${cellValue}</textarea>
