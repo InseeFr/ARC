@@ -166,7 +166,9 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         ;
         
         List<List<String>> resultTemp = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
-        
+        if (resultTemp.size() == 2) {
+        	throw new Exception("No mapping rules found for this ruleset.");
+        }
         ArrayList<ArrayList<String>> result= new ArrayList<>();
         
 
