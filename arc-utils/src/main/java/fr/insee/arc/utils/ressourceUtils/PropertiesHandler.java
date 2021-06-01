@@ -1,6 +1,7 @@
 package fr.insee.arc.utils.ressourceUtils;
 
 
+import java.io.File;
 import java.net.URL;
 
 import org.apache.logging.log4j.core.config.Configurator;
@@ -41,10 +42,16 @@ public class PropertiesHandler {
     private String disableDebugGui;
 
     public void initializeLog() {
-        URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
-
         // Using here an XML configuration
-        Configurator.initialize(null, log4jprops.toString());
+        URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
+        if (log4jprops != null) {
+        	Configurator.initialize(null, log4jprops.toString());
+        } else {
+        	File file = new File(logConfiguration);
+        	Configurator.initialize(null, file.getAbsolutePath());
+        }
+
+        
     }
 
 
