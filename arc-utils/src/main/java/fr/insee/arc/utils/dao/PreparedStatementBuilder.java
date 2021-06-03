@@ -79,10 +79,26 @@ public String sqlEqual(String val, String type) {
     }
 }
 
+/**
+ * Register and return the SQL bind variable placeholder
+ * @param p
+ * @return
+ */
 public String quoteText(String s)
 {
 	parameters.add(s);
 	return BIND_VARIABLE_PLACEHOLDER;
+}
+
+/**
+ * Return the sql escaped quoted string
+ * The bind variable is not registered
+ * @param p
+ * @return
+ */
+public String quoteTextWithoutBinding(String p)
+{
+	return "'"+p.replace("'", "''")+"'";
 }
 
 /**
@@ -137,7 +153,7 @@ public String getQueryWithParameters() {
 	
 	for (String p : this.parameters)
 	{
-		q = StringUtils.replaceOnce(q ,BIND_VARIABLE_PLACEHOLDER,"'"+p.replace("'", "''")+"'");
+		q = StringUtils.replaceOnce(q ,BIND_VARIABLE_PLACEHOLDER,quoteTextWithoutBinding(p));
 	}
 	
 	return q;
