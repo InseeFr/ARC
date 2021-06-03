@@ -11,7 +11,7 @@
 	<!-- LOGGER LIST -->
 
 	<Loggers>
-		<Logger name="fr.insee.arc" level="${env:ARC_LOGLEVEL:-trace}" additivity="false">
+		<Logger name="fr.insee.arc" level="${env:ARC_LOGLEVEL:-error}" additivity="false">
             <AppenderRef ref="Console" />
         </Logger>
 	    

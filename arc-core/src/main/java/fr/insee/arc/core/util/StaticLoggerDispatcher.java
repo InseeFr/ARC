@@ -1,8 +1,7 @@
 package fr.insee.arc.core.util;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -18,6 +17,11 @@ public class StaticLoggerDispatcher {
 //	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
+	public static void error(Exception e, Logger logger) {
+//		loggerDispatcher.error(message, logger);
+		LoggerHelper.error(logger,ExceptionUtils.getStackTrace(e));
+	}
+	
 	public static void error(Object message, Logger logger) {
 //		loggerDispatcher.error(message, logger);
 		LoggerHelper.error(logger,message);
@@ -26,7 +30,7 @@ public class StaticLoggerDispatcher {
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void error(Object message, Exception ex, Logger logger) {
 //		loggerDispatcher.error(message, ex, logger);
-		LoggerHelper.error(logger,message,ex);
+		LoggerHelper.error(logger,message,ExceptionUtils.getStackTrace(ex));
 	}
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */

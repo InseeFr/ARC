@@ -23,7 +23,6 @@ public class BatchConfig {
 		PropertySourcesHelper fetcher = new PropertySourcesHelper();
 		List<String> expectedPaths = new ArrayList<>();
 		String propertyPathVar = System.getProperty("properties.path");
-		System.out.println("eex" + System.getProperty("fr.insee.arc.batch.parametre.envExecution"));
 		if (propertyPathVar != null) {
 			expectedPaths.add("file:" + propertyPathVar  + "/*.properties");
 		}
