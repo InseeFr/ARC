@@ -10,7 +10,8 @@ import java.util.ArrayList;
 
 public class JeuDeRegle {
 
-    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    public static final String DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
+
 
     private String idNorme;
     private String periodicite;
@@ -23,7 +24,7 @@ public class JeuDeRegle {
     private String etat;
 
     public JeuDeRegle(String idNorme, String periodicite, String validiteInf, String validiteSup, String version) throws ParseException {
-        this(idNorme, periodicite, sdf.parse(validiteInf), sdf.parse(validiteSup), version);
+        this(idNorme, periodicite, new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).parse(validiteInf), new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).parse(validiteSup), version);
     }
 
     public JeuDeRegle(String idNorme, String periodicite, Date validiteInf, Date validiteSup, String version) {
@@ -62,7 +63,7 @@ public class JeuDeRegle {
     }
 
     public String getValiditeInfString() {
-        return sdf.format(this.validiteInf);
+        return new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).format(this.validiteInf);
     }
 
     public void setValiditeInf(Date validiteInf) {
@@ -84,7 +85,7 @@ public class JeuDeRegle {
     }
 
     public String getValiditeSupString() {
-        return sdf.format(this.validiteSup);
+        return new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).format(this.validiteSup);
     }
 
     public void setValiditeSup(Date validiteSup) {
