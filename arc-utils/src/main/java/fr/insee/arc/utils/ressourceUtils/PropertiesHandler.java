@@ -2,9 +2,29 @@ package fr.insee.arc.utils.ressourceUtils;
 
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URL;
+import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.appender.rolling.RollingFileManager;
+import org.apache.logging.log4j.core.appender.rolling.RolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
+import org.apache.logging.log4j.core.appender.rolling.TriggeringPolicy;
+import org.apache.logging.log4j.core.config.AppenderRef;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.springframework.stereotype.Component;
 
 @Component("properties")
@@ -23,6 +43,7 @@ public class PropertiesHandler {
     private String ldapDirectoryIdent;
     private String ldapDirectoryPassword;
     /* Log */
+    private String logDirectory;
     private String logConfiguration;
     /* Batch */
     private String batchParametersDirectory;
@@ -42,16 +63,65 @@ public class PropertiesHandler {
     private String disableDebugGui;
 
     public void initializeLog() {
+   	
+    	LoggerContext context;
+    	
         // Using here an XML configuration
         URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
         if (log4jprops != null) {
-        	Configurator.initialize(null, log4jprops.toString());
+        	context=Configurator.initialize(null, log4jprops.toString());
         } else {
         	File file = new File(logConfiguration);
-        	Configurator.initialize(null, file.getAbsolutePath());
-        }
-
+        	context=Configurator.initialize(null, file.getAbsolutePath());
+        } 
         
+        // replace ConsoleAppender with FileAppender if a logDirectory (fr.insee.arc.log.directory) is set
+        // TODO remove xml configuration ??
+        if (!logDirectory.isBlank())
+        {
+	        Configuration config = context.getConfiguration();
+	        @SuppressWarnings("deprecation")
+	        
+	        // create the rolling file appender
+	        // TODO remove deprecated method (should be easy as the deprecated method source code uses the new method)
+			Appender appender = RollingFileAppender
+	        		.createAppender(
+	        				this.logDirectory + File.separator+ "arc.log"
+	        				, this.logDirectory + File.separator+ "arc-%d{MM-dd-yyyy}.log"
+	        				, null
+	        				, "File"
+	        				, null
+	        				, null
+	        				, null
+	        				, TimeBasedTriggeringPolicy.newBuilder().withInterval(1).withModulate(true).build()
+	        				, null
+	        				, PatternLayout.newBuilder().withPattern("%d %p %c [%t] %m%n").build()
+	        				,null
+	        				,null
+	        				,null
+	        				,null
+	        				,config
+	        				);
+	      	appender.start();
+	      	config.addAppender(appender);
+	
+	      	// replace every console appender by the the rollingfileappender
+	      	Map<String, LoggerConfig> loggerConfig = config.getLoggers();
+	      	for (LoggerConfig l:loggerConfig.values())
+	      	{
+	      			for (Appender z:l.getAppenders().values())
+	      			{
+	      				if (z.getClass().getSimpleName().equals(ConsoleAppender.class.getSimpleName()))
+	      				{
+	      	      			l.removeAppender(z.getName());
+	      	      			l.addAppender(appender, null, null);
+	      				}
+	      			}
+	      	}
+	      	
+	      	// apply
+	      	context.updateLoggers();
+        }
     }
 
 
@@ -293,5 +363,17 @@ public class PropertiesHandler {
 	public void setDisableDebugGui(String disableDebugGui) {
 		this.disableDebugGui = disableDebugGui;
 	}
+
+
+	public String getLogDirectory() {
+		return logDirectory;
+	}
+
+
+	public void setLogDirectory(String logDirectory) {
+		this.logDirectory = logDirectory;
+	}
+	
+	
     
 }
