@@ -2,25 +2,14 @@ package fr.insee.arc.utils.ressourceUtils;
 
 
 import java.io.File;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.Map;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
-import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.RollingFileManager;
-import org.apache.logging.log4j.core.appender.rolling.RolloverStrategy;
 import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
-import org.apache.logging.log4j.core.appender.rolling.TriggeringPolicy;
-import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.LoggerConfig;
@@ -83,7 +72,8 @@ public class PropertiesHandler {
 	        @SuppressWarnings("deprecation")
 	        
 	        // create the rolling file appender
-	        // TODO remove deprecated method (should be easy as the deprecated method source code uses the new method)
+	        // TODO remove deprecated method
+	        // should be easy as the deprecated method source code uses the new method despite the new method doesn't implement default values....
 			Appender appender = RollingFileAppender
 	        		.createAppender(
 	        				this.logDirectory + File.separator+ "arc.log"
