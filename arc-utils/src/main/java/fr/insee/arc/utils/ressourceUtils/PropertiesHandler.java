@@ -66,7 +66,7 @@ public class PropertiesHandler {
         
         // replace ConsoleAppender with FileAppender if a logDirectory (fr.insee.arc.log.directory) is set
         // TODO remove xml configuration ??
-        if (!logDirectory.isBlank())
+        if (logDirectory!=null && !logDirectory.trim().equals(""))
         {
 	        Configuration config = context.getConfiguration();
 	        @SuppressWarnings("deprecation")
