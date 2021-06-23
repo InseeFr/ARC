@@ -25,6 +25,22 @@
 		</c:import>
 
 		<div class="container-fluid">
+			<div class="row" id="viewEnv">
+				<div class="col"">
+					<h2 class="env-description">${envMap[bacASable]}</h2>
+				<c:if test="${!isEnvProd}">
+					<textarea 
+						name="viewPilotageBAS.customValues['envDescription']"
+						placeholder="<spring:message code="gui.textarea.envDescription.placeholder"/>" class="env-description-field">${viewPilotageBAS.customValues['envDescription']}</textarea>
+					<button
+						class="btn btn-primary btn-sm ml-4"
+						type="submit"
+						doAction="updateEnvDescription"
+						scope="viewEnv;"><span class="fa fa-save">&nbsp;</span><spring:message code="gui.button.update"/></button>
+				</c:if>
+				</div>
+			</div>
+			<hr />
 			<div class="row">
 				<div class="col-md-7">
 					<div class="row">
@@ -47,7 +63,7 @@
 							<div class="col-md-8">
 								<input type="hidden" name="viewEntrepotBAS.sessionName" value="${viewEntrepotBAS.sessionName}" m="js" />
 								<h3>
-									<spring:message code="managementSandbox.loadFile"/> (${envMap[bacASable]})
+									<spring:message code="managementSandbox.loadFile"/>
 								</h3>
 								<div class="input-group my-3">
 									<div class="custom-file">

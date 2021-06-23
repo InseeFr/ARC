@@ -32,6 +32,8 @@ isenv boolean,
 mise_a_jour_immediate boolean, 
 CONSTRAINT ext_etat_jeuderegle_pkey PRIMARY KEY (id) 
 );
+ALTER TABLE arc.ext_etat_jeuderegle add column IF NOT exists env_description text;
+
 
 -- enregistrement des bacs à sable
 do $$
