@@ -368,12 +368,21 @@ th textarea {
 	padding: 0px;
 	margin: 0px;
 }
-
 textarea:not(.noselect ):focus {
 	background-image: none;
 	max-height: 100%;
 	border: 2px solid #009900;
 	padding: 0px;
+}
+h2.env-description {
+	display:inline-block;
+	margin-right:1em;
+	vertical-align: top;
+}
+textarea.env-description-field {
+	border:0;
+	height:2em;
+	width: 80%
 }
 
 textarea[name="consoleIhm"] {

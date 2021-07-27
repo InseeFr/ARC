@@ -46,7 +46,9 @@ public class ChargementBrutalTable {
     	StringBuilder requete=new StringBuilder();
     	int idLigne = nb_boucle * LIMIT_CHARGEMENT_BRUTAL;
     	String line = br.readLine();
-
+    	if (line == null) {
+    		throw new Exception("The file is empty.");
+    	}
     	boolean start=true;
     	while (line != null && idLigne < (nb_boucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
           if (start)

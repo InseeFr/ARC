@@ -52,6 +52,8 @@ import fr.insee.arc.web.util.VObject;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 
+	private static final String ENV_DESCRIPTION = "envDescription";
+
 	private static final String ENTRY_DATE = "date_entree";
 
 	private static final String ACTION_NAME = "EnvManagement";
@@ -127,6 +129,17 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				getViewPilotageBAS(), requete, 
 				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields,
 				this::reworkPilotageContent);
+		
+		PreparedStatementBuilder envQuery = new PreparedStatementBuilder();
+		envQuery.append("select env_description from arc.ext_etat_jeuderegle where replace(id,'.','_') = ");
+		envQuery.append(envQuery.quoteText(getBacASable()));
+		try {
+			String envDescription = UtilitaireDao.get(POOLNAME).getString(null, envQuery);
+			getViewPilotageBAS().setCustomValue(ENV_DESCRIPTION, envDescription);
+		} catch (SQLException e) {
+			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
+		}
+		
 	}
 	
 	private ArrayList<ArrayList<String>> reworkPilotageContent(ArrayList<ArrayList<String>> content) {
@@ -242,7 +255,22 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	public String selectPilotageBAS(Model model) {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
-
+	
+	@PostMapping("/updateEnvDescription")
+	public String updateEnvDescription(Model model) {
+		PreparedStatementBuilder envQuery = new PreparedStatementBuilder();
+		envQuery.append("update arc.ext_etat_jeuderegle set env_description = ");
+		envQuery.append(envQuery.quoteText(getViewPilotageBAS().getCustomValue(ENV_DESCRIPTION)));
+		envQuery.append("where replace(id,'.','_') = ");
+		envQuery.append(envQuery.quoteText(getBacASable()));
+	try {
+		UtilitaireDao.get(POOLNAME).executeRequest(null, envQuery);
+	} catch (SQLException e) {		
+		loggerDispatcher.error("Error in updateEnvDescription", e, LOGGER);
+	}
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+	
 	@RequestMapping("/sortPilotageBAS")
 	public String sortPilotageBAS(Model model) {		
 		this.vObjectService.sort(getViewPilotageBAS());
