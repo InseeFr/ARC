@@ -11,7 +11,7 @@
 	</c:import>
 </head>
 
-<body class='bg-light'>
+<body class="bg-body">
 <form spellcheck="false" action="selectQuery.action" method="POST">
 
 <div class="container-fluid">

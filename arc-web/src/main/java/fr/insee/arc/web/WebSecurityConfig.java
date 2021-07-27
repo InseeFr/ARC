@@ -39,9 +39,14 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
         AdapterDeploymentContextFactoryBean factoryBean;
         if (!keycloakFile.isEmpty()) {
              factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
-        } else if (!keycloakResource.isEmpty()) {
+             System.out.println(">>>>>>>>>>>>>>> 1");
+             } else if (!keycloakResource.isEmpty()) {
             factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
+            System.out.println(">>>>>>>>>>>>>>> 2");
+
         } else {
+            System.out.println(">>>>>>>>>>>>>>> 3");
+
         	return new AdapterDeploymentContext();
         }
         factoryBean.afterPropertiesSet();
@@ -51,6 +56,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		http.csrf().disable();
 		// disable debug gui if property is set
 		if (!properties.getDisableDebugGui().isEmpty())
 		{

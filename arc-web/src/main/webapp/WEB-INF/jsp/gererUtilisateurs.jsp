@@ -16,7 +16,7 @@
 	</c:import>
 </head>
 
-<body class="bg-light">
+<body class="bg-body">
 <form id="selectGererUtilisateurs"
 	action="selectGererUtilisateurs.action"
 	spellcheck="false"

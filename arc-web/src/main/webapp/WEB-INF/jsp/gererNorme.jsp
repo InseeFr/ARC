@@ -17,7 +17,7 @@
 </head>
 </c:if>
 
-<body class='bg-light'>
+<body class="bg-body">
 
 <form
 	spellcheck="false"
@@ -35,7 +35,7 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<div class="col-md-6">
+		<div class="col-md-5">
 			<!-- norm list -->
 			<c:set var="view" value="${viewNorme}"  scope="request"/>
 			<c:import url="tiles/templateVObject.jsp">

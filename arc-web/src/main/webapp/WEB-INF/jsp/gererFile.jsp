@@ -11,7 +11,7 @@
 	</c:import>	
 </head>
 
-<body class='bg-light'>
+<body class="bg-body">
 <form action="gererFile" spellcheck="false"method="post">
 <div class="container-fluid">
 	<div class="row">
@@ -24,6 +24,8 @@
 				<c:param name="btnSee" value="true" />
 				<c:param name="btnAdd" value="true" />
 				<c:param name="btnDelete" value="true" />
+				<c:param name="ligneFilter" value ="true" />
+				<c:param name="multiSelection" value ="true" />
 				<c:param name="checkbox" value="true" />
 				<c:param name="checkboxVisible" value="true" />
 				<c:param name="extraScopeSee" value ="viewDirIn;viewDirOut;" />
@@ -55,7 +57,7 @@
 					<input type="text" m="" action='select' name="dirOut" value="${dirOut}" />
 					<input id="viewDirOut.transfer" type="submit" doAction="transferDirOut" scope="viewDirIn;viewDirOut;" value="Transférer"></input>
 					<input id="viewDirOut.update" type="submit" doAction="renameDirOut" scope="viewDirIn;viewDirOut;" value="Mettre à jour" style="display:none;"></input>
-					<input id="viewDirOut.copy" type="submit" doAction="copyDirOut" scope="viewDirOut;viewDirOut;" value="Copier"></input>
+					<input id="viewDirOut.copy" type="submit" doAction="copyDirOut" scope="viewDirIn;viewDirOut;" value="Copier"></input>
 				</c:param>
 			</c:import>
 		</div>

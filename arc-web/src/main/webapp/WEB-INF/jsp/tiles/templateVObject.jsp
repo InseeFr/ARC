@@ -52,17 +52,22 @@
 <c:set var="allowResize" value="${param.allowResize}" />
 <div
 	id="${view.sessionName}"
-	class='${taille}'
+	class='bg-body ${taille}'
 >
+
 <%-- <input type="hidden" name="${view.sessionName}.sessionName" value="${view.sessionName}" m="js"> --%>
 	<c:if test="${view.isInitialized && view.isScoped}">
 		<div class="row">
 			<div class="col-md">
 				<div class="card  no-margin overflow-auto">
 					<div class="card-header bg-primary p-0">
-						<h3 class="text-white m-1" id="${view.sessionName}_description"><spring:message code="${view.title}"/></h3>
+<!-- 					onclick="var fullIdentifier='full';var fullCss= fullIdentifier + ' position-fixed min-vh-100 min-vw-100 top-0 left-0 zindex-1000';if ($('#${view.sessionName}').hasClass(fullIdentifier)){$('#${view.sessionName}').removeClass(fullCss);}else{$('#${view.sessionName}').addClass(fullCss);}" -->				
+						<h3 class="text-white m-1 float-left" id="${view.sessionName}_description"><spring:message code="${view.title}"/></h3>
+							<c:import url="tiles/template_help.jsp">
+								<c:param name="helpPage" value="/html/en/${view.sessionName}.html" />
+							</c:import>
 					</div>
-					<div class="card-body p-0">
+					<div class="card-body p-0 ${view.sessionName}">
 						<input name="${view.sessionName}.headerSortDLabel" type="hidden"
 						id="${view.sessionName}_headerSortDLabel" />
 						<table class="fixedHeader w-100 " aria-describedby="${view.sessionName}_description">
@@ -368,15 +373,10 @@
 		</div>
 		<!--            Les boutons pour faire défiler les pages de résultat -->
 
-		<div class="row mt-3">
+		<div class="row mt-3 ${view.sessionName}_collapse collapse show">
 			<!--             Les boutons d'action -->
 
-			<div class='col-md'>
-				<div
-					class="btn-text-sm"
-					role="group"
-					style="float: left;"
-				>
+				<div class="col btn-text-sm btn-width" role="group">
 					<button
 						id="${view.sessionName}.select"
 						class="btn btn-secondary btn-sm "
@@ -452,8 +452,7 @@
 				<c:import url="/WEB-INF/jsp/tiles/template_page_manager.jsp">
 					<c:param name="allowResize">${allowResize}</c:param>
 				</c:import>
-			</div>
 		</div>
-		<br>
+		<div class="mb-2"></div>
 	</c:if>
 </div>

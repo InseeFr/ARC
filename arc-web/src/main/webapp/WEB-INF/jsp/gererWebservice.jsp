@@ -12,7 +12,8 @@
 	</c:import>
 	</head>
 </c:if>
-<body>
+
+<body class="bg-body">
 
 	<form id="selectWebserviceContext" action="selectWebserviceContext.action"
 	spellcheck="false" method="post" enctype="multipart/form-data" accept-charset="UTF-8">

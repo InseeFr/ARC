@@ -1,21 +1,57 @@
 @charset "UTF-8";
 
-
 /* Override bootstrap css */
+
+.container-fluid {
+	padding-right: 0;
+    padding-left: 0;
+}
+
+.row {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.col, .col-1, .col-10, .col-11, .col-12, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-auto, .col-lg, .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-auto, .col-md, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-auto, .col-sm, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-auto, .col-xl, .col-xl-1, .col-xl-10, .col-xl-11, .col-xl-12, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-auto {
+	padding-right: 0.3rem;
+    padding-left: 0.3rem;
+}	
+
+.mt-4-5
+{
+	margin-top: 3rem!important;
+}
+
+
 
 .form-control{
 	width: auto;
 	font-size: inherit;
 }
 
-.bg-light {
-/*     background-color: #aabbfa!important; */
+.bg-body {
+/*	background-color: #000000 !important; */
 	background-color: #ffffff !important;
 }
 
-.navbar {
-	background-color: #eeeeee !important;	
+.text-body {
+/*     color: #f8f9fa!important; */
+    color: #000000!important;
 }
+    
+
+.top-0 {
+	top:0!important;
+}
+
+.left-0 {
+	left:0!important;
+}
+
+.zindex-1000 {
+	z-index:1000!important;
+}
+
 
 .btn-primary, .btn-secondary{
 	line-height:0.9rem;
@@ -35,10 +71,10 @@
 
 .btn-group-sm>.btn, .btn-sm {
     padding: .25rem .5rem;
-/*     font-size: .8rem; */
+    font-size: .8rem;
     line-height: 1.25;
     border-radius: .2rem !important;
-        margin: 0.25rem;
+    margin: 0.25rem;
 }
 
 li.nav-item {
@@ -58,7 +94,7 @@ li.nav-item.active {
 }
 
 .navbar-light .navbar-nav .nav-link {
-    color: #007bff;
+    color: #000022;
 }
 
 li.nav-item {
@@ -67,17 +103,17 @@ li.nav-item {
     margin-bottom: auto;
 }
 
-@media (min-width:768px) {
-	li.nav-item {
-	    width: 8rem;
-	}
-}
+/* @media (min-width:768px) { */
+/* 	li.nav-item { */
+/* 	    width: 8rem; */
+/* 	} */
+/* } */
 
-@media (min-width:992px) {
-	li.nav-item {
-	    width: 11rem;
-	}
-}
+/* @media (min-width:992px) { */
+/* 	li.nav-item { */
+/* 	    width: 11rem; */
+/* 	} */
+/* } */
 .navbar-brand {
     font-size: 2rem;
 }
@@ -87,26 +123,28 @@ li.nav-item {
 }
 
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-    color: #495057;
-    border-bottom: 2px solid #000000;
-    border-top: none;
-    border-left: none;
-    border-right: none;
+/*     color: #495057; */
+/*     border-bottom: 2px solid #000000; */
+/*     border-top: none; */
+/*     border-left: none; */
+/*     border-right: none; */
+	font-weight:bold;
 }
 
 .nav-tabs .nav-link {
     height: 1.6rem;
     padding-top: 0.2rem;
+    color: #000022;
 }
 
 .nav-link {
     display: block;
     padding: 0rem 0rem;
-	font-weight: 500;
+/* 	font-weight: 500; */
 }
 
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-    color: #495057;
+    color: #000022;
     background-color: transparent;
 }
 
@@ -118,6 +156,11 @@ li.nav-item {
 
 .bg-primary {
     background-color: #005baf!important;
+}
+
+.badge-primary
+{
+	background-color: #005baf!important;
 }
 
 /* End of bootstap revamp */
@@ -415,7 +458,7 @@ div#hourglass {
 	left: 0px;
 	width: 100%;
 	height: 100%;
-	z-index: 900;
+	z-index: 9000;
 	border: 0px;
 	margin: 0;
 	background-size: 5%;
@@ -708,7 +751,7 @@ input.onglet_global {
 
 table td,table th {
 	padding: 0px; /* 'cellpadding' equivalent */
-	font-size: small;
+	font-size: 0.75rem;
 }
 
 .fieldset_header td {
@@ -1076,4 +1119,32 @@ body.help {
 
 .help h2 {
 	margin:.75em;
+}
+
+.vh-menu-bar {
+	min-height:calc(100vh - 3rem);
+}
+
+.vw-menu-bar {
+	min-width:9rem;
+}
+
+.btn-width {
+	 min-width:21rem;
+}
+
+.custom-file {
+	 max-width:21rem;
+}
+
+.menu-box-style {
+    background-color: #fafafa;
+    border: 1px solid #f0f0f0;	
+}
+
+.arc-page-title {
+	display:inline-block;
+	align-self:center;
+	font-size: 120%;
+	font-weight:500;
 }

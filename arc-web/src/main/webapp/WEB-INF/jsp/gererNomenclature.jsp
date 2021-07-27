@@ -17,7 +17,7 @@
 	</head>
 </c:if>
 
-<body class='bg-light'>
+<body class="bg-body">
 
 <form
 	spellcheck="false"

@@ -6,14 +6,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="${pageContext.response.locale}">
 <head>
-	<title><spring:message code="header.manageEnvironment"/> - ${bacASable}</title>
+	<title><spring:message code="header.envManagement"/> - ${bacASable}</title>
 	
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/gererPilotageBAS.js" />
 	</c:import>
 </head>
 
-<body class="bg-light">
+<body class="bg-body">
 
 	<form spellcheck="false" id="selectPilotageBAS" action="selectPilotageBAS.action"
 		method="post"
@@ -47,7 +47,7 @@
 							<div class="col-md-8">
 								<input type="hidden" name="viewEntrepotBAS.sessionName" value="${viewEntrepotBAS.sessionName}" m="js" />
 								<h3>
-									<spring:message code="managementSandbox.loadFile"/> (${envMap[bacASable]})
+									<spring:message code="managementSandbox.loadFile"/>
 								</h3>
 								<div class="input-group my-3">
 									<div class="custom-file">

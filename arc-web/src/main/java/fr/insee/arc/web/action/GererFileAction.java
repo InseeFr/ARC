@@ -107,29 +107,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	@RequestMapping("/transferDirIn")
 	public String transferDirIn(Model model) {
-		Map<String,ArrayList<String>> m = viewDirIn.mapContentSelected();
-		if (!m.isEmpty()) {
-			for (String f: m.get("filename")) {
-				File fileIn = Paths.get(this.dirIn, f).toFile();
-				File fileOut = Paths.get(this.dirOut, f).toFile();
-				fileIn.renameTo(fileOut);
-			}
-		} else {
-			m = viewDirIn.mapContent();
-			while (!m.isEmpty()) {
-				for (int i=0;i<m.get("filename").size();i++) {
-					if (m.get(IS_DIRECTORY).get(i).equals("false"))
-					{
-						File fileIn = Paths.get(this.dirIn, m.get("filename").get(i)).toFile();
-						File fileOut = Paths.get(this.dirOut, m.get("filename").get(i)).toFile();
-						fileIn.renameTo(fileOut);
-					}
-				}
-				ArrayList<ArrayList<String>> listeFichier = getDirFiles(this.dirIn, this.viewDirIn);
-				this.vObjectService.initializeByList(viewDirIn, listeFichier, new HashMap<>());
-				m = viewDirIn.mapContent();
-			}
-		}
+		transfer(viewDirIn, this.dirIn, this.dirOut);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -172,27 +150,14 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	@RequestMapping("/deleteDirIn")
 	public String delDirIn(Model model) {
-		if (!this.dirIn.contains(REPERTOIRE_EFFACABLE))
+		if (delete(viewDirIn, this.dirIn, this.dirOut))
 		{
-			File f=new File(this.dirIn);
-			if (f.listFiles().length==0)
-			{
-				FileUtils.delete(this.dirIn);
-				this.dirIn=null;
-			}
-			else
-			{
-				this.viewDirIn.setMessage("Le répertoire doit être vide ou contenir "+REPERTOIRE_EFFACABLE+" pour etre effaçable. ");
-			}
-		}
-		else
-		{
-			FileUtils.deleteRecursive(this.dirIn, true);
 			this.dirIn=null;
+			model.addAttribute(DIR_IN, this.dirIn);
 		}
-		model.addAttribute(DIR_IN, this.dirIn);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
+
 
 
 	// private SessionMap session;
@@ -229,36 +194,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	@RequestMapping("/transferDirOut")
 	public String transferDirOut(Model model) {
-		Map<String,ArrayList<String>> m=viewDirOut.mapContentSelected();
-		if (!m.isEmpty())
-		{
-			for (String f:m.get("filename"))
-			{
-				File fileIn = new File(this.dirOut + f);
-				File fileOut = new File(this.dirIn + f);
-				fileIn.renameTo(fileOut);
-			}
-		}
-		else
-		{
-
-			m=viewDirOut.mapContent();
-			while (!m.isEmpty())
-			{
-				for (int i=0;i<m.get("filename").size();i++)
-				{
-					if (m.get(IS_DIRECTORY).get(i).equals("false"))
-					{
-						File fileIn = new File(this.dirOut + m.get("filename").get(i));
-						File fileOut = new File(this.dirIn + m.get("filename").get(i));
-						fileIn.renameTo(fileOut);
-					}
-				}
-				ArrayList<ArrayList<String>> listeFichier = getDirFiles(this.dirOut, this.viewDirOut);
-				this.vObjectService.initializeByList(viewDirOut, listeFichier, new HashMap<>());
-				m=viewDirOut.mapContent();
-			}
-		}
+		transfer(viewDirOut, this.dirOut, this.dirIn);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -304,40 +240,95 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 
 	@RequestMapping("/deleteDirOut")
 	public String delDirOut(Model model) {
-
-		if (!this.dirOut.contains(REPERTOIRE_EFFACABLE))
+		if (delete(viewDirOut, this.dirOut, this.dirIn))
 		{
-			File f=new File(this.dirOut);
-			if (f.listFiles().length==0)
-			{
-				FileUtils.delete(this.dirOut);
-				this.dirOut=null;
-			}
-			else
-			{
-				this.viewDirOut.setMessage("Le répertoire doit être vide ou contenir "+REPERTOIRE_EFFACABLE+" pour etre effaçable. ");
-			}
-		}
-		else
-		{
-			FileUtils.deleteRecursive(this.dirOut, true);
 			this.dirOut=null;
+			model.addAttribute(DIR_OUT, this.dirOut);
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
+	
+	private void transfer(VObject viewSource, String dirSource, String dirTarget)
+	{
+		Map<String, ArrayList<String>> m = viewSource.mapContentSelected();
+		if (!m.isEmpty()) {
+			for (String f : m.get("filename")) {
+				File fileSource = Paths.get(dirSource, f).toFile();
+				File fileTarget = Paths.get(dirTarget, f).toFile();
+				if (!fileSource.renameTo(fileTarget))
+				{
+					String errorMessage = "An error occured while tranfering the file "+fileSource;
+					loggerDispatcher.error(errorMessage, LOGGER);
+					viewSource.setMessage(errorMessage);
+				}
+			}
+		} else {
+			for (File fileSource : new File(dirSource).listFiles()) {
+				if (!fileSource.isDirectory()) {
+					File fileTarget = Paths.get(dirTarget, fileSource.getName()).toFile();
+					
+					if (!fileSource.renameTo(fileTarget))
+					{
+						String errorMessage = "An error occured while tranfering the file "+fileSource;
+						loggerDispatcher.error(errorMessage, LOGGER);
+						viewSource.setMessage(errorMessage);
+					}
+					
+				}
+			}
+		}
+	}
+	
+	private boolean delete(VObject viewSource, String dirSource, String dirTarget) {
+
+		Map<String, ArrayList<String>> m = viewSource.mapContentSelected();
+		if (!m.isEmpty()) {
+			for (String f : m.get("filename")) {
+				File fileSource = new File(dirSource + f);
+				if (fileSource.isFile()) {
+					if (!fileSource.delete())
+					{
+						String errorMessage = "An error occured while deleting the file "+fileSource;
+						loggerDispatcher.error(errorMessage, LOGGER);
+						viewSource.setMessage(errorMessage);
+					}
+				}
+			}
+			return false;
+		}
+		
+			File dirSourceFile = new File(dirSource);
+			if (dirSourceFile.listFiles().length == 0) {
+				FileUtils.delete(dirSource);
+				return true;
+			} else {
+				for (File f : dirSourceFile.listFiles()) {
+					if (f.isFile()) {
+						if (!f.delete())
+						{
+							String errorMessage = "An error occured while deleting the file "+f;
+							loggerDispatcher.error(errorMessage, LOGGER);
+							viewSource.setMessage(errorMessage);
+						}
+					}
+				}
+				return false;
+			}
+	}
+	
 	private void copy(VObject viewSource, String dirSource, String dirTarget) {
 		Map<String,ArrayList<String>> m = viewSource.mapContentSelected();
 		if (!m.isEmpty())
 		{
 			for (String f:m.get("filename"))
 			{
-				File fileIn = new File(dirSource + f);
-				File fileOut = new File(dirTarget + f);
+				File fileSource = new File(dirSource + f);
+				File fileTarget = new File(dirTarget + f);
 				try {
-					Files.copy(fileIn.toPath(), fileOut.toPath());
+					Files.copy(fileSource.toPath(), fileTarget.toPath());
 				} catch (IOException e) {
-					String errorMessage = "An error occured while copying the file";
+					String errorMessage = "An error occured while copying the file "+fileSource;
 					loggerDispatcher.error(errorMessage, e, LOGGER);
 					viewSource.setMessage(errorMessage);
 				}
@@ -345,27 +336,19 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		}
 		else
 		{
-			m=viewSource.mapContent();
-			while (!m.isEmpty())
+			for (File fileSource:new File(dirSource).listFiles())
 			{
-				for (int i=0;i<m.get("filename").size();i++)
+				if (!fileSource.isDirectory())
 				{
-					if (m.get(IS_DIRECTORY).get(i).equals("false"))
-					{
-						File fileIn = new File(dirSource + m.get("filename").get(i));
-						File fileOut = new File(dirTarget + m.get("filename").get(i));
-						try {
-							Files.copy(fileIn.toPath(), fileOut.toPath());
-						} catch (IOException e) {
-							String errorMessage = "An error occured while copying a file";
-							loggerDispatcher.error(errorMessage, e, LOGGER);
-							viewSource.setMessage(errorMessage);
-						}
+					File fileTarget = Paths.get(dirTarget, fileSource.getName()).toFile();
+					try {
+						Files.copy(fileSource.toPath(), fileTarget.toPath());
+					} catch (IOException e) {
+						String errorMessage = "An error occured while copying the file "+fileSource;
+						loggerDispatcher.error(errorMessage, e, LOGGER);
+						viewSource.setMessage(errorMessage);
 					}
 				}
-				ArrayList<ArrayList<String>> listeFichier = getDirFiles(dirSource, this.viewDirOut);
-				this.vObjectService.initializeByList(viewSource, listeFichier, new HashMap<>());
-				m = viewSource.mapContent();
 			}
 		}
 	}

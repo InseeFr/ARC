@@ -21,7 +21,7 @@
 
 </head>
 
-<body class='bg-light'>
+<body class="bg-body">
 	<form spellcheck="false" action="index" method="post"
 		enctype="multipart/form-data" accept-charset="UTF-8">
 		<c:import url="tiles/header.jsp">

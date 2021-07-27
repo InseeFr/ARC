@@ -18,6 +18,7 @@ import fr.insee.arc.core.service.engine.xsd.controls.EnumForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.IntForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.RegexForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.TimeForXsd;
+import fr.insee.arc.core.service.engine.xsd.groups.XsdChoice;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -71,11 +72,8 @@ public class XsdRulesRetrievalService {
 			Integer borneSup = ManipString.parseNumber(line.get(columns.get("borne_sup")));
 			switch (idClasse) {
 			case "CARDINALITE":
-				if (rubriquePere.equals("liasse")) {
-					System.out.println("");
-				}
 				if (position!=null) {
-					if (ManipString.compareStringWithNull("xs:choice", role)) {
+					if (ManipString.compareStringWithNull(XsdChoice.xsdChoiceIdentifier, role)) {
 						String[] complements = parseComplementsFrom(condition);
 						builder.addChoiceRelation(rubriquePere, rubriqueFils, borneInf, borneSup, complements, position);
 					} else {
