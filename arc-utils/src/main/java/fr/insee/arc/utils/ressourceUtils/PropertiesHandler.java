@@ -1,19 +1,6 @@
 package fr.insee.arc.utils.ressourceUtils;
 
 
-import java.io.File;
-import java.net.URL;
-import java.util.Map;
-
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.springframework.stereotype.Component;
 
 @Component("properties")
@@ -33,6 +20,7 @@ public class PropertiesHandler {
     private String ldapDirectoryPassword;
     /* Log */
     private String logDirectory;
+    private String logLevel;
     private String logConfiguration;
     /* Batch */
     private String batchParametersDirectory;
@@ -52,65 +40,15 @@ public class PropertiesHandler {
     private String disableDebugGui;
 
     public void initializeLog() {
-   	
-    	LoggerContext context;
+    	LogConfigurator logConf = new LogConfigurator(logConfiguration);
     	
-        // Using here an XML configuration
-        URL log4jprops = this.getClass().getClassLoader().getResource(logConfiguration);
-        if (log4jprops != null) {
-        	context=Configurator.initialize(null, log4jprops.toString());
-        } else {
-        	File file = new File(logConfiguration);
-        	context=Configurator.initialize(null, file.getAbsolutePath());
-        } 
+    	// if logDirectory (fr.insee.arc.log.directory) is set
+        if (logDirectory != null && !logDirectory.trim().isEmpty()) {
+	        logConf.configureRollingFileAppender(logDirectory);
+        }
         
-        // replace ConsoleAppender with FileAppender if a logDirectory (fr.insee.arc.log.directory) is set
-        // TODO remove xml configuration ??
-        if (logDirectory!=null && !logDirectory.trim().equals(""))
-        {
-	        Configuration config = context.getConfiguration();
-	        @SuppressWarnings("deprecation")
-	        
-	        // create the rolling file appender
-	        // TODO remove deprecated method
-	        // should be easy as the deprecated method source code uses the new method despite the new method doesn't implement default values....
-			Appender appender = RollingFileAppender
-	        		.createAppender(
-	        				this.logDirectory + File.separator+ "arc.log"
-	        				, this.logDirectory + File.separator+ "arc-%d{MM-dd-yyyy}.log"
-	        				, null
-	        				, "File"
-	        				, null
-	        				, null
-	        				, null
-	        				, TimeBasedTriggeringPolicy.newBuilder().withInterval(1).withModulate(true).build()
-	        				, null
-	        				, PatternLayout.newBuilder().withPattern("%d %p %c [%t] %m%n").build()
-	        				,null
-	        				,null
-	        				,null
-	        				,null
-	        				,config
-	        				);
-	      	appender.start();
-	      	config.addAppender(appender);
-	
-	      	// replace every console appender by the the rollingfileappender
-	      	Map<String, LoggerConfig> loggerConfig = config.getLoggers();
-	      	for (LoggerConfig l:loggerConfig.values())
-	      	{
-	      			for (Appender z:l.getAppenders().values())
-	      			{
-	      				if (z.getClass().getSimpleName().equals(ConsoleAppender.class.getSimpleName()))
-	      				{
-	      	      			l.removeAppender(z.getName());
-	      	      			l.addAppender(appender, null, null);
-	      				}
-	      			}
-	      	}
-	      	
-	      	// apply
-	      	context.updateLoggers();
+        if (logLevel != null && !logLevel.trim().isEmpty()) {
+        	logConf.configureLogLevel(logLevel);
         }
     }
 
@@ -220,7 +158,28 @@ public class PropertiesHandler {
         this.ldapDirectoryPassword = ldapDirectoryPassword;
     }
 
-    public String getLogConfiguration() {
+
+	public String getLogDirectory() {
+		return logDirectory;
+	}
+
+	
+	public void setLogDirectory(String logDirectory) {
+		this.logDirectory = logDirectory;
+	}
+	
+	
+    public String getLogLevel() {
+		return logLevel;
+	}
+
+
+	public void setLogLevel(String logLevel) {
+		this.logLevel = logLevel;
+	}
+
+
+	public String getLogConfiguration() {
         return logConfiguration;
     }
 
@@ -352,16 +311,6 @@ public class PropertiesHandler {
 
 	public void setDisableDebugGui(String disableDebugGui) {
 		this.disableDebugGui = disableDebugGui;
-	}
-
-
-	public String getLogDirectory() {
-		return logDirectory;
-	}
-
-
-	public void setLogDirectory(String logDirectory) {
-		this.logDirectory = logDirectory;
 	}
 	
 	
