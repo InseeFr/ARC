@@ -21,6 +21,7 @@ public class PropertiesHandler {
     /* Log */
     private String logDirectory;
     private String logLevel;
+    private String logFileName;
     private String logConfiguration;
     /* Batch */
     private String batchParametersDirectory;
@@ -44,7 +45,7 @@ public class PropertiesHandler {
     	
     	// if logDirectory (fr.insee.arc.log.directory) is set
         if (logDirectory != null && !logDirectory.trim().isEmpty()) {
-	        logConf.configureRollingFileAppender(logDirectory);
+	        logConf.configureRollingFileAppender(logDirectory, logFileName);
         }
         
         if (logLevel != null && !logLevel.trim().isEmpty()) {
@@ -176,6 +177,16 @@ public class PropertiesHandler {
 
 	public void setLogLevel(String logLevel) {
 		this.logLevel = logLevel;
+	}
+
+
+	public String getLogFileName() {
+		return logFileName;
+	}
+
+
+	public void setLogFileName(String logFileName) {
+		this.logFileName = logFileName;
 	}
 
 

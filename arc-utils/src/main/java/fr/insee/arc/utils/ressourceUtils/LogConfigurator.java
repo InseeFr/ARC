@@ -12,15 +12,12 @@ import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.RolloverStrategy;
 import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
 import org.apache.logging.log4j.core.appender.rolling.TriggeringPolicy;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.apache.logging.log4j.core.util.Booleans;
-import org.apache.logging.log4j.core.util.Integers;
 
 public class LogConfigurator {
 
@@ -39,12 +36,13 @@ public class LogConfigurator {
 
 	/** Replace ConsoleAppender with FileAppender 
 	 * @param logDirectory
+	 * @param logFileName 
 	 */
-	public void configureRollingFileAppender(String logDirectory) {
+	public void configureRollingFileAppender(String logDirectory, String logFileName) {
 		// TODO remove xml configuration ??
 
 		Configuration config = context.getConfiguration();
-		Appender appender = createRollingFileAppender(logDirectory, config);
+		Appender appender = createRollingFileAppender(config, logDirectory, logFileName);
 		appender.start();
 		config.addAppender(appender);
 
@@ -66,12 +64,13 @@ public class LogConfigurator {
 		context.updateLoggers();
 	}
 
-	/** Create the rolling file appender */
-	private RollingFileAppender createRollingFileAppender(String logDirectory, Configuration config) {
+	/** Create the rolling file appender 
+	 * @param logFileName */
+	private RollingFileAppender createRollingFileAppender(Configuration config, String logDirectory, String logFileName) {
 		return RollingFileAppender.newBuilder()
 			.setConfiguration(config)
-			.withFileName(logDirectory + File.separator+ "arc.log")
-			.withFilePattern(logDirectory + File.separator+ "arc-%d{MM-dd-yyyy}.log").setFilter((Filter) null).setIgnoreExceptions(Booleans.parseBoolean(null, true))
+			.withFileName(logDirectory + File.separator + logFileName + ".log")
+			.withFilePattern(logDirectory + File.separator + logFileName + "-%d{MM-dd-yyyy}.log").setFilter((Filter) null)
 			.setName("File")
 			.withBufferSize(8192)
 			.setLayout(
