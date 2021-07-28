@@ -13,3 +13,16 @@ addons:
 script: 
     - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then mvn clean verify ; fi'
     - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn clean verify sonar:sonar -Pcoverage ; fi'
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script:
+      bash deploy.sh latest
+    on:
+      branch: master
+  - provider: script
+    skip_cleanup: true
+    script:
+      bash deploy.sh $TRAVIS_TAG
+    on:
+      tags: true
