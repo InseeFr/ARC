@@ -15,7 +15,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Verify with Maven
+    - name: Verify with Maven and Sonar
       run: mvn verify sonar:sonar -Dsonar.projectKey=fr.insee:arc -Dsonar.organization=inseefr -Dsonar.host.url=https://sonarcloud.io
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
