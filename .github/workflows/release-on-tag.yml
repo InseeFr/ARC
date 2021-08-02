@@ -19,5 +19,5 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "*/target/*.war,arc-batch/target/ArcMain.jar"
-        body: "New automated release"
+        body: "New automated release. See [CHANGELOG](https://github.com/InseeFr/ARC/blob/master/CHANGELOG.md)"
         token: ${{ secrets.GITHUB_TOKEN }}
