@@ -20,5 +20,4 @@ jobs:
       with:
         artifacts: "*/target/*.war,arc-batch/target/ArcMain.jar"
         body: "New automated release"
-        draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
