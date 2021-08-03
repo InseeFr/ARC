@@ -49,10 +49,10 @@
 				<c:param name="ligneFilter" value ="true" />
 				<c:param name="checkbox" value ="true" />
 				<c:param name="checkboxVisible" value ="true" />
-				<c:param name="extraScopeAdd" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeDelete" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeUpdate" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeSee" value ="viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeAdd" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeDelete" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeUpdate" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeSee" value ="viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
 	
 			</c:import>
 		</div>
@@ -70,10 +70,10 @@
 				<c:param name="ligneFilter" value ="true" />
 				<c:param name="checkbox" value ="true" />
 				<c:param name="checkboxVisible" value ="true" />
-				<c:param name="extraScopeAdd" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeDelete" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeUpdate" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-				<c:param name="extraScopeSee" value ="viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+				<c:param name="extraScopeAdd" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeDelete" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeUpdate" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeSee" value ="viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
 	
 			</c:import>
 		</div>
@@ -91,9 +91,10 @@
 			<c:param name="ligneFilter" value ="true" />
 			<c:param name="checkbox" value ="true" />
 			<c:param name="checkboxVisible" value ="true" />
-			<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-			<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
-			<c:param name="extraScopeSee" value ="viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;viewModuleButtons;" />
+			<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeDelete" value ="-viewModules;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeSee" value ="viewModules;viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;viewExpression;-viewJeuxDeReglesCopie;" />
 			<c:param name="otherButton">
 				<button
 					class="btn btn-primary btn-sm"
@@ -107,111 +108,20 @@
 		</div>
 	</div>
 
+	<div class="row">
+		<div class="col">
+			<!-- rule set list -->
+			<c:set var="view" value="${viewModules}"  scope="request"/>
+			<c:import url="tiles/templateTabnav.jsp">
+				<c:param name="extraScopeSee" value ="viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;viewExpression;-viewJeuxDeReglesCopie;" />
+			</c:import>
+		</div>
+	</div>
+
 		<div class="row">
 			<div class="col">
-				<div  id="viewModuleButtons" class="col-md">
-					<!-- tab to choose the module -->
-				<c:if test="${viewChargement.isInitialized==true&&viewChargement.isScoped==true
-				|| viewNormage.isInitialized==true&&viewNormage.isScoped==true
-				|| viewControle.isInitialized==true&&viewControle.isScoped==true
-				|| viewFiltrage.isInitialized==true&&viewFiltrage.isScoped==true
-				|| viewMapping.isInitialized==true&&viewMapping.isScoped==true
-				|| viewExpression.isInitialized==true&&viewExpression.isScoped==true
-				 }">
-					<ul
-						class="nav nav-tabs mb-2"
-						id="chooseModule"
-						role="tablist"
-					>
-					
-					
-						<li class="nav-item"><a
-								class="nav-link ${viewChargement.isInitialized==true&&viewChargement.isScoped==true ? 'active' : '' }"
-								id="load-tab"
-								data-toggle="tab"
-								href="#load"
-								role="tab"
-								aria-controls="load"
-								aria-selected="true"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
-							>
-								<spring:message code="normManagement.load"/>
-							</a></li>
-						<li class="nav-item"><a
-								class="nav-link ${viewNormage.isInitialized==true&&viewNormage.isScoped==true ? 'active' : '' }"
-								id="structurize-tab"
-								data-toggle="tab"
-								href="#structurize"
-								role="tab"
-								aria-controls="structurize"
-								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
-							>
-								<spring:message code="normManagement.structurize"/>
-							</a></li>
-						<li class="nav-item"><a
-								class="nav-link ${viewControle.isInitialized==true&&viewControle.isScoped==true ? 'active' : '' }"
-								id="control-tab"
-								data-toggle="tab"
-								href="#control"
-								role="tab"
-								aria-controls="control"
-								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
-							>
-								<spring:message code="normManagement.control"/>
-							</a></li>
-						<li class="nav-item"><a
-								class="nav-link ${viewFiltrage.isInitialized==true&&viewFiltrage.isScoped==true ? 'active' : '' }"
-								id="filter-tab"
-								data-toggle="tab"
-								href="#filter"
-								role="tab"
-								aria-controls="filter"
-								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
-							>
-								<spring:message code="normManagement.filter"/>
-							</a></li>
-						<li class="nav-item"><a
-								class="nav-link ${viewMapping.isInitialized==true&&viewMapping.isScoped==true ? 'active' : '' }"
-								id="mapmodel-tab"
-								data-toggle="tab"
-								href="#mapmodel"
-								role="tab"
-								aria-controls="mapmodel"
-								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;viewMapping;-viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
-							>
-								<spring:message code="normManagement.mapmodel"/>
-							</a></li>
-							<li class="nav-item font-smaller" style="margin-left:auto"><a
-								class="nav-link ${viewExpression.isInitialized==true&&viewExpression.isScoped==true ? 'active' : '' }"
-								id="expressions-tab"
-								data-toggle="tab"
-								href="#expressions"
-								role="tab"
-								aria-controls="expressions"
-								aria-selected="false"
-								onclick="$('[id=\x22viewJeuxDeRegles.select\x22]').attr('scope','-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;viewExpression;-viewJeuxDeReglesCopie;'); $('[id=\x22viewJeuxDeRegles.select\x22]').click();"
-							>
-								<spring:message code="normManagement.expression"/>
-							</a></li>
-					</ul>
-				</c:if>
 
-					<!-- The content of the tab -->
-					<div
-						class="tab-content mt-3"
-						id="tabVOjectRulesSet"
-					>
 						<%-- LOAD PANEL --%>
-						<div
-							
-							id="load"
-							role="tabpanel"
-							aria-labelledby="load-tab"
-						>
 							<c:set var="view" value="${viewChargement}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">
 								<c:param name="btnSelect" value ="true" />
@@ -263,23 +173,15 @@
 												id="viewChargement.import"
 												type="submit"
 												doAction="importChargement"
-												scope="viewModuleButtons;viewChargement;"
+												scope="viewChargement;"
 												multipart="true"
 											><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 										</div>
 									</div>
-
 								</c:param>
-
 							</c:import>
-						</div>
 
 						<%-- STRUCTURIZE PANEL --%>
-						<div
-							id="structurize"
-							role="tabpanel"
-							aria-labelledby="structurize-tab"
-						>
 							<c:set var="view" value="${viewNormage}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">
 								<c:param name="btnSelect" value ="true" />
@@ -332,23 +234,16 @@
 													id="viewNormage.import"
 													type="submit"
 													doAction="importNormage"
-													scope="viewModuleButtons;viewNormage;"
+													scope="viewNormage;"
 													multipart="true"
 												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 											</div>
 										</div>
 									</c:if>
 								</c:param>
-
 							</c:import>
-						</div>
 
 						<%-- CONTROL TAB --%>
-						<div
-							id="control"
-							role="tabpanel"
-							aria-labelledby="control-tab"
-						>
 							<c:set var="view" value="${viewControle}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">
 								<c:param name="btnSelect" value ="true" />
@@ -401,22 +296,16 @@
 													class="btn btn-primary btn-sm"
 													type="submit"
 													doAction="importControle"
-													scope="viewModuleButtons;viewControle;"
+													scope="viewControle;"
 													multipart="true"
 												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 											</div>
 										</div>
 									</c:if>
 								</c:param>
-
 							</c:import>
-						</div>
+							
 						<%-- FILTER TAB --%>
-						<div
-							id="filter"
-							role="tabpanel"
-							aria-labelledby="filter-tab"
-						>
 							<c:set var="view" value="${viewFiltrage}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">
 								<c:param name="btnSelect" value ="true" />
@@ -478,23 +367,16 @@
 													id="viewFiltrage.import"
 													type="submit"
 													doAction="importFiltrage"
-													scope="viewModuleButtons;viewFiltrage;"
+													scope="viewFiltrage;"
 													multipart="true"
 												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 											</div>
 										</div>
 									</c:if>
 								</c:param>
-
 							</c:import>
-						</div>
 
 						<%-- MAPPING TAB --%>
-						<div
-							id="mapmodel"
-							role="tabpanel"
-							aria-labelledby="mapmodel-tab"
-						>
 							<c:set var="view" value="${viewMapping}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">
 								<c:param name="btnSelect" value ="true" />
@@ -557,23 +439,16 @@
 													id="viewMapping.import"
 													type="submit"
 													doAction="importMapping"
-													scope="viewModuleButtons;viewMapping;"
+													scope="viewMapping;"
 													multipart="true"
 												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 											</div>
 										</div>
 									</c:if>
 								</c:param>
-
 							</c:import>
-						</div>
+							
 						<%-- EXPRESSIONS TAB --%>
-						<div
-							id="expressions"
-							role="tabpanel"
-							aria-labelledby="expressions-tab"
-						>
-						</div>
 						<c:set var="view" value="${viewExpression}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">
 								<c:param name="btnSelect" value ="true" />
@@ -626,7 +501,7 @@
 													id="viewExpression.import"
 													type="submit"
 													doAction="importExpression"
-													scope="viewModuleButtons;viewExpression;"
+													scope="viewExpression;"
 													multipart="true"
 												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
 											</div>
@@ -634,39 +509,27 @@
 									</c:if>
 								</c:param>
 							</c:import>
-					</div>
-
-
-
-
 
 					<%-- Modal to rule copy --%>
-								<div>
-
-									<c:set var="view" value="${viewJeuxDeReglesCopie}"  scope="request"/>
-									<c:import url="tiles/templateVObject.jsp">
-										<c:param name="btnSee" value ="true" />
-										<c:param name="btnSelect" value ="true" />
-										<c:param name="btnSort" value ="true" />
-										<c:param name="ligneFilter" value ="true" />
-										<c:param name="checkbox" value ="true" />
-										<c:param name="checkboxVisible" value ="true" />
-										<c:param name="otherButton">
-											<input
-												class="btn btn-primary btn-sm"
-												id="viewJeuxDeReglesCopie.copie"
-												type="submit"
-												doAction="copieJeuxDeRegles"
-												scope="-viewJeuxDeReglesCopie;${viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']};"
-												value="<spring:message code="gui.button.copy"/>"
-											></input>
-										</c:param>
-
-									</c:import>
-
-
-								</div>
-				</div>
+							<c:set var="view" value="${viewJeuxDeReglesCopie}"  scope="request"/>
+							<c:import url="tiles/templateVObject.jsp">
+								<c:param name="btnSee" value ="true" />
+								<c:param name="btnSelect" value ="true" />
+								<c:param name="btnSort" value ="true" />
+								<c:param name="ligneFilter" value ="true" />
+								<c:param name="checkbox" value ="true" />
+								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="otherButton">
+									<input
+										class="btn btn-primary btn-sm"
+										id="viewJeuxDeReglesCopie.copie"
+										type="submit"
+										doAction="copieJeuxDeRegles"
+										scope="-viewJeuxDeReglesCopie;${viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']};"
+										value="<spring:message code="gui.button.copy"/>"
+									></input>
+								</c:param>
+							</c:import>
 			</div>
 		</div>
 	</div>

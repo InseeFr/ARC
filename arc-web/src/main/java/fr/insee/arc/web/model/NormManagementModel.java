@@ -8,6 +8,7 @@ import fr.insee.arc.web.model.viewobjects.ViewFiltrage;
 import fr.insee.arc.web.model.viewobjects.ViewJeuxDeRegles;
 import fr.insee.arc.web.model.viewobjects.ViewJeuxDeReglesCopie;
 import fr.insee.arc.web.model.viewobjects.ViewMapping;
+import fr.insee.arc.web.model.viewobjects.ViewModules;
 import fr.insee.arc.web.model.viewobjects.ViewNormage;
 import fr.insee.arc.web.model.viewobjects.ViewNorme;
 import fr.insee.arc.web.util.VObject;
@@ -23,6 +24,9 @@ public class NormManagementModel implements ArcModel {
 	// The ruleset view
 	private VObject viewJeuxDeRegles;
 
+	// The module selection view
+	private VObject viewModules;
+	
 	// The load rules view
 	private VObject viewChargement;
 
@@ -49,6 +53,7 @@ public class NormManagementModel implements ArcModel {
 		this.viewCalendrier = new ViewCalendrier();
 		this.viewJeuxDeRegles = new ViewJeuxDeRegles();
 		this.viewChargement = new ViewChargement();
+		this.viewModules = new ViewModules();
 		this.viewNormage = new ViewNormage();
 		this.viewControle = new ViewControle();
 		this.viewFiltrage = new ViewFiltrage();
@@ -78,6 +83,14 @@ public class NormManagementModel implements ArcModel {
 
 	public void setViewJeuxDeRegles(VObject viewRulesSet) {
 		this.viewJeuxDeRegles = viewRulesSet;
+	}
+	
+	public VObject getViewModules() {
+		return viewModules;
+	}
+
+	public void setViewModules(VObject viewModules) {
+		this.viewModules = viewModules;
 	}
 
 	public VObject getViewChargement() {

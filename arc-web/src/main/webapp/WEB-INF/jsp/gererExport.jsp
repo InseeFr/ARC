@@ -34,10 +34,9 @@
 
 
 	<div class="container-fluid">
+		<c:import url="/WEB-INF/jsp/tiles/template_environment.jsp"></c:import>
 		<div class="row">
-				<!-- left column -->
-				<div class="col-md-12 border-right" style="margin-top: 2.25rem;"
-				>
+				<div class="col-md-12 border-right">
 					<div class="row">
 						<div class="col-md">
 							<!-- norm list -->

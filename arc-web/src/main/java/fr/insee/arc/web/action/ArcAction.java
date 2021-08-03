@@ -1,9 +1,5 @@
 package fr.insee.arc.web.action;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,14 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -32,17 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.LoggerDispatcher;
-import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.files.FileUtils;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler;
 import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.dao.IndexDao;
 import fr.insee.arc.web.model.ArcModel;
@@ -156,7 +140,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     		@RequestParam(required = false) String bacASable,
 			@RequestParam(required = false) String scope) {
 		LoggerHelper.trace(LOGGER, getActionName());
-		
+				
 		if (getActionName().equals(IndexAction.ACTION_NAME))
 		{
 	    	// run the initialization script

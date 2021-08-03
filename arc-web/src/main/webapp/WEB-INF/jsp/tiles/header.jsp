@@ -27,7 +27,6 @@
 	</div>
 	<span class="badge badge-light arc-page-title">
 		<spring:message code="header.${param.currentPage}"/>
-		<c:if test="${param.currentPage=='envManagement' || param.currentPage=='export'}"><br>${envMap[bacASable]}</c:if>
 	</span>
 	<div id="connectionCheck"
 		class="btn-sm float-right btn ${isDataBaseOK ? 'btn-success' : 'btn-danger'}">

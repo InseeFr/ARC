@@ -43,6 +43,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.action.GererNormeAction;
+import fr.insee.arc.web.model.GuiModules;
 import fr.insee.arc.web.util.EAlphaNumConstante;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
@@ -65,7 +66,7 @@ public class GererNormeDao implements IDbConstant {
 	private static final String TOKEN_NOM_VARIABLE = "{tokenNomVariable}";
 
 	private static final String MESSAGE_VARIABLE_CLEF_NULL = "La variable {tokenNomVariable} est une variable clef pour la consolidation.\nVous devez vous assurer qu'elle ne soit jamais null.";
-
+	
     @Autowired
     private WebLoggerDispatcher loggerDispatcher;
     
@@ -187,27 +188,58 @@ public class GererNormeDao implements IDbConstant {
 			viewObject.destroy(viewRulesSet);
 		}
 	}
-
+	
 	/**
-	 * Initialize the {@link VObject} of a load ruleset. Only
-	 * get the load rule link to the selected rule set.
+	 * Initialize the {@value GererNormeAction#viewRulesSet}. Only get the rulesset
+	 * link to the selected norm and calendar.
 	 */
-	public void initializeChargement(VObject moduleView, VObject viewRulesSet, String theTableName,
-			String scope) {
-		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+	public void initializeViewModules(VObject viewModules, VObject viewRulesSet) {
+		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
+
+		// Get the selected calendar for requesting the rule set
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		if (!selection.isEmpty() && scope != null) {
-            HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
-            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,type_fichier, delimiter, format, commentaire from arc.ihm_chargement_regle");
-            whereRuleSetEquals(requete, selection, type);
-            
-            viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+		if (!selection.isEmpty()) {
+			PreparedStatementBuilder requete = new PreparedStatementBuilder();
+			
+			
+			// TODO : faire cela plus proprement avec iniitalizeByList de VObject
+			boolean union=false;
+			int i=0;
+			for (GuiModules module:GuiModules.values())
+			{
+				if (union)
+				{
+					requete.append("\n UNION ALL ");
+				}
+				else
+				{
+					union=true;
+				}
+				
+				requete.append("\n SELECT "+(i++)+" as module_order, "+requete.quoteText(moduleIdentifier(module))+" as module_name");
+			}
+			
+
+			HashMap<String, String> defaultInputFields = new HashMap<>();
+			viewObject.initialize(viewModules, requete, null, defaultInputFields);
+
+			if (viewModules.mapContentSelected().isEmpty())
+			{
+				viewModules.setSelectedLines(new ArrayList<>(Arrays.asList(true)));
+			}
+			
+			
 		} else {
-			viewObject.destroy(moduleView);
+			viewObject.destroy(viewModules);
 		}
 	}
 
+	
+	/** 
+	 * Default fields for arc rules set
+	 * @param selection
+	 * @return
+	 */
 	private HashMap<String, String> defaultRuleInputFields(Map<String, ArrayList<String>> selection) {
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
@@ -223,11 +255,36 @@ public class GererNormeDao implements IDbConstant {
 	 * Initialize the {@link VObject} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeNormage(VObject moduleView, VObject viewRulesSet, String theTableName,
-			String scope) {
-		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+	public void initializeChargement(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		if (!selection.isEmpty() && scope != null) {
+		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+				
+		if (!selection.isEmpty() && !moduleSelection.isEmpty()
+				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.load)))
+		{
+		    HashMap<String, String> type = viewRulesSet.mapHeadersType();
+            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,type_fichier, delimiter, format, commentaire from arc.ihm_chargement_regle");
+            whereRuleSetEquals(requete, selection, type);
+            
+            viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+		} else {
+			viewObject.destroy(moduleView);
+		}
+	}
+
+	
+	/**
+	 * Initialize the {@link VObject} of a load ruleset. Only
+	 * get the load rule link to the selected rule set.
+	 */
+	public void initializeNormage(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
+		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
+		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		
+		if (!selection.isEmpty() && !moduleSelection.isEmpty()
+				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.structurize)))
+		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique,rubrique_nmcl,commentaire from arc.ihm_normage_regle");
@@ -243,11 +300,13 @@ public class GererNormeDao implements IDbConstant {
 	 * Initialize the {@link VObject} of a control ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeControle(VObject moduleView, VObject viewRulesSet, String theTableName,
-			String scope) {
-		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+	public void initializeControle(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		if (!selection.isEmpty() && scope != null) {
+		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+				
+		if (!selection.isEmpty() && !moduleSelection.isEmpty()
+				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.control)))
+		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,blocking_threshold,error_row_processing,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
@@ -264,11 +323,13 @@ public class GererNormeDao implements IDbConstant {
 	 * Initialize the {@link VObject} of a filter ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeFiltrage(VObject moduleView, VObject viewRulesSet, String theTableName,
-			String scope) {
-		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+	public void initializeFiltrage(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		if (!selection.isEmpty() && scope != null) {
+		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		
+		if (!selection.isEmpty() && !moduleSelection.isEmpty()
+				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.filter)))
+		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             
             PreparedStatementBuilder requete = new PreparedStatementBuilder();
@@ -285,11 +346,13 @@ public class GererNormeDao implements IDbConstant {
 	 * Initialize the {@link VObject} of the mapping rule. Only get the load
 	 * rule link to the selected rule set.
 	 */
-	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, String theTableName, String scope) {
-		System.out.println("/* initializeMapping */");
+	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		if (!selection.isEmpty() && scope != null) {
-			
+		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		
+		if (!selection.isEmpty() && !moduleSelection.isEmpty()
+				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.mapmodel)))
+		{
 			HashMap<String, String> type = viewRulesSet.mapHeadersType();
 
             PreparedStatementBuilder requete = new PreparedStatementBuilder(
@@ -306,7 +369,6 @@ public class GererNormeDao implements IDbConstant {
             requete.append("\n  AND mapping.validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append("\n  AND mapping.version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
             
-            
 			viewObject.initialize(viewMapping,requete,theTableName, defaultRuleInputFields(selection));
 		} else {
 			viewObject.destroy(viewMapping);
@@ -317,11 +379,14 @@ public class GererNormeDao implements IDbConstant {
 	 * Initialize the {@link VObject} of the expression. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeExpression(VObject moduleView, VObject viewRulesSet, String theTableName,
-			String scope) {
+	public void initializeExpression(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		if (!selection.isEmpty() && scope != null) {
+		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		
+		if (!selection.isEmpty() && !moduleSelection.isEmpty()
+				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.expression)))
+		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             PreparedStatementBuilder requete = new PreparedStatementBuilder();;
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,expr_nom, expr_valeur, commentaire from arc.ihm_expression");
@@ -338,7 +403,7 @@ public class GererNormeDao implements IDbConstant {
 	 * 
 	 * @param viewJeuxDeReglesCopie
 	 */
-	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, VObject viewRulesSet,
+	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, VObject viewRulesSet, VObject viewModules, 
 			String theTableName, String scope) {
 		LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
 		if (scope != null) {
@@ -860,4 +925,16 @@ public class GererNormeDao implements IDbConstant {
 		return listeColonnes;
 	}
 
+	
+	/**
+	 * Return the module identifier
+	 * "norManagement.load" identify the load module in the normManagement action and its international alias
+	 * @param moduleName
+	 * @return
+	 */
+	private String moduleIdentifier(GuiModules moduleName)
+	{
+		return GererNormeAction.ACTION_NAME+"."+moduleName.toString();
+	}
+	
 }

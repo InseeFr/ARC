@@ -39,14 +39,10 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
         AdapterDeploymentContextFactoryBean factoryBean;
         if (!keycloakFile.isEmpty()) {
              factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
-             System.out.println(">>>>>>>>>>>>>>> 1");
              } else if (!keycloakResource.isEmpty()) {
             factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
-            System.out.println(">>>>>>>>>>>>>>> 2");
 
         } else {
-            System.out.println(">>>>>>>>>>>>>>> 3");
-
         	return new AdapterDeploymentContext();
         }
         factoryBean.afterPropertiesSet();
