@@ -38,6 +38,8 @@
 		<property name="ldapDirectoryIdent" value="${fr.insee.annuaire.arc.ident}"></property>
 		<property name="ldapDirectoryPassword" value="${fr.insee.annuaire.arc.password}"></property>
 		<property name="logDirectory" value="${fr.insee.arc.log.directory:}"></property>
+		<property name="logLevel" value="${fr.insee.arc.log.level:ERROR}"></property>
+		<property name="logFileName" value="arc-batch"></property>
 		<property name="logConfiguration" value="${fr.insee.arc.log.configuration:fr/insee/config/log4j2.xml}"></property>
 		<property name="batchParametersDirectory" value="#{systemEnvironment['APPLICATION_DIRECTORY'] ?: '${fr.insee.arc.batch.parametre.repertoire}' }"></property>
 		<property name="version" value="${fr.insee.arc.version:v0}"></property>
