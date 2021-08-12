@@ -21,6 +21,7 @@ ARG LOG_SETTINGS=fr/insee/config/log4j2.xml
 
 COPY . /usr/src/app/
 RUN echo $(ls -1 /usr/src/app/)
+RUN echo $(ls .git)
 
 # Run a conditional script for the maven build
 RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
