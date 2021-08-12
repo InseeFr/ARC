@@ -725,7 +725,7 @@ public class ManipString implements IConstanteCaractere {
                 outputStream.write(buffer, 0, count);
             }
 
-            return outputStream.toString(StandardCharsets.ISO_8859_1);
+            return outputStream.toString(StandardCharsets.ISO_8859_1.toString());
         }
         catch (Exception e) {
 			return null;
@@ -747,7 +747,7 @@ public class ManipString implements IConstanteCaractere {
                 outputStream.write(buffer, 0, count);
             }
 
-            return outputStream.toString(StandardCharsets.UTF_8);
+            return outputStream.toString(StandardCharsets.UTF_8.toString());
         }
         catch (Exception e) {
 			return null;
