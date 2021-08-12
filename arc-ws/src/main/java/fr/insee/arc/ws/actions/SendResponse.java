@@ -99,6 +99,7 @@ public class SendResponse {
 
 	public SendResponse( HttpServletResponse response ){
 		try {
+			response.setBufferSize(128 * 1024);
 			this.wr=response.getOutputStream();
 		}
 		catch (IOException e) {

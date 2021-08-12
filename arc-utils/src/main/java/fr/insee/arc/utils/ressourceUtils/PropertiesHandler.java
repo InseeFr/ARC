@@ -1,7 +1,13 @@
 package fr.insee.arc.utils.ressourceUtils;
 
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
+
+import fr.insee.arc.utils.utils.ManipString;
 
 @Component("properties")
 public class PropertiesHandler {
@@ -40,6 +46,8 @@ public class PropertiesHandler {
     private String authorizedRoles;
     private String disableDebugGui;
 
+    private String gitCommitId;
+    
     public void initializeLog() {
     	LogConfigurator logConf = new LogConfigurator(logConfiguration);
     	
@@ -237,7 +245,7 @@ public class PropertiesHandler {
 
 
     public void setVersion(String version) {
-        this.version = version;
+    	this.version = ManipString.substringAfterFirst(version, "version-");
     }
     
     public String getVersionDate() {
@@ -323,7 +331,24 @@ public class PropertiesHandler {
 	public void setDisableDebugGui(String disableDebugGui) {
 		this.disableDebugGui = disableDebugGui;
 	}
+
+
+	public String getGitCommitId() {
+		return gitCommitId;
+	}
+
+
+	public void setGitCommitId(String gitCommitId) {
+		this.gitCommitId = gitCommitId;
+	}
 	
-	
+	public Map<String,String> fullVersionInformation()
+	{
+		Map<String,String> map = new LinkedHashMap<>();
+		map.put("version", getVersion());
+		map.put("buildDate", getVersionDate());
+		map.put("gitCommitId", getGitCommitId());
+		return map;
+	}
     
 }

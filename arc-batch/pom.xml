@@ -69,34 +69,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
-			<!-- <plugin> -->
-			<!-- <groupId>org.apache.maven.plugins</groupId> -->
-			<!-- <artifactId>maven-assembly-plugin</artifactId> -->
-			<!-- <executions> -->
-			<!-- <execution> -->
-			<!-- <phase>package</phase> -->
-			<!-- <goals> -->
-			<!-- <goal>single</goal> -->
-			<!-- </goals> -->
-			<!-- <configuration> -->
-			<!-- <archive> -->
-			<!-- <manifest> -->
-			<!-- <mainClass> -->
-			<!-- fr.insee.arc.batch.LanceurARC -->
-			<!-- </mainClass> -->
-			<!-- </manifest> -->
-			<!-- </archive> -->
-			<!-- <descriptorRefs> -->
-			<!-- <descriptorRef>jar-with-dependencies</descriptorRef> -->
-			<!-- </descriptorRefs> -->
-			<!-- <finalName>ArcMain</finalName> -->
-			<!-- <appendAssemblyId>false</appendAssemblyId> -->
-			<!-- </configuration> -->
-			<!-- </execution> -->
-			<!-- </executions> -->
-			<!-- </plugin> -->
 		</plugins>
 	</build>
 

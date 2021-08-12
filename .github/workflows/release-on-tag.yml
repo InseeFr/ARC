@@ -15,7 +15,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Package with Maven
-      run: mvn package -Denv.arcVersion=${GITHUB_REF#refs/*/version-} -Denv.arcVersionDate=$(date +'%Y-%m-%d')
+      run: mvn package
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "*/target/*.war,arc-batch/target/ArcMain.jar"

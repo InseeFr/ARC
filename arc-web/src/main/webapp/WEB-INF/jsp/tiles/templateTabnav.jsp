@@ -54,7 +54,7 @@
 
 		<!--            Les boutons pour faire défiler les pages de résultat -->
 
-		<div class="row ${view.sessionName}_collapse collapse show">
+		<div class="row ${view.sessionName}_collapse collapse show mt-0-2">
 			<!--             Les boutons d'action -->
 
 				<div class="col btn-text-sm btn-width" role="group">

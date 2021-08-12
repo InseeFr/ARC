@@ -37,7 +37,7 @@
 							<h1 class="display-4">
 								<spring:message code="home.welcome" />
 							</h1>
-							<p class="lead">Version ${version} (${versionDate})</p>
+							<p class="lead">${version}</p>
 						</div>
 					</div>
 				</div>

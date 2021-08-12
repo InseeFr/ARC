@@ -106,6 +106,10 @@ li.nav-item.active {
     margin-top:0.1rem !important;
 }
 
+.mt-0-2, .my-0-2 {
+    margin-top:0.2rem !important;
+}
+
 .navbar-light .navbar-nav .nav-link {
     color: #000022;
 }
@@ -1145,7 +1149,7 @@ body.help {
 }
 
 .vw-menu-bar {
-	min-width:9rem;
+	width:11rem;
 }
 
 .btn-width {

@@ -1,10 +1,11 @@
 package fr.insee.arc.utils.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
@@ -16,6 +17,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -55,6 +58,17 @@ public class ManipString implements IConstanteCaractere {
                              .map(t-> t.trim().toLowerCase())//
                              .collect(Collectors.toList());
     }
+    
+    /**
+     * Convert a variadic elements into an arrayList
+     * @param elements
+     * @return
+     */
+    public static List<String> stringToList(String... elements)
+    {
+    	return new ArrayList<>(Arrays.asList(elements));
+    }
+
     
     /**
      * Transforme une chaîne de caractères en list, utilisant le separateur indiqué
@@ -691,6 +705,53 @@ public class ManipString implements IConstanteCaractere {
      */
     public static String reformerRadical(String radical) {
 	return radical + (radical.endsWith(closingBrace) ? empty : closingBrace);
+    }
+    
+    
+    // Zlib  compress
+    public static String compress(String data)
+    {
+        final Deflater deflater = new Deflater();
+        deflater.setLevel(Deflater.BEST_COMPRESSION);
+        deflater.setInput(data.getBytes(StandardCharsets.UTF_8));
+
+        try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.getBytes(StandardCharsets.UTF_8).length))
+        {
+            deflater.finish();
+            final byte[] buffer = new byte[1024];
+            while (!deflater.finished())
+            {
+                final int count = deflater.deflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+
+            return outputStream.toString(StandardCharsets.ISO_8859_1);
+        }
+        catch (Exception e) {
+			return null;
+		}
+    }
+
+    // Zlib uncompress
+    public static String decompress(String data)
+    {
+        final Inflater inflater = new Inflater();
+        inflater.setInput(data.getBytes(StandardCharsets.ISO_8859_1));
+
+        try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.getBytes(StandardCharsets.ISO_8859_1).length))
+        {
+            byte[] buffer = new byte[1024];
+            while (!inflater.finished())
+            {
+                final int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+
+            return outputStream.toString(StandardCharsets.UTF_8);
+        }
+        catch (Exception e) {
+			return null;
+		}
     }
     
 }

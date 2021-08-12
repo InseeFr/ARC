@@ -64,7 +64,7 @@ public class BatchARC {
 	// mode production (boucle sur les paquets d'enveloppes)
 	private static boolean production=true;
 	
-	// keepInDatabase = est-ce qu'on garde les données intermédiaire en base ou est-ce qu'on les export sous forme de fichiers dans le repertoire export ?
+	// keepInDatabase = est-ce qu'on garde les données des phases intérmédiaires en base ?
 	// false en production 
 	private static boolean keepInDatabase;
 	
@@ -215,7 +215,7 @@ public class BatchARC {
 		
 		do {
 		
-		message("Batch ARC " + properties.getVersion() + " " + properties.getVersionDate());
+		message("Batch ARC " + properties.fullVersionInformation().toString());
 		
 		try{
 		
@@ -227,7 +227,7 @@ public class BatchARC {
 		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase","false")))
 		{
 			env=BDParameters.getString(null, "LanceurARC.env",ApiService.IHM_SCHEMA);
-			envExecution=BDParameters.getString(null, "LanceurARC.envExecution","arc.prod");
+			envExecution=BDParameters.getString(null, "LanceurARC.envExecution","arc_prod");
 		}	
 		else
 		{
@@ -471,7 +471,7 @@ public class BatchARC {
 	public static void creerTablePilotageBatch() throws Exception
 	{
 		PreparedStatementBuilder requete=new PreparedStatementBuilder();
-		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text collate \"C\", operation text collate \"C\"); ");
+		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
 		requete.append("\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
         UtilitaireDao.get("arc").executeRequest(null, requete);
 	}

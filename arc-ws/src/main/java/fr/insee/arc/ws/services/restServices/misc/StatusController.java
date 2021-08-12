@@ -32,10 +32,7 @@ public class StatusController {
 
 	@GetMapping(value = "/version", produces = "application/json")
 	public Map<String, String> version(){
-		Map<String,String> map = new HashMap<>();
-		map.put("version", properties.getVersion());
-		map.put("buildDate", properties.getVersionDate());
-		return map;
+		return properties.fullVersionInformation();
 	}
 
 	

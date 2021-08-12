@@ -36,12 +36,12 @@
 
 <div class="mt-4-5"></div>
 
-<nav class="navbar menu-box-style navbar-expand-lg navbar-light collapse pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
+<nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
 		<ul class="navbar-nav mr-0 flex-column ml-1 mr-1 mb-4">
 			<li><h5 class="">Accueil</h5></li>
 			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'home' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse" href="index"><spring:message
 			code="header.home"/></a></li>
-			<li><h5 class="mt-4">Définition des règles</h5></li>
+			<li><h5 class="mt-4">Règles</h5></li>
 			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'familyManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectFamilleNorme"><spring:message code="header.familyManagement"/></a>
 			</li>
@@ -62,12 +62,16 @@
 				onclick="$(this).attr('href', 'enterPilotageBAS?bacASable='+$('#environnementTravail option:selected').val());"><spring:message code="header.envManagement"/></a></li>
 			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'export' ? ' font-weight-bold' : ''}"" data-target=".navbar-collapse" href="selectExport"
 				onclick="$(this).attr('href', 'selectExport?bacASable='+$('#environnementTravail option:selected').val());"><spring:message code="header.export"/></a></li>
+			
+			<li><h5 class="mt-4">Maintenance</h5></li>
 			<c:if test="${userManagementActive}">
 				<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'userManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
-				href="selectGererUtilisateurs"><spring:message code="header.userManagement"/></a>
-			</li>
+					href="selectGererUtilisateurs"><spring:message code="header.userManagement"/></a>
+				</li>
 			</c:if>
+			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'parameters' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+				href="selectParameters"><spring:message code="header.parameters"/></a></li>
     	</ul>
 </nav>
 
-<div class="ml-5 float-left vh-menu-bar vw-menu-bar left-navbar collapse"></div>
+<div class="float-left vh-menu-bar vw-menu-bar left-navbar collapse"></div>

@@ -48,9 +48,10 @@ public class PropertySourcesHelper {
 			fetcher.configure(configurer, env,
 					"file:" + tomcatDir + "/webapps/*.properties",
 					"file:" + tomcatDir + "/wtpwebapps/*.properties",
-					"classpath*:fr/insee/config/*.properties");
+					"classpath*:fr/insee/config/*.properties",
+					"classpath*:git.properties");
 		} else {
-			fetcher.configure(configurer, env, "classpath*:fr/insee/config/*.properties");
+			fetcher.configure(configurer, env, "classpath*:fr/insee/config/*.properties","classpath*:git.properties");
 		}
 		configurer.setIgnoreUnresolvablePlaceholders(true);
 		configurer.setIgnoreResourceNotFound(true);

@@ -9,6 +9,95 @@ val text,
 CONSTRAINT parameter_pkey PRIMARY KEY (key) 
 ); 
 
+ALTER TABLE arc.parameter add column IF NOT exists description text;
+
+-- mvcc rule for no update if same value, no insert if key
+CREATE or REPLACE RULE parameter_description_update AS 
+ON UPDATE TO arc.parameter
+where NEW.description = OLD.description
+do instead nothing;
+
+CREATE OR REPLACE RULE parameter_description_insert AS 
+ON INSERT TO arc.parameter where 
+exists (select from arc.parameter a where a.key=new.key)
+do instead nothing;
+
+
+-- batch initialization parameters
+INSERT INTO arc.parameter VALUES ('ApiInitialisationService.Nb_Jour_A_Conserver','365');
+UPDATE arc.parameter set description='parameter.batch.initialization.numberOfDayToKeepAfterRetrievedByAllCLients' where key='ApiInitialisationService.Nb_Jour_A_Conserver';
+
+INSERT INTO arc.parameter VALUES ('ApiInitialisationService.NB_FICHIER_PER_ARCHIVE','10000');
+UPDATE arc.parameter set description='parameter.batch.initialization.numberOfFilesToProceedAtSameTimeForDeletion' where key='ApiInitialisationService.NB_FICHIER_PER_ARCHIVE';
+
+INSERT INTO arc.parameter VALUES ('ApiService.HEURE_INITIALISATION_PRODUCTION','22');
+UPDATE arc.parameter set description='parameter.batch.initialization.StartsJustAfterThisHour' where key='ApiService.HEURE_INITIALISATION_PRODUCTION';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.INTERVAL_JOUR_INITIALISATION','7');
+UPDATE arc.parameter set description='parameter.batch.initialization.minimumDayIntervalBetweenInitializations' where key='LanceurARC.INTERVAL_JOUR_INITIALISATION';
+
+-- batch execution parameters
+INSERT INTO arc.parameter VALUES ('LanceurARC.keepInDatabase','false');
+UPDATE arc.parameter set description='parameter.batch.execution.keepPreviousPhaseData' where key='LanceurARC.keepInDatabase';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.maxFilesPerPhase','1000000');
+UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesToProceedPerPhase' where key='LanceurARC.maxFilesPerPhase';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.deltaStepAllowed','10000');
+UPDATE arc.parameter set description='parameter.batch.execution.howManyStepsFurtherPhaseAreExecuted' where key='LanceurARC.deltaStepAllowed';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.poolingDelay','1000');
+UPDATE arc.parameter set description='parameter.batch.execution.sleepingDelayDuringAFullPhaseLoopInMs' where key='LanceurARC.poolingDelay';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.envFromDatabase','false');
+UPDATE arc.parameter set description='parameter.batch.execution.booleanUseEnvironmentDeclaredInDatabase' where key='LanceurARC.envFromDatabase';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.env','arc.ihm');
+UPDATE arc.parameter set description='parameter.batch.execution.environmentOfRuleset' where key='LanceurARC.env';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.envExecution','arc_prod');
+UPDATE arc.parameter set description='parameter.batch.execution.environmentForExecution' where key='LanceurARC.envExecution';
+
+INSERT INTO arc.parameter VALUES ('ApiReceptionService.batch.maxNumberOfFiles','25000');
+UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesRegisteredInReceptionPhase' where key='ApiReceptionService.batch.maxNumberOfFiles';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.tailleMaxReceptionEnMb','100');
+UPDATE arc.parameter set description='parameter.batch.execution.maxCompressedArchiveSizeRegisteredInReceptionPhase' where key='LanceurARC.tailleMaxReceptionEnMb';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.maxFilesToLoad','101');
+UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesProceedInLoadPhase' where key='LanceurARC.maxFilesToLoad';
+
+INSERT INTO arc.parameter VALUES ('LanceurARC.maxFilesPerPhase','1000000');
+UPDATE arc.parameter set description='parameter.batch.execution.defaultMaxNumberOfFilesProceedInPhase' where key='LanceurARC.maxFilesPerPhase';
+
+-- ihm sandbox parameters
+INSERT INTO arc.parameter VALUES ('ApiInitialisationService.nbSandboxes','8');
+UPDATE arc.parameter set description='parameter.ihm.sandbox.numberOfSandboxes' where key='ApiInitialisationService.nbSandboxes';
+
+INSERT INTO arc.parameter VALUES ('ApiReceptionService.ihm.maxNumberOfFiles','5000');
+UPDATE arc.parameter set description='parameter.ihm.sandbox.maxNumberOfFilesRegisteredAtTheSameTime' where key='ApiReceptionService.ihm.maxNumberOfFiles';
+
+INSERT INTO arc.parameter VALUES ('ArcAction.productionEnvironments','["arc_prod"]');
+UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListWithProductionGUI' where key='ArcAction.productionEnvironments';
+
+
+-- parallelism parameters
+INSERT INTO arc.parameter VALUES ('ApiChargementService.MAX_PARALLEL_WORKERS','2');
+UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p1.load' where key='ApiChargementService.MAX_PARALLEL_WORKERS';
+
+INSERT INTO arc.parameter VALUES ('ApiNormageService.MAX_PARALLEL_WORKERS','5');
+UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p2.xmlStructurize' where key='ApiNormageService.MAX_PARALLEL_WORKERS';
+
+INSERT INTO arc.parameter VALUES ('ApiControleService.MAX_PARALLEL_WORKERS','3');
+UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p3.control' where key='ApiControleService.MAX_PARALLEL_WORKERS';
+ 
+INSERT INTO arc.parameter VALUES ('ApiFiltrageService.MAX_PARALLEL_WORKERS','2');
+UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.filter' where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
+
+INSERT INTO arc.parameter VALUES ('MappingService.MAX_PARALLEL_WORKERS','4');
+UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p5.mapmodel' where key='MappingService.MAX_PARALLEL_WORKERS';
+
+
 -- table de pilotage du batch de production
 CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text);
 insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select from arc.pilotage_batch);

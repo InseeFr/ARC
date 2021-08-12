@@ -140,7 +140,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     		@RequestParam(required = false) String bacASable,
 			@RequestParam(required = false) String scope) {
 		LoggerHelper.trace(LOGGER, getActionName());
-				
+
 		if (getActionName().equals(IndexAction.ACTION_NAME))
 		{
 	    	// run the initialization script
@@ -181,7 +181,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     	model.addAttribute("bacASable", getBacASable());
     	model.addAttribute("isDataBaseOK", isDataBaseOk());
     	model.addAttribute("version", getVersion());
-    	model.addAttribute("versionDate", properties.getVersionDate());
     	model.addAttribute("isEnvProd", isEnvProd());
     	model.addAttribute("application", getApplication());
     	model.addAttribute("userManagementActive", properties.isLdapActive());
@@ -432,7 +431,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 	
 	public String getVersion() {
-		return properties.getVersion();
+		return properties.fullVersionInformation().toString();
 	}
 
 	public String getApplication() {
