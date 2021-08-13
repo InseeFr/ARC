@@ -16,7 +16,12 @@ jobs:
       with:
         java-version: 11
     - name: Verify with Maven and Sonar
+      if: ${{ github.actor != 'dependabot[bot]' }}
       run: mvn verify sonar:sonar -Dsonar.projectKey=fr.insee:arc -Dsonar.organization=inseefr -Dsonar.host.url=https://sonarcloud.io
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: Verify with Maven (Dependabot)
+      # Dependabot does not have access to secrets
+      if: ${{ github.actor == 'dependabot[bot]' }}
+      run: mvn verify
