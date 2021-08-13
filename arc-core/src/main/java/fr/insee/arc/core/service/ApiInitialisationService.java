@@ -24,6 +24,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -243,156 +244,14 @@ public class ApiInitialisationService extends ApiService {
 		}
 	}
 
-	
-	/**
-	 * inject in sql database initialization scripts the input parameters
-	 * @param query
-	 * @param user
-	 * @param nbSandboxes
-	 * @param envExecution
-	 * @return
-	 */
-	private static String applyBddScriptParameters (String query, String userRestricted, Integer nbSandboxes, String envExecution)
-	{
-		if (userRestricted!=null)
-		{
-			query=query.replace("{{userRestricted}}", userRestricted);
-		}
-		if (nbSandboxes!=null)
-		{
-			query=query.replace("{{nbSandboxes}}", String.valueOf(nbSandboxes));
-		}
-		if (envExecution!=null)
-		{
-			query=query.replace("{{envExecution}}", envExecution.replace(".","_"));
-		}
-		return query;
-	}
-	
-	private static String readBddScript (String scriptName, String userRestricted, Integer nbSandboxes, String envExecution) throws Exception
-	{
-			if (ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName)!=null)
-			{
-				return applyBddScriptParameters(IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName), StandardCharsets.UTF_8), userRestricted, nbSandboxes, envExecution);
-			}
-		return null;
-	}
-	
-	private static void executeBddScript (Connection connexion, String scriptName, String userRestricted, Integer nbSandboxes, String envExecution) throws Exception
-	{
-		String query;
-
-		if ((query=readBddScript(scriptName, userRestricted, nbSandboxes, envExecution))!=null)
-		{
-				UtilitaireDao.get("arc").executeImmediate(connexion,query);
-		}
-	}
-	
-	
-	private static final String GIT_COMMIT_ID_PARAMETER_KEY="git.commit.id{{envExecution}}";
-	private static final String GIT_COMMIT_ID_PARAMETER_VALUE_NOVERSION="NOVERSION";
-	
-	private static String gitCommitIdParameterKey(String...envExecution)
-	{
-		if (envExecution==null || envExecution.length==0)
-		{
-			return GIT_COMMIT_ID_PARAMETER_KEY.replace("{{envExecution}}","");
-		}
-			
-		return GIT_COMMIT_ID_PARAMETER_KEY.replace("{{envExecution}}","."+envExecution[0]);
-	}
-
-	
-	private static String checkBddScriptVersion (Connection connexion, String... envExecution)
-	{
-		
-		return BDParameters.getString(connexion, gitCommitIdParameterKey(envExecution),GIT_COMMIT_ID_PARAMETER_VALUE_NOVERSION);
-	}
-
-
-	private static void setBddScriptVersion (Connection connexion, String commitId, String... envExecution)
-	{
-		
-		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId);
-	}
-
-	
     /**
      * Méthode pour initialiser ou patcher la base de données la base de donnée. 
-     * Passer à LIQUIBASE ??
-     * @param connexion
-     * @throws Exception
      */
-	public static void bddScript(Connection connexion) {
-
-		PropertiesHandler p = PropertiesHandler.getInstance();
-		
-		String databaseOldGitVersion=checkBddScriptVersion(connexion);
-		String applicationNewGitVersion=p.getGitCommitId();
-		
-		// if database registered git number is not the same as the application git number
-		
-		if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {
-
-			setBddScriptVersion(connexion,applicationNewGitVersion);
-			
-			Integer nbSandboxes = BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes", 8);
-
-			// global script. Mainly to build the arc schema
-			try {
-				
-				executeBddScript(connexion, "BdD/script_global.sql", p.getDatabaseRestrictedUsername(), nbSandboxes, null);
-				executeBddScript(connexion, "BdD/script_function.sql", p.getDatabaseRestrictedUsername(), nbSandboxes,
-						null);
-	
-				// iterate over each phase and try to load its global script
-	
-				for (TraitementPhase t : TraitementPhase.values()) {
-					executeBddScript(connexion, "BdD/script_global_phase_" + t.toString().toLowerCase() + ".sql",
-							p.getDatabaseRestrictedUsername(), nbSandboxes, null);
-				}
-				
-			} catch (Exception e) {
-				setBddScriptVersion(connexion,databaseOldGitVersion);
-			}
-			
-		}
+	public static void bddScript(Connection connexion, String...envExecutions) {
+		BddPatcher.bddScript(connexion, envExecutions);
 	}
 
-    
-    public static void bddScript(Connection connexion, String[] envExecutions) {
-    		
-		PropertiesHandler p = PropertiesHandler.getInstance();
-		
-		String databaseOldGitVersion=checkBddScriptVersion(connexion, envExecutions);
-		String applicationNewGitVersion=p.getGitCommitId();
-		
-		// if database registered git number is not the same as the application git number
-		
-		if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {
 
-			setBddScriptVersion(connexion,applicationNewGitVersion, envExecutions);
-
-			try {
-	            	// iterate over each sandbox environment and try to load its script
-		    		for (String envExecution: envExecutions)
-		    		{
-		    			executeBddScript(connexion, "BdD/script_sandbox.sql", p.getDatabaseRestrictedUsername(), null, envExecution);
-		    		}
-		            
-		            // iterate over each sandbox environment
-		    		for (String envExecution: envExecutions)
-		            {
-		                // iterate over each phase for its sandbox relating script
-						for (TraitementPhase t : TraitementPhase.values()) {
-			                executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", p.getDatabaseRestrictedUsername(), null, envExecution);
-						}
-		            }
-				} catch (Exception e) {
-					setBddScriptVersion(connexion,databaseOldGitVersion, envExecutions);
-				}
-		}
-    }
     
     /**
      * Build directories for the sandbox
