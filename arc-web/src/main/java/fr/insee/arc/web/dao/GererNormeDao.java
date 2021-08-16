@@ -202,7 +202,6 @@ public class GererNormeDao implements IDbConstant {
 			PreparedStatementBuilder requete = new PreparedStatementBuilder();
 			
 			
-			// TODO : faire cela plus proprement avec iniitalizeByList de VObject
 			boolean union=false;
 			int i=0;
 			for (GuiModules module:GuiModules.values())

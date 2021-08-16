@@ -105,9 +105,27 @@ public class BddPatcher {
 	private static void setBddScriptVersion (Connection connexion, String commitId, String... envExecution)
 	{
 		
-		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId);
+		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId, bddParameterDescription(envExecution));
 	}
 
+	/**
+	 * parameter description
+	 * @param envExecution
+	 * @return
+	 */
+	private static String bddParameterDescription(String...envExecution)
+	{
+		if (envExecution==null || envExecution.length==0)
+		{
+			return "parameter.database.version.global"; 
+		}
+		else
+		{
+			return "parameter.database.version.sandbox"; 
+		}
+	}
+	
+	
 	/**
 	 * execute the global sql scripts
 	 * @param connexion
@@ -165,14 +183,14 @@ public class BddPatcher {
 
 		PropertiesHandler p = PropertiesHandler.getInstance();
 		
-		String databaseOldGitVersion=checkBddScriptVersion(connexion);
+		String databaseOldGitVersion=checkBddScriptVersion(connexion, envExecutions);
 		String applicationNewGitVersion=p.getGitCommitId();
 		
 		// if database registered git number is not the same as the application git number
 		
 		if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {
 
-			setBddScriptVersion(connexion,applicationNewGitVersion);
+			setBddScriptVersion(connexion,applicationNewGitVersion, envExecutions);
 			
 
 			// global script. Mainly to build the arc schema

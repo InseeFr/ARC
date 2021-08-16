@@ -81,18 +81,48 @@ public class BDParameters {
 		}
 	}
 	
-	public static void setString(Connection c,String key, String val)
+	
+	/**
+	 * Update the parameter value and description by key 
+	 * @param c
+	 * @param key
+	 * @param val
+	 * @param description
+	 */
+	public static void setString(Connection c,String key, String val, String description)
 	{
 		try {
+			
 			PreparedStatementBuilder requete=new PreparedStatementBuilder();
-			requete.append("UPDATE  "+parameterTable+" set val="+requete.quoteText(val)+" where key="+requete.quoteText(key)+" ");
+			requete.append("UPDATE  "+parameterTable+" ");
+			requete.append("SET val="+requete.quoteText(val)+" ");
+			if (!description.isBlank())
+				{
+				requete.append(", description="+requete.quoteText(description)+" ");
+				}
+			requete.append("WHERE key="+requete.quoteText(key)+" ");
+			
+			
 			UtilitaireDao.get("arc").executeRequest(c,requete);
 			
 		} catch (SQLException e) {
 			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);
 		}
 	}
-
+	
+	
+	/**
+	 * Update the parameter value by key 
+	 * @param c
+	 * @param key
+	 * @param val
+	 */
+	public static void setString(Connection c,String key, String val)
+	{
+		setString (c,key, val, null);
+	}
+	
+	
 	/** Insert or update the value for that key.*/
 	public static void setValue(Connection c, String key, String value) {
 		PreparedStatementBuilder request=new PreparedStatementBuilder();

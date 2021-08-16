@@ -12,9 +12,9 @@ public class ViewParameters extends VObject {
 	private static final HashMap<String, ColumnRendering> columnMap= new HashMap<>();
 
 	static {
-		columnMap.put("description", new ColumnRendering(true, "parameter.header.description", "70%", "text", null, true));
-		columnMap.put("key", new ColumnRendering(true, "key", "20%", "text", null, true));
-		columnMap.put("val", new ColumnRendering(true, "val", "10%", "text", null, true));
+		columnMap.put("description", new ColumnRendering(true, "label.description", "70%", "text", null, false));
+		columnMap.put("key", new ColumnRendering(true, "label.key", "20%", "text", null, true));
+		columnMap.put("val", new ColumnRendering(true, "label.val", "10%", "text", null, true));
 
 	}
 	

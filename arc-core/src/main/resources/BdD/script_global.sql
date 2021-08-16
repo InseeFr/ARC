@@ -38,16 +38,16 @@ UPDATE arc.parameter set description='parameter.batch.initialization.minimumDayI
 
 -- batch execution parameters
 INSERT INTO arc.parameter VALUES ('LanceurARC.keepInDatabase','false');
-UPDATE arc.parameter set description='parameter.batch.execution.keepPreviousPhaseData' where key='LanceurARC.keepInDatabase';
+UPDATE arc.parameter set description='parameter.batch.execution.keepPreviousModuleData' where key='LanceurARC.keepInDatabase';
 
 INSERT INTO arc.parameter VALUES ('LanceurARC.maxFilesPerPhase','1000000');
-UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesToProceedPerPhase' where key='LanceurARC.maxFilesPerPhase';
+UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesToProceedPerModule' where key='LanceurARC.maxFilesPerPhase';
 
 INSERT INTO arc.parameter VALUES ('LanceurARC.deltaStepAllowed','10000');
-UPDATE arc.parameter set description='parameter.batch.execution.howManyStepsFurtherPhaseAreExecuted' where key='LanceurARC.deltaStepAllowed';
+UPDATE arc.parameter set description='parameter.batch.execution.howManyStepsFurtherModuleAreExecuted' where key='LanceurARC.deltaStepAllowed';
 
 INSERT INTO arc.parameter VALUES ('LanceurARC.poolingDelay','1000');
-UPDATE arc.parameter set description='parameter.batch.execution.sleepingDelayDuringAFullPhaseLoopInMs' where key='LanceurARC.poolingDelay';
+UPDATE arc.parameter set description='parameter.batch.execution.sleepingDelayDuringPipelineLoopInMs' where key='LanceurARC.poolingDelay';
 
 INSERT INTO arc.parameter VALUES ('LanceurARC.envFromDatabase','false');
 UPDATE arc.parameter set description='parameter.batch.execution.booleanUseEnvironmentDeclaredInDatabase' where key='LanceurARC.envFromDatabase';
@@ -59,16 +59,16 @@ INSERT INTO arc.parameter VALUES ('LanceurARC.envExecution','arc_prod');
 UPDATE arc.parameter set description='parameter.batch.execution.environmentForExecution' where key='LanceurARC.envExecution';
 
 INSERT INTO arc.parameter VALUES ('ApiReceptionService.batch.maxNumberOfFiles','25000');
-UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesRegisteredInReceptionPhase' where key='ApiReceptionService.batch.maxNumberOfFiles';
+UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesRegisteredInReceptionModule' where key='ApiReceptionService.batch.maxNumberOfFiles';
 
 INSERT INTO arc.parameter VALUES ('LanceurARC.tailleMaxReceptionEnMb','100');
-UPDATE arc.parameter set description='parameter.batch.execution.maxCompressedArchiveSizeRegisteredInReceptionPhase' where key='LanceurARC.tailleMaxReceptionEnMb';
+UPDATE arc.parameter set description='parameter.batch.execution.maxCompressedArchiveSizeRegisteredInReceptionModule' where key='LanceurARC.tailleMaxReceptionEnMb';
 
 INSERT INTO arc.parameter VALUES ('LanceurARC.maxFilesToLoad','101');
-UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesProceedInLoadPhase' where key='LanceurARC.maxFilesToLoad';
+UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesProceedInLoadModule' where key='LanceurARC.maxFilesToLoad';
 
 INSERT INTO arc.parameter VALUES ('LanceurARC.maxFilesPerPhase','1000000');
-UPDATE arc.parameter set description='parameter.batch.execution.defaultMaxNumberOfFilesProceedInPhase' where key='LanceurARC.maxFilesPerPhase';
+UPDATE arc.parameter set description='parameter.batch.execution.defaultMaxNumberOfFilesProcessedByModules' where key='LanceurARC.maxFilesPerPhase';
 
 -- ihm sandbox parameters
 INSERT INTO arc.parameter VALUES ('ApiInitialisationService.nbSandboxes','8');
