@@ -1,7 +1,9 @@
 package fr.insee.arc.core.service.handler;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
+import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
@@ -87,7 +90,14 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	public String tempTableA;
     public ArrayList<String> tempTableAColumnsLongName;
     public ArrayList<String> tempTableAColumnsShortName;
-
+    
+    // initialize the integration date with current
+	private final String integrationDate = FormatSQL.toDate(
+			FormatSQL.quoteText(new SimpleDateFormat(EDateFormat.DATE_DASH.getApplicationFormat()).format(new Date()))
+			,FormatSQL.quoteText(EDateFormat.DATE_DASH.getDatastoreFormat())
+			);
+    
+    
 	/**
 	 * Actions à réaliser sur les données
 	 */
@@ -573,7 +583,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 				"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("periodicite")) +
 				"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("validite")));
 		
-		req2.append("('" + fileName + "',"+this.idLigne+",current_date,'"+normeCourante.getIdNorme()+"','"+normeCourante.getPeriodicite()+"','"+validite+"'");
+		req2.append("('" + fileName + "',"+this.idLigne+","+integrationDate+",'"+normeCourante.getIdNorme()+"','"+normeCourante.getPeriodicite()+"','"+validite+"'");
 		
 		int z=0;
 
@@ -654,7 +664,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
             StringBuilder reqSelect = new StringBuilder();
             reqSelect.append("\n SELECT row_number() over (), ww.* FROM (");
-            reqSelect.append("\n SELECT '{nom_fichier}',current_date,'{id_norme}','{validite}','{periodicite}'");
+            reqSelect.append("\n SELECT '{nom_fichier}',"+integrationDate+",'{id_norme}','{validite}','{periodicite}'");
 
             StringBuilder reqFrom = new StringBuilder();
 

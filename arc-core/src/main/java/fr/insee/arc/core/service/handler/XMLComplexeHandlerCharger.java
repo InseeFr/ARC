@@ -1,7 +1,9 @@
 package fr.insee.arc.core.service.handler;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
@@ -36,8 +39,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	public HashMap<String, Integer> colData;
 	
 	// @trees
-//	public ArrayList<HashMap<Integer, Integer>> trees = new ArrayList<>();
-	
 	public HashMap<Integer, Integer> tree = new HashMap<>();
 	public HashMap<Integer, Boolean> treeNode = new HashMap<>();
 
@@ -116,6 +117,13 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
     public final static String JOINXML_QUERY_BLOCK="\n -- query";
     public final static String JOINXML_STRUCTURE_BLOCK="\n -- structure\n";
     public final static String HEADER="$h";
+    
+    // initialize the integration date with current
+	private final String integrationDate = FormatSQL.toDate(
+			FormatSQL.quoteText(new SimpleDateFormat(EDateFormat.DATE_DASH.getApplicationFormat()).format(new Date()))
+			,FormatSQL.quoteText(EDateFormat.DATE_DASH.getDatastoreFormat())
+			);
+    
 	/**
 	 * Actions à réaliser sur les données
 	 */
@@ -582,8 +590,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	public void insertQueryBuilder(StringBuilder aRequete, String tempTableI, String fileName, List<Integer> lineCols, List<Integer> lineIds,
 			List<String> lineValues) throws SAXParseException {
 
-//		System.out.println("*****");
-
 		HashMap<Integer, String> keep = new HashMap<>();
 
 		String s;
@@ -631,7 +637,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 				"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("periodicite")) +
 				"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("validite")));
 		
-		req2.append("('" + fileName + "',"+this.idLigne+",current_date,'"+normeCourante.getIdNorme()+"','"+normeCourante.getPeriodicite()+"','"+validite+"'");
+		req2.append("('" + fileName + "',"+this.idLigne+","+integrationDate+",'"+normeCourante.getIdNorme()+"','"+normeCourante.getPeriodicite()+"','"+validite+"'");
 		
 		int z=0;
 
@@ -713,7 +719,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	
 	            StringBuilder reqSelect = new StringBuilder();
 	            reqSelect.append("\n SELECT row_number() over (), ww.* FROM (");
-	            reqSelect.append("\n SELECT '{nom_fichier}',current_date,'{id_norme}','{validite}','{periodicite}'");
+	            reqSelect.append("\n SELECT '{nom_fichier}',"+integrationDate+",'{id_norme}','{validite}','{periodicite}'");
 	
 	            StringBuilder reqFrom = new StringBuilder();
 	

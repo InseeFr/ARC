@@ -2090,9 +2090,20 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @return
      * @throws SQLException 
      */
-    public static String quoteText(String s) throws SQLException
+    public static String quoteText(String s)
     {
-    	return "'" + Utils.escapeLiteral(null, s, true) + "'";
+    	try {
+			return "'" + Utils.escapeLiteral(null, s, true) + "'";
+		} catch (SQLException e) {
+			LoggerHelper.errorAsComment(LOGGER, "This string cannot be escaped to postgres database format");
+			return null;
+		}
+    }
+    
+    
+    public static String toDate(String dateTextIn, String formatIn)
+    {
+    	return "to_date("+dateTextIn+"::text,"+formatIn+")";
     }
     
 }
