@@ -2,6 +2,8 @@ package fr.insee.arc.core.util;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -96,7 +98,7 @@ public class BDParameters {
 			PreparedStatementBuilder requete=new PreparedStatementBuilder();
 			requete.append("UPDATE  "+parameterTable+" ");
 			requete.append("SET val="+requete.quoteText(val)+" ");
-			if (!description.isBlank())
+			if (!StringUtils.isBlank(description))
 				{
 				requete.append(", description="+requete.quoteText(description)+" ");
 				}
