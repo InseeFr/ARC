@@ -1,23 +1,39 @@
 package fr.insee.arc.core.util;
 
+/**
+ * Enum of the date formats used by ARC
+ * Provides the corresponding format between the application level and the datastore level
+ * @author FY2QEQ
+ *
+ */
 public enum EDateFormat {
-    SIMPLE_DATE_FORMAT_SQL("yyyy-MM-dd"),
-    YYYY_MM_DD_HH_MM_SS("yyyy-MM-dd' 'HH:mm:ss"),
-    SIMPLE_DATE_FORMAT_IHM("dd/MM/yyyy"),
-    DATE_FORMAT_WITH_SECOND("dd/MM/yyyy HH:mm:ss"),
-    DATE_FORMAT_WITH_HOUR("yyyy-MM-dd:HH");
+	
+    DATE_DASH("yyyy-MM-dd","YYYY-MM-DD"),
 ;
     
-    private String value;
+    private String applicationFormat;
+    private String datastoreFormat;
    
-    private EDateFormat(String value) {
-	this.value = value;
+    private EDateFormat(String applicationFormat, String datastoreFormat) {
+		this.applicationFormat = applicationFormat;
+		this.datastoreFormat= datastoreFormat;
     }
 
+	public String getApplicationFormat() {
+		return applicationFormat;
+	}
 
-    public String getValue() {
-        return value;
-    }
+	public void setApplicationFormat(String applicationFormat) {
+		this.applicationFormat = applicationFormat;
+	}
+
+	public String getDatastoreFormat() {
+		return datastoreFormat;
+	}
+
+	public void setDatastoreFormat(String datastoreFormat) {
+		this.datastoreFormat = datastoreFormat;
+	}
+
     
-
 }

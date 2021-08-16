@@ -1401,9 +1401,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @param rootDirectory
      * @param undoFilesSelection
      */
-    public static void backToTargetPhase(String phaseAExecuter, String env, String rootDirectory, PreparedStatementBuilder undoFilesSelection)
+    public static void backToTargetPhase(TraitementPhase phaseAExecuter, String env, String rootDirectory, PreparedStatementBuilder undoFilesSelection)
     {
-		if (TraitementPhase.valueOf(phaseAExecuter).getOrdre()==TraitementPhase.INITIALISATION.getOrdre())
+		if (phaseAExecuter.getOrdre()==TraitementPhase.INITIALISATION.getOrdre())
 		{
 			resetBAS(env, rootDirectory);
 		}
@@ -1413,7 +1413,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		    		IHM_SCHEMA, env, rootDirectory,
 					TraitementPhase.INITIALISATION.getNbLigneATraiter());
 			try {
-				serv.retourPhasePrecedente(TraitementPhase.valueOf(phaseAExecuter), undoFilesSelection,
+				serv.retourPhasePrecedente(phaseAExecuter, undoFilesSelection,
 						new ArrayList<>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
 			} finally {
 		        serv.finaliser();
