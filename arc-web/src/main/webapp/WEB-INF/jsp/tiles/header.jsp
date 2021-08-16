@@ -1,5 +1,7 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>  
+
 
 <div class="menu-box-style" style="display: flex;flex-direction:row;flex-wrap:nowrap;justify-content: space-between;position: fixed;top: 0;width: 100%;z-index: 2000;">
 	
@@ -13,7 +15,7 @@
 	</button>
 	<c:forEach items="en,fr" var="lang">
 		<c:choose>
-			<c:when test="${pageContext.response.locale == lang}">
+			<c:when test="${fn:startsWith(pageContext.response.locale,lang)}">
 				<a class="btn-sm text-body font-weight-bold"><u>${lang}</u></a>
 			</c:when>
 			<c:otherwise>

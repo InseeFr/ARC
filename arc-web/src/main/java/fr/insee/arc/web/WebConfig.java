@@ -73,7 +73,7 @@ public class WebConfig implements WebMvcConfigurer {
 		messageSource.addBasenames("messages");
 		messageSource.setDefaultEncoding("UTF-8");
 		messageSource.setAlwaysUseMessageFormat(true);
-		messageSource.setDefaultLocale(Locale.ENGLISH);
+		messageSource.setDefaultLocale(Locale.FRENCH);
 		return messageSource;
 	}
 	

@@ -110,7 +110,7 @@ public class ExecuteServiceController {
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
 
-			ApiService.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), env, repertoire, new PreparedStatementBuilder());
+			ApiService.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new PreparedStatementBuilder());
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
 
