@@ -250,8 +250,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	@PostMapping(value = {"/selectPilotageBAS"}, 
-			consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+	@PostMapping(value = {"/selectPilotageBAS"}
+//	,consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE}
+	)
 	public String selectPilotageBAS(Model model) {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -531,14 +532,18 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/executerBatch")
-	public String executerBatch(Model model, String phaseAExecuter) {
+	public String executerBatch(Model model, TraitementPhase phaseAExecuter) {
 		loggerDispatcher.debug("executerBatch", LOGGER);
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
 		
-		ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA,
-				getBacASable());
-
-		ApiServiceFactory.getService(phaseAExecuter, ApiService.IHM_SCHEMA, getBacASable(),
+		
+		if (!phaseAExecuter.equals(TraitementPhase.INITIALISATION))
+		{
+			ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA,
+					getBacASable());
+		}
+		
+		ApiServiceFactory.getService(phaseAExecuter.toString(), ApiService.IHM_SCHEMA, getBacASable(),
 				this.repertoire, "10000000"
 				//,"1" // to set batch mode or not
 				).invokeApi();
@@ -568,7 +573,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/undoBatch")
-	public String undoBatch(Model model, String phaseAExecuter) {
+	public String undoBatch(Model model, TraitementPhase phaseAExecuter) {
 		loggerDispatcher.debug("undoBatch", LOGGER);
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 		

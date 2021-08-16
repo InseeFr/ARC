@@ -156,9 +156,7 @@
 													onclick="return alimenterPhase($(this));" type="submit"
 													label="<spring:message code='${phase}'/>"
 													name="phaseAExecuter"
-													value="${phase}">
-													<spring:message code="${phase}" />
-												</button>
+													value="${phase}"><spring:message code="${phase}"/></button>
 										</c:forEach>
 
 									</div>
