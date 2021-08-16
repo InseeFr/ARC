@@ -211,8 +211,6 @@ public class ChargeurXmlComplexe implements IChargeur{
         // Création de la table de stockage
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         XMLComplexeHandlerCharger handler = new XMLComplexeHandlerCharger();
-        // handler.tableSchema=tableSchema;
-        // handler.tableName=tableName;
         handler.fileName = fileName;
         handler.connexion = connexion;
         handler.col = col;
