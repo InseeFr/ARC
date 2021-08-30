@@ -1372,6 +1372,15 @@ public class VObjectService {
         // on ne gere pas les autres cas: ca doit planter
         this.initialize(data, requete, data.getTable(), defaultInputFields);
     }
+    
+    
+    // give values to be added to a result row
+	public static void addRowToVObjectList(ArrayList<ArrayList<String>> result,String...elements)
+	{
+		result.add(new ArrayList<>(Arrays.asList(Arrays.copyOf(elements, elements.length))));
+	}
+	
+    
 
     public void setFilterPattern(int filterPattern) {
         this.filterPattern = filterPattern;

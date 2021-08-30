@@ -20,6 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.web.model.FileSystemManagementModel;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.util.VObjectService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -80,7 +81,6 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 	public void initializeDirIn() {
 		loggerDispatcher.debug("/* initializeDirIn */", LOGGER);
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-
 		ArrayList<ArrayList<String>> listeFichier = getDirFiles(this.dirIn, this.viewDirIn);
 		this.vObjectService.initializeByList(viewDirIn, listeFichier, defaultInputFields);
 	}
@@ -357,25 +357,30 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 		File dirFile = Paths.get(dirUri).toFile();
 		ArrayList<ArrayList<String>> listeFichier = new ArrayList<>();
 		if (!dirFile.exists() || !dirFile.isDirectory()) {
-			this.viewDirIn.setMessage("Invalid input directory");
+			listeFichier = errorFromDirectory();
 		} else {
 			listeFichier = getFilesFromDirectory(dirFile, dirVobject.mapFilterFields());
 		}
 		return listeFichier;
 	}
+	
+	private void initializeArrayForDirVObject(ArrayList<ArrayList<String>> result)
+	{
+		VObjectService.addRowToVObjectList(result,"filename",IS_DIRECTORY);
+		VObjectService.addRowToVObjectList(result,"text","text");
+	}
+
+	private ArrayList<ArrayList<String>> errorFromDirectory() {
+		ArrayList<ArrayList<String>> result = new ArrayList<>();
+		initializeArrayForDirVObject(result);
+		VObjectService.addRowToVObjectList(result, "<Path not valid>", "false");
+		return result;
+	}
 
 	private ArrayList<ArrayList<String>> getFilesFromDirectory(File dir, HashMap<String,ArrayList<String>> filter) {
 		ArrayList<ArrayList<String>> result=new ArrayList<>();
 
-		ArrayList<String> entete = new ArrayList<>();
-		entete.add("filename");
-		entete.add(IS_DIRECTORY);
-		result.add(entete);
-
-		ArrayList<String> format = new ArrayList<>();
-		format.add("text");
-		format.add("text");
-		result.add(format);
+		initializeArrayForDirVObject(result);
 
 		int nb=0;
 
@@ -415,10 +420,7 @@ public class GererFileAction extends ArcAction<FileSystemManagementModel> {
 			}
 
 			if (toInsert) {
-				ArrayList<String> fileAttribute = new ArrayList<String>();
-				fileAttribute.add(f.getName());
-				fileAttribute.add(""+f.isDirectory());
-				result.add(fileAttribute);
+				VObjectService.addRowToVObjectList(result,f.getName(),""+f.isDirectory());
 				nb++;
 				if (nb>50) {
 					break;
