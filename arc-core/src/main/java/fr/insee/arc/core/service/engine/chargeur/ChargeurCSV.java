@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,11 +20,13 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
+import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.XMLUtil;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
@@ -55,6 +59,10 @@ public class ChargeurCSV implements IChargeur {
     private InputStream streamContent;
     private String env;
     private String validite;
+	private final String integrationDate = FormatSQL.toDate(
+			FormatSQL.quoteText(new SimpleDateFormat(EDateFormat.DATE_DASH.getApplicationFormat()).format(new Date()))
+			,FormatSQL.quoteText(EDateFormat.DATE_DASH.getDatastoreFormat())
+			);
 
     public ChargeurCSV(ThreadChargementService threadChargementService, String fileName) {
         this.fileName = fileName;
@@ -541,13 +549,13 @@ public class ChargeurCSV implements IChargeur {
 
         req.append(" TABLE " + this.tableTempA);
         req.append(" AS (SELECT ");
-        req.append("\n\t '" + this.fileName + "'::text collate \"C\" as id_source");
-        req.append("\n\t ,id::integer as id");
-        req.append("\n\t ,current_date::text collate \"C\" as date_integration ");
-        req.append("\n\t ,'" + this.norme.getIdNorme() + "'::text collate \"C\" as id_norme ");
-        req.append("\n\t ,'" + this.norme.getPeriodicite() + "'::text collate \"C\" as periodicite ");
-        req.append("\n\t ,'" + this.validite + "'::text collate \"C\" as validite ");
-        req.append("\n\t ,0::integer as nombre_colonne");
+        req.append("\n '" + this.fileName + "'::text collate \"C\" as id_source");
+        req.append("\n ,id::integer as id");
+        req.append("\n ,"+integrationDate+"::text collate \"C\" as date_integration ");
+        req.append("\n ,'" + this.norme.getIdNorme() + "'::text collate \"C\" as id_norme ");
+        req.append("\n ,'" + this.norme.getPeriodicite() + "'::text collate \"C\" as periodicite ");
+        req.append("\n ,'" + this.validite + "'::text collate \"C\" as validite ");
+        req.append("\n ,0::integer as nombre_colonne");
         
 
         req.append("\n\t , ");

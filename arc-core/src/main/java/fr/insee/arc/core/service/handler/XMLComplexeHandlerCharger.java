@@ -627,7 +627,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		StringBuilder req = new StringBuilder();
 		StringBuilder req2 = new StringBuilder();
 		this.idLigne++;
-		//req.append("insert into " + tempTableI + "(id_source, id, date_integration, id_norme, periodicite, validite");
 		
 		req.append("insert into " + tempTableI + 
 				"(" + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id_source")) +
