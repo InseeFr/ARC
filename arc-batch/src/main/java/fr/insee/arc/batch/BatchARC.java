@@ -243,6 +243,8 @@ public class BatchARC {
 		String repertoire = properties.getBatchParametersDirectory();
 		mapParam.put("repertoire", repertoire);
 
+		message(mapParam.toString());
+
 
 		creerTablePilotageBatch();
 
