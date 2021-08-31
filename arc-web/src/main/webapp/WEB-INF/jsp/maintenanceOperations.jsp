@@ -14,7 +14,7 @@
 	<head>
 <title><spring:message code="header.export"/></title>
 	<c:import url="tiles/defaulthead.jsp">
-		<c:param name="pageJs" value="/js/MaintenanceParameters.js" />
+		<c:param name="pageJs" value="/js/maintenanceOperations.js" />
 	</c:import>
 	</head>
 </c:if>
@@ -29,7 +29,7 @@
 	accept-charset="UTF-8"
 >
 	<c:import url="tiles/header.jsp">
-		<c:param name="currentPage" value="parameters" />
+		<c:param name="currentPage" value="operations" />
 	</c:import>
 
 
@@ -39,20 +39,16 @@
 				<div class="col-md-12">
 					<div class="row">
 						<div class="col-md">
-							<!-- norm list -->
-							<c:set var="view" value="${viewParameters}"  scope="request"/>
-							<c:import url="tiles/templateVObject.jsp">
-								<c:param name="btnSelect" value ="true" />
-								<c:param name="btnSee" value ="true" />
-								<c:param name="btnSort" value ="true" />
-								<c:param name="btnAdd" value ="true" />
-								<c:param name="btnUpdate" value ="true" />
-								<c:param name="btnDelete" value ="true" />
-								<c:param name="ligneAdd" value ="true" />
-								<c:param name="ligneFilter" value ="true" />
-								<c:param name="checkbox" value ="true" />
-								<c:param name="checkboxVisible" value ="true" />
-							</c:import>
+						<div id="viewOperations">
+							<button
+								id="viewOperations.generateErrorMessageInLogs"
+								class="btn btn-secondary btn-sm"
+								type="submit"
+								doAction="generateErrorMessageInLogsOperations"
+								scope="viewOperations;"
+								value="<spring:message code="gui.button.generateErrorMessageInLogs"/>"
+							><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.generateErrorMessageInLogs"/></button>
+							</div>
 						</div>
 					</div>
 			</div>			

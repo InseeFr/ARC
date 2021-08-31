@@ -39,7 +39,7 @@
 <div class="mt-4-5"></div>
 
 <nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
-		<ul class="navbar-nav mr-0 flex-column ml-1 mr-1 mb-4">
+		<ul class="navbar-nav flex-column ml-1 mr-1 mb-4">
 			<li><h5 class="">Accueil</h5></li>
 			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'home' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse" href="index"><spring:message
 			code="header.home"/></a></li>
@@ -73,6 +73,8 @@
 			</c:if>
 			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'parameters' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectParameters"><spring:message code="header.parameters"/></a></li>
+			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'operations' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+				href="selectOperations"><spring:message code="header.operations"/></a></li>
     	</ul>
 </nav>
 

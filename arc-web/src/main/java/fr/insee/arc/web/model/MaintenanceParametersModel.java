@@ -3,12 +3,12 @@ package fr.insee.arc.web.model;
 import fr.insee.arc.web.model.viewobjects.ViewParameters;
 import fr.insee.arc.web.util.VObject;
 
-public class ManageParametersModel implements ArcModel {
+public class MaintenanceParametersModel implements ArcModel {
 
     private VObject viewParameters;
 
 
-    public ManageParametersModel() {
+    public MaintenanceParametersModel() {
 		this.viewParameters = new ViewParameters();
 	}
 

@@ -7,7 +7,7 @@ import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 
 
-public class ViewParameters extends VObject {
+public class ViewOperations extends VObject {
 
 	private static final HashMap<String, ColumnRendering> columnMap= new HashMap<>();
 
@@ -19,10 +19,10 @@ public class ViewParameters extends VObject {
 
 	}
 	
-	public ViewParameters() {
+	public ViewOperations() {
         super();
-        this.setTitle("view.parameters");
-        this.setSessionName("viewParameters");
+        this.setTitle("view.operations");
+        this.setSessionName("viewOperations");
     	this.setDefaultPaginationSize(20);
         this.setConstantVObject(new ConstantVObject(columnMap));
     }

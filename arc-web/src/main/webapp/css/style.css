@@ -120,17 +120,6 @@ li.nav-item {
     margin-bottom: auto;
 }
 
-/* @media (min-width:768px) { */
-/* 	li.nav-item { */
-/* 	    width: 8rem; */
-/* 	} */
-/* } */
-
-/* @media (min-width:992px) { */
-/* 	li.nav-item { */
-/* 	    width: 11rem; */
-/* 	} */
-/* } */
 .navbar-brand {
     font-size: 2rem;
 }
@@ -1149,7 +1138,7 @@ body.help {
 }
 
 .vw-menu-bar {
-	width:11rem;
+	width:12rem;
 }
 
 .btn-width {

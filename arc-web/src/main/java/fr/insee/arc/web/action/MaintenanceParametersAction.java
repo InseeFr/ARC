@@ -1,28 +1,9 @@
 package fr.insee.arc.web.action;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tools.ant.util.FileUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
@@ -30,27 +11,23 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
-import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.web.model.ManageParametersModel;
+import fr.insee.arc.web.model.MaintenanceParametersModel;
 import fr.insee.arc.web.util.VObject;
 
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class ManageParametersAction extends ArcAction<ManageParametersModel>  {
+public class MaintenanceParametersAction extends ArcAction<MaintenanceParametersModel>  {
 
-	private static final String RESULT_SUCCESS = "/jsp/manageParameters.jsp";
+	private static final String RESULT_SUCCESS = "/jsp/MaintenanceParameters.jsp";
 
-	private static final Logger LOGGER = LogManager.getLogger(ManageParametersAction.class);
+	private static final Logger LOGGER = LogManager.getLogger(MaintenanceParametersAction.class);
 
     private VObject viewParameters;
 
 	@Override
-	protected void putAllVObjects(ManageParametersModel arcModel) {
+	protected void putAllVObjects(MaintenanceParametersModel arcModel) {
 		setViewParameters(this.vObjectService.preInitialize(arcModel.getViewParameters()));
 		
 		putVObject(getViewParameters(), t -> initializeParameters());
@@ -58,7 +35,7 @@ public class ManageParametersAction extends ArcAction<ManageParametersModel>  {
 
     public void initializeParameters() {
         HashMap<String, String> defaultInputFields = new HashMap<>();
-        this.vObjectService.initialize(viewParameters, new PreparedStatementBuilder("SELECT description, key ,val FROM arc.parameter"),  "arc.parameter", defaultInputFields);
+        this.vObjectService.initialize(viewParameters, new PreparedStatementBuilder("SELECT row_number() over (order by description,key,val) as i, key ,val, description FROM arc.parameter"),  "arc.parameter", defaultInputFields);
     }
 
     @RequestMapping("/selectParameters")
@@ -109,7 +86,7 @@ public class ManageParametersAction extends ArcAction<ManageParametersModel>  {
 
 	@Override
 	public String getActionName() {
-		return "manageParameters";
+		return "MaintenanceParameters";
 	}
 
     
