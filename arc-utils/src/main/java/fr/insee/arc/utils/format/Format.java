@@ -238,7 +238,7 @@ public class Format implements IConstanteCaractere {
     }
 
     /**
-     * Transforme le nom d'une balise.</br>
+     * Transforme le nom d'une balise en nom compatible avec une base de donnéees</br>
      * Exemple : </br>
      * <code>n4ds:s21.g00.30.001</code> devient <code>s21_g00_30_001</code>
      * @param attribut
@@ -255,8 +255,18 @@ public class Format implements IConstanteCaractere {
 
     public static String toBdVal(String attribut) {
         return "v_" + toBdRaw(attribut);
-
     }
+
+    public static String toBdMain(String attribut) {
+        return "m_" + toBdRaw(attribut);
+    }
+    
+    public static String toBdRemovePrefix(String attribut)
+    {
+    	return attribut.substring(2);
+    }
+    
+    
 
     public static void removeToIndex(List<String> liste, int fatherIndex) {
 
