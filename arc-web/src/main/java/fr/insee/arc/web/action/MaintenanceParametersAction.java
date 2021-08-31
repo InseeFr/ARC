@@ -20,7 +20,7 @@ import fr.insee.arc.web.util.VObject;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MaintenanceParametersAction extends ArcAction<MaintenanceParametersModel>  {
 
-	private static final String RESULT_SUCCESS = "/jsp/MaintenanceParameters.jsp";
+	private static final String RESULT_SUCCESS = "/jsp/maintenanceParameters.jsp";
 
 	private static final Logger LOGGER = LogManager.getLogger(MaintenanceParametersAction.class);
 
