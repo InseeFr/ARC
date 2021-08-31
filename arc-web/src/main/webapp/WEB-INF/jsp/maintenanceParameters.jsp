@@ -14,7 +14,7 @@
 	<head>
 <title><spring:message code="header.export"/></title>
 	<c:import url="tiles/defaulthead.jsp">
-		<c:param name="pageJs" value="/js/MaintenanceParameters.js" />
+		<c:param name="pageJs" value="/js/maintenanceParameters.js" />
 	</c:import>
 	</head>
 </c:if>
