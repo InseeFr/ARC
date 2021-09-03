@@ -14,7 +14,7 @@ public class TestLoggers {
 
 	public static String sendLoggersTest(String origin)
 	{
-		String message=origin+GENERATED_MESSAGE_TO_TEST_LOGGERS;
+		String message=origin+" "+GENERATED_MESSAGE_TO_TEST_LOGGERS;
 		LoggerHelper.error(LOGGER, message);
 		LoggerHelper.warn(LOGGER, message);
 		LoggerHelper.info(LOGGER, message);
