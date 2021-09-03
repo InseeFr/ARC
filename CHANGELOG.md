@@ -18,3 +18,9 @@ All notable changes to this project will be documented in this file.
 - adds /healthcheck to webservice
 - improves error message on key-value loading failing
 - adds clarifying report to files marked KO because one other file in the archive could not be read
+
+## 91.1.1 - 2021-09-03
+- database and application version now directly picked from git metadata
+- tabs in gui are now persitant
+- new maintenance menu to set parameters and test loggers
+- bugfixes in gui
