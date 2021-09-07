@@ -137,6 +137,20 @@ INSERT INTO arc.ext_etat_jeuderegle values ('arc.prod','PRODUCTION','TRUE','FALS
 INSERT INTO arc.ext_etat_jeuderegle values ('inactif','INACTIF','FALSE','FALSE') ON CONFLICT DO NOTHING;
 
 
+-- patch to delete historical double records
+do $$ 
+declare doublon int;
+begin
+SELECT count(*) into doublon FROM (SELECT id from arc.ext_mod_periodicite group by id having count(*)>1) u;
+
+if (doublon>0) then 
+DROP TABLE arc.ext_mod_periodicite;
+END IF;
+
+exception when others then end;
+$$;
+
+
 CREATE TABLE IF NOT EXISTS arc.ext_mod_periodicite 
 ( 
 id text, 
