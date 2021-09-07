@@ -5,16 +5,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import org.json.JSONObject;
 
-import fr.insee.arc.core.service.ApiReceptionService;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.Record;
 import fr.insee.arc.ws.services.restServices.setRules.pojo.SetRulesPojo;
 
@@ -33,14 +29,14 @@ public class WebServiceHelloTest {
     public static void testHello() throws Exception
     {
     	URL url = new URL("http://localhost:28080/arc-ws/hello");
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    	HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		String charset = "UTF-8";
 		
 		conn.setDoOutput(true);
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Accept-Charset", charset);
 		conn.setRequestProperty("Content-Type", "application/json; utf-8"); 
-		
+		 
 		if (conn.getResponseCode() != 200) {
 			throw new RuntimeException("Failed : HTTP error code : "
 				+ conn.getResponseCode());

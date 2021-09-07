@@ -109,4 +109,11 @@ public class ManipStringTest {
 		assertEquals("c", ManipString.substringAfterLast("a-b-c", "-"));
 	}
 
+	// compress
+	@Test
+	public void compress() {
+		String testValue1="arêtes de po¹ssôn";
+		assertEquals(testValue1,ManipString.decompress(ManipString.compress(testValue1)));
+	}
+	
 }
