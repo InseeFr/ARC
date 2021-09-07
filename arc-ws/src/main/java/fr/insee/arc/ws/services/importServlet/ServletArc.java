@@ -1,6 +1,11 @@
 package fr.insee.arc.ws.services.importServlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -9,8 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.ws.actions.HealthCheck;
 import fr.insee.arc.ws.actions.InitiateRequest;
@@ -23,6 +30,8 @@ public class ServletArc extends HttpServlet {
 
     public static final String CONF_DAO_FACTORY = "daofactory";
 
+    private static final List<String> DEFAULT_SOURCE = Arrays.asList("mapping", "nomenclature", "metadata");
+    
     private static final Logger LOGGER = LogManager.getLogger(ServletArc.class);
 
 
@@ -50,7 +59,7 @@ public class ServletArc extends HttpServlet {
         JSONObject dsnRequest = null;
 
         if (request.getParameter("requests") != null) {
-            dsnRequest = new JSONObject(request.getParameter("requests"));
+        	dsnRequest = buildRequest(request);
             LoggerHelper.info(LOGGER, "ServletArc.doPost(): Requête reçue : " + dsnRequest);
             SendResponse resp = new SendResponse(response);
             try {
@@ -64,4 +73,37 @@ public class ServletArc extends HttpServlet {
         }
     }
 
+    /**
+     * read JSON parameters provide by the http request
+     * return the JSON object
+     * @param request
+     * @return
+     */
+    private JSONObject buildRequest(HttpServletRequest request) {
+
+        // get parameters from request
+    	JSONObject returned = new JSONObject(request.getParameter("requests"));
+        
+    	// exit if SOURCE key is not specified
+    	if (returned.isNull(JsonKeys.SOURCE.getKey()))
+    	{
+    		return returned;
+    	}
+    	
+    	// if any correct source provided, exit
+    	JSONArray sourcesProvidedByClient=returned.getJSONArray(JsonKeys.SOURCE.getKey());
+		for (int i = 0; i < sourcesProvidedByClient.length(); i++) {
+			if (DEFAULT_SOURCE.contains(sourcesProvidedByClient.getString(i))) {
+				return returned;
+			}
+		}
+
+		// if no sources provided, add all the default sources to be retrieved
+        returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);
+        
+        return returned;
+
+    }
+
+    
 }

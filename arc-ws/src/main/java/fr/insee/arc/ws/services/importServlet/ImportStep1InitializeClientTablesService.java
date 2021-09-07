@@ -1,11 +1,16 @@
 package fr.insee.arc.ws.services.importServlet;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.utils.JsonKeys;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.ws.actions.SendResponse;
 import fr.insee.arc.ws.dao.ClientDao;
 import fr.insee.arc.ws.dao.ClientDaoImpl;
@@ -13,6 +18,8 @@ import fr.insee.arc.ws.dao.DAOException;
 
 public class ImportStep1InitializeClientTablesService {
 
+	protected static final Logger LOGGER = LogManager.getLogger(ImportStep1InitializeClientTablesService.class);
+	
 	private ClientDao clientDao;
 	private JSONObject dsnRequest;
 
@@ -32,40 +39,74 @@ public class ImportStep1InitializeClientTablesService {
 
 	private ArrayList<ArrayList<String>> tablesMetierNames;
 
+	private List<String> sources;
 	
+	private static final String SPECIAL_ENVIRONMENT="arc";
 
-public ImportStep1InitializeClientTablesService buildParam()
-{
-	timestamp = System.currentTimeMillis();
+	public ImportStep1InitializeClientTablesService buildParam() {
+		timestamp = System.currentTimeMillis();
 
-	environnement = dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());
+		environnement = dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());
 
-	client = dsnRequest.getString(JsonKeys.CLIENT.getKey());
-	
-	famille = dsnRequest.getString(JsonKeys.FAMILLE.getKey());
-	
-	this.tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.timestamp,
-			dsnRequest);
-	
-	return this;
-}
+		client = dsnRequest.getString(JsonKeys.CLIENT.getKey());
 
-	
-	
+		famille = dsnRequest.getString(JsonKeys.FAMILLE.getKey());
+
+		sources = makeSource();
+
+		this.tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.timestamp, dsnRequest);
+
+		return this;
+	}
+
+	private List<String> makeSource() {
+		JSONArray source = (JSONArray) dsnRequest.getJSONArray(JsonKeys.SOURCE.getKey());
+		List<String> returned = new ArrayList<>();
+		for (int i = 0; i < source.length(); i++) {
+			returned.add(source.getString(i));
+		}
+		return returned;
+	}
+
+	private void createTableMappingIfNeeded() {
+		if (!sources.contains("mapping")) {
+			return;
+		}
+		LoggerHelper.debug(LOGGER, "Mapping tables needed");
+		if (!environnement.equalsIgnoreCase(SPECIAL_ENVIRONMENT)) {
+			this.clientDao.verificationClientFamille(this.timestamp, this.client, this.famille, this.environnement);
+			tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.timestamp, this.dsnRequest);
+			this.clientDao.createImages(this.timestamp, client, environnement, tablesMetierNames);
+		}
+	}
+
+	private void createTableNomenclatureIfNeeded() {
+		if (!sources.contains("nomenclature")) {
+			return;
+		}
+		this.clientDao.createNmcl(this.timestamp, client, environnement);
+	}
+
+	public void createTableMetadataIfNeeded() {
+		if (!sources.contains("metadata")) {
+			return;
+		}
+		this.clientDao.createTableMetier(this.timestamp, client, this.famille, environnement);
+		this.clientDao.createVarMetier(this.timestamp, client, this.famille, environnement);
+		this.clientDao.createTableFamille(this.timestamp, client, environnement);
+		this.clientDao.createTablePeriodicite(this.timestamp, client, environnement);
+	}
+
 	public void execute(SendResponse resp) {
 
 		try {
 
-			if (!environnement.equalsIgnoreCase("arc")) {
-				this.clientDao.verificationClientFamille(this.timestamp, this.client, this.famille, this.environnement);
-				tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.timestamp, this.dsnRequest);
-				this.clientDao.createImages(this.timestamp, client, environnement, tablesMetierNames);
-				this.clientDao.createTableMetier(this.timestamp, client, this.famille, environnement);
-				this.clientDao.createVarMetier(this.timestamp, client, this.famille, environnement);
-			}
-			this.clientDao.createNmcl(this.timestamp, client, environnement);
-			this.clientDao.createTableFamille(this.timestamp, client, environnement);
-			this.clientDao.createTablePeriodicite(this.timestamp, client, environnement);
+			createTableMappingIfNeeded();
+			
+			createTableNomenclatureIfNeeded();
+			
+			createTableMetadataIfNeeded();
+			
 			// on renvoie l'id du client avec son timestamp
 			resp.send(ApiService.dbEnv(environnement) + client + "_" + this.timestamp);
 			resp.endSending();

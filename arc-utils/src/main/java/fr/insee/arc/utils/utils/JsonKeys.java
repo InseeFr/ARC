@@ -30,7 +30,8 @@ public enum JsonKeys {
 	,PHASE("phase")
 	,FILENAME("filename")
 	,FILEDATA("filedata")
-	
+	,SOURCE("source")
+
 	;
 	
 	private String key;
