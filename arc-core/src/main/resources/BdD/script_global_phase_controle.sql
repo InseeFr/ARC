@@ -15,15 +15,15 @@ CREATE TABLE IF NOT EXISTS arc.ihm_controle_regle
   id_regle integer NOT NULL, 
   todo text, 
   commentaire text,
-  xsd_ordre int,
-  xsd_label_fils text,
-  xsd_role text,
   CONSTRAINT ihm_controle_regle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version, id_regle), 
   CONSTRAINT ihm_controle_regle_jeuderegle_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) 
       REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE 
       ON UPDATE CASCADE ON DELETE CASCADE 
 );
 
+ALTER TABLE arc.ihm_controle_regle add column IF NOT exists xsd_ordre int;
+ALTER TABLE arc.ihm_controle_regle add column IF NOT exists xsd_label_fils text;
+ALTER TABLE arc.ihm_controle_regle add column IF NOT exists xsd_role text;
 ALTER TABLE arc.ihm_controle_regle add column IF NOT exists blocking_threshold text;
 ALTER TABLE arc.ihm_controle_regle add column IF NOT exists error_row_processing text default 'e';
 do $$ begin ALTER TABLE arc.ihm_controle_regle add constraint ihm_controle_regle_seuil_bloquant_check check (blocking_threshold ~ '^(>|>=)[0123456789.]+[%u]$'); exception when others then end; $$;

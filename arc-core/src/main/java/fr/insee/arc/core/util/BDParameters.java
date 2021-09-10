@@ -38,6 +38,7 @@ public class BDParameters {
 	        requete.append("\n ( ");
 	        requete.append("\n key text, ");
 	        requete.append("\n val text, ");
+	        requete.append("\n description text, ");
 	        requete.append("\n CONSTRAINT parameter_pkey PRIMARY KEY (key) ");
 	        requete.append("\n ); ");
 	        
@@ -96,6 +97,7 @@ public class BDParameters {
 		try {
 			
 			PreparedStatementBuilder requete=new PreparedStatementBuilder();
+			
 			requete.append("UPDATE  "+parameterTable+" ");
 			requete.append("SET val="+requete.quoteText(val)+" ");
 			if (!StringUtils.isBlank(description))
