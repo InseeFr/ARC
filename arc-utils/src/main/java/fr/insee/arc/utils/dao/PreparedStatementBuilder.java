@@ -98,7 +98,7 @@ public String quoteText(String s)
  */
 public String quoteTextWithoutBinding(String p)
 {
-	return "'"+p.replace("'", "''")+"'";
+	return p==null?"NULL":"'"+p.replace("'", "''")+"'";
 }
 
 /**
