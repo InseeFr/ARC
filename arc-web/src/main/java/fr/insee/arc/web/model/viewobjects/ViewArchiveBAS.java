@@ -12,6 +12,7 @@ public class ViewArchiveBAS extends VObject {
         
         this.setTitle("view.envManagement.archive");
         this.setSessionName("viewArchiveBAS");
+    	this.setDefaultPaginationSize(20);
         
         this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
 
