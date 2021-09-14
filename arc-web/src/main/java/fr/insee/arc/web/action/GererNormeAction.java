@@ -897,8 +897,8 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 					.append("  (id_regle, id_norme, validite_inf, validite_sup,  version , periodicite, variable_sortie, expr_regle_col, commentaire) ")
 					.append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.viewMapping.getTable() + "),0)+row_number() over () ,")
 					.append(requete.quoteText(viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.ID_NORME.getValue()).get(0))+ ", ")
-					.append(requete.quoteText(viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VALIDITE_INF.getValue()).get(0))+ ", ")
-					.append(requete.quoteText(viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VALIDITE_SUP.getValue()).get(0))+ ", ")
+					.append(requete.quoteText(viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VALIDITE_INF.getValue()).get(0))+ "::date, ")
+					.append(requete.quoteText(viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VALIDITE_SUP.getValue()).get(0))+ "::date, ")
 					.append(requete.quoteText(viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VERSION.getValue()).get(0))+ ", ")
 					.append(requete.quoteText(viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.PERIODICITE.getValue()).get(0))+ ", ")
 					.append("  liste_colonne.nom_variable_metier,").append("  null,").append(
