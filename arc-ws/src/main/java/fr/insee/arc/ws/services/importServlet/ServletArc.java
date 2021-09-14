@@ -1,11 +1,8 @@
 package fr.insee.arc.ws.services.importServlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,10 +24,14 @@ import fr.insee.arc.ws.dao.DAOException;
 public class ServletArc extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+	
+    public static final String NOMENCLATURE = "nomenclature";
+    public static final String METADATA = "metadata";
+    public static final String MAPPING = "mapping";
 
     public static final String CONF_DAO_FACTORY = "daofactory";
-
-    private static final List<String> DEFAULT_SOURCE = Arrays.asList("mapping", "nomenclature", "metadata");
+    
+    private static final List<String> DEFAULT_SOURCE = Arrays.asList(MAPPING, NOMENCLATURE, METADATA);
     
     private static final Logger LOGGER = LogManager.getLogger(ServletArc.class);
 
@@ -60,7 +61,9 @@ public class ServletArc extends HttpServlet {
 
         if (request.getParameter("requests") != null) {
         	dsnRequest = buildRequest(request);
+        	
             LoggerHelper.info(LOGGER, "ServletArc.doPost(): Requête reçue : " + dsnRequest);
+            
             SendResponse resp = new SendResponse(response);
             try {
                 new InitiateRequest(dsnRequest).doRequest(resp);
@@ -83,11 +86,11 @@ public class ServletArc extends HttpServlet {
 
         // get parameters from request
     	JSONObject returned = new JSONObject(request.getParameter("requests"));
-        
-    	// exit if SOURCE key is not specified
+    	
+    	// if SOURCE key is not specified, add all the default sources to be retrieved
     	if (returned.isNull(JsonKeys.SOURCE.getKey()))
     	{
-    		return returned;
+    		return returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);
     	}
     	
     	// if any correct source provided, exit
@@ -99,9 +102,7 @@ public class ServletArc extends HttpServlet {
 		}
 
 		// if no sources provided, add all the default sources to be retrieved
-        returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);
-        
-        return returned;
+        return returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);
 
     }
 

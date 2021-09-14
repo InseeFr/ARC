@@ -4,7 +4,7 @@
 
     <servlet>
     <servlet-name>Arc</servlet-name>
-    <servlet-class>fr.insee.arc.ws.servlet.ServletArc</servlet-class>
+    <servlet-class>fr.insee.arc.ws.services.importServlet.ServletArc</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>Arc</servlet-name>

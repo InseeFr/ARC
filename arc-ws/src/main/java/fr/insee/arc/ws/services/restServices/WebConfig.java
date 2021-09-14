@@ -16,7 +16,7 @@ import fr.insee.arc.utils.ressourceUtils.PropertySourcesHelper;
 @Configuration
 @EnableWebMvc
 @ImportResource("/WEB-INF/applicationContext.xml")
-@ComponentScan({ "fr.insee.arc.ws.services.rest", "fr.insee.arc.utils" })
+@ComponentScan({ "fr.insee.arc.ws.services.restServices", "fr.insee.arc.utils" })
 public class WebConfig implements WebMvcConfigurer {
 	
 	@Bean
