@@ -14,7 +14,7 @@ ALTER TABLE arc.parameter add column IF NOT exists description text;
 -- mvcc rule for no update if same value, no insert if key
 CREATE or REPLACE RULE parameter_description_update AS 
 ON UPDATE TO arc.parameter
-where NEW.description = OLD.description
+where NEW.val = OLD.val and NEW.description = OLD.description
 do instead nothing;
 
 CREATE OR REPLACE RULE parameter_description_insert AS 
