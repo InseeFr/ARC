@@ -3,6 +3,7 @@ package fr.insee.arc.web.action;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -123,8 +124,15 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
-        requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T)+" order by date_entree desc");
+        requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T)+" ");
 		
+        // the most recent files processed must be shown first by default
+        // set this default order
+        if (getViewPilotageBAS().getHeaderSortDLabels() == null) {
+        	getViewPilotageBAS().setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
+        	getViewPilotageBAS().setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
+        }
+        
 		this.vObjectService.initialize(
 				getViewPilotageBAS(), requete, 
 				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields,
