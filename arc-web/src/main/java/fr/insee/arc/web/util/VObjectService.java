@@ -897,7 +897,7 @@ public class VObjectService {
 
 
                                 } else {
-                                    s.append(" (" + headersDLabel.get(i) + "::bigint)" + condtionOR);
+                                    s.append(" (" + headersDLabel.get(i) + ")" + condtionOR);
 
                                 }
                                 s.append(" OR");
