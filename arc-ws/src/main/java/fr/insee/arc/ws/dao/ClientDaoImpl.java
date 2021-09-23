@@ -351,7 +351,7 @@ public class ClientDaoImpl implements ClientDao {
     public void updatePilotage(long timestamp, String environnement, String tableSource) {
         LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.updatePilotage()");
         Connection connection = null;
-
+        
         String client = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(tableSource, "."), "_").toUpperCase();
 
         StringBuilder columnClient = new StringBuilder();
@@ -567,7 +567,14 @@ public class ClientDaoImpl implements ClientDao {
         }
     }
 
-    public String getAClientTable(String client) throws Exception {
+    /**
+     * 
+     * @param client
+     * @param isSourceListTable : is it the table containing the list of id_source of the files to be marked ?
+     * @return
+     * @throws Exception
+     */
+    public String getAClientTable(String client, boolean isSourceListTable) throws Exception {
         String clientLc = client.toLowerCase();
         String schema = ManipString.substringBeforeFirst(clientLc, ".");
         String clientDb = ManipString.substringAfterFirst(clientLc, ".").replace("_", "\\_") + "%";
@@ -579,7 +586,7 @@ public class ClientDaoImpl implements ClientDao {
         	.append("SELECT schemaname||'.'||tablename FROM pg_tables")
         	.append(" WHERE tablename like " + requete.quoteText(clientDb))
         	.append(" AND schemaname=" + requete.quoteText(schema))
-        	.append(" AND tablename not like "+requete.quoteText("%id\\_source%"));
+        	.append(" AND tablename "+(isSourceListTable?"":"NOT")+" like "+requete.quoteText("%id\\_source%"));
         
         
         String r = UtilitaireDao.get("arc").getString(null,requete);
@@ -589,9 +596,14 @@ public class ClientDaoImpl implements ClientDao {
         return r;
 
     }
+    
+    public String getAClientTable(String client) throws Exception 
+    {
+    	return getAClientTable(client,false);
+    }
 
     public String getIdTable(String client) throws Exception {
-        return getAClientTable(client);
+        return getAClientTable(client,true);
     }
 
     public void dropTable(String clientTable) throws Exception {
