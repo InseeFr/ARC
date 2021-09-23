@@ -35,7 +35,7 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<div class="col-md-5">
+		<div class="col-md-6">
 			<!-- norm list -->
 			<c:set var="view" value="${viewNorme}"  scope="request"/>
 			<c:import url="tiles/templateVObject.jsp">
@@ -77,7 +77,7 @@
 	
 			</c:import>
 		</div>
-	<div class="col-md">
+	<div class="col-md-3">
 		<!-- rule set list -->
 		<c:set var="view" value="${viewJeuxDeRegles}"  scope="request"/>
 		<c:import url="tiles/templateVObject.jsp">
