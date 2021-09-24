@@ -5,6 +5,7 @@
 	trimDirectiveWhitespaces="true"
 %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri = "http://www.springframework.org/tags/form" prefix = "form"%>
 <%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${current_locale}"/>
@@ -18,6 +19,7 @@
 	</c:import>
 	</head>
 </c:if>
+<!--   <script>$(function(){$(".datepicker").datepicker();});</script> -->
 <body class="bg-body">
 
 <form
@@ -36,9 +38,9 @@
 	<div class="container-fluid">
 
 		<div class="row">
-				<div class="col-md-12">
-					<div class="row">
-						<div class="col-md">
+			<div class="col-md-12">
+				<div class="row">
+					<div class="col-md">
 						<div id="viewOperations">
 							<button
 								id="viewOperations.generateErrorMessageInLogs"
@@ -48,9 +50,28 @@
 								scope="viewOperations;"
 								value="<spring:message code="gui.button.generateErrorMessageInLogs"/>"
 							><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.generateErrorMessageInLogs"/></button>
-							</div>
+                        </div>
+                        <div id="viewOperations">
+                            <form:form method="POST" action="/deleteLastImportRequestOperations" modelAttribute="deleteRequest">
+                                <button
+                                    id="viewOperations.deleteLastImportRequest"
+                                    class="btn btn-secondary btn-sm"
+                                    type="submit"
+                                    doAction="deleteLastImportRequestOperations"
+                                    scope="viewOperations;"
+                                    value="<spring:message code="gui.button.deleteLastImportRequest"/>"
+                                ><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.deleteLastImportRequest"/></button>
+                                <spring:message code="label.client.software"/>
+                                <form:select path = "ihmClient">
+                                    <form:option value = "NONE" label = "Select"/>
+                                    <form:options items = "${ihmClients}" />
+                                </form:select>   
+                                <spring:message code="label.import.date.low"/><input type="date" class="datepicker" id="lowDate">
+                                <spring:message code="label.import.date.high"/><input type="date" class="datepicker" id="highDate">
+                            </form:form>
 						</div>
 					</div>
+				</div>
 			</div>			
 		</div>
 	</div>	
