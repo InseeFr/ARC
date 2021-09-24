@@ -38,20 +38,20 @@
 
 <div class="mt-4-5"></div>
 
-<nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
-		<ul class="navbar-nav flex-column ml-1 mr-1 mb-4">
+<nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse show pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
+		<ul class="navbar-nav flex-column ml-1 mr-0 mb-4">
 			<li><h5 class="">Accueil</h5></li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'home' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse" href="index"><spring:message
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'home' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse" href="index"><spring:message
 			code="header.home"/></a></li>
 			<li><h5 class="mt-4">Règles</h5></li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'familyManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'familyManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectFamilleNorme"><spring:message code="header.familyManagement"/></a>
 			</li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'normManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'normManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectNorme"><spring:message code="header.normManagement"/></a></li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'externalFile' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'externalFile' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectListNomenclatures"><spring:message code="header.externalFile"/></a></li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'webserviceManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'webserviceManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectWebserviceContext"><spring:message code="header.webserviceManagement"/></a></li>
 			<li><h5 class="mt-4">Bacs à sable</h5></li>
 			<li class="nobullet mt-1 mb-1 text-left">
@@ -60,22 +60,22 @@
 						<option value="${bas}" ${bas == bacASable ? "class='font-weight-bold' selected" : ''}>${envMap.get(bas)}</option>
 					</c:forEach>
 				</select></li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'envManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse" href="enterPilotageBAS"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'envManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse" href="enterPilotageBAS"
 				onclick="$(this).attr('href', 'enterPilotageBAS?bacASable='+$('#environnementTravail option:selected').val());"><spring:message code="header.envManagement"/></a></li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'export' ? ' font-weight-bold' : ''}"" data-target=".navbar-collapse" href="selectExport"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'export' ? ' font-weight-bold' : ''}"" data-target=".navbar-collapse" href="selectExport"
 				onclick="$(this).attr('href', 'selectExport?bacASable='+$('#environnementTravail option:selected').val());"><spring:message code="header.export"/></a></li>
 			
 			<li><h5 class="mt-4">Maintenance</h5></li>
 			<c:if test="${userManagementActive}">
-				<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'userManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+				<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'userManagement' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 					href="selectGererUtilisateurs"><spring:message code="header.userManagement"/></a>
 				</li>
 			</c:if>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'parameters' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'parameters' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectParameters"><spring:message code="header.parameters"/></a></li>
-			<li class="nav-item mt-1 mb-1 text-left"><a class="nav-link${param.currentPage == 'operations' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
+			<li class="nav-item mt-1 mb-1 text-left"><a class="pl-1 pr-1 nav-link${param.currentPage == 'operations' ? ' font-weight-bold' : ''}" data-target=".navbar-collapse"
 				href="selectOperations"><spring:message code="header.operations"/></a></li>
     	</ul>
 </nav>
 
-<div class="float-left vh-menu-bar vw-menu-bar left-navbar collapse"></div>
+<div class="float-left vh-menu-bar vw-menu-bar left-navbar collapse show"></div>

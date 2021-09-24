@@ -27,8 +27,8 @@ public class ViewCalendrier extends VObject {
 		put("id", new ColumnRendering(false, "label.id", "0%", "text", null, false));
 		put("id_norme", new ColumnRendering(false, "label.norm", "0", "text", null, true));
 		put("periodicite", new ColumnRendering(false, "label.periodicity", "0", "text", null, true));
-		put("validite_inf", new ColumnRendering(true, "label.validity.min", "30%", "text", null, true));
-		put("validite_sup", new ColumnRendering(true, "label.validity.max", "30%", "text", null, true));
+		put("validite_inf", new ColumnRendering(true, "label.validity.min", "35%", "text", null, true));
+		put("validite_sup", new ColumnRendering(true, "label.validity.max", "35%", "text", null, true));
 		put("etat", new ColumnRendering(true, "label.state", "30%", "select",
 			new PreparedStatementBuilder("select id, val from arc.ext_etat order by id desc"), true));
 

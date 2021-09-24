@@ -1,5 +1,11 @@
 @charset "UTF-8";
 
+/* base font size from rem */
+html {
+	font-size: calc(0.6vw + 6px);
+}
+
+
 /* Override bootstrap css */
 
 .w-fitcontent
@@ -83,9 +89,9 @@ textarea
 }
 
 .btn-group-sm>.btn, .btn-sm {
-    padding: .25rem .5rem;
+    padding: .25rem .3rem 0.25rem 0.3rem;
     font-size: .8rem;
-    line-height: 1.25;
+    line-height: 0.8rem;
     border-radius: .2rem !important;
     margin: 0.25rem;
 }
@@ -220,7 +226,7 @@ th.sort {
 body {
 	background-color: #F7F7FF;
     position: relative;
-    font-size : 0.8rem;
+    font-size : 0.75rem;
     line-height: 1.25rem;
 }
 
@@ -309,6 +315,8 @@ input {
 	font-family: inherit;
 	cursor: hand;
 	cursor: pointer;
+	border: 1px solid #aaa;
+	padding-bottom: 2px;
 }
 
 .hand {
@@ -317,8 +325,8 @@ input {
 }
 
 input[type='checkbox'] {
-	width: 13px;
-	margin-left: 3px;
+	width: 0.75rem;
+    margin-left: 0.05rem;
 }
 
 input[type='text'] {
@@ -803,7 +811,7 @@ h2 {  font-weight: bold;
 h3 {
 	color: black;
 	font-weight: bold;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 }
 
 table.entete {
@@ -851,7 +859,7 @@ table.fixedHeader thead th {
 }
 
 table.fixedHeader thead th:first-child {
-	width: 23px;
+	width: 1rem;
 }
 
 table.fixedHeader thead td {
@@ -1138,7 +1146,7 @@ body.help {
 }
 
 .vw-menu-bar {
-	width:12rem;
+	width:9.75rem;
 }
 
 .btn-width {

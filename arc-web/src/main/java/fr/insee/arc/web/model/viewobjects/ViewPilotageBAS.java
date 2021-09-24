@@ -28,7 +28,7 @@ public class ViewPilotageBAS extends VObject {
             private static final long serialVersionUID = 3294598955186326004L;
 
             {
-                put("date_entree", new ColumnRendering(true, "label.date.entry", "10%", "text", null, true));
+                put("date_entree", new ColumnRendering(true, "label.date.entry", "17%", "text", null, true));
             }
         }
 
