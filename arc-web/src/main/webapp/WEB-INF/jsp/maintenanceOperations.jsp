@@ -65,9 +65,13 @@
                                 <form:select path = "ihmClient">
                                     <form:option value = "NONE" label = "Select"/>
                                     <form:options items = "${ihmClients}" />
-                                </form:select>   
-                                <spring:message code="label.import.date.low"/><input type="date" class="datepicker" id="lowDate">
-                                <spring:message code="label.import.date.high"/><input type="date" class="datepicker" id="highDate">
+                                </form:select>
+                                <form:select path = "environment">
+                                    <form:option value = "NONE" label = "Select"/>
+                                    <form:options items = "${environments}" />
+                                </form:select>
+                                <spring:message code="label.import.date.low"/><form:input type="date" class="datepicker" path="lowDate"/>
+                                <spring:message code="label.import.date.high"/><form:input type="date" class="datepicker" path="highDate"/>
                             </form:form>
 						</div>
 					</div>
