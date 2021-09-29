@@ -61,17 +61,21 @@
                                     scope="viewOperations;"
                                     value="<spring:message code="gui.button.deleteLastImportRequest"/>"
                                 ><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.deleteLastImportRequest"/></button>
-                                <spring:message code="label.client.software"/>
-                                <form:select path = "ihmClient">
+                                <span style="margin:1px;background-color:#eeeeee;">
+                                <span style="padding:0px 10px 0px 10px"><spring:message code="label.client.software"/></span>
+                                <form:select path = "ihmClient" required="required">
                                     <form:option value = "NONE" label = "Select"/>
                                     <form:options items = "${ihmClients}" />
-                                </form:select>
-                                <form:select path = "environment">
+                                </form:select></span>
+                                <span style="margin:1px;background-color:#eeeeee;">
+                                <span style="padding:0px 10px 0px 10px"><spring:message code="label.client.environment"/></span>
+                                <form:select path = "environment" required="required">
                                     <form:option value = "NONE" label = "Select"/>
                                     <form:options items = "${environments}" />
                                 </form:select>
-                                <spring:message code="label.import.date.low"/><form:input type="date" class="datepicker" path="lowDate"/>
-                                <spring:message code="label.import.date.high"/><form:input type="date" class="datepicker" path="highDate"/>
+                                </span>
+                                <span style="margin:1px;background-color:#eeeeee;"><span style="padding:0px 10px 0px 10px"><spring:message code="label.import.date.low"/></span><form:input type="date" class="datepicker" path="lowDate" required="required"/></span>
+                                <span style="margin:1px;background-color:#eeeeee;"><span style="padding:0px 10px 0px 10px"><spring:message code="label.import.date.high"/></span><form:input type="date" class="datepicker" path="highDate" required="required"/></span>
                             </form:form>
 						</div>
 					</div>

@@ -31,39 +31,62 @@ import fr.insee.arc.web.util.VObject;
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperationsModel>  {
-
-	private static final String RESULT_SUCCESS = "/jsp/maintenanceOperations.jsp";
-
-	private static final Logger LOGGER = LogManager.getLogger(MaintenanceOperationsAction.class);
-
-	private static final String IHM_CLIENTS = "ihmClients";
-	private static final String IHM_ENVIRONMENTS = "environments";
-
+    
+    private static final String RESULT_SUCCESS = "/jsp/maintenanceOperations.jsp";
+    
+    private static final Logger LOGGER = LogManager.getLogger(MaintenanceOperationsAction.class);
+    
+    private static final String IHM_CLIENTS = "ihmClients";
+    private static final String IHM_ENVIRONMENTS = "environments";
+    
     private static final String IHM_DELETE_REQUEST = "deleteRequest";
+
+    private static final String COL_GENERATION_COMPOSITE = "generation_composite";
+    private static final String COL_JOINTURE = "jointure";
+    private static final String COL_DATE_CLIENT = "date_client";
+    private static final String COL_CLIENT = "client";
+    private static final String COL_TO_DELETE = "to_delete";
+    private static final String COL_O_CONTAINER = "o_container";
+    private static final String COL_V_CONTAINER = "v_container";
+    private static final String COL_CONTAINER = "container";
+    private static final String COL_DATE_ENTREE = "date_entree";
+    private static final String COL_VERSION = "version";
+    private static final String COL_VALIDITE_SUP = "validite_sup";
+    private static final String COL_VALIDITE_INF = "validite_inf";
+    private static final String COL_ETAPE = "etape";
+    private static final String COL_NB_ESSAIS = "nb_essais";
+    private static final String COL_NB_ENR = "nb_enr";
+    private static final String COL_TAUX_KO = "taux_ko";
+    private static final String COL_RAPPORT = "rapport";
+    private static final String COL_DATE_TRAITEMENT = "date_traitement";
+    private static final String COL_ETAT_TRAITEMENT = "etat_traitement";
+    private static final String COL_PHASE_TRAITEMENT = "phase_traitement";
+    private static final String COL_PERIODICITE = "periodicite";
+    private static final String COL_VALIDITE = "validite";
+    private static final String COL_ID_NORME = "id_norme";
+    private static final String COL_ID_SOURCE = "id_source";
+
     
     private static final List<String> COL_PILOTAGE_FICHIER = Arrays.asList(
-        "id_source", "id_norme", "validite", "periodicite", "phase_traitement", "etat_traitement", "date_traitement",
-        "rapport", "taux_ko", "nb_enr", "nb_essais", "etape", "validite_inf", "validite_sup", "version", "date_entree",
-        "container", "v_container", "o_container", "to_delete", "client", "date_client", "jointure",
-        "generation_composite"
+        COL_ID_SOURCE, COL_ID_NORME, COL_VALIDITE, COL_PERIODICITE, COL_PHASE_TRAITEMENT, COL_ETAT_TRAITEMENT,
+        COL_DATE_TRAITEMENT, COL_RAPPORT, COL_TAUX_KO, COL_NB_ENR, COL_NB_ESSAIS, COL_ETAPE, COL_VALIDITE_INF,
+        COL_VALIDITE_SUP, COL_VERSION, COL_DATE_ENTREE, COL_CONTAINER, COL_V_CONTAINER, COL_O_CONTAINER, COL_TO_DELETE,
+        COL_CLIENT, COL_DATE_CLIENT, COL_JOINTURE, COL_GENERATION_COMPOSITE
     );
-    
     private static final List<String> COL_PILOTAGE_FICHIER_CLIENT_NULL = Arrays.asList(
-        "id_source", "id_norme", "validite", "periodicite", "phase_traitement", "etat_traitement", "date_traitement",
-        "rapport", "taux_ko", "nb_enr", "nb_essais", "etape", "validite_inf", "validite_sup", "version", "date_entree",
-        "container", "v_container", "o_container", "to_delete", "NULL", "NULL", "jointure",
-        "generation_composite"
+        COL_ID_SOURCE, COL_ID_NORME, COL_VALIDITE, COL_PERIODICITE, COL_PHASE_TRAITEMENT, COL_ETAT_TRAITEMENT,
+        COL_DATE_TRAITEMENT, COL_RAPPORT, COL_TAUX_KO, COL_NB_ENR, COL_NB_ESSAIS, COL_ETAPE, COL_VALIDITE_INF,
+        COL_VALIDITE_SUP, COL_VERSION, COL_DATE_ENTREE, COL_CONTAINER, COL_V_CONTAINER, COL_O_CONTAINER, COL_TO_DELETE,
+        "NULL", "NULL", COL_JOINTURE, COL_GENERATION_COMPOSITE
     );
-    
     private static final List<String> COL_PILOTAGE_FICHIER_UNNESTED = Arrays.asList(
-        "id_source", "id_norme", "validite", "periodicite", "phase_traitement", "etat_traitement", "date_traitement",
-        "rapport", "taux_ko", "nb_enr", "nb_essais", "etape", "validite_inf", "validite_sup", "version", "date_entree",
-        "container", "v_container", "o_container", "to_delete", "unnest(client) AS client", "unnest(date_client) AS date_client", "jointure",
-        "generation_composite"
+        COL_ID_SOURCE, COL_ID_NORME, COL_VALIDITE, COL_PERIODICITE, COL_PHASE_TRAITEMENT, COL_ETAT_TRAITEMENT,
+        COL_DATE_TRAITEMENT, COL_RAPPORT, COL_TAUX_KO, COL_NB_ENR, COL_NB_ESSAIS, COL_ETAPE, COL_VALIDITE_INF,
+        COL_VALIDITE_SUP, COL_VERSION, COL_DATE_ENTREE, COL_CONTAINER, COL_V_CONTAINER, COL_O_CONTAINER, COL_TO_DELETE,
+        "unnest(client) AS client", "unnest(date_client) AS date_client", COL_JOINTURE, COL_GENERATION_COMPOSITE
     );
-    
     private static final List<String> COL_PILOTAGE_FICHIER_AGG = Arrays.asList(
-        "id_source", "max(id_norme) AS id_norme", "max(validite) AS validite", "max(periodicite) AS periodicite",
+        COL_ID_SOURCE, "max(id_norme) AS id_norme", "max(validite) AS validite", "max(periodicite) AS periodicite",
         "max(phase_traitement) AS phase_traitement", "max(etat_traitement) AS etat_traitement",
         "max(date_traitement) AS date_traitement", "max(rapport) AS rapport", "max(taux_ko) AS taux_ko",
         "max(nb_enr) AS nb_enr", "max(nb_essais) AS nb_essais", "max(etape) AS etape",
@@ -169,8 +192,8 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         );
         returned.append("\nSELECT " + COL_PILOTAGE_FICHIER.stream().collect(Collectors.joining(", ")));
         returned.append("\nFROM " + fromTable);
-        returned.append("\nWHERE " + FormatSQL.textToSql(deleteRequest.getIhmClient()) + " != ANY(client)");
-        returned.append("\n    OR phase_traitement != 'MAPPING'");
+        returned.append("\nWHERE NOT (" + FormatSQL.textToSql(deleteRequest.getIhmClient()) + " = ANY(coalesce(client, ARRAY[]::TEXT[]))");
+        returned.append("\n    AND phase_traitement = 'MAPPING')");
         returned.append("\n;");
         return returned.toString();
     }
@@ -184,37 +207,38 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
     }
 
     @RequestMapping("/deleteLastImportRequestOperations")
-    public String deleteLastImportRequestOperations(@ModelAttribute("deleteRequest") DeleteRequestModel deleteRequete, Model model) {
+    public String deleteLastImportRequestOperations(@ModelAttribute("deleteRequest") DeleteRequestModel deleteRequest, Model model) {
         StringBuilder query = new StringBuilder();
         String temporaryTableName = FormatSQL.temporaryTableName("pilotage_fichier");
         query.append(dropTable(temporaryTableName));
         query.append(
             createWorkTableDeleteLastImportRequestOperations(
-                deleteRequete, fromTable(deleteRequete), temporaryTableName
+                deleteRequest, fromTable(deleteRequest), temporaryTableName
             )
         );
-        String newPilotageFichierTableName = FormatSQL.temporaryTableName(fromTable(deleteRequete));
+        String newPilotageFichierTableName = FormatSQL.temporaryTableName(fromTable(deleteRequest));
         query.append(dropTable(newPilotageFichierTableName));
         query.append(
             createNewTableDeleteLastImportRequestOperations(
-                deleteRequete, temporaryTableName, newPilotageFichierTableName
+                deleteRequest, temporaryTableName, newPilotageFichierTableName
             )
         );
-        query.append(insertNotDeletedRequestOperations(deleteRequete, fromTable(deleteRequete), newPilotageFichierTableName));
-        query.append(dropTable(fromTable(deleteRequete)));
+        query.append(insertNotDeletedRequestOperations(deleteRequest, fromTable(deleteRequest), newPilotageFichierTableName));
+        query.append(dropTable(fromTable(deleteRequest)));
         query.append(renameTable(newPilotageFichierTableName, "pilotage_fichier"));
         try {
-//            UtilitaireDao.get("arc").executeImmediate(null, query.toString());
             System.out.println(query.toString());
-        } catch (RuntimeException e) {
+            UtilitaireDao.get("arc").executeBlock(null, /*query.toString()*/ "SELECT 1");
+        } catch (SQLException e) {
             String message = "Erreur lors de la suppression des opérations pour l'application cliente "
-                + deleteRequete.getIhmClient() + " entre le " + deleteRequete.getLowDate() + "(inclus) et le "
-                + deleteRequete.getHighDate() + " (exclu)";
+                + deleteRequest.getIhmClient() + " entre le " + deleteRequest.getLowDate() + "(inclus) et le "
+                + deleteRequest.getHighDate() + " (exclu)";
             this.viewOperations.setMessage(
                 message+" :\n"+e.getMessage()
             );
             LoggerHelper.error(LOGGER, message, e);
-        }        
+        }
+        model.addAttribute(IHM_DELETE_REQUEST, new DeleteRequestModel());
         return generateDisplay(model, RESULT_SUCCESS);
     }
 
