@@ -19,7 +19,6 @@
 	</c:import>
 	</head>
 </c:if>
-<!--   <script>$(function(){$(".datepicker").datepicker();});</script> -->
 <body class="bg-body">
 
 <form
@@ -52,7 +51,7 @@
 							><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.generateErrorMessageInLogs"/></button>
                         </div>
                         <div id="viewOperations">
-                            <form:form method="POST" action="/deleteLastImportRequestOperations" modelAttribute="deleteRequest">
+                            <form:form method="POST" action="/deleteLastImportRequestOperations" modelAttribute="deleteRequest" ajax="true">
                                 <button
                                     id="viewOperations.deleteLastImportRequest"
                                     class="btn btn-secondary btn-sm"
@@ -60,6 +59,7 @@
                                     doAction="deleteLastImportRequestOperations"
                                     scope="viewOperations;"
                                     value="<spring:message code="gui.button.deleteLastImportRequest"/>"
+                                    ajax="false"
                                 ><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.deleteLastImportRequest"/></button>
                                 <span style="margin:1px;background-color:#eeeeee;">
                                 <span style="padding:0px 10px 0px 10px"><spring:message code="label.client.software"/></span>
