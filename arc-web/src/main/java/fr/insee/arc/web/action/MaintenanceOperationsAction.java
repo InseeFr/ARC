@@ -41,60 +41,20 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
     
     private static final String IHM_DELETE_REQUEST = "deleteRequest";
 
-    /*private static final String COL_GENERATION_COMPOSITE = "generation_composite";
-    private static final String COL_JOINTURE = "jointure";*/
     private static final String COL_DATE_CLIENT = "date_client";
     private static final String COL_CLIENT = "client";
-   /* private static final String COL_TO_DELETE = "to_delete";
-    private static final String COL_O_CONTAINER = "o_container";
-    private static final String COL_V_CONTAINER = "v_container";
-    private static final String COL_CONTAINER = "container";
-    private static final String COL_DATE_ENTREE = "date_entree";
-    private static final String COL_VERSION = "version";
-    private static final String COL_VALIDITE_SUP = "validite_sup";
-    private static final String COL_VALIDITE_INF = "validite_inf";
-    private static final String COL_ETAPE = "etape";
-    private static final String COL_NB_ESSAIS = "nb_essais";
-    private static final String COL_NB_ENR = "nb_enr";
-    private static final String COL_TAUX_KO = "taux_ko";
-    private static final String COL_RAPPORT = "rapport";
-    private static final String COL_DATE_TRAITEMENT = "date_traitement";
-    private static final String COL_ETAT_TRAITEMENT = "etat_traitement";*/
-    private static final String COL_PHASE_TRAITEMENT = "phase_traitement";/*
-    private static final String COL_PERIODICITE = "periodicite";
-    private static final String COL_VALIDITE = "validite";
-    private static final String COL_ID_NORME = "id_norme";*/
+    private static final String COL_PHASE_TRAITEMENT = "phase_traitement";
     private static final String COL_ID_SOURCE = "id_source";
 
-    
-    private static final List<String> COL_PILOTAGE_FICHIER = Arrays.asList(
-        COL_ID_SOURCE, /*COL_ID_NORME, COL_VALIDITE, COL_PERIODICITE, */COL_PHASE_TRAITEMENT, /*COL_ETAT_TRAITEMENT,
-        COL_DATE_TRAITEMENT, COL_RAPPORT, COL_TAUX_KO, COL_NB_ENR, COL_NB_ESSAIS, COL_ETAPE, COL_VALIDITE_INF,
-        COL_VALIDITE_SUP, COL_VERSION, COL_DATE_ENTREE, COL_CONTAINER, COL_V_CONTAINER, COL_O_CONTAINER, COL_TO_DELETE,*/
-        COL_CLIENT, COL_DATE_CLIENT/*, COL_JOINTURE, COL_GENERATION_COMPOSITE*/
-    );
-    private static final List<String> COL_PILOTAGE_FICHIER_CLIENT_NULL = Arrays.asList(
-        COL_ID_SOURCE, /*COL_ID_NORME, COL_VALIDITE, COL_PERIODICITE, */COL_PHASE_TRAITEMENT, /*COL_ETAT_TRAITEMENT,
-        COL_DATE_TRAITEMENT, COL_RAPPORT, COL_TAUX_KO, COL_NB_ENR, COL_NB_ESSAIS, COL_ETAPE, COL_VALIDITE_INF,
-        COL_VALIDITE_SUP, COL_VERSION, COL_DATE_ENTREE, COL_CONTAINER, COL_V_CONTAINER, COL_O_CONTAINER, COL_TO_DELETE,*/
-        "NULL", "NULL"/*, COL_JOINTURE, COL_GENERATION_COMPOSITE*/
-    );
-    private static final List<String> COL_PILOTAGE_FICHIER_UNNESTED = Arrays.asList(
-        COL_ID_SOURCE, /*COL_ID_NORME, COL_VALIDITE, COL_PERIODICITE, */COL_PHASE_TRAITEMENT, /*COL_ETAT_TRAITEMENT,
-        COL_DATE_TRAITEMENT, COL_RAPPORT, COL_TAUX_KO, COL_NB_ENR, COL_NB_ESSAIS, COL_ETAPE, COL_VALIDITE_INF,
-        COL_VALIDITE_SUP, COL_VERSION, COL_DATE_ENTREE, COL_CONTAINER, COL_V_CONTAINER, COL_O_CONTAINER, COL_TO_DELETE,*/
-        "unnest(client) AS client", "unnest(date_client) AS date_client"/*, COL_JOINTURE, COL_GENERATION_COMPOSITE*/
-    );
+    private static final List<String> COL_PILOTAGE_FICHIER = Arrays
+        .asList(COL_ID_SOURCE, COL_PHASE_TRAITEMENT, COL_CLIENT, COL_DATE_CLIENT);
+    private static final List<String> COL_PILOTAGE_FICHIER_CLIENT_NULL = Arrays
+        .asList(COL_ID_SOURCE, COL_PHASE_TRAITEMENT, "NULL", "NULL");
+    private static final List<String> COL_PILOTAGE_FICHIER_UNNESTED = Arrays
+        .asList(COL_ID_SOURCE, COL_PHASE_TRAITEMENT, "unnest(client) AS client", "unnest(date_client) AS date_client");
     private static final List<String> COL_PILOTAGE_FICHIER_AGG = Arrays.asList(
-        COL_ID_SOURCE, /*"max(id_norme) AS id_norme", "max(validite) AS validite", "max(periodicite) AS periodicite",*/
-        "max(phase_traitement) AS phase_traitement", /*"max(etat_traitement) AS etat_traitement",
-        "max(date_traitement) AS date_traitement", "max(rapport) AS rapport", "max(taux_ko) AS taux_ko",
-        "max(nb_enr) AS nb_enr", "max(nb_essais) AS nb_essais", "max(etape) AS etape",
-        "max(validite_inf) AS validite_inf", "max(validite_sup) AS validite_sup", "max(version) AS version",
-        "max(date_entree) AS date_entree", "max(container) AS container", "max(v_container) AS v_container",
-        "max(o_container) AS o_container", "max(to_delete) AS to_delete",*/ "array_remove(array_agg(client), NULL) AS client",
-        "array_remove(array_agg(date_client), NULL) AS date_client"/*, "max(jointure) AS jointure",
-        "max(generation_composite) AS generation_composite"*/
+        COL_ID_SOURCE, "max(phase_traitement) AS phase_traitement", "array_remove(array_agg(client), NULL) AS client",
+        "array_remove(array_agg(date_client), NULL) AS date_client"
     );
 
     private static final long NB_LINES_PER_PARTITION = 100_000L;
@@ -103,25 +63,35 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
     private List<String> ihmClients;
     private List<String> environments;
 
-	@Override
-	protected void putAllVObjects(MaintenanceOperationsModel arcModel) {
-		setViewOperations(this.vObjectService.preInitialize(arcModel.getViewOperations()));
-		putVObject(getViewOperations(), t -> initializeOperations());
-		setIhmClients(UtilitaireDao.get("arc").getList(null, "SELECT DISTINCT id_application FROM arc.ihm_client", new ArrayList<>()));
-		setEnvironments(UtilitaireDao.get("arc").getList(null, "SELECT DISTINCT schema_name FROM information_schema.schemata WHERE schema_name LIKE 'arc_%' ORDER BY schema_name ASC", new ArrayList<>()));
-	}
+    @Override
+    protected void putAllVObjects(MaintenanceOperationsModel arcModel) {
+        setViewOperations(this.vObjectService.preInitialize(arcModel.getViewOperations()));
+        putVObject(getViewOperations(), t -> initializeOperations());
+        setIhmClients(
+            UtilitaireDao.get("arc")
+                .getList(null, "SELECT DISTINCT id_application FROM arc.ihm_client", new ArrayList<>())
+        );
+        setEnvironments(
+            UtilitaireDao.get("arc").getList(
+                null,
+                "SELECT DISTINCT schema_name FROM information_schema.schemata WHERE schema_name LIKE 'arc_%' ORDER BY schema_name ASC",
+                new ArrayList<>()
+            )
+        );
+    }
 
-	public void initializeOperations() {
+    public void initializeOperations() {
         HashMap<String, String> defaultInputFields = new HashMap<>();
-        this.vObjectService.initialize(viewOperations, new PreparedStatementBuilder("SELECT true"),  "arc.operations", defaultInputFields);
-        
+        this.vObjectService.initialize(
+            this.viewOperations, new PreparedStatementBuilder("SELECT true"), "arc.operations", defaultInputFields
+        );
     }
 	
 	@Override
     public void extraModelAttributes(Model model) {
         model.addAttribute(IHM_DELETE_REQUEST, new DeleteRequestModel());
-        model.addAttribute(IHM_CLIENTS, ihmClients);
-        model.addAttribute(IHM_ENVIRONMENTS, environments);
+        model.addAttribute(IHM_CLIENTS, this.ihmClients);
+        model.addAttribute(IHM_ENVIRONMENTS, this.environments);
     }
 	
 	private static final String ORIGIN="WEB GUI";
@@ -142,15 +112,6 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         return returned.toString();
     }
     
-    /*
-     *     DROP TABLE IF EXISTS pilotage_fichier$tmp$3836156292$4054;
-    CREATE TEMPORARY TABLE IF NOT EXISTS pilotage_fichier$tmp$3836156292$4054 AS
-    SELECT id_source, phase_traitement, unnest(client) AS client, unnest(date_client) AS date_client
-    FROM arc_bas5.pilotage_fichier
-    WHERE 'DSNFLASH' = ANY(client)
-        AND phase_traitement = 'MAPPING'
-    ;
-     */
     private static String createWorkTableDeleteLastImportRequestOperations(DeleteRequestModel deleteRequest, String fromTableName, String toTableName) {
         StringBuilder returned = new StringBuilder();
         returned.append("\nCREATE UNLOGGED TABLE IF NOT EXISTS " + toTableName + " AS");
@@ -162,15 +123,6 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         return returned.toString();
     }
     
-
-    /*
-    DROP TABLE IF EXISTS pilotage_fichier$tmp$6836156292$8717;
-    CREATE TEMPORARY TABLE IF NOT EXISTS pilotage_fichier$tmp$6836156292$8717 AS
-    SELECT id_source, phase_traitement, client, date_client
-    FROM pilotage_fichier$tmp$3836156292$4054
-    WHERE NOT ('DSNFLASH' = client AND '2021-09-01'::date <= date_client AND date_client <= '2021-10-01'::date)
-    ;
-    */
     private static String createNewTableDeleteLastImportRequestOperations(DeleteRequestModel deleteRequest, String fromTableName, String toTableName) {
         StringBuilder returned = new StringBuilder();
         returned.append("\nCREATE UNLOGGED TABLE IF NOT EXISTS " + toTableName + " AS");
@@ -191,16 +143,6 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         ).stream().collect(Collectors.joining(" AND "));
     }
     
-    /*
-    INSERT INTO pilotage_fichier$tmp$6836156292$8717 (id_source, phase_traitement, client, date_client)
-    SELECT id_source, phase_traitement, NULL, NULL
-    FROM pilotage_fichier$tmp$3836156292$4054 lefty
-    WHERE NOT EXISTS (
-        SELECT 1 
-        FROM pilotage_fichier$tmp$6836156292$8717 righty
-        WHERE lefty.id_source = righty.id_source
-    );
-     */
     private static String insertNotDeletedRequestOperations(
         DeleteRequestModel deleteRequest, String fromTable, String toTable
     ) {
@@ -228,17 +170,7 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         return returned.toString();
     }
     
-
-/*
-         SELECT count(1) FROM pilotage_fichier$tmp$6836156292$8717;
-
-        DROP TABLE IF EXISTS pilotage_fichier$tmp$5213697716$3274;
-        CREATE TEMPORARY TABLE IF NOT EXISTS pilotage_fichier$tmp$5213697716$3274 AS
-        SELECT id_source, max(phase_traitement) AS phase_traitement, array_agg(client) AS client, array_agg(date_client) AS date_client
-        FROM pilotage_fichier$tmp$6836156292$8717
-        GROUP BY id_source;
- */
-   private String createTableAggregatedLines(
+   private static String createTableAggregatedLines(
         DeleteRequestModel deleteRequest, String fromTable, String toTable
     ) {
         StringBuilder returned = new StringBuilder();
@@ -311,38 +243,20 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         return generateDisplay(model, RESULT_SUCCESS);
     }
     
-
-    
-
-    
-
-    /*
-     * UPDATE arc_bas5.pilotage_fichier lefty
-    SET client = righty.client, date_client = righty.date_client
-    FROM pilotage_fichier$tmp$5213697716$3274 righty
-    WHERE lefty.id_source = righty.id_source
-        AND abs(hashtext(lefty.id_source) % 1) = 0
-        AND abs(hashtext(righty.id_source) % 1) = 0
-        AND lefty.phase_traitement = 'MAPPING'
-    ;
-     */
-private static String updateOnePartition(DeleteRequestModel deleteRequest, String fromTable, String toTable, long partnb, long partnum) {
-    StringBuilder returned = new StringBuilder();
-    returned.append("\nUPDATE " + toTable + " lefty");
-    returned.append("\nSET client = righty.client, date_client = righty.date_client");
-    returned.append("\nFROM " + fromTable+ " righty");
-    returned.append("\nWHERE lefty.id_source = righty.id_source");
-    returned.append("\n    AND abs(hashtext(lefty.id_source) % " + partnb + ") = " + partnum);
-    returned.append("\n    AND abs(hashtext(righty.id_source) % " + partnb + ") = " + partnum);
-    returned.append("\n    AND lefty.phase_traitement = 'MAPPING'");
-    returned.append("\n;");
-    return returned.toString();
-}
-
-
-
-
-    
+    private static String updateOnePartition(
+        DeleteRequestModel deleteRequest, String fromTable, String toTable, long partnb, long partnum
+    ) {
+        StringBuilder returned = new StringBuilder();
+        returned.append("\nUPDATE " + toTable + " lefty");
+        returned.append("\nSET client = righty.client, date_client = righty.date_client");
+        returned.append("\nFROM " + fromTable + " righty");
+        returned.append("\nWHERE lefty.id_source = righty.id_source");
+        returned.append("\n    AND abs(hashtext(lefty.id_source) % " + partnb + ") = " + partnum);
+        returned.append("\n    AND abs(hashtext(righty.id_source) % " + partnb + ") = " + partnum);
+        returned.append("\n    AND lefty.phase_traitement = 'MAPPING'");
+        returned.append("\n;");
+        return returned.toString();
+    }
 
     @RequestMapping("/selectOperations")
     public String selectOperations(Model model) {
@@ -352,25 +266,25 @@ private static String updateOnePartition(DeleteRequestModel deleteRequest, Strin
 
     @RequestMapping("/addOperations")
     public String addOperations(Model model) {
-        this.vObjectService.insert(viewOperations);
+        this.vObjectService.insert(this.viewOperations);
         return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/deleteOperations")
     public String deleteOperations(Model model) {
-         this.vObjectService.delete(viewOperations);
+         this.vObjectService.delete(this.viewOperations);
         return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/updateOperations")
     public String updateOperations(Model model) {
-        this.vObjectService.update(viewOperations);
+        this.vObjectService.update(this.viewOperations);
         return generateDisplay(model, RESULT_SUCCESS);
     }
 
     @RequestMapping("/sortOperations")
     public String sortOperations(Model model) {
-        this.vObjectService.sort(viewOperations);
+        this.vObjectService.sort(this.viewOperations);
         return generateDisplay(model, RESULT_SUCCESS);
     }
 
@@ -394,35 +308,19 @@ private static String updateOnePartition(DeleteRequestModel deleteRequest, Strin
 		return "manageOperations";
 	}
 
-    
-    /**
-     * @return the ihmClients
-     */
 	@ModelAttribute("ihmClients")
     public List<String> getIhmClients() {
-        return ihmClients;
+        return this.ihmClients;
     }
 
-    
-    /**
-     * @param ihmClients the ihmClients to set
-     */
     public void setIhmClients(List<String> ihmClients) {
         this.ihmClients = ihmClients;
     }
 
-    
-    /**
-     * @return the environments
-     */
     public List<String> getEnvironments() {
-        return environments;
+        return this.environments;
     }
 
-    
-    /**
-     * @param environments the environments to set
-     */
     public void setEnvironments(List<String> environments) {
         this.environments = environments;
     }
