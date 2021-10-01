@@ -425,7 +425,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return La valeur prise par {@code SELECT COUNT(*) FROM <aTable>}
 	 */
 	public long getCount(Connection connexion, String aTable) {
-		return getCount(connexion, aTable, null);
+		return getCount(connexion, aTable, new PreparedStatementBuilder("true"));
 	}
 
 	/**
