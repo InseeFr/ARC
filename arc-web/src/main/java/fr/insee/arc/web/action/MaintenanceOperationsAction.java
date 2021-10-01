@@ -144,7 +144,7 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
     }
     
     private static String insertNotDeletedRequestOperations(
-        DeleteRequestModel deleteRequest, String fromTable, String toTable
+        String fromTable, String toTable
     ) {
         StringBuilder returned = new StringBuilder();
         returned.append(
@@ -161,17 +161,9 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         returned.append("\n;");
         return returned.toString();
     }
-
-    private static String renameTable(String oldTableName, String newTableName) {
-        StringBuilder returned = new StringBuilder();
-        returned.append("\nALTER TABLE IF EXISTS " + oldTableName);
-        returned.append("\nRENAME TO " + newTableName);
-        returned.append("\n;");
-        return returned.toString();
-    }
     
    private static String createTableAggregatedLines(
-        DeleteRequestModel deleteRequest, String fromTable, String toTable
+        String fromTable, String toTable
     ) {
         StringBuilder returned = new StringBuilder();
         returned.append("\nCREATE UNLOGGED TABLE IF NOT EXISTS " + toTable + " AS");
@@ -181,6 +173,21 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         returned.append("\n;");
         return returned.toString();
     }
+   
+   private static String updateOnePartition(
+       String fromTable, String toTable, long partnb, long partnum
+   ) {
+       StringBuilder returned = new StringBuilder();
+       returned.append("\nUPDATE " + toTable + " lefty");
+       returned.append("\nSET client = righty.client, date_client = righty.date_client");
+       returned.append("\nFROM " + fromTable + " righty");
+       returned.append("\nWHERE lefty.id_source = righty.id_source");
+       returned.append("\n    AND abs(hashtext(lefty.id_source) % " + partnb + ") = " + partnum);
+       returned.append("\n    AND abs(hashtext(righty.id_source) % " + partnb + ") = " + partnum);
+       returned.append("\n    AND lefty.phase_traitement = 'MAPPING'");
+       returned.append("\n;");
+       return returned.toString();
+   }
 
     @RequestMapping("/deleteLastImportRequestOperations")
     public String deleteLastImportRequestOperations(
@@ -213,18 +220,18 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
                 )
             );
             query.append(
-                insertNotDeletedRequestOperations(deleteRequest, tempTableCopyEligibleLines, tempTableDeleteLines)
+                insertNotDeletedRequestOperations(tempTableCopyEligibleLines, tempTableDeleteLines)
             );
             /*
              * 
              */
             String tempTableNameAggregatedLines = FormatSQL.temporaryTableName(fromTable(deleteRequest));
             query.append(dropTable(tempTableNameAggregatedLines));
-            query.append(createTableAggregatedLines(deleteRequest, tempTableDeleteLines, tempTableNameAggregatedLines));
+            query.append(createTableAggregatedLines(tempTableDeleteLines, tempTableNameAggregatedLines));
             for (long i = 0; i < nbOfPartitions; i++) {
                 query.append(
                     updateOnePartition(
-                        deleteRequest, tempTableNameAggregatedLines, fromTable(deleteRequest), nbOfPartitions, i
+                        tempTableNameAggregatedLines, fromTable(deleteRequest), nbOfPartitions, i
                     )
                 );
             }
@@ -241,21 +248,6 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
         }
         model.addAttribute(IHM_DELETE_REQUEST, new DeleteRequestModel());
         return generateDisplay(model, RESULT_SUCCESS);
-    }
-    
-    private static String updateOnePartition(
-        DeleteRequestModel deleteRequest, String fromTable, String toTable, long partnb, long partnum
-    ) {
-        StringBuilder returned = new StringBuilder();
-        returned.append("\nUPDATE " + toTable + " lefty");
-        returned.append("\nSET client = righty.client, date_client = righty.date_client");
-        returned.append("\nFROM " + fromTable + " righty");
-        returned.append("\nWHERE lefty.id_source = righty.id_source");
-        returned.append("\n    AND abs(hashtext(lefty.id_source) % " + partnb + ") = " + partnum);
-        returned.append("\n    AND abs(hashtext(righty.id_source) % " + partnb + ") = " + partnum);
-        returned.append("\n    AND lefty.phase_traitement = 'MAPPING'");
-        returned.append("\n;");
-        return returned.toString();
     }
 
     @RequestMapping("/selectOperations")

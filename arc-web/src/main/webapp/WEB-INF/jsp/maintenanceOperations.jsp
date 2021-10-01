@@ -63,14 +63,15 @@
                                 ><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.deleteLastImportRequest"/></button>
                                 <span style="margin:1px;background-color:#eeeeee;">
                                 <span style="padding:0px 10px 0px 10px"><spring:message code="label.client.software"/></span>
+                                <spring:message code='label.import.select' var='labelImportSelect'/>
                                 <form:select path = "ihmClient" required="required">
-                                    <form:option value = "NONE" label = "Select"/>
+                                    <form:option value = "" label = "${labelImportSelect}"/>
                                     <form:options items = "${ihmClients}" />
                                 </form:select></span>
                                 <span style="margin:1px;background-color:#eeeeee;">
                                 <span style="padding:0px 10px 0px 10px"><spring:message code="label.client.environment"/></span>
                                 <form:select path = "environment" required="required">
-                                    <form:option value = "NONE" label = "Select"/>
+                                    <form:option value = "" label = "${labelImportSelect}"/>
                                     <form:options items = "${environments}" />
                                 </form:select>
                                 </span>
