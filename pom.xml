@@ -15,6 +15,8 @@
 		<project.spring.version>5.2.10.RELEASE</project.spring.version>
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	<url>https://github.com/InseeFr/ARC</url>
 

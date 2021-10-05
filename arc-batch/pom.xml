@@ -14,7 +14,7 @@
 	<name>ARC-BATCH</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.siera.version>0.0.2-SNAPSHOT</project.siera.version>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<build>

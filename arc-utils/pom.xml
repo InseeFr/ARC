@@ -11,6 +11,11 @@
 	<artifactId>arc-utils</artifactId>
 	<name>ARC-UTILS</name>
 	<description>Contain all utility classes</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
 
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
