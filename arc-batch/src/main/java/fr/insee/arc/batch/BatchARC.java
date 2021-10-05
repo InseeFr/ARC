@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -77,48 +77,36 @@ public class BatchARC {
 	// Maximum number of files processed in each phase iteration
 	protected static int maxFilesPerPhase;
 
-	// retard permis entre chaque phase : si une phase a deltaStepAllowed coups d'avance
-	// elle attend que la suivant est terminée avant de reprendre
-	private static int deltaStepAllowed;
-
 	// fréquence à laquelle les phases sont démarrées
 	private static int poolingDelay;
 
 	// heure d'initalisation en production
-	private static int HEURE_INITIALISATION_PRODUCTION;
+	private static int hourToTriggerInitializationInProduction;
 	
 	// interval entre chaque initialisation en nb de jours
-	private static Integer INTERVAL_JOUR_INITIALISATION;
+	private static Integer intervalForInitializationInDay;
 
+	// keys name for the hashmap mapParam containing the batch parameters
+	private static final String KEY_FOR_METADATA_ENVIRONMENT="env";
+	private static final String KEY_FOR_EXECUTION_ENVIRONMENT="envExecution";
+	private static final String KEY_FOR_DIRECTORY_LOCATION="repertoire";
+	private static final String KEY_FOR_BATCH_CHUNK_ID="numlot";
 
-	public static class DateUtil
-	{
-	    public static Date addDays(Date date, int days)
-	    {
-	        Calendar cal = Calendar.getInstance();
-	        cal.setTime(date);
-	        cal.add(Calendar.DATE, days); //minus number would decrement the days
-	        return cal.getTime();
-	    }
-	}
-
-
-
+	
 	public static class InitialiserThread {
-		public ServiceReporting report=new ServiceReporting();
+		private ServiceReporting report=new ServiceReporting();
 
 		  public void run() {
-			  InitialiserBatch c=new InitialiserBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get("numlot"));
+			  InitialiserBatch c=new InitialiserBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
 			  c.execute();
 			  this.report=c.report;
 		  }
 		}
 
-	public static class RecevoirThread extends Thread {
-		public ServiceReporting report=new ServiceReporting();
-		  @Override
+	public static class RecevoirThread {
+		private ServiceReporting report=new ServiceReporting();
 		  public void run() {
-			RecevoirBatch c=new RecevoirBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get("numlot"));
+			RecevoirBatch c=new RecevoirBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
 			c.execute();
 			this.report=c.report;
 		  }
@@ -127,7 +115,7 @@ public class BatchARC {
 	public static class ChargerThread extends Thread {
 		@Override
 		  public void run() {
-			ChargerBatch c=new ChargerBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , maxFilesToLoad+"", keepInDatabase?null:mapParam.get("numlot"));
+			ChargerBatch c=new ChargerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesToLoad+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
 			c.execute();
 		  }
 		}
@@ -135,7 +123,7 @@ public class BatchARC {
 	public static class NormerThread extends Thread {
 		  @Override
 		  public void run() {
-			  NormerBatch c=new NormerBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get("numlot"));
+			  NormerBatch c=new NormerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
 			  c.execute();
 		  }
 		}
@@ -143,7 +131,7 @@ public class BatchARC {
 	public static class ControlerThread extends Thread {
 		  @Override
 		  public void run() {
-			  ControlerBatch c=new ControlerBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get("numlot"));
+			  ControlerBatch c=new ControlerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
 			  c.execute();
 		  }
 		}
@@ -151,7 +139,7 @@ public class BatchARC {
 	public static class FiltrerThread extends Thread {
 		  @Override
 		  public void run() {
-			  FiltrerBatch c=new FiltrerBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get("numlot"));
+			  FiltrerBatch c=new FiltrerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
 			  c.execute();
 		  }
 		}
@@ -160,7 +148,7 @@ public class BatchARC {
 	public static class MapperThread extends Thread {
 		  @Override
 		  public void run() {
-			  MapperBatch c= new MapperBatch(mapParam.get("env"), mapParam.get("envExecution"), mapParam.get("repertoire") , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get("numlot"));
+			  MapperBatch c= new MapperBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
 			  c.execute();
 		  }
 		}
@@ -185,18 +173,14 @@ public class BatchARC {
 		// Maximum number of files processed in each phase iteration
 		maxFilesPerPhase=BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase",1000000);
 
-		// retard permis entre chaque phase : si une phase a deltaStepAllowed coups d'avance
-		// elle attend que la suivant est terminée avant de reprendre
-		deltaStepAllowed=BDParameters.getInt(null, "LanceurARC.deltaStepAllowed",10000);
-
 		// fréquence à laquelle les phases sont démarrées
 		poolingDelay=BDParameters.getInt(null, "LanceurARC.poolingDelay",1000);
 
 		// heure d'initalisation en production
-		HEURE_INITIALISATION_PRODUCTION=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
+		hourToTriggerInitializationInProduction=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
 		
 		// interval entre chaque initialisation en nb de jours
-		INTERVAL_JOUR_INITIALISATION = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
+		intervalForInitializationInDay = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
 	}
 	
 	
@@ -237,11 +221,11 @@ public class BatchARC {
 		
 		envExecution=envExecution.replace(".", "_");
 		
-		mapParam.put("env", env);
-		mapParam.put("envExecution", envExecution);
+		mapParam.put(KEY_FOR_METADATA_ENVIRONMENT, env);
+		mapParam.put(KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
 		
 		String repertoire = properties.getBatchParametersDirectory();
-		mapParam.put("repertoire", repertoire);
+		mapParam.put(KEY_FOR_DIRECTORY_LOCATION, repertoire);
 
 		message(mapParam.toString());
 
@@ -321,7 +305,7 @@ public class BatchARC {
 		 Date dNow = new Date();
 		 Date dLastInitialize;
 
-		 mapParam.put("numlot", dateFormat2.format(dNow));
+		 mapParam.put(KEY_FOR_BATCH_CHUNK_ID, dateFormat2.format(dNow));
 
 	     dLastInitialize = dateFormat.parse(lastInitialize);
 	     
@@ -334,7 +318,7 @@ public class BatchARC {
 	    	 initialiser.run();
 			 message("Initialisation terminée : "+(int)initialiser.report.nbLines+" e : "+initialiser.report.duree+" ms");
 			
-			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("update arc.pilotage_batch set last_init=to_char(current_date+interval '"+INTERVAL_JOUR_INITIALISATION+" days','yyyy-mm-dd')||':"+HEURE_INITIALISATION_PRODUCTION+"' , operation=case when operation='R' then 'O' else operation end;"));
+			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("update arc.pilotage_batch set last_init=to_char(current_date+interval '"+intervalForInitializationInDay+" days','yyyy-mm-dd')||':"+hourToTriggerInitializationInProduction+"' , operation=case when operation='R' then 'O' else operation end;"));
 		}
 		 productionOn=productionOn();
 
@@ -352,7 +336,7 @@ public class BatchARC {
 
 			 if (production)
 			 {
-				 message("Reception : "+(int)recevoir.report.nbLines+" e : "+recevoir.report.duree+" ms");
+				 message("Reception : "+recevoir.report.nbLines+" e : "+recevoir.report.duree+" ms");
 			 }
 			 
 			 fichierRestant=(int)recevoir.report.nbLines>0;
@@ -468,9 +452,10 @@ public class BatchARC {
 
 	/**
 	 * Créer la table de pilotage batch si elle n'existe pas déjà
+	 * @throws SQLException 
 	 * @throws Exception
 	 */
-	public static void creerTablePilotageBatch() throws Exception
+	public static void creerTablePilotageBatch() throws SQLException
 	{
 		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
@@ -499,9 +484,10 @@ public class BatchARC {
 	 * Effacer les répertoires de chargement OK KO et ENCOURS
 	 * @param directory
 	 * @param envExecution
+	 * @throws IOException 
 	 * @throws Exception 
 	 */
-	public static void effacerRepertoireChargement(String directory, String envExecution) throws Exception
+	public static void effacerRepertoireChargement(String directory, String envExecution) throws IOException
 	{
 		
 		// Effacer les fichiers des répertoires OK et KO
@@ -530,6 +516,15 @@ public class BatchARC {
 		}
 	}
 
+	/**
+	 * If the file has already been moved in the archive directory by ARC
+	 * it is safe to delete it
+	 * else save it to the archive directory 
+	 * @param repertoire
+	 * @param envExecution
+	 * @param z
+	 * @return
+	 */
 	private static boolean deleteIfArchived(String repertoire, String envExecution, File z) {
 		
 		String entrepot =  ManipString.substringBeforeFirst(z.getName(),"_");
