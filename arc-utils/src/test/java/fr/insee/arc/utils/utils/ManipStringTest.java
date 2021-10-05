@@ -7,113 +7,75 @@ import org.junit.Test;
 public class ManipStringTest {
 
 	@Test
-	public void isStringNullYesNull() {
+	public void isStringNull() {
+		// yes null
 		assertEquals(true, ManipString.isStringNull(null));
-	}
-
-	@Test
-	public void isStringNullYesEmpty() {
+		// yes empty
 		assertEquals(true, ManipString.isStringNull(""));
+		// false not empty
+		assertEquals(false, ManipString.isStringNull(" "));
 	}
 
 	@Test
-	public void isStringNullNo() {
-		assertEquals(false, ManipString.isStringNull("hi"));
-	}
-
-	// substringBeforeFirst
-	@Test
-	public void substringBeforeFirstNullString() {
+	public void substringBeforeFirst() {
+		// null input string -> return null
 		assertEquals(null, ManipString.substringBeforeFirst(null, "-"));
-	}
-
-
-	@Test
-	public void substringBeforeFirstNullSep() {
+		// null separator -> return all string
 		assertEquals("abc", ManipString.substringBeforeFirst("abc", null));
-	}
-
-	@Test
-	public void substringBeforeFirstNoSep() {
+		// separator not found -> return all string
 		assertEquals("abc", ManipString.substringBeforeFirst("abc", "-"));
+		// standard use case
+		assertEquals("a", ManipString.substringBeforeFirst("a-b-c", "-"));
+		assertEquals("az", ManipString.substringBeforeFirst("az-b-c", "-"));
 	}
 
-	@Test
-	public void substringBeforeFirstOk() {
-		assertEquals("a", ManipString.substringBeforeFirst("a-b-c", "-"));
-	}
 
 	// substringBeforeLast
 	@Test
-	public void substringBeforeLastNullString() {
+	public void substringBeforeLast() {
+		// null input string -> return null
 		assertEquals(null, ManipString.substringBeforeLast(null, "-"));
-	}
-
-
-	@Test
-	public void substringBeforeLastNullSep() {
+		// null separator -> return all string
 		assertEquals("abc", ManipString.substringBeforeLast("abc", null));
-	}
-
-	@Test
-	public void substringBeforeLastNoSep() {
+		// separator not found -> return all string
 		assertEquals("abc", ManipString.substringBeforeLast("abc", "-"));
-	}
-
-	@Test
-	public void substringBeforeLastOk() {
+		// standard use case
 		assertEquals("a-b", ManipString.substringBeforeLast("a-b-c", "-"));
 	}
 
 	// substringAfterFirst
 	@Test
-	public void substringAfterFirstNullString() {
+	public void substringAfterFirst() {
 		assertEquals(null, ManipString.substringAfterFirst(null, "-"));
-	}
-
-
-	@Test
-	public void substringAfterFirstNullSep() {
 		assertEquals("abc", ManipString.substringAfterFirst("abc", null));
-	}
-
-	@Test
-	public void substringAfterFirstNoSep() {
 		assertEquals("abc", ManipString.substringAfterFirst("abc", "-"));
-	}
-
-	@Test
-	public void substringAfterFirstOk() {
 		assertEquals("b-c", ManipString.substringAfterFirst("a-b-c", "-"));
 	}
+
 
 	// substringAfterLast
 	@Test
 	public void substringAfterLastNullString() {
 		assertEquals(null, ManipString.substringAfterLast(null, "-"));
-	}
-
-
-	@Test
-	public void substringAfterLastNullSep() {
 		assertEquals("abc", ManipString.substringAfterLast("abc", null));
-	}
-
-	@Test
-	public void substringAfterLastNoSep() {
 		assertEquals("abc", ManipString.substringAfterLast("abc", "-"));
-	}
-
-	@Test
-	public void substringAfterLastOk() {
 		assertEquals("c", ManipString.substringAfterLast("a-b-c", "-"));
 	}
 
-	// compress
+
 	@Test
 	public void compress() {
-		String testValue1="arêtes de po¹ssôn";
+		String testValue1="arÃªtes de poÃ¿ssâ–’n";
 		assertEquals(testValue1,ManipString.decompress(ManipString.compress(testValue1)));
 	}
+	
+	@Test
+	public void parseInteger() {
+		assertEquals((Integer)null,ManipString.parseInteger("1 am not a number"));
+		assertEquals((Integer)10,ManipString.parseInteger("+10"));
+		assertEquals(null,ManipString.parseInteger("10.8"));
+	}
+
+	
 	
 }

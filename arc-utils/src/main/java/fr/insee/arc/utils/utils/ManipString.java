@@ -156,15 +156,14 @@ public class ManipString implements IConstanteCaractere {
      * @param s
      * @return
      */
-    public static Integer parseNumber(String s)
+    public static Integer parseInteger(String s)
     {
-    	Integer r=null;
     	try {
-    		r=Integer.parseInt(s);
+    		return Integer.parseInt(s);
     	} catch (Exception e)
     	{
+    		return null;
     	}
-    	return r;
     }
 
 

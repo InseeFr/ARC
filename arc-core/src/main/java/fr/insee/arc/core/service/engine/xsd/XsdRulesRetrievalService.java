@@ -67,9 +67,9 @@ public class XsdRulesRetrievalService {
 			String condition = line.get(columns.get("condition"));
 			String role = line.get(columns.get("xsd_role"));
 			String label = line.get(columns.get("xsd_label_fils"));
-			Integer position = ManipString.parseNumber(line.get(columns.get("xsd_ordre")));
-			Integer borneInf = ManipString.parseNumber(line.get(columns.get("borne_inf")));
-			Integer borneSup = ManipString.parseNumber(line.get(columns.get("borne_sup")));
+			Integer position = ManipString.parseInteger(line.get(columns.get("xsd_ordre")));
+			Integer borneInf = ManipString.parseInteger(line.get(columns.get("borne_inf")));
+			Integer borneSup = ManipString.parseInteger(line.get(columns.get("borne_sup")));
 			switch (idClasse) {
 			case "CARDINALITE":
 				if (position!=null) {

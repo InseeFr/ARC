@@ -194,7 +194,7 @@ public class ApiInitialisationService extends ApiService {
                 	
                 	if (name_no_ext.contains("#"))
                 	{
-                    	Integer number=ManipString.parseNumber(ManipString.substringAfterLast(name_no_ext,"#"));
+                    	Integer number=ManipString.parseInteger(ManipString.substringAfterLast(name_no_ext,"#"));
                     	
                     	// c'est un fichier valide
                     	if (number!=null)
