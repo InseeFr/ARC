@@ -70,7 +70,13 @@ public void setLength(int i) {
 	query.setLength(i);
 }
 
-
+/**
+ * build the sql expression for equality
+ * register the bind variable if the value is not null
+ * @param val
+ * @param type
+ * @return
+ */
 public String sqlEqual(String val, String type) {
     if (val == null) {
         return " is null ";

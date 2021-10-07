@@ -39,6 +39,12 @@ public class ManipString implements IConstanteCaractere {
 
     public static final String patternForIdRubriqueWithBrackets = "\\{"+patternForIdRubrique+"\\}";
 
+    
+    /**
+     * Build a temporary name for archive entry names
+     * @param e
+     * @return
+     */
     public static String redoEntryName(String e)
     {
         return e.replace("/", "§").replace("\\","§");

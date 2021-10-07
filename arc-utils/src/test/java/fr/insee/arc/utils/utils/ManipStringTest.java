@@ -76,6 +76,10 @@ public class ManipStringTest {
 		assertEquals(null,ManipString.parseInteger("10.8"));
 	}
 
-	
+	@Test
+	public void redoEntryName() {
+		// rename an archive entry to a temporary name
+		assertEquals("a.tar.gz§depot§c.xml",ManipString.redoEntryName("a.tar.gz/depot\\c.xml"));
+	}
 	
 }

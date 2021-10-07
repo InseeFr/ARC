@@ -28,6 +28,7 @@ public enum ModeRequete {
         this.expression = anExpression.replace("{}", String.valueOf(value));
     }
 
+    @Override
     public String toString() {
         return this.expression;
     }
