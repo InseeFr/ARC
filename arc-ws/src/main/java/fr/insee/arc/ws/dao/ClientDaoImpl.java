@@ -88,7 +88,8 @@ public class ClientDaoImpl implements ClientDao {
         request.append("CREATE TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_id_source ");
         request.append("AS SELECT id_source FROM " + ApiService.dbEnv(environnement) + "pilotage_fichier T1 ");
         request.append("WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) AND T1.periodicite='" + periodicite + "' ");
-        if (validiteInf != "") {
+
+        if (!StringUtils.isEmpty(validiteInf)) {
             request.append("AND validite>='" + validiteInf + "' ");
         }
         request.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TraitementPhase.MAPPING + "' ");

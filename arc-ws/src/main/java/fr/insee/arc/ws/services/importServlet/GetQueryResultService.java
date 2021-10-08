@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -85,24 +86,28 @@ public void execute(SendResponse resp)
  */
 private boolean parseRequests(JSONObject dsnRequest) {
 	
-	this.ids = new ArrayList<String>();
-    this.sqlRequests = new HashMap<String, String>();
+	this.ids = new ArrayList<>();
+    this.sqlRequests = new HashMap<>();
+    String tempName="temp_";
 	
-    JSONObject sqlRequest = new JSONObject();
+    JSONObject sqlRequest;
     for (int i = 0; i < dsnRequest.getJSONArray(JsonKeys.REQUESTS.getKey()).length(); i++) {
         sqlRequest = dsnRequest.getJSONArray(JsonKeys.REQUESTS.getKey()).getJSONObject(i);
-        if (this.sqlRequests.containsKey(sqlRequest.getString(JsonKeys.ID.getKey())) == false) {
-            if (sqlRequest.getString(JsonKeys.ID.getKey()) != "") {
-                this.ids.add("temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_"
+        
+        if (!this.sqlRequests.containsKey(sqlRequest.getString(JsonKeys.ID.getKey()))) {
+        	
+            if (!StringUtils.isEmpty(sqlRequest.getString(JsonKeys.ID.getKey()))) {
+                this.ids.add(tempName + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_"
                         + sqlRequest.getString(JsonKeys.ID.getKey()));
                 this.sqlRequests.put(
-                        "temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_"
+                		tempName + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_"
                                 + sqlRequest.getString(JsonKeys.ID.getKey()), sqlRequest.getString(JsonKeys.SQL.getKey()));
             } else {
-                this.ids.add("temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_r" + i);
-                this.sqlRequests.put("temp_" + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_r" + i,
+                this.ids.add(tempName + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_r" + i);
+                this.sqlRequests.put(tempName + dsnRequest.getString(JsonKeys.CLIENT.getKey()) + "_" + this.timestamp + "_r" + i,
                         sqlRequest.getString(JsonKeys.SQL.getKey()));
             }
+            
         } else {
             throw new DAOException("Id présent plusieurs fois : " + sqlRequest.getString(JsonKeys.ID.getKey()));
         }

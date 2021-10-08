@@ -867,7 +867,9 @@ public class GererNormeDao implements IDbConstant {
 				UtilitaireDao.get("arc").executeRequest(null, requete);
 
 				// Throwing away the first line
-				bufferedReader.readLine();
+				String uselessLine = bufferedReader.readLine();
+				LoggerHelper.debug(LOGGER, uselessLine + "is thrown away");
+				
 
 				// Importing the file in the database (COPY command)
 				UtilitaireDao.get("arc").importing(null, nomTableImage, bufferedReader, true, false,

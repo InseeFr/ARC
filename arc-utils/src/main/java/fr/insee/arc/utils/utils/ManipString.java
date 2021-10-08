@@ -89,6 +89,7 @@ public class ManipString implements IConstanteCaractere {
 				     .collect(Collectors.toList());//
     }
     
+    
     /**
      * Extrait les morceaux définis par le pattern, sachant que le pattern contient un groupe.
      * @param aPattern
@@ -96,7 +97,6 @@ public class ManipString implements IConstanteCaractere {
      * @return
      */
     public static List<String> extractFromPatternWithOneGroup(String aPattern, String aChaine) {
-        LoggerHelper.trace(LOGGER, "Pattern de détection des tables de nomenclatures dans l'expression du filtre:", aPattern);
         List<String> returned = new ArrayList<>();
         if(aChaine == null) return returned;
         Pattern pattern = Pattern.compile(aPattern);

@@ -14,13 +14,13 @@ public class XsdParseService {
 public void run() throws Exception
 {
 	
-	FileInputStream tmpInx=new FileInputStream(new File("D:\\SauvNT\\EXPERTISE\\SIRENE4\\NormeEDI-CFE\\Message_REGENT_V2008-11.xsd"));
-	
-	SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-    XSDHandlerParser handler = new XSDHandlerParser();
-    SAXParser saxParser = saxParserFactory.newSAXParser();
-    saxParser.parse(tmpInx, handler);
-    tmpInx.close();
+	try(FileInputStream tmpInx=new FileInputStream(new File("my_xsd_file.xsd")))
+	{
+		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+	    XSDHandlerParser handler = new XSDHandlerParser();
+	    SAXParser saxParser = saxParserFactory.newSAXParser();
+	    saxParser.parse(tmpInx, handler);
+	}
 }
 	
 	

@@ -5,6 +5,13 @@ html {
 	font-size: calc(0.6vw + 6px);
 }
 
+body {
+	background-color: #F7F7FF;
+    position: relative;
+    font-size : 0.8rem;
+    line-height: 1.25rem;
+}
+
 
 /* Override bootstrap css */
 
@@ -223,13 +230,6 @@ th.sort {
 	width: 18px;
 }
 
-body {
-	background-color: #F7F7FF;
-    position: relative;
-    font-size : 0.75rem;
-    line-height: 1.25rem;
-}
-
 a.onglet {
 	border: 1px solid;
 	background-color: #ffffff;
@@ -350,7 +350,6 @@ td textarea {
 	max-height: 22px;
 	line-height: 22px;
 	outline-style: none;
-	overflow: hidden;
 	background-image: none;
 	background-repeat: no-repeat;
 	background-position: 100% 100%;
@@ -375,7 +374,6 @@ th textarea {
 	max-height: 15px;
 	line-height: 15px;
 	outline-style: none;
-	overflow: hidden;
 	background-image: none;
 	background-repeat: no-repeat;
 	background-position: 100% 100%;
@@ -411,7 +409,6 @@ textarea[name="consoleIhm"] {
 	padding: 2px;
 	margin: 0px;
 	height: 100px;
-	overflow: auto;
 }
 
 input[type='text']:focus {
@@ -426,14 +423,6 @@ input[type='button'] {
 	border: 1px outset #aaaaaa;
 	padding-bottom: 2px;
 }
-
-/* input[type='submit'] { */
-/* 	position: relative; */
-/* 	height: 18px; */
-/* 	background-color: #CCDDFF; */
-/* 	border: 1px outset #aaaaaa; */
-/* 	padding-bottom: 2px; */
-/* } */
 
 div.tr_tab {
 	margin-left: 10px;
@@ -595,7 +584,6 @@ div.menu {
 	padding: 0px;
 	height: 18px;
 	border-spacing: 0px;
-	height: 100%;
 }
 
 input.menu {
@@ -629,7 +617,7 @@ div.hide {
 	z-index: 800;
 }
 
-div.bandeau_main { /*	background-color:#f0f0ff;*/
+div.bandeau_main {
 	margin-bottom: 10px;
 	margin-top: 5px;
 }
@@ -770,7 +758,7 @@ input.onglet_global {
 }
 
 table td,table th {
-	padding: 0px; /* 'cellpadding' equivalent */
+	padding: 0px;
 	font-size: 0.75rem;
 }
 
@@ -802,10 +790,8 @@ h1 {
 }
 
 h2 {  font-weight: bold; 
-	/* color:blue; */
 	font-size: 1.2rem;
 	color: black;
-	font-weight: bold;
 }
 
 h3 {
@@ -815,9 +801,6 @@ h3 {
 }
 
 table.entete {
-	/*	margin-top: 5px;
-	margin-bottom: 5px;*/
-	/* font-weight: bold;*/
 	width: 100%;
 }
 
@@ -895,10 +878,6 @@ table.fixedHeader tbody {
 	-webkit-user-select: text;
 	-moz-user-select:	text;
 	-khtml-user-select : text;
-}
-
-table.fixedHeader tbody tr {
-	
 }
 
 table.fixedHeader tbody tr:nth-child(even) {
@@ -986,20 +965,6 @@ p.notfound {
 	color: #ff0000;
 }
 
-/*
-#divMenuAvecZoom{
-	position:fixed; 
-	top:0; 
-	left:0; 
-	background-color: #0088BB; 
-	border: 0;
-	height:2em;
-	margin: 0;
-	width:100%;
-	padding: 0;
-	
-}
-*/
 #divReduites {
 	position: fixed;
 	top: 0;
@@ -1018,8 +983,6 @@ ul.listeDivReduites {
 	padding: 0;
 	height: inherit;
 	display: inline-block;
-	/*    position:relative;
-    left:5px;*/
 }
 
 ul.listeDivReduites li {
@@ -1048,11 +1011,7 @@ ul.listeDivReduites li {
 ul.listeDivReduites li:hover {
 	border: 1px outset #AAAAAA;
 }
-/*
-.iconRestaurer{
-	background-position: -48px -80px;
-}
-*/
+
 .iconReduire {
 	background-position: -48px -128px;
 }

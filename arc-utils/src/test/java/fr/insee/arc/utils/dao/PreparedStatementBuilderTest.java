@@ -54,14 +54,5 @@ public class PreparedStatementBuilderTest {
 		assertEquals((new ArrayList<String>(Arrays.asList("10"))).toString(),p.getParameters().toString());
 		
 	}
-	
-	
 
-	@Test
-	public void hashcode() {
-		System.out.println(Math.abs(Integer.MIN_VALUE+1));
-		assertEquals(true,true);
-	}
-	
-	
 }
