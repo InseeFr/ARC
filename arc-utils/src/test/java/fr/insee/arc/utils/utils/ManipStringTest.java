@@ -22,18 +22,29 @@ public class ManipStringTest {
 	}
 
 	@Test
-	public void substringBeforeFirst() {
+	public void substringBeforeFirstNullInput() {
 		// null input string -> return null
 		assertEquals(null, ManipString.substringBeforeFirst(null, "-"));
-		// null separator -> return all string
-		assertEquals("abc", ManipString.substringBeforeFirst("abc", null));
-		// separator not found -> return all string
-		assertEquals("abc", ManipString.substringBeforeFirst("abc", "-"));
-		// standard use case
-		assertEquals("a", ManipString.substringBeforeFirst("a-b-c", "-"));
-		assertEquals("az", ManipString.substringBeforeFirst("az-b-c", "-"));
 	}
 
+	@Test
+	public void substringBeforeFirstNullSep() {
+	// null separator -> return all string
+	assertEquals("abc", ManipString.substringBeforeFirst("abc", null));
+	}
+	
+	@Test
+	public void substringBeforeFirstSepNotFound() {
+	// separator not found -> return all string
+	assertEquals("abc", ManipString.substringBeforeFirst("abc", "-"));
+	}
+	
+	@Test
+	public void substringBeforeFirstNormal() {
+		// standard use case
+		assertEquals("az", ManipString.substringBeforeFirst("az-b-c", "-"));
+	}
+	
 
 	// substringBeforeLast
 	@Test
