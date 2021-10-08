@@ -125,7 +125,7 @@ public class ChargeurCSV implements IChargeur {
 		if (this.userDefinedHeaders == null) {
 			try (InputStreamReader inputStreamReader = new InputStreamReader(streamHeader);
 					BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-					CSVReader readerCSV = new CSVReader(bufferedReader, separateur.charAt(0));) {
+					CSVReader readerCSV = new CSVReader(bufferedReader, (separateur==null)?';':separateur.charAt(0));) {
 				this.headers = getHeader(readerCSV);
 			} finally {
 				streamHeader.close();

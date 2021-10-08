@@ -43,7 +43,6 @@ import fr.insee.arc.utils.utils.ManipString;
 public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConstanteNumerique {
     public static final String varIdSource = "id_source";
     public static final String tokenIdSource = "{:idSource}";
-    public static final String tokenId = "{:id}";
     public static final String aliasTable = "{:alias}";
     public static final String functionBefore = "{:functionBefore}";
     public static final String functionAfter = "{:functionAfter}";
@@ -349,7 +348,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 			HashMap<String,String>  linkedIds  = new  HashMap<> ();
 
 			construireListeIdentifiants(nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
-			construireTableFiltrageCalculIdentifiantsFichierCourant(requeteGlobale, nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds, tokenId);
+			construireTableFiltrageCalculIdentifiantsFichierCourant(requeteGlobale, nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
 			
 			HashMap<TableMapping,ArrayList<TableMapping>> tablesFilles=ordonnerTraitementTable();
 					
@@ -374,8 +373,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 			this.requeteTextuelleInsertion = requeteGlobale.toString();
 			this.isRequeteCalculee = true;
 		}
-		return this.requeteTextuelleInsertion.replace(tokenIdSource, aNomFichier).replace(tokenId, String.valueOf(Math
-		        .abs(aNomFichier.hashCode())));
+		return this.requeteTextuelleInsertion.replace(tokenIdSource, aNomFichier);
 	}
 
 	/**
@@ -523,7 +521,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 			for (TableMapping table : this.ensembleTableMapping) {
 //				System.out.println(order.get(table));
 
-				if (order.get(table)==i)
+				if (order.get(table).equals(i))
 				{
 					r.add(table);
 					end=false;
@@ -735,7 +733,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 */
 	private StringBuilder construireTableFiltrageCalculIdentifiantsFichierCourant(StringBuilder returned,
 	        Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe, HashMap<String,String>  linkedIds
-	        , String ident
 	        ) {
 		this.nomTableFichierCourant = "fichier";
 

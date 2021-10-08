@@ -2,6 +2,11 @@ package fr.insee.arc.utils.utils;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Test;
 
 public class ManipStringTest {
@@ -72,7 +77,9 @@ public class ManipStringTest {
 	@Test
 	public void parseInteger() {
 		assertEquals((Integer)null,ManipString.parseInteger("1 am not a number"));
+		// positive number with + sign
 		assertEquals((Integer)10,ManipString.parseInteger("+10"));
+		// decimal number returns null
 		assertEquals(null,ManipString.parseInteger("10.8"));
 	}
 
@@ -81,5 +88,21 @@ public class ManipStringTest {
 		// rename an archive entry to a temporary name
 		assertEquals("a.tar.gz§depot§c.xml",ManipString.redoEntryName("a.tar.gz/depot\\c.xml"));
 	}
+	
+	
+	@Test
+    public void stringToListSeparator() {
+		assertEquals(Arrays.asList("a","b","cde"),ManipString.stringToList("a,b,cde",","));
+    }
+	
+	@Test(expected = NullPointerException.class)
+	 public void stringToListSeparatorNull() {
+		ManipString.stringToList(null,",");
+    }
+	
+	@Test
+    public void stringToListVariadic() {
+		assertEquals(Arrays.asList("a","b","cde"),ManipString.stringToList("a","b","cde"));
+    }
 	
 }
