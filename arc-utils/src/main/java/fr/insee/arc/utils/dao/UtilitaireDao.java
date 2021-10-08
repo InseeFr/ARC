@@ -1590,17 +1590,15 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		/**
 		 * Copy dans le fichier
 		 */
-		OutputStream os = new FileOutputStream(fName);
-		GZIPOutputStream gzos = new GZIPOutputStream(os)
+		try(GZIPOutputStream gzos = new GZIPOutputStream(new FileOutputStream(fName))
+				{
+					{
+						this.def.setLevel(Deflater.BEST_SPEED);
+					}
+				};
+				)
 		{
-			{
-				this.def.setLevel(Deflater.BEST_SPEED);
-			}
-		};
-		try {
 			exporting(connexion, aRequete, gzos, true, false);
-		} finally {
-			gzos.close();
 		}
 	}
 
