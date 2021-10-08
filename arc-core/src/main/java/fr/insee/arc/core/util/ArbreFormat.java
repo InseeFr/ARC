@@ -37,7 +37,7 @@ public class ArbreFormat {
     public ArbreFormat(Norme aNorme) throws Exception {
         super();
         
-        HashMap<String, String> arbreFormat = new HashMap<String, String>();
+        HashMap<String, String> arbreFormat = new HashMap<>();
         // Récupérer le 'format' lié à la norme
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         SAXParser saxParser = saxParserFactory.newSAXParser();
@@ -128,7 +128,7 @@ public class ArbreFormat {
      * @param feuilles the feuilles to set
      */
     public void setBranches(ArrayList<String> branches) {
-        this.feuilles = branches;
+        this.branches = branches;
     }
     
     
