@@ -20,6 +20,11 @@
 		<sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>javasecurity:S6096</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		
+		<sonar.issue.ignore.multicriteria>e2</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria.e2.ruleKey>javasecurity:S2083</sonar.issue.ignore.multicriteria.e2.ruleKey>
+		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
+		
 	</properties>
 	<url>https://github.com/InseeFr/ARC</url>
 

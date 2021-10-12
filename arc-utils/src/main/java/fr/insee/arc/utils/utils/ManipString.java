@@ -49,8 +49,7 @@ public class ManipString implements IConstanteCaractere {
      */
     public static String redoEntryName(String e)
     {
-    	String rebuildEntryName=e.replace("/", "§").replace("\\","§");
-        return rebuildEntryName;
+    	return e.replace("/", "§").replace("\\","§");
     }
 
     
