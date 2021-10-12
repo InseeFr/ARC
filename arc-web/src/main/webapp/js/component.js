@@ -874,6 +874,8 @@ function ajaxConfigurationCall()
 
 						}
 						$(document).trigger('readyAgain');
+
+						updateConsole();
 						updateConsoleState=false;
 
 						$("#hourglass").remove();
@@ -942,12 +944,14 @@ function ajaxConfigurationCall()
 						var z2=new Date().getTime();
 
 						$(document).trigger('readyAgain');
+						
+						updateConsole();
 						updateConsoleState=false;
 
 						$("#hourglass").remove();
 						
 						applyElementAttributes($this.attr('scope'),attributesSaved);
-
+						
 					}
 				});
 			}
@@ -1257,12 +1261,15 @@ function updateConsole()
 		var view=$('[name="consoleIhm"]').attr("target");
 		$.ajax({
 		  	type: "POST",
-		  	url: serverUrl+view+".action",
+		  	url: view+".action",
 		  	data: null,
 	        beforeSend: function(xhr) {
 	            var token = $("meta[name='_csrf']").attr("content");
 	            var header = $("meta[name='_csrf_header']").attr("content");
-	            xhr.setRequestHeader(header, token);
+	            if (token!=undefined && header!=undefined)
+	            {
+	            	xhr.setRequestHeader(header, token);
+	            }
 	        },
 		  	success: function(data, textStatus) {
 					$('[name="consoleIhm"]').append(data);

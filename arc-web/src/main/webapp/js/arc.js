@@ -1,6 +1,4 @@
-﻿var doc=window.location.href.split(new RegExp("/"));
-var serverUrl=doc[0]+"/"+doc[1]+"/"+doc[2]+"/"+doc[3]+"/";
-var lineHeight=22;
+﻿var lineHeight=22;
 var updateConsoleState =false;
 var nbLinesConsole=500;
 var couleurSelection="rgb(106, 171, 224)";
