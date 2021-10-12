@@ -38,14 +38,9 @@ public class TarGzDecompressor implements ArchiveExtractor {
 
 	    while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
 		/** If the entry is a directory, create the directory. **/
-		if (entry.isDirectory()) {
-		    File f = new File(entry.getName());
-		    boolean created = f.mkdir();
-		    if (!created) {
-			StaticLoggerDispatcher.info(String.format("Unable to create directory '%s', during extraction of archive contents.%n",
-				f.getAbsolutePath()), LOGGER);
-		    }
-		} else {
+	    	
+		// directories if not empty are automatically read in tar entries list   	
+		if (!entry.isDirectory()) {
 		    int count;
 		    byte data[] = new byte[32738];
 		    

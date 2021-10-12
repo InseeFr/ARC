@@ -328,6 +328,12 @@ public class ApiReceptionService extends ApiService {
 			TarEntry currentEntry = tarInput.getNextEntry();
 			// Check every entry
 			while (currentEntry != null) {
+				if (currentEntry.isDirectory())
+				{
+					currentEntry = tarInput.getNextEntry();
+				}
+				else
+				{
 				l = new ArrayList<>();
 				l.add(f.getName());
 				l.add(entrepot + currentEntry.getName());
@@ -349,6 +355,7 @@ public class ApiReceptionService extends ApiService {
 				l.add(null);
 				contentTemp.add(l);
 				rapport = null;
+				}
 			}
 		} catch (IOException e1) {
 			erreur = 1;
