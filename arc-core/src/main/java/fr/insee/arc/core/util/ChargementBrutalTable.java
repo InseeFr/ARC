@@ -81,7 +81,6 @@ public class ChargementBrutalTable {
 	    validiteOk[0]= null;
 	   
 	    int nbBoucle = 0;
-	    boolean erreur = false;
 	
 	    try(InputStreamReader isr = new InputStreamReader(file);
 	    		BufferedReader br = new BufferedReader(isr);) {
@@ -99,15 +98,12 @@ public class ChargementBrutalTable {
 	    	}
 
 	    } catch (IOException e) {
-	    	throw e;
+	    	throw (new Exception("Erreur de lecture du fichier " + idSource));
 	    }
 
 	    if (normeOk[0].getIdNorme()==null) {
 	        throw (new Exception("Aucune norme trouvée"));
 	    }
-	    if (erreur) {
-	        throw (new Exception("Une erreur est survenu lors du calcule de la norme du fichier"));
-		}
     }
 
     /** Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
