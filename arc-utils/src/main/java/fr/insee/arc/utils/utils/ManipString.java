@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
@@ -47,7 +49,8 @@ public class ManipString implements IConstanteCaractere {
      */
     public static String redoEntryName(String e)
     {
-        return e.replace("/", "§").replace("\\","§");
+    	String rebuildEntryName=e.replace("/", "§").replace("\\","§");
+        return rebuildEntryName;
     }
 
     
