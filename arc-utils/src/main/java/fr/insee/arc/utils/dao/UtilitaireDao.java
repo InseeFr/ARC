@@ -125,14 +125,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return get(aPool);
 	}
 
-	private final static String untokenize(ModeRequete... modes) {
-		StringBuilder returned = new StringBuilder();
-		for (int i = 0; i < modes.length; i++) {
-			returned.append(modes[i].expr()).append("\n");
-		}
-		return returned.toString();
-	}
-
 
 	/**
 	 * Retourne une connexion hors contexte (sans pooling)
@@ -487,7 +479,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			try(Statement st = connexionWrapper.getConnexion().createStatement();)
 			{
 				try {
-					st.execute(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr() + requete);
+					st.execute(ModeRequete.configureQuery(requete,modes));
 					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
 				} catch (Exception e) {
 					st.cancel();
@@ -549,6 +541,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	}
 	
+	
 	/**
 	 * Exécution de requêtes ramenant des enregistrements
 	 *
@@ -569,7 +562,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public <T> T executeRequest(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider,
 			ModeRequete... modes) throws SQLException {
 		if (modes != null && modes.length > 0) {
-			LoggerHelper.trace(LOGGER, "\n" + untokenize(modes));
+			LoggerHelper.trace(LOGGER, "\n" + ModeRequete.configureQuery(null,modes));
 		}
 
 		long start = new Date().getTime();
@@ -585,7 +578,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				connexionWrapper.getConnexion().setAutoCommit(false);
 				if (modes != null && modes.length > 0) {
 					try(PreparedStatement stmt = connexionWrapper.getConnexion()
-							.prepareStatement(untokenize(modes) + ModeRequete.EXTRA_FLOAT_DIGIT.expr());)
+							.prepareStatement(ModeRequete.configureQuery(null,modes));)
 					{
 						stmt.execute();
 					}

@@ -36,4 +36,49 @@ public enum ModeRequete {
     public String expr() {
         return this.expression;
     }
+    
+
+    /**
+     * untokenize the configuration modes to be used in the query
+     * @param modes
+     * @return
+     */
+	public static String untokenize(ModeRequete... modes) {
+		StringBuilder returned = new StringBuilder();
+		for (int i = 0; i < modes.length; i++) {
+			returned.append(modes[i].expr()).append("\n");
+		}
+		return returned.toString();
+	}
+
+
+    
+    /**
+     * Configure query with modes
+     * Extra float digit modes in activated by default
+     * @param requete
+     * @param modes
+     * @return
+     */
+    public static String configureQuery(String requete, ModeRequete... modes)
+    {
+    	
+    	StringBuilder query=new StringBuilder();
+    	
+		// user defined configuration modes
+		query.append(ModeRequete.untokenize(modes));
+		
+		// decimal approximation configuration for float
+		query.append(ModeRequete.EXTRA_FLOAT_DIGIT.expr());
+
+		// query
+		if (requete!=null)
+		{
+			query.append(requete);
+		}
+		
+		return query.toString();
+		
+    }
+	
 }
