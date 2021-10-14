@@ -26,13 +26,18 @@
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>javasecurity:S6096</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
 		
-		<!-- ARC is kinda framework and user must be able to configure its directory. only happen in webservice and on purpose -->
+		<!-- ARC is kinda framework and user must be able to manipulate its source or target directories. On purpose -->
 		<sonar.issue.ignore.multicriteria.e2.ruleKey>javasecurity:S2083</sonar.issue.ignore.multicriteria.e2.ruleKey>
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
 		
 		<!-- Non bind sql is invoked in batch only with retricted access. No choice for maintenance query. -->
 		<sonar.issue.ignore.multicriteria.e3.ruleKey>javasecurity:S3649</sonar.issue.ignore.multicriteria.e3.ruleKey>
 		<sonar.issue.ignore.multicriteria.e3.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
+		
+		<!-- csrf -->
+		<sonar.issue.ignore.multicriteria.e3.ruleKey>java:S3752</sonar.issue.ignore.multicriteria.e3.ruleKey>
+		<sonar.issue.ignore.multicriteria.e3.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
+		
 		
 		
 	</properties>
