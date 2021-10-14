@@ -43,7 +43,6 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 public class ThreadChargementService extends ApiChargementService implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
     int indice;
-    private Thread t;
     private String container;
     public String validite;
 

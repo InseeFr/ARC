@@ -30,7 +30,6 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
     private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
 
     int indice;
-    private Thread t;
     protected String tableTempFiltrageOk;
     protected String tableMappingPilTemp;
 
