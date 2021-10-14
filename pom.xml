@@ -20,7 +20,7 @@
 		
 		
 		<!-- sonar rules to ignore -->
-		<sonar.issue.ignore.multicriteria>e1,e2,e3</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
 		
 		<!-- archive content cannot change directory -->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>javasecurity:S6096</sonar.issue.ignore.multicriteria.e1.ruleKey>
@@ -35,8 +35,13 @@
 		<sonar.issue.ignore.multicriteria.e3.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
 		
 		<!-- csrf -->
-		<sonar.issue.ignore.multicriteria.e3.ruleKey>java:S3752</sonar.issue.ignore.multicriteria.e3.ruleKey>
-		<sonar.issue.ignore.multicriteria.e3.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
+		<sonar.issue.ignore.multicriteria.e4.ruleKey>java:S3752</sonar.issue.ignore.multicriteria.e4.ruleKey>
+		<sonar.issue.ignore.multicriteria.e4.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
+		
+		<!-- user-controlled data -->
+		<sonar.issue.ignore.multicriteria.e5.ruleKey>javasecurity:S3649</sonar.issue.ignore.multicriteria.e5.ruleKey>
+		<sonar.issue.ignore.multicriteria.e5.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e5.resourceKey>
+		
 		
 		
 		
