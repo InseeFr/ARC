@@ -20,7 +20,7 @@
 		
 		
 		<!-- sonar rules to ignore -->
-		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5,e6,e7</sonar.issue.ignore.multicriteria>
 		
 		<!-- archive content cannot change directory -->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>javasecurity:S6096</sonar.issue.ignore.multicriteria.e1.ruleKey>
@@ -30,17 +30,25 @@
 		<sonar.issue.ignore.multicriteria.e2.ruleKey>javasecurity:S2083</sonar.issue.ignore.multicriteria.e2.ruleKey>
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
 		
-		<!-- Non bind sql is invoked in batch only with retricted access. No choice for maintenance query. -->
+		<!-- Non bind sql is invoked in batch only with restricted access. No choice for maintenance query. -->
 		<sonar.issue.ignore.multicriteria.e3.ruleKey>javasecurity:S3649</sonar.issue.ignore.multicriteria.e3.ruleKey>
 		<sonar.issue.ignore.multicriteria.e3.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
 		
-		<!-- csrf -->
-		<sonar.issue.ignore.multicriteria.e4.ruleKey>java:S3752</sonar.issue.ignore.multicriteria.e4.ruleKey>
+		<!-- csrf protection. Probably to be removed because of internal global identification -->
+		<sonar.issue.ignore.multicriteria.e4.ruleKey>java:S4502</sonar.issue.ignore.multicriteria.e4.ruleKey>
 		<sonar.issue.ignore.multicriteria.e4.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
-		
+	
 		<!-- user-controlled data -->
 		<sonar.issue.ignore.multicriteria.e5.ruleKey>javasecurity:S3649</sonar.issue.ignore.multicriteria.e5.ruleKey>
 		<sonar.issue.ignore.multicriteria.e5.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e5.resourceKey>
+
+		<!-- form query type -->
+		<sonar.issue.ignore.multicriteria.e6.ruleKey>java:S3752</sonar.issue.ignore.multicriteria.e6.ruleKey>
+		<sonar.issue.ignore.multicriteria.e6.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e6.resourceKey>
+		
+		<!-- sql injection for export functionnality is required for now -->
+		<sonar.issue.ignore.multicriteria.e7.ruleKey>java:S2077</sonar.issue.ignore.multicriteria.e7.ruleKey>
+		<sonar.issue.ignore.multicriteria.e7.resourceKey>**/ExportAction.java</sonar.issue.ignore.multicriteria.e7.resourceKey>
 		
 		
 		
