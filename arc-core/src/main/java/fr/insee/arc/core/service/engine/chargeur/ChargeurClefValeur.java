@@ -20,6 +20,7 @@ import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
 /**
@@ -78,8 +79,7 @@ public class ChargeurClefValeur implements IChargeur {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LoggerHelper.errorAsComment(LOGGER, "ChargeurCleValeur.run - xml conversion failed for IO reason");
                 }
             }
         }

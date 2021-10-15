@@ -142,8 +142,7 @@ public class ChargeurXml implements IChargeur{
         try {
 			UtilitaireDao.get("arc").executeBlock(this.connexion, requete);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    LoggerHelper.errorAsComment(LOGGER, "ChargeurXML.initialisation - creation failed on the temporary table A which is the temporary recipient for the xml file to be loaded");
 		}
         java.util.Date endDate = new java.util.Date();
         
@@ -213,7 +212,7 @@ public class ChargeurXml implements IChargeur{
             saxParser.parse(f, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             error = true;
-            e.printStackTrace();
+            LoggerHelper.errorAsComment(LOGGER, "ChargeurXml.execution() - SAX parser failed to parse the xml file");
             rapport = e.getMessage().replace("'", "''");
             handler.requete.setLength(0);
             this.start = 0;

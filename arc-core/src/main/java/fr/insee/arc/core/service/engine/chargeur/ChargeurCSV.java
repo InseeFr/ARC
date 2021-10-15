@@ -27,6 +27,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.XMLUtil;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
@@ -168,7 +169,7 @@ public class ChargeurCSV implements IChargeur {
 			UtilitaireDao.get("arc").importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent, true,
 					this.userDefinedHeaders == null, this.separateur, this.quote, this.encoding);
 		} catch (Exception e) {
-			e.printStackTrace();
+		    LoggerHelper.errorAsComment(LOGGER, "ChargeurCSV.copyerFile - the csv file couldn't be copy streamed to database");
 			throw e;
 		} finally {
 			streamContent.close();

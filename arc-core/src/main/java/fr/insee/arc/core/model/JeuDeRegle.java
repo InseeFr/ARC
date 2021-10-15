@@ -2,17 +2,24 @@ package fr.insee.arc.core.model;
 
 import java.util.Date;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.utils.utils.LoggerHelper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+
 public class JeuDeRegle {
 
     public static final String DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
 
+	private static final Logger LOGGER = LogManager.getLogger(JeuDeRegle.class);
 
+    
     private String idNorme;
     private String periodicite;
     private Date validiteInf;
@@ -76,7 +83,7 @@ public class JeuDeRegle {
             java.sql.Date dateSql = new java.sql.Date(formatter.parse(validiteInf).getTime());
             this.validiteInf = dateSql;
         } catch (ParseException e) {
-            e.printStackTrace();
+            LoggerHelper.errorAsComment(LOGGER, "JeuDeRegle.setValiditeInfString - the validité sup "+validiteInf+" isn't at date format "+format);
         }
     }
 
@@ -98,7 +105,7 @@ public class JeuDeRegle {
             java.sql.Date dateSql = new java.sql.Date(formatter.parse(validiteSup).getTime());
             this.validiteSup = dateSql;
         } catch (ParseException e) {
-            e.printStackTrace();
+            LoggerHelper.errorAsComment(LOGGER, "JeuDeRegle.setValiditeSupString - the validité sup "+validiteSup+" isn't at date format "+format);
         }
     }
 
