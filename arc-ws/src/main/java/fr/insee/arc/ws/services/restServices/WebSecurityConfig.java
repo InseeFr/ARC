@@ -53,17 +53,9 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	@Override
 	protected AdapterDeploymentContext adapterDeploymentContext() throws Exception {
 		AdapterDeploymentContextFactoryBean factoryBean;
-		if (!keycloakFile.isEmpty()) {
+		if (fr.insee.arc.utils.webutils.WebSecurity.isKeycloakFileConfigurationActive(keycloakFile)) {
 			factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
-		} else if (!keycloakResource.isEmpty()) {
-        	// if the classpath keycloak.json hadn't been overloaded, return the basic adapter 
-          	 if (
-          			 !fr.insee.arc.utils.webutils.WebSecurity.isKeycloackOverloaded(
-          					 KeycloakDeploymentBuilder.loadAdapterConfig(new ClassPathResource(keycloakResource).getInputStream()))
-          			 )
-          	 {
-            	return new AdapterDeploymentContext();
-          	 }
+		} else if (fr.insee.arc.utils.webutils.WebSecurity.isKeycloakResourceConfigurationActive(keycloakResource)) {
 			factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
 		} else {
 			return new AdapterDeploymentContext();
@@ -149,9 +141,12 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 		return secureChannelProcessor;
 	}
 
-	/** Returns true if Keycloak authentification should be used.*/
+	/**
+	 * Returns true if Keycloak authentification should be used.
+	 * @return
+	 */
 	private boolean isKeycloakActive() {
-		return !keycloakFile.isEmpty() || !keycloakResource.isEmpty();
+		return fr.insee.arc.utils.webutils.WebSecurity.isKeycloakActive(keycloakFile,keycloakResource);
 	}
 
 	@Override

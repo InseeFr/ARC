@@ -1,6 +1,7 @@
 package fr.insee.arc.web;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.keycloak.adapters.AdapterDeploymentContext;
@@ -42,26 +43,18 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	 *  to dynamically set the config file (if present).*/
 	@Bean
 	@Override
-    protected AdapterDeploymentContext adapterDeploymentContext() throws Exception {
-        AdapterDeploymentContextFactoryBean factoryBean;
-        if (!keycloakFile.isEmpty()) {
-        	factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
-        } else if (!keycloakResource.isEmpty()) {
-        	// if the classpath keycloak.json hadn't been overloaded, return the basic adapter 
-           	 if (
-           			 !fr.insee.arc.utils.webutils.WebSecurity.isKeycloackOverloaded(
-           					 KeycloakDeploymentBuilder.loadAdapterConfig(new ClassPathResource(keycloakResource).getInputStream()))
-           			 )
-           	 {
-             	return new AdapterDeploymentContext();
-           	 }
-           	 factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
-        } else {
-        	return new AdapterDeploymentContext();
-        }
-        factoryBean.afterPropertiesSet();
-        return factoryBean.getObject();
-    }
+	protected AdapterDeploymentContext adapterDeploymentContext() throws Exception {
+		AdapterDeploymentContextFactoryBean factoryBean;
+		if (fr.insee.arc.utils.webutils.WebSecurity.isKeycloakFileConfigurationActive(keycloakFile)) {
+			factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
+		} else if (fr.insee.arc.utils.webutils.WebSecurity.isKeycloakResourceConfigurationActive(keycloakResource)) {
+			factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
+		} else {
+			return new AdapterDeploymentContext();
+		}
+		factoryBean.afterPropertiesSet();
+		return factoryBean.getObject();
+	}
 	
 
 	@Override
@@ -105,9 +98,14 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 		}
 	}
 
-	/** Returns true if Keycloak authentification should be used.*/
+
+	
+	/**
+	 * Returns true if Keycloak authentification should be used.
+	 * @return
+	 */
 	private boolean isKeycloakActive() {
-		return !keycloakFile.isEmpty() || !keycloakResource.isEmpty();
+		return fr.insee.arc.utils.webutils.WebSecurity.isKeycloakActive(keycloakFile,keycloakResource);
 	}
 
 	@Override
