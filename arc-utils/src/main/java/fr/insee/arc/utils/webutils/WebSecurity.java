@@ -24,7 +24,8 @@ public class WebSecurity {
 	
 	public static boolean isKeycloackOverloaded(AdapterConfig adapterConfig)
 	{
-        LoggerHelper.infoAsComment(LOGGER, "keycloak adapterConfig.getRealm() : "+adapterConfig.getRealm());
+        LoggerHelper.infoAsComment(LOGGER, "Keycloak classpath configuration overload");
+		LoggerHelper.infoAsComment(LOGGER, "keycloak adapterConfig.getRealm() : "+adapterConfig.getRealm());
         LoggerHelper.infoAsComment(LOGGER, "keycloak adapterConfig.getAuthServerUrl() : "+adapterConfig.getAuthServerUrl());
 		return isOverloaded(adapterConfig.getRealm()) 
 				&& isOverloaded(adapterConfig.getAuthServerUrl()) 
