@@ -20,7 +20,7 @@
 		
 		
 		<!-- sonar rules to ignore -->
-		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5,e6,e7,e8,e9</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5,e6,e7,e81,e82,e9</sonar.issue.ignore.multicriteria>
 		
 		<!-- archive content cannot change directory -->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>javasecurity:S6096</sonar.issue.ignore.multicriteria.e1.ruleKey>
@@ -50,9 +50,12 @@
 		<sonar.issue.ignore.multicriteria.e7.ruleKey>java:S2077</sonar.issue.ignore.multicriteria.e7.ruleKey>
 		<sonar.issue.ignore.multicriteria.e7.resourceKey>**/ExportAction.java</sonar.issue.ignore.multicriteria.e7.resourceKey>
 		
-		<!--  no upload limit in ARC on purpose -->
-		<sonar.issue.ignore.multicriteria.e8.ruleKey>java:S4507</sonar.issue.ignore.multicriteria.e8.ruleKey>
-		<sonar.issue.ignore.multicriteria.e8.resourceKey>**/WebConfig.java</sonar.issue.ignore.multicriteria.e8.resourceKey>
+		<!--  no upload limit in ARC sandbox interface -->
+		<sonar.issue.ignore.multicriteria.e81.ruleKey>java:S4507</sonar.issue.ignore.multicriteria.e81.ruleKey>
+		<sonar.issue.ignore.multicriteria.e81.resourceKey>**/WebConfig.java</sonar.issue.ignore.multicriteria.e81.resourceKey>
+		<sonar.issue.ignore.multicriteria.e82.ruleKey>java:S5693</sonar.issue.ignore.multicriteria.e82.ruleKey>
+		<sonar.issue.ignore.multicriteria.e82.resourceKey>**/WebConfig.java</sonar.issue.ignore.multicriteria.e82.resourceKey>
+		
 		
 		<!--  ignore javascript eval security test for jquery tablesorter -->
 		<sonar.issue.ignore.multicriteria.e9.ruleKey>javascript:S1523</sonar.issue.ignore.multicriteria.e9.ruleKey>
