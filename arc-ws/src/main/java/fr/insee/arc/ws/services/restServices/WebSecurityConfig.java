@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.keycloak.adapters.AdapterDeploymentContext;
+import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -55,6 +56,14 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 		if (!keycloakFile.isEmpty()) {
 			factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
 		} else if (!keycloakResource.isEmpty()) {
+        	// if the classpath keycloak.json hadn't been overloaded, return the basic adapter 
+          	 if (
+          			 !fr.insee.arc.utils.webutils.WebSecurity.isKeycloackOverloaded(
+          					 KeycloakDeploymentBuilder.loadAdapterConfig(new ClassPathResource(keycloakResource).getInputStream()))
+          			 )
+          	 {
+            	return new AdapterDeploymentContext();
+          	 }
 			factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
 		} else {
 			return new AdapterDeploymentContext();

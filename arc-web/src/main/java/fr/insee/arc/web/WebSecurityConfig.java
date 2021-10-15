@@ -1,14 +1,20 @@
 package fr.insee.arc.web;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import org.keycloak.adapters.AdapterDeploymentContext;
+import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
+import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,6 +37,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 	private PropertiesHandler properties;
 
 
+
 	/** Overrides KeycloakWebSecurityConfigurerAdapter 
 	 *  to dynamically set the config file (if present).*/
 	@Bean
@@ -38,10 +45,17 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
     protected AdapterDeploymentContext adapterDeploymentContext() throws Exception {
         AdapterDeploymentContextFactoryBean factoryBean;
         if (!keycloakFile.isEmpty()) {
-             factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
-             } else if (!keycloakResource.isEmpty()) {
-            factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
-
+        	factoryBean = new AdapterDeploymentContextFactoryBean(new FileSystemResource(keycloakFile));
+        } else if (!keycloakResource.isEmpty()) {
+        	// if the classpath keycloak.json hadn't been overloaded, return the basic adapter 
+           	 if (
+           			 !fr.insee.arc.utils.webutils.WebSecurity.isKeycloackOverloaded(
+           					 KeycloakDeploymentBuilder.loadAdapterConfig(new ClassPathResource(keycloakResource).getInputStream()))
+           			 )
+           	 {
+             	return new AdapterDeploymentContext();
+           	 }
+           	 factoryBean = new AdapterDeploymentContextFactoryBean(new ClassPathResource(keycloakResource));
         } else {
         	return new AdapterDeploymentContext();
         }
