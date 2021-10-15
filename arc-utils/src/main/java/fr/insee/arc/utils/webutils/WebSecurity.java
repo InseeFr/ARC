@@ -2,7 +2,13 @@ package fr.insee.arc.utils.webutils;
 
 import org.keycloak.representations.adapters.config.AdapterConfig;
 
+import fr.insee.arc.utils.utils.LoggerHelper;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class WebSecurity {
+	private static final Logger LOGGER = LogManager.getLogger(WebSecurity.class);
 
 	
 	private WebSecurity() {
@@ -14,6 +20,8 @@ public class WebSecurity {
 	
 	public static boolean isKeycloackOverloaded(AdapterConfig adapterConfig)
 	{
+        LoggerHelper.infoAsComment(LOGGER, "keycloak adapterConfig.getRealm() : "+adapterConfig.getRealm());
+        LoggerHelper.infoAsComment(LOGGER, "keycloak adapterConfig.getAuthServerUrl() : "+adapterConfig.getAuthServerUrl());
 		return isOverloaded(adapterConfig.getRealm()) 
 				&& isOverloaded(adapterConfig.getAuthServerUrl()) 
 				;
