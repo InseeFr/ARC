@@ -1017,15 +1017,7 @@ function splitAndEvalArray(scope)
 	{
 		// on enleve la partie avant le [
 		var divMain=tScope[i].split("[")[0];
-		
-		if (divMain.indexOf("(")>-1)
-		{
-			tScopeCurrent[i]=eval(divMain);
-		}
-		else
-		{
-			tScopeCurrent[i]=divMain;
-		}
+		tScopeCurrent[i]=divMain;
 	}
 	return tScopeCurrent;
 }
@@ -1043,11 +1035,6 @@ function savElementAttributes(scope)
 		if (tScope[i].indexOf("[")>-1)
 			{
 			var divMain=tScope[i].split("[")[0];
-
-			if (divMain.indexOf("(")>-1)
-				{
-					divMain=eval(divMain);
-				}
 			
 			// on garde ce qui est entre les crochets
 			var aTraiter=tScope[i].split("[")[1].split("]")[0];
@@ -1082,11 +1069,6 @@ function applyElementAttributes(scope, attributesSaved)
 			{
 			var divMain=tScope[i].split("[")[0];
 
-			if (divMain.indexOf("(")>-1)
-				{
-					divMain=eval(divMain);
-				}
-			
 			// on garde ce qui est entre les crochets
 			var aTraiter=tScope[i].split("[")[1].split("]")[0];
 			// on itere sur les virgules : [elem1, attr à conserver1, elem2,
