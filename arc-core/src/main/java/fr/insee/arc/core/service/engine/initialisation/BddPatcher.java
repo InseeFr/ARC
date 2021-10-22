@@ -107,6 +107,12 @@ public class BddPatcher {
 		
 		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId, bddParameterDescription(envExecution));
 	}
+	
+	private static void setBddScriptVersionWithoutDescription (Connection connexion, String commitId, String... envExecution)
+	{
+		
+		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId);
+	}
 
 	/**
 	 * parameter description
@@ -190,7 +196,7 @@ public class BddPatcher {
 		
 		if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {
 
-			setBddScriptVersion(connexion,applicationNewGitVersion, envExecutions);
+			setBddScriptVersionWithoutDescription(connexion,applicationNewGitVersion, envExecutions);
 			
 
 			// global script. Mainly to build the arc schema
@@ -208,6 +214,9 @@ public class BddPatcher {
 			} catch (Exception e) {
 				setBddScriptVersion(connexion,databaseOldGitVersion);
 			}
+			
+			// set version number when the update scripts are over
+			setBddScriptVersion(connexion,applicationNewGitVersion, envExecutions);
 			
 		}
 	}	
