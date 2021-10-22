@@ -18,19 +18,15 @@
 	<form id="selectWebserviceContext" action="selectWebserviceContext.action"
 	spellcheck="false" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 
+		<c:if test="${scope==null}">
+			<c:import url="tiles/header.jsp">
+				<c:param name="currentPage" value="webserviceManagement" />
+			</c:import>
+		</c:if>
+
 		<div class="container-fluid">
 
-			<div class="row mb-5">
-				<div class="col">
-					<c:if test="${scope==null}">
-						<c:import url="tiles/header.jsp">
-							<c:param name="currentPage" value="webserviceManagement" />
-						</c:import>
-					</c:if>
-				</div>
-			</div>
-
-			<div class="row border-bottom">
+			<div class="row">
 				<!-- left column -->
 				<div class="col-md-5">
 					<!-- norm list -->
