@@ -291,6 +291,12 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	public void initializeRapportBAS() {
 		LoggerHelper.debug(LOGGER, "* initializeRapportBAS *");
 		HashMap<String, String> defaultInputFields = new HashMap<>();
+		
+        if (getViewRapportBAS().getHeaderSortDLabels() == null) {
+        	getViewRapportBAS().setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
+        	getViewRapportBAS().setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
+        }
+		
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
 		requete.append(
 				"select date_entree, phase_traitement, array_to_string(etat_traitement,'$') as etat_traitement, rapport, count(1) as nb ");
