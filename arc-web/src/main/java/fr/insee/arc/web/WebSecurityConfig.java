@@ -80,7 +80,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 			http
 			// public
 			.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
-			.antMatchers("/", "/index").permitAll()
+			.antMatchers("/").permitAll()
 			.antMatchers("/css/**", "/fonts/**", "/img/**", "/js/**").permitAll();
 			if (authorizedRoles.length == 0) {
 				// authenticated
