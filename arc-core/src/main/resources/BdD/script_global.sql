@@ -23,6 +23,18 @@ exists (select from arc.parameter a where a.key=new.key)
 do instead nothing;
 
 
+-- optimization parameters at database level
+do $$
+declare
+c record;
+BEGIN
+for c in (select current_database() as n) loop
+execute 'alter database '||c.n||' set enable_bitmapscan=off;';
+execute 'alter database '||c.n||' set synchronous_commit=off;';
+end loop;
+end;
+$$;
+
 -- batch initialization parameters
 INSERT INTO arc.parameter VALUES ('ApiInitialisationService.Nb_Jour_A_Conserver','365');
 UPDATE arc.parameter set description='parameter.batch.initialization.numberOfDayToKeepAfterRetrievedByAllCLients' where key='ApiInitialisationService.Nb_Jour_A_Conserver';
