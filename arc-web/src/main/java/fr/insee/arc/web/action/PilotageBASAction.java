@@ -92,28 +92,28 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	@Override
 	public void putAllVObjects(EnvManagementModel arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);	
-	
+
+		setViewPilotageBAS(vObjectService.preInitialize(arcModel.getViewPilotageBAS()));
+		setViewRapportBAS(vObjectService.preInitialize(arcModel.getViewRapportBAS()));	
 		setViewArchiveBAS(vObjectService.preInitialize(arcModel.getViewArchiveBAS()));
 		setViewEntrepotBAS(vObjectService.preInitialize(arcModel.getViewEntrepotBAS()));
 		setViewFichierBAS(vObjectService.preInitialize(arcModel.getViewFichierBAS()));
-		setViewPilotageBAS(vObjectService.preInitialize(arcModel.getViewPilotageBAS()));
-		setViewRapportBAS(vObjectService.preInitialize(arcModel.getViewRapportBAS()));	
 		
 		// If the sandbox changed, have to destroy all table and re create later
 		if (this.isRefreshMonitoring) {
+			vObjectService.destroy(getViewPilotageBAS());
+			vObjectService.destroy(getViewRapportBAS());
 			vObjectService.destroy(getViewArchiveBAS());
 			vObjectService.destroy(getViewEntrepotBAS());
 			vObjectService.destroy(getViewFichierBAS());
-			vObjectService.destroy(getViewPilotageBAS());
-			vObjectService.destroy(getViewRapportBAS());
 			this.isRefreshMonitoring = false;
 		}
 
+		putVObject(getViewPilotageBAS(), t -> initializePilotageBAS());
+		putVObject(getViewRapportBAS(), t -> initializeRapportBAS());
 		putVObject(getViewArchiveBAS(), t -> initializeArchiveBAS());
 		putVObject(getViewEntrepotBAS(), t -> initializeEntrepotBAS());
 		putVObject(getViewFichierBAS(), t -> initializeFichierBAS());
-		putVObject(getViewPilotageBAS(), t -> initializePilotageBAS());
-		putVObject(getViewRapportBAS(), t -> initializeRapportBAS());
 	
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
 	}
@@ -147,7 +147,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		} catch (SQLException e) {
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
 		}
-		
 	}
 	
 	private ArrayList<ArrayList<String>> reworkPilotageContent(ArrayList<ArrayList<String>> content) {
@@ -609,9 +608,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	// visual des Fichiers
 	public void initializeFichierBAS() {
 		LoggerHelper.debug(LOGGER, "initializeFichierBAS");
+
 		Map<String, ArrayList<String>> selectionLigne = getViewPilotageBAS().mapContentSelected();
 		ArrayList<String> selectionColonne = getViewPilotageBAS().listHeadersSelected();
-
 		Map<String, ArrayList<String>> selectionLigneRapport = getViewRapportBAS().mapContentSelected();
 
 		if (!selectionLigne.isEmpty() && !selectionColonne.isEmpty()) {
