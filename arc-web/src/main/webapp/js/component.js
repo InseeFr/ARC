@@ -1339,18 +1339,10 @@ jQuery.param2 = function( a, traditional ) {
 
 	var prefix,
 	s = [],
-	add = function( key, value, todo ) {
+	add = function( key, value) {
 		// If value is a function, invoke it and return its value
 		value = jQuery.isFunction( value ) ? value() : ( value == null ? "" : value );
-
-		if (todo!=undefined)
-		{
-			s[ s.length ] = encodeURIComponent( key ) + "=" + encodeURIComponent( value );
-		}
-		else
-		{
-			s[ s.length ] ="";
-		}
+		s[ s.length ] = encodeURIComponent( key ) + "=" + encodeURIComponent( value );
 	};
 
 	// Set traditional to true for jQuery <= 1.3.2 behavior.
@@ -1362,7 +1354,7 @@ jQuery.param2 = function( a, traditional ) {
 	if ( jQuery.isArray( a ) || ( a.jquery && !jQuery.isPlainObject( a ) ) ) {
 		// Serialize the form elements
 		jQuery.each( a, function() {
-			add( this.name, this.value, this.todo );
+			add(this.name, this.value);
 		});
 
 	} else {
@@ -1387,6 +1379,9 @@ jQuery.param2 = function( a, traditional ) {
 };
 
 
+// extended serialization function
+// pass parameters mark with m only
+// pass false for unchecked checkbox
 jQuery.fn.extend({
 	serialize2: function() {
 		return jQuery.param2( this.serializeArray2() );
@@ -1408,20 +1403,24 @@ jQuery.fn.extend({
 
 			// Use .is( ":disabled" ) so that fieldset[disabled] works
 			return this.name && !jQuery( this ).is( ":disabled" ) &&
-			rsubmittable.test( this.nodeName ) && !rsubmitterTypes.test( type ) &&
-			( this.checked || !rcheckableType.test( type ) );
+			rsubmittable.test( this.nodeName ) && !rsubmitterTypes.test( type )
+			// the serialization function only pass parameters with m attributes for performance purpose
+			// m attribute is marked when something change
+			&& jQuery(this).attr("m")!=undefined 
+			//&& ( this.checked || !rcheckableType.test( type ) )
+			;
 		})
 		.map(function( i, elem ) {
-			var val = jQuery( this ).val();
-			var m = jQuery( this ).attr("m");
-
+			var type = this.type;
+			// modification so that checkbox values are passed if they are unchecked
+			var val = rcheckableType.test(this.type)?(jQuery(this).is(":checked")?"true":"false"):jQuery(this).val();
 			return val == null ?
 					null :
-						jQuery.isArray( val ) ?
-								jQuery.map( val, function( val ) {
-									return { name: elem.name, value: val.replace( rCRLF, "\r\n" ), todo: m };
+						jQuery.isArray(val) ?
+								jQuery.map(val, function(val) {
+									return { name: elem.name, value: val.replace( rCRLF, "\r\n" )};
 								}) :
-								{ name: elem.name, value: val.replace( rCRLF, "\r\n" ), todo: m };
+								{ name: elem.name, value: val.replace( rCRLF, "\r\n" )};
 		}).get();
 	}
 });

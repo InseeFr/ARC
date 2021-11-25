@@ -119,7 +119,7 @@
 							<c:param name="ligneFilter" value ="true" />
 							<c:param name="checkbox" value ="true" />
 							<c:param name="checkboxVisible" value ="false" />
-							<c:param name="extraScopeSee" value ="viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;" />
+							<c:param name="extraScopeSee" value ="viewPilotageBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;" />
 						</c:import>
 					</div>
 				</div>

@@ -22,6 +22,10 @@ $(document).on('ready readyAgain', function() {
 	$("#viewPilotageBAS").find("td").off('click').on('click',function() {
 		updateCheckBoxGrid('viewPilotageBAS;viewRapportBAS',$(this));
 	})
+	
+	$("#viewRapportBAS").find("td").off('click').on('click',function() {
+		updateCheckBoxGrid('viewRapportBAS;viewPilotageBAS',$(this));
+	})
 
 	$("[name^='viewPilotage']").filter("[name*='selectedColumns']").closest("table").find("tbody").find("tr").find("td").css("background-color","");
 	$("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewPilotage']").filter("[name*='selectedLines']:checked").closest("tr").index()).find("td").eq($("[name^='viewPilotage']").filter("[name*='selectedColumns']:checked").closest("th").index()).css("background-color","#aaaabb");
