@@ -1246,6 +1246,7 @@ function updateConsole()
 		  	url: view+".action",
 		  	data: null,
 	        beforeSend: function(xhr) {
+	        	xhr.overrideMimeType( "text/plain; charset=utf-8" );
 	            var token = $("meta[name='_csrf']").attr("content");
 	            var header = $("meta[name='_csrf_header']").attr("content");
 	            if (token!=undefined && header!=undefined)
