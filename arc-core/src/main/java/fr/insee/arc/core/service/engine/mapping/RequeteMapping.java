@@ -319,6 +319,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
             mapVariable.get(result.get(i).get(ARRAY_FIRST_COLUMN_INDEX)).ajouterTable(mapTable.get(result.get(i)
                     .get(ARRAY_SECOND_COLUMN_INDEX)));
         }
+                
         this.ensembleTableMapping.addAll(mapTable.values());
         this.ensembleVariableMapping.addAll(mapVariable.values());
 
@@ -349,7 +350,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
 			construireListeIdentifiants(nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
 			construireTableFiltrageCalculIdentifiantsFichierCourant(requeteGlobale, nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
-			
 			HashMap<TableMapping,ArrayList<TableMapping>> tablesFilles=ordonnerTraitementTable();
 					
 			for (TableMapping table : this.ensembleTableMapping) {
@@ -431,8 +431,69 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	}
 	
 	
+	
+	public int computeTableNumber(HashMap<TableMapping,Integer> order, HashMap<TableMapping,ArrayList<TableMapping>> tableTree, TableMapping table)
+	{
+		
+		if (order.get(table)!=null)
+				{
+				return order.get(table);
+				}
+		
+		// default case
+		if (table.getEnsembleVariableClef().size()==1 && order.get(table)==null)
+		{
+			order.put(table, 1);
+			return 1;
+		}
+
+		int k=0;
+		for (TableMapping table2 : this.ensembleTableMapping) {
+
+			// if a foreign key is found in the table
+				if (!table.equals(table2) && table.getEnsembleVariableClefString().contains(table2.getPrimaryKey()))
+					{
+					
+						// register the table as a child of the ancestor tables having a primary key corresponding its foreign keys
+						addTableInTreeHierarchy(tableTree,table2,table);
+					
+						// the index of the table is the maximum index of its ancestor table + 1
+						// we compute the index of ancestor tables recursivly
+						int kTemp=computeTableNumber(order,tableTree,table2)+1;
+						if (kTemp>k)
+						{
+							k=kTemp;
+						}
+					}
+			}		
+		
+		order.put(table, k);
+		return k;
+	}
+	
+	/**
+	 * Add a table as child of an ancestor table in the table model tree
+	 * @param tableTree
+	 * @param tableAncestor
+	 * @param tableChild
+	 */
+	public void addTableInTreeHierarchy(HashMap<TableMapping,ArrayList<TableMapping>> tableTree, TableMapping tableAncestor, TableMapping tableChild)
+	{
+		// create the tree entry if it doesn't exist
+		if (tableTree.get(tableAncestor)==null)
+		{
+			tableTree.put(tableAncestor, new ArrayList<TableMapping>());
+		}
+		// add the son table if not already set
+		if (!tableTree.get(tableAncestor).contains(tableChild))
+		{
+			tableTree.get(tableAncestor).add(tableChild);
+		}	
+	}
+	
 	/**
 	 * Ordonne le traitements des entités métier en partant des entités feuilles et en remontant l'arbre du modèle
+	 * this recursive version works with multiple fathers or sons links
 	 */
 	public HashMap<TableMapping,ArrayList<TableMapping>> ordonnerTraitementTable()
 	{
@@ -441,69 +502,35 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		{
 			return new HashMap<>();
 		}
-			
+
 		// initialisation
 		HashMap<TableMapping,Integer> order=new HashMap<>();
-		HashMap<TableMapping,ArrayList<TableMapping>> son=new HashMap<>();
-
-		do {
-			for (TableMapping table : this.ensembleTableMapping) {
-				if (table.getEnsembleVariableClef().size()==1 && order.get(table)==null)
-				{
-					order.put(table, 1);
-					break;
-				}
-			}	
-
-			/* allocation = had there been a table allocation during the last iteration ? */
-			/* if not stop trying to link the tables */
-			boolean allocation=true;
-			while (allocation)
-			{
-				allocation=false;
-				for (TableMapping table : this.ensembleTableMapping) {
-					// si le numéro d'ordre n'a pas été affecté
-					if (order.get(table)==null)
-					{
-						for (TableMapping table2 : this.ensembleTableMapping) {
-							{
-								// si la table2 a déjà été affecté, on va comparer table et table2
-								// pour affecter un numéro d'ordre à table
-								if (order.get(table2)!=null && !table.equals(table2))
-								{
-									
+		HashMap<TableMapping,ArrayList<TableMapping>> tableTree=new HashMap<>();
 		
-										if (table.getEnsembleVariableClefString().contains(table2.getPrimaryKey()))
-										{
-											order.put(table, order.get(table2)+1);
-											if (son.get(table2)==null)
-											{
-												son.put(table2, new ArrayList<TableMapping>());
-											}
-											son.get(table2).add(table);
-											allocation=true;
-										}
-										
-										if (table2.getEnsembleVariableClefString().contains(table.getPrimaryKey()))
-										{
-											order.put(table, order.get(table2)-1);
-											if (son.get(table)==null)
-											{
-												son.put(table, new ArrayList<TableMapping>());
-											}
-											son.get(table).add(table2);
-											allocation=true;
-										}
-				
-								}
-							}
-						}
-					}
-				}	
-			}
-		} while (order.size()<this.ensembleTableMapping.size());
+		// compute the index of every table
+		for (TableMapping table : this.ensembleTableMapping) {
+			computeTableNumber(order,tableTree,table);
+		}
+
+		// set the table ordered list
+		// the order list corresponds to the order of the query to build the table
+		// counter intuitive but in our process, the leaf tables in the data model depending from others tables are computed first whereas the root tables are computed last
+		// mainly because it is easier to respect model integrity this way as for example, when useless records must be deleted
+		this.ensembleTableMapping=buildTheOrderedTablesListForProcess(order);
 		
-		/* get the max order between elements */
+		return tableTree;
+		
+	}
+	
+	/**
+	 * Build a linked hash set containing the list of the tables ordered for the process
+	 * @param order : the order index computed for table
+	 * @return
+	 */
+	public Set<TableMapping> buildTheOrderedTablesListForProcess(HashMap<TableMapping,Integer> order)
+	{
+
+		// get the maximum index of ordered tables 
 		int k=0;
 		for (TableMapping table : this.ensembleTableMapping) {
 			if (order.get(table)>k)
@@ -512,15 +539,12 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 			}
 		}
 		
-		/* Put ordered tables into a linkedhashmap */
+		// Put ordered tables into a linkedhashmap by descending order
 		Set<TableMapping> r=new LinkedHashSet<>();
 		for (Integer i=k;i>Integer.MIN_VALUE;i--)
 		{
-//			System.out.println(i);
 			boolean end=true;			
 			for (TableMapping table : this.ensembleTableMapping) {
-//				System.out.println(order.get(table));
-
 				if (order.get(table).equals(i))
 				{
 					r.add(table);
@@ -533,24 +557,10 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 			}
 		}
 		
-		
-		this.ensembleTableMapping=r;
-		
-//		for (TableMapping table : this.ensembleTableMapping) {
-//		System.out.println(table.getNomTableCourt()+" : "+order.get(table));
-//			if (son.get(table)!=null)
-//			{
-//				for (TableMapping t:son.get(table))
-//				{
-//					System.out.println(">"+t.getNomTableCourt());	
-//				}
-//			}
-//		}
-		
-		return son;
+		return r;
 	}
 	
-
+	
 	/**
 	 *
 	 * @param returned

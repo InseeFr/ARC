@@ -25,7 +25,7 @@ public class RequeteMappingTest {
 	}
 
 	
-	// ordonnerTraitementTable()
+	// ordonnerTraitementTableRecursive()
 	
 	@Test
 	public void mappingOrderOneTable() {
@@ -40,15 +40,25 @@ public class RequeteMappingTest {
 	
 	@Test
 	public void mappingOrderParentAndChild() {
-		Set<TableMapping> tables = new HashSet<>();
-		TableMapping parent = new TableMapping("", "parent", 0);
-		tables.add(parent);
-		TableMapping child = new TableMapping("", "child", 0);
+
 		VariableMapping idParent = new VariableMapping(null, "id_parent", "");
 		idParent.setExpressionRegle(new RegleMappingClePrimaire("", "", idParent));
+		VariableMapping idChild = new VariableMapping(null, "id_child", "");
+		idChild.setExpressionRegle(new RegleMappingClePrimaire("", "", idChild));
+		
+		Set<TableMapping> tables = new HashSet<>();
+		
+		TableMapping parent = new TableMapping("", "parent", 0);
+		parent.ajouterVariable(idParent);
+		parent.construireEnsembleVariablesTypes();
+		tables.add(parent);
+		
+		TableMapping child = new TableMapping("", "child", 0);
 		child.ajouterVariable(idParent);
+		child.ajouterVariable(idChild);
 		child.construireEnsembleVariablesTypes();
 		tables.add(child);
+		
 		mappingRequest.setEnsembleTableMapping(tables);
 
 		HashMap<TableMapping, ArrayList<TableMapping>> result = mappingRequest.ordonnerTraitementTable();
