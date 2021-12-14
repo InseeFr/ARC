@@ -9,9 +9,9 @@ All notable changes to this project will be documented in this file.
 - for security purpose, ihm has now distinct public page index and a secured index
 - keycloak.resource=keycloak.json settings is now default. ARC now detects if keycloak is activated by scanning the "realm" and "auth-server-url" value. No changes required for current installations
 - log4j security fix
-- the retrieved data webservice wand now be used to retrieve specific data types ("mapping", "nomenclature", "metadata")
+- the data retrieval webservice can now be used to retrieve specific data types ("mapping", "nomenclature", "metadata")
 - maintenance parameters GUI to set the way ARC works is now available
-- archive reader now works for archive containing several directories
+- archive reader now works for tar.gz archives that contain several directories
 
 ## version-91.1.2 - 2021-10-04
 - bug fix in user management interface due to a null attribute
