@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## version-91.1.4 - 2021-12-16
+- fix for log4j security jndi injection problem
+
 ## version-91.1.3 - 2021-12-14
 - sonar security fix
 - for security purpose, ihm has now distinct public page index and a secured index
