@@ -4,11 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## version-91.1.5 - 2021-12-16
-- git-commit-id-plugin depandency update to get the tag number correctly
-
 ## version-91.1.4 - 2021-12-16
-- fix for log4j security jndi injection problem
+- fix #2 for log4j security jndi injection problem
+- git-commit-id-plugin depandency update to get the tag number correctly
 
 ## version-91.1.3 - 2021-12-14
 - sonar security fix
