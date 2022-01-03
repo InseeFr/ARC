@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## version-91.1.6 - 2022-01-03
 - log4j 2.17
+- database h2 security fix
 
 ## version-91.1.4 - 2021-12-16
 - fix #2 for log4j security jndi injection problem
