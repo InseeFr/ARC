@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## version-91.1.5 - 2022-01-03
+## version-91.1.6 - 2022-01-03
 - log4j 2.17
 
 ## version-91.1.4 - 2021-12-16
