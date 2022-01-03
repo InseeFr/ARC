@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/github/license/inseefr/arc)](https://opensource.org/licenses/MIT)
 
 - [General presentation of the application](#General-presentation-of-the-application)
+  - [More ARC presentations and tutorial](#More-ARC-presentations-and-tutorial)
 - [Running the application](#Running-the-application)
   - [Running the web application with Docker](#Running-the-web-application-with-Docker)
     - [Maven build configuration (optionnal)](#Maven-build-configuration-optionnal)
@@ -27,6 +28,9 @@ The ARC (from the French: Acquisition - Réception - Contrôles) software allows
 These functionnalities/services aim the statistician’s independence and ability to adapt to the data evolutions, thereby avoiding impacts on the statistical chain.
 
 ![workflow](user-guide/img/workflow.png)
+
+### More ARC presentations and tutorial
+https://hackmd.io/cg4xbdLoRFqHVky-lx5DiA?view
 
 ## Running the application
 
