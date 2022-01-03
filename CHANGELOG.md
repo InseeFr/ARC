@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## version-91.1.7 - 2022-01-03
+- log4j 2.17.1
+
 ## version-91.1.6 - 2022-01-03
 - log4j 2.17
 - database h2 security fix
