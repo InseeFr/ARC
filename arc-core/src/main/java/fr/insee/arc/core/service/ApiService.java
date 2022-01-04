@@ -95,7 +95,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     protected String currentIdSource;
     public int reporting=0;
 
-    protected String bdDateFormat="DD/MM/YYYY H24:MI:SS";
+    protected String bdDateFormat="DD/MM/YYYY HH24:MI:SS";
 
     public final static String IHM_SCHEMA="arc.ihm";
     
@@ -849,6 +849,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         Date date = new Date();
         
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        
         requete.append("\n set enable_hashjoin=off; ");
         requete.append("\n UPDATE " + tablePil + " AS a ");
         requete.append("\n \t SET etat_traitement =  b.etat_traitement, ");
@@ -856,7 +857,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         requete.append("\n \t   validite = b.validite, ");
         requete.append("\n \t   periodicite = b.periodicite, ");
         requete.append("\n \t   taux_ko = b.taux_ko, ");
-        requete.append("\n \t   date_traitement = to_date('" + formatter.format(date) + "','"+this.bdDateFormat+"'), ");
+        requete.append("\n \t   date_traitement = to_timestamp('" + formatter.format(date) + "','"+this.bdDateFormat+"'), ");
         requete.append("\n \t   nb_enr = b.nb_enr, ");
         requete.append("\n \t   rapport = b.rapport, ");
         requete.append("\n \t   validite_inf = b.validite_inf, ");
