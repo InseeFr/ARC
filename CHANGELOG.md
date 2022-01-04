@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## version-91.1.9 - 2022-01-03
+- revert phase ihm bugfix for reception phase
+
 ## version-91.1.8 - 2022-01-03
 - files timestamp fix
 
