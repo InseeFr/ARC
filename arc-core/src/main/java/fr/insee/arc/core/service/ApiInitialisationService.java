@@ -892,7 +892,7 @@ public class ApiInitialisationService extends ApiService {
         {
         	requete = new PreparedStatementBuilder();
             requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
-            if (querySelection != null) {
+            if (querySelection.length()>0) {
             	 requete.append("AND id_source IN (SELECT distinct id_source FROM (");
                  requete.append(querySelection);
                  requete.append(") q1 ) ");
