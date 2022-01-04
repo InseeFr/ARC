@@ -27,6 +27,7 @@ public class BatchConfig {
 			expectedPaths.add("file:" + propertyPathVar  + "/*.properties");
 		}
 		expectedPaths.add("classpath*:fr/insee/config/*.properties");
+		expectedPaths.add("classpath:*.properties");
 		fetcher.configure(configurer, env, expectedPaths.toArray(new String[0]));
 		configurer.setIgnoreUnresolvablePlaceholders(true);
 		configurer.setIgnoreResourceNotFound(true);
