@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## version-91.1.12 - 2022-01-03
+## version-91.1.12 - 2022-01-10
 - h2 security fix
 - git informations retrieval bug fix for batch
 
