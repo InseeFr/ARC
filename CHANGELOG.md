@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## version-91.1.13 - 2022-02-22
+- postgres driver security bump
+- spring security bump
+
 ## version-91.1.12 - 2022-01-10
 - h2 security fix
 - git informations retrieval bug fix for batch
