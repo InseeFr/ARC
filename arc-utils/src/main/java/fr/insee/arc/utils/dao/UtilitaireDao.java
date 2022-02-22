@@ -1722,43 +1722,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param table
 	 * @param is
 	 * @param csv
+	 * @param header
 	 * @param aDelim
 	 * @throws Exception
 	 */
-	public void importing(Connection connexion, String table, InputStream is, boolean csv, String... aDelim)
-			throws Exception {
-		ConnectionWrapper conn = initConnection(connexion);
-		try {
-			conn.getConnexion().setAutoCommit(false);
-			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
-			String delimiter = "";
-			String quote = Character.toString((char) 2);
-
-			if (aDelim != null && aDelim.length > 0) {
-				delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
-			}
-
-			boolean header = true;
-			if (aDelim != null && aDelim.length > 1) {
-				header = false;
-			}
-
-			String h = (header ? ", HEADER true " : "");
-
-			if (csv) {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", is);
-			} else {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
-			}
-			conn.getConnexion().commit();
-		} catch (Exception e) {
-			conn.getConnexion().rollback();
-			LoggerHelper.error(LOGGER, e);
-		} finally {
-			conn.close();
-		}
-	}
-
 	public void importing(Connection connexion, String table, Reader aReader, boolean csv, boolean header,
 			String... aDelim) throws Exception {
 		ConnectionWrapper conn = initConnection(connexion);
