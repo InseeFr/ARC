@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+- model tablename can now contain digits
 
 ## version-91.1.13 - 2022-02-22
 - postgres driver security bump
