@@ -763,8 +763,13 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     public final boolean isNomTableMetierValide(String nomTable) {
-		return nomTable.matches("(?i)^"+TraitementPhase.MAPPING.toString().toLowerCase()+"_" + viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0) + "_([a-z]|_)*[a-z]+_ok$");
+    	return isNomTableMetierValide(nomTable, TraitementPhase.MAPPING.toString().toLowerCase(), viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
     }
+    
+    public static final boolean isNomTableMetierValide(String nomTable, String phase, String famille) {
+		return nomTable.matches("(?i)^"+phase.toLowerCase()+"_" + famille + "_[a-z]([a-z]|[0-9]|_)+_ok$");
+    }
+    
 
     @RequestMapping("/addTableMetier")
     public String addTableMetier(Model model) {
