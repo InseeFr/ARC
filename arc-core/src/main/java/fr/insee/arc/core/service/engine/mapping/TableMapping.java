@@ -28,8 +28,8 @@ import fr.insee.arc.utils.textUtils.IConstanteNumerique;
  */
 public class TableMapping implements IConstanteCaractere, IDbConstant, IConstanteNumerique {
 
-    private static final String encours = "encours";
-
+    private static final String ARC_PROCESSING_TABLE = "ArcProcessingTable";
+    
     public static final Integer GROUPE_UN = 1;
 
     private String nomTable;
@@ -370,9 +370,18 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
             }
             returned.append(variable.expressionSQLtoText(aNumeroGroupe)+" as "+ variable.getNomVariable());
         }
-        return returned.toString();
+        
+        return applyModelTableIdentifier(returned.toString());
     }
 
+
+	
+	public String applyModelTableIdentifier (String expression)
+	{
+		return expression.replace(ARC_PROCESSING_TABLE, "'"+this.getNomTableCourt()+"'");
+	}
+	
+    
     public String expressionSQL(Integer aNumeroGroupe) {
         StringBuilder returned = new StringBuilder();
         boolean isFirst = true;

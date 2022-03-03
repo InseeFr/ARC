@@ -60,6 +60,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
     private static final String foreignKeyPrefix = "fk_";
     // identifiant lien direct
     private static final String idKeyPrefix = "id_";
+
     
     private static final String SORT_WORK_MEM="128MB";
     
@@ -559,8 +560,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		
 		return r;
 	}
-	
-	
+
 	/**
 	 *
 	 * @param returned
@@ -581,23 +581,12 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		Set<String> ensembleIdentifiantsGroupesRetenus = new HashSet<>(table.getEnsembleIdentifiantsRubriques(groupe));
 		ensembleIdentifiantsGroupesRetenus.removeAll(setIdSource);
 
-		// v_g : a quoi cela sert ?
-	//	Set<String> ensembleNomsRubriquesGroupes = new HashSet<String>(table.getEnsembleNomsRubriques(groupe));
 
 		// on concatene i_g et v_g
 		Set<String> keys = new HashSet<>();
 		keys.addAll(ensembleIdentifiantsGroupesRetenus);
-	//	keys.addAll(ensembleNomsRubriquesGroupes);
-
-
-		//System.out.println(keys);
-
-
-//		Set<String> ensembleIdentifiantsNonGroupesRetenus = new HashSet<>(table.getEnsembleIdentifiantsRubriques());
-//		ensembleIdentifiantsNonGroupesRetenus.removeAll(setIdSource);
 
 		Set<String> ensembleIdentifiantsNonGroupesRetenus=this.ensembleRubriqueIdentifianteTable.get(table);
-
 
 
 		/*
@@ -678,13 +667,11 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		returned.append("\n set local work_mem='"+SORT_WORK_MEM+"';");
 		returned.append("\n INSERT INTO " + this.nomTableTemporairePrepUnion + " ");
 		returned.append("\n SELECT ");
-//		returned.append(groupe+"::smallint "+NUMERO_GROUPE);
-//		returned.append(", " + this.ensembleGroupes.size()+"::smallint "+NB_GROUPES);
 		returned.append(" " + listeVariablesTypesPrepUnion(new StringBuilder(), table, "::" , true) + " FROM (");
 
 		// Attention à ce distinct : faut bien garder les identifiant de rémunération intermédiaire du coup et pas le final
 		// Finalement NON : Utilisation d'une variable de départage
-		returned.append("\n SELECT DISTINCT "+table.expressionSQLPrepUnion(groupe, nomsVariablesIdentifiantes, reglesIdentifiantes));
+		returned.append("\n SELECT DISTINCT "+ table.expressionSQLPrepUnion(groupe, nomsVariablesIdentifiantes, reglesIdentifiantes));
 		returned.append("\n FROM ");
 		returned.append("\n TMP_DATA d ," + this.nomTableSource + " e ");
 		returned.append("\n WHERE e.id=d.id_table ");
