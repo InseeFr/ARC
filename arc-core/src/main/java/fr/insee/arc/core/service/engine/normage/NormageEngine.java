@@ -151,6 +151,7 @@ public class NormageEngine {
 
 		} else {
 			
+			
 			// split structure blocks
 			String[] ss=jointure.split(XMLComplexeHandlerCharger.JOINXML_STRUCTURE_BLOCK);
 			
@@ -218,6 +219,14 @@ public class NormageEngine {
 
 	}
 
+	
+	
+	private String normalizeTag (String tag)
+	{
+		return " "+"i_"+tag.toUpperCase()+" ";
+		
+	}
+	
 	@SuppressWarnings("unused")
 	private String optimisation96(String jointure, int subjoinNumber) {
 		StaticLoggerDispatcher.info("optimisation96()", LOGGER);
@@ -272,10 +281,6 @@ public class NormageEngine {
 
 		}
 
-		// r=r+"INSERT INTO "+this.tableNormageOKTemp+" SELECT "+fieldsToBeInserted+"
-		// FROM {table_destination}; \n ";
-
-		// bug mémoire : analyze sur les tables générées;
 		StringBuilder analyze = new StringBuilder();
 
 		Pattern p = Pattern.compile("create temporary table ([^ ]+) as ");
@@ -1627,6 +1632,40 @@ public class NormageEngine {
 		return jointure;
 	}
 	
+	
+	private Integer excludeFileonTimeOut(HashMap<String, ArrayList<String>> regle)
+	{
+		for (int j = 0; j < regle.get("id_regle").size(); j++) {
+			String type = regle.get("id_classe").get(j);
+			if (type.equals("exclusion")) {			
+				return Integer.parseInt(regle.get("rubrique").get(j));
+			}
+		}
+		return null;
+	}
+	
+
+	private String applyQueryPlanParametersOnJointure(String query, Integer statementTimeOut)
+	{
+		return applyQueryPlanParametersOnJointure(new PreparedStatementBuilder(query), statementTimeOut).getQuery().toString();
+	}
+	
+	
+	private PreparedStatementBuilder applyQueryPlanParametersOnJointure(PreparedStatementBuilder query, Integer statementTimeOut)
+	{
+		PreparedStatementBuilder r=new PreparedStatementBuilder();
+		
+		r.append("set enable_nestloop=off;\n");
+		r.append((statementTimeOut==null)?"":"set statement_timeout="+statementTimeOut.toString()+";\n");
+		r.append("commit;");
+		r.append(query);
+		r.append("set enable_nestloop=on;\n");
+		r.append("reset statement_timeout;");
+		
+		r.setQuery(new StringBuilder(r.getQuery().toString().replace(" insert into ", "commit; insert into ")));
+		return r;
+	}
+	
 	/**
 	 * execute query with partition if needed
 	 * @param regle
@@ -1658,9 +1697,7 @@ public class NormageEngine {
 
 		// No partition found; normal execution
 		UtilitaireDao.get("arc").executeImmediate(connection,
-				"set enable_nestloop=off;\n"
-				+ replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, id_source)
-				+ "set enable_nestloop=on;\n"
+				applyQueryPlanParametersOnJointure(replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, id_source),null)
 				);
 
 	}
@@ -1694,6 +1731,8 @@ public class NormageEngine {
 	String partitionTableName="";
 	String partitionIdentifier=" m_"+element+" ";
 	
+	Integer statementTimeOut=excludeFileonTimeOut(regle);
+	
 	if (blocCreate.contains(partitionIdentifier))
 	{
 		// get the tablename
@@ -1725,6 +1764,7 @@ public class NormageEngine {
 	// partition if and only if enough records
 	if (total>=minSize)
 	{	
+		
 		String partitionTableNameWithAllRecords="all_"+partitionTableName;
 
 		// rename the table to split
@@ -1732,12 +1772,11 @@ public class NormageEngine {
 		UtilitaireDao.get("arc").executeImmediate(connection,bloc3);
 		
 		PreparedStatementBuilder bloc4=new PreparedStatementBuilder();
-		bloc4.append("\n set enable_nestloop=off;\n");
 		bloc4.append("\n drop table if exists "+partitionTableName+";");
 		bloc4.append("\n create temporary table "+partitionTableName+" as select * from "+partitionTableNameWithAllRecords+" where "+partitionIdentifier+">=?::int and "+partitionIdentifier+"<?::int;");
 		bloc4.append(blocInsert);
-		bloc4.append("\n set enable_nestloop=on;\n");
-
+		
+		bloc4=applyQueryPlanParametersOnJointure(bloc4, statementTimeOut);
 		
 		// iterate through chunks
 		int iterate=1;
@@ -1753,14 +1792,9 @@ public class NormageEngine {
 
 	}
 	else
+		// no partitions needed
 	{
-		StringBuilder bloc3=new StringBuilder();
-		
-		bloc3.append("\n set enable_nestloop=off;\n");
-		bloc3.append(blocInsert);
-		bloc3.append("\n set enable_nestloop=on;\n");
-		
-		UtilitaireDao.get("arc").executeImmediate(connection,bloc3);
+		UtilitaireDao.get("arc").executeImmediate(connection,applyQueryPlanParametersOnJointure(blocInsert,statementTimeOut));
 	}
 	}
 	
