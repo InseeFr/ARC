@@ -5,10 +5,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.LoggerHelper;
 
 
 /**
@@ -25,6 +29,7 @@ public class Norme implements IDbConstant{
     private String defValidite;
     private RegleChargement regleChargement;
     
+	private static final Logger LOGGER = LogManager.getLogger(Norme.class);
     
     public Norme(String idNorme, String periodicite, String defNorme, String defValidite) {
         super();
@@ -35,7 +40,6 @@ public class Norme implements IDbConstant{
     }
     
     public Norme() {
-        // TODO Auto-generated constructor stub
     }
 
     public String getIdNorme() {
@@ -85,7 +89,7 @@ public class Norme implements IDbConstant{
             normes = new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
             		new PreparedStatementBuilder( "select id_norme, periodicite, def_norme, def_validite from " + tableNorme + ";"))).content;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LoggerHelper.errorAsComment(LOGGER, "Norme.getNormesBase - norms retrieval in database failed ");
         }
 
         //boucle sur les normes

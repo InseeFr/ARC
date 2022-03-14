@@ -39,8 +39,6 @@ public class LogConfigurator {
 	 * @param logFileName 
 	 */
 	public void configureRollingFileAppender(String logDirectory, String logFileName) {
-		// TODO remove xml configuration ??
-
 		Configuration config = context.getConfiguration();
 		Appender appender = createRollingFileAppender(config, logDirectory, logFileName);
 		appender.start();
