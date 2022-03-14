@@ -1,5 +1,6 @@
 package fr.insee.arc.utils.dao;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -67,7 +68,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(UtilitaireDao.class);
 
-    
+	public static final int READ_BUFFER_SIZE = 131072;
     
 	private int nbTryMax = 120;
 	/**
@@ -917,7 +918,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public static void generateTarGzFromFile(File fileIn, File fileOut, String entryName) throws IOException {
 
-		try (FileInputStream fis = new FileInputStream(fileIn);)
+		try (BufferedInputStream fis = new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE);)
 		{
 			try(TarArchiveOutputStream taos = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(fileOut)));)
 			{
@@ -949,7 +950,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				entry.setSize(fileIn.length());
 				taos.putArchiveEntry(entry);
 				// Ecriture dans le fichier
-				copy(new FileInputStream(fileIn), taos);
+				copy(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE), taos);
 				taos.closeArchiveEntry();
 			} catch (IOException ex) {
 				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromFile()", LOGGER, ex);
@@ -972,7 +973,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		File fileIn = Paths.get(receptionDirectoryRoot, currentContainer).toFile();
 		if (fileIn.exists()) {
 			try {
-				try(ZipInputStream tarInput = new ZipInputStream(new FileInputStream(fileIn));)
+				try(ZipInputStream tarInput = new ZipInputStream(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE));)
 				{
 					ZipEntry currentEntry = tarInput.getNextEntry();
 					// si le fichier est trouvé, on ajoute
@@ -1014,7 +1015,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			// on crée le stream pour lire à l'interieur de
 			// l'archive
 			try {
-				try(TarInputStream tarInput = new TarInputStream(new GZIPInputStream(new FileInputStream(fileIn)));)
+				try(TarInputStream tarInput = new TarInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE)));)
 				{
 					TarEntry currentEntry = tarInput.getNextEntry();
 					// si le fichier est trouvé, on ajoute
@@ -1054,7 +1055,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				// l'archive
 				long size = 0;
 				
-				try(GZIPInputStream tarInput = new GZIPInputStream(new FileInputStream(fileIn));)
+				try(GZIPInputStream tarInput = new GZIPInputStream(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE));)
 				{
 					// on recupere d'abord la taille du stream; gzip ne permet pas
 					// de le faire directement
@@ -1066,7 +1067,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				TarArchiveEntry entry = new TarArchiveEntry(listIdSourceContainer.get(0));
 				entry.setSize(size);
 				taos.putArchiveEntry(entry);
-				try(GZIPInputStream tarInput = new GZIPInputStream(new FileInputStream(fileIn));)
+				try(GZIPInputStream tarInput = new GZIPInputStream(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE));)
 				{
 					for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
 						taos.write(c);
@@ -1156,7 +1157,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					entry.setSize(fileIn.length());
 					taos.putArchiveEntry(entry);
 					// Ecriture dans le fichier
-					copy(new FileInputStream(fileIn), taos);
+					copy(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE), taos);
 					taos.closeArchiveEntry();
 				}
 			}
