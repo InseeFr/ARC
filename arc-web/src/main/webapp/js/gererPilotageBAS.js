@@ -23,7 +23,10 @@ $(document).on('ready readyAgain', function() {
 		updateCheckBoxGrid('viewPilotageBAS;viewRapportBAS',$(this));
 	})
 	
-	$("#viewRapportBAS").find("td").off('click').on('click',function() {
+	$("#viewRapportBAS").find("td").filter(":nth-child(5n+3)").off('click').on('click',function() {
+		updateCheckBoxGrid('viewRapportBAS;viewPilotageBAS',$(this));
+	})
+	$("#viewRapportBAS").find("td").filter(":nth-child(5n+4)").off('click').on('click',function() {
 		updateCheckBoxGrid('viewRapportBAS;viewPilotageBAS',$(this));
 	})
 
