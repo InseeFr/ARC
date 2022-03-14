@@ -227,6 +227,7 @@
 					<br/>
 					<input type="submit" class="btn btn-primary btn-sm" id="ActionsProd.toggleOnPROD" value="<spring:message code="gui.button.startProd"/>" scope="viewPilotageBAS;" doAction="toggleOnPROD" onclick="return confirm('<spring:message code="gui.button.startProd.confirm" javaScriptEscape="true"/>');"/>
 					<input type="submit" class="btn btn-primary btn-sm" id="ActionsProd.toggleOffPROD" value="<spring:message code="gui.button.stopProd"/>" scope="viewPilotageBAS;" doAction="toggleOffPROD" onclick="return confirm('<spring:message code="gui.button.stopProd.confirm" javaScriptEscape="true"/>');"/>
+					<input type="submit" class="btn btn-primary btn-sm" id="ActionsProd.applyRulesProd" value="<spring:message code="gui.button.applyRulesProd"/>" scope="viewPilotageBAS;" doAction="applyRulesProd" onclick="return confirm('<spring:message code="gui.button.applyRulesProd.confirm" javaScriptEscape="true"/>');"/>
 				</div>
 			</c:if>
 

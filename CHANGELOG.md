@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+- button to apply directly rules in production environments
+
+## version-91.1.20 - 2022-03-14
+- add exclusion rules on structurize phase
 - model tablename can now contain digits
 
 ## version-91.1.13 - 2022-02-22

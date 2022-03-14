@@ -394,6 +394,19 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
     	return generateDisplay(model, RESULT_SUCCESS);
     }
 	
+    /**
+     * user is able to copy the rules fast to a production environment
+     * @param model
+     * @return
+     */
+    @RequestMapping("/applyRulesProd")
+    public String applyRulesProd(Model model) {
+    	ApiInitialisationService.copyTablesToExecution(null, ApiService.IHM_SCHEMA,getBacASable());
+    	return generateDisplay(model, RESULT_SUCCESS);
+    }
+    
+
+    
 	// Actions du bac à sable
 
 	@RequestMapping("/filesUploadBAS")
