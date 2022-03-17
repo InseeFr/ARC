@@ -17,11 +17,10 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 
@@ -31,6 +30,10 @@ public class NormageEngine {
 
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private String columnToBeAdded = "";
+	
+
+	// nom de bases des vues dans l'enchainement de clause with qu'on va générer
+	private	String withBaseName="v";
 
 	private Connection connection;
 
@@ -1517,6 +1520,136 @@ public class NormageEngine {
 
 	}
 	
+	private void initializeFromForCartesianReduce(String bloc, ArrayList<String> from, ArrayList<Boolean> keep)
+	{
+
+		String[] blocLines=bloc.split("\n");
+		
+		
+		for (String s:blocLines)
+		{
+			from.add(s);
+			// on met à null tout ce qui n'est pas un left join. ces lignes seront gardées par défaut
+			// et ne seront pas scannées
+			// sinon on met à false pour le pas garder par défaut les clauses left join
+			// ces lignes là seront scanées pour voir s'il faut les garder
+			keep.add((s.startsWith(" left join "))?false:null);
+		}
+	}
+	
+	private void computeFromForCartesianReduce(String blocCreate, ArrayList<String> from, ArrayList<Boolean> keep, String rubrique)
+	{
+		// on déplie la clause from
+		String r=rubrique;
+		
+		for (int i=from.size()-1;i>=0;i--)
+		{
+			if (keep.get(i)!=null && isRubriqueUsedInFromBloc(from.get(i),r))
+			{
+				keep.set(i, true);
+				// récupération de la rubrique pere dont on va garder la ligne dans une des itérations suivantes
+				r=findFatherOfRubrique(blocCreate, ManipString.substringBeforeFirst(ManipString.substringAfterFirst(from.get(i)," on m_"),"="));
+			}
+			
+		}
+	}
+	
+	private void computeExecuteForCartesianReduce(ArrayList<String> from, ArrayList<Boolean> keep, List<String> rubriquesUtiles)
+	{	
+		List<String> stack=new ArrayList<>();
+		
+		for (int i=0;i<from.size();i++)
+		{
+			// on ne scan que les lignes de jointure
+			if (keep.get(i)!=null)
+			{
+				// on garde toutes les lignes
+				keep.set(i,true);
+				
+				// pour chaque rubriques de reduction
+				for (String r:rubriquesUtiles)
+				{
+					
+					// on regarde si la table de référence de la ligne de jointure concerne la rubrique
+					if (isRubriqueUsedInFromBloc(from.get(i),r))
+					{
+						//si oui, on stack la rubrique avec celles deja trouvées
+						stack.add(r);
+						
+						// si la stack est suffisante
+						if (stack.size()>1)
+						{
+							// alors on ajoute la clause de filtre sur le n-uplet de la stack
+							String stackSelect=StringUtils.join(stack,",");							
+							from.set(i, from.get(i)+ " and row("+stackSelect+")::text in (select row("+stackSelect+")::text from "+withBaseName+rubriquesUtiles.size()+") ");
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	
+	private String returnFromAfterCartesianReduce(ArrayList<String> from, ArrayList<Boolean> keep)
+	{
+		StringBuilder returned=new StringBuilder();
+		for (int i=0;i<from.size();i++)
+		{
+			if (keep.get(i)==null || keep.get(i))
+			{
+				if (i>0) returned.append("\n");
+				returned.append(from.get(i));
+			}
+		}
+		return returned.toString();
+	}
+	
+	private boolean isRubriqueUsedInFromBloc(String blocFrom, String rubrique)
+	{
+		if (rubrique.startsWith("m_")) rubrique=rubrique.substring(2);
+		return blocFrom.contains(" t_"+rubrique+" ") || blocFrom.contains(" t_"+rubrique+"_null ");
+	}
+	
+	private String findFatherOfRubrique(String blocCreate, String rubrique)
+	{
+		
+		rubrique=((rubrique.startsWith("i_")||rubrique.startsWith("v_"))?"":"m_")+rubrique;
+		
+		if (!blocCreate.contains(rubrique)) return null;
+		
+		return ManipString.substringBeforeFirst(
+				ManipString.substringAfterLast(
+						ManipString.substringBeforeLast(blocCreate, " as "+rubrique+" ")
+						,"create temporary table t_"
+						)
+				," as ");
+	}
+	
+	private ArrayList<String> rubriqueUsedInRelation(String blocCreate, HashMap<String, ArrayList<String>> regle)
+	{
+		ArrayList<String> returned=new ArrayList<>();
+		for (int j = 0; j < regle.get("id_regle").size(); j++) {
+			String type = regle.get("id_classe").get(j);
+			if (type.equals("relation")) {
+								
+				String r1=findFatherOfRubrique(blocCreate, regle.get("rubrique").get(j).toLowerCase());
+				String r2=findFatherOfRubrique(blocCreate, regle.get("rubrique_nmcl").get(j).toLowerCase());
+				
+				// si les 2 rubriques sont bien trouvées et utilisées
+				if (r1!=null && r2!=null)
+					{
+						returned.add(r1);
+						returned.add(r2);
+					}
+			}
+		}		
+		
+		// si 0 ou 1 seule rubrique trouvée, on renvoie un tableau vide
+		return returned;
+	}
+	
+	
 	/**
 	 * Rules to reduce the cartesian products
 	 * For a given set, the method builds a new set
@@ -1538,23 +1671,20 @@ public class NormageEngine {
 				String[] bloc=jointure.split("\n insert into \\{table_destination\\} ");
 				
 				String rubriquesDuSelect=ManipString.substringBeforeFirst(ManipString.substringAfterFirst(bloc[1],"select "),"\n from ")+",";
-
+				String rubriquesDeJointure=ManipString.substringAfterFirst(bloc[1],"\n from ");
+				String blocCreate=ManipString.substringBeforeFirst(bloc[0],"\n analyze");
+						
 				// regarder si les rubrique de la regles sont présentes
 				for (String r:rubriques)
 				{
-					if (rubriquesDuSelect.contains(",i_"+r+","))
-					{
-						rubriquesUtiles.add("i_"+r);
-						rubriquesNull.add("null");
-					}
-					if (rubriquesDuSelect.contains(",m_"+r+","))
+					if (isRubriqueUsedInFromBloc(rubriquesDeJointure,r))
 					{
 						rubriquesUtiles.add("m_"+r);
 						rubriquesNull.add("null");
 					}
 				}
 				
-				// si - de 3 rubriques présentes, on ne fait rien
+				// si 1 ou 2 rubriques présentes, on ne fait rien (ne sert à rien)
 				if (rubriquesUtiles.size()<3)
 				{
 					return jointure;
@@ -1566,8 +1696,6 @@ public class NormageEngine {
 				// on initialise la requete avec le bloc 0 (bloc de préparation, calcul des tables temporaires, etc.)
 				StringBuilder requete=new StringBuilder(bloc[0]);
 
-				// nom de bases des vues dans l'enchainement de clause with qu'on va générer
-				String withBaseName="v";
 				
 				
 				// pour chaque bloc d'insert, on réécrit la requete
@@ -1581,11 +1709,25 @@ public class NormageEngine {
 					String blocSelect = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(bloc[i],"\n select "),"\n from ");
 					String blocFrom = ManipString.substringBeforeLast(ManipString.substringAfterFirst(bloc[i],"\n from "),"\n;");
 					
+					ArrayList<String> from = new ArrayList<>();
+					ArrayList<Boolean> keep = new ArrayList<>();
+					
+					initializeFromForCartesianReduce(blocFrom, from, keep);
+					
+					for (String r:rubriquesUtiles)
+					{
+						computeFromForCartesianReduce(blocCreate, from, keep, r);
+					}
+					for (String r:rubriqueUsedInRelation(blocCreate,regle))
+					{
+						computeFromForCartesianReduce(blocCreate, from, keep, r);
+					}
+					
 					// on matérialise les n-uplets distincts
 					requete.append("\n with "+withBaseName+0+" as ( ");
-					requete.append("\n select distinct "+rubriquesUtilesSelect+" ");
+					requete.append("\n select "+rubriquesUtilesSelect+" ");
 					requete.append("\n from ");
-					requete.append(blocFrom);
+					requete.append(returnFromAfterCartesianReduce(from, keep));
 					requete.append("\n ) ");
 					
 					// on itére sur les rubriques utiles
@@ -1607,7 +1749,7 @@ public class NormageEngine {
 						{
 							requete.append("\n where not exists (select from "+withBaseName+k+" v where u."+rubriquesUtiles.get(k)+"=v."+rubriquesUtiles.get(k)+") ");
 						}
-						// ajouter le n-uplet null, null, null
+						// ajouter le n-uplet null, null, null,...
 						if (k==(rubriquesUtiles.size()-1))
 						{
 							requete.append("\n UNION ALL select "+ StringUtils.join(rubriquesNull,",")+" ");
@@ -1615,13 +1757,17 @@ public class NormageEngine {
 						
 						requete.append("\n ) ");
 					}
+
+					from = new ArrayList<>();
+					keep = new ArrayList<>();
+					initializeFromForCartesianReduce(blocFrom, from, keep);
+					computeExecuteForCartesianReduce(from, keep, rubriquesUtiles);
+					
 					requete.append("\n select ");
 					requete.append(blocSelect);
 					requete.append("\n from ");
-					requete.append(blocFrom);
-					requete.append("\n and row("+rubriquesUtilesSelect+")::text in (select row("+rubriquesUtilesSelect+")::text from "+withBaseName+rubriquesUtiles.size()+") ");
+					requete.append(returnFromAfterCartesianReduce(from, keep));
 					requete.append("\n;");
-					
 				}
 
 				// 1 seule regle de reduction prise en compte pour le moment 
@@ -1656,12 +1802,14 @@ public class NormageEngine {
 		PreparedStatementBuilder r=new PreparedStatementBuilder();
 		
 		r.append("set enable_nestloop=off;\n");
+		r.append("set enable_seqscan=on;\n");
 		r.append((statementTimeOut==null)?"":"set statement_timeout="+statementTimeOut.toString()+";\n");
 		r.append("commit;");
 		r.append(query);
-		r.append("set enable_nestloop=on;\n");
 		r.append("reset statement_timeout;");
-		
+		r.append("set enable_nestloop=on;\n");
+		r.append("set enable_seqscan=off;\n");
+				
 		r.setQuery(new StringBuilder(r.getQuery().toString().replace(" insert into ", "commit; insert into ")));
 		return r;
 	}
