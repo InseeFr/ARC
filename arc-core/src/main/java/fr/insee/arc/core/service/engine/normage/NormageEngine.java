@@ -1800,7 +1800,7 @@ public class NormageEngine {
 	private PreparedStatementBuilder applyQueryPlanParametersOnJointure(PreparedStatementBuilder query, Integer statementTimeOut)
 	{
 		PreparedStatementBuilder r=new PreparedStatementBuilder();
-		
+		// seqscan on can be detrimental on some rare large file
 		r.append("set enable_nestloop=off;\n");
 		r.append((statementTimeOut==null)?"":"set statement_timeout="+statementTimeOut.toString()+";\n");
 		r.append("commit;");
