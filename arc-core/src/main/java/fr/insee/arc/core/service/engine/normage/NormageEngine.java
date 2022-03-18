@@ -1802,13 +1802,11 @@ public class NormageEngine {
 		PreparedStatementBuilder r=new PreparedStatementBuilder();
 		
 		r.append("set enable_nestloop=off;\n");
-		r.append("set enable_seqscan=on;\n");
 		r.append((statementTimeOut==null)?"":"set statement_timeout="+statementTimeOut.toString()+";\n");
 		r.append("commit;");
 		r.append(query);
-		r.append("reset statement_timeout;");
+		r.append((statementTimeOut==null)?"":"reset statement_timeout;");
 		r.append("set enable_nestloop=on;\n");
-		r.append("set enable_seqscan=off;\n");
 				
 		r.setQuery(new StringBuilder(r.getQuery().toString().replace(" insert into ", "commit; insert into ")));
 		return r;
