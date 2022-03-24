@@ -29,8 +29,11 @@ These functionnalities/services aim the statistician’s independence and abilit
 
 ![workflow](user-guide/img/workflow.png)
 
-### More ARC presentations and tutorial
-https://hackmd.io/cg4xbdLoRFqHVky-lx5DiA?view
+### ARC user guides, tutorial and presentations
+[User guide ARC old version](https://github.com/InseeFr/ARC/blob/master/user-guide/User_guide_v1.pdf)
+[User guide ARC new version but unfinished yet](https://github.com/InseeFr/ARC/blob/master/user-guide/User_guide_v2.pdf)
+[Tutorial](https://hackmd.io/@EgVaFRsUQ-ywTiFcXIsWig/rJzPiJp3U#/)
+[ARC functionnalities and architecture](https://hackmd.io/cg4xbdLoRFqHVky-lx5DiA?view)
 
 ## Running the application
 
