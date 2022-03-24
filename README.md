@@ -1,4 +1,14 @@
 # ARC - Acquire - Register - Control 
+
+## ARC user guides, tutorial and presentations
+[User guide ARC old version](https://github.com/InseeFr/ARC/raw/master/user-guide/User_guide_v1.pdf)
+
+[User guide ARC new version but unfinished yet](https://github.com/InseeFr/ARC/raw/master/user-guide/User_guide_v2.pdf)
+
+[Tutorial](https://hackmd.io/@EgVaFRsUQ-ywTiFcXIsWig/rJzPiJp3U#/)
+
+[ARC functionnalities and architecture](https://hackmd.io/cg4xbdLoRFqHVky-lx5DiA?view)
+
 ## Workbench for acquisition and normalization of data sets
 [![Build Status](https://travis-ci.org/InseeFr/ARC.svg?branch=master)](https://travis-ci.org/InseeFr/ARC)
 
@@ -28,9 +38,6 @@ The ARC (from the French: Acquisition - Réception - Contrôles) software allows
 These functionnalities/services aim the statistician’s independence and ability to adapt to the data evolutions, thereby avoiding impacts on the statistical chain.
 
 ![workflow](user-guide/img/workflow.png)
-
-### More ARC presentations and tutorial
-https://hackmd.io/cg4xbdLoRFqHVky-lx5DiA?view
 
 ## Running the application
 
