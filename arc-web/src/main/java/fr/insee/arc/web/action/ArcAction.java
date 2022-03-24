@@ -141,12 +141,19 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 			@RequestParam(required = false) String scope) {
 		LoggerHelper.trace(LOGGER, getActionName());
 
+		// no action required for unsecured page
+		if(getActionName().equals(HomeAction.ACTION_NAME))
+		{
+			return;
+		}
+		
+		// initialize the database on secure page index
 		if (getActionName().equals(IndexAction.ACTION_NAME))
 		{
 	    	// run the initialization script
 			ApiInitialisationService.bddScript(null);
 		}
-
+		
 		this.envMap=(Map<String, String>) getSession().get(SessionParameters.ENV_MAP);
 		
 		// adding production sandbox to session

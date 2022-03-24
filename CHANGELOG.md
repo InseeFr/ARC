@@ -3,7 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+- correct the database build from a blank database
+- more on user guides
+
+## version-91.1.21 - 2022-03-14
 - button to apply directly rules in production environments
+- optimization of cartesian reduction algorithm
 
 ## version-91.1.20 - 2022-03-14
 - add exclusion rules on structurize phase
