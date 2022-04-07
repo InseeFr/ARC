@@ -1,7 +1,7 @@
-# Load rules
-{lang=en}
+# Phase de mapping
+{lang=fr}
 
-## Rules description
+## Description des règles
 
 ## Variables reservées
 ArcProcessingTable : le nom de la table sur laquelle travaille le mapping; cela permet de créer des regles permettant de calculer une variable différemment selon la table contenant la variable
