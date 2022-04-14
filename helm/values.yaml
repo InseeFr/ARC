@@ -21,6 +21,7 @@ imageWs:
 imageDb:
     repository: postgres
     tag: 11
+    port: 5432
 
 imagePullSecrets: []
 nameOverride: ""
