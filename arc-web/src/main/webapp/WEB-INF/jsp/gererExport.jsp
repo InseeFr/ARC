@@ -56,6 +56,7 @@
 								<c:param name="extraScopeDelete" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 								<c:param name="extraScopeUpdate" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 								<c:param name="extraScopeSee" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
+								<c:param name="multiSelection" value ="true" />
 								<c:param name="otherButton">
 									<input 
 										class="btn btn-primary btn-sm"
@@ -92,6 +93,7 @@
 								<c:param name="extraScopeDelete" value ="viewSchemaNmcl;" />
 								<c:param name="extraScopeUpdate" value ="viewSchemaNmcl;" />
 								<c:param name="extraScopeSee" value ="viewSchemaNmcl;" />
+								<c:param name="multiSelection" value ="true" />
 								<c:param name="otherButton">
 									<button
 										class="btn btn-primary btn-sm"
