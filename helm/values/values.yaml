@@ -1,0 +1,28 @@
+# helm install -f ./values/values.yaml releaseName ./helm-charts/charts/arc/
+# helm upgrade -f ./values/values.yaml releaseName ./helm-charts/charts/arc/
+# TODO : fix the DATABASE_URL, DATABASE_USER AND DATABASE_PASSWORD to be set automatically with the envDb given parameters
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+  tls:
+    - hosts:
+        - arc.lab.sspcloud.fr
+  hosts:
+    - host: arc.lab.sspcloud.fr
+
+envDb:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+
+imageDb:
+  port: 5432
+  
+env:
+  DATABASE_URL: "jdbc:postgresql://releaseName-arc-db:5432/postgres"
+  DATABASE_USER: "postgres"
+  DATABASE_PASSWORD: "password"
+  DATABASE_RESTRICTED_USER: "arc_restricted"
+  APPLICATION_DIRECTORY: "./"
