@@ -10,9 +10,9 @@
 	<description>ARC version type composite</description>
 	<properties>
 		<version>0.0.2-SNAPSHOT</version>
-		<project.struts2.version>2.5.20</project.struts2.version>
+		<project.struts2.version>2.5.30</project.struts2.version>
 		<project.log4j.version>2.17.1</project.log4j.version>
-		<project.spring.version>5.3.16</project.spring.version>
+		<project.spring.version>5.3.18</project.spring.version>
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
