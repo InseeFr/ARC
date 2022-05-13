@@ -21,7 +21,13 @@ public class ArcThreadFactory extends ThreadRunnerTemplate {
 	}
 
 	@Override
-	public void run() {
+	public void run()
+	{
+		execute();
+	}
+	
+	
+	public void execute() {
 
 		switch (getPhaseName()) {
 		case INITIALISATION:
