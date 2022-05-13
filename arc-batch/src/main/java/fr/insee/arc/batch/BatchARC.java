@@ -88,6 +88,9 @@ public class BatchARC {
 	// interval entre chaque initialisation en nb de jours
 	private static Integer intervalForInitializationInDay;
 
+	// nombre de runner maximum pour une phase donnée (cas de blocage)
+	private static Integer maxNumberOfThreadsOfTheSamePhaseAtTheSameTime;
+
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
 	// Maintenance initialization process can only occur in this case
@@ -120,6 +123,10 @@ public class BatchARC {
 
 		// interval entre chaque initialisation en nb de jours
 		intervalForInitializationInDay = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION", 7);
+
+		// nombre de runner maximum pour une phase donnée (cas de blocage)
+		maxNumberOfThreadsOfTheSamePhaseAtTheSameTime = BDParameters.getInt(null,
+				"LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE", 1);
 
 		// either we take env and envExecution from database or properties
 		// default is from properties
@@ -212,7 +219,6 @@ public class BatchARC {
 					message("Début boucle Chargement->Mapping");
 
 					int numberOfIterationBewteenBlockageCheck = 30;
-					int maxNumberOfThreadsOfTheSamePhaseAtTheSameTime = 3;
 
 					// initialiser le tableau de phase
 					int startingPhase = TraitementPhase.CHARGEMENT.getOrdre();
@@ -235,8 +241,8 @@ public class BatchARC {
 					do {
 
 						iteration++;
-						
-						message("> iteration "+iteration);
+
+						message("> iteration " + iteration);
 
 						message(">> delete start");
 						// delete dead thread i.e. keep only living thread in the pool
@@ -247,8 +253,8 @@ public class BatchARC {
 								for (ArcThreadFactory thread : pool.get(phase)) {
 									if (thread.isAlive()) {
 										poolToKeep.get(phase).add(thread);
-										
-										message(phase+" is still alive");
+
+										message(phase + " is still alive");
 
 									}
 								}
@@ -256,9 +262,8 @@ public class BatchARC {
 						}
 						pool = poolToKeep;
 
-
 						message(">> delete end");
-						
+
 						// add new thread and start
 
 						HashMap<TraitementPhase, Integer> elligibleFiles = new HashMap<TraitementPhase, Integer>();
@@ -269,15 +274,16 @@ public class BatchARC {
 								ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
 								a.start();
 								pool.get(phase).add(a);
-								
-								message(">> start "+phase);
 
-								
+								message(">> start " + phase);
+
 							} else {
 								// if a thread is blocked, add the right thread
 
-								// we test blocked thread every nth iteration
-								if (iteration % numberOfIterationBewteenBlockageCheck == 0) {
+								// we test blocked thread every nth iteration and only if extra runners are
+								// allowed
+								if (iteration % numberOfIterationBewteenBlockageCheck == 0
+										&& (pool.get(phase).size() < maxNumberOfThreadsOfTheSamePhaseAtTheSameTime)) {
 									iteration = 0;
 
 									// check if all the phase threads are blocked
@@ -293,9 +299,9 @@ public class BatchARC {
 
 									// if ALL threads for the phase are blocked, something has to be done
 									if (blocked) {
-										
-										message(">> blocked "+phase);
-										
+
+										message(">> blocked " + phase);
+
 										// retrieve what phase still have some things to do
 										// this will retrieved only once
 										if (elligibleFiles.isEmpty()) {
@@ -310,17 +316,13 @@ public class BatchARC {
 										if (elligibleFiles.get(phase.previousPhase()) != null) {
 											// can start a new thread if no more than the
 											// maxNumberOfThreadsOfTheSamePhaseAtTheSameTime in the stack
-											if (pool.get(phase)
-													.size() < maxNumberOfThreadsOfTheSamePhaseAtTheSameTime) {
-												ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
-												a.start();
-												pool.get(phase).add(a);
-												
-												message(">> new "+phase);
-												
-											}
+											ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
+											a.start();
+											pool.get(phase).add(a);
+
+											message(">> new " + phase);
 										} else {
-											
+
 											boolean nothingToDoInPrevious = true;
 											// if nothing to do in the previous phases
 											for (int i = phases.indexOf(phase) - 2; i >= 0; i--) {
@@ -329,18 +331,15 @@ public class BatchARC {
 													break;
 												}
 											}
-											
-											if (nothingToDoInPrevious)
-											{
+
+											if (nothingToDoInPrevious) {
 												message(">> new reception");
 
-												receive(envExecution,false);
+												receive(envExecution, false);
 												// exit loop if new files are recieved not to trigger it several times
 												break;
 											}
-											
 
-											
 										}
 									}
 
