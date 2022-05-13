@@ -536,7 +536,7 @@ public class BatchARC {
 			message("Reprise des fichiers en cours de traitement");
 		} else {
 			ArcThreadFactory recevoir = new ArcThreadFactory(mapParam, TraitementPhase.RECEPTION);
-			recevoir.run();
+			recevoir.execute();
 			message("Reception : " + recevoir.getReport().nbLines + " e : " + recevoir.getReport().duree + " ms");
 		}
 
@@ -564,7 +564,7 @@ public class BatchARC {
 
 			message("Initialisation en cours");
 
-			initialiser.run();
+			initialiser.execute();
 
 			message("Initialisation terminée : " + (int) initialiser.getReport().nbLines + " e : "
 					+ initialiser.getReport().duree + " ms");
