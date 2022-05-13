@@ -254,7 +254,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
 //            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ this.tableNormageKO +";"));
         }
         
-        requete.append(this.marquageFinal(this.tablePil, this.tableNormagePilTemp));
+        requete.append(this.marquageFinal(this.tablePil, this.tableNormagePilTemp, this.idSource));
         UtilitaireDao.get("arc").executeBlock(connexion, requete);
 
         

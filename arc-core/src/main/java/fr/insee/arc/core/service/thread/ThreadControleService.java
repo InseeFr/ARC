@@ -276,7 +276,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
     }
     
-    requete.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp));
+    requete.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp, this.idSource));
     
     requete.append(FormatSQL.dropTable(tableOutOkTemp).toString());
     requete.append(FormatSQL.dropTable(tableOutKoTemp).toString());

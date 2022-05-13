@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,20 +17,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fr.insee.arc.batch.unitaryLauncher.ChargerBatch;
-import fr.insee.arc.batch.unitaryLauncher.ControlerBatch;
-import fr.insee.arc.batch.unitaryLauncher.FiltrerBatch;
-import fr.insee.arc.batch.unitaryLauncher.InitialiserBatch;
-import fr.insee.arc.batch.unitaryLauncher.MapperBatch;
-import fr.insee.arc.batch.unitaryLauncher.NormerBatch;
-import fr.insee.arc.batch.unitaryLauncher.RecevoirBatch;
-import fr.insee.arc.core.model.ServiceReporting;
+import fr.insee.arc.batch.threadRunners.ArcThreadFactory;
+import fr.insee.arc.batch.threadRunners.parameter.ParameterKey;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -37,9 +34,9 @@ import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.Sleep;
 
 /**
- * Classe lanceur de l'application Accueil Reception Contrôle
- * 07/08/2015
- * Version pour les tests de performance et pré-production
+ * Classe lanceur de l'application Accueil Reception Contrôle 07/08/2015 Version
+ * pour les tests de performance et pré-production
+ * 
  * @author Manu
  * 
  */
@@ -48,27 +45,32 @@ public class BatchARC {
 	static HashMap<String, String> mapParam = new HashMap<>();
 
 	/**
-	 * variable dateInitialisation
-	 * si vide (ou si date du jour+1 depassé à 20h),  je lance initialisation et j'initialise dateInitialisation à la nouvelle date du jour
-	 * puis une fois terminé, je lancent la boucle des batchs
-	 * si date du jour+1 depassé a 20h,
-	 * - j'indique aux autre batchs de s'arreter
-	 * - une fois arretés, je met tempo à la date du jour
-	 * - je lance initialisation
-	 * etc.
+	 * variable dateInitialisation si vide (ou si date du jour+1 depassé à 20h), je
+	 * lance initialisation et j'initialise dateInitialisation à la nouvelle date du
+	 * jour puis une fois terminé, je lancent la boucle des batchs si date du jour+1
+	 * depassé a 20h, - j'indique aux autre batchs de s'arreter - une fois arretés,
+	 * je met tempo à la date du jour - je lance initialisation etc.
 	 */
-	
+
 	@Autowired
 	PropertiesHandler properties;
-	
-	// mode production (boucle sur les paquets d'enveloppes)
-	private static boolean production=true;
-	
-	// keepInDatabase = est-ce qu'on garde les données des phases intérmédiaires en base ?
-	// false en production 
+
+	// the metadata schema
+	String env;
+
+	// the sandbox schema where batch process runs
+	String envExecution;
+
+	// file directory
+	String repertoire;
+
+	// keepInDatabase = est-ce qu'on garde les données des phases intérmédiaires en
+	// base ?
+	// false en production
 	private static boolean keepInDatabase;
-	
-	// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas excéder une certaine taille
+
+	// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
+	// excéder une certaine taille
 	protected static int tailleMaxReceptionEnMb;
 
 	// Maximum number of files to load
@@ -82,432 +84,387 @@ public class BatchARC {
 
 	// heure d'initalisation en production
 	private static int hourToTriggerInitializationInProduction;
-	
+
 	// interval entre chaque initialisation en nb de jours
 	private static Integer intervalForInitializationInDay;
 
-	// keys name for the hashmap mapParam containing the batch parameters
-	private static final String KEY_FOR_METADATA_ENVIRONMENT="env";
-	private static final String KEY_FOR_EXECUTION_ENVIRONMENT="envExecution";
-	private static final String KEY_FOR_DIRECTORY_LOCATION="repertoire";
-	private static final String KEY_FOR_BATCH_CHUNK_ID="numlot";
+	// true = the batch will resume the process from a formerly interrupted batch
+	// false = the batch will proceed to a new load
+	// Maintenance initialization process can only occur in this case
+	private static boolean dejaEnCours;
 
-	
-	public static class InitialiserThread {
-		private ServiceReporting report=new ServiceReporting();
-
-		  public void run() {
-			  InitialiserBatch c=new InitialiserBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
-			  c.execute();
-			  this.report=c.report;
-		  }
-		}
-
-	public static class RecevoirThread {
-		private ServiceReporting report=new ServiceReporting();
-		  public void run() {
-			RecevoirBatch c=new RecevoirBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , tailleMaxReceptionEnMb+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
-			c.execute();
-			this.report=c.report;
-		  }
-		}
-
-	public static class ChargerThread extends Thread {
-		@Override
-		  public void run() {
-			ChargerBatch c=new ChargerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesToLoad+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
-			c.execute();
-		  }
-		}
-
-	public static class NormerThread extends Thread {
-		  @Override
-		  public void run() {
-			  NormerBatch c=new NormerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
-			  c.execute();
-		  }
-		}
-
-	public static class ControlerThread extends Thread {
-		  @Override
-		  public void run() {
-			  ControlerBatch c=new ControlerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
-			  c.execute();
-		  }
-		}
-
-	public static class FiltrerThread extends Thread {
-		  @Override
-		  public void run() {
-			  FiltrerBatch c=new FiltrerBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
-			  c.execute();
-		  }
-		}
-
-
-	public static class MapperThread extends Thread {
-		  @Override
-		  public void run() {
-			  MapperBatch c= new MapperBatch(mapParam.get(KEY_FOR_METADATA_ENVIRONMENT), mapParam.get(KEY_FOR_EXECUTION_ENVIRONMENT), mapParam.get(KEY_FOR_DIRECTORY_LOCATION) , maxFilesPerPhase+"", keepInDatabase?null:mapParam.get(KEY_FOR_BATCH_CHUNK_ID));
-			  c.execute();
-		  }
-		}
-	
-	public static void message(String msg)
-	{
-		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())+"  "+msg);
+	public static void message(String msg) {
+		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "  " + msg);
 	}
 
-	
-	private static void initParameters()
-	{
+	private void initParameters() {
 
-		keepInDatabase= Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase","false"));
-		
-		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas excéder une certaine taille
-		tailleMaxReceptionEnMb=BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb",10);
+		keepInDatabase = Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
+
+		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
+		// excéder une certaine taille
+		tailleMaxReceptionEnMb = BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb", 10);
 
 		// Maximum number of files to load
-		maxFilesToLoad=BDParameters.getInt(null, "LanceurARC.maxFilesToLoad",101);
+		maxFilesToLoad = BDParameters.getInt(null, "LanceurARC.maxFilesToLoad", 101);
 
 		// Maximum number of files processed in each phase iteration
-		maxFilesPerPhase=BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase",1000000);
+		maxFilesPerPhase = BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase", 1000000);
 
 		// fréquence à laquelle les phases sont démarrées
-		poolingDelay=BDParameters.getInt(null, "LanceurARC.poolingDelay",1000);
+		poolingDelay = BDParameters.getInt(null, "LanceurARC.poolingDelay", 1000);
 
 		// heure d'initalisation en production
-		hourToTriggerInitializationInProduction=BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",22);
-		
+		hourToTriggerInitializationInProduction = BDParameters.getInt(null,
+				"ApiService.HEURE_INITIALISATION_PRODUCTION", 22);
+
 		// interval entre chaque initialisation en nb de jours
-		intervalForInitializationInDay = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION",7);
+		intervalForInitializationInDay = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION", 7);
+
+		// either we take env and envExecution from database or properties
+		// default is from properties
+		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
+			env = BDParameters.getString(null, "LanceurARC.env", ApiService.IHM_SCHEMA);
+			envExecution = BDParameters.getString(null, "LanceurARC.envExecution", "arc_prod");
+		} else {
+			env = properties.getBatchArcEnvironment();
+			envExecution = properties.getBatchExecutionEnvironment();
+		}
+
+		envExecution = envExecution.replace(".", "_");
+
+		repertoire = properties.getBatchParametersDirectory();
+
+		mapParam.put(ParameterKey.KEY_FOR_DIRECTORY_LOCATION, repertoire);
+		mapParam.put(ParameterKey.KEY_FOR_BATCH_CHUNK_ID, new SimpleDateFormat("yyyyMMddHH").format(new Date()));
+		mapParam.put(ParameterKey.KEY_FOR_METADATA_ENVIRONMENT, env);
+		mapParam.put(ParameterKey.KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
+		mapParam.put(ParameterKey.KEY_FOR_MAX_SIZE_RECEPTION, String.valueOf(tailleMaxReceptionEnMb));
+		mapParam.put(ParameterKey.KEY_FOR_MAX_FILES_TO_LOAD, String.valueOf(maxFilesToLoad));
+		mapParam.put(ParameterKey.KEY_FOR_MAX_FILES_PER_PHASE, String.valueOf(maxFilesPerPhase));
+		mapParam.put(ParameterKey.KEY_FOR_KEEP_IN_DATABASE, String.valueOf(keepInDatabase));
+
+		message(mapParam.toString());
+
 	}
-	
-	
+
 	/**
 	 * Lanceur MAIN arc
+	 * 
 	 * @param args
 	 */
 	public void execute(String[] args) {
 
 		// fill the parameters
 		initParameters();
-				
-		boolean fichierRestant=false;
 
-		message ("Main");
-		
-		do {
-		
+		message("Main");
+
 		message("Batch ARC " + properties.fullVersionInformation().toString());
-		
-		try{
-		
-		String env =null;
-		String envExecution = null;
-		
-		// either we take env and envExecution from database or properties
-		// default is from properties
-		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase","false")))
-		{
-			env=BDParameters.getString(null, "LanceurARC.env",ApiService.IHM_SCHEMA);
-			envExecution=BDParameters.getString(null, "LanceurARC.envExecution","arc_prod");
-		}	
-		else
-		{
-			env= properties.getBatchArcEnvironment();
-			envExecution = properties.getBatchExecutionEnvironment();
+
+		try {
+
+			boolean productionOn = productionOn();
+
+			if (!productionOn) {
+
+				message("La production est arretée !");
+
+			} else {
+
+				maintenanceTablePilotageBatch();
+
+				message("Déplacements de fichiers");
+
+				// on vide les repertoires de chargement OK, KO, ENCOURS
+				effacerRepertoireChargement(repertoire, envExecution);
+
+				// des archives n'ont elles pas été traitées jusqu'au bout ?
+				ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+						new PreparedStatementBuilder(
+								"select distinct container from " + envExecution + ".pilotage_fichier where etape=1")))
+										.mapContent().get("container");
+
+				dejaEnCours = (aBouger != null);
+
+				// si oui, on essaie de recopier les archives dans chargement OK
+				if (dejaEnCours) {
+					copyFileFromArchiveDirectoryToOK(envExecution, repertoire, aBouger);
+
+				}
+				message("Fin des déplacements de fichiers");
+
+				message("Traitement Début");
+
+				// initialize. Phase d'initialisation
+				initialize();
+
+				// register file. Phase de reception.
+				receive(envExecution, dejaEnCours);
+
+				productionOn = productionOn();
+				// Vérifier si la production est activée
+				if (productionOn) {
+
+					int delay = poolingDelay / 6;
+					boolean exit = false;
+
+					message("Début boucle Chargement->Mapping");
+
+					int numberOfIterationBewteenBlockageCheck = 30;
+					int maxNumberOfThreadsOfTheSamePhaseAtTheSameTime = 3;
+
+					// initialiser le tableau de phase
+					int startingPhase = TraitementPhase.CHARGEMENT.getOrdre();
+
+					ArrayList<TraitementPhase> phases = new ArrayList<>();
+					for (TraitementPhase phase : TraitementPhase.values()) {
+						if (phase.getOrdre() >= startingPhase) {
+							phases.add(phase.getOrdre() - startingPhase, phase);
+						}
+					}
+
+					// initialiser le pool de thread
+					HashMap<TraitementPhase, ArrayList<ArcThreadFactory>> pool = new HashMap<>();
+					for (TraitementPhase phase : phases) {
+						pool.put(phase, new ArrayList<>());
+					}
+
+					// boucle de chargement
+					int iteration = 0;
+					do {
+
+						iteration++;
+						
+						message("> iteration "+iteration);
+
+						message(">> delete start");
+						// delete dead thread i.e. keep only living thread in the pool
+						HashMap<TraitementPhase, ArrayList<ArcThreadFactory>> poolToKeep = new HashMap<>();
+						for (TraitementPhase phase : phases) {
+							poolToKeep.put(phase, new ArrayList<>());
+							if (!pool.get(phase).isEmpty()) {
+								for (ArcThreadFactory thread : pool.get(phase)) {
+									if (thread.isAlive()) {
+										poolToKeep.get(phase).add(thread);
+										
+										message(phase+" is still alive");
+
+									}
+								}
+							}
+						}
+						pool = poolToKeep;
+
+
+						message(">> delete end");
+						
+						// add new thread and start
+
+						HashMap<TraitementPhase, Integer> elligibleFiles = new HashMap<TraitementPhase, Integer>();
+
+						for (TraitementPhase phase : phases) {
+							// if no thread in phase, start one
+							if (pool.get(phase).isEmpty()) {
+								ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
+								a.start();
+								pool.get(phase).add(a);
+								
+								message(">> start "+phase);
+
+								
+							} else {
+								// if a thread is blocked, add the right thread
+
+								// we test blocked thread every nth iteration
+								if (iteration % numberOfIterationBewteenBlockageCheck == 0) {
+									iteration = 0;
+
+									// check if all the phase threads are blocked
+									boolean blocked = true;
+									// iterate thru the thread pool
+									for (ArcThreadFactory thread : pool.get(phase)) {
+										// if one thread is not considered as blocked, exit, nothing to do
+										if (!thread.isBlocked()) {
+											blocked = false;
+											break;
+										}
+									}
+
+									// if ALL threads for the phase are blocked, something has to be done
+									if (blocked) {
+										
+										message(">> blocked "+phase);
+										
+										// retrieve what phase still have some things to do
+										// this will retrieved only once
+										if (elligibleFiles.isEmpty()) {
+											elligibleFiles = elligible();
+										}
+
+										// now start the right thread
+										// we will iterate through the phase to see what thread to start
+
+										// if something to do in previous phase and that the thread is blocked
+										// start a new thread for the phase
+										if (elligibleFiles.get(phase.previousPhase()) != null) {
+											// can start a new thread if no more than the
+											// maxNumberOfThreadsOfTheSamePhaseAtTheSameTime in the stack
+											if (pool.get(phase)
+													.size() < maxNumberOfThreadsOfTheSamePhaseAtTheSameTime) {
+												ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
+												a.start();
+												pool.get(phase).add(a);
+												
+												message(">> new "+phase);
+												
+											}
+										} else {
+											
+											boolean nothingToDoInPrevious = true;
+											// if nothing to do in the previous phases
+											for (int i = phases.indexOf(phase) - 2; i >= 0; i--) {
+												if (elligibleFiles.get(phases.get(i)) != null) {
+													nothingToDoInPrevious = false;
+													break;
+												}
+											}
+											
+											if (nothingToDoInPrevious)
+											{
+												message(">> new reception");
+
+												receive(envExecution,false);
+												// exit loop if new files are recieved not to trigger it several times
+												break;
+											}
+											
+
+											
+										}
+									}
+
+								}
+							}
+							// delay between phases not to overload
+							Sleep.sleep(delay);
+						}
+
+						// check if batch must exit loop
+
+						// exit if nothing left to do
+						// or if the production had been turned OFF
+						exit = isNothingLeftToDo(envExecution) || !productionOn();
+
+						Sleep.sleep(delay);
+
+					} while (!exit);
+
+					if (productionOn) {
+						// Effacer les fichiers du répertoire OK
+						effacerRepertoireChargement(repertoire, envExecution);
+					}
+
+				}
+
+				// Maintenance du catalog
+				ApiService.maintenancePgCatalog(null, "full");
+				message("Traitement Fin");
+
+				if (args != null && args.length > 0 && args[0].equals("noExit")) {
+					message("No Exit");
+				} else {
+					System.exit(0);
+				}
+
+			}
+
+		} catch (Exception ex) {
+			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
+			System.exit(202);
 		}
-		
-		envExecution=envExecution.replace(".", "_");
-		
-		mapParam.put(KEY_FOR_METADATA_ENVIRONMENT, env);
-		mapParam.put(KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
-		
-		String repertoire = properties.getBatchParametersDirectory();
-		mapParam.put(KEY_FOR_DIRECTORY_LOCATION, repertoire);
 
-		message(mapParam.toString());
+		message("Fin du batch");
 
+	}
 
-		creerTablePilotageBatch();
+	/**
+	 * Créer la table de pilotage batch si elle n'existe pas déjà
+	 * 
+	 * @throws SQLException
+	 * @throws Exception
+	 */
+	public void maintenanceTablePilotageBatch() throws SQLException {
 
-		InitialiserThread initialiser=new InitialiserThread();
-		RecevoirThread recevoir=new RecevoirThread();
-		ChargerThread charger=new ChargerThread();
-		NormerThread normer=new NormerThread();
-		ControlerThread controler=new ControlerThread();
-		FiltrerThread filtrer=new FiltrerThread();
-		MapperThread mapper=new MapperThread();
+		// création de al table si elle n'existe pas
+		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
+		requete.append(
+				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
+		UtilitaireDao.get("arc").executeRequest(null, requete);
 
-		
 		// opération de maintenance
 		message("Maintenance pilotage");
 		ApiService.maintenancePilotage(null, envExecution, "freeze");
 		message("Fin de Maintenance pilotage");
-		
-		message("Déplacements de fichiers");
-
-		boolean productionOn=productionOn();
-
-		if (productionOn)
-		{
-		// on vide les repertoires de chargement OK, KO, ENCOURS
-		effacerRepertoireChargement(repertoire, envExecution);
-		
-		
-		// des archives n'ont elles pas été traitées jusqu'au bout ?
-		ArrayList<String> aBouger= new GenericBean(UtilitaireDao.get("arc").executeRequest(null,new PreparedStatementBuilder("select distinct container from "+envExecution+".pilotage_fichier where etape=1"))).mapContent().get("container");
-		
-		boolean dejaEnCours=(aBouger!=null);
-
-		// si oui, on essaie de recopier les archives dans chargement OK
-		if (aBouger!=null)
-		{
-			
-			for (String container:aBouger)
-			{
-				String entrepotContainer=ManipString.substringBeforeFirst(container, "_");
-				String originalContainer=ManipString.substringAfterFirst(container, "_");
-				
-				File fIn= Paths.get(
-						ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepotContainer)
-						, originalContainer
-						).toFile();
-				
-				File fOut= Paths.get(
-						ApiReceptionService.directoryReceptionEtatOK(repertoire, envExecution)
-						, container
-						).toFile();
-
-				Files.copy(fIn.toPath(), fOut.toPath());
-			}
-			
-		}
-		
-		message("Fin des déplacements de fichiers");
-
-		
-		do
-		{
-			
-		message("Traitement Début");
-
-		// plage d'initialisation
-
-		 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
-		 DateFormat dateFormat2 = new SimpleDateFormat("yyyyMMddHH");
-
-		 String lastInitialize=null;
-         lastInitialize=UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("select last_init from arc.pilotage_batch "));
-
-
-		 Date dNow = new Date();
-		 Date dLastInitialize;
-
-		 mapParam.put(KEY_FOR_BATCH_CHUNK_ID, dateFormat2.format(dNow));
-
-	     dLastInitialize = dateFormat.parse(lastInitialize);
-	     
-	     // la nouvelle initialisation se lance directe : pas de plage horaire. Mais juste en cas de modification de regles.
-	     // on lance toujours l'initialisation en mode "non production"
-	     // on ne la lance que s'il n'y a rien en cours (pas essentiel mais plus sécurisé)
-	     if ((!dejaEnCours && dLastInitialize.compareTo(dNow)<0) || !production)
-	     {
-	    	 message("Initialisation en cours");
-	    	 initialiser.run();
-			 message("Initialisation terminée : "+(int)initialiser.report.nbLines+" e : "+initialiser.report.duree+" ms");
-			
-			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("update arc.pilotage_batch set last_init=to_char(current_date+interval '"+intervalForInitializationInDay+" days','yyyy-mm-dd')||':"+hourToTriggerInitializationInProduction+"' , operation=case when operation='R' then 'O' else operation end;"));
-		}
-		 productionOn=productionOn();
-
-
-		 // Vérifier si la production est activée
-		 if (productionOn)
-		 {
-		
-		// Reception : ne faire que si il n'y a rien déjà en cours au début du batch
-			 if (!dejaEnCours)
-			 {
-				 recevoir.run();
-				 dejaEnCours=false;
-			 }
-
-			 if (production)
-			 {
-				 message("Reception : "+recevoir.report.nbLines+" e : "+recevoir.report.duree+" ms");
-			 }
-			 
-			 fichierRestant=(int)recevoir.report.nbLines>0;
-
-		// on lance tout systematiquement pour la reprise sur erreur
-
-			int delay=poolingDelay/6;
-			boolean exit=false;
-		
-			message("Début boucle Chargement->Mapping");
-			do {
-				
-			if (!charger.isAlive())
-			{
-				charger=new ChargerThread();
-				charger.start();
-			}
-
-			Sleep.sleep(delay);
-			
-			if (!normer.isAlive())
-			{
-				normer=new NormerThread();
-				normer.start();
-			}
-			Sleep.sleep(delay);
-
-			if (!controler.isAlive())
-			{
-				controler=new ControlerThread();
-				controler.start();
-			}
-
-			Sleep.sleep(delay);
-			
-			if (!filtrer.isAlive())
-			{
-				filtrer=new FiltrerThread();
-				filtrer.start();
-			}
-
-			Sleep.sleep(delay);
-			
-			if (!mapper.isAlive())
-			{
-				mapper=new MapperThread();
-				mapper.start();
-			}
-			
-			Sleep.sleep(delay);
-			
-			if (
-					UtilitaireDao.get("arc").getInt(null,new PreparedStatementBuilder("select count(*) from (select 1 from "+envExecution+".pilotage_fichier where etape=1 limit 1) ww"))==0
-					)
-			{
-					exit=true;
-			}
-
-			
-			productionOn=productionOn();
-
-			if (!productionOn)
-			{
-				break;
-			}
-			
-			Sleep.sleep(delay);
-		}
-			while (!exit);
-
-
-			if (productionOn)
-			{
-				// Effacer les fichiers du répertoire OK
-				effacerRepertoireChargement(repertoire, envExecution);
-			}
-
-		}
-
-		 // Maintenance du catalog
-		ApiService.maintenancePgCatalog(null, "full");
-			
-
-		message("Traitement Fin");
-
-		// si on n'est pas en production, on itere tant qu'il y a des fichiers dans le repertoire.
-		}
-		while (!production && recevoir.report.nbLines>0 && productionOn);
-        
-        if (args!=null && args.length>0 && args[0].equals("noExit"))
-        {
-        	message("No Exit");
-        }
-        else
-        {
-        	System.exit(0);
-        }
 
 	}
-		
-
-    } catch (Exception ex) {
-         LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
-		System.exit(202);
-    }
-	
-	} while (fichierRestant);
-
-	message("Fin du batch");
-
-}
-
 
 	/**
-	 * Créer la table de pilotage batch si elle n'existe pas déjà
-	 * @throws SQLException 
-	 * @throws Exception
+	 * exit loop condition
+	 * 
+	 * @param envExecution
+	 * @return
 	 */
-	public static void creerTablePilotageBatch() throws SQLException
-	{
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
-		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
-		requete.append("\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
-        UtilitaireDao.get("arc").executeRequest(null, requete);
+	public boolean isNothingLeftToDo(String envExecution) {
+		boolean isNothingLeftToDo = false;
+		if (UtilitaireDao.get("arc").getInt(null, new PreparedStatementBuilder("select count(*) from (select 1 from "
+				+ envExecution + ".pilotage_fichier where etape=1 limit 1) ww")) == 0) {
+			isNothingLeftToDo = true;
+		}
+		return isNothingLeftToDo;
 	}
-
 
 	/**
 	 * test si la chaine batch est arrétée
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	public static boolean productionOn() throws Exception {
-		if (production) {
-			return UtilitaireDao.get("arc").hasResults(null, new PreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
-		}
-		else
-		{
-			return true;
-		}
+		return UtilitaireDao.get("arc").hasResults(null,
+				new PreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 	}
-	
-	
+
 	/**
 	 * Effacer les répertoires de chargement OK KO et ENCOURS
+	 * 
 	 * @param directory
 	 * @param envExecution
-	 * @throws IOException 
-	 * @throws Exception 
+	 * @throws IOException
+	 * @throws Exception
 	 */
-	public static void effacerRepertoireChargement(String directory, String envExecution) throws IOException
-	{
-		
+	public static void effacerRepertoireChargement(String directory, String envExecution) throws IOException {
+
 		// Effacer les fichiers des répertoires OK et KO
 		String envDirectory = envExecution.replace(".", "_").toUpperCase();
 
 		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.OK);
-		
+
 		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.KO);
-		
+
 		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.ENCOURS);
-		
+
 	}
 
-	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat) throws IOException {
-		File f= Paths.get(ApiReceptionService.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
+	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat)
+			throws IOException {
+		File f = Paths.get(ApiReceptionService.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
 		if (!f.exists()) {
 			return;
 		}
-		File[] fs= f.listFiles();
-		for (File z:fs) {
+		File[] fs = f.listFiles();
+		for (File z : fs) {
 			if (z.isDirectory()) {
 				FileUtils.deleteDirectory(z);
 			} else {
@@ -517,33 +474,161 @@ public class BatchARC {
 	}
 
 	/**
-	 * If the file has already been moved in the archive directory by ARC
-	 * it is safe to delete it
-	 * else save it to the archive directory 
+	 * If the file has already been moved in the archive directory by ARC it is safe
+	 * to delete it else save it to the archive directory
+	 * 
 	 * @param repertoire
 	 * @param envExecution
 	 * @param z
 	 * @return
 	 */
 	private static boolean deleteIfArchived(String repertoire, String envExecution, File z) {
-		
-		String entrepot =  ManipString.substringBeforeFirst(z.getName(),"_");
-		String filename = ManipString.substringAfterFirst(z.getName(),"_");
-		
+
+		String entrepot = ManipString.substringBeforeFirst(z.getName(), "_");
+		String filename = ManipString.substringAfterFirst(z.getName(), "_");
+
 		// ajout d'un garde fou : si le fichier n'est pas archivé : pas touche
-		File fCheck = Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepot)
-				, filename
-				).toFile();
-		
-		if (fCheck.exists())
-		{
+		File fCheck = Paths
+				.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepot),
+						filename)
+				.toFile();
+
+		if (fCheck.exists()) {
 			return z.delete();
-		}
-		else
-		{
+		} else {
 			return z.renameTo(fCheck);
 		}
 	}
-	
+
+	/**
+	 * 
+	 * @param envExecution
+	 * @throws SQLException
+	 */
+	private static void resetPending(String envExecution) throws SQLException {
+		// delete files that are en cours
+		StringBuilder query = new StringBuilder();
+		query.append("\n DELETE FROM " + envExecution + ".pilotage_fichier ");
+		query.append("\n WHERE etape=1 AND PHASE_TRAITEMENT='{" + TraitementEtat.ENCOURS + "}' ");
+		query.append(";");
+
+		// update these files to etape=1
+		query.append("\n UPDATE " + envExecution + ".pilotage_fichier ");
+		query.append("\n set etape=1 ");
+		query.append("\n WHERE etape=3");
+		query.append(";");
+
+		UtilitaireDao.get("arc").executeBlock(null, query);
+
+	}
+
+	/**
+	 * si c'est une reprise de batch déjà en cours, on remet les fichiers en_cours à
+	 * l'état précédent dans la table de piltoage
+	 * 
+	 * @param envExecution
+	 * @param repriseEnCOurs
+	 * @param recevoir
+	 * @throws SQLException
+	 */
+	private static void receive(String envExecution, boolean repriseEnCOurs) throws SQLException {
+		if (repriseEnCOurs) {
+			resetPending(envExecution);
+			message("Reprise des fichiers en cours de traitement");
+		} else {
+			ArcThreadFactory recevoir = new ArcThreadFactory(mapParam, TraitementPhase.RECEPTION);
+			recevoir.run();
+			message("Reception : " + recevoir.getReport().nbLines + " e : " + recevoir.getReport().duree + " ms");
+		}
+
+	}
+
+	public static void initialize() throws SQLException, ParseException {
+		ArcThreadFactory initialiser = new ArcThreadFactory(mapParam, TraitementPhase.INITIALISATION);
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
+
+		String lastInitialize = null;
+		lastInitialize = UtilitaireDao.get("arc").getString(null,
+				new PreparedStatementBuilder("select last_init from arc.pilotage_batch "));
+
+		Date dNow = new Date();
+		Date dLastInitialize;
+
+		dLastInitialize = dateFormat.parse(lastInitialize);
+
+		// la nouvelle initialisation se lance si la date actuelle est postérieure à la
+		// date programmée d'initialisation (last_init)
+		// on ne la lance que s'il n'y a rien en cours (pas essentiel mais plus
+		// sécurisé)
+		if ((!dejaEnCours && dLastInitialize.compareTo(dNow) < 0)) {
+
+			message("Initialisation en cours");
+
+			initialiser.run();
+
+			message("Initialisation terminée : " + (int) initialiser.getReport().nbLines + " e : "
+					+ initialiser.getReport().duree + " ms");
+
+			UtilitaireDao.get("arc").executeRequest(null,
+					new PreparedStatementBuilder(
+							"update arc.pilotage_batch set last_init=to_char(current_date+interval '"
+									+ intervalForInitializationInDay + " days','yyyy-mm-dd')||':"
+									+ hourToTriggerInitializationInProduction
+									+ "' , operation=case when operation='R' then 'O' else operation end;"));
+		}
+	}
+
+	/**
+	 * Copy the files from the archive directory to ok directory
+	 * 
+	 * @param envExecution
+	 * @param repertoire
+	 * @param aBouger
+	 * @throws IOException
+	 */
+	private void copyFileFromArchiveDirectoryToOK(String envExecution, String repertoire, ArrayList<String> aBouger)
+			throws IOException {
+
+		for (String container : aBouger) {
+			String entrepotContainer = ManipString.substringBeforeFirst(container, "_");
+			String originalContainer = ManipString.substringAfterFirst(container, "_");
+
+			File fIn = Paths.get(
+					ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepotContainer),
+					originalContainer).toFile();
+
+			File fOut = Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, envExecution), container)
+					.toFile();
+
+			Files.copy(fIn.toPath(), fOut.toPath());
+		}
+	}
+
+	/**
+	 * return if there is
+	 * 
+	 * @return
+	 * @throws SQLException
+	 * @throws ArcException
+	 */
+	private HashMap<TraitementPhase, Integer> elligible() throws SQLException, ArcException {
+		PreparedStatementBuilder query = new PreparedStatementBuilder();
+
+		query.append("SELECT phase_traitement, count(*) as n ");
+		query.append("FROM " + this.envExecution + ".pilotage_fichier ");
+		query.append("WHERE etape=1 and etat_traitement!='{" + TraitementEtat.ENCOURS + "}' ");
+		query.append("GROUP BY phase_traitement ");
+		query.append("HAVING COUNT(*)>0 ");
+
+		HashMap<String, String> keyValue = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, query))
+				.keyValue();
+		HashMap<TraitementPhase, Integer> r = new HashMap<>();
+
+		for (String k : keyValue.keySet()) {
+			r.put(TraitementPhase.valueOf(k), Integer.parseInt(keyValue.get(k)));
+		}
+		return r;
+	}
 
 }

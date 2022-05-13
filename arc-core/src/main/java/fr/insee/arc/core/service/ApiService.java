@@ -149,27 +149,17 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
                     if (px.getError()!=null) {
                         error = px.error;
                     }
-                    px = null;
                     it.remove();
+                    
+                    // close connexion when thread is done except if it is the master connexion (first one)
+                    if (parallel==0 && !px.getConnexion().equals(connexionList.get(0)))
+                    {
+                    		px.getConnexion().close();
+                    }
 
                 }
             }
         };
-
-        if (parallel == 0 || error != null) {
-            for (int i = 1; i < connexionList.size(); i++) {
-                try {
-                    connexionList.get(i).close();
-                } catch (SQLException ex) {
-                    throw new SQLException("Error in multithread close connection");
-                }
-            }
-        }
-
-        if (error != null) {
-            throw new SQLException("Error in multithread execution");
-        }
-
     }
     
     /**
@@ -315,7 +305,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
     
     /**
-     * Vérifier si y'a des fichiers à traiter avant toutes choses
+     * Vérifier si y'a des fichiers à traiter
+     * on teste dans la phase précédente si on trouve des fichiers OK avec etape=1 
      *
      * @param tablePil
      * @param phaseAncien
@@ -326,10 +317,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         boolean todo = false;
         requete.append("SELECT 1 FROM " + tablePil + " a ");
         requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien) + " AND " + requete.quoteText(TraitementEtat.OK.toString()) + "=ANY(etat_traitement) ");
-        requete.append("and etape=1 ");
-        requete.append("UNION ALL ");
-        requete.append("SELECT 1 FROM " + tablePil + " a ");
-        requete.append("WHERE phase_traitement=" + requete.quoteText(phaseNouveau) + " AND " + requete.quoteText(TraitementEtat.ENCOURS.toString()) + "=ANY(etat_traitement) ");
         requete.append("and etape=1 ");
         requete.append("limit 1 ");
         try {
@@ -342,7 +329,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
     /**
      * Marque dans la table de pilotage les id_source qui vont être traités dans la phase
-     * Si des id_source sont déjà en traitement, la méthode n'en selectionne pas de nouveaux
+     * Si des id_source sont déjà en traitement, la méthode en selectionnera de nouveaux
      * Copie la table de pilotage pour les id_source selectionnés. Cette table sera mis à jour pendant l'éxécution de la phase.
      * @param connexion
      * @param phaseIn
@@ -355,22 +342,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp, Integer nbEnr) {
         loggerDispatcher.info("** register **", LOGGER_APISERVICE);
         try {
-            StringBuilder blocInit = new StringBuilder();
-
-            // si il n'y a pas de sources déjà marquées en cours, on procède à la selection
-        	PreparedStatementBuilder requete = new PreparedStatementBuilder();
-        	requete.append("SELECT 1 FROM " + tablePil + " ");
-        	requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
-        	requete.append("\n AND " + requete.quoteText(TraitementEtat.ENCOURS.toString())+ "=ANY(etat_traitement) ");
-        	requete.append("\n AND etape=1 ");
-        	requete.append("\n LIMIT 1 ");
-        	
-            if (!UtilitaireDao.get(poolName).hasResults(connexion,requete)) {
-                blocInit.append(selectionSource(tablePil, phaseIn, phase, nbEnr));
-            }
-            blocInit.append(copieTablePilotage(phase, tablePil, tablePilTemp));
-
-            UtilitaireDao.get(poolName).executeBlock(connexion, blocInit);
+            UtilitaireDao.get(poolName).executeBlock(connexion, copieTablePilotage(phase, tablePil, tablePilTemp, phaseIn, phase, nbEnr));
         } catch (Exception ex) {
             LoggerHelper.error(LOGGER_APISERVICE,ApiService.class, "register()", ex);
         }
@@ -511,7 +483,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
     
     /**
-     * récupere le contenu d'une requete; iniitalise si le résultat est null
+     * récupere le contenu d'une requete dans un map
      * @param c
      * @param req
      * @return
@@ -520,17 +492,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws SQLException
     {
     	GenericBean gb=  new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new PreparedStatementBuilder(req)));
-    	HashMap<String, ArrayList<String>> m = gb.mapContent();
-
-    	if (gb.headers.size()>0 && m.get(gb.headers.get(0))==null)
-    	{
-    		for (int i=0; i<gb.headers.size(); i++)
-    		{
-    			m.put(gb.headers.get(i), new ArrayList<String>());
-    		}
-    	}
-    	
-    	return m;
+    	return gb.mapContent(true);
     }
     
     /**
@@ -545,66 +507,58 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
 		}
     }
-    
+      
     /**
      * Selection d'un lot d'id_source pour appliquer le traitement
      * Les id_sources sont selectionnés parmi les id_source présent dans la phase précédentes avec etape =1
      * Ces id_source sont alors mis à jour dans la phase précédente à étape =0 et 
      * une nouvelle ligne est créee pour la phase courante et pour chaque id_source avec etape=1
+     * Fabrique une copie de la table de pilotage avec uniquement les fichiers concernés par le traitement
+     * @param phase
      * @param tablePil
-     *            , la table de pilotage des fichiers
+     * @param tablePilTemp
      * @param phaseAncien
-     *            , la phase précédente
      * @param phaseNouveau
-     *            , la phase courante
      * @param nbEnr
-     *            , le nombre maximal d'enregistrement que l'on souhaite voir traités
      * @return
      */
-    private String selectionSource(String tablePil, String phaseAncien, String phaseNouveau, Integer nbEnr) {
+    private String copieTablePilotage(String phase, String tablePil, String tablePilTemp, String phaseAncien, String phaseNouveau, Integer nbEnr) {
         StringBuilder requete = new StringBuilder();
+        
         Date date = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         
-        requete.append("WITH prep as (SELECT a.*, count(1) OVER (ORDER BY date_traitement, nb_essais, id_source) as cum_enr ");
-        requete.append("FROM " + tablePil + " a ");
-        requete.append("WHERE phase_traitement='"+phaseAncien+"'  AND '" + TraitementEtat.OK + "'=ANY(etat_traitement) and etape=1 ) ");
-        requete.append(",mark AS (SELECT a.*    FROM prep a WHERE cum_enr<" + nbEnr + " ");
-        requete.append("UNION   (SELECT a.* FROM prep a LIMIT 1)) ");
-        requete.append(", update as ( UPDATE " + tablePil + " a set etape=0 from mark b where a.id_source=b.id_source and a.etape=1) ");
-        requete.append("INSERT INTO " + tablePil + " ");
-        requete.append("(container, id_source, date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape, generation_composite ");
-        requete.append(",jointure");
-        requete.append(") ");
-        requete.append("select container, id_source, date_entree, id_norme, validite, periodicite, '" + phaseNouveau + "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
-        requete.append(", to_date('" + formatter.format(date) + "','"+this.bdDateFormat+"') , rapport, taux_ko, nb_enr, nb_essais, 1 as etape, generation_composite ");
-        requete.append(",jointure ");
-        requete.append("from mark; ");
-
-        return requete.toString();
-    }
-
-    /**
-     * Fabrique une copie de la table de pilotage avec uniquement les informations et les enregistrements qui concernent le batch
-     *
-     * @param tablePil
-     * @param tablePilTemp
-     * @return
-     */
-    private String copieTablePilotage(String phase, String tablePil, String tablePilTemp) {
-        StringBuilder requete = new StringBuilder();
         requete.append("\n DROP TABLE IF EXISTS " + tablePilTemp + "; ");
+
+        
         requete.append("\n CREATE ");
         if (!tablePilTemp.contains(".")) {
             requete.append("TEMPORARY ");
         } else {
             requete.append(" ");
         }
-        requete.append("TABLE " + tablePilTemp + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ( ");
-        requete.append("\n SELECT *  ");
-        requete.append("\n FROM " + tablePil + " ");
-        requete.append("\n WHERE etape=1 and phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}'); ");
-        requete.append("\n analyze " + tablePilTemp + ";");
+        requete.append("\n TABLE " + tablePilTemp + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS  ");
+       
+        requete.append("\n WITH prep AS (");
+        requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, nb_essais, id_source) as cum_enr ");
+        requete.append("\n FROM " + tablePil + " a ");
+        requete.append("\n WHERE phase_traitement='"+phaseAncien+"'  AND '" + TraitementEtat.OK + "'=ANY(etat_traitement) and etape=1 ) ");
+        requete.append("\n , mark AS (SELECT a.* FROM prep a WHERE cum_enr<" + nbEnr + " ");
+        requete.append("\n UNION   (SELECT a.* FROM prep a LIMIT 1)) ");
+        
+        // update the line in pilotage with etape=0 for the previous step
+        requete.append("\n , update as ( UPDATE " + tablePil + " a set etape=3 from mark b where a.id_source=b.id_source and a.etape=1) ");
+        
+        // insert the line in pilotage with etape=1 for the current step 
+        requete.append("\n , insert as (INSERT INTO " + tablePil + " ");
+        requete.append("\n (container, id_source, date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape, generation_composite,jointure) ");
+        requete.append("\n SELECT container, id_source, date_entree, id_norme, validite, periodicite, '" + phaseNouveau + "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
+        requete.append("\n , to_timestamp('" + formatter.format(date) + "','"+this.bdDateFormat+"') , rapport, taux_ko, nb_enr, nb_essais, 1 as etape, generation_composite, jointure ");
+        requete.append("\n FROM mark ");
+        requete.append("\n RETURNING *) ");
+        
+        requete.append("\n SELECT * from insert; ");
+        requete.append("\n ANALYZE " + tablePilTemp + ";");
         return requete.toString();
     }
 
@@ -809,10 +763,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @param phaseNew
      * @param etatNew
      * @return
-     * 
-     *         modif 05/04/2016 Pépin Rémi Ajout du paramètre typeComopsite pour garder en base la requete de génération et l'exécuter si
-     *         besoin.
-     * 
      */
     public static StringBuilder pilotageMarkIdsource(String tablePilotage, String idSource, String phaseNew, String etatNew, String rapport, String... jointure) {
         StringBuilder requete = new StringBuilder();
@@ -834,24 +784,20 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
 
     /**
-     * Remplace les enregistrement en cours d'une phase d'une table de pilotage avec ceux d'une table de pilotage temporaire
-     *
+     * return the query that marks the file processed by the phase in the persistent pilotage table @param tablePil
      * @param tablePil
      * @param tablePilTemp
+     * @param idSource
      * @return
      */
-    public String marquageFinal(String tablePil, String tablePilTemp) {
-        return marquageFinal(tablePil, tablePilTemp, "");
-    }
-
-    public String marquageFinal(String tablePil, String tablePilTemp, String id_source) {
+    public String marquageFinal(String tablePil, String tablePilTemp, String idSource) {
         StringBuilder requete = new StringBuilder();
         Date date = new Date();
         
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         
         requete.append("\n set enable_hashjoin=off; ");
-        requete.append("\n UPDATE " + tablePil + " AS a ");
+        requete.append("\n UPDATE " + tablePil + " a ");
         requete.append("\n \t SET etat_traitement =  b.etat_traitement, ");
         requete.append("\n \t   id_norme = b.id_norme, ");
         requete.append("\n \t   validite = b.validite, ");
@@ -869,18 +815,40 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
         // Si on dispose d'un id source on met à jour seulement celui ci
         requete.append("\n \t FROM " + tablePilTemp + " as b ");
-        if (id_source.isEmpty()) {
-            requete.append("\n \t WHERE b.id_source =  a.id_source");
-        } else {
-            requete.append("\n \t WHERE b.id_source = '" + id_source + "' ");
-            requete.append("\n \t AND a.id_source = '" + id_source + "' ");
-        }
+        requete.append("\n \t WHERE a.id_source = '" + idSource + "' ");
         requete.append("\n \t AND a.etape = 1 ; ");
+        
+        requete.append(resetPreviousPhaseMark(tablePil, idSource));
+        
         requete.append("\n set enable_hashjoin = on; ");
         return requete.toString();
 
     }
 
+    /**
+     * Return the query that marks the files or all file if idSource not provided
+     * The mark indicates reset etape to 0 for the previous phase, meaning the file is no longer processed in the current phase
+     * @param idSource
+     * @return
+     */
+    public static StringBuilder resetPreviousPhaseMark(String tablePil, String idSource)
+    {
+        StringBuilder requete = new StringBuilder();
+
+        // mettre à etape = 0 la phase marquée à 3
+        requete.append("\n UPDATE " + tablePil + " a ");
+        requete.append("\n SET etape = 0 ");
+        requete.append("\n WHERE a.etape = 3 ");
+        if (idSource!=null)
+        {
+        	requete.append("\n AND a.id_source = '" + idSource + "' ");
+        }
+        requete.append("\n ;");
+        return requete;
+    }
+
+    
+    
     public String getMiseANiveauSchemaTable(String aTableReference, String... aTableCible) throws SQLException {
 
         StringBuilder returned = new StringBuilder();

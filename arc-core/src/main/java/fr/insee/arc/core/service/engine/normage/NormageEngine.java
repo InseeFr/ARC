@@ -113,7 +113,7 @@ public class NormageEngine {
 			StaticLoggerDispatcher.trace("listeRubrique fichier " + listeRubriqueSource, LOGGER);
 			StaticLoggerDispatcher.trace("listeRubrique règles " + ((paramBatch != null) ? rubriqueUtiliseeDansRegles.get("var"):"NULL (MODE IHM)"), LOGGER);
 
-			HashSet<String> alreadyAdded = new HashSet<String>();
+			HashSet<String> alreadyAdded = new HashSet<>();
 
 			for (String variable : listeRubriqueSource) {
 				// pour toutes les variables du fichier commencant par i ou v et qui n'ont pas
@@ -147,7 +147,7 @@ public class NormageEngine {
 			bloc3.append("\n CREATE TEMPORARY TABLE " + tableDestination + " ");
 			bloc3.append("\n  AS SELECT ");
 			bloc3.append(reqSelect);
-			bloc3.append(" from " + tableSource + " ;");
+			bloc3.append(" FROM " + tableSource + " ;");
 			
 			UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
 
@@ -1301,9 +1301,6 @@ public class NormageEngine {
 										+ rubrique + ") end as rk_" + rubrique + " , * from    ("
 										+ ManipString.substringAfterFirst(line.replace(";", ""), " (") + " t0_"
 										+ rubrique + " ) t1_" + rubrique + " where rk_" + rubrique + "=1);";
-
-//                                     System.out.println(lines[k]);
-
 							}
 
 							break;
@@ -1311,10 +1308,6 @@ public class NormageEngine {
 
 						k++;
 					}
-
-//                                 jointure=jointure+"\n AND ("+rubrique+"="+rubriqueNmcl+" ";
-//                                 jointure=jointure+"\n or "+rubrique+" is null ";
-//                                 jointure=jointure+"\n or "+rubrique+" not in (select distinct "+rubriqueNmcl+" from "+this.tableNormageOKTemp2+" where id_source='"+id_source+"' and "+rubriqueNmcl+" is not null)) ";
 				}
 			}
 		}

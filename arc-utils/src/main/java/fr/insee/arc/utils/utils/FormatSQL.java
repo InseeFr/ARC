@@ -43,9 +43,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String PARALLEL_WORK_MEM = "24MB";
     public static final String SEQUENTIAL_WORK_MEM = "32MB";
     private static final String SQL_SEPARATOR = "chr(1)";
-    
-    public static final int _LONGUEUR_MAXIMALE_NOM_TABLE = 63;
-    public static final int _LONGUEUR_MAXIMALE_NOM_TABLE_RAW = _LONGUEUR_MAXIMALE_NOM_TABLE - 10 - 4;
+
     private static final String MAX_VALUE_BIGINT_SQL_POSTGRES = new BigInteger("2").pow(63).subtract(BigInteger.ONE)
             .toString();
     private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
@@ -59,11 +57,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 
     public static final String EXPRESSION_TYPE_SQL_SEUL = "CASE WHEN lower(data_type)='array' \n THEN replace(replace(replace(ltrim(udt_name,'_'),'int4','int'),'int8','bigint'),'float8','float')||'[]' \n ELSE lower(data_type) \n END ";
     public static final String EXPRESSION_TYPE_SQL = EXPRESSION_TYPE_SQL_SEUL + " AS data_type";
-    private static final String BEGIN_COMMENTARY = "/*";
-    private static final String END_COMMENTARY = "*/";
     
-    
-    public static enum ObjectType
+    public enum ObjectType
     {
         TABLE("TABLE"), VIEW("VIEW"), TEMPORARY_TABLE ("TEMPORARY TABLE");
         private String name;
@@ -91,25 +86,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
             end = separator[0];
         }
         return end;
-    }
-
-    /**
-     * Replace les rubriques entre crochet par des vraies valeurs
-     *
-     * @param req
-     * @param args
-     * @return
-     */
-    public static String getRequete(String req, String... args)
-    {
-        String s = req;
-        String exp = "";
-        for (int i = 0; i < args.length; i++)
-        {
-            exp = "{" + i + "}";
-            s = s.replace(exp, args[i]);
-        }
-        return s;
     }
 
     /**
@@ -272,17 +248,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 	{
 		return "SET role='"+roleName+"'; ";
 	}
-    
-
-    public static String getIdColumns(String tempTableA)
-    {
-        return "SELECT upper(substr(column_name,3)) FROM information_schema.columns WHERE  table_name   = 'a' and substr(column_name,1,2)='i_' order by ordinal_position;\n";
-    }
-
-    public static String getDataColumns(String tempTableA)
-    {
-        return "SELECT upper(substr(column_name,3)) FROM information_schema.columns WHERE  table_name   = 'a' and substr(column_name,1,2)='v_' order by ordinal_position;\n";
-    }
 
     /**
      * Configuration de la base de données pour des petites requetes
@@ -292,12 +257,10 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static String modeParallel(String defaultSchema)
     {
-        // return "";
         return "set enable_nestloop=on; set enable_mergejoin=off; set enable_hashjoin=on; set enable_material=off; set enable_seqscan=off;"
                 + "set work_mem='" + PARALLEL_WORK_MEM + "'; set maintenance_work_mem='" + PARALLEL_WORK_MEM
                 + "'; set temp_buffers='" + PARALLEL_WORK_MEM + "'; set statement_timeout="
                 + (3600000 * TIME_OUT_SQL_EN_HEURE) + "; "
-                // + "set geqo=off;
                 + "set from_collapse_limit=10000; set join_collapse_limit=10000;"
                 + "set enable_hashagg=on; set search_path=" + defaultSchema.toLowerCase() + ", public;";
     }
@@ -316,13 +279,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
                         + " set enable_seqscan=off; " + " set from_collapse_limit=100; set join_collapse_limit=100;"
                         + " set statement_timeout=" + (3600000 * TIME_OUT_SQL_EN_HEURE) + ";" + " set search_path="
                         + defaultSchema.toLowerCase() + ", public;");
-        // if (work_mem != null) {
-        // requete.append("set work_mem='" + work_mem + "';");
-        // }
-        // else
-        // {
-        // requete.append("set work_mem='"+SEQUENTIAL_WORK_MEM+"';");
-        // }
         return requete.toString();
     }
 
@@ -337,7 +293,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     
     public static String resetTimeOutMaintenance()
     {
-        return "BEGIN;reset statement_timeout;COMMIT;";
+        return "BEGIN;RESET statement_timeout;COMMIT;";
     }
     
     
@@ -347,49 +303,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static String tryQuery(String query)
     {
         return "do $$ begin " + query + " exception when others then end; $$; ";
-    }
-
-    
-    /**
-     * Retourne la requête d'insertion dans {@code table} des valeurs
-     * {@code values} de type {@code columnTypes} dans les colonnes
-     * {@code columnNames}, en respectant cet ordre.
-     *
-     * <br/>
-     *
-     * Aucun contrôle n'est fait sur la taille des paramètres en entrée.
-     *
-     * @param table
-     * @param columnNames
-     * @param columnTypes
-     * @param values
-     * @return
-     */
-    public static String insertInto(String table, List<String> columnNames, List<String> columnTypes,
-            List<String> values)
-    {
-        StringBuilder sb = new StringBuilder("INSERT INTO " + table + " (");
-        for (int i = 0; i < columnNames.size(); i++)
-        {
-            if (i != 0)
-            {
-                sb.append(", ");
-            }
-            sb.append(columnNames.get(i));
-        }
-        sb.append(") VALUES (");
-        for (int i = 0; i < values.size(); i++)
-        {
-            if (i != 0)
-            {
-                sb.append(", ");
-            }
-            sb.append(//
-                    (values.get(i) == null ? "null" : //
-                            ("'" + values.get(i).replace("'", "''") + "'")) + "::" + columnTypes.get(i));
-        }
-        sb.append(")");
-        return sb.toString();
     }
 
     /**
@@ -829,39 +742,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         return tabFinal;
     }
 
-    public static StringBuilder dupliquerVers(List<String> sources, List<String> targets)
-    {
-        StringBuilder returned = new StringBuilder();
-        for (int i = 0; i < sources.size(); i++)
-        {
-            returned.append(dupliquerVers(sources.get(i), targets.get(i)));
-        }
-        return returned;
-    }
-
-    public static StringBuilder dupliquerVers(String source, String target)
-    {
-        return new StringBuilder("DROP TABLE IF EXISTS " + target + ";")//
-                .append("CREATE TABLE " + target + "  " + FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM " + source
-                        + ";");
-    }
-
-    public static StringBuilder dupliquerVers(List<String> sources, List<String> targets, String clauseWhere)
-    {
-        StringBuilder returned = new StringBuilder();
-        for (int i = 0; i < sources.size(); i++)
-        {
-            returned.append(dupliquerVers(sources.get(i), targets.get(i), clauseWhere));
-        }
-        return returned;
-    }
-
-    public static StringBuilder dupliquerVers(String source, String target, String clauseWhere)
-    {
-        return new StringBuilder("DROP TABLE IF EXISTS " + target + ";")//
-                .append("CREATE TABLE " + target + "  " + FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM " + source
-                        + " WHERE " + clauseWhere + ";");
-    }
+ 
 
     public static final String listeTablesExistantes(List<String> tables)
     {
@@ -1773,222 +1654,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 		String tableName = tableSchemaName.split("\\.")[1];
 		return modeleDeDonneesTable(tableSchema,tableName);
     }
-
-    /**
-     * Requête pour récupérer les tables ayant un pattern donné
-     * 
-     * @param table
-     * @return
-     */
-    public static String fetchTableNames(String tableSchema, String aPattern)
-    {
-        return fetchObjectNames(ObjectType.TABLE, tableSchema, aPattern);
-    }
-    
-    /**
-     * Requête pour récupérer les tables ayant un pattern donné (préfixées par le schéma)
-     * 
-     * @param table
-     * @return
-     */
-    public static String fetchTableNamesWithSchema(String tableSchema, String aPattern)
-    {
-        return fetchObjectNamesWithSchema(ObjectType.TABLE, tableSchema, aPattern);
-    }
-
-    /**
-     * Requête pour récupérer les vues ayant un pattern donné
-     * 
-     * @param table
-     * @return
-     */
-    public static String fetchViewNames(String viewSchema, String aPattern)
-    {
-        return fetchObjectNames(ObjectType.VIEW, viewSchema, aPattern);
-    }
-
-    /**
-     * Requête pour récupérer les tables ayant un pattern donné
-     * 
-     * @param table
-     * @return
-     */
-    public static String fetchObjectNames(ObjectType tableOrView, String tableSchema, String aPattern)
-    {
-        String tableType = (tableOrView.equals(ObjectType.TABLE) ? "BASE " : "") + tableOrView;
-        StringBuilder requete = new StringBuilder();
-        requete.append("\n SELECT table_name");
-        requete.append("\n FROM INFORMATION_SCHEMA.TABLES ");
-        requete.append("\n WHERE table_name ~ '" + aPattern + "' ");
-        requete.append("\n   AND table_schema = '" + tableSchema.toLowerCase() + "'");
-        requete.append("\n   AND table_type = '" + tableType + "'; ");
-        return requete.toString();
-    }
-    
-    /**
-     * Requête pour récupérer les tables ayant un pattern donné (préfixées par le schéma)
-     * 
-     * @param table
-     * @return
-     */
-    public static String fetchObjectNamesWithSchema(ObjectType tableOrView, String tableSchema, String aPattern)
-    {
-        String tableType = (tableOrView.equals(ObjectType.TABLE) ? "BASE " : "") + tableOrView;
-        StringBuilder requete = new StringBuilder();
-        requete.append("\n SELECT table_schema,table_name");
-        requete.append("\n FROM INFORMATION_SCHEMA.TABLES ");
-        requete.append("\n WHERE table_name ~ '" + aPattern + "' ");
-        requete.append("\n   AND table_schema = '" + tableSchema.toLowerCase() + "'");
-        requete.append("\n   AND table_type = '" + tableType + "'; ");
-        return requete.toString();
-    }
-
-    public static String coalesce(String cast, String defaultValue, String... colNames)
-    {
-        List<String> cols = colNames == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(colNames));
-        cols.add(defaultValue);
-        return cols.stream().map((t) -> t + "::" + cast).collect(Collectors.joining(", ", "coalesce(", ")"));
-    }
-    
-    /**
-     * TODO à finir
-     * @param nomTable
-     * @param nomEtTypeAttributs
-     * @return
-     */
-	public static String requeteCreate(String nomTable, List<List<String>> nomEtTypeAttributs) {
-		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.dropUniqueTable(nomTable));
-		requete.append("\n CREATE TABLE IF NOT EXISTS ");
-		requete.append(nomTable);
-		requete.append("(\n");
-		requete.append(FormatSQL.mettreEnFormeAttributTypeCreate(nomEtTypeAttributs));
-		requete.append("\n)");
-	      requete.append("\n;");
-		return requete.toString();
-	}
-	
-	public static String mettreEnFormeAttributTypeCreate(List<List<String>> nomEtTypeAttributs){
-		StringBuilder listEnForm = new StringBuilder();	
-		if(nomEtTypeAttributs.size() > 0){
-			//Parcour toute la liste sauf le dernier element
-			for(int i=0; i<nomEtTypeAttributs.size()-1; i++){
-				listEnForm.append(nomEtTypeAttributs.get(i).get(0));
-				listEnForm.append(" ");
-				listEnForm.append(nomEtTypeAttributs.get(i).get(1));
-				listEnForm.append(",\n");
-			}
-			listEnForm.append(nomEtTypeAttributs.get(nomEtTypeAttributs.size()-1).get(0));
-			listEnForm.append(" ");
-			listEnForm.append(nomEtTypeAttributs.get(nomEtTypeAttributs.size()-1).get(1));
-			return listEnForm.toString();
-		}
-		return "";
-	}
-	
-	
-	/**
-	 * Select avec attribut et where
-	 * @param table
-	 * @param attributs
-	 * @param clauses
-	 * @return
-	 */
-	public static String select(String table, String attributs, String... clauses){
-		StringBuilder returned = new StringBuilder();
-		returned.append("(SELECT ");
-		returned.append(attributs);
-		returned.append("\n FROM ");
-		returned.append(table);
-		returned.append(formerClauses(clauses));
-		returned.append(")");
-		return returned.toString();
-	}
-	
-	/**
-	 * Select avec attribut, limit et where
-	 * @param table
-	 * @param attributs
-	 * @param limit
-	 * @param clauses
-	 * @return
-	 */
-	public static String select(String table, String attributs, int limit, String... clauses){
-		StringBuilder returned = new StringBuilder();
-		returned.append("(SELECT ");
-		returned.append(attributs);
-		returned.append("\n FROM ");
-		returned.append(table);
-		returned.append(formerClauses(clauses));
-		returned.append("\n LIMIT " + limit);
-		returned.append(")");
-		return returned.toString();
-	}
-	
-	public static String formerClauses(String... clauses){
-		StringBuilder returned = new StringBuilder();
-		if(clauses.length > 0){
-			returned.append("\n WHERE ");
-			returned.append(clauses[0]);
-			for(int i=1; i<clauses.length; i++){
-				returned.append("\n AND ");
-				returned.append(clauses[i]);
-			}
-		}
-		return returned.toString();
-	}
-	
-
-    /**
-     * Requête pour récupérer le modèle de données de colonnes précises d'une table. Attention, les
-     * noms des colonnes qui contiennent l'information sont attname et typname.
-     * 
-     * @param table
-     * @return
-     */
-    public static String modeleDeDonneesTable(String tableSchema, String tableName, String... colonnes)
-    {
-        StringBuilder requete = new StringBuilder();
-        requete.append("\n SELECT lower(column_name) as attname");
-        requete.append("\n   , lower(data_type) as typname");
-        requete.append("\n FROM INFORMATION_SCHEMA.COLUMNS ");
-        requete.append("\n WHERE table_name = '" + tableName.toLowerCase() + "' ");
-        requete.append(" AND table_schema = '" + tableSchema.toLowerCase() + "' ");
-        requete.append(" AND  column_name IN (");
-        requete.append(Format.untokenize(colonnes, "", "'", "'", ",",""));
-        requete.append(" ) ");
-        return requete.toString();
-    }
-    
-    /**
-     * Requête pour récupérer le modèle de données d'une table Attention, les
-     * noms des colonnes qui contiennent l'information sont attname et typname.
-     * 
-     * @param table
-     * @return
-     */
-    public static String modeleDeDonneesTable(String tableSchemaName, String... colonnes)
-    {
-    	String tableSchema = tableSchemaName.split("\\.")[0];
-		String tableName = tableSchemaName.split("\\.")[1];
-		return modeleDeDonneesTable(tableSchema,tableName, colonnes);
-    }
-    
-    /**
-     * Pour savoir si une function existe dans la base
-     * TODO voir pour verrouiller sur le schéma également.
-     * @param aNom
-     * @param aNbArg
-     * @return
-     */
-    public static String checkIfFunctionExist(String aNom, int aNbArg) {
-    	 StringBuilder requete = new StringBuilder();
-         requete.append("\n SELECT true");
-         requete.append("\n FROM pg_proc");
-         requete.append("\n WHERE proname  = "+FormatSQL.textToSql(aNom)+" AND pronargs = "+ aNbArg );
-         requete.append("\n ");
-         return requete.toString();
-    }
     
     /**
      * Renvoie les tables héritant de celle-ci
@@ -2006,83 +1671,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     	requete.append("\n WHERE p.relname = "+requete.quoteText(tableName)+" and pn.nspname = "+requete.quoteText(tableSchema)+" ");
     	return requete;
     }
-    
-    /**
-     * Change l'héritage d'une table
-     */
-    public static String deleteTableHeritage(String table, String ancienneTableHeritage) {
-    	StringBuilder requete = new StringBuilder();
-    	requete.append("\n ALTER TABLE "+table);
-    	requete.append("\n NO INHERIT "+ancienneTableHeritage);
-    	requete.append("\n ; ");
-    	return requete.toString();
-    }
-    
-    /**
-     * Change l'héritage d'une table
-     */
-    public static String addTableHeritage(String table, String nouvelleTableHeritage) {
-    	StringBuilder requete = new StringBuilder();
-    	requete.append("\n ALTER TABLE "+table);
-    	requete.append("\n INHERIT "+nouvelleTableHeritage);
-    	requete.append("\n ; ");
-    	return requete.toString();
-    }
-
-
-    /**
-     * Add an header sql commentary to a query
-     * 
-     * @param theQuery
-     *            : the query that will be modified
-     * @param theHeader
-     *            : the header to add
-     * @return the query with a sql commentary header
-     */
-    public static String addCommentaryHeaderToQuery(String theQuery, String theHeader) {
-	StringBuilder outputed = new StringBuilder();
-	outputed.append(toCommentary(theHeader));
-	outputed.append(newline + theQuery);
-
-	return outputed.toString();
-
-    }
-
-    /**
-     * Add an header sql commentary to a query
-     * 
-     * @param theQuery
-     *            : the query that will be modified
-     * @param someHeaders
-     *            : somme headers to add
-     * @return the query with a sql commentary header
-     */
-    public static String addCommentaryHeaderToQuery(String theQuery, Collection<String> someHeaders) {
-	StringBuilder outputed = new StringBuilder();
-	if (CollectionUtils.isNotEmpty(someHeaders)) {
-	    outputed.append(toCommentary(String.join(newline, someHeaders)));	    
-	    outputed.append(newline);
-	}
-	outputed.append(theQuery);
-
-	return outputed.toString();
-
-    }
-
-    /**
-     * Add an header sql commentary to a query
-     * 
-     * @param theQuery
-     *            : the query that will be modified
-     * @param theHeader
-     *            : the header to add
-     * @return the query with a sql commentary header
-     */
-    public static String toCommentary(String noneFormatedCommentary) {
-	return BEGIN_COMMENTARY + noneFormatedCommentary + END_COMMENTARY;
-
-    }
-
     
     /**
      * escape quote return value through function

@@ -102,5 +102,36 @@ public enum TraitementPhase {
 		}
 		return listePhaseC;
 	}
+	
+	/**
+	 * Return sql syntax to translate the phase referenced by its name to its index number
+	 * @return
+	 */
+	public static StringBuilder phaseToIndexSQL(String columnToTranslate)
+	{
+		StringBuilder query = new StringBuilder();
+		query.append("(CASE");
+		for (TraitementPhase phase : TraitementPhase.values()) { 
+		    query.append(" WHEN "+columnToTranslate+"='"+phase+"' THEN "+phase.getOrdre());
+		}
+		query.append(" END)");
+		return query;
+	}
 
+	/**
+	 * Return sql syntax to translate the phase referenced by its index number to its name
+	 * @return
+	 */
+	public static StringBuilder indexToPhaseSQL(String columnToTranslate)
+	{
+		StringBuilder query = new StringBuilder();
+		query.append("(CASE");
+		for (TraitementPhase phase : TraitementPhase.values()) { 
+		    query.append(" WHEN "+columnToTranslate+"="+phase.getOrdre()+" THEN '"+phase+"'");
+		}
+		query.append(" END)");
+		return query;
+	}
+
+	
 }

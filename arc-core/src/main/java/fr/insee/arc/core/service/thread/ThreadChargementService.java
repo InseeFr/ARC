@@ -371,7 +371,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	}
 
 
-	requete.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp));
+	requete.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
 	UtilitaireDao.get("arc").executeBlock(connexion, requete);
 
 	

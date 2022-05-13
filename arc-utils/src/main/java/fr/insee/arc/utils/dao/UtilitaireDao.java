@@ -1368,19 +1368,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		this.executeImmediate(aConnexion, FormatSQL.createAsSelectFrom(aNomTableCible, aNomTableSource));
 	}
 
-	public void dupliquerVers(Connection connexion, List<String> sources, List<String> targets) throws SQLException {
-		this.executeImmediate(connexion, FormatSQL.dupliquerVers(sources, targets));
-	}
-
-	public void dupliquerVers(Connection connexion, String source, String target) throws SQLException {
-		this.executeImmediate(connexion, FormatSQL.dupliquerVers(source, target));
-	}
-
-	public void dupliquerVers(Connection connexion, List<String> sources, List<String> targets, String clauseWhere)
-			throws SQLException {
-		this.executeImmediate(connexion, FormatSQL.dupliquerVers(sources, targets, clauseWhere));
-	}
-
 	/**
 	 * Postgres libère mal l'espace sur les tables quand on fait trop d'opération
 	 * sur les colonnes. Un vacuum full des tables du méta-modèle permet de résoudre

@@ -148,7 +148,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                 /*
                  * Transfert de la table mapping_ko temporaire vers la table mapping_ko définitive
                  */
-                requeteMAJFinale.append(marquageFinal(this.tablePil, this.tableMappingPilTemp));
+                requeteMAJFinale.append(marquageFinal(this.tablePil, this.tableMappingPilTemp, this.idSource));
                 
                 UtilitaireDao.get(poolName).executeBlock(this.connexion, requeteMAJFinale);
 

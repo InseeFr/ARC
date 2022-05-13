@@ -76,6 +76,7 @@ public class ExportAction extends ArcAction<ExportModel>  {
         query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add headers text;"));
         query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add order_table text;"));
         query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add zip text;"));
+        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add primary key (file_name);"));
 
         try {
 			UtilitaireDao.get("arc").executeImmediate(null, query);
@@ -218,9 +219,8 @@ public class ExportAction extends ArcAction<ExportModel>  {
 			    	
 			    		Connection c=UtilitaireDao.get("arc").getDriverConnexion();
 			    		c.setAutoCommit(false);
-			    		// if the 
-			    	    System.out.println("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" "));
-			    	    Statement stmt = c.createStatement();
+
+			    		Statement stmt = c.createStatement();
 			    	    stmt.setFetchSize(5000);
 			    		
 			    	    try (ResultSet res=stmt.executeQuery("SELECT * FROM "+ getBacASable() +"."+tablesToExport.get(n)+" WHERE "+(StringUtils.isEmpty(filterTable.get(n))?"true":filterTable.get(n))+" "+(StringUtils.isEmpty(orderTable.get(n))?"":"ORDER BY "+orderTable.get(n)+" ")))
@@ -300,15 +300,13 @@ public class ExportAction extends ArcAction<ExportModel>  {
 			            c.close();
 			            bw.flush();
 			            fw.flush();
-			            
-			    		}
 			    		
-		            if (!StringUtils.isEmpty(zip.get(n)))
-		    		{
-			            zos.flush();
-			            zos.flush();
-			            zos.closeEntry();
-		    		} 
+			            if (!StringUtils.isEmpty(zip.get(n)))
+			    		{
+				            zos.flush();
+				            zos.closeEntry();
+			    		} 
+			        }
 	    		}
 	    		
     		}

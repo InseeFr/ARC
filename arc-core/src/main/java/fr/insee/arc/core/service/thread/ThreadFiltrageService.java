@@ -266,7 +266,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
             requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
         }
         
-        requete.append(this.marquageFinal(this.tablePil, this.tableFiltragePilTemp));
+        requete.append(this.marquageFinal(this.tablePil, this.tableFiltragePilTemp, this.idSource));
         UtilitaireDao.get("arc").executeBlock(connexion, requete);
 
         UtilitaireDao.get("arc").dropTable(this.connexion, this.tableTempFiltrageOk, this.tableFiltrageDataTemp, this.tableTempFiltrageKo);

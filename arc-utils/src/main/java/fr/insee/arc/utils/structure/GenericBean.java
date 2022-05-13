@@ -3,6 +3,8 @@ package fr.insee.arc.utils.structure;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import fr.insee.arc.utils.exception.ArcException;
+
 // TODO add documentation of the purpose of this class
 public class GenericBean {
 
@@ -69,12 +71,13 @@ public class GenericBean {
 
 	/**
 	 * Produce a HashMap containing headers and their relative content (header, content)
+	 * return empty map if no records
 	 *
 	 * @return the HashMap
 	 */
 	public HashMap<String, ArrayList<String>> mapContent() {
-		if (this.content == null || this.content.size() == 0) {
-			return new HashMap<String, ArrayList<String>>();
+		if (this.content == null || this.content.isEmpty()) {
+			return new HashMap<>();
 		}
 		
 		HashMap<String, ArrayList<String>> r = new HashMap<String, ArrayList<String>>();
@@ -89,6 +92,32 @@ public class GenericBean {
 		}
 		return r;
 	}
+	
+
+    /**
+     * Produce a HashMap containing headers and their relative content (header, content)
+     * If content is empty, initialize the map with the column entries and empty list
+     * @return
+     */
+    public HashMap<String, ArrayList<String>> mapContent(boolean initializeMapWithColumns)
+    {
+    	HashMap<String, ArrayList<String>> m = this.mapContent();
+    	
+		if (!initializeMapWithColumns) {
+			return m;
+		}
+    	
+    	// if headers found but no record returned from query, add column entry with empty list
+    	if (!this.headers.isEmpty() && m.get(this.headers.get(0))==null)
+    	{
+    		for (int i=0; i<this.headers.size(); i++)
+    		{
+    			m.put(this.headers.get(i), new ArrayList<>());
+    		}
+    	}
+    	return m;
+    }
+    
 	
 	public HashMap<String, Record> mapRecord() {
 		if (this.content == null || this.content.size() == 0) {
@@ -130,4 +159,27 @@ public class GenericBean {
     	}
     	return l;
     }
+
+	public HashMap<String, String> keyValue() throws ArcException {
+		HashMap<String, String> r = new HashMap<>();
+		
+		if (!this.content.isEmpty() && this.content.get(0).size()!=2)
+		{
+			throw new ArcException("GenericBean keyValue : the set hasn't exactly 2 elements and cannot be mapped to key>value format");
+		}
+		
+		for (ArrayList<String> line:this.content)
+		{
+			if (r.get(line.get(0))!=null)
+			{
+				throw new ArcException("GenericBean keyValue : duplicate key "+line.get(0)+" ");
+			}
+			r.put(line.get(0), line.get(1));
+		}
+		return r;
+	}
+
+	
+	
+	
 }

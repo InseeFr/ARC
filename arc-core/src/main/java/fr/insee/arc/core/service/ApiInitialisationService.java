@@ -867,10 +867,17 @@ public class ApiInitialisationService extends ApiService {
      * @param listEtat
      */
     public void retourPhasePrecedente(TraitementPhase phase, PreparedStatementBuilder querySelection, ArrayList<TraitementEtat> listEtat) {
-        LOGGER.info("Retour arrière pour la phase :" + phase);
+        LOGGER.info("Retour arrière pour la phase : {}", phase);
         PreparedStatementBuilder requete;
         // MAJ de la table de pilotage
         Integer nbLignes = 0;
+
+        // reset etape=3 file to etape=0
+        try {
+            UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null)));
+        } catch (Exception e) {
+        	loggerDispatcher.error(e, LOGGER);
+        }
 
         
         // Delete the selected file entries from the pilotage table from all the phases after the undo phase
@@ -1149,11 +1156,12 @@ public class ApiInitialisationService extends ApiService {
     public boolean remettreEtapePilotage() throws SQLException {
 
         StringBuilder requete = new StringBuilder();
+        
+        requete.append(ApiService.resetPreviousPhaseMark(this.tablePil, null));
+        
         requete.append("WITH tmp_1 as (select id_source, max(");
-
         new StringBuilder();
         requete.append("case ");
-
         for (TraitementPhase p : TraitementPhase.values()) {
             requete.append("when phase_traitement='" + p.toString() + "' then " + p.ordinal() + " ");
         }
