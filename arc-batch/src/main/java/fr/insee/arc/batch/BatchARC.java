@@ -90,6 +90,10 @@ public class BatchARC {
 
 	// nombre de runner maximum pour une phase donnée (cas de blocage)
 	private static Integer maxNumberOfThreadsOfTheSamePhaseAtTheSameTime;
+	
+	// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y a un blocage
+	// et si un nouveau runner doit etre lancé
+	private static Integer numberOfIterationBewteenBlockageCheck;
 
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
@@ -99,7 +103,14 @@ public class BatchARC {
 	public static void message(String msg) {
 		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "  " + msg);
 	}
-
+	
+	public static void message(String msg, int iteration) {
+		if (iteration%numberOfIterationBewteenBlockageCheck==0)
+		{
+			message(msg);
+		}
+	}
+	
 	private void initParameters() {
 
 		keepInDatabase = Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
@@ -127,6 +138,11 @@ public class BatchARC {
 		// nombre de runner maximum pour une phase donnée (cas de blocage)
 		maxNumberOfThreadsOfTheSamePhaseAtTheSameTime = BDParameters.getInt(null,
 				"LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE", 1);
+		
+		// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y a un blocage
+		// et si un nouveau runner doit etre lancé
+		numberOfIterationBewteenBlockageCheck = BDParameters.getInt(null,
+				"LanceurARC.PARALLEL_BATCHLOCK_CHECK_ITERATION_INTERVAL", 120);
 
 		// either we take env and envExecution from database or properties
 		// default is from properties
@@ -218,8 +234,6 @@ public class BatchARC {
 
 					message("Début boucle Chargement->Mapping");
 
-					int numberOfIterationBewteenBlockageCheck = 30;
-
 					// initialiser le tableau de phase
 					int startingPhase = TraitementPhase.CHARGEMENT.getOrdre();
 
@@ -238,13 +252,13 @@ public class BatchARC {
 
 					// boucle de chargement
 					int iteration = 0;
+					message("> iteration " + iteration);
+					
 					do {
 
 						iteration++;
-
-						message("> iteration " + iteration);
-
-						message(">> delete start");
+						message("> iteration (batch lock check ) : " + iteration, iteration);
+						
 						// delete dead thread i.e. keep only living thread in the pool
 						HashMap<TraitementPhase, ArrayList<ArcThreadFactory>> poolToKeep = new HashMap<>();
 						for (TraitementPhase phase : phases) {
@@ -253,16 +267,12 @@ public class BatchARC {
 								for (ArcThreadFactory thread : pool.get(phase)) {
 									if (thread.isAlive()) {
 										poolToKeep.get(phase).add(thread);
-
-										message(phase + " is still alive");
-
+										message(phase + " is still alive", iteration);
 									}
 								}
 							}
 						}
 						pool = poolToKeep;
-
-						message(">> delete end");
 
 						// add new thread and start
 
@@ -275,7 +285,7 @@ public class BatchARC {
 								a.start();
 								pool.get(phase).add(a);
 
-								message(">> start " + phase);
+								message(">> start " + phase, iteration);
 
 							} else {
 								// if a thread is blocked, add the right thread
@@ -300,7 +310,7 @@ public class BatchARC {
 									// if ALL threads for the phase are blocked, something has to be done
 									if (blocked) {
 
-										message(">> blocked " + phase);
+										message(">> blocked " + phase, iteration);
 
 										// retrieve what phase still have some things to do
 										// this will retrieved only once
@@ -320,7 +330,7 @@ public class BatchARC {
 											a.start();
 											pool.get(phase).add(a);
 
-											message(">> new " + phase);
+											message(">> starting new " + phase, iteration);
 										} else {
 
 											boolean nothingToDoInPrevious = true;
@@ -333,7 +343,7 @@ public class BatchARC {
 											}
 
 											if (nothingToDoInPrevious) {
-												message(">> new reception");
+												message(">> starting new reception", iteration);
 
 												receive(envExecution, false);
 												// exit loop if new files are recieved not to trigger it several times
