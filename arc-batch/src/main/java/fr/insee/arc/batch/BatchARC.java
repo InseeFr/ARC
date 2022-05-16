@@ -142,7 +142,7 @@ public class BatchARC {
 		// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y a un blocage
 		// et si un nouveau runner doit etre lancé
 		numberOfIterationBewteenBlockageCheck = BDParameters.getInt(null,
-				"LanceurARC.PARALLEL_BATCHLOCK_CHECK_ITERATION_INTERVAL", 120);
+				"LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL", 120);
 
 		// either we take env and envExecution from database or properties
 		// default is from properties
