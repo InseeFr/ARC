@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,12 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleMappingEntity;
-import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.ApiMappingService;
-import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
-import fr.insee.arc.core.service.engine.mapping.VariableMapping;
-import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMapping;
 import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -40,11 +33,9 @@ import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.action.GererNormeAction;
 import fr.insee.arc.web.model.GuiModules;
-import fr.insee.arc.web.util.EAlphaNumConstante;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
 import fr.insee.arc.web.util.WebLoggerDispatcher;
@@ -60,13 +51,8 @@ public class GererNormeDao implements IDbConstant {
 
 	private static final Logger LOGGER = LogManager.getLogger(GererNormeDao.class);
 
-	private static final String CLEF_CONSOLIDATION = "{clef}";
-	public final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
+	public static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
 
-	private static final String TOKEN_NOM_VARIABLE = "{tokenNomVariable}";
-
-	private static final String MESSAGE_VARIABLE_CLEF_NULL = "La variable {tokenNomVariable} est une variable clef pour la consolidation.\nVous devez vous assurer qu'elle ne soit jamais null.";
-	
     @Autowired
     private WebLoggerDispatcher loggerDispatcher;
     
@@ -517,108 +503,7 @@ public class GererNormeDao implements IDbConstant {
 		return sb.toString();
 	}
 
-	private static List<String> getTableEnvironnement(String state) {
-		StringBuilder requete = new StringBuilder();
-
-		String zeEnv = ManipString.substringAfterFirst(state, EAlphaNumConstante.DOT.getValue());
-		String zeSchema = ManipString.substringBeforeFirst(state, EAlphaNumConstante.DOT.getValue());
-
-		requete.append("SELECT replace(lower(relname), '" + zeEnv + "', '') ")//
-				.append("\n  FROM pg_class a ")//
-				.append("\n  INNER JOIN pg_namespace b ON a.relnamespace=b.oid ")//
-				.append("\n  WHERE lower(b.nspname)=lower('" + zeSchema + "') ")//
-				.append("\n  AND lower(relname) LIKE '" + zeEnv.toLowerCase() + "\\_%'; ");
-		return UtilitaireDao.get(poolName).getList(null, requete, new ArrayList<String>());
-	}
-
-	/**
-	 * @param listRegle
-	 * @param returned
-	 * @return
-	 * @throws Exception
-	 */
-	private static Set<Integer> groupesUtiles(List<AbstractRegleMapping> listRegle) throws Exception {
-		Set<Integer> returned = new TreeSet<>();
-		for (int i = 0; i < listRegle.size(); i++) {
-			returned.addAll(listRegle.get(i).getEnsembleGroupes());
-		}
-		return returned;
-	}
-
-	/**
-	 * Exécution d'une règle sur la table <anEnvTarget>_filtrage_ok
-	 *
-	 * @param anEnvTarget
-	 * @param regleMapping
-	 * @return
-	 * @throws SQLException
-	 */
-	private static Boolean createRequeteSelect(String anEnvTarget, AbstractRegleMapping regleMapping) throws Exception {
-		StringBuilder requete = new StringBuilder("SELECT CASE WHEN ")//
-				.append("(" + regleMapping.getExpressionSQL() + ")::" + regleMapping.getVariableMapping().getType())//
-				.append(" IS NULL THEN false ELSE false END")//
-				.append(" AS " + regleMapping.getVariableMapping().getNomVariable());
-		requete.append("\n  FROM " + anEnvTarget + EAlphaNumConstante.UNDERSCORE.getValue() + "filtrage_ok ;");
-		return UtilitaireDao.get(poolName).getBoolean(null, new PreparedStatementBuilder(requete));
-	}
-
-	private static Boolean createRequeteSelect(String anEnvTarget, AbstractRegleMapping regleMapping, Integer groupe)
-			throws Exception {
-		StringBuilder requete = new StringBuilder("SELECT CASE WHEN ");//
-		requete.append("(" + regleMapping.getExpressionSQL(groupe) + ")::"
-				+ regleMapping.getVariableMapping().getType().replace("[]", ""))//
-				.append(" IS NULL THEN false ELSE false END")//
-				.append(" AS " + regleMapping.getVariableMapping().getNomVariable());
-		requete.append("\n  FROM " + anEnvTarget + EAlphaNumConstante.UNDERSCORE.getValue() + "filtrage_ok ;");
-		return UtilitaireDao.get(poolName).getBoolean(null, new PreparedStatementBuilder(requete));
-	}
-
-	/**
-	 * Creation d'une table vide avec les colonnes adéquates.<br/>
-	 * En particulier, si la règle n'utilise pas du tout de noms de colonnes, une
-	 * colonne {@code col$null} est créée, qui permette un requêtage.
-	 *
-	 * @param anEnvTarget
-	 * @param colUtiles
-	 * @param tableADropper
-	 * @throws SQLException
-	 */
-	private static void createTablePhasePrecedente(String anEnvTarget, Set<String> colUtiles,
-			List<String> tableADropper) throws SQLException {
-		
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
-		
-		requete.append("DROP TABLE IF EXISTS " + anEnvTarget + "_" + TraitementPhase.FILTRAGE + "_"+TraitementEtat.OK+";");
-		requete.append("CREATE TABLE " + anEnvTarget + "_" + TraitementPhase.FILTRAGE + "_"+TraitementEtat.OK+" (");
-		requete.append(Format.untokenize(colUtiles, " text, "));
-		requete.append(colUtiles.isEmpty() ? "col$null text" : " text")//
-				.append(");");
-
-		requete.append("\nINSERT INTO " + anEnvTarget + "_" + TraitementPhase.FILTRAGE + "_"+TraitementEtat.OK+" (")//
-				.append(Format.untokenize(colUtiles, ", "))//
-				.append(colUtiles.isEmpty() ? "col$null" : "")//
-				.append(") VALUES (");
-		
-		boolean isFirst = true;
-		for (String variable : colUtiles) {
-			if (isFirst) {
-				isFirst = false;
-			} else {
-				requete.append(", ");
-			}
-			if (ApiMappingService.colNeverNull.contains(variable)) {
-				requete.append(requete.quoteText(variable));
-			} else {
-				requete.append("null");
-			}
-		}
-		requete.append(colUtiles.isEmpty() ? "null" : "")//
-				.append(");");
-
-		tableADropper.add(anEnvTarget + EAlphaNumConstante.UNDERSCORE.getValue() + TraitementPhase.FILTRAGE + "_"+TraitementEtat.OK);
-		UtilitaireDao.get(poolName).executeRequest(null, requete);
-	}
-
+	
 	public void calculerVariableToType(VObject viewNorme, Map<String, String> mapVariableToType,
 			Map<String, String> mapVariableToTypeConso) throws SQLException {
 		
