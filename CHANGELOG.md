@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-91.1.42 - 2022-04-29
+- batch optimization : better queuing for files processing to avoid downtime
+
+## version-91.1.41 - 2022-04-29
+- button to apply directly rules in production environments
+- optimization of cartesian reduction algorithm
+- spring and springboot security fix
+- multiselection on export gui
+
 ## version-91.1.40 - 2022-04-29
 - button to apply directly rules in production environments
 - optimization of cartesian reduction algorithm
