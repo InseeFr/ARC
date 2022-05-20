@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-91.1.42 - 2022-04-29
+## version-91.1.45 - 2022-04-29
 - batch optimization : better queuing for files processing to avoid downtime
+- bug fix to download database output from the gui
 
 ## version-91.1.41 - 2022-04-29
 - button to apply directly rules in production environments
