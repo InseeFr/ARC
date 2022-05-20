@@ -767,7 +767,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		ArrayList<String> selectionColonne = getViewPilotageBAS().listHeadersSelected();
 		ArrayList<Integer> selectionIndexColonne = getViewPilotageBAS().indexHeadersSelected();
 
-		String phase = TraitementPhase.getPhase(selectionIndexColonne.get(0)-1).toString();
+		String phase = TraitementPhase.getPhase(selectionIndexColonne.get(0)).toString();
 		String etat = selectionColonne.get(0).split("_")[1].toUpperCase();
 		String date = selectionLigne.get(ENTRY_DATE).get(0);
 
