@@ -194,7 +194,9 @@ public class BatchARC {
 				message("La production est arretée !");
 
 			} else {
-
+				
+				resetPending(envExecution);
+				
 				maintenanceTablePilotageBatch();
 
 				message("Déplacements de fichiers");
@@ -257,7 +259,8 @@ public class BatchARC {
 					do {
 
 						iteration++;
-						message("> iteration (batch lock check ) : " + iteration, iteration);
+						
+						message("> batch lock check iteration : "+iteration, iteration);
 						
 						// delete dead thread i.e. keep only living thread in the pool
 						HashMap<TraitementPhase, ArrayList<ArcThreadFactory>> poolToKeep = new HashMap<>();
@@ -326,6 +329,7 @@ public class BatchARC {
 										if (elligibleFiles.get(phase.previousPhase()) != null) {
 											// can start a new thread if no more than the
 											// maxNumberOfThreadsOfTheSamePhaseAtTheSameTime in the stack
+											
 											ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
 											a.start();
 											pool.get(phase).add(a);
@@ -344,8 +348,9 @@ public class BatchARC {
 
 											if (nothingToDoInPrevious) {
 												message(">> starting new reception", iteration);
-
 												receive(envExecution, false);
+												ApiService.maintenancePgCatalog(null, "freeze");
+												ApiService.maintenancePilotage(null, envExecution, "freeze");
 												// exit loop if new files are recieved not to trigger it several times
 												break;
 											}
@@ -359,14 +364,16 @@ public class BatchARC {
 							Sleep.sleep(delay);
 						}
 
+						//check if production on 
+						productionOn=productionOn();
+
 						// check if batch must exit loop
-
-						// exit if nothing left to do
-						// or if the production had been turned OFF
-						exit = isNothingLeftToDo(envExecution) || !productionOn();
-
+						// exit if nothing left to do or if the production had been turned OFF
+						exit = isNothingLeftToDo(envExecution) || !productionOn;
+						
 						Sleep.sleep(delay);
-
+						System.gc();
+						
 					} while (!exit);
 
 					if (productionOn) {
@@ -518,7 +525,7 @@ public class BatchARC {
 		// delete files that are en cours
 		StringBuilder query = new StringBuilder();
 		query.append("\n DELETE FROM " + envExecution + ".pilotage_fichier ");
-		query.append("\n WHERE etape=1 AND PHASE_TRAITEMENT='{" + TraitementEtat.ENCOURS + "}' ");
+		query.append("\n WHERE etape=1 AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
 		query.append(";");
 
 		// update these files to etape=1
@@ -542,9 +549,10 @@ public class BatchARC {
 	 */
 	private static void receive(String envExecution, boolean repriseEnCOurs) throws SQLException {
 		if (repriseEnCOurs) {
-			resetPending(envExecution);
 			message("Reprise des fichiers en cours de traitement");
+			resetPending(envExecution);
 		} else {
+			message("Reception de nouveaux fichiers");
 			ArcThreadFactory recevoir = new ArcThreadFactory(mapParam, TraitementPhase.RECEPTION);
 			recevoir.execute();
 			message("Reception : " + recevoir.getReport().nbLines + " e : " + recevoir.getReport().duree + " ms");

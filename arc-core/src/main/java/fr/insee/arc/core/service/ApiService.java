@@ -546,8 +546,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         requete.append("\n , mark AS (SELECT a.* FROM prep a WHERE cum_enr<" + nbEnr + " ");
         requete.append("\n UNION   (SELECT a.* FROM prep a LIMIT 1)) ");
         
-        // update the line in pilotage with etape=0 for the previous step
-        requete.append("\n , update as ( UPDATE " + tablePil + " a set etape=3 from mark b where a.id_source=b.id_source and a.etape=1) ");
+        // update the line in pilotage with etape=3 for the previous step
+        requete.append("\n , update as ( UPDATE " + tablePil + " a set etape=3 from mark b where a.id_source=b.id_source and a.etape=1 AND a.phase_traitement='"+phaseAncien+"'  AND '" + TraitementEtat.OK + "'=ANY(a.etat_traitement)) ");
         
         // insert the line in pilotage with etape=1 for the current step 
         requete.append("\n , insert as (INSERT INTO " + tablePil + " ");
@@ -818,7 +818,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         requete.append("\n \t WHERE a.id_source = '" + idSource + "' ");
         requete.append("\n \t AND a.etape = 1 ; ");
         
-        requete.append(resetPreviousPhaseMark(tablePil, idSource));
+        requete.append(resetPreviousPhaseMark(tablePil, idSource, null));
         
         requete.append("\n set enable_hashjoin = on; ");
         return requete.toString();
@@ -831,18 +831,24 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @param idSource
      * @return
      */
-    public static StringBuilder resetPreviousPhaseMark(String tablePil, String idSource)
+    public static StringBuilder resetPreviousPhaseMark(String tablePil, String idSource, String tableSource)
     {
         StringBuilder requete = new StringBuilder();
 
         // mettre à etape = 0 la phase marquée à 3
         requete.append("\n UPDATE " + tablePil + " a ");
-        requete.append("\n SET etape = 0 ");
-        requete.append("\n WHERE a.etape = 3 ");
+        requete.append("\n SET etape=0 ");
+        requete.append("\n WHERE a.etape=3 ");
         if (idSource!=null)
         {
         	requete.append("\n AND a.id_source = '" + idSource + "' ");
         }
+        
+        if (tableSource!=null)
+        {
+        	 requete.append("\n AND EXISTS (SELECT 1 FROM "+tableSource+" b where a.id_source=b.id_source) ");
+        }
+        
         requete.append("\n ;");
         return requete;
     }
@@ -1441,28 +1447,17 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         this.connexion.setAutoCommit(false);
         this.connexion.rollback();
         StringBuilder requete = new StringBuilder();
-        // Date date = new Date();
-        // SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+
         for (int i = 0; i < tableDrop.length; i++) {
             requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");
         }
 
-        // requete.append("UPDATE "+tablePil+"  SET phase_traitement='"+phaseAvant+"', etat_traitement='{"+TraitementEtat.OK+"}' ");
-        requete.append("UPDATE " + tablePil + " set etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport='"
-                + exception.toString().replace("'", "''").replaceAll("\r", "") + "' ");
-        requete.append("WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ;");
-
+        requete.append("WITH t0 AS ( "); 
+        requete.append(updatePilotageErrorQuery(phase, tablePil, exception));
+        requete.append("\n RETURNING id_source) ");
         
-        // requete.append("DELETE FROM " + tablePil + " ");
-        // requete.append("	WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS
-        // + "}' ;");
-        //
-        //
-        //
-        // requete.append("INSERT INTO " + this.tableSuiviErreur + " (phase_traitement, date_evenement, message) VALUES ");
-        // requete.append("('" + phase + "','" + formatter.format(date) + "'::timestamp,'"
-        // + exception.toString().replace("'", "''").replaceAll("\r", "") + "');");
-        // System.out.println("Exception : " + exception);
+        requete.append(resetPreviousPhaseMark(tablePil, null, "t0"));
+        
         UtilitaireDao.get(poolName).executeBlock(connexion, requete);
     }
     
@@ -1493,16 +1488,33 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         for (int i = 0; i < tableDrop.length; i++) {
             requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");
         }
+        requete.append(updatePilotageErrorQuery(phase, tablePil, exception));
 
-        requete.append("UPDATE " + tablePil + " set etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport='"
-                + exception.toString().replace("'", "''").replaceAll("\r", "") + "' ");
-        requete.append("WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}'"
-        	+ "AND id_source = '"+idSource+"' ;");
-
+        requete.append("\n AND id_source = '"+idSource+"' ");
+        requete.append("\n ;");
         
+        requete.append(resetPreviousPhaseMark(tablePil, idSource, null));
+
         UtilitaireDao.get(poolName).executeBlock(connexion, requete);
     }
 
+    
+    /**
+     * Query to update pilotage table when error occurs
+     * @param phase
+     * @param tablePil
+     * @param exception
+     * @return
+     */
+    private static StringBuilder updatePilotageErrorQuery(String phase, String tablePil, Exception exception)
+    {
+        StringBuilder requete = new StringBuilder();
+        requete.append("UPDATE " + tablePil + " SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport='"
+                + exception.toString().replace("'", "''").replace("\r", "") + "' ");
+        requete.append("\n WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
+		return requete;
+    }
+    
     
     /**
      * permet de récupérer un tableau de la forme id_source | id1 , id2, id3 ... type_comp | comp1,comp2, comp3 ...

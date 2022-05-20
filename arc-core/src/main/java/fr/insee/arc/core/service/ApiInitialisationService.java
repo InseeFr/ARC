@@ -874,7 +874,7 @@ public class ApiInitialisationService extends ApiService {
 
         // reset etape=3 file to etape=0
         try {
-            UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null)));
+            UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
         } catch (Exception e) {
         	loggerDispatcher.error(e, LOGGER);
         }
@@ -1157,7 +1157,7 @@ public class ApiInitialisationService extends ApiService {
 
         StringBuilder requete = new StringBuilder();
         
-        requete.append(ApiService.resetPreviousPhaseMark(this.tablePil, null));
+        requete.append(ApiService.resetPreviousPhaseMark(this.tablePil, null, null));
         
         requete.append("WITH tmp_1 as (select id_source, max(");
         new StringBuilder();

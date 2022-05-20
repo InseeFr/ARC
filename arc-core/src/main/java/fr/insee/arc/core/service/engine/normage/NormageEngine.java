@@ -1913,6 +1913,7 @@ public class NormageEngine {
 		PreparedStatementBuilder bloc4=new PreparedStatementBuilder();
 		bloc4.append("\n drop table if exists "+partitionTableName+";");
 		bloc4.append("\n create temporary table "+partitionTableName+" as select * from "+partitionTableNameWithAllRecords+" where "+partitionIdentifier+">=?::int and "+partitionIdentifier+"<?::int;");
+		bloc4.append("\n analyze "+partitionTableName+";");
 		bloc4.append(blocInsert);
 		
 		bloc4=applyQueryPlanParametersOnJointure(bloc4, statementTimeOut);
