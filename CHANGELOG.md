@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-91.1.50 - 2022-05-31
+- deliverable name fix for internal ci/cd
+
 ## version-91.1.46 - 2022-05-31
 - hello, healthcheck and version urls are now public access
 
