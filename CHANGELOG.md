@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-91.1.46 - 2022-05-31
+- hello, healthcheck and version urls are now public access
+
 ## version-91.1.45 - 2022-04-29
 - batch optimization : better queuing for files processing to avoid downtime
 - bug fix to download database output from the gui
