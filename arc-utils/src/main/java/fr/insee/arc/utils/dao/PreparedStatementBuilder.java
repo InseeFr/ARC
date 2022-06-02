@@ -86,6 +86,17 @@ public String sqlEqual(String val, String type) {
 }
 
 /**
+ * Append a SQL bind variable to query
+ * @param p
+ * @return
+ */
+public PreparedStatementBuilder appendQuoteText(String s)
+{
+	this.append(quoteText(s));
+	return this;
+}
+
+/**
  * Register and return the SQL bind variable placeholder
  * @param p
  * @return
@@ -95,6 +106,7 @@ public String quoteText(String s)
 	parameters.add(s);
 	return BIND_VARIABLE_PLACEHOLDER;
 }
+
 
 /**
  * Return the sql escaped quoted string

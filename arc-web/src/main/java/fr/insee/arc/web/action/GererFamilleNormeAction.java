@@ -1,9 +1,12 @@
 package fr.insee.arc.web.action;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -80,7 +84,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     private void initializeFamilleNorme() {
         System.out.println("/* initializeFamilleNorme */");
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-        this.vObjectService.initialize(viewFamilleNorme, new PreparedStatementBuilder("select id_famille from arc.ihm_famille order by id_famille"), "arc.ihm_famille", defaultInputFields);
+        this.vObjectService.initialize(viewFamilleNorme, new PreparedStatementBuilder("select "+ID_FAMILLE+" from arc.ihm_famille order by "+ID_FAMILLE+""), "arc.ihm_famille", defaultInputFields);
     }
 
     @RequestMapping("/selectFamilleNorme")
@@ -110,6 +114,51 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     public String sortFamilleNorme(Model model) {
         return sortVobject(model, RESULT_SUCCESS, getViewFamilleNorme());
     }
+    
+    @RequestMapping("/downloadFamilleNorme")
+    public String downloadFamilleNorme(Model model, HttpServletResponse response) {
+    	
+    	Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
+    	
+		if (!selection.isEmpty()) {
+			
+			String selectedFamille=selection.get(ID_FAMILLE).get(0);
+			
+			PreparedStatementBuilder requeteTableMetier = new PreparedStatementBuilder();
+			requeteTableMetier.append("SELECT a.* ");
+			requeteTableMetier.append("FROM arc.ihm_mod_table_metier a ");
+			requeteTableMetier.append("WHERE "+ID_FAMILLE+"=");
+			requeteTableMetier.appendQuoteText(selectedFamille);
+
+			PreparedStatementBuilder requeteVariableMetier = new PreparedStatementBuilder();
+			requeteVariableMetier.append("SELECT a.* ");
+			requeteVariableMetier.append("FROM arc.ihm_mod_variable_metier a ");
+			requeteVariableMetier.append("WHERE "+ID_FAMILLE+"=");
+			requeteVariableMetier.appendQuoteText(selectedFamille);
+
+			ArrayList<PreparedStatementBuilder> queries = new ArrayList<>();
+			queries.add(requeteTableMetier);
+			queries.add(requeteVariableMetier);
+
+
+			ArrayList<String> fileNames = new ArrayList<>();
+			fileNames.add("modelTables");
+			fileNames.add("modelVariables");
+			
+			
+			this.vObjectService.download(viewFamilleNorme, response, fileNames
+					, queries
+					);
+			return "none";
+		} else {
+			this.viewFamilleNorme.setMessage("You didn't select anything");
+			return generateDisplay(model, RESULT_SUCCESS);
+		}
+
+    }
+    
+    
+	
 
     /*
      * CLIENT
