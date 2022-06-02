@@ -2,7 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-91.1.51 - 2022-05-31
+## version-91.1.55 - 2022-06-02
+- model metadata can now be exported
+
+## version-91.1.51 - 2022-06-02
 - esane test for ci/cd
 
 ## version-91.1.50 - 2022-05-31
