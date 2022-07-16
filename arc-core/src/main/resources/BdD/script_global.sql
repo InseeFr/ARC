@@ -31,6 +31,8 @@ BEGIN
 for c in (select current_database() as n) loop
 execute 'alter database '||c.n||' set enable_bitmapscan=off;';
 execute 'alter database '||c.n||' set synchronous_commit=off;';
+execute 'alter database '||c.n||' set max_parallel_workers_per_gather=0;';
+execute 'alter database '||c.n||' set max_parallel_maintenance_workers=0;';
 end loop;
 end;
 $$;
