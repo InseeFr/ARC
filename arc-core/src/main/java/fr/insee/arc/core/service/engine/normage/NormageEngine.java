@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,10 +29,6 @@ public class NormageEngine {
 
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private String columnToBeAdded = "";
-	
-
-	// nom de bases des vues dans l'enchainement de clause with qu'on va générer
-	private	String withBaseName="v";
 
 	private Connection connection;
 
@@ -209,9 +204,6 @@ public class NormageEngine {
 				// optimisation manu 9.6
 				// retravaille de la requete pour éliminer UNION ALL
 				subJoin = optimisation96(subJoin,subJoinNumber);
-	
-				subJoin = appliquerRegleReduction(regle, norme, validite, periodicite, subJoin);
-				
 				
 				executerJointure(regle, norme, validite, periodicite, subJoin, validiteText, id_source);
 
@@ -222,15 +214,6 @@ public class NormageEngine {
 
 	}
 
-	
-	
-	private String normalizeTag (String tag)
-	{
-		return " "+"i_"+tag.toUpperCase()+" ";
-		
-	}
-	
-	@SuppressWarnings("unused")
 	private String optimisation96(String jointure, int subjoinNumber) {
 		StaticLoggerDispatcher.info("optimisation96()", LOGGER);
 
@@ -243,7 +226,6 @@ public class NormageEngine {
 
 		String[] lines = r.split("\n");
 		String insert = null;
-		String fieldsToBeInserted = "";
 
 		r = "";
 		for (int i = 0; i < lines.length; i++) {
@@ -254,8 +236,6 @@ public class NormageEngine {
 					insert = insert + ")";
 				}
 				if (!fieldsToBeInsertedFound) {
-					fieldsToBeInserted = ManipString.substringBeforeLast(
-							ManipString.substringAfterFirst(insert, "insert into {table_destination} ("), ")");
 					fieldsToBeInsertedFound = true;
 				}
 			}
@@ -415,8 +395,6 @@ public class NormageEngine {
 					ArrayList<String> aTraiter = getChildrenTree(blocCreate, rubriqueM);
 					aTraiter.add(0, rubriqueM);
 
-					// System.out.println(aTraiter);
-
 					StringBuilder blocCreateNew = new StringBuilder();
 					StringBuilder blocInsertNew = new StringBuilder();
 					HashSet<String> colonnesAAjouter = new HashSet<String>();
@@ -548,8 +526,6 @@ public class NormageEngine {
 
 		returned = blocCreate.replaceAll("\n$", "") + "\n" + blocInsert.replaceAll("\n$", "");
 
-		// System.out.println(jointure);
-
 		return returned;
 	}
 
@@ -576,15 +552,12 @@ public class NormageEngine {
 
 			String type = regle.get("id_classe").get(j);
 
+			// cas 1 on met en indépendant les règles en relation
 			// en gros on parcours les regles de relation
 			// on va exclure les bloc en relation des blocs à calculer comme indépendants
-
 			if (type.equals("relation")) {
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
-
-//             System.out.println(rubrique+" : "+rubriqueNmcl);
-//             System.out.println(blocCreate);
 
 				String rubriqueM = getM(blocCreate, rubrique);
 				String rubriqueNmclM = getM(blocCreate, rubriqueNmcl);
@@ -606,13 +579,15 @@ public class NormageEngine {
 					}
 				}
 			}
-
+			
+			// cas 3 : deux rubrique déclarées en cartesian
+			// les rubriques déclarées en cartésian ne peuvent intégrer un groupe de rubrique indépendante
 			if (type.equals("cartesian")) {
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 				String rubriqueM = getM(blocCreate, rubrique);
 				rubriqueExclusion.add(rubriqueM);
 			}
-
+			
 		}
 
 		// on déroule sur les fils pour ajouter les regles d'indépendance
@@ -1003,7 +978,10 @@ public class NormageEngine {
 			if (type.equals("independance")) {
 
 				String rubriqueRegle[] = regle.get("rubrique").get(j).replace(" ", "").toLowerCase().split(",");
+				String rubriqueNmclRegle[] = regle.get("rubrique_nmcl").get(j).replace(" ", "").toLowerCase().split(",");
+
 				ArrayList<String> rubrique = new ArrayList<String>();
+				HashMap<String,String> rubriqueNmcl = new HashMap<>();
 
 				// ne garder que les rubriques qui existent dans la requete
 				// vérifier qu'elles ont le même pere
@@ -1022,6 +1000,7 @@ public class NormageEngine {
 
 						rubriqueRegle[i] = m_rubrique;
 						rubrique.add(rubriqueRegle[i]);
+						rubriqueNmcl.put(rubriqueRegle[i],rubriqueNmclRegle[i]);
 
 						if (fatherSav == null) {
 							fatherSav = getFatherM(blocCreate, rubriqueRegle[i]);
@@ -1059,87 +1038,79 @@ public class NormageEngine {
 					StringBuilder blocInsertNew = new StringBuilder();
 
 					for (int i = 0; i < lines.length; i++) {
+					boolean changed = false;
 
-//                             System.out.println(">"+lines[i]);
+					for (String r : rubrique) {
+						if (testRubriqueInCreate(lines[i], r)) {
+							table.put(r, getTable(lines[i]));
+							pere.put(r, getFather(lines[i]));
+							autreCol.put(r, getOthers(lines[i]));
 
-						boolean changed = false;
+							// on met le "$" au nom de la table
+							blocCreateNew
+									.append(lines[i].replace(" as (select ",
+											"$ as (select ")+"\n");
 
-						for (String r : rubrique) {
-							if (testRubriqueInCreate(lines[i], r)) {
+							// on saute une ligne : on ne veut pas garder la table null
+							i++;
 
-//                                     System.out.println(r);
-//                                     System.out.println(getTable(lines[i]));
-//                                     System.out.println(getFather(lines[i]));
-//                                     System.out.println(getOthers(lines[i]));
-
-								table.put(r, getTable(lines[i]));
-								pere.put(r, getFather(lines[i]));
-								autreCol.put(r, getOthers(lines[i]));
-
-								// on met le "$" au nom de la table
-								blocCreateNew
-										.append(lines[i].replace(" as (select ",
-												"$ as (select row_number() over (partition by " + pere.get(r)
-														+ ") as r, xx.* from    (select ")
-												.replace(";", "") + " xx ); \n");
-
-								// on saute une ligne : on ne veut pas garder la table null
-								i++;
-
-								changed = true;
-							}
-						}
-
-						if (!changed) {
-							blocCreateNew.append(lines[i] + "\n");
-						}
-//                             System.out.println(">"+i);
-
-					}
-
-					// pour n bloc indépendants A, B, C on crée une unique table A contenant à la
-					// fois A, B, C en mettant ce qu'on peut en face l'un de l'autre (a.r=b.r=c.r)
-
-					// ajout des lignes vides pour pouvoir faire les jointures sans jointure externe
-					// si on retrouve (pere,r) sans A et B, pas de soucis, on pourra mettre en face
-					// simplemet
-					// sinon, on ajoute cet identifiant aux tables dans lesquel il manque pour
-					// pouvoir faire la jointure normalement aussi
-					// attention de ne pas générer des valeur null factices (d'ou le left join qui
-					// réintroduit une valeur valide au hasard)
-					for (String r0 : rubrique) {
-						for (String r1 : rubrique) {
-							if (!r1.equals(r0)) {
-								blocCreateNew.append("insert into " + table.get(r0) + "$ ");
-								blocCreateNew.append(" select a.r, c." + r0 + ", a." + pere.get(r1) + " ");
-
-								String pattern = " as ([^ ()]*) ";
-								Pattern p = Pattern.compile(pattern);
-								Matcher m = p.matcher(autreCol.get(r0));
-								while (m.find()) {
-									blocCreateNew.append(", c." + m.group(1) + " ");
-								}
-
-								blocCreateNew.append(" from " + table.get(r1) + "$ a ");
-								blocCreateNew.append(" left join ");
-								blocCreateNew.append(" (select distinct on (" + pere.get(r0) + ") * from "
-										+ table.get(r0) + "$ ) c ");
-								blocCreateNew.append(" on a." + pere.get(r1) + "=c." + pere.get(r0) + " ");
-								blocCreateNew.append(" where not exists (select 1 from " + table.get(r0)
-										+ "$ b where a.r=b.r and a." + pere.get(r1) + "=b." + pere.get(r0) + ");");
-								blocCreateNew.append("\n");
-
-							}
-
+							changed = true;
 						}
 					}
 
-					// création de la table finale; on prend comme id de table celle de la premiere
-					// rubrique
-					blocCreateNew.append("create temporary table " + table.get(rubrique.get(0)) + " as (select");
+					if (!changed) {
+						blocCreateNew.append(lines[i] + "\n");
+					}
+				}
+					
+					System.out.println("§§§§§§§§§§§§§§§§§§§§§");
+					System.out.println(blocCreateNew.toString());
+					
+					blocCreateNew.append("create temporary table " + table.get(rubrique.get(0)) + " as ( ");
+					blocCreateNew.append("with tmp0 as ( ");
+					
 					boolean first = true;
 
 					// les colonnes identifiantes m_
+					for (String r0 : rubrique) {
+						if (!first) {
+							blocCreateNew.append("union all");
+						}
+						blocCreateNew.append(" select '" + table.get(r0) + "' as u " );
+						blocCreateNew.append(" ,"+pere.get(r0)+" as id_pere " );
+						blocCreateNew.append(" ,"+rubriqueNmcl.get(r0)+"::text as v ");
+						blocCreateNew.append(" ,"+r0+" as i ");
+						blocCreateNew.append(" from "+table.get(r0)+"$ ");
+						first = false;
+					}
+					
+					blocCreateNew.append(" ) ");
+					blocCreateNew.append(" , tmp1 as ( ");
+					blocCreateNew.append(" select row_number() over (partition by id_pere, u, v) as r ");
+					blocCreateNew.append(" , case when v is null then min(v) over (partition by id_pere) else v end as v2 ");
+					blocCreateNew.append(" ,* ");
+					blocCreateNew.append(" from tmp0 ");
+					blocCreateNew.append(" ) ");
+					
+					
+					blocCreateNew.append(" , tmp3 as ( select id_pere, r, v2");
+					for (String r0 : rubrique) {
+						blocCreateNew.append(" ,max(case when u='"+table.get(r0)+"' then i else null end) as "+r0+" ");
+					}
+					blocCreateNew.append(" from tmp1 ");
+					blocCreateNew.append(" group by id_pere, r, v2 ");
+					blocCreateNew.append(" ) ");
+	
+					blocCreateNew.append(" , tmp4 as ( select a.id_pere");
+					for (String r0 : rubrique) {
+						blocCreateNew.append(" , coalesce(a."+r0+", b."+r0+") as "+r0+" ");
+					}
+					blocCreateNew.append(" from tmp3 a, tmp3 b");
+					blocCreateNew.append(" where a.id_pere=b.id_pere and row(a.v2)::text=row(b.v2)::text and b.r=1");
+					blocCreateNew.append(" ) ");
+					
+					blocCreateNew.append(" select ");
+					first=true;
 					for (String r0 : rubrique) {
 						if (!first) {
 							blocCreateNew.append(",");
@@ -1147,59 +1118,48 @@ public class NormageEngine {
 						blocCreateNew.append(" " + r0 + " as " + r0 + " ");
 						first = false;
 					}
-
-					// la colonne pere
-					blocCreateNew.append(", " + table.get(rubrique.get(0)) + "$." + pere.get(rubrique.get(0)) + " as "
-							+ pere.get(rubrique.get(0)) + " ");
-
-					// les autres colonnes
+					blocCreateNew.append(", id_pere as "+pere.get(rubrique.get(0))+" ");
+					
+					int wi=1;
 					for (String r0 : rubrique) {
-
 						String pattern = " as ([^ ()]*) ";
 						Pattern p = Pattern.compile(pattern);
 						Matcher m = p.matcher(autreCol.get(r0));
 						while (m.find()) {
 							blocCreateNew.append(", " + m.group(1) + " as " + m.group(1) + " ");
 						}
-
 					}
-
-					// keep the record id r for partition ruels if needed
-					blocCreateNew.append(", "+table.get(rubrique.get(0)) + "$.r as r ");
 					
-					blocCreateNew.append("from ");
-
-					// bloc from
-					first = true;
+					blocCreateNew.append(" from tmp4 a ");
+					
+					wi=1;
 					for (String r0 : rubrique) {
-						if (!first) {
-							blocCreateNew.append(",");
-						}
-						blocCreateNew.append(" " + table.get(r0) + "$ ");
-						first = false;
-					}
+						blocCreateNew.append(" left join lateral ( ");
+						blocCreateNew.append(" select ");
+						
+						String pattern = " as ([^ ()]*) ";
+						Pattern p = Pattern.compile(pattern);
+						Matcher m = p.matcher(autreCol.get(r0));
 
-					// jointure et fini
-					blocCreateNew.append("where ");
-					first = true;
-					for (int i = 1; i < rubrique.size(); i++) {
-						if (!first) {
-							blocCreateNew.append("and ");
+						first=true;
+						while (m.find()) {
+							if (!first) {
+								blocCreateNew.append(",");
+							}
+							blocCreateNew.append(" " + m.group(1) + " as " + m.group(1) + " ");
+							first=false;
 						}
-						blocCreateNew.append(" " + table.get(rubrique.get(i - 1)) + "$." + pere.get(rubrique.get(i - 1))
-								+ "=" + table.get(rubrique.get(i)) + "$." + pere.get(rubrique.get(i)));
-						blocCreateNew.append(" and " + table.get(rubrique.get(i - 1)) + "$.r="
-								+ table.get(rubrique.get(i)) + "$.r ");
-						first = false;
+						blocCreateNew.append(" from "+table.get(r0)+"$ b ");			
+						blocCreateNew.append(" where a."+r0+"=b."+r0+" and a.id_pere=b."+pere.get(r0)+" ");
+						blocCreateNew.append(" ) w"+wi+" on true ");
+						wi++;
 					}
-					blocCreateNew.append(");\n");
-
-					// la table "null" pour les relation
+					blocCreateNew.append(") ;");
+					
+					// la table "null" pour les relations
 					blocCreateNew.append("create temporary table " + table.get(rubrique.get(0))
 							+ "_null as (select * from " + table.get(rubrique.get(0)) + " where false);\n");
-
-//                         System.out.println("#"+blocCreateNew);
-
+					
 					blocCreate = blocCreateNew.toString();
 
 					// ne reste plus qu'a retirer les conditions de jointure sur les tables
@@ -1229,12 +1189,18 @@ public class NormageEngine {
 			}
 
 		}
+		
 
 		returned = blocCreate.replaceAll("\n$", "") + "\n" + blocInsert.replaceAll("\n$", "");
+		
+		System.out.println("§§§§§§§§§§§§§§§§§§§§§");
+		System.out.println(returned);
 		return returned;
 
 	}
 
+	
+	
 	/**
 	 * Modifie la requete pour appliquer les regles d'unicite
 	 * 
@@ -1356,8 +1322,6 @@ public class NormageEngine {
 		ArrayList<String> listRubriqueNmcl = new ArrayList<String>();
 		ArrayList<String> listTableNmcl = new ArrayList<String>();
 
-// System.out.println(regle);
-
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
 			String type = regle.get("id_classe").get(j);
 			if (type.equals("relation")) {
@@ -1387,35 +1351,11 @@ public class NormageEngine {
 							// extraction du nom de la table
 							listTableNmcl.add(getTable(line));
 
-							// récupère l'identifiant pere du block (c'est l'identifiant juste aprés celui
-							// du block m_...)
-//                         String idBlock=getFather(line);
-
-							// déclarer une colonne en nomenclature indique en quelque sorte que c'est une
-							// clé dans son groupe :
-							// on garde donc des valeurs uniques dans le groupe (pour un meme pere, une
-							// seule valeur)
-							// et non null (si c'est null, la jointure sera false de toutes façons)
-							// si la colonne nomenclature n'a pas déjà été traitée, on fait ce traitement
-							// d'unicité
-//                         if (!testRubriqueInCreate(lines[k],"rk_"+rubriqueNmcl))
-//                         {
-//                         lines[k]=ManipString.substringBeforeFirst(line," (")
-//                                 +" (select * from    (select case when "+rubriqueNmcl+" is null then -1 else row_number() over (partition by "+idBlock+","+rubriqueNmcl+") end as rk_"+rubriqueNmcl+" , * from    ("
-//                                 + ManipString.substringAfterFirst(line.replace(";", "")," (")
-//                                 +" t0_"+rubriqueNmcl+" ) t1_"+rubriqueNmcl+" where rk_"+rubriqueNmcl+"=1);"
-//                                 ;
-//                         }
-
 							break;
 						}
 
 						k++;
 					}
-
-//                     jointure=jointure+"\n AND ("+rubrique+"="+rubriqueNmcl+" ";
-//                     jointure=jointure+"\n or "+rubrique+" is null ";
-//                     jointure=jointure+"\n or "+rubrique+" not in (select distinct "+rubriqueNmcl+" from "+this.tableNormageOKTemp2+" where id_source='"+id_source+"' and "+rubriqueNmcl+" is not null)) ";
 				}
 			}
 		}
@@ -1429,16 +1369,7 @@ public class NormageEngine {
 
 		viewAndInsert = "";
 		for (int k = 0; k < lines.length; k++) {
-
-//     if (lines[k].startsWith("create temporary table "))
-//     {
 			viewAndInsert += lines[k] + "\n";
-//     }
-//     else
-//     {
-//         viewAndInsert+=lines[k].substring(1)+"\n";
-//
-//     }
 		}
 
 		viewAndInsert = ManipString.substringBeforeLast(viewAndInsert, " select ");
@@ -1471,17 +1402,11 @@ public class NormageEngine {
 					// on ajoute la clause de jointure
 					select = select.replace(" " + listTableNmcl.get(l) + " ", " " + listTableNmcl.get(l) + "_null ")
 							.replace("=" + listTableNmcl.get(l) + ".", "=" + listTableNmcl.get(l) + "_null.");
-
-					// select=select+"\n AND ("+listRubrique.get(l)+" is null or
-					// "+listRubrique.get(l)+" not in (select distinct "+listRubriqueNmcl.get(l)+"
-					// from "+getTable(blocCreate,listRubriqueNmcl.get(l))+" where
-					// "+listRubriqueNmcl.get(l)+" is not null))";
 					select = select + "\n AND NOT EXISTS (select 1 from (select distinct " + listRubriqueNmcl.get(l)
 							+ " as g_rub," + getFather(getLine(blocCreate, listRubriqueNmcl.get(l)))
 							+ " as g_pere from " + getTable(blocCreate, listRubriqueNmcl.get(l)) + ") xx where "
 							+ listRubrique.get(l) + "=g_rub and "
 							+ iToM(getFather(getLine(blocCreate, listRubriqueNmcl.get(l)))) + "=g_pere) ";
-//             System.out.println(listRubriqueNmcl.get(l)+">"+iToM(getFather(getLine(blocCreate, listRubriqueNmcl.get(l)))));
 
 				}
 			}
@@ -1499,7 +1424,6 @@ public class NormageEngine {
 					select = select.replace(" " + listTableNmcl.get(l) + "_null ", " " + listTableNmcl.get(l) + " ")
 							.replace("=" + listTableNmcl.get(l) + "_null.", "=" + listTableNmcl.get(l) + ".");
 					select = select + "\n AND " + listRubrique.get(l) + "=" + listRubriqueNmcl.get(l) + " ";
-//             select=select+"\n AND ("+listRubrique.get(l)+"="+listRubriqueNmcl.get(l)+" or "+getM(blocCreate,listRubrique.get(l))+" is null)";
 				}
 			}
 
@@ -1512,98 +1436,7 @@ public class NormageEngine {
 		return returned;
 
 	}
-	
-	private void initializeFromForCartesianReduce(String bloc, ArrayList<String> from, ArrayList<Boolean> keep)
-	{
 
-		String[] blocLines=bloc.split("\n");
-		
-		
-		for (String s:blocLines)
-		{
-			from.add(s);
-			// on met à null tout ce qui n'est pas un left join. ces lignes seront gardées par défaut
-			// et ne seront pas scannées
-			// sinon on met à false pour le pas garder par défaut les clauses left join
-			// ces lignes là seront scanées pour voir s'il faut les garder
-			keep.add((s.startsWith(" left join "))?false:null);
-		}
-	}
-	
-	private void computeFromForCartesianReduce(String blocCreate, ArrayList<String> from, ArrayList<Boolean> keep, String rubrique)
-	{
-		// on déplie la clause from
-		String r=rubrique;
-		
-		for (int i=from.size()-1;i>=0;i--)
-		{
-			if (keep.get(i)!=null && isRubriqueUsedInFromBloc(from.get(i),r))
-			{
-				keep.set(i, true);
-				// récupération de la rubrique pere dont on va garder la ligne dans une des itérations suivantes
-				r=findFatherOfRubrique(blocCreate, ManipString.substringBeforeFirst(ManipString.substringAfterFirst(from.get(i)," on m_"),"="));
-			}
-			
-		}
-	}
-	
-	private void computeExecuteForCartesianReduce(ArrayList<String> from, ArrayList<Boolean> keep, List<String> rubriquesUtiles)
-	{	
-		List<String> stack=new ArrayList<>();
-		
-		for (int i=0;i<from.size();i++)
-		{
-			// on ne scan que les lignes de jointure
-			if (keep.get(i)!=null)
-			{
-				// on garde toutes les lignes
-				keep.set(i,true);
-				
-				// pour chaque rubriques de reduction
-				for (String r:rubriquesUtiles)
-				{
-					
-					// on regarde si la table de référence de la ligne de jointure concerne la rubrique
-					if (isRubriqueUsedInFromBloc(from.get(i),r))
-					{
-						//si oui, on stack la rubrique avec celles deja trouvées
-						stack.add(r);
-						
-						// si la stack est suffisante
-						if (stack.size()>1)
-						{
-							// alors on ajoute la clause de filtre sur le n-uplet de la stack
-							String stackSelect=StringUtils.join(stack,",");							
-							from.set(i, from.get(i)+ " and row("+stackSelect+")::text in (select row("+stackSelect+")::text from "+withBaseName+rubriquesUtiles.size()+") ");
-						}
-						break;
-					}
-				}
-			}
-		}
-	}
-	
-	
-	private String returnFromAfterCartesianReduce(ArrayList<String> from, ArrayList<Boolean> keep)
-	{
-		StringBuilder returned=new StringBuilder();
-		for (int i=0;i<from.size();i++)
-		{
-			if (keep.get(i)==null || keep.get(i))
-			{
-				if (i>0) returned.append("\n");
-				returned.append(from.get(i));
-			}
-		}
-		return returned.toString();
-	}
-	
-	private boolean isRubriqueUsedInFromBloc(String blocFrom, String rubrique)
-	{
-		if (rubrique.startsWith("m_")) rubrique=rubrique.substring(2);
-		return blocFrom.contains(" t_"+rubrique+" ") || blocFrom.contains(" t_"+rubrique+"_null ");
-	}
-	
 	private String findFatherOfRubrique(String blocCreate, String rubrique)
 	{
 		
@@ -1618,159 +1451,6 @@ public class NormageEngine {
 						)
 				," as ");
 	}
-	
-	private ArrayList<String> rubriqueUsedInRelation(String blocCreate, HashMap<String, ArrayList<String>> regle)
-	{
-		ArrayList<String> returned=new ArrayList<>();
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-			String type = regle.get("id_classe").get(j);
-			if (type.equals("relation")) {
-								
-				String r1=findFatherOfRubrique(blocCreate, regle.get("rubrique").get(j).toLowerCase());
-				String r2=findFatherOfRubrique(blocCreate, regle.get("rubrique_nmcl").get(j).toLowerCase());
-				
-				// si les 2 rubriques sont bien trouvées et utilisées
-				if (r1!=null && r2!=null)
-					{
-						returned.add(r1);
-						returned.add(r2);
-					}
-			}
-		}		
-		
-		// si 0 ou 1 seule rubrique trouvée, on renvoie un tableau vide
-		return returned;
-	}
-	
-	
-	/**
-	 * Rules to reduce the cartesian products
-	 * For a given set, the method builds a new set
-	 * with the only constraint of containing all values for any of the column of the set
-	 */
-	private String appliquerRegleReduction(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
-		
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-			String type = regle.get("id_classe").get(j);
-			if (type.equals("reduction")) {
-
-				String[] rubriques = regle.get("rubrique").get(j).toLowerCase().split(",");
-				List<String> rubriquesUtiles=new ArrayList<String>();
-				List<String> rubriquesNull=new ArrayList<String>();
-
-				
-				// extraction de la clause select
-				String[] bloc=jointure.split("\n insert into \\{table_destination\\} ");
-				
-				String rubriquesDuSelect=ManipString.substringBeforeFirst(ManipString.substringAfterFirst(bloc[1],"select "),"\n from ")+",";
-				String rubriquesDeJointure=ManipString.substringAfterFirst(bloc[1],"\n from ");
-				String blocCreate=ManipString.substringBeforeFirst(bloc[0],"\n analyze");
-						
-				// regarder si les rubrique de la regles sont présentes
-				for (String r:rubriques)
-				{
-					if (isRubriqueUsedInFromBloc(rubriquesDeJointure,r))
-					{
-						rubriquesUtiles.add("m_"+r);
-						rubriquesNull.add("null");
-					}
-				}
-				
-				// si 1 ou 2 rubriques présentes, on ne fait rien (ne sert à rien)
-				if (rubriquesUtiles.size()<3)
-				{
-					return jointure;
-				}
-				
-				String rubriquesUtilesSelect = StringUtils.join(rubriquesUtiles,",");
-				
-				
-				// on initialise la requete avec le bloc 0 (bloc de préparation, calcul des tables temporaires, etc.)
-				StringBuilder requete=new StringBuilder(bloc[0]);
-
-				
-				
-				// pour chaque bloc d'insert, on réécrit la requete
-				for (int i=1;i<bloc.length;i++)
-				{
-					requete.append("\n insert into {table_destination} ");
-					// récupération des colonnes de l'insert
-					requete.append(ManipString.substringBeforeFirst(bloc[i],"\n select "));
-
-					
-					String blocSelect = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(bloc[i],"\n select "),"\n from ");
-					String blocFrom = ManipString.substringBeforeLast(ManipString.substringAfterFirst(bloc[i],"\n from "),"\n;");
-					
-					ArrayList<String> from = new ArrayList<>();
-					ArrayList<Boolean> keep = new ArrayList<>();
-					
-					initializeFromForCartesianReduce(blocFrom, from, keep);
-					
-					for (String r:rubriquesUtiles)
-					{
-						computeFromForCartesianReduce(blocCreate, from, keep, r);
-					}
-					for (String r:rubriqueUsedInRelation(blocCreate,regle))
-					{
-						computeFromForCartesianReduce(blocCreate, from, keep, r);
-					}
-					
-					// on matérialise les n-uplets distincts
-					requete.append("\n with "+withBaseName+0+" as ( ");
-					requete.append("\n select "+rubriquesUtilesSelect+" ");
-					requete.append("\n from ");
-					requete.append(returnFromAfterCartesianReduce(from, keep));
-					requete.append("\n ) ");
-					
-					// on itére sur les rubriques utiles
-					for (int k=0;k<rubriquesUtiles.size();k++)
-					{
-						requete.append("\n , "+withBaseName+(k+1)+" as ( ");
-						
-						// on ajoute à la table générée avant
-						if (k>0)
-						{
-							requete.append("\n select * from "+withBaseName+k+" UNION ALL ");
-
-						}
-						
-						// les n uplet distinct sur la rubrique en cours
-						requete.append("\n select distinct on ("+rubriquesUtiles.get(k)+") * from "+withBaseName+0+" u ");
-						// dont on a pas déjà la valeur
-						if (k>0)
-						{
-							requete.append("\n where not exists (select from "+withBaseName+k+" v where u."+rubriquesUtiles.get(k)+"=v."+rubriquesUtiles.get(k)+") ");
-						}
-						// ajouter le n-uplet null, null, null,...
-						if (k==(rubriquesUtiles.size()-1))
-						{
-							requete.append("\n UNION ALL select "+ StringUtils.join(rubriquesNull,",")+" ");
-						}
-						
-						requete.append("\n ) ");
-					}
-
-					from = new ArrayList<>();
-					keep = new ArrayList<>();
-					initializeFromForCartesianReduce(blocFrom, from, keep);
-					computeExecuteForCartesianReduce(from, keep, rubriquesUtiles);
-					
-					requete.append("\n select ");
-					requete.append(blocSelect);
-					requete.append("\n from ");
-					requete.append(returnFromAfterCartesianReduce(from, keep));
-					requete.append("\n;");
-				}
-
-				// 1 seule regle de reduction prise en compte pour le moment 
-				return requete.toString();
-			}
-		}
-		
-		return jointure;
-	}
-	
 	
 	private Integer excludeFileonTimeOut(HashMap<String, ArrayList<String>> regle)
 	{
@@ -2044,13 +1724,18 @@ public class NormageEngine {
 
 			// si on a exclus le bloc, on ne le met pas dans la regle
 			int nbRubriqueRetenue = 0;
-			StringBuilder untoken = new StringBuilder();
+			StringBuilder rubriqueContent = new StringBuilder();
+			StringBuilder rubriqueNmclContent = new StringBuilder();
+
 			for (String z : s) {
 				if (!exclusion.contains(z)) {
-					if (untoken.length() > 0) {
-						untoken.append(",");
+					if (rubriqueContent.length() > 0) {
+						rubriqueContent.append(",");
+						rubriqueNmclContent.append(",");
 					}
-					untoken.append(z);
+					rubriqueContent.append(z);
+					rubriqueNmclContent.append("null");	
+					
 					nbRubriqueRetenue++;
 				}
 
@@ -2064,8 +1749,8 @@ public class NormageEngine {
 				regle.get("validite_inf").add("1900-01-01");
 				regle.get("validite_sup").add("3000-01-01");
 				regle.get("id_classe").add("independance");
-				regle.get("rubrique").add(untoken.toString());
-				regle.get("rubrique_nmcl").add(null);
+				regle.get("rubrique").add(rubriqueContent.toString());
+				regle.get("rubrique_nmcl").add(rubriqueNmclContent.toString());
 
 			}
 
