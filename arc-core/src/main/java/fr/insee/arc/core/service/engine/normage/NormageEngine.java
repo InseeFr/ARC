@@ -21,8 +21,6 @@ import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.ManipString;
 
-
-
 public class NormageEngine {
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
@@ -35,10 +33,8 @@ public class NormageEngine {
 	/**
 	 * Caractéristique du fichier (idSource) issu du pilotage de ARC
 	 * 
-	 * id_source : nom du fichier jointure : requete de strucutration
-	 * id_norme : identifiant de norme
-	 * validite : validite
-	 * periodicite : periodicite
+	 * id_source : nom du fichier jointure : requete de strucutration id_norme :
+	 * identifiant de norme validite : validite periodicite : periodicite
 	 */
 	private HashMap<String, ArrayList<String>> pilotageIdSource;
 
@@ -65,7 +61,7 @@ public class NormageEngine {
 	private String paramBatch;
 
 	public String structure;
-	
+
 	public NormageEngine(Connection connection, HashMap<String, ArrayList<String>> pil,
 			HashMap<String, ArrayList<String>> regle, HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles,
 			String tableSource, String tableDestination, String paramBatch) {
@@ -79,12 +75,10 @@ public class NormageEngine {
 		this.paramBatch = paramBatch;
 	}
 
-	
-    public void executeEngine() throws Exception {
-    	execute();
-    }
-	
-	
+	public void executeEngine() throws Exception {
+		execute();
+	}
+
 	public void execute() throws Exception {
 
 		// variables locales
@@ -94,7 +88,6 @@ public class NormageEngine {
 		Date validite = this.formatter.parse(pilotageIdSource.get("validite").get(0));
 		String periodicite = pilotageIdSource.get("periodicite").get(0);
 		String validiteText = pilotageIdSource.get("validite").get(0);
-
 
 		if (jointure == null || jointure.equals("")) {
 
@@ -106,7 +99,10 @@ public class NormageEngine {
 			UtilitaireDao.get("arc").getColumns(connection, listeRubriqueSource, tableSource);
 
 			StaticLoggerDispatcher.trace("listeRubrique fichier " + listeRubriqueSource, LOGGER);
-			StaticLoggerDispatcher.trace("listeRubrique règles " + ((paramBatch != null) ? rubriqueUtiliseeDansRegles.get("var"):"NULL (MODE IHM)"), LOGGER);
+			StaticLoggerDispatcher.trace(
+					"listeRubrique règles "
+							+ ((paramBatch != null) ? rubriqueUtiliseeDansRegles.get("var") : "NULL (MODE IHM)"),
+					LOGGER);
 
 			HashSet<String> alreadyAdded = new HashSet<>();
 
@@ -143,41 +139,35 @@ public class NormageEngine {
 			bloc3.append("\n  AS SELECT ");
 			bloc3.append(reqSelect);
 			bloc3.append(" FROM " + tableSource + " ;");
-			
+
 			UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
 
-
 		} else {
-			
-			
-			// split structure blocks
-			String[] ss=jointure.split(XMLComplexeHandlerCharger.JOINXML_STRUCTURE_BLOCK);
-			
-			if (ss.length>1)
-			{
-					jointure=ss[0];
-					this.structure=ss[1];
-			}
-			
-			// split query blocks
-			int subJoinNumber=0;
-			for (String subJoin:jointure.split(XMLComplexeHandlerCharger.JOINXML_QUERY_BLOCK))
-			{
-				
-				HashMap<String, ArrayList<String>> regle= new HashMap<String, ArrayList<String>>();
 
-				for (String key:regleInitiale.keySet())
-				{
-					ArrayList<String> al=new ArrayList<String>();
-					for (String val:regleInitiale.get(key))
-					{
+			// split structure blocks
+			String[] ss = jointure.split(XMLComplexeHandlerCharger.JOINXML_STRUCTURE_BLOCK);
+
+			if (ss.length > 1) {
+				jointure = ss[0];
+				this.structure = ss[1];
+			}
+
+			// split query blocks
+			int subJoinNumber = 0;
+			for (String subJoin : jointure.split(XMLComplexeHandlerCharger.JOINXML_QUERY_BLOCK)) {
+
+				HashMap<String, ArrayList<String>> regle = new HashMap<String, ArrayList<String>>();
+
+				for (String key : regleInitiale.keySet()) {
+					ArrayList<String> al = new ArrayList<String>();
+					for (String val : regleInitiale.get(key)) {
 						al.add(val);
 					}
 					regle.put(key, al);
 				}
-				
+
 				subJoin = subJoin.toLowerCase();
-				
+
 				// ORDRE IMPORTANT
 				// on supprime les rubriques inutilisées quand le service est invoqué en batch
 				// (this.paramBatch!=null)
@@ -185,26 +175,26 @@ public class NormageEngine {
 				// pour que les gens qui testent en bac à sable n'aient pas de probleme
 				if (paramBatch != null) {
 					ajouterRegleSuppression(regle, norme, validite, periodicite, subJoin, rubriqueUtiliseeDansRegles);
-	
+
 					subJoin = appliquerRegleSuppression(regle, norme, validite, periodicite, subJoin);
 				}
-	
+
 				ajouterRegleDuplication(regle, norme, validite, periodicite, subJoin);
-	
+
 				subJoin = appliquerRegleDuplication(regle, norme, validite, periodicite, subJoin);
-	
+
 				ajouterRegleIndependance(regle, norme, validite, periodicite, subJoin);
-	
+
 				subJoin = appliquerRegleIndependance(regle, norme, validite, periodicite, subJoin);
-	
+
 				subJoin = appliquerRegleUnicite(regle, norme, validite, periodicite, subJoin);
-	
+
 				subJoin = appliquerRegleRelation(regle, norme, validite, periodicite, subJoin);
-	
+
 				// optimisation manu 9.6
 				// retravaille de la requete pour éliminer UNION ALL
-				subJoin = optimisation96(subJoin,subJoinNumber);
-				
+				subJoin = optimisation96(subJoin, subJoinNumber);
+
 				executerJointure(regle, norme, validite, periodicite, subJoin, validiteText, id_source);
 
 				subJoinNumber++;
@@ -277,18 +267,16 @@ public class NormageEngine {
 				+ "\n insert into {table_destination}"
 				+ ManipString.substringAfterFirst(r, "insert into {table_destination}");
 
-
-		if (subjoinNumber>0)
-		{
+		if (subjoinNumber > 0) {
 			// on recrée les tables temporaires
-			r=r.replaceAll("create temporary table ([^ ]+) as ", "drop table if exists $1; create temporary table $1 as ");
-		}
-		else
-		{
+			r = r.replaceAll("create temporary table ([^ ]+) as ",
+					"drop table if exists $1; create temporary table $1 as ");
+		} else {
 
-			// on crée la table destination avec les bonnes colonnes pour la premiere sous jointure
+			// on crée la table destination avec les bonnes colonnes pour la premiere sous
+			// jointure
 			r = "drop table if exists {table_destination}; create temporary table {table_destination} as SELECT * FROM {table_source} where false; \n "
-				+ this.columnToBeAdded + "\n" + r;
+					+ this.columnToBeAdded + "\n" + r;
 		}
 		return r;
 	}
@@ -546,6 +534,7 @@ public class NormageEngine {
 
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
 		HashSet<String> rubriqueExclusion = new HashSet<String>();
+		HashMap<String, String> rubriquesAvecRegleDIndependance = new HashMap<>();
 
 		// pour toutes les règles de relation,
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -579,20 +568,35 @@ public class NormageEngine {
 					}
 				}
 			}
-			
+
 			// cas 3 : deux rubrique déclarées en cartesian
-			// les rubriques déclarées en cartésian ne peuvent intégrer un groupe de rubrique indépendante
+			// les rubriques déclarées en cartésian ne peuvent intégrer un groupe de
+			// rubrique indépendante
 			if (type.equals("cartesian")) {
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 				String rubriqueM = getM(blocCreate, rubrique);
 				rubriqueExclusion.add(rubriqueM);
 			}
-			
+
+			if (type.equals("independance")) {
+				String rubrique = regle.get("rubrique").get(j).toLowerCase();
+				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
+				rubriquesAvecRegleDIndependance.put(anyToM(rubrique), rubriqueNmcl);
+			}
+
 		}
 
+		
+		for (String k:rubriquesAvecRegleDIndependance.keySet())
+		{
+			rubriqueExclusion.remove(k);	
+		}
+
+		
 		// on déroule sur les fils pour ajouter les regles d'indépendance
-		ArrayList<String> r = new ArrayList<String>();
-		addIndependanceToChildren(r, blocCreate, getM(blocCreate), regle, norme, periodicite, rubriqueExclusion);
+		ArrayList<String> r = new ArrayList<>();
+		addIndependanceToChildren(r, blocCreate, getM(blocCreate), regle, rubriquesAvecRegleDIndependance, norme,
+				periodicite, rubriqueExclusion);
 
 	}
 
@@ -975,13 +979,14 @@ public class NormageEngine {
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
 			String type = regle.get("id_classe").get(j);
 
-			if (type.equals("independance")) {
+			if (type.equals("bloc_independance")) {
 
 				String rubriqueRegle[] = regle.get("rubrique").get(j).replace(" ", "").toLowerCase().split(",");
-				String rubriqueNmclRegle[] = regle.get("rubrique_nmcl").get(j).replace(" ", "").toLowerCase().split(",");
+				String rubriqueNmclRegle[] = regle.get("rubrique_nmcl").get(j).replace(" ", "").toLowerCase()
+						.split(",");
 
 				ArrayList<String> rubrique = new ArrayList<String>();
-				HashMap<String,String> rubriqueNmcl = new HashMap<>();
+				HashMap<String, String> rubriqueNmcl = new HashMap<>();
 
 				// ne garder que les rubriques qui existent dans la requete
 				// vérifier qu'elles ont le même pere
@@ -1000,16 +1005,11 @@ public class NormageEngine {
 
 						rubriqueRegle[i] = m_rubrique;
 						rubrique.add(rubriqueRegle[i]);
-						rubriqueNmcl.put(rubriqueRegle[i],rubriqueNmclRegle[i]);
+						rubriqueNmcl.put(rubriqueRegle[i], rubriqueNmclRegle[i]);
 
 						if (fatherSav == null) {
 							fatherSav = getFatherM(blocCreate, rubriqueRegle[i]);
-
-//                                     System.out.println(rubriqueRegle[i]+"->"+fatherSav);
-
 						} else {
-//                                     System.out.println(rubriqueRegle[i]+"->"+getFatherM(blocCreate,rubriqueRegle[i]));
-
 							if (!fatherSav.equals(getFatherM(blocCreate, rubriqueRegle[i]))) {
 								StaticLoggerDispatcher.info(
 										"La rubrique " + rubriqueRegle[i] + " n'a pas le même pere que les autres",
@@ -1038,127 +1038,45 @@ public class NormageEngine {
 					StringBuilder blocInsertNew = new StringBuilder();
 
 					for (int i = 0; i < lines.length; i++) {
-					boolean changed = false;
+						boolean changed = false;
 
-					for (String r : rubrique) {
-						if (testRubriqueInCreate(lines[i], r)) {
-							table.put(r, getTable(lines[i]));
-							pere.put(r, getFather(lines[i]));
-							autreCol.put(r, getOthers(lines[i]));
+						for (String r : rubrique) {
+							if (testRubriqueInCreate(lines[i], r)) {
+								table.put(r, getTable(lines[i]));
+								pere.put(r, getFather(lines[i]));
+								autreCol.put(r, getOthers(lines[i]));
 
-							// on met le "$" au nom de la table
-							blocCreateNew
-									.append(lines[i].replace(" as (select ",
-											"$ as (select ")+"\n");
+								// on met le "$" au nom de la table
+								blocCreateNew.append(lines[i].replace(" as (select ", "$ as (select ") + "\n");
 
-							// on saute une ligne : on ne veut pas garder la table null
-							i++;
+								// on saute une ligne : on ne veut pas garder la table null
+								i++;
 
-							changed = true;
-						}
-					}
-
-					if (!changed) {
-						blocCreateNew.append(lines[i] + "\n");
-					}
-				}
-					
-					System.out.println("§§§§§§§§§§§§§§§§§§§§§");
-					System.out.println(blocCreateNew.toString());
-					
-					blocCreateNew.append("create temporary table " + table.get(rubrique.get(0)) + " as ( ");
-					blocCreateNew.append("with tmp0 as ( ");
-					
-					boolean first = true;
-
-					// les colonnes identifiantes m_
-					for (String r0 : rubrique) {
-						if (!first) {
-							blocCreateNew.append("union all");
-						}
-						blocCreateNew.append(" select '" + table.get(r0) + "' as u " );
-						blocCreateNew.append(" ,"+pere.get(r0)+" as id_pere " );
-						blocCreateNew.append(" ,"+rubriqueNmcl.get(r0)+"::text as v ");
-						blocCreateNew.append(" ,"+r0+" as i ");
-						blocCreateNew.append(" from "+table.get(r0)+"$ ");
-						first = false;
-					}
-					
-					blocCreateNew.append(" ) ");
-					blocCreateNew.append(" , tmp1 as ( ");
-					blocCreateNew.append(" select row_number() over (partition by id_pere, u, v) as r ");
-					blocCreateNew.append(" , case when v is null then min(v) over (partition by id_pere) else v end as v2 ");
-					blocCreateNew.append(" ,* ");
-					blocCreateNew.append(" from tmp0 ");
-					blocCreateNew.append(" ) ");
-					
-					
-					blocCreateNew.append(" , tmp3 as ( select id_pere, r, v2");
-					for (String r0 : rubrique) {
-						blocCreateNew.append(" ,max(case when u='"+table.get(r0)+"' then i else null end) as "+r0+" ");
-					}
-					blocCreateNew.append(" from tmp1 ");
-					blocCreateNew.append(" group by id_pere, r, v2 ");
-					blocCreateNew.append(" ) ");
-	
-					blocCreateNew.append(" , tmp4 as ( select a.id_pere");
-					for (String r0 : rubrique) {
-						blocCreateNew.append(" , coalesce(a."+r0+", b."+r0+") as "+r0+" ");
-					}
-					blocCreateNew.append(" from tmp3 a, tmp3 b");
-					blocCreateNew.append(" where a.id_pere=b.id_pere and row(a.v2)::text=row(b.v2)::text and b.r=1");
-					blocCreateNew.append(" ) ");
-					
-					blocCreateNew.append(" select ");
-					first=true;
-					for (String r0 : rubrique) {
-						if (!first) {
-							blocCreateNew.append(",");
-						}
-						blocCreateNew.append(" " + r0 + " as " + r0 + " ");
-						first = false;
-					}
-					blocCreateNew.append(", id_pere as "+pere.get(rubrique.get(0))+" ");
-					
-					int wi=1;
-					for (String r0 : rubrique) {
-						String pattern = " as ([^ ()]*) ";
-						Pattern p = Pattern.compile(pattern);
-						Matcher m = p.matcher(autreCol.get(r0));
-						while (m.find()) {
-							blocCreateNew.append(", " + m.group(1) + " as " + m.group(1) + " ");
-						}
-					}
-					
-					blocCreateNew.append(" from tmp4 a ");
-					
-					wi=1;
-					for (String r0 : rubrique) {
-						blocCreateNew.append(" left join lateral ( ");
-						blocCreateNew.append(" select ");
-						
-						String pattern = " as ([^ ()]*) ";
-						Pattern p = Pattern.compile(pattern);
-						Matcher m = p.matcher(autreCol.get(r0));
-
-						first=true;
-						while (m.find()) {
-							if (!first) {
-								blocCreateNew.append(",");
+								changed = true;
 							}
-							blocCreateNew.append(" " + m.group(1) + " as " + m.group(1) + " ");
-							first=false;
 						}
-						blocCreateNew.append(" from "+table.get(r0)+"$ b ");			
-						blocCreateNew.append(" where a."+r0+"=b."+r0+" and a.id_pere=b."+pere.get(r0)+" ");
-						blocCreateNew.append(" ) w"+wi+" on true ");
-						wi++;
+
+						if (!changed) {
+							blocCreateNew.append(lines[i] + "\n");
+						}
 					}
-					blocCreateNew.append(") ;");
+
+					boolean isThereAnyValue= calculerTableIndependance(blocCreateNew, false, rubrique, rubriqueNmcl, table, pere, autreCol);
 					
-					// la table "null" pour les relations
-					blocCreateNew.append("create temporary table " + table.get(rubrique.get(0))
+					
+					// calculer la table _null pour les jointures
+					// c'est plus compliqué si y'a des rubriques avec valeurs car il faut mettre seulement les blocs avec valeurs à null
+					
+					if (isThereAnyValue)
+					{
+						calculerTableIndependance(blocCreateNew, true, rubrique, rubriqueNmcl, table, pere, autreCol);
+					}
+					else
+					{
+						blocCreateNew.append("create temporary table " + table.get(rubrique.get(0))
 							+ "_null as (select * from " + table.get(rubrique.get(0)) + " where false);\n");
+					}
+					
 					
 					blocCreate = blocCreateNew.toString();
 
@@ -1189,17 +1107,137 @@ public class NormageEngine {
 			}
 
 		}
-		
 
 		returned = blocCreate.replaceAll("\n$", "") + "\n" + blocInsert.replaceAll("\n$", "");
-		
-		System.out.println("§§§§§§§§§§§§§§§§§§§§§");
-		System.out.println(returned);
+
 		return returned;
 
 	}
 
-	
+	private boolean calculerTableIndependance(StringBuilder blocRequete, boolean nullTableRequired, ArrayList<String> rubrique, HashMap<String, String> rubriqueNmcl, HashMap<String, String> table, HashMap<String, String> pere, HashMap<String, String> autreCol)
+	{
+		boolean isThereAnyValue=false;
+		
+		blocRequete.append("create temporary table " + table.get(rubrique.get(0)) + (nullTableRequired?"_null":"") + " as ( ");
+		// bloc des valeurs : on met tous les identifiants et valeurs ensemble
+		blocRequete.append("with tmp0_value as ( ");
+		boolean first = true;
+		// les colonnes identifiantes m_
+		for (String r0 : rubrique) {
+			if (!first) {
+				blocRequete.append("union all");
+			}
+
+			boolean rubriqueHasNoValue=rubriqueNmcl.get(r0).equals("null");
+			//register there is a value declared for null table calculation
+			if (!rubriqueHasNoValue)
+			{
+				isThereAnyValue=true;
+			}
+			String rubriqueHasNoValueSQL = rubriqueHasNoValue ? "false as hasValue"
+					: "true as hasValue";
+
+			blocRequete.append(" select " + rubriqueHasNoValueSQL + ", '" + table.get(r0) + "' as u ");
+			blocRequete.append(" ," + pere.get(r0) + " as id_pere ");
+			blocRequete.append(" ," + rubriqueNmcl.get(r0) + "::text as v ");
+			blocRequete.append(" ," + r0 + " as i ");
+			blocRequete.append(" from " + table.get(r0) + "$ ");
+			if (!rubriqueHasNoValue && nullTableRequired)
+			{
+				blocRequete.append(" where false ");
+			}
+			first = false;
+		}
+		blocRequete.append(" ) ");
+
+		// bloc des valeurs distinct de valeurs
+		blocRequete.append(
+				", tmp0_distinct_value as (select distinct id_pere, v from tmp0_value where hasValue) ");
+
+		//
+		blocRequete.append(", tmp0 as ( ");
+		blocRequete.append(" select u, id_pere, v, i from tmp0_value where hasValue ");
+		blocRequete.append(" union all ");
+		blocRequete.append(
+				" select a.u, a.id_pere, b.v, a.i from tmp0_value a left join tmp0_distinct_value b on a.id_pere=b.id_pere ");
+		blocRequete.append(" where not hasValue ");
+		blocRequete.append(" ) ");
+
+		//
+		blocRequete.append(" , tmp1 as ( ");
+		blocRequete.append(" select row_number() over (partition by id_pere, u, v) as r ");
+		blocRequete
+				.append(" , case when v is null then min(v) over (partition by id_pere) else v end as v2 ");
+		blocRequete.append(" ,* ");
+		blocRequete.append(" from tmp0 ");
+		blocRequete.append(" ) ");
+
+		blocRequete.append(" , tmp3 as ( select id_pere, r, v2");
+		for (String r0 : rubrique) {
+			blocRequete.append(
+					" ,max(case when u='" + table.get(r0) + "' then i else null end) as " + r0 + " ");
+		}
+		blocRequete.append(" from tmp1 ");
+		blocRequete.append(" group by id_pere, r, v2 ");
+		blocRequete.append(" ) ");
+
+		blocRequete.append(" , tmp4 as ( select a.id_pere");
+		for (String r0 : rubrique) {
+			blocRequete.append(" , coalesce(a." + r0 + ", b." + r0 + ") as " + r0 + " ");
+		}
+		blocRequete.append(" from tmp3 a, tmp3 b");
+		blocRequete.append(" where a.id_pere=b.id_pere and row(a.v2)::text=row(b.v2)::text and b.r=1");
+		blocRequete.append(" ) ");
+
+		blocRequete.append(" select ");
+		first = true;
+		for (String r0 : rubrique) {
+			if (!first) {
+				blocRequete.append(",");
+			}
+			blocRequete.append(" " + r0 + " as " + r0 + " ");
+			first = false;
+		}
+		blocRequete.append(", id_pere as " + pere.get(rubrique.get(0)) + " ");
+
+
+		for (String r0 : rubrique) {
+			String pattern = " as ([^ ()]*) ";
+			Pattern p = Pattern.compile(pattern);
+			Matcher m = p.matcher(autreCol.get(r0));
+			while (m.find()) {
+				blocRequete.append(", " + m.group(1) + " as " + m.group(1) + " ");
+			}
+		}
+
+		blocRequete.append(" from tmp4 a ");
+
+		int wi;
+		wi = 1;
+		for (String r0 : rubrique) {
+			blocRequete.append(" left join lateral ( ");
+			blocRequete.append(" select ");
+
+			String pattern = " as ([^ ()]*) ";
+			Pattern p = Pattern.compile(pattern);
+			Matcher m = p.matcher(autreCol.get(r0));
+
+			first = true;
+			while (m.find()) {
+				if (!first) {
+					blocRequete.append(",");
+				}
+				blocRequete.append(" " + m.group(1) + " as " + m.group(1) + " ");
+				first = false;
+			}
+			blocRequete.append(" from " + table.get(r0) + "$ b ");
+			blocRequete.append(" where a." + r0 + "=b." + r0 + " and a.id_pere=b." + pere.get(r0) + " ");
+			blocRequete.append(" ) w" + wi + " on true ");
+			wi++;
+		}
+		blocRequete.append(") ;\n");
+		return isThereAnyValue;
+	}
 	
 	/**
 	 * Modifie la requete pour appliquer les regles d'unicite
@@ -1232,7 +1270,8 @@ public class NormageEngine {
 
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 
-				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" - "+rubriqueNmcl,
+				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" -
+				// "+rubriqueNmcl,
 				// logger);
 
 				// vérifier l'existance des rubriques
@@ -1329,7 +1368,8 @@ public class NormageEngine {
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
 
-				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" - "+rubriqueNmcl,
+				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" -
+				// "+rubriqueNmcl,
 				// logger);
 
 				// cérifier l'existance des rubriques
@@ -1437,56 +1477,52 @@ public class NormageEngine {
 
 	}
 
-	private String findFatherOfRubrique(String blocCreate, String rubrique)
-	{
-		
-		rubrique=((rubrique.startsWith("i_")||rubrique.startsWith("v_"))?"":"m_")+rubrique;
-		
-		if (!blocCreate.contains(rubrique)) return null;
-		
+	private String findFatherOfRubrique(String blocCreate, String rubrique) {
+
+		rubrique = ((rubrique.startsWith("i_") || rubrique.startsWith("v_")) ? "" : "m_") + rubrique;
+
+		if (!blocCreate.contains(rubrique))
+			return null;
+
 		return ManipString.substringBeforeFirst(
-				ManipString.substringAfterLast(
-						ManipString.substringBeforeLast(blocCreate, " as "+rubrique+" ")
-						,"create temporary table t_"
-						)
-				," as ");
+				ManipString.substringAfterLast(ManipString.substringBeforeLast(blocCreate, " as " + rubrique + " "),
+						"create temporary table t_"),
+				" as ");
 	}
-	
-	private Integer excludeFileonTimeOut(HashMap<String, ArrayList<String>> regle)
-	{
+
+	private Integer excludeFileonTimeOut(HashMap<String, ArrayList<String>> regle) {
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
 			String type = regle.get("id_classe").get(j);
-			if (type.equals("exclusion")) {			
+			if (type.equals("exclusion")) {
 				return Integer.parseInt(regle.get("rubrique").get(j));
 			}
 		}
 		return null;
 	}
-	
 
-	private String applyQueryPlanParametersOnJointure(String query, Integer statementTimeOut)
-	{
-		return applyQueryPlanParametersOnJointure(new PreparedStatementBuilder(query), statementTimeOut).getQuery().toString();
+	private String applyQueryPlanParametersOnJointure(String query, Integer statementTimeOut) {
+		return applyQueryPlanParametersOnJointure(new PreparedStatementBuilder(query), statementTimeOut).getQuery()
+				.toString();
 	}
-	
-	
-	private PreparedStatementBuilder applyQueryPlanParametersOnJointure(PreparedStatementBuilder query, Integer statementTimeOut)
-	{
-		PreparedStatementBuilder r=new PreparedStatementBuilder();
+
+	private PreparedStatementBuilder applyQueryPlanParametersOnJointure(PreparedStatementBuilder query,
+			Integer statementTimeOut) {
+		PreparedStatementBuilder r = new PreparedStatementBuilder();
 		// seqscan on can be detrimental on some rare large file
 		r.append("set enable_nestloop=off;\n");
-		r.append((statementTimeOut==null)?"":"set statement_timeout="+statementTimeOut.toString()+";\n");
+		r.append((statementTimeOut == null) ? "" : "set statement_timeout=" + statementTimeOut.toString() + ";\n");
 		r.append("commit;");
 		r.append(query);
-		r.append((statementTimeOut==null)?"":"reset statement_timeout;");
+		r.append((statementTimeOut == null) ? "" : "reset statement_timeout;");
 		r.append("set enable_nestloop=on;\n");
-				
+
 		r.setQuery(new StringBuilder(r.getQuery().toString().replace(" insert into ", "commit; insert into ")));
 		return r;
 	}
-	
+
 	/**
 	 * execute query with partition if needed
+	 * 
 	 * @param regle
 	 * @param norme
 	 * @param validite
@@ -1515,17 +1551,17 @@ public class NormageEngine {
 		}
 
 		// No partition found; normal execution
-		UtilitaireDao.get("arc").executeImmediate(connection,
-				applyQueryPlanParametersOnJointure(replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, id_source),null)
-				);
+		UtilitaireDao.get("arc").executeImmediate(connection, applyQueryPlanParametersOnJointure(
+				replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, id_source),
+				null));
 
 	}
-	
-	
+
 	/**
-	 * execute the query through the partition rubrique @element
-	 * if their is enough records @minSize
-	 * the query is executed by part, the number max of records is set by @chunkSize
+	 * execute the query through the partition rubrique @element if their is enough
+	 * records @minSize the query is executed by part, the number max of records is
+	 * set by @chunkSize
+	 * 
 	 * @param regle
 	 * @param norme
 	 * @param validite
@@ -1539,96 +1575,94 @@ public class NormageEngine {
 	 * @throws Exception
 	 */
 	private void executerJointureWithPartition(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure, String validiteText, String id_source, String element, int minSize, int chunkSize) throws Exception {
-	/* get the query blocks */
-	String blocCreate=ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
-	String blocInsert="\n insert into {table_destination} " +ManipString.substringAfterFirst(jointure, "\n insert into {table_destination} ");
-	
-	// rework create block to get the number of record in partition if the rubrique is found
-	
-	// watch out the independance rules which can put the partition rubrique in another table than t_rubrique
-	String partitionTableName="";
-	String partitionIdentifier=" m_"+element+" ";
-	
-	Integer statementTimeOut=excludeFileonTimeOut(regle);
-	
-	if (blocCreate.contains(partitionIdentifier))
-	{
-		// get the tablename
-		partitionTableName=
-				ManipString.substringBeforeFirst(
-						ManipString.substringAfterLast(
-								ManipString.substringBeforeLast(blocCreate, partitionIdentifier)
-						,"create temporary table ")
-					," as ");
-		
-		// if independance rule used for the element ($ sign), then use record id "r" as partition key
-		if (blocCreate.contains(" t_"+element+"$ "))
-		{
-			partitionIdentifier="r";
+			String periodicite, String jointure, String validiteText, String id_source, String element, int minSize,
+			int chunkSize) throws Exception {
+		/* get the query blocks */
+		String blocCreate = ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
+		String blocInsert = "\n insert into {table_destination} "
+				+ ManipString.substringAfterFirst(jointure, "\n insert into {table_destination} ");
+
+		// rework create block to get the number of record in partition if the rubrique
+		// is found
+
+		// watch out the independance rules which can put the partition rubrique in
+		// another table than t_rubrique
+		String partitionTableName = "";
+		String partitionIdentifier = " m_" + element + " ";
+
+		Integer statementTimeOut = excludeFileonTimeOut(regle);
+
+		if (blocCreate.contains(partitionIdentifier)) {
+			// get the tablename
+			partitionTableName = ManipString.substringBeforeFirst(
+					ManipString.substringAfterLast(ManipString.substringBeforeLast(blocCreate, partitionIdentifier),
+							"create temporary table "),
+					" as ");
+
+			// if independance rule used for the element ($ sign), then use record id "r" as
+			// partition key
+			if (blocCreate.contains(" t_" + element + "$ ")) {
+				partitionIdentifier = "r";
+			}
+
+			blocCreate = blocCreate + "select max(" + partitionIdentifier + ") from " + partitionTableName;
+		} else {
+			blocCreate = blocCreate + "select 0";
 		}
-		
-		blocCreate=blocCreate+"select max("+partitionIdentifier+") from "+partitionTableName;
-	}
-	else
-	{
-		blocCreate=blocCreate+"select 0";
-	}
-	
-	blocCreate=replaceQueryParameters(blocCreate, norme, validite, periodicite, jointure, validiteText, id_source);
-	blocInsert=replaceQueryParameters(blocInsert, norme, validite, periodicite, jointure, validiteText, id_source);
 
-	int total=UtilitaireDao.get("arc").getInt(connection, new PreparedStatementBuilder(blocCreate));
-	
-	// partition if and only if enough records
-	if (total>=minSize)
-	{	
-		
-		String partitionTableNameWithAllRecords="all_"+partitionTableName;
+		blocCreate = replaceQueryParameters(blocCreate, norme, validite, periodicite, jointure, validiteText,
+				id_source);
+		blocInsert = replaceQueryParameters(blocInsert, norme, validite, periodicite, jointure, validiteText,
+				id_source);
 
-		// rename the table to split
-		StringBuilder bloc3=new StringBuilder("alter table "+partitionTableName+" rename to "+partitionTableNameWithAllRecords+";");
-		UtilitaireDao.get("arc").executeImmediate(connection,bloc3);
-		
-		PreparedStatementBuilder bloc4=new PreparedStatementBuilder();
-		bloc4.append("\n drop table if exists "+partitionTableName+";");
-		bloc4.append("\n create temporary table "+partitionTableName+" as select * from "+partitionTableNameWithAllRecords+" where "+partitionIdentifier+">=?::int and "+partitionIdentifier+"<?::int;");
-		bloc4.append("\n analyze "+partitionTableName+";");
-		bloc4.append(blocInsert);
-		
-		bloc4=applyQueryPlanParametersOnJointure(bloc4, statementTimeOut);
-		
-		// iterate through chunks
-		int iterate=1;
-		do {
-			
-			bloc4.setParameters(Arrays.asList(""+(iterate),""+(iterate+chunkSize)));	
+		int total = UtilitaireDao.get("arc").getInt(connection, new PreparedStatementBuilder(blocCreate));
 
-			UtilitaireDao.get("arc").executeRequest(connection, bloc4);
+		// partition if and only if enough records
+		if (total >= minSize) {
 
-			iterate=iterate+chunkSize;
-			
-		} while (iterate<=total);
+			String partitionTableNameWithAllRecords = "all_" + partitionTableName;
 
-	}
-	else
+			// rename the table to split
+			StringBuilder bloc3 = new StringBuilder(
+					"alter table " + partitionTableName + " rename to " + partitionTableNameWithAllRecords + ";");
+			UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
+
+			PreparedStatementBuilder bloc4 = new PreparedStatementBuilder();
+			bloc4.append("\n drop table if exists " + partitionTableName + ";");
+			bloc4.append("\n create temporary table " + partitionTableName + " as select * from "
+					+ partitionTableNameWithAllRecords + " where " + partitionIdentifier + ">=?::int and "
+					+ partitionIdentifier + "<?::int;");
+			bloc4.append("\n analyze " + partitionTableName + ";");
+			bloc4.append(blocInsert);
+
+			bloc4 = applyQueryPlanParametersOnJointure(bloc4, statementTimeOut);
+
+			// iterate through chunks
+			int iterate = 1;
+			do {
+
+				bloc4.setParameters(Arrays.asList("" + (iterate), "" + (iterate + chunkSize)));
+
+				UtilitaireDao.get("arc").executeRequest(connection, bloc4);
+
+				iterate = iterate + chunkSize;
+
+			} while (iterate <= total);
+
+		} else
 		// no partitions needed
-	{
-		UtilitaireDao.get("arc").executeImmediate(connection,applyQueryPlanParametersOnJointure(blocInsert,statementTimeOut));
+		{
+			UtilitaireDao.get("arc").executeImmediate(connection,
+					applyQueryPlanParametersOnJointure(blocInsert, statementTimeOut));
+		}
 	}
-	}
-	
-	private String replaceQueryParameters(String query, String norme, Date validite,String periodicite, String jointure, String validiteText, String id_source)
-	{
-		return query.toString()
-				.replace("{table_source}", tableSource)
-				.replace("{table_destination}", tableDestination)
-				.replace("{id_norme}", norme)
-				.replace("{validite}", validiteText)
-				.replace("{periodicite}", periodicite)
+
+	private String replaceQueryParameters(String query, String norme, Date validite, String periodicite,
+			String jointure, String validiteText, String id_source) {
+		return query.toString().replace("{table_source}", tableSource).replace("{table_destination}", tableDestination)
+				.replace("{id_norme}", norme).replace("{validite}", validiteText).replace("{periodicite}", periodicite)
 				.replace("{nom_fichier}", id_source);
 	}
-	
 
 	/**
 	 * determine le pere d'une rubrique "m_<***>" dans un bloc
@@ -1714,7 +1748,8 @@ public class NormageEngine {
 	 */
 
 	private void addIndependanceToChildren(ArrayList<String> r, String blocCreate, String mRubrique,
-			HashMap<String, ArrayList<String>> regle, String norme, String periodicite, HashSet<String> exclusion) {
+			HashMap<String, ArrayList<String>> regle, HashMap<String, String> rubriquesAvecRegleDIndependance,
+			String norme, String periodicite, HashSet<String> exclusion) {
 		ArrayList<String> s = getChildren(blocCreate, mRubrique);
 
 		if (s.isEmpty()) {
@@ -1734,8 +1769,9 @@ public class NormageEngine {
 						rubriqueNmclContent.append(",");
 					}
 					rubriqueContent.append(z);
-					rubriqueNmclContent.append("null");	
-					
+					rubriqueNmclContent.append(rubriquesAvecRegleDIndependance.get(z) == null ? "null"
+							: rubriquesAvecRegleDIndependance.get(z));
+
 					nbRubriqueRetenue++;
 				}
 
@@ -1748,14 +1784,15 @@ public class NormageEngine {
 				regle.get("periodicite").add(periodicite);
 				regle.get("validite_inf").add("1900-01-01");
 				regle.get("validite_sup").add("3000-01-01");
-				regle.get("id_classe").add("independance");
+				regle.get("id_classe").add("bloc_independance");
 				regle.get("rubrique").add(rubriqueContent.toString());
 				regle.get("rubrique_nmcl").add(rubriqueNmclContent.toString());
 
 			}
 
 			for (String rub : s) {
-				addIndependanceToChildren(r, blocCreate, rub, regle, norme, periodicite, exclusion);
+				addIndependanceToChildren(r, blocCreate, rub, regle, rubriquesAvecRegleDIndependance, norme,
+						periodicite, exclusion);
 			}
 
 		}
@@ -1914,6 +1951,20 @@ public class NormageEngine {
 			return "m_" + rubrique.substring(2);
 		}
 		return rubrique;
+	}
+	
+	private String anyToM(String rubrique) {
+
+		if (rubrique.startsWith("m_"))
+		{
+			return rubrique;
+		}
+		
+		if (rubrique.startsWith("i_") || rubrique.startsWith("v_")) {
+			return "m_" + rubrique.substring(2);
+		}
+		
+		return "m_"+rubrique;
 	}
 
 	/**
