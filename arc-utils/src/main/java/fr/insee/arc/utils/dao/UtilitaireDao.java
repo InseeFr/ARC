@@ -398,12 +398,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		sql.append("\n  WHERE lower(" + token + "pg_class.relname)=lower(" + sql.quoteText(tableName) + ")");
 		sql.append("\n    AND attnum>0 ");
 		sql.append("\n    AND attisdropped=false ");
+		sql.append("\n    AND NOT pg_is_other_temp_schema(pg_namespace.oid) ");
 		sql.append("\n ORDER BY attname ");
 		sql.append(";");
 
-		
 		try {
-			liste.addAll(new GenericBean(executeRequest(null, sql, ModeRequete.EXTRA_FLOAT_DIGIT)).mapContent().get("attname"));
+			liste.addAll(new GenericBean(executeRequest(connexion, sql, ModeRequete.EXTRA_FLOAT_DIGIT)).mapContent().get("attname"));
 		} catch (SQLException e) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "getColumns()", LOGGER, e);
 		}
