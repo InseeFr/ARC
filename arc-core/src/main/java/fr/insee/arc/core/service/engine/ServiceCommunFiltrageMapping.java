@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -122,31 +123,16 @@ public class ServiceCommunFiltrageMapping {
     }
 
     /**
-     *
+     * return distinct column of a table in a set
      * @param aConnexion
      * @param table
      *
      * @return
      * @throws SQLException
      */
-    public static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) throws SQLException {
-        Set<String> returned = new HashSet<String>();
-        String token = (aTable.contains(".") ? ("schema_columns.table_schema||'.'||") : "");
-        
-        PreparedStatementBuilder requete= new PreparedStatementBuilder();
-        requete.append("SELECT DISTINCT column_name")
-        .append(" FROM information_schema.columns schema_columns")
-        .append(" WHERE " + requete.quoteText(aTable.toLowerCase()) + "=" + token + "schema_columns.table_name");
-        
-        ArrayList<ArrayList<String>> result = UtilitaireDao.get("arc").executeRequest(
-                aConnexion,
-                requete);
-        for (int i = 2; i < result.size(); i++) {
-//            if (logger.isTraceEnabled()) {
-//                StaticLoggerDispatcher.trace("Rubrique trouvée : " + result.get(i).get(0), logger);
-//            }
-            returned.add(result.get(i).get(0));
-        }
-        return returned;
+    public static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) {
+		return new HashSet<>(UtilitaireDao.get("arc").getColumns(aConnexion, new ArrayList<>(), aTable));
     }
+    
+    
 }
