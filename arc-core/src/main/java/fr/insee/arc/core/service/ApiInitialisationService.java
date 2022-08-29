@@ -938,7 +938,7 @@ public class ApiInitialisationService extends ApiService {
         }
 
         if (nbLignes > 0) {
-            maintenancePilotage(this.connexion, this.envExecution, "");
+            ApiService.maintenanceDatabaseClassic(connexion, envExecution);
         }
 
         // Penser à tuer la connexion
@@ -947,7 +947,7 @@ public class ApiInitialisationService extends ApiService {
     public void resetEnvironnement() {
         try {
 	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
-	        maintenancePilotage(this.connexion, this.envExecution, "");
+	        ApiService.maintenanceDatabaseClassic(connexion, envExecution);
         } catch (Exception e) {
         	loggerDispatcher.error(e, LOGGER);
         }
@@ -1125,10 +1125,11 @@ public class ApiInitialisationService extends ApiService {
 
         // maintenance des tables de catalogue car postgres ne le réalise pas correctement sans mettre en oeuvre
         // une stratégie de vacuum hyper agressive et donc ajouter une spécificité pour les DBAs
-        UtilitaireDao.get(poolName).maintenancePgCatalog(this.connexion, "freeze");
-
+        ApiService.maintenanceDatabaseClassic(connexion, envExecution);
+		
     }
 
+    
     
     public static void rebuildPilotage(Connection connexion, String tablePilotage) throws SQLException
     {

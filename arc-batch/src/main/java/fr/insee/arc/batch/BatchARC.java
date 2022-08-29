@@ -90,8 +90,9 @@ public class BatchARC {
 
 	// nombre de runner maximum pour une phase donnée (cas de blocage)
 	private static Integer maxNumberOfThreadsOfTheSamePhaseAtTheSameTime;
-	
-	// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y a un blocage
+
+	// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y
+	// a un blocage
 	// et si un nouveau runner doit etre lancé
 	private static Integer numberOfIterationBewteenBlockageCheck;
 
@@ -103,14 +104,13 @@ public class BatchARC {
 	public static void message(String msg) {
 		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "  " + msg);
 	}
-	
+
 	public static void message(String msg, int iteration) {
-		if (iteration%numberOfIterationBewteenBlockageCheck==0)
-		{
+		if (iteration % numberOfIterationBewteenBlockageCheck == 0) {
 			message(msg);
 		}
 	}
-	
+
 	private void initParameters() {
 
 		keepInDatabase = Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
@@ -138,11 +138,12 @@ public class BatchARC {
 		// nombre de runner maximum pour une phase donnée (cas de blocage)
 		maxNumberOfThreadsOfTheSamePhaseAtTheSameTime = BDParameters.getInt(null,
 				"LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE", 1);
-		
-		// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y a un blocage
+
+		// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y
+		// a un blocage
 		// et si un nouveau runner doit etre lancé
-		numberOfIterationBewteenBlockageCheck = BDParameters.getInt(null,
-				"LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL", 120);
+		numberOfIterationBewteenBlockageCheck = BDParameters.getInt(null, "LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL",
+				120);
 
 		// either we take env and envExecution from database or properties
 		// default is from properties
@@ -194,9 +195,9 @@ public class BatchARC {
 				message("La production est arretée !");
 
 			} else {
-				
+
 				resetPending(envExecution);
-				
+
 				maintenanceTablePilotageBatch();
 
 				message("Déplacements de fichiers");
@@ -255,13 +256,13 @@ public class BatchARC {
 					// boucle de chargement
 					int iteration = 0;
 					message("> iteration " + iteration);
-					
+
 					do {
 
 						iteration++;
-						
-						message("> batch lock check iteration : "+iteration, iteration);
-						
+
+						message("> batch lock check iteration : " + iteration, iteration);
+
 						// delete dead thread i.e. keep only living thread in the pool
 						HashMap<TraitementPhase, ArrayList<ArcThreadFactory>> poolToKeep = new HashMap<>();
 						for (TraitementPhase phase : phases) {
@@ -297,7 +298,6 @@ public class BatchARC {
 								// allowed
 								if (iteration % numberOfIterationBewteenBlockageCheck == 0
 										&& (pool.get(phase).size() < maxNumberOfThreadsOfTheSamePhaseAtTheSameTime)) {
-									iteration = 0;
 
 									// check if all the phase threads are blocked
 									boolean blocked = true;
@@ -329,7 +329,7 @@ public class BatchARC {
 										if (elligibleFiles.get(phase.previousPhase()) != null) {
 											// can start a new thread if no more than the
 											// maxNumberOfThreadsOfTheSamePhaseAtTheSameTime in the stack
-											
+
 											ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
 											a.start();
 											pool.get(phase).add(a);
@@ -349,8 +349,6 @@ public class BatchARC {
 											if (nothingToDoInPrevious) {
 												message(">> starting new reception", iteration);
 												receive(envExecution, false);
-												ApiService.maintenancePgCatalog(null, "freeze");
-												ApiService.maintenancePilotage(null, envExecution, "freeze");
 												// exit loop if new files are recieved not to trigger it several times
 												break;
 											}
@@ -363,17 +361,29 @@ public class BatchARC {
 							// delay between phases not to overload
 							Sleep.sleep(delay);
 						}
+						
+						
+						if (iteration%500==0)
+						{
+							System.out.println(iteration+": database maintenance started");
 
-						//check if production on 
-						productionOn=productionOn();
+							new Thread() {
+								public void run(){
+									ApiService.maintenanceDatabaseClassic(null, envExecution);
+								}
+							}.start();
+						}
+						
+						// check if production on
+						productionOn = productionOn();
 
 						// check if batch must exit loop
 						// exit if nothing left to do or if the production had been turned OFF
 						exit = isNothingLeftToDo(envExecution) || !productionOn;
-						
+
 						Sleep.sleep(delay);
 						System.gc();
-						
+
 					} while (!exit);
 
 					if (productionOn) {
@@ -383,8 +393,6 @@ public class BatchARC {
 
 				}
 
-				// Maintenance du catalog
-				ApiService.maintenancePgCatalog(null, "full");
 				message("Traitement Fin");
 
 				if (args != null && args.length > 0 && args[0].equals("noExit")) {
@@ -418,12 +426,15 @@ public class BatchARC {
 		requete.append(
 				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
 		UtilitaireDao.get("arc").executeRequest(null, requete);
+		
+		
 
-		// opération de maintenance
-		message("Maintenance pilotage");
-		ApiService.maintenancePilotage(null, envExecution, "freeze");
-		message("Fin de Maintenance pilotage");
+		// Maintenance full du catalog
+		ApiService.maintenancePgCatalog(null, "full");
 
+		// maintenance des tables métier de la base de données
+		ApiService.maintenanceDatabaseClassic(null, envExecution);
+		
 	}
 
 	/**

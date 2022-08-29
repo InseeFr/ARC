@@ -590,12 +590,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             } catch (Exception ex) {
                 LoggerHelper.error(LOGGER_APISERVICE,ApiService.class, "finaliser()", ex);
             }
-			
-          if (this.currentPhase.equals(TraitementPhase.CHARGEMENT.toString()) && this.paramBatch!=null)
-          {
-  				ApiService.maintenancePgCatalog(this.connexion, "freeze analyze");
-  				ApiService.maintenancePilotageT(this.connexion, this.envExecution, "freeze analyze");
-          }
 		}
         }
         finally {
@@ -654,6 +648,12 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
    
 
+    /**
+     * Maintenance sur la table de pilotage
+     * @param connexion
+     * @param envExecution
+     * @param type
+     */
     public static void maintenancePilotage(Connection connexion, String envExecution, String type) {
         String tablePil = dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
         StaticLoggerDispatcher.info("** Maintenance Pilotage **", LOGGER_APISERVICE);
@@ -696,6 +696,19 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             UtilitaireDao.get(poolName).maintenancePgCatalog(connexion, type);
 	}
 
+	/**
+	 * classic database maintenance routine
+	 * 2 vacuum are sent successively to remove dead tuple completely
+	 * @param connexion
+	 * @param envExecution
+	 * @param typeMaintenance
+	 */
+	 public static void maintenanceDatabaseClassic(Connection connexion, String envExecution)
+	 {
+		 ApiService.maintenanceDatabase(connexion, envExecution, "");
+		 ApiService.maintenanceDatabase(connexion, envExecution, "analyze");
+	 }
+	 
     /**
      * vacuum analyze et index sur les tables * vacuum analyze et index sur les tables
      * 
@@ -704,11 +717,15 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * @param typeMaintenance
      *            : full ou ""
      */         
-    public static void maintenance(Connection connexion, String envExecution, String typeMaintenance)       {
-//        maintenancePilotage(connexion, envExecution, typeMaintenance);
-//		maintenancePgCatalog(connexion, typeMaintenance);
+    public static void maintenanceDatabase(Connection connexion, String envExecution, String typeMaintenance)
+    {
+        ApiService.maintenancePgCatalog(connexion, typeMaintenance);
+        
+        ApiService.maintenancePilotage(connexion, envExecution, typeMaintenance);
+        
+		ApiService.maintenancePilotageT(connexion, envExecution, typeMaintenance);
+		
     	StaticLoggerDispatcher.info("** Fin de maintenance **", LOGGER_APISERVICE);
-
     }
 
     public static String temporaryTableName(String aEnvExecution, String aCurrentPhase, String tableName, String... suffix) {
@@ -853,85 +870,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         return requete;
     }
 
-    
-    
-    public String getMiseANiveauSchemaTable(String aTableReference, String... aTableCible) throws SQLException {
-
-        StringBuilder returned = new StringBuilder();
-        
-        for (int i = 0; i < aTableCible.length; i++) {
-    	ArrayList<ArrayList<String>> listeColonne = UtilitaireDao.get(poolName).executeRequest(this.connexion,
-    			new PreparedStatementBuilder(FormatSQL.listAjoutColonne(aTableReference, aTableCible[i])));
-        
-        ArrayList<ArrayList<String>> listeColonneKeeped = new ArrayList<ArrayList<String>>();
-
-        for (int j =2; j<listeColonne.size(); j++) {
-//            String debutNomColonne = listeColonne.get(j).get(0).substring(0, 2);
-//            if (!(debutNomColonne.equalsIgnoreCase("i_") || debutNomColonne.equalsIgnoreCase("v_"))) {
-                listeColonneKeeped.add(listeColonne.get(j));
-//            }
-        }
-
-            returned.append(FormatSQL.addColonnePourGenericBeanData(aTableCible[i], listeColonneKeeped) + "\n");
-        }
-        return returned.toString();
-        
-    }
-
-
-    /**
-     * Renvoie la liste des colonnes d'une table, avec comme séparateur une virgule
-     *
-     * @param connexion
-     * @param tableIn
-     * @return
-     */
-    public String listeColonne(Connection connexion, String tableIn) {
-        ArrayList<ArrayList<String>> result = new ArrayList<>();
-        try {
-            result = UtilitaireDao.get(poolName).executeRequest(connexion, new PreparedStatementBuilder(FormatSQL.listeColonne(tableIn)));
-
-        } catch (SQLException ex) {
-            LoggerHelper.error(LOGGER_APISERVICE,ApiService.class, "listeColonne()", ex);
-        }
-        StringBuilder listCol = new StringBuilder();
-        if (result.size() >= 2) {// les données ne sont qu'à partir du 3e
-            // élement (1er noms, 2e types)
-            for (int i = 2; i < result.size(); i++) {
-                if (i == 2) {// initialisation de la liste (pas de virgule)
-                    listCol.append(result.get(i).get(0));
-                } else {
-                    listCol.append("," + result.get(i).get(0));
-                }
-            }
-        }
-        return listCol.toString();
-    }
-    
-    /**
-     * Renvoie un hashset des colonnes
-     *
-     * @param connexion
-     * @param tableIn
-     * @return
-     */
-    public HashSet<String> listeColonneHashSet(Connection connexion, String tableIn) {
-        ArrayList<ArrayList<String>> result = new ArrayList<>();
-        try {
-            result = UtilitaireDao.get(poolName).executeRequest(connexion, new PreparedStatementBuilder(FormatSQL.listeColonne(tableIn)));
-        } catch (SQLException ex) {
-            LoggerHelper.error(LOGGER_APISERVICE,ApiService.class, "listeColonne()", ex);
-        }
-        HashSet<String> listCol = new HashSet<String>();
-        if (result.size() >= 2) {// les données ne sont qu'à partir du 3e
-            // élement (1er noms, 2e types)
-            for (int i = 2; i < result.size(); i++) {
-                    listCol.add(result.get(i).get(0));
-            }
-        }
-        return listCol;
-    }
-
     /**
      * Créer une table image vide d'une autre table Si le schema est spécifié, la table est créée dans le schema; sinon elle est crée en
      * temporary
@@ -959,46 +897,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
 
     /**
-     * Insertion dans une table resultat; les id_source de la table resultat présent dans la table pilotage sont préalablement effacés Si le
-     * schema est spécifié, la table est créée dans le schema; sinon elle est crée en temporary
-     *
-     * @param tableIn
-     * @param tableToBeCreated
-     * @return
-     */
-    public String insertTableResultat(String tableTemp, String tableFinale, String tableFinaleBuffer, String tablePil, String... col) {
-        StringBuilder requete = new StringBuilder();
-        // sécurité inutile à condition qu'on fasse bien une transaction donnée + pilotage
-        // requete.append("DELETE FROM " + tableFinale + " A USING (select id_source from " + tablePil +
-        // ") B where a.id_source=B.id_source; ");
-        // requete.append("do $$ begin DROP INDEX "+ManipString.substringBeforeFirst(tableFinale,
-        // ".")+"idx1_"+ManipString.substringAfterFirst(tableFinale, ".")+"; exception when others then end; $$;");
-
-        // if (tableFinaleBuffer != null) {
-        // requete.append("LOCK TABLE "+tableFinaleBuffer+" IN ACCESS EXCLUSIVE MODE;");
-        // }
-
-        String cols;
-        if (col.length == 1) {
-            cols = col[0];
-        } else {
-            cols = listeColonne(this.connexion, tableTemp);
-        }
-        // System.out.println(cols);
-
-        // loggerDispatcher.info("Liste des colonnes de la table " + tableTemp +
-        // " : " + cols,logger);
-        if (tableFinale != null) {
-            requete.append("\n INSERT INTO " + tableFinale + " (" + cols + ") select " + cols + " from " + tableTemp + " ; ");
-        }
-        if (tableFinaleBuffer != null) {
-            requete.append("\n INSERT INTO " + tableFinaleBuffer + " (" + cols + ") select " + cols + " from " + tableTemp + " ; ");
-        }
-
-        return requete.toString();
-    }
-    
-    /**
      * Permet de déclencher l'intialisation en production à une certaine heure
      */
     public static void declencherInitialisationEnProduction() {
@@ -1020,66 +918,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             LoggerHelper.error(LOGGER_APISERVICE, e);
         }
     }
-    
-    
-    
-    /**
-     * Insertion dans une table resultat; les id_source de la table resultat présent dans la table pilotage sont préalablement effacés Si le
-     * schema est spécifié, la table est créée dans le schema; sinon elle est crée en temporary
-     *
-     * @param tableIn
-     * @param tableToBeCreated
-     * @return
-     */
-    public String insertTableResultat2(String tableTemp, String tableFinale, String tableFinaleBuffer, String tablePil, String... col) {
-        StringBuilder requete = new StringBuilder();
-        
-        // récupération des colonnes de la table
-        String cols;
-        if (col.length >0) {
-            cols = col[0];
-        } else {
-            cols = listeColonne(this.connexion, tableTemp);
-        }
-        
-        // on parse cols pour trier les colonnes. Certaines vont dans le type composite, d'autre pas
-        // Celles qui commencent pas i_ ou v_ sont les noms des attributs contenuent dans le fichier source et vont donc
-        // dans le type composite mais pas ailleurs.
-        
-        String[] arrayColonne = cols.split(",");
-        String colonneNonAttribut = "";
-        String colonneAttribut="";
-        
-        for (String colonne : arrayColonne) {
-            String debutNomCol = colonne.trim().substring(0, 2);
-            if (!(debutNomCol.equalsIgnoreCase("i_") || debutNomCol.equalsIgnoreCase("v_"))) {
-                colonneNonAttribut = colonneNonAttribut + colonne+",";
-            }
-            else
-            {
-            	colonneAttribut = colonneAttribut + colonne+","; 
-            }
-        }
-        
-        //on supprime les dernières virgules
-        colonneNonAttribut=ManipString.substringBeforeLast(colonneNonAttribut, ",");
-        colonneAttribut=ManipString.substringBeforeLast(colonneAttribut, ",");
-
-        // on construit la chaine d'insertion
-        String colsInserted = colonneNonAttribut + ", data";
-        String colsValues = colonneNonAttribut + ", ROW("+colonneAttribut+") ";
-
-        
-        if (tableFinale != null) {
-            requete.append("\n INSERT INTO " + tableFinale + " (" + colsInserted + ") select " + colsValues + " from " + tableTemp + " ; ");
-        }
-        if (tableFinaleBuffer != null) {
-            requete.append("\n INSERT INTO " + tableFinaleBuffer + " (" + colsInserted + ") select " + colsValues + " from " + tableTemp + " ; ");
-        }
-
-        return requete.toString();
-    }
-    
     
 	/**
 	 * Directory management
