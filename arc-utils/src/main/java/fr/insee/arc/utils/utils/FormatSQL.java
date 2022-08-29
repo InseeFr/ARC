@@ -183,32 +183,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 
    
     /**
-     * Pour récupérer la liste des colonnes d'une table
-     *
-     * @param table
-     * @return
-     */
-    public static String listeColonne(String table, String... listeAttribut)
-    {
-        String tableSchema = ManipString.substringBeforeFirst(table, ".");
-        String tableName = ManipString.substringAfterLast(table, ".");
-        StringBuilder requete = new StringBuilder();
-        requete.append("SELECT column_name as column_name");
-        for (int i = 0; i < listeAttribut.length; i++)
-        {
-            requete.append(", " + listeAttribut[i]/* + " AS " + listeAttribut[i]*/);
-        }
-        requete.append(" ");
-        requete.append("FROM INFORMATION_SCHEMA.COLUMNS ");
-        requete.append("WHERE table_name='" + tableName.toLowerCase() + "' ");
-        if (table.contains("."))
-        {
-            requete.append(" AND table_schema='" + tableSchema.toLowerCase() + "'; ");
-        }
-        return requete.toString();
-    }
-    
-    /**
      * Pour récupérer la liste des colonnes d'une table rapidement
      *
      * @param table
@@ -439,19 +413,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, String columns,
             String clauseWhere, boolean dropFirst)
     {
-        // StringBuilder requete = new StringBuilder();
-        // if (dropFirst)
-        // {
-        // requete.append(dropUniqueTable(aNomTableCible));
-        // }
-        // String where = ((StringUtils.isBlank(clauseWhere)) ? empty : " WHERE
-        // " + clauseWhere);
-        // requete.append("\n CREATE TABLE " + aNomTableCible + " " +
-        // FormatSQL.WITH_NO_VACUUM + " AS ");
-        // requete.append("\n SELECT " + columns + " FROM " + aNomTableSource);
-        // requete.append(where + ";");
-        // return requete.toString();
-        
         // Si la table contient un . on est dans un schema, sinon c'est du temps
         if (aNomTableCible.contains(".")) {
             return createObjectAsSelectFrom(ObjectType.TABLE, aNomTableCible, aNomTableSource, columns, clauseWhere,
@@ -934,47 +895,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         requete.append("ALTER TABLE " + table + " ");
         requete.append("DROP COLUMN " + colonne);
         requete.append(";");
-        return requete.toString();
-    }
-
-    /**
-     * Détection des colonnes d'une table {@code tableIn} qui ne sont pas encore
-     * dans l'autre table {@code tableOut}
-     *
-     * @param tableIn
-     *            table servant de référence
-     * @param tableOut
-     * @return
-     */
-    public static String listAjoutColonne(String tableIn, String tableOut)
-    {
-        // scission du nom en entrée en schema + nom de table
-        String tableSchemaIn = ManipString.substringBeforeFirst(tableIn, DOT);
-        String tableNameIn = ManipString.substringAfterLast(tableIn, DOT);
-        String tableSchemaOut = ManipString.substringBeforeFirst(tableOut, DOT);
-        String tableNameOut = ManipString.substringAfterLast(tableOut, DOT);
-        StringBuilder requete = new StringBuilder();
-        requete.append("WITH ");
-        requete.append("def AS (	SELECT column_name, data_type ");
-        requete.append("		FROM INFORMATION_SCHEMA.COLUMNS ");
-        requete.append("		WHERE TABLE_NAME='" + tableNameOut.toLowerCase() + "' ");
-        if (tableOut.contains(DOT))
-        {
-            requete.append("	AND TABLE_schema='" + tableSchemaOut.toLowerCase() + "' ");
-        }
-        requete.append("), ");
-        requete.append("temp AS (	SELECT column_name, udt_name, data_type");
-        requete.append("		FROM INFORMATION_SCHEMA.COLUMNS ");
-        requete.append("		WHERE TABLE_NAME='" + tableNameIn.toLowerCase() + "' ");
-        if (tableIn.contains(DOT))
-        {
-            requete.append("			AND TABLE_schema='" + tableSchemaIn.toLowerCase() + "'");
-        }
-        requete.append(") ");
-        requete.append(
-                "SELECT column_name, ltrim(udt_name,'_')||(CASE WHEN lower(data_type)='ARRAY' THEN '[]' ELSE '' END) AS data_type ");
-        requete.append("FROM temp ");
-        requete.append("WHERE NOT EXISTS (SELECT 1 FROM def WHERE temp.column_name=def.column_name); ");
         return requete.toString();
     }
 
@@ -1484,57 +1404,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     {
         return "row(" + aNomVariable + ")::text IN ('()','(\"\")')";
     }
-
-    /**
-     * recrée la table avec son modèle quand la structure de la table est
-     * différente du modèle (la table a changée)
-     *
-     * @param table
-     * @param model
-     * @return
-     */
-    public static String replaceIfTableChanged(String table, String model)
-    {
-        String tableSchema = ManipString.substringBeforeFirst(table, ".").toLowerCase();
-        String tableName = ManipString.substringAfterFirst(table, ".").toLowerCase();
-        String modelSchema = ManipString.substringBeforeFirst(model, ".").toLowerCase();
-        String modelName = ManipString.substringAfterFirst(model, ".").toLowerCase();
-        StringBuilder returned = new StringBuilder();
-        returned.append("\n do $$ ");
-        returned.append("DECLARE n integer; ");
-        returned.append("BEGIN ");
-        returned.append("select count(1) into n from ( ");
-        returned.append("( ");
-        returned.append(
-                "select column_name||'.'||data_type||'.'||udt_name as t from information_schema.columns where table_name='"
-                        + tableName + "' and table_schema='" + tableSchema + "' ");
-        returned.append("EXCEPT ");
-        returned.append(
-                "select column_name||'.'||data_type||'.'||udt_name as t from information_schema.columns where table_name='"
-                        + modelName + "' and table_schema='" + modelSchema + "' ");
-        returned.append(") ");
-        returned.append("UNION ALL ");
-        returned.append("( ");
-        returned.append(
-                "select column_name||'.'||data_type||'.'||udt_name as t from information_schema.columns where table_name='"
-                        + modelName + "' and table_schema='" + modelSchema + "' ");
-        returned.append("EXCEPT ");
-        returned.append(
-                "select column_name||'.'||data_type||'.'||udt_name as t from information_schema.columns where table_name='"
-                        + tableName + "' and table_schema='" + tableSchema + "' ");
-        returned.append(") ");
-        returned.append(") v;");
-        returned.append("\n if (n>0) then ");
-        returned.append("DROP TABLE IF EXISTS " + tableSchema + "." + tableName + "; ");
-        returned.append("ALTER TABLE " + modelSchema + "." + modelName + " rename to " + tableName + "; ");
-        returned.append("else ");
-        returned.append("DROP TABLE IF EXISTS " + modelSchema + "." + modelName + "; ");
-        returned.append("end if; ");
-        returned.append("END; ");
-        returned.append("$$;\n");
-        return returned.toString();
-    }
-
     /**
      *
      * @param anExpression
@@ -1623,38 +1492,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         return returned.toString();
     }
 
-    /**
-     * Requête pour récupérer le modèle de données d'une table Attention, les
-     * noms des colonnes qui contiennent l'information sont attname et typname.
-     * 
-     * @param table
-     * @return
-     */
-    public static PreparedStatementBuilder modeleDeDonneesTable(String tableSchema, String tableName)
-    {
-    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
-        requete.append("\n SELECT lower(column_name) as attname");
-        requete.append("\n   , "+EXPRESSION_TYPE_SQL_SEUL+" as typname");
-        requete.append("\n FROM INFORMATION_SCHEMA.COLUMNS ");
-        requete.append("\n WHERE table_name = " + requete.quoteText(tableName.toLowerCase()) + " ");
-        requete.append(" AND table_schema = " + requete.quoteText(tableSchema.toLowerCase()) + "; ");
-        return requete;
-    }
-    
-    /**
-     * Requête pour récupérer le modèle de données d'une table Attention, les
-     * noms des colonnes qui contiennent l'information sont attname et typname.
-     * 
-     * @param table
-     * @return
-     */
-    public static PreparedStatementBuilder modeleDeDonneesTable(String tableSchemaName)
-    {
-    	String tableSchema = tableSchemaName.split("\\.")[0];
-		String tableName = tableSchemaName.split("\\.")[1];
-		return modeleDeDonneesTable(tableSchema,tableName);
-    }
-    
     /**
      * Renvoie les tables héritant de celle-ci
      * Colonnes de résultat:

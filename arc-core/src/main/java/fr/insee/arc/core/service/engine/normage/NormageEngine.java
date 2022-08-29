@@ -586,14 +586,14 @@ public class NormageEngine {
 
 		}
 
-		
+		// rubriques which had been declared explicitly with independance rules are remove from exclusion
 		for (String k:rubriquesAvecRegleDIndependance.keySet())
 		{
 			rubriqueExclusion.remove(k);	
 		}
 
 		
-		// on déroule sur les fils pour ajouter les regles d'indépendance
+		// ARC compute which rubriques are independant and set the independance rules 
 		ArrayList<String> r = new ArrayList<>();
 		addIndependanceToChildren(r, blocCreate, getM(blocCreate), regle, rubriquesAvecRegleDIndependance, norme,
 				periodicite, rubriqueExclusion);
@@ -1114,6 +1114,19 @@ public class NormageEngine {
 
 	}
 
+	/**
+	 * Method that calculate the query to create the tables for independant rules
+	 * The goal is to put the lines of independant block front to front
+	 * For rubriques with as a value declared in rubriqueNcml, the calculation must respect the relationship between this values
+	 * @param blocRequete
+	 * @param nullTableRequired
+	 * @param rubrique
+	 * @param rubriqueNmcl
+	 * @param table
+	 * @param pere
+	 * @param autreCol
+	 * @return
+	 */
 	private boolean calculerTableIndependance(StringBuilder blocRequete, boolean nullTableRequired, ArrayList<String> rubrique, HashMap<String, String> rubriqueNmcl, HashMap<String, String> table, HashMap<String, String> pere, HashMap<String, String> autreCol)
 	{
 		boolean isThereAnyValue=false;
@@ -1475,19 +1488,6 @@ public class NormageEngine {
 
 		return returned;
 
-	}
-
-	private String findFatherOfRubrique(String blocCreate, String rubrique) {
-
-		rubrique = ((rubrique.startsWith("i_") || rubrique.startsWith("v_")) ? "" : "m_") + rubrique;
-
-		if (!blocCreate.contains(rubrique))
-			return null;
-
-		return ManipString.substringBeforeFirst(
-				ManipString.substringAfterLast(ManipString.substringBeforeLast(blocCreate, " as " + rubrique + " "),
-						"create temporary table t_"),
-				" as ");
 	}
 
 	private Integer excludeFileonTimeOut(HashMap<String, ArrayList<String>> regle) {
