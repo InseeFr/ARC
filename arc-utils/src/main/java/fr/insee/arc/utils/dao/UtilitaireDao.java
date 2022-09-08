@@ -1358,16 +1358,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
-	public void createAsSelectFrom(Connection aConnexion, String aNomTableCible, String aNomTableSource,
-			boolean dropFirst) throws SQLException {
-		this.executeImmediate(aConnexion, FormatSQL.createAsSelectFrom(aNomTableCible, aNomTableSource, dropFirst));
-	}
-
-	public void createAsSelectFrom(Connection aConnexion, String aNomTableCible, String aNomTableSource)
-			throws SQLException {
-		this.executeImmediate(aConnexion, FormatSQL.createAsSelectFrom(aNomTableCible, aNomTableSource));
-	}
-
 	/**
 	 * Postgres libère mal l'espace sur les tables quand on fait trop d'opération
 	 * sur les colonnes. Un vacuum full des tables du méta-modèle permet de résoudre

@@ -904,7 +904,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 					.append("  liste_colonne.nom_variable_metier,").append("  null,").append(
 							"  null")
 					.append("  FROM (")
-					.append(FormatSQL.listeColonneTableMetierSelonFamilleNorme(ApiService.IHM_SCHEMA,
+					.append(ApiService.listeColonneTableMetierSelonFamilleNorme(ApiService.IHM_SCHEMA,
 									viewNorme.mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0)))
 					.append(") liste_colonne");
 				

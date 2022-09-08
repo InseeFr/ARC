@@ -194,12 +194,14 @@ INSERT INTO arc.ext_mod_type_autorise values ('text','Texte sans taille limite')
 INSERT INTO arc.ext_mod_type_autorise values ('text[]','Tableau de texte sans limite') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_mod_type_autorise values ('timestamp without time zone','Date et heure') ON CONFLICT DO NOTHING;
 
+-- a "family" identifies the one output data model
 CREATE TABLE IF NOT EXISTS arc.ihm_famille 
 ( 
   id_famille text NOT NULL, 
   CONSTRAINT ihm_famille_pkey PRIMARY KEY (id_famille) 
 ); 
         
+-- client names for the data retrieval webservice 
 CREATE TABLE IF NOT EXISTS arc.ihm_client 
 (id_famille text NOT NULL, 
 id_application text NOT NULL, 
@@ -208,6 +210,24 @@ CONSTRAINT fk_client_famille FOREIGN KEY (id_famille)
 REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE 
 ON UPDATE NO ACTION ON DELETE NO ACTION 
 );        
+
+-- define the white list for hosts accessing the data retrieval webservice
+CREATE TABLE IF NOT EXISTS arc.ihm_webservice_whitelist
+(
+host_allowed text, id_famille text, id_application text, is_secured text
+, PRIMARY KEY (host_allowed)
+, FOREIGN KEY (id_famille,id_application) REFERENCES arc.ihm_client(id_famille,id_application)
+ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- data retrieval webservice logs 
+CREATE TABLE IF NOT EXISTS arc.ihm_webservice_log
+(
+id_webservice_logging bigserial, id_famille text, id_application text, host_allowed text, event_timestamp timestamp
+, PRIMARY KEY (id_webservice_logging)
+, FOREIGN KEY (id_famille,id_application) REFERENCES arc.ihm_client(id_famille,id_application)
+ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 
 -- tables de gestion des règles        

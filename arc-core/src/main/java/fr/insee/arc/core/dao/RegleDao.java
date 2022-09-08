@@ -29,15 +29,15 @@ public class RegleDao {
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
 
 		PreparedStatementBuilder sb = new PreparedStatementBuilder();
-		sb.append("SELECT 	id_regle, id_classe, ");
-		sb.append("		rubrique_pere, rubrique_fils, borne_inf, borne_sup, condition, pre_action, blocking_threshold, error_row_processing  ");
-		sb.append("FROM " + tableRegle + " a ");
+		sb.append("SELECT id_regle, id_classe, ");
+		sb.append(" rubrique_pere, rubrique_fils, borne_inf, borne_sup, condition, pre_action, blocking_threshold, error_row_processing  ");
+		sb.append(" FROM " + tableRegle + " a ");
 		sb.append(" WHERE EXISTS (SELECT 1 FROM (SELECT id_norme, periodicite, validite FROM " + tableIn
 				+ " LIMIT 1) b ");
-		sb.append("		WHERE a.id_norme=b.id_norme ");
-		sb.append("		AND a.periodicite=b.periodicite ");
-		sb.append("		AND to_date(b.validite,'YYYY-MM-DD')>=a.validite_inf ");
-		sb.append("		AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup) ");
+		sb.append(" WHERE a.id_norme=b.id_norme ");
+		sb.append(" AND a.periodicite=b.periodicite ");
+		sb.append(" AND to_date(b.validite,'YYYY-MM-DD')>=a.validite_inf ");
+		sb.append(" AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup) ");
 		sb.append("; ");
 
 		HashMap<String, ArrayList<String>> g = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, sb))

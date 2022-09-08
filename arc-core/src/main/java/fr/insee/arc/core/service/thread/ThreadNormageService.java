@@ -135,24 +135,24 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     private void creerTableTravail() throws SQLException {
         StaticLoggerDispatcher.info("Créer les tables images", LOGGER);
         // Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
-        StringBuilder bloc1 = new StringBuilder("DISCARD TEMP;");
+        StringBuilder query = new StringBuilder("DISCARD TEMP;");
         
         // créer la table de pilotage relative au thread
-        bloc1.append(createTablePilotageIdSource(this.tablePilTemp, this.tableNormagePilTemp, this.idSource));
-        bloc1.append(createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
+        query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableNormagePilTemp, this.idSource));
+        query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
 
-        StaticLoggerDispatcher.debug("requete créer table travail" + bloc1, LOGGER);
+        StaticLoggerDispatcher.debug("requete créer table travail" + query, LOGGER);
 
        
-        //On met que le normage s'est bien passé
-        bloc1.append("\n UPDATE "+this.tableNormagePilTemp);
-        bloc1.append("\n\t SET etat_traitement = '{"+TraitementEtat.OK+"}'");
-        bloc1.append("\n\t , phase_traitement = '"+this.currentPhase+"'");
-        bloc1.append("\n\t WHERE id_source='"+this.idSource+"';");
+        //On indique que le normage s'est bien passé
+        query.append("\n UPDATE "+this.tableNormagePilTemp);
+        query.append("\n\t SET etat_traitement = '{"+TraitementEtat.OK+"}'");
+        query.append("\n\t , phase_traitement = '"+this.currentPhase+"'");
+        query.append("\n\t WHERE id_source='"+this.idSource+"';");
         
-        bloc1.append(this.createTableTravail("", this.tableNormageDataTemp, this.tableNormageKOTemp, this.tableNormagePilTemp, TraitementEtat.KO.toString()));
+        query.append(this.createTableTravail("", this.tableNormageDataTemp, this.tableNormageKOTemp, this.tableNormagePilTemp, TraitementEtat.KO.toString()));
                 
-        UtilitaireDao.get(poolName).executeBlock(this.getConnexion(), bloc1);
+        UtilitaireDao.get(poolName).executeBlock(this.getConnexion(), query);
 
     }
 
@@ -230,32 +230,26 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
      */
     private void insertionFinale() throws Exception {
     	
-    	updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure);
+    	StringBuilder query=new StringBuilder();
     	
+    	// update the number of record ans structure in the pilotage table
+    	query.append(updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure));
+    
     	// promote the application user account to full right
-    	switchToFullRightRole();
+    	query.append(switchToFullRightRole());
     	
     	String tableIdSourceOK=tableOfIdSource(this.tableNormageOK ,this.idSource);
-        createTableInherit(connexion, this.tableNormageOKTemp, tableIdSourceOK);
+    	query.append(createTableInherit(connexion, this.tableNormageOKTemp, tableIdSourceOK));
         String tableIdSourceKO=tableOfIdSource(this.tableNormageKO ,this.idSource);
-        createTableInherit(connexion, this.tableNormageKOTemp, tableIdSourceKO);
+        query.append(createTableInherit(connexion, this.tableNormageKOTemp, tableIdSourceKO));
         
-        StringBuilder requete = new StringBuilder();
-        
-        if (paramBatch == null) {
-        	requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableNormageOK + "_todo;"));
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableNormageOK +";"));
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ this.tableNormageKO +";"));
-        }
-        else
-        {
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableNormageOK + "_todo;"));
-            requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
-//            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ this.tableNormageKO +";"));
+        if (paramBatch != null) {
+        	query.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
         }
         
-        requete.append(this.marquageFinal(this.tablePil, this.tableNormagePilTemp, this.idSource));
-        UtilitaireDao.get("arc").executeBlock(connexion, requete);
+        query.append(this.marquageFinal(this.tablePil, this.tableNormagePilTemp, this.idSource));
+        
+        UtilitaireDao.get("arc").executeBlock(connexion, query);
 
         
     }

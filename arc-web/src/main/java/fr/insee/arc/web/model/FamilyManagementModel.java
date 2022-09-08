@@ -2,6 +2,7 @@ package fr.insee.arc.web.model;
 
 import fr.insee.arc.web.model.viewobjects.ViewClient;
 import fr.insee.arc.web.model.viewobjects.ViewFamilleNorme;
+import fr.insee.arc.web.model.viewobjects.ViewHostAllowed;
 import fr.insee.arc.web.model.viewobjects.ViewTableMetier;
 import fr.insee.arc.web.model.viewobjects.ViewVariableMetier;
 import fr.insee.arc.web.util.VObject;
@@ -14,12 +15,15 @@ public class FamilyManagementModel implements ArcModel {
 
     private VObject viewTableMetier;
 
+    private VObject viewHostAllowed;
+    
     private VObject  viewVariableMetier;
 
     public FamilyManagementModel() {
 		this.viewClient = new ViewClient();
 		this.viewFamilleNorme = new ViewFamilleNorme();
 		this.viewTableMetier = new ViewTableMetier();
+		this.viewHostAllowed = new ViewHostAllowed();
 		this.viewVariableMetier = new ViewVariableMetier();
 	}
 
@@ -46,6 +50,14 @@ public class FamilyManagementModel implements ArcModel {
 	public void setViewTableMetier(VObject viewTableMetier) {
 		this.viewTableMetier = viewTableMetier;
 	}
+	
+	public VObject getViewHostAllowed() {
+		return viewHostAllowed;
+	}
+
+	public void setViewHostAllowed(VObject viewHostAllowed) {
+		this.viewHostAllowed = viewHostAllowed;
+	}
 
 	public VObject getViewVariableMetier() {
 		return viewVariableMetier;
@@ -54,5 +66,7 @@ public class FamilyManagementModel implements ArcModel {
 	public void setViewVariableMetier(VObject viewVariableMetier) {
 		this.viewVariableMetier = viewVariableMetier;
 	}
+	
+	
 
 }

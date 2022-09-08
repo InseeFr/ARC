@@ -42,11 +42,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     private static final String _ID = "id_";
     public static final String PARALLEL_WORK_MEM = "24MB";
     public static final String SEQUENTIAL_WORK_MEM = "32MB";
-    private static final String SQL_SEPARATOR = "chr(1)";
-
-    private static final String MAX_VALUE_BIGINT_SQL_POSTGRES = new BigInteger("2").pow(63).subtract(BigInteger.ONE)
-            .toString();
-    private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
     public static final boolean DROP_FIRST_FALSE = false;
     public static final boolean DROP_FIRST_TRUE = true;
     public static final int TAILLE_MAXIMAL_BLOC_SQL = 300000;
@@ -54,9 +49,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final int TIME_OUT_SQL_EN_HEURE = 100;
     public static final int TIMEOUT_MAINTENANCE = 600000;
     
+    private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
 
-    public static final String EXPRESSION_TYPE_SQL_SEUL = "CASE WHEN lower(data_type)='array' \n THEN replace(replace(replace(ltrim(udt_name,'_'),'int4','int'),'int8','bigint'),'float8','float')||'[]' \n ELSE lower(data_type) \n END ";
-    public static final String EXPRESSION_TYPE_SQL = EXPRESSION_TYPE_SQL_SEUL + " AS data_type";
     
     public enum ObjectType
     {
@@ -68,6 +62,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
             this.name = aName;
         }
 
+        @Override
         public String toString()
         {
             return this.name;
@@ -76,7 +71,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 
     public static String end(String[] separator)
     {
-        String end = new String();
+        String end;
         if (separator == null || separator.length == 0)
         {
             end = defaultSeparator;
@@ -88,54 +83,15 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         return end;
     }
 
-    /**
-     * Requête de paramétrage. Utile pour faire des jointures sur des colonnes
-     * NULLABLE.
-     *
-     * @param isTransformNullEquals
-     * @return la requête qui permet de valoriser l'expression
-     *         {@code machin = NULL} à une des deux valeurs de vérité
-     *         {@code true} ou {@code false}.
-     */
-    public static final String setTransformNullEquals(boolean isTransformNullEquals)
+     public static String dropTableCascade(String aTableName)
     {
-        return "set transform_null_equals=" + isTransformNullEquals + ";";
+        return dropObjectCascade(ObjectType.TABLE, aTableName);
     }
 
-     public static String dropUniqueTable(String aTableName)
-    {
-        return dropUniqueObject(ObjectType.TABLE, aTableName);
-    }
-
-    public static String dropUniqueView(String aTableName)
-    {
-        return dropUniqueObject(ObjectType.VIEW, aTableName);
-    }
-
-    public static String dropUniqueObject(ObjectType tableOrView, String anObjectName)
+    public static String dropObjectCascade(ObjectType tableOrView, String anObjectName)
     {
         StringBuilder sql = new StringBuilder("\n DROP " + tableOrView + " IF EXISTS " + anObjectName + " CASCADE;");
         return sql.toString();
-    }
-
-    public static String dropViews(Collection<String> someViewNames)
-    {
-        return dropObjects(ObjectType.VIEW, someViewNames);
-    }
-
-    public static String dropTables(Collection<String> someTableNames)
-    {
-        return dropObjects(ObjectType.TABLE, someTableNames);
-    }
-
-    public static String dropObjects(ObjectType tableOrView, Collection<String> someTableNames)
-    {
-        StringBuilder returned = new StringBuilder();
-        for (String nomTable : someTableNames)
-        {
-            returned.append(dropUniqueObject(tableOrView, nomTable) + "\n COMMIT;");
-        }
-        return returned.toString();
     }
     
     public static String dropTable(String tableName, String... separator) {
@@ -143,29 +99,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 	returned.append("DROP " + ObjectType.TABLE + " IF EXISTS " + tableName + " CASCADE " + end(separator));
 	return returned.toString();
     }
-
-    /**
-     * Revoi le sch�ma d'une table
-     * 
-     * @param table
-     * @return
-     */
-    public static String getSchema(String table)
-    {
-        return ManipString.substringBeforeFirst(table, ".");
-    }
-
-    /**
-     * Revoi le nom court d'une table
-     * 
-     * @param table
-     * @return
-     */
-    public static String getName(String table)
-    {
-        return ManipString.substringAfterFirst(table, ".");
-    }
-
     
     public static PreparedStatementBuilder tableExists(String table, String... separator) {
 	String tableSchema = ManipString.substringBeforeFirst(table, DOT);
@@ -194,25 +127,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     }
 
     /**
-     * Requête de sélection de la liste des colonnes des tables métier associée
-     * à une norme
-     *
-     * @param listeTable
-     * @return
-     */
-    public static PreparedStatementBuilder listeColonneTableMetierSelonFamilleNorme(String anEnvironnement, String idFamille)
-    {
-    	PreparedStatementBuilder requete=new PreparedStatementBuilder();
-    	
-		requete.append("SELECT DISTINCT nom_variable_metier, type_variable_metier\n")
-		    .append("  FROM " + anEnvironnement + "_mod_variable_metier\n")
-		    .append("  WHERE lower(id_famille)=lower(" + requete.quoteText(idFamille) + ")");
-    	
-        return requete;
-    }
-
-
-    /**
      * Switch the database user
      * @param roleName
      * @return
@@ -220,7 +134,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
 	public static String changeRole(String roleName)
 	{
-		return "SET role='"+roleName+"'; ";
+		return "SET role='"+roleName+"';COMMIT;";
 	}
 
     /**
@@ -231,38 +145,32 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static String modeParallel(String defaultSchema)
     {
-        return "set enable_nestloop=on; set enable_mergejoin=off; set enable_hashjoin=on; set enable_material=off; set enable_seqscan=off;"
-                + "set work_mem='" + PARALLEL_WORK_MEM + "'; set maintenance_work_mem='" + PARALLEL_WORK_MEM
-                + "'; set temp_buffers='" + PARALLEL_WORK_MEM + "'; set statement_timeout="
-                + (3600000 * TIME_OUT_SQL_EN_HEURE) + "; "
-                + "set from_collapse_limit=10000; set join_collapse_limit=10000;"
-                + "set enable_hashagg=on; set search_path=" + defaultSchema.toLowerCase() + ", public;";
+    	StringBuilder query=new StringBuilder();
+    	query
+    	.append("set enable_nestloop=on;")
+    	.append("set enable_mergejoin=off;")
+    	.append("set enable_hashjoin=on;")
+    	.append("set enable_material=off;")
+    	.append("set enable_seqscan=off;")
+    	.append("set work_mem='" + PARALLEL_WORK_MEM + "';")
+    	.append("set maintenance_work_mem='" + PARALLEL_WORK_MEM+"';")
+    	.append("set temp_buffers='" + PARALLEL_WORK_MEM + "';")
+    	.append("set statement_timeout="+ (3600000 * TIME_OUT_SQL_EN_HEURE) + ";")
+    	.append("set from_collapse_limit=10000;")
+    	.append("set join_collapse_limit=10000;")
+    	.append("set enable_hashagg=on;")
+    	.append("set search_path=" + defaultSchema.toLowerCase() + ", public;")
+    	.append("COMMIT;")
+    	;
+    	return query.toString();
     }
-
-    /**
-     * Configuration de la base de données pour des traitements lourds
-     *
-     * @param defaultSchema
-     * @param work_mem
-     * @return requete
-     */
-    public static String modeSequential(String defaultSchema, String work_mem)
-    {
-        StringBuilder requete = new StringBuilder(
-                "set enable_nestloop=on; set enable_mergejoin=off; set enable_hashjoin=on; "
-                        + " set enable_seqscan=off; " + " set from_collapse_limit=100; set join_collapse_limit=100;"
-                        + " set statement_timeout=" + (3600000 * TIME_OUT_SQL_EN_HEURE) + ";" + " set search_path="
-                        + defaultSchema.toLowerCase() + ", public;");
-        return requete.toString();
-    }
-
     
     /**
      * timeOut
      */
     public static String setTimeOutMaintenance()
     {
-        return "BEGIN;set statement_timeout="+TIMEOUT_MAINTENANCE+";COMMIT;";
+        return "BEGIN;SET statement_timeout="+TIMEOUT_MAINTENANCE+";COMMIT;";
     }
     
     public static String resetTimeOutMaintenance()
@@ -309,7 +217,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     }
 
     /**
-     * Recopie une table à l'identique; ceci pour éviter l'hérésie du vacuum
+     * Recopie une table à l'identique
      *
      * @param table
      * @param where
@@ -331,70 +239,17 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         {
             requete.append(" ");
         }
-        requete.append("TABLE " + tableRebuild + " " + FormatSQL.WITH_NO_VACUUM + " as select * from " + table
-                + " a where " + where + "; ");
+        requete.append("TABLE " + tableRebuild + " " + FormatSQL.WITH_NO_VACUUM + " as select * FROM " + table
+                + " a WHERE " + where + "; ");
         requete.append("\n DROP TABLE IF EXISTS " + table + " CASCADE;");
         requete.append(
-                "\n ALTER TABLE " + tableRebuild + " rename to " + ManipString.substringAfterFirst(table, ".") + " ;");
+                "\n ALTER TABLE " + tableRebuild + " RENAME TO " + ManipString.substringAfterFirst(table, ".") + " ;");
         requete.append("set enable_nestloop=on; ");
         for (int i = 0; i < triggersAndIndexes.length; i++)
         {
             requete.append(triggersAndIndexes[i]);
         }
         return requete;
-    }
-
-    /**
-     * Création d'une table à partir d'une map contenant les nom des colonnes et les types SQL
-     * @param aNomTable
-     * @param aMapColonneToType
-     * @return
-     */
-    public static String createFromSqlModele(String aNomTable, Map<String, String> aMapColonneToType)
-    {
-        StringBuilder requete = new StringBuilder();
-        requete.append(FormatSQL.dropUniqueTable(aNomTable));
-        requete.append("\n CREATE TABLE "+aNomTable);
-        requete.append("\n (");
-        requete.append("\n " +aMapColonneToType.keySet().stream().map(t-> t +" " + aMapColonneToType.get(t)).collect(Collectors.joining("\n, ")));
-        requete.append("\n )");
-        requete.append("\n ;");
-        return requete.toString();
-    }
-    
-    
-    public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, boolean dropFirst)
-    {
-        // StringBuilder requete = new StringBuilder();
-        // if (dropFirst)
-        // {
-        // requete.append(dropUniqueTable(aNomTableCible));
-        // }
-        // return requete.append(createAsSelectFrom(aNomTableCible,
-        // aNomTableSource)).toString();
-        return createAsSelectFrom(aNomTableCible, aNomTableSource, "*", null, dropFirst);
-    }
-
-    /**
-     * TODO refactor
-     *
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @param clauseWhere
-     * @param dropFirst
-     * @return
-     */
-    public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, String clauseWhere,
-            boolean dropFirst)
-    {
-        // StringBuilder requete = new StringBuilder();
-        // if (dropFirst)
-        // {
-        // requete.append(dropUniqueTable(aNomTableCible));
-        // }
-        // return requete.append(createAsSelectFrom(aNomTableCible,
-        // aNomTableSource, clauseWhere)).toString();
-        return createAsSelectFrom(aNomTableCible, aNomTableSource, "*", clauseWhere, dropFirst);
     }
 
     /**
@@ -425,9 +280,30 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
        
     }
 
-    public static String createViewAsSelectFrom(String aNomTableCible, String aNomTableSource, Object object)
+    
+    
+    /**
+     * this sql block test is the query to test is true to execute the other query
+     * @param queryToTest
+     * @param queryToExecute
+     * @return
+     */
+    public static String executeIf(String queryToTest, String queryToExecute)
     {
-        return createObjectAsSelectFrom(ObjectType.VIEW, aNomTableCible, aNomTableSource, "*", null, false);
+    	StringBuilder query=new StringBuilder();
+    	query
+    	.append("do $$ declare b boolean; begin execute ")
+    	.append(quoteText(queryToTest))
+    	.append(" into b; ")
+    	.append("if (b) then execute ")
+    	.append(quoteText(queryToExecute))
+    	.append("; end if; end; $$;");
+    	return query.toString();
+    }
+
+    public static String executeIf(StringBuilder queryToTest, StringBuilder queryToExecute)
+    {
+    	return executeIf(queryToTest.toString(), queryToExecute.toString());
     }
 
     /**
@@ -446,7 +322,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         StringBuilder requete = new StringBuilder();
         if (dropFirst)
         {
-            requete.append(dropUniqueObject(tableOrView, aNomTableCible));
+            requete.append(dropObjectCascade(tableOrView, aNomTableCible));
         }
         String where = ((StringUtils.isBlank(clauseWhere)) ? empty : " WHERE " + clauseWhere);
         /*
@@ -463,289 +339,20 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     }
 
     /**
-     *
-     * Méthode de création d'une requête
-     * {@code CREATE TABLE aNomTableCible AS SELECT columns FROM aNomTableSource WHERE clauseWhere;}
-     * , éventuellement précédée d'un {@code DROP}
-     *
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @param columns
-     * @param clauseWhere
-     * @param dropFirst
-     * @return
-     */
-    public static String createTempAsSelectFrom(String aNomTableCible, String aNomTableSource, String columns,
-            String clauseWhere, boolean dropFirst)
-    {
-        StringBuilder requete = new StringBuilder();
-        if (dropFirst)
-        {
-            requete.append(dropUniqueTable(aNomTableCible));
-        }
-        String where = ((StringUtils.isBlank(clauseWhere)) ? empty : " WHERE " + clauseWhere);
-        // return requete.append(createAsSelectFrom(aNomTableCible,
-        // aNomTableSource, columns, clauseWhere)).toString();
-        // StringBuilder requete = new StringBuilder();
-        requete.append("\n CREATE TEMPORARY TABLE " + aNomTableCible + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
-        requete.append("\n SELECT " + columns + " FROM " + aNomTableSource);
-        requete.append(where + ";");
-        return requete.toString();
-    }
-
-    /**
-     *
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @param clauseWhere
-     *            le WHERE n'y est pas, je le rajouterai tout seul merci.
-     * @return
-     */
-    public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, String columns,
-            String clauseWhere)
-    {
-        // StringBuilder requete = new StringBuilder();
-        // requete.append("\n CREATE TABLE " + aNomTableCible + "
-        // "+FormatSQL.WITH_NO_VACUUM+" AS ");
-        // requete.append("\n SELECT " + columns + " FROM " + aNomTableSource);
-        // requete.append(((StringUtils.isBlank(clauseWhere)) ? empty : "\n
-        // WHERE " + clauseWhere) + ";");
-        // return requete.toString();
-        return createAsSelectFrom(aNomTableCible, aNomTableSource, columns, clauseWhere, DROP_FIRST_FALSE);
-    }
-
-    /**
-     *
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @return la requête de copie simple de la table {@code aNomTableCible}
-     */
-    public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource)
-    {
-        // StringBuilder requete = new StringBuilder();
-        // requete.append("CREATE TABLE " + aNomTableCible +
-        // " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT * FROM "
-        // + aNomTableSource + ";");
-        // return requete.toString();
-        return createAsSelectFrom(aNomTableCible, aNomTableSource, empty, false);
-    }
-
-    /**
-     *
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @param clauseWhere
-     *            le WHERE n'y est pas, je le rajouterai tout seul merci.
-     * @return
-     */
-    public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, String clauseWhere)
-    {
-        return createAsSelectFrom(aNomTableCible, aNomTableSource, "*", clauseWhere, DROP_FIRST_FALSE);
-    }
-
-    /**
-     *
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @param clauseWhere
-     *            le WHERE n'y est pas, je le rajouterai tout seul merci.
-     * @return
-     */
-    public static String createTempAsSelectFrom(String aNomTableCible, String aNomTableSource, String clauseWhere)
-    {
-        return createTempAsSelectFrom(aNomTableCible, aNomTableSource, "*", clauseWhere, DROP_FIRST_FALSE);
-    }
-
-    public static String createIfNotExistsAsSelectFrom(String aNomTableCible, String aNomTableSource,
-            String clauseWhere)
-    {
-        StringBuilder requete = new StringBuilder();
-        requete.append("CREATE TABLE IF NOT EXISTS " + aNomTableCible + " " + FormatSQL.WITH_NO_VACUUM
-                + " AS SELECT * FROM " + aNomTableSource + " WHERE " + clauseWhere + ";");
-        return requete.toString();
-    }
-
-    public static String upsert(String nomTableUpdatee, String nomTableUpdator, List<String> listeColonnesClefs,
-            List<String> listeColonnesUpdatees, List<String> listeColonnesIgnorees)
-    {
-        /*
-         * Calcul de la condition de jointure
-         */
-        StringBuilder conditionJointure = new StringBuilder();
-        for (int i = 0; i < listeColonnesClefs.size(); i++)
-        {
-            if (i > 0)
-            {
-                conditionJointure.append(" AND ");
-            }
-            conditionJointure
-                    .append("updatee." + listeColonnesClefs.get(i) + " = updator." + listeColonnesClefs.get(i));
-        }
-        /*
-         * ÉTAPE 1 : UPDATE
-         */
-        StringBuilder returned = new StringBuilder();
-        StringBuilder update = new StringBuilder();
-        update.append("\nUPDATE " + nomTableUpdatee + " updatee");
-        update.append("\nSET ");
-        for (int i = 0; i < listeColonnesUpdatees.size(); i++)
-        {
-            if (i > 0)
-            {
-                update.append(",\n  ");
-            }
-            update.append(listeColonnesUpdatees.get(i) + " = updator." + listeColonnesUpdatees.get(i));
-        }
-        update.append("\nFROM " + nomTableUpdator + " updator");
-        update.append("\nWHERE " + conditionJointure + ";");
-        returned.append(fastUpdate(update));
-        /*
-         * ÉTAPE 2 : INSERT
-         */
-        returned.append("\nINSERT INTO " + nomTableUpdatee + " (");
-        String colonnes = Format
-                .untokenize(Arrays.asList(listeColonnesClefs, listeColonnesUpdatees, listeColonnesIgnorees), ", ");
-        returned.append(colonnes);
-        returned.append(")");
-        returned.append("\nSELECT " + colonnes);
-        returned.append("\nFROM " + nomTableUpdator + " updator");
-        returned.append("\nWHERE NOT EXISTS (");
-        returned.append("\n  SELECT 1 FROM " + nomTableUpdatee + " updatee");
-        returned.append("\n  WHERE " + conditionJointure);
-        returned.append(");");
-        return returned.toString();
-    }
-
-    /**
-     * Transforme un tableau resultat de requete : chaque colonne va etre parsée
-     * et éclatée selon un séparateur ca permet de pivoter, transposer tres
-     * facilement (on utilise string_agg avec le separateur pour les colonnes
-     * qu'on souhaite pivoter);
-     *
-     * @param r
-     * @param separator
-     * @return
-     */
-    public static ArrayList<ArrayList<String>> pivot(ArrayList<ArrayList<String>> r, String separator)
-    {
-        HashMap<String, ArrayList<String>> m = new GenericBean(r).mapContent();
-        HashMap<String, ArrayList<ArrayList<String>>> z = new HashMap<String, ArrayList<ArrayList<String>>>();
-        ArrayList<ArrayList<String>> tabFinal = new ArrayList<ArrayList<String>>();
-        // on boucle sur chaque colonne
-        for (int j = 0; j < r.get(0).size(); j++)
-        {
-            ArrayList<String> colonne = m.get(r.get(0).get(j));
-            ArrayList<ArrayList<String>> tabColonne = new ArrayList<ArrayList<String>>();
-            int maxNb = 0;
-            // on parcours toutes les lignes de la colonne
-            for (int i = 0; i < colonne.size(); i++)
-            {
-                ArrayList<String> ligne = new ArrayList<String>();
-                String cell = ManipString.replaceNull(colonne.get(i));
-                String q[] = cell.split(separator);
-                // on split selon le separateur les cellules
-                // pour creer les colonnes
-                if (q.length > maxNb)
-                {
-                    maxNb = q.length;
-                }
-                for (int k = 0; k < q.length; k++)
-                {
-                    ligne.add(q[k]);
-                }
-                tabColonne.add(ligne);
-            }
-            // equilibrage du tableau : avoir le meme nombre d'element dans
-            // chacune des lignes
-            for (int i = 0; i < colonne.size(); i++)
-            {
-                for (int k = tabColonne.get(i).size(); k < maxNb; k++)
-                {
-                    tabColonne.get(i).add("");
-                }
-            }
-            // ajout dans la map finale
-            z.put(r.get(0).get(j), tabColonne);
-        }
-        // reconstitution du tableau final
-        for (int i = 0; i < r.size() - 2; i++)
-        {
-            ArrayList<String> ligne = new ArrayList<String>();
-            for (int j = 0; j < r.get(0).size(); j++)
-            {
-                ligne.addAll(z.get(r.get(0).get(j)).get(i));
-            }
-            if (i == 0)
-            {
-                ArrayList<String> headers = new ArrayList<String>();
-                ArrayList<String> types = new ArrayList<String>();
-                for (int j = 0; j < r.get(0).size(); j++)
-                {
-                    // if (z.get(r.get(0).get(j)).get(0).size()>1)
-                    // {
-                    for (int k = 0; k < z.get(r.get(0).get(j)).get(0).size(); k++)
-                    {
-                        headers.add(r.get(0).get(j) + "_" + k);
-                        types.add(r.get(1).get(j));
-                    }
-                    // }
-                    // else
-                    // {
-                    // headers.add(r.get(0).get(j));
-                    // types.add(r.get(1).get(j));
-                    // }
-                }
-                tabFinal.add(headers);
-                tabFinal.add(types);
-            }
-            tabFinal.add(ligne);
-        }
-        return tabFinal;
-    }
-
- 
-
-    public static final String listeTablesExistantes(List<String> tables)
-    {
-        List<String> liste = new ArrayList<>();
-        for (int i = 0; i < tables.size(); i++)
-        {
-            liste.add(tableExiste(tables.get(i)).toString());
-        }
-        return Format.untokenize(liste, "\nUNION ");
-    }
-
-    public static final String listeTablesExistantes(String... tables)
-    {
-        return listeTablesExistantes(Arrays.asList(tables));
-    }
-
-    private static final StringBuilder tableExiste(String table)
-    {
-        String tokenJoin = table.contains(".") ?
-        /*
-         * Le nom de la table contient "." ? Il est précédé du nom du schéma.
-         */
-                " INNER JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid" :
-                /*
-                 * Sinon, aucune jointure sur le nom de schéma.
-                 */
-                "";
-        String tokenCond = table.contains(".") ?
-        /*
-         * Le nom de la table contient "." ? Il est précédé du nom de schéma.
-         */
-                "lower(pg_namespace.nspname||'.'||pg_class.relname)" :
-                /*
-                 * Sinon, la condition d'égalité porte sur le nom de la table
-                 */
-                "pg_class.relname";
-        StringBuilder requete = new StringBuilder("SELECT DISTINCT '" + table + "' table_existe\n");
-        requete.append("  FROM pg_class" + tokenJoin);
-        requete.append("  WHERE " + tokenCond + " = lower('" + table + "')");
-        return requete;
-    }
-
+    *
+    * @param aNomTableCible
+    * @param aNomTableSource
+    * @param clauseWhere
+    *            le WHERE n'y est pas, je le rajouterai tout seul merci.
+    * @return
+    */
+   public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, String clauseWhere)
+   {
+       return createAsSelectFrom(aNomTableCible, aNomTableSource, "*", clauseWhere, DROP_FIRST_FALSE);
+   }
+    
+    
+    
     /**
      * @param table
      * @return
@@ -786,12 +393,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String temporaryTableName(String aName)
     {
         String newName = aName.split(_REGEX_TMP)[0];
-        /**
-         * Impératif : permet de s'assurer que les noms des tables ne causeront
-         * aucune collision 2 milliseconds : pour éviter les problèmes
-         * d'arrondis
-         */
-        Sleep.sleep(2);
         // on met la date du jour dans le nom de la table
         String l = System.currentTimeMillis() + "";
         // on prend que les 10 derniers chiffres (durrée de vie : 6 mois)
@@ -827,93 +428,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         return ManipString.padLeft(rn, "0", precision);
     }
 
-    public static final String id(String suffix)
-    {
-        return _ID + suffix;
-    }
-
-    /**
-     * Mise à niveau d'une table qui a des colonnes manquantes
-     *
-     * @param table
-     * @param listeColonne
-     * @return
-     */
-    public static String addColonnePourGenericBeanData(String table, ArrayList<ArrayList<String>> listeColonne)
-    {
-        return addColonne(table, listeColonne);
-    }
-
-    /**
-     * Mise à niveau d'une table qui a des colonnes manquantes
-     *
-     * @param table
-     * @param listeColonne
-     * @return
-     */
-    public static String addColonnePourGenericBean(String table, ArrayList<ArrayList<String>> listeColonne)
-    {
-        return addColonne(table, listeColonne.subList(ARRAY_THIRD_COLUMN_INDEX, listeColonne.size()));
-    }
-
-    /**
-     * Mise à niveau d'une table qui a des colonnes manquantes
-     *
-     * @param table
-     * @param listeColonne
-     * @return
-     */
-    public static <T extends List<String>> String addColonne(String table, List<T> listeColonne)
-    {
-        StringBuilder requete = new StringBuilder();
-        String nomColonne = "";
-        String typeColonne = "";
-        // élement (1er noms, 2e types)
-        if (listeColonne.size() == 0) { return requete.toString(); }
-        requete.append("ALTER TABLE " + table + " ");
-        for (int i = ARRAY_FIRST_COLUMN_INDEX; i < listeColonne.size(); i++)
-        {
-            nomColonne = listeColonne.get(i).get(0);
-            typeColonne = listeColonne.get(i).get(1);
-            if (i > 0)
-            {
-                requete.append(",");
-            }
-            requete.append("ADD COLUMN " + nomColonne + " " + typeColonne + " ");
-            if (typeColonne.equals("text"))
-            {
-                requete.append(" collate \"C\" ");
-            }
-        }
-        requete.append(";");
-        return requete.toString();
-    }
-    
-    public static String dropColonne(String table, String colonne)
-    {
-        StringBuilder requete = new StringBuilder();
-        requete.append("ALTER TABLE " + table + " ");
-        requete.append("DROP COLUMN " + colonne);
-        requete.append(";");
-        return requete.toString();
-    }
-
-    /**
-     * Verrouille une table
-     *
-     * @param tableName
-     * @return
-     */
-    public static String lock(String... tableName)
-    {
-        StringBuilder requete = new StringBuilder();
-        for (int i = 0; i < tableName.length; i++)
-        {
-            requete.append("LOCK TABLE " + tableName[i] + " IN ACCESS EXCLUSIVE MODE;\n");
-        }
-        return requete.toString();
-    }
-
     /**
      * converti une chaine de caractere pour etre mise en parametre d'un sql si
      * c'est vide, ca devient "null" quote devient quote quote
@@ -923,7 +437,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static String textToSql(String val)
     {
-        if (val == null || val.trim().equals("") || val == "null")
+        if (val == null || val.trim().equals(""))
         {
             return "null";
         }
@@ -933,456 +447,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         }
     }
 
-    public static String textToSqlNoNull(String val)
-    {
-        if (val == null || val.trim().equals(""))
-        {
-            return "''";
-        }
-        else
-        {
-            return "'" + val.replace("'", "''") + "'";
-        }
-    }
-
-    public static String int8ToSqlNoNull(String val)
-    {
-        if (val == null || val.trim().equals(""))
-        {
-            return "0";
-        }
-        else
-        {
-            return "'" + val.replace("'", "''") + "'";
-        }
-    }
-
-    public static String boolToSqlNoNull(String val, String escape)
-    {
-        if (val == null || val.trim().equals(""))
-        {
-            return escape;
-        }
-        else
-        {
-            return "'" + val.replace("'", "''") + "'";
-        }
-    }
-
-    public static String expressionJointure(String lefty, List<String> variablesLeft, String righty,
-            List<String> variablesRight, String indent, String operator)
-    {
-        return expressionJointure(lefty, variablesLeft, righty, variablesRight, indent, operator, null);
-    }
-
     /**
-     *
-     * @param lefty
-     * @param variablesLeft
-     * @param righty
-     * @param variablesRight
-     * @param indent
-     * @param operator
-     * @param cast
-     * @return l'expression de jointure entre les tables {@code lefty} et
-     *         {@code righty} sur l'égalité (ou autre opérateur {@code operator}
-     *         ) des variables de {@code variablesLeft} et
-     *         {@code variablesRight}.
-     */
-    public static String expressionJointure(String lefty, List<String> variablesLeft, String righty,
-            List<String> variablesRight, String indent, String operator, String cast)
-    {
-        // String token = (StringUtils.isBlank(cast) ? empty : "::" + cast);
-        // StringBuilder returned = new StringBuilder();
-        // for (int i = 0; i < variablesLeft.size(); i++) {
-        // if (i > 0) {
-        // returned.append("\n" + indent + "AND ");
-        // }
-        // returned.append(lefty + "." + variablesLeft.get(i) + token + " " +
-        // operator + " " + righty + "." + variablesRight.get(i) +
-        // token);
-        // }
-        // return returned.toString();
-        return expressionTermeATerme(lefty, variablesLeft, righty, variablesRight, indent, operator, cast, "AND");
-    }
-
-    /**
-     *
-     * @param lefty
-     * @param variablesLeft
-     * @param righty
-     * @param variablesRight
-     * @param indent
-     * @param operator
-     * @param cast
-     * @return l'expression de mise à jour des variables {@code variablesLeft}
-     *         de {@code lefty} à partir des variables {@code variablesRight} de
-     *         {@code righty}.
-     */
-    public static String expressionEgaliteUpdate(String lefty, List<String> variablesLeft, String righty,
-            List<String> variablesRight, String indent, String cast)
-    {
-        return expressionTermeATerme(lefty, variablesLeft, righty, variablesRight, indent, equals, cast, comma);
-    }
-
-    public static String expressionTermeATerme(String lefty, List<String> variablesLeft, String righty,
-            List<String> variablesRight, String indent, String operator, String cast, String separator)
-    {
-        LoggerHelper.traceAsComment(LOGGER, "lefty =", lefty, "variablesLeft =", variablesLeft, "righty =", righty,
-                "variablesRight =", variablesRight, "indent =", indent, "operator =", operator, "cast =", cast,
-                "separator =", separator);
-        String token = (StringUtils.isBlank(cast) ? empty : "::" + cast);
-        StringBuilder returned = new StringBuilder();
-        for (int i = 0; i < variablesLeft.size(); i++)
-        {
-            if (i > 0)
-            {
-                returned.append("\n" + indent + separator + space);
-            }
-            if (StringUtils.isNotBlank(lefty))
-            {
-                returned.append(lefty + DOT);
-            }
-            returned.append(variablesLeft.get(i) + token + space + operator + space);
-            if (StringUtils.isNotBlank(righty))
-            {
-                returned.append(righty + DOT);
-            }
-            returned.append(variablesRight.get(i) + token);
-        }
-        return returned.toString();
-    }
-
-    /**
-     * Pour faire des jointures même avec des null, on enveloppe les variables
-     * dans row
-     *
-     * @param lefty
-     *            nom de la table de gauche
-     * @param variablesLeft
-     *            nom des variables de la table de gauche sur lesqelles on fait
-     *            la jointure
-     * @param righty
-     *            nom de la table de droite
-     * @param variablesRight
-     *            nom des variables de la table de droite sur lesqelles on fait
-     *            la jointure
-     * @param indent
-     *            indentation pour la mise en forme dans les log
-     * @param operator
-     *            operateur de comparaison pour la jointure
-     * @return
-     */
-    public static String expressionJointureRow(String lefty, List<String> variablesLeft, String righty,
-            List<String> variablesRight, String indent, String operator)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append(expressionRow(lefty, variablesLeft)).append(operator)
-                .append(expressionRow(righty, variablesRight));
-        return returned.toString();
-    }
-
-    /**
-     * Fait un row d'une liste de variable
-     *
-     * @param table
-     * @param variables
-     * @return
-     */
-    public static String expressionRow(String table, List<String> variables)
-    {
-        StringBuilder returned = new StringBuilder("row(");
-        for (int i = 0; i < variables.size(); i++)
-        {
-            if (i > 0)
-            {
-                returned.append(", ");
-            }
-            returned.append(table + "." + variables.get(i));
-        }
-        returned.append(")::text collate \"C\" ");
-        return returned.toString();
-    }
-
-    /**
-     * arrayRemoveNulls prend une liste et calcule le tableau resultat les null
-     * sont exclus du tableau
-     *
-     * @param table
-     * @param variables
-     * @return
-     */
-    public static String arrayRemoveNulls(String table, List<String> variables)
-    {
-        StringBuilder returned = new StringBuilder();
-        String prefix = "";
-        if (table != null && !table.trim().equals(""))
-        {
-            prefix = table + DOT;
-        }
-        returned.append("string_to_array(rtrim(");
-        boolean first = true;
-        for (String var : variables)
-        {
-            if (!first)
-            {
-                returned.append("||");
-            }
-            returned.append("coalesce(" + prefix + var + "::text||" + SQL_SEPARATOR + ", '' )");
-            first = false;
-        }
-        returned.append("," + SQL_SEPARATOR + "), " + SQL_SEPARATOR + ")");
-        return returned.toString();
-    }
-
-    /**
-     * arrayKeepNulls prend une liste et calcule le tableau resultat les null
-     * sont inclus dans le tableau
-     *
-     * @param table
-     * @param variables
-     * @return
-     */
-    public static String arrayKeepNulls(String table, List<String> variables)
-    {
-        StringBuilder returned = new StringBuilder();
-        String prefix = "";
-        if (table != null && !table.trim().equals(""))
-        {
-            prefix = table + DOT;
-        }
-        returned.append("string_to_array(");
-        boolean first = true;
-        for (String var : variables)
-        {
-            if (!first)
-            {
-                returned.append("||" + SQL_SEPARATOR + "||");
-            }
-            returned.append("coalesce(" + prefix + var + "::text, '' )");
-            first = false;
-        }
-        returned.append("," + SQL_SEPARATOR + ")");
-        return returned.toString();
-    }
-
-    /**
-     * Pour faire des jointures même avec des null, on enveloppe les variables
-     * dans row
-     *
-     * @param lefty
-     *            nom de la table de gauche
-     * @param variablesLeft
-     *            nom des variables de la table de gauche sur lesqelles on fait
-     *            la jointure
-     * @param righty
-     *            nom de la table de droite
-     * @param variablesRight
-     *            nom des variables de la table de droite sur lesqelles on fait
-     *            la jointure
-     * @param indent
-     *            indentation pour la mise en forme dans les log
-     * @param operator
-     *            operateur de comparaison pour la jointure
-     * @return
-     */
-    public static String expressionJointureRowIgnoreCase(String lefty, List<String> variablesLeft, String righty,
-            List<String> variablesRight, String indent, String operator)
-    {
-        StringBuilder returned = new StringBuilder();
-        StringBuilder leftSide = new StringBuilder("upper(row(");
-        StringBuilder rightSide = new StringBuilder("upper(row(");
-        for (int i = 0; i < variablesLeft.size(); i++)
-        {
-            if (i > 0)
-            {
-                leftSide.append(", ");
-                rightSide.append(", ");
-            }
-            leftSide.append(lefty + "." + variablesLeft.get(i));
-            rightSide.append(righty + "." + variablesRight.get(i));
-        }
-        leftSide.append(")::text collate \"C\") ");
-        rightSide.append(")::text collate \"C\") ");
-        returned.append(leftSide).append(operator).append(rightSide);
-        return returned.toString();
-    }
-
-    /**
-     * Il est préférable que le nom de la séquence contienne un nom de schema
-     *
-     * @param nomSequence
-     * @return
-     */
-    public static String createSequenceIfNotExists(String nomSequence)
-    {
-        String token = nomSequence.split("\\.")[nomSequence.contains(DOT) ? 1 : 0];
-        String schema = nomSequence.contains(DOT) ? nomSequence.split("\\.")[0] : empty;
-        StringBuilder returned = new StringBuilder("DO");
-        returned.append("\n $$");
-        returned.append("\n BEGIN");
-        returned.append("\n  IF NOT EXISTS (SELECT 1 ");
-        returned.append("\n                 FROM pg_class ");
-        returned.append("\n                 INNER JOIN pg_namespace ");
-        returned.append("\n                   ON pg_class.relnamespace = pg_namespace.oid ");
-        returned.append("\n                 WHERE lower(relname) = lower('" + token + "')");
-        if (!schema.isEmpty())
-        {
-            returned.append("\n                    AND lower(nspname)=lower('" + schema + "')");
-        }
-        returned.append("\n                 )");
-        returned.append("\n  THEN");
-        returned.append("\n     EXECUTE 'CREATE SEQUENCE " + nomSequence);
-        returned.append("\n       INCREMENT 1");
-        returned.append("\n       MINVALUE 1");
-        returned.append("\n       MAXVALUE " + MAX_VALUE_BIGINT_SQL_POSTGRES);
-        returned.append("\n       START 1");
-        returned.append("\n       CACHE 1;';");
-        returned.append("\n   END IF;");
-        returned.append("\n END");
-        returned.append("\n $$;");
-        return returned.toString();
-    }
-
-    
-    public static String safelyViewTableTo(String ancienne, String nouvelle)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append(createViewTo(ancienne, nouvelle));
-        return returned.toString();
-    }
-    
-    
-    public static String safelyRenameTableTo(String ancienne, String nouvelle)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append(dropUniqueTable(nouvelle));
-        returned.append(renameTableTo(ancienne, nouvelle));
-        return returned.toString();
-    }
-
-    public static String renameTableTo(String ancienne, String nouvelle)
-    {
-        String token = nouvelle.split("\\.")[nouvelle.contains(DOT) ? 1 : 0];
-        return "\n ALTER TABLE " + ancienne + " RENAME TO " + token + ";";
-    }
-    
-    public static String dropConstraint(String aTable, String aConstraint)
-    {
-        return "\n ALTER TABLE " + aTable + " DROP CONSTRAINT IF EXISTS " + aConstraint + " CASCADE ;";
-    }
-    
-    public static String createViewTo(String ancienne, String nouvelle)
-    {
-        return tryQuery("\n CREATE VIEW "+nouvelle+" AS SELECT * FROM "+ancienne+";");
-    }
-
-    public static StringBuilder createIndex(String nomIndex, String nomTable, List<String> listeColonnes)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append("\n CREATE INDEX " + nomIndex + " ON " + nomTable + " ("
-                + Format.untokenize(listeColonnes, ", ") + ");");
-        return returned;
-    }
-
-    public static StringBuilder createIndex(String nomIndex, String nomTable, String indexType,
-            List<String> someColonnes)
-    {
-        return createIndex(nomIndex, nomTable, indexType, someColonnes, Arrays.asList());
-    }
-
-    public static StringBuilder createIndex(String nomIndex, String nomTable, String indexType,
-            List<String> someColonnes, String indexImplementation)
-    {
-        return createIndex(nomIndex, nomTable, indexType, someColonnes, IntStream.range(0, someColonnes.size()).boxed()
-                .map((i) -> indexImplementation).collect(Collectors.toList()));
-    }
-    public static String dropIndex (String nomIndex) {
-	return "\n DROP INDEX "+ nomIndex + " ; ";
-    }
-
-    /**
-     * 
-     * @param nomIndex
-     *            (optionnel, peut valoir null) le nom de l'index
-     * @param nomTable
-     *            le nom de la table sur lequel l'index est défini
-     * @param indexType
-     *            (optionnel, peut valoir null) le type de l'index
-     * @param someColonnes
-     *            les colonnes sur lesquelles porte l'index
-     * @param indexTypes
-     *            (optionnel, peut valoir null ou être plus petit que
-     *            {@code someColonnes}) l'implémentation de l'index pour chaque
-     *            colonne
-     * @return {@code CREATE INDEX <nomIndex> ON <nomTable> USING <typeIndex> (someColonnes_1 indexTypes_1 [, ...]);}
-     */
-    public static StringBuilder createIndex(String nomIndex, String nomTable, String indexType,
-            List<String> someColonnes, List<String> indexTypes)
-    {
-        Function<Integer, String> iTypes = (i) -> (indexTypes != null) && (indexTypes.size() == someColonnes.size())
-                ? " " + indexTypes.get(i) : "";
-        StringBuilder returned = new StringBuilder();
-        returned.append("\n CREATE INDEX");
-        if (nomIndex != null)
-        {
-            returned.append(" " + nomIndex);
-        }
-        returned.append(" ON " + nomTable);
-        if (indexType != null)
-        {
-            returned.append(" USING " + indexType);
-        }
-        returned.append(" (");
-        returned.append(IntStream.range(0, someColonnes.size()).boxed()
-                .map((i) -> someColonnes.get(i) + iTypes.apply(i)).collect(Collectors.joining(", ")));
-        returned.append(")");
-        return returned;
-    }
-
-    public static String createSchema(String aNomSchema, String authorization)
-    {
-        return "\n CREATE SCHEMA IF NOT EXISTS " + aNomSchema
-                + (StringUtils.isBlank(authorization) ? empty : (" AUTHORIZATION " + authorization)) + ";";
-    }
-
-    public static String fastUpdate(String query)
-    {
-        String returned = query;
-        String tableName = ManipString
-                .substringBeforeFirst(ManipString.substringAfterFirst(returned.toLowerCase(), "update "), " ");
-        returned = returned + "\n ; vacuum " + tableName + ";";
-        return returned;
-        // return "\n SELECT public.fastUpdate('" + query.replace("'", "''") +
-        // "');";
-    }
-
-    public static String vacuum(String nomTable)
-    {
-        return "VACUUM " + nomTable + ";";
-    }
-
-    public static String fastUpdate(StringBuilder query)
-    {
-        return fastUpdate(query.toString());
-    }
-
-    public static String fastDelete(String query)
-    {
-        String returned = query;
-        String tableName = ManipString
-                .substringBeforeFirst(ManipString.substringAfterFirst(returned.toLowerCase(), "delete from "), " ");
-        returned = returned + "\n ; vacuum " + tableName + ";";
-        return returned;
-    }
-
-    public static String fastDelete(StringBuilder query)
-    {
-        return fastDelete(query.toString());
-    }
-
-    /**
-     * Ne garde que les séparateur
+     * Ne garde que les séparateurs
      *
      * @param tokens
      * @param separator
@@ -1390,106 +456,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static String toNullRow(Collection<?> tokens)
     {
-        return (tokens == null || tokens.size() == 0) ? "(" + empty + ")"
+        return (tokens == null || tokens.isEmpty()) ? "(" + empty + ")"
                 : "(" + StringUtils.repeat(",", tokens.size() - 1) + ")";
-    }
-
-    /**
-     * Pour tester qu'une variable est NULL ou vide (quotequote en SQL)
-     *
-     * @param aNomVariable
-     * @return
-     */
-    public static String rowEmpty(String aNomVariable)
-    {
-        return "row(" + aNomVariable + ")::text IN ('()','(\"\")')";
-    }
-    /**
-     *
-     * @param anExpression
-     * @return retourne l'expression brackettée <{> anExpression <}>
-     */
-    public static String encapsulerBracket(String anExpression)
-    {
-        return new StringBuilder(openingBrace + anExpression + closingBrace).toString();
-    }
-
-    public static String addColonne(String aNomTable, String aNomColonne, String aType, String aValeurParDefaut)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append("\n ALTER TABLE " + aNomTable + " ADD COLUMN " + aNomColonne + " " + aType + " DEFAULT "
-                + aValeurParDefaut + ";");
-        return returned.toString();
-    }
-    
-    public static String addColonne(String aNomTable, String aNomColonne, String aType)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append("\n ALTER TABLE " + aNomTable + " ADD COLUMN " + aNomColonne + " " + aType + ";");
-        return returned.toString();
-    }
-
-    public static String listeContraintes(String aSchema, String aTable, String aTypeContrainte)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append("\n SELECT conname, nam.nspname, cla.relname");
-        returned.append("\n FROM pg_constraint con");
-        returned.append("\n   INNER JOIN pg_class cla ON con.conrelid = cla.oid");
-        returned.append("\n   INNER JOIN pg_namespace nam ON nam.oid = cla.relnamespace");
-        returned.append("\n WHERE lower(cla.relname) = lower('" + aTable + "')");
-        returned.append("\n   AND lower(nam.nspname) = lower('" + aSchema + "')");
-        returned.append("\n   AND lower(con.contype) = lower('" + aTypeContrainte + "')");
-        returned.append(";");
-        return returned.toString();
-    }
-
-    public static String addPrimaryKey(String aSchema, String aTable, List<String> aListeVariables)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append("\n ALTER TABLE " + aSchema + "." + aTable);
-        returned.append("\n ADD CONSTRAINT " + aSchema + "_" + aTable + "_pkey");
-        returned.append("\n PRIMARY KEY");
-        returned.append("\n " + Format.untokenize(aListeVariables, "(", empty, empty, ", ", ")"));
-        returned.append(";");
-        return returned.toString();
-    }
-
-    public static String alterTableSetSchema(String nomTable, String schema)
-    {
-        StringBuilder returned = new StringBuilder();
-        returned.append("ALTER TABLE " + nomTable + " SET SCHEMA " + schema + ";");
-        return returned.toString();
-    }
-
-    /**
-     * 
-     * @param fromTable
-     * @param groupBy
-     * @param toTable
-     * @return
-     */
-    public static String createAsSelectDistinct(String fromTable, Set<String> groupBy, String toTable)
-    {
-        StringBuilder returned = new StringBuilder();
-        String tempTable = temporaryTableName(fromTable);
-        String zeGroupBy = new SequentialUntokenizer<>().untokenize(groupBy);
-        returned.append("\n CREATE TABLE " + tempTable + " AS ");
-        returned.append("\n SELECT " + zeGroupBy + " FROM " + fromTable + " GROUP BY " + zeGroupBy + ";");
-        if (fromTable.equalsIgnoreCase(toTable))
-        {
-            returned.append(dropUniqueTable(fromTable));
-        }
-        returned.append(renameTableTo(tempTable, toTable));
-        return returned.toString();
-    }
-
-    public static String selectDistinct(String fromTable, Set<String> groupBy)
-    {
-        StringBuilder returned = new StringBuilder();
-        // String tempTable = temporaryTableName(fromTable);
-        String zeGroupBy = new SequentialUntokenizer<>().untokenize(groupBy);
-        returned.append("\n SELECT " + zeGroupBy + " FROM " + fromTable + " GROUP BY " + zeGroupBy);
-        return returned.toString();
     }
 
     /**

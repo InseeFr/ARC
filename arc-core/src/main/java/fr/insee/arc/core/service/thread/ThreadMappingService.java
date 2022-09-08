@@ -143,7 +143,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
                 requeteMAJFinale.append(requeteMapping.requeteTransfertVersTablesMetierDefinitives());
 
             	// promote the application user account to full right
-            	switchToFullRightRole();
+                UtilitaireDao.get("arc").executeImmediate(connexion,switchToFullRightRole());
                 	
                 /*
                  * Transfert de la table mapping_ko temporaire vers la table mapping_ko définitive

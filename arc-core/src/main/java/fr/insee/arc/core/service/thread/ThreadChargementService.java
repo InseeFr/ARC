@@ -123,34 +123,15 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	StaticLoggerDispatcher.info("Chargement des Fichiers", LOGGER);
 
 	try {
-	    // nettoyer la connexion
-	    UtilitaireDao.get("arc").executeImmediate(this.connexion, "DISCARD TEMP;");
-
-	    UtilitaireDao.get("arc").executeBlock(connexion,
-		    createTablePilotageIdSource(this.tablePilTemp, this.tableChargementPilTemp, this.idSource));
-
+	    // preparer le chargement
+		preparation();
+		
 	    // Charger les fichiers
-	    ArrayList<String> allCols = new ArrayList<String>();
-	    HashMap<String, Integer> colData = new HashMap<>();
-	    chargementFichiers(allCols, colData);
+	    chargementFichiers();
 
-	    // retirer de table tempTableA les ids marqués en erreur
-	    StaticLoggerDispatcher.info("Retirer de table temporaire les fichiers marqués en erreur", LOGGER);
-	    clean();
-
-	    // Mettre à jour le nombre d'enregistrement dans la table de
-	    // pilotage temporaire
-	    StaticLoggerDispatcher.info("Recopie dans les tables Résultats", LOGGER);
-	    insertionFinale(this.connexion, this.tableChargementOK, this.idSource);
-
-	    // Nettoyage
-	    StringBuilder blocFin = new StringBuilder();
-	    blocFin.append(FormatSQL.dropTable(this.getTableTempA()));
-	    blocFin.append(FormatSQL.dropTable(this.tableTempAll));
-	    blocFin.append(FormatSQL.dropTable(this.getTableChargementBrutal()));
-	    blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
-	    UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
-
+	    // finaliser le chargement
+	    finalisation();
+	  
 	} catch (Exception e) {
 		StaticLoggerDispatcher.error(e,LOGGER);
 	    try {
@@ -166,27 +147,77 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	}
     }
 
+    
+    /** 
+     * Prepare the loading phase
+     * @throws SQLException
+     */
+    public void preparation() throws SQLException
+    {
+    	StringBuilder query=new StringBuilder();
+    	query.append("DISCARD TEMP;");
+    	query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableChargementPilTemp, this.idSource));
+    	UtilitaireDao.get("arc").executeBlock(connexion,query);
+    }
+    
+    
     /**
+	 * finalisation du chargement
+	 * @throws Exception 
+	 */
+	public void finalisation() throws Exception
+	{
+		
+		StringBuilder query=new StringBuilder();
+		  
+	    // retirer de table tempTableA les ids marqués en erreur
+	    query.append(truncateTableIfKO());
+	    
+	    // mise à jour du nombre d'enregistrement
+	    query.append(updateNbEnr(this.tableChargementPilTemp, this.getTableTempA()));	
+	    
+	    // Mettre à jour le nombre d'enregistrement dans la table de
+	    // pilotage temporaire
+	    query.append(insertionFinale(this.connexion, this.tableChargementOK, this.idSource));
+	
+	    // Nettoyage des tabels temporaires
+	    query.append(clean());
+	    
+	    UtilitaireDao.get("arc").executeBlock(this.connexion, query);
+	}
+
+	/**
      * Retirer de la table des données les fichiers en KO
      *
      * @throws SQLException
      */
-    public void clean() throws SQLException {
+    public String truncateTableIfKO() {
 	StaticLoggerDispatcher.info("** clean **", LOGGER);
 
-	try {
+	StringBuilder queryTest=new StringBuilder();
+	queryTest.append("select count(*)>0 from (select id_source from " + this.tableChargementPilTemp + " where etat_traitement='{"
+		    + TraitementEtat.KO + "}' limit 1) u ");
 
-	    // Check if the source loaded in not in a KO state
-	    if (UtilitaireDao.get("arc").hasResults(this.connexion,
-	    		new PreparedStatementBuilder("select id_source from  " + this.tableChargementPilTemp + " where  etat_traitement='{"
-			    + TraitementEtat.KO + "}' "))) {
-		UtilitaireDao.get("arc").executeBlock(this.connexion, "TRUNCATE TABLE " + this.getTableTempA() + ";");
-	    }
-
-	} catch (Exception e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
+	StringBuilder queryToExecute=new StringBuilder();
+	
+	queryToExecute.append("TRUNCATE TABLE " + this.getTableTempA() + ";");
+	
+	return FormatSQL.executeIf(queryTest, queryToExecute);
+    }
+    
+    
+    /**
+     * clean temporary table
+     * @return
+     */
+    public String clean() 
+    {
+    	StringBuilder blocFin = new StringBuilder();
+	    blocFin.append(FormatSQL.dropTable(this.getTableTempA()));
+	    blocFin.append(FormatSQL.dropTable(this.tableTempAll));
+	    blocFin.append(FormatSQL.dropTable(this.getTableChargementBrutal()));
+	    blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
+	    return blocFin.toString();
     }
 
     /**
@@ -215,8 +246,12 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @param aColData
      * @throws Exception
      */
-    public void chargementFichiers(ArrayList<String> aAllCols, HashMap<String, Integer> aColData) throws Exception {
+    public void chargementFichiers() throws Exception {
 
+	ArrayList<String> aAllCols = new ArrayList<String>();
+	HashMap<String, Integer> aColData = new HashMap<>();
+    	
+    	
 	StaticLoggerDispatcher.info("** chargementFichiers **", LOGGER);
 
 	java.util.Date beginDate = new java.util.Date();
@@ -346,40 +381,21 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @param tableName
      * @throws SQLException
      */
-    private void insertionFinale(Connection connexion, String tableName, String idSource) throws Exception {
+    private String insertionFinale(Connection connexion, String tableName, String idSource) {
+   	StaticLoggerDispatcher.info("** insertTableOK **", LOGGER);
 
-	updateNbEnr(this.tableChargementPilTemp, this.getTableTempA());
-
-	StaticLoggerDispatcher.info("** insertTableOK **", LOGGER);
-	java.util.Date beginDate = new java.util.Date();
-
+   	StringBuilder query = new StringBuilder();
 	String tableIdSource = tableOfIdSource(tableName, this.idSource);
 
 	// promote the application user account to full right
-	switchToFullRightRole();
+	query.append(switchToFullRightRole());
 	
 	// Créer la table des données de la table des donénes chargées
-	createTableInherit(connexion, getTableTempA(), tableIdSource);
-
-	StringBuilder requete = new StringBuilder();
-
-	if (paramBatch == null) {
-	    requete.append("alter table " + tableIdSource + " inherit " + tableName + "_todo;");
-	    requete.append("alter table " + tableIdSource + " inherit " + tableName + ";");
-	} else {
-	    requete.append("alter table " + tableIdSource + " inherit " + tableName + "_todo;");
-	}
-
-
-	requete.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
-	UtilitaireDao.get("arc").executeBlock(connexion, requete);
-
+	query.append(createTableInherit(connexion, getTableTempA(), tableIdSource));
 	
-
-	java.util.Date endDate = new java.util.Date();
-	StaticLoggerDispatcher.info("** insertTableOK ** temps : " + (endDate.getTime() - beginDate.getTime()) + " ms",
-		LOGGER);
-
+	query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
+	
+	return query.toString();
     }
 
     /**
@@ -410,8 +426,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    bloc3.append(" id_norme='" + normeOk.getIdNorme() + "' \n");
 	    bloc3.append(", validite='" + validite + "' \n");
 	    bloc3.append(", periodicite='" + normeOk.getPeriodicite() + "' \n");
-	    // bloc3.append(", etat_traitement='{" + TraitementEtat.OK + "}'
-	    // \n");
 	}
 
 	bloc3.append("where id_source='" + idSource + "' AND phase_traitement='" + this.currentPhase + "'; \n");

@@ -152,24 +152,24 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     public void preparation() throws SQLException {
         StaticLoggerDispatcher.info("** preparation **", LOGGER);
 
-        StringBuilder blocPrep = new StringBuilder();
+        StringBuilder query = new StringBuilder();
 
         // Marquage du jeux de règles appliqué
         StaticLoggerDispatcher.info("Récupération des rubrique de la table ", LOGGER);
 
         // fabrication de la table de pilotage controle lié au thread
-        blocPrep.append("DISCARD TEMP;");
-        blocPrep.append(createTablePilotageIdSource(this.tablePilTemp, this.tableControlePilTemp, this.idSource));
+        query.append("DISCARD TEMP;");
+        query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableControlePilTemp, this.idSource));
 
         // Marquage du jeux de règles appliqué
         StaticLoggerDispatcher.info("Marquage du jeux de règles appliqué ", LOGGER);
-        blocPrep.append(marqueJeuDeRegleApplique(this.tableControlePilTemp, TraitementEtat.OK.toString()));
+        query.append(marqueJeuDeRegleApplique(this.tableControlePilTemp, TraitementEtat.OK.toString()));
         
         // Fabrication de la table de controle temporaire
         StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
-        blocPrep.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
+        query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
-        UtilitaireDao.get("arc").executeBlock(this.connexion, blocPrep);
+        UtilitaireDao.get("arc").executeBlock(this.connexion, query);
 
         // Récupération des Jeux de règles associés
         this.sjdr.fillRegleControle(this.connexion, jdr, this.getTableControleRegle(), this.tableControleDataTemp);
@@ -255,24 +255,18 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     private void insertionFinale() throws Exception {
 
 	// promote the application user account to full right
-    switchToFullRightRole();
+    UtilitaireDao.get("arc").executeImmediate(connexion,switchToFullRightRole());
     	
     // Créer les tables héritées
     String tableIdSourceOK=tableOfIdSource(tableOutOk ,this.idSource);
-    createTableInherit(connexion, tableOutOkTemp, tableIdSourceOK);
+    UtilitaireDao.get("arc").executeBlock(connexion, createTableInherit(connexion, tableOutOkTemp, tableIdSourceOK));
     String tableIdSourceKO=tableOfIdSource(tableOutKo ,this.idSource);
-    createTableInherit(connexion, tableOutKoTemp, tableIdSourceKO);
+    UtilitaireDao.get("arc").executeBlock(connexion, createTableInherit(connexion, tableOutKoTemp, tableIdSourceKO));
     
     StringBuilder requete = new StringBuilder();
     
-    if (paramBatch == null) {
-    	requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
-        requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk +";"));
-        requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ tableOutKo +";"));
-    }
-    else
+    if (paramBatch != null)
     {
-        requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ tableOutOk + "_todo;"));
         requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
     }
     

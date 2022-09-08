@@ -125,7 +125,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
             // Suppression de la table nom table
 			String nomTable = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
             System.out.println("/* Delete nomenclature : " + nomTable + " */");
-            UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropUniqueTable(nomTable));
+            UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropTableCascade(nomTable));
             StringBuilder requete = new StringBuilder();
             requete.append("\n SELECT nom_table FROM arc.ihm_nmcl ");
             requete.append("\n WHERE nom_table like '" + typeNomenclature(nomTable) + "%'");

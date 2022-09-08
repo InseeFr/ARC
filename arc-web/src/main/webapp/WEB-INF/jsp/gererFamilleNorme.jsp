@@ -34,7 +34,7 @@
 						<c:param name="checkbox" value="true" />
 						<c:param name="checkboxVisible" value="true" />
 						<c:param name="extraScopeSee"
-							value="viewClient;viewTableMetier;viewVariableMetier;" />
+							value="viewClient;viewTableMetier;viewHostAllowed;viewVariableMetier;" />
 						<c:param name="otherButton">
 							<button class="btn btn-primary btn-sm"
 								id="viewFamilleNorme.download" type="submit"
@@ -57,6 +57,10 @@
 						<c:param name="btnDelete" value="true" />
 						<c:param name="checkbox" value="true" />
 						<c:param name="checkboxVisible" value="true" />
+						<c:param name="extraScopeSee" value="viewHostAllowed;" />
+						<c:param name="extraScopeAdd" value="viewHostAllowed;" />
+						<c:param name="extraScopeUpdate" value="viewHostAllowed;" />
+						<c:param name="extraScopeDelete" value="viewHostAllowed;" />
 					</c:import>
 					<!-- VIEW TABLE METIER -->
 					<c:set var="view" value="${viewTableMetier}" scope="request" />
@@ -73,6 +77,19 @@
 						<c:param name="extraScopeAdd" value="viewVariableMetier;" />
 						<c:param name="extraScopeUpdate" value="viewVariableMetier;" />
 						<c:param name="extraScopeDelete" value="viewVariableMetier;" />
+					</c:import>
+					<!-- VIEW HOST ALLOWED -->
+					<c:set var="view" value="${viewHostAllowed}" scope="request" />
+					<c:import url="tiles/templateVObject.jsp">
+						<c:param name="ligneAdd" value="true" />
+						<c:param name="btnSelect" value="true" />
+						<c:param name="btnSee" value="true" />
+						<c:param name="btnSort" value="true" />
+						<c:param name="btnAdd" value="true" />
+						<c:param name="btnUpdate" value="true" />
+						<c:param name="btnDelete" value="true" />
+						<c:param name="checkbox" value="true" />
+						<c:param name="checkboxVisible" value="true" />
 					</c:import>
 				</div>
 				<div class="col-md-8">

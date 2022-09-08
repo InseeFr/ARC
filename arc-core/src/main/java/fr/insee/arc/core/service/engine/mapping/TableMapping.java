@@ -240,7 +240,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
     }
 
     public String requeteCreation() {
-        StringBuilder returned = new StringBuilder(FormatSQL.dropUniqueTable(this.getNomTableTemporaire()));
+        StringBuilder returned = new StringBuilder(FormatSQL.dropTableCascade(this.getNomTableTemporaire()));
         returned.append("CREATE "+(this.getNomTableTemporaire().contains(".")?"UNLOGGED":"TEMPORARY")+" TABLE " + this.getNomTableTemporaire() + " (");
         boolean isFirst = true;
         for (VariableMapping variable : this.getEnsembleVariableMapping()) {

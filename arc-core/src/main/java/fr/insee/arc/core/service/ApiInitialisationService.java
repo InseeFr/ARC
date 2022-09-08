@@ -1088,15 +1088,15 @@ public class ApiInitialisationService extends ApiService {
 		           		 		else
 		           		 		{
 			           		 			// si on ne trouve pas la table dans la phase en etape=1, on détruit le lien avec to do
-				           		 		if (!etape.equals("1"))
-				           		 		{
-				           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" NO INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
-				           		 		}
-				           		 		else
-				           		 		// sinon on pose le lien (etape 1 ou 2)
-				           		 		{
-				           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
-				           		 		}
+//				           		 		if (!etape.equals("1"))
+//				           		 		{
+//				           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" NO INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
+//				           		 		}
+//				           		 		else
+//				           		 		// sinon on pose le lien (etape 1 ou 2)
+//				           		 		{
+//				           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
+//				           		 		}
 		           		 		}
 		           		 	}
 		           		 	

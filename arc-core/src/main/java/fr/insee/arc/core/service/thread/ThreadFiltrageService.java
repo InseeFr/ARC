@@ -245,24 +245,18 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
     public void insertionFinale() throws Exception
     {
     	// promote the application user account to full right
-    	switchToFullRightRole();
+    	UtilitaireDao.get("arc").executeImmediate(connexion,switchToFullRightRole());
     	
     	// créer les tables héritées
     	String tableIdSourceOK=tableOfIdSource(this.tableFiltrageOk ,this.idSource);
-    	createTableInherit(connexion, this.tableTempFiltrageOk, tableIdSourceOK);
+    	UtilitaireDao.get("arc").executeBlock(connexion, createTableInherit(connexion, this.tableTempFiltrageOk, tableIdSourceOK));
         String tableIdSourceKO=tableOfIdSource(this.tableFiltrageKo ,this.idSource);
-        createTableInherit(connexion, this.tableTempFiltrageKo, tableIdSourceKO);
+        UtilitaireDao.get("arc").executeBlock(connexion, createTableInherit(connexion, this.tableTempFiltrageKo, tableIdSourceKO));
         
         StringBuilder requete = new StringBuilder();
         
-        if (paramBatch == null) {
-        	requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableFiltrageOk + "_todo;"));
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableFiltrageOk +";"));
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceKO+" inherit "+ this.tableFiltrageKo +";"));
-        }
-        else
+        if (paramBatch == null)
         {
-            requete.append(FormatSQL.tryQuery("alter table "+tableIdSourceOK+" inherit "+ this.tableFiltrageOk + "_todo;"));
             requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
         }
         

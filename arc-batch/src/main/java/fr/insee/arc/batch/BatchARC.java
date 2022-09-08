@@ -95,6 +95,9 @@ public class BatchARC {
 	// a un blocage
 	// et si un nouveau runner doit etre lancé
 	private static Integer numberOfIterationBewteenBlockageCheck;
+	
+	// nombre d'iteration de la boucle batch entre chaque routine de maintenance de la base de données
+	private static Integer numberOfIterationBewteenDatabaseMaintenanceRoutine;
 
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
@@ -145,6 +148,12 @@ public class BatchARC {
 		numberOfIterationBewteenBlockageCheck = BDParameters.getInt(null, "LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL",
 				120);
 
+		
+		// nombre d'iteration de la boucle batch entre chaque routine de maintenance de la base de données
+		numberOfIterationBewteenDatabaseMaintenanceRoutine = BDParameters.getInt(null, "LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL",
+				500);
+		
+		
 		// either we take env and envExecution from database or properties
 		// default is from properties
 		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
@@ -363,9 +372,9 @@ public class BatchARC {
 						}
 						
 						
-						if (iteration%500==0)
+						if (iteration%numberOfIterationBewteenDatabaseMaintenanceRoutine==0)
 						{
-							System.out.println(iteration+": database maintenance started");
+							message(iteration+": database maintenance started");
 
 							new Thread() {
 								public void run(){

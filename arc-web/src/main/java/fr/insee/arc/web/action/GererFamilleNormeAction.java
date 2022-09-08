@@ -41,6 +41,9 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
 	private static final String ID_FAMILLE = "id_famille";
 
+	private static final String ID_APPLICATION = "id_application";
+
+	
 	private static final String RESULT_SUCCESS = "jsp/gererFamilleNorme.jsp";
 
     private static final String IHM_MOD_VARIABLE_METIER = "ihm_mod_variable_metier";
@@ -52,6 +55,8 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
     private VObject viewClient;
 
+    private VObject  viewHostAllowed;
+    
     private VObject viewTableMetier;
 
     private VObject  viewVariableMetier;
@@ -68,11 +73,14 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 		setViewClient(vObjectService.preInitialize(arcModel.getViewClient()));
 		setViewFamilleNorme(vObjectService.preInitialize(arcModel.getViewFamilleNorme()));
 		setViewTableMetier(vObjectService.preInitialize(arcModel.getViewTableMetier()));
+		setViewHostAllowed(vObjectService.preInitialize(arcModel.getViewHostAllowed()));
+
 		setViewVariableMetier(vObjectService.preInitialize(arcModel.getViewVariableMetier()));
 		
 		putVObject(getViewFamilleNorme(), t -> initializeFamilleNorme());
 		putVObject(getViewClient(), t -> initializeClient());
 		putVObject(getViewTableMetier(), t -> initializeTableMetier());
+		putVObject(getViewHostAllowed(), t -> initializeHostAllowed());
 		putVObject(getViewVariableMetier(), t -> initializeVariableMetier());
 
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);	
@@ -218,6 +226,59 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
     /*
+     * TABLES HOSTS AUTORISES
+     */
+    public void initializeHostAllowed() {
+        try {
+            System.out.println("/* initializeHostAllowed */");
+            Map<String, ArrayList<String>> selection = viewClient.mapContentSelected();
+            
+            if (!selection.isEmpty()) {
+				HashMap<String, String> type = viewClient.mapHeadersType();
+				PreparedStatementBuilder requete = new PreparedStatementBuilder();
+                requete.append("SELECT * FROM arc.ihm_webservice_whitelist");
+                requete.append(" WHERE id_famille" + requete.sqlEqual(selection.get(ID_FAMILLE).get(0), type.get(ID_FAMILLE)));
+                requete.append(" AND id_application" + requete.sqlEqual(selection.get(ID_APPLICATION).get(0), type.get(ID_APPLICATION)));
+    
+                HashMap<String, String> defaultInputFields = new HashMap<>();
+                defaultInputFields.put(ID_FAMILLE, selection.get(ID_FAMILLE).get(0));
+                defaultInputFields.put(ID_APPLICATION, selection.get(ID_APPLICATION).get(0));
+
+                this.vObjectService.initialize(viewHostAllowed, requete, "arc.ihm_webservice_whitelist", defaultInputFields);
+            } else {
+                this.vObjectService.destroy(viewHostAllowed);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/selectHostAllowed")
+    public String selectHostAllowed(Model model) {
+        return basicAction(model, RESULT_SUCCESS);
+    }
+    
+    @RequestMapping("/addHostAllowed")
+    public String addHostAllowed(Model model) {
+        return addLineVobject(model, RESULT_SUCCESS, getViewHostAllowed());
+    }
+
+    @RequestMapping("/deleteHostAllowed")
+    public String deleteHostAllowed(Model model) {
+        return deleteLineVobject(model, RESULT_SUCCESS, getViewHostAllowed());
+    }
+
+    @RequestMapping("/updateHostAllowed")
+    public String updateHostAllowed(Model model) {
+        return updateVobject(model, RESULT_SUCCESS, getViewHostAllowed());
+    }
+
+    @RequestMapping("/sortHostAllowed")
+    public String sortHostAllowed(Model model) {
+        return sortVobject(model, RESULT_SUCCESS, getViewHostAllowed());
+    }
+    
+    /*
      * TABLES METIER
      */
     public void initializeTableMetier() {
@@ -262,6 +323,8 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         return sortVobject(model, RESULT_SUCCESS, getViewTableMetier());
     }
 
+    
+    
     /**
      *
      * @param idFamille
@@ -883,7 +946,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     /**
      * @return the viewClient
      */
-    public VObject getViewClient() {
+    public final VObject getViewClient() {
         return this.viewClient;
     }
 
@@ -891,8 +954,17 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
      * @param viewClient
      *            the viewClient to set
      */
-    public void setViewClient(VObject viewClient) {
+    public final void setViewClient(VObject viewClient) {
         this.viewClient = viewClient;
     }
 
+	public final VObject getViewHostAllowed() {
+		return viewHostAllowed;
+	}
+
+	public final void setViewHostAllowed(VObject viewHostAllowed) {
+		this.viewHostAllowed = viewHostAllowed;
+	}
+
+    
 }

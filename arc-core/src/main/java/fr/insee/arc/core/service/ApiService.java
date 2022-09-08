@@ -500,12 +500,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      *  required is true if the restrictedUserAccount exists
      * @throws SQLException
      */
-    protected void switchToFullRightRole() throws SQLException
+    public String switchToFullRightRole()
     {
 		if (!properties.getDatabaseRestrictedUsername().equals(""))
 		{
-			UtilitaireDao.get("arc").executeImmediate(connexion, FormatSQL.changeRole(properties.getDatabaseUsername()));
+			return FormatSQL.changeRole(properties.getDatabaseUsername());
 		}
+		return "";
     }
       
     /**
@@ -623,11 +624,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
    		 	for (String z:m.get("id_source")) {	
    		 		
    		 		count++;
-       			 if (paramBatch==null)
-       			 {
-        			 query.append("ALTER TABLE "+tableOfIdSource(tablePrevious, z)+" NO INHERIT "+tablePrevious+"_todo ;");
-       			 }
-        		 else
+       			 if (paramBatch!=null)
         		 {
         			 query.append("DROP TABLE IF EXISTS "+tableOfIdSource(tablePrevious, z)+";");
 	 
@@ -742,10 +739,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         return dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName;
     }
 
-    public static String temporaryTableName(String aEnvExecution, String tableName) {
-        return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + tableName);
-    }
-
     public static String globalTableName(String aEnvExecution, String tableName) {
         return dbEnv(aEnvExecution) + tableName;
     }
@@ -840,6 +833,25 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         requete.append("\n set enable_hashjoin = on; ");
         return requete.toString();
 
+    }
+    
+
+    /**
+     * Requête de sélection de la liste des colonnes des tables métier associée
+     * à une norme
+     *
+     * @param listeTable
+     * @return
+     */
+    public static PreparedStatementBuilder listeColonneTableMetierSelonFamilleNorme(String anEnvironnement, String idFamille)
+    {
+    	PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    	
+		requete.append("SELECT DISTINCT nom_variable_metier, type_variable_metier\n")
+		    .append("  FROM " + anEnvironnement + "_mod_variable_metier\n")
+		    .append("  WHERE lower(id_famille)=lower(" + requete.quoteText(idFamille) + ")");
+    	
+        return requete;
     }
 
     /**
@@ -999,9 +1011,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
             String... etat_traitement) {
         StringBuilder requete = new StringBuilder();
 
-        if (tableIn.toLowerCase().contains("_todo")) {
-            requete.append(FormatSQL.lock(tableIn));
-        }
+//        if (tableIn.toLowerCase().contains("_todo")) {
+//            requete.append(FormatSQL.lock(tableIn));
+//        }
         requete.append("\n DROP TABLE IF EXISTS " + tableOut + " CASCADE; \n");
 
         requete.append("\n CREATE ");
@@ -1031,29 +1043,28 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
     
   
-
-    public void createTableInherit(Connection connexion, String tableIn, String tableIdSource) throws Exception
+/**
+ * 
+ * @param connexion
+ * @param tableIn
+ * @param tableIdSource
+ * @return
+ */
+    public String createTableInherit(Connection connexion, String tableIn, String tableIdSource)
     {
+        StaticLoggerDispatcher.info("** createTableOK ** : "+tableIdSource, LOGGER_APISERVICE);
+    	
+        // si la table in n'est pas vide
+    	StringBuilder queryToTest = new StringBuilder();
+    	queryToTest.append("SELECT count(*)>0 FROM (SELECT 1 FROM "+tableIn+" LIMIT 1) u");
+    	
+    	StringBuilder queryToExecute = new StringBuilder();
 
     	// on créé la table héritée que si la table a des enregistrements
-    	if (UtilitaireDao.get(poolName).hasResults(connexion, new PreparedStatementBuilder("SELECT 1 FROM "+tableIn+" LIMIT 1")))
-    	{
-    	
-        StringBuilder query = new StringBuilder();
-        
-        StaticLoggerDispatcher.info("** createTableOK ** : "+tableIdSource, LOGGER_APISERVICE);
-    	java.util.Date beginDate = new java.util.Date();
-    	        
-        query.append("DROP TABLE IF EXISTS " + tableIdSource + ";");
-        query.append("CREATE TABLE " + tableIdSource +" "+FormatSQL.WITH_NO_VACUUM+" AS SELECT * FROM "+tableIn+";");
+     	queryToExecute.append("DROP TABLE IF EXISTS " + tableIdSource + ";");
+     	queryToExecute.append("CREATE TABLE " + tableIdSource +" "+FormatSQL.WITH_NO_VACUUM+" AS SELECT * FROM "+tableIn+";");
 
-
-        UtilitaireDao.get("arc").executeBlock(connexion, query);
-        
-        java.util.Date endDate = new java.util.Date();
-        StaticLoggerDispatcher.info("** createTableOK ** temps : " + (endDate.getTime()-beginDate.getTime()) + " ms", LOGGER_APISERVICE);
-    	}
-    	
+     	return FormatSQL.executeIf(queryToTest, queryToExecute);
     }
     
     
@@ -1108,7 +1119,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      * 
      * @throws SQLException
      */
-    public void updateNbEnr(String tablePilTemp, String tableTravailTemp, String...jointure) throws SQLException {
+    public String updateNbEnr(String tablePilTemp, String tableTravailTemp, String...jointure) throws SQLException {
         StringBuilder query = new StringBuilder();
 
         // mise à jour du nombre d'enregistrement et du type composite
@@ -1121,8 +1132,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         }
         query.append(";");
         
-        UtilitaireDao.get(poolName).executeBlock(this.getConnexion(), query);
-
+        return query.toString();
     }
     
     
@@ -1319,7 +1329,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         this.connexion.rollback();
         
     	// promote the application user account to full right
-    	switchToFullRightRole();
+        UtilitaireDao.get("arc").executeImmediate(connexion,switchToFullRightRole());
         
         StringBuilder requete = new StringBuilder();
         
