@@ -79,7 +79,7 @@ public class ServiceJeuDeRegle {
 
 		java.util.Date date = new java.util.Date();
 		
-		// register the columns from the source table
+		// register the columns from the source table into listRubTable
 		registerRubriquesFromSourceTable(connexion, table);
 		
 		// execute the correction rules (aka "preAction") before the control step
@@ -148,6 +148,7 @@ public class ServiceJeuDeRegle {
 							connexion
 							, table
 							, "id"
+							, this.listRubTable
 							, "true"
 							, pa
 							);

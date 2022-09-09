@@ -155,8 +155,13 @@ public class ThreadChargementService extends ApiChargementService implements Run
     public void preparation() throws SQLException
     {
     	StringBuilder query=new StringBuilder();
-    	query.append("DISCARD TEMP;");
+    	
+        // nettoyage des objets base de données du thread
+        query.append(cleanThread());
+    	
+    	// création des tables temporaires de données
     	query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableChargementPilTemp, this.idSource));
+
     	UtilitaireDao.get("arc").executeBlock(connexion,query);
     }
     
@@ -179,9 +184,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    // Mettre à jour le nombre d'enregistrement dans la table de
 	    // pilotage temporaire
 	    query.append(insertionFinale(this.connexion, this.tableChargementOK, this.idSource));
-	
-	    // Nettoyage des tabels temporaires
-	    query.append(clean());
 	    
 	    UtilitaireDao.get("arc").executeBlock(this.connexion, query);
 	}
@@ -203,21 +205,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	queryToExecute.append("TRUNCATE TABLE " + this.getTableTempA() + ";");
 	
 	return FormatSQL.executeIf(queryTest, queryToExecute);
-    }
-    
-    
-    /**
-     * clean temporary table
-     * @return
-     */
-    public String clean() 
-    {
-    	StringBuilder blocFin = new StringBuilder();
-	    blocFin.append(FormatSQL.dropTable(this.getTableTempA()));
-	    blocFin.append(FormatSQL.dropTable(this.tableTempAll));
-	    blocFin.append(FormatSQL.dropTable(this.getTableChargementBrutal()));
-	    blocFin.append("\nDISCARD SEQUENCES; DISCARD TEMP;");
-	    return blocFin.toString();
     }
 
     /**
@@ -391,7 +378,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	query.append(switchToFullRightRole());
 	
 	// Créer la table des données de la table des donénes chargées
-	query.append(createTableInherit(connexion, getTableTempA(), tableIdSource));
+	query.append(createTableInherit(getTableTempA(), tableIdSource));
 	
 	query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
 	

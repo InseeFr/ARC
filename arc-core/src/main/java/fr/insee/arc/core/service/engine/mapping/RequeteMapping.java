@@ -337,9 +337,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
 		if (!this.isRequeteCalculee) {
 			StringBuilder requeteGlobale = new StringBuilder("");
-//			if(discardTemp) {
-//				requeteGlobale.append("DISCARD TEMP; ");
-//			}
+
 			requeteGlobale.append("SET ENABLE_HASHAGG=ON; SET ENABLE_BITMAPSCAN=OFF; \n");
 
 			construireTablePrecedente(requeteGlobale);

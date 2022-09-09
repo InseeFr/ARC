@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.postgresql.core.Utils;
 
+import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -83,21 +84,14 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         return end;
     }
 
-     public static String dropTableCascade(String aTableName)
+    public static String dropObjectCascade(ObjectType tableOrView, String anObjectName, String... separator)
     {
-        return dropObjectCascade(ObjectType.TABLE, aTableName);
-    }
-
-    public static String dropObjectCascade(ObjectType tableOrView, String anObjectName)
-    {
-        StringBuilder sql = new StringBuilder("\n DROP " + tableOrView + " IF EXISTS " + anObjectName + " CASCADE;");
+        StringBuilder sql = new StringBuilder("\n DROP " + tableOrView + " IF EXISTS " + anObjectName + " CASCADE "+end(separator));
         return sql.toString();
     }
     
     public static String dropTable(String tableName, String... separator) {
-	StringBuilder returned = new StringBuilder();
-	returned.append("DROP " + ObjectType.TABLE + " IF EXISTS " + tableName + " CASCADE " + end(separator));
-	return returned.toString();
+	return dropObjectCascade(ObjectType.TABLE,tableName,separator);
     }
     
     public static PreparedStatementBuilder tableExists(String table, String... separator) {
@@ -160,6 +154,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     	.append("set join_collapse_limit=10000;")
     	.append("set enable_hashagg=on;")
     	.append("set search_path=" + defaultSchema.toLowerCase() + ", public;")
+    	.append(ModeRequete.EXTRA_FLOAT_DIGIT.expr())
     	.append("COMMIT;")
     	;
     	return query.toString();

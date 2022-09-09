@@ -67,9 +67,6 @@ public enum ModeRequete {
     	
 		// user defined configuration modes
 		query.append(ModeRequete.untokenize(modes));
-		
-		// decimal approximation configuration for float
-		query.append(ModeRequete.EXTRA_FLOAT_DIGIT.expr());
 
 		// query
 		if (requete!=null)

@@ -99,6 +99,9 @@ public class BatchARC {
 	// nombre d'iteration de la boucle batch entre chaque routine de maintenance de la base de données
 	private static Integer numberOfIterationBewteenDatabaseMaintenanceRoutine;
 
+	// nombre d'iteration de la boucle batch entre chaque routine de vérification du reste à faire
+	private static Integer numberOfIterationBewteenCheckTodo;
+	
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
 	// Maintenance initialization process can only occur in this case
@@ -152,6 +155,10 @@ public class BatchARC {
 		// nombre d'iteration de la boucle batch entre chaque routine de maintenance de la base de données
 		numberOfIterationBewteenDatabaseMaintenanceRoutine = BDParameters.getInt(null, "LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL",
 				500);
+		
+		// nombre d'iteration de la boucle batch entre chaque routine de vérification du reste à faire
+		numberOfIterationBewteenCheckTodo = BDParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
+				10);
 		
 		
 		// either we take env and envExecution from database or properties
@@ -383,13 +390,16 @@ public class BatchARC {
 							}.start();
 						}
 						
-						// check if production on
-						productionOn = productionOn();
-
-						// check if batch must exit loop
-						// exit if nothing left to do or if the production had been turned OFF
-						exit = isNothingLeftToDo(envExecution) || !productionOn;
-
+						if (iteration%numberOfIterationBewteenCheckTodo==0)
+						{
+							// check if production on
+							productionOn = productionOn();
+	
+							// check if batch must exit loop
+							// exit if nothing left to do or if the production had been turned OFF
+							exit = isNothingLeftToDo(envExecution) || !productionOn;
+						}
+						
 						Sleep.sleep(delay);
 						System.gc();
 
@@ -429,7 +439,7 @@ public class BatchARC {
 	 */
 	public void maintenanceTablePilotageBatch() throws SQLException {
 
-		// création de al table si elle n'existe pas
+		// création de la table si elle n'existe pas
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
 		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
 		requete.append(
@@ -575,7 +585,7 @@ public class BatchARC {
 			message("Reception de nouveaux fichiers");
 			ArcThreadFactory recevoir = new ArcThreadFactory(mapParam, TraitementPhase.RECEPTION);
 			recevoir.execute();
-			message("Reception : " + recevoir.getReport().nbLines + " e : " + recevoir.getReport().duree + " ms");
+			message("Reception : " + recevoir.getReport().duree + " ms");
 		}
 
 	}
@@ -604,8 +614,7 @@ public class BatchARC {
 
 			initialiser.execute();
 
-			message("Initialisation terminée : " + (int) initialiser.getReport().nbLines + " e : "
-					+ initialiser.getReport().duree + " ms");
+			message("Initialisation terminée : " + initialiser.getReport().duree + " ms");
 
 			UtilitaireDao.get("arc").executeRequest(null,
 					new PreparedStatementBuilder(

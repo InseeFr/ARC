@@ -562,13 +562,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public <T> T executeRequest(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider,
 			ModeRequete... modes) throws SQLException {
-		if (modes != null && modes.length > 0) {
-			LoggerHelper.trace(LOGGER, "\n" + ModeRequete.configureQuery(null,modes));
-		}
 
 		long start = new Date().getTime();
 		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
-		LoggerHelper.trace(LOGGER, "\n"+requete.getQueryWithParameters());
+		LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
 		LoggerHelper.trace(LOGGER, requete.getParameters());
 		
 		this.silent=false;
@@ -577,30 +574,18 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
 			try {
 				connexionWrapper.getConnexion().setAutoCommit(false);
-				if (modes != null && modes.length > 0) {
-					try(PreparedStatement stmt = connexionWrapper.getConnexion()
-							.prepareStatement(ModeRequete.configureQuery(null,modes));)
-					{
-						stmt.execute();
-					}
-				} else {
-					try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(ModeRequete.EXTRA_FLOAT_DIGIT.expr());)
-					{
-						stmt.execute();
-					}
-				}
-				try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(requete.getQuery().toString());)
+				try(PreparedStatement stmt = connexionWrapper.getConnexion().prepareStatement(ModeRequete.configureQuery(requete.getQuery().toString(),modes));)
 				{
 					for (int i=0;i<requete.getParameters().size();i++)
 					{
 						stmt.setString(i+1, requete.getParameters().get(i));
 					}
-					
-					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
 	
 					try {
 						// the first result found will be output
 						boolean isresult = stmt.execute();
+						LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
+
 						if (!isresult)
 						{
 							do {
@@ -1429,22 +1414,23 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 *
-	 *
+	 * Met à jour un table en mode bulk
+	 * c'est à dire en recréant l'image modifiée de la table à mettre à jour et en droppant l'ancienne
+	 * Equivalent à UPDATE table SET [@param set] WHERE [@param where]
 	 * @param aConnexion
 	 * @param tableName
 	 * @param keys       : clé de jointure. ex: "id_source,id"
+	 * @param colList    : la liste complète des colonnes de la table
 	 * @param where      : la clause where sur laquelle se fait la mise à jour. ex :
 	 *                   "id='12' and id_source like 'a%'"
 	 * @param set        ... : la nouvelle valeur et le nom de la colonne a mettre à
 	 *                   jour "12 as a"
 	 * @throws SQLException
 	 */
-	public static void fastUpdate(String poolName, Connection aConnexion, String tableName, String keys, String where,
+	public static void fastUpdate(String poolName, Connection aConnexion, String tableName, String keys, List<String> colList, String where,
 			String... set) throws SQLException {
 		// récupérer la liste des colonnes
 		// liste de toutes les colonnes
-		ArrayList<String> colList = listeCol(poolName, aConnexion, tableName);
 		// liste des colonnes à mettre à jour
 		ArrayList<String> colSetList = new ArrayList<String>();
 		ArrayList<String> setList = new ArrayList<String>();

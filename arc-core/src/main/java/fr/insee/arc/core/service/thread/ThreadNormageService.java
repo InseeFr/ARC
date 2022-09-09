@@ -135,9 +135,12 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     private void creerTableTravail() throws SQLException {
         StaticLoggerDispatcher.info("Créer les tables images", LOGGER);
         // Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
-        StringBuilder query = new StringBuilder("DISCARD TEMP;");
+        StringBuilder query = new StringBuilder();
         
-        // créer la table de pilotage relative au thread
+        // nettoyage des objets base de données du thread
+        query.append(cleanThread());
+        
+    	// création des tables temporaires de données
         query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableNormagePilTemp, this.idSource));
         query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
 
@@ -239,9 +242,9 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     	query.append(switchToFullRightRole());
     	
     	String tableIdSourceOK=tableOfIdSource(this.tableNormageOK ,this.idSource);
-    	query.append(createTableInherit(connexion, this.tableNormageOKTemp, tableIdSourceOK));
+    	query.append(createTableInherit(this.tableNormageOKTemp, tableIdSourceOK));
         String tableIdSourceKO=tableOfIdSource(this.tableNormageKO ,this.idSource);
-        query.append(createTableInherit(connexion, this.tableNormageKOTemp, tableIdSourceKO));
+        query.append(createTableInherit(this.tableNormageKOTemp, tableIdSourceKO));
         
         if (paramBatch != null) {
         	query.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));

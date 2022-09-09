@@ -1050,7 +1050,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
  * @param tableIdSource
  * @return
  */
-    public String createTableInherit(Connection connexion, String tableIn, String tableIdSource)
+    public String createTableInherit(String tableIn, String tableIdSource)
     {
         StaticLoggerDispatcher.info("** createTableOK ** : "+tableIdSource, LOGGER_APISERVICE);
     	
@@ -1114,6 +1114,12 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
     }
 
     
+    public String cleanThread()
+    {
+    	return "DISCARD SEQUENCES; DISCARD TEMP;";
+    }
+    
+    
     /**
      * Met à jour le comptage du nombre d'enregistrement par fichier; nos fichiers de blocs XML sont devenus tous plats :) 
      * 
@@ -1165,6 +1171,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
      */
     public ServiceReporting invokeApi() {
         double start = System.currentTimeMillis();
+        
+        // deprecated and removed for now
         int nbLignes = 0;
 
         loggerDispatcher.info("****** Execution " + this.getCurrentPhase() + " *******", LOGGER_APISERVICE);
@@ -1192,22 +1200,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
                 }
             }
         } finally {
-            if (this.todo && !this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString())) {
-                
-            	if (this.reporting>0)
-            	{
-            		nbLignes=this.reporting;
-            	}
-            	else
-            	{
-	            	try {
-	                    UtilitaireDao.get(poolName).executeImmediate(this.connexion, "CREATE TABLE IF NOT EXISTS " + this.tablePilTemp + " (nb_enr int); ");
-	                } catch (SQLException e) {
-	                    e.printStackTrace();
-	                }
-	                nbLignes = UtilitaireDao.get(poolName).getInt(this.connexion, new PreparedStatementBuilder("select coalesce(sum(nb_enr),0) from " + this.tablePilTemp));
-            	}
-            }
             this.finaliser();
         }
 

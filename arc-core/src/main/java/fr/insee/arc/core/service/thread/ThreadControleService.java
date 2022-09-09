@@ -104,8 +104,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
             execute();          
 
-            calculSeuilControle();
-            
             insertionFinale();
             
         } catch (Exception e) {
@@ -154,15 +152,14 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
         StringBuilder query = new StringBuilder();
 
-        // Marquage du jeux de règles appliqué
-        StaticLoggerDispatcher.info("Récupération des rubrique de la table ", LOGGER);
-
-        // fabrication de la table de pilotage controle lié au thread
-        query.append("DISCARD TEMP;");
+        // nettoyage des objets base de données du thread
+        query.append(cleanThread());
+        
+        // création des tables temporaires de données
         query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableControlePilTemp, this.idSource));
 
         // Marquage du jeux de règles appliqué
-        StaticLoggerDispatcher.info("Marquage du jeux de règles appliqué ", LOGGER);
+        StaticLoggerDispatcher.info("Marquage du jeux de règles appliqués ", LOGGER);
         query.append(marqueJeuDeRegleApplique(this.tableControlePilTemp, TraitementEtat.OK.toString()));
         
         // Fabrication de la table de controle temporaire
@@ -211,7 +208,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la table des seuils
      * @throws SQLException
      */
-    public void calculSeuilControle() throws Exception {
+    public StringBuilder calculSeuilControle() throws Exception {
         StaticLoggerDispatcher.info("finControle", LOGGER);
 
 
@@ -244,8 +241,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         blocFin.append(ajoutTableControle(this.tableControleDataTemp, tableOutKoTemp, this.tableControlePilTemp, "etat_traitement ='{"+TraitementEtat.KO+"}' "
         		, "controle='"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE+"' OR "));
 
-        UtilitaireDao.get("arc").executeBlock(this.connexion, blocFin);
-
+        return blocFin;
     }
 
     /**
@@ -254,30 +250,27 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      */
     private void insertionFinale() throws Exception {
 
+   	// calcul des seuils pour finalisation 
+   	StringBuilder query=new StringBuilder();
+   	query.append(calculSeuilControle());
+
 	// promote the application user account to full right
-    UtilitaireDao.get("arc").executeImmediate(connexion,switchToFullRightRole());
-    	
+	query.append(switchToFullRightRole());
+
     // Créer les tables héritées
     String tableIdSourceOK=tableOfIdSource(tableOutOk ,this.idSource);
-    UtilitaireDao.get("arc").executeBlock(connexion, createTableInherit(connexion, tableOutOkTemp, tableIdSourceOK));
+    query.append(createTableInherit(tableOutOkTemp, tableIdSourceOK));
     String tableIdSourceKO=tableOfIdSource(tableOutKo ,this.idSource);
-    UtilitaireDao.get("arc").executeBlock(connexion, createTableInherit(connexion, tableOutKoTemp, tableIdSourceKO));
-    
-    StringBuilder requete = new StringBuilder();
+    query.append(createTableInherit(tableOutKoTemp, tableIdSourceKO));
     
     if (paramBatch != null)
     {
-        requete.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
+    	query.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
     }
     
-    requete.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp, this.idSource));
+    query.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp, this.idSource));
     
-    requete.append(FormatSQL.dropTable(tableOutOkTemp).toString());
-    requete.append(FormatSQL.dropTable(tableOutKoTemp).toString());
-    requete.append(FormatSQL.dropTable(this.tableControleDataTemp).toString());
-    requete.append("\n DISCARD SEQUENCES; DISCARD TEMP;");
-    
-    UtilitaireDao.get("arc").executeBlock(this.connexion, requete);
+    UtilitaireDao.get("arc").executeBlock(this.connexion, query);
     }
     
     
