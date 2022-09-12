@@ -92,15 +92,19 @@ public enum TraitementPhase {
         return phase;
     }
 
-	
-	public static List<TraitementPhase> getListPhaseC() {
+    
+	public static List<TraitementPhase> listPhasesAfterPhase(TraitementPhase phase) {
 		List<TraitementPhase> listePhaseC = new ArrayList<>();
 		for (TraitementPhase t : values()) {
-			if (t.getOrdre()>=0) {
+			if (t.getOrdre()>=phase.getOrdre()) {
 				listePhaseC.add(t);
 			}
 		}
 		return listePhaseC;
+	}
+	
+	public static List<TraitementPhase> getListPhaseC() {
+		return listPhasesAfterPhase(TraitementPhase.INITIALISATION);
 	}
 	
 	/**

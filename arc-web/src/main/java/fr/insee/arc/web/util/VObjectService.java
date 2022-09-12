@@ -69,13 +69,26 @@ public class VObjectService {
     private LoggerDispatcher loggerDispatcher;
     
     private String pool = "arc";
+    
+    // filter constants
+    // 0 is default
+    public static final int FILTER_LIKE_CONTAINS=0;
+    public static final Integer DEFAULT_FILTER_PATTERN=FILTER_LIKE_CONTAINS;
+    
+    public static final int FILTER_LIKE_ENDSWITH=1;
+    public static final int FILTER_REGEXP_SIMILARTO=2;
+    public static final String FILTER_OR="OR";
+    public static final String FILTER_AND="AND";
 
-    private boolean noOrder = false;
-    private boolean noCount = false;
+    // pagination and order default constant
+	public static final boolean DEFAULT_NO_ORDER=false;
+	public static final boolean DEFAULT_NO_COUNT=false;
+	public static final boolean DEFAULT_NO_LIMIT=false;
 
-    // filtering    
-    private int filterPattern = 0;
-    private String filterFunction = "upper";
+	public static final String DEFAULT_FILTER_FUNCTION="upper";
+	
+	
+    
 
     
     /** Try to set some informations based on the data saved in session.
@@ -193,14 +206,16 @@ public class VObjectService {
 	        requete.append("select alias_de_table.* from (");
 	        requete.append(mainQuery);
 	        requete.append(") alias_de_table ");
-	        requete.append(buildFilter(data.getFilterFields(), data.getHeadersDLabel()));
+	        
+	        requete.append(buildFilter(data.getFilterFields(), data.getHeadersDLabel(), data.getFilterPattern(), data.getFilterFunction()));
  
-	        if (this.noOrder == false) {
+	        if (!data.isNoOrder()) {
 	            requete.append(buildOrderBy(data.getHeaderSortDLabels(), data.getHeaderSortDOrders()));
+	            requete.append(", alias_de_table ");
 	        }
 	
-	        if (data.getPaginationSize() != null && data.getPaginationSize() > 0) {
-	            requete.append(" limit " + data.getPaginationSize() + " offset " + ((indexPage - 1) * data.getPaginationSize()));
+	        if (!data.isNoLimit() && data.getPaginationSize() != null && data.getPaginationSize() > 0) {
+	            requete.append(buildLimit(data, indexPage));
 	        }
 	
 
@@ -228,13 +243,10 @@ public class VObjectService {
 	        data.setTable(table);
 	        data.setHeadersDLabel(headersDLabel);
 	        data.setHeadersDType(headersDType);
-	        data.setHeadersVLabel(buildHeadersVLabel(data, headersDLabel));
-	        data.setHeadersVSize(buildHeadersVSize(data, headersDLabel));
-	        data.setHeadersVType(buildHeadersVType(data, headersDLabel));
-	        data.setHeadersVSelect(buildHeadersVSelect(data, headersDLabel));
-	        data.setHeadersVisible(buildHeadersVisible(data, headersDLabel));
-	        data.setHeadersUpdatable(buildHeadersUpdatable(data, headersDLabel));
-	        data.setHeadersRequired(buildHeadersRequired(data, headersDLabel));
+	        
+	        // apply the rendering
+	        applyColumnRendering(data, headersDLabel);
+	        
 	        data.setContent(TableObject.as(aContent));
 	        data.setDefaultInputFields(defaultInputFields);
 	        data.setInputFields(eraseInputFields(headersDLabel, defaultInputFields));
@@ -284,20 +296,35 @@ public class VObjectService {
 	
 	}
 
-	private Integer pageManagement(PreparedStatementBuilder mainQuery, VObject currentData) {
+	// set the default pagination size if the parameter is null
+	public void setPaginationSizeIfNull(VObject currentData)
+	{
+		
+		if (currentData.getPaginationSize() == null) {
+			currentData.setPaginationSize(currentData.getDefaultPaginationSize());
+		}
+	}
+	
+	
+	/**
+	 * Calculate the number of pages that will be display according to the pagination size required
+	 * If the parameter "noCount" is set to true, it won't calculate the number of pages 
+	 * @param mainQuery
+	 * @param currentData
+	 * @return
+	 */
+	public Integer pageManagement(PreparedStatementBuilder mainQuery, VObject currentData) {
 				
 		ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 		if (currentData.getIdPage() == null) {
 		    currentData.setIdPage("1");
 		}
 		
-		if (currentData.getPaginationSize() == null) {
-			currentData.setPaginationSize(currentData.getDefaultPaginationSize());
-		}
+		setPaginationSizeIfNull(currentData);
 		
-		if (!this.noCount) {
+		if (!currentData.isNoCount()) {
 		    if (currentData.getPaginationSize() > 0 
-		    		&& !this.noOrder) {
+		    		&& !currentData.isNoOrder()) {
 		        try {
 		        	
 		        	PreparedStatementBuilder requete=new PreparedStatementBuilder();
@@ -317,6 +344,10 @@ public class VObjectService {
 		    } else {
 		    	currentData.setNbPages(1);
 		    }
+		}
+		else
+		{
+			currentData.setNbPages(9999);
 		}
 
 		try {
@@ -341,13 +372,31 @@ public class VObjectService {
 
 	/**
      * Absolument indispensable dans le cas ou des tables de vues sont générées dynamiquement
-     *
+     * Set the rendering for columns
      * @param aRendering
      */
-    public void initialiserColumnRendering(VObject data, HashMap<String, ColumnRendering> aRendering) {
+    public void initialiserColumnRendering(VObject data, Map<String, ColumnRendering> aRendering) {
     	data.getConstantVObject().setColumnRender(aRendering);
     }
 
+    /**
+     * Apply a rendering, even after an initialization query
+     * So the result of the query can be interpreted to generate a particular rendering
+     * Use method "initialiserColumnRendering" to set the column rendering
+     * @param data
+     * @param headersDLabel
+     */
+    public void applyColumnRendering(VObject data, ArrayList<String> headersDLabel )
+    {
+    	data.setHeadersVLabel(buildHeadersVLabel(data, headersDLabel));
+        data.setHeadersVSize(buildHeadersVSize(data, headersDLabel));
+        data.setHeadersVType(buildHeadersVType(data, headersDLabel));
+        data.setHeadersVSelect(buildHeadersVSelect(data, headersDLabel));
+        data.setHeadersVisible(buildHeadersVisible(data, headersDLabel));
+        data.setHeadersUpdatable(buildHeadersUpdatable(data, headersDLabel));
+        data.setHeadersRequired(buildHeadersRequired(data, headersDLabel));
+    }
+    
     /**
      * A vouaire
      */
@@ -812,13 +861,10 @@ public class VObjectService {
     }
 
     
-    public static final int FILTER_LIKE_CONTAINS=0;
-    public static final int FILTER_LIKE_ENDSWITH=1;
-    public static final int FILTER_REGEXP_SIMILARTO=2;
     
-    public static final String FILTER_OR="OR";
-    public static final String FILTER_AND="AND";
-
+    public PreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel) {
+    return buildFilter(filterFields, headersDLabel, DEFAULT_FILTER_PATTERN, DEFAULT_FILTER_FUNCTION);
+    }
 
 
     /**
@@ -828,7 +874,7 @@ public class VObjectService {
      * @return
      */
     
-    public PreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel) {
+    public PreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel, Integer filterPattern, String filterFunction) {
 
         Pattern patternMath = Pattern.compile("[<>=]");
 
@@ -840,7 +886,7 @@ public class VObjectService {
         for (int i = 0; i < filterFields.size(); i++) {
             if (filterFields.get(i) != null && !filterFields.get(i).equals("")) {
 
-                if ((this.filterPattern == FILTER_LIKE_CONTAINS || this.filterPattern == FILTER_LIKE_ENDSWITH || this.filterPattern == FILTER_REGEXP_SIMILARTO)) {
+                if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH || filterPattern == FILTER_REGEXP_SIMILARTO)) {
                     s.append(" AND (");
                 }
                 
@@ -916,29 +962,29 @@ public class VObjectService {
                 	
                 	String toSearch="";
                 	
-                    if (this.filterPattern == FILTER_LIKE_CONTAINS || this.filterPattern == FILTER_LIKE_ENDSWITH) {
-                        s.append(" " + this.filterFunction + "(" + headersDLabel.get(i) + "::text) LIKE ");
+                    if (filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH) {
+                        s.append(" " + filterFunction + "(" + headersDLabel.get(i) + "::text) LIKE ");
                     }
 
-                    if (this.filterPattern == FILTER_REGEXP_SIMILARTO) {
-                        s.append(" ' '||" + this.filterFunction + "(" + headersDLabel.get(i) + "::text) SIMILAR TO ");
+                    if (filterPattern == FILTER_REGEXP_SIMILARTO) {
+                        s.append(" ' '||" + filterFunction + "(" + headersDLabel.get(i) + "::text) SIMILAR TO ");
                     }
 
                     // Si on a déjà un % dans le filtre on n'en rajoute pas
-                    if ((this.filterPattern == FILTER_LIKE_CONTAINS || this.filterPattern == FILTER_REGEXP_SIMILARTO) && !filterFields.get(i).contains("%")) {
+                    if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_REGEXP_SIMILARTO) && !filterFields.get(i).contains("%")) {
                     	toSearch+="%";
                     }
 
-                    if (this.filterPattern == FILTER_LIKE_CONTAINS || this.filterPattern == FILTER_LIKE_ENDSWITH) {
+                    if (filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH) {
                     	toSearch+=filterFields.get(i).toUpperCase();
                     }
 
-                    if (this.filterPattern == FILTER_REGEXP_SIMILARTO) {
+                    if (filterPattern == FILTER_REGEXP_SIMILARTO) {
                         String aChercher = patternMather(filterFields.get(i).toUpperCase().trim());
                         toSearch+="( " + aChercher.replace(" ", "| ") + ")%";
                     }
 
-                    if ((this.filterPattern == FILTER_LIKE_CONTAINS || this.filterPattern == FILTER_LIKE_ENDSWITH) && !filterFields.get(i).contains("%")) {
+                    if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH) && !filterFields.get(i).contains("%")) {
                     	toSearch+="%";
                     }
                     
@@ -988,9 +1034,18 @@ public class VObjectService {
                 s.append("desc ");
             }
         }
-        s.append(", alias_de_table ");
         return s;
     }
+    
+    public PreparedStatementBuilder buildLimit(VObject data, Integer indexPage)
+    {
+    
+	setPaginationSizeIfNull(data);
+
+    return new PreparedStatementBuilder(" limit " + data.getPaginationSize() + " offset " + ((indexPage - 1) * data.getPaginationSize()));
+    
+    }
+    
 
     /**
      * Trier suivant une colonne
@@ -1041,6 +1096,7 @@ public class VObjectService {
         	.append(") alias_de_table ")
         	.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()))
         	.append(buildOrderBy(v0.getHeaderSortDLabels(), v0.getHeaderSortDOrders()))
+        	.append(", alias_de_table ")
         	;
         ArrayList<String> fileNames = new ArrayList<>();
         fileNames.add("Vue");
@@ -1330,10 +1386,6 @@ public class VObjectService {
         data.setConstantVObject(new ConstantVObject(columnRender));
     }
 
-    public int getFilterPattern() {
-        return this.filterPattern;
-    }
-
     public void initializeByList(VObject data, ArrayList<ArrayList<String>> liste, HashMap<String, String> defaultInputFields) {
 
     	
@@ -1378,36 +1430,6 @@ public class VObjectService {
 	public static void addRowToVObjectList(ArrayList<ArrayList<String>> result,String...elements)
 	{
 		result.add(new ArrayList<>(Arrays.asList(Arrays.copyOf(elements, elements.length))));
-	}
-	
-    
-
-    public void setFilterPattern(int filterPattern) {
-        this.filterPattern = filterPattern;
-    }
-
-    public String getFilterFunction() {
-        return this.filterFunction;
-    }
-
-    public void setFilterFunction(String filterFunction) {
-        this.filterFunction = filterFunction;
-    }
-
-    public Boolean getNoOrder() {
-        return this.noOrder;
-    }
-
-    public void setNoOrder(Boolean noPage) {
-        this.noOrder = noPage;
-    }
-
-    public Boolean getNoCount() {
-		return noCount;
-	}
-
-	public void setNoCount(Boolean noCount) {
-		this.noCount = noCount;
 	}
 
 	/**

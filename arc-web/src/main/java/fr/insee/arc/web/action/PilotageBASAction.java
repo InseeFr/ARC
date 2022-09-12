@@ -7,8 +7,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +49,8 @@ import fr.insee.arc.web.model.viewobjects.ViewEntrepotBAS;
 import fr.insee.arc.web.model.viewobjects.ViewFichierBAS;
 import fr.insee.arc.web.model.viewobjects.ViewPilotageBAS;
 import fr.insee.arc.web.model.viewobjects.ViewRapportBAS;
+import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.util.LineObject;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
@@ -122,25 +126,84 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	public void initializePilotageBAS() {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS *");
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-		
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
-        requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T)+" ");
-		
+
+        
+        
         // the most recent files processed must be shown first by default
         // set this default order
         if (getViewPilotageBAS().getHeaderSortDLabels() == null) {
         	getViewPilotageBAS().setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
         	getViewPilotageBAS().setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
         }
-        
+		
+    	getViewPilotageBAS().setNoCount(true);
+    	getViewPilotageBAS().setNoLimit(true);
+
+    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		
+    	requete.append("SELECT date_entree ");
+		for (TraitementPhase phase:TraitementPhase.listPhasesAfterPhase(TraitementPhase.RECEPTION))
+		{
+			for (TraitementEtat etat:new ArrayList<>(Arrays.asList(TraitementEtat.valuesByOrdreAffichage())))
+			{
+				String columnName=phase.toString().toLowerCase()+"_"+etat.toString().toLowerCase();
+				requete.append("\n, max(CASE WHEN phase_traitement='"+phase+"' and etat_traitement='"+etat.getSqlArrayExpression()+"' THEN n ELSE 0 END) as "+columnName+" ");
+			}
+			
+		}
+		requete.append("\n FROM (");
+        requete.append("\n SELECT date_entree, phase_traitement, etat_traitement, count(*) as n ");
+		requete.append("\n FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" b ");
+		requete.append("\n WHERE date_entree IN ( ");
+		requete.append("\n SELECT DISTINCT date_entree FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" a ");
+        requete.append(this.vObjectService.buildFilter(getViewPilotageBAS().getFilterFields(), getViewPilotageBAS().getHeadersDLabel()));
+        requete.append(this.vObjectService.buildOrderBy(getViewPilotageBAS().getHeaderSortDLabels(), getViewPilotageBAS().getHeaderSortDOrders()));
+        requete.append(this.vObjectService.buildLimit(getViewPilotageBAS(), this.vObjectService.pageManagement(null, getViewPilotageBAS())));
+		requete.append("\n ) ");
+		requete.append("\n GROUP BY date_entree, phase_traitement, etat_traitement ");
+		requete.append(") ttt ");
+		requete.append("group by date_entree ");
+
 		this.vObjectService.initialize(
 				getViewPilotageBAS(), requete, 
-				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields,
-				this::reworkPilotageContent);
+				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields);
 		
+		ArrayList<String> columns=getViewPilotageBAS().getHeadersDLabel();
+		Map<String, ColumnRendering> columnRendering=getViewPilotageBAS().getConstantVObject().columnRender;
+		
+		// for all columns, set rendering visibility to false
+		for (int i=1; i<columns.size();i++)
+		{
+			ColumnRendering renderAttributes=new ColumnRendering(false, ManipString.translateAscii(columns.get(i)), null, "text", null, false);
+			columnRendering.put(columns.get(i), renderAttributes);
+		}
+		
+
+		// now display the columns only which have positive values
+
+		for (LineObject l:getViewPilotageBAS().getContent())
+		{
+			for (int i=1; i<columns.size();i++)
+			{
+				if (!l.getD().get(i).equals("0"))
+				{
+					columnRendering.get(columns.get(i)).visible=true;
+				}
+			}
+		}
+		
+		
+		
+		this.vObjectService.initialiserColumnRendering(getViewPilotageBAS(), columnRendering);
+		this.vObjectService.applyColumnRendering(getViewPilotageBAS(), columns);
+
+
+		// display comment for the sandbox
 		PreparedStatementBuilder envQuery = new PreparedStatementBuilder();
 		envQuery.append("select env_description from arc.ext_etat_jeuderegle where replace(id,'.','_') = ");
 		envQuery.append(envQuery.quoteText(getBacASable()));
+		
+		
 		try {
 			String envDescription = UtilitaireDao.get(POOLNAME).getString(null, envQuery);
 			getViewPilotageBAS().setCustomValue(ENV_DESCRIPTION, envDescription);
@@ -148,106 +211,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
 		}
 	}
-	
-	private ArrayList<ArrayList<String>> reworkPilotageContent(ArrayList<ArrayList<String>> content) {
-		GenericBean g = new GenericBean(content);
-		HashMap<String, ArrayList<String>> mapContent = g.mapContent();
-		HashMap<String, String> mt = g.mapTypes();
-
-		ArrayList<String> newHeaders = new ArrayList<>();
-
-		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
-
-		// ne garder les colonnes avec au moins un enregistrements dedans
-
-		newHeaders.add(ENTRY_DATE);
-
-		for (Map.Entry<String, ArrayList<String>> entry : mapContent.entrySet()) {
-			boolean toKeep = false;
-			int i = 0;
-
-			while (i < entry.getValue().size() && !entry.getKey().equals(ENTRY_DATE)) {
-
-				if (Integer.parseInt(entry.getValue().get(i)) > 0) {
-					toKeep = true;
-				}
-				i++;
-			}
-
-			if (toKeep) {
-				newHeaders.add(entry.getKey());
-			}
-		}
-
-		// ordonner les colonnes selon la phase et l'etat
-		Collections.sort(newHeaders, new Comparator<String>() {
-			public int compare(String a, String b) {
-				String phaseA = ManipString.substringBeforeLast(a, "_").toUpperCase();
-				String etatA = ManipString.substringAfterLast(a, "_").toUpperCase();
-
-				String phaseB = ManipString.substringBeforeLast(b, "_").toUpperCase();
-				String etatB = ManipString.substringAfterLast(b, "_").toUpperCase();
-
-				//Check if one of the two headers is date_entree. Because date_entree is not a TypeTraitementPhase
-				try {
-					TraitementPhase.valueOf(phaseA);
-				} catch (Exception e) {
-					return -1;
-				}
-
-				try {
-					TraitementPhase.valueOf(phaseB);
-				} catch (Exception e) {
-					return 1;
-				}
-
-				if (TraitementPhase.valueOf(phaseA).getOrdre() > TraitementPhase.valueOf(phaseB).getOrdre()) {
-					return 1;
-				}
-				if (TraitementPhase.valueOf(phaseA).getOrdre() < TraitementPhase.valueOf(phaseB).getOrdre()) {
-					return -1;
-				}
-				if (TraitementEtat.valueOf(etatA).getOrdre() > TraitementEtat.valueOf(etatB).getOrdre()) {
-					return 1;
-				}
-				if (TraitementEtat.valueOf(etatA).getOrdre() < TraitementEtat.valueOf(etatB).getOrdre()) {
-					return -1;
-				}
-				return 0;
-
-			}
-		});
-
-		// ajouter les coloonnes
-		newContent.add(newHeaders);
-
-		// ajout des types des colonnes
-		ArrayList<String> newTypes = new ArrayList<>();
-
-		for (int j = 0; j < newHeaders.size(); j++) {
-			newTypes.add(mt.get(newHeaders.get(j)));
-		}
-
-		newContent.add(newTypes);
-
-		// ajout du contenu relatifs aux colonnes
-		if (!mapContent.isEmpty()) {
-			for (int k = 0; k < mapContent.get(newHeaders.get(0)).size(); k++) {
-				ArrayList<String> newLine = new ArrayList<>();
-				for (int j = 0; j < newHeaders.size(); j++) {
-					newLine.add(mapContent.get(newHeaders.get(j)).get(k));
-				}
-
-				newContent.add(newLine);
-			}
-		}
-
-		return newContent;
-	}
 
 	/**
 	 * Entering sandbox monitoring from main menu build the database and filesystem
-	 * TODO : use liquibase instead
 	 * 
 	 * @return
 	 */
@@ -258,7 +224,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@PostMapping(value = {"/selectPilotageBAS"}
-//	,consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE}
 	)
 	public String selectPilotageBAS(Model model) {
 		return generateDisplay(model, RESULT_SUCCESS);

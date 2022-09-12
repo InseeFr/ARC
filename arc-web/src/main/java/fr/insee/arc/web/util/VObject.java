@@ -95,6 +95,17 @@ public class VObject {
 
 	private HashMap<String, String> customValues;
 
+	// pagination and order attribute
+    private boolean noOrder = VObjectService.DEFAULT_NO_ORDER;
+    private boolean noCount = VObjectService.DEFAULT_NO_COUNT;
+    private boolean noLimit = VObjectService.DEFAULT_NO_LIMIT;
+    
+    // filtering    
+    private int filterPattern = VObjectService.DEFAULT_FILTER_PATTERN;
+    private String filterFunction = VObjectService.DEFAULT_FILTER_FUNCTION;
+
+	
+	
 	public ArrayList<ArrayList<String>> listContent() {
         if (getSavedContent() == null) {
             return new ArrayList<ArrayList<String>>();
@@ -548,7 +559,7 @@ public class VObject {
 		return paginationSize;
 	}
 
-	public void setPaginationSize(int paginationSize) {
+	public void setPaginationSize(Integer paginationSize) {
 		this.paginationSize = paginationSize;
 	}
 
@@ -854,5 +865,45 @@ public class VObject {
 		this.fileUpload = fileUpload;
 	}
 
+	public boolean isNoOrder() {
+		return noOrder;
+	}
+
+	public void setNoOrder(boolean noOrder) {
+		this.noOrder = noOrder;
+	}
+
+	public boolean isNoCount() {
+		return noCount;
+	}
+
+	public void setNoCount(boolean noCount) {
+		this.noCount = noCount;
+	}
+
+	public boolean isNoLimit() {
+		return noLimit;
+	}
+
+	public void setNoLimit(boolean noLimit) {
+		this.noLimit = noLimit;
+	}
+
+	public int getFilterPattern() {
+		return filterPattern;
+	}
+
+	public void setFilterPattern(int filterPattern) {
+		this.filterPattern = filterPattern;
+	}
+
+	public String getFilterFunction() {
+		return filterFunction;
+	}
+
+	public void setFilterFunction(String filterFunction) {
+		this.filterFunction = filterFunction;
+	}
+	
 
 }
