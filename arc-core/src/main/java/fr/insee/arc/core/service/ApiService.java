@@ -662,26 +662,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         }
     }
 
-    /**
-     * Maintenance sur la transposée de la table de pilotage (vue par date d'entrée dans l'écran IHM)
-     * @param connexion
-     * @param envExecution
-     * @param type
-     */
-    public static void maintenancePilotageT(Connection connexion, String envExecution, String type) {
-        
-    	// table de pilotage transposée par date d'entrée
-    	String tablePilT = dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER+"_t";
-        
-    	StaticLoggerDispatcher.info("** Maintenance Pilotage T **", LOGGER_APISERVICE);
-
-        try {
-            UtilitaireDao.get(poolName).executeImmediate(connexion,FormatSQL.vacuumSecured(tablePilT, type));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 	/**
 	 * vaccum table du méta modele
 	 * @param connexion
@@ -719,8 +699,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         ApiService.maintenancePgCatalog(connexion, typeMaintenance);
         
         ApiService.maintenancePilotage(connexion, envExecution, typeMaintenance);
-        
-		ApiService.maintenancePilotageT(connexion, envExecution, typeMaintenance);
 		
     	StaticLoggerDispatcher.info("** Fin de maintenance **", LOGGER_APISERVICE);
     }

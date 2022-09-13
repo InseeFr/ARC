@@ -157,6 +157,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		requete.append("\n WHERE date_entree IN ( ");
 		requete.append("\n SELECT DISTINCT date_entree FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" a ");
         requete.append(this.vObjectService.buildFilter(getViewPilotageBAS().getFilterFields(), getViewPilotageBAS().getHeadersDLabel()));
+        requete.append("\n AND phase_traitement='"+TraitementPhase.RECEPTION+"' ");
         requete.append(this.vObjectService.buildOrderBy(getViewPilotageBAS().getHeaderSortDLabels(), getViewPilotageBAS().getHeaderSortDOrders()));
         requete.append(this.vObjectService.buildLimit(getViewPilotageBAS(), this.vObjectService.pageManagement(null, getViewPilotageBAS())));
 		requete.append("\n ) ");

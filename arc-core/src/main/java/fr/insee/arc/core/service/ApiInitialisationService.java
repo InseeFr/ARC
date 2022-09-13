@@ -1138,12 +1138,12 @@ public class ApiInitialisationService extends ApiService {
                 FormatSQL.rebuildTableAsSelectWhere(tablePilotage, "true",
                         "create index idx1_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (id_source);",
                         "create index idx2_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (phase_traitement, etape);",
-                        "create index idx3_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (date_entree);",
                         "create index idx4_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (rapport) where rapport is not null;",
                         "create index idx5_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (o_container,v_container);",
                         "create index idx6_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (to_delete);",
-                        "CREATE TRIGGER tg_pilotage_fichier_calcul AFTER INSERT OR UPDATE OR DELETE ON " + tablePilotage    + " FOR EACH ROW EXECUTE PROCEDURE arc.transpose_pilotage_calcul();",
-                        "CREATE TRIGGER tg_pilotage_fichier_fin AFTER INSERT OR UPDATE OR DELETE ON " + tablePilotage+ " FOR EACH STATEMENT EXECUTE PROCEDURE arc.transpose_pilotage_fin();"));
+                        "create index idx7_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (date_entree, phase_traitement, etat_traitement);"
+        				));
+
         UtilitaireDao.get("arc").executeBlock(connexion, "analyze " + tablePilotage + ";");
     }
     
@@ -1189,7 +1189,6 @@ public class ApiInitialisationService extends ApiService {
     public static void clearPilotageAndDirectories(String repertoire, String env) throws Exception {
         try {
         	 UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_fichier; ");
-        	 UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_fichier_t; ");
              UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_archive; ");
 
 
