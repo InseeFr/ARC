@@ -658,7 +658,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
         try {
             UtilitaireDao.get(poolName).executeImmediate(connexion,"vacuum " +type + " "+ tablePil + ";");
         } catch (Exception e) {
-            e.printStackTrace();
+			StaticLoggerDispatcher.error("Error in ApiService.maintenancePilotage", LOGGER_APISERVICE);
         }
     }
 
@@ -1169,11 +1169,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
                 } catch (Exception ex) {
                     loggerDispatcher.error("Erreur dans " + this.getCurrentPhase() + ". ", ex, LOGGER_APISERVICE);
                     try {
-                        ex.printStackTrace();
-
                         this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.getTablePil(), ex, "aucuneTableADroper");
                     } catch (Exception ex2) {
-                        ex2.printStackTrace();
+                    	loggerDispatcher.error("Error in ApiService.invokeApi.repriseSurErreur", LOGGER_APISERVICE);
                     }
                 }
             }

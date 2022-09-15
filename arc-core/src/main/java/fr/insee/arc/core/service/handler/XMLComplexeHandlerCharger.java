@@ -156,8 +156,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		try {
 			UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);
 		} catch (SQLException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "startElement()", LOGGER, ex);
-			//e.printStackTrace();
+			LoggerHelper.errorGenTextAsComment(getClass(), "XMLComplexeHandlerCharger.startElement()", LOGGER, ex);
 			 throw new SAXParseException("Fichier XML : erreur de requete insertion  : "+ex.getMessage() , "", "", 0, 0);
 		}
 		this.requete.setLength(0);
@@ -178,20 +177,11 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		this.closedTag2=this.closedTag1;
 		this.closedTag1=this.closedTag;
 		this.closedTag = Format.toBdRaw(renameColumn(qName));
-//				+(this.father_1.equals(root_father)?"":
-//					(father_separator+
-//							ManipString.substringBeforeFirst(
-//									this.father_1
-//									,father_separator)
-//					)
-//					)
-				;
 				
 		// la condition de lecture est assez spéciale
 		// on doit arriver à la fin du stream de l'element et concaténer toutes
 		// les données trouvées jusqu'a ce qu'on en trouve plus
 		if (this.closedTag.equals(this.currentTag) && this.hasData) {
-			// System.out.println(currentTag+" = " + donnees + " ; ");
 
 			if (this.colData.get(this.currentTag) == null) {
 				this.colData.put(this.currentTag, 1);
@@ -240,17 +230,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 							)
 					{	
 
-						// update in trees the existing link between multipleleaf and its father
-//						 @trees
-//							{
-//							// update trees the existing link between multipleleaf and its father
-//							if (m.get(this.allCols.indexOf(this.closedTag1)).equals(this.allCols.indexOf(fatherOfTheBlock)))
-//							{
-//								m.put(this.allCols.indexOf(closedTagHeader1), this.allCols.indexOf(fatherOfTheBlock));
-//								m.put(this.allCols.indexOf(this.closedTag1), this.allCols.indexOf(closedTagHeader1));
-//							}
-//						}
-						
 						// mettre à jour tree
 						this.tree.put(this.allCols.indexOf(closedTagHeader1), this.allCols.indexOf(fatherOfTheBlock));
 						this.tree.put(this.allCols.indexOf(this.closedTag1), this.allCols.indexOf(closedTagHeader1));
@@ -285,24 +264,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		this.treeStackFatherLag = new ArrayList<String>(this.treeStackFather);
 		this.father = this.treeStackFather.get(this.treeStackFather.size() - 1);
 		this.treeStackFather.remove(this.treeStackFather.size() - 1);
-
-		
-//		 System.out.println();
-//		 System.out.println("closedTag : "+closedTag);
-//		 System.out.println("closedTag1 : "+closedTag1);
-//		 System.out.println("currentTag : "+currentTag);
-//		 System.out.println("father : "+this.father);
-//		 System.out.println("leaf status : "+this.leafPossible);
-//		 System.out.println("leaf possible : "+this.leafPossible);
-//		 System.out.println("allCols : "+ allCols);
-//		 System.out.println("lineCols : "+ lineCols);
-//		 System.out.println("lineIds : "+ lineIds);
-//		 System.out.println("lineValues : "+ lineValues);
-//		 System.out.println("lineCols11 : "+ lineCols11);
-//		 System.out.println("treeStack : "+ treeStack);
-//		 System.out.println("treeFatherStack : "+ treeStackFather);
-//		 System.out.println("treeStackFatherLag : "+ treeStackFatherLag);
-		
 		
 		if (this.closedTag.equals(this.currentTag) && this.leafPossible) {
 
@@ -310,11 +271,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			 if (this.lineCols.indexOf(this.allCols.indexOf(this.closedTag)) < this.lineCols.size() - 1) {
 				 
 				 // réalisation de l'insertion
-//				 System.out.println("insert : "+
-//						 this.lineCols.subList(0,this.lineCols.size()-1)
-//				 +" / "+ this.lineIds.subList(0,this.lineCols.size()-1)
-//				 +" / "+ this.lineValues.subList(0,this.lineCols.size()-1)
-//						 );
 				 
 				 insertQueryBuilder(this.requete,this.tempTableA, this.fileName, this.lineCols.subList(0,this.lineCols.size()-1), this.lineIds.subList(0,this.lineCols.size()-1), this.lineValues.subList(0,this.lineCols.size()-1));
 
@@ -355,21 +311,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			 this.lineCols11.add(this.lineCols11.get(this.lineCols11.size() - 1));
 
 		}
-		 
-//		 System.out.println("après");
-//		 System.out.println("father : "+this.father);
-//		 System.out.println("leaf status : "+this.leafPossible);
-//		 System.out.println("leaf possible : "+this.leafPossible);
-//		 System.out.println("allCols : "+ allCols);
-//		 System.out.println("lineCols : "+ lineCols);
-//		 System.out.println("lineIds : "+ lineIds);
-//		 System.out.println("lineValues : "+ lineValues);
-//		 System.out.println("lineCols11 : "+ lineCols11);
-//		 System.out.println("treeStack : "+ treeStack);
-//		 System.out.println("treeFatherStack : "+ treeStackFather);
-//		 System.out.println("treeStackFatherLag : "+ treeStackFatherLag);
-		
-
 	}
 
 	/**
@@ -439,53 +380,21 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			this.allCols.add(this.currentTag);
 
 			this.requete.append("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag) + " " + this.numBdType + ";");
-//			this.requete.append("alter table " + this.tempTableA + " add i_" + this.currentTag + " " + this.numBdType + ";");
-			
-			// } catch (SQLException e) {
-			// 666 LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
-			// e.printStackTrace();
-			// }
 
 		} else {
 			// ajouter 1 a son index si la colonne existe dejà
-
 			this.col.put(this.currentTag, (Integer) (o) + 1);
-
-			// if (rootDistance.get(currentTag)!=distance)
-			// {
-			// throw new
-			// SAXParseException("Fichier XML non pris en charge : rubrique placée diferemment dans l'arbre xml  : "+currentTag,"","",0,0);
-			// }
-
 		}
 
 		this.distance++;
-		
-//		if (this.tree.get(this.allCols.indexOf(this.currentTag))!=null
-//				&& this.tree.get(this.allCols.indexOf(this.currentTag))!=this.allCols.indexOf(this.father))
-//		{
-//			 throw new SAXParseException(
-//					 "Pères différents trouvés pour l'élément "+this.allCols.indexOf(this.currentTag)+" : "+this.tree.get(this.allCols.indexOf(this.currentTag))+" et "+this.allCols.indexOf(this.father)
-//					 , "", "", 0, 0);			
-//		}
 		
 		// si le lien pere fils n'est pas enregistré
 		// ou que pour ce fils, on trouve un autre pere et que ce pere trouvé n'est pas grand pere
 		
 		if (this.tree.get(this.allCols.indexOf(this.currentTag))==null
-				// @trees
-//			|| (
-//					! this.tree.get(this.allCols.indexOf(this.currentTag)).equals(this.allCols.indexOf(this.father))
-//					&& (
-//					// condition for multiple leaf
-//					this.tree.get(this.tree.get(this.allCols.indexOf(this.currentTag)))==null 
-//						|| !this.tree.get(this.tree.get(this.allCols.indexOf(this.currentTag))).equals(this.allCols.indexOf(this.father)))
-//					)
 				)
 		{
 			this.tree.put(this.allCols.indexOf(this.currentTag), this.allCols.indexOf(this.father));
-			// @trees
-//			Format.putAndCopyTree(this.trees,this.allCols.indexOf(this.currentTag), this.allCols.indexOf(this.father));
 		}
 	
 		// enregistrement de la structure
@@ -496,8 +405,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 				+(this.father.equals(root_father)?"1":this.col.get(this.father))
 				+" "
 				+"i_"+this.currentTag
-//				+" "+
-//				this.col.get(this.currentTag)
 				);
 		
 		
@@ -519,13 +426,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		{
 			this.colDist.put(this.allCols.indexOf(this.currentTag), this.distance);
 		}
-		else
-		{
-//			if (!this.colDist.get(this.allCols.indexOf(this.currentTag)).equals(this.distance))
-//			{
-//				 throw new SAXParseException("Fichier XML non pris en charge : distance à la racine de la rubrique variante  : " + this.currentTag, "", "", 0, 0);
-//			}
-		}
 
 		/*
 		 * quand le pere de la rubrique fermée est retrouvée et que ce n'est pas
@@ -543,7 +443,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 					UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);
 				} catch (SQLException ex) {
 					LoggerHelper.errorGenTextAsComment(getClass(), "startElement()", LOGGER, ex);
-					//e.printStackTrace();
 					 throw new SAXParseException("Fichier XML : erreur de requete insertion  : "+ex.getMessage() , "", "", 0, 0);
 				}
 				this.requete.setLength(0);
@@ -661,7 +560,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		 req.append(")values");
 		 req2.append(")");
 
-		 // attention; on doit insérer au bon endroit;
+		// attention : on doit insérer au bon endroit
 		z=aRequete.indexOf(req.toString(),this.start);
 
 		if (z>-1)
@@ -696,19 +595,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
     private void requeteJointureXML() {
     	
     		// construction de la requete de jointure
-            
-		// @trees
-//        for (HashMap<Integer, Integer> localTree:this.trees)
-//            {
-    	
                 StringBuilder req= new StringBuilder();
-
-                // @trees
-//                if (!jointure.equals(""))
-//                {
-//                	req.append(JOINXML_ANOTER_BLOCK);
-//                }
-//                int[][] arr = Format.getTreeArrayByDistance(localTree, this.colDist);
                 
                 int[][] arr = Format.getTreeArrayByDistance(this.tree, this.colDist);
 	            StringBuilder reqCreate = new StringBuilder(" \n");
@@ -790,20 +677,10 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	
 	            // la compression fait perdre trop de temp
 	            // Mais apres, c'est sur que la table de pilotage devient un peu trop "grosse"
-	
-	//            try {
-	//              this.jointure=StringCompress.compress(req.toString());
-	//            } catch (IOException e) {
-	//              LoggerHelper.errorGenTextAsComment(getClass(), "index()", LOGGER, ex);
-	//              e.printStackTrace();
-	//            }
 	            req.append(JOINXML_STRUCTURE_BLOCK);
 	            req.append(structure.substring(1));
 	            this.jointure=this.jointure+req.toString().replace("'", "''");
-            
-	            // @trees
-	            // }
-//            System.out.println(this.jointure);
+
 
     }
     

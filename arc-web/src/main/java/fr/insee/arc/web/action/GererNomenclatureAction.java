@@ -21,6 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -141,7 +142,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
             this.vObjectService.delete(viewListNomenclatures);
         } catch (Exception e) {
-            e.printStackTrace();
+        	StaticLoggerDispatcher.error("Error in GeerFamilleNormeAction.executeRequeteMiseAjourTableMetier", LOGGER);
         }
         return basicAction(model, RESULT_SUCCESS);
     }
@@ -161,11 +162,10 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     	try {
             importNomenclatureDansBase(fileUpload);
         } catch (Exception ex) {
-            ex.printStackTrace();
             if (ManipString.isStringNull(this.viewListNomenclatures.getMessage())) {
             	this.viewListNomenclatures.setMessage(ex.toString());
             }
-            loggerDispatcher.error(ex,LOGGER);
+            loggerDispatcher.error("Error in GererNomenclatureAction.importListNomenclatures",LOGGER);
         }
 
         return generateDisplay(model, RESULT_SUCCESS);
@@ -179,11 +179,6 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
         // Vérification du bon format du nom de la table : nom_millesime
         // doit être de la forme nom_millesime
-
-        // if (!nomTable.matches(REGEX_FILE_NMCL)) {
-        // this.viewListNomenclatures.setMessage("Erreur - le nom de table n'est pas de la forme nmcl_nom_millesime, le tout en minuscule!");
-        // return false;
-        // }
 
         if (!nomTable.startsWith(NMCL_)) {
             this.viewListNomenclatures.setMessage("Erreur - le nom doit commencer par nmcl_");

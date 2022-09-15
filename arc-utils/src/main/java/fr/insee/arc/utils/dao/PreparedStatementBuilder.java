@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fr.insee.arc.utils.exception.ArcException;
+
 public class PreparedStatementBuilder {
 
 private StringBuilder query=new StringBuilder();
@@ -44,12 +46,7 @@ public PreparedStatementBuilder append(StringBuilder s)
 
 @Override
 public String toString() {
-	
-	System.out.println(query);
-	Exception e=new Exception();
-	e.printStackTrace();	
-	
-	return null;
+	throw new ArcException("ToString is not allowed for PreparedStatementBuilder");
 }
 
 

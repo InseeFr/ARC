@@ -1,7 +1,10 @@
 package fr.insee.arc.ws.services.importServlet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.ws.actions.SendResponse;
@@ -9,6 +12,9 @@ import fr.insee.arc.ws.dao.ClientDao;
 import fr.insee.arc.ws.dao.ClientDaoImpl;
 
 public class ImportStep3GetTableDataService {
+	
+	protected static final Logger LOGGER = LogManager.getLogger(ImportStep3GetTableDataService.class);
+
 
 	private ClientDao clientDao;
 	private JSONObject dsnRequest;
@@ -42,8 +48,7 @@ public class ImportStep3GetTableDataService {
 			// renvoie un nom de table du client si il en reste une
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StaticLoggerDispatcher.error("** Error in servlet ImportStep3GetTableDataService **", LOGGER);
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
 			resp.endSending();
 		}

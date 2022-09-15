@@ -626,7 +626,6 @@ public class ApiReceptionService extends ApiService {
 			}
 		} catch (Exception ex) {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "registerFiles()", LOGGER, ex);
-		    ex.printStackTrace();
 		}
 	}
 

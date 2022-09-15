@@ -357,16 +357,13 @@ public class ApiInitialisationService extends ApiService {
             mettreAJourSchemaTableMetierThrow(connexion, envParameters, envExecution);
     	} catch (Exception e)
     	{
-    		StaticLoggerDispatcher.info("Erreur mettreAJourSchemaTableMetier", LOGGER);
-            e.printStackTrace();
-    	}
+    		StaticLoggerDispatcher.error("Error in ApiInitialisation.mettreAJourSchemaTableMetier" , LOGGER);    	}
     	
     }
 
     
     public static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution) throws Exception {
-        try {
-        	StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
+    		StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
             /*
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
              */
@@ -500,10 +497,6 @@ public class ApiInitialisationService extends ApiService {
                 }
             }
             UtilitaireDao.get("arc").executeBlock(connexion, requeteMAJSchema);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw ex;
-        }
     }
 
     /**
@@ -706,8 +699,7 @@ public class ApiInitialisationService extends ApiService {
         	copyTablesToExecutionThrow(connexion, anParametersEnvironment, anExecutionEnvironment);
     	} catch (Exception e)
     	{
-    		StaticLoggerDispatcher.info("Erreur copyTablesToExecution", LOGGER);
-            e.printStackTrace();
+    		StaticLoggerDispatcher.error("Error in ApiInitialisation.copyTablesToExecution" , LOGGER);
     	}
     }
     
@@ -821,9 +813,8 @@ public class ApiInitialisationService extends ApiService {
             UtilitaireDao.get("arc").executeBlock(connexion, requete);
 
         } catch (Exception e) {
-        	StaticLoggerDispatcher.info("Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment, LOGGER);
-        	StaticLoggerDispatcher.info(e.getMessage().toString(), LOGGER);
-            e.printStackTrace();
+        	StaticLoggerDispatcher.trace("Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment, LOGGER);
+        	StaticLoggerDispatcher.error("Error in ApiInitialisation.copyRulesTablesToExecution" , LOGGER);
             throw e;
         }
     }

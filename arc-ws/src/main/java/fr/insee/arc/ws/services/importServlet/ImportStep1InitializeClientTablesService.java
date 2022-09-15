@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.ws.actions.SendResponse;
 import fr.insee.arc.ws.dao.ClientDao;
@@ -31,7 +32,7 @@ public class ImportStep1InitializeClientTablesService {
 		clientDao = new ClientDaoImpl();
 		this.dsnRequest = dsnRequest;
 	}
-
+	
 	private long timestamp;
 
 	private String environnement;
@@ -100,7 +101,7 @@ public class ImportStep1InitializeClientTablesService {
             resp.send(ApiService.dbEnv(environnement) + client + "_" + this.timestamp);
             resp.endSending();
         } catch (DAOException e) {
-            e.printStackTrace();
+			StaticLoggerDispatcher.error("** Error in servlet ImportStep1InitializeClientTablesService **", LOGGER);
             resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
             resp.endSending();
         }

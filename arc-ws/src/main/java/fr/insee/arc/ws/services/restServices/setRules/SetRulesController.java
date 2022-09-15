@@ -2,7 +2,6 @@ package fr.insee.arc.ws.services.restServices.setRules;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -109,7 +108,6 @@ public class SetRulesController {
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
 			response.put("status", "KO");
 		}
 

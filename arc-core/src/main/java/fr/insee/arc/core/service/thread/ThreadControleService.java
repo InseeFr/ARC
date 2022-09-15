@@ -55,8 +55,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         try {
             this.connexion.setClientInfo("ApplicationName", "Controle fichier "+idSource);
         } catch (SQLClientInfoException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            StaticLoggerDispatcher.error("Error in setting connexion name", LOGGER);
         }
 
         this.setTablePil(theApi.getTablePil());
@@ -107,8 +106,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
             insertionFinale();
             
         } catch (Exception e) {
-			StaticLoggerDispatcher.error(e,LOGGER);
-			e.printStackTrace();
+			StaticLoggerDispatcher.error("Error in control Thread",LOGGER);
 		    try {
 				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 					"aucuneTableADroper");

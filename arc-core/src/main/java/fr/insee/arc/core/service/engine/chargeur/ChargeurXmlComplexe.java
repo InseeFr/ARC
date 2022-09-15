@@ -170,8 +170,7 @@ public class ChargeurXmlComplexe implements IChargeur{
         try {
 			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StaticLoggerDispatcher.error("Error in ChargeurXML.initialisation()",LOGGER);
 		}
         java.util.Date endDate = new java.util.Date();
         
@@ -240,7 +239,7 @@ public class ChargeurXmlComplexe implements IChargeur{
             saxParser.parse(f, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             error = true;
-            e.printStackTrace();
+            StaticLoggerDispatcher.error("Error in ChargeurXML.execution()", LOGGER);
             rapport = e.getMessage().replace("'", "''");
             handler.requete.setLength(0);
             this.start = 0;

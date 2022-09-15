@@ -618,8 +618,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				if (!this.silent) {
 					LoggerHelper.error(LOGGER, "executeRequest()", e);
 				}
-				e.printStackTrace();
-
 				connexionWrapper.getConnexion().rollback();
 				throw e;
 			} finally {

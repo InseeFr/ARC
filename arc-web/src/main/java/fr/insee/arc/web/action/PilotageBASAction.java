@@ -499,9 +499,6 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			querySelection.append(" AND nom_archive IN " + Format.sqlListe(selection.get("nom_archive")) + " ");
 		}
 
-		loggerDispatcher.info("Ma requete pour récupérer la liste des enveloppes : " + querySelection.toString(),
-				LOGGER);
-
 		ArrayList<String> listRepertoire = new ArrayList<>();
 		GenericBean g;
 		String entrepot = "";
@@ -515,7 +512,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, requete));
 			entrepot = g.mapContent().get("entrepot").get(0);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			loggerDispatcher.error("Error in PilotageBasAction.downloadEnveloppeFromArchiveBAS()", LOGGER);
 		}
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE");
 		String chemin = Paths.get(this.repertoire, getBacASable().toUpperCase()).toString();
@@ -703,10 +700,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
 			message = messageOk;
 		} catch (SQLException e) {
-			loggerDispatcher
-					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
-							+ updateToDelete, LOGGER);
-			e.printStackTrace();
+			loggerDispatcher.error("Error in PilotageBASAction.restore", LOGGER);
 			message = "managementSandbox.batch.replay.error";
 		}
 	
@@ -898,10 +892,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
 			message = "managementSandbox.batch.delete.ok";
 		} catch (SQLException e) {
-			loggerDispatcher
-					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
-							+ updateToDelete, LOGGER);
-			e.printStackTrace();
+			loggerDispatcher.error("Error in PilotageBASAction.toDeleteBAS", LOGGER);
 			message = "managementSandbox.batch.delete.error";
 		}
 
@@ -939,7 +930,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			loggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
 							+ updateToDelete, LOGGER);
-			e.printStackTrace();
+			loggerDispatcher.error("Error in PilotageBASAction.undoActionBAS", LOGGER);
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

@@ -1,7 +1,6 @@
 package fr.insee.arc.web.action;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +18,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -191,7 +190,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeClient", LOGGER);
         }
     }
 
@@ -249,7 +248,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                 this.vObjectService.destroy(viewHostAllowed);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeHostAllowed", LOGGER);
         }
     }
 
@@ -298,7 +297,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                 this.vObjectService.destroy(viewTableMetier);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeTableMetier", LOGGER);
         }
     }
 
@@ -387,7 +386,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 		this.vObjectService.initialize(viewVariableMetier, requete, "arc."+IHM_MOD_VARIABLE_METIER, defaultInputFields);
 		
 	    } catch (Exception ex) {
-		ex.printStackTrace();
+			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeVariableMetier", LOGGER);
 	    }
 	    
 	} else {
@@ -565,7 +564,6 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 	    this.viewVariableMetier.setMessage(message.toString());
 
 	} catch (Exception e) {
-	    e.printStackTrace();
 	    this.viewVariableMetier.setMessage(e.getMessage());
 	}
 	return generateDisplay(model, RESULT_SUCCESS);
@@ -688,7 +686,6 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
             message.append("L'ajout de variables s'est achevé sur un succès.\n");
             return requete.toString();
         } catch (Exception ex) {
-            ex.printStackTrace();
             message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
         }
         return empty;
@@ -811,11 +808,8 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
              *
              */
             if (drop) {
-
-                // UtilitaireDao.get("arc").executeRequest(null, delete);
                 message.append("Toutes les variables sélectionnées ont été supprimées des tables sélectionnées.\n");
                 return delete.toString();
-
             }
 
             message.append("Les variables sélectionnées n'ont pas été supprimées car la suppression d'au moins une variable pose problème.\n");
@@ -824,7 +818,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            loggerDispatcher.error("Error in GererFamilleNormeAction.deleteVariableMetierWithoutSync", LOGGER);
         }
         return empty;
     }
@@ -869,7 +863,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
             message.append("Les règles correspondant aux variables supprimées dans les tables métier ont été supprimées.\n");
             message.append("Pensez également à valoriser les règles pour les variables nouvellement créées.\n");
         } catch (Exception ex) {
-            ex.printStackTrace();
+        	StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.executeRequeteMiseAjourTableMetier", LOGGER);
             message.append("Impossible de synchroniser les règles avec les familles de normes.");
         }
     }

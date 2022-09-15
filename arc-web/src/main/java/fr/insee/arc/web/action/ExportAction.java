@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -81,7 +82,7 @@ public class ExportAction extends ArcAction<ExportModel>  {
         try {
 			UtilitaireDao.get("arc").executeImmediate(null, query);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			StaticLoggerDispatcher.error("Error in ExportAction.initializeExport", LOGGER);
 		}
 
         this.vObjectService.initialize(viewExport, new PreparedStatementBuilder("SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export"),  getBacASable() +".export", defaultInputFields);

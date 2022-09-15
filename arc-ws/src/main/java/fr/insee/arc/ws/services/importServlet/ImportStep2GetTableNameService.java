@@ -2,8 +2,11 @@ package fr.insee.arc.ws.services.importServlet;
 
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -13,6 +16,9 @@ import fr.insee.arc.ws.dao.ClientDaoImpl;
 
 public class ImportStep2GetTableNameService {
 
+	protected static final Logger LOGGER = LogManager.getLogger(ImportStep2GetTableNameService.class);
+
+	
 	private ClientDao clientDao;
 	private JSONObject dsnRequest;
 
@@ -82,8 +88,7 @@ public class ImportStep2GetTableNameService {
 			resp.endSending();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StaticLoggerDispatcher.error("** Error in servlet ImportStep2GetTableNameService **", LOGGER);
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
 			resp.endSending();
 		}

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
 
@@ -94,7 +95,6 @@ public class SendResponse {
 
     private static final Logger LOGGER = LogManager.getLogger(SendResponse.class);
 
-//	private GZIPOutputStream wr;
 	public ServletOutputStream wr;
 
 	public SendResponse( HttpServletResponse response ){
@@ -103,7 +103,7 @@ public class SendResponse {
 			this.wr=response.getOutputStream();
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			StaticLoggerDispatcher.error("** Error in servlet SendResponse **", LOGGER);
 		}
 	}
 
