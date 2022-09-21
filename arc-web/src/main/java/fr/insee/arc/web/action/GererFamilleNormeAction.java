@@ -1,5 +1,8 @@
 package fr.insee.arc.web.action;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -24,6 +28,7 @@ import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.model.FamilyManagementModel;
 import fr.insee.arc.web.model.viewobjects.ViewVariableMetier;
 import fr.insee.arc.web.util.ArcStringUtils;
@@ -165,7 +170,21 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
     
     
-	
+    @RequestMapping("/importDDI")
+    public String importDDI(Model model, MultipartFile fileUpload) throws IOException {    	
+    	loggerDispatcher.debug("importDDI",LOGGER);
+    	try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))){
+    	    
+    		String line;
+    		while ((line = rd.readLine()) != null) {
+    	        System.out.println(line);
+    	    }
+    		
+    	}
+        return generateDisplay(model, RESULT_SUCCESS);
+    }
+    
+    
 
     /*
      * CLIENT

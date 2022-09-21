@@ -42,6 +42,12 @@
 								<span class="fa fa-download">&nbsp;</span>
 								<spring:message code="gui.button.downloadRuleset" />
 							</button>
+							<button class="btn btn-primary btn-sm"
+								id="viewFamilleNorme.importDDI" type="submit"
+								doAction="importDDI" multipart="true">
+								<span class="fa fa-upload">&nbsp;</span>
+								<spring:message code="gui.button.importDDI" />
+							</button>
 						</c:param>
 					</c:import>
 
