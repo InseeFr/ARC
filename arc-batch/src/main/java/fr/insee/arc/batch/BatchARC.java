@@ -24,6 +24,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -108,7 +109,7 @@ public class BatchARC {
 	private static boolean dejaEnCours;
 
 	public static void message(String msg) {
-		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "  " + msg);
+		StaticLoggerDispatcher.warn(msg, LOGGER);
 	}
 
 	public static void message(String msg, int iteration) {
@@ -201,6 +202,8 @@ public class BatchARC {
 		message("Main");
 
 		message("Batch ARC " + properties.fullVersionInformation().toString());
+		
+		Thread maintenance=new Thread();
 
 		try {
 
@@ -381,13 +384,17 @@ public class BatchARC {
 						
 						if (iteration%numberOfIterationBewteenDatabaseMaintenanceRoutine==0)
 						{
-							message(iteration+": database maintenance started");
-
-							new Thread() {
-								public void run(){
-									ApiService.maintenanceDatabaseClassic(null, envExecution);
-								}
-							}.start();
+							if (!maintenance.isAlive())
+							{
+								message(iteration+": database maintenance started");
+								maintenance=new Thread() {
+									@Override
+									public void run(){
+										ApiService.maintenanceDatabaseClassic(null, envExecution);
+									}
+								};
+								maintenance.start();
+							}
 						}
 						
 						if (iteration%numberOfIterationBewteenCheckTodo==0)
