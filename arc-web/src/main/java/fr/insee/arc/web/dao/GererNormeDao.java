@@ -51,7 +51,7 @@ public class GererNormeDao implements IDbConstant {
 
 	private static final Logger LOGGER = LogManager.getLogger(GererNormeDao.class);
 
-	public static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
+	private static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
 
     @Autowired
     private WebLoggerDispatcher loggerDispatcher;

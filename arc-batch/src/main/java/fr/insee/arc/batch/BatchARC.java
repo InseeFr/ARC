@@ -30,6 +30,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.Sleep;
@@ -456,7 +457,7 @@ class BatchARC {
 		
 
 		// Maintenance full du catalog
-		ApiService.maintenancePgCatalog(null, "full");
+		ApiService.maintenancePgCatalog(null, FormatSQL.VACUUM_OPTION_FULL);
 
 		// maintenance des tables métier de la base de données
 		ApiService.maintenanceDatabaseClassic(null, envExecution);

@@ -180,7 +180,7 @@ public class VObjectService {
 	 * @param defaultInputFields
 	 * @param reworkContent function to rewrite the fetched content
 	 */
-	public void initialize(VObject data, PreparedStatementBuilder mainQuery, String table, HashMap<String, String> defaultInputFields, 
+	private void initialize(VObject data, PreparedStatementBuilder mainQuery, String table, HashMap<String, String> defaultInputFields, 
 			Function<ArrayList<ArrayList<String>>, ArrayList<ArrayList<String>>> reworkContent) {
 	    try {
 	        LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
@@ -410,7 +410,7 @@ public class VObjectService {
      * Génére les labels de colonnes. Si une déclaration est faite dans ConstantVObject, on met le label déclaré.
      * Sinon on garde le nom de colonne de la base de données
      */
-    public ArrayList<String> buildHeadersVLabel(VObject data, ArrayList<String> headers) {
+    private ArrayList<String> buildHeadersVLabel(VObject data, ArrayList<String> headers) {
         ArrayList<String> headersVLabel = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject()//
@@ -428,7 +428,7 @@ public class VObjectService {
      * Génére la taille de colonnes. Si une déclaration est faite dans ConstantVObject, on met la taille déclaré.
      * Sinon on ne met rien.
      */
-    public ArrayList<String> buildHeadersVSize(VObject data, ArrayList<String> headers) {
+    private ArrayList<String> buildHeadersVSize(VObject data, ArrayList<String> headers) {
         ArrayList<String> headersVSize = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
@@ -444,7 +444,7 @@ public class VObjectService {
      * Génére le type de colonnes. Si une déclaration est faite dans ConstantVObject, on met le type déclaré.
      * Sinon on met text.
      */
-    public ArrayList<String> buildHeadersVType(VObject data, ArrayList<String> headers) {
+    private ArrayList<String> buildHeadersVType(VObject data, ArrayList<String> headers) {
         ArrayList<String> headersVType = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
@@ -460,7 +460,7 @@ public class VObjectService {
      * Génére la visibilité des colonnes. Si une déclaration est faite dans ConstantVObject, on met la visibilité déclarée.
      * Sinon on met visible par défaut.
      */
-    public ArrayList<Boolean> buildHeadersVisible(VObject data, ArrayList<String> headers) {
+    private ArrayList<Boolean> buildHeadersVisible(VObject data, ArrayList<String> headers) {
         ArrayList<Boolean> headersVisible = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
@@ -477,7 +477,7 @@ public class VObjectService {
      *  on met la valeur déclarée.
      * Sinon on met modifiable par défaut.
      */
-    public ArrayList<Boolean> buildHeadersUpdatable(VObject data, ArrayList<String> headers) {
+    private ArrayList<Boolean> buildHeadersUpdatable(VObject data, ArrayList<String> headers) {
         ArrayList<Boolean> headersUpdatable = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
@@ -494,7 +494,7 @@ public class VObjectService {
      *  on met la valeur déclarée.
      * Sinon on met obligatoire par défaut.
      */
-    public ArrayList<Boolean> buildHeadersRequired(VObject data, ArrayList<String> headers) {
+    private ArrayList<Boolean> buildHeadersRequired(VObject data, ArrayList<String> headers) {
         ArrayList<Boolean> headersRequired = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
             if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
@@ -507,7 +507,7 @@ public class VObjectService {
     }
 
 
-    public ArrayList<LinkedHashMap<String, String>> buildHeadersVSelect(VObject data, ArrayList<String> headers) {
+    private ArrayList<LinkedHashMap<String, String>> buildHeadersVSelect(VObject data, ArrayList<String> headers) {
         ArrayList<ArrayList<String>> arrayVSelect = new ArrayList<>();
         ArrayList<LinkedHashMap<String, String>> headerVSelect = new ArrayList<>();
         for (int i = 0; i < headers.size(); i++) {
@@ -538,7 +538,7 @@ public class VObjectService {
     /**
      * Remise à zéro des champs d'entrée avec les valeurs par défault
      */
-    public ArrayList<String> eraseInputFields(ArrayList<String> headersDLabel,
+    private ArrayList<String> eraseInputFields(ArrayList<String> headersDLabel,
             HashMap<String, String> defaultInputFields)
     {
         ArrayList<String> inputFields = new ArrayList<>();
@@ -874,7 +874,7 @@ public class VObjectService {
      * @return
      */
     
-    public PreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel, Integer filterPattern, String filterFunction) {
+    private PreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel, Integer filterPattern, String filterFunction) {
 
         Pattern patternMath = Pattern.compile("[<>=]");
 
@@ -998,7 +998,7 @@ public class VObjectService {
         return s;
     }
 
-    public String patternMather(String aChercher) {
+    private String patternMather(String aChercher) {
         String returned = aChercher;
         returned = ManipString.translateAscii(returned).replace(" ", "  ") + " ";
         // enlever tout les mots de moins de 2 lettres
@@ -1124,7 +1124,7 @@ public class VObjectService {
      * @param requetes
      *            , liste des requetes SQL
      */
-    public void download(VObject currentData, HttpServletResponse response, List<String> fileNames, PreparedStatementBuilder... requetes) {
+    private void download(VObject currentData, HttpServletResponse response, List<String> fileNames, PreparedStatementBuilder... requetes) {
     	VObject v0 = fetchVObjectData(currentData.getSessionName());
         if (currentData.getFilterFields() == null) {
             currentData.setFilterFields(v0.getFilterFields());
@@ -1241,19 +1241,6 @@ public class VObjectService {
             } catch (IOException ex) {
                 LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
             }
-        }
-    }
-
-    // 4MB buffer
-    private static final byte[] BUFFER = new byte[4096 * 1024];
-
-    /**
-     * copy input to output stream - available in several StreamUtils or Streams classes
-     */
-    public static void copy(InputStream input, OutputStream output) throws IOException {
-        int bytesRead;
-        while ((bytesRead = input.read(BUFFER)) != -1) {
-            output.write(BUFFER, 0, bytesRead);
         }
     }
 

@@ -28,14 +28,14 @@ public class VObject {
 	/** Requête de génération du tableau */
 	private PreparedStatementBuilder mainQuery;
 
-	public PreparedStatementBuilder beforeSelectQuery;
+	private PreparedStatementBuilder beforeSelectQuery;
 
-	public PreparedStatementBuilder afterUpdateQuery;
+	private PreparedStatementBuilder afterUpdateQuery;
 
-	public PreparedStatementBuilder afterInsertQuery;
+	private PreparedStatementBuilder afterInsertQuery;
 
 	/** Table utilisée pour les update/insert/delete */
-	public String table;
+	private String table;
 
 	/** Tableau du contenu de la requete (ligne, colonne) */
 	private TableObject content;
@@ -386,8 +386,8 @@ public class VObject {
     }
     
 
-	@SuppressWarnings("unchecked")
-	public VObject copy() {
+	@SuppressWarnings("unchecked") 
+	VObject copy() {
 		VObject v0 = new VObject();
 		v0.setTitle(this.getTitle());
 		v0.setSessionName(this.getSessionName());

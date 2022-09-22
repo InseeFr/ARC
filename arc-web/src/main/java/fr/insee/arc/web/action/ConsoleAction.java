@@ -24,7 +24,7 @@ public class ConsoleAction {
 
 	@Autowired
     @Qualifier("activeLoggerDispatcher")
-    protected LoggerDispatcher loggerDispatcher;
+    private LoggerDispatcher loggerDispatcher;
 	
 	@RequestMapping("/updateConsole")
 	public void updateConsole(HttpSession session, HttpServletResponse response) {

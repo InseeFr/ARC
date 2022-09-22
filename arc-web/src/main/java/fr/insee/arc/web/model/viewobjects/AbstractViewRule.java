@@ -8,8 +8,8 @@ import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.VObject;
 
 /** Abstract class for rules display (load, control,...)*/
-public abstract class AbstractViewRule extends VObject {
-	public AbstractViewRule(String title, String sessionName, int paginationSize) {
+abstract class AbstractViewRule extends VObject {
+	AbstractViewRule(String title, String sessionName, int paginationSize) {
         super();
         
         this.setTitle(title);

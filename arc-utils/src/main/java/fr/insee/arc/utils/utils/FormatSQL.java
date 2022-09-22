@@ -1,19 +1,8 @@
 package fr.insee.arc.utils.utils;
 
-import java.math.BigInteger;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,11 +10,8 @@ import org.postgresql.core.Utils;
 
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
-import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
-import fr.insee.arc.utils.textUtils.SequentialUntokenizer;
 
 public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 {
@@ -40,15 +26,20 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String defaultSeparator = ";\n";
     public static final String _TMP = "$tmp$";
     public static final String _REGEX_TMP = "\\$tmp\\$";
-    private static final String _ID = "id_";
+
     public static final String PARALLEL_WORK_MEM = "24MB";
     public static final String SEQUENTIAL_WORK_MEM = "32MB";
+    
     public static final boolean DROP_FIRST_FALSE = false;
     public static final boolean DROP_FIRST_TRUE = true;
+    
     public static final int TAILLE_MAXIMAL_BLOC_SQL = 300000;
     public static final int MAX_LOCK_PER_TRANSACTION = 50;
     public static final int TIME_OUT_SQL_EN_HEURE = 100;
     public static final int TIMEOUT_MAINTENANCE = 600000;
+    
+    public static final String VACUUM_OPTION_NONE="";
+    public static final String VACUUM_OPTION_FULL="full";
     
     private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
 
@@ -211,6 +202,17 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     	return "VACUUM "+ type +" " + table + "; COMMIT; \n"; 
     }
 
+    /**
+     * Lance un vacuum d'un certain type sur une table
+     * @param table
+     * @param type
+     * @return
+     */
+    public static String analyzeSecured(String table)
+    {    		
+    	return "ANALYZE " + table + "; COMMIT; \n"; 
+    }
+    
     /**
      * Recopie une table à l'identique
      *

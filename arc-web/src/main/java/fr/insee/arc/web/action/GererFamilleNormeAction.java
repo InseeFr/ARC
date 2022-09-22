@@ -189,7 +189,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     /*
      * CLIENT
      */
-    public void initializeClient() {
+    private void initializeClient() {
 	LoggerHelper.info(LOGGER, "/* initializeClient */");
         try {
 			Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
@@ -246,7 +246,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     /*
      * TABLES HOSTS AUTORISES
      */
-    public void initializeHostAllowed() {
+    private void initializeHostAllowed() {
         try {
             System.out.println("/* initializeHostAllowed */");
             Map<String, ArrayList<String>> selection = viewClient.mapContentSelected();
@@ -299,7 +299,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     /*
      * TABLES METIER
      */
-    public void initializeTableMetier() {
+    private void initializeTableMetier() {
         try {
             System.out.println("/* initializeTableMetier */");
             Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
@@ -389,7 +389,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     }
 
 
-    public void initializeVariableMetier() {
+    private void initializeVariableMetier() {
 	if (CollectionUtils.isNotEmpty(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE))) {
 		List<String> listeTableFamille = getListeTableMetierFamille(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
 	    HashMap<String, ColumnRendering> rendering = ViewVariableMetier.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
@@ -421,7 +421,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
      * @param idFamille
      * @return La requête permettant d'obtenir le croisement variable*table pour les variables de la famille
      */
-    public static PreparedStatementBuilder getRequeteListeVariableMetierTableMetier(List<String> listeTableMetier, String idFamille) {
+    private static PreparedStatementBuilder getRequeteListeVariableMetierTableMetier(List<String> listeTableMetier, String idFamille) {
         
     	PreparedStatementBuilder left = new PreparedStatementBuilder("\n (SELECT nom_variable_metier");
         for (int i = 0; i < listeTableMetier.size(); i++) {
@@ -876,7 +876,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         return requete.toString();
     }
 
-    public static final void executeRequeteMiseAjourTableMetier(StringBuilder message, StringBuilder requete) {
+    private static final void executeRequeteMiseAjourTableMetier(StringBuilder message, StringBuilder requete) {
         try {
             UtilitaireDao.get("arc").executeBlock(null, requete);
             message.append("Les règles correspondant aux variables supprimées dans les tables métier ont été supprimées.\n");
@@ -887,11 +887,11 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         }
     }
 
-    public final boolean isNomTableMetierValide(String nomTable) {
+    private final boolean isNomTableMetierValide(String nomTable) {
     	return isNomTableMetierValide(nomTable, TraitementPhase.MAPPING.toString().toLowerCase(), viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
     }
     
-    public static final boolean isNomTableMetierValide(String nomTable, String phase, String famille) {
+    static final boolean isNomTableMetierValide(String nomTable, String phase, String famille) {
 		return nomTable.matches("(?i)^"+phase.toLowerCase()+"_" + famille + "_[a-z]([a-z]|[0-9]|_)+_ok$");
     }
     

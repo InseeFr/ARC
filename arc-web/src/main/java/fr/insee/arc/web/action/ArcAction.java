@@ -44,13 +44,12 @@ import fr.insee.arc.web.util.VObjectService;
  * @author Pépin Rémi
  *
  */
-public abstract class ArcAction<T extends ArcModel> implements IConstanteCaractere {
+abstract class ArcAction<T extends ArcModel> implements IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);
 
 	private static final String DEFAULT_PRODUCTION_ENVIRONMENTS="[\"arc_prod\"]";
 	
-	protected static final String NONE = "none";
 	protected static final String POOLNAME = "arc"; 
 
 	@Autowired
@@ -73,7 +72,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	@Autowired
 	private IndexDao indexDao;
 
-	protected Map<String, String> envMap;
+	private Map<String, String> envMap;
 
 
 	/**
@@ -86,7 +85,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	/**
 	 * Contains a map with the table names
 	 */
-	protected BddTable bddTable;
+	private BddTable bddTable;
 
 	/**
 	 * The scope of the page defines the {@link VObject} to display
@@ -103,7 +102,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	private boolean isDataBaseOK;
 
 	/** Selected environment.*/
-	protected String bacASable;
+	private String bacASable;
 
 	/** Is the current environment a production environment?*/
 	private boolean isEnvProd;
@@ -183,7 +182,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
     }
 
 	/** Fills the model with some attributes expected on (almost) all pages.*/
-	protected void refreshGenericModelAttributes(Model model) {
+	private void refreshGenericModelAttributes(Model model) {
 		model.addAttribute("envMap", getEnvMap());
     	model.addAttribute("bacASable", getBacASable());
     	model.addAttribute("isDataBaseOK", isDataBaseOk());
@@ -248,7 +247,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	 * 
 	 * @return
 	 */
-	public String generateDisplay(Model model, String successUri) {
+	String generateDisplay(Model model, String successUri) {
 		LoggerHelper.debug(LOGGER, "generateDisplay()", getScope());
 		// Initialize required VObjects according to scope
 		boolean defaultWhenNoScope = true;

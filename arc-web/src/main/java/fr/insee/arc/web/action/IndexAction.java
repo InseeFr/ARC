@@ -15,9 +15,9 @@ import fr.insee.arc.web.model.NoModel;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class IndexAction extends ArcAction<NoModel> {
+class IndexAction extends ArcAction<NoModel> {
 
-    public static final String ACTION_NAME = "index";
+    static final String ACTION_NAME = "index";
     private static final String RESULT_SUCCESS = "jsp/index.jsp";
     
     @RequestMapping({"/index"})

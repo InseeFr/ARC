@@ -5,15 +5,9 @@ import java.util.Map;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 
-/**
- * FIXME isUpdatable l'étiquette ne correspond pas au produit false<-/->true
- *
- *
- */
 public final class ConstantVObject {
 
     public Map<String, ColumnRendering> columnRender;
-    public static int logSize = 10000;
 
     public static class ColumnRendering {
         public Boolean visible;
@@ -71,16 +65,6 @@ public final class ConstantVObject {
         }
         
         
-    }
-
-    public static class EntryColumnRendering {
-        public String columnName;
-        public ColumnRendering columnRendering;
-
-        public EntryColumnRendering(String aColumnName, ColumnRendering aColumnRendering) {
-            this.columnName = aColumnName;
-            this.columnRendering = aColumnRendering;
-        }
     }
 
     public ConstantVObject() {
