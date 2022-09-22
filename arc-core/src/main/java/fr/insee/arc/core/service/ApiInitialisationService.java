@@ -1183,7 +1183,7 @@ public class ApiInitialisationService extends ApiService {
              UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_archive; ");
 
 
-            if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
+            if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
                 ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
                 		new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent().get("id_entrepot");
                 if (entrepotList!=null)

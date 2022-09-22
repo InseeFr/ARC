@@ -16,7 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
-import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -24,7 +23,7 @@ import fr.insee.arc.utils.utils.ManipString;
 
 public class NormageEngine {
 
-	private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
+	private static final Logger LOGGER = LogManager.getLogger(NormageEngine.class);
 
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	private String columnToBeAdded = "";
@@ -172,10 +171,10 @@ public class NormageEngine {
 		int subJoinNumber = 0;
 		for (String subJoin : jointure.split(XMLComplexeHandlerCharger.JOINXML_QUERY_BLOCK)) {
 
-			HashMap<String, ArrayList<String>> regle = new HashMap<String, ArrayList<String>>();
+			HashMap<String, ArrayList<String>> regle = new HashMap<>();
 
 			for (String key : regleInitiale.keySet()) {
-				ArrayList<String> al = new ArrayList<String>();
+				ArrayList<String> al = new ArrayList<>();
 				for (String val : regleInitiale.get(key)) {
 					al.add(val);
 				}
@@ -190,9 +189,9 @@ public class NormageEngine {
 			// i.e. en ihm (this.paramBatch==null) on garde toutes les rubriques
 			// pour que les gens qui testent en bac à sable n'aient pas de probleme
 			if (paramBatch != null) {
-				ajouterRegleSuppression(regle, norme, validite, periodicite, subJoin, rubriqueUtiliseeDansRegles);
+				NormageEngineRegleSupression.ajouterRegleSuppression(regle, norme, validite, periodicite, subJoin, rubriqueUtiliseeDansRegles);
 
-				subJoin = appliquerRegleSuppression(regle, norme, validite, periodicite, subJoin);
+				subJoin = NormageEngineRegleSupression.appliquerRegleSuppression(regle, norme, validite, periodicite, subJoin);
 			}
 
 			ajouterRegleDuplication(regle, norme, validite, periodicite, subJoin);
@@ -612,360 +611,9 @@ public class NormageEngine {
 
 	}
 
-	/**
-	 * Ajoute automatiquement des regle de suppression de blocs non utilisés
-	 * 
-	 * @param regle                      : regle dans lesquels le bloc a été ajouté
-	 * @param norme
-	 * @param validite
-	 * @param periodicite
-	 * @param jointure
-	 * @param rubriqueUtiliseeDansRegles
-	 * @throws Exception
-	 */
 
-	private void ajouterRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure, HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles)
-			throws Exception {
-		// on va jouer au "qui enleve-t-on" ??
-		// on va parcourir les regles de normage, controle, filtrage, mapping et voir
-		// quelles sont les rubriques utilisées
-
-		// op 1 : identifier les blocs inutiles
-
-		ArrayList<String> listVarUtilisee = new ArrayList<String>();
-		ArrayList<Integer> lineASupprimer = new ArrayList<Integer>();
-
-		for (int j = 0; j < rubriqueUtiliseeDansRegles.get("id_norme").size(); j++) {
-			listVarUtilisee.add(rubriqueUtiliseeDansRegles.get("var").get(j));
-		}
-
-		String[] lines0 = jointure.split("\n");
-		int max0 = lines0.length - 1;
-		int k0 = max0;
-		while (k0 >= 1) {
-			String line0 = ManipString.substringBeforeFirst(lines0[k0], "from (select ");
-
-			if (line0.startsWith("create temporary table ") && !line0.contains("_null as (select * from ")) {
-				// pour chaque ligne valide, on parcours la liste des variables du controle et
-				// du mapping; si on trouve qq'un on ne fait
-				// rien
-				// sinon on va noter le groupe comme eventuellement à supprimer
-
-				boolean foundVarControleMapping = false;
-				for (String varControleMapping : listVarUtilisee) {
-					// on teste toutes les variables sauf le pere du bloc (qui est en 2ieme
-					// position)
-					String line2 = ManipString.substringBeforeFirst(line0, ",") + ","
-							+ ManipString.substringAfterFirst(ManipString.substringAfterFirst(line0, ","), ",");
-
-					if (line2.contains(" " + varControleMapping + " ")) {
-						foundVarControleMapping = true;
-						break;
-					}
-				}
-
-				// on a trouvé aucune variable de mapping dans ce groupe
-				if (!foundVarControleMapping) {
-					// extraire la rubrique parente
-					String rubriquePere = ManipString
-							.substringBeforeFirst(ManipString.substringAfterFirst(line0, "as (select "), " as m_");
-
-					boolean foundRubriquePere = false;
-					// faut vérifier qu'on peut bien supprimer la table : aucune table qui suit ne
-					// doit contenir la rubrique pere de la
-					// table
-
-					Integer k1 = k0 + 1;
-
-					while (k1 <= max0) {
-						String line1 = ManipString.substringBeforeFirst(lines0[k1], "from (select ");
-
-						if (!line1.startsWith("create temporary table ")) {
-							break;
-						}
-
-						// si on retrouve le pere dans une table qui n'est pas à supprimer, la table
-						// doit etre gardée
-						if (line1.contains(" " + rubriquePere + " ") && !lineASupprimer.contains(k1)) {
-							foundRubriquePere = true;
-							break;
-						}
-
-						k1++;
-					}
-
-					if (!foundRubriquePere) {
-						String rubriquePereBloc = getCoreVariableName(rubriquePere);
-
-						// ajouter le bloc aux regles de suppression si pas dans la table de regle
-						if (!regle.get("rubrique").contains(rubriquePere)
-								&& !regle.get("rubrique_nmcl").contains(rubriquePere)
-								&& !regle.get("rubrique").contains(rubriquePereBloc)
-								&& !regle.get("rubrique_nmcl").contains(rubriquePereBloc)) {
-							lineASupprimer.add(k0);
-							regle.get("id_regle").add("B");
-							regle.get("id_norme").add(norme);
-							regle.get("periodicite").add(periodicite);
-							regle.get("validite_inf").add("1900-01-01");
-							regle.get("validite_sup").add("3000-01-01");
-							regle.get("id_classe").add("deletion");
-							regle.get("rubrique").add(rubriquePereBloc);
-							regle.get("rubrique_nmcl").add(null);
-
-							// System.out.println("Suppression des blocs : "+rubriquePereBloc);
-
-						}
-					}
-				}
-
-			}
-
-			k0--;
-		}
-
-		// op 2 : identifier les variables inutilisées
-		max0 = lines0.length - 1;
-		k0 = max0;
-		while (k0 >= 1) {
-			String line0 = ManipString.substringBeforeFirst(lines0[k0], "from (select ");
-
-			if (line0.startsWith("create temporary table ") && !line0.contains("_null as (select * from ")
-					&& !lineASupprimer.contains(k0)) {
-				Pattern p = Pattern.compile(" as [iv][^, (]*");
-				Matcher m = p.matcher(line0);
-				int nbMatch = 0;
-				while (m.find()) {
-					nbMatch++;
-
-					// on ne considère ni les identifiant de blocs, ni les peres (donc nbMatch>2 car
-					// ceux sont les deux premieres variables
-					// d'un bloc)
-					if (nbMatch > 2) {
-						String rubrique = getCoreVariableName(ManipString.substringAfterFirst(m.group(), " as "));
-						String rubriqueI = "i_" + rubrique;
-						String rubriqueV = "v_" + rubrique;
-
-						if (!listVarUtilisee.contains(rubriqueI) && !listVarUtilisee.contains(rubriqueV)
-								&& !regle.get("rubrique").contains(rubriqueI)
-								&& !regle.get("rubrique_nmcl").contains(rubriqueI)
-								&& !regle.get("rubrique").contains(rubriqueV)
-								&& !regle.get("rubrique_nmcl").contains(rubriqueV)
-								&& !regle.get("rubrique").contains(rubrique)
-								&& !regle.get("rubrique_nmcl").contains(rubrique)) {
-							regle.get("id_regle").add("R");
-							regle.get("id_norme").add(norme);
-							regle.get("periodicite").add(periodicite);
-							regle.get("validite_inf").add("1900-01-01");
-							regle.get("validite_sup").add("3000-01-01");
-							regle.get("id_classe").add("deletion");
-							regle.get("rubrique").add(rubrique);
-							regle.get("rubrique_nmcl").add(null);
-							// System.out.println("Suppression des rubriques : "+rubrique);
-
-						}
-					}
-				}
-
-			}
-			k0--;
-
-		}
-
-		// System.out.println();
-		//
-		// for (int j=0;j<regle.get("id_regle").size();j++)
-		// {
-		// System.out.println();
-		// System.out.print(regle.get("id_regle").get(j));
-		// System.out.print(","+regle.get("id_norme").get(j));
-		// System.out.print(","+regle.get("periodicite").get(j));
-		// System.out.print(","+regle.get("validite_inf").get(j));
-		// System.out.print(","+regle.get("validite_sup").get(j));
-		// System.out.print(","+regle.get("id_classe").get(j));
-		// System.out.print(","+regle.get("rubrique").get(j));
-		// System.out.print(","+regle.get("rubrique_nmcl").get(j));
-		//
-		// }
-
-	}
-
-//
-//
-	/**
-	 * Modifie la requete pour appliquer les regles de suppression
-	 * 
-	 * @param regle
-	 * @param norme
-	 * @param validite
-	 * @param periodicite
-	 * @param jointure
-	 * @return
-	 * @throws Exception
-	 */
-	private String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
-
-		StaticLoggerDispatcher.info("appliquerRegleSuppression()", LOGGER);
-
-		String returned = jointure;
-		int max = 0;
-
-		// ajout des regles
-		// parcourt des regles : faut parcourir les suppression d'abord
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-
-			String type = regle.get("id_classe").get(j);
-			String rubrique = regle.get("rubrique").get(j);
-
-			if (type.equals("deletion")) {
-				String[] lines = returned.split("\n");
-				max = lines.length - 1;
-
-				// on met tout en minuscule
-				rubrique = rubrique.toLowerCase();
-
-				// on va iterer sur les lignes pour identifier les groupes à enlever
-				// si le groupe est pere d'autre groupe, faut aussi retirer les autres groupes
-				int k = max - 1;
-
-				ArrayList<String> grpAEnlever = new ArrayList<String>();
-				grpAEnlever.add(rubrique);
-
-				ArrayList<Integer> ligneAEnlever = new ArrayList<Integer>();
-
-				while (k > 0 && !lines[k].startsWith(" from")) {
-
-					if (lines[k].startsWith(" left join ")) {
-						// on ne reteste pas les lignes déjà vues
-						if (!ligneAEnlever.contains(k)) {
-							String line = lines[k];
-
-							String grpTrouve = null;
-							// tester si les rubriques de grpAEnlever sont pere d'une autre rubrique
-							for (String r : grpAEnlever) {
-								// cas 1 : ajouter la rubrique trouvée à la liste des rubrique a enlever
-								if (line.endsWith("i_" + r)) {
-									// extraire la rubrique à enlever et la mettre dans variable grpTrouve
-									grpTrouve = ManipString
-											.substringBeforeFirst(ManipString.substringAfterLast(line, "=t_"), ".");
-									// marquer la ligne à enlever;
-									ligneAEnlever.add(k);
-									// revenir au début
-									k = max - 1;
-									break;
-								}
-
-								// cas 2 : tester si la rubrique est fille
-								if (line.startsWith(" left join t_" + r + " ")) {
-									ligneAEnlever.add(k);
-									break;
-								}
-
-							}
-
-							if (grpTrouve != null) {
-								grpAEnlever.add(grpTrouve);
-							}
-
-						}
-
-					}
-					k = k - 1;
-				}
-
-				// on connait desormais les groupes a enlever de la requete
-
-				ArrayList<String> rubriqueAEnlever = new ArrayList<String>();
-
-				k = 1;
-				while (k <= max) {
-					String line = lines[k];
-					if (!line.startsWith("create temporary table ")) {
-						break;
-					}
-
-					for (String r : grpAEnlever) {
-						if (line.startsWith("create temporary table t_" + r + " ")
-								|| line.startsWith("create temporary table t_" + r + "_null ")) {
-
-							if (!rubriqueAEnlever.contains("i_" + r)) {
-								rubriqueAEnlever.add("i_" + r);
-							}
-
-							if (!rubriqueAEnlever.contains("m_" + r)) {
-								rubriqueAEnlever.add("m_" + r);
-							}
-
-							ligneAEnlever.add(k);
-
-							Pattern p = Pattern.compile(" as [iv][^, (]* ");
-							Matcher m = p.matcher(line);
-							boolean notFirst = false;
-							while (m.find()) {
-								// on n'enleve pas l'identifiant technique de la table pere
-								if (notFirst) {
-									rubriqueAEnlever.add(ManipString.substringAfterFirst(m.group(), " as ").trim());
-								} else {
-									notFirst = true;
-								}
-							}
-
-							break;
-						}
-					}
-
-					k++;
-
-				}
-
-				// on met la rubrique de base : meme si c'est pas un groupe, ca permet d'enlever
-				// des colonnes betement
-				if (!rubriqueAEnlever.contains("i_" + rubrique)) {
-					rubriqueAEnlever.add("i_" + rubrique);
-				}
-
-				if (!rubriqueAEnlever.contains("v_" + rubrique)) {
-					rubriqueAEnlever.add("v_" + rubrique);
-				}
-
-				// on en termine
-				// on crée le nouveau stringBuilder
-				StringBuilder f = new StringBuilder();
-				k = 0;
-				while (k <= max) {
-					String line = lines[k];
-
-					// if (line.startsWith(" insert ") || line.startsWith(" select "))
-					if (true) {
-						line = line + ",";
-						for (String r : rubriqueAEnlever) {
-							line = line.replace("," + r + ",", ",");
-							line = line.replace(", " + r + " as " + r + " ,", ",");
-							line = line.replace(", " + r + " as " + r + "  ", " ");
-							line = line.replace(",min( " + r + " ) as " + r + ",", ",");
-							line = line.replace(",min( " + r + " ) as  " + r + ",", ",");
-							line = line.replace(",min( " + r + " ) as " + r + " ", " ");
-							line = line.replace(",min( " + r + " ) as  " + r + " ", " ");
-						}
-						line = line.substring(0, line.length() - 1);
-					}
-
-					if (!ligneAEnlever.contains(k)) {
-						f.append(line + "\n");
-					}
-
-					k++;
-
-				}
-
-				returned = f.toString();
-			}
-
-		}
-		return returned;
-	}
-
+	
+	
 	/**
 	 * Modifie la requete pour appliquer les regles d'indépendance
 	 * 
@@ -1747,12 +1395,15 @@ public class NormageEngine {
 	/**
 	 * A partir du blocCreate, determine récursivement les enfant d'une rubrique
 	 * "m_<***>"
-	 * 
 	 * @param r
 	 * @param blocCreate
 	 * @param mRubrique
+	 * @param regle
+	 * @param rubriquesAvecRegleDIndependance
+	 * @param norme
+	 * @param periodicite
+	 * @param exclusion
 	 */
-
 	private void addIndependanceToChildren(ArrayList<String> r, String blocCreate, String mRubrique,
 			HashMap<String, ArrayList<String>> regle, HashMap<String, String> rubriquesAvecRegleDIndependance,
 			String norme, String periodicite, HashSet<String> exclusion) {
@@ -1866,7 +1517,7 @@ public class NormageEngine {
 	 * @param fullVariableName
 	 * @return
 	 */
-	private String getCoreVariableName(String fullVariableName) {
+	protected static String getCoreVariableName(String fullVariableName) {
 		return fullVariableName.substring(2);
 	}
 
