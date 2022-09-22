@@ -14,7 +14,7 @@ import fr.insee.arc.utils.ressourceUtils.PropertySourcesHelper;
 
 @Configuration
 @ImportResource("classpath:applicationContext.xml")
-public class BatchConfig {
+class BatchConfig {
 
 	
 	@Bean

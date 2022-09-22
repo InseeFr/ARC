@@ -1,8 +1,8 @@
-package fr.insee.arc.batch.unitaryLauncher;
+package fr.insee.arc.batch.unitarylauncher;
 
 import java.util.HashMap;
 
-import fr.insee.arc.batch.threadRunners.parameter.ParameterKey;
+import fr.insee.arc.batch.threadrunners.parameter.ParameterKey;
 
 public class ComputeBatchArgs {
 

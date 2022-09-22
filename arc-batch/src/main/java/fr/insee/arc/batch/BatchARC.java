@@ -17,8 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fr.insee.arc.batch.threadRunners.ArcThreadFactory;
-import fr.insee.arc.batch.threadRunners.parameter.ParameterKey;
+import fr.insee.arc.batch.threadrunners.ArcThreadFactory;
+import fr.insee.arc.batch.threadrunners.parameter.ParameterKey;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiReceptionService;
@@ -41,9 +41,9 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author Manu
  * 
  */
-public class BatchARC {
+class BatchARC {
 	private static final Logger LOGGER = LogManager.getLogger(BatchARC.class);
-	static HashMap<String, String> mapParam = new HashMap<>();
+	private static HashMap<String, String> mapParam = new HashMap<>();
 
 	/**
 	 * variable dateInitialisation si vide (ou si date du jour+1 depassé à 20h), je
@@ -53,17 +53,17 @@ public class BatchARC {
 	 * je met tempo à la date du jour - je lance initialisation etc.
 	 */
 
-	@Autowired
+	private @Autowired
 	PropertiesHandler properties;
 
 	// the metadata schema
-	String env;
+	private String env;
 
 	// the sandbox schema where batch process runs
-	String envExecution;
+	private String envExecution;
 
 	// file directory
-	String repertoire;
+	private String repertoire;
 
 	// keepInDatabase = est-ce qu'on garde les données des phases intérmédiaires en
 	// base ?
@@ -72,13 +72,13 @@ public class BatchARC {
 
 	// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
 	// excéder une certaine taille
-	protected static int tailleMaxReceptionEnMb;
+	private static int tailleMaxReceptionEnMb;
 
 	// Maximum number of files to load
-	protected static int maxFilesToLoad;
+	private static int maxFilesToLoad;
 
 	// Maximum number of files processed in each phase iteration
-	protected static int maxFilesPerPhase;
+	private static int maxFilesPerPhase;
 
 	// fréquence à laquelle les phases sont démarrées
 	private static int poolingDelay;
@@ -108,11 +108,11 @@ public class BatchARC {
 	// Maintenance initialization process can only occur in this case
 	private static boolean dejaEnCours;
 
-	public static void message(String msg) {
+	private static void message(String msg) {
 		StaticLoggerDispatcher.warn(msg, LOGGER);
 	}
 
-	public static void message(String msg, int iteration) {
+	private static void message(String msg, int iteration) {
 		if (iteration % numberOfIterationBewteenBlockageCheck == 0) {
 			message(msg);
 		}
@@ -194,7 +194,7 @@ public class BatchARC {
 	 * 
 	 * @param args
 	 */
-	public void execute(String[] args) {
+	void execute(String[] args) {
 
 		// fill the parameters
 		initParameters();
@@ -444,7 +444,7 @@ public class BatchARC {
 	 * @throws SQLException
 	 * @throws Exception
 	 */
-	public void maintenanceTablePilotageBatch() throws SQLException {
+	private void maintenanceTablePilotageBatch() throws SQLException {
 
 		// création de la table si elle n'existe pas
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
@@ -469,7 +469,7 @@ public class BatchARC {
 	 * @param envExecution
 	 * @return
 	 */
-	public boolean isNothingLeftToDo(String envExecution) {
+	private boolean isNothingLeftToDo(String envExecution) {
 		boolean isNothingLeftToDo = false;
 		if (UtilitaireDao.get("arc").getInt(null, new PreparedStatementBuilder("select count(*) from (select 1 from "
 				+ envExecution + ".pilotage_fichier where etape=1 limit 1) ww")) == 0) {
@@ -484,7 +484,7 @@ public class BatchARC {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean productionOn() throws Exception {
+	private static boolean productionOn() throws Exception {
 		return UtilitaireDao.get("arc").hasResults(null,
 				new PreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 	}
@@ -497,7 +497,7 @@ public class BatchARC {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static void effacerRepertoireChargement(String directory, String envExecution) throws IOException {
+	private static void effacerRepertoireChargement(String directory, String envExecution) throws IOException {
 
 		// Effacer les fichiers des répertoires OK et KO
 		String envDirectory = envExecution.replace(".", "_").toUpperCase();
@@ -597,7 +597,7 @@ public class BatchARC {
 
 	}
 
-	public static void initialize() throws SQLException, ParseException {
+	private static void initialize() throws SQLException, ParseException {
 		ArcThreadFactory initialiser = new ArcThreadFactory(mapParam, TraitementPhase.INITIALISATION);
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");

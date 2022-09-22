@@ -1,4 +1,4 @@
-package fr.insee.arc.batch.unitaryLauncher;
+package fr.insee.arc.batch.unitarylauncher;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.ServiceReporting;
@@ -12,7 +12,7 @@ public class ChargerBatch extends Batch {
         super(someArgs);
     }
 
-    public ServiceReporting report = new ServiceReporting(0, 0);
+    private ServiceReporting report = new ServiceReporting(0, 0);
 
     /**
      *

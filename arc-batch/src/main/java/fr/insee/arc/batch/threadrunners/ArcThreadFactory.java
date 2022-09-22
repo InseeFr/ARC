@@ -1,16 +1,16 @@
-package fr.insee.arc.batch.threadRunners;
+package fr.insee.arc.batch.threadrunners;
 
 import java.util.HashMap;
 
-import fr.insee.arc.batch.threadRunners.parameter.ParameterKey;
-import fr.insee.arc.batch.unitaryLauncher.ChargerBatch;
-import fr.insee.arc.batch.unitaryLauncher.ComputeBatchArgs;
-import fr.insee.arc.batch.unitaryLauncher.ControlerBatch;
-import fr.insee.arc.batch.unitaryLauncher.FiltrerBatch;
-import fr.insee.arc.batch.unitaryLauncher.InitialiserBatch;
-import fr.insee.arc.batch.unitaryLauncher.MapperBatch;
-import fr.insee.arc.batch.unitaryLauncher.NormerBatch;
-import fr.insee.arc.batch.unitaryLauncher.RecevoirBatch;
+import fr.insee.arc.batch.threadrunners.parameter.ParameterKey;
+import fr.insee.arc.batch.unitarylauncher.ChargerBatch;
+import fr.insee.arc.batch.unitarylauncher.ComputeBatchArgs;
+import fr.insee.arc.batch.unitarylauncher.ControlerBatch;
+import fr.insee.arc.batch.unitarylauncher.FiltrerBatch;
+import fr.insee.arc.batch.unitarylauncher.InitialiserBatch;
+import fr.insee.arc.batch.unitarylauncher.MapperBatch;
+import fr.insee.arc.batch.unitarylauncher.NormerBatch;
+import fr.insee.arc.batch.unitarylauncher.RecevoirBatch;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -91,7 +91,7 @@ public class ArcThreadFactory extends Thread {
 	}
 
 
-	public void initializeThreadRunnerTemplate(HashMap<String, String> mapParam, TraitementPhase phaseName) {
+	private void initializeThreadRunnerTemplate(HashMap<String, String> mapParam, TraitementPhase phaseName) {
 		setPhaseName(phaseName);
 		setMapParam(mapParam);
 	}

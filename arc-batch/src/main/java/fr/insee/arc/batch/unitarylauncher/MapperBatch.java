@@ -1,4 +1,4 @@
-package fr.insee.arc.batch.unitaryLauncher;
+package fr.insee.arc.batch.unitarylauncher;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.ServiceReporting;
@@ -7,13 +7,12 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.batch.Batch;
 
 
-public class NormerBatch extends Batch {
-
-    public NormerBatch(String... someArgs) {
+public class MapperBatch extends Batch {
+    public MapperBatch(String... someArgs) {
         super(someArgs);
     }
 
-    public ServiceReporting report = new ServiceReporting(0, 0);
+    private ServiceReporting report = new ServiceReporting(0, 0);
 
     /**
      *
@@ -24,13 +23,13 @@ public class NormerBatch extends Batch {
      *            {@code args[3]} : nombre de lignes maximal à traiter
      */
     public static void main(String[] args) {
-        Batch batch = new NormerBatch(args);
+        Batch batch = new MapperBatch(args);
         batch.execute();
     }
 
     @Override
     public void execute() {
-        this.report = ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), (String) this.args[0], (String) this.args[1],
+        this.report = ApiServiceFactory.getService(TraitementPhase.MAPPING.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
 
     }

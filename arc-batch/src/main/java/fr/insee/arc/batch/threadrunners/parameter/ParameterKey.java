@@ -1,4 +1,4 @@
-package fr.insee.arc.batch.threadRunners.parameter;
+package fr.insee.arc.batch.threadrunners.parameter;
 
 public class ParameterKey {
 
