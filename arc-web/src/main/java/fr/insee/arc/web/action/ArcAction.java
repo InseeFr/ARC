@@ -44,7 +44,7 @@ import fr.insee.arc.web.util.VObjectService;
  * @author Pépin Rémi
  *
  */
-abstract class ArcAction<T extends ArcModel> implements IConstanteCaractere {
+public abstract class ArcAction<T extends ArcModel> implements IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(ArcAction.class);
 

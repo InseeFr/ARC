@@ -15,7 +15,7 @@ import fr.insee.arc.web.model.NoModel;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-class HomeAction extends ArcAction<NoModel> {
+public class HomeAction extends ArcAction<NoModel> {
 
     static final String ACTION_NAME = "home";
     private static final String RESULT_SUCCESS = "jsp/home.jsp";
