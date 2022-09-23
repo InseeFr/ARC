@@ -113,7 +113,7 @@ public class XsdRulesRetrievalService {
 			break;
 			case "ENUM_TABLE":
 				GenericBean enumAsSqlResults = new GenericBean(UtilitaireDao.get("arc").executeRequest(connection, new PreparedStatementBuilder(condition)));
-				String columNameInResult = enumAsSqlResults.headers.get(0);
+				String columNameInResult = enumAsSqlResults.getHeaders().get(0);
 				builder.addRuleTo(rubriquePere, new EnumForXsd(enumAsSqlResults.mapContent().get(columNameInResult)));
 			break;
 			case "NUM":

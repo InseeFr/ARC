@@ -95,12 +95,5 @@ public class GenericBeanTest {
 		//then
 		assertTrue(!genericBean.isEmpty());
 	}
-	
-	@Test
-	public void getHeadersUpperCaseOk() {
-		genericBean = new GenericBean(headers, types, new ArrayList<ArrayList<String>>());
-		assertEquals("COL1", genericBean.getHeadersUpperCase().get(0));
-		assertEquals("COL2", genericBean.getHeadersUpperCase().get(1));
-	}
 
 }

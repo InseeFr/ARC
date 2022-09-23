@@ -375,41 +375,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 * Récupère les colonnes de la table {@code tableName}
-	 *
-	 * @param connexion la connexion à la base
-	 * @param liste     la liste des colonnes retournée
-	 * @param tableName le nom de la table
-	 * @return
-	 */
-	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableName) {
-		
-		String token = (!tableName.contains(DOT)) ? "" : "pg_namespace.nspname||'.'||";
-		
-		PreparedStatementBuilder sql = new PreparedStatementBuilder();
-		sql.append("SELECT DISTINCT attname");
-		sql.append("\n  FROM pg_namespace");
-		sql.append("\n  INNER JOIN pg_class");
-		sql.append("\n    ON pg_class.relnamespace = pg_namespace.oid");
-		sql.append("\n  INNER JOIN pg_attribute ");
-		sql.append("\n    ON pg_class.oid          = pg_attribute.attrelid ");
-		sql.append("\n  WHERE lower(" + token + "pg_class.relname)=lower(" + sql.quoteText(tableName) + ")");
-		sql.append("\n    AND attnum>0 ");
-		sql.append("\n    AND attisdropped=false ");
-		sql.append("\n    AND NOT pg_is_other_temp_schema(pg_namespace.oid) ");
-		sql.append("\n ORDER BY attname ");
-		sql.append(";");
-
-		try {
-			liste.addAll(new GenericBean(executeRequest(connexion, sql, ModeRequete.EXTRA_FLOAT_DIGIT)).mapContent().get("attname"));
-		} catch (SQLException e) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "getColumns()", LOGGER, e);
-		}
-		
-		return liste;
-	}
-
-	/**
 	 *
 	 * @param connexion
 	 * @param aTable
@@ -1372,31 +1337,30 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 * Renvoie la liste des colonnes d'une table (EN MAJUSCULE), avec comme
-	 * séparateur une virgule
+	 * Renvoie la liste des colonnes d'une table 
 	 *
 	 * @param connexion
 	 * @param tableIn
 	 * @return
 	 * @throws SQLException
 	 */
-	public static ArrayList<String> listeCol(String poolName, Connection connexion, String tableIn)
-			throws SQLException {
-		ArrayList<String> colList = new ArrayList<String>();
-		colList = new GenericBean(get(poolName).executeRequest(connexion, FormatSQL.listeColonneByHeaders(tableIn)))
-				.getHeadersUpperCase();
-		return colList;
+	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn) {
+		try {
+			liste.addAll(new GenericBean(get(this.pool).executeRequest(connexion, FormatSQL.listeColonneByHeaders(tableIn)))
+					.getHeaders());
+		} catch (SQLException e) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "getColumns()", LOGGER, e);
+		}
+		return liste;
 	}
 
-	/**
-	 * Renvoie la liste des colonnes d'une table (EN MAJUSCULE), avec comme
-	 * séparateur une virgule
-	 *
-	 */
-	public ArrayList<String> listeCol(Connection connexion, String tableIn) throws SQLException {
-		return listeCol(this.pool, connexion, tableIn);
+	
+	public List<String> getColumns(Connection connexion, String tableIn) throws SQLException
+	{
+		return new ArrayList<>(getColumns(connexion, new ArrayList<>(), tableIn));
 	}
-
+	
+	
 	/*
 	 * Prend en entrée une table et une liste de variables, renvoi les variables qui
 	 * ne sont pas dans la table Une liste vide veut dire que la table contient

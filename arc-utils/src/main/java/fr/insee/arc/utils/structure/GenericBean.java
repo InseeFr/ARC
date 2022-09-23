@@ -23,8 +23,8 @@ import fr.insee.arc.utils.exception.ArcException;
  */
 public class GenericBean {
 
-	public ArrayList<String> headers;
-	public ArrayList<String> types;
+	private ArrayList<String> headers;
+	private ArrayList<String> types;
 	public ArrayList<ArrayList<String>> content;
 
 	
@@ -46,16 +46,21 @@ public class GenericBean {
 	 */
 	public GenericBean(ArrayList<ArrayList<String>> requestResult) {
 		// refactor de la méthode; faut pas utiliser la commande "remove" sinon on détruit le requestResult initial
-		this.headers = requestResult.get(0);
-		this.types = requestResult.get(1);
-		this.content =new ArrayList<ArrayList<String>>();
+		this.headers= new ArrayList<>();
+		this.headers.addAll(requestResult.get(0));
+		
+		this.types= new ArrayList<>();
+		this.types.addAll(requestResult.get(1));
+		
+		this.content =new ArrayList<>();
 		for (int i=2;i<requestResult.size();i++)
 		{
 			this.content.add(requestResult.get(i));
 			
 		}
 	}
-
+	
+	
 	/**
 	 * Transform the headers ArrayList to a HashMap containing the index
 	 * of headers (key: header, value: index)
@@ -161,19 +166,7 @@ public class GenericBean {
     public int size() {
         return this.content.size();
     }
-    
-    public ArrayList<String> getHeadersUpperCase()
-    {
-    	ArrayList<String> l= new ArrayList<String>();
-    	if (this.headers!=null)
-    	{
-	    	for (String s:this.headers)
-	    	{
-	    		l.add(s.toUpperCase());
-	    	}
-    	}
-    	return l;
-    }
+
 
 	public HashMap<String, String> keyValue() throws ArcException {
 		HashMap<String, String> r = new HashMap<>();
@@ -192,6 +185,30 @@ public class GenericBean {
 			r.put(line.get(0), line.get(1));
 		}
 		return r;
+	}
+
+	public ArrayList<String> getHeaders() {
+		return headers;
+	}
+
+	public void setHeaders(ArrayList<String> headers) {
+		this.headers = headers;
+	}
+
+	public ArrayList<String> getTypes() {
+		return types;
+	}
+
+	public void setTypes(ArrayList<String> types) {
+		this.types = types;
+	}
+
+	public ArrayList<ArrayList<String>> getContent() {
+		return content;
+	}
+
+	public void setContent(ArrayList<ArrayList<String>> content) {
+		this.content = content;
 	}
 
 	

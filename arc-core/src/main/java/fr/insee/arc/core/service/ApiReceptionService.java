@@ -547,12 +547,12 @@ public class ApiReceptionService extends ApiService {
 			if (!g.content.isEmpty()) {
 				String dirIn = ApiReceptionService.directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution);
 				for (int i = 0; i < g.content.size(); i++) {
-					String container = g.content.get(i).get(g.headers.indexOf(GB_CONTAINER));
-					String v_container = g.content.get(i).get(g.headers.indexOf(GB_VCONTAINER));
-					String fileName = g.content.get(i).get(g.headers.indexOf(GB_FILENAME));
-					String type = g.content.get(i).get(g.headers.indexOf(GB_TYPE));
-					String etat = g.content.get(i).get(g.headers.indexOf(GB_STATE));
-					String rapport = g.content.get(i).get(g.headers.indexOf(GB_REPORT));
+					String container = g.content.get(i).get(g.getHeaders().indexOf(GB_CONTAINER));
+					String v_container = g.content.get(i).get(g.getHeaders().indexOf(GB_VCONTAINER));
+					String fileName = g.content.get(i).get(g.getHeaders().indexOf(GB_FILENAME));
+					String type = g.content.get(i).get(g.getHeaders().indexOf(GB_TYPE));
+					String etat = g.content.get(i).get(g.getHeaders().indexOf(GB_STATE));
+					String rapport = g.content.get(i).get(g.getHeaders().indexOf(GB_REPORT));
 					String containerNewName = buildContainerName(container);
 					if (type.equals(TraitementTypeFichier.DA.toString())) {
 						insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName, etat, rapport);
@@ -694,8 +694,6 @@ public class ApiReceptionService extends ApiService {
 	 *            , nom du fichier
 	 */
 	public static void deplacerFichier(String dirIn, String dirOut, String fileNameIn, String fileNameOut) {
-//		StaticLoggerDispatcher.info("Mes paramètres de déplacement de fichier : \n dirIn : " + dirIn + " \n, dirOut : " + dirOut + " \n, FilenameIn :"
-//				+ FileNameIn + " \n, FilenameOut :" + fileNameOut, logger);
 		if (!dirIn.equals(dirOut)) {
 			File fileIn = new File(dirIn + File.separator + fileNameIn); 
 			File fileOut = new File(dirOut + File.separator + fileNameOut);
@@ -712,8 +710,8 @@ public class ApiReceptionService extends ApiService {
 	 * @return
 	 */
 	public GenericBean findDuplicates(GenericBean fileList) {
-		ArrayList<String> headers = fileList.headers;
-		ArrayList<String> types = fileList.types;
+		ArrayList<String> headers = fileList.getHeaders();
+		ArrayList<String> types = fileList.getTypes();
 		ArrayList<ArrayList<String>> content = fileList.content;
 		
 		// Localiser les doublons

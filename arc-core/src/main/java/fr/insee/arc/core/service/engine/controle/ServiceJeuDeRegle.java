@@ -92,20 +92,15 @@ public class ServiceJeuDeRegle {
 	}
 	
 	/**
-	 * Get the columns (also named "rubriques") list from the table in order to know what controls must be evaluated
+	 * Get the columns (also named "rubriques") list in uppercase from the table in order to know what controls must be evaluated
 	 * @param connexion
 	 * @param table
 	 * @throws SQLException
 	 */
 	private void registerRubriquesFromSourceTable(Connection connexion, String table) throws SQLException
 	{
-
-		this.listRubTable = UtilitaireDao.get("arc").listeCol(connexion, table);
-
-		if (this.listRubTable==null)
-		{
-			this.listRubTable = new ArrayList<>();
-		}
+		this.listRubTable = UtilitaireDao.get("arc").getColumns(connexion, table);
+		this.listRubTable.replaceAll(String::toUpperCase);
 	}
 	
 	
