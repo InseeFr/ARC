@@ -11,11 +11,9 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dao.JeuDeRegleDao;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
-import fr.insee.arc.core.service.engine.mapping.RequeteMappingCalibree;
 import fr.insee.arc.core.service.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.utils.FormatSQL;
 
 
 /**

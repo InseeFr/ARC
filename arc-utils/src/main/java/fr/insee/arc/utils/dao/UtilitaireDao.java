@@ -1065,7 +1065,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	/**
 	 *
-	 * FIXME : input n'est pas fermé ici car passé en paramètre.<br/>
 	 * copy input to output stream - available in several StreamUtils or Streams
 	 * classes
 	 *
@@ -1081,12 +1080,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				output.write(buffer, 0, n);
 			}
 		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException ioe) {
-					LoggerHelper.errorAsComment(LOGGER, ioe, "Lors de la clôture de InputStream");
-				}
+			try {
+				input.close();
+			} catch (IOException ioe) {
+				LoggerHelper.errorAsComment(LOGGER, ioe, "Lors de la clôture de InputStream");
 			}
 		}
 	}
