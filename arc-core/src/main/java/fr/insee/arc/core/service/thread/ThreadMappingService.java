@@ -55,7 +55,6 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
         this.tableTempFiltrageOk = "tableTempFiltrageOk".toLowerCase();
         this.tableMappingPilTemp = "tableMappingPilTemp".toLowerCase();
         
-        this.requeteSQLCalibree = new RequeteMappingCalibree(this.connexion, FormatSQL.TAILLE_MAXIMAL_BLOC_SQL, this.tableMappingPilTemp);
         this.jdrDAO = new JeuDeRegleDao();
         this.setTableJeuDeRegle(anApi.getTableJeuDeRegle());
         this.setTableNorme(anApi.getTableNorme());
