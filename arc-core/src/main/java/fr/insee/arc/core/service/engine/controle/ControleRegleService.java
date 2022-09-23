@@ -14,6 +14,4 @@ public class ControleRegleService {
 	public static final String XSD_DATETIME_NAME = "xs:dateTime";
 	public static final String XSD_TIME_NAME = "xs:time";
 
-	private static final Logger logger = LogManager.getLogger(ControleRegleService.class);
-
 }

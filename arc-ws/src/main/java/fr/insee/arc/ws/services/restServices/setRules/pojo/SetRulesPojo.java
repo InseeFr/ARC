@@ -1,6 +1,5 @@
 package fr.insee.arc.ws.services.restServices.setRules.pojo;
 
-import java.util.List;
 import java.util.Map;
 
 import fr.insee.arc.utils.structure.Record;

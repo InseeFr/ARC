@@ -1114,7 +1114,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			
 			// excute the copy
 			try {
-				UtilitaireDao.get("arc").executeRequest(getQueryHandler().getWrapped(), requete);
+				UtilitaireDao.get("arc").executeRequest(null, requete);
 			} catch (SQLException ex) {
 				loggerDispatcher.error("Error in copieJeuxDeRegles", ex, LOGGER);
 			}

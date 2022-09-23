@@ -22,8 +22,8 @@ import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
-import fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler;
-import fr.insee.arc.utils.queryhandler.UtilitaireDAOQueryHandler;
+import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -73,14 +73,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	private IndexDao indexDao;
 
 	private Map<String, String> envMap;
-
-
-	/**
-	 *  Used to execute SQL queries outside of VObjectService.
-	 */
-	@Autowired
-	@Qualifier("queryHandler")
-	private UtilitaireDAOIhmQueryHandler queryHandler;
 
 	/**
 	 * Contains a map with the table names
@@ -222,10 +214,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 		LoggerHelper.debug(LOGGER, "getDataBaseStatus()");
 		// test the database connection
 		try {
-			// we only want one try
-			queryHandler.setMaxRetry(1);
-			queryHandler.executeUpdate("select true", UtilitaireDAOQueryHandler.OnException.THROW);
-			queryHandler.resetMaxRetry();
+			UtilitaireDao.get(POOLNAME, 1).executeRequest(null, new PreparedStatementBuilder("select true"));
 			setDataBaseOk(true);
 	
 		} catch (Exception e) {
@@ -405,21 +394,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 
 	public void setListVObjectOrder(List<VObject> listVObjectOrder) {
 		this.listVObjectOrder = listVObjectOrder;
-	}
-
-	/**
-	 * @return the queryHandler
-	 */
-	public final UtilitaireDAOIhmQueryHandler getQueryHandler() {
-		return this.queryHandler;
-	}
-
-	/**
-	 * @param queryHandler
-	 *            the queryHandler to set
-	 */
-	public final void setQueryHandler(UtilitaireDAOIhmQueryHandler queryHandler) {
-		this.queryHandler = queryHandler;
 	}
 
 	/** Return true if the environment is a production environment.*/

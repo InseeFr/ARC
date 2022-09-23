@@ -41,7 +41,6 @@ public class ChargeurXml implements IChargeur{
     private HashMap<String, Integer> colData;
     private List<String> allCols;
     private StringBuilder requeteInsert;
-    private int start;
     private String tableChargementPilTemp;
     private String currentPhase;
     private Norme norme;
@@ -66,7 +65,6 @@ public class ChargeurXml implements IChargeur{
         this.allCols = threadChargementService.getAllCols();
         this.requeteInsert = threadChargementService.getRequeteInsert();
         this.tableTempA = threadChargementService.getTableTempA();
-        this.start = threadChargementService.start;
         this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
         this.currentPhase = threadChargementService.getCurrentPhase();
         this.f =  threadChargementService.filesInputStreamLoad.getTmpInxChargement();
@@ -85,7 +83,6 @@ public class ChargeurXml implements IChargeur{
         this.fileName = fileName;
         this.connexion = connexion;
         this.tableTempA = tableOut;
-        this.start = 0;
         this.norme=new Norme(norme, periodicite, null, null);
         this.validite = validite;
         this.f=f;
@@ -214,7 +211,6 @@ public class ChargeurXml implements IChargeur{
             LoggerHelper.errorAsComment(LOGGER, "ChargeurXml.execution() - SAX parser failed to parse the xml file");
             rapport = e.getMessage().replace("'", "''");
             handler.requete.setLength(0);
-            this.start = 0;
             throw e;
         }
 

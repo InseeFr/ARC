@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,11 +11,11 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 public class ServiceCommunFiltrageMapping {
     private static final Logger logger = LogManager.getLogger(ServiceCommunFiltrageMapping.class);

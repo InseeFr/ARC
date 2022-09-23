@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -39,19 +38,11 @@ public class ChargeurClefValeur implements IChargeur {
     private PipedOutputStream outputStream;
     private String paramBatch;
     private InputStream tmpInxChargement;
-    private String tableChargementPilTemp;
-    private String fileName;
-    private String currentPhase;
-    private Connection connexion;
     private ChargeurXml chargeurXml;
 
     public ChargeurClefValeur(ThreadChargementService threadChargementService, String fileName) {
         super();
 
-        this.fileName = fileName;
-        this.connexion = threadChargementService.getConnexion();
-        this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
-        this.currentPhase = threadChargementService.getCurrentPhase();
         this.tmpInxChargement = threadChargementService.filesInputStreamLoad.getTmpInxChargement();
         this.normeOk = threadChargementService.normeOk;
         this.separateur = this.normeOk.getRegleChargement().getDelimiter();
@@ -179,8 +170,6 @@ public class ChargeurClefValeur implements IChargeur {
 
         ecrireXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-        // bw.write("<N4DS>\n");
-
         String rubrique = ManipString.substringBeforeFirst(ligne, separateur);
         String donnee = ManipString.substringAfterFirst(ligne, separateur);
 
@@ -203,7 +192,6 @@ public class ChargeurClefValeur implements IChargeur {
         // On ouvre les premières balises
         for (int i = listePeresRubriqueCourante.size() - 1; i > 0; i--) {
             String rubriqueCourante = listePeresRubriqueCourante.get(i);
-            // System.out.println("On ouvre le tag :" + pereCourant);
             ecrireXML("<" + rubriqueCourante + ">\n");
 
             // on initialise la map des rubriques ouvertes
@@ -212,7 +200,6 @@ public class ChargeurClefValeur implements IChargeur {
 
         String rubriqueCourante = listePeresRubriqueCourante.get(0);
         mapRubriquesFilles.get(listePeresRubriqueCourante.get(1)).add(rubriqueCourante);
-        // System.out.println("On ouvre le tag :" + pereCourant);
 
         ecrireXML("<" + rubriqueCourante + ">" + donnee + "</" + rubriqueCourante + ">\n");
 
@@ -386,14 +373,10 @@ public class ChargeurClefValeur implements IChargeur {
 
     @Override
     public void initialisation() {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void finalisation() {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

@@ -40,11 +40,4 @@
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>
 
-	<bean id="queryHandler"
-		class="fr.insee.arc.utils.queryhandler.UtilitaireDAOIhmQueryHandler"
-		scope="session">
-		<aop:scoped-proxy />
-		<constructor-arg value="${fr.insee.database.poolName}" />
-	</bean>
-
 </beans>

@@ -11,8 +11,6 @@ public class FiltrerBatch extends Batch {
         super(someArgs);
     }
 
-    private ServiceReporting report = new ServiceReporting(0, 0);
-
     /**
      *
      * @param args
@@ -29,7 +27,7 @@ public class FiltrerBatch extends Batch {
 
     @Override
     public void execute() {
-        this.report = ApiServiceFactory.getService(TraitementPhase.FILTRAGE.toString(), (String) this.args[0], (String) this.args[1],
+        ApiServiceFactory.getService(TraitementPhase.FILTRAGE.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
 
     }

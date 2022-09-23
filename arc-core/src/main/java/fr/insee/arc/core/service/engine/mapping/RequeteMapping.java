@@ -868,11 +868,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		        .append(Format.untokenize(table.getEnsembleVariableNonClef(), ", "));
 	}
 
-	private static StringBuilder listeVariablesPrepUnion(StringBuilder returned, TableMapping table) {
-		table.sqlListeVariables(returned);
-		return returned;
-	}
-
 	private static StringBuilder listeVariablesTypesPrepUnion(StringBuilder returned, TableMapping table,
 	        String separateur, boolean removeArrayTypeForGroupe) {
 		table.sqlListeVariablesTypes(returned, separateur, removeArrayTypeForGroupe);

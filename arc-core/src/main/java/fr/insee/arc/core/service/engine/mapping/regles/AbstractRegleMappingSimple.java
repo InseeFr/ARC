@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 

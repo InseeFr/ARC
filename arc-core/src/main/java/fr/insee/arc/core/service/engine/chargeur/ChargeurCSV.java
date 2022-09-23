@@ -22,6 +22,7 @@ import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
@@ -29,7 +30,6 @@ import fr.insee.arc.utils.textUtils.XMLUtil;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Classe pour charger les fichier CSV. On lit les headers du fichier qu'on va
@@ -55,9 +55,7 @@ public class ChargeurCSV implements IChargeur {
 	private String currentPhase;
 	private Norme norme;
 	private String tableTempA;
-	private String tableChargementBrutal;
 	private static final String TABLE_TEMP_T = "T";
-	private String jointure;
 	private InputStream streamHeader;
 	private InputStream streamContent;
 	private String env;
@@ -69,7 +67,6 @@ public class ChargeurCSV implements IChargeur {
 	public ChargeurCSV(ThreadChargementService threadChargementService, String fileName) {
 		this.fileName = fileName;
 		this.connexion = threadChargementService.getConnexion();
-		this.tableChargementBrutal = threadChargementService.getTableChargementBrutal();
 		this.tableTempA = threadChargementService.getTableTempA();
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
 		this.currentPhase = threadChargementService.getCurrentPhase();
