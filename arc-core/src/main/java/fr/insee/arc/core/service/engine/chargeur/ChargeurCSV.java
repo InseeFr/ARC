@@ -225,7 +225,6 @@ public class ChargeurCSV implements IChargeur {
 			 * 
 			 */
 
-			StringBuilder addId = new StringBuilder();
 			StringBuilder req;
 
 			if (!joinTable.isEmpty()) {
@@ -336,16 +335,14 @@ public class ChargeurCSV implements IChargeur {
 				// si pas de partition, nbIteration=1
 				boolean partitionedProcess = (partitionExpression.size() > 0);
 				// default value 100000
-				int partition_size = 100000;
+				int partitionSize = 100000;
 
 				int nbPartition = 1;
 				// creation de l'index de partitionnement
 				if (partitionedProcess) {
-					req = new StringBuilder();
-
 					// comptage rapide su échantillon à 1/10000 pour trouver le nombre de partiton
 					nbPartition = UtilitaireDao.get("arc").getInt(connexion,
-							new PreparedStatementBuilder("select ((count(*)*10000)/" + partition_size + ")+1 from "
+							new PreparedStatementBuilder("select ((count(*)*10000)/" + partitionSize + ")+1 from "
 									+ this.tableTempA + " tablesample system(0.01)"));
 
 					req = new StringBuilder();
@@ -481,6 +478,13 @@ public class ChargeurCSV implements IChargeur {
 		return colonneErreur;
 	}
 
+	/**
+	 * Transform the raw data table from csv file (col1, col2, col3, ...) to an ARC standard table
+	 * (col1, col2, col3, ...) becomes (i_col1, v_col1, i_col2, v_col2, i_col3, v_col3, ...)
+	 * where i are line index and v the value
+	 * also meta data column (filename, norme, validite) are added to the ARC standard table
+	 * @throws SQLException
+	 */
 	public void flatBaseToIdedFlatBase() throws SQLException {
 		StaticLoggerDispatcher.info("** FlatBaseToIdedFlatBase **", LOGGER);
 		java.util.Date beginDate = new java.util.Date();
@@ -545,40 +549,11 @@ public class ChargeurCSV implements IChargeur {
 	public void execution() throws Exception {
 		StaticLoggerDispatcher.info("execution", LOGGER);
 
-		String rapport = "";
-		StringBuilder requeteBilan = new StringBuilder();
-
 		// On met le fichier en base
-
 		csvtoBase();
 
-		// 2 cas, soit on a une hierachie et on l'utilise, soit on en a pas et on met
-		// des i_= au numéro de ligne
-
-		// if (normeCourante.getRegleChargement().getFormat() != null &&
-		// !normeCourante.getRegleChargement().getFormat().trim().equals("")) {
-		//
-		// // On récupère le format du fichier
-		//
-		// ArbreFormat arbreFormat = new ArbreFormat(normeCourante);
-		// ArrayList<String> colonneErreur = ControleFormat(arbreFormat);
-		// if (colonneErreur.size() != 0) {
-		// StringBuilder mes = new StringBuilder("Incohérence entre les colonnes du
-		// fichier et les colonnes du format");
-		// mes.append("\n les colonnes ");
-		// for (String col : colonneErreur) {
-		// mes.append(col + ", ");
-		// }
-		// mes.setLength(mes.length() - 2);
-		// mes.append("sont en erreur");
-		//
-		// throw new Exception(mes.toString());
-		// }
-		//
-		// FlatBaseToHierarchicalBase(arbreFormat);
-		// } else {
+		// on retraduit le fichier à la mode ARC avec des i_ et v_ pour chacune des colonnes et en ajoutant les meta data
 		flatBaseToIdedFlatBase();
-		// }
 
 	}
 

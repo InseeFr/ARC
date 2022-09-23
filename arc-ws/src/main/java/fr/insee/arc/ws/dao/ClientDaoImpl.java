@@ -385,7 +385,6 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createNmcl()");
         Connection connection = null;
         ArrayList<ArrayList<String>> nmclNames = new ArrayList<>();
-        ArrayList<ArrayList<String>> result = new ArrayList<>();
         String schema = ManipString.substringBeforeFirst(ApiService.dbEnv(environnement), ".");
 
         try {
@@ -402,9 +401,7 @@ public class ClientDaoImpl implements ClientDao {
             String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
 
-            int i = 0;
             for (ArrayList<String> nmcl : nmclNames) {
-                i++;
                 String nomTableImage = prefixeNomTableImage + nmcl.get(0);
 
                 UtilitaireDao.get("arc").executeImmediate(connection,
@@ -457,7 +454,6 @@ public class ClientDaoImpl implements ClientDao {
         Connection connection = null;
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
-            String schema = ManipString.substringBeforeFirst(ApiService.dbEnv(environnement), ".");
             String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_famille";
@@ -490,7 +486,6 @@ public class ClientDaoImpl implements ClientDao {
             String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_periodicite";
-            String schema = ManipString.substringBeforeFirst(ApiService.dbEnv(environnement), ".");
             UtilitaireDao.get("arc").executeImmediate(connection,
                     "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS SELECT DISTINCT id, val FROM " + "arc.ext_mod_periodicite;");
         } catch (Exception e) {

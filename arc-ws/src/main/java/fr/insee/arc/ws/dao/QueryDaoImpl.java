@@ -35,25 +35,15 @@ public class QueryDaoImpl implements QueryDao {
     @SQLExecutor
     public void doRequest(String id, SendResponse resp, long timestamp) {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.doRequest()");
-        long beginning = System.currentTimeMillis();
         Connection connection = null;
-        ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> result = new ArrayList<>();
 
         try {
-            long beginning1 = System.currentTimeMillis();
             connection = UtilitaireDao.get("arc").getDriverConnexion();
-            long time1 = System.currentTimeMillis() - beginning1;
-            LoggerHelper.debugAsComment(LOGGER, timestamp, ": QueryDaoImpl.doRequest() : Connection Done - ", time1, "ms");
 
-            long beginning2 = System.currentTimeMillis();
             result = UtilitaireDao.get("arc").executeRequest(connection, new PreparedStatementBuilder("SELECT * FROM " + id + ";"));
-            long time2 = System.currentTimeMillis() - beginning2;
-            LoggerHelper.debugAsComment(LOGGER, timestamp + "QueryDaoImpl.doRequest() : ExecuteQuery(Get ", id, ") Done -", time2, "ms");
 
-            long beginning3 = System.currentTimeMillis();
             UtilitaireDao.get("arc").executeImmediate(connection, "DROP TABLE " + id + ";");
-            long time3 = System.currentTimeMillis() - beginning3;
-            LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.doRequest() : DropTable(", id, ") Done - ", time3, "ms");
 
             if (result != null) {
                 map(result, resp);
@@ -63,7 +53,6 @@ public class QueryDaoImpl implements QueryDao {
         } finally {
             close(connection);
         }
-        long time = System.currentTimeMillis() - beginning;
         LoggerHelper.debugFinMethodeAsComment(getClass(), "doRequest()", LOGGER);
     }
 

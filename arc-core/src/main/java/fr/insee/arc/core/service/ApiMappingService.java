@@ -47,8 +47,6 @@ public class ApiMappingService extends ApiService {
     
     private static final String PREFIX_IDENTIFIANT_RUBRIQUE = "i_";
 
-    protected RequeteMappingCalibree requeteSQLCalibree;
-
     protected JeuDeRegleDao jdrDAO;
     protected RegleMappingFactory regleMappingFactory;
     
@@ -82,7 +80,6 @@ public class ApiMappingService extends ApiService {
     public ApiMappingService(String aCurrentPhase, String anParametersEnvironment, String anEnvironnementExecution, String aDirectoryRoot,
             Integer aNbEnr, String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, anEnvironnementExecution, null, aNbEnr, paramBatch);
-        this.requeteSQLCalibree = new RequeteMappingCalibree(this.connexion, FormatSQL.TAILLE_MAXIMAL_BLOC_SQL, this.tablePilTemp);
         this.jdrDAO = new JeuDeRegleDao();
     }
 

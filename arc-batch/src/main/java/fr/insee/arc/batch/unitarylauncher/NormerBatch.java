@@ -1,7 +1,6 @@
 package fr.insee.arc.batch.unitarylauncher;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
-import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementPhase;
 //
 import fr.insee.arc.utils.batch.Batch;
@@ -12,8 +11,6 @@ public class NormerBatch extends Batch {
     public NormerBatch(String... someArgs) {
         super(someArgs);
     }
-
-    private ServiceReporting report = new ServiceReporting(0, 0);
 
     /**
      *
@@ -30,7 +27,7 @@ public class NormerBatch extends Batch {
 
     @Override
     public void execute() {
-        this.report = ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), (String) this.args[0], (String) this.args[1],
+        ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
 
     }

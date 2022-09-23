@@ -1,7 +1,6 @@
 package fr.insee.arc.batch.unitarylauncher;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
-import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementPhase;
 //
 import fr.insee.arc.utils.batch.Batch;

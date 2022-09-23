@@ -18,7 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import fr.insee.arc.core.model.BddTable;
+import fr.insee.arc.core.databaseobjetcs.DatabaseObjectService;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
@@ -73,11 +73,13 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	private IndexDao indexDao;
 
 	private Map<String, String> envMap;
+	
+	protected DatabaseObjectService databaseObjectService;
+	
 
 	/**
 	 * Contains a map with the table names
 	 */
-	private BddTable bddTable;
 
 	/**
 	 * The scope of the page defines the {@link VObject} to display
@@ -164,8 +166,7 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 			this.bacASable = bacASable;
 		}
 		this.isEnvProd = checkEnv(this.bacASable);
-		this.bddTable = new BddTable(this.bacASable);
-		this.bddTable.export(getSession().asMap());
+		this.databaseObjectService = new DatabaseObjectService(this.bacASable);
 		this.scope = scope;
 		
     	initialize(arcModel);
@@ -347,21 +348,6 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	}
 
 	/**
-	 * @return the bddTable
-	 */
-	public final BddTable getBddTable() {
-		return this.bddTable;
-	}
-
-	/**
-	 * @param bddTable
-	 *            the bddTable to set
-	 */
-	public final void setBddTable(BddTable bddTable) {
-		this.bddTable = bddTable;
-	}
-
-	/**
 	 * @return the scope
 	 */
 	public final String getScope() {
@@ -445,4 +431,5 @@ public abstract class ArcAction<T extends ArcModel> implements IConstanteCaracte
 	protected Session getSession() {
 		return session;
 	}
+
 }

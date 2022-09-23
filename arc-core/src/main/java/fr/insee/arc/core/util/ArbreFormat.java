@@ -37,7 +37,6 @@ public class ArbreFormat {
     public ArbreFormat(Norme aNorme) throws Exception {
         super();
         
-        HashMap<String, String> arbreFormat = new HashMap<>();
         // Récupérer le 'format' lié à la norme
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         SAXParser saxParser = saxParserFactory.newSAXParser();

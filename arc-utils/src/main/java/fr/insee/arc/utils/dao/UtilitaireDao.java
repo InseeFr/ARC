@@ -96,8 +96,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	private static Map<String, UtilitaireDao> map;
 	private boolean silent = false;
 
-	private static String FILE_THAT_CONTAINS_CONFIG_PARAMETER = "file:///";
-
 	@Autowired
 	PropertiesHandler properties;
 

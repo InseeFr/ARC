@@ -310,8 +310,6 @@ public class ApiInitialisationService extends ApiService {
         // on cherche tous les containers contenant un fichier à rejouer
         // on remet l'archive à la racine
 
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
-
         ArrayList<String> containerList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
         		new PreparedStatementBuilder("select distinct container from " + tablePil + " where to_delete in ('R','RA')"))).mapContent().get("container");
 

@@ -10,11 +10,6 @@ import fr.insee.arc.utils.bdd.AbstractRequeteSQLCalibree;
 import fr.insee.arc.utils.bdd.RequeteSQLCalibree;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 
-/**
- * Buffer à requêtes.<br/>
- * FIXME ajouter gestion de params
- *
- */
 public class RequeteMappingCalibree extends AbstractRequeteSQLCalibree implements IDbConstant {
 
     /**

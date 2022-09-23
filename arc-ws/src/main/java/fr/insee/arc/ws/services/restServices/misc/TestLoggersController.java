@@ -1,7 +1,5 @@
 package fr.insee.arc.ws.services.restServices.misc;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,8 +12,6 @@ import fr.insee.arc.core.model.TestLoggers;
 @RestController
 
 public class TestLoggersController {
-
-    private static final Logger LOGGER = LogManager.getLogger(TestLoggersController.class);
 
 	private static final String ORIGIN="WEB SERVICE";
     

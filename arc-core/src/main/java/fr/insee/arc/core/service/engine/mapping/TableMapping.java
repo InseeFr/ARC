@@ -662,8 +662,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
      */
     public String getGroupIdentifier()
     {
-    	StringBuilder r=new StringBuilder();
-    	Set<String> s=new HashSet<String>();
+    	Set<String> s=new HashSet<>();
     	 
     	    for (VariableMapping variable : this.getEnsembleVariableClef()) {
                
@@ -674,8 +673,6 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
                 	{
                 		if (variable.getNomVariable().startsWith("id_"))
                 		{
-//                    		r.append(",");
-//                			r.append(variable);
                 			s.add(variable.toString());
                 		}
                 		else
@@ -683,8 +680,6 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
                 			if (!variable.getEnsembleIdentifiantsRubriques().isEmpty())
                 			{
                 				
-//	                    		r.append(",");
-//	                			r.append(Format.untokenize(variable.getEnsembleIdentifiantsRubriques(),","));
                 				s.addAll(variable.getEnsembleIdentifiantsRubriques());
                 			}
                 		}

@@ -10,9 +10,6 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
-/**
- * FIXME make abstract Classe des variables d'environnement liées au batch
- */
 public class BatchEnv {
 
     private static final Logger LOGGER = LogManager.getLogger(BatchEnv.class);

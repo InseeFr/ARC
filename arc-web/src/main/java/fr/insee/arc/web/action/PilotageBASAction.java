@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.core.databaseobjetcs.TableEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
-import fr.insee.arc.core.model.BddTable;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
@@ -148,9 +148,9 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		}
 		requete.append("\n FROM (");
         requete.append("\n SELECT date_entree, phase_traitement, etat_traitement, count(*) as n ");
-		requete.append("\n FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" b ");
+		requete.append("\n FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" b ");
 		requete.append("\n WHERE date_entree IN ( ");
-		requete.append("\n SELECT DISTINCT date_entree FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" a ");
+		requete.append("\n SELECT DISTINCT date_entree FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" a ");
         requete.append(this.vObjectService.buildFilter(getViewPilotageBAS().getFilterFields(), getViewPilotageBAS().getHeadersDLabel()));
         requete.append("\n AND phase_traitement='"+TraitementPhase.RECEPTION+"' ");
         requete.append(this.vObjectService.buildOrderBy(getViewPilotageBAS().getHeaderSortDLabels(), getViewPilotageBAS().getHeaderSortDOrders()));
@@ -161,8 +161,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		requete.append("group by date_entree ");
 
 		this.vObjectService.initialize(
-				getViewPilotageBAS(), requete, 
-				getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER_T), defaultInputFields);
+				getViewPilotageBAS(), requete, null, defaultInputFields);
 		
 		ArrayList<String> columns=getViewPilotageBAS().getHeadersDLabel();
 		Map<String, ColumnRendering> columnRendering=getViewPilotageBAS().getConstantVObject().columnRender;
@@ -260,7 +259,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
 		requete.append(
 				"select date_entree, phase_traitement, array_to_string(etat_traitement,'$') as etat_traitement, rapport, count(1) as nb ");
-		requete.append("from " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
+		requete.append("from " + databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER));
 		requete.append(" where rapport is not null ");
 		requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
 		requete.append("order by date_entree asc ");
@@ -426,7 +425,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			HashMap<String, String> defaultInputFields = new HashMap<>();
 			
 			PreparedStatementBuilder requete = new PreparedStatementBuilder();
-			requete.append("select * from "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_ARCHIVE)+" where entrepot="
+			requete.append("select * from "+databaseObjectService.getTable(TableEnum.PILOTAGE_ARCHIVE)+" where entrepot="
 	                    + requete.quoteText(entrepotLecture) + " ");
 
 			this.vObjectService.initialize(getViewArchiveBAS(), requete, null, defaultInputFields);
@@ -594,7 +593,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			// get the file with the selected date_entree, state, and phase_tratement
 				PreparedStatementBuilder requete = new PreparedStatementBuilder();
 	            requete.append("SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
-	            requete.append(" FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
+	            requete.append(" FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" ");
 	            requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigne.get(ENTRY_DATE).get(0), "text"));
 	            requete.append(" AND array_to_string(etat_traitement,'$')" + requete.sqlEqual(etat, "text"));
 	            requete.append(" AND phase_traitement" + requete.sqlEqual(phase, "text"));
@@ -607,7 +606,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		
 			PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
-            requete.append(" FROM "+getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER)+" ");
+            requete.append(" FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" ");
             requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigneRapport.get(ENTRY_DATE).get(0), "text"));
             requete.append(" AND array_to_string(etat_traitement,'$')"
                     + requete.sqlEqual(selectionLigneRapport.get("etat_traitement").get(0), type.get("etat_traitement")));
@@ -776,7 +775,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				// Get the files to download
 				requete = new PreparedStatementBuilder();
 				requete.append(
-						"SELECT id_source FROM " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
+						"SELECT id_source FROM " + databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER));
 				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
 				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + "::text[] ");
 				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
@@ -811,7 +810,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 				requete = new PreparedStatementBuilder();
 				requete.append("WITH prep as ( ");
 				requete.append("SELECT id_source FROM "
-						+ getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER));
+						+ databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER));
 				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
 				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + "::text[] ");
 				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
@@ -961,7 +960,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		updateToDelete.append("prep AS ( ");
 		updateToDelete.append(querySelection);
 		updateToDelete.append("         ) ");
-		updateToDelete.append("UPDATE " + getBddTable().getQualifedName(BddTable.ID_TABLE_PILOTAGE_FICHIER) + " a ");
+		updateToDelete.append("UPDATE " + databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER) + " a ");
 		updateToDelete.append("SET to_delete=" + value + " ");
 		updateToDelete.append(
 				"WHERE EXISTS (SELECT 1 FROM prep WHERE a.container=prep.container AND a.id_source=prep.id_source); ");

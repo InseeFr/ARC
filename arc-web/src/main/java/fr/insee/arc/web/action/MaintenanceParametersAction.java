@@ -2,8 +2,6 @@ package fr.insee.arc.web.action;
 
 import java.util.HashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
@@ -21,8 +19,6 @@ import fr.insee.arc.web.util.VObject;
 public class MaintenanceParametersAction extends ArcAction<MaintenanceParametersModel>  {
 
 	private static final String RESULT_SUCCESS = "/jsp/maintenanceParameters.jsp";
-
-	private static final Logger LOGGER = LogManager.getLogger(MaintenanceParametersAction.class);
 
     private VObject viewParameters;
 
