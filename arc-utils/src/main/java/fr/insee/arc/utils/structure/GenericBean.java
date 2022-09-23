@@ -5,7 +5,22 @@ import java.util.HashMap;
 
 import fr.insee.arc.utils.exception.ArcException;
 
-// TODO add documentation of the purpose of this class
+/**
+ * Result of a select query given by UtilitaireDao.execute request is a list of list
+ * as
+ * [
+ * [col_name#1, col_name#2, ..., col_name#p]
+ * ,[col_type#1, col_type#2, ..., col_type#p]
+ * ,[col_data#1-1, col_data#1-2, ..., col_data#1-p]
+ *  ,[col_data#2-1, col_data#2-2, ..., col_data#2-p]
+ *  , ...
+ *  ,[col_data#n-1, col_data#n-2, ..., col_data#n-p]
+ *  ]
+ * This class split this table view into headers, content, data object list
+ * and also provide function to return the list of data or the type mapped by the column name 
+ * @author FY2QEQ
+ *
+ */
 public class GenericBean {
 
 	public ArrayList<String> headers;

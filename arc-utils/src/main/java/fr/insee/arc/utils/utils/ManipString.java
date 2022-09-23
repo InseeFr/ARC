@@ -129,11 +129,10 @@ public class ManipString implements IConstanteCaractere {
      *            , la chaine de caractère à lire
      * @return une liste de rubrique
      */
-    // TODO : a réécrire : super faux
-    static public ArrayList<String> extractRubriques(final String cond) {
+    public static ArrayList<String> extractRubriques(final String cond) {
     	
     	
-    	ArrayList<String> listRubrique = new ArrayList<String>();
+    	ArrayList<String> listRubrique = new ArrayList<>();
         boolean isTrue = true;
         if (StringUtils.isBlank(cond)){
             return listRubrique;

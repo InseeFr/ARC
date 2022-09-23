@@ -94,62 +94,30 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
 
-    /**
-     * Gives a sectional view of the hierarchy.
-     *
-     * TODO add documentation
-     * FIXME ugly AND not optimized
-     *
-     * @param aHierarchicalView
-     * @param aLevelOrder
-     * @return the projection
-     */
-    public static HierarchicalView asCoupe(HierarchicalView aHierarchicalView, List<String> aLevelOrder) {
-        HierarchicalView returned = asRoot(rootLevel);
-        List<String> path = new ArrayList<String>();
-         // For every level
-        for (int i = 0; i < aLevelOrder.size(); i++) {
-            // Adding this level
-            returned.addLevel(aLevelOrder.get(i));
-            // For every element of the considered level
-            for (HierarchicalView v : aHierarchicalView.getLevel(aLevelOrder.get(i))) {
-                HierarchicalView current = v;
-                // Searching for the path to this element from the root.
-                while (!current.getLevelName().equals(rootLevel)) {
-                    // One level up
-                    current = current.getParent();
-                    if (aLevelOrder.contains(current.getLevelName())) {
-                        path.add(0, current.getLocalRoot());
-                    }
-                }
-                current = returned;
-                // Walk the path up to the element parent
-                for (int j = 0; j < path.size(); j++) {
-                    current = current.get(path.get(j));
-                }
-                path.clear();
-                // Then we insert the element in the sectional vision
-                current.put(v.getLocalRoot());
-            }
-        }
-        return returned;
-    }
-
-    // TODO add documentation
+	/**
+	 * set the node identifier to the root level
+	 * @param aName
+	 * @return
+	 */
     public static final HierarchicalView asRoot(String aName) {
-        return new HierarchicalView(aName, rootLevel, levelZero, new HashMap<String, List<HierarchicalView>>(), new ArrayList<String>(),
-                new HashMap<String, HierarchicalView>());
+        return new HierarchicalView(aName, rootLevel, levelZero, new HashMap<>(), new ArrayList<>(),
+                new HashMap<>());
     }
 
-    // TODO add documentation
+	/**
+	 * set node as child of a parent tree
+	 * @param aName
+	 * @param aParent
+	 * @return
+	 */
     public static final HierarchicalView asChild(String aName, HierarchicalView aParent) {
         HierarchicalView returned = new HierarchicalView(aName, aParent, aParent.absoluteRoot, aParent.levelOrder.get(levelZero),
-                aParent.levelNumber + 1, new HashMap<String, List<HierarchicalView>>(), new ArrayList<String>(),
-                new HashMap<String, HierarchicalView>());
+                aParent.levelNumber + 1, new HashMap<>(), new ArrayList<>(),
+                new HashMap<>());
         // Grabbing the following levels
         for (int i = 1; i < aParent.levelOrder.size(); i++) {
             returned.levelOrder.add(aParent.levelOrder.get(i));
-            returned.levelView.put(aParent.levelOrder.get(i), new ArrayList<HierarchicalView>());
+            returned.levelView.put(aParent.levelOrder.get(i), new ArrayList<>());
         }
         // This element is its daddy son
         if (!aParent.hasChild(aName)) {

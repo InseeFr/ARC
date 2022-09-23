@@ -1,6 +1,12 @@
 package fr.insee.arc.utils.structure.tree;
 
-// TODO add documentation
+/**
+ * abtract interface for tree modelization
+ * @author FY2QEQ
+ *
+ * @param <K>
+ * @param <V>
+ */
 public interface ITree<K, V> {
 
     /**
