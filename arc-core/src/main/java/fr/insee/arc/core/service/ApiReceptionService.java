@@ -144,7 +144,7 @@ public class ApiReceptionService extends ApiService {
 		for (String d : entrepotIdList) {
 
 			if (fileSize > fileSizeLimit || fileNb > maxNumberOfFiles) {
-				this.reporting=fileNb;
+				setReportNumberOfObject(fileNb);
 				break;
 			}
 
@@ -181,7 +181,7 @@ public class ApiReceptionService extends ApiService {
 							)
 					{
 						if (fileSize > fileSizeLimit || fileNb > maxNumberOfFiles) {
-							this.reporting=fileNb;
+							setReportNumberOfObject(fileNb);
 							break;
 						}
 

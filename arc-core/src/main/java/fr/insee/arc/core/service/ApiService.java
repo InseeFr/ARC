@@ -90,7 +90,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	protected String nullString = "[[[#NULL VALUE#]]]";
 	protected String paramBatch = null;
 	protected String currentIdSource;
-	public int reporting = 0;
+	
+	// made to report the number of object processed by the phase
+	private int reportNumberOfObject = 0;
 
 	protected String bdDateFormat = "DD/MM/YYYY HH24:MI:SS";
 
@@ -1178,9 +1180,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	public ServiceReporting invokeApi() {
 		double start = System.currentTimeMillis();
 
-		// deprecated and removed for now
-		int nbLignes = 0;
-
 		loggerDispatcher.info("****** Execution " + this.getCurrentPhase() + " *******", LOGGER_APISERVICE);
 		try {
 
@@ -1211,7 +1210,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 		loggerDispatcher.info("****** Fin " + this.getCurrentPhase() + " *******", LOGGER_APISERVICE);
 
-		return new ServiceReporting(nbLignes, System.currentTimeMillis() - start);
+		return new ServiceReporting(this.reportNumberOfObject, System.currentTimeMillis() - start);
 
 	}
 
@@ -1550,4 +1549,14 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this.idSource = idSource;
 	}
 
+	public int getReportNumberOfObject() {
+		return reportNumberOfObject;
+	}
+
+	public void setReportNumberOfObject(int reportNumberOfObject) {
+		this.reportNumberOfObject = reportNumberOfObject;
+	}
+
+	
+	
 }

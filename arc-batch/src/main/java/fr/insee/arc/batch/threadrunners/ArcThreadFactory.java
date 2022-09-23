@@ -49,14 +49,13 @@ public class ArcThreadFactory extends Thread {
 			InitialiserBatch i = new InitialiserBatch(
 					ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_SIZE_RECEPTION));
 			i.execute();
-			setReport(i.report);
 			break;
 
 		case RECEPTION:
 			RecevoirBatch r = new RecevoirBatch(
 					ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_SIZE_RECEPTION));
 			r.execute();
-			setReport(r.report);
+			setReport(r.getReport());
 			break;
 
 		case CHARGEMENT:

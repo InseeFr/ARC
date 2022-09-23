@@ -593,7 +593,7 @@ class BatchARC {
 			message("Reception de nouveaux fichiers");
 			ArcThreadFactory recevoir = new ArcThreadFactory(mapParam, TraitementPhase.RECEPTION);
 			recevoir.execute();
-			message("Reception : " + recevoir.getReport().duree + " ms");
+			message("Reception : " + recevoir.getReport().getNbObject() +" objets enregistrés en "+recevoir.getReport().getDuree() + " ms");
 		}
 
 	}
@@ -622,7 +622,7 @@ class BatchARC {
 
 			initialiser.execute();
 
-			message("Initialisation terminée : " + initialiser.getReport().duree + " ms");
+			message("Initialisation terminée : " + initialiser.getReport().getDuree() + " ms");
 
 			UtilitaireDao.get("arc").executeRequest(null,
 					new PreparedStatementBuilder(

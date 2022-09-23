@@ -8,8 +8,6 @@ import fr.insee.arc.utils.batch.Batch;
 
 public class InitialiserBatch extends Batch  {
 
-    public ServiceReporting report;
-
     public InitialiserBatch(String... someArgs) {
         super(someArgs);
     }
@@ -30,7 +28,7 @@ public class InitialiserBatch extends Batch  {
 
     @Override
     public void execute() {
-        this.report = ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), (String) this.args[0], (String) this.args[1],
+        ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
     }
 

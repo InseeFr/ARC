@@ -9,7 +9,7 @@ import fr.insee.arc.utils.batch.Batch;
 
 public class RecevoirBatch extends Batch {
 
-    public ServiceReporting report;
+    private ServiceReporting report;
 
     public RecevoirBatch(String... someArgs) {
         super(someArgs);
@@ -34,5 +34,9 @@ public class RecevoirBatch extends Batch {
         this.report = ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), (String) this.args[0], (String) this.args[1],
                 (String) this.args[2], (String) this.args[3], (String) this.args[4]).invokeApi();
     }
+
+	public ServiceReporting getReport() {
+		return report;
+	}
 
 }
