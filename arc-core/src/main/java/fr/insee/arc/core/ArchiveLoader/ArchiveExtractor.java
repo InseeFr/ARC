@@ -4,7 +4,7 @@ import java.io.File;
 
 /**
  * 
- * @author P�pin R�mi
+ * @author rémi pépin
  *
  */
 public interface ArchiveExtractor {

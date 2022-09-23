@@ -63,89 +63,6 @@ public class Format implements IConstanteCaractere {
         return returned;
     }
 
-    public static String repeter(char carac, int nombre) {
-        StringBuilder returned = new StringBuilder();
-        if (nombre == 0) {
-            return "";
-        }
-        if (nombre == 1) {
-            returned.append(carac);
-        } else {
-            returned.append(repeter(carac, nombre / 2) + repeter(carac, nombre - (nombre / 2)));
-        }
-        return returned.toString();
-    }
-
-    /**
-     * Renvoie une chaîne comportant {@code tailleMax} caractères, et vérifiant les propriétés suivantes :<br/>
-     * 1. les premiers caractères sont {@code carac}<br/>
-     * 2. les derniers caractères forment la chaîne {@code texte}<br/>
-     * 3. si la taille de {@code texte} supérieure à {@code tailleMax}, elle est tronquée (les premiers caractères sont conservés)
-     * @deprecated Utiliser {@link org.apache.commons.lang3.StringUtils#leftPad}
-     * @param texte
-     * @param tailleMax
-     * @param carac
-     * @return
-     */
-    public static String cadrerDroite(String texte, int tailleMax, char carac) {
-        if (texte.length() == tailleMax) {
-            return texte;
-        } else if (texte.length() > tailleMax) {
-            return texte.substring(0, tailleMax);
-        } else {
-            return repeter(carac, tailleMax - texte.length()) + texte;
-        }
-    }
-
-    /**
-     * Renvoie une chaîne comportant {@code tailleMax} caractères, et vérifiant les propriétés suivantes :<br/>
-     * 1. les derniers caractères sont {@code carac}<br/>
-     * 2. les premiers caractères forment la chaîne {@code texte}<br/>
-     * 3. si la taille de {@code texte} supérieure à {@code tailleMax}, elle est tronquée (les premiers caractères sont conservés)
-     *@deprecated Utiliser {@link org.apache.commons.lang3.StringUtils#rightPad}
-     * @param texte
-     * @param tailleMax
-     * @param carac
-     * @return
-     */
-    public static String cadrerGauche(String texte, int tailleMax, char carac) {
-        if (texte.length() == tailleMax) {
-            return texte;
-        } else if (texte.length() > tailleMax) {
-            return texte.substring(0, tailleMax);
-        } else {
-            return texte + repeter(carac, tailleMax - texte.length());
-        }
-    }
-
-    /**
-     *
-     * @param string
-     *            Une chaîne de caractères comportant des bouts de la forme <code>"{:nomArg}"</code>
-     * @param args
-     *            par paires <code>"{:nomArg}"</code>, {@code "valeurArg"}
-     * @return la substitution <code>string[{:nomArg} := valeurArg]</code> pour toutes les paires de <code>"{:nomArg}"</code> et
-     *         {@code "valeurArg"}
-     */
-    public static String parseString(String string, String... args) {
-        String s = string;
-        String nom = null;
-        String valeur = null;
-        for (String arg : args) {
-            if (nom == null) {
-                nom = arg;
-            } else if (valeur == null) {
-                valeur = arg;
-            }
-            if (nom != null && valeur != null) {
-                s = s.replace(nom, valeur);
-                nom = null;
-                valeur = null;
-            }
-        }
-        return s;
-    }
-
     /**
      * Renvoie "{k}"
      *
@@ -238,7 +155,7 @@ public class Format implements IConstanteCaractere {
     }
 
     /**
-     * Transforme le nom d'une balise en nom compatible avec une base de donn�ees</br>
+     * Transforme le nom d'une balise en nom compatible avec une base de donnees</br>
      * Exemple : </br>
      * <code>n4ds:s21.g00.30.001</code> devient <code>s21_g00_30_001</code>
      * @param attribut
@@ -476,16 +393,6 @@ public class Format implements IConstanteCaractere {
 
         for (int j = 0; j < arr.length; j++) {
             if (arr[j][0] == arr2 && arr[j][2] == 2) {
-
-                // result.append(",case when i_" + allCols.get(arr[j][1]) + " is null then max(i_" + allCols.get(arr[j][1]) +
-                // ") over (partition by i_"+ allCols.get(arr2) + ") else i_" + allCols.get(arr[j][1]) + " end as i_" +
-                // allCols.get(arr[j][1]));
-                // if (colData.get(allCols.get(arr[j][1])) != null) {
-                // result.append(",case when i_" + allCols.get(arr[j][1]) + " is null then max(v_" + allCols.get(arr[j][1])
-                // + ") over (partition by i_" + allCols.get(arr2) + ") else v_" + allCols.get(arr[j][1]) + " end as v_"+
-                // allCols.get(arr[j][1]));
-                // }
-
                 result.append(",first_value(i_" + allCols.get(arr[j][1]) + ") over (partition by i_" + allCols.get(arr2) + " order by i_"
                         + allCols.get(arr[j][1]) + " nulls last) as i_" + allCols.get(arr[j][1]));
                 if (colData.get(allCols.get(arr[j][1])) != null) {
@@ -503,16 +410,6 @@ public class Format implements IConstanteCaractere {
 
         for (int j = 0; j < arr.length; j++) {
             if (arr[j][0] == arr2 && arr[j][2] == 2) {
-
-                // result.append(",case when i_" + allCols.get(arr[j][1]) + " is null then max(i_" + allCols.get(arr[j][1]) +
-                // ") over (partition by i_"+ allCols.get(arr2) + ") else i_" + allCols.get(arr[j][1]) + " end as i_" +
-                // allCols.get(arr[j][1]));
-                // if (colData.get(allCols.get(arr[j][1])) != null) {
-                // result.append(",case when i_" + allCols.get(arr[j][1]) + " is null then max(v_" + allCols.get(arr[j][1])
-                // + ") over (partition by i_" + allCols.get(arr2) + ") else v_" + allCols.get(arr[j][1]) + " end as v_"+
-                // allCols.get(arr[j][1]));
-                // }
-
                 result.append(",first_value(i_" + allCols.get(arr[j][1]) + ") over (partition by i_" + allCols.get(arr2) + " order by i_"
                         + allCols.get(arr[j][1]) + " nulls last) as i_" + allCols.get(arr[j][1]));
                 if (colData.get(allCols.get(arr[j][1])) != false) {
