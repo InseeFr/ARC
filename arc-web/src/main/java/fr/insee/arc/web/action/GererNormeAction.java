@@ -27,7 +27,6 @@ import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.dao.GererNormeDao;

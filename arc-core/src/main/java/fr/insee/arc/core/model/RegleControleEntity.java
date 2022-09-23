@@ -1,13 +1,11 @@
 package fr.insee.arc.core.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.dao.AbstractEntity;
+import fr.insee.arc.utils.format.Format;
 
 public class RegleControleEntity extends AbstractEntity {
 

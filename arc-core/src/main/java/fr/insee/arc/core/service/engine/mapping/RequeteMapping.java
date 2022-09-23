@@ -841,15 +841,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	}
 
 	/**
-	 *
-	 * @return {@code true} si et seulement si l'ensemble des groupes est non vide.
-	 */
-	private boolean isRequeteAGroupes() {
-		return !this.ensembleGroupes.isEmpty();
-	}
-
-
-	/**
 	 * 
 	 * @param returned
 	 * @param table
@@ -862,22 +853,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		        + ")");
 		returned.append("\n SELECT " + sqlListeVariablesOrdonnee(table));
 		returned.append("\n FROM "+this.nomTableTemporaireFinale+" ");
-		returned.append(";\n");
-		return returned;
-	}
-	
-	/**
-	 *
-	 * @param returned
-	 * @param table
-	 * @return
-	 */
-	private static StringBuilder calculerRequeteFinale(StringBuilder returned, TableMapping table, StringBuilder requeteArrayAggGroup) {
-		returned.append("\n INSERT INTO " + table.getNomTableTemporaire() + " (" + sqlListeVariablesOrdonnee(table)
-		        + ")");
-		returned.append("\n SELECT " + sqlListeVariablesOrdonnee(table));
-		returned.append("\n FROM ");
-		returned.append(requeteArrayAggGroup);
 		returned.append(";\n");
 		return returned;
 	}

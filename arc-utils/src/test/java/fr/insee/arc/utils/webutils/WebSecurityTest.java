@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import fr.insee.arc.utils.webutils.WebSecurity;
-
 public class WebSecurityTest {
 
 

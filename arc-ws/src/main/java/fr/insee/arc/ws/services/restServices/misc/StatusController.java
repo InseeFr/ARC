@@ -1,6 +1,5 @@
 package fr.insee.arc.ws.services.restServices.misc;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,15 +6,14 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.ApiChargementService;
 import fr.insee.arc.core.service.engine.chargeur.ChargeurCSV;
 import fr.insee.arc.core.service.engine.chargeur.ChargeurClefValeur;
 import fr.insee.arc.core.service.engine.chargeur.ChargeurXml;
 import fr.insee.arc.core.service.engine.chargeur.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.engine.chargeur.IChargeur;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
-import fr.insee.arc.core.util.TypeChargement;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.core.util.TypeChargement;
 
 
 /**

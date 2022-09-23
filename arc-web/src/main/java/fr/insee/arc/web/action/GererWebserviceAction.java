@@ -15,7 +15,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.model.WebServiceManagementModel;
 import fr.insee.arc.web.util.VObject;
 

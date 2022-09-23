@@ -9,8 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;

@@ -14,9 +14,8 @@ import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.RequeteMappingCalibree;
 import fr.insee.arc.core.service.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 
 /**

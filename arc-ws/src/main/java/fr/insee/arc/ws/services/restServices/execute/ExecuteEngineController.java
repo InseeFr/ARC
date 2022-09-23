@@ -1,8 +1,6 @@
 package fr.insee.arc.ws.services.restServices.execute;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -12,7 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +31,10 @@ import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
+import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
 import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
-import fr.insee.arc.core.util.LoggerDispatcher;
 
 @RestController
 public class ExecuteEngineController {

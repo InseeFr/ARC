@@ -12,15 +12,14 @@ import fr.insee.arc.core.dao.JeuDeRegleDao;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiMappingService;
-import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.RequeteMappingCalibree;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Sleep;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * @author S4LWO8

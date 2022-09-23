@@ -1,9 +1,7 @@
 package fr.insee.arc.web.model.viewobjects;
 
 import java.util.HashMap;
-import java.util.List;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.util.ConstantVObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.VObject;

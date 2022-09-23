@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * FIXME make abstract Classe des variables d'environnement liées au batch

@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Chargement brutalement d'un fichier pour déterminer la norme et la validité associées.

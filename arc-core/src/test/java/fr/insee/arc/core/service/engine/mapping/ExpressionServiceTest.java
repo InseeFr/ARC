@@ -9,8 +9,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.insee.arc.utils.structure.GenericBean;
-
 public class ExpressionServiceTest {
 
 	private ExpressionService expressionService;

@@ -22,11 +22,10 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.handler.XMLHandlerCharger4;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.Norme;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Classe chargeant les fichiers Xml. Utiliser l'api SAX pour parser les fichiers
