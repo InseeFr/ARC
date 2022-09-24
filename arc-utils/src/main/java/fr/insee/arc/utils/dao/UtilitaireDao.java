@@ -70,7 +70,22 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	public static final int READ_BUFFER_SIZE = 131072;
     
-	private int nbTryMax = 120;
+	
+	
+	/**
+	 * defaut number of tries to initialize an connexion to arc database
+	 */
+	private static final int DEFAULT_NUMBER_OF_CONNECTION_TRIES = 5;
+	
+	/**
+	 * delay between connection tries to arc database
+	 */
+	private static final int MILLISECOND_BETWEEN_CONNECTION_TRIES = 1000;
+
+	/**
+	 * configurable parameter to set the number of try to get a connexion to arc database
+	 */
+	private int nbTryMax = DEFAULT_NUMBER_OF_CONNECTION_TRIES;
 	/**
 	 * Format des données utilisées dans la commande copy
 	 */
@@ -126,37 +141,45 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 
 	/**
-	 * Retourne une connexion hors contexte (sans pooling)
+	 * Retourne une connexion vers la base de données
 	 *
 	 * @return la connexion
 	 * @throws SQLException
 	 * @throws ClassNotFoundException
 	 */
-	public final Connection getDriverConnexion() throws Exception {
+	public final Connection getDriverConnexion() throws SQLException {
 		// invocation du driver
-		Class.forName(
-		properties.getDatabaseDriverClassName());
-		boolean connectionOk = false;
-		int nbTry = 0;
-		Connection c = null;
-		while (!connectionOk && nbTry < nbTryMax) {
+		try {
+			Class.forName(properties.getDatabaseDriverClassName());
+			boolean connectionOk = false;
+			int nbTry = 0;
+			Connection c = null;
+			
+			while (!connectionOk && nbTry < nbTryMax) {
 			// renvoie la connexion relative au driver
-			try {
-			c = DriverManager.getConnection(properties.getDatabaseUrl(), properties.getDatabaseUsername(),
-					properties.getDatabasePassword());
-				connectionOk = true;
-			} catch (Exception e) {
-				int sleep = 5000;
-				LoggerHelper.error(LOGGER,
-						"Connection failure. Tentative de reconnexion dans " + (sleep / 1000) + " secondes", nbTry);
-				Thread.sleep(sleep);
+				try {
+				c = DriverManager.getConnection(properties.getDatabaseUrl(), properties.getDatabaseUsername(),
+						properties.getDatabasePassword());
+					connectionOk = true;
+				} catch (Exception e) {
+					LoggerHelper.error(LOGGER,
+							"Connection failure. Tentative de reconnexion dans " + MILLISECOND_BETWEEN_CONNECTION_TRIES +" milisecondes", nbTry);
+					try {
+						Thread.sleep(MILLISECOND_BETWEEN_CONNECTION_TRIES);
+					} catch (InterruptedException e1) {
+						Thread.currentThread().interrupt();
+					}
+				}
+				nbTry++;
 			}
-			nbTry++;
-		}
 		if (!connectionOk) {
-			throw new Exception("la connexion a échouée");
+			throw new SQLException("La connexion n'a pu aboutir");
 		}
 		return c;
+		
+		} catch (ClassNotFoundException e1) {
+			throw new SQLException("L'initialisation de la connexion a échouée");
+		}
 	}
 
 	/**
@@ -164,16 +187,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param connexion
 	 * @return une nouvelle connexion non poolée si connexion isnull, ou la
 	 *         connexion en entrée
+	 * @throws SQLException 
 	 */
-	public final ConnectionWrapper initConnection(Connection connexion) {
-		try {
+	public final ConnectionWrapper initConnection(Connection connexion) throws SQLException {
 			Boolean isNull = (connexion == null);
-
-			return new ConnectionWrapper(isNull, isNull ? getDriverConnexion() : connexion);
-		} catch (Exception e) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "initConnection()", LOGGER, e);
-		}
-		return null;
+			return new ConnectionWrapper(isNull, Boolean.TRUE.equals(isNull) ? getDriverConnexion() : connexion);
 	}
 
 	/** Returns true if the connection is valid. */
@@ -370,7 +388,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return getInt(connexion, new PreparedStatementBuilder("select max(" + column + ") max_value from " + table));
 	}
 
-	public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) {
+	public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) throws SQLException {
 		return getColumns(aConnexion, new HashSet<String>(), aNomTable).contains(aNomVariable);
 	}
 
@@ -483,7 +501,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 	
 	/**
-	 * Exécution de requêtes ramenant des enregistrements
+	 * Exécution de requêtes ramenant des enregistrements en mode PreparedStatement
 	 *
 	 * <br/>
 	 *
@@ -505,6 +523,70 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	}
 	
+	/**
+	 * Exécution de requêtes ramenant des enregistrements en mode Statement (donc sans cache)
+	 * @param connexion
+	 * @param requete
+	 * @return
+	 * @throws SQLException
+	 */
+	public ArrayList<ArrayList<String>> executeStatement(Connection connexion, PreparedStatementBuilder requete)
+			throws SQLException {
+		return executeStatement(connexion, requete, EntityProvider.getArrayOfArrayProvider());
+
+	}
+	
+	/**
+	 * 
+	 * @param <T>
+	 * @param connexion
+	 * @param requete
+	 * @param entityProvider
+	 * @return
+	 * @throws SQLException
+	 */
+	public <T> T executeStatement(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider) throws SQLException {
+
+		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
+		LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
+		LoggerHelper.trace(LOGGER, requete.getParameters());
+		
+		this.silent=false;
+		
+		try {
+			ConnectionWrapper connexionWrapper = initConnection(connexion);
+			try {
+				connexionWrapper.getConnexion().setAutoCommit(false);
+				try(Statement stmt = connexionWrapper.getConnexion().createStatement();)
+				{
+					try {
+						ResultSet res = stmt.executeQuery(requete.getQuery().toString());
+						return entityProvider.apply(res);
+					} catch (Exception e) {
+						if (!this.silent) {
+							LoggerHelper.error(LOGGER, stmt.toString());
+						}
+						throw e;
+					} finally {
+						connexionWrapper.getConnexion().commit();
+					}
+				}
+			} catch (Exception e) {
+				if (!this.silent) {
+					LoggerHelper.error(LOGGER, "executeStatement()", e);
+				}
+				connexionWrapper.getConnexion().rollback();
+				throw e;
+			} finally {
+				connexionWrapper.close();
+			}
+		} catch (Exception ex) {
+			if (!this.silent) {
+				LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
+			}
+			throw ex;
+		}
+	}
 	
 	/**
 	 * Exécution de requêtes ramenant des enregistrements
@@ -1344,13 +1426,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws SQLException
 	 */
-	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn) {
-		try {
-			liste.addAll(new GenericBean(get(this.pool).executeRequest(connexion, FormatSQL.listeColonneByHeaders(tableIn)))
+	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn) throws SQLException {
+			liste.addAll(new GenericBean(get(this.pool).executeStatement(connexion, FormatSQL.listeColonneByHeaders(tableIn)))
 					.getHeaders());
-		} catch (SQLException e) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "getColumns()", LOGGER, e);
-		}
 		return liste;
 	}
 

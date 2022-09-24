@@ -129,7 +129,7 @@ public class ServiceCommunFiltrageMapping {
      * @return
      * @throws SQLException
      */
-    public static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) {
+    public static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) throws SQLException {
 		return new HashSet<>(UtilitaireDao.get("arc").getColumns(aConnexion, new ArrayList<>(), aTable));
     }
     

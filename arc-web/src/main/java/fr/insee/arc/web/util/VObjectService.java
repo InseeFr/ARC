@@ -613,17 +613,14 @@ public class VObjectService {
                 requete.append("\n");
             }
             requete.append("END;");
-            try {
-                if (!allNull) {
-                    UtilitaireDao.get(this.pool).executeRequest(null, requete);
-                }
-            } catch (SQLException e) {
-                currentData.setMessage(e.getMessage());
-                return false;
+
+            if (!allNull) {
+                UtilitaireDao.get(this.pool).executeRequest(null, requete);
             }
+
         } catch (Exception ex) {
-            LoggerHelper.errorGenTextAsComment(getClass(), "insert()", LOGGER, ex);
-            currentData.setMessage(ex.getMessage());
+            LoggerHelper.error(LOGGER, ex);
+            currentData.setMessage("Error in VObjectService.insert");
             return false;
         }
         return true;
@@ -638,9 +635,9 @@ public class VObjectService {
         LoggerHelper.traceAsComment(LOGGER, "delete()", currentData.getSessionName());
         VObject v0 = fetchVObjectData(currentData.getSessionName());
 
+        try {
         ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
-        
         PreparedStatementBuilder reqDelete = new PreparedStatementBuilder();
         reqDelete.append("BEGIN; ");
         for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
@@ -672,10 +669,10 @@ public class VObjectService {
             }
         }
         reqDelete.append("END; ");
-        try {
-            UtilitaireDao.get(this.pool).executeRequest(null, reqDelete);
-        } catch (SQLException e) {
-        	currentData.setMessage(e.getMessage());
+        UtilitaireDao.get(this.pool).executeRequest(null, reqDelete);
+        } catch (SQLException ex) {
+            LoggerHelper.error(LOGGER, ex);
+        	currentData.setMessage("Error in VObjectService.delete");
         }
     }
 
@@ -751,6 +748,7 @@ public class VObjectService {
             }
         }
         
+        try {
         ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
         // SQL update query
@@ -814,14 +812,15 @@ public class VObjectService {
             reqUpdate.append("\n");
         }
         reqUpdate.append("END;");
-        try {
-            if (!toBeUpdated.isEmpty()) {
-                UtilitaireDao.get(this.pool).executeRequest(null, reqUpdate);
-            }
-            session.put(currentData.getSessionName(), v0);
-        } catch (SQLException e) {
-            currentData.setMessage(e.getMessage());
+	            if (!toBeUpdated.isEmpty()) {
+	                UtilitaireDao.get(this.pool).executeRequest(null, reqUpdate);
+	            }
+	            session.put(currentData.getSessionName(), v0);
+        } catch (SQLException ex) {
+            LoggerHelper.error(LOGGER, ex);
+        	currentData.setMessage("Error in VObjectService.update");
         }
+        
     }
 
     public PreparedStatementBuilder queryView(VObject currentData) {
