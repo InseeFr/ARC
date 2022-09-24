@@ -57,63 +57,45 @@ class BatchARC {
 	private @Autowired
 	PropertiesHandler properties;
 
-	// the metadata schema
-	private String env;
-
 	// the sandbox schema where batch process runs
 	private String envExecution;
 
 	// file directory
 	private String repertoire;
 
-	// keepInDatabase = est-ce qu'on garde les données des phases intérmédiaires en
-	// base ?
-	// false en production
-	private static boolean keepInDatabase;
-
-	// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
-	// excéder une certaine taille
-	private static int tailleMaxReceptionEnMb;
-
-	// Maximum number of files to load
-	private static int maxFilesToLoad;
-
-	// Maximum number of files processed in each phase iteration
-	private static int maxFilesPerPhase;
-
 	// fréquence à laquelle les phases sont démarrées
-	private static int poolingDelay;
+	private int poolingDelay;
 
 	// heure d'initalisation en production
-	private static int hourToTriggerInitializationInProduction;
+	private int hourToTriggerInitializationInProduction;
 
 	// interval entre chaque initialisation en nb de jours
-	private static Integer intervalForInitializationInDay;
+	private Integer intervalForInitializationInDay;
 
 	// nombre de runner maximum pour une phase donnée (cas de blocage)
-	private static Integer maxNumberOfThreadsOfTheSamePhaseAtTheSameTime;
+	private Integer maxNumberOfThreadsOfTheSamePhaseAtTheSameTime;
 
 	// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y
 	// a un blocage
 	// et si un nouveau runner doit etre lancé
-	private static Integer numberOfIterationBewteenBlockageCheck;
+	private Integer numberOfIterationBewteenBlockageCheck;
 	
 	// nombre d'iteration de la boucle batch entre chaque routine de maintenance de la base de données
-	private static Integer numberOfIterationBewteenDatabaseMaintenanceRoutine;
+	private Integer numberOfIterationBewteenDatabaseMaintenanceRoutine;
 
 	// nombre d'iteration de la boucle batch entre chaque routine de vérification du reste à faire
-	private static Integer numberOfIterationBewteenCheckTodo;
+	private Integer numberOfIterationBewteenCheckTodo;
 	
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
 	// Maintenance initialization process can only occur in this case
-	private static boolean dejaEnCours;
+	private boolean dejaEnCours;
 
 	private static void message(String msg) {
 		StaticLoggerDispatcher.warn(msg, LOGGER);
 	}
 
-	private static void message(String msg, int iteration) {
+	private void message(String msg, int iteration) {
 		if (iteration % numberOfIterationBewteenBlockageCheck == 0) {
 			message(msg);
 		}
@@ -121,20 +103,20 @@ class BatchARC {
 
 	private void initParameters() {
 
-		keepInDatabase = Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
+		boolean keepInDatabase = Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
 
 		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
 		// excéder une certaine taille
-		tailleMaxReceptionEnMb = BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb", 10);
+		int tailleMaxReceptionEnMb = BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb", 10);
 
 		// Maximum number of files to load
-		maxFilesToLoad = BDParameters.getInt(null, "LanceurARC.maxFilesToLoad", 101);
+		int maxFilesToLoad = BDParameters.getInt(null, "LanceurARC.maxFilesToLoad", 101);
 
 		// Maximum number of files processed in each phase iteration
-		maxFilesPerPhase = BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase", 1000000);
+		int maxFilesPerPhase = BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase", 1000000);
 
 		// fréquence à laquelle les phases sont démarrées
-		poolingDelay = BDParameters.getInt(null, "LanceurARC.poolingDelay", 1000);
+		this.poolingDelay = BDParameters.getInt(null, "LanceurARC.poolingDelay", 1000);
 
 		// heure d'initalisation en production
 		hourToTriggerInitializationInProduction = BDParameters.getInt(null,
@@ -162,6 +144,9 @@ class BatchARC {
 		numberOfIterationBewteenCheckTodo = BDParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
 				10);
 		
+
+		// the metadata schema
+		String env;
 		
 		// either we take env and envExecution from database or properties
 		// default is from properties
@@ -598,7 +583,7 @@ class BatchARC {
 
 	}
 
-	private static void initialize() throws SQLException, ParseException {
+	private void initialize() throws SQLException, ParseException {
 		ArcThreadFactory initialiser = new ArcThreadFactory(mapParam, TraitementPhase.INITIALISATION);
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
