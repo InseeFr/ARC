@@ -30,7 +30,7 @@ public class XsdRulesRetrievalService {
 		return fetchRulesFromBase(connection, jdr, null);
 	}
 
-	public XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr, String filter) throws SQLException, InvalidStateForXsdException {
+	private XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr, String filter) throws SQLException, InvalidStateForXsdException {
 		PreparedStatementBuilder request= new PreparedStatementBuilder(
 				"select id_classe, "
 				+ "rubrique_pere, rubrique_fils, "
@@ -54,7 +54,7 @@ public class XsdRulesRetrievalService {
 
 	/** Parses the control rules described in the SQL results
 	 *  and returns them as a XsdControlDescription object.*/
-	public XsdControlDescription parseSqlResults(ArrayList<ArrayList<String>> results, Connection connection)
+	private XsdControlDescription parseSqlResults(ArrayList<ArrayList<String>> results, Connection connection)
 			throws SQLException, InvalidStateForXsdException {
 		XsdControlDescriptionBuilder builder = new XsdControlDescriptionBuilder();
 		Map<String, Integer> columns = new GenericBean(results).mapIndex();
@@ -73,7 +73,7 @@ public class XsdRulesRetrievalService {
 			switch (idClasse) {
 			case "CARDINALITE":
 				if (position!=null) {
-					if (ManipString.compareStringWithNull(XsdChoice.xsdChoiceIdentifier, role)) {
+					if (ManipString.compareStringWithNull(XsdChoice.XSD_CHOICE_IDENTIFIER, role)) {
 						String[] complements = parseComplementsFrom(condition);
 						builder.addChoiceRelation(rubriquePere, rubriqueFils, borneInf, borneSup, complements, position);
 					} else {

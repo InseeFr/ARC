@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.ArchiveLoader.ArchiveChargerFactory;
 import fr.insee.arc.core.ArchiveLoader.FilesInputStreamLoad;
 import fr.insee.arc.core.ArchiveLoader.IArchiveFileLoader;
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.factory.ChargeurFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
@@ -67,7 +68,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	this.error = null;
 	this.indice = currentIndice;
 	this.setEnvExecution(aApi.getEnvExecution());
-	this.idSource = aApi.getListIdsource().get(ID_SOURCE).get(this.indice);
+	this.idSource = aApi.getListIdsource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
 	this.connexion = connexion;
 	try {
 	    this.connexion.setClientInfo("ApplicationName", "Chargement fichier " + idSource);

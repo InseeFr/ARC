@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
@@ -98,7 +99,7 @@ public class ApiChargementService extends ApiService {
         setListIdsource(pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString()));
 
         // récupère le nombre de fichier à traiter
-        int nbFichier = getListIdsource().get(ID_SOURCE).size();
+        int nbFichier = getListIdsource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
         
         Connection chargementThread = null;
         ArrayList<ThreadChargementService> threadList = new ArrayList<>();

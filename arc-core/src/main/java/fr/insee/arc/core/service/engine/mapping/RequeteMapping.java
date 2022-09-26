@@ -41,7 +41,6 @@ import fr.insee.arc.utils.utils.ManipString;
  * restituent telle que calculée la première fois.
  */
 public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConstanteNumerique {
-    public static final String varIdSource = "id_source";
     public static final String tokenIdSource = "{:idSource}";
     public static final String aliasTable = "{:alias}";
     public static final String functionBefore = "{:functionBefore}";
@@ -365,9 +364,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 				requeteGlobale.append(FormatSQL.dropTable(this.nomTableTemporaireIdTable));
 			}
 			requeteGlobale.append(FormatSQL.dropTable(this.nomTableFichierCourant));
-
-			
-//			System.out.println(requeteGlobale);
 
 			this.requeteTextuelleInsertion = requeteGlobale.toString();
 			this.isRequeteCalculee = true;

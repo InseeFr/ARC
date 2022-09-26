@@ -30,7 +30,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
     private static final String tokenRegexFin = "\\}$";
     private static final String tokenRegexDebutOuFin = "(" + tokenRegexdebut + ")|(" + tokenRegexFin + ")";
     private static final String tokenRegexExpressionEchappee = "[^\\{:\\}]+";
-    public static final String tokenRegexExpressionTable = "\\{:" + tokenRegexExpressionEchappee + "\\}";
+    private static final String tokenRegexExpressionTable = "\\{:" + tokenRegexExpressionEchappee + "\\}";
     public static final String tokenRegexExpressionMappingGlobale = "\\{:" + tokenRegexExpressionEchappee + "(" + tokenRegexExpressionTable + "|"
             + tokenRegexExpressionEchappee + ")*\\}";
 
@@ -57,7 +57,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
         /*
          * La requête doit contenir uniquement du SQL, sans "{" ni "}".
          */
-        if (!requete.matches(CodeSQL.regexRegleCodeSQLrubriqueSeparator) || !requete.matches(CodeSQL.regexRegleCodeSQLrubriqueIgnoreIdSeparator)) {
+        if (!requete.matches(CodeSQL.REGEXP_TO_FIND_IDENTIFIER_RUBRIQUE) || !requete.matches(CodeSQL.REGEXP_TO_FIND_NONIDENTIFIER_RUBRIQUE)) {
             throw new IllegalStateException("La règle " + this.getExpression() + " contient des noms de tables inexistants.");
         }
         this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new PreparedStatementBuilder(requete));

@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dao.JeuDeRegleDao;
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
@@ -92,10 +93,10 @@ public class ApiMappingService extends ApiService {
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         
-        int nbFichier = getTabIdSource().get(ID_SOURCE).size();
+        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
         
         Connection connextionThread = null;
-        ArrayList<ThreadMappingService> threadList = new ArrayList<ThreadMappingService>();
+        ArrayList<ThreadMappingService> threadList = new ArrayList<>();
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
         int currentIndice = 0;
 
@@ -107,7 +108,7 @@ public class ApiMappingService extends ApiService {
             }
             
             connextionThread = chooseConnection(connextionThread, threadList, connexionList);
-            this.currentIdSource = getTabIdSource().get("id_source").get(currentIndice);
+            this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
             
             ThreadMappingService r = new ThreadMappingService( connextionThread, currentIndice, this);
             threadList.add(r);

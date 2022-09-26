@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 
 /**
@@ -16,15 +17,14 @@ import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
 
     // separator to catch rubrique
-    public static final String rubriqueSeparator0="{";
-    public static final String rubriqueSeparator1="}";
+    private static final String SEPARATOR_START_IDENTIFIER_RUBRIQUE="{";
+    private static final String SEPARATOR_END_IDENTIFIER_RUBRIQUE="}";
 
     // separator to catch rubrique which user wants to ignore id
-    public static final String rubriqueIgnoreIdSeparator0="#";
-    public static final String rubriqueIgnoreIdSeparator1="#";
-
+    private static final String SEPARATOR_START_NONIDENTIFIER_RUBRIQUE="#";
+    private static final String SEPARATOR_END_NONIDENTIFIER_RUBRIQUE="#";
     
-    public AbstractRegleMappingSimple(String anExpression, VariableMapping aVariableMapping) {
+    protected AbstractRegleMappingSimple(String anExpression, VariableMapping aVariableMapping) {
         super(anExpression, aVariableMapping);
         this.ensembleIdentifiantsRubriques = new HashSet<>();
         this.ensembleNomsRubriques = new HashSet<>();
@@ -40,8 +40,8 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
      */
     public static final class CodeSQL extends AbstractRegleMappingSimple {
 
-        public static final String regexRegleCodeSQLrubriqueSeparator = "^((?!\\"+rubriqueSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueSeparator1+").)*$";
-        public static final String regexRegleCodeSQLrubriqueIgnoreIdSeparator = "^((?!\\"+rubriqueIgnoreIdSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueIgnoreIdSeparator1+").)*$";
+        public static final String REGEXP_TO_FIND_IDENTIFIER_RUBRIQUE = "^((?!\\"+SEPARATOR_START_IDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_IDENTIFIER_RUBRIQUE+").)*$";
+        public static final String REGEXP_TO_FIND_NONIDENTIFIER_RUBRIQUE = "^((?!\\"+SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE+").)*$";
         
         public CodeSQL(String anExpression, VariableMapping aVariableMapping) {
             super(anExpression, aVariableMapping);
@@ -78,8 +78,8 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
      * Où {@code xxxx} est un nom de rubrique valide ou bien un nom de colonne présent dans la table de filtrage.
      */
     public static final class RubriqueMapping extends AbstractRegleMappingSimple {
-        public static final String regexDebutIdentifiant = "i_";
-        public static final String regexDebutNom = "v_";
+        public static final String DATABASECOLUMN_START_FOR_RUBRIQUE = "i_";
+        public static final String DATABASECOLUMN_START_FOR_VALUE = "v_";
 
 
         protected Set<String> ensembleNomsRubriquesReglesExistants;
@@ -93,40 +93,30 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
         }
 
 
-        private static final String tokenIdSource = "id_source";
+
+        private static final String REGEXP_EMPTY_IDENTIFIER_RUBRIQUE = SEPARATOR_START_IDENTIFIER_RUBRIQUE+SEPARATOR_END_IDENTIFIER_RUBRIQUE;
 
 
-        private static final String emptyBrackets = rubriqueSeparator0+rubriqueSeparator1;
-
-
-        private static final String emptyBracketsIgnoreId = rubriqueSeparator0+rubriqueSeparator1;
-        private static final String sqlPseudoColumnIgnoreId="1";
+        private static final String REGEXP_EMPTY_NONIDENTIFIER_RUBRIQUE = SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE;
+        
+        private static final String PSEUDO_COLUMN_IGNORED_ID="1";
         
 
-        public static final String regexRubriqueMapping = "((\\"+rubriqueSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueSeparator1+")|(\\"+rubriqueIgnoreIdSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueIgnoreIdSeparator1+"))";
+        public static final String regexRubriqueMapping = "((\\"+SEPARATOR_START_IDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_IDENTIFIER_RUBRIQUE+")|(\\"+SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE+"))";
         
         /**
          * Regex un peu plus permissive que nécessaire : la fabrique doit identifier {n'importe quoi} comme une rubrique, charge à la
          * méthode {@link #deriver()} et à la méthode {@link #deriverTest()} de lever les exceptions si besoin est.
          */
-        public static final String regexRubriqueMappingAcceptante = "((\\"+rubriqueSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueSeparator1+")|(\\"+rubriqueIgnoreIdSeparator0+"[a-zA-Z0-9_]+\\"+rubriqueIgnoreIdSeparator1+"))";
-    
-        
-        /**
-         *
-         * @param nomRubrique
-         * @return <code>{</code>{@code <nomRubrique>}<code>}</code>
-         */
-        public static final String rubriqueEchappee(String nomRubrique) {
-            return new StringBuilder(openingBrace + nomRubrique + closingBrace).toString();
-        }
+        public static final String regexRubriqueMappingAcceptante = "((\\"+SEPARATOR_START_IDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_IDENTIFIER_RUBRIQUE+")|(\\"+SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE+"))";
+
 
         @Override
         public void deriverTest() throws Exception {
             check();
             String expressionSansAccolades = this.getExpression().substring(ONE, this.getExpression().length() - ONE).toLowerCase(Locale.FRENCH);
             this.expressionSQL = expressionSansAccolades;
-            if (tokenIdSource.equalsIgnoreCase(expressionSansAccolades) || expressionSansAccolades.startsWith(regexDebutIdentifiant)) {
+            if (ColumnEnum.ID_SOURCE.getColumnName().equalsIgnoreCase(expressionSansAccolades) || expressionSansAccolades.startsWith(DATABASECOLUMN_START_FOR_RUBRIQUE)) {
                 this.ensembleIdentifiantsRubriques.add(expressionSansAccolades);
             } else {
                 this.ensembleNomsRubriques.add(expressionSansAccolades);
@@ -146,12 +136,12 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
             check();
 
             // is it a rubrique for id to be ignored ?
-            boolean ignoreId=this.getExpression().startsWith(rubriqueIgnoreIdSeparator0)
-            		&& this.getExpression().endsWith(rubriqueIgnoreIdSeparator1)
+            boolean ignoreId=this.getExpression().startsWith(SEPARATOR_START_NONIDENTIFIER_RUBRIQUE)
+            		&& this.getExpression().endsWith(SEPARATOR_END_NONIDENTIFIER_RUBRIQUE)
             		;
             
-            String expressionWithoutSeparator=ignoreId?this.getExpression().substring(rubriqueIgnoreIdSeparator0.length(), this.getExpression().length() - rubriqueIgnoreIdSeparator1.length())
-            		:this.getExpression().substring(rubriqueSeparator0.length(), this.getExpression().length() - rubriqueSeparator1.length());
+            String expressionWithoutSeparator=ignoreId?this.getExpression().substring(SEPARATOR_START_NONIDENTIFIER_RUBRIQUE.length(), this.getExpression().length() - SEPARATOR_END_NONIDENTIFIER_RUBRIQUE.length())
+            		:this.getExpression().substring(SEPARATOR_START_IDENTIFIER_RUBRIQUE.length(), this.getExpression().length() - SEPARATOR_END_IDENTIFIER_RUBRIQUE.length());
             
             this.expressionSQL = expressionWithoutSeparator;
             
@@ -159,7 +149,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
             /*
              * Traitement de l'id_source
              */
-            if (tokenIdSource.equalsIgnoreCase(expressionWithoutSeparator)) {
+            if (ColumnEnum.ID_SOURCE.getColumnName().equalsIgnoreCase(expressionWithoutSeparator)) {
                 this.ensembleIdentifiantsRubriques.add(expressionWithoutSeparator);
             }
             /*
@@ -170,8 +160,8 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
                 /*
                  * Protection pour ne rajouter dans la liste des identifiants i_ que les rubriques provenant de v_
                  */
-                if (expressionWithoutSeparator.startsWith(regexDebutNom)) {
-               		this.ensembleIdentifiantsRubriques.add(ignoreId?sqlPseudoColumnIgnoreId:expressionWithoutSeparator.replaceFirst(regexDebutNom, regexDebutIdentifiant));
+                if (expressionWithoutSeparator.startsWith(DATABASECOLUMN_START_FOR_VALUE)) {
+               		this.ensembleIdentifiantsRubriques.add(ignoreId?PSEUDO_COLUMN_IGNORED_ID:expressionWithoutSeparator.replaceFirst(DATABASECOLUMN_START_FOR_VALUE, DATABASECOLUMN_START_FOR_RUBRIQUE));
 
                 }
             }
@@ -179,13 +169,13 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
              * Traitement des identifiants
              */
             else if (this.ensembleIdentifiantsRubriquesReglesExistants.contains(expressionWithoutSeparator)) {
-                this.ensembleIdentifiantsRubriques.add(ignoreId?sqlPseudoColumnIgnoreId:expressionWithoutSeparator);
+                this.ensembleIdentifiantsRubriques.add(ignoreId?PSEUDO_COLUMN_IGNORED_ID:expressionWithoutSeparator);
             }
             /*
              * Cas rebut
              */
             else {
-                this.expressionSQL = exprNull;
+                this.expressionSQL = MAPPING_NULL_EXPRESSION;
             }
         }
 
@@ -193,7 +183,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
          * Vérifie la bonne forme de l'expression de cette rubrique.
          */
         private void check() {
-            if (emptyBrackets.equalsIgnoreCase(getExpression()) || emptyBracketsIgnoreId.equalsIgnoreCase(getExpression())) {
+            if (REGEXP_EMPTY_IDENTIFIER_RUBRIQUE.equalsIgnoreCase(getExpression()) || REGEXP_EMPTY_NONIDENTIFIER_RUBRIQUE.equalsIgnoreCase(getExpression())) {
                 throw new IllegalArgumentException("Pour la variable " + this.variableMapping.getNomVariable() + " ::= "
                         + this.variableMapping.getExpressionRegle().getExpression() + ".\nUne " + this.getClass().getName()
                         + " ne peut pas recevoir d'expression vide.");

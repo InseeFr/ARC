@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiFiltrageService;
@@ -42,12 +43,15 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	private String tableTempFiltrageKo;
 	private String tableFiltrageKo;
 	private String tableFiltrageOk;
+	
+    public static final String REGEX_SELECTION_RUBRIQUE = "\\{[^\\{:\\}]*\\}";
+
 
 	public ThreadFiltrageService(Connection connexion, int currentIndice, ApiFiltrageService theApi) {
 
 		this.indice = currentIndice;
 		this.setEnvExecution(theApi.getEnvExecution());
-		this.idSource = theApi.getTabIdSource().get(ID_SOURCE).get(indice);
+		this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
 		this.setPreviousPhase(theApi.getPreviousPhase());
 		this.setCurrentPhase(theApi.getCurrentPhase());
 		this.connexion = connexion;
@@ -282,7 +286,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		}
 		requete.append("\n END ");
 		requete.append(")::bigint as check_against_rule ");
-		requete.append("\n from " + aTableControleOk + " ctrl; ");
+		requete.append("\n FROM " + aTableControleOk + " ctrl; ");
 		requete.append("\n COMMIT; ");
 
 		requete.append("\n BEGIN; ");
@@ -385,9 +389,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 			returned = returned.replaceAll("(?i)\\{" + rubrique + "\\}", rubrique);
 		}
 		boolean onlyNull = returned.equalsIgnoreCase(exprRegle);
-		returned = returned.replaceAll(regexSelectionRubrique, "null");
+		returned = returned.replaceAll(REGEX_SELECTION_RUBRIQUE, "null");
 		onlyNull &= !returned.equals(exprRegle);
-		return new Pair<Boolean, String>(onlyNull, returned);
+		return new Pair<>(onlyNull, returned);
 	}
 
 	/**
@@ -407,6 +411,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle = normeToPeriodiciteToValiditeInfToValiditeSupToRegle;
 	}
 
+	@Override
 	public Thread getT() {
 		return t;
 	}
@@ -415,6 +420,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.t = t;
 	}
 
+	@Override
 	public Connection getConnexion() {
 		return connexion;
 	}

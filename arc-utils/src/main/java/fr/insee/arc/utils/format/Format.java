@@ -223,7 +223,6 @@ public class Format implements IConstanteCaractere {
 
         for (int i = 0; i < hash.length; i++) {
             hashString.append(asLetters(hash[i] + 129));
-            // hashString.append(Integer.toString(hash[i]+129));
         }
 
         return hashString.toString();

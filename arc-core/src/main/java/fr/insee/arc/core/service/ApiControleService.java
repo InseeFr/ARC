@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.core.service.thread.ThreadControleService;
@@ -65,9 +66,9 @@ public class ApiControleService extends ApiService {
 
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
-        int nbFichier = getTabIdSource().get(ID_SOURCE).size();
+        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
         Connection connextionThread = null;
-        ArrayList<ThreadControleService> threadList = new ArrayList<ThreadControleService>();
+        ArrayList<ThreadControleService> threadList = new ArrayList<>();
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
         int currentIndice = 0;
 

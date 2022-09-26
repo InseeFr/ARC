@@ -53,8 +53,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	public static final String CHILD_TABLE_TOKEN = "child";
 
-	// Nom du fichier
-	public static final String ID_SOURCE = "id_source";
 	// racine xml
 	public static final String ROOT = "root";
 

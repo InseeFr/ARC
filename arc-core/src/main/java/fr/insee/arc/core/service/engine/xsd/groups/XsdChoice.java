@@ -12,10 +12,10 @@ public class XsdChoice extends AbstractXsdGroup {
 	private final int position;
 	private XsdIterator iterator;
 	
-	public static final String xsdChoiceIdentifier="xs:choice";
+	public static final String XSD_CHOICE_IDENTIFIER="xs:choice";
 
 	@SafeVarargs
-	public XsdChoice(XsdGroup... elements) {
+	private XsdChoice(XsdGroup... elements) {
 		this.sequences = elements;
 		if (isEmpty()) {
 			this.position = 0;
@@ -47,7 +47,7 @@ public class XsdChoice extends AbstractXsdGroup {
 
 	@Override
 	public String getType() {
-		return xsdChoiceIdentifier;
+		return XSD_CHOICE_IDENTIFIER;
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiControleService;
@@ -47,7 +48,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
         this.indice = currentIndice;
         this.setEnvExecution(theApi.getEnvExecution());
-        this.idSource = theApi.getTabIdSource().get(ID_SOURCE).get(indice);
+        this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
         this.connexion = connexion;
         try {
             this.connexion.setClientInfo("ApplicationName", "Controle fichier "+idSource);

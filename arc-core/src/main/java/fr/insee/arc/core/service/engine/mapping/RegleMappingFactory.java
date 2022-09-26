@@ -71,7 +71,7 @@ public class RegleMappingFactory {
         /*
          * Est-ce que c'est une règle de correspondance fonctionnelle ?
          */
-        else if (anExpression.matches(CodeSQL.regexRegleCodeSQLrubriqueSeparator) && anExpression.matches(CodeSQL.regexRegleCodeSQLrubriqueIgnoreIdSeparator)) {
+        else if (anExpression.matches(CodeSQL.REGEXP_TO_FIND_IDENTIFIER_RUBRIQUE) && anExpression.matches(CodeSQL.REGEXP_TO_FIND_NONIDENTIFIER_RUBRIQUE)) {
             return new CodeSQL(anExpression, aVariableMapping);
         }
         return new RegleMappingCorrespondanceFonctionnelle(this, anExpression, aVariableMapping);

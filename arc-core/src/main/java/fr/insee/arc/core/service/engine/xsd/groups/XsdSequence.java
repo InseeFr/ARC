@@ -22,7 +22,7 @@ public class XsdSequence extends AbstractXsdGroup {
 	}
 	
 	@SafeVarargs
-	public XsdSequence(XsdGroup... elements) {
+	private XsdSequence(XsdGroup... elements) {
 		this.sequences = elements;
 		if (isEmpty()) {
 			this.position = 0;

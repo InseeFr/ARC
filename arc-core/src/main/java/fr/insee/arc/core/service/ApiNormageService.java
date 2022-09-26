@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.core.util.BDParameters;
@@ -55,12 +56,12 @@ public class ApiNormageService extends ApiService {
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         
-        int nbFichier = getTabIdSource().get(ID_SOURCE).size();
+        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
         
         Connection connectionThread = null;
         
         // Pool de thread
-        ArrayList<ThreadNormageService> threadList = new ArrayList<ThreadNormageService>();
+        ArrayList<ThreadNormageService> threadList = new ArrayList<>();
         
         // Pool de connexion
         ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());

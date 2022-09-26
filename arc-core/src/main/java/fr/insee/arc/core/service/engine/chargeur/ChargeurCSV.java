@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.opencsv.CSVReader;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
@@ -500,7 +501,7 @@ public class ChargeurCSV implements IChargeur {
 
 		req.append(" TABLE " + this.tableTempA);
 		req.append(" AS (SELECT ");
-		req.append("\n '" + this.fileName + "'::text collate \"C\" as id_source");
+		req.append("\n '" + this.fileName + "'::text collate \"C\" as "+ColumnEnum.ID_SOURCE.getColumnName());
 		req.append("\n ,id::integer as id");
 		req.append("\n ," + integrationDate + "::text collate \"C\" as date_integration ");
 		req.append("\n ,'" + this.norme.getIdNorme() + "'::text collate \"C\" as id_norme ");

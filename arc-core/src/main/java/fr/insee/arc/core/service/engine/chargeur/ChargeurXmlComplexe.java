@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.NormeFichier;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
@@ -58,12 +59,12 @@ public class ChargeurXmlComplexe implements IChargeur{
 
     // temporary table where data will be loaded by the XML SAX engine
     private String tableTempA = "A";
-    private ArrayList<String> tempTableAColumnsLongName=new ArrayList<String>(Arrays.asList("id_source","id","date_integration","id_norme","periodicite","validite"));
+    private ArrayList<String> tempTableAColumnsLongName=new ArrayList<String>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName(),"id","date_integration","id_norme","periodicite","validite"));
     private ArrayList<String> tempTableAColumnsShortName=new ArrayList<String>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
     private ArrayList<String> tempTableAColumnsType=new ArrayList<String>(Arrays.asList("text collate \"C\"","int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
 
-    public String rapport;
-    public Boolean error = false;
+    private String rapport;
+    private Boolean error = false;
     public String jointure;
     
     public ChargeurXmlComplexe(ThreadChargementService threadChargementService, String fileName) {

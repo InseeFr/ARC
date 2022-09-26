@@ -19,12 +19,17 @@ public abstract class AbstractRegleMapping implements IDbConstant, IConstanteCar
 
     protected static final Logger LOGGER = LogManager.getLogger(AbstractRegleMapping.class);
 
-    public static final String exprNull = "null";
+    /**
+     * Règle null pour le mapping. La colonne métier calculée sera vide si elle se voit affectée cette règle
+     * Utilisé si les rubriques spécifiées dans le calcul de la rubrique n'existent pas par exemple
+     */
+    public static final String MAPPING_NULL_EXPRESSION = "null";
 
-    public static final String regexdebutEchappement = "^\\{";
-    public static final String regexFinEchappement = "\\}$";
+    private static final String REGEX_DEBUT_ECHAPPEMENT = "^\\{";
+    
+    private static final String REGEX_FIN_ECHAPPEMENT = "\\}$";
 
-    public static final String regexDebutOuFinEchappement = "(" + regexdebutEchappement + ")|(" + regexFinEchappement + ")";
+    public static final String REGEX_DEBUT_OU_FIN_ECHAPPEMENT = "(" + REGEX_DEBUT_ECHAPPEMENT + ")|(" + REGEX_FIN_ECHAPPEMENT + ")";
 
     private String expression;
 

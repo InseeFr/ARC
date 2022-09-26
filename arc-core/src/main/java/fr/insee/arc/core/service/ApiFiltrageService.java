@@ -7,12 +7,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.service.engine.mapping.IMappingServiceConstanteToken;
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.service.thread.ThreadFiltrageService;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * La table {@code <environnement>_controle_ok} contient les données chargées, normées et contrôlées.<br/>
@@ -27,7 +27,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
  *
  */
 @Component
-public class ApiFiltrageService extends ApiService implements IConstanteCaractere, IMappingServiceConstanteToken {
+public class ApiFiltrageService extends ApiService implements IConstanteCaractere {
     private static final Logger logger = LogManager.getLogger(ApiFiltrageService.class);
 
         
@@ -61,7 +61,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
     	
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
-        int nbFichier = getTabIdSource().get(ID_SOURCE).size();
+        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
         
         Connection connextionThread = null;
         ArrayList<ThreadFiltrageService> threadList = new ArrayList<>();

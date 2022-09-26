@@ -9,6 +9,7 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
@@ -52,7 +53,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
     public ThreadNormageService(Connection connexion, int currentIndice, ApiNormageService theApi) {
         
         this.indice = currentIndice;
-        this.idSource = theApi.getTabIdSource().get(ID_SOURCE).get(indice);
+        this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
         this.connexion = connexion;
         
         try {
