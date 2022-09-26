@@ -106,7 +106,14 @@ public class ApiReceptionService extends ApiService {
 	}
 
 
-	public GenericBean moveAndCheckClientFiles(int fileSizeLimit, int maxNumberOfFiles) {
+	/**
+	 * Initialize the application directories if needed
+	 * List the the files received and start to move to the processing directory
+	 * @param fileSizeLimit
+	 * @param maxNumberOfFiles
+	 * @return
+	 */
+	private GenericBean moveAndCheckClientFiles(int fileSizeLimit, int maxNumberOfFiles) {
 		
 		GenericBean archivesContent = null;
 		
@@ -132,7 +139,7 @@ public class ApiReceptionService extends ApiService {
 	}
 
 	/** Moves files into RECEPTION_ENCOURS directory, check if the archives are readable and returns a description of the content of all treated files. */
-	public GenericBean moveAndCheckUntilLimit(int fileSizeLimit, int maxNumberOfFiles, ArrayList<String> entrepotIdList)
+	private GenericBean moveAndCheckUntilLimit(int fileSizeLimit, int maxNumberOfFiles, ArrayList<String> entrepotIdList)
 			throws IOException, SQLException {
 		String dirOut = directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution);
 		GenericBean archivesContent = null;
@@ -281,7 +288,7 @@ public class ApiReceptionService extends ApiService {
 	 * @param filesIn the archives
 	 * @return a GenericBean describing the archive
 	 */
-	public GenericBean checkArchiveFiles(File[] filesIn) {
+	private GenericBean checkArchiveFiles(File[] filesIn) {
 		ArrayList<ArrayList<String>> content = new ArrayList<>();
 		ArrayList<String> l;
 		for (File f : filesIn) {
@@ -531,7 +538,7 @@ public class ApiReceptionService extends ApiService {
 	 * Enregistrer les fichiers en entrée Déplacer les fichier reçus dans les repertoires OK ou pas OK selon le bordereau Supprimer les
 	 * fichiers déjà existants de la table de pilotage Marquer les fichiers dans la table de pilotage
 	 */
-	public void registerAndDispatchFiles(Connection connexion, GenericBean archiveContent) {
+	private void registerAndDispatchFiles(Connection connexion, GenericBean archiveContent) {
 		StaticLoggerDispatcher.info("registerAndDispatchFiles", LOGGER);
 		// la bean (fileName,type, etat) contient pour chaque fichier, le type
 		// du fichier et l'action à réaliser
@@ -629,7 +636,7 @@ public class ApiReceptionService extends ApiService {
 		}
 	}
 
-	public String buildContainerName(String container) {
+	private String buildContainerName(String container) {
 		String newContainerName = "";
 		newContainerName = "";
 		if (container.endsWith(".tar.gz")) {
@@ -646,11 +653,11 @@ public class ApiReceptionService extends ApiService {
 		return newContainerName;
 	}
 
-	public String normalizeContainerName(String container, String extension) {
+	private String normalizeContainerName(String container, String extension) {
 		return ManipString.substringBeforeLast(container, extension) +  extension;
 	}
 
-	public void soumettreRequete(StringBuilder requete) {
+	private void soumettreRequete(StringBuilder requete) {
 		try {
 			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
 		} catch (SQLException ex) {
@@ -659,7 +666,7 @@ public class ApiReceptionService extends ApiService {
 		requete.setLength(0);
 	}
 
-	public void insertPilotage(StringBuilder requete, String tablePilotage, String originalContainer, String newContainer, String v_container,
+	private void insertPilotage(StringBuilder requete, String tablePilotage, String originalContainer, String newContainer, String v_container,
 			String fileName, String etat, String rapport) {
 		Date d = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
@@ -709,7 +716,7 @@ public class ApiReceptionService extends ApiService {
 	 * @param fileList
 	 * @return
 	 */
-	public GenericBean findDuplicates(GenericBean fileList) {
+	private GenericBean findDuplicates(GenericBean fileList) {
 		ArrayList<String> headers = fileList.getHeaders();
 		ArrayList<String> types = fileList.getTypes();
 		ArrayList<ArrayList<String>> content = fileList.content;

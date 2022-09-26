@@ -24,16 +24,16 @@ public class RegleMappingFactory {
      * Ensemble des rubriques qui ont été rencontrées dans les tables de chargement pour les données issues d'un même entrepot.<br/>
      * Plus concrètement, c'est le nom des colonnes de la table physique de l'étape précédente (filtrage pour l'instant).
      */
-    protected Set<String> ensembleNomRubriqueExistante;
-    protected Set<String> ensembleIdentifiantRubriqueExistante;
+    private Set<String> ensembleNomRubriqueExistante;
+    private Set<String> ensembleIdentifiantRubriqueExistante;
 
-    protected Set<TableMapping> ensembleTableMapping;
+    private Set<TableMapping> ensembleTableMapping;
 
-    protected String environnement;
+    private String environnement;
 
-    protected Connection connexion;
+    private Connection connexion;
 
-    protected String idFamille;
+    private String idFamille;
 
     public RegleMappingFactory(Connection aConnexion, String anEnvironnement, Set<String> anEnsembleIdentifiantRubriqueExistante,
             Set<String> anEnsembleNomRubriqueExistante) {
@@ -47,7 +47,7 @@ public class RegleMappingFactory {
         /*
          * Est-ce que c'est une règle de clef primaire ?
          */
-        if (anExpression.matches(RegleMappingClePrimaire.regexRegleClefPrimaire)) {
+        if (anExpression.matches(RegleMappingClePrimaire.REGEXP_PRIMARY_KEY_RULE)) {
             return new RegleMappingClePrimaire(anExpression, this.idFamille, aVariableMapping);
         }
         /*

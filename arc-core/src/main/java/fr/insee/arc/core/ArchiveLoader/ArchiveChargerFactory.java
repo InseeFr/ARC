@@ -29,7 +29,7 @@ public class ArchiveChargerFactory {
 
     }
     
-    public IArchiveFileLoader getChargeur(TypeArchive typeArchive){
+    private IArchiveFileLoader getChargeur(TypeArchive typeArchive){
         StaticLoggerDispatcher.info("** getLoader from type **", LOGGER);
         return this.map.get(typeArchive);
     }

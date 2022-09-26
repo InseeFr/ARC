@@ -356,7 +356,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 				this.nomTableTemporaireFinale="table_finale_"+table.getNomTableCourt();
 
 				creerTablePrepUnion(requeteGlobale, table, nomsVariablesIdentifiantes, reglesIdentifiantes);
-				insererTablePrepUnion(requeteGlobale, table, nomsVariablesIdentifiantes, reglesIdentifiantes);
+				insererTablePrepUnion(requeteGlobale, table, reglesIdentifiantes);
 				calculerRequeteArrayAggGroup(requeteGlobale, table, tablesFilles);
 				calculerRequeteFinale(requeteGlobale, table);
 				
@@ -379,8 +379,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @param reglesIdentifiantes
 	 * @return La requête {@code returned}, augmentée de la requête d'insertion dans la table {@code prep_union}.
 	 */
-	private StringBuilder insererTablePrepUnion(StringBuilder returned, TableMapping table,
-	        Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes) {
+	private StringBuilder insererTablePrepUnion(StringBuilder returned, TableMapping table, Map<String, String> reglesIdentifiantes) {
 
 		String requete="";
 		String requeteSav="";
@@ -388,7 +387,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		/*
 		 * Lorsqu'aucun groupe n'est défini pour aucune table, on attribue par défaut le groupe 1 à toute variable de toute table.
 		 */
-		if (this.ensembleGroupes.size()==0)
+		if (this.ensembleGroupes.isEmpty())
 		{
 			this.ensembleGroupes.add(TableMapping.GROUPE_UN);
 		}
@@ -396,7 +395,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		for (Integer groupe : this.ensembleGroupes) {
 
 			StringBuilder req=new StringBuilder();
-			insererTablePrepUnionAvecGroupe(req, table, groupe, nomsVariablesIdentifiantes, reglesIdentifiantes, true);
+			insererTablePrepUnionAvecGroupe(req, table, groupe, reglesIdentifiantes, true);
 			requete=req.toString();
 
 			if (!requete.equals(requeteSav))
@@ -411,7 +410,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		for (Integer groupe : this.ensembleGroupes) {
 
 			StringBuilder req=new StringBuilder();
-			insererTablePrepUnionAvecGroupe(req, table, groupe, nomsVariablesIdentifiantes, reglesIdentifiantes, false);
+			insererTablePrepUnionAvecGroupe(req, table, groupe, reglesIdentifiantes, false);
 			requete=req.toString();
 
 			if (!requete.equals(requeteSav))
@@ -427,7 +426,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	
 	
 	
-	public int computeTableNumber(HashMap<TableMapping,Integer> order, HashMap<TableMapping,ArrayList<TableMapping>> tableTree, TableMapping table)
+	private int computeTableNumber(HashMap<TableMapping,Integer> order, HashMap<TableMapping,ArrayList<TableMapping>> tableTree, TableMapping table)
 	{
 		
 		if (order.get(table)!=null)
@@ -472,13 +471,14 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @param tableAncestor
 	 * @param tableChild
 	 */
-	public void addTableInTreeHierarchy(HashMap<TableMapping,ArrayList<TableMapping>> tableTree, TableMapping tableAncestor, TableMapping tableChild)
+	private void addTableInTreeHierarchy(HashMap<TableMapping,ArrayList<TableMapping>> tableTree, TableMapping tableAncestor, TableMapping tableChild)
 	{
 		// create the tree entry if it doesn't exist
 		if (tableTree.get(tableAncestor)==null)
 		{
-			tableTree.put(tableAncestor, new ArrayList<TableMapping>());
+			tableTree.put(tableAncestor, new ArrayList<>());
 		}
+		
 		// add the son table if not already set
 		if (!tableTree.get(tableAncestor).contains(tableChild))
 		{
@@ -522,7 +522,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @param order : the order index computed for table
 	 * @return
 	 */
-	public Set<TableMapping> buildTheOrderedTablesListForProcess(HashMap<TableMapping,Integer> order)
+	private Set<TableMapping> buildTheOrderedTablesListForProcess(HashMap<TableMapping,Integer> order)
 	{
 
 		// get the maximum index of ordered tables 
@@ -569,7 +569,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @param modeIdentifiantGroupe : true : identifiant group, false : identifiant non groupe
 	 */
 	private StringBuilder insererTablePrepUnionAvecGroupe(StringBuilder returned, TableMapping table, Integer groupe,
-	        Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes, boolean modeIdentifiantGroupe) {
+	        Map<String, String> reglesIdentifiantes, boolean modeIdentifiantGroupe) {
 
 		// i_g
 		Set<String> ensembleIdentifiantsGroupesRetenus = new HashSet<>(table.getEnsembleIdentifiantsRubriques(groupe));
@@ -665,7 +665,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
 		// Attention à ce distinct : faut bien garder les identifiant de rémunération intermédiaire du coup et pas le final
 		// Finalement NON : Utilisation d'une variable de départage
-		returned.append("\n SELECT DISTINCT "+ table.expressionSQLPrepUnion(groupe, nomsVariablesIdentifiantes, reglesIdentifiantes));
+		returned.append("\n SELECT DISTINCT "+ table.expressionSQLPrepUnion(groupe, reglesIdentifiantes));
 		returned.append("\n FROM ");
 		returned.append("\n TMP_DATA d ," + this.nomTableSource + " e ");
 		returned.append("\n WHERE e.id=d.id_table ");
@@ -685,11 +685,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
 		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporairePrepUnion + "  CASCADE; ");
 		returned.append("\n CREATE temporary TABLE " + this.nomTableTemporairePrepUnion + " (");
-
-//		returned.append(NUMERO_GROUPE +  " smallint");
-//		returned.append(", ");
-//		returned.append(NB_GROUPES + " smallint");
-//		returned.append(", ");
 
 		listeVariablesTypesPrepUnion(returned, aTable, space, true);
 		returned.append(") "+FormatSQL.WITH_NO_VACUUM+";");
@@ -726,15 +721,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	        Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe, HashMap<String,String>  linkedIds
 	        ) {
 		this.nomTableFichierCourant = "fichier";
-
-//		System.out.println(nomsVariablesIdentifiantes);
-//		System.out.println(reglesIdentifiantes);
-//		System.out.println(nomsVariablesGroupe);
-//		System.out.println(linkedIds);
-
-//		StringBuilder requeteIndex=new StringBuilder();
-
-
 		HashSet<String> alreadyAdded=new HashSet<>();
 
 
@@ -742,7 +728,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		returned.append("\n CREATE temporary TABLE " + nomTableFichierCourant + " "+FormatSQL.WITH_NO_VACUUM+" AS ");
 
 
-		// bloc 1 : calcul de l'identifiant group et non groupe
+		// bloc 1 : calcul de l'identifiant groupe et non groupe
 
 		returned.append("\n SELECT id_table ");
 		for (String nomVariable : reglesIdentifiantes.keySet()) {

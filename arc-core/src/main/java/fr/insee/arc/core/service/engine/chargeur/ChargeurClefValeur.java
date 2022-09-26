@@ -50,7 +50,7 @@ public class ChargeurClefValeur implements IChargeur {
         this.envExecution = threadChargementService.getEnvExecution();
     }
     
-    class KeyValueSubLoader implements Runnable {
+    private class KeyValueSubLoader implements Runnable {
     	private Exception exceptionThrown = null;
 
         @Override
@@ -116,7 +116,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @author S4LWO8
      * @throws Exception
      */
-    public void clefValeurToXml(HashMap<String, String> arbreFormat, InputStream tmpInx2) throws Exception {
+    private void clefValeurToXml(HashMap<String, String> arbreFormat, InputStream tmpInx2) throws Exception {
         StaticLoggerDispatcher.info("** Conversion du fichier clef valeur en XML **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
         // contient la liste des pères pour l'élément précédent
@@ -164,7 +164,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @param bw
      * @throws Exception
      */
-    public ArrayList<String> initialisationOutputStream(HashMap<String, String> arbreFormat, HashMap<String, ArrayList<String>> mapRubriquesFilles,
+    private ArrayList<String> initialisationOutputStream(HashMap<String, String> arbreFormat, HashMap<String, ArrayList<String>> mapRubriquesFilles,
             String ligne) throws Exception {
         // ecriture de l'entete du fichier
 
@@ -218,7 +218,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @param bw
      * @throws Exception
      */
-    public ArrayList<String> lectureLigne(HashMap<String, String> arbreFormat,
+    private ArrayList<String> lectureLigne(HashMap<String, String> arbreFormat,
             ArrayList<String> listePeresRubriquePrecedante, HashMap<String, ArrayList<String>> mapRubriquesFilles, String ligne)
             throws Exception {
         String rubrique;
@@ -316,7 +316,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @param bw
      * @throws IOException
      */
-    public void finaliserOutputStream(ArrayList<String> listePeresRubriqueCourante) throws IOException {
+    private void finaliserOutputStream(ArrayList<String> listePeresRubriqueCourante) throws IOException {
 
         String rubriqueCourante;
         for (int i = 1; i < listePeresRubriqueCourante.size(); i++) {

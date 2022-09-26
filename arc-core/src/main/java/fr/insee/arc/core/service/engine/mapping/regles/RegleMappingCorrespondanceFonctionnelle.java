@@ -28,12 +28,12 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
 
     private RegleMappingFactory regleMappingFactory;
 
-    protected List<AbstractRegleMapping> listeTokenRegle;
+    private List<AbstractRegleMapping> listeTokenRegle;
 
-    protected Set<String> ensembleIdentifiantsRubriques;
-    protected Set<String> ensembleNomsRubriques;
+    private Set<String> ensembleIdentifiantsRubriques;
+    private Set<String> ensembleNomsRubriques;
 
-    protected boolean isCalcule;
+    private boolean isCalcule;
 
     public RegleMappingCorrespondanceFonctionnelle(RegleMappingFactory aRegleMappingFactory, String anExpression, VariableMapping aVariableMapping) {
         super(anExpression, aVariableMapping);
@@ -79,7 +79,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
      * 1. Recherche des règles globales.<br/>
      * 2. Recherche des rubriques.<br/>
      */
-    protected void decomposerElementsSimple() {
+    private void decomposerElementsSimple() {
         List<String> triplet = decouperEnTrois(this.getExpression());
         /*
          * Recherche des boucles infinies dûes au fait qu'une accolade n'est pas fermée.

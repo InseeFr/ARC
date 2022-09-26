@@ -126,7 +126,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
         }
     }
 
-    protected void decomposerElementsSimple() {
+    private void decomposerElementsSimple() {
         Matcher matcher = patternDebutRegleGroupe.matcher(this.getExpression());
         int end = 0;
         String expressionGroupe;

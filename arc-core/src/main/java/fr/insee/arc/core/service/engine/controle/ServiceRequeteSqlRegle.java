@@ -26,8 +26,8 @@ public class ServiceRequeteSqlRegle {
 	public static final String RECORD_WITH_ERROR_TO_EXCLUDE="1";
 	public static final String RECORD_WITH_ERROR_TO_KEEP="2";
 	
-	public static final String ERROR_ROW_PROCESSING_KEEP="k";
-	public static final String ERROR_ROW_PROCESSING_EXCLUDE="e";
+	private static final String ERROR_ROW_PROCESSING_KEEP="k";
+	private static final String ERROR_ROW_PROCESSING_EXCLUDE="e";
 	
 	private static final HashMap<String,String[]> XSD_DATE_RULES
 	=new HashMap<String,String[]>() {
@@ -140,7 +140,7 @@ public class ServiceRequeteSqlRegle {
 	 * insert the count of line with false evaluation and the rules number in the meta table
 	 * @return
 	 */
-	public String insertBloc(String blockingThreshold, String errorRowProcessing, String regleId)
+	private String insertBloc(String blockingThreshold, String errorRowProcessing, String regleId)
 	{
 		// map from gui user action code to database control code
 		HashMap<String, String> mapRowProcessing=new HashMap<>();
@@ -453,22 +453,12 @@ public class ServiceRequeteSqlRegle {
 	 * @param reg la règle à appliquer
 	 * */
 	public String ctlIsValueIn(RegleControleEntity reg) {
-		String requete = "WITH " + "ctl AS (	SELECT id " + "			FROM " + this.tableTempData + " "
-		+ "			WHERE {2} not in ({3}) ) "
+		String requete = "WITH " + "ctl AS ( SELECT id " + " FROM " + this.tableTempData + " "
+		+ "WHERE {2} not in ({3}) ) "
 		+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
 		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
-
-	/** Requête de contrôle qui ne remonte jamais d'erreur.*/
-	public String ctlAlwaysTrue(RegleControleEntity reg) {
-		String requete = "WITH " + "ctl AS (	SELECT id " + "			FROM " + this.tableTempData + " "
-				+ "			WHERE false ) "
-				+ insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle());
-		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle());
-		return requete;
-	}
-
 
 	/**
 	 * ecriture du bout de requete SQL qui permet d'implémenter la condition de cardinalité
@@ -476,7 +466,7 @@ public class ServiceRequeteSqlRegle {
 	 * @param reg
 	 * @return
 	 */
-	public String conditionCardinalite(RegleControleEntity reg) {
+	private String conditionCardinalite(RegleControleEntity reg) {
 		String cond = "";
 		String rubrique = reg.getRubriquePere();
 		String rubriqueF = reg.getRubriqueFils();
@@ -512,7 +502,7 @@ public class ServiceRequeteSqlRegle {
 	 * @param condition0
 	 * @return le résultat est en MAJUSCULE
 	 */
-	public String rewriteCondition(Map<String, RegleControleEntity> mapRubrique, String condition0) {
+	private String rewriteCondition(Map<String, RegleControleEntity> mapRubrique, String condition0) {
 		StaticLoggerDispatcher.debug("Je rentre dans la méthode rewriteCondition", logger);
 		// Passage en MAJUSCULE car la map contient des elements en majuscule
 		// bétonnage du code pour que le .uppercase ne lève pas de null pointerException
@@ -556,7 +546,7 @@ public class ServiceRequeteSqlRegle {
 	 * @param mapRubrique
 	 * @return
 	 */
-	public String writeFiltre(Map<String, RegleControleEntity> mapRubrique) {
+	private String writeFiltre(Map<String, RegleControleEntity> mapRubrique) {
 		String filtre = "";
 		String type = "";
 		String rubrique = "";
@@ -604,7 +594,7 @@ public class ServiceRequeteSqlRegle {
 	 * @param args
 	 * @return
 	 */
-	public String getRequete(String req, String... args) {
+	private String getRequete(String req, String... args) {
 		if (args.length == 0) {
 			return req;
 		}
@@ -647,7 +637,7 @@ public class ServiceRequeteSqlRegle {
 	 * @param borneSup
 	 * @return
 	 */
-	public String conditionLongueur(RegleControleEntity reg) {
+	private String conditionLongueur(RegleControleEntity reg) {
 		String cond = "";
 		String rubrique = reg.getRubriquePere();
 		String borneInf = reg.getBorneInf();

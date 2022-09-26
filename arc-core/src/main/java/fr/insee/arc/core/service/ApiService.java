@@ -94,14 +94,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	protected String bdDateFormat = "DD/MM/YYYY HH24:MI:SS";
 
-	public final static String IHM_SCHEMA = "arc.ihm";
+	public static final String IHM_SCHEMA = "arc.ihm";
 
 	protected String idSource;
 
-	public final static String SEPARATEUR_JOINTURE_XML = "\n";
 	protected Boolean todo = false;
 
-	protected HashMap<String, ArrayList<String>> tabIdSource;
+	private HashMap<String, ArrayList<String>> tabIdSource;
 
 	public Exception error = null;
 	public Thread t = null;
@@ -261,7 +260,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param aCurrentPhase
 	 * @param aNbEnr
 	 */
-	public boolean initialiser() {
+	private boolean initialiser() {
 		loggerDispatcher.info("** initialiser **", LOGGER_APISERVICE);
 		// Vérifie si y'a des sources à traiter
 		if (this.todo) {
@@ -289,11 +288,11 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	/**
 	 * Permet de configurer la connexion Mettre un timeout par exemple
 	 */
-	public StringBuilder configConnection() {
+	private StringBuilder configConnection() {
 		return configConnection(this.getEnvExecution());
 	}
 
-	public static StringBuilder configConnection(String anEnvExecution) {
+	private static StringBuilder configConnection(String anEnvExecution) {
 		StringBuilder requete = new StringBuilder();
 		requete.append(FormatSQL.modeParallel(ManipString.substringBeforeFirst(ApiService.dbEnv(anEnvExecution), ".")));
 		return requete;
@@ -308,7 +307,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param phaseAncien
 	 * @return
 	 */
-	public boolean checkTodo(String tablePil, String phaseAncien, String phaseNouveau) {
+	private boolean checkTodo(String tablePil, String phaseAncien, String phaseNouveau) {
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
 		boolean todo = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
@@ -338,7 +337,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param nbEnr
 	 * @throws SQLException
 	 */
-	public void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp,
+	private void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp,
 			Integer nbEnr) {
 		loggerDispatcher.info("** register **", LOGGER_APISERVICE);
 		try {
@@ -633,13 +632,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	}
 
 	/**
-	 * Effacer les fichiers traités de la table todo de la phase précédente
+	 * Effacer les fichiers traités de la table to_do de la phase précédente
 	 * 
 	 * @param connexion
 	 * @param tablePilTemp
 	 * @param tablePrevious
 	 */
-	public static void deleteTodo(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch) {
+	private static void deleteTodo(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch) {
 		try {
 
 			// Si on est en batch, on drop les tables source
@@ -676,7 +675,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param envExecution
 	 * @param type
 	 */
-	public static void maintenancePilotage(Connection connexion, String envExecution, String type) {
+	private static void maintenancePilotage(Connection connexion, String envExecution, String type) {
 		String tablePil = dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
 		StaticLoggerDispatcher.info("** Maintenance Pilotage **", LOGGER_APISERVICE);
 
@@ -721,7 +720,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param typeMaintenance FormatSQL.VACUUM_OPTION_FULL or
 	 *                        FormatSQL.VACUUM_OPTION_NONE
 	 */
-	public static void maintenanceDatabase(Connection connexion, String envExecution, String typeMaintenance) {
+	private static void maintenanceDatabase(Connection connexion, String envExecution, String typeMaintenance) {
 		ApiService.maintenancePgCatalog(connexion, typeMaintenance);
 
 		ApiService.maintenancePilotage(connexion, envExecution, typeMaintenance);
@@ -740,7 +739,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param suffix        optionnal suffix added to the temporary name
 	 * @return
 	 */
-	public static String temporaryTableName(String aEnvExecution, String aCurrentPhase, String tableName,
+	private static String temporaryTableName(String aEnvExecution, String aCurrentPhase, String tableName,
 			String... suffix) {
 
 		if (suffix != null && suffix.length > 0) {
@@ -1006,25 +1005,23 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	}
 
 	/**
-	 * Création filtre sur les id_source marqué en état KO
-	 *
-	 * @param tableIn
-	 * @param tableOut
-	 * @param tablePilTemp
+	 * Creation de la table de travail contenant les données en entrée d'une phase et pour un fichier donné
+	 * La table en sortie est temporaire ou unlogged car elle est volatile et utilisée que durant l'execution de la phase
+	 * La table en entrée est dans le ca d'utilisation principale la table résultat des données 
+	 * en sortie la phase précédente pour le fichier donnée.
+	 * @param extraColumns
+	 * @param tableIn	la table des données en entrée de la phase
+	 * @param tableOut	la table des données du fichier en sortie
+	 * @param tablePilTemp	la table de pilotage relative à la phase; c'est la liste des fichiers selectionnés pour la phase
+	 * @param idSource	le nom du fichier
+	 * @param isIdSource	le nom du fichier est-il spécifié ?
+	 * @param etatTraitement	l'état du traitement  si on souhaite crée une table en sortie relative à un état particulier
 	 * @return
 	 */
-	public String createTableTravail(String extraColumns, String tableIn, String tableOut, String tablePilTemp,
-			String... etat_traitement) {
-		return (createTableTravail(extraColumns, tableIn, tableOut, tablePilTemp, "", false, etat_traitement));
-	}
-
-	public String createTableTravail(String extraColumns, String tableIn, String tableOut, String tablePilTemp,
-			String idSource, Boolean isIdSource, String... etat_traitement) {
+	public String createTableTravail(String extraColumns, String tableIn, String tableOut, String tablePilTemp
+			, String... etatTraitement) {
 		StringBuilder requete = new StringBuilder();
 
-//        if (tableIn.toLowerCase().contains("_todo")) {
-//            requete.append(FormatSQL.lock(tableIn));
-//        }
 		requete.append("\n DROP TABLE IF EXISTS " + tableOut + " CASCADE; \n");
 
 		requete.append("\n CREATE ");
@@ -1042,11 +1039,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("\n    WHERE exists ( SELECT 1  ");
 		requete.append("\n            FROM " + tablePilTemp + " pil  ");
 		requete.append("\n  where pil.id_source=stk.id_source ");
-		if (etat_traitement.length > 0) {
-			requete.append(" AND '" + etat_traitement[0] + "'=ANY(pil.etat_traitement) ");
-		}
-		if (isIdSource) {
-			requete.append(" AND stk.id_source ='" + idSource + "' ");
+		if (etatTraitement.length > 0) {
+			requete.append(" AND '" + etatTraitement[0] + "'=ANY(pil.etat_traitement) ");
 		}
 		requete.append(" ) ");
 		requete.append(");\n");
@@ -1277,7 +1271,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param tableDrop
 	 * @throws SQLException
 	 */
-	public void repriseSurErreur(Connection connexion, String phase, String tablePil, Exception exception,
+	private void repriseSurErreur(Connection connexion, String phase, String tablePil, Exception exception,
 			String... tableDrop) throws SQLException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de

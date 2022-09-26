@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import com.opencsv.CSVReader;
 
 import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjetcs.DatabaseObjectService;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
@@ -90,7 +91,7 @@ public class ChargeurCSV implements IChargeur {
 	 * @throws Exception
 	 */
 
-	public void csvtoBase() throws Exception {
+	private void copyCsvFileToDatabase() throws Exception {
 		StaticLoggerDispatcher.info("** CSVtoBase **", LOGGER);
 
 		java.util.Date beginDate = new java.util.Date();
@@ -138,10 +139,10 @@ public class ChargeurCSV implements IChargeur {
 			headers[i] = Format.toBdVal(headers[i]);
 		}
 
-		// On crée la table dans laquelle on va COPYer le tout
-		initialiserTable();
+		// On crée la table dans laquelle on va copier le tout
+		initializeCsvTableContainer();
 
-		copyerFile();
+		importCsvDataToTable();
 
 		java.util.Date endDate = new java.util.Date();
 
@@ -150,11 +151,12 @@ public class ChargeurCSV implements IChargeur {
 	}
 
 	/**
-	 * @param quote
+	 * Start the postgres copy in commande with the right parameters
+	 * @param quote	the csv separator
 	 * @throws Exception
 	 * @throws IOException
 	 */
-	public void copyerFile() throws Exception {
+	private void importCsvDataToTable() throws Exception {
 		try {
 			StringBuilder columnForCopy = new StringBuilder();
 			columnForCopy.append("(");
@@ -181,7 +183,7 @@ public class ChargeurCSV implements IChargeur {
 	 * @throws Exception
 	 * @throws IOException
 	 */
-	public void applyFormat() throws SQLException {
+	private void applyFormat() throws SQLException {
 		String format = norme.getRegleChargement().getFormat();
 		if (format != null && !format.isEmpty()) {
 			format = format.trim();
@@ -335,8 +337,9 @@ public class ChargeurCSV implements IChargeur {
 
 				// si pas de partition, nbIteration=1
 				boolean partitionedProcess = (partitionExpression.size() > 0);
-				// default value 100000
-				int partitionSize = 100000;
+
+				// default value of the maximum records per partition
+				int partitionSize = DatabaseObjectService.MAX_NUMBER_OF_RECORD_PER_PARTITION;
 
 				int nbPartition = 1;
 				// creation de l'index de partitionnement
@@ -412,9 +415,10 @@ public class ChargeurCSV implements IChargeur {
 	}
 
 	/**
+	 * Create the table where the csv file data will be stored
 	 * @throws SQLException
 	 */
-	public void initialiserTable() throws SQLException {
+	private void initializeCsvTableContainer() throws SQLException {
 		StringBuilder req = new StringBuilder();
 		req.append("DROP TABLE IF EXISTS " + TABLE_TEMP_T + " ;");
 		req.append(" \nCREATE TEMPORARY TABLE " + TABLE_TEMP_T + " (");
@@ -451,7 +455,7 @@ public class ChargeurCSV implements IChargeur {
 	 * @return
 	 * @throws IOException
 	 */
-	public String[] getHeader(CSVReader readerCSV) throws IOException {
+	private String[] getHeader(CSVReader readerCSV) throws IOException {
 
 		return readerCSV.readNext();
 	}
@@ -486,7 +490,7 @@ public class ChargeurCSV implements IChargeur {
 	 * also meta data column (filename, norme, validite) are added to the ARC standard table
 	 * @throws SQLException
 	 */
-	public void flatBaseToIdedFlatBase() throws SQLException {
+	private void transformCsvDataToArcData() throws SQLException {
 		StaticLoggerDispatcher.info("** FlatBaseToIdedFlatBase **", LOGGER);
 		java.util.Date beginDate = new java.util.Date();
 
@@ -551,10 +555,10 @@ public class ChargeurCSV implements IChargeur {
 		StaticLoggerDispatcher.info("execution", LOGGER);
 
 		// On met le fichier en base
-		csvtoBase();
+		copyCsvFileToDatabase();
 
 		// on retraduit le fichier à la mode ARC avec des i_ et v_ pour chacune des colonnes et en ajoutant les meta data
-		flatBaseToIdedFlatBase();
+		transformCsvDataToArcData();
 
 	}
 

@@ -10,14 +10,27 @@ public class DatabaseObjectService {
 	/**
 	 * the proprietary application schema
 	 */
-	public static final String ARC_SCHEMA="arc";
+	public static final String ARC_METADATA_SCHEMA="arc";
 	
+	
+	/**
+	 * database collation
+	 */
+	public static final String DATABASE_COLLATION="collate \"C\"";
 	
 	/**
 	 * database characters convention
 	 */
 	public static final String SCHEMA_SEPARATOR=".";
 	public static final String QUERY_SEPARATOR=";";
+	
+	
+	/**
+	 * ARC special parameter
+	 */
+	public static final int MAX_NUMBER_OF_RECORD_PER_PARTITION=100000;
+	
+	
 	
 	/**
 	 * the sandbox schema
@@ -33,7 +46,7 @@ public class DatabaseObjectService {
 	
 	public String getTable(TableEnum e)
 	{
-		return e.isTableInSanbox()?this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName():ARC_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
+		return e.isTableInSanbox()?this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName():ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
 	}
 	
 

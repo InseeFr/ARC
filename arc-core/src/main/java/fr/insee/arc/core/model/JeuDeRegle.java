@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class JeuDeRegle {
 
-    public static final String DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
 
 	private static final Logger LOGGER = LogManager.getLogger(JeuDeRegle.class);
 

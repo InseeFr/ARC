@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.databaseobjetcs.TableEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.ApiService;
@@ -802,8 +803,11 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	
 	@RequestMapping("/addExpression")
 	public String addExpression(Model model) {
-		String exprNameHeader = ExpressionService.EXPR_NAME;
+		String exprNameHeader = ColumnEnum.EXPR_NOM.getColumnName();
+		
+		// trim the inserted expression
 		viewExpression.setInputFieldFor(exprNameHeader, viewExpression.getInputFieldFor(exprNameHeader).trim());
+		
 		return addLineVobject(model, RESULT_SUCCESS, this.viewExpression);
 	}
 

@@ -27,13 +27,13 @@ import fr.insee.arc.utils.utils.ManipString;
 public class ServiceJeuDeRegle {
 
 	private static final Logger logger = LogManager.getLogger(ServiceJeuDeRegle.class);
-	public ServiceRequeteSqlRegle servSql;
+	private ServiceRequeteSqlRegle servSql;
 	
 	/**
 	 * Liste des rubriques de la table de données DSN
 	 */
-	List<String> listRubTable = new ArrayList<>();
-	String tableControleRegle;
+	private List<String> listRubTable = new ArrayList<>();
+	private String tableControleRegle;
 
     public ServiceJeuDeRegle(){
     	this.servSql = new ServiceRequeteSqlRegle();
@@ -160,7 +160,7 @@ public class ServiceJeuDeRegle {
 	 * @param structure
 	 * @throws SQLException
 	 */
-	public void control(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
+	private void control(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
 
 		StringBuilder blocRequete = new StringBuilder();
 		blocRequete.append(this.servSql.initTemporaryTable(table));
@@ -279,7 +279,7 @@ public class ServiceJeuDeRegle {
 	 * @param table
 	 * @throws SQLException
 	 */
-	public String executeRegleCondition(JeuDeRegle jdr, RegleControleEntity reg) {
+	private String executeRegleCondition(JeuDeRegle jdr, RegleControleEntity reg) {
 		StaticLoggerDispatcher.info("Je lance executeRegleCondition()",logger);
 		String requete = "";
 
@@ -311,7 +311,7 @@ public class ServiceJeuDeRegle {
 	 * @param table
 	 * @throws SQLException
 	 */
-	public String executeRegleCardinalite(JeuDeRegle jdr, RegleControleEntity reg) {
+	private String executeRegleCardinalite(JeuDeRegle jdr, RegleControleEntity reg) {
 		StaticLoggerDispatcher.info("Je lance executeRegleCardinalite()",logger);
 		String requete = "";
 

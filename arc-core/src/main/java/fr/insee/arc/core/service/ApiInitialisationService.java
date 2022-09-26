@@ -60,12 +60,10 @@ public class ApiInitialisationService extends ApiService {
     private int Nb_Jour_A_Conserver;
 
     private static final Logger LOGGER = LogManager.getLogger(ApiInitialisationService.class);
-    public String tablePilTemp2;
 
     public ApiInitialisationService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot,
             Integer aNbEnr, String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
-        this.tablePilTemp2 = FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + TraitementTableExecution.PILOTAGE_FICHIER, "2");
     }
 
     @Override
@@ -100,7 +98,7 @@ public class ApiInitialisationService extends ApiService {
      *
      * @throws Exception
      */
-    public void rebuildFileSystem() throws Exception {
+    private void rebuildFileSystem() throws Exception {
         loggerDispatcher.info("rebuildFileSystem", LOGGER);
 
         // parcourir toutes les archives dans le répertoire d'archive
@@ -304,7 +302,7 @@ public class ApiInitialisationService extends ApiService {
      * @param tablePil
      * @throws SQLException
      */
-    public void reinstate(Connection connexion, String tablePil) throws Exception {
+    private void reinstate(Connection connexion, String tablePil) throws Exception {
         loggerDispatcher.info("reinstateWithRename", LOGGER);
 
         // on cherche tous les containers contenant un fichier à rejouer
@@ -347,7 +345,7 @@ public class ApiInitialisationService extends ApiService {
      * @throws Exception
      */
     
-    public static void mettreAJourSchemaTableMetier(Connection connexion, String envParameters, String envExecution) {
+    private static void mettreAJourSchemaTableMetier(Connection connexion, String envParameters, String envExecution) {
     	try{
             StaticLoggerDispatcher.info("Mettre à jour le schéma des tables métiers avec la famille", LOGGER);
             mettreAJourSchemaTableMetierThrow(connexion, envParameters, envExecution);
@@ -358,7 +356,7 @@ public class ApiInitialisationService extends ApiService {
     }
 
     
-    public static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution) throws Exception {
+    private static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution) throws Exception {
     		StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
             /*
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
@@ -395,6 +393,7 @@ public class ApiInitialisationService extends ApiService {
                     "(Phy) Famille -> Table -> Variable -> Type",
                     Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"), relationalView);
             StringBuilder requeteMAJSchema = new StringBuilder();
+                        
             /*
              * AJOUT/MODIFICATION DES COLONNES DE REFERENCE
              */
@@ -502,7 +501,7 @@ public class ApiInitialisationService extends ApiService {
      * @param tablePil
      * @throws Exception
      */
-    public void cleanToDelete(Connection connexion, String tablePil) throws Exception {
+    private void cleanToDelete(Connection connexion, String tablePil) throws Exception {
         loggerDispatcher.info("cleanToDelete", LOGGER);
 
         StringBuilder requete = new StringBuilder();
@@ -519,7 +518,7 @@ public class ApiInitialisationService extends ApiService {
      * @param tablePil
      * @throws SQLException
      */
-    public void nettoyerTablePilotage(Connection connexion, String envExecution) throws Exception {
+    private void nettoyerTablePilotage(Connection connexion, String envExecution) throws Exception {
 
         loggerDispatcher.info("nettoyerTablePilotage", LOGGER);
         
@@ -699,7 +698,9 @@ public class ApiInitialisationService extends ApiService {
     	}
     }
     
-    public static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
+    
+    
+    private static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
     	copyRulesTablesToExecution(connexion, anParametersEnvironment, anExecutionEnvironment);
     	applyExpressions(connexion, anExecutionEnvironment);
     }
@@ -711,7 +712,7 @@ public class ApiInitialisationService extends ApiService {
      * @param anExecutionEnvironment
      * @throws Exception
      */
-    public static void copyRulesTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
+    private static void copyRulesTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
     	StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
         try {
         	
@@ -946,7 +947,7 @@ public class ApiInitialisationService extends ApiService {
      * @param env
      * @return
      */
-    public PreparedStatementBuilder requeteListAllTablesEnvTmp(String env) {
+    private PreparedStatementBuilder requeteListAllTablesEnvTmp(String env) {
         PreparedStatementBuilder requete = new PreparedStatementBuilder();
         TraitementPhase[] phase = TraitementPhase.values();
         // on commence après la phase "initialisation". i=2
@@ -983,7 +984,7 @@ public class ApiInitialisationService extends ApiService {
         return requete;
     }
 
-    public static PreparedStatementBuilder requeteListTableEnv(String env, String phase) {
+    private static PreparedStatementBuilder requeteListTableEnv(String env, String phase) {
         // Les tables dans l'environnement sont de la forme
         TraitementEtat[] etat = TraitementEtat.values();
         PreparedStatementBuilder requete = new PreparedStatementBuilder();
@@ -1005,7 +1006,7 @@ public class ApiInitialisationService extends ApiService {
      * @param envExecution
      * @throws Exception
      */
-    public void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws Exception {
+    private void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws Exception {
         loggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
         try {
             // maintenance de la table de pilotage
@@ -1118,7 +1119,7 @@ public class ApiInitialisationService extends ApiService {
 
     
     
-    public static void rebuildPilotage(Connection connexion, String tablePilotage) throws SQLException
+    private static void rebuildPilotage(Connection connexion, String tablePilotage) throws SQLException
     {
         UtilitaireDao.get("arc").executeBlock(
                 connexion,
@@ -1141,7 +1142,7 @@ public class ApiInitialisationService extends ApiService {
      * @return
      * @throws SQLException
      */
-    public boolean remettreEtapePilotage() throws SQLException {
+    private boolean remettreEtapePilotage() throws SQLException {
 
         StringBuilder requete = new StringBuilder();
         
@@ -1211,7 +1212,7 @@ public class ApiInitialisationService extends ApiService {
      * Rebuild des grosses tables
      * attention si on touche parameteres de requetes ou à la clause exists; forte volumétrie !
      */
-    public static String deleteTableByPilotage(String nomTable, String nomTableSource, String tablePil, String phase, String etat, String extraCond) {
+    private static String deleteTableByPilotage(String nomTable, String nomTableSource, String tablePil, String phase, String etat, String extraCond) {
         StringBuilder requete = new StringBuilder();
 
         String tableDestroy = FormatSQL.temporaryTableName(nomTable, "D");

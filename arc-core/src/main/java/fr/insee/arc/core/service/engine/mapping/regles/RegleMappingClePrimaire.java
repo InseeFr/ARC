@@ -17,16 +17,16 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  */
 public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
 
-    protected static final String tokenOrderByWhat = "{:tokenOrderByWhat}";
+    protected static final String TOKEN_ORDER_BY_WHAT = "{:tokenOrderByWhat}";
 
-    protected TableMapping tableMappingIdentifiee;
+    private TableMapping tableMappingIdentifiee;
 
     private String idFamille;
 
     /**
      * Comment reconnaître une règle de clef primaire ?
      */
-    public final static String regexRegleClefPrimaire = "^\\{pk:.*\\}$";
+    public static final String REGEXP_PRIMARY_KEY_RULE = "^\\{pk:.*\\}$";
 
     /**
      * Pourquoi un milliard ? Parce que c'est grand.

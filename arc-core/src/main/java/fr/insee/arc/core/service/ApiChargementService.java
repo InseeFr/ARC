@@ -44,11 +44,10 @@ public class ApiChargementService extends ApiService {
     
     protected String directoryIn;
     private String tableTempA;
-    protected String tableTempAll;
     protected String tableChargementOK;
     private String tableChargementBrutal;
 
-    HashMap<String, Integer> col = new HashMap<>();
+    private HashMap<String, Integer> col = new HashMap<>();
     private ArrayList<String> allCols;
     private HashMap<String, Integer> colData;
     private StringBuilder requeteInsert;
@@ -77,9 +76,6 @@ public class ApiChargementService extends ApiService {
 
         // table B de reception de l'ensemble des fichiers brutalement
         this.setTableChargementBrutal("B");
-
-        // table de reception de l'ensemble des fichiers avec nom de colonnes longs
-        this.tableTempAll = "L";
 
         // récupération des différentes normes dans la base
         this.listeNorme = Norme.getNormesBase(this.connexion, this.tableNorme);

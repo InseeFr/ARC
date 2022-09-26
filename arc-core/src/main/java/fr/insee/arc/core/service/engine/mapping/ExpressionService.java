@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
@@ -13,14 +14,10 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class ExpressionService implements IDbConstant {
 
-
-	public static final String EXPR_NAME = "expr_nom";
-	public static final String EXPR_VALUE = "expr_valeur";
-
 	public Optional<String> loopInExpressionSet(GenericBean expressions){
 		return loopInExpressionSet(
-				expressions.mapContent().get(EXPR_NAME), 
-				expressions.mapContent().get(EXPR_VALUE));
+				expressions.mapContent().get(ColumnEnum.EXPR_NOM.getColumnName()), 
+				expressions.mapContent().get(ColumnEnum.EXPR_VALEUR.getColumnName()));
 	}
 	
 	/** Checks whether the name is a valid expression name.
@@ -139,9 +136,9 @@ public class ExpressionService implements IDbConstant {
 		for (int i = 0; i < expressions.size(); i++) {
 			request.append("\n UPDATE "+ table + " ");
 			request.append("\n set " + field + "=replace(" + field + ", ");
-			request.append(request.quoteText("{@"+expressions.mapContent().get(ExpressionService.EXPR_NAME).get(i)+"@}"));
+			request.append(request.quoteText("{@"+expressions.mapContent().get(ColumnEnum.EXPR_NOM.getColumnName()).get(i)+"@}"));
 			request.append(",");
-			request.append(request.quoteText(expressions.mapContent().get(ExpressionService.EXPR_VALUE).get(i)));
+			request.append(request.quoteText(expressions.mapContent().get(ColumnEnum.EXPR_VALEUR.getColumnName()).get(i)));
 			request.append(") ");
 			request.append("\n WHERE " + field + " like '%{@%@}%' ");
 			request.append("\n AND ");

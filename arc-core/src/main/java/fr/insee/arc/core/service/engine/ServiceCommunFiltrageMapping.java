@@ -18,13 +18,19 @@ import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
 public class ServiceCommunFiltrageMapping {
-    private static final Logger logger = LogManager.getLogger(ServiceCommunFiltrageMapping.class);
-    public static final String debutRequeteResultatUnique = "{:";
-    public static final int longueurDebutRequeteResultatUnique = debutRequeteResultatUnique.length();
-    public static final String finRequeteResultatUnique = "}";
-    public static final int longueurFinRequeteResultatUnique = finRequeteResultatUnique.length();
-    public static final String regexpRequeteResultatUnique = "\\{:.*\\}";
-    public static final String regexpRegleResultatUnique = ".*" + regexpRequeteResultatUnique + ".*";
+	
+	private ServiceCommunFiltrageMapping() {
+		throw new IllegalStateException("Utility class");
+	}
+	
+    private static final Logger LOGGER = LogManager.getLogger(ServiceCommunFiltrageMapping.class);
+    
+    
+    private static final String DEBUT_REQUETE_RESULTAT_UNIQUE = "{:";
+    private static final int LONGUEUR_DEBUT_REQUETE_RESULTAT_UNIQUE = DEBUT_REQUETE_RESULTAT_UNIQUE.length();
+    private static final String FIN_REQUETE_RESULTAT_UNIQUE = "}";
+    private static final int LONGUEUR_FIN_REQUETE_RESULTAT_UNIQUE = FIN_REQUETE_RESULTAT_UNIQUE.length();
+    private static final String REGEXP_REQUETE_RESULTAT_UNIQUE = "\\{:.*\\}";
 
     /**
      * Parcourt l'ensemble des règles à la recherche de règles globales de la forme
@@ -44,9 +50,9 @@ public class ServiceCommunFiltrageMapping {
     public static void parserRegleGlobale(Connection aConnexion, String aEnvExecution,
             HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle, String aNomColonneRegle)
             throws SQLException {
-        if (logger.isInfoEnabled()) {
+        if (LOGGER.isInfoEnabled()) {
             StaticLoggerDispatcher.info(
-                    "Début du parsing des règles portant sur des valeurs globales (count sur une table...)", logger);
+                    "Début du parsing des règles portant sur des valeurs globales (count sur une table...)", LOGGER);
         }
         // Pour chaque règle
         for (int i = 0; i < aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle.getLevel(aNomColonneRegle)
@@ -63,16 +69,16 @@ public class ServiceCommunFiltrageMapping {
                     .setLocalRoot(
                             ServiceCommunFiltrageMapping.traiterRegleGlobale(aConnexion, expressionRegleInterprete,
                                     aEnvExecution));
-            if (logger.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled()) {
                 StaticLoggerDispatcher.debug("Le parsing valorise la règle "
                         + expressionRegleInterprete
                         + " à : "
                         + aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle.getLevel(aNomColonneRegle)
-                                .get(i).getLocalRoot(), logger);
+                                .get(i).getLocalRoot(), LOGGER);
             }
         }
-        if (logger.isInfoEnabled()) {
-            StaticLoggerDispatcher.info("Fin du parsing des règles portant sur des valeurs globales", logger);
+        if (LOGGER.isInfoEnabled()) {
+            StaticLoggerDispatcher.info("Fin du parsing des règles portant sur des valeurs globales", LOGGER);
         }
     }
 
@@ -85,10 +91,10 @@ public class ServiceCommunFiltrageMapping {
      * @return la règle parsée et exécutée partiellement
      * @throws SQLException
      */
-    public static String traiterRegleGlobale(Connection aConnexion, String anExpressionRegle, String aEnvExecution)
+    private static String traiterRegleGlobale(Connection aConnexion, String anExpressionRegle, String aEnvExecution)
             throws SQLException {
         String returned = anExpressionRegle;
-        Pattern pattern = Pattern.compile(regexpRequeteResultatUnique);
+        Pattern pattern = Pattern.compile(REGEXP_REQUETE_RESULTAT_UNIQUE);
         // Matcher pour {:expression}
         Matcher trouverRequeteValeurGlobale = pattern.matcher(returned);
         // Tant que cette expression {:expression} est trouvée
@@ -96,8 +102,8 @@ public class ServiceCommunFiltrageMapping {
             String expressionRequeteValeurGlobaleAvecAccolades = trouverRequeteValeurGlobale.group(0);
             // Intérieur de l'expression
             String expressionRequeteValeurGlobale = expressionRequeteValeurGlobaleAvecAccolades.substring(
-                    longueurDebutRequeteResultatUnique, expressionRequeteValeurGlobaleAvecAccolades.length()
-                            - longueurFinRequeteResultatUnique);
+                    LONGUEUR_DEBUT_REQUETE_RESULTAT_UNIQUE, expressionRequeteValeurGlobaleAvecAccolades.length()
+                            - LONGUEUR_FIN_REQUETE_RESULTAT_UNIQUE);
             // Matcher pour {:nom générique de table}
             Matcher trouverReferenceTableMetier = pattern.matcher(expressionRequeteValeurGlobale);
             String requeteValeurGlobaleAvecVraiNomTableMetier = expressionRequeteValeurGlobale;
@@ -111,8 +117,8 @@ public class ServiceCommunFiltrageMapping {
                         nomGeneriqueTableMetierTrouve,
                         aEnvExecution
                                 + "_"
-                                + nomGeneriqueTableMetierTrouve.substring(longueurDebutRequeteResultatUnique,
-                                        nomGeneriqueTableMetierTrouve.length() - longueurFinRequeteResultatUnique));
+                                + nomGeneriqueTableMetierTrouve.substring(LONGUEUR_DEBUT_REQUETE_RESULTAT_UNIQUE,
+                                        nomGeneriqueTableMetierTrouve.length() - LONGUEUR_FIN_REQUETE_RESULTAT_UNIQUE));
             }
             String valeurRequete = UtilitaireDao.get("arc").getString(aConnexion, new PreparedStatementBuilder(requeteValeurGlobaleAvecVraiNomTableMetier));
             returned = returned.replace(expressionRequeteValeurGlobaleAvecAccolades,

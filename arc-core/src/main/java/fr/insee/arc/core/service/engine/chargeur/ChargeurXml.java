@@ -50,13 +50,13 @@ public class ChargeurXml implements IChargeur{
 
     // temporary table where data will be loaded by the XML SAX engine
     private String tableTempA = "A";
-    private ArrayList<String> tempTableAColumnsLongName=new ArrayList<String>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName(),"id","date_integration","id_norme","periodicite","validite"));
-    private ArrayList<String> tempTableAColumnsShortName=new ArrayList<String>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
-    private ArrayList<String> tempTableAColumnsType=new ArrayList<String>(Arrays.asList("text collate \"C\"","int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
+    private ArrayList<String> tempTableAColumnsLongName=new ArrayList<>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName(),"id","date_integration","id_norme","periodicite","validite"));
+    private ArrayList<String> tempTableAColumnsShortName=new ArrayList<>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
+    private ArrayList<String> tempTableAColumnsType=new ArrayList<>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnType().getTypeCollated(),"int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
 
-    public String rapport = null;
-    public Boolean error = false;
-    public String jointure;
+    private String rapport = null;
+    private Boolean error = false;
+    private String jointure;
     
     public ChargeurXml(ThreadChargementService threadChargementService, String fileName) {
         this.fileName = fileName;
@@ -76,9 +76,9 @@ public class ChargeurXml implements IChargeur{
     
     public ChargeurXml(Connection connexion, String fileName, InputStream f, String tableOut, String norme, String periodicite, String validite) {
     	
-    	this.col = new HashMap<String, Integer>();
-        this.allCols= new ArrayList<String>();
-        this.colData= new HashMap<String, Integer>();
+    	this.col = new HashMap<>();
+        this.allCols= new ArrayList<>();
+        this.colData= new HashMap<>();
         this.requeteInsert=new StringBuilder();
 
         this.fileName = fileName;

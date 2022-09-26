@@ -255,86 +255,15 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
         return returned.toString();
     }
 
-    public String expressionSQL() {
-        StringBuilder returned = new StringBuilder();
-        boolean isFirst = true;
-        for (VariableMapping variable : this.ensembleVariableClef) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                returned.append(", ");
-            }
-            returned.append(variable.expressionSQL());
-        }
-        isFirst = this.ensembleVariableClef.isEmpty();
-        for (VariableMapping variable : this.ensembleVariableNonClef) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                returned.append(", ");
-            }
-            returned.append(variable.expressionSQL());
-        }
-        return returned.toString();
-    }
-
-// Methode sans variable de déparatge
-//    public String expressionSQLPrepUnion(Integer aNumeroGroupe, Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes) {
-//        StringBuilder returned = new StringBuilder();
-//        boolean isFirst = true;
-//
-//		HashSet<String> varUsed=new HashSet<String>();
-//
-//        for (VariableMapping variable : this.ensembleVariableClef) {
-//            if (isFirst) {
-//                isFirst = false;
-//            } else {
-//                returned.append(", ");
-//            }
-//            String nomVariable = variable.getNomVariable() + underscore + aNumeroGroupe;
-//            String expression = reglesIdentifiantes.get(nomVariable);
-//            if (expression != null) {
-//
-//            	if (!varUsed.contains(variable.getNomVariable()))
-//            	{
-//            		expression=variable.getNomVariable()+"::text as "+variable.getNomVariable()+", "+nomVariable + "::text as "+nomVariable;
-//            		varUsed.add(variable.getNomVariable());
-//            	}
-//            	else
-//            	{
-//                	expression = nomVariable + "::text as "+nomVariable;
-//            	}
-//
-//                // expression = reglesIdentifiantes.get(nomsVariablesIdentifiantes.get(nomVariable));
-////                expression = nomVariable + "::text as " + variable.getNomVariable();
-//
-//            } else {
-//                nomVariable = variable.getNomVariable();
-//                expression = reglesIdentifiantes.get(nomVariable);
-//                if (expression != null) {
-//                    // expression = reglesIdentifiantes.get(nomsVariablesIdentifiantes.get(nomVariable));
-//                    expression = nomVariable + "::text as " + nomVariable;
-//                } else {
-//                    expression = "null::text as "+nomVariable;
-//                }
-//            }
-//            returned.append(expression);
-//        }
-//
-//        isFirst = this.ensembleVariableClef.isEmpty();
-//        for (VariableMapping variable : this.ensembleVariableNonClef) {
-//            if (isFirst) {
-//                isFirst = false;
-//            } else {
-//                returned.append(", ");
-//            }
-//            returned.append(variable.expressionSQLtoText(aNumeroGroupe)+" as "+ variable.getNomVariable());
-//        }
-//        return returned.toString();
-//    }
-
-
-    public String expressionSQLPrepUnion(Integer aNumeroGroupe, Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes) {
+    /**
+     * Compute the sql expression for the temporary table needed to prepare the mapping calculation
+     * More exactly it computes all the identifier of the model tables and the link between them
+     * @param aNumeroGroupe
+     * @param nomsVariablesIdentifiantes
+     * @param reglesIdentifiantes
+     * @return
+     */
+    public String expressionSQLPrepUnion(Integer aNumeroGroupe, Map<String, String> reglesIdentifiantes) {
         StringBuilder returned = new StringBuilder();
         boolean isFirst = true;
 
@@ -352,7 +281,6 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
                 nomVariable = variable.getNomVariable();
                 expression = reglesIdentifiantes.get(nomVariable);
                 if (expression != null) {
-                    // expression = reglesIdentifiantes.get(nomsVariablesIdentifiantes.get(nomVariable));
                     expression = nomVariable + "::text as " + nomVariable;
                 } else {
                     expression = "null::text as "+nomVariable;
@@ -375,58 +303,15 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
     }
 
 
-	
-	public String applyModelTableIdentifier (String expression)
+	/**
+	 * 
+	 * @param expression
+	 * @return
+	 */
+	private String applyModelTableIdentifier (String expression)
 	{
 		return expression.replace(ARC_PROCESSING_TABLE, "'"+this.getNomTableCourt()+"'");
 	}
-	
-    
-    public String expressionSQL(Integer aNumeroGroupe) {
-        StringBuilder returned = new StringBuilder();
-        boolean isFirst = true;
-        for (VariableMapping variable : this.ensembleVariableClef) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                returned.append(", ");
-            }
-            returned.append(variable.expressionSQL(aNumeroGroupe));
-        }
-        isFirst = this.ensembleVariableClef.isEmpty();
-        for (VariableMapping variable : this.ensembleVariableNonClef) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                returned.append(", ");
-            }
-            returned.append(variable.expressionSQL(aNumeroGroupe));
-        }
-        return returned.toString();
-    }
-
-    public String expressionSQLAsType(Integer aNumeroGroupe) {
-        StringBuilder returned = new StringBuilder();
-        boolean isFirst = true;
-        for (VariableMapping variable : this.ensembleVariableClef) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                returned.append(", ");
-            }
-            returned.append(variable.expressionSQLAsType(aNumeroGroupe));
-        }
-        isFirst = this.ensembleVariableClef.isEmpty();
-        for (VariableMapping variable : this.ensembleVariableNonClef) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                returned.append(", ");
-            }
-            returned.append(variable.expressionSQLAsType(aNumeroGroupe));
-        }
-        return returned.toString();
-    }
 
     /**
      *
@@ -446,7 +331,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
      * @param returned
      * @return
      */
-    public void sqlListeVariables(StringBuilder returned) {
+    private void sqlListeVariables(StringBuilder returned) {
         boolean isFirst = true;
         for (VariableMapping variable : this.ensembleVariableClef) {
             if (isFirst) {
@@ -773,16 +658,6 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
      */
     public void setGroupe(boolean someIsGroupe) {
         this.isGroupe = this.isGroupe || someIsGroupe;
-    }
-
-    public void attribuerGroupeRecursivement() {
-        this.mapGroupeToEnsembleIdentifiantsRubriques.put(GROUPE_UN, new HashSet<String>());
-        this.mapGroupeToEnsembleNomsRubriques.put(GROUPE_UN, new HashSet<String>());
-        for (VariableMapping variable : this.ensembleVariableMapping) {
-            variable.getEnsembleGroupes().add(GROUPE_UN);
-            this.mapGroupeToEnsembleIdentifiantsRubriques.get(GROUPE_UN).addAll(variable.getEnsembleIdentifiantsRubriques());
-            this.mapGroupeToEnsembleNomsRubriques.get(GROUPE_UN).addAll(variable.getEnsembleNomsRubriques());
-        }
     }
 
 

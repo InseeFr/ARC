@@ -138,7 +138,7 @@ public class BddPatcher {
 	 * @param p
 	 * @throws Exception
 	 */
-	public static void bddScriptGlobalExecutor(Connection connexion, PropertiesHandler p) throws Exception
+	private static void bddScriptGlobalExecutor(Connection connexion, PropertiesHandler p) throws Exception
 	{
 		Integer nbSandboxes = BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes", 8);
 		
@@ -162,7 +162,7 @@ public class BddPatcher {
 	 * @param envExecutions
 	 * @throws Exception
 	 */
-	public static void bddScriptEnvironmentExecutor(Connection connexion, PropertiesHandler p, String[] envExecutions) throws Exception
+	private static void bddScriptEnvironmentExecutor(Connection connexion, PropertiesHandler p, String[] envExecutions) throws Exception
 	{
 		for (String envExecution: envExecutions)
 		{

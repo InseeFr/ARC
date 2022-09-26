@@ -38,7 +38,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
 
     private String environnement;
 
-    protected Set<TableMapping> ensembleTableMapping;
+    private Set<TableMapping> ensembleTableMapping;
 
     public RegleMappingGlobale(Connection aConnexion, String anExpression, String anEnvironnement, Set<TableMapping> someTablesMapping,
             VariableMapping aVariableMapping) {
