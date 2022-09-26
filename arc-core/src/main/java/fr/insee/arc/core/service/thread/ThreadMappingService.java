@@ -27,9 +27,9 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
 
     private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
 
-    int indice;
-    protected String tableTempFiltrageOk;
-    protected String tableMappingPilTemp;
+    private int indice;
+    private String tableTempFiltrageOk;
+    private String tableMappingPilTemp;
 
     public ThreadMappingService(Connection connexion, int currentIndice, ApiMappingService anApi) {
 

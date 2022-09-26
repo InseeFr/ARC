@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.handler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -23,15 +24,14 @@ public class FormatFichierHandler extends DefaultHandler {
     
     
     //L'arbre de la forme, <enfant;parent>
-    public HashMap<String, String> arbre = new HashMap<String, String>();
+    private HashMap<String, String> arbre = new HashMap<>();
     
     //la liste des pères de l'éléments courant
-    public ArrayList<String> listePere = new ArrayList<String>();
-    public String nomNorme;
+    private ArrayList<String> listePere = new ArrayList<>();
 
     @Override
     public void startDocument() throws SAXException {
-
+    	// no handler action at document start
     }
 
 
@@ -70,7 +70,17 @@ public class FormatFichierHandler extends DefaultHandler {
 
     @Override
     public void endDocument() throws SAXException {
-
+    	// no handler action at document end
     }
 
+
+
+	public HashMap<String, String> getArbre() {
+		return arbre;
+	}
+
+	public void setArbre(HashMap<String, String> arbre) {
+		this.arbre = arbre;
+	}
+    
 }

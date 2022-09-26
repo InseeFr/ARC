@@ -34,52 +34,52 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 	public HashMap<String, Integer> col;
 	public HashMap<String, Integer> colData;
-	public HashMap<Integer, Integer> tree = new HashMap<>();
-	public HashMap<Integer, Boolean> treeNode = new HashMap<>();
+	private HashMap<Integer, Integer> tree = new HashMap<>();
+	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
 
-	public HashMap<Integer, Integer> colDist = new HashMap<>();
-	public HashMap<Integer, String> keepLast = new HashMap<>();
+	private HashMap<Integer, Integer> colDist = new HashMap<>();
+	private HashMap<Integer, String> keepLast = new HashMap<>();
 
 	public int start;
-	public int idLigne=0;
+	private int idLigne=0;
 
-	public int distance = 0;
+	private int distance = 0;
 
 	public Connection connexion;
 
 	public String fileName;
 	public String jointure="";
 
-	public String currentTag;
-	public String closedTag;
+	private String currentTag;
+	private String closedTag;
 
-	public String father = "*";
-	public StringBuilder currentData = new StringBuilder();
+	private String father = "*";
+	private StringBuilder currentData = new StringBuilder();
 
 	/*
 	 * pour les rubriques recursives (au cas ou...)
 	 */
-	public boolean leafPossible = false;
-	public boolean leafStatus = false;
+	private boolean leafPossible = false;
+	private boolean leafStatus = false;
 
-	public List<String> treeStack = new ArrayList<String>();
-	public List<String> treeStackFather = new ArrayList<String>();
-	public List<String> treeStackFatherLag = new ArrayList<String>();
+	private List<String> treeStack = new ArrayList<>();
+	private List<String> treeStackFather = new ArrayList<>();
+	private List<String> treeStackFatherLag = new ArrayList<>();
 
 	public List<String> allCols;
-	public List<Integer> lineCols = new ArrayList<Integer>();
-	public List<Integer> lineCols11 = new ArrayList<Integer>();
-	public List<Integer> lineIds = new ArrayList<Integer>();
-	public List<String> lineValues = new ArrayList<String>();
+	private List<Integer> lineCols = new ArrayList<>();
+	private List<Integer> lineCols11 = new ArrayList<>();
+	private List<Integer> lineIds = new ArrayList<>();
+	private List<String> lineValues = new ArrayList<>();
 
 	// parametrage des types de la base de données
-	public String textBdType = "text";
-	public String numBdType = "int";
+	private String textBdType = "text";
+	private String numBdType = "int";
 
 	public StringBuilder requete;
 
 	// indique que la balise courante a des données
-	public boolean hasData=false;
+	private boolean hasData=false;
 	
 	public int sizeLimit;
 
@@ -337,7 +337,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	 * @param lineValues
 	 * @throws SAXParseException 
 	 */
-	public void insertQueryBuilder(StringBuilder aRequete, String tempTableI, String fileName, List<Integer> lineCols, List<Integer> lineIds,
+	private void insertQueryBuilder(StringBuilder aRequete, String tempTableI, String fileName, List<Integer> lineCols, List<Integer> lineIds,
 			List<String> lineValues) throws SAXParseException {
 
 

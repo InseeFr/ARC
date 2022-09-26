@@ -1248,7 +1248,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			try {
 				Statement stmt = connexionWrapper.getConnexion().createStatement();
 				try {
-					ResultSet rs = stmt.executeQuery(requete.toString());
+					ResultSet rs = stmt.executeQuery(requete);
 					while (rs.next()) {
 						returned.add(rs.getString(FIRST_COLUMN_INDEX));
 					}

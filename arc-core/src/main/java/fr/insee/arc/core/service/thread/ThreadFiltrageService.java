@@ -34,14 +34,14 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 public class ThreadFiltrageService extends ApiFiltrageService implements Runnable {
 
 	private static final Logger logger = LogManager.getLogger(ThreadFiltrageService.class);
-	int indice;
+	private int indice;
 
-	protected String tableFiltragePilTemp;
-	protected String tableTempFiltrageOk;
-	protected String tableFiltrageDataTemp;
-	protected String tableTempFiltrageKo;
-	protected String tableFiltrageKo;
-	protected String tableFiltrageOk;
+	private String tableFiltragePilTemp;
+	private String tableTempFiltrageOk;
+	private String tableFiltrageDataTemp;
+	private String tableTempFiltrageKo;
+	private String tableFiltrageKo;
+	private String tableFiltrageOk;
 
 	public ThreadFiltrageService(Connection connexion, int currentIndice, ApiFiltrageService theApi) {
 
@@ -120,7 +120,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 *
 	 * @throws SQLException
 	 */
-	public void initialiserBatchFiltrage() throws SQLException {
+	private void initialiserBatchFiltrage() throws SQLException {
 
 		StringBuilder query = new StringBuilder();
 
@@ -158,7 +158,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 * @return
 	 */
 
-	public static HierarchicalView calculerNormeToPeriodiciteToValiditeInfToValiditeSupToRegle(
+	private static HierarchicalView calculerNormeToPeriodiciteToValiditeInfToValiditeSupToRegle(
 			List<List<String>> aRegleActive) {
 		return HierarchicalView.asRelationalToHierarchical(
 				// Une description sommaire de cette hiérarchie
@@ -181,7 +181,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 *
 	 * @throws SQLException
 	 */
-	public void filtrer() throws SQLException {
+	private void filtrer() throws SQLException {
 		StaticLoggerDispatcher.info("Table des données à filtrer utilisée : " + this.tableFiltrageDataTemp, logger);
 
 		List<List<String>> regleActive = Format
@@ -229,7 +229,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 * @throws Exception
 	 *
 	 */
-	public void insertionFinale() throws Exception {
+	private void insertionFinale() throws Exception {
 		
 		StringBuilder query=new StringBuilder();
 		
@@ -253,7 +253,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		UtilitaireDao.get("arc").executeBlock(connexion, query);
 	}
 
-	public StringBuilder getRequeteFiltrageIntermediaire(String envExecution, String aTableControleOk,
+	private StringBuilder getRequeteFiltrageIntermediaire(String envExecution, String aTableControleOk,
 			String aTableFiltrageOk, String aTableFiltrageKo,
 			HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle, String excludedRate,
 			String aTablePilotage) throws SQLException {
@@ -358,7 +358,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		return requete;
 	}
 
-	public static void parserRegleCorrespondanceFonctionnelle(
+	private static void parserRegleCorrespondanceFonctionnelle(
 			HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle, Set<String> aListeRubrique,
 			String aNiveauRegle) {
 		for (int i = 0; i < aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle.getLevel(aNiveauRegle).size(); i++) {

@@ -42,10 +42,9 @@ public class ArbreFormat {
         SAXParser saxParser = saxParserFactory.newSAXParser();
         FormatFichierHandler formatHandler = new FormatFichierHandler();
 
-        formatHandler.nomNorme = aNorme.getIdNorme();
         saxParser.parse(new InputSource(new StringReader(aNorme.getRegleChargement().getFormat())), formatHandler);
 
-        this.arbreFormat = formatHandler.arbre;
+        this.arbreFormat = formatHandler.getArbre();
         calculerFeuilles();
         
     }

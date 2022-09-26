@@ -39,67 +39,65 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	public HashMap<String, Integer> colData;
 	
 	// @trees
-	public HashMap<Integer, Integer> tree = new HashMap<>();
-	public HashMap<Integer, Boolean> treeNode = new HashMap<>();
+	private HashMap<Integer, Integer> tree = new HashMap<>();
+	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
 
-	public HashMap<Integer, Integer> colDist = new HashMap<>();
-	public HashMap<Integer, String> keepLast = new HashMap<>();
+	private HashMap<Integer, Integer> colDist = new HashMap<>();
+	private HashMap<Integer, String> keepLast = new HashMap<>();
 
 	public int start;
-	public int idLigne=0;
+	private int idLigne=0;
 
-	public int distance = 0;
+	private int distance = 0;
 
 	public Connection connexion;
 
 	public String fileName;
 	public String jointure="";
 
-	public String currentTag;
+	private String currentTag;
 	
-	public String closedTag;
-	public String closedTag1;
-	public String closedTag2;
+	private String closedTag;
+	private String closedTag1;
+	private String closedTag2;
 	
 	// this handler will keep the father reference to handle elements which have the same name but not the same parent
-	public String father_separator="__";
-	public String root_father = "*";
+	private String root_father = "*";
 	
-	public String father_1 = root_father;
-	public String father = root_father;
-	public StringBuilder currentData = new StringBuilder();
+	private String father = root_father;
+	private StringBuilder currentData = new StringBuilder();
 
 	/*
 	 * pour les rubriques recursives (au cas ou...)
 	 */
-	public boolean leafPossible = false;
-	public boolean leafStatus = false;
+	private boolean leafPossible = false;
+	private boolean leafStatus = false;
 
 	/* stacks of ancestors */
 	/* ancestors with raw xml name*/
-	public HashMap<String,Integer> treeStackQName = new HashMap<String,Integer>();
-	public Integer orderTreeStackQName=0;
+	private HashMap<String,Integer> treeStackQName = new HashMap<String,Integer>();
+	private Integer orderTreeStackQName=0;
 	
 	/* ancestors with database name*/
-	public List<String> treeStack = new ArrayList<String>();
-	public List<String> treeStackFather = new ArrayList<String>();
-	public List<String> treeStackFatherLag = new ArrayList<String>();
+	private List<String> treeStack = new ArrayList<String>();
+	private List<String> treeStackFather = new ArrayList<String>();
+	private List<String> treeStackFatherLag = new ArrayList<String>();
 
 	public List<String> allCols;
-	public List<Integer> lineCols = new ArrayList<Integer>();
-	public List<Integer> lineCols11 = new ArrayList<Integer>();
-	public List<Integer> lineIds = new ArrayList<Integer>();
-	public List<String> lineValues = new ArrayList<String>();
+	private List<Integer> lineCols = new ArrayList<Integer>();
+	private List<Integer> lineCols11 = new ArrayList<Integer>();
+	private List<Integer> lineIds = new ArrayList<Integer>();
+	private List<String> lineValues = new ArrayList<String>();
 
 	// parametrage des types de la base de données
-	public String textBdType = "text";
-	public String numBdType = "int";
+	private String textBdType = "text";
+	private String numBdType = "int";
 
 	public StringBuilder requete;
-	public StringBuilder structure=new StringBuilder();
+	private StringBuilder structure=new StringBuilder();
 
 	// indique que la balise courante a des données
-	public boolean hasData=false;
+	private boolean hasData=false;
 	
 	public int sizeLimit;
 
@@ -114,9 +112,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
     // format to rename column with format rules
 	public ArrayList<Pair<String, String>> format;
     
-    public final static String JOINXML_QUERY_BLOCK="\n -- query";
-    public final static String JOINXML_STRUCTURE_BLOCK="\n -- structure\n";
-    public final static String HEADER="$h";
+    public static final String JOINXML_QUERY_BLOCK="\n -- query";
+    public static final String JOINXML_STRUCTURE_BLOCK="\n -- structure\n";
+    private static final String HEADER="$h";
     
     // initialize the integration date with current
 	private final String integrationDate = FormatSQL.toDate(
@@ -458,7 +456,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 		this.treeStackFather.add(this.father);
 		this.treeStack.add(this.currentTag);
-		this.father_1 = father;
 		this.father = this.currentTag;
 
 		this.leafPossible = true;
@@ -486,7 +483,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 * @param lineValues
 	 * @throws SAXParseException 
 	 */
-	public void insertQueryBuilder(StringBuilder aRequete, String tempTableI, String fileName, List<Integer> lineCols, List<Integer> lineIds,
+	private void insertQueryBuilder(StringBuilder aRequete, String tempTableI, String fileName, List<Integer> lineCols, List<Integer> lineIds,
 			List<String> lineValues) throws SAXParseException {
 
 		HashMap<Integer, String> keep = new HashMap<>();

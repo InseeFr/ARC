@@ -1026,7 +1026,7 @@ public class ApiInitialisationService extends ApiService {
             if (!g.mapContent().isEmpty()) {
                 ArrayList<String> envTables = g.mapContent().get("table_name");
                 for (String nomTable : envTables) {
-                    UtilitaireDao.get("arc").executeBlock(connexion, FormatSQL.dropTable(nomTable).toString());
+                    UtilitaireDao.get("arc").executeBlock(connexion, FormatSQL.dropTable(nomTable));
                 }
             }
 

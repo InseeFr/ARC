@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 
 /**
  * Chargement brutalement d'un fichier pour déterminer la norme et la validité associées.
@@ -23,11 +24,10 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 public class ChargementBrutalTable {
 
     
-	// todo : externaliser dans les regles de chargement
 	/** Combien de boucle au maximum */
-	public static final int LIMIT_BOUCLE = 1;
-    /** Combien de ligne on charge à la fois (OPTI) */
-    public static final int LIMIT_CHARGEMENT_BRUTAL = 50;
+	private static final int LIMIT_BOUCLE = 1;
+    /** Combien de ligne on charge pour chacune des boucles */
+    private static final int LIMIT_CHARGEMENT_BRUTAL = 50;
        
     private static final Logger LOGGER = LogManager.getLogger(ChargementBrutalTable.class);
     private Connection connexion;
@@ -36,20 +36,20 @@ public class ChargementBrutalTable {
     /** Retourne une requête (SELECT) contenant l'idsource et des lignes du fichier.
      * @param idSource du fichier chargé
      * @param br reader ouvert sur le fichier
-     * @param nb_boucle étape dans la lecture
+     * @param nbBoucle étape dans la lecture
      * */
-    private String requeteFichierBrutalement(String idSource, BufferedReader br, int nb_boucle) throws Exception {
+    private String requeteFichierBrutalement(String idSource, BufferedReader br, int nbBoucle) throws Exception {
         StaticLoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
 
     	
     	StringBuilder requete=new StringBuilder();
-    	int idLigne = nb_boucle * LIMIT_CHARGEMENT_BRUTAL;
+    	int idLigne = nbBoucle * LIMIT_CHARGEMENT_BRUTAL;
     	String line = br.readLine();
     	if (line == null) {
     		throw new Exception("The file is empty.");
     	}
     	boolean start=true;
-    	while (line != null && idLigne < (nb_boucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
+    	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
           if (start)
           {
     		requete.append("\nSELECT '"+idSource.replace("'", "''")+"'::text as id_source,"+ idLigne +"::int as id_ligne,'"+line.replace("'", "''")+"'::text as ligne");
@@ -61,7 +61,7 @@ public class ChargementBrutalTable {
           }
           
           idLigne++;
-          if (idLigne < (nb_boucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
+          if (idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
               line = br.readLine();
           }
        }
@@ -144,10 +144,10 @@ public class ChargementBrutalTable {
 	    		normsFound.append(resultLine.get(2));
 	    		normsFound.append("}");
         	}
-        	throw new Exception("More than one norm and/or validity match the expression:" + normsFound);
+        	throw new ArcException("More than one norm and/or validity match the expression:" + normsFound);
         } else if (result.isEmpty())
         {
-        	throw new Exception("Zero norm and/or validity match the expression");
+        	throw new ArcException("Zero norm and/or validity match the expression");
         }
 
         normeOk[0]=listeNorme.get(Integer.parseInt(result.get(0).get(0)));

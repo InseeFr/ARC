@@ -30,19 +30,18 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
     private int indice;
 
-    public String tableControleDataTemp;
-    protected String tableControlePilTemp;
-    public String tableTempControleFoo;
-    protected String tableOutOkTemp="tableOutOkTemp";
-    protected String tableOutKoTemp="tableOutKoTemp";
-    String tableOutOk;
-    String tableOutKo;
+    private String tableControleDataTemp;
+    private String tableControlePilTemp;
+    private String tableOutOkTemp="tableOutOkTemp";
+    private String tableOutKoTemp="tableOutKoTemp";
+    private String tableOutOk;
+    private String tableOutKo;
 
-    public ServiceJeuDeRegle sjdr;
+    private ServiceJeuDeRegle sjdr;
 
-    public JeuDeRegle jdr;
+    private JeuDeRegle jdr;
     
-    public String structure;
+    private String structure;
 
     public ThreadControleService(Connection connexion, int currentIndice, ApiControleService theApi) {
 
@@ -85,7 +84,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         // Nom des tables temporaires      
         this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
         this.tableControlePilTemp= FormatSQL.temporaryTableName("controle_pil_temp");
-        this.tableTempControleFoo = FormatSQL.temporaryTableName("controle_foo_temp");
         
         // tables finales
         this.tableOutOk = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK;
@@ -143,7 +141,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la table des règles de controles
      * @throws SQLException
      */
-    public void preparation() throws SQLException {
+    private void preparation() throws SQLException {
         StaticLoggerDispatcher.info("** preparation **", LOGGER);
 
         StringBuilder query = new StringBuilder();
@@ -180,7 +178,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *
      * @throws SQLException
      */
-    public void execute() throws Exception {
+    private void execute() throws Exception {
         StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
 
         this.sjdr.executeJeuDeRegle(this.connexion, jdr, this.tableControleDataTemp, this.structure);
@@ -204,7 +202,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la table des seuils
      * @throws SQLException
      */
-    public StringBuilder calculSeuilControle() throws Exception {
+    private StringBuilder calculSeuilControle() throws Exception {
         StaticLoggerDispatcher.info("finControle", LOGGER);
 
 
@@ -275,7 +273,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      * Marque les résultats des contrôle dans la table de pilotage
      * @return
      */
-    public String marquagePilotage() {
+    private String marquagePilotage() {
         StringBuilder blocFin = new StringBuilder();
         blocFin.append("\n UPDATE "+this.tableControlePilTemp+" ");
         blocFin.append("\n SET etat_traitement= ");
@@ -310,7 +308,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la condition pour filtrer la recopie
      * @return
      */
-    public String ajoutTableControle(String tableIn, String tableOut, String tableControlePilTemp, String condFichier,
+    private String ajoutTableControle(String tableIn, String tableOut, String tableControlePilTemp, String condFichier,
             String condEnregistrement) {
 
         StringBuilder requete = new StringBuilder();

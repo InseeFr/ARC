@@ -42,12 +42,15 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
  */
 public class ThreadChargementService extends ApiChargementService implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
-    int indice;
+    
+    //
+    private int indice;
+
     private String container;
     public String validite;
 
-    public File fileChargement;
-    public String entrepot;
+    private File fileChargement;
+    private String entrepot;
 
     /*
      * / On utiliser plusieur input stream car chacun à une utilité. Et en
@@ -57,7 +60,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
     public Norme normeOk;
 
-    protected String tableChargementPilTemp;
+    private String tableChargementPilTemp;
 
     public ThreadChargementService(Connection connexion, int currentIndice, ApiChargementService aApi) {
 
@@ -152,7 +155,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * Prepare the loading phase
      * @throws SQLException
      */
-    public void preparation() throws SQLException
+    private void preparation() throws SQLException
     {
     	StringBuilder query=new StringBuilder();
     	
@@ -170,7 +173,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * finalisation du chargement
 	 * @throws Exception 
 	 */
-	public void finalisation() throws Exception
+	private void finalisation() throws Exception
 	{
 		
 		StringBuilder query=new StringBuilder();
@@ -193,7 +196,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      *
      * @throws SQLException
      */
-    public String truncateTableIfKO() {
+    private String truncateTableIfKO() {
 	StaticLoggerDispatcher.info("** clean **", LOGGER);
 
 	StringBuilder queryTest=new StringBuilder();
@@ -208,32 +211,13 @@ public class ThreadChargementService extends ApiChargementService implements Run
     }
 
     /**
-     * export des données
-     * 
-     * @param table
-     * @throws Exception
-     */
-    public void export(String table) throws Exception {
-   	String repertoire = properties.getBatchParametersDirectory();
-	String envDir = this.getEnvExecution().replace(".", "_").toUpperCase();
-	String dirOut = repertoire + envDir + File.separator + "EXPORT";
-	File f = new File(dirOut);
-
-	if (!f.exists()) {
-	    f.mkdir();
-	}
-
-	UtilitaireDao.get(poolName).export(this.connexion, table, dirOut, this.getParamBatch());
-    }
-
-    /**
      * Méthode pour charger les fichiers
      * 
      * @param aAllCols
      * @param aColData
      * @throws Exception
      */
-    public void chargementFichiers() throws Exception {
+    private void chargementFichiers() throws Exception {
 
 	ArrayList<String> aAllCols = new ArrayList<String>();
 	HashMap<String, Integer> aColData = new HashMap<>();

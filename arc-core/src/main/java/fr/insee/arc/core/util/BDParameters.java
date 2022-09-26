@@ -15,16 +15,16 @@ public class BDParameters {
     private static final Logger LOGGER = LogManager.getLogger(BDParameters.class);
 
 	
-	private static final String parameterTable="arc.parameter";
-	private static final String getParameterQuery = "SELECT val FROM "+parameterTable+" ";
+	private static final String PARAMETER_TABLE="arc.parameter";
+	private static final String PARAMETER_SQL_QUERY = "SELECT val FROM "+PARAMETER_TABLE+" ";
 
 	private static PreparedStatementBuilder parameterQuery(String key) {
 		PreparedStatementBuilder requete=new PreparedStatementBuilder();
-		requete.append(getParameterQuery+ " WHERE key="+requete.quoteText(key));
+		requete.append(PARAMETER_SQL_QUERY+ " WHERE key="+requete.quoteText(key));
 		return requete;
 	}
 
-	public static String getString(Connection c, String key) {
+	private static String getString(Connection c, String key) {
 		String r = null;
 		try {
 			r = UtilitaireDao.get("arc").getString(c, parameterQuery(key));
@@ -61,7 +61,7 @@ public class BDParameters {
 		return s == null ? defaultValue : s;
 	}
 
-	public static Integer getInt(Connection c, String key) {
+	private static Integer getInt(Connection c, String key) {
 		String val=getString(c, key);
 		return val==null?null:Integer.parseInt(val);
 	}
@@ -75,10 +75,10 @@ public class BDParameters {
 		return s == null ? defaultValue : s;
 	}
 	
-	public static void insertDefaultValue(Connection c,String key, String defaultValue)
+	private static void insertDefaultValue(Connection c,String key, String defaultValue)
 	{
 		try {
-			UtilitaireDao.get("arc").executeImmediate(c,"INSERT INTO "+parameterTable+" values ('"+key+"','"+defaultValue+"');");
+			UtilitaireDao.get("arc").executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
 		} catch (SQLException e) {
 			StaticLoggerDispatcher.error("Error on inserting key in parameter table", LOGGER);
 		}
@@ -98,7 +98,7 @@ public class BDParameters {
 			
 			PreparedStatementBuilder requete=new PreparedStatementBuilder();
 			
-			requete.append("UPDATE  "+parameterTable+" ");
+			requete.append("UPDATE  "+PARAMETER_TABLE+" ");
 			requete.append("SET val="+requete.quoteText(val)+" ");
 			if (!StringUtils.isBlank(description))
 				{
@@ -124,30 +124,6 @@ public class BDParameters {
 	public static void setString(Connection c,String key, String val)
 	{
 		setString (c,key, val, null);
-	}
-	
-	
-	/** Insert or update the value for that key.*/
-	public static void setValue(Connection c, String key, String value) {
-		PreparedStatementBuilder request=new PreparedStatementBuilder();
-
-		request.append("INSERT INTO "+ parameterTable +" (key,val) VALUES (");
-		request.append(request.quoteText(key));
-		request.append(",");
-		request.append(request.quoteText(value));
-		request.append("')");
-		request.append("  ON CONFLICT (key) DO UPDATE SET val =");
-		request.append(request.quoteText(value));
-		request.append("  WHERE EXCLUDED.key=");
-		request.append(request.quoteText(key));
-		request.append(";");
-		
-		try {
-			UtilitaireDao.get("arc").executeRequest(c, request);
-		} catch (SQLException e) {
-			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);
-		}
-
 	}
 	
 }

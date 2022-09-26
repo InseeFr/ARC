@@ -36,18 +36,18 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
 
     private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
 
-    public int indice ;
+    private int indice ;
     
-    protected String tableNormageDataTemp;
-    protected String tableNormagePilTemp;
+    private String tableNormageDataTemp;
+    private String tableNormagePilTemp;
 
-    protected String tableNormageOKTemp;
-    protected String tableNormageKOTemp;
+    private String tableNormageOKTemp;
+    private String tableNormageKOTemp;
     
-    protected String tableNormageOK;
-    protected String tableNormageKO;
+    private String tableNormageOK;
+    private String tableNormageKO;
 
-    protected String structure;
+    private String structure;
 
     public ThreadNormageService(Connection connexion, int currentIndice, ApiNormageService theApi) {
         

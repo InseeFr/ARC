@@ -606,7 +606,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		loggerDispatcher.info("finaliser", LOGGER_APISERVICE);
 
 		try {
-			if (this.todo) {
+			if (Boolean.TRUE.equals(this.todo)) {
 
 				if (!(this.getTablePrevious().contains(TraitementPhase.DUMMY.toString().toLowerCase())
 						|| this.getTablePrevious().contains(TraitementPhase.INITIALISATION.toString().toLowerCase())
@@ -614,7 +614,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 					deleteTodo(this.connexion, this.tablePilTemp, this.getTablePrevious(), this.paramBatch);
 				}
 				StringBuilder requete = new StringBuilder();
-				requete.append(FormatSQL.dropTable(this.tablePilTemp).toString());
+				requete.append(FormatSQL.dropTable(this.tablePilTemp));
 				try {
 					UtilitaireDao.get(poolName).executeBlock(this.connexion, requete);
 				} catch (Exception ex) {
