@@ -101,10 +101,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	// table B de reception de l'ensemble des fichiers brutalement
 	this.setTableChargementBrutal("B");
 
-	// table de reception de l'ensemble des fichiers avec nom de colonnes
-	// longs
-	this.tableTempAll = "L";
-
 	// table de sortie des données dans l'application (hors du module)
 	this.tableChargementOK = ApiService.globalTableName(envExecution, this.currentPhase,
 		TraitementEtat.OK.toString());
