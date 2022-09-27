@@ -1,7 +1,5 @@
 package fr.insee.arc.core.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,19 +43,6 @@ public class RegleMappingEntity extends AbstractEntity {
 
     public RegleMappingEntity(List<String> someNames, List<String> someValues) {
         super(someNames, someValues);
-    }
-
-    public RegleMappingEntity(HashMap<String, ArrayList<String>> mapInputFields) {
-        super(mapInputFields);
-        this.setIdRegle(mapInputFields.get(colIdRegle).get(0));
-        this.setIdNorme(mapInputFields.get(colIdNorme).get(0));
-        this.setValiditeInf(mapInputFields.get(colValiditeInf).get(0));
-        this.setValiditeSup(mapInputFields.get(colValiditeSup).get(0));
-        this.setVersion(mapInputFields.get(colVersion).get(0));
-        this.setPeriodicite(mapInputFields.get(colPeriodicite).get(0));
-        this.setVariableSortie(mapInputFields.get(colVariableSortie).get(0));
-        this.setExprRegleCol(mapInputFields.get(colExprRegleCol).get(0));
-        this.setCommentaire(mapInputFields.get(colCommentaire).get(0));
     }
 
     public String getIdRegle() {

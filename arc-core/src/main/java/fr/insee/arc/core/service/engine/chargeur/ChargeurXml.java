@@ -58,6 +58,11 @@ public class ChargeurXml implements IChargeur{
     private Boolean error = false;
     private String jointure;
     
+    /**
+     * constructor with thread object 
+     * @param threadChargementService
+     * @param fileName
+     */
     public ChargeurXml(ThreadChargementService threadChargementService, String fileName) {
         this.fileName = fileName;
         this.col = threadChargementService.getCol();
@@ -73,7 +78,16 @@ public class ChargeurXml implements IChargeur{
         this.validite = threadChargementService.validite;
     }
 
-    
+    /**
+     * constructor with parameter
+     * @param connexion
+     * @param fileName
+     * @param f
+     * @param tableOut
+     * @param norme
+     * @param periodicite
+     * @param validite
+     */
     public ChargeurXml(Connection connexion, String fileName, InputStream f, String tableOut, String norme, String periodicite, String validite) {
     	
     	this.col = new HashMap<>();

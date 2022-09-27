@@ -134,10 +134,6 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
         }
     }
 
-    public boolean contains(VariableMapping variable) {
-        return this.ensembleVariableMapping.contains(variable);
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -211,19 +207,6 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
      */
     public Set<String> getEnsembleNomsRubriques() {
         return this.ensembleNomsRubriques;
-    }
-
-    /**
-     *
-     * @param aNumeroGroupe
-     * @return l'ensemble des noms de rubriques pour le groupe {@code aNumeroGroupe} et pour cette table.
-     */
-    public Set<String> getEnsembleNomsRubriques(Integer aNumeroGroupe) {
-        Set<String> returned = new HashSet<>();
-        for (VariableMapping variable : this.ensembleVariableMapping) {
-            returned.addAll(variable.getEnsembleNomsRubriques(aNumeroGroupe));
-        }
-        return returned;
     }
 
     /**

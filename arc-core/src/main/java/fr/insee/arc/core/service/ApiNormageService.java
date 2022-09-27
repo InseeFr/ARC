@@ -37,8 +37,6 @@ public class ApiNormageService extends ApiService {
         super();
     }
     
-    protected String separator = ",";
-
     public ApiNormageService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);

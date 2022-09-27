@@ -433,21 +433,6 @@ public class ChargeurCSV implements IChargeur {
 		UtilitaireDao.get("arc").executeImmediate(connexion, req);
 	}
 
-	/**
-	 * @param inputStreaReader
-	 * @return
-	 * @throws IOException
-	 */
-	public String getQuote(InputStreamReader inputStreaReader) throws IOException {
-		String quote;
-		if (inputStreaReader.read() == '"') {
-			quote = "\"";
-
-		} else {
-			quote = null;
-		}
-		return quote;
-	}
 
 	/**
 	 * @param bufferedReader
@@ -458,29 +443,6 @@ public class ChargeurCSV implements IChargeur {
 	private String[] getHeader(CSVReader readerCSV) throws IOException {
 
 		return readerCSV.readNext();
-	}
-
-	/**
-	 * Contrôle pour vérifier que les feuilles du format = les colonnes du csv
-	 * 
-	 * @param aFormat
-	 * @return
-	 */
-	public List<String> controleFormat(ArbreFormat aFormat) {
-
-		StaticLoggerDispatcher.info("** ControleFormat **", LOGGER);
-
-		ArrayList<String> colonneErreur = new ArrayList<String>();
-		int i = 0;
-
-		while (i < headers.length) {
-			if (!aFormat.getArbreFormat().keySet().contains(headers[i])) {
-				colonneErreur.add(headers[i]);
-			}
-			i++;
-		}
-
-		return colonneErreur;
 	}
 
 	/**

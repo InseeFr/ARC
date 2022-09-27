@@ -105,23 +105,5 @@ public class ApiControleService extends ApiService {
 
 
     }
-
-    /**
-     * Méthode pour controler une table
-     *
-     * @param connexion
-     *
-     * @param tableControle
-     *            la table à controler
-     *
-     * @throws SQLException
-     */
-    public static void executeABlanc(Connection connexion, String env, String phase, String tableControle, ServiceJeuDeRegle sjdrA, ArrayList<JeuDeRegle> listJdrA) throws Exception {
-        StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + tableControle + " **", logger);
-        for (JeuDeRegle jdr : listJdrA) {
-            sjdrA.executeJeuDeRegle(connexion, jdr, tableControle, null);
-        }
-
-    }
     
 }

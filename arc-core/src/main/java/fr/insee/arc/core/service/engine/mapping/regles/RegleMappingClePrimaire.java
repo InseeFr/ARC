@@ -17,8 +17,6 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  */
 public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
 
-    protected static final String TOKEN_ORDER_BY_WHAT = "{:tokenOrderByWhat}";
-
     private TableMapping tableMappingIdentifiee;
 
     private String idFamille;

@@ -46,7 +46,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ApiService.class);
 
-	public static final String SUFFIXE_TEMP_FILE_ORIADE = "_W";
 	public static final String FICHIER_MISE_EN_PRODUCTION = "production.dummy";
 
 	protected int maxParallelWorkers;
@@ -249,7 +248,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	/**
 	 * Compteur simple pour tester la boucle d'execution
 	 */
-	protected Integer cptBoucle = 0;
 	private String tableOutKo;
 
 	/**
@@ -754,9 +752,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName;
 	}
 
-	public static String globalTableName(String aEnvExecution, String tableName) {
-		return dbEnv(aEnvExecution) + tableName;
-	}
 
 	/**
 	 * liste les id_source pour une phase et un etat donnée dans une table de
@@ -925,29 +920,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		}
 		requete.append("; ");
 		return requete.toString();
-	}
-
-	/**
-	 * Permet de déclencher l'intialisation en production à une certaine heure
-	 */
-	public static void declencherInitialisationEnProduction() {
-
-		int HEURE_INITIALISATION_PRODUCTION = BDParameters.getInt(null, "ApiService.HEURE_INITIALISATION_PRODUCTION",
-				22);
-
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
-		Date dNow = DateUtils.setHours(new Date(), HEURE_INITIALISATION_PRODUCTION);
-
-		System.out.println("declencherInitialisationEnProduction : " + dateFormat.format(dNow));
-
-		try {
-			UtilitaireDao.get("arc").executeRequest(null,
-					new PreparedStatementBuilder("update arc.pilotage_batch set last_init='" + dateFormat.format(dNow)
-							+ "', operation=case when operation='R' then 'O' else operation end;"));
-
-		} catch (SQLException e) {
-			LoggerHelper.error(LOGGER_APISERVICE, e);
-		}
 	}
 
 	/**

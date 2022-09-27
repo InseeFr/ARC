@@ -113,10 +113,6 @@ public class VariableMapping implements Comparable<VariableMapping> {
         return true;
     }
 
-    public boolean belongsTo(TableMapping table) {
-        return this.ensembleTableMapping.contains(table);
-    }
-
     /**
      * @param expressionRegle
      *            the expressionRegle to set
@@ -176,11 +172,6 @@ public class VariableMapping implements Comparable<VariableMapping> {
                 .toString();
     }
 
-    public String expressionSQLAsType() {
-        return new StringBuilder("(" + this.getExpressionRegle().getExpressionSQL() + ")::" + this.getType())//
-                .append(" AS " + this.getNomVariable()).toString();
-    }
-
     public String expressionSQL(Integer aNumeroGroupe) {
         return new StringBuilder("(" + this.getExpressionRegle().getExpressionSQL(aNumeroGroupe) + ")::" + this.getType())//
                 .toString();
@@ -198,10 +189,6 @@ public class VariableMapping implements Comparable<VariableMapping> {
 
     public String toString() {
         return this.nomVariable;
-    }
-
-    public String minOverPartitionByIdTable() {
-        return "min(" + this.nomVariable + ") OVER (PARTITION BY id_table ORDER BY ordre_intra) AS " + this.nomVariable + ", ";
     }
 
     public boolean isGroupe() {

@@ -46,26 +46,7 @@ public class ApiMappingService extends ApiService {
     
     private static final String PREFIX_IDENTIFIANT_RUBRIQUE = "i_";
 
-    protected JeuDeRegleDao jdrDAO;
     protected RegleMappingFactory regleMappingFactory;
-    
-    /**
-     * Liste des colonnes jamais null par construction dans ARC.<br/>
-     * Permet un pseudo test fonctionnel des règles de mapping sur le critère "ma règle renvoie pas null".
-     */
-    public static final Set<String> colNeverNull = new HashSet<String>() {
-
-        /**
-         *
-         */
-        private static final long serialVersionUID = 6959692110781102988L;
-
-        {
-            add("id");
-            add("id_source");
-        }
-
-    };
 
     /**
      * @param anParametersEnvironment
@@ -79,7 +60,6 @@ public class ApiMappingService extends ApiService {
     public ApiMappingService(String aCurrentPhase, String anParametersEnvironment, String anEnvironnementExecution, String aDirectoryRoot,
             Integer aNbEnr, String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, anEnvironnementExecution, null, aNbEnr, paramBatch);
-        this.jdrDAO = new JeuDeRegleDao();
     }
 
     /**

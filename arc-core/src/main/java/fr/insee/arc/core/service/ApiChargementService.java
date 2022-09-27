@@ -52,10 +52,6 @@ public class ApiChargementService extends ApiService {
     private HashMap<String, Integer> colData;
     private StringBuilder requeteInsert;
     protected StringBuilder requeteBilan;
-    protected int nbFileLoaded = 0;
-    public int start = 0;
-
-    protected String fileName;
 
     protected List<Norme> listeNorme;
 

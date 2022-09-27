@@ -143,14 +143,6 @@ public class JeuDeRegle {
         return requete;
     }
 
-    public String getSqlEquals(String alias) {
-        return new StringBuilder(alias + ".id_norme = '" + this.idNorme + "'")//
-                .append("\n  AND " + alias + ".validite_inf = '" + this.getValiditeInfString() + "'")//
-                .append("\n  AND " + alias + ".validite_sup = '" + this.getValiditeSupString() + "'")//
-                .append("\n  AND " + alias + ".periodicite = '" + this.getPeriodicite() + "'")//
-                .append("\n  AND " + alias + ".version = '" + this.getVersion() + "'")//
-                .toString();
-    }
 
     @Override
     public int hashCode() {

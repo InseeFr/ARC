@@ -9,6 +9,13 @@ import java.math.BigInteger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+
+/**
+ * Class used to compress and uncompress String
+ * @author FY2QEQ
+ *
+ */
+
 public class StringCompress {
 	public static String compress(String str) throws IOException{
 	    try(

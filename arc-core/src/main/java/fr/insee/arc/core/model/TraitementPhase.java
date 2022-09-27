@@ -80,19 +80,6 @@ public enum TraitementPhase {
         return phase;
     }
     
-    /**
-     * Renvoie la phase précédente ou null
-     * 
-     * @return
-     */
-    public TraitementPhase nextPhase() {
-        TraitementPhase phase = null;
-        int i = this.getOrdre();
-        phase = getPhase(i + 1);
-        return phase;
-    }
-
-    
 	public static List<TraitementPhase> listPhasesAfterPhase(TraitementPhase phase) {
 		List<TraitementPhase> listePhaseC = new ArrayList<>();
 		for (TraitementPhase t : values()) {
@@ -106,36 +93,5 @@ public enum TraitementPhase {
 	public static List<TraitementPhase> getListPhaseC() {
 		return listPhasesAfterPhase(TraitementPhase.INITIALISATION);
 	}
-	
-	/**
-	 * Return sql syntax to translate the phase referenced by its name to its index number
-	 * @return
-	 */
-	public static StringBuilder phaseToIndexSQL(String columnToTranslate)
-	{
-		StringBuilder query = new StringBuilder();
-		query.append("(CASE");
-		for (TraitementPhase phase : TraitementPhase.values()) { 
-		    query.append(" WHEN "+columnToTranslate+"='"+phase+"' THEN "+phase.getOrdre());
-		}
-		query.append(" END)");
-		return query;
-	}
-
-	/**
-	 * Return sql syntax to translate the phase referenced by its index number to its name
-	 * @return
-	 */
-	public static StringBuilder indexToPhaseSQL(String columnToTranslate)
-	{
-		StringBuilder query = new StringBuilder();
-		query.append("(CASE");
-		for (TraitementPhase phase : TraitementPhase.values()) { 
-		    query.append(" WHEN "+columnToTranslate+"="+phase.getOrdre()+" THEN '"+phase+"'");
-		}
-		query.append(" END)");
-		return query;
-	}
-
 	
 }
