@@ -5,10 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Services;
-import fr.insee.arc.ws.dao.DAOException;
 import fr.insee.arc.ws.services.importServlet.GetQueryResultService;
 import fr.insee.arc.ws.services.importServlet.ImportStep1InitializeClientTablesService;
 import fr.insee.arc.ws.services.importServlet.ImportStep2GetTableNameService;
@@ -51,9 +51,9 @@ public class InitiateRequest implements IDbConstant {
 	 * Initie le requêtage en faisant appel au DAO.
 	 *
 	 * @param resp Le flux dans lequel on écrit la réponse.
-	 * @throws DAOException 
+	 * @throws ArcException 
 	 */
-	public void doRequest(SendResponse resp) throws DAOException {
+	public void doRequest(SendResponse resp) throws ArcException {
 		LoggerHelper.debugDebutMethodeAsComment(getClass(), "doRequest()", LOGGER);
 
 		if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.QUERY.getService())) {
@@ -68,7 +68,7 @@ public class InitiateRequest implements IDbConstant {
 		else {
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"Le service n'est pas reconnu.\"}");
 			resp.endSending();
-			throw new DAOException("Le JSON n'est pas conforme");
+			throw new ArcException("Le JSON n'est pas conforme");
 		}
 	}
 }

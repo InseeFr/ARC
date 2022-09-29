@@ -168,22 +168,22 @@ public class VariableMapping implements Comparable<VariableMapping> {
         return this.type;
     }
 
-    public String expressionSQL() {
+    public String expressionSQL() throws ArcException {
         return new StringBuilder("(" + this.getExpressionRegle().getExpressionSQL() + ")::" + this.getType())//
                 .toString();
     }
 
-    public String expressionSQL(Integer aNumeroGroupe) {
+    public String expressionSQL(Integer aNumeroGroupe) throws ArcException {
         return new StringBuilder("(" + this.getExpressionRegle().getExpressionSQL(aNumeroGroupe) + ")::" + this.getType())//
                 .toString();
     }
 
-    public String expressionSQLtoText(Integer aNumeroGroupe) {
+    public String expressionSQLtoText(Integer aNumeroGroupe) throws ArcException {
         return new StringBuilder("(" + this.getExpressionRegle().getExpressionSQL(aNumeroGroupe) + ")::text")//
                 .toString();
     }
     
-    public String expressionSQLAsType(Integer aNumeroGroupe) {
+    public String expressionSQLAsType(Integer aNumeroGroupe) throws ArcException {
         return new StringBuilder("(" + this.getExpressionRegle().getExpressionSQL(aNumeroGroupe) + ")::" + this.getType())//
                 .append(" AS " + this.getNomVariable()).toString();
     }

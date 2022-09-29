@@ -1,20 +1,19 @@
 package fr.insee.arc.core.service;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.dao.JeuDeRegleDao;
 import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 
 
 /**
@@ -66,7 +65,7 @@ public class ApiMappingService extends ApiService {
      * Un jeu de règles = un lot de traitement
      */
     @Override
-    public void executer() throws Exception {
+    public void executer() throws ArcException {
     	
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "MappingService.MAX_PARALLEL_WORKERS",4);
         
@@ -103,7 +102,11 @@ public class ApiMappingService extends ApiService {
         
         StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
         for (Connection connection : connexionList) {
-            connection.close();
+            try {
+				connection.close();
+			} catch (SQLException e) {
+				throw new ArcException("Error in closing thread connections",e);
+			}
         }
     }
 

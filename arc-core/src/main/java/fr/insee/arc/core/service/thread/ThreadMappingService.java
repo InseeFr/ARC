@@ -76,7 +76,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
             
             executionMapping();
 
-        } catch (Exception e) {
+        } catch (ArcException e) {
             StaticLoggerDispatcher.error(e, LOGGER);
 
 	    try {
@@ -115,7 +115,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
     }
 
     
-    private void executionMapping() throws Exception
+    private void executionMapping() throws ArcException
     {
         /*
          * Construire l'ensemble des jeux de règles

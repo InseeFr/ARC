@@ -1639,10 +1639,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param csv
 	 * @param header
 	 * @param aDelim
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	public void importing(Connection connexion, String table, Reader aReader, boolean csv, boolean header,
-			String... aDelim) throws Exception {
+			String... aDelim) throws ArcException {
 		ConnectionWrapper conn = initConnection(connexion);
 		try {
 			conn.getConnexion().setAutoCommit(false);
@@ -1666,9 +1666,18 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", aReader);
 			}
 			conn.getConnexion().commit();
-		} catch (Exception e) {
-			conn.getConnexion().rollback();
+		} catch (SQLException | IOException e) {
+
 			LoggerHelper.error(LOGGER, e);
+
+			try {
+				conn.getConnexion().rollback();
+			} catch (SQLException e1) {
+				throw new ArcException("Error in connection rollback",e1);
+			}
+			
+			throw new ArcException(e);
+
 		} finally {
 			conn.close();
 		}
@@ -1685,7 +1694,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param header
 	 * @param aDelim
 	 * @param aQuote
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
 			boolean header, String aDelim, String aQuote) throws ArcException {
@@ -1710,7 +1719,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *                    des colonnes ?
 	 * @param aDelim      le délimiter (exemple le point virgule)
 	 * @param aQuote
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
 			boolean header, String aDelim, String aQuote) throws ArcException {
@@ -1731,7 +1740,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param aQuote
 	 * @param encoding    : default = UTF8
 	 * @throws ArcException 
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
 			boolean header, String aDelim, String aQuote, String encoding) throws ArcException {

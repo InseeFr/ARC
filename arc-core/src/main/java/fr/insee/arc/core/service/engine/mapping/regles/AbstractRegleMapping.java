@@ -98,14 +98,14 @@ public abstract class AbstractRegleMapping implements IDbConstant, IConstanteCar
     /**
      * @return the expressionSQL
      */
-    public abstract String getExpressionSQL();
+    public abstract String getExpressionSQL() throws ArcException;
 
     /**
      *
      * @param aNumeroGroupe
      * @return the expressionSQL
      */
-    public abstract String getExpressionSQL(Integer aNumeroGroupe);
+    public abstract String getExpressionSQL(Integer aNumeroGroupe) throws ArcException;
 
     /**
      * @return the variableMapping

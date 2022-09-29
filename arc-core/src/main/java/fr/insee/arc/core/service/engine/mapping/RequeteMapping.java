@@ -208,7 +208,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
      * 3. Second passage dans TableMapping#construireEnsembleRubrique() : traitement de tous les ensembles rubriques liés aux clefs
      * étrangères.<br/>
      *
-     * @throws Exception
+     * @throws ArcException
      */
     private void deriver() throws ArcException {
         /*
@@ -331,8 +331,9 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 *
 	 * @param aNomFichier
 	 * @return la requête de mapping pour le fichier {@code aNomFichier}
+	 * @throws ArcException 
 	 */
-	public String getRequete(String aNomFichier) {
+	public String getRequete(String aNomFichier) throws ArcException {
 
 		if (!this.isRequeteCalculee) {
 			StringBuilder requeteGlobale = new StringBuilder("");
@@ -378,8 +379,9 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @param nomsVariablesIdentifiantes
 	 * @param reglesIdentifiantes
 	 * @return La requête {@code returned}, augmentée de la requête d'insertion dans la table {@code prep_union}.
+	 * @throws ArcException 
 	 */
-	private StringBuilder insererTablePrepUnion(StringBuilder returned, TableMapping table, Map<String, String> reglesIdentifiantes) {
+	private StringBuilder insererTablePrepUnion(StringBuilder returned, TableMapping table, Map<String, String> reglesIdentifiantes) throws ArcException {
 
 		String requete="";
 		String requeteSav="";
@@ -567,9 +569,10 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @return la requête passée en paramètre, augmentée de la requête d'insertion dans la table {@code prep_union}
 	 *
 	 * @param modeIdentifiantGroupe : true : identifiant group, false : identifiant non groupe
+	 * @throws ArcException 
 	 */
 	private StringBuilder insererTablePrepUnionAvecGroupe(StringBuilder returned, TableMapping table, Integer groupe,
-	        Map<String, String> reglesIdentifiantes, boolean modeIdentifiantGroupe) {
+	        Map<String, String> reglesIdentifiantes, boolean modeIdentifiantGroupe) throws ArcException {
 
 		// i_g
 		Set<String> ensembleIdentifiantsGroupesRetenus = new HashSet<>(table.getEnsembleIdentifiantsRubriques(groupe));

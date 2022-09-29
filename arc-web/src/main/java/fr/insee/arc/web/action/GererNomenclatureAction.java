@@ -249,7 +249,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         return basicAction(model, RESULT_SUCCESS);
     }
 
-    private void importNomenclatureDansBase(MultipartFile fileUpload) throws Exception {
+    private void importNomenclatureDansBase(MultipartFile fileUpload) throws ArcException {
 		if (viewListNomenclatures.mapContentSelected().isEmpty()) {
             this.viewListNomenclatures.setMessage("Vous devez selectionner une nomenclature pour l'importation.");
             return;
@@ -303,7 +303,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         UtilitaireDao.get(poolName).executeBlock(null, creationTableDef);
     }
 
-    private void remplissageTableTemporaire(BufferedReader rd) throws Exception {
+    private void remplissageTableTemporaire(BufferedReader rd) throws ArcException {
 		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
     	UtilitaireDao.get(poolName).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
     }
@@ -326,9 +326,9 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
     /**
      * @param colonnesFichier
-     * @throws Exception
+     * @throws ArcException
      */
-    private void verificationColonnes(String[] colonnesFichier, String[] typesFichier) throws Exception {
+    private void verificationColonnes(String[] colonnesFichier, String[] typesFichier) throws ArcException {
 		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         String typeNomenclature = typeNomenclature(newNomenclatureName);
 
@@ -357,7 +357,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         return list;
     }
 
-    private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl, String elementDescription) {
+    private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl, String elementDescription) throws ArcException {
         for (String e : listeFichier) {
             if (!listIhmSchemaNmcl.contains(e)) {
                 String message = "externalFilesManagement.import.error.extraImport";

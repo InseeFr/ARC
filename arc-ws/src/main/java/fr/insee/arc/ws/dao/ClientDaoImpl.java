@@ -1,7 +1,8 @@
 package fr.insee.arc.ws.dao;
 
+import java.io.IOException;
 import java.sql.Connection;
-
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -36,7 +38,7 @@ public class ClientDaoImpl implements ClientDao {
      * @see fr.insee.arc.ws.dao.ClientDao#verificationClientFamille(long, java.lang.String, java.lang.String)
      */
     @Override
-    public void verificationClientFamille(long timestamp, String client, String idFamille, String environnement) throws DAOException {
+    public void verificationClientFamille(long timestamp, String client, String idFamille, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#verificationClientFamille()");
         Connection connection = null;
 
@@ -58,10 +60,8 @@ public class ClientDaoImpl implements ClientDao {
             LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.verificationClientFamille() : ExecuteQuery Done -", time2, "ms");
 
             if (!bool.equals("t")) {
-                throw new DAOException("Vous ne pouvez pas accéder à cette famille de norme.");
+                throw new ArcException("Vous ne pouvez pas accéder à cette famille de norme.");
             }
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -76,7 +76,7 @@ public class ClientDaoImpl implements ClientDao {
     @Override
     @SQLExecutor
     public ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, String client, boolean reprise, String environnement, String idFamille,
-            String validiteInf, String validiteSup, String periodicite) {
+            String validiteInf, String validiteSup, String periodicite) throws ArcException {
         //
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#getIdSrcTableMetier()");
         Connection connection = null;
@@ -119,8 +119,6 @@ public class ClientDaoImpl implements ClientDao {
                     new PreparedStatementBuilder("SELECT nom_table_metier FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;"));
             UtilitaireDao.get("arc").executeImmediate(connection,
                     "DROP TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;");
-        } catch (Exception ex) {
-            throw new DAOException(ex);
         } finally {
             close(connection);
         }
@@ -129,7 +127,7 @@ public class ClientDaoImpl implements ClientDao {
 
     @Override
     @SQLExecutor
-    public ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) {
+    public ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) throws ArcException {
 
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#getIdSrcTableMetier()");
 
@@ -238,8 +236,6 @@ public class ClientDaoImpl implements ClientDao {
             tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
             		 new PreparedStatementBuilder("SELECT nom_table_metier FROM " + env + client + "_" + timestamp + "_mod_table_metier;"));
             UtilitaireDao.get("arc").executeImmediate(connection, "DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_mod_table_metier;");
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -253,7 +249,7 @@ public class ClientDaoImpl implements ClientDao {
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcmage(long, java.lang.String, java.lang.String, java.util.ArrayList)
      */
     @Override
-    public ArrayList<String> createImages(long timestamp, String client, String environnement, ArrayList<ArrayList<String>> tablesMetierNames) {
+    public ArrayList<String> createImages(long timestamp, String client, String environnement, ArrayList<ArrayList<String>> tablesMetierNames) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl.createImage()");
 
         ArrayList<String> mesTablesImagesCrees = new ArrayList<String>();
@@ -268,7 +264,7 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     @Override
-    public void addImage(long timestamp, String client, String environnement, ArrayList<String> tableMetier, ArrayList<String> mesTablesImagesCrees) {
+    public void addImage(long timestamp, String client, String environnement, ArrayList<String> tableMetier, ArrayList<String> mesTablesImagesCrees) throws ArcException {
         Connection connection = null;
         StringBuilder request = new StringBuilder();
         String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
@@ -291,8 +287,6 @@ public class ClientDaoImpl implements ClientDao {
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             UtilitaireDao.get("arc").executeBlock(connection, request);
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -306,7 +300,7 @@ public class ClientDaoImpl implements ClientDao {
      */
     @Override
     @SQLExecutor
-    public void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp) {
+    public void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.getResponse()");
         Connection connection = null;
         ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
@@ -333,12 +327,6 @@ public class ClientDaoImpl implements ClientDao {
                 mapJsonResponse(result, resp);
                 resp.send("}");
             }
-
-            // UtilitaireDao.get("arc").executeRequest(connection,
-            // "DROP TABLE " + environnement + "_" + client + "_" + timestamp + "_" + tableMetierName + ";");
-
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -347,9 +335,8 @@ public class ClientDaoImpl implements ClientDao {
     /*
      * (non-Javadoc)
      *
-     * @see fr.insee.arc_essnet.ws.dao.ClientDarcilotage(long, java.lang.String, java.lang.String)
      */
-    public void updatePilotage(long timestamp, String environnement, String tableSource) {
+    public void updatePilotage(long timestamp, String environnement, String tableSource) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.updatePilotage()");
         Connection connection = null;
         
@@ -360,16 +347,12 @@ public class ClientDaoImpl implements ClientDao {
         columnClient.append("SET client = array_append(client, '" + client + "') ");
         columnClient.append(", date_client = array_append( date_client, localtimestamp ) ");
         columnClient.append("WHERE true ");
-        // columnClient.append("AND T1.id_source IN (SELECT id_source FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp+
-        // "_id_source) ");
         columnClient.append("AND EXISTS (SELECT 1 FROM " + tableSource + " T2 where T1.id_source=T2.id_source) ");
         columnClient.append("AND T1.phase_traitement='" + TraitementPhase.MAPPING + "';");
 
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             UtilitaireDao.get("arc").executeBlock(connection, columnClient.toString());
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -381,7 +364,7 @@ public class ClientDaoImpl implements ClientDao {
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcl(fr.insee.arc_essnet.ws.actions.Senarc
      */
     @SQLExecutor
-    public void createNmcl(long timestamp, String client, String environnement) {
+    public void createNmcl(long timestamp, String client, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createNmcl()");
         Connection connection = null;
         ArrayList<ArrayList<String>> nmclNames = new ArrayList<>();
@@ -407,8 +390,6 @@ public class ClientDaoImpl implements ClientDao {
                 UtilitaireDao.get("arc").executeImmediate(connection,
                         "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM " + schema + "." + nmcl.get(0) + ";");
             }
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -419,7 +400,7 @@ public class ClientDaoImpl implements ClientDao {
      *
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcMetier(java.lang.String, fr.insee.arc_essnet.ws.actions.Senarc
      */
-    public void createVarMetier(long timestamp, String client, String idFamille, String environnement) {
+    public void createVarMetier(long timestamp, String client, String idFamille, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createVarMetier()");
         Connection connection = null;
         try {
@@ -435,8 +416,6 @@ public class ClientDaoImpl implements ClientDao {
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
             UtilitaireDao.get("arc").executeRequest(connection,requete);
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -449,7 +428,7 @@ public class ClientDaoImpl implements ClientDao {
      */
     @Override
     @SQLExecutor
-    public void createTableFamille(long timestamp, String client, String environnement) {
+    public void createTableFamille(long timestamp, String client, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTableFamille()");
         Connection connection = null;
         try {
@@ -464,8 +443,6 @@ public class ClientDaoImpl implements ClientDao {
                     + "arc.ihm_client c ON f.id_famille = c.id_famille WHERE lower(c.id_application) = lower(" + requete.quoteText(client) + ");"
                     );
             UtilitaireDao.get("arc").executeRequest(connection,requete);
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -478,7 +455,7 @@ public class ClientDaoImpl implements ClientDao {
      */
     @Override
     @SQLExecutor
-    public void createTablePeriodicite(long timestamp, String client, String environnement) {
+    public void createTablePeriodicite(long timestamp, String client, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTablePeriodicite()");
         Connection connection = null;
         try {
@@ -488,8 +465,6 @@ public class ClientDaoImpl implements ClientDao {
             String nomTableImage = prefixeNomTableImage + "ext_mod_periodicite";
             UtilitaireDao.get("arc").executeImmediate(connection,
                     "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS SELECT DISTINCT id, val FROM " + "arc.ext_mod_periodicite;");
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -500,7 +475,7 @@ public class ClientDaoImpl implements ClientDao {
      *
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcleMetier(java.lang.String, fr.insee.arc_essnet.ws.actions.Senarc
      */
-    public void createTableMetier(long timestamp, String client, String idFamille, String environnement) {
+    public void createTableMetier(long timestamp, String client, String idFamille, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.sendTableMetier()");
         Connection connection = null;
         try {
@@ -515,8 +490,6 @@ public class ClientDaoImpl implements ClientDao {
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
             UtilitaireDao.get("arc").executeRequest(connection, requete);
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -530,7 +503,7 @@ public class ClientDaoImpl implements ClientDao {
      * @param resp
      *            Flux où écrire la réponse une fois mise en forme.
      */
-    private void mapJsonResponse(ArrayList<ArrayList<String>> result, SendResponse resp) {
+    private void mapJsonResponse(ArrayList<ArrayList<String>> result, SendResponse resp) throws ArcException {
         List<String> table = new ArrayList<>();
         StringBuilder row = new StringBuilder("\"");
         String cell;
@@ -553,13 +526,13 @@ public class ClientDaoImpl implements ClientDao {
      * @param connection
      *            Connexion à fermer.
      */
-    private static void close(Connection connection) {
+    private static void close(Connection connection) throws ArcException {
         if (connection != null) {
-            try {
-                connection.close();
-            } catch (Exception ex) {
-                LoggerHelper.errorGenTextAsComment(ClientDaoImpl.class, "close(Connection)", LOGGER, ex);
-            }
+                try {
+					connection.close();
+				} catch (SQLException e) {
+					throw new ArcException(e);
+				}
         }
     }
 
@@ -568,9 +541,9 @@ public class ClientDaoImpl implements ClientDao {
      * @param client
      * @param isSourceListTable : is it the table containing the list of id_source of the files to be marked ?
      * @return
-     * @throws Exception
+     * @throws ArcException
      */
-    public String getAClientTable(String client, boolean isSourceListTable) throws Exception {
+    public String getAClientTable(String client, boolean isSourceListTable) throws ArcException {
         String clientLc = client.toLowerCase();
         String schema = ManipString.substringBeforeFirst(clientLc, ".");
         String clientDb = ManipString.substringAfterFirst(clientLc, ".").replace("_", "\\_") + "%";
@@ -593,16 +566,16 @@ public class ClientDaoImpl implements ClientDao {
 
     }
     
-    public String getAClientTable(String client) throws Exception 
+    public String getAClientTable(String client) throws ArcException 
     {
     	return getAClientTable(client,false);
     }
 
-    public String getIdTable(String client) throws Exception {
+    public String getIdTable(String client) throws ArcException {
         return getAClientTable(client,true);
     }
 
-    public void dropTable(String clientTable) throws Exception {
+    public void dropTable(String clientTable) throws ArcException {
         if (StringUtils.isBlank(clientTable)) {
             return;
         }

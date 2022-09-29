@@ -716,7 +716,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	}
 
 	@RequestMapping("/downloadBdBAS")
-	public void downloadBdBAS(HttpServletResponse response) throws Exception {
+	public void downloadBdBAS(HttpServletResponse response) throws ArcException {
 		Map<String, ArrayList<String>> selectionLigne = getViewPilotageBAS().mapContentSelected();
 		ArrayList<String> selectionColonne = getViewPilotageBAS().listHeadersSelected();
 		ArrayList<Integer> selectionIndexColonne = getViewPilotageBAS().indexHeadersSelected();

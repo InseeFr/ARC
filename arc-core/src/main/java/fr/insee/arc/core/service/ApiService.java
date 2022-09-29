@@ -591,7 +591,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return requete.toString();
 	}
 
-	public abstract void executer() throws Exception;
+	public abstract void executer() throws ArcException;
 
 	/**
 	 * Finalise l'appel d'une phase Marque dans la table de pilotage globale les

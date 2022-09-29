@@ -114,14 +114,14 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
             // sortir les données du module vers l'application
             insertionFinale();
 
-        } catch (Exception e) {
+        } catch (ArcException e) {
             StaticLoggerDispatcher.error(e, LOGGER);
 	    try {
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
-			"aucuneTableADroper");
-	    } catch (ArcException e2) {
-            StaticLoggerDispatcher.error(e2, LOGGER);
-	    }
+			this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+				"aucuneTableADroper");
+		    } catch (ArcException e2) {
+	            StaticLoggerDispatcher.error(e2, LOGGER);
+		    }
             Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
     }
@@ -170,10 +170,10 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
      * La méthode devrait etre refactor (pour séparer "deletion" et "relation")
      * La réécriture de la requete selon les règles utilisateurs devrait être moins adhérente à la structure de la requete issu du chargement
      * (trop dépendant des mot clés ou saut de ligne pour l'instant)
-     * @throws Exception
+     * @throws ArcException
      *
      */
-    private void jointureBlocXML() throws Exception {
+    private void jointureBlocXML() throws ArcException {
 
         StaticLoggerDispatcher.info("jointureBlocXML()", LOGGER);
 
@@ -229,10 +229,10 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
      * IMPORTANT : les ajouts ou mise à jours de données sur les tables de l'application doivent avoir lieu dans un même bloc de transaction
      * (ACID)
      * 
-     * @throws Exception
+     * @throws ArcException
      *
      */
-    private void insertionFinale() throws Exception {
+    private void insertionFinale() throws ArcException {
     	
     	StringBuilder query=new StringBuilder();
     	

@@ -1,5 +1,6 @@
 package fr.insee.arc.core.service.engine.initialisation;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 
@@ -9,6 +10,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class BddPatcher {
@@ -61,16 +63,20 @@ public class BddPatcher {
 		return query;
 	}
 	
-	private static String readBddScript (String scriptName, String userRestricted, Integer nbSandboxes, String envExecution) throws Exception
+	private static String readBddScript (String scriptName, String userRestricted, Integer nbSandboxes, String envExecution) throws ArcException
 	{
 			if (ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName)!=null)
 			{
-				return applyBddScriptParameters(IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName), StandardCharsets.UTF_8), userRestricted, nbSandboxes, envExecution);
+				try {
+					return applyBddScriptParameters(IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName), StandardCharsets.UTF_8), userRestricted, nbSandboxes, envExecution);
+				} catch (IOException e) {
+					throw new ArcException("Database script couldn't be read", e);
+				}
 			}
 		return null;
 	}
 	
-	private static void executeBddScript (Connection connexion, String scriptName, String userRestricted, Integer nbSandboxes, String envExecution) throws Exception
+	private static void executeBddScript (Connection connexion, String scriptName, String userRestricted, Integer nbSandboxes, String envExecution) throws ArcException
 	{
 		String query;
 
@@ -136,9 +142,9 @@ public class BddPatcher {
 	 * execute the global sql scripts
 	 * @param connexion
 	 * @param p
-	 * @throws Exception
+	 * @throws ArcException
 	 */
-	private static void bddScriptGlobalExecutor(Connection connexion, PropertiesHandler p) throws Exception
+	private static void bddScriptGlobalExecutor(Connection connexion, PropertiesHandler p) throws ArcException
 	{
 		Integer nbSandboxes = BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes", 8);
 		
@@ -160,9 +166,9 @@ public class BddPatcher {
 	 * @param connexion
 	 * @param p
 	 * @param envExecutions
-	 * @throws Exception
+	 * @throws ArcException
 	 */
-	private static void bddScriptEnvironmentExecutor(Connection connexion, PropertiesHandler p, String[] envExecutions) throws Exception
+	private static void bddScriptEnvironmentExecutor(Connection connexion, PropertiesHandler p, String[] envExecutions) throws ArcException
 	{
 		for (String envExecution: envExecutions)
 		{
@@ -183,7 +189,6 @@ public class BddPatcher {
      * Méthode pour initialiser ou patcher la base de données la base de donnée.
      * La version de la base de données correpond au numéro de commit de git 
      * @param connexion
-     * @throws Exception
      */
 	public static void bddScript(Connection connexion, String...envExecutions) {
 

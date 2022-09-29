@@ -26,7 +26,7 @@ public class NormageEngineRegleSupression {
 	 * @param periodicite
 	 * @param jointure
 	 * @param rubriqueUtiliseeDansRegles
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 
 	protected static void ajouterRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
@@ -185,7 +185,7 @@ public class NormageEngineRegleSupression {
 	 * @param periodicite
 	 * @param jointure
 	 * @return
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	protected static String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws ArcException {

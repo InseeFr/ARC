@@ -73,7 +73,7 @@ public class ServiceJeuDeRegle {
      *            la table de travail dont les enregistrement seront "marqués"
      * @throws ArcException
      */
-	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
+	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table, String structure) throws ArcException {
 		StaticLoggerDispatcher.debug("executeJeuDeRegle", logger);
 
 		java.util.Date date = new java.util.Date();
@@ -160,7 +160,7 @@ public class ServiceJeuDeRegle {
 	 * @param structure
 	 * @throws ArcException
 	 */
-	private void control(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
+	private void control(Connection connexion, JeuDeRegle jdr, String table, String structure) throws ArcException {
 
 		StringBuilder blocRequete = new StringBuilder();
 		blocRequete.append(this.servSql.initTemporaryTable(table));

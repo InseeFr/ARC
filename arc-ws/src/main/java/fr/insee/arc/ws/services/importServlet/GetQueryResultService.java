@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.ws.actions.SendResponse;
-import fr.insee.arc.ws.dao.DAOException;
 import fr.insee.arc.ws.dao.QueryDao;
 import fr.insee.arc.ws.dao.QueryDaoImpl;
 
@@ -36,7 +37,7 @@ private List<String> ids;
 private HashMap<String, String> sqlRequests;
 
 
-public GetQueryResultService buildParam()
+public GetQueryResultService buildParam() throws ArcException
 {
 	timestamp = System.currentTimeMillis();
 
@@ -71,7 +72,7 @@ public void execute(SendResponse resp)
          }
          resp.send("]}");
          resp.endSending();
-     } catch (DAOException e) {
+     } catch (ArcException e) {
          resp.send("{\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
          resp.endSending();
      }
@@ -83,8 +84,9 @@ public void execute(SendResponse resp)
  * Cette fonction permet de parser les requêtes sql contenue dans le fichier JSON reçu pour le service QUERY
  *
  * @param dsnRequest
+ * @throws ArcException 
  */
-private boolean parseRequests(JSONObject dsnRequest) {
+private boolean parseRequests(JSONObject dsnRequest) throws ArcException {
 	
 	this.ids = new ArrayList<>();
     this.sqlRequests = new HashMap<>();
@@ -109,7 +111,7 @@ private boolean parseRequests(JSONObject dsnRequest) {
             }
             
         } else {
-            throw new DAOException("Id présent plusieurs fois : " + sqlRequest.getString(JsonKeys.ID.getKey()));
+            throw new ArcException("Id présent plusieurs fois : " + sqlRequest.getString(JsonKeys.ID.getKey()));
         }
     }
     return true;

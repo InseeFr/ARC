@@ -10,18 +10,18 @@ import org.json.JSONObject;
 
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.ws.actions.SendResponse;
 import fr.insee.arc.ws.dao.ClientDao;
 import fr.insee.arc.ws.dao.ClientDaoImpl;
-import fr.insee.arc.ws.dao.DAOException;
 
 public class ImportStep1InitializeClientTablesService {
 
 	protected static final Logger LOGGER = LogManager.getLogger(ImportStep1InitializeClientTablesService.class);
 
     static interface Executable {
-        void execute();
+        void execute() throws ArcException;
     }
     
 	private ClientDao clientDao;
@@ -47,7 +47,7 @@ public class ImportStep1InitializeClientTablesService {
 
 	private static final String SPECIALENVIRONMENT="arc";
 
-    public ImportStep1InitializeClientTablesService buildParam()
+    public ImportStep1InitializeClientTablesService buildParam() throws ArcException
     {
     	timestamp = System.currentTimeMillis();
     
@@ -67,7 +67,7 @@ public class ImportStep1InitializeClientTablesService {
     	return this;
     }
 
-	private void executeIf(String source, Executable exe) {
+	private void executeIf(String source, Executable exe) throws ArcException {
 	    if (!sources.contains(source)) {
             return;
         }
@@ -83,7 +83,7 @@ public class ImportStep1InitializeClientTablesService {
         return returned;
     }
     
-    public void execute(SendResponse resp) {
+    public void execute(SendResponse resp) throws ArcException {
 
         try {
 
@@ -100,7 +100,7 @@ public class ImportStep1InitializeClientTablesService {
             // on renvoie l'id du client avec son timestamp
             resp.send(ApiService.dbEnv(environnement) + client + "_" + this.timestamp);
             resp.endSending();
-        } catch (DAOException e) {
+        } catch (ArcException e) {
 			StaticLoggerDispatcher.error("** Error in servlet ImportStep1InitializeClientTablesService **", LOGGER);
             resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
             resp.endSending();

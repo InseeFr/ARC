@@ -66,7 +66,7 @@ public class ApiInitialisationService extends ApiService {
     }
 
     @Override
-    public void executer() throws Exception {
+    public void executer() throws ArcException {
 
         // Supprime les lignes devenues inutiles récupérées par le webservice de la table pilotage_fichier
         nettoyerTablePilotage(this.connexion, this.envExecution);
@@ -95,9 +95,9 @@ public class ApiInitialisationService extends ApiService {
     /**
      * remet le filesystem en etat en cas de restauration de la base
      *
-     * @throws Exception
+     * @throws ArcException
      */
-    private void rebuildFileSystem() throws Exception {
+    private void rebuildFileSystem() throws ArcException {
         loggerDispatcher.info("rebuildFileSystem", LOGGER);
 
         // parcourir toutes les archives dans le répertoire d'archive
@@ -201,20 +201,28 @@ public class ApiInitialisationService extends ApiService {
                         	
                         	// comparer au fichier sans index
                     		File autreFichier=new File (dirOut + File.separator + name_source + ext);
-                    		if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
-                    		{
-                    			fichier.delete();
-                    		}
+                    		try {
+								if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
+								{
+									fichier.delete();
+								}
+							} catch (IOException e) {
+								throw new ArcException(e);
+							}
                     		
                     		// comparer aux fichier avec un index précédent
                     		for (int i=2;i<number;i++)
                     		{
                     			autreFichier=new File (dirOut + File.separator + name_source + "#" + i + ext);
                         		
-                        		if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
-                        		{
-                        			fichier.delete();
-                        		}
+                        		try {
+									if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
+									{
+										fichier.delete();
+									}
+								} catch (IOException e) {
+									throw new ArcException(e);
+								}
 
                     		}
                     		
@@ -287,7 +295,7 @@ public class ApiInitialisationService extends ApiService {
     
     /**
      * Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans l'environnement d'excécution courant
-     * @throws Exception
+     * @throws ArcException
      */
     public static void synchroniserSchemaExecution(Connection connexion, String envParameters, String envExecution) {
         copyTablesToExecution(connexion, envParameters, envExecution);
@@ -301,7 +309,7 @@ public class ApiInitialisationService extends ApiService {
      * @param tablePil
      * @throws ArcException
      */
-    private void reinstate(Connection connexion, String tablePil) throws Exception {
+    private void reinstate(Connection connexion, String tablePil) throws ArcException {
         loggerDispatcher.info("reinstateWithRename", LOGGER);
 
         // on cherche tous les containers contenant un fichier à rejouer
@@ -341,7 +349,7 @@ public class ApiInitialisationService extends ApiService {
      * familles de norme
      *
      * @param connexion
-     * @throws Exception
+     * @throws ArcException
      */
     
     private static void mettreAJourSchemaTableMetier(Connection connexion, String envParameters, String envExecution) {
@@ -355,7 +363,7 @@ public class ApiInitialisationService extends ApiService {
     }
 
     
-    private static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution) throws Exception {
+    private static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters, String envExecution) throws ArcException {
     		StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
             /*
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
@@ -498,9 +506,9 @@ public class ApiInitialisationService extends ApiService {
      *
      * @param connexion
      * @param tablePil
-     * @throws Exception
+     * @throws ArcException
      */
-    private void cleanToDelete(Connection connexion, String tablePil) throws Exception {
+    private void cleanToDelete(Connection connexion, String tablePil) throws ArcException {
         loggerDispatcher.info("cleanToDelete", LOGGER);
 
         StringBuilder requete = new StringBuilder();
@@ -517,7 +525,7 @@ public class ApiInitialisationService extends ApiService {
      * @param tablePil
      * @throws ArcException
      */
-    private void nettoyerTablePilotage(Connection connexion, String envExecution) throws Exception {
+    private void nettoyerTablePilotage(Connection connexion, String envExecution) throws ArcException {
 
         loggerDispatcher.info("nettoyerTablePilotage", LOGGER);
         
@@ -684,7 +692,7 @@ public class ApiInitialisationService extends ApiService {
      * @param connexion
      * @param anParametersEnvironment
      * @param anExecutionEnvironment
-     * @throws Exception
+     * @throws ArcException
      */
     
     public static void copyTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) {
@@ -699,7 +707,7 @@ public class ApiInitialisationService extends ApiService {
     
     
     
-    private static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
+    private static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws ArcException {
     	copyRulesTablesToExecution(connexion, anParametersEnvironment, anExecutionEnvironment);
     	applyExpressions(connexion, anExecutionEnvironment);
     }
@@ -709,9 +717,9 @@ public class ApiInitialisationService extends ApiService {
      * @param connexion
      * @param anParametersEnvironment
      * @param anExecutionEnvironment
-     * @throws Exception
+     * @throws ArcException
      */
-    private static void copyRulesTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws Exception {
+    private static void copyRulesTablesToExecution(Connection connexion, String anParametersEnvironment, String anExecutionEnvironment) throws ArcException {
     	StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
         try {
         	
@@ -815,7 +823,7 @@ public class ApiInitialisationService extends ApiService {
         }
     }
 
-    private static void applyExpressions(Connection connexion, String anExecutionEnvironment) throws Exception {
+    private static void applyExpressions(Connection connexion, String anExecutionEnvironment) throws ArcException {
 		// Checks expression validity
     	ExpressionService expressionService = new ExpressionService();
     	ArrayList<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion, anExecutionEnvironment + ".jeuderegle");
@@ -1003,7 +1011,7 @@ public class ApiInitialisationService extends ApiService {
      *
      * @param connexion
      * @param envExecution
-     * @throws Exception
+     * @throws ArcException
      */
     private void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws ArcException {
         loggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
@@ -1173,7 +1181,7 @@ public class ApiInitialisationService extends ApiService {
     }
 
 
-    public static void clearPilotageAndDirectories(String repertoire, String env) throws Exception {
+    public static void clearPilotageAndDirectories(String repertoire, String env) throws ArcException {
         try {
         	 UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_fichier; ");
              UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_archive; ");

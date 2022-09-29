@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,6 +12,7 @@ import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.service.thread.ThreadFiltrageService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
@@ -54,9 +56,9 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
 
     /**
      * Exécute le mapping de bout en bout
-     * @throws Exception 
+     * @throws ArcException 
      */
-    public void executer() throws Exception {
+    public void executer() throws ArcException {
         
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
     	
@@ -93,7 +95,11 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
 
         StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
         for (Connection connection : connexionList) {
-            connection.close();
+            try {
+				connection.close();
+			} catch (SQLException e) {
+				throw new ArcException("Error in closing thread connections",e);
+			}
         }
 
 

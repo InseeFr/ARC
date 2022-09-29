@@ -1,16 +1,20 @@
 package fr.insee.arc.core.util;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.service.handler.FormatFichierHandler;
+import fr.insee.arc.utils.exception.ArcException;
 
 
 /**
@@ -29,14 +33,15 @@ public class ArbreFormat {
     private HashMap<String, String> arbreFormat;
     
     //éléments terminaux
-    private ArrayList<String> feuilles = new ArrayList<String>();
+    private ArrayList<String> feuilles = new ArrayList<>();
     
     //éléments intermédiaire
-    private ArrayList<String> branches = new ArrayList<String>();
+    private ArrayList<String> branches = new ArrayList<>();
 
-    public ArbreFormat(Norme aNorme) throws Exception {
+    public ArbreFormat(Norme aNorme) throws ArcException {
         super();
         
+        try {
         // Récupérer le 'format' lié à la norme
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         SAXParser saxParser = saxParserFactory.newSAXParser();
@@ -46,6 +51,10 @@ public class ArbreFormat {
 
         this.arbreFormat = formatHandler.getArbre();
         calculerFeuilles();
+        } catch (SAXException | IOException | ParserConfigurationException e)
+        {
+        	throw new ArcException(e);
+        }
         
     }
     

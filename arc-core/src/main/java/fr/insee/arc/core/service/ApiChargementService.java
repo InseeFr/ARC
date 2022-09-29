@@ -2,6 +2,7 @@ package fr.insee.arc.core.service;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 
 
 /**
@@ -79,7 +81,7 @@ public class ApiChargementService extends ApiService {
     }
 
     @Override
-    public void executer() throws Exception {
+    public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER);
         
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiChargementService.MAX_PARALLEL_WORKERS",4);
@@ -122,7 +124,11 @@ public class ApiChargementService extends ApiService {
 
         StaticLoggerDispatcher.info("** Fermeture des connexions **", LOGGER);
         for (Connection connection : connexionList) {
-            connection.close();
+            try {
+				connection.close();
+			} catch (SQLException e) {
+				throw new ArcException("Error in closing thread connections",e);
+			}
         }
 
         StaticLoggerDispatcher.info("****** Fin ApiChargementService *******", LOGGER);

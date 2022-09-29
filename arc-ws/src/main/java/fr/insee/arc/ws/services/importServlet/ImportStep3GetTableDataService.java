@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.ws.actions.SendResponse;
 import fr.insee.arc.ws.dao.ClientDao;
@@ -34,7 +35,7 @@ public class ImportStep3GetTableDataService {
 		return this;
 	}
 
-	public void execute(SendResponse resp) {
+	public void execute(SendResponse resp) throws ArcException {
 
 		try {
 			client = this.dsnRequest.getString(JsonKeys.CLIENT.getKey());
@@ -47,7 +48,7 @@ public class ImportStep3GetTableDataService {
 
 			// renvoie un nom de table du client si il en reste une
 
-		} catch (Exception e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("** Error in servlet ImportStep3GetTableDataService **", LOGGER);
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
 			resp.endSending();

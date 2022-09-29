@@ -94,7 +94,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 
 			this.insertionFinale();
 
-		} catch (Exception e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error(e, LOGGER_APISERVICE);
 			try {
 				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
@@ -230,10 +230,10 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 * IMPORTANT : les ajouts ou mise à jours de données sur les tables de
 	 * l'application doivent avoir lieu dans un même bloc de transaction (ACID)
 	 * 
-	 * @throws Exception
+	 * @throws ArcException
 	 *
 	 */
-	private void insertionFinale() throws Exception {
+	private void insertionFinale() throws ArcException {
 		
 		StringBuilder query=new StringBuilder();
 		

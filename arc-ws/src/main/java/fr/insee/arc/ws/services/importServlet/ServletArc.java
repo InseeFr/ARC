@@ -29,7 +29,6 @@ import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.ws.actions.HealthCheck;
 import fr.insee.arc.ws.actions.InitiateRequest;
 import fr.insee.arc.ws.actions.SendResponse;
-import fr.insee.arc.ws.dao.DAOException;
 
 public class ServletArc extends HttpServlet {
 
@@ -188,7 +187,7 @@ public class ServletArc extends HttpServlet {
 				SendResponse resp = new SendResponse(response);
 				try {
 					new InitiateRequest(dsnRequest).doRequest(resp);
-				} catch (DAOException e) {
+				} catch (ArcException e) {
 					resp.send("{\"type\":\"jsonwsp/JSONObject\",\"error\":\"" + e.getMessage() + "\"}");
 					resp.endSending();
 				}

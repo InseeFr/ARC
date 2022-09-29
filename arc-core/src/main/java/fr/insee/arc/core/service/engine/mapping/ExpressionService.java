@@ -96,19 +96,19 @@ public class ExpressionService implements IDbConstant {
 
 
 	public boolean isExpressionSyntaxPresentInControl(Connection connexion, String environment,
-			JeuDeRegle ruleSet) throws Exception {
+			JeuDeRegle ruleSet) throws ArcException {
 		return isExpressionSyntaxPresent(connexion, environment + ".controle_regle", "condition", ruleSet)
 				|| isExpressionSyntaxPresent(connexion, environment + ".controle_regle", "pre_action", ruleSet);
 	}
 
 
-	public boolean isExpressionSyntaxPresentInMapping(Connection connexion, String environment, JeuDeRegle ruleSet) throws Exception {
+	public boolean isExpressionSyntaxPresentInMapping(Connection connexion, String environment, JeuDeRegle ruleSet) throws ArcException {
 		return isExpressionSyntaxPresent(connexion, environment + ".mapping_regle", "expr_regle_col", ruleSet);
 	}
 	
 
 
-	private boolean isExpressionSyntaxPresent(Connection connexion, String table, String field, JeuDeRegle ruleSet) throws Exception {
+	private boolean isExpressionSyntaxPresent(Connection connexion, String table, String field, JeuDeRegle ruleSet) throws ArcException {
 		PreparedStatementBuilder request = new PreparedStatementBuilder();
 		request.append("select 1 from ");
 		request.append(table);

@@ -115,7 +115,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
                 + " n'est pas reconnue comme valide.");
     }
 
-    private void majMapRegleGroupe(Pair<List<Integer>, AbstractRegleMapping> aPairRegleGroupe) {
+    private void majMapRegleGroupe(Pair<List<Integer>, AbstractRegleMapping> aPairRegleGroupe) throws ArcException {
         for (int i = 0; i < aPairRegleGroupe.getFirst().size(); i++) {
             if (this.mapRegleGroupe.containsKey(aPairRegleGroupe.getFirst().get(i))) {
                 throw new ArcException("L'expression " + this.getExpression() + " comporte plusieurs références au numéro de groupe "
@@ -125,7 +125,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
         }
     }
 
-    private void decomposerElementsSimple() {
+    private void decomposerElementsSimple() throws ArcException {
         Matcher matcher = patternDebutRegleGroupe.matcher(this.getExpression());
         int end = 0;
         String expressionGroupe;
@@ -186,7 +186,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
     }
 
     @Override
-    public String getExpressionSQL() {
+    public String getExpressionSQL() throws ArcException {
         throw new ArcException("Cette méthode ne devrait pas être appelée par RegleMappingGroupe");
     }
 
@@ -196,9 +196,10 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
      *         Il se peut qu'une règle à groupe ne contienne pas de règle POUR le groupe demandé.<br/>
      *         Par exemple, la variable A a trois groupes 1, 2 et 3 et la variable B a deux groupes 1 et 2. Le groupe 3 existe bien, mais
      *         est valorisé à {@code "null"} pour la variable B.
+     * @throws ArcException 
      */
     @Override
-    public String getExpressionSQL(Integer aNumeroGroupe) {
+    public String getExpressionSQL(Integer aNumeroGroupe) throws ArcException {
         if (this.mapRegleGroupe.containsKey(aNumeroGroupe)) {
             return this.mapRegleGroupe.get(aNumeroGroupe).getExpressionSQL(aNumeroGroupe);
         }

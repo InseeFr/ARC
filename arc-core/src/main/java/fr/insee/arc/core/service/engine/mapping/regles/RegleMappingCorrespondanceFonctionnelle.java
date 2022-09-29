@@ -135,7 +135,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
     }
 
     @Override
-    public String getExpressionSQL() {
+    public String getExpressionSQL() throws ArcException {
         if (!this.isCalcule) {
             StringBuilder expression = new StringBuilder();
             for (int i = 0; i < this.listeTokenRegle.size(); i++) {
@@ -151,7 +151,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
     }
 
     @Override
-    public String getExpressionSQL(Integer aNumeroGroupe) {
+    public String getExpressionSQL(Integer aNumeroGroupe) throws ArcException {
         return this.getExpressionSQL();
     }
 

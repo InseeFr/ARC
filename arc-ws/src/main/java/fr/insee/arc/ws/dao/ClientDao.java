@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.actions.SendResponse;
 
 public interface ClientDao {
@@ -18,7 +19,7 @@ public interface ClientDao {
      * @param idFamille
      *            Id de la famille de norme.
      */
-    void verificationClientFamille(long timestamp, String client, String idFamille, String environnement);
+    void verificationClientFamille(long timestamp, String client, String idFamille, String environnement) throws ArcException;
 
     /**
      * Créer une image des ids sources répondants aux critères et récupère la liste des noms des tables métiers
@@ -40,10 +41,9 @@ public interface ClientDao {
      * @param periodicite
      *            Périodicité.
      * @return La liste des noms des tables métiers.
-     * @deprecated
      */
     ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, String client, boolean reprise, String environnement, String idFamille,
-            String validiteInf, String validiteSup, String periodicite);
+            String validiteInf, String validiteSup, String periodicite) throws ArcException;
 
     /**
      * Créer une image des ids sources répondants aux critères et récupère la liste des noms des tables métiers
@@ -53,8 +53,9 @@ public interface ClientDao {
      * @param JSONObject
      *            contient les paramètres de la requête
      * @return La liste des noms des tables métiers.
+     * @throws ArcException 
      */
-    ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON);
+    ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) throws ArcException;
 
     /**
      * Créer une image des tables métiers.
@@ -69,8 +70,9 @@ public interface ClientDao {
      *            La liste des noms des tables métiers.
      *
      * @return liste des noms de tables images crées
+     * @throws ArcException 
      */
-    ArrayList<String> createImages(long timestamp, String client, String environnement, ArrayList<ArrayList<String>> tablesMetierNames);
+    ArrayList<String> createImages(long timestamp, String client, String environnement, ArrayList<ArrayList<String>> tablesMetierNames) throws ArcException;
 
     /**
      * Créer une image des tables métiers.
@@ -85,8 +87,9 @@ public interface ClientDao {
      *            La liste des noms des tables métiers.
      *
      * @return liste des noms de tables images crées
+     * @throws ArcException 
      */
-    void addImage(long timestamp, String client, String environnement, ArrayList<String> tableMetier, ArrayList<String> mesTablesImagesCrees);
+    void addImage(long timestamp, String client, String environnement, ArrayList<String> tableMetier, ArrayList<String> mesTablesImagesCrees) throws ArcException;
 
     /**
      * Récupère les tables métiers.
@@ -102,8 +105,9 @@ public interface ClientDao {
      * @param resp
      *            Flux dans lequel on écrit la requête.
      * @return Retourne true s'il y a de nouvelles lignes.
+     * @throws ArcException 
      */
-    void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp);
+    void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp) throws ArcException;
 
     /**
      * Met à jours les colonnes client et date_client de la table environnement_pilotage_fichier.
@@ -114,16 +118,18 @@ public interface ClientDao {
      *            Nom du client.
      * @param environnement
      *            Exemple : arc.bas
+     * @throws ArcException 
      */
-    void updatePilotage(long timestamp, String environnement, String tableSource);
+    void updatePilotage(long timestamp, String environnement, String tableSource) throws ArcException;
 
     /**
      * Renvoie les tables de nomenclatures.
      *
      * @param resp
      *            Flux dans lequel on écrit la requête.
+     * @throws ArcException 
      */
-    void createNmcl(long timestamp, String client, String environnement);
+    void createNmcl(long timestamp, String client, String environnement) throws ArcException;
 
     /**
      * Renvoie la table des variables métier.
@@ -132,8 +138,9 @@ public interface ClientDao {
      *            Exemple : arc.bas
      * @param resp
      *            Flux dans lequel on écrit la requête.
+     * @throws ArcException 
      */
-    void createVarMetier(long timestamp, String client, String idFamille, String environnement);
+    void createVarMetier(long timestamp, String client, String idFamille, String environnement) throws ArcException;
 
     /**
      * Renvoie la table des variables métier.
@@ -142,29 +149,32 @@ public interface ClientDao {
      *            Exemple : arc.bas
      * @param resp
      *            Flux dans lequel on écrit la requête.
+     * @throws ArcException 
      */
-    void createTableMetier(long timestamp, String client, String idFamille, String environnement);
+    void createTableMetier(long timestamp, String client, String idFamille, String environnement) throws ArcException;
 
     /**
      * Renvoie la table famille
      *
      * @param timestamp
      * @param client
+     * @throws ArcException 
      */
-    void createTableFamille(long timestamp, String client, String environnement);
+    void createTableFamille(long timestamp, String client, String environnement) throws ArcException;
 
-    String getAClientTable(String client) throws Exception;
+    String getAClientTable(String client) throws ArcException;
 
-    String getIdTable(String client) throws Exception;
+    String getIdTable(String client) throws ArcException;
 
-    void dropTable(String clientTable) throws Exception;
+    void dropTable(String clientTable) throws ArcException;
 
     /**
      * Renvoie la table périodicité
      *
      * @param timestamp
      * @param client
+     * @throws ArcException 
      */
-    void createTablePeriodicite(long timestamp, String client, String environnement);
+    void createTablePeriodicite(long timestamp, String client, String environnement) throws ArcException;
 
 }

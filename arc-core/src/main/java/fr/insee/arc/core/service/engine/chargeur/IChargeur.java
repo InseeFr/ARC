@@ -7,9 +7,9 @@ import fr.insee.arc.utils.exception.ArcException;
  */
 public interface IChargeur {
    
-    public void initialisation();
+    public void initialisation() throws ArcException;
      
-    public void finalisation();
+    public void finalisation() throws ArcException;
     
     public void execution() throws ArcException;
     

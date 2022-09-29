@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
@@ -245,8 +246,9 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
      * @param nomsVariablesIdentifiantes
      * @param reglesIdentifiantes
      * @return
+     * @throws ArcException 
      */
-    public String expressionSQLPrepUnion(Integer aNumeroGroupe, Map<String, String> reglesIdentifiantes) {
+    public String expressionSQLPrepUnion(Integer aNumeroGroupe, Map<String, String> reglesIdentifiantes) throws ArcException {
         StringBuilder returned = new StringBuilder();
         boolean isFirst = true;
 

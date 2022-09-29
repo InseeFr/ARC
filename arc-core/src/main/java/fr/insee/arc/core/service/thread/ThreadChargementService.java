@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.thread;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
@@ -132,11 +133,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    // finaliser le chargement
 	    finalisation();
 	  
-	} catch (Exception e) {
+	} catch (ArcException e) {
 		StaticLoggerDispatcher.error(e,LOGGER);
-	    try {
-
-		// En acs d'erreur on met le fichier en KO avec l'erreur obtenu.
+	    
+		try {
+		// En cas d'erreur on met le fichier en KO avec l'erreur obtenu.
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (ArcException e2) {
@@ -168,9 +169,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
     
     /**
 	 * finalisation du chargement
-	 * @throws Exception 
+	 * @throws ArcException 
 	 */
-	private void finalisation() throws Exception
+	private void finalisation() throws ArcException
 	{
 		
 		StringBuilder query=new StringBuilder();
@@ -212,9 +213,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * 
      * @param aAllCols
      * @param aColData
-     * @throws Exception
+     * @throws ArcException
      */
-    private void chargementFichiers() throws Exception {
+    private void chargementFichiers() throws ArcException {
 
 	ArrayList<String> aAllCols = new ArrayList<String>();
 	HashMap<String, Integer> aColData = new HashMap<>();
@@ -248,27 +249,27 @@ public class ThreadChargementService extends ApiChargementService implements Run
     /**
      * Méthode qui permet de charger les fichiers s'ils disposent d'un container
      * 
-     * @throws Exception
+     * @throws ArcException
      */
-    private void chargementFichierAvecContainer() throws Exception {
+    private void chargementFichierAvecContainer() throws ArcException {
 
-    try {
-	this.fileChargement = new File(this.directoryIn + File.separator + container);
-	this.entrepot = ManipString.substringBeforeFirst(container, "_") + "_";
-	
-	ArchiveChargerFactory archiveChargerFactory = new ArchiveChargerFactory(fileChargement, this.idSource);
-	IArchiveFileLoader archiveChargeur=  archiveChargerFactory.getChargeur(container);
-
-	    this.filesInputStreamLoad = archiveChargeur.loadArchive();
-	    choixChargeur();
-    } 
-    catch(Exception e)
-    {
-    	throw e;
-    }
-    finally {
-	   	this.filesInputStreamLoad.closeAll();
-    }
+    try {	
+		    try {
+				this.fileChargement = new File(this.directoryIn + File.separator + container);
+				this.entrepot = ManipString.substringBeforeFirst(container, "_") + "_";
+				
+				ArchiveChargerFactory archiveChargerFactory = new ArchiveChargerFactory(fileChargement, this.idSource);
+				IArchiveFileLoader archiveChargeur=  archiveChargerFactory.getChargeur(container);
+			
+				    this.filesInputStreamLoad = archiveChargeur.loadArchive();
+				    choixChargeur();
+			    } 
+			    finally {
+						this.filesInputStreamLoad.closeAll();
+			    }
+	    } catch (ArcException | IOException e) {
+			throw new ArcException(e);
+		}
     }
 
     /**
@@ -277,9 +278,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @param currentEntryNormage
      * @param tmpInxChargement
      * @param tmpInxNormage
-     * @throws Exception
+     * @throws ArcException
      */
-    private void choixChargeur() throws Exception {
+    private void choixChargeur() throws ArcException {
 	StaticLoggerDispatcher.info("** choixChargeur : " + this.idSource + " **", LOGGER);
 	// Si on a pas 1 seule norme alors le fichier est en erreur
 	ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
@@ -322,9 +323,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @param norme
      * @return l'objet Norme avec la règle de chargement renseignée
      * @throws ArcException
-     * @throws Exception si aucune règle n'est trouvée
+     * @throws ArcException si aucune règle n'est trouvée
      */
-    private Norme calculerTypeFichier(Norme norme) throws Exception {
+    private Norme calculerTypeFichier(Norme norme) throws ArcException {
     	
     	PreparedStatementBuilder requete=new PreparedStatementBuilder();
     	requete
@@ -334,7 +335,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion(), requete));
 		if (g.mapContent().isEmpty()) {
-			throw new Exception("La norme n'a pas de règle de chargement associée.");
+			throw new ArcException("La norme n'a pas de règle de chargement associée.");
 		}
 		
 		norme.setRegleChargement(new RegleChargement(TypeChargement.getEnum(g.content.get(0).get(0)),
@@ -375,7 +376,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @throws ArcException
      */
 
-    private boolean majPilotage(String idSource, Norme normeOk, String validite) throws Exception {
+    private boolean majPilotage(String idSource, Norme normeOk, String validite) throws ArcException {
 	boolean erreur = false;
 	StaticLoggerDispatcher.info("Mettre à jour la table de pilotage", LOGGER);
 	java.util.Date beginDate = new java.util.Date();

@@ -102,7 +102,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
             insertionFinale();
             
-        } catch (Exception e) {
+        } catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error in control Thread",LOGGER);
 		    try {
 				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
@@ -179,7 +179,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *
      * @throws ArcException
      */
-    private void execute() throws Exception {
+    private void execute() throws ArcException {
         StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
 
         this.sjdr.executeJeuDeRegle(this.connexion, jdr, this.tableControleDataTemp, this.structure);
@@ -203,7 +203,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la table des seuils
      * @throws ArcException
      */
-    private StringBuilder calculSeuilControle() throws Exception {
+    private StringBuilder calculSeuilControle() throws ArcException {
         StaticLoggerDispatcher.info("finControle", LOGGER);
 
 
@@ -241,9 +241,9 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
     /**
      * Insertion dans les vraies tables
-     * @throws Exception
+     * @throws ArcException
      */
-    private void insertionFinale() throws Exception {
+    private void insertionFinale() throws ArcException {
 
    	// calcul des seuils pour finalisation 
    	StringBuilder query=new StringBuilder();

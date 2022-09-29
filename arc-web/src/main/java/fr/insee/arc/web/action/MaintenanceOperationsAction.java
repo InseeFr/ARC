@@ -74,9 +74,7 @@ public class MaintenanceOperationsAction extends ArcAction<MaintenanceOperations
     }
 
     @RequestMapping("/startOperations")
-    public String startOperations(Model model) throws Exception {
-          	
-    	
+    public String startOperations(Model model) {
         return generateDisplay(model, RESULT_SUCCESS);
     }
 

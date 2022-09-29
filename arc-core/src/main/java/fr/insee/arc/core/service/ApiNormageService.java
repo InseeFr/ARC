@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +13,7 @@ import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 
 
 /**
@@ -44,7 +46,7 @@ public class ApiNormageService extends ApiService {
     }
 
     @Override
-    public void executer() throws Exception {
+    public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
         
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiNormageService.MAX_PARALLEL_WORKERS",4);
@@ -90,7 +92,11 @@ public class ApiNormageService extends ApiService {
 
         StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
         for (Connection connection : connexionList) {
-            connection.close();
+            try {
+				connection.close();
+			} catch (SQLException e) {
+				throw new ArcException("Error in closing thread connections",e);
+			}
         }
 
         long dateFin= java.lang.System.currentTimeMillis() ;

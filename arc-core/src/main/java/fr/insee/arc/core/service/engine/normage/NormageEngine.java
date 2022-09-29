@@ -150,7 +150,7 @@ public class NormageEngine {
 	 * according to the user rules
 	 * 
 	 * @param jointure
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private void complexExecutionWithJoinDefined(String jointure) throws ArcException {
 		// variables locales
@@ -309,7 +309,7 @@ public class NormageEngine {
 	 * @param validite
 	 * @param periodicite
 	 * @param jointure
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private void ajouterRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws ArcException {
@@ -544,7 +544,7 @@ public class NormageEngine {
 	 * @param validite
 	 * @param periodicite
 	 * @param jointure
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private void ajouterRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws ArcException {
@@ -629,7 +629,7 @@ public class NormageEngine {
 	 * @param periodicite
 	 * @param jointure
 	 * @return
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private String appliquerRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws ArcException {
@@ -921,7 +921,7 @@ public class NormageEngine {
 	 * @param periodicite
 	 * @param jointure
 	 * @return
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private String appliquerRegleUnicite(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws ArcException {
@@ -1010,7 +1010,7 @@ public class NormageEngine {
 	 * @param periodicite
 	 * @param jointure
 	 * @return
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private String appliquerRegleRelation(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) throws ArcException {
@@ -1191,7 +1191,7 @@ public class NormageEngine {
 	 * @param validiteText
 	 * @param id_source
 	 * @return
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private void executerJointure(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, String validiteText, String id_source) throws ArcException {
@@ -1232,7 +1232,7 @@ public class NormageEngine {
 	 * @param element
 	 * @param minSize
 	 * @param chunkSize
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 	private void executerJointureWithPartition(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, String validiteText, String id_source, String element, int minSize,

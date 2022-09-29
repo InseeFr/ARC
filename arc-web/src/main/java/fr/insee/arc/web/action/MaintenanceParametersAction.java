@@ -65,9 +65,7 @@ public class MaintenanceParametersAction extends ArcAction<MaintenanceParameters
     }
 
     @RequestMapping("/startParameters")
-    public String startParameters(Model model) throws Exception {
-          	
-    	
+    public String startParameters(Model model) {
         return generateDisplay(model, RESULT_SUCCESS);
     }
 

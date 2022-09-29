@@ -323,7 +323,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @param bw
      * @throws IOException
      */
-    private void finaliserOutputStream(ArrayList<String> listePeresRubriqueCourante) throws IOException {
+    private void finaliserOutputStream(ArrayList<String> listePeresRubriqueCourante) throws ArcException {
 
         String rubriqueCourante;
         for (int i = 1; i < listePeresRubriqueCourante.size(); i++) {

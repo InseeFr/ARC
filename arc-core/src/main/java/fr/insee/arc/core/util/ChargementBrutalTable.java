@@ -79,7 +79,7 @@ public class ChargementBrutalTable {
     
     /** Calcule la norme. Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
      * @throws IOException
-     * @throws Exception si aucune norme ou plus d'une norme trouvée */
+     * @throws ArcException si aucune norme ou plus d'une norme trouvée */
     public void calculeNormeAndValiditeFichiers(String idSource, InputStream file, Norme[] normeOk, String[] validiteOk)
     		throws ArcException {
     	StaticLoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
@@ -117,7 +117,7 @@ public class ChargementBrutalTable {
      * @param requeteFichier une requête contenant la description du fichier
      * @throws ArcException
      * @throws ArcException 
-     * @throws Exception si aucune norme ou plus d'une norme trouvée*/
+     * @throws ArcException si aucune norme ou plus d'une norme trouvée*/
     private void calculerNormeAndValidite(Norme[] normeOk, String[] validiteOk, String requeteFichier) throws ArcException {
         StaticLoggerDispatcher.info("** calculerNorme **", LOGGER);
 

@@ -1,7 +1,6 @@
 package fr.insee.arc.ws.dao;
 
 import java.sql.Connection;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +11,7 @@ import org.json.JSONArray;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.ws.actions.SendResponse;
@@ -33,7 +33,7 @@ public class QueryDaoImpl implements QueryDao {
      */
     @Override
     @SQLExecutor
-    public void doRequest(String id, SendResponse resp, long timestamp) throws DAOException {
+    public void doRequest(String id, SendResponse resp, long timestamp) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.doRequest()");
         Connection connection = null;
         ArrayList<ArrayList<String>> result = new ArrayList<>();
@@ -48,8 +48,6 @@ public class QueryDaoImpl implements QueryDao {
             if (result != null) {
                 map(result, resp);
             }
-        } catch (Exception e) {
-            throw new DAOException(e);
         } finally {
             close(connection);
         }
@@ -62,7 +60,7 @@ public class QueryDaoImpl implements QueryDao {
      * @see dao.ResponseDao#createImage(java.util.List, java.util.HashMap, java.lang.String)
      */
     @Override
-    public void createImage(List<String> ids, HashMap<String, String> sqlRequests, long timestamp) throws DAOException {
+    public void createImage(List<String> ids, HashMap<String, String> sqlRequests, long timestamp) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.createImage()");
         long beginning = System.currentTimeMillis();
         Connection connection = null;
@@ -82,8 +80,6 @@ public class QueryDaoImpl implements QueryDao {
             long time2 = System.currentTimeMillis() - beginning2;
             LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.createImage() : ExecuteQuery(Create temp_) Done -", time2, "ms");
 
-        } catch (Exception e1) {
-            throw new DAOException(e1);
         } finally {
             close(connection);
         }

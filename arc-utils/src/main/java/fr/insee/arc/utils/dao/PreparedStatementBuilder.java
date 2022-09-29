@@ -14,7 +14,7 @@ private StringBuilder query=new StringBuilder();
 	
 private List<String> parameters=new ArrayList<String>();
 
-private final static String BIND_VARIABLE_PLACEHOLDER="  ?  ";
+private static final String BIND_VARIABLE_PLACEHOLDER="  ?  ";
 
 public PreparedStatementBuilder() {
 	super();

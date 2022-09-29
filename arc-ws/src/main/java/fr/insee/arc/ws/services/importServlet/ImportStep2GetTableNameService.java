@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.ws.actions.SendResponse;
 import fr.insee.arc.ws.dao.ClientDao;
@@ -48,13 +49,13 @@ public class ImportStep2GetTableNameService {
 		return this;
 	}
 
-	public void execute(SendResponse resp) {
+	public void execute(SendResponse resp) throws ArcException {
 
 		try {
 			StringBuilder type = new StringBuilder();
 
 			client = this.dsnRequest.getString(JsonKeys.CLIENT.getKey());
-			environnement = this.dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());
+			environnement = this.dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());	
 
 			String tableName = this.clientDao.getAClientTable(client);
 
@@ -87,7 +88,7 @@ public class ImportStep2GetTableNameService {
 			resp.send(tableName + " " + type);
 			resp.endSending();
 
-		} catch (Exception e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("** Error in servlet ImportStep2GetTableNameService **", LOGGER);
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
 			resp.endSending();

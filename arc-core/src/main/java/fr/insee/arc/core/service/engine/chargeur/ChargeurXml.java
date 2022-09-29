@@ -105,7 +105,7 @@ public class ChargeurXml implements IChargeur{
     
     /**
      * Autonomous execution with parameters constructor
-     * @throws Exception 
+     * @throws ArcException 
      */
     public void executeEngine() throws ArcException {
     	initialisation();
@@ -113,7 +113,7 @@ public class ChargeurXml implements IChargeur{
     }
 
     @Override
-    public void initialisation() {
+    public void initialisation() throws ArcException {
         StaticLoggerDispatcher.info("** requeteCreateA **", LOGGER);
 
         java.util.Date beginDate = new java.util.Date();
@@ -154,6 +154,7 @@ public class ChargeurXml implements IChargeur{
 			UtilitaireDao.get("arc").executeBlock(this.connexion, requete);
 		} catch (ArcException e) {
 		    LoggerHelper.errorAsComment(LOGGER, "ChargeurXML.initialisation - creation failed on the temporary table A which is the temporary recipient for the xml file to be loaded");
+		    throw e;
 		}
         java.util.Date endDate = new java.util.Date();
         
