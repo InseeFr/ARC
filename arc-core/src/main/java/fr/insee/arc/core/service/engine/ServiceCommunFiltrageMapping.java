@@ -61,7 +61,7 @@ public class ServiceCommunFiltrageMapping {
             String expressionRegleInterprete = aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle
                     .getLevel(aNomColonneRegle).get(i).getLocalRoot();
             if (expressionRegleInterprete==null){
-            	expressionRegleInterprete=IConstanteCaractere.empty;
+            	expressionRegleInterprete=IConstanteCaractere.EMPTY;
             }
             aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle
                     .getLevel(aNomColonneRegle)

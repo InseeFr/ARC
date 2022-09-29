@@ -66,7 +66,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
 
     @Override
     public void deriverTest() throws ArcException {
-        String intermediaire = this.getExpression().replaceAll(tokenRegexDebutOuFin, empty);
+        String intermediaire = this.getExpression().replaceAll(tokenRegexDebutOuFin, EMPTY);
         Pattern pattern = Pattern.compile("\\{:[^\\{:\\}]+\\}");
         Matcher matcher = pattern.matcher(intermediaire);
         StringBuilder returned = new StringBuilder();
@@ -88,7 +88,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
     }
 
     private String obtenirRequeteExecutable() {
-        String returned = this.getExpression().replaceAll(tokenRegexDebutOuFin, empty);
+        String returned = this.getExpression().replaceAll(tokenRegexDebutOuFin, EMPTY);
         for (TableMapping table : this.ensembleTableMapping) {
             returned = returned.replace(tokenTable(table.getNomTableCourt()), ApiService.dbEnv(this.environnement) + table);
         }

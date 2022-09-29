@@ -85,7 +85,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
         /*
          * Éliminer les accolades de début ou de fin
          */
-        String expressionGroupe = anExpressionGroupe.replaceAll(REGEX_DEBUT_OU_FIN_ECHAPPEMENT, empty);
+        String expressionGroupe = anExpressionGroupe.replaceAll(REGEX_DEBUT_OU_FIN_ECHAPPEMENT, EMPTY);
         Matcher matcher = patternExpressionListeNombreAccolade.matcher(expressionGroupe);
         /*
          * Repérer {1, 2}

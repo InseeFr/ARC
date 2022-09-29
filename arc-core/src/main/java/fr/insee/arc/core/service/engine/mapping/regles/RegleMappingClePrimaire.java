@@ -62,7 +62,7 @@ public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
                             .toLowerCase()//
                             + "_" + this.variableMapping//
                                     .getNomVariable()//
-                                    .replace("id_", empty) + "_ok")) {
+                                    .replace("id_", EMPTY) + "_ok")) {
                 this.tableMappingIdentifiee = table;
             }
         }
@@ -79,7 +79,7 @@ public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
     public void deriverTest() throws ArcException {
         String regexDebut = "^\\{pk:mapping_" + this.idFamille;
         String boutDeux = "_ok\\}$";
-        String nomVariable = this.getExpression().replaceFirst(regexDebut.toLowerCase(), "id").replaceFirst(boutDeux, empty);
+        String nomVariable = this.getExpression().replaceFirst(regexDebut.toLowerCase(), "id").replaceFirst(boutDeux, EMPTY);
         LoggerHelper.traceAsComment(LOGGER, "regexDebut :" + regexDebut + " , Nom variable : " + nomVariable);
         if (!nomVariable.equalsIgnoreCase(this.variableMapping.getNomVariable())) {
             throw new ArcException("La règle de clé primaire pour la variable " + this.getVariableMapping().getNomVariable()

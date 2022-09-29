@@ -625,7 +625,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                         message.append("La variable "
                                 + this.viewVariableMetier.getInputFields().get(1)
                                 + " existe déjà. Pour la modifier, passez par la ligne correspondante du tableau variable*table.\nAucune variable n'a été ajoutée.\n");
-                        return empty;
+                        return EMPTY;
                     }
                 }
             }
@@ -634,7 +634,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
        	 if (blank)
        	 {
        		 message.append("Vous avez oublié de spécifier les tables cibles pour votre variable");
-                return empty;
+                return EMPTY;
        	 }
             
             message.append("L'ajout de variables s'est achevé sur un succès.\n");
@@ -643,7 +643,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
             LOGGER.error("Erreur ", ex);
             message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
         }
-        return empty;
+        return EMPTY;
     }
 
     private static boolean checkIsValide(List<String> inputFields) {
@@ -706,7 +706,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         } catch (Exception ex) {
             message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
         }
-        return empty;
+        return EMPTY;
     }
 
     private static String synchronizeRegleWithVariableMetier(StringBuilder message, String idFamille) {
@@ -838,7 +838,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         } catch (Exception ex) {
             loggerDispatcher.error("Error in GererFamilleNormeAction.deleteVariableMetierWithoutSync", LOGGER);
         }
-        return empty;
+        return EMPTY;
     }
 
     private boolean isModificationOk(StringBuilder message, HashMap<String, ArrayList<String>> mapContentAfterUpdate) {
@@ -866,7 +866,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
             requeteLocale.append("\n  SET type_consolidation = '" + someViewVariableMetier.mapOnlyUpdatedContent().get("type_consolidation").get(i)
                     + "'");
             requeteLocale.append(",\n    description_variable_metier = '"
-                    + someViewVariableMetier.mapOnlyUpdatedContent().get("description_variable_metier").get(i).replace(quote, quotequote) + "'");
+                    + someViewVariableMetier.mapOnlyUpdatedContent().get("description_variable_metier").get(i).replace(QUOTE, QUOTE_ESCAPE) + "'");
             requeteLocale.append("\n  WHERE id_famille = '" + someViewVariableMetier.mapOnlyUpdatedContent().get(ID_FAMILLE).get(i) + "'");
             requeteLocale.append("\n    AND nom_variable_metier = '"
                     + someViewVariableMetier.mapOnlyUpdatedContent().get(MODEL_VARIABLE_NAME).get(i) + "'");

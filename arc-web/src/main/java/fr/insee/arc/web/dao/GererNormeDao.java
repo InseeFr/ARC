@@ -656,7 +656,7 @@ public class GererNormeDao implements IDbConstant {
 
 				// Importing the file in the database (COPY command)
 				UtilitaireDao.get("arc").importing(null, nomTableImage, bufferedReader, true, false,
-						IConstanteCaractere.semicolon);
+						IConstanteCaractere.SEMICOLON);
 
 			} catch (Exception ex) {
 				vObjectToUpdate.setMessage("Error when uploading the file : " + ex.getMessage());
@@ -704,7 +704,7 @@ public class GererNormeDao implements IDbConstant {
 
 	private static List<String> getHeaderFromFile(BufferedReader bufferedReader) throws IOException {
 		String listeColonnesAggregees = bufferedReader.readLine();
-		List<String> listeColonnes = Arrays.asList(listeColonnesAggregees.split(IConstanteCaractere.semicolon));
+		List<String> listeColonnes = Arrays.asList(listeColonnesAggregees.split(IConstanteCaractere.SEMICOLON));
 		LoggerHelper.debug(LOGGER, "Columns list : ", Format.untokenize(listeColonnes, ", "));
 		return listeColonnes;
 	}

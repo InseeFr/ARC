@@ -4,32 +4,23 @@ package fr.insee.arc.utils.textUtils;
  * Character constants
  */
 public interface IConstanteCaractere {
-	    public static final String dot = ".";
-
 	    // Marker
-	    public static final String comma = ",";
-	    public static final String empty = "";
-	    public static final String BOM = "\uFEFF";
-	    public static final String colon = ":";
-	    public static final String closingBrace = "}";
-	    public static final String closingParenthesis = ")";
-	    public static final String dash = "-";
-	    public static final String dollar = "$";
+	    public static final String COMMA = ",";
+	    public static final String EMPTY = "";
+	    public static final String BRACE_END = "}";
+	    public static final String PARENTHESIS_END = ")";
+	    public static final String DASH = "-";
+	    public static final String DOLLAR = "$";
 	    public static final String DOT = ".";
-	    public static final String equals = "=";
-	    public static final String newline = "\n";
-	    public static final String openingBrace = "{";
-	    public static final String openingParenthesis = "(";
-	    public static final String percent = "%";
-	    public static final String plus = "+";
-	    public static final String quote = "'";
-	    public static final String quotequote = "''";
-	    public static final String semicolon = ";";
-	    public static final String sharp = "#";
-	    public static final String space = " ";
-	    public static final String htmlUnseccableSpace = "&nbsp;";
-	    public static final String star = "*";
-	    public static final String underscore = "_";
-	    public static final String ALIAS_NOM_TABLE = "$VG$";
+	    public static final String EQUAL_OPERATOR = "=";
+	    public static final String NEWLINE = "\n";
+	    public static final String BRACE_START = "{";
+	    public static final String PARENTHESIS_OPEN = "(";
+	    public static final String QUOTE = "'";
+	    public static final String QUOTE_ESCAPE = "''";
+	    public static final String SEMICOLON = ";";
+	    public static final String SHARP = "#";
+	    public static final String SPACE = " ";
+	    public static final String UNDERSCORE = "_";
 
 	}

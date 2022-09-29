@@ -57,7 +57,7 @@ public class LoggerHelper {
         {
             if (i > 0)
             {
-                returned.append(IConstanteCaractere.space);
+                returned.append(IConstanteCaractere.SPACE);
             }
             returned.append(tokens[i]);
         }
@@ -197,7 +197,7 @@ public class LoggerHelper {
      */
     public static void debugDebutMethodeAsComment(Class<?> clazz, String method, Logger aLogger)
     {
-        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), IConstanteCaractere.sharp, method, "(début)");
+        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), IConstanteCaractere.SHARP, method, "(début)");
     }
 
     /**
@@ -209,7 +209,7 @@ public class LoggerHelper {
      */
     public static void debugFinMethodeAsComment(Class<?> clazz, String method, Logger aLogger)
     {
-        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), IConstanteCaractere.sharp, method, "(fin)");
+        logAsComment(aLogger, Level.DEBUG, clazz.getCanonicalName(), IConstanteCaractere.SHARP, method, "(fin)");
     }
 
     /**
@@ -354,6 +354,6 @@ public class LoggerHelper {
     public static final void errorGenTextAsComment(Class<?> clazz, String method, Logger aLogger, Throwable t)
     {
         logAsComment(aLogger, Level.ERROR, t, "Lors de l'exécution de", clazz.getCanonicalName(),
-                IConstanteCaractere.sharp, method);
+                IConstanteCaractere.SHARP, method);
     }
 }

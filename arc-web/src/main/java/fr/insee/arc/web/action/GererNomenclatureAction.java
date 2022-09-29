@@ -148,10 +148,10 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     }
 
     private String typeNomenclature(String nomTable) {
-        String[] tokens = nomTable.split(underscore);
+        String[] tokens = nomTable.split(UNDERSCORE);
         StringBuilder typeNomenclature = new StringBuilder();
         for (int i = 0; i < tokens.length - 1; i++) {
-            typeNomenclature.append((i > 0 ? underscore : "") + tokens[i]);
+            typeNomenclature.append((i > 0 ? UNDERSCORE : "") + tokens[i]);
         }
         return typeNomenclature.toString();
     }
@@ -185,7 +185,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
             return false;
         }
 
-        if (nomTable.split(underscore).length < 3) {
+        if (nomTable.split(UNDERSCORE).length < 3) {
             this.viewListNomenclatures.setMessage("Erreur - le nom doit être de la forme nmcl_type_millesime (au moins deux underscore)");
             return false;
         }

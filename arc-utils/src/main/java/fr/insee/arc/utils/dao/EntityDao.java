@@ -194,8 +194,8 @@ public abstract class EntityDao<T extends AbstractEntity> implements IConstanteN
         if (anExpression == null) {
             return "null";
         }
-        return anExpression.matches("^\\(.*\\)$") ? anExpression : new StringBuilder(quote).append(anExpression.replace(quote, quotequote))
-                .append(quote).toString();
+        return anExpression.matches("^\\(.*\\)$") ? anExpression : new StringBuilder(QUOTE).append(anExpression.replace(QUOTE, QUOTE_ESCAPE))
+                .append(QUOTE).toString();
     }
 
     /**
@@ -214,8 +214,8 @@ public abstract class EntityDao<T extends AbstractEntity> implements IConstanteN
     }
 
     public String toString() {
-        return new StringBuilder(this.tableName + newline)//
-                .append(this.getNames() + newline)//
+        return new StringBuilder(this.tableName + NEWLINE)//
+                .append(this.getNames() + NEWLINE)//
                 .append(this.getTypes())//
                 .toString();
     }
