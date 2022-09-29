@@ -10,5 +10,13 @@ public class ArcException extends RuntimeException {
 	public ArcException(String error) {
 		super(error);
 	}
+	
+	public ArcException(Exception ex) {
+		super(ex);
+	}
+
+	public ArcException(String error, Exception ex) {
+		super(ex);
+	}
 
 }

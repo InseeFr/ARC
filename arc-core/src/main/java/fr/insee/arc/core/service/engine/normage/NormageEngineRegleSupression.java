@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
 
 public class NormageEngineRegleSupression {
@@ -30,7 +31,7 @@ public class NormageEngineRegleSupression {
 
 	protected static void ajouterRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles)
-			throws Exception {
+			throws ArcException {
 		// on va jouer au "qui enleve-t-on" ??
 		// on va parcourir les regles de normage, controle, filtrage, mapping et voir
 		// quelles sont les rubriques utilisées
@@ -117,8 +118,6 @@ public class NormageEngineRegleSupression {
 							regle.get("rubrique").add(rubriquePereBloc);
 							regle.get("rubrique_nmcl").add(null);
 
-							// System.out.println("Suppression des blocs : "+rubriquePereBloc);
-
 						}
 					}
 				}
@@ -189,7 +188,7 @@ public class NormageEngineRegleSupression {
 	 * @throws Exception
 	 */
 	protected static String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
+			String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info("appliquerRegleSuppression()", LOGGER);
 

@@ -3,7 +3,6 @@ package fr.insee.arc.core.service.engine.chargeur;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,11 +23,12 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.Norme;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Pair;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 
@@ -103,9 +103,9 @@ public class ChargeurXmlComplexe implements IChargeur{
     
     /**
      * Autonomous execution with parameters constructor
-     * @throws Exception 
+     * @throws ArcException 
      */
-    public void executeEngine() throws Exception {
+    public void executeEngine() throws ArcException {
     	initialisation();
     	execution();
     }
@@ -129,7 +129,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 					this.format.add(new Pair<String,String>(f.split(",")[0].trim(),f.split(",")[1].trim()));
 				}
 			}
-        } catch (SQLException e1) {
+        } catch (ArcException e1) {
 		}
 
         
@@ -167,7 +167,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 
         try {
 			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error in ChargeurXML.initialisation()",LOGGER);
 		}
         java.util.Date endDate = new java.util.Date();
@@ -190,13 +190,13 @@ public class ChargeurXmlComplexe implements IChargeur{
 
         try {
             UtilitaireDao.get("arc").executeBlock(this.connexion, requeteBilan);
-        } catch (SQLException ex) {
+        } catch (ArcException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "chargerXml()", LOGGER, ex);
         }
     }
 
     @Override
-    public void execution() throws Exception {
+    public void execution() throws ArcException {
         StaticLoggerDispatcher.info("** execution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
@@ -240,7 +240,7 @@ public class ChargeurXmlComplexe implements IChargeur{
             StaticLoggerDispatcher.error("Error in ChargeurXML.execution()", LOGGER);
             rapport = e.getMessage().replace("'", "''");
             handler.requete.setLength(0);
-            throw e;
+            throw new ArcException("Error in ChargeurXML.execution()");
         }
 
         this.jointure=handler.jointure;
@@ -253,7 +253,7 @@ public class ChargeurXmlComplexe implements IChargeur{
     }
 
     @Override
-    public void charger() throws Exception {
+    public void charger() throws ArcException {
         initialisation();
         execution();
         finalisation();

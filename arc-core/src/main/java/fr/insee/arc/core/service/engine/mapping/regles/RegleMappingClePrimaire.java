@@ -6,6 +6,7 @@ import java.util.Set;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.TableMapping;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.LoggerHelper;
 /**
@@ -75,13 +76,13 @@ public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
      * Attention à la casse des différents éléments
      */
     @Override
-    public void deriverTest() {
+    public void deriverTest() throws ArcException {
         String regexDebut = "^\\{pk:mapping_" + this.idFamille;
         String boutDeux = "_ok\\}$";
         String nomVariable = this.getExpression().replaceFirst(regexDebut.toLowerCase(), "id").replaceFirst(boutDeux, empty);
         LoggerHelper.traceAsComment(LOGGER, "regexDebut :" + regexDebut + " , Nom variable : " + nomVariable);
         if (!nomVariable.equalsIgnoreCase(this.variableMapping.getNomVariable())) {
-            throw new IllegalStateException("La règle de clé primaire pour la variable " + this.getVariableMapping().getNomVariable()
+            throw new ArcException("La règle de clé primaire pour la variable " + this.getVariableMapping().getNomVariable()
                     + " n'est pas de la forme : \"{\"pk:mapping_<famille>_<variable>_ok\"}\"");
         }
     }

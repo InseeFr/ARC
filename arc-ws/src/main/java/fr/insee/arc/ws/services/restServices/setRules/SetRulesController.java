@@ -1,6 +1,5 @@
 package fr.insee.arc.ws.services.restServices.setRules;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.services.restServices.setRules.pojo.SetRulesPojo;
 
 @RestController
@@ -110,9 +110,9 @@ public class SetRulesController {
 	/**
 	 * replace = delete + insert
 	 * @param bodyPojo
-	 * @throws SQLException 
+	 * @throws ArcException 
 	 */
-	public void replaceRulesDAO(SetRulesPojo bodyPojo, String tablename, String...primaryKeys) throws SQLException
+	public void replaceRulesDAO(SetRulesPojo bodyPojo, String tablename, String...primaryKeys) throws ArcException
 	{
 		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 	

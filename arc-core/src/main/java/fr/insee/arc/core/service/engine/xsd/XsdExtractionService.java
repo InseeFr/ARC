@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.engine.xsd;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -9,6 +8,7 @@ import java.util.TreeSet;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.xsd.controls.ControlForXsd;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdGroup;
+import fr.insee.arc.utils.exception.ArcException;
 
 /** Produces an XSD-format export of a set of control rules.*/
 public class XsdExtractionService {
@@ -16,7 +16,7 @@ public class XsdExtractionService {
 	private static final String END_LINE = "\n";
 	private static final String INDENT = "\t";
 
-	public String get(Connection connection, JeuDeRegle jdr) throws SQLException, InvalidStateForXsdException {
+	public String get(Connection connection, JeuDeRegle jdr) throws ArcException {
 		XsdRulesRetrievalService retrievalService = new XsdRulesRetrievalService();
 		XsdControlDescription data = retrievalService.fetchRulesFromBase(connection, jdr);
 		return generateXsdSchemaFrom(data);
@@ -26,7 +26,7 @@ public class XsdExtractionService {
 	 * @throws InvalidStateForXsdException if the XsdControlDescription
 	 * 		would result in an invalid XSD schema.*/
 	public String generateXsdSchemaFrom(XsdControlDescription data)
-			throws InvalidStateForXsdException {
+			throws ArcException {
 		XsdGroup roots = data.getRoots();
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" + END_LINE);
@@ -46,7 +46,7 @@ public class XsdExtractionService {
 	 * @throws InvalidStateForXsdException if the XsdControlDescription
 	 * 		would result in an invalid XSD schema.*/
 	public String generateNodeAndChildrenAsXsdElements(XsdControlDescription data, XsdElement element, String indentation)
-			throws InvalidStateForXsdException {
+			throws ArcException {
 		StringBuilder sb = new StringBuilder();
 		if (data.hasComments(element)) {
 			sb.append(getComments(element, data, indentation));
@@ -83,7 +83,7 @@ public class XsdExtractionService {
 	 * @param data the information to use
 	 * @param indentation the indentation level to start the description with */
 	private String getTypeDescription(XsdElement element, XsdControlDescription data, String indentation)
-			throws InvalidStateForXsdException {
+			throws ArcException {
 		String type = data.hasChildren(element) ? "xs:complexType" : "xs:simpleType";
 		StringBuilder sb = new StringBuilder();
 		sb.append(indentation + "<" + type + ">" + END_LINE);
@@ -99,7 +99,7 @@ public class XsdExtractionService {
 	 * @param data the information to use
 	 * @param indentation the indentation level to start the description with */
 	private String getChildren(XsdElement element, XsdControlDescription data, String indentation)
-			throws InvalidStateForXsdException {
+			throws ArcException {
 		XsdGroup children = data.getChildrenOf(element);
 		if (children.isEmpty()) {
 			return "";
@@ -145,7 +145,7 @@ public class XsdExtractionService {
 	 * @param data the information to use
 	 * @param indentation the indentation level to start the description with */
 	private String getRestrictions(XsdElement element, XsdControlDescription data, String indentation)
-			throws InvalidStateForXsdException {
+			throws ArcException {
 		Set<ControlForXsd> rules = data.getRulesFor(element);
 		if (rules.isEmpty()) {
 			return "";
@@ -180,7 +180,7 @@ public class XsdExtractionService {
 	 * Defaults to "xs:string".
 	 * @param rules the set of rules for the element
 	 * @throws InvalidStateForXsdException if more than one possible type is found*/
-	public String findType(Set<ControlForXsd> rules) throws InvalidStateForXsdException {
+	public String findType(Set<ControlForXsd> rules) throws ArcException {
 		TreeSet<String> typesFound = new TreeSet<>();
 		for (ControlForXsd rule : rules) {
 			if (rule.defineType()) {
@@ -188,7 +188,7 @@ public class XsdExtractionService {
 			}
 		}
 		if (typesFound.size() > 1) {
-			throw new InvalidStateForXsdException(
+			throw new ArcException(
 					"Plus d'un type est possible : le type XSD n'est pas déterminable.");
 		}
 		String typeFound = typesFound.pollFirst();

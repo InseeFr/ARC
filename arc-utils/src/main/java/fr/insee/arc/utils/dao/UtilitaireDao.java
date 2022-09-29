@@ -3,6 +3,7 @@ package fr.insee.arc.utils.dao;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +48,7 @@ import org.postgresql.core.BaseConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtils;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -144,10 +146,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * Retourne une connexion vers la base de données
 	 *
 	 * @return la connexion
-	 * @throws SQLException
+	 * @throws ArcException
 	 * @throws ClassNotFoundException
 	 */
-	public final Connection getDriverConnexion() throws SQLException {
+	public final Connection getDriverConnexion() throws ArcException {
 		// invocation du driver
 		try {
 			Class.forName(properties.getDatabaseDriverClassName());
@@ -173,12 +175,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				nbTry++;
 			}
 		if (!connectionOk) {
-			throw new SQLException("La connexion n'a pu aboutir");
+			throw new ArcException("La connexion n'a pu aboutir");
 		}
 		return c;
 		
 		} catch (ClassNotFoundException e1) {
-			throw new SQLException("L'initialisation de la connexion a échouée");
+			throw new ArcException("L'initialisation de la connexion a échouée");
 		}
 	}
 
@@ -187,9 +189,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param connexion
 	 * @return une nouvelle connexion non poolée si connexion isnull, ou la
 	 *         connexion en entrée
-	 * @throws SQLException 
+	 * @throws ArcException 
 	 */
-	public final ConnectionWrapper initConnection(Connection connexion) throws SQLException {
+	public final ConnectionWrapper initConnection(Connection connexion) throws ArcException {
 			Boolean isNull = (connexion == null);
 			return new ConnectionWrapper(isNull, Boolean.TRUE.equals(isNull) ? getDriverConnexion() : connexion);
 	}
@@ -234,7 +236,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 								.append(";")//
 				);
 			}
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "dropTable()", LOGGER, ex);
 		}
 	}
@@ -249,22 +251,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 * <br/>
-	 *
-	 *
-	 * @param connexion la connexion à la base
-	 * @param seq       le nom de la séquence
-	 */
-	public void createSequence(Connection connexion, String seq) {
-		try {
-			executeImmediate(connexion, "CREATE SEQUENCE " + seq);
-		} catch (SQLException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "createSequence()", LOGGER, ex);
-		}
-	}
-
-
-	/**
 	 * Exécute une requête {@code sql} avec des arguments {@code args}, renvoie le
 	 * booléen (unique) que cette requête est censée rendre<br/>
 	 *
@@ -272,8 +258,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param sql
 	 * @param args
 	 * @return
+	 * @throws ArcException 
 	 */
-	public Boolean getBoolean(Connection connexion, PreparedStatementBuilder sql, String... args) throws Exception {
+	public Boolean getBoolean(Connection connexion, PreparedStatementBuilder sql, String... args) throws ArcException {
 		
 		String returned;
 		returned = getString(connexion,sql,args);
@@ -319,9 +306,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param requete   la requête
 	 * @param args      les arguments de la requête (optionnels)
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public String getString(Connection connexion, PreparedStatementBuilder requete, String... args) throws SQLException {
+	public String getString(Connection connexion, PreparedStatementBuilder requete, String... args) throws ArcException {
 			requete.setQuery(new StringBuilder(Format.parseStringAvecArguments(requete.getQuery().toString(), args)));
 			ArrayList<ArrayList<String>> returned=executeRequest(connexion, requete , ModeRequete.EXTRA_FLOAT_DIGIT);
 			return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? null : returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
@@ -331,9 +318,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	
 
 	public Date getDate(Connection aConnexion, PreparedStatementBuilder aRequete, SimpleDateFormat aSimpleDateFomrat)
-			throws ParseException, SQLException {
+			throws ArcException {
 		String resultat = getString(aConnexion, aRequete);
-		return resultat == null ? null : aSimpleDateFomrat.parse(resultat);
+		try {
+			return resultat == null ? null : aSimpleDateFomrat.parse(resultat);
+		} catch (ParseException e) {
+			throw new ArcException(e);
+		}
 	}
 	
 
@@ -351,7 +342,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		try {
 			returned = getString(connexion,sql,args);
 			return (returned == null ? Long.MIN_VALUE : Long.parseLong(returned));
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "getInt()", LOGGER, e);
 		}
 		return Long.MIN_VALUE;
@@ -388,7 +379,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return getInt(connexion, new PreparedStatementBuilder("select max(" + column + ") max_value from " + table));
 	}
 
-	public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) throws SQLException {
+	public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) throws ArcException {
 		return getColumns(aConnexion, new HashSet<String>(), aNomTable).contains(aNomVariable);
 	}
 
@@ -432,10 +423,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param requete
 	 * @param modes
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	public ArrayList<ArrayList<String>> executeRequestWithoutMetadata(Connection connexion, PreparedStatementBuilder requete,
-			ModeRequete... modes) throws SQLException {
+			ModeRequete... modes) throws ArcException {
 		ArrayList<ArrayList<String>> returned = executeRequest(connexion, requete, modes);
 		returned.remove(0);
 		returned.remove(0);
@@ -443,12 +434,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	public void executeImmediate(Connection connexion, StringBuilder requete, ModeRequete... modes)
-			throws SQLException {
+			throws ArcException {
 		executeImmediate(connexion, requete.toString(), modes);
 	}
 
 
-	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes) throws SQLException {
+	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes) throws ArcException {
 
 		long start = new Date().getTime();
 		
@@ -463,16 +454,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				try {
 					st.execute(ModeRequete.configureQuery(requete,modes));
 					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					st.cancel();
 					LoggerHelper.error(LOGGER, e);
 					LoggerHelper.error(LOGGER, requete);
 					throw e;
 				}
 			}
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			LoggerHelper.error(LOGGER, e);
-			throw e;
+			throw new ArcException(e);
 		} finally {
 			if (connexionWrapper.isLocal()) {
 				connexionWrapper.close();
@@ -486,7 +477,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param connexion
 	 * @param requete
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	public Boolean testResultRequest(Connection connexion, PreparedStatementBuilder requete) {
 		PreparedStatementBuilder requeteLimit = new PreparedStatementBuilder();
@@ -512,13 +503,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 * @return
 	 * @throws ConnexionException
-	 * @throws SQLException
+	 * @throws ArcException
 	 * @throws PoolException
 	 *
 	 *
 	 */
 	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, PreparedStatementBuilder requete,  ModeRequete... modes)
-			throws SQLException {
+			throws ArcException {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
 
 	}
@@ -528,10 +519,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param connexion
 	 * @param requete
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	public ArrayList<ArrayList<String>> executeStatement(Connection connexion, PreparedStatementBuilder requete)
-			throws SQLException {
+			throws ArcException {
 		return executeStatement(connexion, requete, EntityProvider.getArrayOfArrayProvider());
 
 	}
@@ -543,9 +534,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param requete
 	 * @param entityProvider
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public <T> T executeStatement(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider) throws SQLException {
+	public <T> T executeStatement(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider) throws ArcException {
 
 		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
 		LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
@@ -562,7 +553,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					try {
 						ResultSet res = stmt.executeQuery(requete.getQuery().toString());
 						return entityProvider.apply(res);
-					} catch (Exception e) {
+					} catch (SQLException e) {
 						if (!this.silent) {
 							LoggerHelper.error(LOGGER, stmt.toString());
 						}
@@ -571,7 +562,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 						connexionWrapper.getConnexion().commit();
 					}
 				}
-			} catch (Exception e) {
+			} catch (SQLException e) {
 				if (!this.silent) {
 					LoggerHelper.error(LOGGER, "executeStatement()", e);
 				}
@@ -580,11 +571,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} finally {
 				connexionWrapper.close();
 			}
-		} catch (Exception ex) {
+		} catch (SQLException ex) {
 			if (!this.silent) {
 				LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
 			}
-			throw ex;
+			throw new ArcException(ex);
 		}
 	}
 	
@@ -600,13 +591,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 * @return
 	 * @throws ConnexionException
-	 * @throws SQLException
+	 * @throws ArcException
 	 * @throws PoolException
 	 *
 	 *
 	 */
 	public <T> T executeRequest(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider,
-			ModeRequete... modes) throws SQLException {
+			ModeRequete... modes) throws ArcException {
 
 		long start = new Date().getTime();
 		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
@@ -650,7 +641,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 							return entityProvider.apply(res);
 						}
 						return null;
-					} catch (Exception e) {
+					} catch (SQLException e) {
 						if (!this.silent) {
 							LoggerHelper.error(LOGGER, stmt.toString());
 						}
@@ -659,7 +650,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 						connexionWrapper.getConnexion().commit();
 					}
 				}
-			} catch (Exception e) {
+			} catch (SQLException e) {
 				if (!this.silent) {
 					LoggerHelper.error(LOGGER, "executeRequest()", e);
 				}
@@ -668,11 +659,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} finally {
 				connexionWrapper.close();
 			}
-		} catch (Exception ex) {
+		} catch (SQLException ex) {
 			if (!this.silent) {
 				LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
 			}
-			throw ex;
+			throw new ArcException(ex);
 		}
 	}
 
@@ -690,15 +681,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public static abstract class EntityProvider<T> implements Function<ResultSet, T> {
 		private static final class ArrayOfArrayProvider extends EntityProvider<ArrayList<ArrayList<String>>> {
-			public ArrayOfArrayProvider() {
-			}
-
 			@Override
 			public ArrayList<ArrayList<String>> apply(ResultSet res) {
 				try {
 					return fromResultSetToArray(res);
-				} catch (SQLException ex) {
-					throw new RuntimeException(ex);
+				} catch (ArcException ex) {
+					throw new ArcException(ex);
 				}
 			}
 		}
@@ -708,10 +696,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 
 		private static final class GenericBeanProvider extends EntityProvider<GenericBean> {
-
-			public GenericBeanProvider() {
-			}
-
 			@Override
 			public GenericBean apply(ResultSet res) {
 				return new GenericBean(getArrayOfArrayProvider().apply(res));
@@ -736,8 +720,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			public List<T> apply(ResultSet res) {
 				try {
 					return fromResultSetToListOfT(() -> new ArrayList<>(), this.orm, res);
-				} catch (SQLException ex) {
-					throw new RuntimeException(ex);
+				} catch (ArcException ex) {
+					throw new ArcException(ex);
 				}
 			}
 		}
@@ -770,17 +754,18 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public static final GenericBean fromResultSetToGenericBean(ResultSet res) {
 		try {
 			return new GenericBean(fromResultSetToArray(res));
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 			throw new IllegalStateException(ex);
 		}
 	}
 
-	public static ArrayList<ArrayList<String>> fromResultSetToArray(ResultSet res) throws SQLException {
+	public static ArrayList<ArrayList<String>> fromResultSetToArray(ResultSet res) throws ArcException {
 		return fromResultSetToList(() -> new ArrayList<>(), new ArrayList<>(), res);
 	}
 
 	public static <T extends List<String>, U extends List<T>> U fromResultSetToList(Supplier<T> newList, U result,
-			ResultSet res) throws SQLException {
+			ResultSet res) throws ArcException {
+		try {
 		ResultSetMetaData rsmd = res.getMetaData();
 		T record = newList.get();
 		// Noms des colonnes
@@ -814,15 +799,24 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			result.add(record);
 		}
 		return result;
+		}
+		catch (SQLException e)
+		{
+			throw new ArcException(e);
+		}
 	}
 
 	public static <T, U extends List<T>> U fromResultSetToListOfT(Supplier<U> newList, Function<ResultSet, T> orm,
-			ResultSet res) throws SQLException {
+			ResultSet res) throws ArcException {
+		try {
 		U result = newList.get();
-		while (res.next()) {
-			result.add(orm.apply(res));
-		}
+			while (res.next()) {
+				result.add(orm.apply(res));
+			}
 		return result;
+		} catch (SQLException e) {
+			throw new ArcException(e);
+		}
 	}
 
 	/**
@@ -836,12 +830,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return (l.size() > 2);
 	}
 
-	public Boolean hasResults(Connection connexion, PreparedStatementBuilder requete) throws Exception {
-		try {
-			return hasResults(executeRequest(connexion, requete));
-		} catch (Exception ex) {
-			throw ex;
-		}
+	public Boolean hasResults(Connection connexion, PreparedStatementBuilder requete) throws ArcException {
+		return hasResults(executeRequest(connexion, requete));
 	}
 
 	/**
@@ -851,9 +841,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param connexion
 	 * @param requete
 	 * @param out
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public void outStreamRequeteSelect(Connection connexion, PreparedStatementBuilder requete, OutputStream out) throws SQLException {
+	public void outStreamRequeteSelect(Connection connexion, PreparedStatementBuilder requete, OutputStream out) throws ArcException {
 		StringBuilder str = new StringBuilder();
 		String lineSeparator = "\n";
 		int k = 0;
@@ -944,7 +934,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param entryName
 	 * @throws IOException
 	 */
-	public static void generateTarGzFromFile(File fileIn, File fileOut, String entryName) throws IOException {
+	public static void generateTarGzFromFile(File fileIn, File fileOut, String entryName) throws ArcException {
 
 		try (BufferedInputStream fis = new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE);)
 		{
@@ -953,9 +943,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				TarArchiveEntry entry = new TarArchiveEntry(entryName);
 				entry.setSize(fileIn.length());
 				taos.putArchiveEntry(entry);
-				copy(fis, taos);
+				copyFromInputstreamToOutputStream(fis, taos);
 				taos.closeArchiveEntry();
 			}
+		} catch (IOException e) {
+			throw new ArcException(e);
 		}
 	}
 
@@ -978,7 +970,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				entry.setSize(fileIn.length());
 				taos.putArchiveEntry(entry);
 				// Ecriture dans le fichier
-				copy(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE), taos);
+				copyFromInputstreamToOutputStream(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE), taos);
 				taos.closeArchiveEntry();
 			} catch (IOException ex) {
 				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromFile()", LOGGER, ex);
@@ -1119,7 +1111,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param output
 	 * @throws IOException
 	 */
-	public static void copy(InputStream input, OutputStream output) throws IOException {
+	public static void copyFromInputstreamToOutputStream(InputStream input, OutputStream output) throws IOException {
 		try {
 			byte[] buffer = new byte[BUFFER_SIZE];
 			int n = 0;
@@ -1141,13 +1133,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 *
 	 * @param connexion
-	 * @param requete          , contient la liste des fichiers
-	 * @param taos             , réceptacle des fichiers
+	 * @param requete          , contient la liste des fichiers à copier
+	 * @param taos             , stream receptacle des fichiers
 	 * @param path             , chemin jusqu'à l'avant dernier dossier
 	 * @param listRepertoireIn , noms du dernier dossier qui diffère d'un cas à
 	 *                         l'autre
 	 */
-	public void copieFichiers(Connection connexion, PreparedStatementBuilder requete, TarArchiveOutputStream taos, String path,
+	public void getFilesDataStreamFromListOfInputDirectories(Connection connexion, PreparedStatementBuilder requete, TarArchiveOutputStream taos, String path,
 			List<String> listRepertoireIn) {
 		LoggerHelper.debugDebutMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
 		GenericBean g;
@@ -1182,11 +1174,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					entry.setSize(fileIn.length());
 					taos.putArchiveEntry(entry);
 					// Ecriture dans le fichier
-					copy(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE), taos);
+					copyFromInputstreamToOutputStream(new BufferedInputStream(new FileInputStream(fileIn),READ_BUFFER_SIZE), taos);
 					taos.closeArchiveEntry();
 				}
 			}
-		} catch (SQLException | IOException ex) {
+		} catch (ArcException | IOException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "copieFichiers()", LOGGER, ex);
 		}
 		LoggerHelper.debugFinMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
@@ -1195,7 +1187,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	/**
 	 * exécute un bloque transactionnel
 	 */
-	public void executeBlock(Connection connexion, String... listeRequete) throws SQLException {
+	public void executeBlock(Connection connexion, String... listeRequete) throws ArcException {
 		StringBuilder bloc = new StringBuilder("BEGIN;\n");
 		for (int i = 0; i < listeRequete.length; i++) {
 			bloc.append(listeRequete[i]).append(semicolon);
@@ -1208,9 +1200,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 * @param connexion
 	 * @param requete
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public void executeBlockNoError(Connection connexion, StringBuilder requete) throws SQLException {
+	public void executeBlockNoError(Connection connexion, StringBuilder requete) throws ArcException {
 		executeImmediate(connexion, "do $$ BEGIN " + requete.toString() + " exception when others then END; $$;\n");
 	}
 
@@ -1218,9 +1210,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 * @param connexion
 	 * @param requete
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public void executeBlock(Connection connexion, StringBuilder requete) throws SQLException {
+	public void executeBlock(Connection connexion, StringBuilder requete) throws ArcException {
 		executeBlock(connexion, requete.toString());
 	}
 
@@ -1228,9 +1220,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 * @param connexion
 	 * @param requete
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public void executeBlock(Connection connexion, String requete) throws SQLException {
+	public void executeBlock(Connection connexion, String requete) throws ArcException {
 		if (!requete.trim().isEmpty()) {
 			executeImmediate(connexion, "BEGIN;" + requete + "COMMIT;");
 		}
@@ -1326,7 +1318,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				listIdSource = m.get("id_source");
 				listContainer = m.get("container");
 				listIdSourceEtat = m.get("etat_traitement");
-			} catch (SQLException ex) {
+			} catch (ArcException ex) {
 				LoggerHelper.errorGenTextAsComment(getClass(), "zipOutStreamRequeteSelect()", LOGGER, ex);
 				break;
 			}
@@ -1424,31 +1416,18 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param connexion
 	 * @param tableIn
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn) throws SQLException {
+	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn) throws ArcException {
 			liste.addAll(new GenericBean(get(this.pool).executeStatement(connexion, FormatSQL.listeColonneByHeaders(tableIn)))
 					.getHeaders());
 		return liste;
 	}
 
 	
-	public List<String> getColumns(Connection connexion, String tableIn) throws SQLException
+	public List<String> getColumns(Connection connexion, String tableIn) throws ArcException
 	{
 		return new ArrayList<>(getColumns(connexion, new ArrayList<>(), tableIn));
-	}
-	
-	
-	/*
-	 * Prend en entrée une table et une liste de variables, renvoi les variables qui
-	 * ne sont pas dans la table Une liste vide veut dire que la table contient
-	 * toute les variables
-	 */
-	public List<String> isColumnsInTable(Connection connexion, String tableIn, List<String> aListVar)
-			throws SQLException {
-		List<String> colTableIn = getColumns(connexion, new ArrayList<String>(), tableIn).stream()
-				.map(t -> t.toLowerCase().trim()).collect(Collectors.toList());
-		return aListVar.stream().filter(t -> !colTableIn.contains(t.toLowerCase().trim())).collect(Collectors.toList());
 	}
 
 	/**
@@ -1463,10 +1442,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *                   "id='12' and id_source like 'a%'"
 	 * @param set        ... : la nouvelle valeur et le nom de la colonne a mettre à
 	 *                   jour "12 as a"
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	public static void fastUpdate(String poolName, Connection aConnexion, String tableName, String keys, List<String> colList, String where,
-			String... set) throws SQLException {
+			String... set) throws ArcException {
 		// récupérer la liste des colonnes
 		// liste de toutes les colonnes
 		// liste des colonnes à mettre à jour
@@ -1563,89 +1542,17 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 *
-	 * @param connexion
-	 * @param directoryOut
-	 * @param file
-	 * @throws Exception
-	 */
-	public void export(Connection connexion, String aRequete, String directoryOut, String file) throws Exception {
-		FileUtils.mkDirs(Paths.get(directoryOut));
-		String fName = "";
-		/*
-		 * On teste le nom de fichiers pour numéroter le lot
-		 */
-		for (int i = 0; i < 1000000; i++) {
-			fName = directoryOut + File.separator + file + "-" + i + ".csv.gz";
-			File f = new File(fName);
-			if (!f.exists()) {
-				break;
-			}
-		}
-		/**
-		 * Copy dans le fichier
-		 */
-		try(GZIPOutputStream gzos = new GZIPOutputStream(new FileOutputStream(fName))
-				{
-					{
-						this.def.setLevel(Deflater.BEST_SPEED);
-					}
-				};
-				)
-		{
-			exporting(connexion, aRequete, gzos, true, false);
-		}
-	}
-
-	/**
-	 * Exporte les données d'une table dans un fichier zip. Ecrase le fichier
-	 * précédent ayant le même nom.
-	 * 
-	 * @param connexion
-	 * @param table
-	 * @param directoryOut
-	 * @param file
-	 * @throws Exception
-	 */
-	public void exportZip(Connection connexion, String table, String directoryOut, String file) throws Exception {
-		FileUtils.mkDirs(Paths.get(directoryOut));
-		String fName = "";
-		String fEntry = "";
-		fEntry = file + FileUtils.EXTENSION_CSV;
-		fName = directoryOut + File.separator + fEntry + FileUtils.EXTENSION_ZIP;
-		/**
-		 * Copy dans le fichier Le deuxième argument du FileOutputstream permet
-		 * d'écraser le fichier s'il existe déjà
-		 */
-		OutputStream os = new FileOutputStream(fName, false);
-		ZipOutputStream zout = new ZipOutputStream(os) {
-
-			{
-				this.def.setLevel(Deflater.BEST_SPEED);
-			}
-		};
-
-		try {
-			zout.putNextEntry(new ZipEntry(fEntry));
-			exporting(connexion, table, zout, true);
-			zout.closeEntry();
-		} finally {
-			zout.close();
-		}
-	}
-
-	/**
 	 * export de table postgres dans un stream
 	 *
 	 * @param connexion
 	 * @param table
 	 * @param os
 	 * @param csv       : true / false (binary)
-	 * @throws SQLException
+	 * @throws ArcException
 	 * @throws IOException
 	 */
 	public void exporting(Connection connexion, String table, OutputStream os, boolean csv, boolean... forceQuote)
-			throws SQLException, IOException {
+			throws ArcException {
 		ConnectionWrapper conn = initConnection(connexion);
 
 		boolean forceQuoteBis;
@@ -1671,6 +1578,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} else {
 				copyManager.copyOut("COPY " + table + " TO STDOUT WITH (FORMAT BINARY)", os);
 			}
+		} catch (SQLException e) {
+			throw new ArcException(e);
+		} catch (IOException e) {
+			throw new ArcException(e);
 		} finally {
 			conn.close();
 		}
@@ -1682,11 +1593,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param table
 	 * @param os
 	 * @param csv       : true / false (binary)
-	 * @throws SQLException
+	 * @throws ArcException
 	 * @throws IOException
 	 */
 	public void exportingWithoutHeader(Connection connexion, String table, OutputStream os, boolean csv,
-			boolean... forceQuote) throws SQLException, IOException {
+			boolean... forceQuote) throws ArcException, IOException {
 		ConnectionWrapper conn = initConnection(connexion);
 
 		boolean forceQuoteBis;
@@ -1712,6 +1623,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} else {
 				copyManager.copyOut("COPY " + table + " TO STDOUT WITH (FORMAT BINARY)", os);
 			}
+		} catch (SQLException e) {
+			throw new ArcException(e);
 		} finally {
 			conn.close();
 		}
@@ -1775,12 +1688,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws Exception
 	 */
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean header, String aDelim, String aQuote) throws Exception {
+			boolean header, String aDelim, String aQuote) throws ArcException {
 		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote);
 	}
 
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean header, String aDelim, String aQuote, String encoding) throws Exception {
+			boolean header, String aDelim, String aQuote, String encoding) throws ArcException {
 		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote,
 				encoding);
 	}
@@ -1800,7 +1713,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws Exception
 	 */
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
-			boolean header, String aDelim, String aQuote) throws Exception {
+			boolean header, String aDelim, String aQuote) throws ArcException {
 		importing(connexion, table, aColumnName, is, format, header, aDelim, aQuote, null);
 	}
 
@@ -1817,13 +1730,14 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param aDelim      le délimiter (exemple le point virgule)
 	 * @param aQuote
 	 * @param encoding    : default = UTF8
+	 * @throws ArcException 
 	 * @throws Exception
 	 */
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
-			boolean header, String aDelim, String aQuote, String encoding) throws Exception {
+			boolean header, String aDelim, String aQuote, String encoding) throws ArcException {
 		LoggerHelper.info(LOGGER, "importing()");
-		ConnectionWrapper conn = initConnection(connexion);
-		try {
+		try (ConnectionWrapper conn = initConnection(connexion);)
+		{
 			conn.getConnexion().setAutoCommit(false);
 			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
 			String delimiter = "";
@@ -1860,70 +1774,50 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			conn.getConnexion().commit();
 
 			LoggerHelper.info(LOGGER, "importing done");
-		} catch (Exception e) {
+		} catch (IOException e) {
 
 			LoggerHelper.error(LOGGER, e);
 
 			if (e.getMessage().startsWith("ERROR: missing data for column")) {
 
-				throw new Exception("Il manque une/des colonne dans le corps du fichier");
+				throw new ArcException("Il manque une/des colonne dans le corps du fichier",e);
 
 			} else if (e.getMessage().startsWith("ERROR: extra data after last expected column")) {
 
-				throw new Exception("Il manque un/des headers");
+				throw new ArcException("Il manque un/des headers",e);
 
 			} else {
-				throw e;
+				throw new ArcException(e);
 			}
 
-		} finally {
-			conn.close();
+		} catch (SQLException e) {
+			throw new ArcException(e);
 		}
 	}
 
 	public void importing(Connection connexion, String table, InputStream is, boolean csv, String aDelim)
-			throws Exception {
+			throws ArcException {
 		importing(connexion, table, null, is, csv, true, aDelim, null);
 	}
 
-	public void importing(Connection connexion, String table, InputStream is, boolean csv) throws Exception {
+	public void importing(Connection connexion, String table, InputStream is, boolean csv) throws ArcException {
 		importing(connexion, table, null, is, csv, true, null, null);
 	}
 
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv)
-			throws Exception {
+			throws ArcException {
 		importing(connexion, table, aColumnName, is, csv, true, null, null);
 	}
 
 	public void importing(Connection connexion, String table, InputStream is, boolean csv, boolean aHeader,
-			String aDelim) throws Exception {
+			String aDelim) throws ArcException {
 		importing(connexion, table, null, is, csv, aHeader, aDelim, null);
 	}
 
 	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean aHeader, String aDelim) throws Exception {
+			boolean aHeader, String aDelim) throws ArcException {
 		importing(connexion, table, aColumnName, is, csv, aHeader, aDelim, null);
 
-	}
-
-
-	/**
-	 *
-	 * @param aConnexion
-	 * @param schema
-	 * @param pattern
-	 * @return la liste des tables telles que {@code pg_namespace.nspname = schema}
-	 *         et {@code pg_class.relname LIKE pattern}
-	 */
-	public List<String> listeTablesFromPattern(Connection aConnexion, String schema, String pattern) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT nspname||'.'||relname AS nom_qualifie");
-		requete.append("\n FROM pg_class INNER JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid");
-		requete.append("\n WHERE pg_namespace.nspname = '" + schema + "'");
-		requete.append("\n   AND pg_class.relname LIKE '" + pattern + "'");
-		requete.append("\n   AND pg_class.relkind = 'r'");
-		requete.append(";");
-		return getList(aConnexion, requete, new ArrayList<String>());
 	}
 
 	public boolean isSilent() {

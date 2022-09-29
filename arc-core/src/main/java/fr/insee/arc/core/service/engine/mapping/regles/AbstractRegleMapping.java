@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 
@@ -52,17 +53,17 @@ public abstract class AbstractRegleMapping implements IDbConstant, IConstanteCar
     /**
      * Met à jour {@code expressionDerivee}.
      *
-     * @throws Exception
+     * @throws ArcException
      */
-    public abstract void deriver() throws Exception;
+    public abstract void deriver() throws ArcException;
 
     /**
      * Met à jour {@code expressionDerivee} dans le cas d'utilisation &laquo;&nbsp;mise à jour d'une règle dans l'écran de
      * normes&nbsp;&raquo;.
      *
-     * @throws Exception
+     * @throws ArcException
      */
-    public abstract void deriverTest() throws Exception;
+    public abstract void deriverTest() throws ArcException;
 
     public abstract Set<Integer> getEnsembleGroupes();
 

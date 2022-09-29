@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.engine.mapping;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
@@ -133,7 +133,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         this.threadId=threadId;
     }
 
-    public void construire() throws Exception {
+    public void construire() throws ArcException {
         /*
          * Récupération de l'ensemble des tables et variables de mapping, mapping objet-relationnel
          */
@@ -152,9 +152,9 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
      * Cette méthode récupère les expressions de règles de mapping, et les attribue aux variables qu'elles concernent
      *
      * @param mapVariable
-     * @throws SQLException
+     * @throws ArcException
      */
-    private void attribuerExpressionRegleMapping(Map<String, VariableMapping> mapVariable) throws Exception {
+    private void attribuerExpressionRegleMapping(Map<String, VariableMapping> mapVariable) throws ArcException {
         PreparedStatementBuilder requete = new PreparedStatementBuilder();
         requete
         	.append("SELECT DISTINCT variable_sortie as variable_sortie, expr_regle_col as expr_regle_col FROM ")
@@ -166,7 +166,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         
         List<List<String>> resultTemp = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
         if (resultTemp.size() == 2) {
-        	throw new Exception("No mapping rules found for this ruleset.");
+        	throw new ArcException("No mapping rules found for this ruleset.");
         }
         ArrayList<ArrayList<String>> result= new ArrayList<>();
         
@@ -210,7 +210,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
      *
      * @throws Exception
      */
-    private void deriver() throws Exception {
+    private void deriver() throws ArcException {
         /*
          * Dériver chacune des variables : après quoi l'expression SQL n'est qu'une concaténation de petits bouts
          */
@@ -281,7 +281,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
      * @param construireAssociationEntreVariableEtTableMapping
      *            une &laquo;&nbsp;map&nbsp;&raquo; qui à chaque nom de variable associe la liste des tables qui ont cette variable.
      */
-    private Map<String, VariableMapping> construireTablesEtVariablesMapping() throws SQLException {
+    private Map<String, VariableMapping> construireTablesEtVariablesMapping() throws ArcException {
         Map<String, VariableMapping> mapVariable = new HashMap<>();
         Map<String, TableMapping> mapTable = new HashMap<>();
         

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,16 +20,15 @@ import fr.insee.arc.core.databaseobjetcs.DatabaseObjectService;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
-import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.XMLUtil;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
 /**
@@ -87,11 +85,14 @@ public class ChargeurCSV implements IChargeur {
 	 * 
 	 * Charger le csv directement en base avec COPY, on s'occupera des i et v plus
 	 * tard
+	 * @throws ArcException 
+	 * @throws IOException 
+	 * @throws ArcException 
 	 * 
-	 * @throws Exception
+	 * @throws ArcException
 	 */
 
-	private void copyCsvFileToDatabase() throws Exception {
+	private void copyCsvFileToDatabase() throws ArcException {
 		StaticLoggerDispatcher.info("** CSVtoBase **", LOGGER);
 
 		java.util.Date beginDate = new java.util.Date();
@@ -123,12 +124,17 @@ public class ChargeurCSV implements IChargeur {
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
 		// premier ligne
 		if (this.userDefinedHeaders == null) {
-			try (InputStreamReader inputStreamReader = new InputStreamReader(streamHeader);
-					BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-					CSVReader readerCSV = new CSVReader(bufferedReader, (separateur==null)?';':separateur.charAt(0));) {
-				this.headers = getHeader(readerCSV);
-			} finally {
-				streamHeader.close();
+			try {
+				try (InputStreamReader inputStreamReader = new InputStreamReader(streamHeader);
+						BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+						CSVReader readerCSV = new CSVReader(bufferedReader, (separateur==null)?';':separateur.charAt(0));) {
+					this.headers = getHeader(readerCSV);
+				} finally {
+					streamHeader.close();
+				}
+			} catch (IOException e)
+			{
+				throw new ArcException(e);
 			}
 		} else {
 			this.headers = userDefinedHeaders.replaceAll(" ", "").split(",");
@@ -153,37 +159,36 @@ public class ChargeurCSV implements IChargeur {
 	/**
 	 * Start the postgres copy in commande with the right parameters
 	 * @param quote	the csv separator
-	 * @throws Exception
-	 * @throws IOException
+	 * @throws ArcException
 	 */
-	private void importCsvDataToTable() throws Exception {
-		try {
-			StringBuilder columnForCopy = new StringBuilder();
-			columnForCopy.append("(");
-			for (String nomCol : this.headers) {
-				columnForCopy.append("" + nomCol + " ,");
-			}
-			columnForCopy.setLength(columnForCopy.length() - 1);
-			columnForCopy.append(")");
+	private void importCsvDataToTable() throws ArcException {
 
-			UtilitaireDao.get("arc").importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent, true,
-					this.userDefinedHeaders == null, this.separateur, this.quote, this.encoding);
-		} catch (Exception e) {
-		    LoggerHelper.errorAsComment(LOGGER, "ChargeurCSV.copyerFile - the csv file couldn't be copy streamed to database");
-			throw e;
-		} finally {
-			streamContent.close();
+		try {
+			try {
+				StringBuilder columnForCopy = new StringBuilder();
+				columnForCopy.append("(");
+				for (String nomCol : this.headers) {
+					columnForCopy.append("" + nomCol + " ,");
+				}
+				columnForCopy.setLength(columnForCopy.length() - 1);
+				columnForCopy.append(")");
+	
+				UtilitaireDao.get("arc").importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent, true,
+						this.userDefinedHeaders == null, this.separateur, this.quote, this.encoding);
+			} finally {
+					streamContent.close();
+			}
+		} catch (IOException e) {
+			throw new ArcException(e);
 		}
 	}
 
 	/**
 	 * restructure a flat file
 	 * 
-	 * @throws SQLException
-	 * @throws Exception
-	 * @throws IOException
+	 * @throws ArcException
 	 */
-	private void applyFormat() throws SQLException {
+	private void applyFormat() throws ArcException {
 		String format = norme.getRegleChargement().getFormat();
 		if (format != null && !format.isEmpty()) {
 			format = format.trim();
@@ -416,9 +421,9 @@ public class ChargeurCSV implements IChargeur {
 
 	/**
 	 * Create the table where the csv file data will be stored
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private void initializeCsvTableContainer() throws SQLException {
+	private void initializeCsvTableContainer() throws ArcException {
 		StringBuilder req = new StringBuilder();
 		req.append("DROP TABLE IF EXISTS " + TABLE_TEMP_T + " ;");
 		req.append(" \nCREATE TEMPORARY TABLE " + TABLE_TEMP_T + " (");
@@ -450,9 +455,9 @@ public class ChargeurCSV implements IChargeur {
 	 * (col1, col2, col3, ...) becomes (i_col1, v_col1, i_col2, v_col2, i_col3, v_col3, ...)
 	 * where i are line index and v the value
 	 * also meta data column (filename, norme, validite) are added to the ARC standard table
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private void transformCsvDataToArcData() throws SQLException {
+	private void transformCsvDataToArcData() throws ArcException {
 		StaticLoggerDispatcher.info("** FlatBaseToIdedFlatBase **", LOGGER);
 		java.util.Date beginDate = new java.util.Date();
 
@@ -513,7 +518,7 @@ public class ChargeurCSV implements IChargeur {
 	}
 
 	@Override
-	public void execution() throws Exception {
+	public void execution() throws ArcException {
 		StaticLoggerDispatcher.info("execution", LOGGER);
 
 		// On met le fichier en base
@@ -525,7 +530,7 @@ public class ChargeurCSV implements IChargeur {
 	}
 
 	@Override
-	public void charger() throws Exception {
+	public void charger() throws ArcException {
 		initialisation();
 		execution();
 		finalisation();

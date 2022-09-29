@@ -20,6 +20,7 @@ import fr.insee.arc.core.service.engine.xsd.groups.XsdChoice;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdGroup;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdSequence;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdSet;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.Pair;
 
 /** Description of a sets of a control rules re-organized for easier manipulations
@@ -111,7 +112,7 @@ public class XsdControlDescription {
 		 * @throws InvalidStateForXsdException if the relation already exists*/
 		public XsdControlDescriptionBuilder addRelation(String parentElement, String childElement,
 				int minOccurs, Integer maxOccurs, int position)
-				throws InvalidStateForXsdException {
+				throws ArcException {
 			addChoiceRelation(parentElement, childElement, minOccurs, maxOccurs, new String[] {}, position);
 			return this;
 		}
@@ -125,11 +126,11 @@ public class XsdControlDescription {
 		 * @param int position
 		 * @throws InvalidStateForXsdException if the relation already exists*/
 		public XsdControlDescriptionBuilder addChoiceRelation(String parentElement, String childElement, int minOccurs, Integer maxOccurs,
-				String[] complement, int position) throws InvalidStateForXsdException {
+				String[] complement, int position) throws ArcException {
 			String complementString = stringifyComplements(complement);
 			XsdElement xsdElement = new XsdElement(childElement, minOccurs, maxOccurs, position);
 			if (relationExists(parentElement, childElement)) {
-				throw new InvalidStateForXsdException("La relation entre " + childElement + " et "
+				throw new ArcException("La relation entre " + childElement + " et "
 						+ parentElement + " est déjà décrite sous forme de séquence.");
 			}
 
@@ -161,12 +162,12 @@ public class XsdControlDescription {
 
 		/** Sets a unique alias for a column name.
 		 * @throws InvalidStateForXsdException if a different alias was already set*/
-		public XsdControlDescriptionBuilder defineAliasFor(String columnName, String alias) throws InvalidStateForXsdException {
+		public XsdControlDescriptionBuilder defineAliasFor(String columnName, String alias) throws ArcException {
 			if (aliasMap.containsKey(columnName)) {
 				if (aliasMap.get(columnName).equals(alias)) {
 					return this;
 				}
-				throw new InvalidStateForXsdException("Un alias " + alias
+				throw new ArcException("Un alias " + alias
 						+ "est déjà défini pour " + columnName + ".");
 			}
 			aliasMap.put(columnName, alias);
@@ -177,7 +178,7 @@ public class XsdControlDescription {
 		 *  or a comment but have no defined parent(s) are defined as root elements with an
 		 *  occurence of 1.
 		 * @throws InvalidStateForXsdException if the description is determined to be invalid*/
-		public XsdControlDescription build() throws InvalidStateForXsdException {
+		public XsdControlDescription build() throws ArcException {
 			// Adds also any "floating" elements (no parent defined) to roots
 			Set<String> roots = getRoots();
 			for (String root : roots) {
@@ -217,7 +218,7 @@ public class XsdControlDescription {
 		/** Deduces a complex organisation of elements (anything involving at least one choice) from the map.
 		 * @return the sequence/choice*/
 		private XsdGroup buildComplexSequence(String elementName, Map<String, Set<XsdElement>> mapOfChildren)
-				throws InvalidStateForXsdException {
+				throws ArcException {
 			// Sorts the map to allow going through it in order
 			SortedMap<Integer, Pair<String, SortedSet<XsdElement>>> sortedEntries = new TreeMap<>();
 			for (Entry<String, Set<XsdElement>> entry : mapOfChildren.entrySet()) {
@@ -293,25 +294,25 @@ public class XsdControlDescription {
 		}
 
 		private SortedSet<XsdElement> sortedSetFrom(String elementName, Set<XsdElement> unsortedSet)
-				throws InvalidStateForXsdException {
+				throws ArcException {
 			SortedSet<XsdElement> sortedSet = new TreeSet<>(unsortedSet);
 			if (sortedSet.size() != unsortedSet.size()) {
-				throw new InvalidStateForXsdException("Au moins un élément parmi les enfants de "
+				throw new ArcException("Au moins un élément parmi les enfants de "
 			+ elementName + " a été écrasé parce que les positions sont mal définies.");
 			}
 			return sortedSet;
 		}
 
-		private void checkLoop(Map<String, XsdGroup> builtTree) throws InvalidStateForXsdException {
+		private void checkLoop(Map<String, XsdGroup> builtTree) throws ArcException {
 			LinkedList<String> path = new LinkedList<>();
 			for (XsdElement el : builtTree.get(null)) {
 				checkLoop(el, builtTree, path);
 			}
 		}
 
-		private void checkLoop(XsdElement el, Map<String, XsdGroup> builtTree, LinkedList<String> path) throws InvalidStateForXsdException {
+		private void checkLoop(XsdElement el, Map<String, XsdGroup> builtTree, LinkedList<String> path) throws ArcException {
 			if (path.contains(el.getName())) {
-				throw new InvalidStateForXsdException(el.getName() + " appartient à une relation cyclique : " + path.stream().collect(Collectors.joining(" > ")));
+				throw new ArcException(el.getName() + " appartient à une relation cyclique : " + path.stream().collect(Collectors.joining(" > ")));
 			}
 			path.addLast(el.getName());
 			for (XsdElement el2 : builtTree.getOrDefault(el.getName(), XsdSequence.fromElements(new TreeSet<>()))) {

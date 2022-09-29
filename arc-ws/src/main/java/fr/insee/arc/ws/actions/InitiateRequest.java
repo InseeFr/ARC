@@ -51,8 +51,9 @@ public class InitiateRequest implements IDbConstant {
 	 * Initie le requêtage en faisant appel au DAO.
 	 *
 	 * @param resp Le flux dans lequel on écrit la réponse.
+	 * @throws DAOException 
 	 */
-	public void doRequest(SendResponse resp) {
+	public void doRequest(SendResponse resp) throws DAOException {
 		LoggerHelper.debugDebutMethodeAsComment(getClass(), "doRequest()", LOGGER);
 
 		if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.QUERY.getService())) {

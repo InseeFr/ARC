@@ -1,7 +1,6 @@
 package fr.insee.arc.core.dao;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,6 +11,7 @@ import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class RegleDao {
@@ -23,7 +23,7 @@ public class RegleDao {
 	private static final Logger logger = LogManager.getLogger(RegleDao.class);
 
 	public static ArrayList<RegleControleEntity> getRegle(Connection connexion, String tableRegle, String tableIn)
-			throws SQLException {
+			throws ArcException {
 		StaticLoggerDispatcher.debug("getRegle", logger);
 
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();

@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.thread;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +17,7 @@ import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.Sleep;
 
 /**
@@ -82,7 +82,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
 	    try {
 			this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 				"aucuneTableADroper");
-		    } catch (SQLException e2) {
+		    } catch (ArcException e2) {
 	            StaticLoggerDispatcher.error(e, LOGGER);
 	
 		    }
@@ -91,9 +91,9 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
     }
 
     /**
-     * @throws SQLException
+     * @throws ArcException
      */
-    private void preparerExecution() throws SQLException {
+    private void preparerExecution() throws ArcException {
 
         StringBuilder requete = new StringBuilder();
 

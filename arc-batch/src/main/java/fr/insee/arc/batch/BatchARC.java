@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -427,10 +426,9 @@ class BatchARC {
 	/**
 	 * Créer la table de pilotage batch si elle n'existe pas déjà
 	 * 
-	 * @throws SQLException
-	 * @throws Exception
+	 * @throws ArcException
 	 */
-	private void maintenanceTablePilotageBatch() throws SQLException {
+	private void maintenanceTablePilotageBatch() throws ArcException {
 
 		// création de la table si elle n'existe pas
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
@@ -468,9 +466,9 @@ class BatchARC {
 	 * test si la chaine batch est arrétée
 	 * 
 	 * @return
-	 * @throws Exception
+	 * @throws ArcException 
 	 */
-	private static boolean productionOn() throws Exception {
+	private static boolean productionOn() throws ArcException {
 		return UtilitaireDao.get("arc").hasResults(null,
 				new PreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 	}
@@ -481,7 +479,6 @@ class BatchARC {
 	 * @param directory
 	 * @param envExecution
 	 * @throws IOException
-	 * @throws Exception
 	 */
 	private static void effacerRepertoireChargement(String directory, String envExecution) throws IOException {
 
@@ -542,9 +539,9 @@ class BatchARC {
 	/**
 	 * 
 	 * @param envExecution
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private static void resetPending(String envExecution) throws SQLException {
+	private static void resetPending(String envExecution) throws ArcException {
 		// delete files that are en cours
 		StringBuilder query = new StringBuilder();
 		query.append("\n DELETE FROM " + envExecution + ".pilotage_fichier ");
@@ -568,9 +565,9 @@ class BatchARC {
 	 * @param envExecution
 	 * @param repriseEnCOurs
 	 * @param recevoir
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private static void receive(String envExecution, boolean repriseEnCOurs) throws SQLException {
+	private static void receive(String envExecution, boolean repriseEnCOurs) throws ArcException {
 		if (repriseEnCOurs) {
 			message("Reprise des fichiers en cours de traitement");
 			resetPending(envExecution);
@@ -583,7 +580,7 @@ class BatchARC {
 
 	}
 
-	private void initialize() throws SQLException, ParseException {
+	private void initialize() throws ArcException {
 		ArcThreadFactory initialiser = new ArcThreadFactory(mapParam, TraitementPhase.INITIALISATION);
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
@@ -595,7 +592,11 @@ class BatchARC {
 		Date dNow = new Date();
 		Date dLastInitialize;
 
-		dLastInitialize = dateFormat.parse(lastInitialize);
+		try {
+			dLastInitialize = dateFormat.parse(lastInitialize);
+		} catch (ParseException e) {
+			throw new ArcException("Date retrieved from pilotage batch table cannot be parsed",e);
+		}
 
 		// la nouvelle initialisation se lance si la date actuelle est postérieure à la
 		// date programmée d'initialisation (last_init)
@@ -648,10 +649,10 @@ class BatchARC {
 	 * return if there is
 	 * 
 	 * @return
-	 * @throws SQLException
 	 * @throws ArcException
+	 * @throws ArcException 
 	 */
-	private HashMap<TraitementPhase, Integer> elligible() throws SQLException, ArcException {
+	private HashMap<TraitementPhase, Integer> elligible() throws ArcException {
 		PreparedStatementBuilder query = new PreparedStatementBuilder();
 
 		query.append("SELECT phase_traitement, count(*) as n ");

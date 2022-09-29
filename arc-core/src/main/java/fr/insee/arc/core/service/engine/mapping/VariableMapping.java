@@ -5,6 +5,7 @@ import java.util.Set;
 
 import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMapping;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingGroupe;
+import fr.insee.arc.utils.exception.ArcException;
 
 /**
  *
@@ -62,7 +63,7 @@ public class VariableMapping implements Comparable<VariableMapping> {
 
     }
 
-    public void deriver() throws Exception {
+    public void deriver() throws ArcException {
         this.expressionRegle.deriver();
         for (TableMapping table : this.ensembleTableMapping) {
             table.setGroupe(isGroupe());

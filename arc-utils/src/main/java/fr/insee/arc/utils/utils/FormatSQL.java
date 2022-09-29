@@ -10,6 +10,7 @@ import org.postgresql.core.Utils;
 
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 
@@ -115,7 +116,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * Switch the database user
      * @param roleName
      * @return
-     * @throws SQLException
+     * @throws ArcException
      */
 	public static String changeRole(String roleName)
 	{
@@ -478,7 +479,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * escape quote return value through function
      * @param s
      * @return
-     * @throws SQLException 
+     * @throws ArcException 
      */
     public static String quoteText(String s)
     {

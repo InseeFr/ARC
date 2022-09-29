@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.engine.controle;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +17,7 @@ import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
@@ -54,9 +54,9 @@ public class ServiceJeuDeRegle {
 	 *            , la table des règles de controle
 	 * @param tableIn
 	 *            , la table à controler
-	 * @throws SQLException
+	 * @throws ArcException
 	 */	
-	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String tableRegle, String tableIn) throws SQLException {
+	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String tableRegle, String tableIn) throws ArcException {
 		StaticLoggerDispatcher.info("recherche de regle dans la table : " + tableRegle,logger);
 		ArrayList<RegleControleEntity> listRegleC = RegleDao.getRegle(connexion, tableRegle, tableIn);
 		jdr.setListRegleControle(listRegleC);
@@ -71,7 +71,7 @@ public class ServiceJeuDeRegle {
      *            le jeu de règle dont il faut appliquer les règles
      * @param table
      *            la table de travail dont les enregistrement seront "marqués"
-     * @throws SQLException
+     * @throws ArcException
      */
 	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
 		StaticLoggerDispatcher.debug("executeJeuDeRegle", logger);
@@ -95,9 +95,9 @@ public class ServiceJeuDeRegle {
 	 * Get the columns (also named "rubriques") list in uppercase from the table in order to know what controls must be evaluated
 	 * @param connexion
 	 * @param table
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private void registerRubriquesFromSourceTable(Connection connexion, String table) throws SQLException
+	private void registerRubriquesFromSourceTable(Connection connexion, String table) throws ArcException
 	{
 		this.listRubTable = UtilitaireDao.get("arc").getColumns(connexion, table);
 		this.listRubTable.replaceAll(String::toUpperCase);
@@ -110,9 +110,9 @@ public class ServiceJeuDeRegle {
 	 * @param jdr
 	 * @param table
 	 * @param structure
-	 * @throws SQLException 
+	 * @throws ArcException 
 	 */
-	private void preAction(Connection connexion, JeuDeRegle jdr, String table) throws SQLException {
+	private void preAction(Connection connexion, JeuDeRegle jdr, String table) throws ArcException {
 		
 		// exécuter les préactions
 				StaticLoggerDispatcher.info("Debut Pré-actions", logger);
@@ -158,7 +158,7 @@ public class ServiceJeuDeRegle {
 	 * @param jdr
 	 * @param table
 	 * @param structure
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	private void control(Connection connexion, JeuDeRegle jdr, String table, String structure) throws Exception {
 
@@ -277,7 +277,7 @@ public class ServiceJeuDeRegle {
 	 * @param jdr
 	 * @param reg
 	 * @param table
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	private String executeRegleCondition(JeuDeRegle jdr, RegleControleEntity reg) {
 		StaticLoggerDispatcher.info("Je lance executeRegleCondition()",logger);
@@ -309,7 +309,7 @@ public class ServiceJeuDeRegle {
 	 * @param jdr
 	 * @param reg
 	 * @param table
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	private String executeRegleCardinalite(JeuDeRegle jdr, RegleControleEntity reg) {
 		StaticLoggerDispatcher.info("Je lance executeRegleCardinalite()",logger);

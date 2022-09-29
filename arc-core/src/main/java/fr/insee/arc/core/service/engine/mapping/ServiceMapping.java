@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.engine.mapping;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +9,7 @@ import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 
 public class ServiceMapping implements IDbConstant {
 	
@@ -22,9 +22,9 @@ public class ServiceMapping implements IDbConstant {
      *
      * @return
      *
-     * @throws SQLException
+     * @throws ArcException
      */
-    public RegleMappingFactory construireRegleMappingFactory(Connection connexion, String envExecution, String tableTempFiltrageOk, String prefixIdentifiantRubrique) throws SQLException {
+    public RegleMappingFactory construireRegleMappingFactory(Connection connexion, String envExecution, String tableTempFiltrageOk, String prefixIdentifiantRubrique) throws ArcException {
         Set<String> ensembleIdentifiantRubriqueExistante = new HashSet<>();
         Set<String> ensembleNomRubriqueExistante = new HashSet<>();
         for (String nomColonne : ServiceCommunFiltrageMapping.calculerListeColonnes(connexion, tableTempFiltrageOk)) {
@@ -42,9 +42,9 @@ public class ServiceMapping implements IDbConstant {
      *
      * @param aJeuDeRegle
      * @return Le bon id_famille
-     * @throws SQLException
+     * @throws ArcException
      */
-    public String fetchIdFamille(Connection connexion, JeuDeRegle aJeuDeRegle, String tableNorme) throws SQLException {
+    public String fetchIdFamille(Connection connexion, JeuDeRegle aJeuDeRegle, String tableNorme) throws ArcException {
         PreparedStatementBuilder requete = new PreparedStatementBuilder();
         requete
         	.append("SELECT id_famille FROM " + tableNorme)

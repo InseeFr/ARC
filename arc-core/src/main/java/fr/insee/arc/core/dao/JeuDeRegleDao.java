@@ -1,7 +1,6 @@
 package fr.insee.arc.core.dao;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,11 +10,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.JeuDeRegle;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 public class JeuDeRegleDao {
 
     private static final Logger LOGGER = LogManager.getLogger(JeuDeRegleDao.class);
@@ -27,9 +27,9 @@ public class JeuDeRegleDao {
      * @param nomTableATraiter
      * @param tableJeuDeRegle
      * @return
-     * @throws SQLException
+     * @throws ArcException
      */
-    public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableJeuDeRegle) throws SQLException {
+    public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableJeuDeRegle) throws ArcException {
         StaticLoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
 
         StringBuilder requete = new StringBuilder();
@@ -48,9 +48,9 @@ public class JeuDeRegleDao {
      * @param nomTableATraiter
      * @param tableJeuDeRegle
      * @return
-     * @throws SQLException
+     * @throws ArcException
      */
-    public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws SQLException {
+    public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws ArcException {
         StaticLoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
 
         StringBuilder requete = new StringBuilder();

@@ -6,7 +6,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +26,11 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
-import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -133,7 +131,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	}
 
 	public void waitForThreads2(int parallel, ArrayList<? extends ApiService> threadList,
-			ArrayList<Connection> connexionList) throws SQLException {
+			ArrayList<Connection> connexionList) throws ArcException {
 
 		while (threadList.size() >= parallel && !threadList.isEmpty()) {
 			Iterator<? extends ApiService> it = threadList.iterator();
@@ -150,7 +148,11 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 					// close connexion when thread is done except if it is the master connexion
 					// (first one)
 					if (parallel == 0 && !px.getConnexion().equals(connexionList.get(0))) {
-						px.getConnexion().close();
+						try {
+							px.getConnexion().close();
+						} catch (SQLException e) {
+							throw new ArcException("Error in closing thread connection",e);
+						}
 					}
 
 				}
@@ -264,7 +266,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		if (this.todo) {
 			try {
 				UtilitaireDao.get(poolName).executeBlock(this.connexion, configConnection());
-			} catch (SQLException ex) {
+			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
 			}
 			register(this.connexion, this.getPreviousPhase(), this.getCurrentPhase(), this.getTablePil(),
@@ -333,7 +335,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param tablePil
 	 * @param tablePilTemp
 	 * @param nbEnr
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	private void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp,
 			Integer nbEnr) {
@@ -506,9 +508,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param c
 	 * @param req
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws SQLException {
+	public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws ArcException {
 		GenericBean gb = new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new PreparedStatementBuilder(req)));
 		return gb.mapContent(true);
 	}
@@ -517,7 +519,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * promote the application to the full right user role if required. required is
 	 * true if the restrictedUserAccount exists
 	 * 
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	public String switchToFullRightRole() {
 		if (!properties.getDatabaseRestrictedUsername().equals("")) {
@@ -771,7 +773,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
 		try {
 			return new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete)).mapContent();
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "pilotageListIdSource()", ex);
 		}
 		return new HashMap<String, ArrayList<String>>();
@@ -1097,9 +1099,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * Met à jour le comptage du nombre d'enregistrement par fichier; nos fichiers
 	 * de blocs XML sont devenus tous plats :)
 	 * 
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	public String updateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) throws SQLException {
+	public String updateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) throws ArcException {
 		StringBuilder query = new StringBuilder();
 
 		// mise à jour du nombre d'enregistrement et du type composite
@@ -1241,18 +1243,22 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param tablePil
 	 * @param exception
 	 * @param tableDrop
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	private void repriseSurErreur(Connection connexion, String phase, String tablePil, Exception exception,
-			String... tableDrop) throws SQLException {
+			String... tableDrop) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
 		// la transaction
 		// si on lui renvoie une requete SQL, il la refuse avec le message
 		// ERROR: current transaction is aborted, commands ignored until end of
 		// transaction block
-		this.connexion.setAutoCommit(false);
-		this.connexion.rollback();
+		try {
+			this.connexion.setAutoCommit(false);
+			this.connexion.rollback();
+		} catch (SQLException e) {
+			throw new ArcException("Error in database connection rollback",e);
+		}
 		StringBuilder requete = new StringBuilder();
 
 		for (int i = 0; i < tableDrop.length; i++) {
@@ -1270,25 +1276,29 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	/**
 	 * Remise dans l'état juste avant le lancement des controles et insertion dans
-	 * une table d'erreur
+	 * une table d'erreur pour un fichier particulier
 	 *
 	 * @param connexion
 	 * @param phase
 	 * @param tablePil
 	 * @param exception
 	 * @param tableDrop
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
 	public void repriseSurErreur(Connection connexion, String phase, String tablePil, String idSource,
-			Exception exception, String... tableDrop) throws SQLException {
+			Exception exception, String... tableDrop) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
 		// la transaction
 		// si on lui renvoie une requete SQL, il la refuse avec le message
 		// ERROR: current transaction is aborted, commands ignored until end of
 		// transaction block
-		this.connexion.setAutoCommit(false);
-		this.connexion.rollback();
+		try {
+			this.connexion.setAutoCommit(false);
+			this.connexion.rollback();
+		} catch (SQLException e) {
+			throw new ArcException("Error in database connection rollback",e);
+		}
 
 		// promote the application user account to full right
 		UtilitaireDao.get("arc").executeImmediate(connexion, switchToFullRightRole());
@@ -1330,9 +1340,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * type_comp | comp1,comp2, comp3 ...
 	 * 
 	 * @return
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	protected HashMap<String, ArrayList<String>> recuperationIdSource(String phaseTraiement) throws SQLException {
+	protected HashMap<String, ArrayList<String>> recuperationIdSource(String phaseTraiement) throws ArcException {
 		HashMap<String, ArrayList<String>> pil = new GenericBean(
 				UtilitaireDao.get(poolName)
 						.executeRequest(this.connexion, new PreparedStatementBuilder("SELECT p.id_source "

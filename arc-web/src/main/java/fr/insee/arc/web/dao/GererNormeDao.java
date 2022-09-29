@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import fr.insee.arc.core.model.RegleMappingEntity;
 import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -419,7 +419,7 @@ public class GererNormeDao implements IDbConstant {
 			UtilitaireDao.get("arc").executeRequest(null, requete);
 			viewRulesSet.setMessage("Go to production registered");
 
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			viewRulesSet.setMessage("Error in the go to production");
 			LoggerHelper.warn(LOGGER, "Error in the go to production");
 
@@ -468,7 +468,7 @@ public class GererNormeDao implements IDbConstant {
 
 		try {
 			UtilitaireDao.get("arc").executeRequest(null, requete);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			LoggerHelper.error(LOGGER, String.format("Error when emptying the rules %s", e.toString()));
 
 		}
@@ -505,7 +505,7 @@ public class GererNormeDao implements IDbConstant {
 
 	
 	public void calculerVariableToType(VObject viewNorme, Map<String, String> mapVariableToType,
-			Map<String, String> mapVariableToTypeConso) throws SQLException {
+			Map<String, String> mapVariableToTypeConso) throws ArcException {
 		
 		PreparedStatementBuilder requete=new PreparedStatementBuilder();
 		requete.append("SELECT DISTINCT lower(nom_variable_metier) AS nom_variable_metier, type_variable_metier, type_consolidation AS type_sortie ");

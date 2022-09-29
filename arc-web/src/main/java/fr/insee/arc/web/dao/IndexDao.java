@@ -1,6 +1,5 @@
 package fr.insee.arc.web.dao;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
 @Component
@@ -42,7 +42,7 @@ public class IndexDao {
 
 			return envMap;
 			
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Sandbox list couldn't be initialized", LOGGER);
 		}
 

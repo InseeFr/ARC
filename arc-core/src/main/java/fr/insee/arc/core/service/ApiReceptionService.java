@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +32,7 @@ import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -140,7 +140,7 @@ public class ApiReceptionService extends ApiService {
 
 	/** Moves files into RECEPTION_ENCOURS directory, check if the archives are readable and returns a description of the content of all treated files. */
 	private GenericBean moveAndCheckUntilLimit(int fileSizeLimit, int maxNumberOfFiles, ArrayList<String> entrepotIdList)
-			throws IOException, SQLException {
+			throws ArcException {
 		String dirOut = directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution);
 		GenericBean archivesContent = null;
 		int fileSize = 0;
@@ -232,7 +232,11 @@ public class ApiReceptionService extends ApiService {
 									if (isArchive)
 									{
 										// copie dans archive avec le nouveau nom
-										Files.copy(Paths.get(f.getAbsolutePath()), Paths.get(fileOutArchive.getAbsolutePath()));
+										try {
+											Files.copy(Paths.get(f.getAbsolutePath()), Paths.get(fileOutArchive.getAbsolutePath()));
+										} catch (IOException e) {
+											throw new ArcException("Files copy in the ARCHIVE directory failed",e);
+										}
 										// déplacer le fichier dans encours
 										deplacerFichier(dirIn, dirOut, f.getName(), d + "_" + fname);
 									}
@@ -242,7 +246,11 @@ public class ApiReceptionService extends ApiService {
 										UtilitaireDao.generateTarGzFromFile(f, fileOutArchive, f.getName());
 										// on copie le tar.gz dans encours
 										File fOut=new File(dirOut + File.separator + d + "_"+ fname);
-										Files.copy(Paths.get(fileOutArchive.getAbsolutePath()), Paths.get(fOut.getAbsolutePath()));
+										try {
+											Files.copy(Paths.get(fileOutArchive.getAbsolutePath()), Paths.get(fOut.getAbsolutePath()));
+										} catch (IOException e) {
+											throw new ArcException("Files copy in the ENCOURS directory failed",e);
+										}
 										// on efface le fichier source
 										f.delete();
 									}
@@ -660,7 +668,7 @@ public class ApiReceptionService extends ApiService {
 	private void soumettreRequete(StringBuilder requete) {
 		try {
 			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "soumettreRequete()", LOGGER, ex);
 		}
 		requete.setLength(0);
@@ -774,7 +782,7 @@ public class ApiReceptionService extends ApiService {
 					}
 				}
 			}
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "dispatchFiles()", LOGGER, ex);
 		}
 		
@@ -821,7 +829,7 @@ public class ApiReceptionService extends ApiService {
 			}
 			}
 		
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "dispatchFiles()", LOGGER, ex);
 		}
 		content=content2;
@@ -863,7 +871,7 @@ public class ApiReceptionService extends ApiService {
 					}
 				}
 			}
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "dispatchFiles()", LOGGER, ex);
 		}
 		requete.setLength(0);

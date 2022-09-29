@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.engine.xsd;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,16 +20,17 @@ import fr.insee.arc.core.service.engine.xsd.controls.TimeForXsd;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdChoice;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
 
 public class XsdRulesRetrievalService {
 	
-	public XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr) throws SQLException, InvalidStateForXsdException {
+	public XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr) throws ArcException {
 		return fetchRulesFromBase(connection, jdr, null);
 	}
 
-	private XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr, String filter) throws SQLException, InvalidStateForXsdException {
+	private XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr, String filter) throws ArcException {
 		PreparedStatementBuilder request= new PreparedStatementBuilder(
 				"select id_classe, "
 				+ "rubrique_pere, rubrique_fils, "
@@ -55,7 +55,7 @@ public class XsdRulesRetrievalService {
 	/** Parses the control rules described in the SQL results
 	 *  and returns them as a XsdControlDescription object.*/
 	private XsdControlDescription parseSqlResults(ArrayList<ArrayList<String>> results, Connection connection)
-			throws SQLException, InvalidStateForXsdException {
+			throws ArcException {
 		XsdControlDescriptionBuilder builder = new XsdControlDescriptionBuilder();
 		Map<String, Integer> columns = new GenericBean(results).mapIndex();
 		for (int i = 1; i < results.size() ; i++) {

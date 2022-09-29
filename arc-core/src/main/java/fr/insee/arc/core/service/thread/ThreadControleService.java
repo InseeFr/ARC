@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.thread;
 
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +16,7 @@ import fr.insee.arc.core.service.engine.controle.ServiceRequeteSqlRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Sleep;
 
@@ -107,7 +107,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		    try {
 				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 					"aucuneTableADroper");
-			    } catch (SQLException e2) {
+			    } catch (ArcException e2) {
 					StaticLoggerDispatcher.error(e2,LOGGER);
 			    }
 		    Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
@@ -140,9 +140,9 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la table des jeux de règles
      * @param tableRegleC
      *            la table des règles de controles
-     * @throws SQLException
+     * @throws ArcException
      */
-    private void preparation() throws SQLException {
+    private void preparation() throws ArcException {
         StaticLoggerDispatcher.info("** preparation **", LOGGER);
 
         StringBuilder query = new StringBuilder();
@@ -177,7 +177,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      * @param tableControle
      *            la table à controler
      *
-     * @throws SQLException
+     * @throws ArcException
      */
     private void execute() throws Exception {
         StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
@@ -201,7 +201,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
      *            la table de pilotage des fichiers
      * @param tableSeuil
      *            la table des seuils
-     * @throws SQLException
+     * @throws ArcException
      */
     private StringBuilder calculSeuilControle() throws Exception {
         StaticLoggerDispatcher.info("finControle", LOGGER);

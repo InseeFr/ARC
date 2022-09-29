@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,15 +37,20 @@ public class ChargementBrutalTable {
      * @param br reader ouvert sur le fichier
      * @param nbBoucle étape dans la lecture
      * */
-    private String requeteFichierBrutalement(String idSource, BufferedReader br, int nbBoucle) throws Exception {
+    private String requeteFichierBrutalement(String idSource, BufferedReader br, int nbBoucle) throws ArcException {
         StaticLoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
 
     	
     	StringBuilder requete=new StringBuilder();
     	int idLigne = nbBoucle * LIMIT_CHARGEMENT_BRUTAL;
-    	String line = br.readLine();
+    	String line;
+		try {
+			line = br.readLine();
+		} catch (IOException e) {
+    		throw new ArcException("File line cannot be read",e);
+		}
     	if (line == null) {
-    		throw new Exception("The file is empty.");
+    		throw new ArcException("The file is empty.");
     	}
     	boolean start=true;
     	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
@@ -62,7 +66,11 @@ public class ChargementBrutalTable {
           
           idLigne++;
           if (idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
-              line = br.readLine();
+              try {
+				line = br.readLine();
+			} catch (IOException e) {
+	    		throw new ArcException("File line cannot be read",e);
+			}
           }
        }
     	return requete.toString();
@@ -73,7 +81,7 @@ public class ChargementBrutalTable {
      * @throws IOException
      * @throws Exception si aucune norme ou plus d'une norme trouvée */
     public void calculeNormeAndValiditeFichiers(String idSource, InputStream file, Norme[] normeOk, String[] validiteOk)
-    		throws Exception {
+    		throws ArcException {
     	StaticLoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
     	
 	    normeOk[0] = new Norme();
@@ -97,19 +105,20 @@ public class ChargementBrutalTable {
 	    	}
 
 	    } catch (IOException e) {
-	    	throw (new Exception("Erreur de lecture du fichier " + idSource));
+	    	throw new ArcException("Erreur de lecture du fichier " + idSource , e);
 	    }
 
 	    if (normeOk[0].getIdNorme()==null) {
-	        throw (new Exception("Aucune norme trouvée"));
+	        throw new ArcException("Aucune norme trouvée");
 	    }
     }
 
     /** Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
      * @param requeteFichier une requête contenant la description du fichier
-     * @throws SQLException
+     * @throws ArcException
+     * @throws ArcException 
      * @throws Exception si aucune norme ou plus d'une norme trouvée*/
-    private void calculerNormeAndValidite(Norme[] normeOk, String[] validiteOk, String requeteFichier) throws Exception {
+    private void calculerNormeAndValidite(Norme[] normeOk, String[] validiteOk, String requeteFichier) throws ArcException {
         StaticLoggerDispatcher.info("** calculerNorme **", LOGGER);
 
         StringBuilder query=new StringBuilder();
@@ -129,8 +138,7 @@ public class ChargementBrutalTable {
         }
         query.append("\n ) vv ");
         query.append("\n where norme is not null ");
-        
-        
+
         ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, new PreparedStatementBuilder(query));
         if (result.size()>1)
         {

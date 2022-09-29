@@ -3,7 +3,6 @@ package fr.insee.arc.ws.services.importServlet;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +21,7 @@ import org.json.JSONObject;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -114,7 +114,7 @@ public class ServletArc extends HttpServlet {
 		HashMap<String, ArrayList<String>> result = new HashMap<>();
 		try {
 			result = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, query)).mapContent();
-		} catch (SQLException e1) {
+		} catch (ArcException e1) {
 			LoggerHelper.error(LOGGER, "Error in querying host allowed");
 		}
 		
@@ -151,7 +151,7 @@ public class ServletArc extends HttpServlet {
 		
 		try {
 			UtilitaireDao.get("arc").executeRequest(null, query);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			LoggerHelper.error(LOGGER, "Error in querying to register the connection entry");
 		}
 		

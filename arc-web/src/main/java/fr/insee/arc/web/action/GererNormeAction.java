@@ -1,7 +1,6 @@
 package fr.insee.arc.web.action;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,9 +23,9 @@ import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.databaseobjetcs.TableEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SQLExecutor;
@@ -869,7 +868,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			
 			
 			 UtilitaireDao.get("arc").executeRequest(null,requete);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error(String.format("Error in preGenererRegleFiltrage : %s", e.toString()), LOGGER);
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -915,7 +914,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 					.append(") liste_colonne");
 				
 			UtilitaireDao.get("arc").executeRequest(null, requete);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in preGenererRegleMapping", e, LOGGER);
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -1025,7 +1024,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	}
 
 	@RequestMapping("/copieJeuxDeRegles")
-	public String copieJeuxDeRegles(Model model) throws SQLException {
+	public String copieJeuxDeRegles(Model model) throws ArcException {
 		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		// le jeu de regle à copier
 		Map<String, ArrayList<String>> selectionOut = viewJeuxDeRegles.mapContentSelected();
@@ -1122,7 +1121,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			// excute the copy
 			try {
 				UtilitaireDao.get("arc").executeRequest(null, requete);
-			} catch (SQLException ex) {
+			} catch (ArcException ex) {
 				loggerDispatcher.error("Error in copieJeuxDeRegles", ex, LOGGER);
 			}
 			this.vObjectService.destroy(viewJeuxDeReglesCopie);

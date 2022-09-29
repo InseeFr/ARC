@@ -4,7 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -27,7 +29,7 @@ public class TarGzDecompressor implements ArchiveExtractor {
     private static final Logger LOGGER = LogManager.getLogger(TarGzDecompressor.class);
 
     @Override
-    public void extract(File archiveFile) throws Exception {
+    public void extract(File archiveFile) throws IOException {
 	StaticLoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
 	File dir = new File(archiveFile + ".dir");
 

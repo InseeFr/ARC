@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMappingSimple.RubriqueMapping;
+import fr.insee.arc.utils.exception.ArcException;
 
 /**
  *
@@ -56,7 +57,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
      * {@link #decomposerElementsSimple()}) en début de dérivation.
      */
     @Override
-    public final void deriver() throws Exception {
+    public final void deriver() throws ArcException {
         this.decomposerElementsSimple();
         for (int i = 0; i < this.listeTokenRegle.size(); i++) {
             this.listeTokenRegle.get(i).deriver();
@@ -66,7 +67,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
     }
 
     @Override
-    public void deriverTest() throws Exception {
+    public void deriverTest() throws ArcException {
         this.decomposerElementsSimple();
         for (int i = 0; i < this.listeTokenRegle.size(); i++) {
             this.listeTokenRegle.get(i).deriverTest();
@@ -79,7 +80,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
      * 1. Recherche des règles globales.<br/>
      * 2. Recherche des rubriques.<br/>
      */
-    private void decomposerElementsSimple() {
+    private void decomposerElementsSimple() throws ArcException {
         List<String> triplet = decouperEnTrois(this.getExpression());
         /*
          * Recherche des boucles infinies dûes au fait qu'une accolade n'est pas fermée.
@@ -87,7 +88,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
         for (int i = 0; i < triplet.size(); i++) {
             if (triplet.get(i).equals(this.getExpression())) {
 
-                throw new IllegalArgumentException("L'expression \"" + this.getExpression() + "\" n'est pas valide.");
+                throw new ArcException("L'expression \"" + this.getExpression() + "\" n'est pas valide.");
             }
         }
         if (!triplet.get(ARRAY_FIRST_COLUMN_INDEX).equalsIgnoreCase(empty)) {

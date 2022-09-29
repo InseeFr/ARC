@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +37,7 @@ import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -220,7 +220,7 @@ public class VObjectService {
 	        ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 	        try {
 	            aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(null, requete,  ModeRequete.IHM_INDEXED));
-	        } catch (SQLException ex) {
+	        } catch (ArcException ex) {
 	        	data.setMessage(ex.getMessage());
 	            LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
 	        }
@@ -332,7 +332,7 @@ public class VObjectService {
 		        	requete.append(buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel()));
 
 		            aContent = UtilitaireDao.get(this.pool).executeRequest(null, requete, ModeRequete.IHM_INDEXED);
-		        } catch (SQLException ex) {
+		        } catch (ArcException ex) {
 		            currentData.setMessage(ex.getMessage());
 		            LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
 		        }
@@ -521,7 +521,7 @@ public class VObjectService {
                         m.put(arrayVSelect.get(j).get(0), arrayVSelect.get(j).get(1));
                     }
                     headerVSelect.add(m);
-                } catch (SQLException ex) {
+                } catch (ArcException ex) {
                     data.setMessage(ex.getMessage());
                     LoggerHelper.errorGenTextAsComment(getClass(), "buildHeadersVSelect()", LOGGER, ex);
                 }
@@ -670,7 +670,7 @@ public class VObjectService {
         }
         reqDelete.append("END; ");
         UtilitaireDao.get(this.pool).executeRequest(null, reqDelete);
-        } catch (SQLException ex) {
+        } catch (ArcException ex) {
             LoggerHelper.error(LOGGER, ex);
         	currentData.setMessage("Error in VObjectService.delete");
         }
@@ -724,7 +724,7 @@ public class VObjectService {
         reqDelete.append("END; ");
         try {
             UtilitaireDao.get(this.pool).executeRequest(null, reqDelete);
-        } catch (SQLException e) {
+        } catch (ArcException e) {
         	currentData.setMessage(e.getMessage());
         }
     }
@@ -816,7 +816,7 @@ public class VObjectService {
 	                UtilitaireDao.get(this.pool).executeRequest(null, reqUpdate);
 	            }
 	            session.put(currentData.getSessionName(), v0);
-        } catch (SQLException ex) {
+        } catch (ArcException ex) {
             LoggerHelper.error(LOGGER, ex);
         	currentData.setMessage("Error in VObjectService.update");
         }
@@ -846,7 +846,7 @@ public class VObjectService {
         try {
             GenericBean g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(null, queryView(currentData)));
             result = g.mapContent();
-        } catch (SQLException ex) {
+        } catch (ArcException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "mapView()", LOGGER, ex);
         }
         return result;
@@ -1147,7 +1147,7 @@ public class VObjectService {
             } finally {
                 zos.close();
             }
-        } catch (IOException | SQLException ex) {
+        } catch (IOException | ArcException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
         } finally {
             try {
@@ -1264,7 +1264,7 @@ public class VObjectService {
         response.setHeader("Content-Disposition", "attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar");
 
         try (TarArchiveOutputStream taos = new TarArchiveOutputStream(response.getOutputStream());){ 
-            UtilitaireDao.get(this.pool).copieFichiers(null, requete, taos, repertoire, listRepertoire);
+            UtilitaireDao.get(this.pool).getFilesDataStreamFromListOfInputDirectories(null, requete, taos, repertoire, listRepertoire);
         } catch (IOException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
         } finally {

@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.thread;
 
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,10 +12,11 @@ import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Sleep;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -119,7 +119,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
 	    try {
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
-	    } catch (SQLException e2) {
+	    } catch (ArcException e2) {
             StaticLoggerDispatcher.error(e2, LOGGER);
 	    }
             Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
@@ -131,9 +131,9 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
      * Créer la table de travail du normage Contient les donnée d'un seul id source. Cela est du au fait que le type composite varie d'un id
      * source à l'autre,
      * 
-     * @throws SQLException
+     * @throws ArcException
      */
-    private void creerTableTravail() throws SQLException {
+    private void creerTableTravail() throws ArcException {
         StaticLoggerDispatcher.info("Créer les tables images", LOGGER);
         // Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
         StringBuilder query = new StringBuilder();

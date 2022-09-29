@@ -3,7 +3,6 @@ package fr.insee.arc.web.action;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -291,7 +291,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
 
     }
 
-    private void creationTableDefinitif() throws SQLException {
+    private void creationTableDefinitif() throws ArcException {
 		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         StringBuilder creationTableDef = new StringBuilder();
 
@@ -308,7 +308,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
     	UtilitaireDao.get(poolName).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
     }
 
-    private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws SQLException {
+    private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws ArcException {
 		String newNomenclatureName = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
         StringBuilder createTableRequest = new StringBuilder();
         createTableRequest.append("\n DROP TABLE IF EXISTS arc.temp_" + newNomenclatureName + ";");
@@ -363,7 +363,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
                 String message = "externalFilesManagement.import.error.extraImport";
                 this.viewListNomenclatures.setMessage(message);
                 this.viewListNomenclatures.setMessageArgs(elementDescription, e);
-                throw new IllegalStateException(message);
+                throw new ArcException(message);
             }
         }
 
@@ -372,7 +372,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
             if (!listeFichier.contains(e)) {
                 String message = "L'element de la table arc.ihm_schema_nmcl '" + e + "' n'est pas dans le fichier de nomenclature";
                 this.viewSchemaNmcl.setMessage(message);
-                throw new IllegalStateException(message);
+                throw new ArcException(message);
             }
         }
     }
@@ -383,7 +383,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
      * Si ce n'est pas le cas une exception est jetée.
      * 
      * @param nomColonne
-     * @throws SQLException
+     * @throws ArcException
      */
     private boolean isColonneValide(String nomColonne) {
         System.out.println("Validation de : " + nomColonne);
@@ -403,7 +403,7 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
      * Si ce n'est pas le cas une exception est jetée.
      * 
      * @param nomColonne
-     * @throws SQLException
+     * @throws ArcException
      */
     private boolean isTypeValide(String typeColonne) {
         System.out.println("Validation de : " + typeColonne);

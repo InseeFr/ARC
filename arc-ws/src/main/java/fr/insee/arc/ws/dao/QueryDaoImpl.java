@@ -33,7 +33,7 @@ public class QueryDaoImpl implements QueryDao {
      */
     @Override
     @SQLExecutor
-    public void doRequest(String id, SendResponse resp, long timestamp) {
+    public void doRequest(String id, SendResponse resp, long timestamp) throws DAOException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.doRequest()");
         Connection connection = null;
         ArrayList<ArrayList<String>> result = new ArrayList<>();
@@ -62,7 +62,7 @@ public class QueryDaoImpl implements QueryDao {
      * @see dao.ResponseDao#createImage(java.util.List, java.util.HashMap, java.lang.String)
      */
     @Override
-    public void createImage(List<String> ids, HashMap<String, String> sqlRequests, long timestamp) {
+    public void createImage(List<String> ids, HashMap<String, String> sqlRequests, long timestamp) throws DAOException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "QueryDaoImpl.createImage()");
         long beginning = System.currentTimeMillis();
         Connection connection = null;

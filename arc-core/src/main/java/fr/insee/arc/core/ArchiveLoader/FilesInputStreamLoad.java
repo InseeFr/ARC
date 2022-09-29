@@ -30,7 +30,7 @@ public class FilesInputStreamLoad {
     
     
     
-    public FilesInputStreamLoad(File theFileToRead) throws Exception {
+    public FilesInputStreamLoad(File theFileToRead) throws IOException {
 	super();
 	try {
 	    this.tmpInxChargement =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));

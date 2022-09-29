@@ -1,6 +1,5 @@
 package fr.insee.arc.core.service.handler;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,6 +15,7 @@ import org.xml.sax.SAXParseException;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -126,7 +126,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 		
 		try {
 			UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "startElement()", LOGGER, ex);
 			 throw new SAXParseException("Fichier XML : erreur de requete insertion  : "+ex.getMessage() , "", "", 0, 0);
 		}
@@ -286,7 +286,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 				try {
 					UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);
-				} catch (SQLException ex) {
+				} catch (ArcException ex) {
 					LoggerHelper.errorGenTextAsComment(getClass(), "startElement()", LOGGER, ex);
 					 throw new SAXParseException("Fichier XML : erreur de requete insertion  : "+ex.getMessage() , "", "", 0, 0);
 				}

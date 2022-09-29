@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.Pair;
 
 
@@ -58,17 +59,15 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
      * Pas de gestion des identifiants et noms de rubriques ici. Tout est fait chez les enfants.
      */
     @Override
-    public final void deriver() throws Exception {
+    public final void deriver() throws ArcException {
         this.decomposerElementsSimple();
         for (Entry<Integer, AbstractRegleMapping> entry : this.mapRegleGroupe.entrySet()) {
             entry.getValue().deriver();
-            // this.ensembleIdentifiantsRubriques.addAll(entry.getValue().ensembleIdentifiantsRubriques);
-            // this.ensembleNomsRubriques.addAll(entry.getValue().ensembleNomsRubriques);
         }
     }
 
     @Override
-    public void deriverTest() throws Exception {
+    public void deriverTest() throws ArcException {
         this.decomposerElementsSimple();
         for (Entry<Integer, AbstractRegleMapping> entry : this.mapRegleGroupe.entrySet()) {
             entry.getValue().deriverTest();
@@ -81,7 +80,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
      *            du type <code>{{1, 2}une règle quelconque}</code>
      * @return
      */
-    private Pair<List<Integer>, AbstractRegleMapping> construireRegleGroupe(String anExpressionGroupe) {
+    private Pair<List<Integer>, AbstractRegleMapping> construireRegleGroupe(String anExpressionGroupe) throws ArcException {
         List<Integer> listeGroupe = new ArrayList<>();
         /*
          * Éliminer les accolades de début ou de fin
@@ -112,14 +111,14 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
             return new Pair<List<Integer>, AbstractRegleMapping>(listeGroupe, this.regleMappingFactory.get(expressionGroupeReturned,
                     this.variableMapping));
         }
-        throw new IllegalStateException("L'expression " + anExpressionGroupe + " dans la règle " + this.getExpression()
+        throw new ArcException("L'expression " + anExpressionGroupe + " dans la règle " + this.getExpression()
                 + " n'est pas reconnue comme valide.");
     }
 
     private void majMapRegleGroupe(Pair<List<Integer>, AbstractRegleMapping> aPairRegleGroupe) {
         for (int i = 0; i < aPairRegleGroupe.getFirst().size(); i++) {
             if (this.mapRegleGroupe.containsKey(aPairRegleGroupe.getFirst().get(i))) {
-                throw new IllegalStateException("L'expression " + this.getExpression() + " comporte plusieurs références au numéro de groupe "
+                throw new ArcException("L'expression " + this.getExpression() + " comporte plusieurs références au numéro de groupe "
                         + aPairRegleGroupe.getFirst().get(i));
             }
             this.mapRegleGroupe.put(aPairRegleGroupe.getFirst().get(i), aPairRegleGroupe.getSecond());
@@ -188,7 +187,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
 
     @Override
     public String getExpressionSQL() {
-        throw new IllegalStateException("Cette méthode ne devrait pas être appelée par RegleMappingGroupe");
+        throw new ArcException("Cette méthode ne devrait pas être appelée par RegleMappingGroupe");
     }
 
     /**

@@ -1,11 +1,13 @@
 package fr.insee.arc.core.ArchiveLoader;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 
 
 /**
@@ -22,12 +24,12 @@ public class TarGzArchiveLoader extends AbstractArchiveFileLoader {
     }
 
     @Override
-    public FilesInputStreamLoad readFileWithoutExtracting() throws Exception {
+    public FilesInputStreamLoad readFileWithoutExtracting() {
 	return null;
     }
 
     @Override
-    public FilesInputStreamLoad loadArchive() throws Exception {
+    public FilesInputStreamLoad loadArchive() throws ArcException {
 	StaticLoggerDispatcher.info("begin loadArchive() ", LOGGER);
 
 	// Mandatory for multithreading to decompress tar.gz archive

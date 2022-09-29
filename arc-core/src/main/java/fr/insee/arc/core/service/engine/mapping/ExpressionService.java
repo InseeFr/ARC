@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.engine.mapping;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +9,7 @@ import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class ExpressionService implements IDbConstant {
@@ -57,7 +57,7 @@ public class ExpressionService implements IDbConstant {
 	}
 	
 	public GenericBean fetchExpressions(Connection connexion, String environnement, JeuDeRegle ruleSet) 
-			throws SQLException {
+			throws ArcException {
 		PreparedStatementBuilder request = new PreparedStatementBuilder();
 		request.append("select expr_nom, expr_valeur from ");
 		request.append(environnement);
@@ -72,7 +72,7 @@ public class ExpressionService implements IDbConstant {
 	/** Fetch the expressions in order so that if expression A includes expression B, then A comes before B.
 	 * It is highly recommended to check for loops beforehand.*/
 	public GenericBean fetchOrderedExpressions(Connection connexion, String environment,
-			JeuDeRegle ruleSet) throws SQLException {
+			JeuDeRegle ruleSet) throws ArcException {
 		PreparedStatementBuilder request = new PreparedStatementBuilder();
 		request.append("WITH recursive exprs AS (select expr_nom, expr_valeur from ");
 		request.append(environment);

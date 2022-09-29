@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ import fr.insee.arc.core.dao.JeuDeRegleDao;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
@@ -28,6 +26,7 @@ import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -263,7 +262,7 @@ public class ApiInitialisationService extends ApiService {
 			entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
 					new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
 
-		} catch (SQLException ex) {
+		} catch (ArcException ex) {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "buildFileSystem(envExecutions)", LOGGER, ex);
 		}
     	
@@ -300,7 +299,7 @@ public class ApiInitialisationService extends ApiService {
      *
      * @param connexion
      * @param tablePil
-     * @throws SQLException
+     * @throws ArcException
      */
     private void reinstate(Connection connexion, String tablePil) throws Exception {
         loggerDispatcher.info("reinstateWithRename", LOGGER);
@@ -516,7 +515,7 @@ public class ApiInitialisationService extends ApiService {
      * @param connexion
      * @param tablePil
      * @param tablePil
-     * @throws SQLException
+     * @throws ArcException
      */
     private void nettoyerTablePilotage(Connection connexion, String envExecution) throws Exception {
 
@@ -894,7 +893,7 @@ public class ApiInitialisationService extends ApiService {
             }
             try {
 				UtilitaireDao.get("arc").executeRequest(connexion, requete);
-			} catch (SQLException e) {
+			} catch (ArcException e) {
 				loggerDispatcher.error(e, LOGGER);
 			}
             
@@ -1006,7 +1005,7 @@ public class ApiInitialisationService extends ApiService {
      * @param envExecution
      * @throws Exception
      */
-    private void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws Exception {
+    private void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws ArcException {
         loggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
         try {
             // maintenance de la table de pilotage
@@ -1119,7 +1118,7 @@ public class ApiInitialisationService extends ApiService {
 
     
     
-    private static void rebuildPilotage(Connection connexion, String tablePilotage) throws SQLException
+    private static void rebuildPilotage(Connection connexion, String tablePilotage) throws ArcException
     {
         UtilitaireDao.get("arc").executeBlock(
                 connexion,
@@ -1140,9 +1139,9 @@ public class ApiInitialisationService extends ApiService {
      * la variable etape indique si c'est bien l'etape à considerer pour traitement ou pas etape='1' : phase à considerer, sinon etape='0'
      *
      * @return
-     * @throws SQLException
+     * @throws ArcException
      */
-    private boolean remettreEtapePilotage() throws SQLException {
+    private boolean remettreEtapePilotage() throws ArcException {
 
         StringBuilder requete = new StringBuilder();
         
@@ -1201,7 +1200,7 @@ public class ApiInitialisationService extends ApiService {
 
         } catch (IOException ex) {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "clearPilotageAndDirectories()", LOGGER, ex);
-        } catch (SQLException ex) {
+        } catch (ArcException ex) {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "clearPilotageAndDirectories()", LOGGER, ex);
             throw ex;
         }

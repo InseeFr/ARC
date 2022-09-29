@@ -1,7 +1,6 @@
 package fr.insee.arc.web.action;
 
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -202,7 +202,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		try {
 			String envDescription = UtilitaireDao.get(POOLNAME).getString(null, envQuery);
 			getViewPilotageBAS().setCustomValue(ENV_DESCRIPTION, envDescription);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
 		}
 	}
@@ -233,7 +233,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		envQuery.append(envQuery.quoteText(getBacASable()));
 	try {
 		UtilitaireDao.get(POOLNAME).executeRequest(null, envQuery);
-	} catch (SQLException e) {		
+	} catch (ArcException e) {		
 		loggerDispatcher.error("Error in updateEnvDescription", e, LOGGER);
 	}
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -289,7 +289,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
     		this.getViewPilotageBAS().setMessage("managementSandbox.batch.status");
     		this.getViewPilotageBAS().setMessageArgs(state, time);
 
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in informationInitialisationPROD", e, LOGGER);
 		}
     	return generateDisplay(model, RESULT_SUCCESS);
@@ -306,7 +306,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			this.getViewPilotageBAS().setMessageArgs(time);
 
 			
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in retarderInitialisationPROD", e, LOGGER);
 		}
     	
@@ -325,7 +325,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			this.getViewPilotageBAS().setMessageArgs(time);
 
 			
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in demanderBatchInitialisationPROD", e, LOGGER);
 		}
     	
@@ -337,7 +337,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
     	try {
 			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='O'; "));
 			this.getViewPilotageBAS().setMessage("managementSandbox.batch.status.switch.on");
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in toggleOnPROD", e, LOGGER);
 		}
     	return generateDisplay(model, RESULT_SUCCESS);
@@ -348,7 +348,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
     	try {
 			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='N'; "));
 			this.getViewPilotageBAS().setMessage("managementSandbox.batch.status.switch.off");
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in toggleOffPROD", e, LOGGER);
 		}
     	return generateDisplay(model, RESULT_SUCCESS);
@@ -505,7 +505,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 			
 			g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, requete));
 			entrepot = g.mapContent().get("entrepot").get(0);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBasAction.downloadEnveloppeFromArchiveBAS()", LOGGER);
 		}
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE");
@@ -693,7 +693,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 	
 			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
 			message = messageOk;
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBASAction.restore", LOGGER);
 			message = "managementSandbox.batch.replay.error";
 		}
@@ -750,7 +750,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 					}
 				}
 			}
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error(e, LOGGER);
 		}
 		
@@ -885,7 +885,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		try {
 			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
 			message = "managementSandbox.batch.delete.ok";
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBASAction.toDeleteBAS", LOGGER);
 			message = "managementSandbox.batch.delete.error";
 		}
@@ -920,7 +920,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		try {
 
 			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			loggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
 							+ updateToDelete, LOGGER);

@@ -19,6 +19,7 @@ import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -82,10 +83,9 @@ public class ChargeurClefValeur implements IChargeur {
 
     /**
      * Loads key-value files
-     * 
-     * @throws Exception
+     * @throws ArcException 
      */
-    private void chargerClefValeur() throws Exception {
+    private void chargerClefValeur() throws ArcException  {
         outputStream = new PipedOutputStream();
 
         KeyValueSubLoader kRunnable = new KeyValueSubLoader();
@@ -103,7 +103,7 @@ public class ChargeurClefValeur implements IChargeur {
             if (exceptionThrown.isPresent()) {
             	 e = exceptionThrown.get();
             }
-            throw e;
+            throw new ArcException(e);
         }
     }
 
@@ -114,9 +114,10 @@ public class ChargeurClefValeur implements IChargeur {
      * @param tmpInx2
      * @return un outputStream contenant une version xml de l'inputStream
      * @author S4LWO8
-     * @throws Exception
+     * @throws IOException 
+     * @throws ArcException 
      */
-    private void clefValeurToXml(HashMap<String, String> arbreFormat, InputStream tmpInx2) throws Exception {
+    private void clefValeurToXml(HashMap<String, String> arbreFormat, InputStream tmpInx2) throws ArcException {
         StaticLoggerDispatcher.info("** Conversion du fichier clef valeur en XML **", LOGGER);
         java.util.Date beginDate = new java.util.Date();
         // contient la liste des pères pour l'élément précédent
@@ -127,28 +128,31 @@ public class ChargeurClefValeur implements IChargeur {
         HashMap<String, ArrayList<String>> mapRubriquesFilles = new HashMap<>();
 
         // Lecture du fichier contenant les données et écriture d'un fichier xml
-        InputStreamReader inputStreamReader = new InputStreamReader(tmpInx2, StandardCharsets.ISO_8859_1);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+		InputStreamReader inputStreamReader = new InputStreamReader(tmpInx2, StandardCharsets.ISO_8859_1);
 
-        // On lit le fichier ligne par ligne
-        String ligne = bufferedReader.readLine();
-
-        // initialisation du fichier
-        listePeresRubriquePrecedante = initialisationOutputStream(arbreFormat, mapRubriquesFilles, ligne);
-
-        ligne = bufferedReader.readLine();
-        // int nbLignesLues = 0;
-        while (ligne != null) {
-
-            listePeresRubriquePrecedante = lectureLigne(arbreFormat, listePeresRubriquePrecedante, mapRubriquesFilles, ligne);
-            // nbLignesLues++;
-            // System.out.println(ligne);
-            ligne = bufferedReader.readLine();
-
-        }
-
-        finaliserOutputStream(listePeresRubriquePrecedante);
-        bufferedReader.close();
+        try
+        (
+        		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        )
+        {
+	        // On lit le fichier ligne par ligne
+	        String ligne = bufferedReader.readLine();
+	
+	        // initialisation du fichier
+	        listePeresRubriquePrecedante = initialisationOutputStream(arbreFormat, mapRubriquesFilles, ligne);
+	
+	        ligne = bufferedReader.readLine();
+	        while (ligne != null) {
+	
+	            listePeresRubriquePrecedante = lectureLigne(arbreFormat, listePeresRubriquePrecedante, mapRubriquesFilles, ligne);
+	            ligne = bufferedReader.readLine();
+	
+	        }
+	
+	        finaliserOutputStream(listePeresRubriquePrecedante);
+        } catch (IOException e) {
+			throw new ArcException(e);
+		}
 
         java.util.Date endDate = new java.util.Date();
         StaticLoggerDispatcher.info("** clefValeurToXml temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
@@ -162,10 +166,11 @@ public class ChargeurClefValeur implements IChargeur {
      * @param ligne
      * @param listePeresRubriqueCourante
      * @param bw
-     * @throws Exception
+     * @throws IOException 
+     * @throws ArcException 
      */
     private ArrayList<String> initialisationOutputStream(HashMap<String, String> arbreFormat, HashMap<String, ArrayList<String>> mapRubriquesFilles,
-            String ligne) throws Exception {
+            String ligne) throws IOException, ArcException {
         // ecriture de l'entete du fichier
 
         ecrireXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -180,7 +185,7 @@ public class ChargeurClefValeur implements IChargeur {
         donnee = StringEscapeUtils.escapeXml11(donnee);
 
         if (!arbreFormat.containsKey(rubrique)) {
-            throw new Exception("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
+            throw new ArcException("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
         }
         ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
         // On remonte dans l'arbre des pères jusqu'à la racine
@@ -216,11 +221,13 @@ public class ChargeurClefValeur implements IChargeur {
      * @param ligne
      * @param listePeresRubriqueCourante
      * @param bw
-     * @throws Exception
+     * @throws IOException 
+     * @throws ArcException 
      */
     private ArrayList<String> lectureLigne(HashMap<String, String> arbreFormat,
-            ArrayList<String> listePeresRubriquePrecedante, HashMap<String, ArrayList<String>> mapRubriquesFilles, String ligne)
-            throws Exception {
+            ArrayList<String> listePeresRubriquePrecedante, HashMap<String, ArrayList<String>> mapRubriquesFilles, String ligne) 
+            		throws ArcException
+            {
         String rubrique;
         String donnee;
         String pere;
@@ -240,7 +247,7 @@ public class ChargeurClefValeur implements IChargeur {
         // StaticLoggerDispatcher.info("rubrique " + rubrique, LOGGER);
         // On verifi si la rubrique existe bien dans notre arbre format. Sinon on lance un exception
         if (!arbreFormat.containsKey(pere)) {
-            throw new Exception("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
+            throw new ArcException("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
         }
         ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
         while (pere != null) {
@@ -327,8 +334,12 @@ public class ChargeurClefValeur implements IChargeur {
 
     }
 
-    private void ecrireXML(String donnee) throws IOException {
-        getOutputStream().write((donnee).getBytes());
+    private void ecrireXML(String donnee) throws ArcException {
+        try {
+			getOutputStream().write((donnee).getBytes());
+		} catch (IOException e) {
+			throw new ArcException(e);
+		}
     }
 
     public Norme getNormeOk() {
@@ -380,13 +391,13 @@ public class ChargeurClefValeur implements IChargeur {
     }
 
     @Override
-    public void execution() throws Exception {
+    public void execution() throws ArcException {
         chargerClefValeur();
 
     }
 
     @Override
-    public void charger() throws Exception {
+    public void charger() throws ArcException {
         initialisation();
         execution();
         finalisation();

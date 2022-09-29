@@ -1,7 +1,6 @@
 package fr.insee.arc.core.util;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 
 public class BDParameters {
 
@@ -45,7 +45,7 @@ public class BDParameters {
 	        
 	        try {
 				UtilitaireDao.get("arc").executeImmediate(c, requete);
-			} catch (SQLException e1) {
+			} catch (ArcException e1) {
 				StaticLoggerDispatcher.error("Error on selecting key in parameter table", LOGGER);
 			}
 		}
@@ -79,7 +79,7 @@ public class BDParameters {
 	{
 		try {
 			UtilitaireDao.get("arc").executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error on inserting key in parameter table", LOGGER);
 		}
 	}
@@ -109,7 +109,7 @@ public class BDParameters {
 			
 			UtilitaireDao.get("arc").executeRequest(c,requete);
 			
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);
 		}
 	}

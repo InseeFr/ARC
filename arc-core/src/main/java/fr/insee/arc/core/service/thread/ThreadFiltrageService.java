@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.thread;
 
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -16,14 +15,15 @@ import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiFiltrageService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Pair;
 import fr.insee.arc.utils.utils.Sleep;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Thread de filtrage. Comme pour le normage, on parallélise et chaque filtrage
@@ -99,7 +99,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 			try {
 				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 						"aucuneTableADroper");
-			} catch (SQLException e2) {
+			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(e2, LOGGER_APISERVICE);
 			}
 			Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
@@ -122,9 +122,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 * priorise.<br/>
 	 *
 	 *
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private void initialiserBatchFiltrage() throws SQLException {
+	private void initialiserBatchFiltrage() throws ArcException {
 
 		StringBuilder query = new StringBuilder();
 
@@ -183,9 +183,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 * Les règles de décision sont la négation des règles codées dans la table
 	 * {@code mapping_filtrage_regle}<br/>
 	 *
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private void filtrer() throws SQLException {
+	private void filtrer() throws ArcException {
 		StaticLoggerDispatcher.info("Table des données à filtrer utilisée : " + this.tableFiltrageDataTemp, logger);
 
 		List<List<String>> regleActive = Format
@@ -260,7 +260,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	private StringBuilder getRequeteFiltrageIntermediaire(String envExecution, String aTableControleOk,
 			String aTableFiltrageOk, String aTableFiltrageKo,
 			HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle, String excludedRate,
-			String aTablePilotage) throws SQLException {
+			String aTablePilotage) throws ArcException {
 		StringBuilder requete = new StringBuilder();
 
 		/**

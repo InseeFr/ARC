@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,15 +23,16 @@ import fr.insee.arc.core.service.engine.chargeur.IChargeur;
 import fr.insee.arc.core.util.ChargementBrutalTable;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.RegleChargement;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.core.util.TypeChargement;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.Sleep;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 
 /**
@@ -139,7 +139,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		// En acs d'erreur on met le fichier en KO avec l'erreur obtenu.
 		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
-	    } catch (SQLException e2) {
+	    } catch (ArcException e2) {
 			StaticLoggerDispatcher.error(e2,LOGGER);
 	    }
 
@@ -150,9 +150,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
     
     /** 
      * Prepare the loading phase
-     * @throws SQLException
+     * @throws ArcException
      */
-    private void preparation() throws SQLException
+    private void preparation() throws ArcException
     {
     	StringBuilder query=new StringBuilder();
     	
@@ -191,7 +191,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	/**
      * Retirer de la table des données les fichiers en KO
      *
-     * @throws SQLException
+     * @throws ArcException
      */
     private String truncateTableIfKO() {
 	StaticLoggerDispatcher.info("** clean **", LOGGER);
@@ -321,7 +321,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * 
      * @param norme
      * @return l'objet Norme avec la règle de chargement renseignée
-     * @throws SQLException
+     * @throws ArcException
      * @throws Exception si aucune règle n'est trouvée
      */
     private Norme calculerTypeFichier(Norme norme) throws Exception {
@@ -347,7 +347,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * 
      * @param connexion
      * @param tableName
-     * @throws SQLException
+     * @throws ArcException
      */
     private String insertionFinale(Connection connexion, String tableName, String idSource) {
    	StaticLoggerDispatcher.info("** insertTableOK **", LOGGER);
@@ -372,7 +372,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @param idSource
      * @param listeNorme
      * @return
-     * @throws SQLException
+     * @throws ArcException
      */
 
     private boolean majPilotage(String idSource, Norme normeOk, String validite) throws Exception {

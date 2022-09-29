@@ -1,7 +1,7 @@
 package fr.insee.arc.core.service.engine.normage;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +19,7 @@ import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
 
 public class NormageEngine {
@@ -75,11 +76,11 @@ public class NormageEngine {
 		this.paramBatch = paramBatch;
 	}
 
-	public void executeEngine() throws Exception {
+	public void executeEngine() throws ArcException {
 		execute();
 	}
 
-	public void execute() throws Exception {
+	public void execute() throws ArcException {
 
 		String jointure = pilotageIdSource.get("jointure").get(0);
 
@@ -94,9 +95,9 @@ public class NormageEngine {
 	/**
 	 * This method execute the basic engine with no xml join set
 	 * 
-	 * @throws SQLException
+	 * @throws ArcException
 	 */
-	private void simpleExecutionWithNoJoinDefined() throws SQLException {
+	private void simpleExecutionWithNoJoinDefined() throws ArcException {
 		StringBuilder reqSelect = new StringBuilder();
 
 		reqSelect.append("id_source, id, date_integration, id_norme, validite, periodicite");
@@ -151,11 +152,16 @@ public class NormageEngine {
 	 * @param jointure
 	 * @throws Exception
 	 */
-	private void complexExecutionWithJoinDefined(String jointure) throws Exception {
+	private void complexExecutionWithJoinDefined(String jointure) throws ArcException {
 		// variables locales
 		String idSource = pilotageIdSource.get("id_source").get(0);
 		String norme = pilotageIdSource.get("id_norme").get(0);
-		Date validite = this.formatter.parse(pilotageIdSource.get("validite").get(0));
+		Date validite;
+		try {
+			validite = this.formatter.parse(pilotageIdSource.get("validite").get(0));
+		} catch (ParseException e) {
+			throw new ArcException("the validite field is not parsable as date",e);
+		}
 		String periodicite = pilotageIdSource.get("periodicite").get(0);
 		String validiteText = pilotageIdSource.get("validite").get(0);
 
@@ -306,7 +312,7 @@ public class NormageEngine {
 	 * @throws Exception
 	 */
 	private void ajouterRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
+			String periodicite, String jointure) throws ArcException {
 		StaticLoggerDispatcher.info("ajouterRegleDuplication()", LOGGER);
 
 		// pour toutes les règles de relation,
@@ -369,7 +375,7 @@ public class NormageEngine {
 	}
 
 	private String appliquerRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
+			String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info("appliquerRegleDuplication()", LOGGER);
 
@@ -541,7 +547,7 @@ public class NormageEngine {
 	 * @throws Exception
 	 */
 	private void ajouterRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
+			String periodicite, String jointure) throws ArcException {
 		StaticLoggerDispatcher.info("ajouterRegleIndependance()", LOGGER);
 
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
@@ -626,7 +632,7 @@ public class NormageEngine {
 	 * @throws Exception
 	 */
 	private String appliquerRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
+			String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info("appliquerRegleIndependance()", LOGGER);
 
@@ -660,7 +666,7 @@ public class NormageEngine {
 						if (!blocCreate.contains(m_rubrique)) {
 							StaticLoggerDispatcher.info("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc",
 									LOGGER);
-							throw new Exception("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc");
+							throw new ArcException("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc");
 						}
 
 						rubriqueRegle[i] = m_rubrique;
@@ -674,7 +680,7 @@ public class NormageEngine {
 								StaticLoggerDispatcher.info(
 										"La rubrique " + rubriqueRegle[i] + " n'a pas le même pere que les autres",
 										LOGGER);
-								throw new Exception(
+								throw new ArcException(
 										"La rubrique " + rubriqueRegle[i] + " n'a pas le même pere que les autres");
 							}
 						}
@@ -918,7 +924,7 @@ public class NormageEngine {
 	 * @throws Exception
 	 */
 	private String appliquerRegleUnicite(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
+			String periodicite, String jointure) throws ArcException {
 		StaticLoggerDispatcher.info("appliquerRegleUnicite()", LOGGER);
 
 		String returned = jointure;
@@ -1007,7 +1013,7 @@ public class NormageEngine {
 	 * @throws Exception
 	 */
 	private String appliquerRegleRelation(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws Exception {
+			String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info("appliquerRegleRelation()", LOGGER);
 
@@ -1188,7 +1194,7 @@ public class NormageEngine {
 	 * @throws Exception
 	 */
 	private void executerJointure(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure, String validiteText, String id_source) throws Exception {
+			String periodicite, String jointure, String validiteText, String id_source) throws ArcException {
 
 		// only first partition rule is processed
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -1230,7 +1236,7 @@ public class NormageEngine {
 	 */
 	private void executerJointureWithPartition(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, String validiteText, String id_source, String element, int minSize,
-			int chunkSize) throws Exception {
+			int chunkSize) throws ArcException {
 		/* get the query blocks */
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
 		String blocInsert = "\n insert into {table_destination} "

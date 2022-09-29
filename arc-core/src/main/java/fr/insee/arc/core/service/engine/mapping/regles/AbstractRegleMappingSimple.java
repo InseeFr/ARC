@@ -7,6 +7,7 @@ import java.util.Set;
 
 import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
+import fr.insee.arc.utils.exception.ArcException;
 
 /**
  *
@@ -48,7 +49,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
         }
 
         @Override
-        public void deriver() throws Exception {
+        public void deriver() throws ArcException {
             this.expressionSQL = this.getExpression();
         }
 
@@ -63,7 +64,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
         }
 
         @Override
-        public void deriverTest() throws Exception {
+        public void deriverTest() throws ArcException {
             this.deriver();
         }
     }
@@ -112,7 +113,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
 
 
         @Override
-        public void deriverTest() throws Exception {
+        public void deriverTest() throws ArcException {
             check();
             String expressionSansAccolades = this.getExpression().substring(ONE, this.getExpression().length() - ONE).toLowerCase(Locale.FRENCH);
             this.expressionSQL = expressionSansAccolades;
@@ -132,7 +133,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
          * 5. Le reste est ce qui n'existe pas.
          */
         @Override
-        public void deriver() throws Exception {
+        public void deriver() throws ArcException {
             check();
 
             // is it a rubrique for id to be ignored ?

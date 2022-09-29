@@ -2,15 +2,15 @@ package fr.insee.arc.core.service.engine.xsd.controls;
 
 import java.util.List;
 
-import fr.insee.arc.core.service.engine.xsd.InvalidStateForXsdException;
+import fr.insee.arc.utils.exception.ArcException;
 
 public class EnumForXsd implements ControlForXsd {
 
 	private final List<String> enumeration;
 
-	public EnumForXsd(List<String> enumeration) throws InvalidStateForXsdException {
+	public EnumForXsd(List<String> enumeration) throws ArcException {
 		if (enumeration == null || enumeration.isEmpty()) {
-			throw new InvalidStateForXsdException("Une énumération XSD ne peut pas être vide.");
+			throw new ArcException("Une énumération XSD ne peut pas être vide.");
 		}
 		this.enumeration = enumeration;
 	}

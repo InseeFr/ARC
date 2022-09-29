@@ -1,13 +1,13 @@
 package fr.insee.arc.ws.services.restServices.execute;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
 import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteQueryPojo;
@@ -22,9 +22,9 @@ public class ExecuteRulesDao {
  * @param serviceName
  * @param serviceId
  * @return
- * @throws SQLException 
+ * @throws ArcException 
  */
-public static void fillRules(Connection c, ExecuteParameterPojo p, String serviceName, int serviceId) throws SQLException
+public static void fillRules(Connection c, ExecuteParameterPojo p, String serviceName, int serviceId) throws ArcException
 {
 	GenericBean gb;
 	
@@ -64,7 +64,7 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 	}
 }
 
-public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnView r, Date firstContactDate) throws SQLException
+public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnView r, Date firstContactDate) throws ArcException
 {
 	r.setReceptionTime(firstContactDate);
 	r.setReturnTime(new Date());

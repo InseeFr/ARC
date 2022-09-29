@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.engine;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
@@ -45,11 +45,11 @@ public class ServiceCommunFiltrageMapping {
      * @param aEnvExecution
      * @param aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle
      * @param aNomColonneRegle
-     * @throws SQLException
+     * @throws ArcException
      */
     public static void parserRegleGlobale(Connection aConnexion, String aEnvExecution,
             HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToVariableToRegle, String aNomColonneRegle)
-            throws SQLException {
+            throws ArcException {
         if (LOGGER.isInfoEnabled()) {
             StaticLoggerDispatcher.info(
                     "Début du parsing des règles portant sur des valeurs globales (count sur une table...)", LOGGER);
@@ -89,10 +89,10 @@ public class ServiceCommunFiltrageMapping {
      * @param anExpressionRegle
      * @param aEnvExecution
      * @return la règle parsée et exécutée partiellement
-     * @throws SQLException
+     * @throws ArcException
      */
     private static String traiterRegleGlobale(Connection aConnexion, String anExpressionRegle, String aEnvExecution)
-            throws SQLException {
+            throws ArcException {
         String returned = anExpressionRegle;
         Pattern pattern = Pattern.compile(REGEXP_REQUETE_RESULTAT_UNIQUE);
         // Matcher pour {:expression}
@@ -133,9 +133,9 @@ public class ServiceCommunFiltrageMapping {
      * @param table
      *
      * @return
-     * @throws SQLException
+     * @throws ArcException
      */
-    public static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) throws SQLException {
+    public static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) throws ArcException {
 		return new HashSet<>(UtilitaireDao.get("arc").getColumns(aConnexion, new ArrayList<>(), aTable));
     }
     

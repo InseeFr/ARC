@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +33,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.model.ExportModel;
@@ -81,7 +81,7 @@ public class ExportAction extends ArcAction<ExportModel>  {
 
         try {
 			UtilitaireDao.get("arc").executeImmediate(null, query);
-		} catch (SQLException e) {
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error in ExportAction.initializeExport", LOGGER);
 		}
 

@@ -10,6 +10,7 @@ import fr.insee.arc.core.service.engine.mapping.TableMapping;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 
 /**
  *
@@ -52,19 +53,19 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
      * <code>{:requete qui renvoie un résultat unique avec des {:nom table} dedans}</code>
      */
     @Override
-    public void deriver() throws Exception {
+    public void deriver() throws ArcException {
         String requete = this.obtenirRequeteExecutable();
         /*
          * La requête doit contenir uniquement du SQL, sans "{" ni "}".
          */
         if (!requete.matches(CodeSQL.REGEXP_TO_FIND_IDENTIFIER_RUBRIQUE) || !requete.matches(CodeSQL.REGEXP_TO_FIND_NONIDENTIFIER_RUBRIQUE)) {
-            throw new IllegalStateException("La règle " + this.getExpression() + " contient des noms de tables inexistants.");
+            throw new ArcException("La règle " + this.getExpression() + " contient des noms de tables inexistants.");
         }
         this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new PreparedStatementBuilder(requete));
     }
 
     @Override
-    public void deriverTest() throws Exception {
+    public void deriverTest() throws ArcException {
         String intermediaire = this.getExpression().replaceAll(tokenRegexDebutOuFin, empty);
         Pattern pattern = Pattern.compile("\\{:[^\\{:\\}]+\\}");
         Matcher matcher = pattern.matcher(intermediaire);
