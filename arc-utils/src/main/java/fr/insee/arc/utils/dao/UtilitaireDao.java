@@ -1190,7 +1190,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public void executeBlock(Connection connexion, String... listeRequete) throws ArcException {
 		StringBuilder bloc = new StringBuilder("BEGIN;\n");
 		for (int i = 0; i < listeRequete.length; i++) {
-			bloc.append(listeRequete[i]).append(SEMICOLON);
+			bloc.append(listeRequete[i]).append(semicolon);
 		}
 		bloc.append("END;\n");
 		executeImmediate(connexion, bloc.toString());

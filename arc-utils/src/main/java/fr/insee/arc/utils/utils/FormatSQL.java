@@ -20,7 +20,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String WITH_AUTOVACUUM_FALSE = "" + FormatSQL.WITH_NO_VACUUM + "";
     public static final String COLLATE_C = "COLLATE pg_catalog.\"C\"";
     private static final String TEXT = "text";
-    public static final String TEXT_COLLATE_C = TEXT + SPACE + COLLATE_C;
+    public static final String TEXT_COLLATE_C = TEXT + space + COLLATE_C;
     public static final String IS_NOT_DISTINCT_FROM = "IS NOT DISTINCT FROM";
     public static final String NO_VACUUM = " (autovacuum_enabled = false, toast.autovacuum_enabled = false) ";
     public static final String WITH_NO_VACUUM = " WITH" + NO_VACUUM;
@@ -322,7 +322,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         {
             requete.append(dropObjectCascade(tableOrView, aNomTableCible));
         }
-        String where = ((StringUtils.isBlank(clauseWhere)) ? EMPTY : " WHERE " + clauseWhere);
+        String where = ((StringUtils.isBlank(clauseWhere)) ? empty : " WHERE " + clauseWhere);
         /*
          * Attention ! Les vues ne peuvent être créées avec un
          * autovacuum_enabled
@@ -398,7 +398,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         // on inverse la chaine de caractere pour avoir les millisecondes en
         // premier en cas de troncature
         l = new StringBuffer(l).reverse().toString();
-        return new StringBuilder(newName).append(_TMP).append(l).append(DOLLAR).append(randomNumber(4)).toString();
+        return new StringBuilder(newName).append(_TMP).append(l).append(dollar).append(randomNumber(4)).toString();
     }
 
     /**
@@ -413,7 +413,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public final static String temporaryTableName(String aName, String suffix)
     {
         String newName = aName.split(_REGEX_TMP)[0];
-        return temporaryTableName(newName + UNDERSCORE + suffix);
+        return temporaryTableName(newName + underscore + suffix);
     }
 
     /**
@@ -454,7 +454,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static String toNullRow(Collection<?> tokens)
     {
-        return (tokens == null || tokens.isEmpty()) ? "(" + EMPTY + ")"
+        return (tokens == null || tokens.isEmpty()) ? "(" + empty + ")"
                 : "(" + StringUtils.repeat(",", tokens.size() - 1) + ")";
     }
 

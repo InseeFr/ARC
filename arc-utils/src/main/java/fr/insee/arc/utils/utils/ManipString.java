@@ -197,7 +197,7 @@ public class ManipString implements IConstanteCaractere {
     }
 
     public static final String[] tokenize(String string, String... tokens) {
-        return string.split("[" + Format.untokenize(tokens, EMPTY) + "]");
+        return string.split("[" + Format.untokenize(tokens, empty) + "]");
     }
 
     /**
@@ -581,7 +581,7 @@ public class ManipString implements IConstanteCaractere {
      * @return
      */
     public static String reformerRadical(String radical) {
-	return radical + (radical.endsWith(BRACE_END) ? EMPTY : BRACE_END);
+	return radical + (radical.endsWith(closingBrace) ? empty : closingBrace);
     }
     
     

@@ -85,10 +85,10 @@ public class ExternalFilesManagementDao implements IDbConstant {
     }
 
     private String typeNomenclature(String nomTable) {
-        String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.UNDERSCORE);
+        String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore);
         StringBuilder typeNomenclature = new StringBuilder();
         for (int i = 0; i < tokens.length - 1; i++) {
-            typeNomenclature.append((i > 0 ? fr.insee.arc.utils.textUtils.IConstanteCaractere.UNDERSCORE : "") + tokens[i]);
+            typeNomenclature.append((i > 0 ? fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore : "") + tokens[i]);
         }
         return typeNomenclature.toString();
     }

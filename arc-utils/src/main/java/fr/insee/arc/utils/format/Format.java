@@ -97,7 +97,7 @@ public class Format implements IConstanteCaractere {
      * @return
      */
     public static String untokenize(Object[] array, String separator) {
-        StringBuilder sb = new StringBuilder(EMPTY);
+        StringBuilder sb = new StringBuilder(empty);
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {
                 sb.append(separator);
@@ -116,7 +116,7 @@ public class Format implements IConstanteCaractere {
      * @return
      */
     public static String untokenize(Collection<?> tokens, String separator) {
-        return tokens == null ? EMPTY : untokenize(tokens.toArray(new Object[tokens.size()]), separator);
+        return tokens == null ? empty : untokenize(tokens.toArray(new Object[tokens.size()]), separator);
     }
 
     /**
@@ -145,7 +145,7 @@ public class Format implements IConstanteCaractere {
         return new StringBuilder(avantTout)//
                 .append(avantToken)//
                 .append(untokenize(array, new StringBuilder(apresToken + separateur + avantToken).toString()))//
-                .append(array.length > 0 ? apresToken : EMPTY)//
+                .append(array.length > 0 ? apresToken : empty)//
                 .append(apresTout)//
                 .toString();
     }
@@ -423,12 +423,12 @@ public class Format implements IConstanteCaractere {
     }
 
     public static String sqlListe(Collection<String> liste) {
-        return new StringBuilder(PARENTHESIS_OPEN).append(QUOTE).append(untokenize(liste, QUOTE + COMMA + SPACE + QUOTE)).append(QUOTE)
-                .append(PARENTHESIS_END).toString();
+        return new StringBuilder(openingParenthesis).append(quote).append(untokenize(liste, quote + comma + space + quote)).append(quote)
+                .append(closingParenthesis).toString();
     }
 
     public static String stringListe(Collection<String> liste) {
-        return new StringBuilder(PARENTHESIS_OPEN).append(untokenize(liste, COMMA + SPACE)).append(PARENTHESIS_END).toString();
+        return new StringBuilder(openingParenthesis).append(untokenize(liste, comma + space)).append(closingParenthesis).toString();
     }
 
     public static String toUpperCase(String string) {

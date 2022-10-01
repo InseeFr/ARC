@@ -91,21 +91,21 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
                 throw new ArcException("L'expression \"" + this.getExpression() + "\" n'est pas valide.");
             }
         }
-        if (!triplet.get(ARRAY_FIRST_COLUMN_INDEX).equalsIgnoreCase(EMPTY)) {
+        if (!triplet.get(ARRAY_FIRST_COLUMN_INDEX).equalsIgnoreCase(empty)) {
             this.listeTokenRegle.add(this.regleMappingFactory.get(triplet.get(ARRAY_FIRST_COLUMN_INDEX), this.variableMapping));
         }
-        if (!triplet.get(ARRAY_SECOND_COLUMN_INDEX).equalsIgnoreCase(EMPTY)) {
+        if (!triplet.get(ARRAY_SECOND_COLUMN_INDEX).equalsIgnoreCase(empty)) {
             this.listeTokenRegle.add(this.regleMappingFactory.get(triplet.get(ARRAY_SECOND_COLUMN_INDEX), this.variableMapping));
         }
-        if (!triplet.get(ARRAY_THIRD_COLUMN_INDEX).equalsIgnoreCase(EMPTY)) {
+        if (!triplet.get(ARRAY_THIRD_COLUMN_INDEX).equalsIgnoreCase(empty)) {
             this.listeTokenRegle.add(this.regleMappingFactory.get(triplet.get(ARRAY_THIRD_COLUMN_INDEX), this.variableMapping));
         }
     }
 
     private List<String> decouperEnTrois(String anExpression) {
-        String boutGauche = EMPTY;
-        String boutDroite = EMPTY;
-        String boutMilieu = EMPTY;
+        String boutGauche = empty;
+        String boutDroite = empty;
+        String boutMilieu = empty;
         Matcher matcher = patternMappingRegleGlobaleOuRubrique.matcher(this.getExpression());
         int start = 0;
         int end = 0;
@@ -140,7 +140,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
             StringBuilder expression = new StringBuilder();
             for (int i = 0; i < this.listeTokenRegle.size(); i++) {
                 if (i == 0) {
-                    expression.append(SPACE);
+                    expression.append(space);
                 }
                 expression.append(this.listeTokenRegle.get(i).getExpressionSQL());
             }

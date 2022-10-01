@@ -683,13 +683,13 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
 	private StringBuilder creerTablePrepUnion(StringBuilder returned, TableMapping aTable,
 	        Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes) {
-		returned.append(NEWLINE);
+		returned.append(newline);
 
 
 		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporairePrepUnion + "  CASCADE; ");
 		returned.append("\n CREATE temporary TABLE " + this.nomTableTemporairePrepUnion + " (");
 
-		listeVariablesTypesPrepUnion(returned, aTable, SPACE, true);
+		listeVariablesTypesPrepUnion(returned, aTable, space, true);
 		returned.append(") "+FormatSQL.WITH_NO_VACUUM+";");
 
 		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporaireIdTable + "  CASCADE; ");
@@ -822,7 +822,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	}
 
 	private static final String nomIdentifiantSuffixeGroupe(String nomVariable, int groupe) {
-		return new StringBuilder(nomVariable + UNDERSCORE + groupe).toString();
+		return new StringBuilder(nomVariable + underscore + groupe).toString();
 	}
 
 	/**
@@ -849,7 +849,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 */
 	private static final StringBuilder sqlListeVariablesOrdonnee(TableMapping table) {
 		return new StringBuilder(Format.untokenize(table.getEnsembleVariableClef(), ", "))//
-		        .append(table.getEnsembleVariableClef().isEmpty() ? EMPTY : ", ")//
+		        .append(table.getEnsembleVariableClef().isEmpty() ? empty : ", ")//
 		        .append(Format.untokenize(table.getEnsembleVariableNonClef(), ", "));
 	}
 

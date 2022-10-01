@@ -258,7 +258,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
             } else {
                 returned.append(", ");
             }
-            String nomVariable = variable.getNomVariable() + UNDERSCORE + aNumeroGroupe;
+            String nomVariable = variable.getNomVariable() + underscore + aNumeroGroupe;
             String expression = reglesIdentifiantes.get(nomVariable);
             if (expression != null) {
                 expression = variable.getNomVariable() + "::text as " + variable.getNomVariable();
@@ -308,7 +308,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
         sqlListeVariables(nomsVariables);
         returned.append(" (" + nomsVariables + ")")//
                 .append("\nSELECT " + nomsVariables)//
-                .append("\nFROM " + this.getNomTableTemporaire() + SEMICOLON + NEWLINE);
+                .append("\nFROM " + this.getNomTableTemporaire() + semicolon + newline);
         return returned.toString();
     }
 
