@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
+import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -219,7 +220,7 @@ public class VObjectService {
 
 	        ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 	        try {
-	            aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(null, requete,  ModeRequete.IHM_INDEXED));
+	            aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(null, requete,  ModeRequeteImpl.arcModeRequeteIHM()));
 	        } catch (ArcException ex) {
 	        	data.setMessage(ex.getMessage());
 	            LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
@@ -331,7 +332,7 @@ public class VObjectService {
 		        	requete.append(") alias_de_table ");
 		        	requete.append(buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel()));
 
-		            aContent = UtilitaireDao.get(this.pool).executeRequest(null, requete, ModeRequete.IHM_INDEXED);
+		            aContent = UtilitaireDao.get(this.pool).executeRequest(null, requete, ModeRequeteImpl.arcModeRequeteIHM());
 		        } catch (ArcException ex) {
 		            currentData.setMessage(ex.getMessage());
 		            LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);

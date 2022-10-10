@@ -17,6 +17,7 @@ import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
+import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -60,8 +61,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
     // identifiant lien direct
     private static final String idKeyPrefix = "id_";
 
-    
-    private static final String SORT_WORK_MEM="128MB";
     
     private Set<TableMapping> ensembleTableMapping;
     private Set<VariableMapping> ensembleVariableMapping;
@@ -661,7 +660,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		 * Insert dans prep union : on fait notre calcul de mise au format
 		 */
 
-		returned.append("\n set local work_mem='"+SORT_WORK_MEM+"';");
+		returned.append("\n set local work_mem='"+ModeRequeteImpl.SORT_WORK_MEM+"';");
 		returned.append("\n INSERT INTO " + this.nomTableTemporairePrepUnion + " ");
 		returned.append("\n SELECT ");
 		returned.append(" " + listeVariablesTypesPrepUnion(new StringBuilder(), table, "::" , true) + " FROM (");
@@ -673,7 +672,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		returned.append("\n TMP_DATA d ," + this.nomTableSource + " e ");
 		returned.append("\n WHERE e.id=d.id_table ");
 		returned.append("\n ) a; ");
-		returned.append("\n set local work_mem='"+FormatSQL.PARALLEL_WORK_MEM+"';");
+		returned.append("\n set local work_mem='"+ModeRequeteImpl.PARALLEL_WORK_MEM+"';");
 
 		returned.append("\n DROP TABLE IF EXISTS TMP_ID CASCADE; ");
 		returned.append("\n DROP TABLE IF EXISTS TMP_DATA CASCADE; ");

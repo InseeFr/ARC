@@ -28,6 +28,7 @@ import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -118,7 +119,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				connexionList.add(connexionTemp);
 
 				// demote application user account to temporary restricted operations and
-				// readonly or non-tempoary schema
+				// readonly or non-temporary schema
 				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution)
 						+ (restrictedUsername.equals("") ? "" : FormatSQL.changeRole(restrictedUsername)));
 			}
@@ -158,7 +159,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				}
 			}
 		}
-		;
 	}
 
 	/**
@@ -294,7 +294,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	private static StringBuilder configConnection(String anEnvExecution) {
 		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.modeParallel(ManipString.substringBeforeFirst(ApiService.dbEnv(anEnvExecution), ".")));
+		requete.append(ModeRequeteImpl.arcModeRequeteEngine(ManipString.substringBeforeFirst(ApiService.dbEnv(anEnvExecution), ".")));
 		return requete;
 
 	}

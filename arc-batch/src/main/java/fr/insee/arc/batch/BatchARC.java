@@ -24,6 +24,7 @@ import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -41,7 +42,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author Manu
  * 
  */
-class BatchARC {
+class BatchARC implements IReturnCode {
 	private static final Logger LOGGER = LogManager.getLogger(BatchARC.class);
 	private static HashMap<String, String> mapParam = new HashMap<>();
 
@@ -409,14 +410,14 @@ class BatchARC {
 				if (args != null && args.length > 0 && args[0].equals("noExit")) {
 					message("No Exit");
 				} else {
-					System.exit(0);
+					System.exit(STATUS_SUCCESS);
 				}
 
 			}
 
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
-			System.exit(202);
+			System.exit(STATUS_FAILURE_TECHNICAL_WARNING);
 		}
 
 		message("Fin du batch");

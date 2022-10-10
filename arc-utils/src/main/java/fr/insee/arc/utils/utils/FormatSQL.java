@@ -17,26 +17,20 @@ import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 {
     public static final String NULL = "null";
-    public static final String WITH_AUTOVACUUM_FALSE = "" + FormatSQL.WITH_NO_VACUUM + "";
-    public static final String COLLATE_C = "COLLATE pg_catalog.\"C\"";
     private static final String TEXT = "text";
-    public static final String TEXT_COLLATE_C = TEXT + space + COLLATE_C;
-    public static final String IS_NOT_DISTINCT_FROM = "IS NOT DISTINCT FROM";
     public static final String NO_VACUUM = " (autovacuum_enabled = false, toast.autovacuum_enabled = false) ";
     public static final String WITH_NO_VACUUM = " WITH" + NO_VACUUM;
     public static final String defaultSeparator = ";\n";
     public static final String _TMP = "$tmp$";
     public static final String _REGEX_TMP = "\\$tmp\\$";
 
-    public static final String PARALLEL_WORK_MEM = "24MB";
-    public static final String SEQUENTIAL_WORK_MEM = "32MB";
     
     public static final boolean DROP_FIRST_FALSE = false;
     public static final boolean DROP_FIRST_TRUE = true;
     
     public static final int TAILLE_MAXIMAL_BLOC_SQL = 300000;
     public static final int MAX_LOCK_PER_TRANSACTION = 50;
-    public static final int TIME_OUT_SQL_EN_HEURE = 100;
+
     public static final int TIMEOUT_MAINTENANCE = 600000;
     
     public static final String VACUUM_OPTION_NONE="";
@@ -123,34 +117,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 		return "SET role='"+roleName+"';COMMIT;";
 	}
 
-    /**
-     * Configuration de la base de données pour des petites requetes
-     *
-     * @param defaultSchema
-     * @return requete
-     */
-    public static String modeParallel(String defaultSchema)
-    {
-    	StringBuilder query=new StringBuilder();
-    	query
-    	.append("set enable_nestloop=on;")
-    	.append("set enable_mergejoin=off;")
-    	.append("set enable_hashjoin=on;")
-    	.append("set enable_material=off;")
-    	.append("set enable_seqscan=off;")
-    	.append("set work_mem='" + PARALLEL_WORK_MEM + "';")
-    	.append("set maintenance_work_mem='" + PARALLEL_WORK_MEM+"';")
-    	.append("set temp_buffers='" + PARALLEL_WORK_MEM + "';")
-    	.append("set statement_timeout="+ (3600000 * TIME_OUT_SQL_EN_HEURE) + ";")
-    	.append("set from_collapse_limit=10000;")
-    	.append("set join_collapse_limit=10000;")
-    	.append("set enable_hashagg=on;")
-    	.append("set search_path=" + defaultSchema.toLowerCase() + ", public;")
-    	.append(ModeRequete.EXTRA_FLOAT_DIGIT.expr())
-    	.append("COMMIT;")
-    	;
-    	return query.toString();
-    }
+
     
     /**
      * timeOut
