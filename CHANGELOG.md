@@ -7,9 +7,10 @@ All notable changes to this project will be documented in this file.
 
 ## version-92.2.01 - 2022-10-03
 - code quality
+- secured the data retrieval service (https + whitelist)
 
 ## version-91.1.60 - 2022-06-02
-- normage optimization for cartesian reduction
+- normage optimization for cartesian reduction with new independance rules
 
 ## version-91.1.55 - 2022-06-02
 - model metadata can now be exported
