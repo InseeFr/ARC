@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;

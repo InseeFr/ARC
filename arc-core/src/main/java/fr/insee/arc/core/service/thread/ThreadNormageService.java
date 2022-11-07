@@ -8,7 +8,7 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
@@ -152,7 +152,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
         query.append("\n UPDATE "+this.tableNormagePilTemp);
         query.append("\n\t SET etat_traitement = '{"+TraitementEtat.OK+"}'");
         query.append("\n\t , phase_traitement = '"+this.currentPhase+"'");
-        query.append("\n\t WHERE id_source='"+this.idSource+"';");
+        query.append("\n\t WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='"+this.idSource+"';");
         
         query.append(this.createTableTravail("", this.tableNormageDataTemp, this.tableNormageKOTemp, this.tableNormagePilTemp, TraitementEtat.KO.toString()));
                 

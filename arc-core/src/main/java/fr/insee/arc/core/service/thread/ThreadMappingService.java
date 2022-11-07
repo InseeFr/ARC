@@ -7,10 +7,10 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.dao.JeuDeRegleDao;
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
 import fr.insee.arc.core.service.ApiMappingService;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
@@ -169,7 +169,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
              * Marquer les OK
              */
             query.append("UPDATE " + this.tableMappingPilTemp + " SET etape=2, etat_traitement = '{" + TraitementEtat.OK + "}' WHERE etat_traitement='{"
-                            + TraitementEtat.ENCOURS + "}' AND id_source = '" + idSource + "' ;");
+                            + TraitementEtat.ENCOURS + "}' AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ;");
 
             /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
              * Opérations de fin d'opération

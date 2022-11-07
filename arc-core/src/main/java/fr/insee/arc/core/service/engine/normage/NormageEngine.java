@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
@@ -34,7 +35,7 @@ public class NormageEngine {
 	/**
 	 * Caractéristique du fichier (idSource) issu du pilotage de ARC
 	 * 
-	 * id_source : nom du fichier jointure : requete de strucutration id_norme :
+	 * idSource : nom du fichier jointure : requete de strucutration id_norme :
 	 * identifiant de norme validite : validite periodicite : periodicite
 	 */
 	private HashMap<String, ArrayList<String>> pilotageIdSource;
@@ -100,7 +101,7 @@ public class NormageEngine {
 	private void simpleExecutionWithNoJoinDefined() throws ArcException {
 		StringBuilder reqSelect = new StringBuilder();
 
-		reqSelect.append("id_source, id, date_integration, id_norme, validite, periodicite");
+		reqSelect.append(ColumnEnum.ID_SOURCE.getColumnName()+", id, date_integration, id_norme, validite, periodicite");
 
 		List<String> listeRubriqueSource = new ArrayList<>();
 		UtilitaireDao.get("arc").getColumns(connection, listeRubriqueSource, tableSource);
@@ -154,7 +155,7 @@ public class NormageEngine {
 	 */
 	private void complexExecutionWithJoinDefined(String jointure) throws ArcException {
 		// variables locales
-		String idSource = pilotageIdSource.get("id_source").get(0);
+		String idSource = pilotageIdSource.get(ColumnEnum.ID_SOURCE.getColumnName()).get(0);
 		String norme = pilotageIdSource.get("id_norme").get(0);
 		Date validite;
 		try {
@@ -1189,12 +1190,12 @@ public class NormageEngine {
 	 * @param periodicite
 	 * @param jointure
 	 * @param validiteText
-	 * @param id_source
+	 * @param idSource
 	 * @return
 	 * @throws ArcException
 	 */
 	private void executerJointure(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure, String validiteText, String id_source) throws ArcException {
+			String periodicite, String jointure, String validiteText, String idSource) throws ArcException {
 
 		// only first partition rule is processed
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -1204,7 +1205,7 @@ public class NormageEngine {
 				String element = regle.get("rubrique").get(j);
 				int minSize = Integer.parseInt(regle.get("rubrique_nmcl").get(j).split(",")[0]);
 				int chunkSize = Integer.parseInt(regle.get("rubrique_nmcl").get(j).split(",")[1]);
-				executerJointureWithPartition(regle, norme, validite, periodicite, jointure, validiteText, id_source,
+				executerJointureWithPartition(regle, norme, validite, periodicite, jointure, validiteText, idSource,
 						element, minSize, chunkSize);
 				return;
 			}
@@ -1212,7 +1213,7 @@ public class NormageEngine {
 
 		// No partition found; normal execution
 		UtilitaireDao.get("arc").executeImmediate(connection, applyQueryPlanParametersOnJointure(
-				replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, id_source),
+				replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, idSource),
 				null));
 
 	}
@@ -1228,14 +1229,14 @@ public class NormageEngine {
 	 * @param periodicite
 	 * @param jointure
 	 * @param validiteText
-	 * @param id_source
+	 * @param idSource
 	 * @param element
 	 * @param minSize
 	 * @param chunkSize
 	 * @throws ArcException
 	 */
 	private void executerJointureWithPartition(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure, String validiteText, String id_source, String element, int minSize,
+			String periodicite, String jointure, String validiteText, String idSource, String element, int minSize,
 			int chunkSize) throws ArcException {
 		/* get the query blocks */
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
@@ -1271,9 +1272,9 @@ public class NormageEngine {
 		}
 
 		blocCreate = replaceQueryParameters(blocCreate, norme, validite, periodicite, jointure, validiteText,
-				id_source);
+				idSource);
 		blocInsert = replaceQueryParameters(blocInsert, norme, validite, periodicite, jointure, validiteText,
-				id_source);
+				idSource);
 
 		int total = UtilitaireDao.get("arc").getInt(connection, new PreparedStatementBuilder(blocCreate));
 
@@ -1318,10 +1319,10 @@ public class NormageEngine {
 	}
 
 	private String replaceQueryParameters(String query, String norme, Date validite, String periodicite,
-			String jointure, String validiteText, String id_source) {
+			String jointure, String validiteText, String idSource) {
 		return query.toString().replace("{table_source}", tableSource).replace("{table_destination}", tableDestination)
 				.replace("{id_norme}", norme).replace("{validite}", validiteText).replace("{periodicite}", periodicite)
-				.replace("{nom_fichier}", id_source);
+				.replace("{nom_fichier}", idSource);
 	}
 
 	/**

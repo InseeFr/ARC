@@ -9,7 +9,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiFiltrageService;
@@ -271,7 +271,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 
 		requete.append("\n BEGIN; ");
 		requete.append("\n create temporary table " + aTableControleCount + " " + FormatSQL.WITH_NO_VACUUM
-				+ " AS SELECT id_source, id, (");
+				+ " AS SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+", id, (");
 		requete.append("\n CASE ");
 		boolean hasRegle = false;
 		for (HierarchicalView expr : aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle
@@ -295,9 +295,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		 * Calcul du taux de filtrage, id_norme, periodicite, validite_inf, validite_sup
 		 */
 		requete.append("\n UPDATE " + aTablePilotage + " pil SET taux_ko = rate.excluded_rate ");
-		requete.append("\n FROM (SELECT id_source, avg(check_against_rule) as excluded_rate FROM " + aTableControleCount
-				+ " GROUP BY id_source) rate ");
-		requete.append("\n WHERE rate.id_source = pil.id_source;\n");
+		requete.append("\n FROM (SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+", avg(check_against_rule) as excluded_rate FROM " + aTableControleCount
+				+ " GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+") rate ");
+		requete.append("\n WHERE rate."+ColumnEnum.ID_SOURCE.getColumnName()+" = pil."+ColumnEnum.ID_SOURCE.getColumnName()+";\n");
 		requete.append("\n COMMIT; ");
 
 		/**
@@ -335,15 +335,15 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		requete.append("\n INSERT INTO " + aTableFiltrageKo + " SELECT * ");
 		requete.append("\n FROM " + aTableControleOk + " a ");
 		requete.append("\n WHERE exists (SELECT 1 FROM " + aTablePilotage + " b WHERE etat_traitement='{"
-				+ TraitementEtat.KO + "}' and a.id_source=b.id_source) ");
+				+ TraitementEtat.KO + "}' and a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") ");
 		requete.append("\n ; ");
 
 		requete.append("\n INSERT INTO " + aTableFiltrageKo + " SELECT * ");
 		requete.append("\n FROM " + aTableControleOk + " a ");
 		requete.append("\n WHERE not exists (SELECT * FROM " + aTablePilotage + " b WHERE etat_traitement='{"
-				+ TraitementEtat.KO + "}' and a.id_source=b.id_source) ");
+				+ TraitementEtat.KO + "}' and a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") ");
 		requete.append("\n AND EXISTS (SELECT * FROM " + aTableControleCount
-				+ " b where a.id_source=b.id_source and a.id=b.id and b.check_against_rule=1) ");
+				+ " b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" and a.id=b.id and b.check_against_rule=1) ");
 		requete.append("\n ; ");
 
 		/**
@@ -352,10 +352,10 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		requete.append("\n INSERT INTO " + aTableFiltrageOk + " SELECT * ");
 		requete.append("\n FROM " + aTableControleOk + " a ");
 		requete.append("\n WHERE exists (SELECT * FROM " + aTableControleCount
-				+ " b where a.id_source=b.id_source and a.id=b.id and b.check_against_rule=0) ");
+				+ " b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" and a.id=b.id and b.check_against_rule=0) ");
 		requete.append(
 				"\n AND exists (SELECT * FROM " + aTablePilotage + " b WHERE etat_traitement in ('{" + TraitementEtat.OK
-						+ "}','{" + TraitementEtat.OK + "," + TraitementEtat.KO + "}')  and a.id_source=b.id_source);");
+						+ "}','{" + TraitementEtat.OK + "," + TraitementEtat.KO + "}')  and a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+");");
 
 		requete.append(FormatSQL.dropTable(aTableControleCount));
 

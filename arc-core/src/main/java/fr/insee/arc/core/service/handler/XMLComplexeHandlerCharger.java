@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
@@ -525,7 +526,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		this.idLigne++;
 		
 		req.append("insert into " + tempTableI + 
-				"(" + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id_source")) +
+				"(" + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf(ColumnEnum.ID_SOURCE.getColumnName())) +
 				"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id")) +
 				"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("date_integration")) +
 				"," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id_norme")) +
@@ -598,7 +599,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	            StringBuilder reqCreate = new StringBuilder(" \n");
 	
 	            StringBuilder reqInsert = new StringBuilder();
-	            reqInsert.append(" INSERT INTO {table_destination} (id,id_source,date_integration,id_norme,validite,periodicite");
+	            reqInsert.append(" INSERT INTO {table_destination} (id,"+ColumnEnum.ID_SOURCE.getColumnName()+",date_integration,id_norme,validite,periodicite");
 	
 	            StringBuilder reqSelect = new StringBuilder();
 	            reqSelect.append("\n SELECT row_number() over (), ww.* FROM (");

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.utils.exception.ArcException;
 

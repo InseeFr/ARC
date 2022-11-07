@@ -1,4 +1,4 @@
-package fr.insee.arc.core.databaseobjetcs;
+package fr.insee.arc.core.databaseobjects;
 
 public enum ColumnEnum {
 	

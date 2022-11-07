@@ -24,6 +24,7 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
@@ -606,7 +607,7 @@ public class ApiReceptionService extends ApiService {
 				if (fichierARejouer)
 				{
 					// marque les fichiers à effacer (ils vont etre rechargés)
-					requete.append("CREATE TEMPORARY TABLE a_rejouer "+FormatSQL.WITH_NO_VACUUM+" as select distinct id_source from "+this.tablePil+" a where to_delete='R' and exists (select 1 from " + this.tablePilTemp + " b where a.id_source=b.id_source); ");
+					requete.append("CREATE TEMPORARY TABLE a_rejouer "+FormatSQL.WITH_NO_VACUUM+" as select distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" from "+this.tablePil+" a where to_delete='R' and exists (select 1 from " + this.tablePilTemp + " b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+"); ");
 
 					// balayer toutes les tables; effacer les enregistrements 
 
@@ -615,25 +616,19 @@ public class ApiReceptionService extends ApiService {
 						ArrayList<String> envTables = g.mapContent().get("table_name");
 						for (String nomTable : envTables) {
 
-							requete.append("DELETE FROM "+nomTable+" a where exists (select 1 from a_rejouer b where a.id_source=b.id_source); ");
+							requete.append("DELETE FROM "+nomTable+" a where exists (select 1 from a_rejouer b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+"); ");
 							requete.append("vacuum "+nomTable+"; ");
-
-//							if (!nomTable.contains(TraitementPhase.MAPPING.toString().toLowerCase())
-//									&& nomTable.endsWith("_" + TraitementEtat.OK.toString().toLowerCase())) {
-//								requete.append("DELETE FROM "+nomTable+"_todo a where exists (select 1 from a_rejouer b where a.id_source=b.id_source); ");
-//								requete.append("vacuum "+nomTable+"_todo; ");	                    
-//							}
 
 						}
 					}
 
 					// effacer de la table pilotage des to_delete à R
-					requete.append("DELETE FROM " + this.tablePil + " a using a_rejouer b where a.id_source=b.id_source; ");
+					requete.append("DELETE FROM " + this.tablePil + " a using a_rejouer b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+"; ");
 				}
 
 
 				// pb des archives sans nom de fichier
-				requete.append("UPDATE " + this.tablePilTemp + " set id_source='' where id_source is null; ");
+				requete.append("UPDATE " + this.tablePilTemp + " set "+ColumnEnum.ID_SOURCE.getColumnName()+"='' where "+ColumnEnum.ID_SOURCE.getColumnName()+" is null; ");
 				requete.append("INSERT INTO " + this.tablePil + " select * from " + this.tablePilTemp + "; \n");
 				requete.append("DISCARD TEMP; \n");
 				soumettreRequete(requete);
@@ -686,7 +681,7 @@ public class ApiReceptionService extends ApiService {
 		if (requete.length()==0)
 		{		
 			requete.append("INSERT INTO " + tablePilotage + " ");
-			requete.append("(o_container, container, v_container, id_source,date_entree,phase_traitement,etat_traitement,date_traitement, rapport, nb_enr, etape) VALUES ");
+			requete.append("(o_container, container, v_container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree,phase_traitement,etat_traitement,date_traitement, rapport, nb_enr, etape) VALUES ");
 		}
 		else
 		{
@@ -745,7 +740,7 @@ public class ApiReceptionService extends ApiService {
 			container = content.get(i).get(headers.indexOf(GB_CONTAINER));
 			fileName = content.get(i).get(headers.indexOf(GB_FILENAME));
 			if (fileName != null) {
-				requete.append("insert into " + this.tablePilTemp + " (container, id_source) values (" + FormatSQL.cast(container) + ","
+				requete.append("insert into " + this.tablePilTemp + " (container, "+ColumnEnum.ID_SOURCE.getColumnName()+") values (" + FormatSQL.cast(container) + ","
 						+ FormatSQL.cast(fileName) + "); \n");
 			}
 		}
@@ -753,20 +748,20 @@ public class ApiReceptionService extends ApiService {
 		// detection des doublons de fichiers sur les id_source juste insérés
 		// faut comparer les id_sources en retirant le #nnn représentant le numéro de l'archive (on utilise le regexp_replace pour retirer le #nnn)
 
-		requete.append("select container, id_source FROM " + this.tablePilTemp + " where id_source in ( ");
-		requete.append("select distinct id_source from ( ");
-		requete.append("select id_source, count(1) over (partition by id_source) as n from " + this.tablePilTemp + " ");
+		requete.append("select container, "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + this.tablePilTemp + " where "+ColumnEnum.ID_SOURCE.getColumnName()+" in ( ");
+		requete.append("select distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" from ( ");
+		requete.append("select "+ColumnEnum.ID_SOURCE.getColumnName()+", count(1) over (partition by "+ColumnEnum.ID_SOURCE.getColumnName()+") as n from " + this.tablePilTemp + " ");
 		requete.append(") ww where n>1 ");
 		requete.append(") ");
 		// detection des doublons de fichiers dans la table de pilotage
 		requete.append("UNION ");
-		requete.append("SELECT container, id_source from " + this.tablePilTemp + " a ");
-		requete.append("where exists (select 1 from " + this.tablePil + " b where a.id_source=b.id_source) \n");
-		requete.append("and a.id_source not in (select distinct id_source from " + this.tablePil + " b where b.to_delete='R') ;\n");
+		requete.append("SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + this.tablePilTemp + " a ");
+		requete.append("where exists (select 1 from " + this.tablePil + " b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") \n");
+		requete.append("and a."+ColumnEnum.ID_SOURCE.getColumnName()+" not in (select distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + this.tablePil + " b where b.to_delete='R') ;\n");
 		
 		// récupérer les doublons pour mettre à jour le dispatcher
 		try {
-			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent().get("id_source");
+			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent().get("+ColumnEnum.ID_SOURCE.getColumnName()+");
 			
 			// on va parcourir la liste des fichiers
 			// si on retrouve l'id_source dans la liste, on le marque en erreur
@@ -789,14 +784,14 @@ public class ApiReceptionService extends ApiService {
 		// on ignore les doublons de l'archive pour les fichiers à rejouer
 		// on recrée un nouvelle liste en ne lui ajoutant pas ces doublons à ignorer
 		requete = new StringBuilder();
-		requete.append("SELECT container, container||'>'||id_source as id_source from " + this.tablePilTemp + " a ");
-		requete.append("where exists (select 1 from " + this.tablePil + " b where to_delete='R' and a.id_source=b.id_source) ;\n");
+		requete.append("SELECT container, container||'>'||"+ColumnEnum.ID_SOURCE.getColumnName()+" as "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + this.tablePilTemp + " a ");
+		requete.append("where exists (select 1 from " + this.tablePil + " b where to_delete='R' and a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") ;\n");
 
 		ArrayList<ArrayList<String>> content2 = new ArrayList<>();
 		try {
 			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent();
 			ArrayList<String> listContainerARejouer = m.get(GB_CONTAINER);
-			ArrayList<String> listIdsourceARejouer = m.get("id_source");
+			ArrayList<String> listIdsourceARejouer = m.get(ColumnEnum.ID_SOURCE.getColumnName());
 
 			if (listIdsourceARejouer==null)
 			{
@@ -849,7 +844,7 @@ public class ApiReceptionService extends ApiService {
 			fileName = content.get(i).get(headers.indexOf(GB_FILENAME));
 			type = content.get(i).get(headers.indexOf(GB_TYPE));
 			if (type.equals(TraitementTypeFichier.AC.toString())) {
-				requete.append("insert into " + this.tablePilTemp + " (container, id_source) values (" + FormatSQL.cast(container) + ","
+				requete.append("insert into " + this.tablePilTemp + " (container, "+ColumnEnum.ID_SOURCE.getColumnName()+") values (" + FormatSQL.cast(container) + ","
 						+ FormatSQL.cast(fileName) + "); \n");
 			}
 		}
@@ -877,7 +872,6 @@ public class ApiReceptionService extends ApiService {
 		requete.setLength(0);
 		requete.append(FormatSQL.dropTable(this.tablePilTemp));
 		soumettreRequete(requete);
-	//	StaticLoggerDispatcher.info("Contenu de content juste avant le retour: " + content.toString(), logger);
 		return new GenericBean(headers, types, content);
 	}
 	

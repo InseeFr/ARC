@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -56,7 +57,7 @@ public class ChargementBrutalTable {
     	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
           if (start)
           {
-    		requete.append("\nSELECT '"+idSource.replace("'", "''")+"'::text as id_source,"+ idLigne +"::int as id_ligne,'"+line.replace("'", "''")+"'::text as ligne");
+    		requete.append("\nSELECT '"+idSource.replace("'", "''")+"'::text as "+ColumnEnum.ID_SOURCE.getColumnName()+","+ idLigne +"::int as id_ligne,'"+line.replace("'", "''")+"'::text as ligne");
     		start=false;
           }
           else

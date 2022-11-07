@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.NormeFichier;
 import fr.insee.arc.core.model.ServiceReporting;
@@ -362,7 +363,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		StringBuilder requete = new StringBuilder();
 		requete.append("WITH ");
 		requete.append(
-				"prep AS (SELECT a.id_source, a.id_norme, a.periodicite, b.validite_inf, b.validite_sup, b.version ");
+				"prep AS (SELECT a."+ColumnEnum.ID_SOURCE.getColumnName()+", a.id_norme, a.periodicite, b.validite_inf, b.validite_sup, b.version ");
 		requete.append("	FROM " + pilTemp + " a  ");
 		requete.append("	INNER JOIN " + this.getTableJeuDeRegle()
 				+ " b ON a.id_norme=b.id_norme AND a.periodicite=b.periodicite AND b.validite_inf <=a.validite::date AND b.validite_sup>=a.validite::date ");
@@ -497,8 +498,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	public static String getNormeAttributes(String idSource, String tablePilotage) {
 		StringBuilder requete = new StringBuilder();
 		requete.append(
-				"\n SELECT pil.id_source, pil.jointure, pil.id_norme, pil.validite, pil.periodicite, pil.validite "
-						+ "FROM " + tablePilotage + " pil " + " WHERE id_source='" + idSource + "' ");
+				"\n SELECT pil."+ColumnEnum.ID_SOURCE.getColumnName()+", pil.jointure, pil.id_norme, pil.validite, pil.periodicite, pil.validite "
+						+ "FROM " + tablePilotage + " pil " + " WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "' ");
 		return requete.toString();
 	}
 
@@ -563,7 +564,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				+ " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS  ");
 
 		requete.append("\n WITH prep AS (");
-		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, nb_essais, id_source) as cum_enr ");
+		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, nb_essais, "+ColumnEnum.ID_SOURCE.getColumnName()+") as cum_enr ");
 		requete.append("\n FROM " + tablePil + " a ");
 		requete.append("\n WHERE phase_traitement='" + phaseAncien + "'  AND '" + TraitementEtat.OK
 				+ "'=ANY(etat_traitement) and etape=1 ) ");
@@ -572,14 +573,14 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 		// update the line in pilotage with etape=3 for the previous step
 		requete.append("\n , update as ( UPDATE " + tablePil
-				+ " a set etape=3 from mark b where a.id_source=b.id_source and a.etape=1 AND a.phase_traitement='"
+				+ " a set etape=3 from mark b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" and a.etape=1 AND a.phase_traitement='"
 				+ phaseAncien + "'  AND '" + TraitementEtat.OK + "'=ANY(a.etat_traitement)) ");
 
 		// insert the line in pilotage with etape=1 for the current step
 		requete.append("\n , insert as (INSERT INTO " + tablePil + " ");
 		requete.append(
-				"\n (container, id_source, date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape, generation_composite,jointure) ");
-		requete.append("\n SELECT container, id_source, date_entree, id_norme, validite, periodicite, '" + phaseNouveau
+				"\n (container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape, generation_composite,jointure) ");
+		requete.append("\n SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, '" + phaseNouveau
 				+ "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
 		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + this.bdDateFormat
 				+ "') , rapport, taux_ko, nb_enr, nb_essais, 1 as etape, generation_composite, jointure ");
@@ -645,9 +646,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			// sinon on retire le lien avec la table héritée
 			StringBuilder query = new StringBuilder();
 			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-					new PreparedStatementBuilder("select id_source from " + tablePilTemp + ""))).mapContent();
+					new PreparedStatementBuilder("select "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + tablePilTemp + ""))).mapContent();
 			int count = 0;
-			for (String z : m.get("id_source")) {
+			for (String z : m.get(ColumnEnum.ID_SOURCE.getColumnName())) {
 
 				count++;
 				if (paramBatch != null) {
@@ -768,7 +769,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			String etat) {
 		loggerDispatcher.info("pilotageListIdsource", LOGGER_APISERVICE);
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();
-		requete.append("SELECT container, id_source FROM " + tablePilotage + " ");
+		requete.append("SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + tablePilotage + " ");
 		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase) + " ");
 		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
 		try {
@@ -776,7 +777,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "pilotageListIdSource()", ex);
 		}
-		return new HashMap<String, ArrayList<String>>();
+		return new HashMap<>();
 	}
 
 	/**
@@ -804,7 +805,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			requete.append(", jointure= '" + jointure[0] + "'");
 		}
 
-		requete.append("WHERE id_source='" + idSource + "';\n");
+		requete.append("WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "';\n");
 		return requete;
 	}
 
@@ -843,7 +844,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 		// Si on dispose d'un id source on met à jour seulement celui ci
 		requete.append("\n \t FROM " + tablePilTemp + " as b ");
-		requete.append("\n \t WHERE a.id_source = '" + idSource + "' ");
+		requete.append("\n \t WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		requete.append("\n \t AND a.etape = 1 ; ");
 
 		requete.append(resetPreviousPhaseMark(tablePil, idSource, null));
@@ -887,11 +888,11 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("\n SET etape=0 ");
 		requete.append("\n WHERE a.etape=3 ");
 		if (idSource != null) {
-			requete.append("\n AND a.id_source = '" + idSource + "' ");
+			requete.append("\n AND a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		}
 
 		if (tableSource != null) {
-			requete.append("\n AND EXISTS (SELECT 1 FROM " + tableSource + " b where a.id_source=b.id_source) ");
+			requete.append("\n AND EXISTS (SELECT 1 FROM " + tableSource + " b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") ");
 		}
 
 		requete.append("\n ;");
@@ -1012,7 +1013,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("\n    FROM " + tableIn + " stk ");
 		requete.append("\n    WHERE exists ( SELECT 1  ");
 		requete.append("\n            FROM " + tablePilTemp + " pil  ");
-		requete.append("\n  where pil.id_source=stk.id_source ");
+		requete.append("\n  where pil."+ColumnEnum.ID_SOURCE.getColumnName()+"=stk."+ColumnEnum.ID_SOURCE.getColumnName()+" ");
 		if (etatTraitement.length > 0) {
 			requete.append(" AND '" + etatTraitement[0] + "'=ANY(pil.etat_traitement) ");
 		}
@@ -1085,7 +1086,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append(
 				"TABLE " + tableOut + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ");
 		requete.append("\n SELECT * FROM " + tableIn + " ");
-		requete.append("\n WHERE id_source ='" + idSource + "' ");
+		requete.append("\n WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+" ='" + idSource + "' ");
 		requete.append("\n AND etape = 1 ");
 		requete.append("\n ; ");
 		return requete.toString();
@@ -1267,7 +1268,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 		requete.append("WITH t0 AS ( ");
 		requete.append(updatePilotageErrorQuery(phase, tablePil, exception));
-		requete.append("\n RETURNING id_source) ");
+		requete.append("\n RETURNING "+ColumnEnum.ID_SOURCE.getColumnName()+") ");
 
 		requete.append(resetPreviousPhaseMark(tablePil, null, "t0"));
 
@@ -1310,7 +1311,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		}
 		requete.append(updatePilotageErrorQuery(phase, tablePil, exception));
 
-		requete.append("\n AND id_source = '" + idSource + "' ");
+		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		requete.append("\n ;");
 
 		requete.append(resetPreviousPhaseMark(tablePil, idSource, null));
@@ -1345,8 +1346,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	protected HashMap<String, ArrayList<String>> recuperationIdSource(String phaseTraiement) throws ArcException {
 		HashMap<String, ArrayList<String>> pil = new GenericBean(
 				UtilitaireDao.get(poolName)
-						.executeRequest(this.connexion, new PreparedStatementBuilder("SELECT p.id_source "
-								+ "\n \t FROM " + this.getTablePilTemp() + " p " + "\n \t order by id_source ;")))
+						.executeRequest(this.connexion, new PreparedStatementBuilder("SELECT p."+ColumnEnum.ID_SOURCE.getColumnName()+" "
+								+ "\n \t FROM " + this.getTablePilTemp() + " p " + "\n \t order by "+ColumnEnum.ID_SOURCE.getColumnName()+" ;")))
 										.mapContent();
 
 		return (pil);

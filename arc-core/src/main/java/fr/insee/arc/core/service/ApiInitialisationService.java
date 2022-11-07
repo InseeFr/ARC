@@ -15,11 +15,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.dao.JeuDeRegleDao;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
@@ -512,7 +513,7 @@ public class ApiInitialisationService extends ApiService {
         loggerDispatcher.info("cleanToDelete", LOGGER);
 
         StringBuilder requete = new StringBuilder();
-        requete.append("DELETE FROM " + tablePil + " a WHERE exists (select 1 from " + tablePil + " b where b.to_delete='1' and a.id_source=b.id_source and a.container=b.container); ");
+        requete.append("DELETE FROM " + tablePil + " a WHERE exists (select 1 from " + tablePil + " b where b.to_delete='1' and a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" and a.container=b.container); ");
         UtilitaireDao.get("arc").executeBlock(connexion, requete);
     }
 
@@ -553,7 +554,7 @@ public class ApiInitialisationService extends ApiService {
 
                 // 2. on fait une première selection des fichiers candidats au Delete
                 .append(",isFichierToDelete AS (	 ")
-                .append("SELECT id_source, container, date_client ")
+                .append("SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+", container, date_client ")
                 .append("FROM ")
                 .append(nomTablePilotage)
                 .append(" a ")
@@ -572,8 +573,8 @@ public class ApiInitialisationService extends ApiService {
                 // par double inclusion (A dans B & B dans A)
 
                 // 3. on selectionne les fichiers éligibles
-                .append("SELECT id_source, container FROM (SELECT unnest(date_client) as t, id_source, container FROM isFichierToDelete) ww ")
-                .append("GROUP BY id_source, container ")
+                .append("SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+", container FROM (SELECT unnest(date_client) as t, "+ColumnEnum.ID_SOURCE.getColumnName()+", container FROM isFichierToDelete) ww ")
+                .append("GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+", container ")
                 // on filtre selon RG2
                 .append("HAVING (current_date - max(t) ::date ) >=" + Nb_Jour_A_Conserver + " ")
                 .append("; ");
@@ -595,10 +596,10 @@ public class ApiInitialisationService extends ApiService {
 
                 // 5. suppression des fichier de la table de pilotage
                 .append(",delete_idsource AS (").append("DELETE FROM ").append(nomTablePilotage).append(" a ").append("USING fichier_to_delete_limit b ")
-                .append("WHERE a.id_source=b.id_source ").append(") ")
+                .append("WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" ").append(") ")
                 
                 //5b. suppression de la tgable des fichiers eligibles
-                .append(",delete_source as (DELETE FROM fichier_to_delete a using fichier_to_delete_limit b where row(a.id_source,a.container)::text=row(b.id_source,b.container)::text) ")
+                .append(",delete_source as (DELETE FROM fichier_to_delete a using fichier_to_delete_limit b where row(a."+ColumnEnum.ID_SOURCE.getColumnName()+",a.container)::text=row(b."+ColumnEnum.ID_SOURCE.getColumnName()+",b.container)::text) ")
                 // 6. récuperer la liste des archives
                 .append("SELECT entrepot, nom_archive FROM delete_archive ");
 
@@ -880,7 +881,7 @@ public class ApiInitialisationService extends ApiService {
         	requete = new PreparedStatementBuilder();
             requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phaseNext.toString()) + " ");
             if (querySelection.length()>0) {
-                requete.append("AND id_source IN (SELECT distinct id_source FROM (");
+                requete.append("AND "+ColumnEnum.ID_SOURCE.getColumnName()+" IN (SELECT distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM (");
                 requete.append(querySelection);
                 requete.append(") q1 ) ");               
             }
@@ -895,7 +896,7 @@ public class ApiInitialisationService extends ApiService {
         	requete = new PreparedStatementBuilder();
             requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
             if (querySelection.length()>0) {
-            	 requete.append("AND id_source IN (SELECT distinct id_source FROM (");
+            	 requete.append("AND "+ColumnEnum.ID_SOURCE.getColumnName()+" IN (SELECT distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM (");
                  requete.append(querySelection);
                  requete.append(") q1 ) ");
             }
@@ -918,7 +919,7 @@ public class ApiInitialisationService extends ApiService {
     	requete = new PreparedStatementBuilder();
         requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
         if (querySelection.length()>0) {
-       	 	requete.append("AND id_source IN (SELECT distinct id_source FROM (");
+       	 	requete.append("AND "+ColumnEnum.ID_SOURCE.getColumnName()+" IN (SELECT distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM (");
             requete.append(querySelection);
             requete.append(") q1 ) ");
        }
@@ -1074,24 +1075,11 @@ public class ApiInitialisationService extends ApiService {
 		           		 	{
 		           		 		// on récupère la variable etape dans la phase
 		           		 		// si on ne trouve la source de la table dans la phase, on drop !
-		           		 		String etape=UtilitaireDao.get(poolName).getString(connexion, new PreparedStatementBuilder("SELECT etape FROM "+tablePil+" WHERE phase_traitement='" + phase + "' AND '" + etat + "'=ANY(etat_traitement) AND id_source=(select id_source from "+t+" limit 1)"));
+		           		 		String etape=UtilitaireDao.get(poolName).getString(connexion, new PreparedStatementBuilder("SELECT etape FROM "+tablePil+" WHERE phase_traitement='" + phase + "' AND '" + etat + "'=ANY(etat_traitement) AND "+ColumnEnum.ID_SOURCE.getColumnName()+"=(select "+ColumnEnum.ID_SOURCE.getColumnName()+" from "+t+" limit 1)"));
 		           		 		
 		           		 		if (etape==null)
 		           		 		{
 		           		 			query.append("\n BEGIN; DROP TABLE IF EXISTS "+t+"; COMMIT;");
-		           		 		}
-		           		 		else
-		           		 		{
-			           		 			// si on ne trouve pas la table dans la phase en etape=1, on détruit le lien avec to do
-//				           		 		if (!etape.equals("1"))
-//				           		 		{
-//				           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" NO INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
-//				           		 		}
-//				           		 		else
-//				           		 		// sinon on pose le lien (etape 1 ou 2)
-//				           		 		{
-//				           		 			query.append(FormatSQL.tryQuery("\n ALTER TABLE "+t+" INHERIT "+ManipString.substringBeforeFirst(t,"_"+CHILD_TABLE_TOKEN+"_")+"_todo;"));
-//				           		 		}
 		           		 		}
 		           		 	}
 		           		 	
@@ -1106,7 +1094,7 @@ public class ApiInitialisationService extends ApiService {
                     {
                     	UtilitaireDao.get("arc").executeBlock(this.connexion, deleteTableByPilotage(nomTable, nomTable, this.tablePil, phase, etat, ""));
                         UtilitaireDao.get("arc").executeImmediate(connexion,
-                                "set default_statistics_target=1; vacuum analyze " + nomTable + "(id_source); set default_statistics_target=100;");
+                                "set default_statistics_target=1; vacuum analyze " + nomTable + "("+ColumnEnum.ID_SOURCE.getColumnName()+"); set default_statistics_target=100;");
                     }
            		 	
                 }
@@ -1131,7 +1119,7 @@ public class ApiInitialisationService extends ApiService {
         UtilitaireDao.get("arc").executeBlock(
                 connexion,
                 FormatSQL.rebuildTableAsSelectWhere(tablePilotage, "true",
-                        "create index idx1_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (id_source);",
+                        "create index idx1_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " ("+ColumnEnum.ID_SOURCE.getColumnName()+");",
                         "create index idx2_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (phase_traitement, etape);",
                         "create index idx4_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (rapport) where rapport is not null;",
                         "create index idx5_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage + " (o_container,v_container);",
@@ -1155,7 +1143,7 @@ public class ApiInitialisationService extends ApiService {
         
         requete.append(ApiService.resetPreviousPhaseMark(this.tablePil, null, null));
         
-        requete.append("WITH tmp_1 as (select id_source, max(");
+        requete.append("WITH tmp_1 as (select "+ColumnEnum.ID_SOURCE.getColumnName()+", max(");
         new StringBuilder();
         requete.append("case ");
         for (TraitementPhase p : TraitementPhase.values()) {
@@ -1163,12 +1151,12 @@ public class ApiInitialisationService extends ApiService {
         }
         requete.append("end ) as p ");
         requete.append("FROM " + this.tablePil + " ");
-        requete.append("GROUP BY id_source ");
+        requete.append("GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+" ");
         requete.append("having max(etape)=0 ) ");
         requete.append("update " + this.tablePil + " a ");
         requete.append("set etape=1 ");
         requete.append("from tmp_1 b ");
-        requete.append("where a.id_source=b.id_source ");
+        requete.append("where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" ");
         requete.append("and a.phase_traitement= case ");
         for (TraitementPhase p : TraitementPhase.values()) {
             requete.append("when p=" + p.ordinal() + " then '" + p.toString() + "' ");
@@ -1230,7 +1218,7 @@ public class ApiInitialisationService extends ApiService {
         
         // PERF : selection des id_source dans une table temporaire pour que postgres puisse partir en semi-hash join
         requete.append("\n CREATE TEMPORARY TABLE TMP_SOURCE_SELECTED AS ");
-        requete.append("\n SELECT id_source from " + tablePil + " ");
+        requete.append("\n SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + tablePil + " ");
         requete.append("\n WHERE phase_traitement='" + phase + "' ");
         requete.append("\n AND '" + etat + "'=ANY(etat_traitement) ");
         requete.append("\n "+extraCond+" ");
@@ -1240,7 +1228,7 @@ public class ApiInitialisationService extends ApiService {
         
         requete.append("\n CREATE  TABLE " + tableDestroy + " "+FormatSQL.WITH_NO_VACUUM+" ");
         requete.append("\n AS select * from " + nomTableSource + " a ");
-        requete.append("\n WHERE exists (select 1 from TMP_SOURCE_SELECTED b WHERE a.id_source=b.id_source) ");
+        requete.append("\n WHERE exists (select 1 from TMP_SOURCE_SELECTED b WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") ");
         requete.append("\n ; ");
 
         requete.append("\n DROP TABLE IF EXISTS " + nomTable + " CASCADE; ");

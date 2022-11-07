@@ -15,8 +15,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.opencsv.CSVReader;
 
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
-import fr.insee.arc.core.databaseobjetcs.DatabaseObjectService;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.DatabaseObjectService;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;

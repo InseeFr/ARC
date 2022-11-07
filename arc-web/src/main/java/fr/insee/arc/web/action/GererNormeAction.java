@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
-import fr.insee.arc.core.databaseobjetcs.TableEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.TableEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;

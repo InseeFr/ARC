@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.core.util.BDParameters;
@@ -75,7 +75,7 @@ public class ApiNormageService extends ApiService {
             }
             
             connectionThread = chooseConnection(connectionThread, threadList, connexionList);
-            this.currentIdSource = getTabIdSource().get("id_source").get(currentIndice);
+            this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
             
             ThreadNormageService r = new ThreadNormageService( connectionThread, currentIndice, this);
             threadList.add(r);

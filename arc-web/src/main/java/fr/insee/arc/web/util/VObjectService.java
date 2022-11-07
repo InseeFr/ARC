@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
@@ -1222,7 +1224,7 @@ public class VObjectService {
         TarArchiveOutputStream taos = null;
         try {
             taos = new TarArchiveOutputStream(new GZIPOutputStream(response.getOutputStream()));
-            UtilitaireDao.get(this.pool).zipOutStreamRequeteSelect(null, requete, taos, repertoire, anEnvExcecution, phase, "ARCHIVE");
+            zipOutStreamRequeteSelect(null, requete, taos, repertoire, anEnvExcecution, phase, "ARCHIVE");
         } catch (IOException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
         } finally {
@@ -1242,6 +1244,100 @@ public class VObjectService {
         }
     }
 
+    
+	/**
+	 * Ecrit le résultat de la requête {@code requete} dans le fichier compressé
+	 * {@code zos} !Important! la requete doit être ordonnée sur le container <br/>
+	 *
+	 *
+	 * @param connexion
+	 * @param requete
+	 * @param taos
+	 * @param nomPhase
+	 *
+	 * @param dirSuffix
+	 */
+	public void zipOutStreamRequeteSelect(Connection connexion, PreparedStatementBuilder requete, TarArchiveOutputStream taos,
+			String repertoireIn, String anEnvExcecution, String nomPhase, String dirSuffix) {
+		int k = 0;
+		int fetchSize = 5000;
+		GenericBean g;
+		ArrayList<String> listIdSource;
+		ArrayList<String> listIdSourceEtat;
+		ArrayList<String> listContainer;
+		String repertoire = repertoireIn + anEnvExcecution.toUpperCase().replace(".", "_") + File.separator;
+
+		String currentContainer;
+		while (true) {
+			// Réécriture de la requete pour avoir le i ème paquet
+			PreparedStatementBuilder requeteLimit=new PreparedStatementBuilder();
+			requeteLimit.append(requete);
+			requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
+			// Récupération de la liste d'id_source par paquet de fetchSize
+			try {
+				g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(null, requeteLimit));
+				HashMap<String, ArrayList<String>> m = g.mapContent();
+				listIdSource = m.get(ColumnEnum.ID_SOURCE.getColumnName());
+				listContainer = m.get("container");
+				listIdSourceEtat = m.get("etat_traitement");
+			} catch (ArcException ex) {
+				LoggerHelper.errorGenTextAsComment(getClass(), "zipOutStreamRequeteSelect()", LOGGER, ex);
+				break;
+			}
+			if (listIdSource == null) {
+				LoggerHelper.traceAsComment(LOGGER, "listIdSource est null, sortie");
+				break;
+			}
+			
+			LoggerHelper.traceAsComment(LOGGER, " listIdSource.size() =", listIdSource.size());
+			
+			ArrayList<String> listIdSourceContainer = new ArrayList<>();
+			ArrayList<String> listIdSourceEtatContainer = new ArrayList<>();
+			
+			// Ajout des fichiers à l'archive
+			int i = 0;
+			while (i < listIdSource.size()) {
+				String receptionDirectoryRoot = Paths.get(repertoire, nomPhase + "_"
+						+ ManipString.substringBeforeFirst(listIdSource.get(i), "_") + "_" + dirSuffix).toString();
+				// fichier non archivé
+				if (UtilitaireDao.isNotArchive(listContainer.get(i))) {
+					UtilitaireDao.generateEntryFromFile(receptionDirectoryRoot,
+							ManipString.substringAfterFirst(listIdSource.get(i), "_"), taos);
+					i++;
+				} else {
+					// on sauvegarde la valeur du container courant
+					// on va extraire de la listIdSource tous les fichiers du
+					// même container
+					currentContainer = ManipString.substringAfterFirst(listContainer.get(i), "_");
+					listIdSourceContainer.clear();
+					listIdSourceEtatContainer.clear();
+					int j = i;
+					while (j < listContainer.size()
+							&& ManipString.substringAfterFirst(listContainer.get(j), "_").equals(currentContainer)) {
+						listIdSourceContainer.add(ManipString.substringAfterFirst(listIdSource.get(j), "_"));
+						listIdSourceEtatContainer.add(listIdSourceEtat.get(j));
+						j++;
+					}
+					// archive .tar.gz
+					if (currentContainer.endsWith(".tar.gz") || currentContainer.endsWith(".tgz")) {
+						UtilitaireDao.generateEntryFromTarGz(receptionDirectoryRoot, currentContainer, listIdSourceContainer, taos);
+						i = i + listIdSourceContainer.size();
+					} else if (currentContainer.endsWith(".zip")) {
+						UtilitaireDao.generateEntryFromZip(receptionDirectoryRoot, currentContainer, listIdSourceContainer, taos);
+						i = i + listIdSourceContainer.size();
+					}
+					// archive .gz
+					else if (listContainer.get(i).endsWith(".gz")) {
+						UtilitaireDao.generateEntryFromGz(receptionDirectoryRoot, currentContainer, listIdSourceContainer, taos);
+						i = i + listIdSourceContainer.size();
+					}
+				}
+			}
+			k++;
+		}
+	}
+    
+    
     /**
      * Télécharger en tar gzip une liste de fichier
      *

@@ -8,6 +8,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
@@ -452,7 +453,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
 
             }
             
-            if (!variable.getNomVariable().equals("id_source"))
+            if (!variable.getNomVariable().equals(ColumnEnum.ID_SOURCE.getColumnName()))
             {
 	            if (isFirstNonClef)
 	            {
@@ -483,7 +484,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
             	allVar.append(variable.getNomVariable());
             	where.append(variable.getNomVariable());
             	
-            	if (!variable.getNomVariable().equals("id_source"))
+            	if (!variable.getNomVariable().equals(ColumnEnum.ID_SOURCE.getColumnName()))
                 {
             		whereAllNonClefNull.append(variable.getNomVariable());
             		whereAllNonClefNull2.append("{NULL}");
@@ -503,7 +504,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
             	select.append(variable.getNomVariable());
             	allVar.append(variable.getNomVariable());
             	groupBy.append(RequeteMapping.aliasTable+"."+variable.getNomVariable());
-            	if (!variable.getNomVariable().equals("id_source"))
+            	if (!variable.getNomVariable().equals(ColumnEnum.ID_SOURCE.getColumnName()))
                 {
             		whereAllNonClefNull.append(variable.getNomVariable());
                 }
@@ -539,7 +540,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
 
                 if (!variable.isGroupe())
                 {
-                	if (!variable.getNomVariable().equals("id_source") && !variable.getNomVariable().equals(getPrimaryKey()) )
+                	if (!variable.getNomVariable().equals(ColumnEnum.ID_SOURCE.getColumnName()) && !variable.getNomVariable().equals(getPrimaryKey()) )
                 	{
                 		if (variable.getNomVariable().startsWith("id_"))
                 		{
@@ -562,20 +563,16 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
             for (VariableMapping variable : this.ensembleVariableNonClef) {
                 if (!variable.isGroupe())
                 {
-                	if (!variable.getNomVariable().equals("id_source") && !variable.getNomVariable().equals(getPrimaryKey()) )
+                	if (!variable.getNomVariable().equals(ColumnEnum.ID_SOURCE.getColumnName()) && !variable.getNomVariable().equals(getPrimaryKey()) )
                 	{
                 		if (variable.getNomVariable().startsWith("id_"))
                 		{
-//                    		r.append(",");
-//                			r.append(variable);
                 			s.add(variable.toString());
                 		}
                 		else
                 		{
                 			if (!variable.getEnsembleIdentifiantsRubriques().isEmpty())
                 			{
-//                				r.append(",");
-//                				r.append(Format.untokenize(variable.getEnsembleIdentifiantsRubriques(),","));
                 				s.addAll(variable.getEnsembleIdentifiantsRubriques());
                 			}
                 		}

@@ -82,7 +82,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text securoty-->
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text security-->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>

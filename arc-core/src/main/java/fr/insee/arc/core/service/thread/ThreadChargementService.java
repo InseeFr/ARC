@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.ArchiveLoader.ArchiveChargerFactory;
 import fr.insee.arc.core.ArchiveLoader.FilesInputStreamLoad;
 import fr.insee.arc.core.ArchiveLoader.IArchiveFileLoader;
-import fr.insee.arc.core.databaseobjetcs.ColumnEnum;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.factory.ChargeurFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
@@ -198,7 +198,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	StaticLoggerDispatcher.info("** clean **", LOGGER);
 
 	StringBuilder queryTest=new StringBuilder();
-	queryTest.append("select count(*)>0 from (select id_source from " + this.tableChargementPilTemp + " where etat_traitement='{"
+	queryTest.append("select count(*)>0 from (select "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + this.tableChargementPilTemp + " where etat_traitement='{"
 		    + TraitementEtat.KO + "}' limit 1) u ");
 
 	StringBuilder queryToExecute=new StringBuilder();
@@ -397,7 +397,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    bloc3.append(", periodicite='" + normeOk.getPeriodicite() + "' \n");
 	}
 
-	bloc3.append("where id_source='" + idSource + "' AND phase_traitement='" + this.currentPhase + "'; \n");
+	bloc3.append("where "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "' AND phase_traitement='" + this.currentPhase + "'; \n");
 	UtilitaireDao.get(poolName).executeBlock(this.getConnexion(), bloc3);
 	java.util.Date endDate = new java.util.Date();
 

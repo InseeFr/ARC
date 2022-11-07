@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.ApiService;
@@ -98,7 +99,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
     public static final Set<String> setIdSource = new HashSet<String>() {
         private static final long serialVersionUID = 9031984127160616029L;
         {
-            this.add("id_source");
+            this.add(ColumnEnum.ID_SOURCE.getColumnName());
         }
     };
 
@@ -706,7 +707,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		this.nomTableSource="parallel_mapping";
 		returned.append("DROP TABLE IF EXISTS "+nomTableSource+";");
 		returned.append("\n CREATE TEMPORARY TABLE "+nomTableSource+" "+FormatSQL.WITH_NO_VACUUM+" AS ");
-		returned.append("\n SELECT * from "+this.nomTablePrecedente+" where id_source='"+tokenIdSource+"' ; ");
+		returned.append("\n SELECT * from "+this.nomTablePrecedente+" where "+ColumnEnum.ID_SOURCE.getColumnName()+"='"+tokenIdSource+"' ; ");
 		return returned;
 	}
 

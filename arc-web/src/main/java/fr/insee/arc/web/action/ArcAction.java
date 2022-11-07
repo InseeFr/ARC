@@ -18,7 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import fr.insee.arc.core.databaseobjetcs.DatabaseObjectService;
+import fr.insee.arc.core.databaseobjects.DatabaseObjectService;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;

@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiService;
@@ -83,10 +84,10 @@ public class ClientDaoImpl implements ClientDao {
         ArrayList<ArrayList<String>> tablesMetierNames = new ArrayList<ArrayList<String>>();
 
         StringBuilder request = new StringBuilder("DROP TABLE IF EXISTS " + ApiService.dbEnv(environnement) + client + "_" + timestamp
-                + "_id_source; ");
+                + "_"+ColumnEnum.ID_SOURCE.getColumnName()+"; ");
 
-        request.append("CREATE TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_id_source ");
-        request.append("AS SELECT id_source FROM " + ApiService.dbEnv(environnement) + "pilotage_fichier T1 ");
+        request.append("CREATE TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_"+ColumnEnum.ID_SOURCE.getColumnName()+" ");
+        request.append("AS SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + ApiService.dbEnv(environnement) + "pilotage_fichier T1 ");
         request.append("WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) AND T1.periodicite='" + periodicite + "' ");
 
         if (!StringUtils.isEmpty(validiteInf)) {
@@ -97,10 +98,10 @@ public class ClientDaoImpl implements ClientDao {
                 + "' AND T1.id_norme=T2.id_norme) ");
         if (!reprise) {
             LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = false");
-            request.append("AND NOT '" + client + "' = ANY(coalesce(T1.client, ARRAY[]::text[])) GROUP BY id_source");
+            request.append("AND NOT '" + client + "' = ANY(coalesce(T1.client, ARRAY[]::text[])) GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+"");
         } else {
             LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = true");
-            request.append("GROUP BY id_source");
+            request.append("GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+"");
         }
         request.append("; ");
         request.append("DROP TABLE IF EXISTS " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier; ");
@@ -157,7 +158,7 @@ public class ClientDaoImpl implements ClientDao {
         /**************************************************************************************************************************/
 
         // Préparation du block de requêtes à executer
-        StringBuilder request = new StringBuilder("DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_id_source; ");
+        StringBuilder request = new StringBuilder("DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_"+ColumnEnum.ID_SOURCE.getColumnName()+"; ");
 
         // Création de la requête de création de la table temporaire contenant la liste des id_sources
         StringBuilder query = new StringBuilder();
@@ -165,9 +166,9 @@ public class ClientDaoImpl implements ClientDao {
         // Cas 1 : Avec limitation du nombre de fichiers à récupérer
         if (nbFichiers > 0) {
 
-            query.append("CREATE TABLE " + env + client + "_" + timestamp + "_id_source ");
-            query.append("AS SELECT id_source FROM (");
-            query.append("SELECT id_source, substr(date_entree,1,10)::date as date_entree FROM " + env + "pilotage_fichier T1 ");
+            query.append("CREATE TABLE " + env + client + "_" + timestamp + "_"+ColumnEnum.ID_SOURCE.getColumnName()+" ");
+            query.append("AS SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM (");
+            query.append("SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+", substr(date_entree,1,10)::date as date_entree FROM " + env + "pilotage_fichier T1 ");
             query.append("WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) AND T1.periodicite='" + periodicite + "' ");
 
             if (requeteJSON.keySet().contains(JsonKeys.VALINF.getKey())) {
@@ -179,10 +180,10 @@ public class ClientDaoImpl implements ClientDao {
 
             if (!reprise) {
                 LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = false");
-                query.append("AND NOT '" + client + "' = ANY(coalesce(T1.client, ARRAY[]::text[])) GROUP BY id_source, date_entree");
+                query.append("AND NOT '" + client + "' = ANY(coalesce(T1.client, ARRAY[]::text[])) GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree");
             } else {
                 LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = true");
-                query.append("GROUP BY id_source, date_entree ");
+                query.append("GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree ");
             }
 
             // on trie par ordre decroissant de date d'entree
@@ -193,8 +194,8 @@ public class ClientDaoImpl implements ClientDao {
 
         // Cas 2 : Sans limitation du nombre de fichiers à récupérer
         else {
-            query.append("CREATE TABLE " + env + client + "_" + timestamp + "_id_source ");
-            query.append("AS SELECT id_source FROM " + env + "pilotage_fichier T1 ");
+            query.append("CREATE TABLE " + env + client + "_" + timestamp + "_"+ColumnEnum.ID_SOURCE.getColumnName()+" ");
+            query.append("AS SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + env + "pilotage_fichier T1 ");
             query.append("WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) AND T1.periodicite='" + periodicite + "' ");
 
             if (requeteJSON.keySet().contains(JsonKeys.VALINF.getKey())) {
@@ -206,10 +207,10 @@ public class ClientDaoImpl implements ClientDao {
 
             if (!reprise) {
                 LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = false");
-                query.append("AND NOT '" + client + "' = ANY(coalesce(T1.client, ARRAY[]::text[])) GROUP BY id_source");
+                query.append("AND NOT '" + client + "' = ANY(coalesce(T1.client, ARRAY[]::text[])) GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+"");
             } else {
                 LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = true");
-                query.append("GROUP BY id_source ");
+                query.append("GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+" ");
             }
 
             query.append("; ");
@@ -277,10 +278,8 @@ public class ClientDaoImpl implements ClientDao {
         request.append("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS ");
         request.append("SELECT * ");
         request.append("FROM " + ApiService.dbEnv(environnement) + tableMetier.get(0) + " T1 WHERE true ");
-        // request.append("AND T1.id_source IN (SELECT id_source FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp +
-        // "_id_source); ");
         request.append("AND exists (SELECT 1 FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp
-                + "_id_source T2 where T2.id_source=T1.id_source); ");
+                + "_"+ColumnEnum.ID_SOURCE.getColumnName()+" T2 where T2."+ColumnEnum.ID_SOURCE.getColumnName()+"=T1."+ColumnEnum.ID_SOURCE.getColumnName()+"); ");
 
         mesTablesImagesCrees.add(nomTableImage);
 
@@ -347,7 +346,7 @@ public class ClientDaoImpl implements ClientDao {
         columnClient.append("SET client = array_append(client, '" + client + "') ");
         columnClient.append(", date_client = array_append( date_client, localtimestamp ) ");
         columnClient.append("WHERE true ");
-        columnClient.append("AND EXISTS (SELECT 1 FROM " + tableSource + " T2 where T1.id_source=T2.id_source) ");
+        columnClient.append("AND EXISTS (SELECT 1 FROM " + tableSource + " T2 where T1."+ColumnEnum.ID_SOURCE.getColumnName()+"=T2."+ColumnEnum.ID_SOURCE.getColumnName()+") ");
         columnClient.append("AND T1.phase_traitement='" + TraitementPhase.MAPPING + "';");
 
         try {

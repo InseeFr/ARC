@@ -21,9 +21,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.insee.arc.core.dao.JeuDeRegleDao;
+import fr.insee.arc.core.databaseobjects.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
 import fr.insee.arc.core.service.engine.chargeur.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.core.service.engine.controle.ServiceRequeteSqlRegle;
@@ -86,7 +87,7 @@ public class ExecuteEngineController {
 						break;
 					case NORMAGE:
 						HashMap<String, ArrayList<String>> pil = new HashMap<>();
-						pil.put("id_source", new ArrayList<String>(Arrays.asList(bodyPojo.fileName)));
+						pil.put(ColumnEnum.ID_SOURCE.getColumnName(), new ArrayList<String>(Arrays.asList(bodyPojo.fileName)));
 						pil.put("id_norme", new ArrayList<String>(Arrays.asList(bodyPojo.norme)));
 						pil.put("validite", new ArrayList<String>(Arrays.asList(bodyPojo.validite)));
 						pil.put("periodicite", new ArrayList<String>(Arrays.asList(bodyPojo.periodicite)));

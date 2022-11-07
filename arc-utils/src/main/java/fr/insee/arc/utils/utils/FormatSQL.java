@@ -17,7 +17,6 @@ import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 {
     public static final String NULL = "null";
-    private static final String TEXT = "text";
     public static final String NO_VACUUM = " (autovacuum_enabled = false, toast.autovacuum_enabled = false) ";
     public static final String WITH_NO_VACUUM = " WITH" + NO_VACUUM;
     public static final String defaultSeparator = ";\n";
