@@ -1259,13 +1259,6 @@ public class NormageEngine {
 					ManipString.substringAfterLast(ManipString.substringBeforeLast(blocCreate, partitionIdentifier),
 							"create temporary table "),
 					" as ");
-
-			// if independance rule used for the element ($ sign), then use record id "r" as
-			// partition key
-			if (blocCreate.contains(" t_" + element + "$ ")) {
-				partitionIdentifier = "r";
-			}
-
 			blocCreate = blocCreate + "select max(" + partitionIdentifier + ") from " + partitionTableName;
 		} else {
 			blocCreate = blocCreate + "select 0";
