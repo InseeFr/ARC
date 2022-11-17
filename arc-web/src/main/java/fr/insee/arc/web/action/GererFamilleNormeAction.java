@@ -1,8 +1,6 @@
 package fr.insee.arc.web.action;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +21,13 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
+import fr.insee.arc.core.serviceinteractif.ddi.DDIParser;
+import fr.insee.arc.core.serviceinteractif.ddi.dao.DDIInsertDAO;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.model.FamilyManagementModel;
@@ -170,16 +172,18 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     
     
     @RequestMapping("/importDDI")
-    public String importDDI(Model model, MultipartFile fileUpload) throws IOException {    	
+    public String importDDI(Model model, MultipartFile fileUploadDDI) throws IOException {    	
     	loggerDispatcher.debug("importDDI",LOGGER);
-    	try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))){
-    	    
-    		String line;
-    		while ((line = rd.readLine()) != null) {
-    	        System.out.println(line);
-    	    }
-    		
-    	}
+        try {
+        	
+        	DDIModeler modeler=DDIParser.parse(fileUploadDDI.getInputStream());
+
+        	new DDIInsertDAO(this.databaseObjectService).insertDDI(modeler);
+            
+            
+        } catch (ArcException e) {
+        	this.viewFamilleNorme.setMessage(e.getMessage());
+        }    	
         return generateDisplay(model, RESULT_SUCCESS);
     }
     
@@ -398,9 +402,8 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 		System.out.println("/* initializeVariableMetier */");
 		PreparedStatementBuilder requete = getRequeteListeVariableMetierTableMetier(listeTableFamille,
 			viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
-		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
+		HashMap<String, String> defaultInputFields = new HashMap<>();
 		defaultInputFields.put(ID_FAMILLE, viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
-		// this.viewVariableMetier.setColumnRendering(ArcConstantVObjectGetter.columnRender.get(this.viewVariableMetier.getSessionName()));
 		this.vObjectService.initialize(viewVariableMetier, requete, "arc."+IHM_MOD_VARIABLE_METIER, defaultInputFields);
 		
 	    } catch (Exception ex) {

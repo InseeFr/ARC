@@ -31,6 +31,11 @@ public PreparedStatementBuilder(StringBuilder query) {
 	this.query = query;
 }
 
+public PreparedStatementBuilder append(SQL s)
+{
+	query.append(s.toString());
+	return this;
+}
 
 public PreparedStatementBuilder append(String s)
 {
@@ -123,6 +128,18 @@ public String quoteTextWithoutBinding(String p)
  */
 public StringBuilder sqlListe(Collection<String> liste)
 {
+	return sqlListe(liste, "","");
+}
+
+/**
+ * convert a javalist into a sql liste with bind variable
+ * @param liste
+ * @param openingBrace
+ * @param closingBrace
+ * @return
+ */
+public StringBuilder sqlListe(Collection<String> liste, String openingBrace, String closingBrace)
+{
 	StringBuilder requete=new StringBuilder();
 	
 	boolean first=true;
@@ -136,11 +153,14 @@ public StringBuilder sqlListe(Collection<String> liste)
 		{
 			requete.append(",");
 		}
+		requete.append(openingBrace);
 		requete.append(quoteText(s));
+		requete.append(closingBrace);
 	}
 	
 	return requete;
 }
+
 
 // getters
 

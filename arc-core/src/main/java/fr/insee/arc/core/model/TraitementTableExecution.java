@@ -10,6 +10,7 @@ public enum TraitementTableExecution {
 
 	private String expression;
 
+	@Override
 	public String toString() {
 		return this.expression;
 	}

@@ -5,4 +5,5 @@ var configJS="Render:FixedHeader;" +
 		"IHM:TextareaHotkeys;" +
 		"IHM:TableMultiCheckbox;" +
 		"Render:AlertBox;" +
-		"IHM:Onglet;";
+		"IHM:Onglet;"+
+		"Render:ChooseFileWithName;";

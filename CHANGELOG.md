@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+- DDI implementation
+
 ## version-92.2.02 - 2022-10-14
 - The batch logger default level was incorrect and fixed
 

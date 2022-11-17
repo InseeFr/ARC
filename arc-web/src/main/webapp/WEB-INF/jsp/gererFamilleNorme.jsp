@@ -42,9 +42,25 @@
 								<span class="fa fa-download">&nbsp;</span>
 								<spring:message code="gui.button.downloadRuleset" />
 							</button>
+							<div class="custom-file">
+								<input
+									name="fileUploadDDI"
+									type="file"
+									class="custom-file-input"
+									id="inputGroupFileLoadDDI"
+								/> <label
+									class="custom-file-label"
+									for="inputGroupFileLoadDDI"
+									aria-describedby="Choose file to upload"
+								><spring:message code="general.chooseFile"/></label>
+							</div>
 							<button class="btn btn-primary btn-sm"
-								id="viewFamilleNorme.importDDI" type="submit"
-								doAction="importDDI" multipart="true">
+								id="viewFamilleNorme.importDDI"
+								type="submit"
+								doAction="importDDI"
+								multipart="true"
+								scope="viewFamilleNorme;"
+								>
 								<span class="fa fa-upload">&nbsp;</span>
 								<spring:message code="gui.button.importDDI" />
 							</button>

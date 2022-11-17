@@ -1344,10 +1344,16 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @throws ArcException
 	 */
 	protected HashMap<String, ArrayList<String>> recuperationIdSource(String phaseTraiement) throws ArcException {
+		
+		PreparedStatementBuilder query=new PreparedStatementBuilder();
+		query.append("SELECT p."+ColumnEnum.ID_SOURCE.getColumnName()+" ");
+		query.append("FROM " + this.getTablePilTemp() + " p ");
+		query.append("ORDER BY "+ColumnEnum.ID_SOURCE.getColumnName());
+		query.append(";");
+		
 		HashMap<String, ArrayList<String>> pil = new GenericBean(
 				UtilitaireDao.get(poolName)
-						.executeRequest(this.connexion, new PreparedStatementBuilder("SELECT p."+ColumnEnum.ID_SOURCE.getColumnName()+" "
-								+ "\n \t FROM " + this.getTablePilTemp() + " p " + "\n \t order by "+ColumnEnum.ID_SOURCE.getColumnName()+" ;")))
+						.executeRequest(this.connexion, query ))
 										.mapContent();
 
 		return (pil);

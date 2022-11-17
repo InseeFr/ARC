@@ -15,6 +15,7 @@ public enum TableEnum {
 	, IHM_ENTREPOT("ihm_entrepot", false)
 	, IHM_FAMILLE("ihm_famille", false)
 	, IHM_MOD_TABLE_METIER("ihm_mod_table_metier", false)
+	, IHM_MOD_VARIABLE_METIER("ihm_mod_variable_metier", false)
 	, IHM_NMCL("ihm_nmcl", false)
 	, IHM_SCHEMA_NMCL("ihm_schema_nmcl", false)
 	, ID_TABLE_IHM_SEUIL("ihm_seuil", false)
