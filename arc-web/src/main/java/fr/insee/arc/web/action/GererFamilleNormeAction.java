@@ -486,9 +486,13 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 	
         StringBuilder message = new StringBuilder();
         StringBuilder bloc = new StringBuilder();
-        bloc.append(addNonExistingVariableMetierWithoutSync(message));
-        bloc.append(synchronizeRegleWithVariableMetier(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
-        executeRequeteMiseAjourTableMetier(message, bloc);
+        String queryToAddNonExistingVaribales=addNonExistingVariableMetierWithoutSync(message);
+        if (!queryToAddNonExistingVaribales.equals(empty))
+        {
+        	bloc.append(addNonExistingVariableMetierWithoutSync(message));
+        	bloc.append(synchronizeRegleWithVariableMetier(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
+        	executeRequeteMiseAjourTableMetier(message, bloc);
+        }
         this.viewVariableMetier.setMessage(message.toString());
         return generateDisplay(model, RESULT_SUCCESS);
     }
@@ -501,16 +505,14 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
     @RequestMapping("/deleteVariableMetier")
 	public String deleteVariableMetier(Model model) {
 
-    	StringBuilder message = new StringBuilder();
-    	executeRequeteMiseAjourTableMetier(message, new StringBuilder(synchronizeRegleWithVariableMetier(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0))));
-    	
-//	    StringBuilder message = new StringBuilder();
-//	    StringBuilder bloc = new StringBuilder();
-//	    bloc.append(deleteVariableMetierWithoutSync(message, viewVariableMetier.mapContentSelected(),
-//	            viewVariableMetier.listContentSelected(), false));
-//	    bloc.append(synchronizeRegleWithVariableMetier(message, viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
-//	    executeRequeteMiseAjourTableMetier(message, bloc);
-//	    this.viewVariableMetier.setMessage(message.toString());
+    	PreparedStatementBuilder query =new PreparedStatementBuilder();
+	    StringBuilder message = new StringBuilder();
+	    StringBuilder bloc = new StringBuilder();
+	    bloc.append(deleteVariableMetierWithoutSync(viewVariableMetier.mapContentSelected(),
+	            viewVariableMetier.listContentSelected(), false));
+	    bloc.append(synchronizeRegleWithVariableMetier(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
+	    executeRequeteMiseAjourTableMetier(message, bloc);
+	    this.viewVariableMetier.setMessage(message.toString());
 	    return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -618,7 +620,6 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
      * @param message
      */
     private String addNonExistingVariableMetierWithoutSync(StringBuilder message) {
-        try {
             StringBuilder requete = new StringBuilder();
             boolean blank=true;
             for (int i = numberOfColumnTableVariableMetier; i < this.viewVariableMetier.getInputFields().size(); i++) {
@@ -661,14 +662,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
        		 message.append("Vous avez oublié de spécifier les tables cibles pour votre variable");
                 return empty;
        	 }
-            
-            message.append("L'ajout de variables s'est achevé sur un succès.\n");
-            return requete.toString();
-        } catch (Exception ex) {
-            LOGGER.error("Erreur ", ex);
-            message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
-        }
-        return empty;
+         return requete.toString();
     }
 
     private static boolean checkIsValide(List<String> inputFields) {
@@ -688,7 +682,6 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
      * @param message
      */
     private String addExistingVariableMetierWithoutSync(StringBuilder message, List<ArrayList<String>> listContent) {
-        try {
             StringBuilder requete = new StringBuilder();
             /**
              * Pour chaque ligne à UPDATE
@@ -726,12 +719,7 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
                     }
                 }
             }
-            message.append("L'ajout de variables s'est achevé sur un succès.\n");
             return requete.toString();
-        } catch (Exception ex) {
-            message.append("Erreur lors de l'ajout des variables.\n").append(ex.getLocalizedMessage());
-        }
-        return empty;
     }
 
     private static String synchronizeRegleWithVariableMetier(String idFamille) {
@@ -823,6 +811,45 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         return true;
     }
 
+    
+    /**
+     * Détruit une variable métier dans la table de référence ihm_mod_variable_metier. Ne détruit pas les colonnes correspondantes dans les
+     * tables d'environnement concernées.
+     *
+     * @param message
+     * @param listContentBeforeUpdate
+     *            Peut être à null
+     */
+    private String deleteVariableMetierWithoutSync(Map<String, ArrayList<String>> map,
+            List<ArrayList<String>> arrayList, boolean onlyWhereBlank) {
+            StringBuilder delete = new StringBuilder();
+            /**
+             * Pour chaque variable :<br/>
+             * 1. Lister les tables<br/>
+             * 2. Supprimer cette colonne des tables listées<br/>
+             * 3. Supprimer cette variable*table de ihm_mod_variable_metier<br/>
+             * 4. Supprimer la règle correspondante de ihm_mapping_regle
+             */
+            StringBuilder listeTable = new StringBuilder();
+            for (int j = 0; j < map.get(MODEL_VARIABLE_NAME).size(); j++) {
+                String nomVariable = map.get(MODEL_VARIABLE_NAME).get(j);
+                /**
+                 * On prépare la liste des tables comportant effectivement la variable
+                 */
+                listeTable.setLength(0);
+                /**
+                 * Pour chaque table trouvée
+                 */
+                for (int i = numberOfColumnTableVariableMetier; i < map.size(); i++) {
+                    if (StringUtils.isBlank(arrayList.get(j).get(i)) || !onlyWhereBlank) {
+                        listeTable.append("[" + this.viewVariableMetier.getHeadersDLabel().get(i) + "]");
+                    }
+                }
+                delete.append("DELETE FROM arc."+IHM_MOD_VARIABLE_METIER+" WHERE id_famille='" + map.get(ID_FAMILLE).get(j)
+                        + "' AND nom_variable_metier='" + nomVariable + "'::text AND '" + listeTable + "' like '%['||nom_table_metier||']%';\n");
+            }
+        return delete.toString();
+    }
     
     /**
      * Update the description fields for variable
