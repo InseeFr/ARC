@@ -40,7 +40,7 @@ public class VObject {
 	/** Tableau du contenu de la requete (ligne, colonne) */
 	private TableObject content;
 
-	/** Previous state of the content (from session)*/
+	/** Previous state of the content (from session) */
 	private TableObject savedContent;
 
 	/** Rendering for this */
@@ -53,15 +53,15 @@ public class VObject {
 
 	// nom des colonnes, type en base (D=Database), label dans la vue (V=VUE) ,
 	// taille sur la vue
-	/** Noms des colonnes en base.*/
+	/** Noms des colonnes en base. */
 	private ArrayList<String> headersDLabel;
-	/** Types des colonnes en base.*/
+	/** Types des colonnes en base. */
 	private ArrayList<String> headersDType;
-	/** Noms des colonnes dans la vue.*/
+	/** Noms des colonnes dans la vue. */
 	private ArrayList<String> headersVLabel;
-	/** Tailles des colonnes dans la vue.*/
+	/** Tailles des colonnes dans la vue. */
 	private ArrayList<String> headersVSize;
-	/** Types des colonnes dans la vue.*/
+	/** Types des colonnes dans la vue. */
 	private ArrayList<String> headersVType;
 	private ArrayList<LinkedHashMap<String, String>> headersVSelect;
 	private ArrayList<Boolean> headersVisible;
@@ -73,7 +73,7 @@ public class VObject {
 	private ArrayList<Boolean> selectedColumns;
 	// champs de saisie
 	private HashMap<String, String> defaultInputFields;
-	private ArrayList<String> inputFields;    
+	private ArrayList<String> inputFields;
 	// Pagination
 	private Integer nbPages;
 	private String idPage;
@@ -81,10 +81,12 @@ public class VObject {
 	// Gestion du tri
 	/** Liste des colonnes utilisées pour trier la table */
 	private ArrayList<String> headerSortDLabels;
-	/** Liste des directions de tri (des colonnes nommées dans headerSortDLabels).
-	 *  true = ascending, false = descending. */
+	/**
+	 * Liste des directions de tri (des colonnes nommées dans headerSortDLabels).
+	 * true = ascending, false = descending.
+	 */
 	private ArrayList<Boolean> headerSortDOrders;
-	/** La colonne cliquée par l'utilisateur pour le tri.*/
+	/** La colonne cliquée par l'utilisateur pour le tri. */
 	private String headerSortDLabel;
 
 	private ArrayList<String> filterFields;
@@ -96,111 +98,106 @@ public class VObject {
 	private HashMap<String, String> customValues;
 
 	// pagination and order attribute
-    private boolean noOrder = VObjectService.DEFAULT_NO_ORDER;
-    private boolean noCount = VObjectService.DEFAULT_NO_COUNT;
-    private boolean noLimit = VObjectService.DEFAULT_NO_LIMIT;
-    
-    // filtering    
-    private int filterPattern = VObjectService.DEFAULT_FILTER_PATTERN;
-    private String filterFunction = VObjectService.DEFAULT_FILTER_FUNCTION;
+	private boolean noOrder = VObjectService.DEFAULT_NO_ORDER;
+	private boolean noCount = VObjectService.DEFAULT_NO_COUNT;
+	private boolean noLimit = VObjectService.DEFAULT_NO_LIMIT;
 
-	
-	
+	// filtering
+	private int filterPattern = VObjectService.DEFAULT_FILTER_PATTERN;
+	private String filterFunction = VObjectService.DEFAULT_FILTER_FUNCTION;
+
 	public ArrayList<ArrayList<String>> listContent() {
-        if (getSavedContent() == null) {
-            return new ArrayList<ArrayList<String>>();
-        }
-        ArrayList<ArrayList<String>> c = new ArrayList<ArrayList<String>>();
-        for (int i = 0; i < getSavedContent().size(); i++) {
-            ArrayList<String> l = new ArrayList<String>();
-            for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
-                l.add(getSavedContent().get(i).d.get(j));
-            }
-            c.add(l);
-        }
-        return c;
-    }
+		if (getSavedContent() == null) {
+			return new ArrayList<ArrayList<String>>();
+		}
+		ArrayList<ArrayList<String>> c = new ArrayList<ArrayList<String>>();
+		for (int i = 0; i < getSavedContent().size(); i++) {
+			ArrayList<String> l = new ArrayList<String>();
+			for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
+				l.add(getSavedContent().get(i).d.get(j));
+			}
+			c.add(l);
+		}
+		return c;
+	}
 
 	/**
-     * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste de toutes les valeurs
-     */
-    public HashMap<String, ArrayList<String>> mapContent() {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContent()).mapContent();
-    }
+	 * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste
+	 * de toutes les valeurs
+	 */
+	public HashMap<String, ArrayList<String>> mapContent() {
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContent()).mapContent();
+	}
 
-
-    /** Returns the old values for the lines with new content.*/
+	/** Returns the old values for the lines with new content. */
 	public ArrayList<ArrayList<String>> listContentBeforeUpdate() {
-        if (getSavedContent() == null) {
-            return new ArrayList<ArrayList<String>>();
-        }
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        // comparaison des lignes dans la table avant et aprés
-        // toBeUpdated contient l'identifiant des lignes à update
-        for (int i = 0; i < getContent().size(); i++) {
-            int j = 0;
-            boolean equals = true;
-            while (j < getContent().get(i).d.size() && equals) {
-                equals = compareOldAndNew(getContent().get(i).d.get(j), 
-                		getSavedContent().get(i).d.get(j));
-                j++;
-            }
-            if (!equals) {
-                r.add(getSavedContent().get(i).d);
-            }
-        }
-        return r;
-    }
+		if (getSavedContent() == null) {
+			return new ArrayList<ArrayList<String>>();
+		}
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		// comparaison des lignes dans la table avant et aprés
+		// toBeUpdated contient l'identifiant des lignes à update
+		for (int i = 0; i < getContent().size(); i++) {
+			int j = 0;
+			boolean equals = true;
+			while (j < getContent().get(i).d.size() && equals) {
+				equals = compareOldAndNew(getContent().get(i).d.get(j), getSavedContent().get(i).d.get(j));
+				j++;
+			}
+			if (!equals) {
+				r.add(getSavedContent().get(i).d);
+			}
+		}
+		return r;
+	}
 
 	private boolean compareOldAndNew(String newContentValue, String oldContentValue) {
-		return newContentValue == null 
-				|| ManipString.compareStringWithNull(oldContentValue, newContentValue);
+		return newContentValue == null || ManipString.compareStringWithNull(oldContentValue, newContentValue);
 	}
 
 	public HashMap<String, ArrayList<String>> mapContentBeforeUpdate() {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentBeforeUpdate()).mapContent();
-    }
-
-    public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(int i) {
-	    ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-	    r.add(listContentBeforeUpdate().get(i));
-	    return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentBeforeUpdate()).mapContent();
 	}
 
-    /** Returns the lines with the new content.*/
-    public ArrayList<ArrayList<String>> listContentAfterUpdate() {
-    	if (getSavedContent() == null) {
-            return new ArrayList<ArrayList<String>>();
-        }
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        // comparaison des lignes dans la table avant et aprés
-        // toBeUpdated contient l'identifiant des lignes à update
-        for (int i = 0; i < getContent().size(); i++) {
-            int j = 0;
-            boolean equals = true;
-            while (j < getContent().get(i).d.size() && equals) {
-                equals = compareOldAndNew(getContent().get(i).d.get(j), 
-                		getSavedContent().get(i).d.get(j));
-                j++;
-            }
-            if (!equals) {
-                r.add(getContent().get(i).d);
-            }
-        }
-        return r;
-    }
+	public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(int i) {
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		r.add(listContentBeforeUpdate().get(i));
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
+	}
 
-    public HashMap<String, ArrayList<String>> mapContentAfterUpdate() {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentAfterUpdate()).mapContent();
-    }
-    
+	/** Returns the lines with the new content. */
+	public ArrayList<ArrayList<String>> listContentAfterUpdate() {
+		if (getSavedContent() == null) {
+			return new ArrayList<ArrayList<String>>();
+		}
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		// comparaison des lignes dans la table avant et aprés
+		// toBeUpdated contient l'identifiant des lignes à update
+		for (int i = 0; i < getContent().size(); i++) {
+			int j = 0;
+			boolean equals = true;
+			while (j < getContent().get(i).d.size() && equals) {
+				equals = compareOldAndNew(getContent().get(i).d.get(j), getSavedContent().get(i).d.get(j));
+				j++;
+			}
+			if (!equals) {
+				r.add(getContent().get(i).d);
+			}
+		}
+		return r;
+	}
+
+	public HashMap<String, ArrayList<String>> mapContentAfterUpdate() {
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentAfterUpdate()).mapContent();
+	}
+
 	public HashMap<String, ArrayList<String>> mapContentAfterUpdate(int i) {
-	    ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-	    r.add(listContentAfterUpdate().get(i));
-	    return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		r.add(listContentAfterUpdate().get(i));
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
 
-	/** Returns the content as it would be after the update.*/
+	/** Returns the content as it would be after the update. */
 	public ArrayList<ArrayList<String>> listUpdatedContent() {
 		if (getSavedContent() == null) {
 			return new ArrayList<>();
@@ -212,7 +209,7 @@ public class VObject {
 				String oldContentValue = getSavedContent().get(i).d.get(j);
 				if (i >= getContent().size() || j >= getContent().get(i).d.size()) {
 					r.get(i).add(oldContentValue);
-				}  else {
+				} else {
 					String newContentValue = getContent().get(i).d.get(j);
 					if (compareOldAndNew(newContentValue, oldContentValue)) {
 						r.get(i).add(oldContentValue);
@@ -220,17 +217,20 @@ public class VObject {
 						r.get(i).add(newContentValue);
 					}
 				}
-				
+
 			}
 		}
 		return r;
 	}
 
-    public HashMap<String, ArrayList<String>> mapUpdatedContent() {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listUpdatedContent()).mapContent();
-    }
-    
-    /** Returns the content as it would be after the update, only on the changed lines.*/
+	public HashMap<String, ArrayList<String>> mapUpdatedContent() {
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listUpdatedContent()).mapContent();
+	}
+
+	/**
+	 * Returns the content as it would be after the update, only on the changed
+	 * lines.
+	 */
 	public ArrayList<ArrayList<String>> listOnlyUpdatedContent() {
 		if (getSavedContent() == null) {
 			return new ArrayList<>();
@@ -248,7 +248,7 @@ public class VObject {
 				} else {
 					line.add(newContentValue);
 					changed = true;
-				}				
+				}
 			}
 			if (changed) {
 				r.add(line);
@@ -257,9 +257,9 @@ public class VObject {
 		return r;
 	}
 
-    public HashMap<String, ArrayList<String>> mapOnlyUpdatedContent() {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listOnlyUpdatedContent()).mapContent();
-    }
+	public HashMap<String, ArrayList<String>> mapOnlyUpdatedContent() {
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listOnlyUpdatedContent()).mapContent();
+	}
 
 	public ArrayList<ArrayList<String>> listContentSelected() {
 		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
@@ -276,7 +276,8 @@ public class VObject {
 	}
 
 	/**
-	 * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste de toutes les valeurs selectionnées
+	 * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste
+	 * de toutes les valeurs selectionnées
 	 */
 	public HashMap<String, ArrayList<String>> mapContentSelected() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentSelected()).mapContent();
@@ -290,103 +291,107 @@ public class VObject {
 
 		ArrayList<String> listHeadersSelected = listHeadersSelected();
 		ArrayList<Integer> indexHeadersSelected = new ArrayList<>();
-		for (Integer i = 0; i< getHeadersDLabel().size(); i++) {
-			if (listHeadersSelected.contains(getHeadersDLabel().get(i))){
+		for (Integer i = 0; i < getHeadersDLabel().size(); i++) {
+			if (listHeadersSelected.contains(getHeadersDLabel().get(i))) {
 				indexHeadersSelected.add(i);
 			}
 
 		}
 		return indexHeadersSelected;
 	}
-	
-    /**
-     * Retourne la liste des entetes base de donnée selectionnés
-     */
-    public ArrayList<String> listHeadersSelected() {
-        if (getSavedContent() == null) {
-            return new ArrayList<String>();
-        }
-        ArrayList<String> r = new ArrayList<String>();
-        if (getSelectedColumns() == null || getSelectedColumns().isEmpty()) {
-            return r;
-        }
-        for (int i = 0; i < getSelectedColumns().size(); i++) {
-            if (Boolean.TRUE.equals(getSelectedColumns().get(i))) {
-                r.add(getHeadersDLabel().get(i));
-            }
-        }
-        return r;
-    }
 
-    public HashMap<String, String> mapHeadersSelected() {
-        HashMap<String, String> r = new HashMap<String, String>();
-        for (String s : listHeadersSelected()) {
-            r.put(s, s);
-        }
-        return r;
-    }
-	
+	/**
+	 * Retourne la liste des entetes base de donnée selectionnés
+	 */
+	public ArrayList<String> listHeadersSelected() {
+		if (getSavedContent() == null) {
+			return new ArrayList<String>();
+		}
+		ArrayList<String> r = new ArrayList<String>();
+		if (getSelectedColumns() == null || getSelectedColumns().isEmpty()) {
+			return r;
+		}
+		for (int i = 0; i < getSelectedColumns().size(); i++) {
+			if (Boolean.TRUE.equals(getSelectedColumns().get(i))) {
+				r.add(getHeadersDLabel().get(i));
+			}
+		}
+		return r;
+	}
+
+	public HashMap<String, String> mapHeadersSelected() {
+		HashMap<String, String> r = new HashMap<String, String>();
+		for (String s : listHeadersSelected()) {
+			r.put(s, s);
+		}
+		return r;
+	}
+
 	public HashMap<String, String> mapHeadersType() {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), null).mapTypes();
-    }
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), null).mapTypes();
+	}
 
 	public ArrayList<ArrayList<String>> listInputFields() {
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(getInputFields());
-        return r;
-    }
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		r.add(getInputFields());
+		return r;
+	}
 
-    public HashMap<String, ArrayList<String>> mapInputFields() {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listInputFields()).mapContent();
-    }
+	public HashMap<String, ArrayList<String>> mapInputFields() {
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listInputFields()).mapContent();
+	}
 
-    /** Modifie la valeur d'input pour la colonne demandée.
-     * @param headerDLabel nom de la colonne en base
-     * @param value valeur à attribuer
-     * @throw IllegalArgumentException si le nom de colonne est invalide */
-    public void setInputFieldFor(String headerDLabel, String value) {
-    	int index = getHeadersDLabel().indexOf(headerDLabel);
-    	if (index == -1) {
-    		throw new IllegalArgumentException("Field " + headerDLabel + " was not found.");
-    	}
-    	getInputFields().set(index, value);
-    }
+	/**
+	 * Modifie la valeur d'input pour la colonne demandée.
+	 * 
+	 * @param headerDLabel nom de la colonne en base
+	 * @param value        valeur à attribuer
+	 * @throw IllegalArgumentException si le nom de colonne est invalide
+	 */
+	public void setInputFieldFor(String headerDLabel, String value) {
+		int index = getHeadersDLabel().indexOf(headerDLabel);
+		if (index == -1) {
+			throw new IllegalArgumentException("Field " + headerDLabel + " was not found.");
+		}
+		getInputFields().set(index, value);
+	}
 
-    /** Retourne la valeur d'input pour la colonne demandée.
-     * Forme abrégée de mapInputFields().get("ma_colonne").get(0).
-     * @param headerDLabel nom de la colonne en base
-     * @throw IllegalArgumentException si le nom de colonne est invalide */
-    public String getInputFieldFor(String headerDLabel) {
-    	int index = getHeadersDLabel().indexOf(headerDLabel);
-    	if (index == -1) {
-    		throw new IllegalArgumentException("Field " + headerDLabel + " was not found.");
-    	}
-    	return mapInputFields().get(headerDLabel).get(0);
-    }
-    
-    public ArrayList<ArrayList<String>> listLineContent(int i) {
-        ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(getContent().get(i).d);
-        return r;
-    }
+	/**
+	 * Retourne la valeur d'input pour la colonne demandée. Forme abrégée de
+	 * mapInputFields().get("ma_colonne").get(0).
+	 * 
+	 * @param headerDLabel nom de la colonne en base
+	 * @throw IllegalArgumentException si le nom de colonne est invalide
+	 */
+	public String getInputFieldFor(String headerDLabel) {
+		int index = getHeadersDLabel().indexOf(headerDLabel);
+		if (index == -1) {
+			throw new IllegalArgumentException("Field " + headerDLabel + " was not found.");
+		}
+		return mapInputFields().get(headerDLabel).get(0);
+	}
 
-    public HashMap<String, ArrayList<String>> mapLineContent(int i) {
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), listLineContent(i)).mapContent();
-    }
+	public ArrayList<ArrayList<String>> listLineContent(int i) {
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		r.add(getContent().get(i).d);
+		return r;
+	}
 
-    public HashMap<String, ArrayList<String>> mapFilterFields() {
-        if (getFilterFields()==null)
-        {
-        	return new HashMap<String, ArrayList<String>>();
-        }
+	public HashMap<String, ArrayList<String>> mapLineContent(int i) {
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listLineContent(i)).mapContent();
+	}
 
-    	ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
-        r.add(getFilterFields());
-        return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
-    }
-    
+	public HashMap<String, ArrayList<String>> mapFilterFields() {
+		if (getFilterFields() == null) {
+			return new HashMap<String, ArrayList<String>>();
+		}
 
-	@SuppressWarnings("unchecked") 
+		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		r.add(getFilterFields());
+		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
+	}
+
+	@SuppressWarnings("unchecked")
 	VObject copy() {
 		VObject v0 = new VObject();
 		v0.setTitle(this.getTitle());
@@ -517,7 +522,6 @@ public class VObject {
 		return this.getContent().size();
 	}
 
-
 	/**
 	 *
 	 *
@@ -528,7 +532,7 @@ public class VObject {
 	}
 
 	public void clear() {
-		setIsInitialized(false);		
+		setIsInitialized(false);
 	}
 
 	public String getTitle() {
@@ -546,7 +550,7 @@ public class VObject {
 	public void setSessionName(String sessionName) {
 		this.sessionName = sessionName;
 	}
-	
+
 	public int getDefaultPaginationSize() {
 		return defaultPaginationSize;
 	}
@@ -838,9 +842,9 @@ public class VObject {
 	public void setCustomValues(HashMap<String, String> customValues) {
 		this.customValues = customValues;
 	}
-	
+
 	public String getCustomValue(String key) {
-		if (getCustomValues() == null){
+		if (getCustomValues() == null) {
 			return null;
 		}
 		return getCustomValues().get(key);
@@ -853,8 +857,6 @@ public class VObject {
 		getCustomValues().put(key, value);
 	}
 
-
-	
 	private List<MultipartFile> fileUpload;
 
 	public List<MultipartFile> getFileUpload() {
@@ -904,6 +906,5 @@ public class VObject {
 	public void setFilterFunction(String filterFunction) {
 		this.filterFunction = filterFunction;
 	}
-	
 
 }

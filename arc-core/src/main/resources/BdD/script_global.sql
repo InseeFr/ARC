@@ -281,12 +281,13 @@ CREATE TABLE IF NOT EXISTS arc.ihm_mod_table_metier
 id_famille text NOT NULL, 
 nom_table_metier text NOT NULL, 
 description_table_metier text, 
-CONSTRAINT pk_ihm_mod_table_metier PRIMARY KEY (id_famille, nom_table_metier), 
-CONSTRAINT fk_ihm_table_metier_famille FOREIGN KEY (id_famille) 
-REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE 
-ON UPDATE CASCADE ON DELETE CASCADE
-); 
-        
+CONSTRAINT pk_ihm_mod_table_metier PRIMARY KEY (id_famille, nom_table_metier)
+);
+
+ALTER TABLE arc.ihm_mod_table_metier DROP CONSTRAINT IF EXISTS fk_ihm_table_metier_famille;
+
+do $$ begin ALTER TABLE arc.ihm_mod_table_metier ADD CONSTRAINT fk2_ihm_table_metier_famille FOREIGN KEY (id_famille) REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
+
 CREATE TABLE IF NOT EXISTS arc.ihm_mod_variable_metier 
 ( 
 id_famille text NOT NULL, 
@@ -295,12 +296,12 @@ nom_variable_metier text NOT NULL,
 type_variable_metier name NOT NULL, 
 description_variable_metier text, 
 type_consolidation text, 
-CONSTRAINT pk_ihm_mod_variable_metier PRIMARY KEY (id_famille, nom_table_metier, nom_variable_metier), 
-CONSTRAINT fk_ihm_mod_variable_table_metier FOREIGN KEY (id_famille, nom_table_metier) 
-REFERENCES arc.ihm_mod_table_metier (id_famille, nom_table_metier) MATCH SIMPLE 
-ON UPDATE CASCADE ON DELETE CASCADE
-); 
+CONSTRAINT pk_ihm_mod_variable_metier PRIMARY KEY (id_famille, nom_table_metier, nom_variable_metier)
+);
 
+ALTER TABLE arc.ihm_mod_variable_metier DROP CONSTRAINT IF EXISTS fk_ihm_mod_variable_table_metier;
+
+do $$ begin ALTER TABLE arc.ihm_mod_variable_metier ADD CONSTRAINT fk2_ihm_mod_variable_table_metier FOREIGN KEY (id_famille,nom_table_metier) REFERENCES arc.ihm_mod_table_metier(id_famille,nom_table_metier) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
         
 CREATE TABLE IF NOT EXISTS arc.ihm_nmcl 
 ( 

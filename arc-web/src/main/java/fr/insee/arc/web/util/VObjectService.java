@@ -63,14 +63,6 @@ public class VObjectService {
 
     private static final Logger LOGGER = LogManager.getLogger(VObjectService.class);
 
-    @Autowired
-    private Session session;
-
-    @Autowired
-    private LoggerDispatcher loggerDispatcher;
-    
-    private String pool = "arc";
-    
     // filter constants
     // 0 is default
     public static final int FILTER_LIKE_CONTAINS=0;
@@ -87,8 +79,16 @@ public class VObjectService {
 	public static final boolean DEFAULT_NO_LIMIT=false;
 
 	public static final String DEFAULT_FILTER_FUNCTION="upper";
-	
-	
+
+    
+    @Autowired
+    private Session session;
+
+    @Autowired
+    private LoggerDispatcher loggerDispatcher;
+    
+    private String pool = "arc";
+    
     
 
     
@@ -632,17 +632,31 @@ public class VObjectService {
   
 
     /*
-     *
+     * delete the selected item in database
      */
     public void delete(VObject currentData, String... tables) {
         LoggerHelper.traceAsComment(LOGGER, "delete()", currentData.getSessionName());
-        VObject v0 = fetchVObjectData(currentData.getSessionName());
-
         try {
-        ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
+        	UtilitaireDao.get(this.pool).executeRequest(null, deleteQuery(currentData, tables).asTransaction());
+        } catch (ArcException ex) {
+            LoggerHelper.error(LOGGER, ex);
+        	currentData.setMessage("Error in VObjectService.delete");
+        }
+    }
 
+    
+    /**
+     * Compute the query for deletion
+     * @param currentData
+     * @param tables
+     * @return
+     */
+    public PreparedStatementBuilder deleteQuery(VObject currentData, String... tables) {
+
+    	VObject v0 = fetchVObjectData(currentData.getSessionName());
+        
+        ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
         PreparedStatementBuilder reqDelete = new PreparedStatementBuilder();
-        reqDelete.append("BEGIN; ");
         for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
             if (currentData.getSelectedLines().get(i) != null && currentData.getSelectedLines().get(i)) {
                 if (tables.length == 0) {
@@ -671,14 +685,10 @@ public class VObjectService {
                 reqDelete.append("; ");
             }
         }
-        reqDelete.append("END; ");
-        UtilitaireDao.get(this.pool).executeRequest(null, reqDelete);
-        } catch (ArcException ex) {
-            LoggerHelper.error(LOGGER, ex);
-        	currentData.setMessage("Error in VObjectService.delete");
-        }
+        return reqDelete;
     }
-
+    
+    
     /**
      * Méthode de suppression spécifique lors de l'action de UPDATE du controle
      */

@@ -38,6 +38,7 @@
 <c:set var="btnAdd" value="${param.btnAdd}" />
 <c:set var="btnUpdate" value="${param.btnUpdate}" />
 <c:set var="btnDelete" value="${param.btnDelete}" />
+<c:set var="confirmDelete" value="${param.confirmDelete}" />
 <c:set var="ligneAdd" value="${param.ligneAdd}" />
 <c:set var="ligneFilter" value="${param.ligneFilter}" />
 <c:set var="checkbox" value="${param.checkbox}" />
@@ -429,16 +430,18 @@
 						><span class="fa fa-save">&nbsp;</span><spring:message code="gui.button.update"/></button>
 					</c:if>
 					<c:if test="${btnDelete}">
-						<button
-							id="${view.sessionName}.delete"
-							class="btn btn-primary btn-sm "
-							type="submit"
-							doAction="delete${viewType}"
-							scope="${view.sessionName};${param.extraScopeDelete}"
-							value="<spring:message code="gui.button.delete"/>"
-						><span class="fa fa-remove">&nbsp;</span><spring:message code="gui.button.delete"/></button>
+							<button
+								id="${view.sessionName}.delete"
+								class="btn btn-primary btn-sm "
+								type="submit"
+								doAction="delete${viewType}"
+								scope="${view.sessionName};${param.extraScopeDelete}"
+								value="<spring:message code="gui.button.delete"/>"
+								<c:if test="${confirmDelete}">
+									onclick="return confirm('<spring:message code="gui.button.general.confirm" javaScriptEscape="true"/>');"
+								</c:if>
+							><span class="fa fa-remove">&nbsp;</span><spring:message code="gui.button.delete"/></button>
 					</c:if>
-
 					<c:if test="${otherButton != null}">
 						<c:forEach items="${otherButton.split('\\\|')}" var="button">
 							<c:out 

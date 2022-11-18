@@ -31,10 +31,12 @@
 						<c:param name="btnAdd" value="true" />
 						<c:param name="btnUpdate" value="true" />
 						<c:param name="btnDelete" value="true" />
+						<c:param name="confirmDelete" value="true" />
 						<c:param name="checkbox" value="true" />
-						<c:param name="checkboxVisible" value="true" />
+						<c:param name="checkboxVisible" value="true"/>
 						<c:param name="extraScopeSee"
 							value="viewClient;viewTableMetier;viewHostAllowed;viewVariableMetier;" />
+						<c:param name="extraScopeDelete" value ="-viewClient;-viewTableMetier;-viewHostAllowed;-viewVariableMetier;" />
 						<c:param name="otherButton">
 							<button class="btn btn-primary btn-sm"
 								id="viewFamilleNorme.download" type="submit"
@@ -94,6 +96,7 @@
 						<c:param name="btnAdd" value="true" />
 						<c:param name="btnUpdate" value="false" />
 						<c:param name="btnDelete" value="true" />
+						<c:param name="confirmDelete" value="true" />
 						<c:param name="checkbox" value="true" />
 						<c:param name="checkboxVisible" value="true" />
 						<c:param name="extraScopeAdd" value="viewVariableMetier;" />

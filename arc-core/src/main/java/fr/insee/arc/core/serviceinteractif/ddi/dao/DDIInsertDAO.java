@@ -4,9 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import fr.insee.arc.core.databaseobjects.DatabaseObjectService;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.core.databaseobjects.TableEnum;
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.famille.ModelTable;
 import fr.insee.arc.core.model.famille.ModelVariable;
 import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
@@ -135,7 +139,7 @@ public class DDIInsertDAO {
 				query.append("(id_famille,nom_table_metier,description_table_metier) ");
 				query.append("VALUES (");
 				query.append(query
-						.sqlListe(Arrays.asList(t.getIdFamille().toUpperCase(), t.getNomTableMetier().toLowerCase(), t.getDescriptionTable())));
+						.sqlListe(Arrays.asList(t.getIdFamille().toUpperCase(), arcTableName(t.getIdFamille(),t.getNomTableMetier()), t.getDescriptionTable())));
 				query.append(")");
 				query.append(SQL.ON_CONFLICT_DO_NOTHING);
 				query.append(";");
@@ -163,7 +167,7 @@ public class DDIInsertDAO {
 				query.append(
 						"(id_famille,nom_table_metier,nom_variable_metier,type_variable_metier,description_variable_metier,type_consolidation) ");
 				query.append("VALUES (");
-				query.append(query.sqlListe(Arrays.asList(v.getIdFamille().toUpperCase(), v.getNomTableMetier().toLowerCase(),
+				query.append(query.sqlListe(Arrays.asList(v.getIdFamille().toUpperCase(), arcTableName(v.getIdFamille(),v.getNomTableMetier()),
 						v.getNomVariableMetier().toLowerCase(), v.getTypeVariableMetier().toLowerCase(), v.getDescriptionVariableMetier(),
 						v.getTypeConsolidation())));
 				query.append(")");
@@ -174,4 +178,18 @@ public class DDIInsertDAO {
 		}
 		return query;
 	}
+	
+	/**
+	 * Convert tablename parse in ddi to arc mapping table
+	 * @param ddiTableName
+	 * @return
+	 */
+	private String arcTableName(String ddiParsedFamilyName, String ddiParsedTableName)
+	{
+		List<String> arcTableNameTokens = Arrays.asList(TraitementPhase.MAPPING.toString().toLowerCase(),ddiParsedFamilyName.toLowerCase(),ddiParsedTableName.toLowerCase(),TraitementEtat.OK.toString().toLowerCase());
+		
+		return StringUtils.join(arcTableNameTokens,"_");
+	}
+	
+	
 }

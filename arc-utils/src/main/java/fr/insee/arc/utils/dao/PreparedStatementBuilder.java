@@ -49,6 +49,17 @@ public PreparedStatementBuilder append(StringBuilder s)
 	return this;
 }
 
+/**
+ * Add transaction command to the prepared statement builder
+ * @return
+ */
+public PreparedStatementBuilder asTransaction()
+{
+	query.insert(0, SQL.BEGIN.toString());
+	query.append(SQL.END.toString());
+	return this;
+}
+
 @Override
 public String toString() {
 	throw new ArcException("ToString is not allowed for PreparedStatementBuilder");
