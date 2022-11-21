@@ -504,8 +504,6 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
 
     @RequestMapping("/deleteVariableMetier")
 	public String deleteVariableMetier(Model model) {
-
-    	PreparedStatementBuilder query =new PreparedStatementBuilder();
 	    StringBuilder message = new StringBuilder();
 	    StringBuilder bloc = new StringBuilder();
 	    bloc.append(deleteVariableMetierWithoutSync(viewVariableMetier.mapContentSelected(),

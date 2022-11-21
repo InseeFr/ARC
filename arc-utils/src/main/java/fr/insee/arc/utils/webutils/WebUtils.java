@@ -3,129 +3,53 @@ package fr.insee.arc.utils.webutils;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class WebUtils {
-    
-    private WebUtils() {
-    	throw new IllegalStateException("Utility class");
-    }
 
-    /** Returns a healthcheck description.*/
-    public static Map<String,Object> getHealthCheckStatus(){
-    	Map<String,Object> map = new HashMap<>();
-    	String status;
-    	if (UtilitaireDao.isConnectionOk("arc")) {
-    		status = "up";
-    	} else {
-    		status = "down";
-    	}
-    	map.put("status", status);
+	private WebUtils() {
+		throw new IllegalStateException("Utility class");
+	}
 
-    	Map<String, Object> details = new HashMap<>();
-    	map.put("details", details);
-    	HashMap<String, String> dbHealthCheck = new HashMap<>();
-		details.put("dataBaseHealthCheck", dbHealthCheck);
-		dbHealthCheck.put("status", status);
-		return map;
-    }
-    
-    public static String getCookie(HttpServletRequest request, String key) {
-        String value = "";
+	private static PropertiesHandler properties = PropertiesHandler.getInstance();
 
-        Cookie[] c = request.getCookies();
+	// json healthcheck attribute
+	private static final String HEALTHCHECK_ATTRIBUTE_STATUS = "status";
+	private static final String HEALTHCHECK_ATTRIBUTE_DETAILS = "details";
+	private static final String HEALTHCHECK_ATTRIBUTE_DATABASEHEALTHCHECK = "dataBaseHealthCheck";
+	private static final String HEALTHCHECK_ATTRIBUTE_VERSION = "version";
 
-        if (c == null) {
-            return value;
-        }
+	// result values
+	private static final String HEALTHCHECK_RESULT_UP = "up";
+	private static final String HEALTHCHECK_RESULT_DOWN = "down";
 
-        for (int i = 0; i < c.length; i++) {
-            if (c[i].getName().equals(key)) {
-                return c[i].getValue();
-            }
-        }
-        return value;
-    }
+	/**
+	 * update healthcheck description in map and return true if status is ok
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public static boolean getHealthCheckStatus(Map<String, Object> map) {
 
-    /**
-     * Create or replace a cookie
-     *
-     * @param key
-     * @param value
-     */
-    public static void setCookie(HttpServletRequest request, HttpServletResponse response, String key, String value) {
-        Cookie[] cookies = request.getCookies();
+		String status = UtilitaireDao.isConnectionOk("arc") ? HEALTHCHECK_RESULT_UP : HEALTHCHECK_RESULT_DOWN;
 
-        boolean foundCookie = false;
+		map.put(HEALTHCHECK_ATTRIBUTE_STATUS, status);
 
-        // update the cookie
-        if (cookies != null) {
-            for (int i = 0; i < cookies.length; i++) {
-                if (cookies[i].getName().equals(key)) {
-                    foundCookie = true;
-                    if (value == null) {
-                        cookies[i].setMaxAge(0);
-                    } else {
-                        cookies[i].setMaxAge(1 * 24 * 60 * 60 * 1000);
-                    }
+		Map<String, Object> details = new HashMap<>();
+		map.put(HEALTHCHECK_ATTRIBUTE_DETAILS, details);
 
-                    cookies[i].setValue(value);
-                    response.addCookie(cookies[i]);
-                    break;
-                }
-            }
-        }
+		HashMap<String, String> dbHealthCheck = new HashMap<>();
+		details.put(HEALTHCHECK_ATTRIBUTE_DATABASEHEALTHCHECK, dbHealthCheck);
+		dbHealthCheck.put(HEALTHCHECK_ATTRIBUTE_STATUS, status);
 
-        // create it 
-        if (!foundCookie && StringUtils.isNotEmpty(value)) {
+		map.put(HEALTHCHECK_ATTRIBUTE_VERSION, properties.getVersion());
 
-                Cookie cookie1 = new Cookie(key, value);
-                cookie1.setHttpOnly(true);
-                cookie1.setMaxAge(1 * 24 * 60 * 60 * 1000);
-                response.addCookie(cookie1);
-        }
+		return map.getOrDefault(HEALTHCHECK_ATTRIBUTE_STATUS, "").equals(HEALTHCHECK_RESULT_UP);
+	}
 
-    }
-
-    /**
-     * ajoute une valeur à la chaine du cookie existant avec un séparateur
-     *
-     * @param key
-     * @param value
-     */
-    public static void setCookieAdditive(HttpServletRequest request, HttpServletResponse response, String key, String value) {
-        String s = getCookie(request, key);
-
-        String separator = ":";
-
-        if (s.equals("")) {
-            setCookie(request, response, key, value);
-        } else {
-            int i = 0;
-            String[] t = s.split(separator);
-            StringBuilder target= new StringBuilder();
-            boolean found = false;
-
-            for (i = 0; i < t.length; i++) {
-                if (t[i].equals(value)) {
-                    found = true;
-                    break;
-                }
-                target.append(separator);
-            }
-
-            if (!found) {
-        	target.append(value);
-            }
-
-            setCookie(request, response, key, target.toString());
-        }
-    }
+	public static Map<String, String> fullVersionInformation() {
+		return properties.fullVersionInformation();
+	}
 
 }
