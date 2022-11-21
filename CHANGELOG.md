@@ -2,7 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-- DDI implementation
+## version-92.2.04 - 2022-11-21
+- healthcheck quality refactor and add-on for web module
+- DDI model implementation
+- bug fix in maintenance screen
 
 ## version-92.2.02 - 2022-10-14
 - The batch logger default level was incorrect and fixed
