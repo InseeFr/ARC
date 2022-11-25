@@ -31,7 +31,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
 	private VObjectService vObject;
 	
     @SuppressWarnings("unused")
-	private final Logger LOGGER = LogManager.getLogger(ExternalFilesManagementDao.class);
+	private static final Logger LOGGER = LogManager.getLogger(ExternalFilesManagementDao.class);
 
     private static final String NOM_TABLE = "nom_table";
     
@@ -39,7 +39,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
     public void initializeViewListNomenclatures(VObject viewListNomenclatures, String table) {
         System.out.println("/* initializeListeNomenclatures */");
         
-        HashMap<String, String> defaultInputFields = new HashMap<String, String>();
+        HashMap<String, String> defaultInputFields = new HashMap<>();
         PreparedStatementBuilder requete = new PreparedStatementBuilder();
         requete.append("\n SELECT " + NOM_TABLE + ", description FROM "+table+" ");
 
@@ -52,11 +52,11 @@ public class ExternalFilesManagementDao implements IDbConstant {
 
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
-        if (!selection.isEmpty() && UtilitaireDao.get(poolName).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0))) {
+        if (!selection.isEmpty() && Boolean.TRUE.equals(UtilitaireDao.get(poolName).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0)))) {
         	PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("select * from arc." + selection.get(NOM_TABLE).get(0) + " ");
 
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
+            HashMap<String, String> defaultInputFields = new HashMap<>();
             defaultInputFields.put(NOM_TABLE, selection.get(NOM_TABLE).get(0));
 
             vObject.initialize(viewNomenclature, requete, "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
@@ -74,8 +74,8 @@ public class ExternalFilesManagementDao implements IDbConstant {
         	PreparedStatementBuilder requete = new PreparedStatementBuilder();
             requete.append("\n SELECT type_nmcl, nom_colonne, type_colonne FROM arc.ihm_schema_nmcl ");
             requete.append("\n WHERE type_nmcl = " + requete.quoteText(typeNomenclature(selection.get(NOM_TABLE).get(0))) + " ");
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-
+         
+            HashMap<String, String> defaultInputFields = new HashMap<>();
             defaultInputFields.put("type_nmcl", typeNomenclature(selection.get(NOM_TABLE).get(0)));
             vObject.initialize(viewSchemaNmcl, requete, "arc.ihm_schema_nmcl", defaultInputFields);
             

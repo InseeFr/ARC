@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
@@ -14,9 +13,9 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.utils.ManipString;
 
 public class ZipDecompressor implements ArchiveExtractor {
 

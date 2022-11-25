@@ -65,28 +65,8 @@ public class ExportAction extends ArcAction<ExportModel>  {
     public void initializeExport() {
     	
         System.out.println("/* initializeExport */");
-        HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-
-        // création de la table d'export si elle n'existe pas
-        StringBuilder query=new StringBuilder();
-        query.append("CREATE SCHEMA IF NOT EXISTS " + getBacASable() +"; " );
-        query.append("\n CREATE TABLE IF NOT EXISTS "+ getBacASable() +".export"+" " );
-        query.append("\n (file_name text, table_to_export text, nomenclature_export text, filter_table text, columns_array_header text, columns_array_value text, etat text); ");
-        
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add nulls text;"));
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add headers text;"));
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add order_table text;"));
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add zip text;"));
-        query.append(FormatSQL.tryQuery("ALTER TABLE "+ getBacASable() +".export add primary key (file_name);"));
-
-        try {
-			UtilitaireDao.get("arc").executeImmediate(null, query);
-		} catch (ArcException e) {
-			StaticLoggerDispatcher.error("Error in ExportAction.initializeExport", LOGGER);
-		}
-
+        HashMap<String, String> defaultInputFields = new HashMap<>();
         this.vObjectService.initialize(viewExport, new PreparedStatementBuilder("SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export"),  getBacASable() +".export", defaultInputFields);
-
     }
 
     @RequestMapping("/selectExport")
@@ -426,58 +406,45 @@ public class ExportAction extends ArcAction<ExportModel>  {
 
     }
     
-
-    
-//    this.viewArchiveBAS8.downloadEnveloppe(querySelection.toString(), chemin, listRepertoire);
-
     
     public ArrayList<ArrayList<String>> getFilesFromDirectory(String dir, HashMap<String,ArrayList<String>> filter2)
     {
         HashMap<String,ArrayList<String>> filter=filter2;
-        ArrayList<ArrayList<String>> result=new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> result=new ArrayList<>();
 
-        ArrayList<String> entete = new ArrayList<String>();
+        ArrayList<String> entete = new ArrayList<>();
         entete.add("filename");
         entete.add("isdirectory");
         result.add(entete);
 
-        ArrayList<String> format = new ArrayList<String>();
+        ArrayList<String> format = new ArrayList<>();
         format.add("text");
         format.add("text");
         result.add(format);
 
-
-//      if (dir.substring(dir.length()-1, dir.length()).equals("\\"))
-//      {
-//          System.out.println("yoooo");
-//          dir=dir.substring(0,dir.length()-1);
-//      }
-//
         File files=new File(dir);
-//      System.out.println(dir);
+
         int nb=0;
 
-
-        // java de merde...
         if (filter==null)
         {
-            filter=new  HashMap<String,ArrayList<String>>();
+            filter=new HashMap<>();
         }
 
         if (filter.isEmpty())
         {
-            filter.put("filename", new ArrayList<String>());
-            filter.put("isdirectory", new ArrayList<String>());
+            filter.put("filename", new ArrayList<>());
+            filter.put("isdirectory", new ArrayList<>());
         }
 
         if (filter.get("filename")==null)
         {
-            filter.put("filename", new ArrayList<String>());
+            filter.put("filename", new ArrayList<>());
         }
 
         if (filter.get("isdirectory")==null)
         {
-            filter.put("isdirectory", new ArrayList<String>());
+            filter.put("isdirectory", new ArrayList<>());
         }
 
 
@@ -501,9 +468,7 @@ public class ExportAction extends ArcAction<ExportModel>  {
             filter.get("isdirectory").set(0, "");
         }
 
-        System.out.println(filter);
-
-
+        
         for (File f:files.listFiles())
         {
             boolean toInsert=true;

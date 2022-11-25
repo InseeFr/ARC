@@ -1,6 +1,5 @@
 package fr.insee.arc.ws.dao;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;

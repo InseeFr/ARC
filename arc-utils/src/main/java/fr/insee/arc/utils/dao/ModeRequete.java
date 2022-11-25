@@ -1,7 +1,5 @@
 package fr.insee.arc.utils.dao;
 
-import java.util.Arrays;
-
 public enum ModeRequete {
     NESTLOOP_ON("set enable_nestloop=on;"), //
     NESTLOOP_OFF("set enable_nestloop=off;"), //

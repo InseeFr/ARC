@@ -1,7 +1,5 @@
 package fr.insee.arc.core.ArchiveLoader;
 
-import java.io.IOException;
-
 import fr.insee.arc.utils.exception.ArcException;
 
 /**

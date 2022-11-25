@@ -378,40 +378,6 @@ public class GererFamilleNormeAction extends ArcAction<FamilyManagementModel> {
         return UtilitaireDao.get("arc").getList(null, requete, new ArrayList<String>());
     }
 
-    private boolean deleteTableMetierWithoutSync(StringBuilder message) {
-        System.out.println("Destruction de la table");
-        boolean drop = true;
-        
-        Map<String,ArrayList<String>> content=viewTableMetier.mapContentSelected();
-        
-        for (int i = 0; (i < content.get(NOM_TABLE_METIER).size()) && drop; i++) {
-
-        	// la condition pour dropper est plutot la suivante
-        	// on ne doit plus avoir de variable dans la table arc.ihm_mod_variable_metier pour la famille et la table a dropper
-        	// le drop de la table en elle meme est faite à l'initialisation !!!!!!!!!!!!!
-        	
-        	PreparedStatementBuilder requete= new PreparedStatementBuilder();
-        	requete
-        		.append("SELECT count(1) from "+this.viewVariableMetier.getTable())
-        		.append(" where id_famille="+requete.quoteText(content.get(ID_FAMILLE).get(i)))
-        		.append(" and nom_table_metier="+requete.quoteText(content.get(NOM_TABLE_METIER).get(i)));
-        	
-        	drop = (UtilitaireDao.get("arc").getInt(null, requete) == 0);
-        	
-        }
-        if (drop) {
-			UtilitaireDao.get("arc").dropTable(null, viewTableMetier.mapContentSelected().get(NOM_TABLE_METIER).toArray(new String[0]));
-            message.append("Les tables sont supprimées avec succès.");
-            return true;
-        } else {
-            message.append("La table ne doit plus avoir de colonne pour pouvoir etre supprimée");
-            if (viewTableMetier.mapContentSelected().get(NOM_TABLE_METIER).size() > 1) {
-                message.append("\nRecommencez en supprimant une table à la fois.");
-            }
-        }
-        return false;
-    }
-
 
     private void initializeVariableMetier() {
 	if (CollectionUtils.isNotEmpty(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE))) {

@@ -14,6 +14,23 @@ exception when others then end;
 $$;
 
 
+-- create export rules table
+CREATE TABLE IF NOT EXISTS {{envExecution}}.export
+(
+file_name text,
+table_to_export text,
+nomenclature_export text,
+filter_table text,
+columns_array_header text,
+columns_array_value text,
+etat text,
+nulls text,
+headers text,
+order_table text,
+zip text,
+PRIMARY KEY (file_name)
+);
+
 -- pilotage tables and view
 DROP TABLE IF EXISTS {{envExecution}}.pilotage_fichier_t;
 

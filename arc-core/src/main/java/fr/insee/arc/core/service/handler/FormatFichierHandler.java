@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.handler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

@@ -31,9 +31,9 @@ public class IndexActionTest {
 	}
 
 	@Test
-	public void indexOk() {
-//		mockMvc.perform(MockMvcRequestBuilders.get("/"))
-//			.andExpect(MockMvcResultMatchers.status().isOk());
+	public void indexOk() throws Exception {
+//		mockMvc.perform(MockMvcRequestBuilders.get("/healthcheck"))
+//			.andExpect(MockMvcResultMatchers.status().isInternalServerError());
 	}
 
 }

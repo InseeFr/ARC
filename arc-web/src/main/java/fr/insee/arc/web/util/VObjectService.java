@@ -372,15 +372,6 @@ public class VObjectService {
 	}
 
 	/**
-     * Absolument indispensable dans le cas ou des tables de vues sont générées dynamiquement
-     * Set the rendering for columns
-     * @param aRendering
-     */
-    public void initialiserColumnRendering(VObject data, Map<String, ColumnRendering> aRendering) {
-    	data.getConstantVObject().setColumnRender(aRendering);
-    }
-
-    /**
      * Apply a rendering, even after an initialization query
      * So the result of the query can be interpreted to generate a particular rendering
      * Use method "initialiserColumnRendering" to set the column rendering
@@ -537,6 +528,15 @@ public class VObjectService {
     }
 
     /**
+	 * Absolument indispensable dans le cas ou des tables de vues sont générées dynamiquement
+	 * Set the rendering for columns
+	 * @param aRendering
+	 */
+	public void initialiserColumnRendering(VObject data, Map<String, ColumnRendering> aRendering) {
+		data.getConstantVObject().setColumnRender(aRendering);
+	}
+
+	/**
      * Remise à zéro des champs d'entrée avec les valeurs par défault
      */
     private ArrayList<String> eraseInputFields(ArrayList<String> headersDLabel,

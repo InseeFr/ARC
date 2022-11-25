@@ -655,7 +655,7 @@ public class PilotageBASAction extends ArcAction<EnvManagementModel> {
 		querySelection.append(" ORDER by container ");
 
 		this.vObjectService.downloadXML(getViewFichierBAS(), response, querySelection, this.repertoire,
-				(String) getBacASable(), TraitementPhase.RECEPTION.toString(),
+				getBacASable(), TraitementPhase.RECEPTION.toString(),
 				TraitementEtat.OK.toString(), TraitementEtat.KO.toString());
 
 		loggerDispatcher.trace("*** Fin du téléchargement des fichiers XML ***", LOGGER);
