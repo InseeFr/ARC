@@ -30,6 +30,11 @@ public class DDIParser {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser saxParser;
 		try {
+			
+			// security "Disable access to external entities in XML parsing"
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			saxParser = factory.newSAXParser();
 
 			DDIHandler ddiHandler = new DDIHandler();
