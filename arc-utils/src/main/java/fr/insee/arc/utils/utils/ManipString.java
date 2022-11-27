@@ -40,6 +40,10 @@ public class ManipString implements IConstanteCaractere {
     public static final String patternForIdRubriqueWithBrackets = "\\{"+patternForIdRubrique+"\\}";
 
     
+
+	ManipString() {
+	}
+    
     /**
      * Build a temporary name for archive entry names
      * @param e
@@ -279,13 +283,6 @@ public class ManipString implements IConstanteCaractere {
         return r;
     }
 
-//    public static String sqlEqual(String val, String type) {
-//        if (val == null) {
-//            return "is null";
-//        } else {
-//            return "='" + val.replace("'", "''") + "'::" + type;
-//        }
-//    }
 
     /**
      * Gets the substring before the first occurrence of a separator

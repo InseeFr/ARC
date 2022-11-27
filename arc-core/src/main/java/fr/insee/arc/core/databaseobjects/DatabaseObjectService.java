@@ -43,7 +43,11 @@ public class DatabaseObjectService {
 	}
 
 	
-	
+	/**
+	 * Return the SQL table name
+	 * @param e
+	 * @return
+	 */
 	public String getTable(TableEnum e)
 	{
 		return e.isTableInSanbox()?this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName():ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();

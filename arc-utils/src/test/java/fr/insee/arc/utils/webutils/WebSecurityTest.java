@@ -6,7 +6,6 @@ import org.junit.Test;
 
 public class WebSecurityTest {
 
-
 	@Test
 	public void isOverloaded1()
 	{
@@ -18,8 +17,5 @@ public class WebSecurityTest {
 	{
 		assertEquals(true, WebSecurity.isOverloaded("i am a properties value that have been overloaded by environement or by other ways"));
 	}
-
-
-	
 	
 }

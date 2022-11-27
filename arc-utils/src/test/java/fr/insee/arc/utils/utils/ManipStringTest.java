@@ -4,26 +4,26 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import org.junit.Test;
 
-public class ManipStringTest {
+public class ManipStringTest extends ManipString {
 
 	
 	// isStringNul
 	@Test
 	public void isStringNull1() {
 		// yes null
-		assertEquals(true, ManipString.isStringNull(null));
+		assertEquals(true, isStringNull(null));
 	}
 
 	@Test
 	public void isStringNull2() {
 		// yes empty
-		assertEquals(true, ManipString.isStringNull(""));
+		assertEquals(true, isStringNull(""));
 	}
 
 	@Test
 	public void isStringNull3() {
 		// false not empty
-		assertEquals(false, ManipString.isStringNull(" "));
+		assertEquals(false, isStringNull(" "));
 	}
 
 	// substringBeforeFirst
@@ -31,25 +31,25 @@ public class ManipStringTest {
 	@Test
 	public void substringBeforeFirst1() {
 		// null input string -> return null
-		assertEquals(null, ManipString.substringBeforeFirst(null, "-"));
+		assertEquals(null, substringBeforeFirst(null, "-"));
 	}
 
 	@Test
 	public void substringBeforeFirst2() {
 	// null separator -> return all string
-	assertEquals("abc", ManipString.substringBeforeFirst("abc", null));
+	assertEquals("abc", substringBeforeFirst("abc", null));
 	}
 	
 	@Test
 	public void substringBeforeFirst3() {
 	// separator not found -> return all string
-	assertEquals("abc", ManipString.substringBeforeFirst("abc", "-"));
+	assertEquals("abc", substringBeforeFirst("abc", "-"));
 	}
 	
 	@Test
 	public void substringBeforeFirst4() {
 		// nominal use case
-		assertEquals("az", ManipString.substringBeforeFirst("az-b-c", "-"));
+		assertEquals("az", substringBeforeFirst("az-b-c", "-"));
 	}
 	
 
