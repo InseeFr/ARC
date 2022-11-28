@@ -34,16 +34,13 @@ public class GererNormeDao {
 	 * @param selection
 	 */
 	public static void initializeViewCalendar(VObjectService viewObject, VObject viewCalendar, String theTableName,
-			Map<String, ArrayList<String>> selection) {
+			Map<String, ArrayList<String>> selection, HashMap<String, String> type) {
 
 		// construction des valeurs par défaut pour les ajouts
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		
 		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
 		defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-		
-		// Get the type of the column for casting
-		HashMap<String, String> type = viewCalendar.mapHeadersType();
 	
 		// requete de la vue
 		PreparedStatementBuilder requete = new PreparedStatementBuilder();

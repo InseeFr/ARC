@@ -110,7 +110,11 @@ public class GererNormeService implements IDbConstant {
 
 		// if a norm is selected, trigger the call to dao to construct calendar view
 		if (!selection.isEmpty()) {
-			GererNormeDao.initializeViewCalendar(viewObject, viewNorme, theTableName, selection);
+			
+			// Get the type of the column for casting
+			HashMap<String, String> type = viewNorme.mapHeadersType();
+			
+			GererNormeDao.initializeViewCalendar(viewObject, viewCalendar, theTableName, selection, type);
 		} else {
 			viewObject.destroy(viewCalendar);
 		}
