@@ -16,12 +16,13 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.webutils.WebUtils;
 import fr.insee.arc.web.model.NoModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class IndexAction extends ArcAction<NoModel> {
+public class IndexAction extends ArcWebGenericService<NoModel> {
 
-	static final String ACTION_NAME = "index";
+	public static final String ACTION_NAME = "index";
 	private static final String RESULT_SUCCESS = "jsp/index.jsp";
 
 	@RequestMapping({ "/index" })

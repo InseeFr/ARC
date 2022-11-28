@@ -44,13 +44,14 @@ import fr.insee.arc.web.model.viewobjects.ViewEntrepotBAS;
 import fr.insee.arc.web.model.viewobjects.ViewFichierBAS;
 import fr.insee.arc.web.model.viewobjects.ViewPilotageBAS;
 import fr.insee.arc.web.model.viewobjects.ViewRapportBAS;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.LineObject;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class PilotageBASAction extends ArcAction<EnvManagementModel> {
+public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> {
 
 	private static final String ENV_DESCRIPTION = "envDescription";
 

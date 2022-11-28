@@ -16,11 +16,12 @@ import org.springframework.web.context.WebApplicationContext;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.model.WebServiceManagementModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class GererWebserviceAction extends ArcAction<WebServiceManagementModel> implements IDbConstant {
+public class GererWebserviceAction extends ArcWebGenericService<WebServiceManagementModel> implements IDbConstant {
 
 	private static final String RESULT_SUCCESS = "/jsp/gererWebservice.jsp";
 	private static final Logger LOGGER = LogManager.getLogger(GererWebserviceAction.class);

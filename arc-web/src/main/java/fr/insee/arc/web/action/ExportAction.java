@@ -37,12 +37,13 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.model.ExportModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
 
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class ExportAction extends ArcAction<ExportModel>  {
+public class ExportAction extends ArcWebGenericService<ExportModel>  {
 
 	private static final String RESULT_SUCCESS = "/jsp/gererExport.jsp";
 

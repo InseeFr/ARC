@@ -23,12 +23,13 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.model.FileSystemManagementModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class GererFileAction extends ArcAction<FileSystemManagementModel> {
+public class GererFileAction extends ArcWebGenericService<FileSystemManagementModel> {
 
 	private static final String IS_DIRECTORY = "isdirectory";
 

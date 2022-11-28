@@ -16,11 +16,12 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.web.dao.UserManagementDao;
 import fr.insee.arc.web.model.UserManagementModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class GererUtilisateursAction extends ArcAction<UserManagementModel>{
+public class GererUtilisateursAction extends ArcWebGenericService<UserManagementModel>{
 
 	private static final Logger LOGGER = LogManager.getLogger(GererUtilisateursAction.class);
 

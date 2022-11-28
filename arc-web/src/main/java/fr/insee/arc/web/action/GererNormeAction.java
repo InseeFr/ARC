@@ -29,14 +29,15 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SQLExecutor;
-import fr.insee.arc.web.dao.GererNormeDao;
+import fr.insee.arc.web.dao.GererNormeService;
 import fr.insee.arc.web.model.NormManagementModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.ConstanteBD;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class GererNormeAction extends ArcAction<NormManagementModel> implements IDbConstant {
+public class GererNormeAction extends ArcWebGenericService<NormManagementModel> implements IDbConstant {
 	
 	private static final String RESULT_SUCCESS = "/jsp/gererNorme.jsp";
 
@@ -46,7 +47,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	private static final Logger LOGGER = LogManager.getLogger(GererNormeAction.class);
 	
 	@Autowired
-	private GererNormeDao gererNormeDao;
+	private GererNormeService gererNormeService;
 
 	// The norm view
 	private VObject viewNorme;
@@ -99,35 +100,35 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
 		
 		putVObject(getViewNorme(),
-				t -> gererNormeDao.initializeViewNorme(t, databaseObjectService.getTable(TableEnum.IHM_NORME)));
+				t -> gererNormeService.initializeViewNorme(t, databaseObjectService.getTable(TableEnum.IHM_NORME)));
 		//
-		putVObject(getViewCalendrier(), t -> gererNormeDao.initializeViewCalendar(t, getViewNorme(),
+		putVObject(getViewCalendrier(), t -> gererNormeService.initializeViewCalendar(t, getViewNorme(),
 				databaseObjectService.getTable(TableEnum.IHM_CALENDRIER) ));
 		//
-		putVObject(getViewJeuxDeRegles(), t -> gererNormeDao.initializeViewRulesSet(t, getViewCalendrier(),
+		putVObject(getViewJeuxDeRegles(), t -> gererNormeService.initializeViewRulesSet(t, getViewCalendrier(),
 				databaseObjectService.getTable(TableEnum.IHM_JEUDEREGLE) ));
 		//
-		putVObject(getViewModules(), t -> gererNormeDao.initializeViewModules(t, getViewJeuxDeRegles()));
+		putVObject(getViewModules(), t -> gererNormeService.initializeViewModules(t, getViewJeuxDeRegles()));
 		//
-		putVObject(getViewChargement(), t -> gererNormeDao.initializeChargement(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(getViewChargement(), t -> gererNormeService.initializeChargement(t, getViewJeuxDeRegles(), getViewModules(),
 				databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE) ));
 		//
-		putVObject(getViewNormage(), t -> gererNormeDao.initializeNormage(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(getViewNormage(), t -> gererNormeService.initializeNormage(t, getViewJeuxDeRegles(), getViewModules(),
 				databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE) ));
 		//
-		putVObject(getViewControle(), t -> gererNormeDao.initializeControle(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(getViewControle(), t -> gererNormeService.initializeControle(t, getViewJeuxDeRegles(), getViewModules(),
 				databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE) ));
 		//
-		putVObject(getViewFiltrage(), t -> gererNormeDao.initializeFiltrage(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(getViewFiltrage(), t -> gererNormeService.initializeFiltrage(t, getViewJeuxDeRegles(), getViewModules(),
 				databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE) ));
 		//
-		putVObject(getViewMapping(), t -> gererNormeDao.initializeMapping(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(getViewMapping(), t -> gererNormeService.initializeMapping(t, getViewJeuxDeRegles(), getViewModules(),
 				databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE)  ));
 		//
-		putVObject(getViewExpression(), t -> gererNormeDao.initializeExpression(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(getViewExpression(), t -> gererNormeService.initializeExpression(t, getViewJeuxDeRegles(), getViewModules(),
 				databaseObjectService.getTable(TableEnum.IHM_EXPRESSION) ));
 		//
-		putVObject(getViewJeuxDeReglesCopie(), t -> gererNormeDao.initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(getViewJeuxDeReglesCopie(), t -> gererNormeService.initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(), getViewModules(),
 				databaseObjectService.getTable(TableEnum.IHM_JEUDEREGLE) , getScope()));
 	}
 
@@ -341,7 +342,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			for (int i = 0; i < selection.get("etat").size(); i++) {
 				String etat = selection.get("etat").get(i);
 				if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-					gererNormeDao.sendRuleSetToProduction(this.viewJeuxDeRegles,
+					gererNormeService.sendRuleSetToProduction(this.viewJeuxDeRegles,
 							databaseObjectService.getTable(TableEnum.PILOTAGE_BATCH)
 							
 							);
@@ -375,23 +376,23 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 		Map<String, ArrayList<String>> selection = viewJeuxDeRegles.mapContentSelected();
 		if (!selection.isEmpty()) {
 			PreparedStatementBuilder requeteRegleChargement = new PreparedStatementBuilder();
-			requeteRegleChargement.append(gererNormeDao.recupRegle(this.viewJeuxDeRegles,
+			requeteRegleChargement.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
 					databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE)
 					));
 			PreparedStatementBuilder requeteRegleNormage = new PreparedStatementBuilder();
-			requeteRegleNormage.append(gererNormeDao.recupRegle(this.viewJeuxDeRegles,
+			requeteRegleNormage.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
 					databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE)));
 			PreparedStatementBuilder requeteRegleControle = new PreparedStatementBuilder();
-			requeteRegleControle.append(gererNormeDao.recupRegle(this.viewJeuxDeRegles,
+			requeteRegleControle.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
 					databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE)));
 			PreparedStatementBuilder requeteRegleMapping = new PreparedStatementBuilder();
-			requeteRegleMapping.append(gererNormeDao.recupRegle(this.viewJeuxDeRegles,
+			requeteRegleMapping.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
 					databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE)));
 			PreparedStatementBuilder requeteRegleFiltrage = new PreparedStatementBuilder();
-			requeteRegleFiltrage.append(gererNormeDao.recupRegle(this.viewJeuxDeRegles,
+			requeteRegleFiltrage.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
 					databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE)));
 			PreparedStatementBuilder requeteRegleExpression = new PreparedStatementBuilder();
-			requeteRegleExpression.append(gererNormeDao.recupRegle(this.viewJeuxDeRegles,
+			requeteRegleExpression.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
 					databaseObjectService.getTable(TableEnum.IHM_EXPRESSION)));
 
 			ArrayList<String> fileNames = new ArrayList<>();
@@ -497,7 +498,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/importChargement")
 	public String importChargement(Model model, MultipartFile fileUploadLoad) {		
-		gererNormeDao.uploadFileRule(getViewChargement(), viewJeuxDeRegles, fileUploadLoad);
+		gererNormeService.uploadFileRule(getViewChargement(), viewJeuxDeRegles, fileUploadLoad);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -510,7 +511,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/importNormage")
 	public String importNormage(Model model, MultipartFile fileUploadStructurize) {
 		
-		gererNormeDao.uploadFileRule(getViewNormage(), viewJeuxDeRegles, fileUploadStructurize);
+		gererNormeService.uploadFileRule(getViewNormage(), viewJeuxDeRegles, fileUploadStructurize);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -636,7 +637,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/importControle")
 	@SQLExecutor
 	public String importControle(Model model, MultipartFile fileUploadControle) {
-		gererNormeDao.uploadFileRule(getViewControle(), viewJeuxDeRegles, fileUploadControle);
+		gererNormeService.uploadFileRule(getViewControle(), viewJeuxDeRegles, fileUploadControle);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -648,7 +649,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/viderChargement")
 	public String viderChargement(Model model) {
 		
-		gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 				databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -661,7 +662,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/viderNormage")
 	public String viderNormage(Model model) {
 		
-		gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 				databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -674,7 +675,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/viderControle")
 	public String viderControle(Model model) {
 		
-		gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 				databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -687,7 +688,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/viderFiltrage")
 	public String viderFiltrage(Model model) {
 		
-		gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 				databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 
@@ -701,7 +702,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/viderMapping")
 	public String viderMapping(Model model) {
 		
-		gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 				databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 
@@ -715,7 +716,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/viderExpression")
 	public String viderExpression(Model model) {
 		
-		gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 				databaseObjectService.getTable(TableEnum.IHM_EXPRESSION));
 		return generateDisplay(model, RESULT_SUCCESS);
 
@@ -828,7 +829,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/importExpression")
 	@SQLExecutor
 	public String importExpression(Model model, MultipartFile fileUploadExpression) {
-		gererNormeDao.uploadFileRule(getViewExpression(), viewJeuxDeRegles, fileUploadExpression);
+		gererNormeService.uploadFileRule(getViewExpression(), viewJeuxDeRegles, fileUploadExpression);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 	
@@ -840,7 +841,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	@RequestMapping("/importFiltrage")
 	public String importFiltrage(Model model, MultipartFile fileUploadFilter) {
 		
-		gererNormeDao.uploadFileRule(this.viewFiltrage, this.viewJeuxDeRegles, fileUploadFilter);
+		gererNormeService.uploadFileRule(this.viewFiltrage, this.viewJeuxDeRegles, fileUploadFilter);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -881,7 +882,7 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 	 */
 	@RequestMapping("/importMapping")
 	public String importMapping(Model model, MultipartFile fileUploadMap) {
-		gererNormeDao.uploadFileRule(getViewMapping(), viewJeuxDeRegles, fileUploadMap);
+		gererNormeService.uploadFileRule(getViewMapping(), viewJeuxDeRegles, fileUploadMap);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -1102,19 +1103,19 @@ public class GererNormeAction extends ArcAction<NormManagementModel> implements 
 			
 			// delete the current rules before the copy
 			if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 						databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_normage_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 						databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 						databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 						databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
-				gererNormeDao.emptyRuleTable(this.viewJeuxDeRegles,
+				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
 						databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE));
 			}
 			

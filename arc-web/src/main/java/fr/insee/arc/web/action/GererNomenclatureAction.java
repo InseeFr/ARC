@@ -29,11 +29,12 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.dao.ExternalFilesManagementDao;
 import fr.insee.arc.web.model.ExternalFilesModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> implements IDbConstant{
+public class GererNomenclatureAction extends ArcWebGenericService<ExternalFilesModel> implements IDbConstant{
 
 	private static final String RESULT_SUCCESS = "/jsp/gererNomenclature.jsp";
 	
@@ -125,14 +126,18 @@ public class GererNomenclatureAction extends ArcAction<ExternalFilesModel> imple
         try {
             // Suppression de la table nom table
 			String nomTable = viewListNomenclatures.mapContentSelected().get(NOM_TABLE).get(0);
-            System.out.println("/* Delete nomenclature : " + nomTable + " */");
+			loggerDispatcher.debug("/* Delete nomenclature : " + nomTable + " */", LOGGER);
+			
+			
             UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropTable(nomTable));
             StringBuilder requete = new StringBuilder();
             requete.append("\n SELECT nom_table FROM arc.ihm_nmcl ");
             requete.append("\n WHERE nom_table like '" + typeNomenclature(nomTable) + "%'");
             requete.append("\n AND nom_table <> '" + nomTable + "'");
-            List<String> listeTables = UtilitaireDao.get(poolName).getList(null, requete.toString(), new ArrayList<String>());
-            System.out.println("# Liste tables : " + Format.untokenize(listeTables, ", "));
+            
+            List<String> listeTables = UtilitaireDao.get(poolName).getList(null, requete.toString(), new ArrayList<>());
+            loggerDispatcher.debug("# Liste tables : " + Format.untokenize(listeTables, ", "), LOGGER);
+            
             if (listeTables.isEmpty()) {
                 requete = new StringBuilder();
                 requete.append("\n DELETE FROM arc.ihm_schema_nmcl");

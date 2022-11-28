@@ -14,11 +14,12 @@ import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.web.model.DatabaseManagementModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class GererQueryAction extends ArcAction<DatabaseManagementModel> implements  IConstanteCaractere {
+public class GererQueryAction extends ArcWebGenericService<DatabaseManagementModel> implements  IConstanteCaractere {
 
 	private static final String RESULT_SUCCESS = "/jsp/gererQuery.jsp";
 
@@ -72,7 +73,7 @@ public class GererQueryAction extends ArcAction<DatabaseManagementModel> impleme
 
 			PreparedStatementBuilder requete=new PreparedStatementBuilder(m);
 			
-			if (UtilitaireDao.get("arc").testResultRequest(null, requete))
+			if (Boolean.TRUE.equals(UtilitaireDao.get("arc").testResultRequest(null, requete)))
 			{
 				this.vObjectService.initialize(viewQuery, requete, "arc.ihm_Query", defaultInputFields);
 			}

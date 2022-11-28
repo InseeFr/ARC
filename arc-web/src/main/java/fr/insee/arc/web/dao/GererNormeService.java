@@ -47,9 +47,9 @@ import fr.insee.arc.web.util.WebLoggerDispatcher;
  *
  */
 @Component
-public class GererNormeDao implements IDbConstant {
+public class GererNormeService implements IDbConstant {
 
-	private static final Logger LOGGER = LogManager.getLogger(GererNormeDao.class);
+	private static final Logger LOGGER = LogManager.getLogger(GererNormeService.class);
 
 	private static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
 

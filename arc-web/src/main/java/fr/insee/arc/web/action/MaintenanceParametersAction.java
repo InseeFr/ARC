@@ -11,12 +11,13 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.model.MaintenanceParametersModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
 
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class MaintenanceParametersAction extends ArcAction<MaintenanceParametersModel>  {
+public class MaintenanceParametersAction extends ArcWebGenericService<MaintenanceParametersModel>  {
 
 	private static final String RESULT_SUCCESS = "/jsp/maintenanceParameters.jsp";
 

@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.web.model.NoModel;
+import fr.insee.arc.web.service.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class HomeAction extends ArcAction<NoModel> {
+public class HomeAction extends ArcWebGenericService<NoModel> {
 
-    static final String ACTION_NAME = "home";
+    public static final String ACTION_NAME = "home";
     private static final String RESULT_SUCCESS = "jsp/home.jsp";
     
     @RequestMapping("/")
