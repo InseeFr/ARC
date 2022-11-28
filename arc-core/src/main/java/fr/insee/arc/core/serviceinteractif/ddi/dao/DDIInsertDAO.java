@@ -72,7 +72,7 @@ public class DDIInsertDAO {
 		query.append("FROM ");
 		query.append(this.databaseObjectService.getTable(TableEnum.IHM_FAMILLE));
 		query.append(" WHERE UPPER(id_famille) IN (");
-		query.append(query.sqlListe(famillesInDDI));
+		query.append(query.sqlListeOfValues(famillesInDDI));
 		query.append(")");
 
 		List<String> famillesDejaExistante = new GenericBean(
@@ -114,7 +114,7 @@ public class DDIInsertDAO {
 		query.append(SQL.INSERT_INTO);
 		query.append(this.databaseObjectService.getTable(TableEnum.IHM_FAMILLE));
 		query.append("(id_famille) VALUES ");
-		query.append(query.sqlListe(familyToInsert, "(", ")"));
+		query.append(query.sqlListeOfValues(familyToInsert, "(", ")"));
 		query.append(SQL.ON_CONFLICT_DO_NOTHING);
 		query.append(";");
 		query.append("\n");
@@ -139,7 +139,7 @@ public class DDIInsertDAO {
 				query.append("(id_famille,nom_table_metier,description_table_metier) ");
 				query.append("VALUES (");
 				query.append(query
-						.sqlListe(Arrays.asList(t.getIdFamille().toUpperCase(), arcTableName(t.getIdFamille(),t.getNomTableMetier()), t.getDescriptionTable())));
+						.sqlListeOfValues(Arrays.asList(t.getIdFamille().toUpperCase(), arcTableName(t.getIdFamille(),t.getNomTableMetier()), t.getDescriptionTable())));
 				query.append(")");
 				query.append(SQL.ON_CONFLICT_DO_NOTHING);
 				query.append(";");
@@ -167,7 +167,7 @@ public class DDIInsertDAO {
 				query.append(
 						"(id_famille,nom_table_metier,nom_variable_metier,type_variable_metier,description_variable_metier,type_consolidation) ");
 				query.append("VALUES (");
-				query.append(query.sqlListe(Arrays.asList(v.getIdFamille().toUpperCase(), arcTableName(v.getIdFamille(),v.getNomTableMetier()),
+				query.append(query.sqlListeOfValues(Arrays.asList(v.getIdFamille().toUpperCase(), arcTableName(v.getIdFamille(),v.getNomTableMetier()),
 						v.getNomVariableMetier().toLowerCase(), v.getTypeVariableMetier().toLowerCase(), v.getDescriptionVariableMetier(),
 						v.getTypeConsolidation())));
 				query.append(")");

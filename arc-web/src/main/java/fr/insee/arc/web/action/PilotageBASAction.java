@@ -649,7 +649,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		// sélectionner
 		//
 		if (!selection.isEmpty()) {
-			querySelection.append(" AND id_source IN (" + querySelection.sqlListe(selection.get("id_source")) + ") ");
+			querySelection.append(" AND id_source IN (" + querySelection.sqlListeOfValues(selection.get("id_source")) + ") ");
 		}
 
 		// optimisation pour avoir des bloc successifs sur la même archive
@@ -820,7 +820,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 				// fichiers
 				if (!getViewFichierBAS().mapContentSelected().isEmpty()) {
 					requete.append("\n AND id_source IN (");
-					requete.append(requete.sqlListe(getViewFichierBAS().mapContentSelected().get("id_source")));
+					requete.append(requete.sqlListeOfValues(getViewFichierBAS().mapContentSelected().get("id_source")));
 					requete.append(")");
 				}
 				requete.append(" ) ");
@@ -852,7 +852,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 				this.getViewFichierBAS().getHeadersDLabel()));
 
 		if (!selection.isEmpty()) {
-			querySelection.append(" AND container IN (" + querySelection.sqlListe(selection.get("container")) + ") ");
+			querySelection.append(" AND container IN (" + querySelection.sqlListeOfValues(selection.get("container")) + ") ");
 		}
 
 		loggerDispatcher.info("Ma requete pour récupérer la liste des enveloppes : " + querySelection.toString(),
@@ -982,7 +982,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		// choisis pour le retour arriere
 		//
 		if (!selection.isEmpty()) {
-			querySelection.append(" AND id_source IN " + querySelection.sqlListe(selection.get("id_source")) + " ");
+			querySelection.append(" AND id_source IN " + querySelection.sqlListeOfValues(selection.get("id_source")) + " ");
 		}
 
 		// On recupere la phase

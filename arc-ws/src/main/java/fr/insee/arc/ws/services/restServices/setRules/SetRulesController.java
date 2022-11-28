@@ -142,7 +142,7 @@ public class SetRulesController {
 		for (int i=0;i<bodyPojo.content.get(columns.get(0)).getData().size();i++)
 		{
 			requete.append("\n INSERT INTO "+tablename+" (");
-			requete.append(String.join(", ", columns));
+			requete.append(requete.sqlListeOfColumns(columns));
 			requete.append(")");
 			requete.append("\n  VALUES (");
 			

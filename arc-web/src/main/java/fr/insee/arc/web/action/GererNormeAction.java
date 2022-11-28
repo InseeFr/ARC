@@ -29,9 +29,9 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SQLExecutor;
-import fr.insee.arc.web.dao.GererNormeService;
 import fr.insee.arc.web.model.NormManagementModel;
 import fr.insee.arc.web.service.ArcWebGenericService;
+import fr.insee.arc.web.service.GererNormeService;
 import fr.insee.arc.web.util.ConstanteBD;
 import fr.insee.arc.web.util.VObject;
 

@@ -98,6 +98,7 @@ public String sqlEqual(String val, String type) {
     }
 }
 
+
 /**
  * Append a SQL bind variable to query
  * @param p
@@ -137,19 +138,19 @@ public String quoteTextWithoutBinding(String p)
  * @param liste
  * @return
  */
-public StringBuilder sqlListe(Collection<String> liste)
+public StringBuilder sqlListeOfValues(Collection<String> liste)
 {
-	return sqlListe(liste, "","");
+	return sqlListeOfValues(liste, "","");
 }
 
 /**
- * convert a javalist into a sql liste with bind variable
+ * convert a javalist of value into a SQL expression and register the bind variables
  * @param liste
  * @param openingBrace
  * @param closingBrace
  * @return
  */
-public StringBuilder sqlListe(Collection<String> liste, String openingBrace, String closingBrace)
+public StringBuilder sqlListeOfValues(Collection<String> liste, String openingBrace, String closingBrace)
 {
 	StringBuilder requete=new StringBuilder();
 	
@@ -171,6 +172,17 @@ public StringBuilder sqlListe(Collection<String> liste, String openingBrace, Str
 	
 	return requete;
 }
+
+/**
+ * convert a javalist of headers into SQL expression
+ * @param liste
+ * @return
+ */
+public StringBuilder sqlListeOfColumns(Collection<String> liste)
+{
+	return new StringBuilder(String.join(",", liste));
+}
+
 
 
 // getters

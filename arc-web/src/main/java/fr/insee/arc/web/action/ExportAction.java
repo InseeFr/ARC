@@ -106,7 +106,7 @@ public class ExportAction extends ArcWebGenericService<ExportModel>  {
     	
     	PreparedStatementBuilder requete = new PreparedStatementBuilder();
     	requete.append("SELECT * FROM "+ getBacASable() +".export ");
-    	requete.append("WHERE file_name IN ("+requete.sqlListe(viewExport.mapContentSelected().get("file_name"))+") ");
+    	requete.append("WHERE file_name IN ("+requete.sqlListeOfValues(viewExport.mapContentSelected().get("file_name"))+") ");
     	
     	// Requeter les export à réaliser
     	HashMap<String,ArrayList<String>> h=new GenericBean(UtilitaireDao.get("arc").executeRequest(null,

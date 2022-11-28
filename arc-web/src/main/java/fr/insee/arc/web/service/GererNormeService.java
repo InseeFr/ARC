@@ -1,4 +1,4 @@
-package fr.insee.arc.web.dao;
+package fr.insee.arc.web.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,6 +35,7 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.web.action.GererNormeAction;
+import fr.insee.arc.web.dao.GererNormeDao;
 import fr.insee.arc.web.model.GuiModules;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
@@ -88,16 +89,13 @@ public class GererNormeService implements IDbConstant {
 	}
 
 	/**
-	 * Initialize the {@value GererNormeAction#viewNorme}. Request the full general
-	 * norm table.
+	 * Initialize the {@value GererNormeAction#viewNorme}. Call dao to create the view
 	 */
 	public void initializeViewNorme(VObject viewNorme, String theTableName) {
 		LoggerHelper.debug(LOGGER, "/* initializeNorme */");
-		HashMap<String, String> defaultInputFields = new HashMap<>();
-
-		viewObject.initialize(
-				viewNorme,
-				new PreparedStatementBuilder("SELECT id_famille, id_norme, periodicite, def_norme, def_validite, etat FROM arc.ihm_norme order by id_norme"), theTableName, defaultInputFields);
+	
+		GererNormeDao.initializeViewNorme(viewObject, viewNorme, theTableName);
+		
 	}
 
 	/**
@@ -110,28 +108,9 @@ public class GererNormeService implements IDbConstant {
 		// get the norm selected
 		Map<String, ArrayList<String>> selection = viewNorme.mapContentSelected();
 
+		// if a norm is selected, trigger the call to dao to construct calendar view
 		if (!selection.isEmpty()) {
-			// Get the type of the column for casting
-			HashMap<String, String> type = viewNorme.mapHeadersType();
-			// requete de la vue
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
-			requete.append("select id_norme, periodicite, validite_inf, validite_sup, etat from arc.ihm_calendrier");
-			requete.append(
-					" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-			requete.append(" and periodicite"
-					+ requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-
-			// construction des valeurs par défaut pour les ajouts
-			HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-			defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-			defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-
-			viewCalendar.setAfterInsertQuery(new PreparedStatementBuilder("select arc.fn_check_calendrier(); "));
-			viewCalendar.setAfterUpdateQuery(new PreparedStatementBuilder("select arc.fn_check_calendrier(); "));
-
-			// Create the vobject
-			viewObject.initialize(viewCalendar, requete, theTableName, defaultInputFields);
-
+			GererNormeDao.initializeViewCalendar(viewObject, viewNorme, theTableName, selection);
 		} else {
 			viewObject.destroy(viewCalendar);
 		}

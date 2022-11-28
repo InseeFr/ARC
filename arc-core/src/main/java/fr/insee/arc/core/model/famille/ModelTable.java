@@ -1,7 +1,5 @@
 package fr.insee.arc.core.model.famille;
 
-import fr.insee.arc.core.databaseobjects.TableEnum;
-
 public class ModelTable {
 
     private String idFamille;
