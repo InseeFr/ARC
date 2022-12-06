@@ -27,6 +27,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.SecuredSaxParser;
 
 /**
  * Classe chargeant les fichiers Xml. Utiliser l'api SAX pour parser les fichiers
@@ -186,16 +187,12 @@ public class ChargeurXml implements IChargeur{
         StaticLoggerDispatcher.info("** execution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
-        // java.util.Date date= new java.util.Date();
         for (String key : col.keySet()) {
             col.put(key, 1);
         }
         
         // Création de la table de stockage
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         XMLHandlerCharger4 handler = new XMLHandlerCharger4();
-        // handler.tableSchema=tableSchema;
-        // handler.tableName=tableName;
         handler.fileName = fileName;
         handler.connexion = connexion;
         handler.col = col;
@@ -212,15 +209,7 @@ public class ChargeurXml implements IChargeur{
 
         // appel du parser et gestion d'erreur
         try {
-            /*
-             * On desactive les les doctypes externe, ainsi que les external-parameter-entity et external-general-entity
-             * -> Protection contre attaque XXE (Sécurité)
-             */
-            saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            saxParserFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            saxParserFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            SAXParser saxParser = saxParserFactory.newSAXParser();
-
+            SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
             saxParser.parse(f, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             error = true;

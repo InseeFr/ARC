@@ -29,6 +29,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Pair;
+import fr.insee.arc.utils.utils.SecuredSaxParser;
 
 
 
@@ -86,9 +87,9 @@ public class ChargeurXmlComplexe implements IChargeur{
     
     public ChargeurXmlComplexe(Connection connexion, String fileName, InputStream f, String tableOut, String norme, String periodicite, String validite, String tableRegle) {
     	
-    	this.col = new HashMap<String, Integer>();
+    	this.col = new HashMap<>();
         this.allCols= new ArrayList<String>();
-        this.colData= new HashMap<String, Integer>();
+        this.colData= new HashMap<>();
         this.requeteInsert=new StringBuilder();
 
     	this.fileName = fileName;
@@ -126,7 +127,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 			if (regle.get("format").get(0)!=null) {
 				for (String f:regle.get("format").get(0).split("\n"))
 				{
-					this.format.add(new Pair<String,String>(f.split(",")[0].trim(),f.split(",")[1].trim()));
+					this.format.add(new Pair<>(f.split(",")[0].trim(),f.split(",")[1].trim()));
 				}
 			}
         } catch (ArcException e1) {
@@ -143,7 +144,7 @@ public class ChargeurXmlComplexe implements IChargeur{
             requete.append(" ");
         }
 
-        // la tabble temporaire A : ids|id|d|data|nombre_colonnes
+        // la table temporaire A : ids|id|d|data|nombre_colonnes
         // data : contiendra les données chargé au format text séparée par des virgules
         // nombre_colonnes : contiendra le nombre de colonne contenue dans data, nécessaire pour compléter la ligne avec des virgules
 
@@ -200,13 +201,11 @@ public class ChargeurXmlComplexe implements IChargeur{
         StaticLoggerDispatcher.info("** execution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
-        // java.util.Date date= new java.util.Date();
         for (String key : col.keySet()) {
             col.put(key, 1);
         }
         
         // Création de la table de stockage
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         XMLComplexeHandlerCharger handler = new XMLComplexeHandlerCharger();
         handler.fileName = fileName;
         handler.connexion = connexion;
@@ -225,15 +224,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 
         // appel du parser et gestion d'erreur
         try {
-            /*
-             * On desactive les les doctypes externe, ainsi que les external-parameter-entity et external-general-entity
-             * -> Protection contre attaque XXE (Sécurité)
-             */
-            saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            saxParserFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            saxParserFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            SAXParser saxParser = saxParserFactory.newSAXParser();
-
+            SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
             saxParser.parse(f, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             error = true;

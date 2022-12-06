@@ -10,6 +10,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.utils.SecuredSaxParser;
 
 public class DDIParser {
 
@@ -27,22 +28,14 @@ public class DDIParser {
 	 */
 	public static DDIModeler parse(InputStream ddiFileInputStream) throws ArcException {
 
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		SAXParser saxParser;
 		try {
-			
-			// security "Disable access to external entities in XML parsing"
-			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			saxParser = factory.newSAXParser();
 
+			SAXParser saxParser=SecuredSaxParser.buildSecuredSaxParser();
 			DDIHandler ddiHandler = new DDIHandler();
 
 			saxParser.parse(ddiFileInputStream, ddiHandler); // parser lisant le fichier
 
 			DDIModeler ddiModeler = new DDIModeler();
-
 			ddiModeler.model(ddiHandler); // modeler valorisant le modèle parsé pour pouvoir l'insérer dans ARC
 
 			return ddiModeler;

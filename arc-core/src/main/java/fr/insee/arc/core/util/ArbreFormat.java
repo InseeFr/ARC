@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.service.handler.FormatFichierHandler;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.utils.SecuredSaxParser;
 
 
 /**
@@ -43,8 +44,8 @@ public class ArbreFormat {
         
         try {
         // Récupérer le 'format' lié à la norme
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-        SAXParser saxParser = saxParserFactory.newSAXParser();
+
+        SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
         FormatFichierHandler formatHandler = new FormatFichierHandler();
 
         saxParser.parse(new InputSource(new StringReader(aNorme.getRegleChargement().getFormat())), formatHandler);
