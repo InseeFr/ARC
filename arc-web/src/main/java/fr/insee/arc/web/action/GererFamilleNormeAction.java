@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
 import fr.insee.arc.core.serviceinteractif.ddi.DDIParser;
 import fr.insee.arc.core.serviceinteractif.ddi.dao.DDIInsertDAO;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -98,7 +98,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 		System.out.println("/* initializeFamilleNorme */");
 		HashMap<String, String> defaultInputFields = new HashMap<String, String>();
 		this.vObjectService.initialize(viewFamilleNorme,
-				new PreparedStatementBuilder(
+				new ArcPreparedStatementBuilder(
 						"select " + ID_FAMILLE + " from arc.ihm_famille order by " + ID_FAMILLE + ""),
 				"arc.ihm_famille", defaultInputFields);
 	}
@@ -119,7 +119,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 	@RequestMapping("/deleteFamilleNorme")
 	public String deleteFamilleNorme(Model model) {
 
-		PreparedStatementBuilder query = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(this.vObjectService.deleteQuery(viewFamilleNorme));
 		query.append(synchronizeRegleWithVariableMetier(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
 		query.asTransaction();
@@ -152,19 +152,19 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 
 			String selectedFamille = selection.get(ID_FAMILLE).get(0);
 
-			PreparedStatementBuilder requeteTableMetier = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requeteTableMetier = new ArcPreparedStatementBuilder();
 			requeteTableMetier.append("SELECT a.* ");
 			requeteTableMetier.append("FROM arc.ihm_mod_table_metier a ");
 			requeteTableMetier.append("WHERE " + ID_FAMILLE + "=");
 			requeteTableMetier.appendQuoteText(selectedFamille);
 
-			PreparedStatementBuilder requeteVariableMetier = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requeteVariableMetier = new ArcPreparedStatementBuilder();
 			requeteVariableMetier.append("SELECT a.* ");
 			requeteVariableMetier.append("FROM arc.ihm_mod_variable_metier a ");
 			requeteVariableMetier.append("WHERE " + ID_FAMILLE + "=");
 			requeteVariableMetier.appendQuoteText(selectedFamille);
 
-			ArrayList<PreparedStatementBuilder> queries = new ArrayList<>();
+			ArrayList<ArcPreparedStatementBuilder> queries = new ArrayList<>();
 			queries.add(requeteTableMetier);
 			queries.add(requeteVariableMetier);
 
@@ -188,7 +188,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 
 			DDIModeler modeler = DDIParser.parse(fileUploadDDI.getInputStream());
 
-			new DDIInsertDAO(this.databaseObjectService).insertDDI(modeler);
+			new DDIInsertDAO(this.dataObjectService).insertDDI(modeler);
 
 		} catch (ArcException e) {
 			this.viewFamilleNorme.setMessage(e.getMessage());
@@ -209,7 +209,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 			
 			if (!selection.isEmpty()) {
 
-				PreparedStatementBuilder requete = new PreparedStatementBuilder();
+				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 				requete.append("SELECT id_famille, id_application FROM arc.ihm_client ");
 				requete.append("WHERE id_famille=" + requete.quoteText(selection.get(ID_FAMILLE).get(0)));
 
@@ -268,7 +268,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 
 			if (!selection.isEmpty()) {
 				HashMap<String, String> type = viewClient.mapHeadersType();
-				PreparedStatementBuilder requete = new PreparedStatementBuilder();
+				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 				requete.append("SELECT * FROM arc.ihm_webservice_whitelist");
 				requete.append(
 						" WHERE id_famille" + requete.sqlEqual(selection.get(ID_FAMILLE).get(0), type.get(ID_FAMILLE)));
@@ -323,7 +323,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 			Map<String, ArrayList<String>> selection = viewFamilleNorme.mapContentSelected();
 			if (!selection.isEmpty()) {
 				HashMap<String, String> type = viewFamilleNorme.mapHeadersType();
-				PreparedStatementBuilder requete = new PreparedStatementBuilder();
+				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 				requete.append("select * from arc.ihm_mod_table_metier");
 				requete.append(
 						" where id_famille" + requete.sqlEqual(selection.get(ID_FAMILLE).get(0), type.get(ID_FAMILLE)));
@@ -348,7 +348,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 	@RequestMapping("/deleteTableMetier")
 	public String deleteTableMetier(Model model) {
 
-		PreparedStatementBuilder query = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(this.vObjectService.deleteQuery(viewTableMetier));
 		query.append(synchronizeRegleWithVariableMetier(viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0)));
 		query.asTransaction();
@@ -387,7 +387,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 			this.vObjectService.initialiserColumnRendering(viewVariableMetier, rendering);
 			try {
 				System.out.println("/* initializeVariableMetier */");
-				PreparedStatementBuilder requete = getRequeteListeVariableMetierTableMetier(listeTableFamille,
+				ArcPreparedStatementBuilder requete = getRequeteListeVariableMetierTableMetier(listeTableFamille,
 						viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
 				HashMap<String, String> defaultInputFields = new HashMap<>();
 				defaultInputFields.put(ID_FAMILLE, viewFamilleNorme.mapContentSelected().get(ID_FAMILLE).get(0));
@@ -411,10 +411,10 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 	 * @return La requête permettant d'obtenir le croisement variable*table pour les
 	 *         variables de la famille
 	 */
-	private static PreparedStatementBuilder getRequeteListeVariableMetierTableMetier(List<String> listeTableMetier,
+	private static ArcPreparedStatementBuilder getRequeteListeVariableMetierTableMetier(List<String> listeTableMetier,
 			String idFamille) {
 
-		PreparedStatementBuilder left = new PreparedStatementBuilder("\n (SELECT nom_variable_metier");
+		ArcPreparedStatementBuilder left = new ArcPreparedStatementBuilder("\n (SELECT nom_variable_metier");
 		for (int i = 0; i < listeTableMetier.size(); i++) {
 			left.append(
 					",\n  CASE WHEN '['||string_agg(nom_table_metier,'][' ORDER BY nom_table_metier)||']' LIKE '%['||'"
@@ -424,7 +424,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 		left.append("\n WHERE id_famille=" + left.quoteText(idFamille));
 		left.append("\n GROUP BY nom_variable_metier) left_side");
 
-		PreparedStatementBuilder right = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder right = new ArcPreparedStatementBuilder();
 		right.append(
 				"\n (SELECT id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier\n");
 		right.append("\n FROM arc." + IHM_MOD_VARIABLE_METIER + "\n");
@@ -432,7 +432,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 		right.append(
 				"\n GROUP BY id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier) right_side");
 
-		PreparedStatementBuilder returned = new PreparedStatementBuilder(
+		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder(
 				"SELECT right_side.id_famille, right_side.nom_variable_metier, right_side.type_variable_metier, right_side.type_consolidation, right_side.description_variable_metier");
 		for (int i = 0; i < listeTableMetier.size(); i++) {
 			returned.append(", " + listeTableMetier.get(i));
@@ -630,7 +630,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 	}
 
 	private static boolean checkIsValide(List<String> inputFields) {
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT count(1) FROM arc." + IHM_MOD_VARIABLE_METIER)//
 				.append("\n WHERE id_famille=" + requete.quoteText(inputFields.get(0)))//
 				.append("\n AND nom_variable_metier=" + requete.quoteText(inputFields.get(1)) + ";");
@@ -860,7 +860,7 @@ public class GererFamilleNormeAction extends ArcWebGenericService<FamilyManageme
 	private static final void executeRequeteMiseAjourTableMetier(StringBuilder message, StringBuilder requete) {
 		try {
 			UtilitaireDao.get("arc").executeBlock(null, requete);
-			message.append("La mise a jour a échouée a réussi");
+			message.append("La mise a jour a réussi");
 		} catch (Exception ex) {
 			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.executeRequeteMiseAjourTableMetier", LOGGER);
 			message.append("La mise a jour a échoué");

@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;

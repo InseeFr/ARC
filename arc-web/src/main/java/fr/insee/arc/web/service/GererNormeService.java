@@ -22,11 +22,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleMappingEntity;
 import fr.insee.arc.utils.dao.EntityDao;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -69,8 +69,8 @@ public class GererNormeService implements IDbConstant {
 	 * @param table        : the sql to get the rules in the database
 	 * @return an sql query to get all the rules bond to a rule set
 	 */
-	public PreparedStatementBuilder recupRegle(VObject viewRulesSet, String table) {
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+	public ArcPreparedStatementBuilder recupRegle(VObject viewRulesSet, String table) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
         requete.append("select * from " + table + " ");
@@ -79,7 +79,7 @@ public class GererNormeService implements IDbConstant {
 	}
 
 	/** Appends a where clause for rulesets. */
-	private void whereRuleSetEquals(PreparedStatementBuilder requete, Map<String, ArrayList<String>> selection,
+	private void whereRuleSetEquals(ArcPreparedStatementBuilder requete, Map<String, ArrayList<String>> selection,
 			HashMap<String, String> type) {
 		requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
         requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
@@ -91,10 +91,10 @@ public class GererNormeService implements IDbConstant {
 	/**
 	 * Initialize the {@value GererNormeAction#viewNorme}. Call dao to create the view
 	 */
-	public void initializeViewNorme(VObject viewNorme, String theTableName) {
+	public void initializeViewNorme(VObject viewNorme, String theDataViewName) {
 		LoggerHelper.debug(LOGGER, "/* initializeNorme */");
 	
-		GererNormeDao.initializeViewNorme(viewObject, viewNorme, theTableName);
+		GererNormeDao.initializeViewNorme(viewObject, viewNorme, theDataViewName);
 		
 	}
 
@@ -131,7 +131,7 @@ public class GererNormeService implements IDbConstant {
 		Map<String, ArrayList<String>> selection = viewCalendar.mapContentSelected();
 		if (!selection.isEmpty()) {
 			HashMap<String, String> type = viewCalendar.mapHeadersType();
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 			requete.append(
 					"select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
 			requete.append(
@@ -149,8 +149,8 @@ public class GererNormeService implements IDbConstant {
 			defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
 			defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
 
-			viewRulesSet.setAfterInsertQuery(new PreparedStatementBuilder("select arc.fn_check_jeuderegle(); "));
-			viewRulesSet.setAfterUpdateQuery(new PreparedStatementBuilder("select arc.fn_check_jeuderegle(); "));
+			viewRulesSet.setAfterInsertQuery(new ArcPreparedStatementBuilder("select arc.fn_check_jeuderegle(); "));
+			viewRulesSet.setAfterUpdateQuery(new ArcPreparedStatementBuilder("select arc.fn_check_jeuderegle(); "));
 
 			viewObject.initialize(viewRulesSet, requete, theTableName, defaultInputFields);
 		} else {
@@ -168,7 +168,7 @@ public class GererNormeService implements IDbConstant {
 		// Get the selected calendar for requesting the rule set
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		if (!selection.isEmpty()) {
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 			
 			
 			boolean union=false;
@@ -231,7 +231,7 @@ public class GererNormeService implements IDbConstant {
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.load)))
 		{
 		    HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,type_fichier, delimiter, format, commentaire from arc.ihm_chargement_regle");
             whereRuleSetEquals(requete, selection, type);
             
@@ -254,7 +254,7 @@ public class GererNormeService implements IDbConstant {
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.structurize)))
 		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique,rubrique_nmcl,commentaire from arc.ihm_normage_regle");
             whereRuleSetEquals(requete, selection, type);
             
@@ -276,7 +276,7 @@ public class GererNormeService implements IDbConstant {
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.control)))
 		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,blocking_threshold,error_row_processing,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
             whereRuleSetEquals(requete, selection, type);
             
@@ -300,7 +300,7 @@ public class GererNormeService implements IDbConstant {
 		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("select * from arc.ihm_filtrage_regle");
             whereRuleSetEquals(requete, selection, type);
             
@@ -323,7 +323,7 @@ public class GererNormeService implements IDbConstant {
 		{
 			HashMap<String, String> type = viewRulesSet.mapHeadersType();
 
-            PreparedStatementBuilder requete = new PreparedStatementBuilder(
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder(
                     "SELECT mapping.id_regle, mapping.id_norme, mapping.validite_inf, mapping.validite_sup, mapping.version, mapping.periodicite, mapping.variable_sortie, mapping.expr_regle_col, mapping.commentaire, variables.type_variable_metier type_sortie, variables.nom_table_metier nom_table_metier /*, variables.nom_table_metier nom_table_metier */ ");
             requete.append("\n  FROM arc.ihm_mapping_regle mapping INNER JOIN arc.ihm_jeuderegle jdr");
             requete.append("\n  ON mapping.id_norme     = jdr.id_norme     AND mapping.periodicite           = jdr.periodicite AND mapping.validite_inf = jdr.validite_inf AND mapping.validite_sup = jdr.validite_sup AND mapping.version = jdr.version");
@@ -356,7 +356,7 @@ public class GererNormeService implements IDbConstant {
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.expression)))
 		{
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();;
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();;
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,expr_nom, expr_valeur, commentaire from arc.ihm_expression");
             whereRuleSetEquals(requete, selection, type);
             viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
@@ -375,7 +375,7 @@ public class GererNormeService implements IDbConstant {
 			String theTableName, String scope) {
 		LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
 		if (scope != null) {
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	        requete.append("select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
 			HashMap<String, String> defaultInputFields = new HashMap<>();
 			viewObject.initialize(viewJeuxDeReglesCopie, requete, theTableName, defaultInputFields);
@@ -396,7 +396,7 @@ public class GererNormeService implements IDbConstant {
 
 		try {
 			
-			PreparedStatementBuilder requete= new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
 			requete.append("update " + theTable + " set last_init='"+ dateFormat.format(dNow) + "', operation=case when operation='R' then 'O' else operation end;");
 			
 			UtilitaireDao.get("arc").executeRequest(null, requete);
@@ -440,7 +440,7 @@ public class GererNormeService implements IDbConstant {
 		loggerDispatcher.info("Empty all the rules of a module", LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
-		PreparedStatementBuilder requete= new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
 		requete.append("DELETE FROM " + table);
         requete.append(" WHERE id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
         requete.append(" AND periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
@@ -490,7 +490,7 @@ public class GererNormeService implements IDbConstant {
 	public void calculerVariableToType(VObject viewNorme, Map<String, String> mapVariableToType,
 			Map<String, String> mapVariableToTypeConso) throws ArcException {
 		
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 		requete.append("SELECT DISTINCT lower(nom_variable_metier) AS nom_variable_metier, type_variable_metier, type_consolidation AS type_sortie ");
 		requete.append("\n FROM arc.ihm_mod_variable_metier ");
 		requete.append("\n WHERE id_famille="+requete.quoteText(viewNorme.mapContentSelected().get("id_famille").get(0))+" ");
@@ -621,7 +621,7 @@ public class GererNormeService implements IDbConstant {
 				/*
 				 * Création d'une table temporaire (qui ne peut pas être TEMPORARY)
 				 */
-				PreparedStatementBuilder requete=new PreparedStatementBuilder();
+				ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 			    requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
 			    requete.append("\n CREATE TABLE " + nomTableImage + " AS SELECT "//
 				    + Format.untokenize(listHeaders, ", ") //
@@ -652,7 +652,7 @@ public class GererNormeService implements IDbConstant {
 
 			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 
-			PreparedStatementBuilder requete=new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 
 			requete.append("\n UPDATE " + nomTableImage + " SET ");
 			requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));

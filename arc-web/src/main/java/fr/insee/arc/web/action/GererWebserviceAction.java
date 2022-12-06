@@ -13,8 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.web.model.WebServiceManagementModel;
 import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
@@ -52,7 +52,7 @@ public class GererWebserviceAction extends ArcWebGenericService<WebServiceManage
         HashMap<String, String> defaultInputFields = new HashMap<String, String>();
         
         
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete.append("\n SELECT * FROM "+t+" ");
         
         vObjectService.initialize(c, requete, t, defaultInputFields);
@@ -99,7 +99,7 @@ public class GererWebserviceAction extends ArcWebGenericService<WebServiceManage
             HashMap<String, String> type = d.mapHeadersType();
 
             // requete de la vue
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("\n SELECT * FROM "+t+" ");
             requete.append("\n WHERE service_name " + requete.sqlEqual(selection.get("service_name").get(0), type.get("service_name")) + " ");
             requete.append("\n AND call_id " + requete.sqlEqual(selection.get("call_id").get(0), type.get("call_id")) + " ");

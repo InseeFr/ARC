@@ -34,11 +34,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.util.LoggerDispatcher;
-import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -168,7 +167,7 @@ public class VObjectService {
 	 * @param table
 	 * @param defaultInputFields
 	 */
-	public void initialize(VObject data, PreparedStatementBuilder mainQuery, String table, HashMap<String, String> defaultInputFields) {
+	public void initialize(VObject data, ArcPreparedStatementBuilder mainQuery, String table, HashMap<String, String> defaultInputFields) {
 		initialize(data, mainQuery, table, defaultInputFields, ((content) -> content));
 	}
 
@@ -181,7 +180,7 @@ public class VObjectService {
 	 * @param defaultInputFields
 	 * @param reworkContent function to rewrite the fetched content
 	 */
-	private void initialize(VObject data, PreparedStatementBuilder mainQuery, String table, HashMap<String, String> defaultInputFields, 
+	private void initialize(VObject data, ArcPreparedStatementBuilder mainQuery, String table, HashMap<String, String> defaultInputFields, 
 			Function<ArrayList<ArrayList<String>>, ArrayList<ArrayList<String>>> reworkContent) {
 	    try {
 	        LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
@@ -203,7 +202,7 @@ public class VObjectService {
 	        Integer indexPage = pageManagement(mainQuery, data);
 	
 	        // lancement de la requete principale et recupération du tableau
-	        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+	        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	        requete.append("select alias_de_table.* from (");
 	        requete.append(mainQuery);
 	        requete.append(") alias_de_table ");
@@ -314,7 +313,7 @@ public class VObjectService {
 	 * @param currentData
 	 * @return
 	 */
-	public Integer pageManagement(PreparedStatementBuilder mainQuery, VObject currentData) {
+	public Integer pageManagement(ArcPreparedStatementBuilder mainQuery, VObject currentData) {
 				
 		ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 		if (currentData.getIdPage() == null) {
@@ -328,7 +327,7 @@ public class VObjectService {
 		    		&& !currentData.isNoOrder()) {
 		        try {
 		        	
-		        	PreparedStatementBuilder requete=new PreparedStatementBuilder();
+		        	ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 		        	requete.append("select ceil(count(1)::float/" + currentData.getPaginationSize() + ") from (");
 		        	requete.append(mainQuery);
 		        	requete.append(") alias_de_table ");
@@ -574,8 +573,8 @@ public class VObjectService {
             List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
             
             Boolean allNull = true;
-            PreparedStatementBuilder reqInsert = new PreparedStatementBuilder();
-            PreparedStatementBuilder reqValues = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder reqInsert = new ArcPreparedStatementBuilder();
+            ArcPreparedStatementBuilder reqValues = new ArcPreparedStatementBuilder();
             reqInsert.append("INSERT INTO " + currentData.getTable() + " (");
             reqValues.append("VALUES (");
             int j = 0;
@@ -606,7 +605,7 @@ public class VObjectService {
             }
             reqInsert.append(") ");
             reqValues.append("); ");
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("BEGIN;");
             requete.append(reqInsert);
             requete.append(reqValues);
@@ -651,12 +650,12 @@ public class VObjectService {
      * @param tables
      * @return
      */
-    public PreparedStatementBuilder deleteQuery(VObject currentData, String... tables) {
+    public ArcPreparedStatementBuilder deleteQuery(VObject currentData, String... tables) {
 
     	VObject v0 = fetchVObjectData(currentData.getSessionName());
         
         ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
-        PreparedStatementBuilder reqDelete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder reqDelete = new ArcPreparedStatementBuilder();
         for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
             if (currentData.getSelectedLines().get(i) != null && currentData.getSelectedLines().get(i)) {
                 if (tables.length == 0) {
@@ -711,7 +710,7 @@ public class VObjectService {
         }
         LoggerHelper.traceAsComment(LOGGER, "toBeUpdated : ", toBeUpdated);
                 
-        PreparedStatementBuilder reqDelete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder reqDelete = new ArcPreparedStatementBuilder();
         reqDelete.append("BEGIN; ");
         for (int i = 0; i < v0.getContent().size(); i++) {
             if (toBeUpdated.contains(i)) {
@@ -765,7 +764,7 @@ public class VObjectService {
         ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null, new ArrayList<>(), currentData.getTable());
 
         // SQL update query
-        PreparedStatementBuilder reqUpdate = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder reqUpdate = new ArcPreparedStatementBuilder();
         reqUpdate.append("BEGIN; ");
 
         for (int i = 0; i < toBeUpdated.size(); i++) {
@@ -836,12 +835,12 @@ public class VObjectService {
         
     }
 
-    public PreparedStatementBuilder queryView(VObject currentData) {
+    public ArcPreparedStatementBuilder queryView(VObject currentData) {
     	VObject v0 = fetchVObjectData(currentData.getSessionName());
         if (currentData.getFilterFields() == null) {
             currentData.setFilterFields(v0.getFilterFields());
         }
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete.append("select alias_de_table.* from (");
         requete.append(v0.getMainQuery());
         requete.append(") alias_de_table ");
@@ -872,7 +871,7 @@ public class VObjectService {
 
     
     
-    public PreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel) {
+    public ArcPreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel) {
     return buildFilter(filterFields, headersDLabel, DEFAULT_FILTER_PATTERN, DEFAULT_FILTER_FUNCTION);
     }
 
@@ -884,11 +883,11 @@ public class VObjectService {
      * @return
      */
     
-    private PreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel, Integer filterPattern, String filterFunction) {
+    private ArcPreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel, Integer filterPattern, String filterFunction) {
 
         Pattern patternMath = Pattern.compile("[<>=]");
 
-        PreparedStatementBuilder s = new PreparedStatementBuilder(" WHERE true ");
+        ArcPreparedStatementBuilder s = new ArcPreparedStatementBuilder(" WHERE true ");
         if (headersDLabel == null || filterFields == null) {
             return s;
         }
@@ -1026,12 +1025,12 @@ public class VObjectService {
      * @param headerSortDOrders ordres du tri des colonnes
      * @return
      */
-    public PreparedStatementBuilder buildOrderBy(ArrayList<String> headerSortLabels, ArrayList<Boolean> headerSortDOrders) {
+    public ArcPreparedStatementBuilder buildOrderBy(ArrayList<String> headerSortLabels, ArrayList<Boolean> headerSortDOrders) {
         if (headerSortLabels == null) {
-            return new PreparedStatementBuilder("order by alias_de_table ");
+            return new ArcPreparedStatementBuilder("order by alias_de_table ");
         }
 
-        PreparedStatementBuilder s = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder s = new ArcPreparedStatementBuilder();
 
         for (int i = 0; i < headerSortLabels.size(); i++) {
             if (i > 0) {
@@ -1047,12 +1046,12 @@ public class VObjectService {
         return s;
     }
     
-    public PreparedStatementBuilder buildLimit(VObject data, Integer indexPage)
+    public ArcPreparedStatementBuilder buildLimit(VObject data, Integer indexPage)
     {
     
 	setPaginationSizeIfNull(data);
 
-    return new PreparedStatementBuilder(" limit " + data.getPaginationSize() + " offset " + ((indexPage - 1) * data.getPaginationSize()));
+    return new ArcPreparedStatementBuilder(" limit " + data.getPaginationSize() + " offset " + ((indexPage - 1) * data.getPaginationSize()));
     
     }
     
@@ -1099,7 +1098,7 @@ public class VObjectService {
         if (currentData.getFilterFields() == null) {
             currentData.setFilterFields(v0.getFilterFields());
         }
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete
         	.append("select alias_de_table.* from (" )
         	.append(v0.getMainQuery())
@@ -1113,10 +1112,10 @@ public class VObjectService {
         this.download(currentData, response, fileNames, requete);
     }
 
-    public void download(VObject currentData, HttpServletResponse response, List<String> fileNames, List<PreparedStatementBuilder> requetes) {
+    public void download(VObject currentData, HttpServletResponse response, List<String> fileNames, List<ArcPreparedStatementBuilder> requetes) {
     	
     	
-    	PreparedStatementBuilder[] array=new PreparedStatementBuilder[requetes.size()];
+    	ArcPreparedStatementBuilder[] array=new ArcPreparedStatementBuilder[requetes.size()];
     	for (int i=0;i<requetes.size();i++)
     	{
     		array[i]=requetes.get(i);
@@ -1134,7 +1133,7 @@ public class VObjectService {
      * @param requetes
      *            , liste des requetes SQL
      */
-    private void download(VObject currentData, HttpServletResponse response, List<String> fileNames, PreparedStatementBuilder... requetes) {
+    private void download(VObject currentData, HttpServletResponse response, List<String> fileNames, ArcPreparedStatementBuilder... requetes) {
     	VObject v0 = fetchVObjectData(currentData.getSessionName());
         if (currentData.getFilterFields() == null) {
             currentData.setFilterFields(v0.getFilterFields());
@@ -1221,7 +1220,7 @@ public class VObjectService {
      *
      * @param listIdSource
      */
-    public void downloadXML(VObject currentData, HttpServletResponse response, PreparedStatementBuilder requete, String repertoire, String anEnvExcecution, String phase, String etatOk, String etatKo) {
+    public void downloadXML(VObject currentData, HttpServletResponse response, ArcPreparedStatementBuilder requete, String repertoire, String anEnvExcecution, String phase, String etatOk, String etatKo) {
     	VObject v0 = fetchVObjectData(currentData.getSessionName());
         if (currentData.getFilterFields() == null) {
             currentData.setFilterFields(v0.getFilterFields());
@@ -1267,7 +1266,7 @@ public class VObjectService {
 	 *
 	 * @param dirSuffix
 	 */
-	public void zipOutStreamRequeteSelect(Connection connexion, PreparedStatementBuilder requete, TarArchiveOutputStream taos,
+	public void zipOutStreamRequeteSelect(Connection connexion, ArcPreparedStatementBuilder requete, TarArchiveOutputStream taos,
 			String repertoireIn, String anEnvExcecution, String nomPhase, String dirSuffix) {
 		int k = 0;
 		int fetchSize = 5000;
@@ -1280,7 +1279,7 @@ public class VObjectService {
 		String currentContainer;
 		while (true) {
 			// Réécriture de la requete pour avoir le i ème paquet
-			PreparedStatementBuilder requeteLimit=new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requeteLimit=new ArcPreparedStatementBuilder();
 			requeteLimit.append(requete);
 			requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
 			// Récupération de la liste d'id_source par paquet de fetchSize
@@ -1358,7 +1357,7 @@ public class VObjectService {
      * @param listRepertoire
      *            noms du dernier dossier (chaque fichier pouvant être dans l'un de la liste)
      */
-    public void downloadEnveloppe(VObject currentData, HttpServletResponse response, PreparedStatementBuilder requete, String repertoire, ArrayList<String> listRepertoire) {
+    public void downloadEnveloppe(VObject currentData, HttpServletResponse response, ArcPreparedStatementBuilder requete, String repertoire, ArrayList<String> listRepertoire) {
         VObject v0 = fetchVObjectData(currentData.getSessionName());
 
         if (currentData.getFilterFields() == null) {
@@ -1480,7 +1479,7 @@ public class VObjectService {
     public void initializeByList(VObject data, ArrayList<ArrayList<String>> liste, HashMap<String, String> defaultInputFields) {
 
     	
-    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+    	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         ArrayList<String> header = liste.get(0);
         ArrayList<String> type = liste.get(1);
 

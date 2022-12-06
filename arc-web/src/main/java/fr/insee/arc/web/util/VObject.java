@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -26,13 +26,13 @@ public class VObject {
 	private Integer paginationSize;
 
 	/** Requête de génération du tableau */
-	private PreparedStatementBuilder mainQuery;
+	private ArcPreparedStatementBuilder mainQuery;
 
-	private PreparedStatementBuilder beforeSelectQuery;
+	private ArcPreparedStatementBuilder beforeSelectQuery;
 
-	private PreparedStatementBuilder afterUpdateQuery;
+	private ArcPreparedStatementBuilder afterUpdateQuery;
 
-	private PreparedStatementBuilder afterInsertQuery;
+	private ArcPreparedStatementBuilder afterInsertQuery;
 
 	/** Table utilisée pour les update/insert/delete */
 	private String table;
@@ -567,35 +567,35 @@ public class VObject {
 		this.paginationSize = paginationSize;
 	}
 
-	public PreparedStatementBuilder getMainQuery() {
+	public ArcPreparedStatementBuilder getMainQuery() {
 		return mainQuery;
 	}
 
-	public void setMainQuery(PreparedStatementBuilder mainQuery) {
+	public void setMainQuery(ArcPreparedStatementBuilder mainQuery) {
 		this.mainQuery = mainQuery;
 	}
 
-	public PreparedStatementBuilder getBeforeSelectQuery() {
+	public ArcPreparedStatementBuilder getBeforeSelectQuery() {
 		return beforeSelectQuery;
 	}
 
-	public void setBeforeSelectQuery(PreparedStatementBuilder beforeSelectQuery) {
+	public void setBeforeSelectQuery(ArcPreparedStatementBuilder beforeSelectQuery) {
 		this.beforeSelectQuery = beforeSelectQuery;
 	}
 
-	public PreparedStatementBuilder getAfterUpdateQuery() {
+	public ArcPreparedStatementBuilder getAfterUpdateQuery() {
 		return afterUpdateQuery;
 	}
 
-	public void setAfterUpdateQuery(PreparedStatementBuilder afterUpdateQuery) {
+	public void setAfterUpdateQuery(ArcPreparedStatementBuilder afterUpdateQuery) {
 		this.afterUpdateQuery = afterUpdateQuery;
 	}
 
-	public PreparedStatementBuilder getAfterInsertQuery() {
+	public ArcPreparedStatementBuilder getAfterInsertQuery() {
 		return afterInsertQuery;
 	}
 
-	public void setAfterInsertQuery(PreparedStatementBuilder afterInsertQuery) {
+	public void setAfterInsertQuery(ArcPreparedStatementBuilder afterInsertQuery) {
 		this.afterInsertQuery = afterInsertQuery;
 	}
 

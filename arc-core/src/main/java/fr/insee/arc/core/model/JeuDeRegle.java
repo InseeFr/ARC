@@ -1,16 +1,15 @@
 package fr.insee.arc.core.model;
 
-import java.util.Date;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
-import fr.insee.arc.utils.utils.LoggerHelper;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.utils.LoggerHelper;
 
 
 public class JeuDeRegle {
@@ -131,8 +130,8 @@ public class JeuDeRegle {
                 + this.validiteSup + ", version=" + this.version + "]";
     }
 
-    public PreparedStatementBuilder getSqlEquals() {
-    	PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    public ArcPreparedStatementBuilder getSqlEquals() {
+    	ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
     	requete
 		.append("id_norme = " + requete.quoteText(this.idNorme))
         .append("\n  AND validite_inf = " + requete.quoteText(this.getValiditeInfString())  + "::date")

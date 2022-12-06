@@ -24,14 +24,14 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -126,7 +126,7 @@ public class ApiReceptionService extends ApiService {
 			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatOK(this.directoryRoot, this.envExecution));
 			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatKO(this.directoryRoot, this.envExecution));
 			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,
-					new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
+					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
 					
 			if (!entrepotList.isEmpty())
 			{
@@ -602,7 +602,7 @@ public class ApiReceptionService extends ApiService {
 				requete.append(";");
 				soumettreRequete(requete);
 
-				boolean fichierARejouer = UtilitaireDao.get("arc").hasResults(connexion, new PreparedStatementBuilder("select 1 from " + this.tablePil + " where phase_traitement='RECEPTION' and to_delete in ('R','F') limit 1;"));
+				boolean fichierARejouer = UtilitaireDao.get("arc").hasResults(connexion, new ArcPreparedStatementBuilder("select 1 from " + this.tablePil + " where phase_traitement='RECEPTION' and to_delete in ('R','F') limit 1;"));
 
 				if (fichierARejouer)
 				{
@@ -761,7 +761,7 @@ public class ApiReceptionService extends ApiService {
 		
 		// récupérer les doublons pour mettre à jour le dispatcher
 		try {
-			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent().get("+ColumnEnum.ID_SOURCE.getColumnName()+");
+			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent().get("+ColumnEnum.ID_SOURCE.getColumnName()+");
 			
 			// on va parcourir la liste des fichiers
 			// si on retrouve l'id_source dans la liste, on le marque en erreur
@@ -789,7 +789,7 @@ public class ApiReceptionService extends ApiService {
 
 		ArrayList<ArrayList<String>> content2 = new ArrayList<>();
 		try {
-			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent();
+			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
 			ArrayList<String> listContainerARejouer = m.get(GB_CONTAINER);
 			ArrayList<String> listIdsourceARejouer = m.get(ColumnEnum.ID_SOURCE.getColumnName());
 
@@ -855,7 +855,7 @@ public class ApiReceptionService extends ApiService {
 				+ " b where a.container=b.o_container),1)::text as v_container ");
 		requete.append("from (select distinct container from " + this.tablePilTemp + " where container is not null) a ");
 		try {
-			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(requete))).mapContent();
+			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
 			ArrayList<String> listContainerDoublons = m.get(GB_CONTAINER);
 			ArrayList<String> listVersionContainerDoublons = m.get(GB_VCONTAINER);
 			if (listContainerDoublons != null) {

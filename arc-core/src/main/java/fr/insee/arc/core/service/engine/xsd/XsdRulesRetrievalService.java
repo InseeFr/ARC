@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.controle.ControleRegleService;
 import fr.insee.arc.core.service.engine.xsd.XsdControlDescription.XsdControlDescriptionBuilder;
@@ -18,7 +19,6 @@ import fr.insee.arc.core.service.engine.xsd.controls.IntForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.RegexForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.TimeForXsd;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdChoice;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -31,7 +31,7 @@ public class XsdRulesRetrievalService {
 	}
 
 	private XsdControlDescription fetchRulesFromBase(Connection connection, JeuDeRegle jdr, String filter) throws ArcException {
-		PreparedStatementBuilder request= new PreparedStatementBuilder(
+		ArcPreparedStatementBuilder request= new ArcPreparedStatementBuilder(
 				"select id_classe, "
 				+ "rubrique_pere, rubrique_fils, "
 				+ "borne_inf, borne_sup, condition, pre_action, "
@@ -112,7 +112,7 @@ public class XsdRulesRetrievalService {
 				builder.addRuleTo(rubriquePere, new EnumForXsd(enumList));
 			break;
 			case "ENUM_TABLE":
-				GenericBean enumAsSqlResults = new GenericBean(UtilitaireDao.get("arc").executeRequest(connection, new PreparedStatementBuilder(condition)));
+				GenericBean enumAsSqlResults = new GenericBean(UtilitaireDao.get("arc").executeRequest(connection, new ArcPreparedStatementBuilder(condition)));
 				String columNameInResult = enumAsSqlResults.getHeaders().get(0);
 				builder.addRuleTo(rubriquePere, new EnumForXsd(enumAsSqlResults.mapContent().get(columNameInResult)));
 			break;

@@ -10,11 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.web.util.VObjectService;
+import fr.insee.arc.web.action.GererNormeAction;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.util.VObjectService;
 
 
 /**
@@ -40,7 +41,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
         System.out.println("/* initializeListeNomenclatures */");
         
         HashMap<String, String> defaultInputFields = new HashMap<>();
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete.append("\n SELECT " + NOM_TABLE + ", description FROM "+table+" ");
 
         vObject.initialize(viewListNomenclatures, requete, table, defaultInputFields);
@@ -53,7 +54,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
         if (!selection.isEmpty() && Boolean.TRUE.equals(UtilitaireDao.get(poolName).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0)))) {
-        	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("select * from arc." + selection.get(NOM_TABLE).get(0) + " ");
 
             HashMap<String, String> defaultInputFields = new HashMap<>();
@@ -71,7 +72,7 @@ public class ExternalFilesManagementDao implements IDbConstant {
         Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
 
         if (!selection.isEmpty()) {
-        	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("\n SELECT type_nmcl, nom_colonne, type_colonne FROM arc.ihm_schema_nmcl ");
             requete.append("\n WHERE type_nmcl = " + requete.quoteText(typeNomenclature(selection.get(NOM_TABLE).get(0))) + " ");
          

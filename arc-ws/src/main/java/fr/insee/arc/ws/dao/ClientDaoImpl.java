@@ -10,11 +10,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -42,7 +42,7 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#verificationClientFamille()");
         Connection connection = null;
 
-        PreparedStatementBuilder request=new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder request=new ArcPreparedStatementBuilder();
         request
         	.append("SELECT EXISTS (SELECT 1 FROM arc.ihm_client")
         	.append(" WHERE id_application=" + request.quoteText(client))
@@ -116,7 +116,7 @@ public class ClientDaoImpl implements ClientDao {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             UtilitaireDao.get("arc").executeBlock(connection, request);
             tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
-                    new PreparedStatementBuilder("SELECT nom_table_metier FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;"));
+                    new ArcPreparedStatementBuilder("SELECT nom_table_metier FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;"));
             UtilitaireDao.get("arc").executeImmediate(connection,
                     "DROP TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;");
         } finally {
@@ -234,7 +234,7 @@ public class ClientDaoImpl implements ClientDao {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             UtilitaireDao.get("arc").executeBlock(connection, request);
             tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
-            		 new PreparedStatementBuilder("SELECT nom_table_metier FROM " + env + client + "_" + timestamp + "_mod_table_metier;"));
+            		 new ArcPreparedStatementBuilder("SELECT nom_table_metier FROM " + env + client + "_" + timestamp + "_mod_table_metier;"));
             UtilitaireDao.get("arc").executeImmediate(connection, "DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_mod_table_metier;");
         } finally {
             close(connection);
@@ -311,14 +311,14 @@ public class ClientDaoImpl implements ClientDao {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
 
             nbLines = UtilitaireDao.get("arc").getInt(connection,
-            		 new PreparedStatementBuilder("select max(rowid) FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName));
+            		 new ArcPreparedStatementBuilder("select max(rowid) FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName));
             nbBlock = (nbLines - 1) / blockSize + 1;
 
             for (int i = 0; i < nbBlock; i++) {
                 LoggerHelper.debugAsComment(LOGGER, "Traitement du bloc ", i, "/", (nbBlock - 1));
                 result = UtilitaireDao.get("arc").executeRequest(
                         connection,
-                        new PreparedStatementBuilder("SELECT * FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName + " u where rowid>" + i
+                        new ArcPreparedStatementBuilder("SELECT * FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName + " u where rowid>" + i
                                 * blockSize + " and rowid<=" + blockSize * (i + 1)));
                 resp.send("{\"" + JsonKeys.ID.getKey() + "\":\"" + ManipString.substringAfterFirst(ApiService.dbEnv(environnement), ".")
                         + tableMetierName + "\",\"" + JsonKeys.TABLE.getKey() + "\":");
@@ -371,7 +371,7 @@ public class ClientDaoImpl implements ClientDao {
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             
-            PreparedStatementBuilder requete=new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
             requete.append("SELECT tablename FROM pg_tables ")
             .append(" WHERE schemaname = " + requete.quoteText(schema))
             .append(" AND tablename LIKE "+ requete.quoteText("nmcl_%"))
@@ -408,7 +408,7 @@ public class ClientDaoImpl implements ClientDao {
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "mod_variable_metier";
 
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
             requete.append("\n SELECT * FROM " + ApiService.dbEnv(environnement) + "mod_variable_metier");
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
@@ -435,7 +435,7 @@ public class ClientDaoImpl implements ClientDao {
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_famille";
 
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append( "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
                     + " AS SELECT DISTINCT f.id_famille FROM arc.ihm_famille f INNER JOIN  "
                     + "arc.ihm_client c ON f.id_famille = c.id_famille WHERE lower(c.id_application) = lower(" + requete.quoteText(client) + ");"
@@ -483,7 +483,7 @@ public class ClientDaoImpl implements ClientDao {
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "mod_table_metier";
 
-            PreparedStatementBuilder requete = new PreparedStatementBuilder("\n CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder("\n CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
             requete.append("\n SELECT * FROM " + ApiService.dbEnv(environnement) + "mod_table_metier");
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
@@ -548,7 +548,7 @@ public class ClientDaoImpl implements ClientDao {
 
         String realClient = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(client, "."), "_");
 
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete
         	.append("SELECT schemaname||'.'||tablename FROM pg_tables")
         	.append(" WHERE tablename like " + requete.quoteText(clientDb))

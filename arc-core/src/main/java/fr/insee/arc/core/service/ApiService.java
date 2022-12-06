@@ -19,7 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.NormeFichier;
 import fr.insee.arc.core.model.ServiceReporting;
@@ -30,7 +31,6 @@ import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -309,7 +309,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @return
 	 */
 	private boolean checkTodo(String tablePil, String phaseAncien, String phaseNouveau) {
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		boolean todo = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
 		requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien) + " AND "
@@ -512,7 +512,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @throws ArcException
 	 */
 	public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws ArcException {
-		GenericBean gb = new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new PreparedStatementBuilder(req)));
+		GenericBean gb = new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new ArcPreparedStatementBuilder(req)));
 		return gb.mapContent(true);
 	}
 
@@ -646,7 +646,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			// sinon on retire le lien avec la table héritée
 			StringBuilder query = new StringBuilder();
 			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-					new PreparedStatementBuilder("select "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + tablePilTemp + ""))).mapContent();
+					new ArcPreparedStatementBuilder("select "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + tablePilTemp + ""))).mapContent();
 			int count = 0;
 			for (String z : m.get(ColumnEnum.ID_SOURCE.getColumnName())) {
 
@@ -768,7 +768,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	public HashMap<String, ArrayList<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase,
 			String etat) {
 		loggerDispatcher.info("pilotageListIdsource", LOGGER_APISERVICE);
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + tablePilotage + " ");
 		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase) + " ");
 		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
@@ -861,9 +861,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param listeTable
 	 * @return
 	 */
-	public static PreparedStatementBuilder listeColonneTableMetierSelonFamilleNorme(String anEnvironnement,
+	public static ArcPreparedStatementBuilder listeColonneTableMetierSelonFamilleNorme(String anEnvironnement,
 			String idFamille) {
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 		requete.append("SELECT DISTINCT nom_variable_metier, type_variable_metier\n")
 				.append("  FROM " + anEnvironnement + "_mod_variable_metier\n")
@@ -1190,7 +1190,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param undoFilesSelection
 	 */
 	public static void backToTargetPhase(TraitementPhase phaseAExecuter, String env, String rootDirectory,
-			PreparedStatementBuilder undoFilesSelection) {
+			ArcPreparedStatementBuilder undoFilesSelection) {
 		if (phaseAExecuter.getOrdre() == TraitementPhase.INITIALISATION.getOrdre()) {
 			resetBAS(env, rootDirectory);
 		} else {
@@ -1345,7 +1345,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 */
 	protected HashMap<String, ArrayList<String>> recuperationIdSource(String phaseTraiement) throws ArcException {
 		
-		PreparedStatementBuilder query=new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 		query.append("SELECT p."+ColumnEnum.ID_SOURCE.getColumnName()+" ");
 		query.append("FROM " + this.getTablePilTemp() + " p ");
 		query.append("ORDER BY "+ColumnEnum.ID_SOURCE.getColumnName());

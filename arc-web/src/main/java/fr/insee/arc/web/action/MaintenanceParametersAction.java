@@ -9,7 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.web.model.MaintenanceParametersModel;
 import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
@@ -32,7 +32,7 @@ public class MaintenanceParametersAction extends ArcWebGenericService<Maintenanc
 
     public void initializeParameters() {
         HashMap<String, String> defaultInputFields = new HashMap<>();
-        this.vObjectService.initialize(viewParameters, new PreparedStatementBuilder("SELECT row_number() over (order by description,key,val) as i, key ,val, description FROM arc.parameter"),  "arc.parameter", defaultInputFields);
+        this.vObjectService.initialize(viewParameters, new ArcPreparedStatementBuilder("SELECT row_number() over (order by description,key,val) as i, key ,val, description FROM arc.parameter"),  "arc.parameter", defaultInputFields);
     }
 
     @RequestMapping("/selectParameters")

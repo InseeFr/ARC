@@ -3,7 +3,7 @@ package fr.insee.arc.web.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 
 public final class ConstantVObject {
 
@@ -14,7 +14,7 @@ public final class ConstantVObject {
         public String label;
         public String size;
         public String type;
-        public PreparedStatementBuilder query;
+        public ArcPreparedStatementBuilder query;
         public Boolean isUpdatable;
         public Boolean isRequired;
 
@@ -33,7 +33,7 @@ public final class ConstantVObject {
          * @param isUpdatable
          *            est-ce que je peux modifier la colonne ?
          */
-        public ColumnRendering(Boolean visible, String label, String size, String type, PreparedStatementBuilder query, Boolean isUpdatable) {
+        public ColumnRendering(Boolean visible, String label, String size, String type, ArcPreparedStatementBuilder query, Boolean isUpdatable) {
             this.visible = visible;
             this.label = label;
             this.size = size;
@@ -59,7 +59,7 @@ public final class ConstantVObject {
         * @param isRequired
         *           est-ce un champ qui doit absolument être saisi?
         */
-        public ColumnRendering(Boolean visible, String label, String size, String type, PreparedStatementBuilder query, Boolean isUpdatable, Boolean isRequired) {
+        public ColumnRendering(Boolean visible, String label, String size, String type, ArcPreparedStatementBuilder query, Boolean isUpdatable, Boolean isRequired) {
             this(visible, label, size, type, query, isUpdatable);
             this.isRequired = isRequired;
         }

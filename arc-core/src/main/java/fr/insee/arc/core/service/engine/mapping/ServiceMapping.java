@@ -4,10 +4,10 @@ import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Set;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -45,7 +45,7 @@ public class ServiceMapping implements IDbConstant {
      * @throws ArcException
      */
     public String fetchIdFamille(Connection connexion, JeuDeRegle aJeuDeRegle, String tableNorme) throws ArcException {
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete
         	.append("SELECT id_famille FROM " + tableNorme)
         	.append("\n WHERE id_norme = " + requete.quoteText(aJeuDeRegle.getIdNorme()))

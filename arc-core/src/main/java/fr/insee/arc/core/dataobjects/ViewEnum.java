@@ -1,8 +1,12 @@
-package fr.insee.arc.core.databaseobjects;
+package fr.insee.arc.core.dataobjects;
 
-public enum TableEnum {
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-	IHM_NORME("ihm_norme", false)
+public enum ViewEnum {
+
+	IHM_NORME("ihm_norme", false, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT)
 	, IHM_CALENDRIER("ihm_calendrier", false)
 	, IHM_JEUDEREGLE("ihm_jeuderegle", false)
 	, IHM_CHARGEMENT_REGLE("ihm_chargement_regle", false)
@@ -23,12 +27,15 @@ public enum TableEnum {
 
 	, PILOTAGE_FICHIER("pilotage_fichier", true)
 	, PILOTAGE_ARCHIVE("pilotage_archive", true)
+	
+	, TEST("test",false,ColumnEnum.TEST1,ColumnEnum.TEST2)
 
 	;
 
-	private TableEnum(String tableName, boolean isTableInSanbox) {
+	private ViewEnum(String tableName, boolean isTableInSanbox, ColumnEnum...columns) {
 		this.tableName = tableName;
 		this.isTableInSanbox = isTableInSanbox;
+		this.columns=new LinkedHashSet<>(Arrays.asList(columns));
 	}
 
 	/**
@@ -40,6 +47,8 @@ public enum TableEnum {
 	 * indicate if the table belongs to a sandbox
 	 */
 	private boolean isTableInSanbox;
+	
+	private Set<ColumnEnum> columns;
 
 	public String getTableName() {
 		return tableName;
@@ -49,4 +58,14 @@ public enum TableEnum {
 		return isTableInSanbox;
 	}
 
+	public Set<ColumnEnum> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(Set<ColumnEnum> columns) {
+		this.columns = columns;
+	}
+
+	
+	
 }

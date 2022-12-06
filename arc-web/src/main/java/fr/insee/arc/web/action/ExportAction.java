@@ -29,13 +29,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.model.ExportModel;
 import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
@@ -67,7 +64,7 @@ public class ExportAction extends ArcWebGenericService<ExportModel>  {
     	
         System.out.println("/* initializeExport */");
         HashMap<String, String> defaultInputFields = new HashMap<>();
-        this.vObjectService.initialize(viewExport, new PreparedStatementBuilder("SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export"),  getBacASable() +".export", defaultInputFields);
+        this.vObjectService.initialize(viewExport, new ArcPreparedStatementBuilder("SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export"),  getBacASable() +".export", defaultInputFields);
     }
 
     @RequestMapping("/selectExport")
@@ -104,7 +101,7 @@ public class ExportAction extends ArcWebGenericService<ExportModel>  {
     public String startExport(Model model) throws Exception {
         
     	
-    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+    	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
     	requete.append("SELECT * FROM "+ getBacASable() +".export ");
     	requete.append("WHERE file_name IN ("+requete.sqlListeOfValues(viewExport.mapContentSelected().get("file_name"))+") ");
     	
@@ -130,7 +127,7 @@ public class ExportAction extends ArcWebGenericService<ExportModel>  {
     	// itérer sur les exports à réaliser
     	for (int n=0;n<tablesToExport.size();n++)
     	{
-    		requete=new PreparedStatementBuilder();
+    		requete=new ArcPreparedStatementBuilder();
     		requete.append("UPDATE "+ getBacASable() +".export set etat="+requete.quoteText(TraitementEtat.ENCOURS.toString())+" where file_name="+requete.quoteText(fileName.get(n))+" ");
     		UtilitaireDao.get("arc").executeRequest(null,requete);
 
@@ -175,7 +172,7 @@ public class ExportAction extends ArcWebGenericService<ExportModel>  {
 			    		// lire la table how to export pour voir comment on va s'y prendre
 			    		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
 			    		h=new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-			    				new PreparedStatementBuilder("SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "+howToExportReworked+" order by pos::int ")))
+			    				new ArcPreparedStatementBuilder("SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "+howToExportReworked+" order by pos::int ")))
 			    				.mapContent();
 			    		
 			    		
@@ -293,7 +290,7 @@ public class ExportAction extends ArcWebGenericService<ExportModel>  {
 	    		
     		}
     		
-    		requete=new PreparedStatementBuilder();
+    		requete=new ArcPreparedStatementBuilder();
     		requete.append("UPDATE "+ getBacASable() +".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') ");
     		requete.append("WHERE file_name="+requete.quoteText(fileName.get(n))+" ");
     		
@@ -379,7 +376,7 @@ public class ExportAction extends ArcWebGenericService<ExportModel>  {
     	HashMap<String, ArrayList<String>> selection = this.viewFileExport.mapContentSelected();
     	if (!selection.isEmpty())
     	{
-    		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
     		boolean first=true;
     		for (String s:selection.get("filename"))
     		{

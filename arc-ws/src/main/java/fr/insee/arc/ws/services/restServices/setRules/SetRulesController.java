@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.services.restServices.setRules.pojo.SetRulesPojo;
@@ -114,7 +114,7 @@ public class SetRulesController {
 	 */
 	public void replaceRulesDAO(SetRulesPojo bodyPojo, String tablename, String...primaryKeys) throws ArcException
 	{
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 	
 		requete.append(deleteRulesQuery(bodyPojo, tablename, primaryKeys));
 		requete.append(insertRulesQuery(bodyPojo, tablename, primaryKeys));
@@ -133,9 +133,9 @@ public class SetRulesController {
 	 * @param primaryKeys
 	 * @return
 	 */
-	public PreparedStatementBuilder insertRulesQuery(SetRulesPojo bodyPojo, String tablename, String...primaryKeys)
+	public ArcPreparedStatementBuilder insertRulesQuery(SetRulesPojo bodyPojo, String tablename, String...primaryKeys)
 	{
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 		List<String> columns=new ArrayList<>(bodyPojo.content.keySet());
 		
 		// fetch data to insert
@@ -161,7 +161,7 @@ public class SetRulesController {
 				
 				if (bodyPojo.content.get(col).getData().isEmpty())
 				{
-					return new PreparedStatementBuilder();
+					return new ArcPreparedStatementBuilder();
 				}
 				
 				requete.append(requete.quoteText(bodyPojo.content.get(col).getData().get(i)));
@@ -181,9 +181,9 @@ public class SetRulesController {
 	 * @param primaryKeys
 	 * @return
 	 */
-	public PreparedStatementBuilder deleteRulesQuery(SetRulesPojo bodyPojo, String tablename, String...primaryKeys)
+	public ArcPreparedStatementBuilder deleteRulesQuery(SetRulesPojo bodyPojo, String tablename, String...primaryKeys)
 	{
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 		List<String> columns=new ArrayList<>(bodyPojo.content.keySet());
 				
 		for (int i=0;i<bodyPojo.content.get(columns.get(0)).getData().size();i++)

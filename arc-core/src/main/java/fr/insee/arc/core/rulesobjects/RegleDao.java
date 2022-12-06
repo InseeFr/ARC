@@ -7,9 +7,9 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -28,7 +28,7 @@ public class RegleDao {
 
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
 
-		PreparedStatementBuilder sb = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder sb = new ArcPreparedStatementBuilder();
 		sb.append("SELECT id_regle, id_classe, ");
 		sb.append(" rubrique_pere, rubrique_fils, borne_inf, borne_sup, condition, pre_action, blocking_threshold, error_row_processing  ");
 		sb.append(" FROM " + tableRegle + " a ");

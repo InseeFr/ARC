@@ -15,15 +15,15 @@ import org.apache.logging.log4j.Logger;
 
 import com.opencsv.CSVReader;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
-import fr.insee.arc.core.databaseobjects.DatabaseObjectService;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -109,14 +109,14 @@ public class ChargeurCSV implements IChargeur {
 
 		// si le quote est une expression complexe, l'interpreter par postgres
 		if (this.quote != null && this.quote.length() > 1 && this.quote.length() < 8) {
-			PreparedStatementBuilder req = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
 			req.append("SELECT " + this.quote + " ");
 			this.quote = UtilitaireDao.get("arc").executeRequest(this.connexion, req).get(2).get(0);
 		}
 
 		// si le séparateur est une expression complexe, l'interpreter par postgres
 		if (this.separateur != null && this.separateur.length() > 1 && this.separateur.length() < 8) {
-			PreparedStatementBuilder req = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
 			req.append("select " + this.separateur + " ");
 			this.separateur = UtilitaireDao.get("arc").executeRequest(this.connexion, req).get(2).get(0);
 		}
@@ -259,7 +259,7 @@ public class ChargeurCSV implements IChargeur {
 					List<String> colsIn = new ArrayList<String>();
 					colsIn = UtilitaireDao.get("arc")
 							.executeRequest(this.connexion,
-									new PreparedStatementBuilder(
+									new ArcPreparedStatementBuilder(
 											"select " + joinSelect.get(i) + " from " + joinTable.get(i) + " limit 0"))
 							.get(0);
 
@@ -299,7 +299,7 @@ public class ChargeurCSV implements IChargeur {
 			 */
 			if (!cols.isEmpty()) {
 				List<String> colsIn = UtilitaireDao.get("arc").executeRequest(this.connexion,
-						new PreparedStatementBuilder("select * from " + this.tableTempA + " limit 0")).get(0);
+						new ArcPreparedStatementBuilder("select * from " + this.tableTempA + " limit 0")).get(0);
 
 				String renameSuffix = "$new$";
 				String partitionNumberPLaceHolder = "#pn#";
@@ -344,14 +344,14 @@ public class ChargeurCSV implements IChargeur {
 				boolean partitionedProcess = (partitionExpression.size() > 0);
 
 				// default value of the maximum records per partition
-				int partitionSize = DatabaseObjectService.MAX_NUMBER_OF_RECORD_PER_PARTITION;
+				int partitionSize = DataObjectService.MAX_NUMBER_OF_RECORD_PER_PARTITION;
 
 				int nbPartition = 1;
 				// creation de l'index de partitionnement
 				if (partitionedProcess) {
 					// comptage rapide su échantillon à 1/10000 pour trouver le nombre de partiton
 					nbPartition = UtilitaireDao.get("arc").getInt(connexion,
-							new PreparedStatementBuilder("select ((count(*)*10000)/" + partitionSize + ")+1 from "
+							new ArcPreparedStatementBuilder("select ((count(*)*10000)/" + partitionSize + ")+1 from "
 									+ this.tableTempA + " tablesample system(0.01)"));
 
 					req = new StringBuilder();

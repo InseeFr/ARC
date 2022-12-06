@@ -21,7 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.web.model.FileSystemManagementModel;
 import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
@@ -351,7 +351,7 @@ public class GererFileAction extends ArcWebGenericService<FileSystemManagementMo
     	if (!selection.isEmpty())
     	{
 
-    		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
     		boolean first=true;
     		for (String s:selection.get(VC_FILENAME))
     		{

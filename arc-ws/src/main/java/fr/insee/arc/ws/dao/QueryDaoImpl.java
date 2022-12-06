@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -41,7 +41,7 @@ public class QueryDaoImpl implements QueryDao {
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
 
-            result = UtilitaireDao.get("arc").executeRequest(connection, new PreparedStatementBuilder("SELECT * FROM " + id + ";"));
+            result = UtilitaireDao.get("arc").executeRequest(connection, new ArcPreparedStatementBuilder("SELECT * FROM " + id + ";"));
 
             UtilitaireDao.get("arc").executeImmediate(connection, "DROP TABLE " + id + ";");
 

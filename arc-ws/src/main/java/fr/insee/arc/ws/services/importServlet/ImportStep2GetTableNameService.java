@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -71,7 +71,7 @@ public class ImportStep2GetTableNameService {
 			} else {
 				// récupération du type
 				ArrayList<ArrayList<String>> l = UtilitaireDao.get("arc").executeRequest(null,
-						new PreparedStatementBuilder("select * from " + tableName + " where false "));
+						new ArcPreparedStatementBuilder("select * from " + tableName + " where false "));
 
 				for (int j = 0; j < l.get(0).size(); j++) {
 					if (j > 0) {

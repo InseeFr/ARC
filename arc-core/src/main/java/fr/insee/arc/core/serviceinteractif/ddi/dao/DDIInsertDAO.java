@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fr.insee.arc.core.databaseobjects.DatabaseObjectService;
-import fr.insee.arc.utils.dao.SQL;
-import fr.insee.arc.core.databaseobjects.TableEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.famille.ModelTable;
 import fr.insee.arc.core.model.famille.ModelVariable;
 import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -22,14 +22,14 @@ import fr.insee.arc.utils.structure.GenericBean;
 public class DDIInsertDAO {
 
 	// give the table alias and column
-	private DatabaseObjectService databaseObjectService;
+	private DataObjectService databaseObjectService;
 
-	public DDIInsertDAO(DatabaseObjectService databaseObjectService) {
+	public DDIInsertDAO(DataObjectService databaseObjectService) {
 		super();
 		this.databaseObjectService = databaseObjectService;
 	}
 
-	public void setDatabaseObjectService(DatabaseObjectService databaseObjectService) {
+	public void setDatabaseObjectService(DataObjectService databaseObjectService) {
 		this.databaseObjectService = databaseObjectService;
 	}
 
@@ -64,19 +64,19 @@ public class DDIInsertDAO {
 		List<String> famillesInDDI = modeler.getModelTables().stream().map(ModelTable::getIdFamille)
 				.map(String::toUpperCase).distinct().collect(Collectors.toList());
 
-		PreparedStatementBuilder query;
+		ArcPreparedStatementBuilder query;
 
 		// keep family that doesn't exist
-		query = new PreparedStatementBuilder();
+		query = new ArcPreparedStatementBuilder();
 		query.append("SELECT upper(id_famille) as famille_deja_existante ");
 		query.append("FROM ");
-		query.append(this.databaseObjectService.getTable(TableEnum.IHM_FAMILLE));
+		query.append(this.databaseObjectService.getView(ViewEnum.IHM_FAMILLE));
 		query.append(" WHERE UPPER(id_famille) IN (");
 		query.append(query.sqlListeOfValues(famillesInDDI));
 		query.append(")");
 
 		List<String> famillesDejaExistante = new GenericBean(
-				UtilitaireDao.get(DatabaseObjectService.POOL_NAME_USED).executeRequest(null, query)).mapContent()
+				UtilitaireDao.get(DataObjectService.POOL_NAME_USED).executeRequest(null, query)).mapContent()
 						.get("famille_deja_existante");
 
 		// keep only family found in ddi but not found in already existing arc family
@@ -96,11 +96,11 @@ public class DDIInsertDAO {
 	 * @throws ArcException
 	 */
 	private void insertRulesDAO(List<String> familyToInsert, DDIModeler modeler) throws ArcException {
-		PreparedStatementBuilder query = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(insertFamily(familyToInsert));
 		query.append(insertTables(familyToInsert, modeler));
 		query.append(insertVariables(familyToInsert, modeler));
-		UtilitaireDao.get(DatabaseObjectService.POOL_NAME_USED).executeRequest(null, query);
+		UtilitaireDao.get(DataObjectService.POOL_NAME_USED).executeRequest(null, query);
 	}
 
 	/**
@@ -108,11 +108,11 @@ public class DDIInsertDAO {
 	 * 
 	 * @param familyToInsert
 	 */
-	private PreparedStatementBuilder insertFamily(List<String> familyToInsert) {
-		PreparedStatementBuilder query;
-		query = new PreparedStatementBuilder();
+	private ArcPreparedStatementBuilder insertFamily(List<String> familyToInsert) {
+		ArcPreparedStatementBuilder query;
+		query = new ArcPreparedStatementBuilder();
 		query.append(SQL.INSERT_INTO);
-		query.append(this.databaseObjectService.getTable(TableEnum.IHM_FAMILLE));
+		query.append(this.databaseObjectService.getView(ViewEnum.IHM_FAMILLE));
 		query.append("(id_famille) VALUES ");
 		query.append(query.sqlListeOfValues(familyToInsert, "(", ")"));
 		query.append(SQL.ON_CONFLICT_DO_NOTHING);
@@ -128,14 +128,14 @@ public class DDIInsertDAO {
 	 * @param modeler
 	 * @return
 	 */
-	private PreparedStatementBuilder insertTables(List<String> familyToInsert, DDIModeler modeler) {
-		PreparedStatementBuilder query;
-		query = new PreparedStatementBuilder();
+	private ArcPreparedStatementBuilder insertTables(List<String> familyToInsert, DDIModeler modeler) {
+		ArcPreparedStatementBuilder query;
+		query = new ArcPreparedStatementBuilder();
 
 		for (ModelTable t : modeler.getModelTables()) {
 			if (familyToInsert.contains(t.getIdFamille())) {
 				query.append(SQL.INSERT_INTO);
-				query.append(this.databaseObjectService.getTable(TableEnum.IHM_MOD_TABLE_METIER));
+				query.append(this.databaseObjectService.getView(ViewEnum.IHM_MOD_TABLE_METIER));
 				query.append("(id_famille,nom_table_metier,description_table_metier) ");
 				query.append("VALUES (");
 				query.append(query
@@ -156,14 +156,14 @@ public class DDIInsertDAO {
 	 * @param modeler
 	 * @return
 	 */
-	private PreparedStatementBuilder insertVariables(List<String> familyToInsert, DDIModeler modeler) {
-		PreparedStatementBuilder query;
-		query = new PreparedStatementBuilder();
+	private ArcPreparedStatementBuilder insertVariables(List<String> familyToInsert, DDIModeler modeler) {
+		ArcPreparedStatementBuilder query;
+		query = new ArcPreparedStatementBuilder();
 
 		for (ModelVariable v : modeler.getModelVariables()) {
 			if (familyToInsert.contains(v.getIdFamille())) {
 				query.append(SQL.INSERT_INTO);
-				query.append(this.databaseObjectService.getTable(TableEnum.IHM_MOD_VARIABLE_METIER));
+				query.append(this.databaseObjectService.getView(ViewEnum.IHM_MOD_VARIABLE_METIER));
 				query.append(
 						"(id_famille,nom_table_metier,nom_variable_metier,type_variable_metier,description_variable_metier,type_consolidation) ");
 				query.append("VALUES (");

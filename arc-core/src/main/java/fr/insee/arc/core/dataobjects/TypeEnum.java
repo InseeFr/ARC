@@ -1,4 +1,4 @@
-package fr.insee.arc.core.databaseobjects;
+package fr.insee.arc.core.dataobjects;
 
 public enum TypeEnum {
 
@@ -6,6 +6,7 @@ public enum TypeEnum {
 	, TEXT_ARRAY("text[]", true)
 	, INT("int", false)
 	, BIGINT("bigint", false)
+	, SERIAL("serial",false)
 	;
 	
 	private TypeEnum(String typeName, boolean isCollated) {
@@ -28,7 +29,7 @@ public enum TypeEnum {
 
 	public String getTypeCollated()
 	{
-		return isCollated?(typeName+" "+DatabaseObjectService.DATABASE_COLLATION):typeName;
+		return isCollated?(typeName+" "+DataObjectService.DATABASE_COLLATION):typeName;
 	}
 	
 }

@@ -3,7 +3,7 @@ package fr.insee.arc.web.model.viewobjects;
 import java.util.HashMap;
 import java.util.List;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.web.util.ConstantVObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.VObject;
@@ -38,7 +38,7 @@ public class ViewVariableMetier  extends VObject {
         returned.put("nom_variable_metier", new ColumnRendering(true, "label.mapmodel.field", "30%", "text", null, true));
         returned.put("description_variable_metier", new ColumnRendering(true, "label.comment", "30%", "text", null, true));
         returned.put("type_variable_metier", new ColumnRendering(true, "label.mapmodel.field.type", "23%", "select",
-        		new PreparedStatementBuilder("SELECT nom_type id, nom_type val FROM arc.ext_mod_type_autorise ORDER BY nom_type"), true, true));
+        		new ArcPreparedStatementBuilder("SELECT nom_type id, nom_type val FROM arc.ext_mod_type_autorise ORDER BY nom_type"), true, true));
         returned.put("type_consolidation", new ColumnRendering(true, "label.mapmodel.field.aggregate", "17%", "text", null, true));
         return returned;
     }

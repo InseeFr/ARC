@@ -1,4 +1,4 @@
-package fr.insee.arc.core.databaseobjects;
+package fr.insee.arc.core.dataobjects;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,10 +10,18 @@ public enum ColumnEnum {
 	, EXPR_NOM("expr_nom",TypeEnum.TEXT,"name of the expression")
 	, EXPR_VALEUR("expr_valeur",TypeEnum.TEXT,"value of the expression")
 	
-	, ID_FAMILLE("id_famille",TypeEnum.INT,"identifier for norm family")
-	
-	, ID_NORME("id_norme",TypeEnum.INT,"identifier for norm")
 
+	, ID("id",TypeEnum.BIGINT,"serial identifier")
+
+	, ID_FAMILLE("id_famille",TypeEnum.INT,"identifier for norm family")
+	, ID_NORME("id_norme",TypeEnum.TEXT,"identifier for norm")
+	, PERIODICITE("periodicite",TypeEnum.TEXT,"peridicity for norm")
+	, DEF_NORME("def_norme",TypeEnum.TEXT,"sql expression to check if file match the norm")
+	, DEF_VALIDITE("def_validite",TypeEnum.TEXT,"sql expression to calculate the date validity of the file")
+	, ETAT("etat",TypeEnum.TEXT,"sql expression to calculate the date validity of the file")
+
+	, TEST1("test1",TypeEnum.TEXT,"test column 1")
+	, TEST2("test2",TypeEnum.TEXT,"test column 2")
 	
 	;
 	
@@ -47,6 +55,12 @@ public enum ColumnEnum {
 	public static List<String> listColumnEnumByName (Collection<ColumnEnum> listOfColumnEnum)
 	{
 		return listOfColumnEnum.stream().map(ColumnEnum::getColumnName).collect(Collectors.toList());
+	}
+	
+	@Override
+	public String toString()
+	{
+		return this.getColumnName();
 	}
 	
 }

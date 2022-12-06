@@ -1,6 +1,6 @@
-package fr.insee.arc.core.databaseobjects;
+package fr.insee.arc.core.dataobjects;
 
-public class DatabaseObjectService {
+public class DataObjectService {
 	
 	/**
 	 * the name of the poolname that jdbc connexions must use
@@ -37,7 +37,7 @@ public class DatabaseObjectService {
 	 */
 	private String sandboxSchema;
 
-	public DatabaseObjectService(String sandboxSchema) {
+	public DataObjectService(String sandboxSchema) {
 		super();
 		this.sandboxSchema = sandboxSchema;
 	}
@@ -48,7 +48,7 @@ public class DatabaseObjectService {
 	 * @param e
 	 * @return
 	 */
-	public String getTable(TableEnum e)
+	public String getView(ViewEnum e)
 	{
 		return e.isTableInSanbox()?this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName():ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
 	}

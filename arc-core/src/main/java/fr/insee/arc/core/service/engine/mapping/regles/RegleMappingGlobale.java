@@ -5,10 +5,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.TableMapping;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -61,7 +61,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
         if (!requete.matches(CodeSQL.REGEXP_TO_FIND_IDENTIFIER_RUBRIQUE) || !requete.matches(CodeSQL.REGEXP_TO_FIND_NONIDENTIFIER_RUBRIQUE)) {
             throw new ArcException("La règle " + this.getExpression() + " contient des noms de tables inexistants.");
         }
-        this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new PreparedStatementBuilder(requete));
+        this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new ArcPreparedStatementBuilder(requete));
     }
 
     @Override
@@ -80,7 +80,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
             end = matcher.end();
         }
         returned.append(intermediaire.substring(end));
-        this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new PreparedStatementBuilder(returned));
+        this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new ArcPreparedStatementBuilder(returned));
     }
 
     private final static String tokenTable(String nomCourt) {

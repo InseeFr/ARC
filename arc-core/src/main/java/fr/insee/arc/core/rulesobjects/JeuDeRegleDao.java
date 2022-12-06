@@ -9,9 +9,9 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -40,7 +40,7 @@ public class JeuDeRegleDao {
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
         requete.append("\n FROM " + tableJeuDeRegle + " a ");
 
-		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new PreparedStatementBuilder(requete))).mapContent();
+		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
         return extractRuleSetObjects(g);
     }
     
@@ -68,7 +68,7 @@ public class JeuDeRegleDao {
         requete.append("\n    AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup); ");
 
 
-		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new PreparedStatementBuilder(requete))).mapContent();
+		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
 
 		ArrayList<JeuDeRegle> listJdr = extractRuleSetObjects(g);
 

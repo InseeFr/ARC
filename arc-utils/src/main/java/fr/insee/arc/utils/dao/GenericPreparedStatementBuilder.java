@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import fr.insee.arc.utils.exception.ArcException;
 
-public class PreparedStatementBuilder {
+public class GenericPreparedStatementBuilder {
 
 private StringBuilder query=new StringBuilder();
 	
@@ -16,34 +16,34 @@ private List<String> parameters=new ArrayList<>();
 
 private static final String BIND_VARIABLE_PLACEHOLDER="  ?  ";
 
-public PreparedStatementBuilder() {
+public GenericPreparedStatementBuilder() {
 	super();
 }
 
 
-public PreparedStatementBuilder(String query) {
+public GenericPreparedStatementBuilder(String query) {
 	super();
 	this.query.append(query);
 }
 
-public PreparedStatementBuilder(StringBuilder query) {
+public GenericPreparedStatementBuilder(StringBuilder query) {
 	super();
 	this.query = query;
 }
 
-public PreparedStatementBuilder append(SQL s)
+public GenericPreparedStatementBuilder append(SQL s)
 {
 	query.append(s.toString());
 	return this;
 }
 
-public PreparedStatementBuilder append(String s)
+public GenericPreparedStatementBuilder append(String s)
 {
 	query.append(s);
 	return this;
 }
 
-public PreparedStatementBuilder append(StringBuilder s)
+public GenericPreparedStatementBuilder append(StringBuilder s)
 {
 	query.append(s);
 	return this;
@@ -53,7 +53,7 @@ public PreparedStatementBuilder append(StringBuilder s)
  * Add transaction command to the prepared statement builder
  * @return
  */
-public PreparedStatementBuilder asTransaction()
+public GenericPreparedStatementBuilder asTransaction()
 {
 	query.insert(0, SQL.BEGIN.toString());
 	query.append(SQL.END.toString());
@@ -65,8 +65,7 @@ public String toString() {
 	throw new ArcException("ToString is not allowed for PreparedStatementBuilder");
 }
 
-
-public PreparedStatementBuilder append(PreparedStatementBuilder s)
+public GenericPreparedStatementBuilder append(GenericPreparedStatementBuilder s)
 {
 	query.append(s.query);
 	parameters.addAll(s.parameters);
@@ -104,7 +103,7 @@ public String sqlEqual(String val, String type) {
  * @param p
  * @return
  */
-public PreparedStatementBuilder appendQuoteText(String s)
+public GenericPreparedStatementBuilder appendQuoteText(String s)
 {
 	this.append(quoteText(s));
 	return this;
@@ -206,6 +205,10 @@ public void setParameters(List<String> parameters) {
 	this.parameters = parameters;
 }
 
+/**
+ * Return the query with the real real parameters instead of bin variables
+ * @return
+ */
 public String getQueryWithParameters() {
 	String q=this.query.toString();
 	

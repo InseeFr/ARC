@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -29,7 +29,7 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 	GenericBean gb;
 	
 	// récupération des règles de retour du webservice
-	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	requete.append("select a.service_name, a.call_id, a.service_type, replace(a.environment,'.','_') as environment, a.target_phase, a.norme, a.validite, a.periodicite, b.query_id, b.query_name, b.expression, b.query_view");
 	requete.append("\n from arc.ihm_ws_context a left outer join arc.ihm_ws_query b ");
 	requete.append("\n on a.service_name=b.service_name and a.call_id=b.call_id ");
@@ -81,7 +81,7 @@ public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnVie
 		DataSetView ds=new DataSetView(
 				Integer.parseInt(p.queries.get(i).query_id)
 				,p.queries.get(i).query_name
-				,new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new PreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
+				,new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new ArcPreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
 				);
 			r.getDataSetView().add(ds);
 		}

@@ -23,7 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -91,10 +91,10 @@ public class ServletArc extends HttpServlet {
 		String clientRealName = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(clientDeclared, "."),
 				"_");
 
-		PreparedStatementBuilder query;
+		ArcPreparedStatementBuilder query;
 
 		// check if security is enable
-		query = new PreparedStatementBuilder();
+		query = new ArcPreparedStatementBuilder();
 		query.append("SELECT count(*) ");
 		query.append("FROM arc.ihm_webservice_whitelist ");
 		query.append("WHERE id_famille=" + query.quoteText(familyName) + " ");
@@ -114,7 +114,7 @@ public class ServletArc extends HttpServlet {
 			hostName = request.getRemoteHost();
 		}
 
-		query = new PreparedStatementBuilder();
+		query = new ArcPreparedStatementBuilder();
 		query.append("SELECT is_secured ");
 		query.append("FROM arc.ihm_webservice_whitelist ");
 		query.append("WHERE id_famille=" + query.quoteText(familyName) + " ");
@@ -154,7 +154,7 @@ public class ServletArc extends HttpServlet {
 		}
 
 		// log the access
-		query = new PreparedStatementBuilder();
+		query = new ArcPreparedStatementBuilder();
 		query.append(
 				"DELETE FROM arc.ihm_webservice_log  where event_timestamp < current_timestamp - INTERVAL '1 YEAR';");
 		query.append("INSERT INTO arc.ihm_webservice_log (id_famille, id_application, host_allowed, event_timestamp) ");

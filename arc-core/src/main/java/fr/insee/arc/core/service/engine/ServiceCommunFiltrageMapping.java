@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
@@ -120,7 +120,7 @@ public class ServiceCommunFiltrageMapping {
                                 + nomGeneriqueTableMetierTrouve.substring(LONGUEUR_DEBUT_REQUETE_RESULTAT_UNIQUE,
                                         nomGeneriqueTableMetierTrouve.length() - LONGUEUR_FIN_REQUETE_RESULTAT_UNIQUE));
             }
-            String valeurRequete = UtilitaireDao.get("arc").getString(aConnexion, new PreparedStatementBuilder(requeteValeurGlobaleAvecVraiNomTableMetier));
+            String valeurRequete = UtilitaireDao.get("arc").getString(aConnexion, new ArcPreparedStatementBuilder(requeteValeurGlobaleAvecVraiNomTableMetier));
             returned = returned.replace(expressionRequeteValeurGlobaleAvecAccolades,
                     valeurRequete == null ? "null" : valeurRequete);
         }

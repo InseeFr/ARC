@@ -11,10 +11,10 @@ import fr.insee.arc.batch.unitarylauncher.InitialiserBatch;
 import fr.insee.arc.batch.unitarylauncher.MapperBatch;
 import fr.insee.arc.batch.unitarylauncher.NormerBatch;
 import fr.insee.arc.batch.unitarylauncher.RecevoirBatch;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 
 public class ArcThreadFactory extends Thread {
@@ -107,7 +107,7 @@ public class ArcThreadFactory extends Thread {
 		boolean blocked;
 		
 		// count the number of file left to be processed in the phase
-		PreparedStatementBuilder query = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("SELECT count(*) FROM " + this.getMapParam().get(ParameterKey.KEY_FOR_EXECUTION_ENVIRONMENT)
 				+ ".pilotage_fichier WHERE etape=1 and phase_traitement='" + this.getPhaseName()
 				+ "' and etat_traitement='{" + TraitementEtat.ENCOURS + "}'");

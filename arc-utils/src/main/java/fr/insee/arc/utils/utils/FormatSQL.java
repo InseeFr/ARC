@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.postgresql.core.Utils;
 
 import fr.insee.arc.utils.dao.ModeRequete;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
@@ -79,10 +79,10 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 	return dropObjectCascade(ObjectType.TABLE,tableName,separator);
     }
     
-    public static PreparedStatementBuilder tableExists(String table, String... separator) {
+    public static GenericPreparedStatementBuilder tableExists(String table, String... separator) {
 	String tableSchema = ManipString.substringBeforeFirst(table, DOT);
 	String tableName = ManipString.substringAfterLast(table, DOT);
-	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+	GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
 	requete.append("SELECT schemaname||'.'||tablename AS table_name FROM pg_tables ");
 	requete.append("\n WHERE tablename like " + requete.quoteText(tableName.toLowerCase()) + " ");
 	if (table.contains(DOT)) {
@@ -100,9 +100,9 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @param table
      * @return
      */
-    public static PreparedStatementBuilder listeColonneByHeaders(String table)
+    public static GenericPreparedStatementBuilder listeColonneByHeaders(String table)
     {
-        return new PreparedStatementBuilder("select * from " + table + " where false; ");
+        return new GenericPreparedStatementBuilder("select * from " + table + " where false; ");
     }
 
     /**
@@ -321,7 +321,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @param table
      * @return
      */
-    public static PreparedStatementBuilder isTableExists(String table)
+    public static GenericPreparedStatementBuilder isTableExists(String table)
     {
         String tokenJoin = table.contains(".") ?
         /*
@@ -341,7 +341,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
                  * Sinon, la condition d'égalité porte sur le nom de la table
                  */
                 "pg_class.relname";
-        PreparedStatementBuilder requete = new PreparedStatementBuilder(
+        GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder(
                 "SELECT CASE WHEN count(1)>0 THEN TRUE ELSE FALSE END table_existe\n");
         requete.append("  FROM pg_class" + tokenJoin);
         requete.append("  WHERE " + tokenCond + " = lower(" + requete.quoteText(table) + ")");
@@ -429,8 +429,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * Colonnes de résultat:
      * @child (schema.table)
      */
-    public static PreparedStatementBuilder getAllInheritedTables(String tableSchema, String tableName) {
-    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+    public static GenericPreparedStatementBuilder getAllInheritedTables(String tableSchema, String tableName) {
+    	GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
     	requete.append("\n SELECT cn.nspname||'.'||c.relname AS child ");
     	requete.append("\n FROM pg_inherits  ");
     	requete.append("\n JOIN pg_class AS c ON (inhrelid=c.oid) ");

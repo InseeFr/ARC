@@ -15,10 +15,10 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
@@ -1162,13 +1162,13 @@ public class NormageEngine {
 	}
 
 	private String applyQueryPlanParametersOnJointure(String query, Integer statementTimeOut) {
-		return applyQueryPlanParametersOnJointure(new PreparedStatementBuilder(query), statementTimeOut).getQuery()
+		return applyQueryPlanParametersOnJointure(new ArcPreparedStatementBuilder(query), statementTimeOut).getQuery()
 				.toString();
 	}
 
-	private PreparedStatementBuilder applyQueryPlanParametersOnJointure(PreparedStatementBuilder query,
+	private ArcPreparedStatementBuilder applyQueryPlanParametersOnJointure(ArcPreparedStatementBuilder query,
 			Integer statementTimeOut) {
-		PreparedStatementBuilder r = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder r = new ArcPreparedStatementBuilder();
 		// seqscan on can be detrimental on some rare large file
 		r.append("set enable_nestloop=off;\n");
 		r.append((statementTimeOut == null) ? "" : "set statement_timeout=" + statementTimeOut.toString() + ";\n");
@@ -1269,7 +1269,7 @@ public class NormageEngine {
 		blocInsert = replaceQueryParameters(blocInsert, norme, validite, periodicite, jointure, validiteText,
 				idSource);
 
-		int total = UtilitaireDao.get("arc").getInt(connection, new PreparedStatementBuilder(blocCreate));
+		int total = UtilitaireDao.get("arc").getInt(connection, new ArcPreparedStatementBuilder(blocCreate));
 
 		// partition if and only if enough records
 		if (total >= minSize) {
@@ -1281,7 +1281,7 @@ public class NormageEngine {
 					"alter table " + partitionTableName + " rename to " + partitionTableNameWithAllRecords + ";");
 			UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
 
-			PreparedStatementBuilder bloc4 = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder bloc4 = new ArcPreparedStatementBuilder();
 			bloc4.append("\n drop table if exists " + partitionTableName + ";");
 			bloc4.append("\n create temporary table " + partitionTableName + " as select * from "
 					+ partitionTableNameWithAllRecords + " where " + partitionIdentifier + ">=?::int and "

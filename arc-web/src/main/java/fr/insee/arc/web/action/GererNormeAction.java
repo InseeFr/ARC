@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
-import fr.insee.arc.core.databaseobjects.TableEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -100,36 +100,36 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 		setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
 		
 		putVObject(getViewNorme(),
-				t -> gererNormeService.initializeViewNorme(t, databaseObjectService.getTable(TableEnum.IHM_NORME)));
+				t -> gererNormeService.initializeViewNorme(t, dataObjectService.getView(ViewEnum.IHM_NORME)));
 		//
 		putVObject(getViewCalendrier(), t -> gererNormeService.initializeViewCalendar(t, getViewNorme(),
-				databaseObjectService.getTable(TableEnum.IHM_CALENDRIER) ));
+				dataObjectService.getView(ViewEnum.IHM_CALENDRIER) ));
 		//
 		putVObject(getViewJeuxDeRegles(), t -> gererNormeService.initializeViewRulesSet(t, getViewCalendrier(),
-				databaseObjectService.getTable(TableEnum.IHM_JEUDEREGLE) ));
+				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) ));
 		//
 		putVObject(getViewModules(), t -> gererNormeService.initializeViewModules(t, getViewJeuxDeRegles()));
 		//
 		putVObject(getViewChargement(), t -> gererNormeService.initializeChargement(t, getViewJeuxDeRegles(), getViewModules(),
-				databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE) ));
+				dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE) ));
 		//
 		putVObject(getViewNormage(), t -> gererNormeService.initializeNormage(t, getViewJeuxDeRegles(), getViewModules(),
-				databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE) ));
+				dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE) ));
 		//
 		putVObject(getViewControle(), t -> gererNormeService.initializeControle(t, getViewJeuxDeRegles(), getViewModules(),
-				databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE) ));
+				dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE) ));
 		//
 		putVObject(getViewFiltrage(), t -> gererNormeService.initializeFiltrage(t, getViewJeuxDeRegles(), getViewModules(),
-				databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE) ));
+				dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE) ));
 		//
 		putVObject(getViewMapping(), t -> gererNormeService.initializeMapping(t, getViewJeuxDeRegles(), getViewModules(),
-				databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE)  ));
+				dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)  ));
 		//
 		putVObject(getViewExpression(), t -> gererNormeService.initializeExpression(t, getViewJeuxDeRegles(), getViewModules(),
-				databaseObjectService.getTable(TableEnum.IHM_EXPRESSION) ));
+				dataObjectService.getView(ViewEnum.IHM_EXPRESSION) ));
 		//
 		putVObject(getViewJeuxDeReglesCopie(), t -> gererNormeService.initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(), getViewModules(),
-				databaseObjectService.getTable(TableEnum.IHM_JEUDEREGLE) , getScope()));
+				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) , getScope()));
 	}
 
 	@Override
@@ -343,7 +343,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 				String etat = selection.get("etat").get(i);
 				if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
 					gererNormeService.sendRuleSetToProduction(this.viewJeuxDeRegles,
-							databaseObjectService.getTable(TableEnum.PILOTAGE_BATCH)
+							dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)
 							
 							);
 				}
@@ -375,25 +375,25 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 	public String downloadJeuxDeRegles(Model model, HttpServletResponse response) {
 		Map<String, ArrayList<String>> selection = viewJeuxDeRegles.mapContentSelected();
 		if (!selection.isEmpty()) {
-			PreparedStatementBuilder requeteRegleChargement = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requeteRegleChargement = new ArcPreparedStatementBuilder();
 			requeteRegleChargement.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
-					databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE)
+					dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE)
 					));
-			PreparedStatementBuilder requeteRegleNormage = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requeteRegleNormage = new ArcPreparedStatementBuilder();
 			requeteRegleNormage.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
-					databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE)));
-			PreparedStatementBuilder requeteRegleControle = new PreparedStatementBuilder();
+					dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE)));
+			ArcPreparedStatementBuilder requeteRegleControle = new ArcPreparedStatementBuilder();
 			requeteRegleControle.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
-					databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE)));
-			PreparedStatementBuilder requeteRegleMapping = new PreparedStatementBuilder();
+					dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE)));
+			ArcPreparedStatementBuilder requeteRegleMapping = new ArcPreparedStatementBuilder();
 			requeteRegleMapping.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
-					databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE)));
-			PreparedStatementBuilder requeteRegleFiltrage = new PreparedStatementBuilder();
+					dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)));
+			ArcPreparedStatementBuilder requeteRegleFiltrage = new ArcPreparedStatementBuilder();
 			requeteRegleFiltrage.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
-					databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE)));
-			PreparedStatementBuilder requeteRegleExpression = new PreparedStatementBuilder();
+					dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE)));
+			ArcPreparedStatementBuilder requeteRegleExpression = new ArcPreparedStatementBuilder();
 			requeteRegleExpression.append(gererNormeService.recupRegle(this.viewJeuxDeRegles,
-					databaseObjectService.getTable(TableEnum.IHM_EXPRESSION)));
+					dataObjectService.getView(ViewEnum.IHM_EXPRESSION)));
 
 			ArrayList<String> fileNames = new ArrayList<>();
 			fileNames.add("Rules_load");
@@ -650,7 +650,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 	public String viderChargement(Model model) {
 		
 		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-				databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE));
+				dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -663,7 +663,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 	public String viderNormage(Model model) {
 		
 		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-				databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE));
+				dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -676,7 +676,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 	public String viderControle(Model model) {
 		
 		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-				databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE));
+				dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -689,7 +689,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 	public String viderFiltrage(Model model) {
 		
 		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-				databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE));
+				dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
@@ -703,7 +703,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 	public String viderMapping(Model model) {
 		
 		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-				databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE));
+				dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
@@ -717,7 +717,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 	public String viderExpression(Model model) {
 		
 		gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-				databaseObjectService.getTable(TableEnum.IHM_EXPRESSION));
+				dataObjectService.getView(ViewEnum.IHM_EXPRESSION));
 		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
@@ -855,7 +855,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 		try {
 			Map<String, ArrayList<String>> selection = viewJeuxDeRegles.mapContentSelected();
 
-			 PreparedStatementBuilder requete= new PreparedStatementBuilder();
+			 ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
 			 requete.append("INSERT INTO " + this.viewFiltrage.getTable())
              .append("  " + Format.stringListe(this.viewFiltrage.getHeadersDLabel()))
              .append("  SELECT (SELECT coalesce(max(id_regle),1) FROM " + this.viewFiltrage.getTable() + ")+row_number() over () ,")
@@ -898,7 +898,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 		try {
 
 			// List hard coded to be sure of the order in the select
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 				requete.append("INSERT INTO " + this.viewMapping.getTable())
 					.append("  (id_regle, id_norme, validite_inf, validite_sup,  version , periodicite, variable_sortie, expr_regle_col, commentaire) ")
 					.append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.viewMapping.getTable() + "),0)+row_number() over () ,")
@@ -1044,7 +1044,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 					.toString();
 
 			// specific columns = column of the table minus common tables minus id_regle (rules generated id)
-			PreparedStatementBuilder getTableSpecificColumns=new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder getTableSpecificColumns=new ArcPreparedStatementBuilder();
 			getTableSpecificColumns.append("\n SELECT string_agg(column_name,',') ");
 			getTableSpecificColumns.append("\n FROM information_schema.columns c ");
 			getTableSpecificColumns.append("\n WHERE table_schema||'.'||table_name ="+getTableSpecificColumns.quoteText(this.getSelectedJeuDeRegle()));
@@ -1054,7 +1054,7 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 			String specificColumns=UtilitaireDao.get(poolName).getString(null, getTableSpecificColumns);
 			
 			// Build the copy query
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 			
 			requete.append("INSERT INTO " + this.getSelectedJeuDeRegle() + " ");
 			requete.append("(");
@@ -1104,19 +1104,19 @@ public class GererNormeAction extends ArcWebGenericService<NormManagementModel> 
 			// delete the current rules before the copy
 			if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
 				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-						databaseObjectService.getTable(TableEnum.IHM_CHARGEMENT_REGLE));
+						dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_normage_regle")) {
 				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-						databaseObjectService.getTable(TableEnum.IHM_NORMAGE_REGLE));
+						dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
 				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-						databaseObjectService.getTable(TableEnum.IHM_CONTROLE_REGLE));
+						dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
 				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-						databaseObjectService.getTable(TableEnum.IHM_FILTRAGE_REGLE));
+						dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
 				gererNormeService.emptyRuleTable(this.viewJeuxDeRegles,
-						databaseObjectService.getTable(TableEnum.IHM_MAPPING_REGLE));
+						dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 			}
 			
 			// excute the copy

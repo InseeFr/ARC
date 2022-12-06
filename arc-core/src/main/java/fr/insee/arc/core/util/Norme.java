@@ -7,8 +7,8 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -87,7 +87,7 @@ public class Norme implements IDbConstant{
         ArrayList<ArrayList<String>> normes = new ArrayList<ArrayList<String>>();
         try {
             normes = new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-            		new PreparedStatementBuilder( "select id_norme, periodicite, def_norme, def_validite from " + tableNorme + ";"))).content;
+            		new ArcPreparedStatementBuilder( "select id_norme, periodicite, def_norme, def_validite from " + tableNorme + ";"))).content;
         } catch (ArcException e) {
             LoggerHelper.errorAsComment(LOGGER, "Norme.getNormesBase - norms retrieval in database failed ");
         }

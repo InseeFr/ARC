@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.insee.arc.batch.threadrunners.ArcThreadFactory;
 import fr.insee.arc.batch.threadrunners.parameter.ParameterKey;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiReceptionService;
@@ -25,7 +26,6 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.batch.IReturnCode;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -212,7 +212,7 @@ class BatchARC implements IReturnCode {
 
 				// des archives n'ont elles pas été traitées jusqu'au bout ?
 				ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-						new PreparedStatementBuilder(
+						new ArcPreparedStatementBuilder(
 								"select distinct container from " + envExecution + ".pilotage_fichier where etape=1")))
 										.mapContent().get("container");
 
@@ -432,7 +432,7 @@ class BatchARC implements IReturnCode {
 	private void maintenanceTablePilotageBatch() throws ArcException {
 
 		// création de la table si elle n'existe pas
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
 		requete.append(
 				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
@@ -456,7 +456,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private boolean isNothingLeftToDo(String envExecution) {
 		boolean isNothingLeftToDo = false;
-		if (UtilitaireDao.get("arc").getInt(null, new PreparedStatementBuilder("select count(*) from (select 1 from "
+		if (UtilitaireDao.get("arc").getInt(null, new ArcPreparedStatementBuilder("select count(*) from (select 1 from "
 				+ envExecution + ".pilotage_fichier where etape=1 limit 1) ww")) == 0) {
 			isNothingLeftToDo = true;
 		}
@@ -471,7 +471,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private static boolean productionOn() throws ArcException {
 		return UtilitaireDao.get("arc").hasResults(null,
-				new PreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
+				new ArcPreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 	}
 
 	/**
@@ -588,7 +588,7 @@ class BatchARC implements IReturnCode {
 
 		String lastInitialize = null;
 		lastInitialize = UtilitaireDao.get("arc").getString(null,
-				new PreparedStatementBuilder("select last_init from arc.pilotage_batch "));
+				new ArcPreparedStatementBuilder("select last_init from arc.pilotage_batch "));
 
 		Date dNow = new Date();
 		Date dLastInitialize;
@@ -612,7 +612,7 @@ class BatchARC implements IReturnCode {
 			message("Initialisation terminée : " + initialiser.getReport().getDuree() + " ms");
 
 			UtilitaireDao.get("arc").executeRequest(null,
-					new PreparedStatementBuilder(
+					new ArcPreparedStatementBuilder(
 							"update arc.pilotage_batch set last_init=to_char(current_date+interval '"
 									+ intervalForInitializationInDay + " days','yyyy-mm-dd')||':"
 									+ hourToTriggerInitializationInProduction
@@ -654,7 +654,7 @@ class BatchARC implements IReturnCode {
 	 * @throws ArcException 
 	 */
 	private HashMap<TraitementPhase, Integer> elligible() throws ArcException {
-		PreparedStatementBuilder query = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
 		query.append("SELECT phase_traitement, count(*) as n ");
 		query.append("FROM " + this.envExecution + ".pilotage_fichier ");

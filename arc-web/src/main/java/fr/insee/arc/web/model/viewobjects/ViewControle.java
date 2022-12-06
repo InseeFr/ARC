@@ -3,7 +3,7 @@ package fr.insee.arc.web.model.viewobjects;
 import java.util.HashMap;
 import java.util.Map;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 
 public class ViewControle extends AbstractViewRule {
@@ -15,7 +15,7 @@ public class ViewControle extends AbstractViewRule {
 	protected Map<String, ColumnRendering> extraFields() {
 		HashMap<String, ColumnRendering> columnRenderings = new HashMap<>();
         columnRenderings.put("id_classe", new ColumnRendering(true, "label.control.type", "13%", "select",
-        		new PreparedStatementBuilder("select id, id from arc.ext_type_controle order by ordre"), true));
+        		new ArcPreparedStatementBuilder("select id, id from arc.ext_type_controle order by ordre"), true));
         columnRenderings.put("rubrique_pere", new ColumnRendering(true, "label.element.main", "11%", "text", null, true));
         columnRenderings.put("rubrique_fils", new ColumnRendering(true, "label.element.child", "11%", "text", null, true));
         columnRenderings.put("borne_inf", new ColumnRendering(true, "label.min", "4%", "text", null, true));
@@ -29,7 +29,7 @@ public class ViewControle extends AbstractViewRule {
         columnRenderings.put("xsd_role", new ColumnRendering(true, "label.xsd.role", "6%", "text", null, true));
         columnRenderings.put("blocking_threshold", new ColumnRendering(true, "label.threshold.blocking", "6%", "text", null, true));
         columnRenderings.put("error_row_processing", new ColumnRendering(true, "label.errorRowProcessing", "11%", "select",
-        		new PreparedStatementBuilder("select 'k' as id, 'conserver' union all select 'e' as id, 'exclure' "), true));
+        		new ArcPreparedStatementBuilder("select 'k' as id, 'conserver' union all select 'e' as id, 'exclure' "), true));
 
 		return columnRenderings;
 	}

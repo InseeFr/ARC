@@ -18,11 +18,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import fr.insee.arc.core.databaseobjects.DatabaseObjectService;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -76,7 +76,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 
 	private Map<String, String> envMap;
 	
-	protected DatabaseObjectService databaseObjectService;
+	protected DataObjectService dataObjectService;
 	
 
 	/**
@@ -168,7 +168,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 			this.bacASable = bacASable;
 		}
 		this.isEnvProd = checkEnv(this.bacASable);
-		this.databaseObjectService = new DatabaseObjectService(this.bacASable);
+		this.dataObjectService = new DataObjectService(this.bacASable);
 		this.scope = scope;
 		
     	initialize(arcModel);
@@ -220,7 +220,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 		LoggerHelper.debug(LOGGER, "getDataBaseStatus()");
 		// test the database connection
 		try {
-			UtilitaireDao.get(POOLNAME, 1).executeRequest(null, new PreparedStatementBuilder("select true"));
+			UtilitaireDao.get(POOLNAME, 1).executeRequest(null, new ArcPreparedStatementBuilder("select true"));
 			setDataBaseOk(true);
 	
 		} catch (Exception e) {

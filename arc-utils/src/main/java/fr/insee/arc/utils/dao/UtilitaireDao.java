@@ -194,7 +194,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	/** Returns true if the connection is valid. */
 	public static boolean isConnectionOk(String pool) {
 		try {
-			get(pool, 1).executeRequest(null, new PreparedStatementBuilder("select true"));
+			get(pool, 1).executeRequest(null, new GenericPreparedStatementBuilder("select true"));
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -255,7 +255,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException 
 	 */
-	public Boolean getBoolean(Connection connexion, PreparedStatementBuilder sql, String... args) throws ArcException {
+	public Boolean getBoolean(Connection connexion, GenericPreparedStatementBuilder sql, String... args) throws ArcException {
 		
 		String returned;
 		returned = getString(connexion,sql,args);
@@ -303,7 +303,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public String getString(Connection connexion, PreparedStatementBuilder requete, String... args) throws ArcException {
+	public String getString(Connection connexion, GenericPreparedStatementBuilder requete, String... args) throws ArcException {
 			requete.setQuery(new StringBuilder(Format.parseStringAvecArguments(requete.getQuery().toString(), args)));
 			ArrayList<ArrayList<String>> returned=executeRequest(connexion, requete , ModeRequete.EXTRA_FLOAT_DIGIT);
 			return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? null : returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
@@ -312,7 +312,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	
 
-	public Date getDate(Connection aConnexion, PreparedStatementBuilder aRequete, SimpleDateFormat aSimpleDateFomrat)
+	public Date getDate(Connection aConnexion, GenericPreparedStatementBuilder aRequete, SimpleDateFormat aSimpleDateFomrat)
 			throws ArcException {
 		String resultat = getString(aConnexion, aRequete);
 		try {
@@ -332,7 +332,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param args      les arguments de la requête (optionnels)
 	 * @return
 	 */
-	public Long getLong(Connection connexion, PreparedStatementBuilder sql, String... args) {
+	public Long getLong(Connection connexion, GenericPreparedStatementBuilder sql, String... args) {
 		String returned;
 		try {
 			returned = getString(connexion,sql,args);
@@ -352,7 +352,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param args      les arguments de la requête (optionnels)
 	 * @return
 	 */
-	public int getInt(Connection connexion, PreparedStatementBuilder sql, ModeRequete... modes) {
+	public int getInt(Connection connexion, GenericPreparedStatementBuilder sql, ModeRequete... modes) {
 		try {
 			ArrayList<ArrayList<String>> returned = executeRequest(connexion, sql, modes);
 			return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? ZERO : Integer.parseInt(returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0)));
@@ -371,7 +371,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *         {@code table}
 	 */
 	public int getMax(Connection connexion, String table, String column) {
-		return getInt(connexion, new PreparedStatementBuilder("select max(" + column + ") max_value from " + table));
+		return getInt(connexion, new GenericPreparedStatementBuilder("select max(" + column + ") max_value from " + table));
 	}
 
 	public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) throws ArcException {
@@ -396,9 +396,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return La valeur prise par
 	 *         {@code SELECT COUNT(*) FROM <aTable> WHERE <clauseWhere>}
 	 */
-	public long getCount(Connection connexion, String aTable, PreparedStatementBuilder clauseWhere) {
+	public long getCount(Connection connexion, String aTable, GenericPreparedStatementBuilder clauseWhere) {
 		
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+		GenericPreparedStatementBuilder requete=new GenericPreparedStatementBuilder();
 		
 		requete.append("SELECT count(1) FROM " + aTable);
 		
@@ -420,7 +420,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public ArrayList<ArrayList<String>> executeRequestWithoutMetadata(Connection connexion, PreparedStatementBuilder requete,
+	public ArrayList<ArrayList<String>> executeRequestWithoutMetadata(Connection connexion, GenericPreparedStatementBuilder requete,
 			ModeRequete... modes) throws ArcException {
 		ArrayList<ArrayList<String>> returned = executeRequest(connexion, requete, modes);
 		returned.remove(0);
@@ -474,8 +474,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public Boolean testResultRequest(Connection connexion, PreparedStatementBuilder requete) {
-		PreparedStatementBuilder requeteLimit = new PreparedStatementBuilder();
+	public Boolean testResultRequest(Connection connexion, GenericPreparedStatementBuilder requete) {
+		GenericPreparedStatementBuilder requeteLimit = new GenericPreparedStatementBuilder();
 		requeteLimit.append("SELECT * from (").append(requete).append(") dummyTable0000000 LIMIT 1");		
 		try {
 			return hasResults(null, requeteLimit);
@@ -501,7 +501,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 *
 	 */
-	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, PreparedStatementBuilder requete,  ModeRequete... modes)
+	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,  ModeRequete... modes)
 			throws ArcException {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
 
@@ -514,7 +514,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public ArrayList<ArrayList<String>> executeStatement(Connection connexion, PreparedStatementBuilder requete)
+	public ArrayList<ArrayList<String>> executeStatement(Connection connexion, GenericPreparedStatementBuilder requete)
 			throws ArcException {
 		return executeStatement(connexion, requete, EntityProvider.getArrayOfArrayProvider());
 
@@ -529,7 +529,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public <T> T executeStatement(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider) throws ArcException {
+	public <T> T executeStatement(Connection connexion, GenericPreparedStatementBuilder requete, EntityProvider<T> entityProvider) throws ArcException {
 
 		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
 		LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
@@ -589,7 +589,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 *
 	 */
-	public <T> T executeRequest(Connection connexion, PreparedStatementBuilder requete, EntityProvider<T> entityProvider,
+	public <T> T executeRequest(Connection connexion, GenericPreparedStatementBuilder requete, EntityProvider<T> entityProvider,
 			ModeRequete... modes) throws ArcException {
 
 		long start = new Date().getTime();
@@ -823,7 +823,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return (l.size() > 2);
 	}
 
-	public Boolean hasResults(Connection connexion, PreparedStatementBuilder requete) throws ArcException {
+	public Boolean hasResults(Connection connexion, GenericPreparedStatementBuilder requete) throws ArcException {
 		return hasResults(executeRequest(connexion, requete));
 	}
 
@@ -836,7 +836,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param out
 	 * @throws ArcException
 	 */
-	public void outStreamRequeteSelect(Connection connexion, PreparedStatementBuilder requete, OutputStream out) throws ArcException {
+	public void outStreamRequeteSelect(Connection connexion, GenericPreparedStatementBuilder requete, OutputStream out) throws ArcException {
 		StringBuilder str = new StringBuilder();
 		String lineSeparator = "\n";
 		int k = 0;
@@ -846,7 +846,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			{
 				while (!endLoop) {
 					try {
-						PreparedStatementBuilder requeteLimit=new PreparedStatementBuilder();
+						GenericPreparedStatementBuilder requeteLimit=new GenericPreparedStatementBuilder();
 						requeteLimit.append(requete);
 						requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
 						
@@ -1132,7 +1132,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param listRepertoireIn , noms du dernier dossier qui diffère d'un cas à
 	 *                         l'autre
 	 */
-	public void getFilesDataStreamFromListOfInputDirectories(Connection connexion, PreparedStatementBuilder requete, TarArchiveOutputStream taos, String path,
+	public void getFilesDataStreamFromListOfInputDirectories(Connection connexion, GenericPreparedStatementBuilder requete, TarArchiveOutputStream taos, String path,
 			List<String> listRepertoireIn) {
 		LoggerHelper.debugDebutMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
 		GenericBean g;
@@ -1292,7 +1292,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			executeImmediate(connexion, FormatSQL.setTimeOutMaintenance());
 
 			GenericBean gb = new GenericBean(
-					executeRequest(connexion, new PreparedStatementBuilder("select tablename from pg_tables where schemaname='pg_catalog'")));
+					executeRequest(connexion, new GenericPreparedStatementBuilder("select tablename from pg_tables where schemaname='pg_catalog'")));
 			StringBuilder requete = new StringBuilder();
 			for (String t : gb.mapContent().get("tablename")) {
 				requete.append(FormatSQL.analyzeSecured(t));

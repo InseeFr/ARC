@@ -13,13 +13,13 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -155,7 +155,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
      * @throws ArcException
      */
     private void attribuerExpressionRegleMapping(Map<String, VariableMapping> mapVariable) throws ArcException {
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete
         	.append("SELECT DISTINCT variable_sortie as variable_sortie, expr_regle_col as expr_regle_col FROM ")
         	.append(this.nomTableRegleMapping)
@@ -285,7 +285,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         Map<String, VariableMapping> mapVariable = new HashMap<>();
         Map<String, TableMapping> mapTable = new HashMap<>();
         
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         requete.append("SELECT DISTINCT nom_variable_metier, nom_table_metier, type_variable_metier FROM ");
         requete.append(this.nomTableModVariableMetier);
         requete.append("\n WHERE id_famille = " + requete.quoteText(this.idFamille) + ";");

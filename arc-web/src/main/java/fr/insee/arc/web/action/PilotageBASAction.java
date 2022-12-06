@@ -23,13 +23,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.databaseobjects.TableEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -135,7 +135,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
     	getViewPilotageBAS().setNoCount(true);
     	getViewPilotageBAS().setNoLimit(true);
 
-    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+    	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		
     	requete.append("SELECT date_entree ");
 		for (TraitementPhase phase:TraitementPhase.listPhasesAfterPhase(TraitementPhase.RECEPTION))
@@ -149,9 +149,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		}
 		requete.append("\n FROM (");
         requete.append("\n SELECT date_entree, phase_traitement, etat_traitement, count(*) as n ");
-		requete.append("\n FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" b ");
+		requete.append("\n FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" b ");
 		requete.append("\n WHERE date_entree IN ( ");
-		requete.append("\n SELECT DISTINCT date_entree FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" a ");
+		requete.append("\n SELECT DISTINCT date_entree FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" a ");
         requete.append(this.vObjectService.buildFilter(getViewPilotageBAS().getFilterFields(), getViewPilotageBAS().getHeadersDLabel()));
         requete.append("\n AND phase_traitement='"+TraitementPhase.RECEPTION+"' ");
         requete.append(this.vObjectService.buildOrderBy(getViewPilotageBAS().getHeaderSortDLabels(), getViewPilotageBAS().getHeaderSortDOrders()));
@@ -195,7 +195,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 
 
 		// display comment for the sandbox
-		PreparedStatementBuilder envQuery = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder envQuery = new ArcPreparedStatementBuilder();
 		envQuery.append("select env_description from arc.ext_etat_jeuderegle where replace(id,'.','_') = ");
 		envQuery.append(envQuery.quoteText(getBacASable()));
 		
@@ -227,7 +227,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 	
 	@PostMapping("/updateEnvDescription")
 	public String updateEnvDescription(Model model) {
-		PreparedStatementBuilder envQuery = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder envQuery = new ArcPreparedStatementBuilder();
 		envQuery.append("update arc.ext_etat_jeuderegle set env_description = ");
 		envQuery.append(envQuery.quoteText(getViewPilotageBAS().getCustomValue(ENV_DESCRIPTION)));
 		envQuery.append("where replace(id,'.','_') = ");
@@ -257,10 +257,10 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
         	getViewRapportBAS().setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
         }
 		
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(
 				"select date_entree, phase_traitement, array_to_string(etat_traitement,'$') as etat_traitement, rapport, count(1) as nb ");
-		requete.append("from " + databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER));
+		requete.append("from " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
 		requete.append(" where rapport is not null ");
 		requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
 		requete.append("order by date_entree asc ");
@@ -284,8 +284,8 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 	@RequestMapping("/informationInitialisationPROD")
     public String informationInitialisationPROD(Model model, HttpServletRequest request) {
     	try {
-			String time = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
-			String state = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT case when operation='O' then 'active' else 'inactive' end from arc.pilotage_batch;"));
+			String time = UtilitaireDao.get("arc").getString(null, new ArcPreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
+			String state = UtilitaireDao.get("arc").getString(null, new ArcPreparedStatementBuilder("SELECT case when operation='O' then 'active' else 'inactive' end from arc.pilotage_batch;"));
 			state = messageSource.getMessage("managementSandbox.batch.status." + state, null, request.getLocale());
     		this.getViewPilotageBAS().setMessage("managementSandbox.batch.status");
     		this.getViewPilotageBAS().setMessageArgs(state, time);
@@ -300,9 +300,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
     public String retarderBatchInitialisationPROD(Model model) {
     	try {
 			UtilitaireDao.get("arc").executeRequest(null, 
-					new PreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date + interval '7 days','yyyy-mm-dd')||':22';"));
+					new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date + interval '7 days','yyyy-mm-dd')||':22';"));
 
-			String time = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
+			String time = UtilitaireDao.get("arc").getString(null, new ArcPreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
 			this.getViewPilotageBAS().setMessage("managementSandbox.batch.init.time");
 			this.getViewPilotageBAS().setMessageArgs(time);
 
@@ -319,9 +319,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
     	
     	// demande l'initialisation : met au jour -1 à 22h
     	try {
-			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date-interval '1 days','yyyy-mm-dd')||':22';"));
+			UtilitaireDao.get("arc").executeRequest(null, new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date-interval '1 days','yyyy-mm-dd')||':22';"));
 			
-			String time = UtilitaireDao.get("arc").getString(null, new PreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
+			String time = UtilitaireDao.get("arc").getString(null, new ArcPreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
 			this.getViewPilotageBAS().setMessage("managementSandbox.batch.init.time");
 			this.getViewPilotageBAS().setMessageArgs(time);
 
@@ -336,7 +336,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
     @RequestMapping("/toggleOnPROD")
     public String toggleOnPROD(Model model) {
     	try {
-			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='O'; "));
+			UtilitaireDao.get("arc").executeRequest(null, new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='O'; "));
 			this.getViewPilotageBAS().setMessage("managementSandbox.batch.status.switch.on");
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in toggleOnPROD", e, LOGGER);
@@ -347,7 +347,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
     @RequestMapping("/toggleOffPROD")
     public String toggleOffPROD(Model model) {
     	try {
-			UtilitaireDao.get("arc").executeRequest(null, new PreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='N'; "));
+			UtilitaireDao.get("arc").executeRequest(null, new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='N'; "));
 			this.getViewPilotageBAS().setMessage("managementSandbox.batch.status.switch.off");
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in toggleOffPROD", e, LOGGER);
@@ -425,8 +425,8 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 				&& !entrepotLecture.equals("")) {
 			HashMap<String, String> defaultInputFields = new HashMap<>();
 			
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
-			requete.append("select * from "+databaseObjectService.getTable(TableEnum.PILOTAGE_ARCHIVE)+" where entrepot="
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+			requete.append("select * from "+dataObjectService.getView(ViewEnum.PILOTAGE_ARCHIVE)+" where entrepot="
 	                    + requete.quoteText(entrepotLecture) + " ");
 
 			this.vObjectService.initialize(getViewArchiveBAS(), requete, null, defaultInputFields);
@@ -440,7 +440,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		LoggerHelper.debug(LOGGER, "* initializeEntrepotBAS *");
 	
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	
 		try {
 			if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
@@ -482,7 +482,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		initializeArchiveBAS();
 		
 		
-		PreparedStatementBuilder querySelection = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
 		
 		querySelection.append("select distinct alias_de_table.nom_archive as nom_fichier from (");
 		querySelection.append(this.getViewArchiveBAS().getMainQuery());
@@ -499,7 +499,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		String entrepot = "";
 		try {
 			
-			PreparedStatementBuilder requete=new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 			requete.append("SELECT DISTINCT entrepot FROM (");
 			requete.append(this.getViewArchiveBAS().getMainQuery());
 			requete.append(") alias_de_table ");
@@ -537,8 +537,8 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 	/*
 	 * Allow the user to select files for the undoBatch fucntionnality
 	 */
-	public PreparedStatementBuilder undoFilesSelection() {
-		PreparedStatementBuilder selectedSrc = new PreparedStatementBuilder();
+	public ArcPreparedStatementBuilder undoFilesSelection() {
+		ArcPreparedStatementBuilder selectedSrc = new ArcPreparedStatementBuilder();
 
 		HashMap<String, ArrayList<String>> m = new HashMap<>(
 				getViewFichierBAS().mapContentSelected());
@@ -592,9 +592,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 			String etat = ManipString.substringAfterLast(selectionColonne.get(0), "_").toUpperCase();
 
 			// get the file with the selected date_entree, state, and phase_tratement
-				PreparedStatementBuilder requete = new PreparedStatementBuilder();
+				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	            requete.append("SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
-	            requete.append(" FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" ");
+	            requete.append(" FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" ");
 	            requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigne.get(ENTRY_DATE).get(0), "text"));
 	            requete.append(" AND array_to_string(etat_traitement,'$')" + requete.sqlEqual(etat, "text"));
 	            requete.append(" AND phase_traitement" + requete.sqlEqual(phase, "text"));
@@ -605,9 +605,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 			HashMap<String, String> type = getViewRapportBAS().mapHeadersType();
 			HashMap<String, String> defaultInputFields = new HashMap<>();
 		
-			PreparedStatementBuilder requete = new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
-            requete.append(" FROM "+databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER)+" ");
+            requete.append(" FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" ");
             requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigneRapport.get(ENTRY_DATE).get(0), "text"));
             requete.append(" AND array_to_string(etat_traitement,'$')"
                     + requete.sqlEqual(selectionLigneRapport.get("etat_traitement").get(0), type.get("etat_traitement")));
@@ -644,7 +644,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		// récupération de la liste des id_source
 
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
-		PreparedStatementBuilder querySelection = this.vObjectService.queryView(getViewFichierBAS());
+		ArcPreparedStatementBuilder querySelection = this.vObjectService.queryView(getViewFichierBAS());
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// sélectionner
 		//
@@ -686,9 +686,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		loggerDispatcher.trace("*** Marquage de fichier à rejouer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 	
-		PreparedStatementBuilder querySelection = requestSelectToMark(selection);
+		ArcPreparedStatementBuilder querySelection = requestSelectToMark(selection);
 	
-		PreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, code);
+		ArcPreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, code);
 		String message;
 		try {
 	
@@ -756,16 +756,16 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		}
 		
 		// List of queries that will be executed to download
-		List<PreparedStatementBuilder> tableauRequete=new ArrayList<>();
+		List<ArcPreparedStatementBuilder> tableauRequete=new ArrayList<>();
 		// Name of the file containing the data download
 		List<String> fileNames = new ArrayList<>();
 
-		PreparedStatementBuilder requete;
+		ArcPreparedStatementBuilder requete;
 		
 		for (String t : tableDownload) {
 			
 			// Check if the table to download got children
-			requete=new PreparedStatementBuilder();
+			requete=new ArcPreparedStatementBuilder();
 			requete.append(FormatSQL.getAllInheritedTables(ManipString.substringBeforeFirst(t, "."),
 					ManipString.substringAfterFirst(t, ".")));
 			requete.append(" LIMIT 1");
@@ -774,9 +774,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 			if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null,requete))) {
 
 				// Get the files to download
-				requete = new PreparedStatementBuilder();
+				requete = new ArcPreparedStatementBuilder();
 				requete.append(
-						"SELECT id_source FROM " + databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER));
+						"SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
 				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
 				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + "::text[] ");
 				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
@@ -800,7 +800,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 
 				// for each files, generate the download query
 				for (String idSource : idSources) {
-					tableauRequete.add(new PreparedStatementBuilder("SELECT * FROM " + ApiService.tableOfIdSource(t, idSource)));
+					tableauRequete.add(new ArcPreparedStatementBuilder("SELECT * FROM " + ApiService.tableOfIdSource(t, idSource)));
 					fileNames.add(t + "_" + idSource);
 				}
 
@@ -808,10 +808,10 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 			// if no children
 			else {
 				
-				requete = new PreparedStatementBuilder();
+				requete = new ArcPreparedStatementBuilder();
 				requete.append("WITH prep as ( ");
 				requete.append("SELECT id_source FROM "
-						+ databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER));
+						+ dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
 				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
 				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + "::text[] ");
 				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
@@ -843,7 +843,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		
 		initializeFichierBAS();
 		
-		PreparedStatementBuilder querySelection = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
 	
 		querySelection.append("select distinct alias_de_table.container as nom_fichier from (");
 		querySelection.append(this.getViewFichierBAS().getMainQuery());
@@ -879,9 +879,9 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		loggerDispatcher.trace("*** Marquage de fichier à supprimer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
 
-		PreparedStatementBuilder querySelection = requestSelectToMark(selection);
+		ArcPreparedStatementBuilder querySelection = requestSelectToMark(selection);
 
-		PreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "'1'");
+		ArcPreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "'1'");
 		String message;
 		try {
 			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
@@ -916,8 +916,8 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 		
 		loggerDispatcher.trace("*** Suppression du marquage de fichier à supprimer ***", LOGGER);
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
-		PreparedStatementBuilder querySelection = requestSelectToMark(selection);
-		PreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "null");
+		ArcPreparedStatementBuilder querySelection = requestSelectToMark(selection);
+		ArcPreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "null");
 		try {
 
 			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
@@ -931,8 +931,8 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 	}
 
 	/** Prepare a request selecting the line to change when marking files for deletion/replay.*/
-	private PreparedStatementBuilder requestSelectToMark(Map<String, ArrayList<String>> selection) {
-		PreparedStatementBuilder querySelection = new PreparedStatementBuilder();
+	private ArcPreparedStatementBuilder requestSelectToMark(Map<String, ArrayList<String>> selection) {
+		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
 		querySelection.append("select distinct container, id_source from (");
 		querySelection.append(this.getViewFichierBAS().getMainQuery());
 		querySelection.append(") alias_de_table ");
@@ -955,13 +955,13 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 	}
 
 	/** Mark the line selected by querySelection for deletion/replay (depending on value).*/
-	private PreparedStatementBuilder requeteUpdateToMark(PreparedStatementBuilder querySelection, String value) {
-		PreparedStatementBuilder updateToDelete = new PreparedStatementBuilder();
+	private ArcPreparedStatementBuilder requeteUpdateToMark(ArcPreparedStatementBuilder querySelection, String value) {
+		ArcPreparedStatementBuilder updateToDelete = new ArcPreparedStatementBuilder();
 		updateToDelete.append("WITH ");
 		updateToDelete.append("prep AS ( ");
 		updateToDelete.append(querySelection);
 		updateToDelete.append("         ) ");
-		updateToDelete.append("UPDATE " + databaseObjectService.getTable(TableEnum.PILOTAGE_FICHIER) + " a ");
+		updateToDelete.append("UPDATE " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " a ");
 		updateToDelete.append("SET to_delete=" + value + " ");
 		updateToDelete.append(
 				"WHERE EXISTS (SELECT 1 FROM prep WHERE a.container=prep.container AND a.id_source=prep.id_source); ");
@@ -976,7 +976,7 @@ public class PilotageBASAction extends ArcWebGenericService<EnvManagementModel> 
 	@RequestMapping("/resetPhaseBAS")
 	public String resetPhaseBAS(Model model) {
 		Map<String, ArrayList<String>> selection = getViewFichierBAS().mapContentSelected();
-		PreparedStatementBuilder querySelection = this.vObjectService.queryView(getViewFichierBAS());
+		ArcPreparedStatementBuilder querySelection = this.vObjectService.queryView(getViewFichierBAS());
 
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// choisis pour le retour arriere

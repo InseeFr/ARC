@@ -15,7 +15,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -25,7 +26,6 @@ import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -114,7 +114,7 @@ public class ApiInitialisationService extends ApiService {
 
         if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
             ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc")
-                    .executeRequest(null, new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent().get("id_entrepot");
+                    .executeRequest(null, new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent().get("id_entrepot");
 
             if (entrepotList!=null)
             {
@@ -161,7 +161,7 @@ public class ApiInitialisationService extends ApiService {
         		// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table archive
         		// Si on en trouve ce n'est pas cohérent et on doit remettre ces fichiers dans le répertoire de reception
         		// pour être rechargé
-                PreparedStatementBuilder requete2=new PreparedStatementBuilder();
+                ArcPreparedStatementBuilder requete2=new ArcPreparedStatementBuilder();
                 requete2.append(" SELECT fname FROM t_files a ");
                 requete2.append(" WHERE NOT EXISTS (SELECT * FROM " + nomTableArchive + " b WHERE b.nom_archive=a.fname) ");
 
@@ -269,7 +269,7 @@ public class ApiInitialisationService extends ApiService {
 		
     	try {
 			entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
-					new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
+					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
 
 		} catch (ArcException ex) {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "buildFileSystem(envExecutions)", LOGGER, ex);
@@ -317,7 +317,7 @@ public class ApiInitialisationService extends ApiService {
         // on remet l'archive à la racine
 
         ArrayList<String> containerList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-        		new PreparedStatementBuilder("select distinct container from " + tablePil + " where to_delete in ('R','RA')"))).mapContent().get("container");
+        		new ArcPreparedStatementBuilder("select distinct container from " + tablePil + " where to_delete in ('R','RA')"))).mapContent().get("container");
 
         if (containerList != null) {
         	String repertoire = properties.getBatchParametersDirectory();
@@ -369,7 +369,7 @@ public class ApiInitialisationService extends ApiService {
             /*
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
              */
-        	PreparedStatementBuilder requeteRef = new PreparedStatementBuilder();
+        	ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
         	requeteRef.append("SELECT lower(id_famille), lower('" + ApiService.dbEnv(envExecution)
                     + "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM " + envParameters + "_mod_variable_metier");
 
@@ -380,7 +380,7 @@ public class ApiInitialisationService extends ApiService {
             /*
              * Récupérer dans le méta-modèle de la base les tables métiers correspondant à la famille chargée
              */
-            PreparedStatementBuilder requete = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("SELECT lower(id_famille), lower(table_schema||'.'||table_name) nom_table_metier, lower(column_name) nom_variable_metier");
             
             // les types dans postgres sont horribles :(
@@ -537,9 +537,9 @@ public class ApiInitialisationService extends ApiService {
         String nomTablePilotage = dbEnv(envExecution) + "pilotage_fichier";
         String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
 
-        PreparedStatementBuilder requete;
+        ArcPreparedStatementBuilder requete;
         
-        requete = new PreparedStatementBuilder();
+        requete = new ArcPreparedStatementBuilder();
         
         requete.append("DROP TABLE IF EXISTS fichier_to_delete; ");
         requete.append("CREATE TEMPORARY TABLE fichier_to_delete AS ");
@@ -583,7 +583,7 @@ public class ApiInitialisationService extends ApiService {
                 
                 
                 // requete sur laquelle on va itérer : on selectionne un certain nombre de fichier et on itere
-                requete = new PreparedStatementBuilder();
+                requete = new ArcPreparedStatementBuilder();
                 
                 // 3b. on selectionne les fichiers éligibles et on limite le nombre de retour pour que l'update ne soit pas trop massif (perf)
                 requete.append("WITH fichier_to_delete_limit AS ( ")
@@ -651,7 +651,7 @@ public class ApiInitialisationService extends ApiService {
         	}
          loggerDispatcher.info("Archivage Fin", LOGGER);
          
-        } while (UtilitaireDao.get("arc").hasResults(connexion, new PreparedStatementBuilder("select 1 from fichier_to_delete limit 1")))
+        } while (UtilitaireDao.get("arc").hasResults(connexion, new ArcPreparedStatementBuilder("select 1 from fichier_to_delete limit 1")))
         ;
         
         // y'a-til des choses à faire ?
@@ -787,7 +787,7 @@ public class ApiInitialisationService extends ApiService {
            
             //1.Préparation des requêtes de suppression des tables nmcl_ et ext_ du schéma courant
             
-            PreparedStatementBuilder requeteSelectDrop = new PreparedStatementBuilder();
+            ArcPreparedStatementBuilder requeteSelectDrop = new ArcPreparedStatementBuilder();
             requeteSelectDrop.append(" SELECT 'DROP TABLE IF EXISTS '||schemaname||'.'||tablename||';'  AS requete_drop");
             requeteSelectDrop.append(" FROM pg_tables where schemaname = "+ requeteSelectDrop.quoteText(anExecutionEnvironment.toLowerCase())+" ");
             requeteSelectDrop.append(" AND tablename SIMILAR TO '%nmcl%|%ext%'");
@@ -805,7 +805,7 @@ public class ApiInitialisationService extends ApiService {
             
             //2.Préparation des requêtes de création des tables
             ArrayList<String> requetesDeCreationTablesNmcl = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
-            		new PreparedStatementBuilder("select tablename from pg_tables where (tablename like 'nmcl\\_%' OR tablename like 'ext\\_%') and schemaname='arc'"))).mapContent().get("tablename");
+            		new ArcPreparedStatementBuilder("select tablename from pg_tables where (tablename like 'nmcl\\_%' OR tablename like 'ext\\_%') and schemaname='arc'"))).mapContent().get("tablename");
             
             if (requetesDeCreationTablesNmcl!=null){
 	            for (String tableName : requetesDeCreationTablesNmcl) {
@@ -862,15 +862,15 @@ public class ApiInitialisationService extends ApiService {
      * @param querySelection
      * @param listEtat
      */
-    public void retourPhasePrecedente(TraitementPhase phase, PreparedStatementBuilder querySelection, ArrayList<TraitementEtat> listEtat) {
+    public void retourPhasePrecedente(TraitementPhase phase, ArcPreparedStatementBuilder querySelection, ArrayList<TraitementEtat> listEtat) {
         LOGGER.info("Retour arrière pour la phase : {}", phase);
-        PreparedStatementBuilder requete;
+        ArcPreparedStatementBuilder requete;
         // MAJ de la table de pilotage
         Integer nbLignes = 0;
 
         // reset etape=3 file to etape=0
         try {
-            UtilitaireDao.get("arc").executeRequest(this.connexion, new PreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
+            UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
         } catch (Exception e) {
         	loggerDispatcher.error(e, LOGGER);
         }
@@ -878,7 +878,7 @@ public class ApiInitialisationService extends ApiService {
         
         // Delete the selected file entries from the pilotage table from all the phases after the undo phase
         for (TraitementPhase phaseNext : phase.nextPhases()) {
-        	requete = new PreparedStatementBuilder();
+        	requete = new ArcPreparedStatementBuilder();
             requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phaseNext.toString()) + " ");
             if (querySelection.length()>0) {
                 requete.append("AND "+ColumnEnum.ID_SOURCE.getColumnName()+" IN (SELECT distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM (");
@@ -893,7 +893,7 @@ public class ApiInitialisationService extends ApiService {
         // Mark the selected file entries to be reload then rebuild the file system for the reception phase
         if (phase.equals(TraitementPhase.RECEPTION))
         {
-        	requete = new PreparedStatementBuilder();
+        	requete = new ArcPreparedStatementBuilder();
             requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
             if (querySelection.length()>0) {
             	 requete.append("AND "+ColumnEnum.ID_SOURCE.getColumnName()+" IN (SELECT distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM (");
@@ -916,7 +916,7 @@ public class ApiInitialisationService extends ApiService {
         }
 
         // Delete the selected file entries from the pilotage table from the undo phase
-    	requete = new PreparedStatementBuilder();
+    	requete = new ArcPreparedStatementBuilder();
         requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
         if (querySelection.length()>0) {
        	 	requete.append("AND "+ColumnEnum.ID_SOURCE.getColumnName()+" IN (SELECT distinct "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM (");
@@ -955,8 +955,8 @@ public class ApiInitialisationService extends ApiService {
      * @param env
      * @return
      */
-    private PreparedStatementBuilder requeteListAllTablesEnvTmp(String env) {
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+    private ArcPreparedStatementBuilder requeteListAllTablesEnvTmp(String env) {
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         TraitementPhase[] phase = TraitementPhase.values();
         // on commence après la phase "initialisation". i=2
         for (int i = 2; i < phase.length; i++) {
@@ -976,8 +976,8 @@ public class ApiInitialisationService extends ApiService {
      * @param env
      * @return
      */
-    public static PreparedStatementBuilder requeteListAllTablesEnv(String env) {
-    	PreparedStatementBuilder requete = new PreparedStatementBuilder();
+    public static ArcPreparedStatementBuilder requeteListAllTablesEnv(String env) {
+    	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         TraitementPhase[] phase = TraitementPhase.values();
         boolean insert = false;
 
@@ -985,17 +985,17 @@ public class ApiInitialisationService extends ApiService {
             if (insert) {
                 requete.append(" UNION ALL ");
             }
-            PreparedStatementBuilder r = requeteListTableEnv(env, phase[i].toString());
+            ArcPreparedStatementBuilder r = requeteListTableEnv(env, phase[i].toString());
             insert = (r.length() > 0);
             requete.append(r);
         }
         return requete;
     }
 
-    private static PreparedStatementBuilder requeteListTableEnv(String env, String phase) {
+    private static ArcPreparedStatementBuilder requeteListTableEnv(String env, String phase) {
         // Les tables dans l'environnement sont de la forme
         TraitementEtat[] etat = TraitementEtat.values();
-        PreparedStatementBuilder requete = new PreparedStatementBuilder();
+        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
         for (int j = 0; j < etat.length; j++) {
             if (!etat[j].equals(TraitementEtat.ENCOURS)) {
                 if (j > 0) {
@@ -1060,7 +1060,7 @@ public class ApiInitialisationService extends ApiService {
                     HashMap<String, ArrayList<String>> m;
                     do {
                     	m=new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-                    			new PreparedStatementBuilder("\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_"+CHILD_TABLE_TOKEN+"\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION+" ) "
+                    			new ArcPreparedStatementBuilder("\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_"+CHILD_TABLE_TOKEN+"\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION+" ) "
            		 					+"\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
            		 					+"\n SELECT tablename from TMP_SELECT ")
            		 					)).mapContent();
@@ -1075,7 +1075,7 @@ public class ApiInitialisationService extends ApiService {
 		           		 	{
 		           		 		// on récupère la variable etape dans la phase
 		           		 		// si on ne trouve la source de la table dans la phase, on drop !
-		           		 		String etape=UtilitaireDao.get(poolName).getString(connexion, new PreparedStatementBuilder("SELECT etape FROM "+tablePil+" WHERE phase_traitement='" + phase + "' AND '" + etat + "'=ANY(etat_traitement) AND "+ColumnEnum.ID_SOURCE.getColumnName()+"=(select "+ColumnEnum.ID_SOURCE.getColumnName()+" from "+t+" limit 1)"));
+		           		 		String etape=UtilitaireDao.get(poolName).getString(connexion, new ArcPreparedStatementBuilder("SELECT etape FROM "+tablePil+" WHERE phase_traitement='" + phase + "' AND '" + etat + "'=ANY(etat_traitement) AND "+ColumnEnum.ID_SOURCE.getColumnName()+"=(select "+ColumnEnum.ID_SOURCE.getColumnName()+" from "+t+" limit 1)"));
 		           		 		
 		           		 		if (etape==null)
 		           		 		{
@@ -1177,7 +1177,7 @@ public class ApiInitialisationService extends ApiService {
 
             if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
                 ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
-                		new PreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent().get("id_entrepot");
+                		new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent().get("id_entrepot");
                 if (entrepotList!=null)
                 {
 	                for (String s : entrepotList) {

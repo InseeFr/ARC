@@ -1,4 +1,4 @@
-package fr.insee.arc.core.databaseobjects;
+package fr.insee.arc.core.dataobjects;
 
 import java.util.Arrays;
 import java.util.List;

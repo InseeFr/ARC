@@ -9,14 +9,14 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiFiltrageService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -147,7 +147,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		UtilitaireDao.get("arc").executeBlock(this.connexion, query);
 
 		// récupération du paramètre de filtrage
-		PreparedStatementBuilder requete = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT valeur FROM " + this.tableSeuil + " WHERE nom = "
 				+ requete.quoteText("filtrage_taux_exclusion_accepte"));
 		this.seuilExclusion = UtilitaireDao.get("arc").getString(this.connexion, requete);
@@ -193,7 +193,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 						/**
 						 * La requête de sélection de la relation
 						 */
-						new PreparedStatementBuilder(getRegles(this.tableFiltrageRegle, this.tableFiltragePilTemp))));
+						new ArcPreparedStatementBuilder(getRegles(this.tableFiltrageRegle, this.tableFiltragePilTemp))));
 
 		this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle = calculerNormeToPeriodiciteToValiditeInfToValiditeSupToRegle(
 				regleActive);

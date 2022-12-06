@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -18,8 +18,8 @@ public class BDParameters {
 	private static final String PARAMETER_TABLE="arc.parameter";
 	private static final String PARAMETER_SQL_QUERY = "SELECT val FROM "+PARAMETER_TABLE+" ";
 
-	private static PreparedStatementBuilder parameterQuery(String key) {
-		PreparedStatementBuilder requete=new PreparedStatementBuilder();
+	private static ArcPreparedStatementBuilder parameterQuery(String key) {
+		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 		requete.append(PARAMETER_SQL_QUERY+ " WHERE key="+requete.quoteText(key));
 		return requete;
 	}
@@ -96,7 +96,7 @@ public class BDParameters {
 	{
 		try {
 			
-			PreparedStatementBuilder requete=new PreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 			
 			requete.append("UPDATE  "+PARAMETER_TABLE+" ");
 			requete.append("SET val="+requete.quoteText(val)+" ");

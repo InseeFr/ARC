@@ -14,7 +14,8 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.ArchiveLoader.ArchiveChargerFactory;
 import fr.insee.arc.core.ArchiveLoader.FilesInputStreamLoad;
 import fr.insee.arc.core.ArchiveLoader.IArchiveFileLoader;
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.factory.ChargeurFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
@@ -26,7 +27,6 @@ import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.RegleChargement;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.core.util.TypeChargement;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -327,7 +327,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
      */
     private Norme calculerTypeFichier(Norme norme) throws ArcException {
     	
-    	PreparedStatementBuilder requete=new PreparedStatementBuilder();
+    	ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
     	requete
     		.append("SELECT type_fichier, delimiter, format ")
     		.append(" FROM "+this.getTableChargementRegle())

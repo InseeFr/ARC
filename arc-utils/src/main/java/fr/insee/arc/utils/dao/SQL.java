@@ -1,9 +1,17 @@
 package fr.insee.arc.utils.dao;
 
 public enum SQL {
-	INSERT_INTO(" INSERT INTO "),ON_CONFLICT_DO_NOTHING (" ON CONFLICT DO NOTHING "),BEGIN("BEGIN; "),END("END; ");
+	SELECT("SELECT"),
+	FROM("FROM"),
+	ORDER_BY("ORDER BY"),
+	INSERT_INTO("INSERT INTO"),
+	ON_CONFLICT_DO_NOTHING ("ON CONFLICT DO NOTHING"),
+	BEGIN("BEGIN;"),
+	END("END;");
 	
 	private String sqlCode;
+	
+	private final static String SPACE=" ";
 
 	private SQL(String sqlCode) {
 		this.sqlCode = sqlCode;
@@ -16,7 +24,7 @@ public enum SQL {
 	@Override
 	public String toString()
 	{
-		return this.sqlCode;
+		return SPACE+this.sqlCode+SPACE;
 	}
 	
 	

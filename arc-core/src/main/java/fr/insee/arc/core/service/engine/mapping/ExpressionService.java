@@ -4,10 +4,10 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
-import fr.insee.arc.core.databaseobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
-import fr.insee.arc.utils.dao.PreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -58,7 +58,7 @@ public class ExpressionService implements IDbConstant {
 	
 	public GenericBean fetchExpressions(Connection connexion, String environnement, JeuDeRegle ruleSet) 
 			throws ArcException {
-		PreparedStatementBuilder request = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 		request.append("select expr_nom, expr_valeur from ");
 		request.append(environnement);
 		request.append(".expression where ");
@@ -73,7 +73,7 @@ public class ExpressionService implements IDbConstant {
 	 * It is highly recommended to check for loops beforehand.*/
 	public GenericBean fetchOrderedExpressions(Connection connexion, String environment,
 			JeuDeRegle ruleSet) throws ArcException {
-		PreparedStatementBuilder request = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 		request.append("WITH recursive exprs AS (select expr_nom, expr_valeur from ");
 		request.append(environment);
 		request.append(".expression WHERE ");
@@ -109,7 +109,7 @@ public class ExpressionService implements IDbConstant {
 
 
 	private boolean isExpressionSyntaxPresent(Connection connexion, String table, String field, JeuDeRegle ruleSet) throws ArcException {
-		PreparedStatementBuilder request = new PreparedStatementBuilder();
+		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 		request.append("select 1 from ");
 		request.append(table);
 		request.append(" where ");
@@ -119,20 +119,20 @@ public class ExpressionService implements IDbConstant {
 	}
 
 	/** Returns a request applying the given expressions to the control rules of the given ruleset.*/
-	public PreparedStatementBuilder applyExpressionsToControl(JeuDeRegle ruleSet, GenericBean expressions, String environment) {
-		return applyExpressionsTo(ruleSet, expressions, environment + ".controle_regle", "condition")
+	public ArcPreparedStatementBuilder applyExpressionsToControl(JeuDeRegle ruleSet, GenericBean expressions, String environment) {
+		return (ArcPreparedStatementBuilder) applyExpressionsTo(ruleSet, expressions, environment + ".controle_regle", "condition")
 				.append(applyExpressionsTo(ruleSet, expressions, environment + ".controle_regle", "pre_action"));
 	}
 
 
 	/** Returns a request applying the given expressions to the mapping rules of the given ruleset.*/
-	public PreparedStatementBuilder applyExpressionsToMapping(JeuDeRegle ruleSet, GenericBean expressions, String environment) {
+	public ArcPreparedStatementBuilder applyExpressionsToMapping(JeuDeRegle ruleSet, GenericBean expressions, String environment) {
 		return applyExpressionsTo(ruleSet, expressions, environment + ".mapping_regle", "expr_regle_col");
 	}
 
 
-	private PreparedStatementBuilder applyExpressionsTo(JeuDeRegle ruleSet, GenericBean expressions, String table, String field) {
-		PreparedStatementBuilder request = new PreparedStatementBuilder();
+	private ArcPreparedStatementBuilder applyExpressionsTo(JeuDeRegle ruleSet, GenericBean expressions, String table, String field) {
+		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < expressions.size(); i++) {
 			request.append("\n UPDATE "+ table + " ");
 			request.append("\n set " + field + "=replace(" + field + ", ");
