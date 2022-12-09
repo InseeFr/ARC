@@ -10,10 +10,10 @@ public class ColumnEnumTest {
 
 	@Test
 	public void listOfColumnEnumTest() {
-		List<ColumnEnum> listOfColumnEnum= Arrays.asList(ColumnEnum.ID_FAMILLE,ColumnEnum.ID_NORME);
-		List<String> listOfColumnEnumName= Arrays.asList("id_famille","id_norme");
-		
-		Assert.assertEquals(ColumnEnum.listColumnEnumByName(listOfColumnEnum), listOfColumnEnumName );
+		List<ColumnEnum> listOfColumnEnum = Arrays.asList(ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME);
+		List<String> listOfColumnEnumName = Arrays.asList("id_famille", "id_norme");
+
+		Assert.assertEquals(ColumnEnum.listColumnEnumByName(listOfColumnEnum), listOfColumnEnumName);
 	}
 
 }

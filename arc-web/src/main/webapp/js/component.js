@@ -8,7 +8,6 @@
 //Render:TextareaEllipsis;
 //VObject:Sort;
 //ICS:AjaxDataSelector;
-//Render:ConsoleIhm;
 //Render:FixedHeader;
 //Render:ChooseFileWithName;
 
@@ -30,7 +29,6 @@ var zoomLvl=screen.width/scrX*100;
 
 var configJS;
 
-var updateConsoleState;
 
 function dummy()
 {
@@ -837,7 +835,7 @@ function ajaxConfigurationCall()
 			var attributesSaved=savElementAttributes($this.attr('scope'));
 			
 			$("body").append("<div id='hourglass'></div>");
-			updateConsole();
+
 			if ($this.attr('ajax')!="false" && $this.attr('multipart')=="true")
 			{
 				e.preventDefault();
@@ -875,8 +873,6 @@ function ajaxConfigurationCall()
 						}
 						$(document).trigger('readyAgain');
 
-						updateConsole();
-						updateConsoleState=false;
 
 						$("#hourglass").remove();
 						$("[m='js']").remove("attr","m");
@@ -944,10 +940,6 @@ function ajaxConfigurationCall()
 						var z2=new Date().getTime();
 
 						$(document).trigger('readyAgain');
-						
-						updateConsole();
-						updateConsoleState=false;
-
 						$("#hourglass").remove();
 						
 						applyElementAttributes($this.attr('scope'),attributesSaved);
@@ -1228,62 +1220,6 @@ function selectByGrid(v,t)
 
 	
 	
-}
-
-
-
-/**
- * Mise à jour de la console
- */
-function updateConsole()
-{
-	if ($('[name="consoleIhm"]').get(0)!=undefined)
-	{
-
-		var view=$('[name="consoleIhm"]').attr("target");
-		$.ajax({
-		  	type: "POST",
-		  	url: view+".action",
-		  	data: null,
-	        beforeSend: function(xhr) {
-	        	xhr.overrideMimeType( "text/plain; charset=utf-8" );
-	            var token = $("meta[name='_csrf']").attr("content");
-	            var header = $("meta[name='_csrf_header']").attr("content");
-	            if (token!=undefined && header!=undefined)
-	            {
-	            	xhr.setRequestHeader(header, token);
-	            }
-	        },
-		  	success: function(data, textStatus) {
-					$('[name="consoleIhm"]').append(data);
-
-
-					var contentConsole="";
-					var lines=$('[name="consoleIhm"]').text().split("\n");
-
-					for (var i=Math.max(0,lines.length-nbLinesConsole);i<lines.length;i++)
-					{
-						contentConsole=contentConsole+lines[i];
-						if (i<lines.length-1)
-						{
-							contentConsole=contentConsole+"\n"
-						}
-
-					}
-
-					$('[name="consoleIhm"]').text(contentConsole);
-					contentConsole="";
-
-
-					$('[name="consoleIhm"]').scrollTop($('[name="consoleIhm"]')[0].scrollHeight);
-					if (updateConsoleState)
-					{
-						setTimeout(function(){ updateConsole();},1000);
-					}
-				}
-		});
-
-	}
 }
 
 /**

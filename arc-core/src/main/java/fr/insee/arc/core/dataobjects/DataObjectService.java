@@ -53,7 +53,10 @@ public class DataObjectService {
 		return e.isTableInSanbox()?this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName():ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
 	}
 	
-
+	public String getFullTableNameInMetadata(String tablename)
+	{
+		return ARC_METADATA_SCHEMA+"."+tablename;
+	}
 	
 	
 	public String getSandboxSchema() {

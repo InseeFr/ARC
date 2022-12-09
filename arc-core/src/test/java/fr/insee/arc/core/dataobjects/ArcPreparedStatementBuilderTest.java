@@ -11,17 +11,17 @@ public class ArcPreparedStatementBuilderTest {
 	@Test
 	public void sqlListeColumnsByList() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		
-		Assert.assertEquals(query.sqlListeOfColumnsArc(ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME).toString(),new StringBuilder("id_famille,id_norme").toString());
-		
+
+		Assert.assertEquals(new StringBuilder("id_famille,id_norme").toString(),
+				query.sqlListeOfColumnsFromModel(ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME).toString());
+
 	}
-	
-	
+
 	@Test
 	public void sqlListeColumnsByView() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		Assert.assertEquals(query.sqlListeOfColumnsFromModel(ViewEnum.TEST).toString(),new StringBuilder("test1,test2").toString());
+		Assert.assertEquals(new StringBuilder("test1,test2").toString(),
+				query.sqlListeOfColumnsFromModel(ViewEnum.TEST).toString());
 	}
-	
 
 }

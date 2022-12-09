@@ -6,36 +6,37 @@ import java.util.Set;
 
 public enum ViewEnum {
 
-	IHM_NORME("ihm_norme", false, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT)
-	, IHM_CALENDRIER("ihm_calendrier", false)
-	, IHM_JEUDEREGLE("ihm_jeuderegle", false)
-	, IHM_CHARGEMENT_REGLE("ihm_chargement_regle", false)
-	, IHM_NORMAGE_REGLE("ihm_normage_regle", false)
-	, IHM_CONTROLE_REGLE("ihm_controle_regle", false)
-	, IHM_FILTRAGE_REGLE("ihm_filtrage_regle", false)
-	, IHM_MAPPING_REGLE("ihm_mapping_regle", false)
-	, IHM_EXPRESSION("ihm_expression", false)
-	, IHM_CLIENT("ihm_client", false)
-	, IHM_ENTREPOT("ihm_entrepot", false)
-	, IHM_FAMILLE("ihm_famille", false)
-	, IHM_MOD_TABLE_METIER("ihm_mod_table_metier", false)
-	, IHM_MOD_VARIABLE_METIER("ihm_mod_variable_metier", false)
-	, IHM_NMCL("ihm_nmcl", false)
-	, IHM_SCHEMA_NMCL("ihm_schema_nmcl", false)
-	, ID_TABLE_IHM_SEUIL("ihm_seuil", false)
-	, PILOTAGE_BATCH("pilotage_batch", false)
+	IHM_NORME("ihm_norme", false, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE,
+			ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT) //
+	, IHM_CALENDRIER("ihm_calendrier", false) //
+	, IHM_JEUDEREGLE("ihm_jeuderegle", false) //
+	, IHM_CHARGEMENT_REGLE("ihm_chargement_regle", false) //
+	, IHM_NORMAGE_REGLE("ihm_normage_regle", false) //
+	, IHM_CONTROLE_REGLE("ihm_controle_regle", false) //
+	, IHM_FILTRAGE_REGLE("ihm_filtrage_regle", false) //
+	, IHM_MAPPING_REGLE("ihm_mapping_regle", false) //
+	, IHM_EXPRESSION("ihm_expression", false) //
+	, IHM_CLIENT("ihm_client", false) //
+	, IHM_ENTREPOT("ihm_entrepot", false) //
+	, IHM_FAMILLE("ihm_famille", false) //
+	, IHM_MOD_TABLE_METIER("ihm_mod_table_metier", false) //
+	, IHM_MOD_VARIABLE_METIER("ihm_mod_variable_metier", false) //
+	, IHM_NMCL("ihm_nmcl", false, ColumnEnum.NOM_TABLE, ColumnEnum.DESCRIPTION) //
+	, IHM_SCHEMA_NMCL("ihm_schema_nmcl", false, ColumnEnum.TYPE_NMCL, ColumnEnum.NOM_COLONNE, ColumnEnum.TYPE_COLONNE) //
+	, ID_TABLE_IHM_SEUIL("ihm_seuil", false) //
+	, PILOTAGE_BATCH("pilotage_batch", false) //
 
-	, PILOTAGE_FICHIER("pilotage_fichier", true)
-	, PILOTAGE_ARCHIVE("pilotage_archive", true)
-	
-	, TEST("test",false,ColumnEnum.TEST1,ColumnEnum.TEST2)
+	, PILOTAGE_FICHIER("pilotage_fichier", true) //
+	, PILOTAGE_ARCHIVE("pilotage_archive", true) //
+
+	, TEST("test", false, ColumnEnum.TEST1, ColumnEnum.TEST2) //
 
 	;
 
-	private ViewEnum(String tableName, boolean isTableInSanbox, ColumnEnum...columns) {
+	private ViewEnum(String tableName, boolean isTableInSanbox, ColumnEnum... columns) {
 		this.tableName = tableName;
 		this.isTableInSanbox = isTableInSanbox;
-		this.columns=new LinkedHashSet<>(Arrays.asList(columns));
+		this.columns = new LinkedHashSet<>(Arrays.asList(columns));
 	}
 
 	/**
@@ -47,7 +48,7 @@ public enum ViewEnum {
 	 * indicate if the table belongs to a sandbox
 	 */
 	private boolean isTableInSanbox;
-	
+
 	private Set<ColumnEnum> columns;
 
 	public String getTableName() {
@@ -66,6 +67,4 @@ public enum ViewEnum {
 		this.columns = columns;
 	}
 
-	
-	
 }

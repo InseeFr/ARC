@@ -33,7 +33,7 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	 * @param columns
 	 * @return
 	 */
-	public StringBuilder sqlListeOfColumnsArc(ColumnEnum... columns) {
+	public StringBuilder sqlListeOfColumnsFromModel(ColumnEnum... columns) {
 		return sqlListeOfColumnsFromModel(Arrays.asList(columns));
 	}
 

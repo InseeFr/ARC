@@ -1,5 +1,4 @@
 ﻿var lineHeight=22;
-var updateConsoleState =false;
 var nbLinesConsole=500;
 var couleurSelection="rgb(106, 171, 224)";
 var couleurOver="rgb(206, 171, 224)";

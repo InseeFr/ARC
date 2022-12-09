@@ -411,23 +411,6 @@ textarea.env-description-field {
 	line-height: 1.25;
 }
 
-textarea[name="consoleIhm"] {
-	position: relative;
-	font: inherit;
-	background-color: #ffffff;
-	background-image: none;
-	border: 1px solid #000000;
-	resize: vertical; overflow : auto;
-	vertical-align: top;
-	max-height: none;
-	line-height: 18px;
-	outline-style: none;
-	overflow: auto;
-	padding: 2px;
-	margin: 0px;
-	height: 100px;
-}
-
 input[type='text']:focus {
 	overflow-wrap: break-word;
 	word-break: break-word;

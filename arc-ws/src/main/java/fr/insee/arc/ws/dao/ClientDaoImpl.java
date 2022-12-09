@@ -22,7 +22,6 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.utils.SQLExecutor;
 import fr.insee.arc.ws.actions.SendResponse;
 
 public class ClientDaoImpl implements ClientDao {
@@ -74,7 +73,6 @@ public class ClientDaoImpl implements ClientDao {
      * java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    @SQLExecutor
     public ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, String client, boolean reprise, String environnement, String idFamille,
             String validiteInf, String validiteSup, String periodicite) throws ArcException {
         //
@@ -126,7 +124,6 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     @Override
-    @SQLExecutor
     public ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) throws ArcException {
 
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#getIdSrcTableMetier()");
@@ -297,7 +294,6 @@ public class ClientDaoImpl implements ClientDao {
      * @see fr.insee.arc.ws.dao.ClientDao#getResponse(long, java.lang.String, java.lang.String, fr.insee.arc.ws.actions.SendResponse)
      */
     @Override
-    @SQLExecutor
     public void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.getResponse()");
         Connection connection = null;
@@ -361,7 +357,6 @@ public class ClientDaoImpl implements ClientDao {
      *
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcl(fr.insee.arc_essnet.ws.actions.Senarc
      */
-    @SQLExecutor
     public void createNmcl(long timestamp, String client, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createNmcl()");
         Connection connection = null;
@@ -425,7 +420,6 @@ public class ClientDaoImpl implements ClientDao {
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcablesFamilles(long, java.lang.String)
      */
     @Override
-    @SQLExecutor
     public void createTableFamille(long timestamp, String client, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTableFamille()");
         Connection connection = null;
@@ -452,7 +446,6 @@ public class ClientDaoImpl implements ClientDao {
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcablesFamilles(long, java.lang.String)
      */
     @Override
-    @SQLExecutor
     public void createTablePeriodicite(long timestamp, String client, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTablePeriodicite()");
         Connection connection = null;

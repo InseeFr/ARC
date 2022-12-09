@@ -79,7 +79,6 @@
 											scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;viewArchiveBAS;viewEntrepotBAS;"
 											multipart="true"
 											ajax="false"
-											onclick="updateConsoleState=true;"
 										><span class="fa fa-upload">&nbsp;</span> <spring:message code="managementSandbox.load"/></button>
 									</div>
 								</div>
@@ -101,7 +100,7 @@
 									value="<spring:message code='managementSandbox.seeRepository'/>"
 									scope="viewEntrepotBAS;viewRapportBAS;viewPilotageBAS;-viewFichierBAS;viewArchiveBAS;"
 									doAction="visualiserEntrepotBAS"
-									onclick="updateConsoleState=true;" style="margin-left: 25px;" />
+									style="margin-left: 25px;" />
 							</div>
 						</div>
 					</div>
@@ -180,38 +179,6 @@
 								</div>
 							</div>
 						</div>
-
-						<div class="col-md-3 border-left">
-
-							<div class="row">
-								<div class="col-md-6">
-									<div class="card no-margin">
-										<div class="card-header bg-primary p-0">
-											<h3 class="text-white m-1">
-												<spring:message code="managementSandbox.console"/>
-											</h3>
-										</div>
-									</div>
-								</div>
-								<div class="col-md-6" style="justify-content: flex-end; display: flex;">
-									<button type="button" class="btn btn-secondary"
-										onclick="$('[name=&quot;consoleIhm&quot;]').html('')">
-										<spring:message code="managementSandbox.emptyConsole"/>
-									</button>
-								</div>
-							</div>
-							<div class="card-body p-0">
-								<div class="row">
-								<div class="col-md">
-									<textarea id="console" name="consoleIhm" cols="" rows=""
-										class="noselect w-100" readonly
-										target="updateConsole"></textarea>
-								</div>
-								</div>
-							</div>
-
-						</div>
-
 					</div>
 
 				</div>
@@ -273,20 +240,19 @@
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS.toDelete" value="<spring:message code="gui.button.deleteFiles"/>"
 							scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-							doAction="toDeleteBAS" onclick="updateConsoleState=true;" />
+							doAction="toDeleteBAS" />
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS.toRestore" value="<spring:message code="gui.button.replayFiles"/>"
 							scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-							doAction="toRestoreBAS" onclick="updateConsoleState=true;" />
+							doAction="toRestoreBAS" />
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS.toRestoreArchive" value="<spring:message code="gui.button.replayArchives"/>"
 							scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-							doAction="toRestoreArchiveBAS"
-							onclick="updateConsoleState=true;" />
+							doAction="toRestoreArchiveBAS" />
 						<input class="btn btn-primary btn-sm" type="submit"
 							id="viewFichierBAS.undoAction" value="<spring:message code="gui.button.cancelTodo"/>"
 							scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-							doAction="undoActionBAS" onclick="updateConsoleState=true;" />
+							doAction="undoActionBAS" />
 					</c:param>
 				</c:import>
 			</div>

@@ -9,7 +9,6 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Services;
-import fr.insee.arc.ws.services.importServlet.GetQueryResultService;
 import fr.insee.arc.ws.services.importServlet.ImportStep1InitializeClientTablesService;
 import fr.insee.arc.ws.services.importServlet.ImportStep2GetTableNameService;
 import fr.insee.arc.ws.services.importServlet.ImportStep3GetTableDataService;
@@ -56,9 +55,7 @@ public class InitiateRequest implements IDbConstant {
 	public void doRequest(SendResponse resp) throws ArcException {
 		LoggerHelper.debugDebutMethodeAsComment(getClass(), "doRequest()", LOGGER);
 
-		if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.QUERY.getService())) {
-			new GetQueryResultService(dsnRequest).buildParam().execute(resp);
-		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.CLIENT.getService())) {
+		if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.CLIENT.getService())) {
 			new ImportStep1InitializeClientTablesService(dsnRequest).buildParam().execute(resp);
 		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.TABLE_NAME.getService())) {
 			new ImportStep2GetTableNameService(dsnRequest).buildParam().execute(resp);

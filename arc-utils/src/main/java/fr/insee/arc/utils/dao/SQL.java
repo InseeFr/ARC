@@ -3,6 +3,7 @@ package fr.insee.arc.utils.dao;
 public enum SQL {
 	SELECT("SELECT"),
 	FROM("FROM"),
+	WHERE("WHERE"),
 	ORDER_BY("ORDER BY"),
 	INSERT_INTO("INSERT INTO"),
 	ON_CONFLICT_DO_NOTHING ("ON CONFLICT DO NOTHING"),

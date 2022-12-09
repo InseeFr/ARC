@@ -20,6 +20,14 @@ public enum ColumnEnum {
 	, DEF_VALIDITE("def_validite",TypeEnum.TEXT,"sql expression to calculate the date validity of the file")
 	, ETAT("etat",TypeEnum.TEXT,"sql expression to calculate the date validity of the file")
 
+	, NOM_TABLE("nom_table",TypeEnum.TEXT,"table name for nomenclature tables")
+	, DESCRIPTION("description",TypeEnum.TEXT,"description")
+	
+	, TYPE_NMCL("type_nmcl",TypeEnum.TEXT,"nomenclature type -nmcl,ext-")
+	, NOM_COLONNE("nom_colonne",TypeEnum.TEXT,"column name of nomenclature schema")
+	, TYPE_COLONNE("type_colonne",TypeEnum.TEXT,"column type of nomenclature schema")
+	
+	
 	, TEST1("test1",TypeEnum.TEXT,"test column 1")
 	, TEST2("test2",TypeEnum.TEXT,"test column 2")
 	

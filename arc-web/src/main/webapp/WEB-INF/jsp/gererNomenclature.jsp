@@ -57,6 +57,12 @@
 								<c:param name="extraScopeUpdate" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 								<c:param name="extraScopeSee" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 								<c:param name="otherButton">
+								<button class="btn btn-primary btn-sm"
+								id="viewNomenclature.download" type="submit"
+								doAction="downloadListNomenclatures" ajax="false">
+								<span class="fa fa-download">&nbsp;</span>
+								<spring:message code="gui.button.downloadFileExport" />
+							</button>
 							<div class="input-group my-3">
 									<div class="custom-file">
 								<input
