@@ -14,8 +14,8 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.web.model.DatabaseManagementModel;
-import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.webusecases.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

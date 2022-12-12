@@ -36,8 +36,8 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.dao.ExternalFilesManagementDao;
 import fr.insee.arc.web.model.ExternalFilesModel;
-import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.webusecases.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

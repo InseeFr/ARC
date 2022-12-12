@@ -17,9 +17,9 @@ import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.web.service.gerernorme.GererNormeService;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
+import fr.insee.arc.web.webusecases.gerernorme.service.GererNormeService;
 
 
 /**

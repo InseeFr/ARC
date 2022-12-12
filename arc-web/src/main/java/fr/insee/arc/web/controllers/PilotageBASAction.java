@@ -43,8 +43,8 @@ import fr.insee.arc.web.model.viewobjects.ViewEntrepotBAS;
 import fr.insee.arc.web.model.viewobjects.ViewFichierBAS;
 import fr.insee.arc.web.model.viewobjects.ViewPilotageBAS;
 import fr.insee.arc.web.model.viewobjects.ViewRapportBAS;
-import fr.insee.arc.web.service.ArcWebGenericService;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.webusecases.ArcWebGenericService;
 import fr.insee.arc.web.util.LineObject;
 import fr.insee.arc.web.util.VObject;
 
