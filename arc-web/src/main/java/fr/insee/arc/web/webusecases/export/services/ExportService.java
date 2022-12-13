@@ -37,12 +37,12 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.webusecases.ArcWebGenericService;
-import fr.insee.arc.web.webusecases.export.models.ExportModel;
+import fr.insee.arc.web.webusecases.export.models.ModelExport;
 
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class ExportService extends ArcWebGenericService<ExportModel>  {
+public class ExportService extends ArcWebGenericService<ModelExport>  {
 
 	private static final String RESULT_SUCCESS = "/jsp/gererExport.jsp";
 
@@ -54,7 +54,7 @@ public class ExportService extends ArcWebGenericService<ExportModel>  {
 
 
 	@Override
-	protected void putAllVObjects(ExportModel arcModel) {
+	protected void putAllVObjects(ModelExport arcModel) {
 		setViewExport(this.vObjectService.preInitialize(arcModel.getViewExport()));
 		setViewFileExport(this.vObjectService.preInitialize(arcModel.getViewFileExport()));
 		

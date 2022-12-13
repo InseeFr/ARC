@@ -1,8 +1,10 @@
 package fr.insee.arc.web.webusecases.gererfamillenorme.services;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
-public class ServiceViewHostAllowed extends GererFamilleNormeService {
+@Controller
+public class ServiceViewHostAllowed extends HubServiceGererFamilleNorme {
 
 	public String selectHostAllowed(Model model) {
 		return basicAction(model, RESULT_SUCCESS);

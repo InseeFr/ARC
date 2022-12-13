@@ -1,14 +1,14 @@
 package fr.insee.arc.web.webusecases.gerernorme.controller;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.web.webusecases.gerernorme.HubControllerGererNorme;
+import fr.insee.arc.web.webusecases.gerernorme.service.ServiceViewMapping;
 
-@Component
-public class ControllerViewMapping extends HubControllerGererNorme {
+@Controller
+public class ControllerViewMapping extends ServiceViewMapping {
 	
 
 	

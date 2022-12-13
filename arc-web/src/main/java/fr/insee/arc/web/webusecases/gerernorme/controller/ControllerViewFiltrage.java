@@ -1,14 +1,14 @@
 package fr.insee.arc.web.webusecases.gerernorme.controller;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.web.webusecases.gerernorme.HubControllerGererNorme;
+import fr.insee.arc.web.webusecases.gerernorme.service.ServiceViewFiltrage;
 
-@Component
-public class ControllerViewFiltrage extends HubControllerGererNorme {
+@Controller
+public class ControllerViewFiltrage extends ServiceViewFiltrage {
 
 	/**
 	 * Action trigger when the table of map rules is request or refresh. Update the
@@ -20,7 +20,7 @@ public class ControllerViewFiltrage extends HubControllerGererNorme {
 	public String selectFiltrageAction(Model model) {
 		return selectFiltrage(model);
 	}
-	
+
 	/**
 	 * Action trigger by updating a filter rule in the GUI. Update the GUI and the
 	 * database. Before inserting, the rules are checked
@@ -32,7 +32,6 @@ public class ControllerViewFiltrage extends HubControllerGererNorme {
 		return updateFiltrage(model);
 	}
 
-	
 	/**
 	 * Action trigger by deleting a structurize rule in the GUI. Update the GUI and
 	 * the database
@@ -53,7 +52,7 @@ public class ControllerViewFiltrage extends HubControllerGererNorme {
 	public String sortFiltrageAction(Model model) {
 		return sortFiltrage(model);
 	}
-	
+
 	/**
 	 * Clean the filter rules. Update GUI and database
 	 * 
@@ -63,7 +62,7 @@ public class ControllerViewFiltrage extends HubControllerGererNorme {
 	public String viderFiltrageAction(Model model) {
 		return viderFiltrage(model);
 	}
-	
+
 	/**
 	 * Action trigger by uploading a filter rule file
 	 * 
@@ -73,7 +72,6 @@ public class ControllerViewFiltrage extends HubControllerGererNorme {
 	public String importFiltrageAction(Model model, MultipartFile fileUploadFilter) {
 		return importFiltrage(model, fileUploadFilter);
 	}
-
 
 	/**
 	 * Action initializing the filter rules

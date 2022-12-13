@@ -33,13 +33,13 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.util.ArcStringUtils;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.webusecases.ArcWebGenericService;
-import fr.insee.arc.web.webusecases.gererfamillenorme.models.FamilyManagementModel;
+import fr.insee.arc.web.webusecases.gererfamillenorme.models.ModelGererFamille;
 import fr.insee.arc.web.webusecases.gererfamillenorme.models.ViewVariableMetier;
 import fr.insee.arc.web.util.VObject;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class GererFamilleNormeService extends ArcWebGenericService<FamilyManagementModel> {
+public class HubServiceGererFamilleNorme extends ArcWebGenericService<ModelGererFamille> {
 
 	protected static final String MODEL_VARIABLE_NAME = "nom_variable_metier";
 
@@ -53,7 +53,7 @@ public class GererFamilleNormeService extends ArcWebGenericService<FamilyManagem
 
 	protected static final String IHM_MOD_VARIABLE_METIER = "ihm_mod_variable_metier";
 
-	private static final Logger LOGGER = LogManager.getLogger(GererFamilleNormeService.class);
+	private static final Logger LOGGER = LogManager.getLogger(HubServiceGererFamilleNorme.class);
 	
 	protected static final int NUMBER_OF_COLUMN_TABLE_VARIABLE_METIER = 5;
 
@@ -73,7 +73,7 @@ public class GererFamilleNormeService extends ArcWebGenericService<FamilyManagem
 	}
 
 	@Override
-	public void putAllVObjects(FamilyManagementModel arcModel) {
+	public void putAllVObjects(ModelGererFamille arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
 
 		setViewClient(vObjectService.preInitialize(arcModel.getViewClient()));

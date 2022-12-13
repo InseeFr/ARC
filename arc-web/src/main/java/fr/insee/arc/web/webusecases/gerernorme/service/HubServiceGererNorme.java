@@ -4,29 +4,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.core.model.JeuDeRegle;
-import fr.insee.arc.core.model.RegleMappingEntity;
-import fr.insee.arc.utils.dao.EntityDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -36,58 +32,117 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.model.GuiModules;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
-import fr.insee.arc.web.util.WebLoggerDispatcher;
+import fr.insee.arc.web.webusecases.ArcWebGenericService;
 import fr.insee.arc.web.webusecases.gerernorme.dao.GererNormeDao;
+import fr.insee.arc.web.webusecases.gerernorme.model.ModelGererNorme;
 
-/**
- * Will own all the utilitary methode used in the {@link GererNormeService}
- * 
- * @author Pépin Rémi
- *
- */
-@Component
-public class GererNormeServiceTemp implements IDbConstant {
+@Controller
+@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class HubServiceGererNorme extends ArcWebGenericService<ModelGererNorme> implements IDbConstant {
+	
+	protected static final String RESULT_SUCCESS = "/jsp/gererNorme.jsp";
+	
+	protected static final String SELECTED_RULESET_TABLE = "SELECTED_RULESET_TABLE";
+	protected static final String SELECTED_RULESET_NAME = "SELECTED_RULESET_NAME";
 
-	private static final Logger LOGGER = LogManager.getLogger(GererNormeServiceTemp.class);
+	private static final Logger LOGGER = LogManager.getLogger(HubServiceGererNorme.class);
 
-	private static final int INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING = 6;
+	// The norm view
+	protected VObject viewNorme;
 
-    @Autowired
-    private WebLoggerDispatcher loggerDispatcher;
+	// The calendar view
+	protected VObject viewCalendrier;
+
+	// The ruleset view
+	protected VObject viewJeuxDeRegles;
+
+	// The module selection view
+	protected VObject viewModules;
+	
+	// The load rules view
+	protected VObject viewChargement;
+
+	// The structurize rules view
+	protected VObject viewNormage;
+
+	// The control rules view
+	protected VObject viewControle;
+
+	// The filter rules view
+	protected VObject viewFiltrage;
+
+	// The map to format rules view
+	protected VObject viewMapping;
+	
+	// Expression to use in mapping
+	protected VObject viewExpression;
+
+	// The on ruleset to copy rules
+	protected VObject viewJeuxDeReglesCopie;
+	
     
     @Autowired
 	@Qualifier("defaultVObjectService")
     private VObjectService viewObject;
+	
+	// The action Name
+	public static final String ACTION_NAME="normManagement";
 
-	/**
-	 * Return the SQL to get all the rules bond to a rule set. It suppose the a rule
-	 * set is selected
-	 * 
-	 * @param viewRulesSet : the Vobject containing the rules
-	 * @param table        : the sql to get the rules in the database
-	 * @return an sql query to get all the rules bond to a rule set
-	 */
-	public ArcPreparedStatementBuilder recupRegle(VObject viewRulesSet, String table) {
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		HashMap<String, String> type = viewRulesSet.mapHeadersType();
-        requete.append("select * from " + table + " ");
-        whereRuleSetEquals(requete, selection, type);
-		return requete;
+	@Override
+	public void putAllVObjects(ModelGererNorme model) {		
+		setViewNorme(vObjectService.preInitialize(model.getViewNorme()));
+		setViewCalendrier(vObjectService.preInitialize(model.getViewCalendrier()));
+		setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewJeuxDeRegles()));
+		setViewModules(vObjectService.preInitialize(model.getViewModules()));
+		setViewChargement(vObjectService.preInitialize(model.getViewChargement()));
+		setViewNormage(vObjectService.preInitialize(model.getViewNormage()));
+		setViewControle(vObjectService.preInitialize(model.getViewControle()));
+		setViewFiltrage(vObjectService.preInitialize(model.getViewFiltrage()));
+		setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
+		setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
+		setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
+		
+		putVObject(getViewNorme(),
+				t -> initializeViewNorme(t, dataObjectService.getView(ViewEnum.IHM_NORME)));
+		//
+		putVObject(getViewCalendrier(), t -> initializeViewCalendar(t, getViewNorme(),
+				dataObjectService.getView(ViewEnum.IHM_CALENDRIER) ));
+		//
+		putVObject(getViewJeuxDeRegles(), t -> initializeViewRulesSet(t, getViewCalendrier(),
+				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) ));
+		//
+		putVObject(getViewModules(), t -> initializeViewModules(t, getViewJeuxDeRegles()));
+		//
+		putVObject(getViewChargement(), t -> initializeChargement(t, getViewJeuxDeRegles(), getViewModules(),
+				dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE) ));
+		//
+		putVObject(getViewNormage(), t -> initializeNormage(t, getViewJeuxDeRegles(), getViewModules(),
+				dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE) ));
+		//
+		putVObject(getViewControle(), t -> initializeControle(t, getViewJeuxDeRegles(), getViewModules(),
+				dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE) ));
+		//
+		putVObject(getViewFiltrage(), t -> initializeFiltrage(t, getViewJeuxDeRegles(), getViewModules(),
+				dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE) ));
+		//
+		putVObject(getViewMapping(), t -> initializeMapping(t, getViewJeuxDeRegles(), getViewModules(),
+				dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)  ));
+		//
+		putVObject(getViewExpression(), t -> initializeExpression(t, getViewJeuxDeRegles(), getViewModules(),
+				dataObjectService.getView(ViewEnum.IHM_EXPRESSION) ));
+		//
+		putVObject(getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(), getViewModules(),
+				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) , getScope()));
 	}
 
-	/** Appends a where clause for rulesets. */
-	private void whereRuleSetEquals(ArcPreparedStatementBuilder requete, Map<String, ArrayList<String>> selection,
-			HashMap<String, String> type) {
-		requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-        requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-        requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-        requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-        requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
+	@Override
+	public String getActionName() {
+		return ACTION_NAME;
 	}
-
+	
+	
 	/**
-	 * Initialize the {@value GererNormeService#viewNorme}. Call dao to create the view
+	 * Initialize the {@value HubServiceGererNorme#viewNorme}. Call dao to create the view
 	 */
 	public void initializeViewNorme(VObject viewNorme, String theDataViewName) {
 		LoggerHelper.debug(LOGGER, "/* initializeNorme */");
@@ -97,7 +152,7 @@ public class GererNormeServiceTemp implements IDbConstant {
 	}
 
 	/**
-	 * Initialize the {@value GererNormeService#viewCalendar}. Only get the calendar
+	 * Initialize the {@value HubServiceGererNorme#viewCalendar}. Only get the calendar
 	 * link to the selected norm.
 	 */
 	public void initializeViewCalendar(VObject viewCalendar, VObject viewNorme, String theTableName) {
@@ -119,7 +174,7 @@ public class GererNormeServiceTemp implements IDbConstant {
 	}
 
 	/**
-	 * Initialize the {@value GererNormeService#viewRulesSet}. Only get the rulesset
+	 * Initialize the {@value HubServiceGererNorme#viewRulesSet}. Only get the rulesset
 	 * link to the selected norm and calendar.
 	 */
 	public void initializeViewRulesSet(VObject viewRulesSet, VObject viewCalendar, String theTableName) {
@@ -157,7 +212,7 @@ public class GererNormeServiceTemp implements IDbConstant {
 	}
 	
 	/**
-	 * Initialize the {@value GererNormeService#viewRulesSet}. Only get the rulesset
+	 * Initialize the {@value HubServiceGererNorme#viewRulesSet}. Only get the rulesset
 	 * link to the selected norm and calendar.
 	 */
 	public void initializeViewModules(VObject viewModules, VObject viewRulesSet) {
@@ -199,23 +254,6 @@ public class GererNormeServiceTemp implements IDbConstant {
 			viewObject.destroy(viewModules);
 		}
 	}
-
-	
-	/** 
-	 * Default fields for arc rules set
-	 * @param selection
-	 * @return
-	 */
-	private HashMap<String, String> defaultRuleInputFields(Map<String, ArrayList<String>> selection) {
-		HashMap<String, String> defaultInputFields = new HashMap<>();
-		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-		defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-		defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-		defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-		defaultInputFields.put("version", selection.get("version").get(0));
-		return defaultInputFields;
-	}
-	
 	
 	/**
 	 * Initialize the {@link VObject} of a load ruleset. Only
@@ -364,7 +402,7 @@ public class GererNormeServiceTemp implements IDbConstant {
 	}
 
 	/**
-	 * Initialize the {@value GererNormeService#viewJeuxDeReglesCopie}. Get in
+	 * Initialize the {@value HubServiceGererNorme#viewJeuxDeReglesCopie}. Get in
 	 * database all the reccord the rule sets.
 	 * 
 	 * @param viewJeuxDeReglesCopie
@@ -382,58 +420,54 @@ public class GererNormeServiceTemp implements IDbConstant {
 		}
 
 	}
+	
 
-	/**
-	 * Send a rule set to production.
-	 */
-	public void sendRuleSetToProduction(VObject viewRulesSet, String theTable) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
-		Date dNow = new Date();
-		loggerDispatcher.warn("Rule set send to production", LOGGER);
 
-		try {
-			
-			ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
-			requete.append("update " + theTable + " set last_init='"+ dateFormat.format(dNow) + "', operation=case when operation='R' then 'O' else operation end;");
-			
-			UtilitaireDao.get("arc").executeRequest(null, requete);
-			viewRulesSet.setMessage("Go to production registered");
-
-		} catch (ArcException e) {
-			viewRulesSet.setMessage("Error in the go to production");
-			LoggerHelper.warn(LOGGER, "Error in the go to production");
-
-		}
+	/** Appends a where clause for rulesets. */
+	protected void whereRuleSetEquals(ArcPreparedStatementBuilder requete, Map<String, ArrayList<String>> selection,
+			HashMap<String, String> type) {
+		requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
+        requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
+        requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
+        requete.append(" and validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
+        requete.append(" and version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
 	}
 
-
 	/**
-	 * 
-	 * @param viewRulesSet
+	 * Return the module identifier
+	 * "norManagement.load" identify the load module in the normManagement action and its international alias
+	 * @param moduleName
 	 * @return
 	 */
-	public JeuDeRegle fetchJeuDeRegle(VObject viewRulesSet) {
-        HashMap<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-        /*
-         * Fabrication d'un JeuDeRegle pour conserver les informations sur norme et calendrier
-         */
-        JeuDeRegle jdr = new JeuDeRegle();
-        jdr.setIdNorme(selection.get("id_norme").get(0));
-        jdr.setPeriodicite(selection.get("periodicite").get(0));
-        jdr.setValiditeInfString(selection.get("validite_inf").get(0), "yyyy-MM-dd");
-        jdr.setValiditeSupString(selection.get("validite_sup").get(0), "yyyy-MM-dd");
-        jdr.setVersion(selection.get("version").get(0));
-        jdr.setEtat(selection.get("etat").get(0));
-        return jdr;
+	private String moduleIdentifier(GuiModules moduleName)
+	{
+		return HubServiceGererNorme.ACTION_NAME+"."+moduleName.toString();
 	}
 
+	
+	/** 
+	 * Default fields for arc rules set
+	 * @param selection
+	 * @return
+	 */
+	private HashMap<String, String> defaultRuleInputFields(Map<String, ArrayList<String>> selection) {
+		HashMap<String, String> defaultInputFields = new HashMap<>();
+		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
+		defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
+		defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
+		defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
+		defaultInputFields.put("version", selection.get("version").get(0));
+		return defaultInputFields;
+	}
+	
+	
 	/**
-	 * Empty all the rules of a norm modul
+	 * Empty all the rules of a norm module
 	 * 
 	 * @param table
 	 * @return
 	 */
-	public void emptyRuleTable(VObject viewRulesSet, String table) {
+	protected void emptyRuleTable(VObject viewRulesSet, String table) {
 		loggerDispatcher.info("Empty all the rules of a module", LOGGER);
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		HashMap<String, String> type = viewRulesSet.mapHeadersType();
@@ -454,149 +488,12 @@ public class GererNormeServiceTemp implements IDbConstant {
 		}
 	}
 
-	public String createTableTest(String aNomTable, List<String> listRubrique) {
-		 StringBuilder sb = new StringBuilder();
-	        sb.append("DROP TABLE IF EXISTS " + aNomTable + ";");
-	        sb.append("CREATE TABLE " + aNomTable);
-	        sb.append("(id_norme text, periodicite text, id_source text, validite text, id integer, controle text, brokenrules text[] ");
-	        
-	        //Je m'assure que les ubriques de base ne sont pas dans la liste des rubriques du filtre (sinon requÃªte invalide),
-	        //--> cas possible lorsque par exemple, le paramÃ¨tre {validite} apparait dans la rÃ¨gle de filtrage.
-	        listRubrique.remove("id_norme");
-	        listRubrique.remove("periodicite");
-	        listRubrique.remove("id_source");
-	        listRubrique.remove("validite");
-	        listRubrique.remove("id");
-	        listRubrique.remove("controle");
-	        listRubrique.remove("brokenrules");
-
-	        
-	        for (String rub : listRubrique) {
-	            if (rub.toUpperCase().startsWith("I")) {
-	                sb.append("," + rub + " integer");
-	            } else {
-	                sb.append("," + rub + " text");
-	            }
-
-	        }
-	        sb.append(");");
-		return sb.toString();
-	}
-
-	
-	public void calculerVariableToType(VObject viewNorme, Map<String, String> mapVariableToType,
-			Map<String, String> mapVariableToTypeConso) throws ArcException {
-		
-		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
-		requete.append("SELECT DISTINCT lower(nom_variable_metier) AS nom_variable_metier, type_variable_metier, type_consolidation AS type_sortie ");
-		requete.append("\n FROM arc.ihm_mod_variable_metier ");
-		requete.append("\n WHERE id_famille="+requete.quoteText(viewNorme.mapContentSelected().get("id_famille").get(0))+" ");
-		
-		ArrayList<ArrayList<String>> resultat = UtilitaireDao.get("arc").executeRequest(null, requete);
-		
-		for (int i = 2; i < resultat.size(); i++) {
-			mapVariableToType.put(resultat.get(i).get(0), resultat.get(i).get(1));
-			mapVariableToTypeConso.put(resultat.get(i).get(0), resultat.get(i).get(2));
-		}
-	}
-
-	public Map<String, ArrayList<String>> calculerReglesAImporter(MultipartFile aFileUpload,
-			List<RegleMappingEntity> listeRegle, EntityDao<RegleMappingEntity> dao,
-			Map<String, String> mapVariableToType, Map<String, String> mapVariableToTypeConso) throws IOException {
-		Map<String, ArrayList<String>> returned = new HashMap<>();
-		returned.put("type_sortie", new ArrayList<String>());
-		returned.put("type_consolidation", new ArrayList<String>());
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(aFileUpload.getInputStream(), StandardCharsets.UTF_8));){
-			dao.setSeparator(";");
-			String line = br.readLine();
-			String someNames = line;
-			dao.setNames(someNames);
-			line = br.readLine();
-			String someTypes = line;
-			dao.setTypes(someTypes);
-			while ((line = br.readLine()) != null) {
-				RegleMappingEntity entity = dao.get(line);
-				listeRegle.add(entity);
-				for (String colName : entity.colNames()) {
-					if (!returned.containsKey(colName)) {
-						/*
-						 * La colonne n'existe pas encore ? Je l'ajoute.
-						 */
-						returned.put(colName, new ArrayList<String>());
-					}
-					/*
-					 * J'ajoute la valeur en fin de colonne.
-					 */
-					returned.get(colName).add(entity.get(colName));
-				}
-				returned.get("type_sortie").add(mapVariableToType.get(entity.getVariableSortie()));
-				returned.get("type_consolidation").add(mapVariableToTypeConso.get(entity.getVariableSortie()));
-			}			
-		} catch (Exception ex) {
-			LoggerHelper.error(LOGGER, "error in calculerReglesAImporter", ex.getStackTrace());
-		}
-		return returned;
-	}
-
-	public boolean testerConsistanceRegleMapping(List<List<String>> data, String anEnvironnement,
-			String anIdFamille, StringBuilder aMessage) {
-		Set<String> variableRegleCharge = new HashSet<String>();
-		for (int i = 0; i < data.size(); i++) {
-			variableRegleCharge.add(data.get(i).get(INDEX_COLONNE_VARIABLE_TABLE_REGLE_MAPPING));
-		}
-		Set<String> variableTableModele = new HashSet<String>();
-		variableTableModele
-				.addAll(UtilitaireDao.get("arc").getList(null,
-						new StringBuilder("SELECT DISTINCT nom_variable_metier FROM " + anEnvironnement
-								+ "_mod_variable_metier WHERE id_famille='" + anIdFamille + "'"),
-						new ArrayList<String>()));
-		Set<String> variableToute = new HashSet<String>();
-		variableToute.addAll(variableRegleCharge);
-		variableToute.addAll(variableTableModele);
-		boolean ok = true;
-		loggerDispatcher.info("Les variables du modèle : " + variableTableModele, LOGGER);
-		loggerDispatcher.info("Les variables des règles chargées : " + variableRegleCharge, LOGGER);
-		for (String variable : variableToute) {
-			if (!variableRegleCharge.contains(variable)) {
-				ok = false;
-				aMessage.append("La variable " + variable + " n'est pas présente dans les règles chargées.\n");
-			}
-			if (!variableTableModele.contains(variable)) {
-				ok = false;
-				aMessage.append(variable + " ne correspond à aucune variable existant.\n");
-			}
-		}
-		if (!ok) {
-			aMessage.append("Les règles ne seront pas chargées.");
-		}
-		return ok;
-	}
-
-
-	/**
-	 *
-	 * @param returned
-	 * @param index    -1 : en fin de tableau<br/>
-	 *                 [0..size[ : le premier élément est ajouté à l'emplacement
-	 *                 {@code index}, les suivants, juste après
-	 * @param args
-	 * @return
-	 */
-	public List<List<String>> ajouterInformationTableau(List<List<String>> returned, int index, String... args) {
-		for (int i = 0; i < returned.size(); i++) {
-			for (int j = 0; j < args.length; j++) {
-				returned.get(i).add((index == -1 ? returned.get(i).size() : index + j), args[j]);
-			}
-		}
-		return returned;
-	}
-
 	/**
 	 * 
 	 * @param vObjectToUpdate the vObject to update with file
 	 * @param tableName       the
 	 */
-	public void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, MultipartFile theFileToUpload) {
+	protected void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, MultipartFile theFileToUpload) {
 
 		// Check if there is file
 		if (theFileToUpload == null || theFileToUpload.isEmpty()) {
@@ -680,6 +577,8 @@ public class GererNormeServiceTemp implements IDbConstant {
 		}
 
 	}
+	
+
 
 	private static List<String> getHeaderFromFile(BufferedReader bufferedReader) throws IOException {
 		String listeColonnesAggregees = bufferedReader.readLine();
@@ -689,15 +588,106 @@ public class GererNormeServiceTemp implements IDbConstant {
 	}
 
 	
-	/**
-	 * Return the module identifier
-	 * "norManagement.load" identify the load module in the normManagement action and its international alias
-	 * @param moduleName
-	 * @return
-	 */
-	private String moduleIdentifier(GuiModules moduleName)
-	{
-		return GererNormeService.ACTION_NAME+"."+moduleName.toString();
+
+	public VObject getViewNorme() {
+		return this.viewNorme;
+	}
+
+	public void setViewNorme(VObject vObjectData) {
+		this.viewNorme = vObjectData;
+	}
+
+	public VObject getViewCalendrier() {
+		return this.viewCalendrier;
+	}
+
+	public void setViewCalendrier(VObject viewCalendrier) {
+		this.viewCalendrier = viewCalendrier;
+	}
+
+	public VObject getViewJeuxDeRegles() {
+		return this.viewJeuxDeRegles;
+	}
+
+	public void setViewJeuxDeRegles(VObject viewJeuxDeRegles) {
+		this.viewJeuxDeRegles = viewJeuxDeRegles;
 	}
 	
+	public VObject getViewModules() {
+		return viewModules;
+	}
+
+	public void setViewModules(VObject viewModules) {
+		this.viewModules = viewModules;
+	}
+	
+	public VObject getViewChargement() {
+		return viewChargement;
+	}
+
+	public void setViewChargement(VObject viewChargement) {
+		this.viewChargement = viewChargement;
+	}
+
+	public VObject getViewNormage() {
+		return this.viewNormage;
+	}
+
+	public void setViewNormage(VObject viewNormage) {
+		this.viewNormage = viewNormage;
+	}
+
+	public VObject getViewControle() {
+		return this.viewControle;
+	}
+
+	public void setViewControle(VObject viewControle) {
+		this.viewControle = viewControle;
+	}
+
+	public VObject getViewMapping() {
+		return this.viewMapping;
+	}
+
+	public void setViewMapping(VObject viewMapping) {
+		this.viewMapping = viewMapping;
+	}
+	
+	public VObject getViewExpression() {
+		return viewExpression;
+	}
+
+	public void setViewExpression(VObject viewExpression) {
+		this.viewExpression = viewExpression;
+	}
+
+	public VObject getViewJeuxDeReglesCopie() {
+		return this.viewJeuxDeReglesCopie;
+	}
+
+	public void setViewJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie) {
+		this.viewJeuxDeReglesCopie = viewJeuxDeReglesCopie;
+	}
+
+	/**
+	 * @return the viewFiltrage
+	 */
+	public VObject getViewFiltrage() {
+		return this.viewFiltrage;
+	}
+
+	/**
+	 * @param viewFiltrage the viewFiltrage to set
+	 */
+	public void setViewFiltrage(VObject viewFiltrage) {
+		this.viewFiltrage = viewFiltrage;
+	}
+
+	/**
+	 * @return the selectedJeuDeRegle
+	 */
+	public String getSelectedJeuDeRegle() {
+		return this.viewJeuxDeReglesCopie.getCustomValue(SELECTED_RULESET_TABLE);
+	}
+
 }

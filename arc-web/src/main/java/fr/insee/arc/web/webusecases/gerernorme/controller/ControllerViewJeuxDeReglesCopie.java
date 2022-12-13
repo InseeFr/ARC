@@ -1,14 +1,13 @@
 package fr.insee.arc.web.webusecases.gerernorme.controller;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import fr.insee.arc.web.webusecases.gerernorme.HubControllerGererNorme;
+import fr.insee.arc.web.webusecases.gerernorme.service.ServiceViewJeuxDeReglesCopie;
 
-@Component
-public class ControllerViewJeuxDeReglesCopie extends HubControllerGererNorme {
-	
+@Controller
+public class ControllerViewJeuxDeReglesCopie extends ServiceViewJeuxDeReglesCopie {
 
 	/**
 	 * Action trigger by requesting the load rules of the register rule set to copy
@@ -56,6 +55,7 @@ public class ControllerViewJeuxDeReglesCopie extends HubControllerGererNorme {
 
 	/**
 	 * Action to copy mapping rules
+	 * 
 	 * @param model
 	 * @return
 	 */
@@ -63,9 +63,10 @@ public class ControllerViewJeuxDeReglesCopie extends HubControllerGererNorme {
 	public String selectJeuxDeReglesMappingCopieAction(Model model) {
 		return selectJeuxDeReglesMappingCopie(model);
 	}
-	
+
 	/**
 	 * Action to copy expression rules
+	 * 
 	 * @param model
 	 * @return
 	 */
@@ -83,6 +84,5 @@ public class ControllerViewJeuxDeReglesCopie extends HubControllerGererNorme {
 	public String copieJeuxDeReglesAction(Model model) {
 		return copieJeuxDeRegles(model);
 	}
-	
 
 }

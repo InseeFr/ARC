@@ -3,7 +3,7 @@ package fr.insee.arc.web.webusecases.gererfamillenorme.models;
 import fr.insee.arc.web.model.ArcModel;
 import fr.insee.arc.web.util.VObject;
 
-public class FamilyManagementModel implements ArcModel {
+public class ModelGererFamille implements ArcModel {
 	
 	private VObject viewFamilleNorme;
 
@@ -15,7 +15,7 @@ public class FamilyManagementModel implements ArcModel {
     
     private VObject  viewVariableMetier;
 
-    public FamilyManagementModel() {
+    public ModelGererFamille() {
 		this.viewClient = new ViewClient();
 		this.viewFamilleNorme = new ViewFamilleNorme();
 		this.viewTableMetier = new ViewTableMetier();

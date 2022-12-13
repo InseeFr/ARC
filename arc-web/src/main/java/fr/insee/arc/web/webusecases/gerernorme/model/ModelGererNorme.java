@@ -1,19 +1,9 @@
-package fr.insee.arc.web.model;
+package fr.insee.arc.web.webusecases.gerernorme.model;
 
-import fr.insee.arc.web.model.viewobjects.ViewCalendrier;
-import fr.insee.arc.web.model.viewobjects.ViewChargement;
-import fr.insee.arc.web.model.viewobjects.ViewControle;
-import fr.insee.arc.web.model.viewobjects.ViewExpression;
-import fr.insee.arc.web.model.viewobjects.ViewFiltrage;
-import fr.insee.arc.web.model.viewobjects.ViewJeuxDeRegles;
-import fr.insee.arc.web.model.viewobjects.ViewJeuxDeReglesCopie;
-import fr.insee.arc.web.model.viewobjects.ViewMapping;
-import fr.insee.arc.web.model.viewobjects.ViewModules;
-import fr.insee.arc.web.model.viewobjects.ViewNormage;
-import fr.insee.arc.web.model.viewobjects.ViewNorme;
+import fr.insee.arc.web.model.ArcModel;
 import fr.insee.arc.web.util.VObject;
 
-public class NormManagementModel implements ArcModel {
+public class ModelGererNorme implements ArcModel {
 
 	// The norm view
 	private VObject viewNorme;
@@ -48,7 +38,7 @@ public class NormManagementModel implements ArcModel {
 	// The on ruleset to copy rules
 	private VObject viewJeuxDeReglesCopie;
 
-	public NormManagementModel() {
+	public ModelGererNorme() {
 		this.viewNorme = new ViewNorme();
 		this.viewCalendrier = new ViewCalendrier();
 		this.viewJeuxDeRegles = new ViewJeuxDeRegles();

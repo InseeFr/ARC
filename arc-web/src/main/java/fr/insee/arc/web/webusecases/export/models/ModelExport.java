@@ -3,13 +3,13 @@ package fr.insee.arc.web.webusecases.export.models;
 import fr.insee.arc.web.model.ArcModel;
 import fr.insee.arc.web.util.VObject;
 
-public class ExportModel implements ArcModel {
+public class ModelExport implements ArcModel {
 
     private VObject viewExport;
 
     private VObject viewFileExport;
 
-    public ExportModel() {
+    public ModelExport() {
 		this.viewExport = new ViewExport();
 		this.viewFileExport = new ViewFileExport();
 	}

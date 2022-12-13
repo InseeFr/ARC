@@ -2,16 +2,15 @@ package fr.insee.arc.web.webusecases.gerernorme.controller;
 
 import java.io.IOException;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.web.webusecases.gerernorme.HubControllerGererNorme;
+import fr.insee.arc.web.webusecases.gerernorme.service.ServiceViewControle;
 
-@Component
-public class ControllerViewControle extends HubControllerGererNorme {
-
+@Controller
+public class ControllerViewControle extends ServiceViewControle {
 
 	/**
 	 * Action trigger when the table of control rules is request or refresh. Update
@@ -78,7 +77,7 @@ public class ControllerViewControle extends HubControllerGererNorme {
 	public String importControleAction(Model model, MultipartFile fileUploadControle) {
 		return importControle(model, fileUploadControle);
 	}
-	
+
 	/**
 	 * Clean the control rules. Update GUI and database
 	 * 
@@ -89,5 +88,4 @@ public class ControllerViewControle extends HubControllerGererNorme {
 		return viderControle(model);
 	}
 
-	
 }

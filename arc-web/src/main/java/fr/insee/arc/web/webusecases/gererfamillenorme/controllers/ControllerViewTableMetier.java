@@ -1,11 +1,12 @@
 package fr.insee.arc.web.webusecases.gererfamillenorme.controllers;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.insee.arc.web.webusecases.gererfamillenorme.services.ServiceViewTableMetier;
 
-
+@Controller
 public class ControllerViewTableMetier extends ServiceViewTableMetier {
 
 	@RequestMapping("/selectTableMetier")

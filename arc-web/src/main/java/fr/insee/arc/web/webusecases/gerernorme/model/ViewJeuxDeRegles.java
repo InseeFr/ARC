@@ -1,4 +1,4 @@
-package fr.insee.arc.web.model.viewobjects;
+package fr.insee.arc.web.webusecases.gerernorme.model;
 
 import java.util.HashMap;
 

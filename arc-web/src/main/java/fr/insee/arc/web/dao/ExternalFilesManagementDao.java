@@ -19,11 +19,10 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
-import fr.insee.arc.web.webusecases.gerernorme.service.GererNormeService;
 
 
 /**
- * Will own all the utilitary methode used in the {@link GererNormeService}
+ * Will own all the utilitary methods used in GererNomenclature
  * 
  * @author Manuel Soulier
  *

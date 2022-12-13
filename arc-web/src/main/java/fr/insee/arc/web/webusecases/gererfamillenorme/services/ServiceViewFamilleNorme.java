@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +19,8 @@ import fr.insee.arc.core.serviceinteractif.ddi.dao.DDIInsertDAO;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
-public class ServiceViewFamilleNorme extends GererFamilleNormeService {
+@Controller
+public class ServiceViewFamilleNorme extends HubServiceGererFamilleNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewFamilleNorme.class);
 

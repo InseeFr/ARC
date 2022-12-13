@@ -1,13 +1,13 @@
 package fr.insee.arc.web.webusecases.gerernorme.controller;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import fr.insee.arc.web.webusecases.gerernorme.HubControllerGererNorme;
+import fr.insee.arc.web.webusecases.gerernorme.service.ServiceViewNorme;
 
-@Component
-public class ControllerViewNorme extends HubControllerGererNorme {
+@Controller
+public class ControllerViewNorme extends ServiceViewNorme {
 	/**
 	 * Action trigger to display a norm entry in the GUI
 	 *

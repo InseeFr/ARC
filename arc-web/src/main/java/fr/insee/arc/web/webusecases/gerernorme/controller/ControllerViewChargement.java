@@ -1,14 +1,14 @@
 package fr.insee.arc.web.webusecases.gerernorme.controller;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.web.webusecases.gerernorme.HubControllerGererNorme;
+import fr.insee.arc.web.webusecases.gerernorme.service.ServiceViewChargement;
 
-@Component
-public class ControllerViewChargement extends HubControllerGererNorme {
+@Controller
+public class ControllerViewChargement extends ServiceViewChargement {
 
 	/**
 	 * Action trigger when the table of load rule is asked or refresh. Update the
@@ -72,12 +72,9 @@ public class ControllerViewChargement extends HubControllerGererNorme {
 	 * @return
 	 */
 	@RequestMapping("/importChargement")
-	public String importChargementAction(Model model, MultipartFile fileUploadLoad) {		
+	public String importChargementAction(Model model, MultipartFile fileUploadLoad) {
 		return importChargement(model, fileUploadLoad);
 	}
-	
-
-
 
 	/**
 	 * Clean the loading rules. Update GUI and database
@@ -89,5 +86,4 @@ public class ControllerViewChargement extends HubControllerGererNorme {
 		return viderChargement(model);
 	}
 
-	
 }

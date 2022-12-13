@@ -1,14 +1,14 @@
 package fr.insee.arc.web.webusecases.gerernorme.controller;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import fr.insee.arc.web.webusecases.gerernorme.HubControllerGererNorme;
+import fr.insee.arc.web.webusecases.gerernorme.service.ServiceViewCalendrier;
 
-@Component
-public class ControllerViewCalendrier extends HubControllerGererNorme {
-	
+@Controller
+public class ControllerViewCalendrier extends ServiceViewCalendrier {
+
 	/**
 	 * Action trigger by selecting a calendar in the GUI. Update the GUI
 	 * 

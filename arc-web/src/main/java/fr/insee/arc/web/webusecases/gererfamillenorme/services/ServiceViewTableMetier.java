@@ -1,5 +1,6 @@
 package fr.insee.arc.web.webusecases.gererfamillenorme.services;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -7,7 +8,8 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
-public class ServiceViewTableMetier extends GererFamilleNormeService {
+@Controller
+public class ServiceViewTableMetier extends HubServiceGererFamilleNorme {
 
 
 	public String selectTableMetier(Model model) {
