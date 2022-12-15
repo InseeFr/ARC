@@ -53,7 +53,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 	private static final String DEFAULT_PRODUCTION_ENVIRONMENTS="[\"arc_prod\"]";
 	
 	protected static final String POOLNAME = "arc"; 
-
+	
 	@Autowired
 	@Qualifier("properties")
 	protected PropertiesHandler properties;

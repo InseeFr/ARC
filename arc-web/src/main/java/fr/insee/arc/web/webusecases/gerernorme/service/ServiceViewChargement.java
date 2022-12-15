@@ -26,7 +26,7 @@ public class ServiceViewChargement extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String addChargement(Model model) {
-		return addLineVobject(model, RESULT_SUCCESS, this.viewChargement);
+		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewChargement());
 	}
 
 	/**
@@ -36,7 +36,7 @@ public class ServiceViewChargement extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String deleteChargement(Model model) {
-		return deleteLineVobject(model, RESULT_SUCCESS, this.viewChargement);
+		return deleteLineVobject(model, RESULT_SUCCESS, this.views.getViewChargement());
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class ServiceViewChargement extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String updateChargement(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.viewChargement);
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewChargement());
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class ServiceViewChargement extends HubServiceGererNorme {
 	 */
 	public String sortChargement(Model model) {
 
-		this.vObjectService.sort(viewChargement);
+		this.vObjectService.sort(views.getViewChargement());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -68,7 +68,7 @@ public class ServiceViewChargement extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String importChargement(Model model, MultipartFile fileUploadLoad) {
-		uploadFileRule(getViewChargement(), viewJeuxDeRegles, fileUploadLoad);
+		uploadFileRule(views.getViewChargement(), views.getViewJeuxDeRegles(), fileUploadLoad);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -79,7 +79,7 @@ public class ServiceViewChargement extends HubServiceGererNorme {
 	 */
 	public String viderChargement(Model model) {
 
-		emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
+		emptyRuleTable(views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

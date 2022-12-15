@@ -25,7 +25,7 @@ public class ServiceViewCalendrier extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String addCalendrier(Model model) {
-		return addLineVobject(model, RESULT_SUCCESS, this.viewCalendrier);
+		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewCalendrier());
 	}
 
 	/**
@@ -36,17 +36,17 @@ public class ServiceViewCalendrier extends HubServiceGererNorme {
 	 */
 	public String deleteCalendrier(Model model) {
 		// get the selected calendar
-		Map<String, ArrayList<String>> selection = viewCalendrier.mapContentSelected();
+		Map<String, ArrayList<String>> selection = views.getViewCalendrier().mapContentSelected();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			// Check actived calendar (code 1)
 			if ("1".equals(etat)) {
-				this.viewCalendrier.setMessage("Caution, cannot delete a active calendar");
+				this.views.getViewCalendrier().setMessage("Caution, cannot delete a active calendar");
 			} else {
-				this.vObjectService.delete(viewCalendrier);
+				this.vObjectService.delete(views.getViewCalendrier());
 			}
 		} else {
-			this.viewJeuxDeRegles.setMessage("You didn't select anything");
+			this.views.getViewJeuxDeRegles().setMessage("You didn't select anything");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -58,11 +58,11 @@ public class ServiceViewCalendrier extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String updateCalendrier(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.viewCalendrier);
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewCalendrier());
 	}
 
 	public String sortCalendrier(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.viewCalendrier);
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewCalendrier());
 	}
 
 }

@@ -45,13 +45,13 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String addRuleSet(Model model) {
-		HashMap<String, ArrayList<String>> selection = viewJeuxDeRegles.mapInputFields();
+		HashMap<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapInputFields();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-				this.viewJeuxDeRegles.setMessage("Caution, cannot add a rule set in the PRODUCTION state");
+				this.views.getViewJeuxDeRegles().setMessage("Caution, cannot add a rule set in the PRODUCTION state");
 			} else {
-				this.vObjectService.insert(viewJeuxDeRegles);
+				this.vObjectService.insert(views.getViewJeuxDeRegles());
 			}
 		}
 
@@ -67,19 +67,19 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 	public String deleteRuleSet(Model model) {
 		
 		// Get the selection
-		Map<String, ArrayList<String>> selection = viewJeuxDeRegles.mapContentSelected();
+		Map<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			loggerDispatcher.info("State to delete : " + etat, LOGGER);
 			// Check production state. If yes cancel the delete and send a message to the
 			// user
 			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-				this.viewJeuxDeRegles.setMessage("Caution, cannot delete a rule set in the PRODUCTION state");
+				this.views.getViewJeuxDeRegles().setMessage("Caution, cannot delete a rule set in the PRODUCTION state");
 			} else {
-				this.vObjectService.delete(viewJeuxDeRegles);
+				this.vObjectService.delete(views.getViewJeuxDeRegles());
 			}
 		} else {
-			this.viewJeuxDeRegles.setMessage("You didn't select anything");
+			this.views.getViewJeuxDeRegles().setMessage("You didn't select anything");
 		}
 
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -95,7 +95,7 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String updateRuleSet(Model model) {
-		HashMap<String, ArrayList<String>> selection = viewJeuxDeRegles.mapContentSelected();
+		HashMap<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
 
 		// on les crée dans tous les environnements et tous les entrepots
 		// (ca evite les erreurs et car ca ne spécialise aucun environnement dans un
@@ -105,14 +105,14 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 			for (int i = 0; i < selection.get("etat").size(); i++) {
 				String etat = selection.get("etat").get(i);
 				if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-					sendRuleSetToProduction(this.viewJeuxDeRegles,
+					sendRuleSetToProduction(this.views.getViewJeuxDeRegles(),
 							dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)
 							
 							);
 				}
 			}
 
-			this.vObjectService.update(viewJeuxDeRegles);
+			this.vObjectService.update(views.getViewJeuxDeRegles());
 
 		}
 
@@ -125,7 +125,7 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String sortRuleSet(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.viewJeuxDeRegles);
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewJeuxDeRegles());
 	}
 
 	/**
@@ -134,26 +134,26 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String downloadJeuxDeRegles(Model model, HttpServletResponse response) {
-		Map<String, ArrayList<String>> selection = viewJeuxDeRegles.mapContentSelected();
+		Map<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
 		if (!selection.isEmpty()) {
 			ArcPreparedStatementBuilder requeteRegleChargement = new ArcPreparedStatementBuilder();
-			requeteRegleChargement.append(recupRegle(this.viewJeuxDeRegles,
+			requeteRegleChargement.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE)
 					));
 			ArcPreparedStatementBuilder requeteRegleNormage = new ArcPreparedStatementBuilder();
-			requeteRegleNormage.append(recupRegle(this.viewJeuxDeRegles,
+			requeteRegleNormage.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE)));
 			ArcPreparedStatementBuilder requeteRegleControle = new ArcPreparedStatementBuilder();
-			requeteRegleControle.append(recupRegle(this.viewJeuxDeRegles,
+			requeteRegleControle.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE)));
 			ArcPreparedStatementBuilder requeteRegleMapping = new ArcPreparedStatementBuilder();
-			requeteRegleMapping.append(recupRegle(this.viewJeuxDeRegles,
+			requeteRegleMapping.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)));
 			ArcPreparedStatementBuilder requeteRegleFiltrage = new ArcPreparedStatementBuilder();
-			requeteRegleFiltrage.append(recupRegle(this.viewJeuxDeRegles,
+			requeteRegleFiltrage.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE)));
 			ArcPreparedStatementBuilder requeteRegleExpression = new ArcPreparedStatementBuilder();
-			requeteRegleExpression.append(recupRegle(this.viewJeuxDeRegles,
+			requeteRegleExpression.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_EXPRESSION)));
 
 			ArrayList<String> fileNames = new ArrayList<>();
@@ -163,7 +163,7 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 			fileNames.add("Rules_mapping");
 			fileNames.add("Rules_filter");
 			fileNames.add("Rules_expression");
-			this.vObjectService.download(viewJeuxDeRegles, response, fileNames
+			this.vObjectService.download(views.getViewJeuxDeRegles(), response, fileNames
 					, new ArrayList<>(
 							Arrays.asList(
 									requeteRegleChargement
@@ -177,7 +177,7 @@ public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 					);
 			return "none";
 		} else {
-			this.viewJeuxDeRegles.setMessage("You didn't select anything");
+			this.views.getViewJeuxDeRegles().setMessage("You didn't select anything");
 			return generateDisplay(model, RESULT_SUCCESS);
 		}
 

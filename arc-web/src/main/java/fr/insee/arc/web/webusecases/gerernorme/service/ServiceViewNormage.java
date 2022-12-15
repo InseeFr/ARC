@@ -17,7 +17,7 @@ public class ServiceViewNormage extends HubServiceGererNorme {
 	 */
 	public String importNormage(Model model, MultipartFile fileUploadStructurize) {
 
-		uploadFileRule(getViewNormage(), viewJeuxDeRegles, fileUploadStructurize);
+		uploadFileRule(views.getViewNormage(), views.getViewJeuxDeRegles(), fileUploadStructurize);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -38,7 +38,7 @@ public class ServiceViewNormage extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String addNormage(Model model) {
-		return addLineVobject(model, RESULT_SUCCESS, this.viewNormage);
+		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class ServiceViewNormage extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String deleteNormage(Model model) {
-		return deleteLineVobject(model, RESULT_SUCCESS, this.viewNormage);
+		return deleteLineVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class ServiceViewNormage extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String updateNormage(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.viewNormage);
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class ServiceViewNormage extends HubServiceGererNorme {
 	 */
 
 	public String sortNormage(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.viewNormage);
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class ServiceViewNormage extends HubServiceGererNorme {
 	 */
 	public String viderNormage(Model model) {
 
-		emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
+		emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

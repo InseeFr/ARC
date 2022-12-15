@@ -37,7 +37,7 @@ public class ServiceViewFiltrage extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String updateFiltrage(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.viewFiltrage);
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewFiltrage());
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class ServiceViewFiltrage extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String deleteFiltrage(Model model) {
-		return deleteLineVobject(model, RESULT_SUCCESS, this.viewFiltrage);
+		return deleteLineVobject(model, RESULT_SUCCESS, this.views.getViewFiltrage());
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class ServiceViewFiltrage extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String sortFiltrage(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.viewFiltrage);
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewFiltrage());
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class ServiceViewFiltrage extends HubServiceGererNorme {
 	 */
 	public String viderFiltrage(Model model) {
 
-		emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE));
+		emptyRuleTable(views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
@@ -78,7 +78,7 @@ public class ServiceViewFiltrage extends HubServiceGererNorme {
 	 */
 	public String importFiltrage(Model model, MultipartFile fileUploadFilter) {
 
-		uploadFileRule(this.viewFiltrage, this.viewJeuxDeRegles, fileUploadFilter);
+		uploadFileRule(this.views.getViewFiltrage(), this.views.getViewJeuxDeRegles(), fileUploadFilter);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -89,12 +89,12 @@ public class ServiceViewFiltrage extends HubServiceGererNorme {
 	 */
 	public String preGenererRegleFiltrage(Model model) {
 		try {
-			Map<String, ArrayList<String>> selection = viewJeuxDeRegles.mapContentSelected();
+			Map<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
 
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-			requete.append("INSERT INTO " + this.viewFiltrage.getTable())
-					.append("  " + Format.stringListe(this.viewFiltrage.getHeadersDLabel()))
-					.append("  SELECT (SELECT coalesce(max(id_regle),1) FROM " + this.viewFiltrage.getTable()
+			requete.append("INSERT INTO " + this.views.getViewFiltrage().getTable())
+					.append("  " + Format.stringListe(this.views.getViewFiltrage().getHeadersDLabel()))
+					.append("  SELECT (SELECT coalesce(max(id_regle),1) FROM " + this.views.getViewFiltrage().getTable()
 							+ ")+row_number() over () ,")
 					.append("  " + requete.quoteText(selection.get("id_norme").get(0)) + ", ")
 					.append("  " + requete.quoteText(selection.get("validite_inf").get(0)) + "::date, ")

@@ -46,92 +46,60 @@ public class HubServiceGererNorme extends ArcWebGenericService<ModelGererNorme> 
 	protected static final String SELECTED_RULESET_NAME = "SELECTED_RULESET_NAME";
 
 	private static final Logger LOGGER = LogManager.getLogger(HubServiceGererNorme.class);
-
-	// The norm view
-	protected VObject viewNorme;
-
-	// The calendar view
-	protected VObject viewCalendrier;
-
-	// The ruleset view
-	protected VObject viewJeuxDeRegles;
-
-	// The module selection view
-	protected VObject viewModules;
 	
-	// The load rules view
-	protected VObject viewChargement;
-
-	// The structurize rules view
-	protected VObject viewNormage;
-
-	// The control rules view
-	protected VObject viewControle;
-
-	// The filter rules view
-	protected VObject viewFiltrage;
-
-	// The map to format rules view
-	protected VObject viewMapping;
+	@Autowired
+	protected ModelGererNorme views;
 	
-	// Expression to use in mapping
-	protected VObject viewExpression;
-
-	// The on ruleset to copy rules
-	protected VObject viewJeuxDeReglesCopie;
-	
-    
     @Autowired
-	@Qualifier("defaultVObjectService")
     private VObjectService viewObject;
 	
 	// The action Name
 	public static final String ACTION_NAME="normManagement";
 
 	@Override
-	public void putAllVObjects(ModelGererNorme model) {		
-		setViewNorme(vObjectService.preInitialize(model.getViewNorme()));
-		setViewCalendrier(vObjectService.preInitialize(model.getViewCalendrier()));
-		setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewJeuxDeRegles()));
-		setViewModules(vObjectService.preInitialize(model.getViewModules()));
-		setViewChargement(vObjectService.preInitialize(model.getViewChargement()));
-		setViewNormage(vObjectService.preInitialize(model.getViewNormage()));
-		setViewControle(vObjectService.preInitialize(model.getViewControle()));
-		setViewFiltrage(vObjectService.preInitialize(model.getViewFiltrage()));
-		setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
-		setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
-		setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
+	public void putAllVObjects(ModelGererNorme model) {
+		views.setViewNorme(vObjectService.preInitialize(model.getViewNorme()));
+		views.setViewCalendrier(vObjectService.preInitialize(model.getViewCalendrier()));
+		views.setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewJeuxDeRegles()));
+		views.setViewModules(vObjectService.preInitialize(model.getViewModules()));
+		views.setViewChargement(vObjectService.preInitialize(model.getViewChargement()));
+		views.setViewNormage(vObjectService.preInitialize(model.getViewNormage()));
+		views.setViewControle(vObjectService.preInitialize(model.getViewControle()));
+		views.setViewFiltrage(vObjectService.preInitialize(model.getViewFiltrage()));
+		views.setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
+		views.setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
+		views.setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
 		
-		putVObject(getViewNorme(),
+		putVObject(views.getViewNorme(),
 				t -> initializeViewNorme(t, dataObjectService.getView(ViewEnum.IHM_NORME)));
 		//
-		putVObject(getViewCalendrier(), t -> initializeViewCalendar(t, getViewNorme(),
+		putVObject(views.getViewCalendrier(), t -> initializeViewCalendar(t, views.getViewNorme(),
 				dataObjectService.getView(ViewEnum.IHM_CALENDRIER) ));
 		//
-		putVObject(getViewJeuxDeRegles(), t -> initializeViewRulesSet(t, getViewCalendrier(),
+		putVObject(views.getViewJeuxDeRegles(), t -> initializeViewRulesSet(t, views.getViewCalendrier(),
 				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) ));
 		//
-		putVObject(getViewModules(), t -> initializeViewModules(t, getViewJeuxDeRegles()));
+		putVObject(views.getViewModules(), t -> initializeViewModules(t, views.getViewJeuxDeRegles()));
 		//
-		putVObject(getViewChargement(), t -> initializeChargement(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(views.getViewChargement(), t -> initializeChargement(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE) ));
 		//
-		putVObject(getViewNormage(), t -> initializeNormage(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(views.getViewNormage(), t -> initializeNormage(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE) ));
 		//
-		putVObject(getViewControle(), t -> initializeControle(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(views.getViewControle(), t -> initializeControle(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE) ));
 		//
-		putVObject(getViewFiltrage(), t -> initializeFiltrage(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(views.getViewFiltrage(), t -> initializeFiltrage(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE) ));
 		//
-		putVObject(getViewMapping(), t -> initializeMapping(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(views.getViewMapping(), t -> initializeMapping(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)  ));
 		//
-		putVObject(getViewExpression(), t -> initializeExpression(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(views.getViewExpression(), t -> initializeExpression(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_EXPRESSION) ));
 		//
-		putVObject(getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t, getViewJeuxDeRegles(), getViewModules(),
+		putVObject(views.getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) , getScope()));
 	}
 
@@ -587,107 +555,12 @@ public class HubServiceGererNorme extends ArcWebGenericService<ModelGererNorme> 
 		return listeColonnes;
 	}
 
-	
-
-	public VObject getViewNorme() {
-		return this.viewNorme;
-	}
-
-	public void setViewNorme(VObject vObjectData) {
-		this.viewNorme = vObjectData;
-	}
-
-	public VObject getViewCalendrier() {
-		return this.viewCalendrier;
-	}
-
-	public void setViewCalendrier(VObject viewCalendrier) {
-		this.viewCalendrier = viewCalendrier;
-	}
-
-	public VObject getViewJeuxDeRegles() {
-		return this.viewJeuxDeRegles;
-	}
-
-	public void setViewJeuxDeRegles(VObject viewJeuxDeRegles) {
-		this.viewJeuxDeRegles = viewJeuxDeRegles;
-	}
-	
-	public VObject getViewModules() {
-		return viewModules;
-	}
-
-	public void setViewModules(VObject viewModules) {
-		this.viewModules = viewModules;
-	}
-	
-	public VObject getViewChargement() {
-		return viewChargement;
-	}
-
-	public void setViewChargement(VObject viewChargement) {
-		this.viewChargement = viewChargement;
-	}
-
-	public VObject getViewNormage() {
-		return this.viewNormage;
-	}
-
-	public void setViewNormage(VObject viewNormage) {
-		this.viewNormage = viewNormage;
-	}
-
-	public VObject getViewControle() {
-		return this.viewControle;
-	}
-
-	public void setViewControle(VObject viewControle) {
-		this.viewControle = viewControle;
-	}
-
-	public VObject getViewMapping() {
-		return this.viewMapping;
-	}
-
-	public void setViewMapping(VObject viewMapping) {
-		this.viewMapping = viewMapping;
-	}
-	
-	public VObject getViewExpression() {
-		return viewExpression;
-	}
-
-	public void setViewExpression(VObject viewExpression) {
-		this.viewExpression = viewExpression;
-	}
-
-	public VObject getViewJeuxDeReglesCopie() {
-		return this.viewJeuxDeReglesCopie;
-	}
-
-	public void setViewJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie) {
-		this.viewJeuxDeReglesCopie = viewJeuxDeReglesCopie;
-	}
-
-	/**
-	 * @return the viewFiltrage
-	 */
-	public VObject getViewFiltrage() {
-		return this.viewFiltrage;
-	}
-
-	/**
-	 * @param viewFiltrage the viewFiltrage to set
-	 */
-	public void setViewFiltrage(VObject viewFiltrage) {
-		this.viewFiltrage = viewFiltrage;
-	}
 
 	/**
 	 * @return the selectedJeuDeRegle
 	 */
 	public String getSelectedJeuDeRegle() {
-		return this.viewJeuxDeReglesCopie.getCustomValue(SELECTED_RULESET_TABLE);
+		return this.views.getViewJeuxDeReglesCopie().getCustomValue(SELECTED_RULESET_TABLE);
 	}
 
 }

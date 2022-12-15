@@ -28,7 +28,7 @@ public class ServiceViewNorme extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String addNorme(Model model) {
-		return addLineVobject(model, RESULT_SUCCESS, this.viewNorme);
+		return addLineVobject(model, RESULT_SUCCESS, views.getViewNorme());
 	}
 
 	/**
@@ -39,19 +39,19 @@ public class ServiceViewNorme extends HubServiceGererNorme {
 	public String deleteNorme(Model model) {
 
 		// Get the gui selection
-		Map<String, ArrayList<String>> selection = viewNorme.mapContentSelected();
+		Map<String, ArrayList<String>> selection = views.getViewNorme().mapContentSelected();
 
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			loggerDispatcher.info("Norm state : " + etat, LOGGER);
 			// Check actived norm (code 1)
 			if ("1".equals(etat)) {
-				this.viewNorme.setMessage("Caution, cannot delete a activated norm");
+				views.getViewNorme().setMessage("Caution, cannot delete a activated norm");
 			} else {
-				this.vObjectService.delete(viewNorme);
+				this.vObjectService.delete(views.getViewNorme());
 			}
 		} else {
-			this.viewNorme.setMessage("You didn't select anything");
+			views.getViewNorme().setMessage("You didn't select anything");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -60,14 +60,14 @@ public class ServiceViewNorme extends HubServiceGererNorme {
 	 * Action trigger by updating a norm in the GUI. Update the GUI
 	 */
 	public String updateNorme(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.viewNorme);
+		return updateVobject(model, RESULT_SUCCESS, views.getViewNorme());
 	}
 
 	/**
 	 * Action trigger by sorting a norm in the GUI. Update the GUI
 	 */
 	public String sortNorme(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.viewNorme);
+		return sortVobject(model, RESULT_SUCCESS, views.getViewNorme());
 	}
 
 }

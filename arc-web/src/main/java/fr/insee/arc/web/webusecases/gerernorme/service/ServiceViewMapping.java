@@ -35,11 +35,11 @@ public class ServiceViewMapping extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String addMapping(Model model) {
-		return addLineVobject(model, RESULT_SUCCESS, this.viewMapping);
+		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	public String deleteMapping(Model model) {
-		return deleteLineVobject(model, RESULT_SUCCESS, this.viewMapping);
+		return deleteLineVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class ServiceViewMapping extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String updateMapping(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.viewMapping);
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class ServiceViewMapping extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String importMapping(Model model, MultipartFile fileUploadMap) {
-		uploadFileRule(getViewMapping(), viewJeuxDeRegles, fileUploadMap);
+		uploadFileRule(views.getViewMapping(), views.getViewJeuxDeRegles(), fileUploadMap);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -69,7 +69,7 @@ public class ServiceViewMapping extends HubServiceGererNorme {
 	 */
 	public String viderMapping(Model model) {
 
-		emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
+		emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
@@ -80,7 +80,7 @@ public class ServiceViewMapping extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String sortMapping(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.viewMapping);
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
 	}
 
 	/**
@@ -95,27 +95,27 @@ public class ServiceViewMapping extends HubServiceGererNorme {
 
 			// List hard coded to be sure of the order in the select
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-			requete.append("INSERT INTO " + this.viewMapping.getTable()).append(
+			requete.append("INSERT INTO " + this.views.getViewMapping().getTable()).append(
 					"  (id_regle, id_norme, validite_inf, validite_sup,  version , periodicite, variable_sortie, expr_regle_col, commentaire) ")
-					.append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.viewMapping.getTable()
+					.append("  SELECT coalesce((SELECT max(id_regle) FROM " + this.views.getViewMapping().getTable()
 							+ "),0)+row_number() over () ,")
 					.append(requete.quoteText(
-							viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.ID_NORME.getValue()).get(0)) + ", ")
+							views.getViewJeuxDeRegles().mapContentSelected().get(ConstanteBD.ID_NORME.getValue()).get(0)) + ", ")
 					.append(requete.quoteText(
-							viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VALIDITE_INF.getValue()).get(0))
+							views.getViewJeuxDeRegles().mapContentSelected().get(ConstanteBD.VALIDITE_INF.getValue()).get(0))
 							+ "::date, ")
 					.append(requete.quoteText(
-							viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VALIDITE_SUP.getValue()).get(0))
+							views.getViewJeuxDeRegles().mapContentSelected().get(ConstanteBD.VALIDITE_SUP.getValue()).get(0))
 							+ "::date, ")
 					.append(requete.quoteText(
-							viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.VERSION.getValue()).get(0)) + ", ")
+							views.getViewJeuxDeRegles().mapContentSelected().get(ConstanteBD.VERSION.getValue()).get(0)) + ", ")
 					.append(requete.quoteText(
-							viewJeuxDeRegles.mapContentSelected().get(ConstanteBD.PERIODICITE.getValue()).get(0))
+							views.getViewJeuxDeRegles().mapContentSelected().get(ConstanteBD.PERIODICITE.getValue()).get(0))
 							+ ", ")
 					.append("  liste_colonne.nom_variable_metier,").append("  null,").append("  null")
 					.append("  FROM (")
 					.append(ApiService.listeColonneTableMetierSelonFamilleNorme(ApiService.IHM_SCHEMA,
-							viewNorme.mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0)))
+							views.getViewNorme().mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0)))
 					.append(") liste_colonne");
 
 			UtilitaireDao.get("arc").executeRequest(null, requete);

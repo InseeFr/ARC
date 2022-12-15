@@ -1,8 +1,11 @@
 package fr.insee.arc.web.webusecases.gerernorme.model;
 
+import org.springframework.stereotype.Component;
+
 import fr.insee.arc.web.model.ArcModel;
 import fr.insee.arc.web.util.VObject;
 
+@Component
 public class ModelGererNorme implements ArcModel {
 
 	// The norm view

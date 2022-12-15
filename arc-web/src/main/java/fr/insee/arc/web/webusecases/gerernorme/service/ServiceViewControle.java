@@ -28,7 +28,7 @@ public class ServiceViewControle extends HubServiceGererNorme {
 	 * @return success
 	 */
 	public String addControle(Model model) {
-		return addLineVobject(model, RESULT_SUCCESS, this.viewControle);
+		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewControle());
 	}
 
 	/**
@@ -38,7 +38,7 @@ public class ServiceViewControle extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String deleteControle(Model model) {
-		return deleteLineVobject(model, RESULT_SUCCESS, this.viewControle);
+		return deleteLineVobject(model, RESULT_SUCCESS, this.views.getViewControle());
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class ServiceViewControle extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String updateControle(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.viewControle);
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewControle());
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class ServiceViewControle extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String sortControle(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.viewControle);
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewControle());
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class ServiceViewControle extends HubServiceGererNorme {
 	 * @throws IOException
 	 */
 	public String importControle(Model model, MultipartFile fileUploadControle) {
-		uploadFileRule(getViewControle(), viewJeuxDeRegles, fileUploadControle);
+		uploadFileRule(views.getViewControle(), views.getViewJeuxDeRegles(), fileUploadControle);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -79,7 +79,7 @@ public class ServiceViewControle extends HubServiceGererNorme {
 	 */
 	public String viderControle(Model model) {
 
-		emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
+		emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

@@ -27,8 +27,8 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 	 * @return
 	 */
 	public String selectJeuxDeReglesChargementCopie(Model model) {
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewChargement.getTable());
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewChargement.getSessionName());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewChargement().getTable());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewChargement().getSessionName());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -40,8 +40,8 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 	 */
 	public String selectJeuxDeReglesNormageCopie(Model model) {
 
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewNormage.getTable());
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewNormage.getSessionName());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewNormage().getTable());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewNormage().getSessionName());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -53,8 +53,8 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 	 */
 	public String selectJeuxDeReglesControleCopie(Model model) {
 
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewControle.getTable());
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewControle.getSessionName());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewControle().getTable());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewControle().getSessionName());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -66,8 +66,8 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 	 */
 	public String selectJeuxDeReglesFiltrageCopie(Model model) {
 
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewFiltrage.getTable());
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewFiltrage.getSessionName());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewFiltrage().getTable());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewFiltrage().getSessionName());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -79,15 +79,15 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 	 */
 	public String selectJeuxDeReglesMappingCopie(Model model) {
 
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewMapping.getTable());
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewMapping.getSessionName());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewMapping().getTable());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewMapping().getSessionName());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	public String selectJeuxDeReglesExpressionCopie(Model model) {
 
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_TABLE, this.viewExpression.getTable());
-		this.viewJeuxDeReglesCopie.setCustomValue(SELECTED_RULESET_NAME, this.viewExpression.getSessionName());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewExpression().getTable());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewExpression().getSessionName());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -98,10 +98,10 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 	public String copieJeuxDeRegles(Model model) throws ArcException {
 		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		// le jeu de regle à copier
-		Map<String, ArrayList<String>> selectionOut = viewJeuxDeRegles.mapContentSelected();
+		Map<String, ArrayList<String>> selectionOut = views.getViewJeuxDeRegles().mapContentSelected();
 		// le nouveau jeu de regle
-		Map<String, ArrayList<String>> selectionIn = viewJeuxDeReglesCopie.mapContentSelected();
-		HashMap<String, String> type = viewJeuxDeReglesCopie.mapHeadersType();
+		Map<String, ArrayList<String>> selectionIn = views.getViewJeuxDeReglesCopie().mapContentSelected();
+		HashMap<String, String> type = views.getViewJeuxDeReglesCopie().mapHeadersType();
 		if (!selectionIn.isEmpty()) {
 
 			// columns found in all rules tables
@@ -170,15 +170,15 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 
 			// delete the current rules before the copy
 			if (this.getSelectedJeuDeRegle().equals("arc.ihm_chargement_regle")) {
-				emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
+				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_normage_regle")) {
-				emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
+				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
-				emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
+				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
-				emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE));
+				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
-				emptyRuleTable(this.viewJeuxDeRegles, dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
+				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 			}
 
 			// excute the copy
@@ -187,10 +187,10 @@ public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 			} catch (ArcException ex) {
 				loggerDispatcher.error("Error in copieJeuxDeRegles", ex, LOGGER);
 			}
-			this.vObjectService.destroy(viewJeuxDeReglesCopie);
+			this.vObjectService.destroy(views.getViewJeuxDeReglesCopie());
 		} else {
 			loggerDispatcher.info("No rule set choosed", LOGGER);
-			this.viewJeuxDeRegles.setMessage("Please choose a ruleset");
+			this.views.getViewJeuxDeRegles().setMessage("Please choose a ruleset");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
