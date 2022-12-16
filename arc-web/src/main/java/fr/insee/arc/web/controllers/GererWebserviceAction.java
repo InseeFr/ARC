@@ -15,9 +15,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.web.gui.ArcWebGenericService;
 import fr.insee.arc.web.model.WebServiceManagementModel;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.webusecases.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.web.dao.UserManagementDao;
+import fr.insee.arc.web.gui.ArcWebGenericService;
 import fr.insee.arc.web.model.UserManagementModel;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.webusecases.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

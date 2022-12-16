@@ -37,6 +37,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.web.gui.ArcWebGenericService;
 import fr.insee.arc.web.model.EnvManagementModel;
 import fr.insee.arc.web.model.viewobjects.ViewArchiveBAS;
 import fr.insee.arc.web.model.viewobjects.ViewEntrepotBAS;
@@ -44,7 +45,6 @@ import fr.insee.arc.web.model.viewobjects.ViewFichierBAS;
 import fr.insee.arc.web.model.viewobjects.ViewPilotageBAS;
 import fr.insee.arc.web.model.viewobjects.ViewRapportBAS;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
-import fr.insee.arc.web.webusecases.ArcWebGenericService;
 import fr.insee.arc.web.util.LineObject;
 import fr.insee.arc.web.util.VObject;
 
