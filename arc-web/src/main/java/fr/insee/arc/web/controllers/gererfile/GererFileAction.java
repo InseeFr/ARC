@@ -3,6 +3,7 @@ package fr.insee.arc.web.controllers.gererfile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.h2.store.fs.FileUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
@@ -48,7 +48,7 @@ public class GererFileAction extends ArcWebGenericService<FileSystemManagementMo
 	private static final String VC_FILENAME ="filename";
 	
 	// private max number of files shown FROM directory
-	private static final int MAX_NUMBER_OF_FILES_SHOWN_FROM_DIRECTORY=50;
+	private static final int MAX_NUMBER_OF_FILES_SHOWN_FROM_DIRECTORY=1000;
 
 
 	private VObject viewDirIn;
@@ -285,17 +285,22 @@ public class GererFileAction extends ArcWebGenericService<FileSystemManagementMo
 				if (fileSource.isFile()) {
 					if (!fileSource.getName().contains(DELETABLE))
 					{
-						String errorMessage = "file must contain the word DELETE to be deleted : "+fileSource;
+						String errorMessage = "file name must contain the word DELETE to be deleted : "+fileSource;
 						viewSource.setMessage(errorMessage);
 					}
 					else
 					{
-						if (!fileSource.delete())
-						{
+						try {
+							Files.delete(fileSource.toPath());
+						} catch (IOException e) {
 							String errorMessage = "An error occured while deleting the file "+fileSource;
-							viewSource.setMessage(errorMessage);
-						}
+							viewSource.setMessage(errorMessage);						}
 					}
+				}
+				else
+				{
+					String errorMessage = "The selected directory cannot be deleted this way. Go under the directory to delete it."+fileSource;
+					viewSource.setMessage(errorMessage);
 				}
 			}
 			return false;
@@ -303,17 +308,28 @@ public class GererFileAction extends ArcWebGenericService<FileSystemManagementMo
 		
 		if (!dirSource.contains(DELETABLE))
 		{
+			String errorMessage = "directory name must contain the word DELETE to be deleted "+dirSource;
+			viewSource.setMessage(errorMessage);
+
 			return false;
 		}
 		
+
 		File dirSourceFile = new File(dirSource);
 		if (dirSourceFile.listFiles().length == 0) {
-			FileUtils.delete(dirSource);
+			try {
+				Files.delete(dirSourceFile.toPath());
+			} catch (IOException e) {
+				String errorMessage = "An error occured while deleting the directory " + dirSource;
+				viewSource.setMessage(errorMessage);
+			}
 			return true;
 		} else {
 			for (File f : dirSourceFile.listFiles()) {
 				if (f.isFile()) {
-					if (!f.delete()) {
+					try {
+						Files.delete(f.toPath());
+					} catch (IOException e) {
 						String errorMessage = "An error occured while deleting the file " + f;
 						viewSource.setMessage(errorMessage);
 					}
@@ -420,7 +436,12 @@ public class GererFileAction extends ArcWebGenericService<FileSystemManagementMo
 		{
 			if (m.get(VC_FILENAME).get(0)!=null && !m.get(VC_FILENAME).get(0).trim().equals(""))
 			{
-				FileUtils.createDirectory(dirSource+m.get(VC_FILENAME).get(0).trim());
+				Path directoryPath = Paths.get(dirSource+m.get(VC_FILENAME).get(0).trim());
+				try {
+					Files.createDirectory(directoryPath);
+				} catch (IOException e) {
+					viewSource.setMessage("directory creation failed "+directoryPath);
+				}
 			}
 		}
 	}

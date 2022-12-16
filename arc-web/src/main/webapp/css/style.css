@@ -394,8 +394,8 @@ th textarea {
 	background-image: none;
 	background-repeat: no-repeat;
 	background-position: 100% 100%;
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 }
 textarea:not(.noselect ):focus {
 	background-image: none;
@@ -453,7 +453,6 @@ div.fond {
 div#body {
 	width: 100%;
 	height: 100%;
-	/*float:left;*/
 	border: 0px;
 	margin-top: 0px;
 	text-align: center;
@@ -518,7 +517,6 @@ div.wrapper_presentation {
 	position: relative;
 	overflow-y: auto;
 	max-height: 850px;
-	/*left:160px;*/
 }
 
 div.wrapper_presentation_global {
@@ -529,7 +527,6 @@ div.wrapper_presentation_global {
 
 div.fieldset_header {
 	position: relative;
-	/*background-color: #e5f0ff;*/
 	margin-bottom: 0px;
 	border-bottom: 1px solid #aaaaaa;
 	min-width: 830px;
@@ -1012,37 +1009,6 @@ ul.listeDivReduites li:hover {
 	border: 1px outset #AAAAAA;
 }
 
-.iconReduire {
-	background-position: -48px -128px;
-}
-
-.iconAgrandir {
-	background-position: -176px -145px;
-}
-
-.iconToggle {
-	background-position: -176px -48px;
-}
-
-.icon {
-	width: 16px;
-	height: 16px;
-	display: block;
-	text-indent: -99999px;
-	overflow: hidden;
-	background-repeat: no-repeat;
-	background-image:
-		url(/GEOLOC_interactif/images/ui-icons_ededed_256x240.png);
-}
-
-.slide {
-	display: inline-block;
-	width: 8em;
-	vertical-align: middle;
-	margin-left: 10px;
-	height: 3px;
-}
-
 li.bleu {
 	color: #000099;
 }
@@ -1057,18 +1023,6 @@ li.rouge {
 
 li.edition {
 	color: #9900CC;
-}
-
-#nomDeLaNouvelleNomenclature {
-	background-color: white;
-	border: medium;
-	width: 200px;
-}
-
-#commentaireGererNomenclature {
-	background-color: white;
-	border: medium;
-	width: 200px;
 }
 
 #nmcl {

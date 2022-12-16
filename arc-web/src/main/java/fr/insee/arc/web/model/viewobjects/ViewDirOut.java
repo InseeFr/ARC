@@ -11,9 +11,9 @@ public class ViewDirOut extends VObject {
         super();
         
         this.setTitle("view.dirOut");
-        
         this.setSessionName("viewDirOut");
-        
+		this.setDefaultPaginationSize(20);
+
         this.setConstantVObject(new ConstantVObject(
 
         new HashMap<String, ColumnRendering>() {

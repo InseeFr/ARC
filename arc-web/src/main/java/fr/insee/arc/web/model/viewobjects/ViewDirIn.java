@@ -11,9 +11,8 @@ public class ViewDirIn extends VObject {
         super();
         
         this.setTitle("view.dirIn");
-        
         this.setSessionName("viewDirIn");
-        
+		this.setDefaultPaginationSize(20);
         this.setConstantVObject(new ConstantVObject(
 
         new HashMap<String, ColumnRendering>() {
