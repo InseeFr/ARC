@@ -2,7 +2,7 @@ package fr.insee.arc.web.webusecases.gerernorme.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,7 +13,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.web.util.ConstanteBD;
 
-@Controller
+@Service
 public class ServiceViewMapping extends HubServiceGererNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewMapping.class);

@@ -2,13 +2,13 @@ package fr.insee.arc.web.webusecases.gerernorme.service;
 
 import java.io.IOException;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ViewEnum;
 
-@Controller
+@Service
 public class ServiceViewControle extends HubServiceGererNorme {
 
 	/**

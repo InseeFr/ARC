@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -23,7 +23,7 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.util.ConstanteBD;
 import fr.insee.arc.web.util.VObject;
 
-@Controller
+@Service
 public class ServiceViewJeuxDeRegles extends HubServiceGererNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewJeuxDeRegles.class);

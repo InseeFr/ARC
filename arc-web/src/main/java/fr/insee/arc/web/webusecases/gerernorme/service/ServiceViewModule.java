@@ -1,9 +1,9 @@
 package fr.insee.arc.web.webusecases.gerernorme.service;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-@Controller
+@Service
 public class ServiceViewModule extends HubServiceGererNorme {
 
 	/**

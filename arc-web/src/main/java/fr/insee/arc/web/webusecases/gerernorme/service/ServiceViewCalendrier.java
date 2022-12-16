@@ -3,10 +3,10 @@ package fr.insee.arc.web.webusecases.gerernorme.service;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-@Controller
+@Service
 public class ServiceViewCalendrier extends HubServiceGererNorme {
 
 	/**

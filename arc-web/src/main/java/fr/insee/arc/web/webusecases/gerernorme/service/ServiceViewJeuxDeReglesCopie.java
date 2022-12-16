@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -15,7 +15,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.web.util.ConstanteBD;
 
-@Controller
+@Service
 public class ServiceViewJeuxDeReglesCopie extends HubServiceGererNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewJeuxDeReglesCopie.class);

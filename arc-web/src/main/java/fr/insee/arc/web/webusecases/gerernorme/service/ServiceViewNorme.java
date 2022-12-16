@@ -5,10 +5,10 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-@Controller
+@Service
 public class ServiceViewNorme extends HubServiceGererNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewNorme.class);

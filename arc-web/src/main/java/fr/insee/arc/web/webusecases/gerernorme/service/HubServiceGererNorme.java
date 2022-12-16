@@ -13,10 +13,9 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,7 +35,7 @@ import fr.insee.arc.web.webusecases.ArcWebGenericService;
 import fr.insee.arc.web.webusecases.gerernorme.dao.GererNormeDao;
 import fr.insee.arc.web.webusecases.gerernorme.model.ModelGererNorme;
 
-@Controller
+@Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class HubServiceGererNorme extends ArcWebGenericService<ModelGererNorme> implements IDbConstant {
 	
