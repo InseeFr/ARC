@@ -14,7 +14,7 @@ import org.springframework.ui.Model;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 
 @Service
-public class ServiceViewFileExport extends HubServiceExport {
+public class ServiceViewFileExport extends InteractorExport {
 
 
     public String selectFileExport(Model model) {

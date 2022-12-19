@@ -187,7 +187,6 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
     	model.addAttribute("version", getVersion());
     	model.addAttribute("isEnvProd", isEnvProd());
     	model.addAttribute("application", getApplication());
-    	model.addAttribute("userManagementActive", properties.isLdapActive());
 	}
 	
 	/** Adds (if overridden) more attributes to the model.*/

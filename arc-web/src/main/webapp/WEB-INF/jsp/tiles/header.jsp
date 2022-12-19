@@ -61,9 +61,6 @@
 			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectExport" /><c:param name="linkId" value="export" /></c:import>
 			
 			<li><h5 class="mt-4">Maintenance</h5></li>
-			<c:if test="${userManagementActive}">
-				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectGererUtilisateurs" /><c:param name="linkId" value="userManagement" /></c:import>
-			</c:if>
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectParameters" /><c:param name="linkId" value="parameters" /></c:import>
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectOperations" /><c:param name="linkId" value="operations" /></c:import>
     	</ul>

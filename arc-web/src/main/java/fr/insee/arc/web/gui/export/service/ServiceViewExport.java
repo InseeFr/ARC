@@ -27,7 +27,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
 
 @Service
-public class ServiceViewExport extends HubServiceExport {
+public class ServiceViewExport extends InteractorExport {
 	   public String selectExport(Model model) {
 
 			return generateDisplay(model, RESULT_SUCCESS);
