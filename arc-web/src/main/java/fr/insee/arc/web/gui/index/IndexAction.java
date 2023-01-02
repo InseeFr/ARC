@@ -1,4 +1,4 @@
-package fr.insee.arc.web.controllers;
+package fr.insee.arc.web.gui.index;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.webutils.WebUtils;
-import fr.insee.arc.web.gui.ArcWebGenericService;
-import fr.insee.arc.web.model.NoModel;
+import fr.insee.arc.web.gui.all.model.NoModel;
+import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

@@ -28,10 +28,10 @@ import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.web.gui.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.model.GuiModules;
+import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.norme.dao.GererNormeDao;
 import fr.insee.arc.web.gui.norme.model.ModelNorme;
-import fr.insee.arc.web.model.GuiModules;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
 

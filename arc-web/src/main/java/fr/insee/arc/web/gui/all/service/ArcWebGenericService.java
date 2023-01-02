@@ -1,4 +1,4 @@
-package fr.insee.arc.web.gui;
+package fr.insee.arc.web.gui.all.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,11 +28,11 @@ import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.web.controllers.HomeAction;
-import fr.insee.arc.web.controllers.IndexAction;
-import fr.insee.arc.web.dao.IndexDao;
-import fr.insee.arc.web.model.ArcModel;
-import fr.insee.arc.web.model.SessionParameters;
+import fr.insee.arc.web.gui.all.dao.ArcWebGenericDao;
+import fr.insee.arc.web.gui.all.model.ArcModel;
+import fr.insee.arc.web.gui.all.model.SessionParameters;
+import fr.insee.arc.web.gui.home.HomeAction;
+import fr.insee.arc.web.gui.index.IndexAction;
 import fr.insee.arc.web.util.Session;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
@@ -72,7 +72,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 	protected String repertoire;
 	
 	@Autowired
-	private IndexDao indexDao;
+	private ArcWebGenericDao indexDao;
 
 	private Map<String, String> envMap;
 	

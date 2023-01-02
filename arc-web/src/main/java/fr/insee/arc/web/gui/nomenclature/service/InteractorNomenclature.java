@@ -18,7 +18,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.web.gui.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.nomenclature.model.ModelNomenclature;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;

@@ -9,7 +9,6 @@ import fr.insee.arc.web.gui.maintenanceparametre.service.ServiceViewParameters;
 @Controller
 public class ControllerViewParameters extends ServiceViewParameters {
 	
-
     @RequestMapping("/selectParameters")
     public String selectParametersAction(Model model) {
     	return selectParameters(model);
@@ -34,5 +33,11 @@ public class ControllerViewParameters extends ServiceViewParameters {
     public String sortParametersAction(Model model) {
     	return sortParameters(model);
     }
+
+    @RequestMapping("/startParameters")
+    public String startParametersAction(Model model) {
+    	return startParameters(model);
+    }
+	
 
 }

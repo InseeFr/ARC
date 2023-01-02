@@ -26,7 +26,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.web.gui.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.LineObject;

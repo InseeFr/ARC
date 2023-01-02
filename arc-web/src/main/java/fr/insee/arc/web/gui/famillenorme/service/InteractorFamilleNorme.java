@@ -20,7 +20,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.web.gui.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.famillenorme.model.ModelGererFamille;
 import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;

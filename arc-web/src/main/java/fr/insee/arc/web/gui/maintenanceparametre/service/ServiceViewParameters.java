@@ -30,4 +30,8 @@ public class ServiceViewParameters extends InteractorMaintenanceParameters {
         return generateDisplay(model, RESULT_SUCCESS);
     }
 
+    public String startParameters(Model model) {
+        return generateDisplay(model, RESULT_SUCCESS);
+    }
+	
 }

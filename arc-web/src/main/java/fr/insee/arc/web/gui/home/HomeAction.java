@@ -1,4 +1,4 @@
-package fr.insee.arc.web.controllers;
+package fr.insee.arc.web.gui.home;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -9,8 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.web.gui.ArcWebGenericService;
-import fr.insee.arc.web.model.NoModel;
+import fr.insee.arc.web.gui.all.model.NoModel;
+import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -20,7 +20,7 @@ public class HomeAction extends ArcWebGenericService<NoModel> {
     private static final String RESULT_SUCCESS = "jsp/home.jsp";
     
     @RequestMapping("/")
-    public String index(Model model, HttpServletRequest request) {
+    public String home(Model model, HttpServletRequest request) {
     	return generateDisplay(model, RESULT_SUCCESS);
     }
 

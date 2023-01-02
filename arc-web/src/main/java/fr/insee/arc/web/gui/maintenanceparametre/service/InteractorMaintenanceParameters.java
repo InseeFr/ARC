@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.web.gui.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.maintenanceparametre.model.ModelMaintenanceParametre;
 
 

@@ -1,8 +1,11 @@
-package fr.insee.arc.web.model;
+package fr.insee.arc.web.gui.maintenanceoperation.model;
 
-import fr.insee.arc.web.model.viewobjects.ViewOperations;
+import org.springframework.stereotype.Component;
+
+import fr.insee.arc.web.gui.all.model.ArcModel;
 import fr.insee.arc.web.util.VObject;
 
+@Component
 public class MaintenanceOperationsModel implements ArcModel {
 
     private VObject viewOperations;
