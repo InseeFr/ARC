@@ -1,4 +1,4 @@
-package fr.insee.arc.web.dao;
+package fr.insee.arc.web.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;

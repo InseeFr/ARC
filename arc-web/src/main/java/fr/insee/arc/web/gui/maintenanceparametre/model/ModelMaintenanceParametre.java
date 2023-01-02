@@ -1,14 +1,17 @@
-package fr.insee.arc.web.model;
+package fr.insee.arc.web.gui.maintenanceparametre.model;
 
-import fr.insee.arc.web.model.viewobjects.ViewParameters;
+import org.springframework.stereotype.Component;
+
+import fr.insee.arc.web.model.ArcModel;
 import fr.insee.arc.web.util.VObject;
 
-public class MaintenanceParametersModel implements ArcModel {
+@Component
+public class ModelMaintenanceParametre implements ArcModel {
 
     private VObject viewParameters;
 
 
-    public MaintenanceParametersModel() {
+    public ModelMaintenanceParametre() {
 		this.viewParameters = new ViewParameters();
 	}
 

@@ -7,10 +7,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.web.gui.pilotage.service.ServiceFichierBAS;
+import fr.insee.arc.web.gui.pilotage.service.ServiceViewFichierBAS;
 
 @Controller
-public class ControllerFichierBAS extends ServiceFichierBAS {
+public class ControllerFichierBAS extends ServiceViewFichierBAS {
 
 	@RequestMapping("/selectFichierBAS")
 	public String selectFichierBASAction(Model model) {

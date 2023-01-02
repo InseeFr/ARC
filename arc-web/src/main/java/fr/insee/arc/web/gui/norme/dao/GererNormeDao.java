@@ -8,7 +8,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
-import fr.insee.arc.web.dao.ArcGenericDao;
+import fr.insee.arc.web.gui.ArcGenericDao;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
 

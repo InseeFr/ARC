@@ -6,10 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import fr.insee.arc.web.gui.pilotage.service.ServicePilotageProd;
+import fr.insee.arc.web.gui.pilotage.service.ServiceViewPilotageProd;
 
 @Controller
-public class ControllerPilotageProd extends ServicePilotageProd {
+public class ControllerPilotageProd extends ServiceViewPilotageProd {
 	
 	/**
 	 * Service permettant de visualiser l'état du batch en production

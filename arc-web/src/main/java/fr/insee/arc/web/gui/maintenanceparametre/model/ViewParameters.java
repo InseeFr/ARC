@@ -1,4 +1,4 @@
-package fr.insee.arc.web.model.viewobjects;
+package fr.insee.arc.web.gui.maintenanceparametre.model;
 
 import java.util.HashMap;
 

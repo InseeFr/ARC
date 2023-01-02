@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 @Service
-public class ServiceEntrepotBAS extends InteractorPilotage {
+public class ServiceViewEntrepotBAS extends InteractorPilotage {
 
 	/**
 	 * Fabrication d'une table temporaire avec comme contenu le nom des archives

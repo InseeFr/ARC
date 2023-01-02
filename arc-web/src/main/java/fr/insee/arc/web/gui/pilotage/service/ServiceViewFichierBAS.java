@@ -27,9 +27,9 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
 @Service
-public class ServiceFichierBAS extends InteractorPilotage {
+public class ServiceViewFichierBAS extends InteractorPilotage {
 
-	private static final Logger LOGGER = LogManager.getLogger(ServiceFichierBAS.class);
+	private static final Logger LOGGER = LogManager.getLogger(ServiceViewFichierBAS.class);
 
 	public String selectFichierBAS(Model model) {
 

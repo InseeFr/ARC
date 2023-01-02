@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import fr.insee.arc.web.gui.pilotage.service.ServiceEntrepotBAS;
+import fr.insee.arc.web.gui.pilotage.service.ServiceViewEntrepotBAS;
 
 @Controller
-public class ControllerEntrepotBAS extends ServiceEntrepotBAS {
+public class ControllerEntrepotBAS extends ServiceViewEntrepotBAS {
 
 
 	/**

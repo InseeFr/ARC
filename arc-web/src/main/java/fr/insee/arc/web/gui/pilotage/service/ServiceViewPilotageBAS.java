@@ -19,9 +19,9 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
 @Service
-public class ServicePilotageBAS extends InteractorPilotage {
+public class ServiceViewPilotageBAS extends InteractorPilotage {
 
-	private static final Logger LOGGER = LogManager.getLogger(ServicePilotageBAS.class);
+	private static final Logger LOGGER = LogManager.getLogger(ServiceViewPilotageBAS.class);
 
 	private static final String WRITING_REPO = "entrepotEcriture";
 

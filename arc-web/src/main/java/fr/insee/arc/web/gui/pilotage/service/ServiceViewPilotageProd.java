@@ -14,9 +14,9 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
 @Service
-public class ServicePilotageProd extends InteractorPilotage {
+public class ServiceViewPilotageProd extends InteractorPilotage {
 
-	private static final Logger LOGGER = LogManager.getLogger(ServicePilotageProd.class);
+	private static final Logger LOGGER = LogManager.getLogger(ServiceViewPilotageProd.class);
 
 	
 	/**

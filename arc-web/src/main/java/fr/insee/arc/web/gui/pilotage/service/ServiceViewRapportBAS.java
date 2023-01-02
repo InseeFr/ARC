@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 @Service
-public class ServiceRapportBAS extends InteractorPilotage {
+public class ServiceViewRapportBAS extends InteractorPilotage {
 
 	public String selectRapportBAS(Model model) {
 

@@ -19,10 +19,10 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.web.gui.pilotage.service.ServicePilotageBAS;
+import fr.insee.arc.web.gui.pilotage.service.ServiceViewPilotageBAS;
 
 @Controller
-public class ControllerPilotageBAS extends ServicePilotageBAS {
+public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	
 	/**
 	 * Entering sandbox monitoring from main menu build the database and filesystem

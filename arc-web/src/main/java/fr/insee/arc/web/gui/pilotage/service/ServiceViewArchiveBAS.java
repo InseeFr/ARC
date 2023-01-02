@@ -18,9 +18,9 @@ import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
 
 @Service
-public class ServiceArchiveBAS extends InteractorPilotage {
+public class ServiceViewArchiveBAS extends InteractorPilotage {
 
-	private static final Logger LOGGER = LogManager.getLogger(ServiceArchiveBAS.class);
+	private static final Logger LOGGER = LogManager.getLogger(ServiceViewArchiveBAS.class);
 
 	/**
 	 * Téléchargement d'enveloppe contenu dans le dossier d'archive
