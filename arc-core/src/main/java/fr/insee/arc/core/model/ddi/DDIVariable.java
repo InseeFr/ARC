@@ -1,10 +1,28 @@
 package fr.insee.arc.core.model.ddi;
 
+/**
+ * Représente une variable concrète définie par DDI, soit le contenu d'une balise {@code Variable}.
+ * 
+ * @author Z84H10
+ *
+ */
 public class DDIVariable {
 
+	/**
+	 * Nom de la variable.
+	 */
     private String variableName;
+    /**
+     * Identifiant unique de l'objet. Il permet d'établir les relations entre objets.
+     */
     private String idVariable;
+    /**
+     * Libellé de la variable.
+     */
     private String label;
+    /**
+     * Identifiant du concept de variable associé à la variable.
+     */
     private String idRepresentedVariable;
 
     public String getVariableName() {

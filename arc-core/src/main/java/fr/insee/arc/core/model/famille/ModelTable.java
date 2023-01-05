@@ -1,9 +1,24 @@
 package fr.insee.arc.core.model.famille;
 
+/**
+ * Représente une table dans ARC.
+ * 
+ * @author Z84H10
+ *
+ */
 public class ModelTable {
 
+	/**
+	 * Identifiant nominal de la famille de norme à laquelle appartient la table.
+	 */
     private String idFamille;
+    /**
+     * Nom métier de la table.
+     */
     private String nomTableMetier;
+    /**
+     * Description et particularités de la table.
+     */
     private String descriptionTable;
 
     public void setIdFamille(String idFamille) {

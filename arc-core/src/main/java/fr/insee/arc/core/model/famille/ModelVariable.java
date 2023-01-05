@@ -1,11 +1,32 @@
 package fr.insee.arc.core.model.famille;
 
+/**
+ * Représente une variable dans une table de ARC.
+ * 
+ * @author Z84H10
+ *
+ */
 public class ModelVariable {
 
+	/**
+	 * Identifiant nominal de la famille de norme à laquelle appartient la variable.
+	 */
     private String idFamille;
+    /**
+     * Nom métier de la table à laquelle appartient la variable.
+     */
     private String nomTableMetier;
+    /**
+     * Nom métier de la variable.
+     */
     private String nomVariableMetier;
+    /**
+     * Type de la variable. Type {@code text} par défaut et si non renseigné.
+     */
     private String typeVariableMetier;
+    /**
+     * Description et particularités de la variable.
+     */
     private String descriptionVariableMetier;
     private String typeConsolidation;
 

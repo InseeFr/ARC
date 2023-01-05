@@ -454,14 +454,12 @@ public class NormageEngine {
 								if (c.startsWith("i_")) {
 									String addCol = "do $$ begin alter table {table_destination} add " + c
 											+ " integer; exception when others then end; $$;";
-									// blocCreateNew.insert(0,addCol);
 									if (!this.columnToBeAdded.contains(addCol)) {
 										this.columnToBeAdded = this.columnToBeAdded + addCol;
 									}
 								} else {
 									String addCol = "do $$ begin alter table {table_destination} add " + c
 											+ " text; exception when others then end; $$;";
-									// blocCreateNew.insert(0,addCol);
 									if (!this.columnToBeAdded.contains(addCol)) {
 										this.columnToBeAdded = this.columnToBeAdded + addCol;
 									}

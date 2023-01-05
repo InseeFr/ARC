@@ -7,6 +7,7 @@ public enum TypeEnum {
 	, INT("int", false)
 	, BIGINT("bigint", false)
 	, SERIAL("serial",false)
+	, DATE("date",false)
 	;
 	
 	private TypeEnum(String typeName, boolean isCollated) {

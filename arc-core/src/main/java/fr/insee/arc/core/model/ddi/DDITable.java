@@ -1,11 +1,32 @@
 package fr.insee.arc.core.model.ddi;
 
+/**
+ * Représente une table de données défini par DDI, soit le contenu d'une balise {@code LogicalRecord}.
+ * 
+ * @author Z84H10
+ *
+ */
 public class DDITable {
 
+	/**
+	 * Nom de la table.
+	 */
     private String tableName;
+    /**
+     * Identifiant unique de l'objet. Il permet d'établir les relations entre objets.
+     */
     private String idTable;
+    /**
+     * Libellé de la table.
+     */
     private String label;
+    /**
+     * Description et particularités de la table.
+     */
     private String description;
+    /**
+     * Identifiant du modèle de données auquel appartient la table.
+     */
     private String idDatabase;
 
     public String getTableName() {

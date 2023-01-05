@@ -12,7 +12,14 @@ import fr.insee.arc.core.model.ddi.DDIVariable;
 import fr.insee.arc.core.model.ddi.DDIVariableOfTable;
 import fr.insee.arc.core.model.famille.ModelTable;
 import fr.insee.arc.core.model.famille.ModelVariable;
+import fr.insee.arc.core.model.famille.ModelVariableTypeEnum;
 
+/**
+ * Classe intégrant un modèle de données en sortie de {@link DDIHandler} dans le modèle {@code famille} de ARC
+ * 
+ * @author Z84H10
+ *
+ */
 public class DDIModeler {
 
     public List<ModelTable> getModelTables() {
@@ -23,67 +30,57 @@ public class DDIModeler {
         return modelVariables;
     }
 
+    /**
+     * Liste alimentée des tables lues par le modeler.
+     */
     private final List<ModelTable> modelTables = new ArrayList<>();
+    /**
+     * Liste alimentée des variables lues par le modeler.
+     */
     private final List<ModelVariable> modelVariables = new ArrayList<>();
-
-    private static final Map<String, String> datatypes;
+    /**
+     * Réalise le lien entre les types DDI et les types {@link ModelVariableTypeEnum}.
+     */
+    private static final Map<String, ModelVariableTypeEnum> datatypes;
     static {
         datatypes = new HashMap<>();
-        datatypes.put("Text", "text");
-        datatypes.put("Numeric", "float"); // tous entiers a priori (identifiants uniquement?)
-        datatypes.put("Category", "text");
-        datatypes.put("DateTime", "date");
-        datatypes.put("undefined", "text"); // si pas de r variable
-        datatypes.put("[type]", "text"); // si r variable n'a pas de type
-        // obligatoire de préciser une taille pour VARCHAR, sinon défaut à 1 et la chaîne de caractères est tronquée
+        datatypes.put("Text", ModelVariableTypeEnum.TEXT);
+        datatypes.put("Code", ModelVariableTypeEnum.TEXT);
+        datatypes.put("Float", ModelVariableTypeEnum.FLOAT);
+        datatypes.put("Decimal", ModelVariableTypeEnum.FLOAT);
+        datatypes.put("Double", ModelVariableTypeEnum.FLOAT);
+        datatypes.put("Integer", ModelVariableTypeEnum.BIGINT);
+        datatypes.put("Long", ModelVariableTypeEnum.BIGINT);
+        datatypes.put("Short", ModelVariableTypeEnum.BIGINT);
+        datatypes.put("DateTime", ModelVariableTypeEnum.DATE);
+        datatypes.put("undefined", ModelVariableTypeEnum.TEXT); // si pas de r variable
     }
 
+    /**
+     * Permet de convertir une sortie de {@link DDIHandler} en une famille de norme selon le modèle de ARC.
+     * @param h {@code DDIHandler} préalablement alimenté par un fichier XML DDI
+     */
     public void model(DDIHandler h) {
-        List<DDIDatabase> listDbs = h.getListDDIDatabases();
-        List<DDITable> listDDITables = h.getListTables();
-        List<DDIVariableOfTable> listVariablesOfTable = h.getListDDIVariableOfTables();
-        List<DDIVariable> listDDIVariables = h.getListVariables();
-        List<DDIRepresentedVariable> listDDIRepresentedVariables = h.getListRepresentedVariables();
         // build modelTables
-        for (DDITable t : listDDITables) {
+        for (DDITable t : h.getListDDITables()) {
             ModelTable mt = new ModelTable();
-            int i = 0;
-            while (i < listDbs.size() && !t.getIdDatabase().equals(listDbs.get(i).getId())) { // retrouver la database
-                i++;
-            }
-            DDIDatabase db = listDbs.get(i);
+            DDIDatabase db = h.getDDIDatabaseByID(t.getIdDatabase());
             mt.setIdFamille(db.getDbName());
             mt.setNomTableMetier(t.getTableName());
             mt.setDescriptionTable(t.getDescription());
             modelTables.add(mt);
         }
         // build modelVariables
-        for (DDIVariableOfTable vt : listVariablesOfTable) {
+        for (DDIVariableOfTable vt : h.getListDDIVariableOfTables()) { // car dans le modèle ARC une variable est propre à une table
             ModelVariable mv = new ModelVariable();
-            int ja = 0;
-            while (ja < listDDITables.size() && !vt.getIdTable().equals(listDDITables.get(ja).getIdTable())) { // retrouver la table
-                ja++;
-            }
-            DDITable t = listDDITables.get(ja);
-            int jb = 0;
-            while (jb < listDbs.size() && !t.getIdDatabase().equals(listDbs.get(jb).getId())) { // retrouver la database
-                jb++;
-            }
-            DDIDatabase db = listDbs.get(jb);
-            int jc = 0;
-            while (jc < listDDIVariables.size() && !vt.getIdVariable().equals(listDDIVariables.get(jc).getIdVariable())) { // retrouver la variable
-                jc++;
-            }
-            DDIVariable v = listDDIVariables.get(jc);
-            int jd = 0;
-            while (jd < listDDIRepresentedVariables.size() && !v.getIdRepresentedVariable().equals(listDDIRepresentedVariables.get(jd).getId())) { // retrouver la represented variable
-                jd++;
-            }
-            DDIRepresentedVariable rv = listDDIRepresentedVariables.get(jd);
+            DDITable t = h.getDDITableByID(vt.getIdTable());
+            DDIDatabase db = h.getDDIDatabaseByID(t.getIdDatabase());
+            DDIVariable v = h.getDDIVariableByID(vt.getIdVariable());
+            DDIRepresentedVariable rv = h.getDDIRepresentedVariableByID(v.getIdRepresentedVariable());
             mv.setIdFamille(db.getDbName());
             mv.setNomTableMetier(t.getTableName());
             mv.setNomVariableMetier(v.getVariableName());
-            mv.setTypeVariableMetier(datatypes.get(rv.getType()));
+            mv.setTypeVariableMetier(datatypes.get(rv.getType()).getTypeName());
             mv.setDescriptionVariableMetier(rv.getDescription());
             modelVariables.add(mv);
         }
