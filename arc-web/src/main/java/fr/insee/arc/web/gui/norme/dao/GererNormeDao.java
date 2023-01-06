@@ -1,9 +1,7 @@
 package fr.insee.arc.web.gui.norme.dao;
 
 import java.util.HashMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -11,7 +9,6 @@ import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.web.gui.all.model.GuiModules;
-import fr.insee.arc.web.gui.norme.service.InteractorNorme;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectHelperDao;
 import fr.insee.arc.web.util.VObjectService;
