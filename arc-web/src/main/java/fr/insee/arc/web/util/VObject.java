@@ -108,11 +108,11 @@ public class VObject {
 
 	public ArrayList<ArrayList<String>> listContent() {
 		if (getSavedContent() == null) {
-			return new ArrayList<ArrayList<String>>();
+			return new ArrayList<>();
 		}
-		ArrayList<ArrayList<String>> c = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> c = new ArrayList<>();
 		for (int i = 0; i < getSavedContent().size(); i++) {
-			ArrayList<String> l = new ArrayList<String>();
+			ArrayList<String> l = new ArrayList<>();
 			for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
 				l.add(getSavedContent().get(i).d.get(j));
 			}
@@ -160,7 +160,7 @@ public class VObject {
 	}
 
 	public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(int i) {
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
 		r.add(listContentBeforeUpdate().get(i));
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
@@ -192,7 +192,7 @@ public class VObject {
 	}
 
 	public HashMap<String, ArrayList<String>> mapContentAfterUpdate(int i) {
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
 		r.add(listContentAfterUpdate().get(i));
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
@@ -262,7 +262,7 @@ public class VObject {
 	}
 
 	public ArrayList<ArrayList<String>> listContentSelected() {
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
 		// si rien dans la liste, return null
 		if (getSelectedLines() == null || getSelectedLines().isEmpty()) {
 			return r;
@@ -286,7 +286,7 @@ public class VObject {
 	/** Return the index of headers selected */
 	public ArrayList<Integer> indexHeadersSelected() {
 		if (getSavedContent() == null) {
-			return new ArrayList<Integer>();
+			return new ArrayList<>();
 		}
 
 		ArrayList<String> listHeadersSelected = listHeadersSelected();
@@ -320,7 +320,7 @@ public class VObject {
 	}
 
 	public HashMap<String, String> mapHeadersSelected() {
-		HashMap<String, String> r = new HashMap<String, String>();
+		HashMap<String, String> r = new HashMap<>();
 		for (String s : listHeadersSelected()) {
 			r.put(s, s);
 		}
@@ -332,7 +332,7 @@ public class VObject {
 	}
 
 	public ArrayList<ArrayList<String>> listInputFields() {
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
 		r.add(getInputFields());
 		return r;
 	}
@@ -372,7 +372,7 @@ public class VObject {
 	}
 
 	public ArrayList<ArrayList<String>> listLineContent(int i) {
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
 		r.add(getContent().get(i).d);
 		return r;
 	}
@@ -383,10 +383,10 @@ public class VObject {
 
 	public HashMap<String, ArrayList<String>> mapFilterFields() {
 		if (getFilterFields() == null) {
-			return new HashMap<String, ArrayList<String>>();
+			return new HashMap<>();
 		}
 
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> r = new ArrayList<>();
 		r.add(getFilterFields());
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
@@ -503,7 +503,7 @@ public class VObject {
 	}
 
 	public ArrayList<String> getV(int j, TableObject content) {
-		ArrayList<String> h = new ArrayList<String>();
+		ArrayList<String> h = new ArrayList<>();
 		if (content == null) {
 			return h;
 		}

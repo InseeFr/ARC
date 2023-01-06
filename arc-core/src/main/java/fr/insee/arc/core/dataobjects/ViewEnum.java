@@ -1,14 +1,16 @@
 package fr.insee.arc.core.dataobjects;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public enum ViewEnum {
 
 	IHM_NORME("ihm_norme", false, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT)
 	, IHM_CALENDRIER("ihm_calendrier", false, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.ETAT)
-	, IHM_JEUDEREGLE("ihm_jeuderegle", false, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ETAT, ColumnEnum.DATE_PRODUCTION, ColumnEnum.DATE_INACTIF)
+	, IHM_JEUDEREGLE("ihm_jeuderegle", false, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ETAT)
+	
+	, VIEW_MODULE("view_module",false,ColumnEnum.MODULE_ORDER,ColumnEnum.MODULE_NAME)
+	
 	, IHM_CHARGEMENT_REGLE("ihm_chargement_regle", false, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE, ColumnEnum.TYPE_FICHIER, ColumnEnum.DELIMITER, ColumnEnum.FORMAT, ColumnEnum.COMMENTAIRE)
 	, IHM_NORMAGE_REGLE("ihm_normage_regle", false, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ID_CLASSE, ColumnEnum.RUBRIQUE, ColumnEnum.RUBRIQUE_NMCL, ColumnEnum.ID_REGLE, ColumnEnum.TODO, ColumnEnum.COMMENTAIRE)
 	, IHM_CONTROLE_REGLE("ihm_controle_regle", false, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ID_CLASSE, ColumnEnum.RUBRIQUE_PERE, ColumnEnum.RUBRIQUE_FILS, ColumnEnum.BORNE_INF, ColumnEnum.BORNE_SUP, ColumnEnum.CONDITION, ColumnEnum.PRE_ACTION, ColumnEnum.ID_REGLE, ColumnEnum.TODO, ColumnEnum.COMMENTAIRE, ColumnEnum.XSD_ORDRE, ColumnEnum.XSD_LABEL_FILS, ColumnEnum.XSD_ROLE, ColumnEnum.BLOCKING_THRESHOLD, ColumnEnum.ERROR_ROW_PROCESSING)
@@ -35,7 +37,14 @@ public enum ViewEnum {
 	private ViewEnum(String tableName, boolean isTableInSanbox, ColumnEnum...columns) {
 		this.tableName = tableName;
 		this.isTableInSanbox = isTableInSanbox;
-		this.columns=new LinkedHashSet<>(Arrays.asList(columns));
+		
+		this.columns=new LinkedHashMap<>();
+		for (ColumnEnum col:columns)
+		{
+			this.columns.put(col, col);
+			
+		}
+		
 	}
 
 	/**
@@ -48,7 +57,7 @@ public enum ViewEnum {
 	 */
 	private boolean isTableInSanbox;
 	
-	private Set<ColumnEnum> columns;
+	private Map<ColumnEnum,ColumnEnum> columns;
 
 	public String getTableName() {
 		return tableName;
@@ -58,14 +67,9 @@ public enum ViewEnum {
 		return isTableInSanbox;
 	}
 
-	public Set<ColumnEnum> getColumns() {
+	public Map<ColumnEnum,ColumnEnum> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(Set<ColumnEnum> columns) {
-		this.columns = columns;
-	}
-
-	
 	
 }

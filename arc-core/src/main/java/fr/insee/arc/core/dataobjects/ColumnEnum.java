@@ -58,6 +58,9 @@ public enum ColumnEnum {
 	, BLOCKING_THRESHOLD("blocking_threshold", TypeEnum.TEXT, "") // expliquer la colonne
 	, ERROR_ROW_PROCESSING("error_row_processing", TypeEnum.TEXT, "") // expliquer la colonne
 
+	, MODULE_ORDER("module_order", TypeEnum.INT, "index of rules module")
+	, MODULE_NAME("module_name", TypeEnum.TEXT, "name of rules module")
+	
 	, TEST1("test1", TypeEnum.TEXT, "test column 1"), TEST2("test2", TypeEnum.TEXT, "test column 2")
 
 	;

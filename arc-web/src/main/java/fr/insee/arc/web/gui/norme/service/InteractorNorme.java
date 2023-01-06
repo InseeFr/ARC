@@ -33,7 +33,6 @@ import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.norme.dao.GererNormeDao;
 import fr.insee.arc.web.gui.norme.model.ModelNorme;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectService;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -48,15 +47,17 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	
 	@Autowired
 	protected ModelNorme views;
-	
-    @Autowired
-    private VObjectService viewObject;
-	
+
 	// The action Name
 	public static final String ACTION_NAME="normManagement";
 
+	private GererNormeDao dao;
+
 	@Override
 	public void putAllVObjects(ModelNorme model) {
+		
+		dao = new GererNormeDao(vObjectService, dataObjectService);
+		
 		views.setViewNorme(vObjectService.preInitialize(model.getViewNorme()));
 		views.setViewCalendrier(vObjectService.preInitialize(model.getViewCalendrier()));
 		views.setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewJeuxDeRegles()));
@@ -70,13 +71,11 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 		views.setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
 		
 		putVObject(views.getViewNorme(),
-				t -> initializeViewNorme(t, dataObjectService.getView(ViewEnum.IHM_NORME)));
+				t -> initializeViewNorme(t));
 		//
-		putVObject(views.getViewCalendrier(), t -> initializeViewCalendar(t, views.getViewNorme(),
-				dataObjectService.getView(ViewEnum.IHM_CALENDRIER) ));
+		putVObject(views.getViewCalendrier(), t -> initializeViewCalendar(t, views.getViewNorme()));
 		//
-		putVObject(views.getViewJeuxDeRegles(), t -> initializeViewRulesSet(t, views.getViewCalendrier(),
-				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) ));
+		putVObject(views.getViewJeuxDeRegles(), t -> initializeViewRulesSet(t, views.getViewCalendrier()));
 		//
 		putVObject(views.getViewModules(), t -> initializeViewModules(t, views.getViewJeuxDeRegles()));
 		//
@@ -111,32 +110,29 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	/**
 	 * Initialize the {@value InteractorNorme#viewNorme}. Call dao to create the view
 	 */
-	public void initializeViewNorme(VObject viewNorme, String theDataViewName) {
+	public void initializeViewNorme(VObject viewNorme) {
 		LoggerHelper.debug(LOGGER, "/* initializeNorme */");
-	
-		GererNormeDao.initializeViewNorme(viewObject, viewNorme, theDataViewName);
-		
+		dao.initializeViewNorme(viewNorme);
 	}
 
 	/**
 	 * Initialize the {@value InteractorNorme#viewCalendar}. Only get the calendar
 	 * link to the selected norm.
 	 */
-	public void initializeViewCalendar(VObject viewCalendar, VObject viewNorme, String theTableName) {
+	public void initializeViewCalendar(VObject viewCalendar, VObject viewNorme) {
 		LoggerHelper.debug(LOGGER, "/* initializeCalendar */");
 
-		// get the norm selected
-		Map<String, ArrayList<String>> selection = viewNorme.mapContentSelected();
+		// get the norm selected records
+		Map<String, ArrayList<String>> viewNormSelectedRecords = viewNorme.mapContentSelected();
 
 		// if a norm is selected, trigger the call to dao to construct calendar view
-		if (!selection.isEmpty()) {
+		if (!viewNormSelectedRecords.isEmpty()) {
+
+			dao.setSelectedRecords(viewNormSelectedRecords);
+			dao.initializeViewCalendar(viewCalendar);
 			
-			// Get the type of the column for casting
-			HashMap<String, String> type = viewNorme.mapHeadersType();
-			
-			GererNormeDao.initializeViewCalendar(viewObject, viewCalendar, theTableName, selection, type);
 		} else {
-			viewObject.destroy(viewCalendar);
+			vObjectService.destroy(viewCalendar);
 		}
 	}
 
@@ -144,37 +140,19 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	 * Initialize the {@value InteractorNorme#viewRulesSet}. Only get the rulesset
 	 * link to the selected norm and calendar.
 	 */
-	public void initializeViewRulesSet(VObject viewRulesSet, VObject viewCalendar, String theTableName) {
+	public void initializeViewRulesSet(VObject viewRulesSet, VObject viewCalendar) {
 		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
 
 		// Get the selected calendar for requesting the rule set
-		Map<String, ArrayList<String>> selection = viewCalendar.mapContentSelected();
-		if (!selection.isEmpty()) {
-			HashMap<String, String> type = viewCalendar.mapHeadersType();
-			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-			requete.append(
-					"select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
-			requete.append(
-					" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-			requete.append(" and periodicite"
-					+ requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-			requete.append(" and validite_inf"
-					+ requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-			requete.append(" and validite_sup"
-					+ requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-
-			HashMap<String, String> defaultInputFields = new HashMap<>();
-			defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-			defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-			defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-			defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-
-			viewRulesSet.setAfterInsertQuery(new ArcPreparedStatementBuilder("select arc.fn_check_jeuderegle(); "));
-			viewRulesSet.setAfterUpdateQuery(new ArcPreparedStatementBuilder("select arc.fn_check_jeuderegle(); "));
-
-			viewObject.initialize(viewRulesSet, requete, theTableName, defaultInputFields);
+		Map<String, ArrayList<String>> viewCalendarSelectedRecords = viewCalendar.mapContentSelected();
+		
+		// if a calendar is selected, trigger the call to dao to construct rulesset view
+		if (!viewCalendarSelectedRecords.isEmpty()) {
+			
+			dao.setSelectedRecords(viewCalendarSelectedRecords);
+			dao.initializeViewRulesSet(viewRulesSet);
 		} else {
-			viewObject.destroy(viewRulesSet);
+			vObjectService.destroy(viewRulesSet);
 		}
 	}
 	
@@ -185,40 +163,23 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	public void initializeViewModules(VObject viewModules, VObject viewRulesSet) {
 		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
 
-		// Get the selected calendar for requesting the rule set
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		if (!selection.isEmpty()) {
-			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		// Get the selected ruleset
+		Map<String, ArrayList<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
+		
+		// if any ruleset selected, display and initialized the modules
+		if (!viewRulesSetSelectedRecords.isEmpty()) {
 			
+			dao.setSelectedRecords(viewRulesSetSelectedRecords);
+			dao.initializeViewModules(viewModules, t -> moduleIdentifier(t));
 			
-			boolean union=false;
-			int i=0;
-			for (GuiModules module:GuiModules.values())
-			{
-				if (union)
-				{
-					requete.append("\n UNION ALL ");
-				}
-				else
-				{
-					union=true;
-				}
-				
-				requete.append("\n SELECT "+(i++)+" as module_order, "+requete.quoteText(moduleIdentifier(module))+" as module_name");
-			}
-			
-
-			HashMap<String, String> defaultInputFields = new HashMap<>();
-			viewObject.initialize(viewModules, requete, null, defaultInputFields);
-
+			// select the first panel if nothing is selected in the module
 			if (viewModules.mapContentSelected().isEmpty())
 			{
 				viewModules.setSelectedLines(new ArrayList<>(Arrays.asList(true)));
 			}
 			
-			
 		} else {
-			viewObject.destroy(viewModules);
+			vObjectService.destroy(viewModules);
 		}
 	}
 	
@@ -238,9 +199,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,type_fichier, delimiter, format, commentaire from arc.ihm_chargement_regle");
             whereRuleSetEquals(requete, selection, type);
             
-            viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
-			viewObject.destroy(moduleView);
+			vObjectService.destroy(moduleView);
 		}
 	}
 
@@ -261,9 +222,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique,rubrique_nmcl,commentaire from arc.ihm_normage_regle");
             whereRuleSetEquals(requete, selection, type);
             
-            viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
-			viewObject.destroy(moduleView);
+			vObjectService.destroy(moduleView);
 		}
 	}
 	
@@ -283,9 +244,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,blocking_threshold,error_row_processing,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
             whereRuleSetEquals(requete, selection, type);
             
-            viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
-			viewObject.destroy(moduleView);
+			vObjectService.destroy(moduleView);
 		}
 	}
 
@@ -307,9 +268,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             requete.append("select * from arc.ihm_filtrage_regle");
             whereRuleSetEquals(requete, selection, type);
             
-            viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
-			viewObject.destroy(moduleView);
+			vObjectService.destroy(moduleView);
 		}
 	}
 	
@@ -340,9 +301,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             requete.append("\n  AND mapping.validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
             requete.append("\n  AND mapping.version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
             
-			viewObject.initialize(viewMapping,requete,theTableName, defaultRuleInputFields(selection));
+            vObjectService.initialize(viewMapping,requete,theTableName, defaultRuleInputFields(selection));
 		} else {
-			viewObject.destroy(viewMapping);
+			vObjectService.destroy(viewMapping);
 		}
 	}
 
@@ -362,9 +323,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();;
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,expr_nom, expr_valeur, commentaire from arc.ihm_expression");
             whereRuleSetEquals(requete, selection, type);
-            viewObject.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
 		} else {
-			viewObject.destroy(moduleView);
+			vObjectService.destroy(moduleView);
 		}
 	}
 
@@ -381,9 +342,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	        requete.append("select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
 			HashMap<String, String> defaultInputFields = new HashMap<>();
-			viewObject.initialize(viewJeuxDeReglesCopie, requete, theTableName, defaultInputFields);
+			vObjectService.initialize(viewJeuxDeReglesCopie, requete, theTableName, defaultInputFields);
 		} else {
-			viewObject.destroy(viewJeuxDeReglesCopie);
+			vObjectService.destroy(viewJeuxDeReglesCopie);
 		}
 
 	}
@@ -402,11 +363,11 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 
 	/**
 	 * Return the module identifier
-	 * "norManagement.load" identify the load module in the normManagement action and its international alias
+	 * "normManagement.load" identify the load module in the normManagement action and its international alias
 	 * @param moduleName
 	 * @return
 	 */
-	private String moduleIdentifier(GuiModules moduleName)
+	private static String moduleIdentifier(GuiModules moduleName)
 	{
 		return InteractorNorme.ACTION_NAME+"."+moduleName.toString();
 	}
@@ -561,5 +522,5 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	public String getSelectedJeuDeRegle() {
 		return this.views.getViewJeuxDeReglesCopie().getCustomValue(SELECTED_RULESET_TABLE);
 	}
-
+	
 }

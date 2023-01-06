@@ -5,10 +5,21 @@ public enum SQL {
 	FROM("FROM"),
 	WHERE("WHERE"),
 	ORDER_BY("ORDER BY"),
+	
+	COMMA(","),
+	AS("AS"),
+	
 	INSERT_INTO("INSERT INTO"),
+	
 	ON_CONFLICT_DO_NOTHING ("ON CONFLICT DO NOTHING"),
+	
 	BEGIN("BEGIN;"),
-	END("END;");
+	END("END;"),
+	
+	AND("AND"),
+	UNION_ALL("UNION ALL"),
+	
+	END_QUERY(";");
 	
 	private String sqlCode;
 	

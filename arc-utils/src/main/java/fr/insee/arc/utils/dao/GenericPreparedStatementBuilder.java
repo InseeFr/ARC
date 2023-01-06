@@ -43,6 +43,12 @@ public GenericPreparedStatementBuilder append(String s)
 	return this;
 }
 
+public GenericPreparedStatementBuilder append(int s)
+{
+	query.append(Integer.toString(s));
+	return this;
+}
+
 public GenericPreparedStatementBuilder append(StringBuilder s)
 {
 	query.append(s);
@@ -119,7 +125,6 @@ public String quoteText(String s)
 	parameters.add(s);
 	return BIND_VARIABLE_PLACEHOLDER;
 }
-
 
 /**
  * Return the sql escaped quoted string

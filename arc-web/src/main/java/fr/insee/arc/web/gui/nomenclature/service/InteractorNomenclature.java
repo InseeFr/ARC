@@ -21,7 +21,6 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.nomenclature.model.ModelNomenclature;
 import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectService;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -33,10 +32,6 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 
     @Autowired
     protected ModelNomenclature views;
-    
-    @Autowired
-    private VObjectService viewObject;
-
     
     @Override
     public void putAllVObjects(ModelNomenclature model) {
@@ -73,7 +68,7 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
         requete.append(requete.sqlListeOfColumnsFromModel(ViewEnum.IHM_NMCL));
         requete.append(SQL.FROM).append(table);
 
-        viewObject.initialize(viewListNomenclatures, requete, table, defaultInputFields);
+        vObjectService.initialize(viewListNomenclatures, requete, table, defaultInputFields);
     }
 
     
@@ -89,9 +84,9 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
             HashMap<String, String> defaultInputFields = new HashMap<>();
             defaultInputFields.put(NOM_TABLE, selection.get(NOM_TABLE).get(0));
 
-            viewObject.initialize(viewNomenclature, requete, "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
+            vObjectService.initialize(viewNomenclature, requete, "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
         } else {
-        	viewObject.destroy(viewNomenclature);
+        	vObjectService.destroy(viewNomenclature);
         }
 
     }
@@ -112,10 +107,10 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
          
             HashMap<String, String> defaultInputFields = new HashMap<>();
             defaultInputFields.put(ColumnEnum.TYPE_NMCL.getColumnName(), typeNomenclature(selection.get(NOM_TABLE).get(0)));
-            viewObject.initialize(viewSchemaNmcl, requete, "arc.ihm_schema_nmcl", defaultInputFields);
+            vObjectService.initialize(viewSchemaNmcl, requete, "arc.ihm_schema_nmcl", defaultInputFields);
             
         } else {
-        	viewObject.destroy(viewSchemaNmcl);
+        	vObjectService.destroy(viewSchemaNmcl);
         }
     }
 

@@ -2,8 +2,10 @@ package fr.insee.arc.core.dataobjects;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
+import fr.insee.arc.utils.dao.SQL;
 
 public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder {
 
@@ -20,7 +22,9 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	}
 
 	/**
-	 * build a sql list of column based on a collection of arc column enumeration elements
+	 * build a sql list of column based on a collection of arc column enumeration
+	 * elements
+	 * 
 	 * @param listOfColumns
 	 * @return
 	 */
@@ -29,7 +33,9 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	}
 
 	/**
-	 * return a liste of column based on a variable array of arc column enumeration elements
+	 * return a liste of column based on a variable array of arc column enumeration
+	 * elements
+	 * 
 	 * @param columns
 	 * @return
 	 */
@@ -37,20 +43,30 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 		return sqlListeOfColumnsFromModel(Arrays.asList(columns));
 	}
 
-	
+	/**
+	 * return a liste of column based on a variable array of arc column enumeration
+	 * elements
+	 * 
+	 * @param columns
+	 * @return
+	 */
+	public StringBuilder sqlListeOfColumnsFromModel(Map<ColumnEnum, ColumnEnum> mapOfColumnEnum) {
+		return sqlListeOfColumnsFromModel(mapOfColumnEnum.keySet());
+	}
+
 	/**
 	 * return sql expression of table columns
+	 * 
 	 * @param columns
 	 * @return
 	 */
 	public StringBuilder sqlListeOfColumnsFromModel(ViewEnum tableEnum) {
 		return sqlListeOfColumnsFromModel(tableEnum.getColumns());
 	}
-	
-	
-	public ArcPreparedStatementBuilder append(ColumnEnum column)
-	{
+
+	public ArcPreparedStatementBuilder append(ColumnEnum column) {
 		return (ArcPreparedStatementBuilder) this.append(column.getColumnName());
 	}
+
 	
 }
