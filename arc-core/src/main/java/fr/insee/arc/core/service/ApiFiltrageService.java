@@ -73,11 +73,6 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
         StaticLoggerDispatcher.info("** Generation des threads pour le filtrage **", logger);
         
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-
-            if (currentIndice % 10 == 0) {
-                StaticLoggerDispatcher.info("filtrage fichier " + currentIndice + "/" + nbFichier, logger);
-            }
-
             connextionThread = chooseConnection(connextionThread, threadList, connexionList);
             this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
 

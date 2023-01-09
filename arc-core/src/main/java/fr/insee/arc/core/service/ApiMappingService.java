@@ -81,11 +81,7 @@ public class ApiMappingService extends ApiService {
 
         StaticLoggerDispatcher.info("** Generation des threads pour le mapping **", logger);
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-            
-            if (currentIndice%10 == 0) {
-                StaticLoggerDispatcher.info("Mapping fichier " + currentIndice + "/" + nbFichier, logger);
-            }
-            
+
             connextionThread = chooseConnection(connextionThread, threadList, connexionList);
             this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
             

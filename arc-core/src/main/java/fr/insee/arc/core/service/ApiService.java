@@ -104,6 +104,15 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	public Exception error = null;
 	public Thread t = null;
 
+	/**
+	 * Build the connection pool for mutithreading
+	 * returns a list of connections usable by the threads 
+	 * @param parallel
+	 * @param connexion
+	 * @param anEnvExecution
+	 * @param restrictedUsername
+	 * @return
+	 */
 	public static ArrayList<Connection> prepareThreads(int parallel, Connection connexion, String anEnvExecution,
 			String restrictedUsername) {
 		ArrayList<Connection> connexionList = new ArrayList<>();

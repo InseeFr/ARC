@@ -104,11 +104,7 @@ public class ApiChargementService extends ApiService {
 
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
 
-            if (currentIndice % 10 == 0) {
-                StaticLoggerDispatcher.info("chargement fichier " + currentIndice + "/" + nbFichier + " en "+ (java.lang.System.currentTimeMillis()-dateDebut)+" ms ", LOGGER);
-            }
-
-            chargementThread = chooseConnection(chargementThread, threadList, connexionList);
+        	chargementThread = chooseConnection(chargementThread, threadList, connexionList);
 
             ThreadChargementService r = new ThreadChargementService(chargementThread, currentIndice, this);
             

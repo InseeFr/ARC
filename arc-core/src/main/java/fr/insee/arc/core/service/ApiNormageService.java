@@ -69,11 +69,7 @@ public class ApiNormageService extends ApiService {
 
         StaticLoggerDispatcher.info("** Generation des threads pour le normage **", logger);
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-            
-            if (currentIndice%10 == 0) {
-                StaticLoggerDispatcher.info("Normage fichier " + currentIndice + "/" + nbFichier, logger);
-            }
-            
+
             connectionThread = chooseConnection(connectionThread, threadList, connexionList);
             this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
             

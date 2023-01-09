@@ -74,11 +74,6 @@ public class ApiControleService extends ApiService {
         StaticLoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
 
         for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-
-            if (currentIndice % 10 == 0) {
-                StaticLoggerDispatcher.info("contrôle fichier " + currentIndice + "/" + nbFichier, logger);
-            }
-
             connextionThread = chooseConnection(connextionThread, threadList, connexionList);
             this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
 
