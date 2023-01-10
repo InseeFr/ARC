@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -102,17 +103,17 @@ public class ServiceViewExport extends InteractorExport {
 		    		try (ZipOutputStream zos=!StringUtils.isEmpty(zip.get(n))?new ZipOutputStream(fw):null)
 		    		{
 		    		
-				    		if (!StringUtils.isEmpty(zip.get(n)))
+				    		if (zos!=null)
 				    		{
 					    		ZipEntry ze = new ZipEntry(fileName.get(n));
 					    		zos.putNextEntry(ze);
 					   		}
 				    		
-				    		try(BufferedWriter bw = !StringUtils.isEmpty(zip.get(n))?new BufferedWriter(new OutputStreamWriter(zos,"UTF-8")):new BufferedWriter(new OutputStreamWriter(fw,"UTF-8")))
+				    		try(BufferedWriter bw = (zos!=null)?new BufferedWriter(new OutputStreamWriter(zos,StandardCharsets.UTF_8)):new BufferedWriter(new OutputStreamWriter(fw,"UTF-8")))
 				    		{
 				    		
-				    		HashMap<String,Integer> pos= new HashMap<String,Integer>();
-				    		ArrayList<String> headerLine=new ArrayList<String>();
+				    		HashMap<String,Integer> pos= new HashMap<>();
+				    		ArrayList<String> headerLine=new ArrayList<>();
 				    		
 				    		// if columns,orders table is specified, get the information from database metadata
 				    		String howToExportReworked;
@@ -236,7 +237,7 @@ public class ServiceViewExport extends InteractorExport {
 				            bw.flush();
 				            fw.flush();
 				    		
-				            if (!StringUtils.isEmpty(zip.get(n)))
+				            if (zos!=null)
 				    		{
 					            zos.flush();
 					            zos.closeEntry();

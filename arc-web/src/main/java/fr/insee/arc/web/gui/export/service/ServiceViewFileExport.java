@@ -51,7 +51,10 @@ public class ServiceViewFileExport extends InteractorExport {
              {
                File fileIn = new File(dirOut + File.separator + m.get("filename").get(i));
                File fileOut = new File(dirOut + File.separator + n.get("filename").get(i));
-               fileIn.renameTo(fileOut);
+               if (!fileIn.renameTo(fileOut))
+               {
+            	   this.views.getViewFileExport().setMessage("Le renommage a échoué");
+               }
              }
          }
        return generateDisplay(model, RESULT_SUCCESS);
