@@ -17,15 +17,13 @@ public class GererNormeDao extends VObjectHelperDao {
 
 	private VObjectService vObjectService;
 	private DataObjectService dataObjectService;
-	
-	public GererNormeDao (VObjectService vObjectService, DataObjectService dataObjectService)
-	{
+
+	public GererNormeDao(VObjectService vObjectService, DataObjectService dataObjectService) {
 		super();
-		this.vObjectService=vObjectService;
-		this.dataObjectService=dataObjectService;
+		this.vObjectService = vObjectService;
+		this.dataObjectService = dataObjectService;
 	}
-		
-	
+
 	/**
 	 * dao call to build norm vobject
 	 * 
@@ -35,8 +33,8 @@ public class GererNormeDao extends VObjectHelperDao {
 	 */
 	public void initializeViewNorme(VObject viewNorme) {
 
-		ViewEnum dataModelNorm=ViewEnum.IHM_NORME;
-		
+		ViewEnum dataModelNorm = ViewEnum.IHM_NORME;
+
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
@@ -61,8 +59,8 @@ public class GererNormeDao extends VObjectHelperDao {
 	 */
 	public void initializeViewCalendar(VObject viewCalendar) {
 
-		ViewEnum dataModelCalendar=ViewEnum.IHM_CALENDRIER;
-		
+		ViewEnum dataModelCalendar = ViewEnum.IHM_CALENDRIER;
+
 		// requete de la vue
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(SQL.SELECT);
@@ -75,30 +73,31 @@ public class GererNormeDao extends VObjectHelperDao {
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.PERIODICITE));
 
 		// build the default value when adding a record
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE);
+		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+				ColumnEnum.PERIODICITE);
 
 		// check constraints on calendar after insert or update
 		ArcPreparedStatementBuilder queryCheckConstraint = new ArcPreparedStatementBuilder();
 		queryCheckConstraint.append(SQL.SELECT).append("arc.fn_check_calendrier()").append(SQL.END_QUERY);
-		
+
 		viewCalendar.setAfterInsertQuery(queryCheckConstraint);
 		viewCalendar.setAfterUpdateQuery(queryCheckConstraint);
-		
-		
+
 		// Initialize the vobject
-		vObjectService.initialize(viewCalendar, query, dataObjectService.getView(dataModelCalendar), defaultInputFields);
+		vObjectService.initialize(viewCalendar, query, dataObjectService.getView(dataModelCalendar),
+				defaultInputFields);
 
 	}
 
-
 	/**
 	 * dao call to build ruleset vobject
+	 * 
 	 * @param viewRulesSet
 	 */
 	public void initializeViewRulesSet(VObject viewRulesSet) {
-		
-		ViewEnum dataModelRulesSet=ViewEnum.IHM_JEUDEREGLE;
-		
+
+		ViewEnum dataModelRulesSet = ViewEnum.IHM_JEUDEREGLE;
+
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(SQL.SELECT);
 		query.append(query.sqlListeOfColumnsFromModel(dataModelRulesSet));
@@ -114,75 +113,69 @@ public class GererNormeDao extends VObjectHelperDao {
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_SUP));
 
 		// build the default value when adding a record
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP);
-		
+		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP);
+
 		// check constraints on rulesets after insert or update
 		ArcPreparedStatementBuilder queryCheckConstraint = new ArcPreparedStatementBuilder();
 		queryCheckConstraint.append(SQL.SELECT).append("arc.fn_check_jeuderegle()").append(SQL.END_QUERY);
-		
+
 		viewRulesSet.setAfterInsertQuery(queryCheckConstraint);
 		viewRulesSet.setAfterUpdateQuery(queryCheckConstraint);
-		
-		vObjectService.initialize(viewRulesSet, query, dataObjectService.getView(dataModelRulesSet), defaultInputFields);
-	}
 
+		vObjectService.initialize(viewRulesSet, query, dataObjectService.getView(dataModelRulesSet),
+				defaultInputFields);
+	}
 
 	/**
 	 * dao call to build module menu vobject
+	 * 
 	 * @param viewRulesSet
 	 */
-	public void initializeViewModules(VObject viewModules, Function<GuiModules,String> functionGetModuleName) {
-		
+	public void initializeViewModules(VObject viewModules, Function<GuiModules, String> functionGetModuleName) {
+
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-	
-		boolean union=false;
-		int i=0;
-		for (GuiModules module:GuiModules.values())
-		{
-			if (union)
-			{
+
+		boolean union = false;
+		int i = 0;
+		for (GuiModules module : GuiModules.values()) {
+			if (union) {
 				query.append(SQL.UNION_ALL);
-			}
-			else
-			{
-				union=true;
+			} else {
+				union = true;
 			}
 			query.append(moduleQuery(i++, module, functionGetModuleName));
 		}
-		
+
 		vObjectService.initialize(viewModules, query, null, new HashMap<>());
 	}
-	
+
 	/**
-	 * build query for module
-	 * module are set in record
-	 * each module record contains 
-	 * - a number (order in guimodules) that indexes the module
-	 * - a name obtained by applying functionGetModuleName
+	 * build query for module module are set in record each module record contains -
+	 * a number (order in guimodules) that indexes the module - a name obtained by
+	 * applying functionGetModuleName
+	 * 
 	 * @param moduleIndex
 	 * @param module
 	 * @param functionGetModuleName
 	 * @return
 	 */
-	private ArcPreparedStatementBuilder moduleQuery(int moduleIndex, GuiModules module, Function<GuiModules,String> functionGetModuleName)
-	{
+	private ArcPreparedStatementBuilder moduleQuery(int moduleIndex, GuiModules module,
+			Function<GuiModules, String> functionGetModuleName) {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		
+
 		query.append(SQL.SELECT);
 		query.append(moduleIndex);
 		query.append(SQL.AS);
 		query.append(ColumnEnum.MODULE_ORDER);
-		
+
 		query.append(SQL.COMMA);
-		
+
 		query.append(query.quoteText(functionGetModuleName.apply(module)));
 		query.append(SQL.AS);
 		query.append(ColumnEnum.MODULE_NAME);
-		
+
 		return query;
 	}
-	
-
-	
 
 }

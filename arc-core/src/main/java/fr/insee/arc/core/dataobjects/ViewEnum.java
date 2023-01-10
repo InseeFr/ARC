@@ -22,8 +22,8 @@ public enum ViewEnum {
 	, IHM_FAMILLE("ihm_famille", false)
 	, IHM_MOD_TABLE_METIER("ihm_mod_table_metier", false)
 	, IHM_MOD_VARIABLE_METIER("ihm_mod_variable_metier", false)
-	, IHM_NMCL("ihm_nmcl", false)
-	, IHM_SCHEMA_NMCL("ihm_schema_nmcl", false)
+	, IHM_NMCL("ihm_nmcl", false, ColumnEnum.NOM_TABLE, ColumnEnum.DESCRIPTION)
+	, IHM_SCHEMA_NMCL("ihm_schema_nmcl", false, ColumnEnum.TYPE_NMCL, ColumnEnum.NOM_COLONNE, ColumnEnum.TYPE_COLONNE)
 	, ID_TABLE_IHM_SEUIL("ihm_seuil", false)
 	, PILOTAGE_BATCH("pilotage_batch", false)
 
