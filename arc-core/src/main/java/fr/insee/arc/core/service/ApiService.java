@@ -30,6 +30,7 @@ import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -113,17 +114,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param restrictedUsername
 	 * @return
 	 */
-	public static ArrayList<Connection> prepareThreads(int parallel, Connection connexion, String anEnvExecution,
+	public static ArrayList<Connection> prepareThreads(int parallel, String anEnvExecution,
 			String restrictedUsername) {
 		ArrayList<Connection> connexionList = new ArrayList<>();
 		try {
-			if (connexion != null) {
-				connexionList.add(connexion);
-				UtilitaireDao.get("arc").executeImmediate(connexion, configConnection(anEnvExecution));
 
-			}
-
-			for (int i = connexionList.size(); i < parallel; i++) {
+			// add thread connexions
+			for (int i = 0; i < parallel; i++) {
 
 				Connection connexionTemp = UtilitaireDao.get(poolName).getDriverConnexion();
 				connexionList.add(connexionTemp);

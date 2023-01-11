@@ -76,7 +76,7 @@ public class ApiMappingService extends ApiService {
         
         Connection connextionThread = null;
         ArrayList<ThreadMappingService> threadList = new ArrayList<>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
         int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le mapping **", logger);

@@ -64,7 +64,7 @@ public class ApiNormageService extends ApiService {
         ArrayList<ThreadNormageService> threadList = new ArrayList<>();
         
         // Pool de connexion
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
         int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le normage **", logger);

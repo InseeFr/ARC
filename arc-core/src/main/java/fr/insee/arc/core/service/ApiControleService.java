@@ -68,7 +68,7 @@ public class ApiControleService extends ApiService {
         int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
         Connection connextionThread = null;
         ArrayList<ThreadControleService> threadList = new ArrayList<>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, null, this.envExecution, properties.getDatabaseRestrictedUsername());
+        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
         int currentIndice = 0;
 
         StaticLoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
