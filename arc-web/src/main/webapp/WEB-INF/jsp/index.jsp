@@ -6,6 +6,7 @@
 <html lang="${pageContext.response.locale}">
 
 <head>
+	<link rel="icon" href="data:,"/>
 
 	<title>Index</title>
 	<c:import url="tiles/defaulthead.jsp">

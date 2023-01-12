@@ -12,10 +12,11 @@
 <html>
 <c:if test="${scope==null}">
 	<head>
-<title><spring:message code="header.export"/></title>
-	<c:import url="tiles/defaulthead.jsp">
-		<c:param name="pageJs" value="/js/maintenanceParameters.js" />
-	</c:import>
+		<link rel="icon" href="data:,"/>
+		<title><spring:message code="header.export"/></title>
+		<c:import url="tiles/defaulthead.jsp">
+			<c:param name="pageJs" value="/js/maintenanceParameters.js" />
+		</c:import>
 	</head>
 </c:if>
 <body class="bg-body">

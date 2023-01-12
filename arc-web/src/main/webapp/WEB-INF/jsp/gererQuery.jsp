@@ -5,6 +5,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="${pageContext.response.locale}">
 <head>
+	<link rel="icon" href="data:,"/>
 	<title>Database Management</title>
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/gererQuery.js" />

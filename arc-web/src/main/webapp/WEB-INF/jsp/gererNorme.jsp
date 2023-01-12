@@ -10,6 +10,7 @@
 <html lang="${pageContext.response.locale}">
 <c:if test="${scope==null}">
 <head>
+	<link rel="icon" href="data:,"/>
 	<title><spring:message code="header.normManagement"/></title>
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/gererNorme.js" />

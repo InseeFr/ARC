@@ -12,7 +12,8 @@
 <html>
 <c:if test="${scope==null}">
 	<head>
-<title><spring:message code="header.export"/></title>
+	<link rel="icon" href="data:,"/>
+	<title><spring:message code="header.export"/></title>
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/gererExport.js" />
 	</c:import>
