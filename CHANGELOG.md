@@ -2,10 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-92.2.05 - 2023-01-12
+## version-92.2.07 - 2023-01-12
+- bug fix in duplicate detection
+
+## version-92.2.06 - 2023-01-12
 - gui refactor
 - parallelism refactor
-- bug fix in duplicate detection
 
 ## version-92.2.04 - 2022-11-21
 - healthcheck quality refactor and add-on for web module

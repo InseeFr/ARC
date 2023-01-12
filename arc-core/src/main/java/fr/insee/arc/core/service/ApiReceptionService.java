@@ -761,7 +761,7 @@ public class ApiReceptionService extends ApiService {
 		
 		// récupérer les doublons pour mettre à jour le dispatcher
 		try {
-			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent().get("+ColumnEnum.ID_SOURCE.getColumnName()+");
+			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName());
 			
 			// on va parcourir la liste des fichiers
 			// si on retrouve l'id_source dans la liste, on le marque en erreur
