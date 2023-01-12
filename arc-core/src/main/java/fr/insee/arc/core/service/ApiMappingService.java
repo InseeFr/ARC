@@ -1,18 +1,12 @@
 package fr.insee.arc.core.service;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
+import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 
 
@@ -37,7 +31,6 @@ import fr.insee.arc.utils.exception.ArcException;
  */
 @Component
 public class ApiMappingService extends ApiService {
-	private static final Logger logger = LogManager.getLogger(ApiMappingService.class);
         
     public ApiMappingService() {
         super();
@@ -71,39 +64,10 @@ public class ApiMappingService extends ApiService {
         
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
-        
-        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
-        
-        Connection connextionThread = null;
-        ArrayList<ThreadMappingService> threadList = new ArrayList<>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
-        int currentIndice = 0;
+      
+        MultiThreading<ApiMappingService,ThreadMappingService> mt=new MultiThreading<>(this, new ThreadMappingService());
+        mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());
 
-        StaticLoggerDispatcher.info("** Generation des threads pour le mapping **", logger);
-        for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-
-            connextionThread = chooseConnection(connextionThread, threadList, connexionList);
-            this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
-            
-            ThreadMappingService r = new ThreadMappingService( connextionThread, currentIndice, this);
-            threadList.add(r);
-            r.start();
-            waitForThreads2(maxParallelWorkers, threadList, connexionList);
-
-
-        }
-
-        StaticLoggerDispatcher.info("** Attente de la fin des threads **", logger);
-        waitForThreads2(0, threadList, connexionList);
-        
-        StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
-        for (Connection connection : connexionList) {
-            try {
-				connection.close();
-			} catch (SQLException e) {
-				throw new ArcException("Error in closing thread connections",e);
-			}
-        }
     }
 
     public static String getPrefixidentifiantrubrique() {

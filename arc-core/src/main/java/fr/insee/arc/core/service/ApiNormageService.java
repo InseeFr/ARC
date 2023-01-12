@@ -1,15 +1,10 @@
 package fr.insee.arc.core.service;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -32,8 +27,6 @@ import fr.insee.arc.utils.exception.ArcException;
  */
 @Component
 public class ApiNormageService extends ApiService {
-
-    private static final Logger logger = LogManager.getLogger(ApiNormageService.class);
     
     public ApiNormageService() {
         super();
@@ -50,54 +43,13 @@ public class ApiNormageService extends ApiService {
         StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
         
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiNormageService.MAX_PARALLEL_WORKERS",4);
-        
-        long dateDebut = java.lang.System.currentTimeMillis() ;
-        
+
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         
-        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
-        
-        Connection connectionThread = null;
-        
-        // Pool de thread
-        ArrayList<ThreadNormageService> threadList = new ArrayList<>();
-        
-        // Pool de connexion
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
-        int currentIndice = 0;
+        MultiThreading<ApiNormageService,ThreadNormageService> mt=new MultiThreading<>(this, new ThreadNormageService());
+        mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());
 
-        StaticLoggerDispatcher.info("** Generation des threads pour le normage **", logger);
-        for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-
-            connectionThread = chooseConnection(connectionThread, threadList, connexionList);
-            this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
-            
-            ThreadNormageService r = new ThreadNormageService( connectionThread, currentIndice, this);
-            threadList.add(r);
-            r.start();
-            
-            waitForThreads2(maxParallelWorkers, threadList, connexionList);
-
-
-        }
-
-        StaticLoggerDispatcher.info("** Attente de la fin des threads **", logger);
-        waitForThreads2(0, threadList, connexionList);
-
-
-        StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
-        for (Connection connection : connexionList) {
-            try {
-				connection.close();
-			} catch (SQLException e) {
-				throw new ArcException("Error in closing thread connections",e);
-			}
-        }
-
-        long dateFin= java.lang.System.currentTimeMillis() ;
-        StaticLoggerDispatcher.info("Temp normage des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER_APISERVICE);
-        
     }
 
 }

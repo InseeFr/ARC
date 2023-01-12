@@ -1,8 +1,6 @@
 package fr.insee.arc.core.service;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +12,7 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.Norme;
@@ -57,8 +56,6 @@ public class ApiChargementService extends ApiService {
 
     protected List<Norme> listeNorme;
 
-    private HashMap<String, ArrayList<String>> listIdsource;
-
     public ApiChargementService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String... paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
@@ -83,63 +80,16 @@ public class ApiChargementService extends ApiService {
     @Override
     public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER);
-        
+ 
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiChargementService.MAX_PARALLEL_WORKERS",4);
-        
-        long dateDebut = java.lang.System.currentTimeMillis() ;
 
         // Récupérer la liste des fichiers selectionnés
         StaticLoggerDispatcher.info("Récupérer la liste des fichiers selectionnés", LOGGER);
-        setListIdsource(pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString()));
-
-        // récupère le nombre de fichier à traiter
-        int nbFichier = getListIdsource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
+        setTabIdSource(pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString()));
         
-        Connection chargementThread = null;
-        ArrayList<ThreadChargementService> threadList = new ArrayList<>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
-        int currentIndice = 0;
+        MultiThreading<ApiChargementService,ThreadChargementService> mt=new MultiThreading<>(this, new ThreadChargementService());
+        mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());
 
-        StaticLoggerDispatcher.info("** Generation des threads pour le chargement **", LOGGER);
-
-        for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-
-        	chargementThread = chooseConnection(chargementThread, threadList, connexionList);
-
-            ThreadChargementService r = new ThreadChargementService(chargementThread, currentIndice, this);
-            
-            threadList.add(r);
-            r.start();
-            waitForThreads2(maxParallelWorkers, threadList, connexionList);
-
-        }
-
-        StaticLoggerDispatcher.info("** Attente de la fin des threads **", LOGGER);
-        waitForThreads2(0, threadList, connexionList);
-
-
-        StaticLoggerDispatcher.info("** Fermeture des connexions **", LOGGER);
-        for (Connection connection : connexionList) {
-            try {
-				connection.close();
-			} catch (SQLException e) {
-				throw new ArcException("Error in closing thread connections",e);
-			}
-        }
-
-        StaticLoggerDispatcher.info("****** Fin ApiChargementService *******", LOGGER);
-        long dateFin= java.lang.System.currentTimeMillis() ;
-        
-        StaticLoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER);
-
-    }
-
-    public HashMap<String, ArrayList<String>> getListIdsource() {
-        return listIdsource;
-    }
-
-    public void setListIdsource(HashMap<String, ArrayList<String>> listIdsource) {
-        this.listIdsource = listIdsource;
     }
 
     public HashMap<String, Integer> getCol() {

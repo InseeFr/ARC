@@ -25,7 +25,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadControleService extends ApiControleService implements Runnable {
+public class ThreadControleService extends ApiControleService implements Runnable, ArcThread<ApiControleService> {
 
     private static final Logger LOGGER = LogManager.getLogger(ThreadControleService.class);
 
@@ -44,7 +44,9 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     
     private String structure;
 
-    public ThreadControleService(Connection connexion, int currentIndice, ApiControleService theApi) {
+    
+    @Override
+    public void configThread(Connection connexion, int currentIndice, ApiControleService theApi) {
 
         this.indice = currentIndice;
         this.setEnvExecution(theApi.getEnvExecution());

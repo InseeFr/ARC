@@ -1,14 +1,9 @@
 package fr.insee.arc.core.service;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadControleService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -32,7 +27,6 @@ import fr.insee.arc.utils.exception.ArcException;
  */
 @Component
 public class ApiControleService extends ApiService {
-	private static final Logger logger = LogManager.getLogger(ApiControleService.class);
 
     public ApiControleService() {
         super();
@@ -59,47 +53,10 @@ public class ApiControleService extends ApiService {
 
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiControleService.MAX_PARALLEL_WORKERS",3);
 
-        
-        long dateDebut = java.lang.System.currentTimeMillis() ;
-        // Initilisation de la table de pilotage
-
-        // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
-        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
-        Connection connextionThread = null;
-        ArrayList<ThreadControleService> threadList = new ArrayList<>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
-        int currentIndice = 0;
-
-        StaticLoggerDispatcher.info("** Generation des threads pour le contrôle **", logger);
-
-        for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-            connextionThread = chooseConnection(connextionThread, threadList, connexionList);
-            this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
-
-            ThreadControleService r = new ThreadControleService(connextionThread, currentIndice, this);
-            threadList.add(r);
-            r.start();
-            waitForThreads2(maxParallelWorkers, threadList, connexionList);
-
-        }
-
-        StaticLoggerDispatcher.info("** Attente de la fin des threads **", logger);
         
-        waitForThreads2(0, threadList, connexionList);
-
-        StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
-        for (Connection connection : connexionList) {
-            try {
-				connection.close();
-			} catch (SQLException e) {
-				throw new ArcException("Error in closing thread connections",e);
-			}
-        }
-        long dateFin= java.lang.System.currentTimeMillis() ;
-
-        StaticLoggerDispatcher.info("Temp chargement des "+ nbFichier+" fichiers : " + (int)Math.round((dateFin-dateDebut)/1000F)+" sec", LOGGER_APISERVICE);
-
+        MultiThreading<ApiControleService,ThreadControleService> mt=new MultiThreading<>(this, new ThreadControleService());
+        mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());
 
     }
     

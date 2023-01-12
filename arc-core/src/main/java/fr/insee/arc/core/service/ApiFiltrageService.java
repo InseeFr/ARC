@@ -1,17 +1,11 @@
 package fr.insee.arc.core.service;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadFiltrageService;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -30,8 +24,6 @@ import fr.insee.arc.utils.textUtils.IConstanteCaractere;
  */
 @Component
 public class ApiFiltrageService extends ApiService implements IConstanteCaractere {
-    private static final Logger logger = LogManager.getLogger(ApiFiltrageService.class);
-
         
     protected String seuilExclusion;
     protected HierarchicalView normeToPeriodiciteToValiditeInfToValiditeSupToRegle;
@@ -63,40 +55,9 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
         this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
     	
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
-        int nbFichier = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).size();
         
-        Connection connextionThread = null;
-        ArrayList<ThreadFiltrageService> threadList = new ArrayList<>();
-        ArrayList<Connection> connexionList = ApiService.prepareThreads(maxParallelWorkers, this.envExecution, properties.getDatabaseRestrictedUsername());
-        int currentIndice = 0;
-
-        StaticLoggerDispatcher.info("** Generation des threads pour le filtrage **", logger);
-        
-        for (currentIndice = 0; currentIndice < nbFichier; currentIndice++) {
-            connextionThread = chooseConnection(connextionThread, threadList, connexionList);
-            this.currentIdSource = getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
-
-            ThreadFiltrageService r = new ThreadFiltrageService(connextionThread, currentIndice, this);
-            threadList.add(r);
-            r.start();
-            waitForThreads2(maxParallelWorkers, threadList, connexionList);
-
-        }
-
-        StaticLoggerDispatcher.info("** Attente de la fin des threads **", logger);
-        waitForThreads2(0, threadList, connexionList);
-
-
-
-        StaticLoggerDispatcher.info("** Fermeture des connexions **", logger);
-        for (Connection connection : connexionList) {
-            try {
-				connection.close();
-			} catch (SQLException e) {
-				throw new ArcException("Error in closing thread connections",e);
-			}
-        }
-
+        MultiThreading<ApiFiltrageService,ThreadFiltrageService> mt=new MultiThreading<>(this, new ThreadFiltrageService());
+        mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());
 
     }
 

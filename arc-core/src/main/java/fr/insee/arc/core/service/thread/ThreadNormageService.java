@@ -33,7 +33,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author Manuel SOULIER
  *
  */
-public class ThreadNormageService extends ApiNormageService implements Runnable {
+public class ThreadNormageService extends ApiNormageService implements Runnable, ArcThread<ApiNormageService> {
 
     private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
 
@@ -50,7 +50,8 @@ public class ThreadNormageService extends ApiNormageService implements Runnable 
 
     private String structure;
 
-    public ThreadNormageService(Connection connexion, int currentIndice, ApiNormageService theApi) {
+    @Override
+    public void configThread(Connection connexion, int currentIndice, ApiNormageService theApi) {
         
         this.indice = currentIndice;
         this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);

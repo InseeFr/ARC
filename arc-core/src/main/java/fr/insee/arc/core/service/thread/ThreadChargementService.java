@@ -42,7 +42,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadChargementService extends ApiChargementService implements Runnable {
+public class ThreadChargementService extends ApiChargementService implements Runnable, ArcThread<ApiChargementService> {
     private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
     
     //
@@ -63,13 +63,13 @@ public class ThreadChargementService extends ApiChargementService implements Run
     public Norme normeOk;
 
     private String tableChargementPilTemp;
+    
+    @Override
+    public void configThread(Connection connexion, int currentIndice, ApiChargementService aApi) {
 
-    public ThreadChargementService(Connection connexion, int currentIndice, ApiChargementService aApi) {
-
-	this.error = null;
 	this.indice = currentIndice;
 	this.setEnvExecution(aApi.getEnvExecution());
-	this.idSource = aApi.getListIdsource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
+	this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
 	this.connexion = connexion;
 	try {
 	    this.connexion.setClientInfo("ApplicationName", "Chargement fichier " + idSource);
@@ -79,7 +79,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	this.tableChargementPilTemp = "chargement_pil_temp";
 
-	this.container = aApi.getListIdsource().get("container").get(this.indice);
+	this.container = aApi.getTabIdSource().get("container").get(this.indice);
 	this.tableChargementRegle = aApi.getTableChargementRegle();
 	this.tableNorme = aApi.getTableNorme();
 	this.tablePilTemp = aApi.getTablePilTemp();

@@ -13,6 +13,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
+import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiFiltrageService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
@@ -32,7 +33,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadFiltrageService extends ApiFiltrageService implements Runnable {
+public class ThreadFiltrageService extends ApiFiltrageService implements Runnable, ArcThread<ApiFiltrageService> {
 
 	private static final Logger logger = LogManager.getLogger(ThreadFiltrageService.class);
 	private int indice;
@@ -47,7 +48,8 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
     public static final String REGEX_SELECTION_RUBRIQUE = "\\{[^\\{:\\}]*\\}";
 
 
-	public ThreadFiltrageService(Connection connexion, int currentIndice, ApiFiltrageService theApi) {
+    @Override
+	public void configThread(Connection connexion, int currentIndice, ApiFiltrageService theApi) {
 
 		this.indice = currentIndice;
 		this.setEnvExecution(theApi.getEnvExecution());

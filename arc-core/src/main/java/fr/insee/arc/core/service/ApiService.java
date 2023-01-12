@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +29,8 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.thread.ThreadChargementService;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
@@ -102,97 +105,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	private HashMap<String, ArrayList<String>> tabIdSource;
 
-	public Exception error = null;
 	public Thread t = null;
-
-	/**
-	 * Build the connection pool for mutithreading
-	 * returns a list of connections usable by the threads 
-	 * @param parallel
-	 * @param connexion
-	 * @param anEnvExecution
-	 * @param restrictedUsername
-	 * @return
-	 */
-	public static ArrayList<Connection> prepareThreads(int parallel, String anEnvExecution,
-			String restrictedUsername) {
-		ArrayList<Connection> connexionList = new ArrayList<>();
-		try {
-
-			// add thread connexions
-			for (int i = 0; i < parallel; i++) {
-
-				Connection connexionTemp = UtilitaireDao.get(poolName).getDriverConnexion();
-				connexionList.add(connexionTemp);
-
-				// demote application user account to temporary restricted operations and
-				// readonly or non-temporary schema
-				UtilitaireDao.get("arc").executeImmediate(connexionTemp, configConnection(anEnvExecution)
-						+ (restrictedUsername.equals("") ? "" : FormatSQL.changeRole(restrictedUsername)));
-			}
-
-		} catch (Exception ex) {
-			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "prepareThreads()", ex);
-		}
-		return connexionList;
-
-	}
-
-	public void waitForThreads2(int parallel, ArrayList<? extends ApiService> threadList,
-			ArrayList<Connection> connexionList) throws ArcException {
-
-		while (threadList.size() >= parallel && !threadList.isEmpty()) {
-			Iterator<? extends ApiService> it = threadList.iterator();
-
-			while (it.hasNext()) {
-				ApiService px = it.next();
-				if (!px.getT().isAlive()) {
-
-					if (px.getError() != null) {
-						error = px.error;
-					}
-					it.remove();
-
-					// close connexion when thread is done except if it is the master connexion
-					// (first one)
-					if (parallel == 0 && !px.getConnexion().equals(connexionList.get(0))) {
-						try {
-							px.getConnexion().close();
-						} catch (SQLException e) {
-							throw new ArcException("Error in closing thread connection",e);
-						}
-					}
-
-				}
-			}
-		}
-	}
-
-	/**
-	 * @param connextionThread
-	 * @param threadList
-	 * @param connexionList
-	 * @return
-	 */
-	public Connection chooseConnection(Connection connextionThread, ArrayList<? extends ApiService> threadList,
-			ArrayList<Connection> connexionList) {
-		// on parcourt l'array list de this.connexion disponible
-		for (int i = 0; i < connexionList.size(); i++) {
-			boolean choosen = true;
-
-			for (int j = 0; j < threadList.size(); j++) {
-				if (connexionList.get(i).equals(threadList.get(j).getConnexion())) {
-					choosen = false;
-				}
-			}
-
-			if (choosen) {
-				connextionThread = connexionList.get(i);
-				break;
-			}
-		}
-		return connextionThread;
-	}
 
 	/**
 	 * Permet la rétro compatibilité pour la migration vers 1 schéma par
@@ -299,11 +212,10 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return configConnection(this.getEnvExecution());
 	}
 
-	private static StringBuilder configConnection(String anEnvExecution) {
+	public static StringBuilder configConnection(String anEnvExecution) {
 		StringBuilder requete = new StringBuilder();
 		requete.append(ModeRequeteImpl.arcModeRequeteEngine(ManipString.substringBeforeFirst(ApiService.dbEnv(anEnvExecution), ".")));
 		return requete;
-
 	}
 
 	/**
@@ -1446,9 +1358,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this.tableOutKo = tableOutKo;
 	}
 
-	public Exception getError() {
-		return error;
-	}
 
 	public Thread getT() {
 		return t;

@@ -24,7 +24,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadMappingService extends ApiMappingService implements Runnable {
+public class ThreadMappingService extends ApiMappingService implements Runnable, ArcThread<ApiMappingService> {
 
     private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
 
@@ -32,7 +32,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable 
     private String tableTempFiltrageOk;
     private String tableMappingPilTemp;
 
-    public ThreadMappingService(Connection connexion, int currentIndice, ApiMappingService anApi) {
+    @Override
+    public void configThread(Connection connexion, int currentIndice, ApiMappingService anApi) {
 
         this.connexion = connexion;
         this.indice = currentIndice;
