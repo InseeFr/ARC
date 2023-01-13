@@ -32,7 +32,7 @@ import fr.insee.arc.web.gui.all.dao.ArcWebGenericDao;
 import fr.insee.arc.web.gui.all.model.ArcModel;
 import fr.insee.arc.web.gui.all.model.SessionParameters;
 import fr.insee.arc.web.gui.home.HomeAction;
-import fr.insee.arc.web.gui.index.IndexAction;
+import fr.insee.arc.web.gui.index.service.IndexAction;
 import fr.insee.arc.web.util.Session;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
