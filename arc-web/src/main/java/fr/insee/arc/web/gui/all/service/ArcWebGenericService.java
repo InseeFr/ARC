@@ -159,7 +159,10 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 		if (this.bacASable == null) {
 			// by default bacASable is the first element of the linkedhashmap
 			List<String> keys=new ArrayList<>(((LinkedHashMap<String,String>) this.envMap).keySet());
-			this.bacASable = keys.get(0);
+			if (!keys.isEmpty())
+			{
+				this.bacASable = keys.get(0);
+			}
 		}
 
 		// updating current sandbox from request

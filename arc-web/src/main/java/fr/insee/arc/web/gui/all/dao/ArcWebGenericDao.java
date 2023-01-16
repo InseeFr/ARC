@@ -46,7 +46,7 @@ public class ArcWebGenericDao {
 			StaticLoggerDispatcher.error("Sandbox list couldn't be initialized", LOGGER);
 		}
 
-		return new HashMap<>();
+		return new LinkedHashMap<>();
 	}
 
 
