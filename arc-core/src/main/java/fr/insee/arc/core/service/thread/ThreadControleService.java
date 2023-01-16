@@ -1,8 +1,5 @@
 package fr.insee.arc.core.service.thread;
 
-import java.sql.Connection;
-import java.sql.SQLClientInfoException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,18 +43,12 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
     
     @Override
-    public void configThread(Connection connexion, int currentIndice, ApiControleService theApi) {
+    public void configThread(ScalableConnection connexion, int currentIndice, ApiControleService theApi) {
 
         this.indice = currentIndice;
         this.setEnvExecution(theApi.getEnvExecution());
         this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
         this.connexion = connexion;
-        try {
-            this.connexion.setClientInfo("ApplicationName", "Controle fichier "+idSource);
-        } catch (SQLClientInfoException e) {
-            StaticLoggerDispatcher.error("Error in setting connexion name", LOGGER);
-        }
-
         this.setTablePil(theApi.getTablePil());
         this.tablePilTemp = theApi.getTablePilTemp();
 
@@ -107,7 +98,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         } catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error in control Thread",LOGGER);
 		    try {
-				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+				this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
 					"aucuneTableADroper");
 			    } catch (ArcException e2) {
 					StaticLoggerDispatcher.error(e2,LOGGER);
@@ -163,11 +154,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
         StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
         query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableControleDataTemp, this.idSource, "'"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
-        UtilitaireDao.get("arc").executeBlock(this.connexion, query);
+        UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query);
 
         // Récupération des Jeux de règles associés
-        this.sjdr.fillRegleControle(this.connexion, jdr, this.getTableControleRegle(), this.tableControleDataTemp);
-        this.structure=UtilitaireDao.get("arc").getString(this.connexion, new ArcPreparedStatementBuilder("SELECT jointure FROM "+this.tableControlePilTemp));
+        this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, this.getTableControleRegle(), this.tableControleDataTemp);
+        this.structure=UtilitaireDao.get("arc").getString(this.connexion.getExecutorConnection(), new ArcPreparedStatementBuilder("SELECT jointure FROM "+this.tableControlePilTemp));
     }
 
     
@@ -184,7 +175,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     private void execute() throws ArcException {
         StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
 
-        this.sjdr.executeJeuDeRegle(this.connexion, jdr, this.tableControleDataTemp, this.structure);
+        this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), jdr, this.tableControleDataTemp, this.structure);
 
     }
 
@@ -267,7 +258,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     
     query.append(this.marquageFinal(this.tablePil, this.tableControlePilTemp, this.idSource));
     
-    UtilitaireDao.get("arc").executeBlock(this.connexion, query);
+    UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query);
     }
     
     
@@ -343,11 +334,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
     }
 
     @Override
-    public Connection getConnexion() {
+    public ScalableConnection getConnexion() {
         return connexion;
     }
 
-    public void setConnexion(Connection connexion) {
+    public void setConnexion(ScalableConnection connexion) {
         this.connexion = connexion;
     }
 

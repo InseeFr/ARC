@@ -8,10 +8,6 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
 		http://www.springframework.org/schema/tool http://www.springframework.org/schema/tool/spring-tool-4.3.xsd
 		">
-	
-	<bean id="utilitaireDao" class="fr.insee.arc.utils.dao.UtilitaireDao">
-  		<constructor-arg index="0" value="arc" />
-	</bean>
 
 	<!-- Gestion des properties -->
 	<bean id="properties"

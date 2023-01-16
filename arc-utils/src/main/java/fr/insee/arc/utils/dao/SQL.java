@@ -6,6 +6,7 @@ public enum SQL {
 	WHERE("WHERE"),
 	ORDER_BY("ORDER BY"),
 	
+	CAST_OPERATOR("::"),
 	COMMA(","),
 	AS("AS"),
 	
@@ -19,7 +20,14 @@ public enum SQL {
 	AND("AND"),
 	UNION_ALL("UNION ALL"),
 	
-	END_QUERY(";");
+	END_QUERY(";"),
+	
+	CREATE("CREATE"),
+	DROP("DROP"),
+	TEMPORARY("TEMPORARY"),
+	TABLE("TABLE"),
+	IF_EXISTS("IF EXISTS")
+	;
 	
 	private String sqlCode;
 	

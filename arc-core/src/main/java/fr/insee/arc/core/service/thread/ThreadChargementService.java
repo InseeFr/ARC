@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.SQLClientInfoException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -52,7 +51,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
     public String validite;
 
     private File fileChargement;
-    private String entrepot;
 
     /*
      * / On utiliser plusieur input stream car chacun à une utilité. Et en
@@ -65,18 +63,12 @@ public class ThreadChargementService extends ApiChargementService implements Run
     private String tableChargementPilTemp;
     
     @Override
-    public void configThread(Connection connexion, int currentIndice, ApiChargementService aApi) {
+    public void configThread(ScalableConnection connexion, int currentIndice, ApiChargementService aApi) {
 
 	this.indice = currentIndice;
 	this.setEnvExecution(aApi.getEnvExecution());
 	this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
 	this.connexion = connexion;
-	try {
-	    this.connexion.setClientInfo("ApplicationName", "Chargement fichier " + idSource);
-	} catch (SQLClientInfoException e) {
-		LOGGER.error(e);
-	}
-
 	this.tableChargementPilTemp = "chargement_pil_temp";
 
 	this.container = aApi.getTabIdSource().get("container").get(this.indice);
@@ -107,7 +99,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		TraitementEtat.OK.toString());
 
 	// récupération des différentes normes dans la base
-	this.listeNorme = Norme.getNormesBase(this.connexion, this.tableNorme);
+	this.listeNorme = Norme.getNormesBase(this.connexion.getExecutorConnection(), this.tableNorme);
 
     }
 
@@ -138,7 +130,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    
 		try {
 		// En cas d'erreur on met le fichier en KO avec l'erreur obtenu.
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+		this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (ArcException e2) {
 			StaticLoggerDispatcher.error(e2,LOGGER);
@@ -155,15 +147,32 @@ public class ThreadChargementService extends ApiChargementService implements Run
      */
     private void preparation() throws ArcException
     {
-    	StringBuilder query=new StringBuilder();
-    	
-        // nettoyage des objets base de données du thread
+    	ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
+
+    	// nettoyage des objets base de données du thread
         query.append(cleanThread());
     	
     	// création des tables temporaires de données
     	query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableChargementPilTemp, this.idSource));
 
-    	UtilitaireDao.get("arc").executeBlock(connexion,query);
+    	UtilitaireDao.get("arc").executeBlock(connexion.getCoordinatorConnection(),query.getQueryWithParameters());
+
+        if (this.connexion.isScaled())
+        {
+        	query=new ArcPreparedStatementBuilder();
+
+        	// nettoyage des objets base de données du thread
+            query.append(cleanThread());
+        	
+        	// création des tables temporaires de données
+            // get the records from tableChargementPilTemp in executor nod
+            GenericBean gb=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(),new ArcPreparedStatementBuilder("SELECT * FROM "+this.tableChargementPilTemp)));
+            // copy them on the coordinator to update pilotage table
+            query.append(query.copyFromGenericBean(this.tableChargementPilTemp, gb));
+        	
+        	UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(),query.getQueryWithParameters());	
+        }
+    	
     }
     
     
@@ -174,7 +183,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	private void finalisation() throws ArcException
 	{
 		
-		StringBuilder query=new StringBuilder();
+		ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 		  
 	    // retirer de table tempTableA les ids marqués en erreur
 	    query.append(truncateTableIfKO());
@@ -184,9 +193,27 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    
 	    // Mettre à jour le nombre d'enregistrement dans la table de
 	    // pilotage temporaire
-	    query.append(insertionFinale(this.connexion, this.tableChargementOK, this.idSource));
+	    query.append(insertionFinale(this.connexion.getExecutorConnection(), this.tableChargementOK, this.idSource));
+
+		if (!this.connexion.isScaled())
+		{
+		query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
+		}
+		
+	    UtilitaireDao.get("arc").executeRequest(this.connexion.getExecutorConnection(), query);
 	    
-	    UtilitaireDao.get("arc").executeBlock(this.connexion, query);
+	    query=new ArcPreparedStatementBuilder();
+		if (this.connexion.isScaled())
+		{
+			GenericBean gb=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getExecutorConnection(),new ArcPreparedStatementBuilder("SELECT * FROM "+this.tableChargementPilTemp)));
+	        // copy them on the nod
+	        query.append(query.copyFromGenericBean(this.tableChargementPilTemp, gb));
+
+	        query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
+
+		    UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(), query);
+		}
+
 	}
 
 	/**
@@ -236,7 +263,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    chargementFichierAvecContainer();
 	}
 
-	UtilitaireDao.get("arc").executeBlock(this.connexion, this.requeteBilan);
+	UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), this.requeteBilan);
 
 	this.getRequeteInsert().setLength(0);
 	this.requeteBilan.setLength(0);
@@ -256,7 +283,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
     try {	
 		    try {
 				this.fileChargement = new File(this.directoryIn + File.separator + container);
-				this.entrepot = ManipString.substringBeforeFirst(container, "_") + "_";
 				
 				ArchiveChargerFactory archiveChargerFactory = new ArchiveChargerFactory(fileChargement, this.idSource);
 				IArchiveFileLoader archiveChargeur=  archiveChargerFactory.getChargeur(container);
@@ -284,7 +310,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	StaticLoggerDispatcher.info("** choixChargeur : " + this.idSource + " **", LOGGER);
 	// Si on a pas 1 seule norme alors le fichier est en erreur
 	ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
-	chgrBrtl.setConnexion(getConnexion());
+	chgrBrtl.setConnexion(getConnexion().getExecutorConnection());
 	chgrBrtl.setListeNorme(listeNorme);
 
 	// Stockage dans des tableaux pour passage par référence
@@ -333,7 +359,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
     		.append(" FROM "+this.getTableChargementRegle())
     		.append(" WHERE id_norme =" + requete.quoteText(norme.getIdNorme()) + ";");
 
-		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion(), requete));
+		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion().getExecutorConnection(), requete));
 		if (g.mapContent().isEmpty()) {
 			throw new ArcException("La norme n'a pas de règle de chargement associée.");
 		}
@@ -361,9 +387,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	
 	// Créer la table des données de la table des donénes chargées
 	query.append(createTableInherit(getTableTempA(), tableIdSource));
-	
-	query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
-	
+
 	return query.toString();
     }
 
@@ -398,7 +422,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	}
 
 	bloc3.append("where "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "' AND phase_traitement='" + this.currentPhase + "'; \n");
-	UtilitaireDao.get(poolName).executeBlock(this.getConnexion(), bloc3);
+	UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), bloc3);
 	java.util.Date endDate = new java.util.Date();
 
 	StaticLoggerDispatcher.info(
@@ -420,11 +444,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
     }
 
     @Override
-	public Connection getConnexion() {
+	public ScalableConnection getConnexion() {
 	return connexion;
     }
 
-    public void setConnexion(Connection connexion) {
+    public void setConnexion(ScalableConnection connexion) {
 	this.connexion = connexion;
     }
 

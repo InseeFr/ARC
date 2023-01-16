@@ -42,7 +42,7 @@ public class ApiNormageService extends ApiService {
     public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
         
-        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiNormageService.MAX_PARALLEL_WORKERS",4);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiNormageService.MAX_PARALLEL_WORKERS",4);
 
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));

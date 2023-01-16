@@ -30,6 +30,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
+import fr.insee.arc.core.service.thread.ScalableConnection;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -69,7 +70,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	@Qualifier("activeLoggerDispatcher")
 	protected LoggerDispatcher loggerDispatcher;
 
-	protected Connection connexion;
+	protected ScalableConnection connexion;
+	
 	protected String envExecution;
 	protected String envParameters;
 	protected String tablePrevious;
@@ -128,7 +130,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this();
 		loggerDispatcher.info("** initialiserVariable **", LOGGER_APISERVICE);
 		try {
-			this.connexion = UtilitaireDao.get(poolName).getDriverConnexion();
+			this.connexion = new ScalableConnection(UtilitaireDao.get(poolName).getDriverConnexion());
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "ApiService()", ex);
 		}
@@ -185,11 +187,11 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		// Vérifie si y'a des sources à traiter
 		if (this.todo) {
 			try {
-				UtilitaireDao.get(poolName).executeBlock(this.connexion, configConnection());
+				UtilitaireDao.get(poolName).executeBlock(this.connexion.getCoordinatorConnection(), configConnection());
 			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
 			}
-			register(this.connexion, this.getPreviousPhase(), this.getCurrentPhase(), this.getTablePil(),
+			register(this.connexion.getCoordinatorConnection(), this.getPreviousPhase(), this.getCurrentPhase(), this.getTablePil(),
 					this.tablePilTemp, this.getNbEnr());
 		}
 
@@ -235,7 +237,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("and etape=1 ");
 		requete.append("limit 1 ");
 		try {
-			todo = UtilitaireDao.get(poolName).hasResults(this.connexion, requete);
+			todo = UtilitaireDao.get(poolName).hasResults(this.connexion.getCoordinatorConnection(), requete);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "checkTodo()", ex);
 		}
@@ -527,21 +529,21 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				if (!(this.getTablePrevious().contains(TraitementPhase.DUMMY.toString().toLowerCase())
 						|| this.getTablePrevious().contains(TraitementPhase.INITIALISATION.toString().toLowerCase())
 						|| this.getTablePrevious().contains(TraitementPhase.RECEPTION.toString().toLowerCase()))) {
-					deleteTodo(this.connexion, this.tablePilTemp, this.getTablePrevious(), this.paramBatch);
+					deleteTodo(this.connexion.getCoordinatorConnection(), this.tablePilTemp, this.getTablePrevious(), this.paramBatch);
 				}
 				StringBuilder requete = new StringBuilder();
 				requete.append(FormatSQL.dropTable(this.tablePilTemp));
 				try {
-					UtilitaireDao.get(poolName).executeBlock(this.connexion, requete);
+					UtilitaireDao.get(poolName).executeBlock(this.connexion.getCoordinatorConnection(), requete);
 				} catch (Exception ex) {
 					LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "finaliser()", ex);
 				}
 			}
 		} finally {
 			try {
-				if (this.connexion != null) {
-					this.connexion.close();
-					this.connexion = null;
+				if (this.connexion.getCoordinatorConnection() != null) {
+					this.connexion.getCoordinatorConnection().close();
+					this.connexion.setCoordinatorConnection(null);
 				}
 			} catch (Exception ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "finaliser()", ex);
@@ -691,7 +693,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase) + " ");
 		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
 		try {
-			return new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete)).mapContent();
+			return new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.connexion.getCoordinatorConnection(), requete)).mapContent();
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "pilotageListIdSource()", ex);
 		}
@@ -1009,7 +1011,9 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("\n ; ");
 		return requete.toString();
 	}
-
+	
+	
+	
 	public String cleanThread() {
 		return "DISCARD SEQUENCES; DISCARD TEMP;";
 	}
@@ -1082,7 +1086,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				} catch (Exception ex) {
 					loggerDispatcher.error("Erreur dans " + this.getCurrentPhase() + ". ", ex, LOGGER_APISERVICE);
 					try {
-						this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.getTablePil(), ex,
+						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.getTablePil(), ex,
 								"aucuneTableADroper");
 					} catch (Exception ex2) {
 						loggerDispatcher.error("Error in ApiService.invokeApi.repriseSurErreur", LOGGER_APISERVICE);
@@ -1173,8 +1177,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		// ERROR: current transaction is aborted, commands ignored until end of
 		// transaction block
 		try {
-			this.connexion.setAutoCommit(false);
-			this.connexion.rollback();
+			this.connexion.getCoordinatorConnection().setAutoCommit(false);
+			this.connexion.getCoordinatorConnection().rollback();
 		} catch (SQLException e) {
 			throw new ArcException("Error in database connection rollback",e);
 		}
@@ -1213,8 +1217,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		// ERROR: current transaction is aborted, commands ignored until end of
 		// transaction block
 		try {
-			this.connexion.setAutoCommit(false);
-			this.connexion.rollback();
+			this.connexion.getCoordinatorConnection().setAutoCommit(false);
+			this.connexion.getCoordinatorConnection().rollback();
 		} catch (SQLException e) {
 			throw new ArcException("Error in database connection rollback",e);
 		}
@@ -1271,7 +1275,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		
 		HashMap<String, ArrayList<String>> pil = new GenericBean(
 				UtilitaireDao.get(poolName)
-						.executeRequest(this.connexion, query ))
+						.executeRequest(this.connexion.getCoordinatorConnection(), query ))
 										.mapContent();
 
 		return (pil);
@@ -1363,7 +1367,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return t;
 	}
 
-	public Connection getConnexion() {
+	public ScalableConnection getConnexion() {
 		return connexion;
 	}
 
