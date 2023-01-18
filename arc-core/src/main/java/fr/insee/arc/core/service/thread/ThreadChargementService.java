@@ -148,14 +148,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
     {
 
     	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
-    	
-		System.out.println("§§§§§§§§§§§§§§§§ 2");
-		System.out.println(query.getQueryWithParameters());
-    	
-
     	UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(),query.getQueryWithParameters());	
-
-    	System.out.println("§§§§§§§§§§§§§§§§ 2 OK");
     	
 	 }
     

@@ -49,17 +49,10 @@ public class ArcThreadGenericDao {
 		query.append(ArcThreadGenericDao.createTablePilotageIdSource(tablePilotagePhase, tablePilotageThread, idSource));
 
 		// if scalable thread
-		if (connexion.isScaled()) {
-
-			System.out.println("§§§§§§§§§§§§§§§§ 1");
-			System.out.println(query.getQueryWithParameters());
-
-			
+		if (connexion.isScaled()) {		
 			// create the pilotage table of the file on the coordinator nod
 			UtilitaireDao.get("arc").executeBlock(connexion.getCoordinatorConnection(), query.getQueryWithParameters());
-
-			System.out.println("§§§§§§§§§§§§§§ 1 OK");
-			
+		
 			query = new ArcPreparedStatementBuilder();
 
 			// nettoyage des objets base de données du thread
@@ -74,10 +67,6 @@ public class ArcThreadGenericDao {
 			query.append(query.copyFromGenericBean(tablePilotageThread, gb));
 
 		}
-		
-		System.out.println("§§§§§§§§§§§§§§§§ 1.5");
-		System.out.println(query.getQueryWithParameters());
-		
 		return query;
 	}
 
