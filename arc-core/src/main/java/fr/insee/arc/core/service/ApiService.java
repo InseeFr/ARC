@@ -97,7 +97,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	// made to report the number of object processed by the phase
 	private int reportNumberOfObject = 0;
 
-	protected String bdDateFormat = "DD/MM/YYYY HH24:MI:SS";
+	public static final String bdDateFormat = "DD/MM/YYYY HH24:MI:SS";
 
 	public static final String IHM_SCHEMA = "arc.ihm";
 
@@ -502,7 +502,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				"\n (container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape, generation_composite,jointure) ");
 		requete.append("\n SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, '" + phaseNouveau
 				+ "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
-		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + this.bdDateFormat
+		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + ApiService.bdDateFormat
 				+ "') , rapport, taux_ko, nb_enr, nb_essais, 1 as etape, generation_composite, jointure ");
 		requete.append("\n FROM mark ");
 		requete.append("\n RETURNING *) ");
@@ -729,50 +729,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return requete;
 	}
 
-	/**
-	 * return the query that marks the file processed by the phase in the persistent
-	 * pilotage table @param tablePil
-	 * 
-	 * @param tablePil
-	 * @param tablePilTemp
-	 * @param idSource
-	 * @return
-	 */
-	public String marquageFinal(String tablePil, String tablePilTemp, String idSource) {
-		StringBuilder requete = new StringBuilder();
-		Date date = new Date();
-
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-
-		requete.append("\n set enable_hashjoin=off; ");
-		requete.append("\n UPDATE " + tablePil + " a ");
-		requete.append("\n \t SET etat_traitement =  b.etat_traitement, ");
-		requete.append("\n \t   id_norme = b.id_norme, ");
-		requete.append("\n \t   validite = b.validite, ");
-		requete.append("\n \t   periodicite = b.periodicite, ");
-		requete.append("\n \t   taux_ko = b.taux_ko, ");
-		requete.append("\n \t   date_traitement = to_timestamp('" + formatter.format(date) + "','" + this.bdDateFormat
-				+ "'), ");
-		requete.append("\n \t   nb_enr = b.nb_enr, ");
-		requete.append("\n \t   rapport = b.rapport, ");
-		requete.append("\n \t   validite_inf = b.validite_inf, ");
-		requete.append("\n \t   validite_sup = b.validite_sup, ");
-		requete.append("\n \t   version = b.version, ");
-		requete.append(
-				"\n \t   etape = case when b.etat_traitement='{" + TraitementEtat.KO + "}' then 2 else b.etape end, ");
-		requete.append("\n \t   jointure = b.jointure ");
-
-		// Si on dispose d'un id source on met à jour seulement celui ci
-		requete.append("\n \t FROM " + tablePilTemp + " as b ");
-		requete.append("\n \t WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
-		requete.append("\n \t AND a.etape = 1 ; ");
-
-		requete.append(resetPreviousPhaseMark(tablePil, idSource, null));
-
-		requete.append("\n set enable_hashjoin = on; ");
-		return requete.toString();
-
-	}
 
 	/**
 	 * Requête de sélection de la liste des colonnes des tables métier associée à
@@ -987,36 +943,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return tableName + "_" + CHILD_TABLE_TOKEN + "_" + hashText;
 	}
 
-	/**
-	 * Créer la copie d'une table selectionnée sur un id_source particulier
-	 * 
-	 * @param TableIn
-	 * @param TableOut
-	 * @param idSource
-	 * @return
-	 */
-	public String createTablePilotageIdSource(String tableIn, String tableOut, String idSource) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n CREATE ");
-		if (!tableOut.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append("UNLOGGED ");
-		}
-		requete.append(
-				"TABLE " + tableOut + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ");
-		requete.append("\n SELECT * FROM " + tableIn + " ");
-		requete.append("\n WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+" ='" + idSource + "' ");
-		requete.append("\n AND etape = 1 ");
-		requete.append("\n ; ");
-		return requete.toString();
-	}
 	
-	
-	
-	public String cleanThread() {
-		return "DISCARD SEQUENCES; DISCARD TEMP;";
-	}
+
 
 	/**
 	 * Met à jour le comptage du nombre d'enregistrement par fichier; nos fichiers

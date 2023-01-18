@@ -8,6 +8,7 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiNormageService;
@@ -50,6 +51,8 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
     private String structure;
 
+	private ArcThreadGenericDao arcThreadGenericDao;
+
     @Override
     public void configThread(ScalableConnection connexion, int currentIndice, ApiNormageService theApi) {
         
@@ -85,6 +88,9 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         this.setTableNormageRegle(theApi.getTableNormageRegle());
         this.setEnvExecution(theApi.getEnvExecution());
         this.setParamBatch(theApi.getParamBatch());
+        
+		// arc thread dao
+		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableNormagePilTemp, idSource);
 
     }
 
@@ -130,28 +136,21 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
      */
     private void creerTableTravail() throws ArcException {
         StaticLoggerDispatcher.info("Créer les tables images", LOGGER);
+    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
+
         // Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
-        StringBuilder query = new StringBuilder();
-        
-        // nettoyage des objets base de données du thread
-        query.append(cleanThread());
-        
     	// création des tables temporaires de données
-        query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableNormagePilTemp, this.idSource));
         query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
-
-        StaticLoggerDispatcher.debug("requete créer table travail" + query, LOGGER);
-
        
         //On indique que le normage s'est bien passé
         query.append("\n UPDATE "+this.tableNormagePilTemp);
-        query.append("\n\t SET etat_traitement = '{"+TraitementEtat.OK+"}'");
-        query.append("\n\t , phase_traitement = '"+this.currentPhase+"'");
-        query.append("\n\t WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='"+this.idSource+"';");
+        query.append("\n SET etat_traitement = '{"+TraitementEtat.OK+"}'");
+        query.append("\n , phase_traitement = '"+this.currentPhase+"'");
+        query.append("\n WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='"+this.idSource+"';");
         
         query.append(this.createTableTravail("", this.tableNormageDataTemp, this.tableNormageKOTemp, this.tableNormagePilTemp, TraitementEtat.KO.toString()));
                 
-        UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), query);
+        UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), query.getQueryWithParameters());
 
     }
 
@@ -229,7 +228,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
      */
     private void insertionFinale() throws ArcException {
     	
-    	StringBuilder query=new StringBuilder();
+    	ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
     	
     	// update the number of record ans structure in the pilotage table
     	query.append(updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure));
@@ -241,15 +240,9 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     	query.append(createTableInherit(this.tableNormageOKTemp, tableIdSourceOK));
         String tableIdSourceKO=tableOfIdSource(this.tableNormageKO ,this.idSource);
         query.append(createTableInherit(this.tableNormageKOTemp, tableIdSourceKO));
-        
-        if (paramBatch != null) {
-        	query.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS "+tableIdSourceKO+";"));
-        }
-        
-        query.append(this.marquageFinal(this.tablePil, this.tableNormagePilTemp, this.idSource));
-        
-        UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(), query);
 
+        // mark file as done into global pilotage table
+        arcThreadGenericDao.marquageFinalDefaultDao(query);
         
     }
 

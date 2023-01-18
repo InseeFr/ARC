@@ -31,7 +31,6 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.Sleep;
 
 
@@ -44,23 +43,20 @@ import fr.insee.arc.utils.utils.Sleep;
 public class ThreadChargementService extends ApiChargementService implements Runnable, ArcThread<ApiChargementService> {
     private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
     
-    //
     private int indice;
 
     private String container;
+
+    private String tableChargementPilTemp;
+    
+    private ArcThreadGenericDao arcThreadGenericDao;
+    
     public String validite;
 
-    private File fileChargement;
-
-    /*
-     * / On utiliser plusieur input stream car chacun à une utilité. Et en
-     * faisaint ainsi, on évite les problèmes liés au IS
-     */
     public FilesInputStreamLoad filesInputStreamLoad;
 
     public Norme normeOk;
-
-    private String tableChargementPilTemp;
+    
     
     @Override
     public void configThread(ScalableConnection connexion, int currentIndice, ApiChargementService aApi) {
@@ -101,6 +97,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	// récupération des différentes normes dans la base
 	this.listeNorme = Norme.getNormesBase(this.connexion.getExecutorConnection(), this.tableNorme);
 
+	// thread generic dao
+	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableChargementPilTemp, idSource);
+	
     }
 
     public void start() {
@@ -147,33 +146,18 @@ public class ThreadChargementService extends ApiChargementService implements Run
      */
     private void preparation() throws ArcException
     {
-    	ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 
-    	// nettoyage des objets base de données du thread
-        query.append(cleanThread());
+    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
     	
-    	// création des tables temporaires de données
-    	query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableChargementPilTemp, this.idSource));
-
-    	UtilitaireDao.get("arc").executeBlock(connexion.getCoordinatorConnection(),query.getQueryWithParameters());
-
-        if (this.connexion.isScaled())
-        {
-        	query=new ArcPreparedStatementBuilder();
-
-        	// nettoyage des objets base de données du thread
-            query.append(cleanThread());
-        	
-        	// création des tables temporaires de données
-            // get the records from tableChargementPilTemp in executor nod
-            GenericBean gb=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(),new ArcPreparedStatementBuilder("SELECT * FROM "+this.tableChargementPilTemp)));
-            // copy them on the coordinator to update pilotage table
-            query.append(query.copyFromGenericBean(this.tableChargementPilTemp, gb));
-        	
-        	UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(),query.getQueryWithParameters());	
-        }
+		System.out.println("§§§§§§§§§§§§§§§§ 2");
+		System.out.println(query.getQueryWithParameters());
     	
-    }
+
+    	UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(),query.getQueryWithParameters());	
+
+    	System.out.println("§§§§§§§§§§§§§§§§ 2 OK");
+    	
+	 }
     
     
     /**
@@ -195,24 +179,8 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    // pilotage temporaire
 	    query.append(insertionFinale(this.connexion.getExecutorConnection(), this.tableChargementOK, this.idSource));
 
-		if (!this.connexion.isScaled())
-		{
-		query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
-		}
-		
-	    UtilitaireDao.get("arc").executeRequest(this.connexion.getExecutorConnection(), query);
-	    
-	    query=new ArcPreparedStatementBuilder();
-		if (this.connexion.isScaled())
-		{
-			GenericBean gb=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getExecutorConnection(),new ArcPreparedStatementBuilder("SELECT * FROM "+this.tableChargementPilTemp)));
-	        // copy them on the nod
-	        query.append(query.copyFromGenericBean(this.tableChargementPilTemp, gb));
-
-	        query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
-
-		    UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(), query);
-		}
+	    // mark file as done in the pilotage table
+	    arcThreadGenericDao.marquageFinalDefaultDao(query);
 
 	}
 
@@ -282,7 +250,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
     try {	
 		    try {
-				this.fileChargement = new File(this.directoryIn + File.separator + container);
+		        File fileChargement;
+
+				fileChargement = new File(this.directoryIn + File.separator + container);
 				
 				ArchiveChargerFactory archiveChargerFactory = new ArchiveChargerFactory(fileChargement, this.idSource);
 				IArchiveFileLoader archiveChargeur=  archiveChargerFactory.getChargeur(container);

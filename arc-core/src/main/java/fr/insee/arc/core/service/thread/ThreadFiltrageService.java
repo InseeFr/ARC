@@ -41,6 +41,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	private String tableTempFiltrageKo;
 	private String tableFiltrageKo;
 	private String tableFiltrageOk;
+	private ArcThreadGenericDao arcThreadGenericDao;
 	
     public static final String REGEX_SELECTION_RUBRIQUE = "\\{[^\\{:\\}]*\\}";
 
@@ -74,6 +75,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.setTableNormageRegle(theApi.getTableNormageRegle());
 		this.setTableSeuil(theApi.getTableSeuil());
 		this.setParamBatch(theApi.getParamBatch());
+		
+		// thread generic dao
+		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableFiltragePilTemp, idSource);
 
 	}
 
@@ -119,13 +123,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 */
 	private void initialiserBatchFiltrage() throws ArcException {
 
-		StringBuilder query = new StringBuilder();
-
-		// nettoyage des objets base de données du thread
-		query.append(cleanThread());
-
-		// création de la table de pilotage temporaire
-		query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableFiltragePilTemp, this.idSource));
+    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
 
 		// marquer le jeu de regle
 		query.append(marqueJeuDeRegleApplique(this.tableFiltragePilTemp));
@@ -137,7 +135,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ok", logger);
 		query.append(FormatSQL.createAsSelectFrom(this.tableTempFiltrageOk, this.tableFiltrageDataTemp, "false"));
 
-		UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query);
+		UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 		// récupération du paramètre de filtrage
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
@@ -228,7 +226,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 */
 	private void insertionFinale() throws ArcException {
 		
-		StringBuilder query=new StringBuilder();
+		ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 		
 		// promote the application user account to full right
 		query.append(switchToFullRightRole());
@@ -239,17 +237,23 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		String tableIdSourceKO = tableOfIdSource(this.tableFiltrageKo, this.idSource);
 		query.append(createTableInherit(this.tableTempFiltrageKo, tableIdSourceKO));
 
-		
-		if (paramBatch == null) {
-			query.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS " + tableIdSourceKO + ";"));
-		}
-
-		//marquage dans la table de pilotage
-		query.append(this.marquageFinal(this.tablePil, this.tableFiltragePilTemp, this.idSource));
-		
-		UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(), query);
+	    // mark file as done in the pilotage table
+	    arcThreadGenericDao.marquageFinalDefaultDao(query);
 	}
 
+	
+	/**
+	 * 
+	 * @param envExecution
+	 * @param aTableControleOk
+	 * @param aTableFiltrageOk
+	 * @param aTableFiltrageKo
+	 * @param aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle
+	 * @param excludedRate
+	 * @param aTablePilotage
+	 * @return
+	 * @throws ArcException
+	 */
 	private StringBuilder getRequeteFiltrageIntermediaire(String envExecution, String aTableControleOk,
 			String aTableFiltrageOk, String aTableFiltrageKo,
 			HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle, String excludedRate,

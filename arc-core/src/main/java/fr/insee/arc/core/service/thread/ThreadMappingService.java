@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
@@ -30,6 +31,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
     private int indice;
     private String tableTempFiltrageOk;
     private String tableMappingPilTemp;
+
+	private ArcThreadGenericDao arcThreadGenericDao;
 
     @Override
     public void configThread(ScalableConnection connexion, int currentIndice, ApiMappingService anApi) {
@@ -58,6 +61,10 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         this.setTableNorme(anApi.getTableNorme());
         this.setTableOutKo(anApi.getTableOutKo());
         this.tablePil = anApi.getTablePil();
+        
+    	// thread generic dao
+    	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableMappingPilTemp, idSource);
+    	
     }
 
     public void start() {
@@ -95,21 +102,15 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
      */
     private void preparerExecution() throws ArcException {
 
-        StringBuilder requete = new StringBuilder();
-
-    	/*
-         * Insertion dans la table temporaire des fichiers marqués dans la table de pilotage
-         */
-        requete.append(cleanThread());
+    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
         
-        requete.append(createTablePilotageIdSource(this.tablePilTemp, this.tableMappingPilTemp, this.idSource));
         /*
          * Marquer le jeu de règles
          */
-        requete.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
+    	query.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
         
-        requete.append(createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
-        UtilitaireDao.get(poolName).executeBlock(this.connexion.getExecutorConnection(), requete);
+        query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
+        UtilitaireDao.get(poolName).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 
     }
@@ -154,15 +155,15 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
             StaticLoggerDispatcher.trace("Mapping : " + listeFichier.get(0), LOGGER);                
 
-            StringBuilder query=new StringBuilder();
+            ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 
             // Créer les tables temporaires métier
             query.append(requeteMapping.requeteCreationTablesTemporaires());
 
             // calculer la requete du fichier
-            query.append(ModeRequete.NESTLOOP_OFF);
+            query.append(ModeRequete.NESTLOOP_OFF.toString());
             query.append(requeteMapping.getRequete(listeFichier.get(0)));
-            query.append(ModeRequete.NESTLOOP_ON);
+            query.append(ModeRequete.NESTLOOP_ON.toString());
 
 
             /**
@@ -186,8 +187,9 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             /*
              * Transfert de la table mapping_ko temporaire vers la table mapping_ko définitive
              */
-            query.append(marquageFinal(this.tablePil, this.tableMappingPilTemp, this.idSource));
-            UtilitaireDao.get(poolName).executeBlock(this.connexion.getExecutorConnection(), query);
+            
+            arcThreadGenericDao.marquageFinalDefaultDao(query);
+
         }
     }
 
