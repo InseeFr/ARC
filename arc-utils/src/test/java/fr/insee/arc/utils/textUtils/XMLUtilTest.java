@@ -1,6 +1,6 @@
 package fr.insee.arc.utils.textUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

@@ -14,10 +14,10 @@ import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
+import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.ManipString;
 
 
 /**

@@ -1,10 +1,8 @@
 package fr.insee.arc.web.gui.famillenorme.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-
-import fr.insee.arc.web.gui.famillenorme.service.ServiceViewTableMetier;
 
 public class ServiceViewTableMetierTest {
 

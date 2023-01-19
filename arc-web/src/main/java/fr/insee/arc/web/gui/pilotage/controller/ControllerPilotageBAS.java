@@ -1,24 +1,11 @@
 package fr.insee.arc.web.gui.pilotage.controller;
 
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.ApiInitialisationService;
-import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.pilotage.service.ServiceViewPilotageBAS;
 
 @Controller

@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.postgresql.core.Utils;
 
-import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;

@@ -6,9 +6,9 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * Loader have to inherit this class

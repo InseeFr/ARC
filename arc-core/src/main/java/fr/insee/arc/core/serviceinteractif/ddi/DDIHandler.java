@@ -1,5 +1,8 @@
 package fr.insee.arc.core.serviceinteractif.ddi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -9,9 +12,6 @@ import fr.insee.arc.core.model.ddi.DDIRepresentedVariable;
 import fr.insee.arc.core.model.ddi.DDITable;
 import fr.insee.arc.core.model.ddi.DDIVariable;
 import fr.insee.arc.core.model.ddi.DDIVariableOfTable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Classe handler intégrant un modèle de données décrit dans un XML DDI dans le modèle Java {@code ddi}

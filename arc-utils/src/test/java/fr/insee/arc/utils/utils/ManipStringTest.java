@@ -1,7 +1,9 @@
 package fr.insee.arc.utils.utils;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
+
 import org.junit.Test;
 
 public class ManipStringTest extends ManipString {

@@ -3,8 +3,6 @@ package fr.insee.arc.utils.structure;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.exception.ArcException;
 
 /**

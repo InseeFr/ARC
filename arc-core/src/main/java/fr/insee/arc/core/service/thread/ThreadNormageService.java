@@ -1,7 +1,5 @@
 package fr.insee.arc.core.service.thread;
 
-import java.sql.Connection;
-import java.sql.SQLClientInfoException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
