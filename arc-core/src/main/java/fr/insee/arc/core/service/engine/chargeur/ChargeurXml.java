@@ -67,7 +67,7 @@ public class ChargeurXml implements IChargeur{
     public ChargeurXml(ThreadChargementService threadChargementService, String fileName) {
         this.fileName = fileName;
         this.col = threadChargementService.getCol();
-        this.connexion = threadChargementService.getConnexion();
+        this.connexion = threadChargementService.getConnexion().getExecutorConnection();
         this.colData = threadChargementService.getColData();
         this.allCols = threadChargementService.getAllCols();
         this.requeteInsert = threadChargementService.getRequeteInsert();

@@ -66,7 +66,7 @@ public class ChargeurCSV implements IChargeur {
 
 	public ChargeurCSV(ThreadChargementService threadChargementService, String fileName) {
 		this.fileName = fileName;
-		this.connexion = threadChargementService.getConnexion();
+		this.connexion = threadChargementService.getConnexion().getExecutorConnection();
 		this.tableTempA = threadChargementService.getTableTempA();
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
 		this.currentPhase = threadChargementService.getCurrentPhase();

@@ -52,7 +52,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
      */
     public void executer() throws ArcException {
         
-        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
     	
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         

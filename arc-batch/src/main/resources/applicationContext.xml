@@ -20,10 +20,6 @@
 
 	<bean id="AppTest" class="fr.insee.arc.batch.AppTestTemp">
 	</bean>
-	 	 
-	<bean id="utilitaireDao" class="fr.insee.arc.utils.dao.UtilitaireDao">
-  	<constructor-arg index="0" value="arc" />
-	</bean> 	 
  
 	<!-- Gestion des properties -->
 	<bean id="properties"

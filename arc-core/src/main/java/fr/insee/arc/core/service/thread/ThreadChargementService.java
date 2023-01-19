@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.SQLClientInfoException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -32,7 +31,6 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.utils.Sleep;
 
 
@@ -45,38 +43,28 @@ import fr.insee.arc.utils.utils.Sleep;
 public class ThreadChargementService extends ApiChargementService implements Runnable, ArcThread<ApiChargementService> {
     private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
     
-    //
     private int indice;
 
     private String container;
-    public String validite;
-
-    private File fileChargement;
-    private String entrepot;
-
-    /*
-     * / On utiliser plusieur input stream car chacun à une utilité. Et en
-     * faisaint ainsi, on évite les problèmes liés au IS
-     */
-    public FilesInputStreamLoad filesInputStreamLoad;
-
-    public Norme normeOk;
 
     private String tableChargementPilTemp;
     
+    private ArcThreadGenericDao arcThreadGenericDao;
+    
+    public String validite;
+
+    public FilesInputStreamLoad filesInputStreamLoad;
+
+    public Norme normeOk;
+    
+    
     @Override
-    public void configThread(Connection connexion, int currentIndice, ApiChargementService aApi) {
+    public void configThread(ScalableConnection connexion, int currentIndice, ApiChargementService aApi) {
 
 	this.indice = currentIndice;
 	this.setEnvExecution(aApi.getEnvExecution());
 	this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
 	this.connexion = connexion;
-	try {
-	    this.connexion.setClientInfo("ApplicationName", "Chargement fichier " + idSource);
-	} catch (SQLClientInfoException e) {
-		LOGGER.error(e);
-	}
-
 	this.tableChargementPilTemp = "chargement_pil_temp";
 
 	this.container = aApi.getTabIdSource().get("container").get(this.indice);
@@ -107,8 +95,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		TraitementEtat.OK.toString());
 
 	// récupération des différentes normes dans la base
-	this.listeNorme = Norme.getNormesBase(this.connexion, this.tableNorme);
+	this.listeNorme = Norme.getNormesBase(this.connexion.getExecutorConnection(), this.tableNorme);
 
+	// thread generic dao
+	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableChargementPilTemp, idSource);
+	
     }
 
     public void start() {
@@ -138,7 +129,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    
 		try {
 		// En cas d'erreur on met le fichier en KO avec l'erreur obtenu.
-		this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+		this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
 			"aucuneTableADroper");
 	    } catch (ArcException e2) {
 			StaticLoggerDispatcher.error(e2,LOGGER);
@@ -155,16 +146,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
      */
     private void preparation() throws ArcException
     {
-    	StringBuilder query=new StringBuilder();
-    	
-        // nettoyage des objets base de données du thread
-        query.append(cleanThread());
-    	
-    	// création des tables temporaires de données
-    	query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableChargementPilTemp, this.idSource));
 
-    	UtilitaireDao.get("arc").executeBlock(connexion,query);
-    }
+    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
+    	UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(),query.getQueryWithParameters());	
+    	
+	 }
     
     
     /**
@@ -174,7 +160,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	private void finalisation() throws ArcException
 	{
 		
-		StringBuilder query=new StringBuilder();
+		ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 		  
 	    // retirer de table tempTableA les ids marqués en erreur
 	    query.append(truncateTableIfKO());
@@ -184,9 +170,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    
 	    // Mettre à jour le nombre d'enregistrement dans la table de
 	    // pilotage temporaire
-	    query.append(insertionFinale(this.connexion, this.tableChargementOK, this.idSource));
-	    
-	    UtilitaireDao.get("arc").executeBlock(this.connexion, query);
+	    query.append(insertionFinale(this.connexion.getExecutorConnection(), this.tableChargementOK, this.idSource));
+
+	    // mark file as done in the pilotage table
+	    arcThreadGenericDao.marquageFinalDefaultDao(query);
+
 	}
 
 	/**
@@ -236,7 +224,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    chargementFichierAvecContainer();
 	}
 
-	UtilitaireDao.get("arc").executeBlock(this.connexion, this.requeteBilan);
+	UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), this.requeteBilan);
 
 	this.getRequeteInsert().setLength(0);
 	this.requeteBilan.setLength(0);
@@ -255,8 +243,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
     try {	
 		    try {
-				this.fileChargement = new File(this.directoryIn + File.separator + container);
-				this.entrepot = ManipString.substringBeforeFirst(container, "_") + "_";
+		        File fileChargement;
+
+				fileChargement = new File(this.directoryIn + File.separator + container);
 				
 				ArchiveChargerFactory archiveChargerFactory = new ArchiveChargerFactory(fileChargement, this.idSource);
 				IArchiveFileLoader archiveChargeur=  archiveChargerFactory.getChargeur(container);
@@ -284,7 +273,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	StaticLoggerDispatcher.info("** choixChargeur : " + this.idSource + " **", LOGGER);
 	// Si on a pas 1 seule norme alors le fichier est en erreur
 	ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
-	chgrBrtl.setConnexion(getConnexion());
+	chgrBrtl.setConnexion(getConnexion().getExecutorConnection());
 	chgrBrtl.setListeNorme(listeNorme);
 
 	// Stockage dans des tableaux pour passage par référence
@@ -333,7 +322,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
     		.append(" FROM "+this.getTableChargementRegle())
     		.append(" WHERE id_norme =" + requete.quoteText(norme.getIdNorme()) + ";");
 
-		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion(), requete));
+		GenericBean g = new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.getConnexion().getExecutorConnection(), requete));
 		if (g.mapContent().isEmpty()) {
 			throw new ArcException("La norme n'a pas de règle de chargement associée.");
 		}
@@ -361,9 +350,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	
 	// Créer la table des données de la table des donénes chargées
 	query.append(createTableInherit(getTableTempA(), tableIdSource));
-	
-	query.append(this.marquageFinal(this.tablePil, this.tableChargementPilTemp, this.idSource));
-	
+
 	return query.toString();
     }
 
@@ -398,7 +385,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	}
 
 	bloc3.append("where "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "' AND phase_traitement='" + this.currentPhase + "'; \n");
-	UtilitaireDao.get(poolName).executeBlock(this.getConnexion(), bloc3);
+	UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), bloc3);
 	java.util.Date endDate = new java.util.Date();
 
 	StaticLoggerDispatcher.info(
@@ -420,11 +407,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
     }
 
     @Override
-	public Connection getConnexion() {
+	public ScalableConnection getConnexion() {
 	return connexion;
     }
 
-    public void setConnexion(Connection connexion) {
+    public void setConnexion(ScalableConnection connexion) {
 	this.connexion = connexion;
     }
 

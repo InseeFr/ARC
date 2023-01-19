@@ -70,23 +70,23 @@ public class ApiInitialisationService extends ApiService {
     public void executer() throws ArcException {
 
         // Supprime les lignes devenues inutiles récupérées par le webservice de la table pilotage_fichier
-        nettoyerTablePilotage(this.connexion, this.envExecution);
+        nettoyerTablePilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
 
         // Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans l'environnement d'excécution courant
-        copyTablesToExecutionThrow(connexion, envParameters, envExecution);
+        copyTablesToExecutionThrow(connexion.getCoordinatorConnection(), envParameters, envExecution);
         
         // mettre à jour les tables métier avec les paramêtres de la famille de norme
-        mettreAJourSchemaTableMetierThrow(connexion, envParameters, envExecution);
+        mettreAJourSchemaTableMetierThrow(connexion.getCoordinatorConnection(), envParameters, envExecution);
 
         // marque les fichiers ou les archives à rejouer
-        reinstate(this.connexion, this.tablePil);
+        reinstate(this.connexion.getCoordinatorConnection(), this.tablePil);
 
         // efface des fichiers de la table de pilotage
-        cleanToDelete(this.connexion, this.tablePil);
+        cleanToDelete(this.connexion.getCoordinatorConnection(), this.tablePil);
 
         // Met en cohérence les table de données avec la table de pilotage de l'environnement
         // La table de pilotage fait foi
-        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
+        synchroniserEnvironmentByPilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
 
         // remettre les archives ou elle doivent etre en cas de restauration de la base
         rebuildFileSystem();
@@ -145,7 +145,7 @@ public class ApiInitialisationService extends ApiService {
                     if (!fichier.isDirectory()) {
 	                	if (first || requete.length()>FormatSQL.TAILLE_MAXIMAL_BLOC_SQL)
 	                	{
-	                		UtilitaireDao.get("arc").executeImmediate(this.connexion, requete + ";");
+	                		UtilitaireDao.get("arc").executeImmediate(this.connexion.getCoordinatorConnection(), requete + ";");
 	                        requete=new StringBuilder();
 	                		requete.append("INSERT INTO t_files values ('"+fichier.getName().replace("'", "''")+"')");
 	                		first=false;
@@ -156,7 +156,7 @@ public class ApiInitialisationService extends ApiService {
 	                	}
                     }
                 }
-        		UtilitaireDao.get("arc").executeImmediate(this.connexion, requete + ";");
+        		UtilitaireDao.get("arc").executeImmediate(this.connexion.getCoordinatorConnection(), requete + ";");
 
         		// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table archive
         		// Si on en trouve ce n'est pas cohérent et on doit remettre ces fichiers dans le répertoire de reception
@@ -165,7 +165,7 @@ public class ApiInitialisationService extends ApiService {
                 requete2.append(" SELECT fname FROM t_files a ");
                 requete2.append(" WHERE NOT EXISTS (SELECT * FROM " + nomTableArchive + " b WHERE b.nom_archive=a.fname) ");
 
-                ArrayList<String> fileToBeMoved=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,requete2)).mapContent().get("fname");
+                ArrayList<String> fileToBeMoved=new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(),requete2)).mapContent().get("fname");
                 
                 if (fileToBeMoved!=null)
                 {
@@ -530,9 +530,9 @@ public class ApiInitialisationService extends ApiService {
 
         loggerDispatcher.info("nettoyerTablePilotage", LOGGER);
         
-        Nb_Jour_A_Conserver = BDParameters.getInt(this.connexion, "ApiInitialisationService.Nb_Jour_A_Conserver",365);
+        Nb_Jour_A_Conserver = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiInitialisationService.Nb_Jour_A_Conserver",365);
         
-        NB_FICHIER_PER_ARCHIVE = BDParameters.getInt(this.connexion, "ApiInitialisationService.NB_FICHIER_PER_ARCHIVE",10000);
+        NB_FICHIER_PER_ARCHIVE = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiInitialisationService.NB_FICHIER_PER_ARCHIVE",10000);
 
         String nomTablePilotage = dbEnv(envExecution) + "pilotage_fichier";
         String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
@@ -870,7 +870,7 @@ public class ApiInitialisationService extends ApiService {
 
         // reset etape=3 file to etape=0
         try {
-            UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
+            UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(), new ArcPreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
         } catch (Exception e) {
         	loggerDispatcher.error(e, LOGGER);
         }
@@ -886,7 +886,7 @@ public class ApiInitialisationService extends ApiService {
                 requete.append(") q1 ) ");               
             }
             requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
-            nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion, requete);
+            nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion.getCoordinatorConnection(), requete);
         }
 
         
@@ -901,13 +901,13 @@ public class ApiInitialisationService extends ApiService {
                  requete.append(") q1 ) ");
             }
             try {
-				UtilitaireDao.get("arc").executeRequest(connexion, requete);
+				UtilitaireDao.get("arc").executeRequest(connexion.getCoordinatorConnection(), requete);
 			} catch (ArcException e) {
 				loggerDispatcher.error(e, LOGGER);
 			}
             
             try {
-                reinstate(this.connexion, this.tablePil);
+                reinstate(this.connexion.getCoordinatorConnection(), this.tablePil);
             } catch (Exception e) {
             	loggerDispatcher.error(e, LOGGER);
             }
@@ -924,17 +924,17 @@ public class ApiInitialisationService extends ApiService {
             requete.append(") q1 ) ");
        }
         requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
-        nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion, requete);
+        nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion.getCoordinatorConnection(), requete);
 
         // Run a database synchronization with the pilotage table
         try {
-	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
+	        synchroniserEnvironmentByPilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
         } catch (Exception e) {
         	loggerDispatcher.error(e, LOGGER);
         }
 
         if (nbLignes > 0) {
-            ApiService.maintenanceDatabaseClassic(connexion, envExecution);
+            ApiService.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
         }
 
         // Penser à tuer la connexion
@@ -942,8 +942,8 @@ public class ApiInitialisationService extends ApiService {
 
     public void resetEnvironnement() {
         try {
-	        synchroniserEnvironmentByPilotage(this.connexion, this.envExecution);
-	        ApiService.maintenanceDatabaseClassic(connexion, envExecution);
+	        synchroniserEnvironmentByPilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
+	        ApiService.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
         } catch (Exception e) {
         	loggerDispatcher.error(e, LOGGER);
         }
@@ -1092,7 +1092,7 @@ public class ApiInitialisationService extends ApiService {
                     }
                     else
                     {
-                    	UtilitaireDao.get("arc").executeBlock(this.connexion, deleteTableByPilotage(nomTable, nomTable, this.tablePil, phase, etat, ""));
+                    	UtilitaireDao.get("arc").executeBlock(this.connexion.getCoordinatorConnection(), deleteTableByPilotage(nomTable, nomTable, this.tablePil, phase, etat, ""));
                         UtilitaireDao.get("arc").executeImmediate(connexion,
                                 "set default_statistics_target=1; vacuum analyze " + nomTable + "("+ColumnEnum.ID_SOURCE.getColumnName()+"); set default_statistics_target=100;");
                     }
@@ -1163,7 +1163,7 @@ public class ApiInitialisationService extends ApiService {
         }
         requete.append("end ; ");
 
-        UtilitaireDao.get("arc").executeBlock(this.connexion, requete);
+        UtilitaireDao.get("arc").executeBlock(this.connexion.getCoordinatorConnection(), requete);
 
         return true;
     }

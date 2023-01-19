@@ -1,12 +1,12 @@
 package fr.insee.arc.core.service.thread;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
@@ -32,8 +32,10 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
     private String tableTempFiltrageOk;
     private String tableMappingPilTemp;
 
+	private ArcThreadGenericDao arcThreadGenericDao;
+
     @Override
-    public void configThread(Connection connexion, int currentIndice, ApiMappingService anApi) {
+    public void configThread(ScalableConnection connexion, int currentIndice, ApiMappingService anApi) {
 
         this.connexion = connexion;
         this.indice = currentIndice;
@@ -59,6 +61,10 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         this.setTableNorme(anApi.getTableNorme());
         this.setTableOutKo(anApi.getTableOutKo());
         this.tablePil = anApi.getTablePil();
+        
+    	// thread generic dao
+    	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableMappingPilTemp, idSource);
+    	
     }
 
     public void start() {
@@ -81,7 +87,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             StaticLoggerDispatcher.error(e, LOGGER);
 
 	    try {
-			this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+			this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
 				"aucuneTableADroper");
 		    } catch (ArcException e2) {
 	            StaticLoggerDispatcher.error(e, LOGGER);
@@ -96,21 +102,15 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
      */
     private void preparerExecution() throws ArcException {
 
-        StringBuilder requete = new StringBuilder();
-
-    	/*
-         * Insertion dans la table temporaire des fichiers marqués dans la table de pilotage
-         */
-        requete.append(cleanThread());
+    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
         
-        requete.append(createTablePilotageIdSource(this.tablePilTemp, this.tableMappingPilTemp, this.idSource));
         /*
          * Marquer le jeu de règles
          */
-        requete.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
+    	query.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
         
-        requete.append(createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
-        UtilitaireDao.get(poolName).executeBlock(this.connexion, requete);
+        query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
+        UtilitaireDao.get(poolName).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 
     }
@@ -121,13 +121,13 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         /*
          * Construire l'ensemble des jeux de règles
          */
-        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion, this.tableTempFiltrageOk, this.getTableJeuDeRegle());
+        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(), this.tableTempFiltrageOk, this.getTableJeuDeRegle());
 
         /*
          * Construction de la factory pour les règles de mapping
          */
         ServiceMapping serviceMapping = new ServiceMapping();
-		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion, this.getEnvExecution(), this.tableTempFiltrageOk, getPrefixidentifiantrubrique());
+		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(), this.getEnvExecution(), this.tableTempFiltrageOk, getPrefixidentifiantrubrique());
         /*
          * Pour chaque jeu de règles
          */
@@ -135,11 +135,11 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             /*
              * Récupération de l'id_famille
              */
-            String idFamille = serviceMapping.fetchIdFamille(this.connexion, listeJeuxDeRegles.get(i),	this.getTableNorme());
+            String idFamille = serviceMapping.fetchIdFamille(this.connexion.getExecutorConnection(), listeJeuxDeRegles.get(i),	this.getTableNorme());
             /*
              * Instancier une requête de mapping générique pour ce jeu de règles.
              */
-            RequeteMapping requeteMapping = new RequeteMapping(this.connexion, this.regleMappingFactory, idFamille, listeJeuxDeRegles.get(i),
+            RequeteMapping requeteMapping = new RequeteMapping(this.connexion.getExecutorConnection(), this.regleMappingFactory, idFamille, listeJeuxDeRegles.get(i),
                     this.getEnvExecution(), this.tableTempFiltrageOk, this.indice);
             /*
              * Construire la requête de mapping (dérivation des règles)
@@ -155,15 +155,15 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
             StaticLoggerDispatcher.trace("Mapping : " + listeFichier.get(0), LOGGER);                
 
-            StringBuilder query=new StringBuilder();
+            ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 
             // Créer les tables temporaires métier
             query.append(requeteMapping.requeteCreationTablesTemporaires());
 
             // calculer la requete du fichier
-            query.append(ModeRequete.NESTLOOP_OFF);
+            query.append(ModeRequete.NESTLOOP_OFF.toString());
             query.append(requeteMapping.getRequete(listeFichier.get(0)));
-            query.append(ModeRequete.NESTLOOP_ON);
+            query.append(ModeRequete.NESTLOOP_ON.toString());
 
 
             /**
@@ -187,15 +187,16 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             /*
              * Transfert de la table mapping_ko temporaire vers la table mapping_ko définitive
              */
-            query.append(marquageFinal(this.tablePil, this.tableMappingPilTemp, this.idSource));
-            UtilitaireDao.get(poolName).executeBlock(this.connexion, query);
+            
+            arcThreadGenericDao.marquageFinalDefaultDao(query);
+
         }
     }
 
 
 
     @Override
-	public Connection getConnexion() {
+	public ScalableConnection getConnexion() {
         return connexion;
     }
 

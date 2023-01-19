@@ -51,7 +51,7 @@ public class ApiControleService extends ApiService {
 
         StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
 
-        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "ApiControleService.MAX_PARALLEL_WORKERS",3);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiControleService.MAX_PARALLEL_WORKERS",3);
 
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
         

@@ -41,13 +41,10 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
@@ -60,7 +57,6 @@ import fr.insee.arc.utils.utils.ManipString;
  * Split this -> ddl, dml, single vs multiple results
  *
  */
-@Component
 public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(UtilitaireDao.class);
@@ -68,16 +64,17 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public static final int READ_BUFFER_SIZE = 131072;
     
 	
+	private static final String CONNECTION_SEPARATOR="\\|\\|\\|";
 	
 	/**
 	 * defaut number of tries to initialize an connexion to arc database
 	 */
-	private static final int DEFAULT_NUMBER_OF_CONNECTION_TRIES = 5;
+	private static final int DEFAULT_NUMBER_OF_CONNECTION_TRIES = 1;
 	
 	/**
 	 * delay between connection tries to arc database
 	 */
-	private static final int MILLISECOND_BETWEEN_CONNECTION_TRIES = 1000;
+	private static final int MILLISECOND_BETWEEN_CONNECTION_TRIES = 500;
 
 	/**
 	 * configurable parameter to set the number of try to get a connexion to arc database
@@ -108,7 +105,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	private static Map<String, UtilitaireDao> map;
 	private boolean silent = false;
 
-	@Autowired
 	PropertiesHandler properties;
 
 	private UtilitaireDao(String aPool) {
@@ -117,6 +113,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			map = new HashMap<>();
 		}
 		if (!map.containsKey(aPool)) {
+			properties=PropertiesHandler.getInstance();
 			map.put(aPool, this);
 		}
 	}
@@ -126,10 +123,15 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			map = new HashMap<>();
 		}
 		if (!map.containsKey(aPool)) {
-			map.put(aPool, (UtilitaireDao) SpringApplicationContext.getBean("utilitaireDao",aPool));
+			map.put(aPool, new UtilitaireDao(aPool));
 		}
 		return map.get(aPool);
 	}
+	
+	public static final UtilitaireDao get(int aPool) {
+		return get(""+aPool);
+	}
+	
 
 	public static final UtilitaireDao get(String aPool, int nbTry) {
 		get(aPool).nbTryMax = nbTry;
@@ -137,6 +139,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 
+	/** Compute the number of executor nods declared in connexion
+	 * 
+	 * @return
+	 */
+	public int computeNumberOfExecutorNods()
+	{
+		return properties.getDatabaseUsername().split(CONNECTION_SEPARATOR).length-1;
+	}
+	
+	
 	/**
 	 * Retourne une connexion vers la base de données
 	 *
@@ -147,27 +159,38 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public final Connection getDriverConnexion() throws ArcException {
 		// invocation du driver
 		try {
-			Class.forName(properties.getDatabaseDriverClassName());
+			
+			
+			int connexionIndex=this.pool.equals("arc")?0:Integer.parseInt(this.pool);
+			String driver=properties.getDatabaseDriverClassName().split(CONNECTION_SEPARATOR)[connexionIndex];
+			String uri=properties.getDatabaseUrl().split(CONNECTION_SEPARATOR)[connexionIndex];
+			String user=properties.getDatabaseUsername().split(CONNECTION_SEPARATOR)[connexionIndex];
+			String password=properties.getDatabasePassword().split(CONNECTION_SEPARATOR)[connexionIndex];
+
+			Class.forName(driver);
 			boolean connectionOk = false;
 			int nbTry = 0;
 			Connection c = null;
 			
 			while (!connectionOk && nbTry < nbTryMax) {
+				nbTry++;
+
 			// renvoie la connexion relative au driver
 				try {
-				c = DriverManager.getConnection(properties.getDatabaseUrl(), properties.getDatabaseUsername(),
-						properties.getDatabasePassword());
+				c = DriverManager.getConnection(uri, user,password);
 					connectionOk = true;
 				} catch (Exception e) {
+					if (nbTry < nbTryMax)
+					{
 					LoggerHelper.error(LOGGER,
 							"Connection failure. Tentative de reconnexion dans " + MILLISECOND_BETWEEN_CONNECTION_TRIES +" milisecondes", nbTry);
-					try {
-						Thread.sleep(MILLISECOND_BETWEEN_CONNECTION_TRIES);
-					} catch (InterruptedException e1) {
-						Thread.currentThread().interrupt();
-					}
+							try {
+								Thread.sleep(MILLISECOND_BETWEEN_CONNECTION_TRIES);
+							} catch (InterruptedException e1) {
+								Thread.currentThread().interrupt();
+							}
+						}
 				}
-				nbTry++;
 			}
 		if (!connectionOk) {
 			throw new ArcException("La connexion n'a pu aboutir");

@@ -1,7 +1,5 @@
 package fr.insee.arc.core.service.thread;
 
-import java.sql.Connection;
-import java.sql.SQLClientInfoException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +11,6 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
-import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiFiltrageService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
@@ -44,12 +41,13 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	private String tableTempFiltrageKo;
 	private String tableFiltrageKo;
 	private String tableFiltrageOk;
+	private ArcThreadGenericDao arcThreadGenericDao;
 	
     public static final String REGEX_SELECTION_RUBRIQUE = "\\{[^\\{:\\}]*\\}";
 
 
     @Override
-	public void configThread(Connection connexion, int currentIndice, ApiFiltrageService theApi) {
+	public void configThread(ScalableConnection connexion, int currentIndice, ApiFiltrageService theApi) {
 
 		this.indice = currentIndice;
 		this.setEnvExecution(theApi.getEnvExecution());
@@ -57,12 +55,6 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.setPreviousPhase(theApi.getPreviousPhase());
 		this.setCurrentPhase(theApi.getCurrentPhase());
 		this.connexion = connexion;
-		try {
-			this.connexion.setClientInfo("ApplicationName", "Filtrage fichier " + idSource);
-		} catch (SQLClientInfoException e) {
-			StaticLoggerDispatcher.error(e, LOGGER_APISERVICE);
-		}
-
 		this.tableFiltrageDataTemp = "filtrage_data_temp";
 		this.tableFiltragePilTemp = "filtrage_pil_Temp";
 
@@ -83,6 +75,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.setTableNormageRegle(theApi.getTableNormageRegle());
 		this.setTableSeuil(theApi.getTableSeuil());
 		this.setParamBatch(theApi.getParamBatch());
+		
+		// thread generic dao
+		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableFiltragePilTemp, idSource);
 
 	}
 
@@ -99,7 +94,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error(e, LOGGER_APISERVICE);
 			try {
-				this.repriseSurErreur(this.connexion, this.getCurrentPhase(), this.tablePil, this.idSource, e,
+				this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
 						"aucuneTableADroper");
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(e2, LOGGER_APISERVICE);
@@ -128,13 +123,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 */
 	private void initialiserBatchFiltrage() throws ArcException {
 
-		StringBuilder query = new StringBuilder();
-
-		// nettoyage des objets base de données du thread
-		query.append(cleanThread());
-
-		// création de la table de pilotage temporaire
-		query.append(createTablePilotageIdSource(this.tablePilTemp, this.tableFiltragePilTemp, this.idSource));
+    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
 
 		// marquer le jeu de regle
 		query.append(marqueJeuDeRegleApplique(this.tableFiltragePilTemp));
@@ -146,13 +135,13 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ok", logger);
 		query.append(FormatSQL.createAsSelectFrom(this.tableTempFiltrageOk, this.tableFiltrageDataTemp, "false"));
 
-		UtilitaireDao.get("arc").executeBlock(this.connexion, query);
+		UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 		// récupération du paramètre de filtrage
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT valeur FROM " + this.tableSeuil + " WHERE nom = "
 				+ requete.quoteText("filtrage_taux_exclusion_accepte"));
-		this.seuilExclusion = UtilitaireDao.get("arc").getString(this.connexion, requete);
+		this.seuilExclusion = UtilitaireDao.get("arc").getString(this.connexion.getExecutorConnection(), requete);
 
 	}
 
@@ -191,7 +180,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		StaticLoggerDispatcher.info("Table des données à filtrer utilisée : " + this.tableFiltrageDataTemp, logger);
 
 		List<List<String>> regleActive = Format
-				.patch(UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion,
+				.patch(UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion.getExecutorConnection(),
 						/**
 						 * La requête de sélection de la relation
 						 */
@@ -200,11 +189,11 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle = calculerNormeToPeriodiciteToValiditeInfToValiditeSupToRegle(
 				regleActive);
 
-		ServiceCommunFiltrageMapping.parserRegleGlobale(this.connexion, this.envExecution,
+		ServiceCommunFiltrageMapping.parserRegleGlobale(this.connexion.getExecutorConnection(), this.envExecution,
 				this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, "expr_regle_filtre");
 
 		StaticLoggerDispatcher.info("calculerListeColonnes", logger);
-		Set<String> listeRubrique = ServiceCommunFiltrageMapping.calculerListeColonnes(this.connexion,
+		Set<String> listeRubrique = ServiceCommunFiltrageMapping.calculerListeColonnes(this.connexion.getExecutorConnection(),
 				this.tableFiltrageDataTemp);
 		StaticLoggerDispatcher.info("Fin calculerListeColonnes", logger);
 
@@ -219,7 +208,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 				this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, this.seuilExclusion,
 				this.tableFiltragePilTemp);
 
-		UtilitaireDao.get("arc").executeImmediate(this.connexion,
+		UtilitaireDao.get("arc").executeImmediate(this.connexion.getExecutorConnection(),
 				"set enable_nestloop=off;" + requete + "set enable_nestloop=on;");
 
 	}
@@ -237,7 +226,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 */
 	private void insertionFinale() throws ArcException {
 		
-		StringBuilder query=new StringBuilder();
+		ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 		
 		// promote the application user account to full right
 		query.append(switchToFullRightRole());
@@ -248,17 +237,23 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		String tableIdSourceKO = tableOfIdSource(this.tableFiltrageKo, this.idSource);
 		query.append(createTableInherit(this.tableTempFiltrageKo, tableIdSourceKO));
 
-		
-		if (paramBatch == null) {
-			query.append(FormatSQL.tryQuery("DROP TABLE IF EXISTS " + tableIdSourceKO + ";"));
-		}
-
-		//marquage dans la table de pilotage
-		query.append(this.marquageFinal(this.tablePil, this.tableFiltragePilTemp, this.idSource));
-		
-		UtilitaireDao.get("arc").executeBlock(connexion, query);
+	    // mark file as done in the pilotage table
+	    arcThreadGenericDao.marquageFinalDefaultDao(query);
 	}
 
+	
+	/**
+	 * 
+	 * @param envExecution
+	 * @param aTableControleOk
+	 * @param aTableFiltrageOk
+	 * @param aTableFiltrageKo
+	 * @param aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle
+	 * @param excludedRate
+	 * @param aTablePilotage
+	 * @return
+	 * @throws ArcException
+	 */
 	private StringBuilder getRequeteFiltrageIntermediaire(String envExecution, String aTableControleOk,
 			String aTableFiltrageOk, String aTableFiltrageKo,
 			HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle, String excludedRate,
@@ -423,11 +418,11 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	}
 
 	@Override
-	public Connection getConnexion() {
+	public ScalableConnection getConnexion() {
 		return connexion;
 	}
 
-	public void setConnexion(Connection connexion) {
+	public void setConnexion(ScalableConnection connexion) {
 		this.connexion = connexion;
 	}
 
