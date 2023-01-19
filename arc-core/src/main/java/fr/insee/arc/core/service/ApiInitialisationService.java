@@ -1182,17 +1182,19 @@ public class ApiInitialisationService extends ApiService {
                 {
 	                for (String s : entrepotList) {
 	                	
-	                    FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
-	                    FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
+	                	FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
+	                	FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
 	                }
                 }
             }
-            FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
-            FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
-            FileUtils.cleanDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
+            FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
+            FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
+            FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
             try {
-                FileUtils.cleanDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
-            } catch (Exception e) {}
+            	FileUtils.deleteDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
+            } catch (Exception e) {
+                LoggerHelper.infoGenTextAsComment(ApiInitialisationService.class, "export directory doesn't exist", LOGGER, e);
+            }
 
         } catch (IOException ex) {
             LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "clearPilotageAndDirectories()", LOGGER, ex);

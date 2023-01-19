@@ -356,4 +356,17 @@ public class LoggerHelper {
         logAsComment(aLogger, Level.ERROR, t, "Lors de l'exécution de", clazz.getCanonicalName(),
                 IConstanteCaractere.sharp, method);
     }
+    
+    /**
+     * Préférer le formattage du message dans les paramètres de
+     *             configuration des appender dans log4j.xml
+     * @param aLogger
+     * @param t
+     * @param tokens
+     */
+    public static final void infoGenTextAsComment(Class<?> clazz, String method, Logger aLogger, Throwable t)
+    {
+        logAsComment(aLogger, Level.INFO, t, "Lors de l'exécution de", clazz.getCanonicalName(),
+                IConstanteCaractere.sharp, method);
+    }
 }

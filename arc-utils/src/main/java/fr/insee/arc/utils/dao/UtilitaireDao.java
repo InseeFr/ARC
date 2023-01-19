@@ -702,7 +702,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				try {
 					return fromResultSetToArray(res);
 				} catch (ArcException ex) {
-					throw new ArcException(ex);
+					throw new IllegalStateException(ex);
 				}
 			}
 		}
@@ -737,7 +737,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				try {
 					return fromResultSetToListOfT(() -> new ArrayList<>(), this.orm, res);
 				} catch (ArcException ex) {
-					throw new ArcException(ex);
+					throw new IllegalStateException(ex);
 				}
 			}
 		}

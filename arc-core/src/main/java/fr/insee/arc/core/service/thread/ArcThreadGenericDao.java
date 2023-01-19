@@ -8,6 +8,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class ArcThreadGenericDao {
@@ -37,8 +38,9 @@ public class ArcThreadGenericDao {
 	/**
 	 * execute dao and returns default query to prepare thread depending if the connection is horizontally scalable or not
 	 * @return
+	 * @throws ArcException 
 	 */
-	public ArcPreparedStatementBuilder preparationDefaultDao() {
+	public ArcPreparedStatementBuilder preparationDefaultDao() throws ArcException {
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		
@@ -77,8 +79,9 @@ public class ArcThreadGenericDao {
 	 * @param tablePilotageThread
 	 * @param id_source
 	 * @return
+	 * @throws ArcException 
 	 */
-	public void marquageFinalDefaultDao(ArcPreparedStatementBuilder query) {
+	public void marquageFinalDefaultDao(ArcPreparedStatementBuilder query) throws ArcException {
 
 		if (!connexion.isScaled()) {
 			query.append(marquageFinal(tablePilotageGlobale, tablePilotageThread, idSource));

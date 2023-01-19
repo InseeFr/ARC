@@ -69,7 +69,7 @@ public GenericPreparedStatementBuilder asTransaction()
 
 @Override
 public String toString() {
-	throw new ArcException("ToString is not allowed for PreparedStatementBuilder");
+	throw new IllegalStateException("ToString is not allowed for PreparedStatementBuilder");
 }
 
 public GenericPreparedStatementBuilder append(GenericPreparedStatementBuilder s)

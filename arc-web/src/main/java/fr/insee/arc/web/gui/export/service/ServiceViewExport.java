@@ -25,6 +25,7 @@ import org.springframework.ui.Model;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
 @Service
@@ -253,6 +254,10 @@ public class ServiceViewExport extends InteractorExport {
 	    		
 	            UtilitaireDao.get("arc").executeRequest(null,requete);
 	    	}
+	    	}
+	    	catch(ArcException e)
+	    	{
+	    		views.getViewExport().setMessage("Export failed because of database query");
 	    	}
 	    	catch(SQLException e)
 	    	{

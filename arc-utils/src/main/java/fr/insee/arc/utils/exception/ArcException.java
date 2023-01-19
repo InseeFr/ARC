@@ -1,6 +1,6 @@
 package fr.insee.arc.utils.exception;
 
-public class ArcException extends RuntimeException {
+public class ArcException extends Exception {
 
 	/**
 	 * 

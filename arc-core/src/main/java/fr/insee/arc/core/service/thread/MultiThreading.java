@@ -43,7 +43,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public T getInstance() {
+	public T getInstance() throws ArcException {
 		if (threadTemplate instanceof ThreadChargementService) {
 			return (T) new ThreadChargementService();
 		}
@@ -76,9 +76,10 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	 * @param listIdSource
 	 * @param envExecution
 	 * @param restrictedUserName
+	 * @throws ArcException 
 	 */
 	public void execute(int maxParallelWorkers, List<String> listIdSource, String envExecution,
-			String restrictedUserName) {
+			String restrictedUserName) throws ArcException {
 
 		StaticLoggerDispatcher.info("/* Generation des threads pour " + threadTemplate.getClass() + " */", LOGGER);
 
@@ -128,8 +129,9 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	/**
 	 * Close the connections granted to threads
 	 * @param connexionList
+	 * @throws ArcException 
 	 */
-	private void closeThreadConnections(List<ScalableConnection> connexionList)
+	private void closeThreadConnections(List<ScalableConnection> connexionList) throws ArcException
 	{
 		for (ScalableConnection connection : connexionList) {
 			try {
@@ -146,8 +148,9 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	 * Exit when all thread are dead and no more file to be proceed
 	 * @param filesByNods
 	 * @param connexionList
+	 * @throws ArcException 
 	 */
-	private void iterateOverThreadConnections(Map<Integer, List<Integer>> filesByNods, List<ScalableConnection> connexionList)
+	private void iterateOverThreadConnections(Map<Integer, List<Integer>> filesByNods, List<ScalableConnection> connexionList) throws ArcException
 	{
 				int currentIndice;
 		
@@ -269,9 +272,10 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	 * @param anEnvExecution
 	 * @param restrictedUsername
 	 * @param connection
+	 * @throws ArcException 
 	 */
 	private static void configAndRestrictConnexion(int poolId, String anEnvExecution, String restrictedUsername,
-			Connection connection) {
+			Connection connection) throws ArcException {
 		UtilitaireDao.get(poolId).executeImmediate(connection, ApiService.configConnection(anEnvExecution)
 				+ (restrictedUsername.equals("") ? "" : FormatSQL.changeRole(restrictedUsername)));
 	}
