@@ -47,7 +47,7 @@ public class FileUtilsTest {
 		
 		FileUtils.deleteDirectory(testDir);
 
-		assertEquals(root.listFiles().length,0);
+		assertEquals(0,root.listFiles().length);
 		
 	}
 
