@@ -494,7 +494,7 @@ public class ClientDaoImpl implements ClientDao {
      * @param resp
      *            Flux où écrire la réponse une fois mise en forme.
      */
-    private void mapJsonResponse(ArrayList<ArrayList<String>> result, SendResponse resp) throws ArcException {
+    private void mapJsonResponse(ArrayList<ArrayList<String>> result, SendResponse resp) {
         List<String> table = new ArrayList<>();
         StringBuilder row = new StringBuilder("\"");
         String cell;

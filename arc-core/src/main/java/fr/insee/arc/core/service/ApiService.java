@@ -947,7 +947,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * 
 	 * @throws ArcException
 	 */
-	public String updateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) throws ArcException {
+	public String updateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) {
 		StringBuilder query = new StringBuilder();
 
 		// mise à jour du nombre d'enregistrement et du type composite
