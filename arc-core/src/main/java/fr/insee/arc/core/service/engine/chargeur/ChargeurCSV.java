@@ -203,6 +203,7 @@ public class ChargeurCSV implements IChargeur {
 			ArrayList<String> joinClause = new ArrayList<>();
 			ArrayList<String> joinSelect = new ArrayList<>();
 			ArrayList<String> partitionExpression = new ArrayList<>();
+			ArrayList<String> indexExpression = new ArrayList<>();
 
 			for (String line : lines) {
 				if (line.startsWith("<join-table>")) {
@@ -217,6 +218,8 @@ public class ChargeurCSV implements IChargeur {
 					wheres.add(ManipString.substringAfterFirst(line, ">").trim());
 				} else if (line.startsWith("<partition-expression>")) {
 					partitionExpression.add(ManipString.substringAfterFirst(line, ">").trim());
+				} else if (line.startsWith("<index>")) {
+					indexExpression.add(ManipString.substringAfterFirst(line, ">").trim());
 				} else if (line.startsWith("<encoding>")) {
 				} else if (line.startsWith("<headers>")) {
 				} else if (line.startsWith("<quote>")) {
@@ -234,6 +237,14 @@ public class ChargeurCSV implements IChargeur {
 			 */
 
 			StringBuilder req;
+			
+			if (!indexExpression.isEmpty()) {
+				req = new StringBuilder();
+				for (int i = 0; i < indexExpression.size(); i++) {
+					req.append("CREATE INDEX idx"+i+"_chargeurcsvidxrule ON "+ this.tableTempA +"("+indexExpression.get(i)+");\n");
+				}
+				UtilitaireDao.get("arc").executeImmediate(connexion, req);
+			}
 
 			if (!joinTable.isEmpty()) {
 				req = new StringBuilder();

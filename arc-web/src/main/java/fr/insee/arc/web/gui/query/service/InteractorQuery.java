@@ -2,6 +2,7 @@ package fr.insee.arc.web.gui.query.service;
 
 import java.util.HashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
@@ -26,10 +27,15 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 
 	protected String mySchema;
 	
+	@Autowired
 	protected ModelQuery views;
 
 	@Override
 	protected void putAllVObjects(ModelQuery model) {
+		
+		System.out.println(model);
+		System.out.println(model.getViewQuery());
+		
 		views.setViewQuery(vObjectService.preInitialize(model.getViewQuery()));
 		views.setViewTable(vObjectService.preInitialize(model.getViewTable()));
 
