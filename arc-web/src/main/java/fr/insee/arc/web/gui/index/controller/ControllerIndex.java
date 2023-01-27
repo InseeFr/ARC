@@ -2,8 +2,6 @@ package fr.insee.arc.web.gui.index.controller;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

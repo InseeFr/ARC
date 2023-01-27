@@ -102,7 +102,7 @@ public class ApiReceptionService extends ApiService {
 		GenericBean archiveContent =  moveAndCheckClientFiles(this.nbEnr, maxNumberOfFiles);
 		if (archiveContent != null)
 		{
-			registerAndDispatchFiles(this.connexion, archiveContent);
+			registerAndDispatchFiles(this.connexion.getCoordinatorConnection(), archiveContent);
 		}
 	}
 
@@ -125,7 +125,7 @@ public class ApiReceptionService extends ApiService {
 			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatEnCours(this.directoryRoot, this.envExecution));
 			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatOK(this.directoryRoot, this.envExecution));
 			UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEtatKO(this.directoryRoot, this.envExecution));
-			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion,
+			HashMap<String, ArrayList<String>> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(),
 					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
 					
 			if (!entrepotList.isEmpty())
@@ -275,7 +275,7 @@ public class ApiReceptionService extends ApiService {
 									
 									// enregistrer le fichier
 									UtilitaireDao.get("arc").executeBlock(
-											this.connexion,
+											this.connexion.getCoordinatorConnection(),
 											"INSERT INTO " + dbEnv(this.envExecution) + "pilotage_archive (entrepot,nom_archive) values ('" + d + "','" + fname
 											+ "'); ");
 									break;
@@ -662,7 +662,7 @@ public class ApiReceptionService extends ApiService {
 
 	private void soumettreRequete(StringBuilder requete) {
 		try {
-			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
+			UtilitaireDao.get("arc").executeImmediate(this.connexion.getCoordinatorConnection(), requete);
 		} catch (ArcException ex) {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "soumettreRequete()", LOGGER, ex);
 		}
@@ -689,7 +689,7 @@ public class ApiReceptionService extends ApiService {
 		}
 		requete.append(" (" + FormatSQL.cast(originalContainer) + "," + FormatSQL.cast(newContainer) + "," + FormatSQL.cast(v_container) + ", "
 				+ FormatSQL.cast(fileName) + "," + FormatSQL.cast(dateFormat.format(d)) + "," + FormatSQL.cast(TraitementPhase.RECEPTION.toString())
-				+ "," + FormatSQL.cast("{" + etat + "}") + "," + "to_timestamp("+FormatSQL.cast(formatter.format(d))+",'"+this.bdDateFormat+"')" + "," + FormatSQL.cast(rapport) + ",1,"+etape+") ");
+				+ "," + FormatSQL.cast("{" + etat + "}") + "," + "to_timestamp("+FormatSQL.cast(formatter.format(d))+",'"+ApiService.bdDateFormat+"')" + "," + FormatSQL.cast(rapport) + ",1,"+etape+") ");
 	}
 
 	/**
@@ -761,7 +761,7 @@ public class ApiReceptionService extends ApiService {
 		
 		// récupérer les doublons pour mettre à jour le dispatcher
 		try {
-			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName());
+			ArrayList<String> listIdsourceDoublons = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(), new ArcPreparedStatementBuilder(requete))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName());
 			
 			// on va parcourir la liste des fichiers
 			// si on retrouve l'id_source dans la liste, on le marque en erreur
@@ -789,7 +789,7 @@ public class ApiReceptionService extends ApiService {
 
 		ArrayList<ArrayList<String>> content2 = new ArrayList<>();
 		try {
-			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
+			HashMap<String, ArrayList<String>> m =  new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(), new ArcPreparedStatementBuilder(requete))).mapContent();
 			ArrayList<String> listContainerARejouer = m.get(GB_CONTAINER);
 			ArrayList<String> listIdsourceARejouer = m.get(ColumnEnum.ID_SOURCE.getColumnName());
 
@@ -855,7 +855,7 @@ public class ApiReceptionService extends ApiService {
 				+ " b where a.container=b.o_container),1)::text as v_container ");
 		requete.append("from (select distinct container from " + this.tablePilTemp + " where container is not null) a ");
 		try {
-			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
+			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(), new ArcPreparedStatementBuilder(requete))).mapContent();
 			ArrayList<String> listContainerDoublons = m.get(GB_CONTAINER);
 			ArrayList<String> listVersionContainerDoublons = m.get(GB_VCONTAINER);
 			if (listContainerDoublons != null) {

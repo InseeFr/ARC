@@ -2,15 +2,14 @@ package fr.insee.arc.core.ArchiveLoader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**
  * The Zip archive loader

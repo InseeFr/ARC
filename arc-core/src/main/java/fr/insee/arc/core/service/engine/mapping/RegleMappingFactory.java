@@ -4,12 +4,12 @@ import java.sql.Connection;
 import java.util.Set;
 
 import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMapping;
+import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMappingSimple.CodeSQL;
+import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMappingSimple.RubriqueMapping;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingCorrespondanceFonctionnelle;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingGlobale;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingGroupe;
-import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMappingSimple.CodeSQL;
-import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMappingSimple.RubriqueMapping;
 
 /**
  *

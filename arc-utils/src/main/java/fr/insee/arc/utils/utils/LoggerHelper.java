@@ -2,6 +2,7 @@ package fr.insee.arc.utils.utils;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.net.Priority;
 
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
@@ -354,6 +355,19 @@ public class LoggerHelper {
     public static final void errorGenTextAsComment(Class<?> clazz, String method, Logger aLogger, Throwable t)
     {
         logAsComment(aLogger, Level.ERROR, t, "Lors de l'exécution de", clazz.getCanonicalName(),
+                IConstanteCaractere.sharp, method);
+    }
+    
+    /**
+     * Préférer le formattage du message dans les paramètres de
+     *             configuration des appender dans log4j.xml
+     * @param aLogger
+     * @param t
+     * @param tokens
+     */
+    public static final void infoGenTextAsComment(Class<?> clazz, String method, Logger aLogger, Throwable t)
+    {
+        logAsComment(aLogger, Level.INFO, t, "Lors de l'exécution de", clazz.getCanonicalName(),
                 IConstanteCaractere.sharp, method);
     }
 }

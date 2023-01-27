@@ -3,8 +3,8 @@ package fr.insee.arc.web.gui.maintenanceoperation.model;
 import java.util.HashMap;
 
 import fr.insee.arc.web.util.ConstantVObject;
-import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.util.VObject;
 
 
 public class ViewOperations extends VObject {

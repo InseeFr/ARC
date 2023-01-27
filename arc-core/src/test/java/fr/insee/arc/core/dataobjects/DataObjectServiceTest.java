@@ -1,7 +1,5 @@
 package fr.insee.arc.core.dataobjects;
 
-import static org.junit.Assert.*;
-
 import org.junit.Assert;
 import org.junit.Test;
 

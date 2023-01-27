@@ -60,7 +60,7 @@ public class ApiMappingService extends ApiService {
     @Override
     public void executer() throws ArcException {
     	
-        this.maxParallelWorkers = BDParameters.getInt(this.connexion, "MappingService.MAX_PARALLEL_WORKERS",4);
+        this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "MappingService.MAX_PARALLEL_WORKERS",4);
         
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource(getPreviousPhase()));

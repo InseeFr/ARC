@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.structure.GenericBean;
 
 public class GenericPreparedStatementBuilder {
 
@@ -68,7 +68,7 @@ public GenericPreparedStatementBuilder asTransaction()
 
 @Override
 public String toString() {
-	throw new ArcException("ToString is not allowed for PreparedStatementBuilder");
+	throw new IllegalStateException("ToString is not allowed for PreparedStatementBuilder");
 }
 
 public GenericPreparedStatementBuilder append(GenericPreparedStatementBuilder s)
@@ -223,6 +223,61 @@ public String getQueryWithParameters() {
 	}
 	
 	return q;
+}
+
+
+/**
+ * Return the query to copy a table by its value
+ * @return
+ */
+public GenericPreparedStatementBuilder copyFromGenericBean(String tableName, GenericBean gb)
+{
+	
+	query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(tableName).append(SQL.END_QUERY);
+	
+	query.append(SQL.CREATE).append(SQL.TEMPORARY).append(SQL.TABLE).append(tableName).append(SQL.AS);
+	
+	boolean firstLine=true;
+	
+	for (int i=0;i<gb.getContent().size();i++)
+	{
+		ArrayList<String> line=gb.getContent().get(i);
+
+		if (firstLine)
+		{
+			firstLine=false;
+		}
+		else
+		{
+			query.append(SQL.UNION_ALL);
+		}
+		
+		boolean firstCell=true;
+
+		query.append(SQL.SELECT);
+		
+		for (int j=0;j<line.size();j++)
+		{
+			
+			String cell=line.get(j);
+			
+			if (firstCell)
+			{
+				firstCell=false;
+			}
+			else
+			{
+				query.append(",");
+			}
+			query.append(quoteText(cell));
+			query.append(SQL.CAST_OPERATOR);
+			query.append(gb.getTypes().get(j));
+			query.append(SQL.AS);
+			query.append(gb.getHeaders().get(j));
+		}
+	}
+	query.append(SQL.END_QUERY);
+	return this;
 }
 
 

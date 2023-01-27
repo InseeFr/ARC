@@ -649,8 +649,9 @@ public class VObjectService {
      * @param currentData
      * @param tables
      * @return
+     * @throws ArcException 
      */
-    public ArcPreparedStatementBuilder deleteQuery(VObject currentData, String... tables) {
+    public ArcPreparedStatementBuilder deleteQuery(VObject currentData, String... tables) throws ArcException {
 
     	VObject v0 = fetchVObjectData(currentData.getSessionName());
         

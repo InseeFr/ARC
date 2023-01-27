@@ -3,9 +3,6 @@ package fr.insee.arc.core.dataobjects;
 import org.junit.Assert;
 import org.junit.Test;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ColumnEnum;
-
 public class ArcPreparedStatementBuilderTest {
 
 	@Test

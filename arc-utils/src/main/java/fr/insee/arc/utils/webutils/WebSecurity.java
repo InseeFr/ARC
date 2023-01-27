@@ -1,15 +1,14 @@
 package fr.insee.arc.utils.webutils;
 
+import java.io.IOException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.core.io.ClassPathResource;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
-
-import java.io.IOException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class WebSecurity {
 	private static final Logger LOGGER = LogManager.getLogger(WebSecurity.class);

@@ -1,5 +1,7 @@
 package fr.insee.arc.web.gui.famillenorme.service;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -18,11 +20,9 @@ public class ServiceViewFamilleNormeTest extends ServiceViewFamilleNorme {
 		File file = new File(path);
 
 		FileInputStream is = new FileInputStream(file);
-
-		System.out.print(is);
-
 		DDIModeler modeler = uploadFamilleNormeDansBase(is);
-		System.out.println(modeler);
+
+		assertEquals("table",modeler.getModelTables().get(0).getNomTableMetier());
 
 	}
 

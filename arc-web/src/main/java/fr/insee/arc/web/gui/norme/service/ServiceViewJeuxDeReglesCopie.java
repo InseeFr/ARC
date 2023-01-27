@@ -95,7 +95,7 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 		return basicAction(model, RESULT_SUCCESS);
 	}
 
-	public String copieJeuxDeRegles(Model model) throws ArcException {
+	public String copieJeuxDeRegles(Model model) {
 		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		// le jeu de regle à copier
 		Map<String, ArrayList<String>> selectionOut = views.getViewJeuxDeRegles().mapContentSelected();
@@ -104,6 +104,8 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 		HashMap<String, String> type = views.getViewJeuxDeReglesCopie().mapHeadersType();
 		if (!selectionIn.isEmpty()) {
 
+			// excute the copy
+			try {
 			// columns found in all rules tables
 			String inCommonColumns = new StringBuilder().append(ConstanteBD.ID_NORME.getValue())
 					.append("," + ConstanteBD.PERIODICITE.getValue()).append("," + ConstanteBD.VALIDITE_INF.getValue())
@@ -181,12 +183,11 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 			}
 
-			// excute the copy
-			try {
 				UtilitaireDao.get("arc").executeRequest(null, requete);
 			} catch (ArcException ex) {
 				loggerDispatcher.error("Error in copieJeuxDeRegles", ex, LOGGER);
 			}
+			
 			this.vObjectService.destroy(views.getViewJeuxDeReglesCopie());
 		} else {
 			loggerDispatcher.info("No rule set choosed", LOGGER);

@@ -1,13 +1,11 @@
 package fr.insee.arc.core.service.thread;
 
-import java.sql.Connection;
-
 public interface ArcThread<T> {
 
 	
-	abstract void configThread(Connection connexion, int currentIndice, T aApi);
+	abstract void configThread(ScalableConnection connexion, int currentIndice, T aApi);
 
-	abstract Connection getConnexion();
+	abstract ScalableConnection getConnexion();
 
 	abstract Thread getT();
 	

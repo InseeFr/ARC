@@ -313,7 +313,7 @@ public class NormageEngine {
 	 * @throws ArcException
 	 */
 	private void ajouterRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws ArcException {
+			String periodicite, String jointure) {
 		StaticLoggerDispatcher.info("ajouterRegleDuplication()", LOGGER);
 
 		// pour toutes les règles de relation,

@@ -37,7 +37,6 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewFamilleNorme.class);
 
-
 	public String selectFamilleNorme(Model model) {
 		return basicAction(model, RESULT_SUCCESS);
 	}
@@ -50,14 +49,13 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 	}
 
 	public String deleteFamilleNorme(Model model) {
-
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append(this.vObjectService.deleteQuery(views.getViewFamilleNorme()));
-		query.append(synchronizeRegleWithVariableMetier(
-				views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
-		query.asTransaction();
-
 		try {
+			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+			query.append(this.vObjectService.deleteQuery(views.getViewFamilleNorme()));
+			query.append(synchronizeRegleWithVariableMetier(
+					views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
+			query.asTransaction();
+
 			UtilitaireDao.get("arc").executeRequest(null, query);
 		} catch (ArcException e) {
 			this.views.getViewFamilleNorme().setMessage("La suppression des tables a échoué");
@@ -131,7 +129,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 		try {
 			new DDIInsertDAO(this.dataObjectService).insertDDI(uploadFamilleNormeDansBase(fileUpload.getInputStream()));
-		} catch (IOException e) {
+		} catch (IOException | ArcException e) {
 			this.views.getViewFamilleNorme().setMessage("Import failed");
 			loggerDispatcher.error("Error in ServiceViewFamilleNorme.uploadFamilleNorme", LOGGER);
 		}
@@ -203,6 +201,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 		
 		return ManipString.substringBeforeLast(ManipString.substringAfterFirst(nomTableMetier, prefix),suffix);
 	}
+
 
 	/**
 	 * Import a xml ddi file into the norm family
