@@ -24,7 +24,7 @@
 		
 		
 		<!-- sonar rules to ignore -->
-		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5,e6,e7,e81,e82,e9</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5,e6,e7,e81,e82,e9,e10</sonar.issue.ignore.multicriteria>
 		
 		<!-- archive content cannot change directory -->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>javasecurity:S6096</sonar.issue.ignore.multicriteria.e1.ruleKey>
