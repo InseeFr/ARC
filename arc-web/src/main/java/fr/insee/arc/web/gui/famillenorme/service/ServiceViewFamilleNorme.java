@@ -1,8 +1,14 @@
 package fr.insee.arc.web.gui.famillenorme.service;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -12,12 +18,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.opencsv.CSVReader;
+
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.model.famille.ModelTable;
+import fr.insee.arc.core.model.famille.ModelVariable;
 import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
 import fr.insee.arc.core.serviceinteractif.ddi.DDIParser;
 import fr.insee.arc.core.serviceinteractif.ddi.dao.DDIInsertDAO;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.utils.ManipString;
 
 @Service
 public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
@@ -40,7 +53,8 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(this.vObjectService.deleteQuery(views.getViewFamilleNorme()));
-		query.append(synchronizeRegleWithVariableMetier(views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
+		query.append(synchronizeRegleWithVariableMetier(
+				views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 		query.asTransaction();
 
 		try {
@@ -96,19 +110,112 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 		}
 
 	}
+
+	/**
+	 * Import a zip file of two CSV into the norm family. It allows to import back a
+	 * downloaded norm family so it should contain two files named modelTables.csv
+	 * and modelVariables.csv
+	 * 
+	 * @param model
+	 * @param fileUpload an external zip file that should contain the
+	 *                   modelTables.csv and modelVariables.csv files
+	 */
+	public String uploadFamilleNorme(Model model, MultipartFile fileUpload) {
+		loggerDispatcher.info("uploadFamilleNorme", LOGGER);
+
+		// Ouverture du fichier
+		if (fileUpload == null || fileUpload.isEmpty()) {
+			this.views.getViewFamilleNorme().setMessage("You must select a file for import.");
+			return generateDisplay(model, RESULT_SUCCESS);
+		}
+
+		try {
+			new DDIInsertDAO(this.dataObjectService).insertDDI(uploadFamilleNormeDansBase(fileUpload.getInputStream()));
+		} catch (IOException e) {
+			this.views.getViewFamilleNorme().setMessage("Import failed");
+			loggerDispatcher.error("Error in ServiceViewFamilleNorme.uploadFamilleNorme", LOGGER);
+		}
+
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+
+	/**
+	 * Adds the norm family imported via {@code uploadFamilleNorme} into the
+	 * database.
+	 * 
+	 * @param fileUploadInputStream the input stream of the zip file to upload
+	 * @throws IOException
+	 */
+	protected DDIModeler uploadFamilleNormeDansBase(InputStream fileUploadInputStream) throws IOException {
+
+		DDIModeler modeler = new DDIModeler();
+
+		try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fileUploadInputStream));
+				BufferedReader buffReader = new BufferedReader(new InputStreamReader(zis));
+				CSVReader readerTables = new CSVReader(buffReader, ';');
+				CSVReader readerVariables = new CSVReader(buffReader, ';');) {
+
+			ZipEntry ze;
+			while ((ze = zis.getNextEntry()) != null) {
+
+				if (ze.getName().equals("modelTables.csv")) {
+
+					readerTables.readNext(); // skip en-tête
+					readerTables.readNext();
+
+					String[] recordOfTables;
+					while ((recordOfTables = readerTables.readNext()) != null) {
+						String idFamille = recordOfTables[0];
+						String nomTableMetier = keepTableName(recordOfTables[1], idFamille);
+						modeler.getModelTables()
+								.add(new ModelTable(idFamille, nomTableMetier, recordOfTables[2]));
+					}
+				} else if (ze.getName().equals("modelVariables.csv")) {
+
+					readerVariables.readNext(); // skip en-tête
+					readerVariables.readNext();
+
+					String[] recordOfVariables;
+					while ((recordOfVariables = readerVariables.readNext()) != null) {
+						String idFamille = recordOfVariables[0];
+						String nomTableMetier = keepTableName(recordOfVariables[1], idFamille);
+						modeler.getModelVariables().add(new ModelVariable(idFamille, nomTableMetier,
+								recordOfVariables[2], recordOfVariables[3], recordOfVariables[4]));
+					}
+				}
+			}
+			return modeler;
+		}
+
+	}
 	
+	/**
+	 * Deletes if present the prefix and suffix used for table names in ARC mapping table
+	 * @param nomTableMetier the table name to check for prefix and suffix
+	 * @param idFamille the norm family name to check in the table name prefix
+	 * @return the table name, with prefix and suffix removed if present
+	 */
+	private String keepTableName(String nomTableMetier, String idFamille) {
+		
+		
+		String prefix = TraitementPhase.MAPPING.toString().toLowerCase() + "_" + idFamille.toLowerCase() + "_";
+		String suffix = "_" + TraitementEtat.OK.toString().toLowerCase();
+		
+		return ManipString.substringBeforeLast(ManipString.substringAfterFirst(nomTableMetier, prefix),suffix);
+	}
 
 	/**
 	 * Import a xml ddi file into the norm family
+	 * 
 	 * @param model
-	 * @param fileUploadDDI
+	 * @param fileUpload
 	 * @return
 	 */
-	public String importDDI(Model model, MultipartFile fileUploadDDI) {
+	public String importDDI(Model model, MultipartFile fileUpload) {
 		loggerDispatcher.debug("importDDI", LOGGER);
 		try {
 
-			DDIModeler modeler = DDIParser.parse(fileUploadDDI.getInputStream());
+			DDIModeler modeler = DDIParser.parse(fileUpload.getInputStream());
 
 			new DDIInsertDAO(this.dataObjectService).insertDDI(modeler);
 
@@ -117,6 +224,5 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
-	
-	
+
 }

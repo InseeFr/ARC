@@ -8,6 +8,19 @@ package fr.insee.arc.core.model.famille;
  */
 public class ModelVariable {
 
+	public ModelVariable(String idFamille, String nomTableMetier, String nomVariableMetier, String typeVariableMetier,
+			String descriptionVariableMetier) {
+		super();
+		this.idFamille = idFamille;
+		this.nomTableMetier = nomTableMetier;
+		this.nomVariableMetier = nomVariableMetier;
+		this.typeVariableMetier = typeVariableMetier;
+		this.descriptionVariableMetier = descriptionVariableMetier;
+	}
+
+	public ModelVariable() {
+	}
+
 	/**
 	 * Identifiant nominal de la famille de norme à laquelle appartient la variable.
 	 */

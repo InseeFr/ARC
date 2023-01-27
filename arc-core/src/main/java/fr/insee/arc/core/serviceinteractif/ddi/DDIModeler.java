@@ -86,4 +86,10 @@ public class DDIModeler {
         }
     }
 
+    
+    @Override
+    public String toString()
+    {
+    	return this.modelTables.get(0).toString();
+    }
 }

@@ -41,10 +41,15 @@ public class ControllerViewFamilleNorme extends ServiceViewFamilleNorme {
 	public String downloadFamilleNormeAction(Model model, HttpServletResponse response) {
 		return downloadFamilleNorme(model, response);
 	}
+	
+	@RequestMapping("/importFamilleNorme")
+	public String uploadFamilleNormeAction(Model model, MultipartFile fileUpload) {
+		return uploadFamilleNorme(model, fileUpload);
+	}
 
 	@RequestMapping("/importDDI")
-	public String importDDIAction(Model model, MultipartFile fileUploadDDI) {
-		return importDDI(model, fileUploadDDI);
+	public String importDDIAction(Model model, MultipartFile fileUpload) {
+		return importDDI(model, fileUpload);
 	}
 
 }

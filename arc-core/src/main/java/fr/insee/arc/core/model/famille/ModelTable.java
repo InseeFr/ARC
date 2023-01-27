@@ -8,6 +8,17 @@ package fr.insee.arc.core.model.famille;
  */
 public class ModelTable {
 
+	public ModelTable()
+	{
+	}
+	
+	public ModelTable(String idFamille, String nomTableMetier, String descriptionTable) {
+		super();
+		this.idFamille = idFamille;
+		this.nomTableMetier = nomTableMetier;
+		this.descriptionTable = descriptionTable;
+	}
+
 	/**
 	 * Identifiant nominal de la famille de norme à laquelle appartient la table.
 	 */

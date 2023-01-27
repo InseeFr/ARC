@@ -47,16 +47,26 @@
 							</button>
 							<div class="custom-file">
 								<input
-									name="fileUploadDDI"
+									name="fileUpload"
 									type="file"
 									class="custom-file-input"
-									id="inputGroupFileLoadDDI"
+									id="inputGroupFileLoad"
 								/> <label
 									class="custom-file-label"
-									for="inputGroupFileLoadDDI"
+									for="inputGroupFileLoad"
 									aria-describedby="Choose file to upload"
 								><spring:message code="general.chooseFile"/></label>
 							</div>
+							<button class="btn btn-primary btn-sm"
+								id="viewFamilleNorme.importFamilleNorme"
+								type="submit"
+								doAction="importFamilleNorme"
+								multipart="true"
+								scope="viewFamilleNorme;"
+								>
+								<span class="fa fa-upload">&nbsp;</span>
+								<spring:message code="gui.button.importRuleset" />
+							</button>
 							<button class="btn btn-primary btn-sm"
 								id="viewFamilleNorme.importDDI"
 								type="submit"
