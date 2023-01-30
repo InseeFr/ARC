@@ -106,5 +106,10 @@ public class FileUtilsArc {
 	    }
 	    return directoryToBeDeleted.delete();
 	}
+	
+	public static void deleteAndRecreateDirectory(File directoryToBeDeletedAndRecreated) {
+		deleteDirectory(directoryToBeDeletedAndRecreated);
+		directoryToBeDeletedAndRecreated.mkdir();
+	}
     
 }
