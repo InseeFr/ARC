@@ -27,7 +27,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.files.FileUtils;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -406,13 +406,7 @@ class BatchARC implements IReturnCode {
 				}
 
 				message("Traitement Fin");
-
-				if (args != null && args.length > 0 && args[0].equals("noExit")) {
-					message("No Exit");
-				} else {
-					System.exit(STATUS_SUCCESS);
-				}
-
+				System.exit(STATUS_SUCCESS);
 			}
 
 		} catch (Exception ex) {
@@ -503,7 +497,7 @@ class BatchARC implements IReturnCode {
 		File[] fs = f.listFiles();
 		for (File z : fs) {
 			if (z.isDirectory()) {
-				FileUtils.deleteDirectory(z);
+				FileUtilsArc.deleteDirectory(z);
 			} else {
 				deleteIfArchived(directory, envExecution, z);
 			}

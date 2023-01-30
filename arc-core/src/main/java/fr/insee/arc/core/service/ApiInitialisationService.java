@@ -28,6 +28,7 @@ import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -1170,7 +1171,6 @@ public class ApiInitialisationService extends ApiService {
 
 
     public static void clearPilotageAndDirectories(String repertoire, String env) throws ArcException {
-        try {
         	 UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_fichier; ");
              UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_archive; ");
 
@@ -1182,26 +1182,15 @@ public class ApiInitialisationService extends ApiService {
                 {
 	                for (String s : entrepotList) {
 	                	
-	                	FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
-	                	FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
+	                	FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
+	                	FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
 	                }
                 }
             }
-            FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
-            FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
-            FileUtils.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
-            try {
-            	FileUtils.deleteDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
-            } catch (Exception e) {
-                LoggerHelper.infoGenTextAsComment(ApiInitialisationService.class, "export directory doesn't exist", LOGGER, e);
-            }
-
-        } catch (IOException ex) {
-            LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "clearPilotageAndDirectories()", LOGGER, ex);
-        } catch (ArcException ex) {
-            LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "clearPilotageAndDirectories()", LOGGER, ex);
-            throw ex;
-        }
+            FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
+            FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
+            FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
+            FileUtilsArc.deleteDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
     }
 
      

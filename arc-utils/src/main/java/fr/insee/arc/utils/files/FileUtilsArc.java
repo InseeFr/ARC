@@ -12,14 +12,14 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
 
-public class FileUtils {
+public class FileUtilsArc {
 
     public static final String EXTENSION_ZIP = ".zip";
     public static final String EXTENSION_CSV = ".csv";
-    private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
+    private static final Logger LOGGER = LogManager.getLogger(FileUtilsArc.class);
     public static final char SEMICOLON = ';';
 
-    private FileUtils() {
+    private FileUtilsArc() {
 	throw new IllegalStateException("Utility class");
     }
 

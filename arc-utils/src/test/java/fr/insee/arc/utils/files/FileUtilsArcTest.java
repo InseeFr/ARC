@@ -9,7 +9,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class FileUtilsTest {
+public class FileUtilsArcTest {
 
 	@Rule
 	public TemporaryFolder testFolder= new TemporaryFolder();
@@ -45,10 +45,28 @@ public class FileUtilsTest {
 		
 		new File(dir4,"file41.txt").createNewFile();
 		
-		FileUtils.deleteDirectory(testDir);
+		FileUtilsArc.deleteDirectory(testDir);
 
 		assertEquals(0,root.listFiles().length);
 		
 	}
+	
+	@Test
+	/** Test for not existing directory
+	 *  must return false
+	 * @throws IOException
+	 */
+	public void deleteDirectoryTestDirectoryNotExists() throws IOException {
+
+		File root=testFolder.newFolder("root");
+		
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
+		
+		File directoryNotExists=new File(testDir, "dirnotexists");
+		
+		assertEquals(false, FileUtilsArc.deleteDirectory(directoryNotExists));
+	}
+	
 
 }

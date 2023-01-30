@@ -181,7 +181,7 @@ public class ApiReceptionService extends ApiService {
 					// si ce n'est pas le fichier de déclenchement d'une mise en production
 					Matcher matcher = p.matcher(f.getName());
 					
-					if (fr.insee.arc.utils.files.FileUtils.isCompletelyWritten(f)
+					if (fr.insee.arc.utils.files.FileUtilsArc.isCompletelyWritten(f)
 							// oriade : format des fichiers temporaires
 //								&& !f.getName().endsWith(ApiService.SUFFIXE_TEMP_FILE_ORIADE)
 							&& !matcher.matches()
