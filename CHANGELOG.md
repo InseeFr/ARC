@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-92.2.09 - 2023-01-12
+## version-92.2.10 - 2023-01-30
 - bug fix FileUtils.cleanDirectory with symbolic lock
 
 ## version-92.2.07 - 2023-01-12

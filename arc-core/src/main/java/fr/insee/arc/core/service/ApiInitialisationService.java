@@ -1182,15 +1182,15 @@ public class ApiInitialisationService extends ApiService {
                 {
 	                for (String s : entrepotList) {
 	                	
-	                	FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
-	                	FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
+	                	FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
+	                	FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
 	                }
                 }
             }
-            FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
-            FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
-            FileUtilsArc.deleteDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
-            FileUtilsArc.deleteDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
+            FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
+            FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
+            FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
+            FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
     }
 
      
