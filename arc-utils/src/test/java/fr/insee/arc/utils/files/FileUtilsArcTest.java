@@ -68,5 +68,36 @@ public class FileUtilsArcTest {
 		assertEquals(false, FileUtilsArc.deleteDirectory(directoryNotExists));
 	}
 	
+	
+	public void deleteAndRecreateDirectoryTest() throws IOException {
+		File root=testFolder.newFolder("root");
+		
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
+		
+		File directoryToTest=new File(testDir, "dir");
+		directoryToTest.mkdir();
+		
+		File fileInDirectoryToTest=new File(directoryToTest,"fileInDirectory.txt");
+		fileInDirectoryToTest.createNewFile();
+		
+		File directoryInsideDirectoryToTest=new File(testDir, "dir1");
+		directoryInsideDirectoryToTest.mkdir();
+		
+		// file in directory must exists at this time
+		assertEquals(true, fileInDirectoryToTest.exists());
+		// sub directory inside the directory to test must exists at this time
+		assertEquals(true, directoryInsideDirectoryToTest.exists());
+
+		FileUtilsArc.deleteAndRecreateDirectory(directoryToTest);
+		
+		// directoryToTest must exist
+		assertEquals(true, directoryToTest.exists());
+		// file in directory must have been erased
+		assertEquals(false, fileInDirectoryToTest.exists());
+		// sub directory inside the directory to test must had been erased
+		assertEquals(false, directoryInsideDirectoryToTest.exists());
+
+	}
 
 }
