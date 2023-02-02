@@ -14,8 +14,9 @@ public class FileUtilsArcTest {
 	@Rule
 	public TemporaryFolder testFolder= new TemporaryFolder();
 		
-	
 	@Test
+	/** Test if deleteDirectory function delete the target directory and its content
+	 */
 	public void deleteDirectoryTest() throws IOException {
 
 		File root=testFolder.newFolder("root");
@@ -69,19 +70,24 @@ public class FileUtilsArcTest {
 	}
 	
 	
+	/**
+	 * Test if deleteAndRecreateDirectory erase the content of target directory and recreate it well
+	 * @throws IOException
+	 */
+	@Test
 	public void deleteAndRecreateDirectoryTest() throws IOException {
 		File root=testFolder.newFolder("root");
 		
 		File testDir=new File(root,"testDir");
 		testDir.mkdir();
 		
-		File directoryToTest=new File(testDir, "dir");
+		File directoryToTest=new File(testDir, "directoryToTest");
 		directoryToTest.mkdir();
 		
-		File fileInDirectoryToTest=new File(directoryToTest,"fileInDirectory.txt");
+		File fileInDirectoryToTest=new File(directoryToTest,"fileInDirectoryToTest.txt");
 		fileInDirectoryToTest.createNewFile();
 		
-		File directoryInsideDirectoryToTest=new File(testDir, "dir1");
+		File directoryInsideDirectoryToTest=new File(directoryToTest, "subfolderOfDirectoryToTest");
 		directoryInsideDirectoryToTest.mkdir();
 		
 		// file in directory must exists at this time
@@ -97,7 +103,27 @@ public class FileUtilsArcTest {
 		assertEquals(false, fileInDirectoryToTest.exists());
 		// sub directory inside the directory to test must had been erased
 		assertEquals(false, directoryInsideDirectoryToTest.exists());
-
 	}
 
+	/**
+	 * Test is file is file is completly written
+	 * @throws IOException
+	 */
+	@Test
+	public void isCompletelyWrittenTest() throws IOException
+	{
+		File root=testFolder.newFolder("root");
+		
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
+
+		
+		File fileInDirectoryToTest=new File(testDir,"fileInDirectory.txt");
+		fileInDirectoryToTest.createNewFile();
+		
+		assertEquals(true, FileUtilsArc.isCompletelyWritten(fileInDirectoryToTest));
+			
+	}
+	
+	
 }
