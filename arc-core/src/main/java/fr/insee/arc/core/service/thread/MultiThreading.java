@@ -193,7 +193,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	 * @param numberOfExecutorNods
 	 * @return
 	 */
-	private static Map<Integer, List<Integer>> dispatchFilesByNodId(List<String> listIdSource,
+	protected static Map<Integer, List<Integer>> dispatchFilesByNodId(List<String> listIdSource,
 			int startIndexOfExecutorNods, int numberOfExecutorNods) {
 		Map<Integer, List<Integer>> filesByNodId = new HashMap<>();
 

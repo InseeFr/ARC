@@ -139,14 +139,26 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 
-	/** Compute the number of executor nods declared in connexion
-	 * 
+	/** 
+	 * Compute the number of executor nods according to he number of user declared in connexion
+	 * Users are split by ||| . See regexp : {@value #CONNECTION_SEPARATOR}
 	 * @return
 	 */
 	public int computeNumberOfExecutorNods()
 	{
-		return properties.getDatabaseUsername().split(CONNECTION_SEPARATOR).length-1;
+		return computeNumberOfExecutorNods(properties.getDatabaseUsername());
 	}
+	
+	/**
+	 * Compute the number of element split ||| . See regexp {@value #CONNECTION_SEPARATOR}
+	 * @param databaseUserName
+	 * @return
+	 */
+	public static int computeNumberOfExecutorNods(String databaseUserName)
+	{
+		return databaseUserName.split(CONNECTION_SEPARATOR).length-1;
+	}
+	
 	
 	
 	/**
