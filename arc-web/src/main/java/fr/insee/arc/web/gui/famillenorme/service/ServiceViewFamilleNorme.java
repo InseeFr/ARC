@@ -193,7 +193,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 	 * @param idFamille the norm family name to check in the table name prefix
 	 * @return the table name, with prefix and suffix removed if present
 	 */
-	private String keepTableName(String nomTableMetier, String idFamille) {
+	protected String keepTableName(String nomTableMetier, String idFamille) {
 		
 		
 		String prefix = TraitementPhase.MAPPING.toString().toLowerCase() + "_" + idFamille.toLowerCase() + "_";
