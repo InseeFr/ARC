@@ -2,6 +2,7 @@ package fr.insee.arc.web.gui.export.model;
 
 import java.util.HashMap;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.web.util.ConstantVObject;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.VObject;
@@ -25,7 +26,7 @@ public class ViewExport extends VObject {
 
             {
                 put("file_name", new ColumnRendering(true, "Nom du fichier à créer", "11%", "text", null, true));
-                put("zip", new ColumnRendering(true, "Zip ?", "4%", "text", null, true));
+                put("zip", new ColumnRendering(true, "Format d'export", "4%", "select", new ArcPreparedStatementBuilder("select id, val from arc.ext_export_format order by id"), true));
                 put("headers", new ColumnRendering(true, "Créer la ligne d'entete ?", "10%", "text", null, true));
                 put("nulls", new ColumnRendering(true, "Mettre null pour les valeurs à null ?", "10%", "text", null, true));
                 put("table_to_export", new ColumnRendering(true, "Table à exporter", "11%", "text", null, true));

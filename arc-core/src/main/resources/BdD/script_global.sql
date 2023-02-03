@@ -392,6 +392,17 @@ CONSTRAINT ext_webservice_queryview_pkey PRIMARY KEY (id)
 INSERT INTO arc.ext_webservice_queryview VALUES ('1','COLUMN'), ('2','LINE') ON CONFLICT DO NOTHING; 
         
 
+-- table de modalités format d'export
+CREATE TABLE IF NOT EXISTS arc.ext_export_format 
+( 
+id text NOT NULL, 
+val text, 
+CONSTRAINT ext_export_format_pkey PRIMARY KEY (id) 
+); 
+
+INSERT INTO arc.ext_export_format VALUES ('0','NA'), ('1','ZIP'), ('2','GZ') ON CONFLICT DO NOTHING; 
+
+
 -- grant / revoke
 REVOKE ALL ON SCHEMA public FROM public;
 REVOKE ALL ON SCHEMA arc FROM public; 
