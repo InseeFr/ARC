@@ -52,7 +52,7 @@
 		
 		<!-- sql injection for export use case is required for now -->
 		<sonar.issue.ignore.multicriteria.e7.ruleKey>java:S2077</sonar.issue.ignore.multicriteria.e7.ruleKey>
-		<sonar.issue.ignore.multicriteria.e7.resourceKey>**/ExportService.java</sonar.issue.ignore.multicriteria.e7.resourceKey>
+		<sonar.issue.ignore.multicriteria.e7.resourceKey>**/ServiceViewExport.java</sonar.issue.ignore.multicriteria.e7.resourceKey>
 		
 		<!--  no upload limit in ARC sandbox interface -->
 		<sonar.issue.ignore.multicriteria.e81.ruleKey>java:S4507</sonar.issue.ignore.multicriteria.e81.ruleKey>
