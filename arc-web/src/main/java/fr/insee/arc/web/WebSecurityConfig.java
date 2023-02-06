@@ -74,6 +74,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 			// public
 			.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll()
 			.antMatchers("/").permitAll()
+			.antMatchers(HttpMethod.GET, "/healthcheck").permitAll()
 			.antMatchers("/css/**", "/fonts/**", "/img/**", "/js/**").permitAll();
 			if (authorizedRoles.length == 0) {
 				// authenticated

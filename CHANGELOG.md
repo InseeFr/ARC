@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+-web health-check is now public
+
 ## version-92.2.11 - 2023-01-30
 - bug fix FileUtils.cleanDirectory with symbolic lock
 
