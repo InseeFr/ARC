@@ -24,17 +24,8 @@ public class Session {
 		httpSession.setAttribute(attributeName, attributeValue);
 	}
 
-
 	public void remove(String attributeName) {
 		httpSession.removeAttribute(attributeName);		
 	}
 
-	public Map<String,Object> asMap(){
-		Map<String,Object> map = new HashMap<>();
-
-		Collections.list(httpSession.getAttributeNames()).forEach(name -> map.put(name, httpSession.getAttribute(name)));
-		
-		return map;
-	}
-	
 }
