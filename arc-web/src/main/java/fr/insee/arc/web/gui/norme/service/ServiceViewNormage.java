@@ -38,7 +38,7 @@ public class ServiceViewNormage extends InteractorNorme {
 	 * @return success
 	 */
 	public String addNormage(Model model) {
-		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
+		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewNormage());
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class ServiceViewNormage extends InteractorNorme {
 	 * @return
 	 */
 	public String deleteNormage(Model model) {
-		return deleteLineVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
+		return deleteLineVobject(model, RESULT_SUCCESS, this.views.getViewNormage());
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class ServiceViewNormage extends InteractorNorme {
 	 * @return
 	 */
 	public String updateNormage(Model model) {
-		return updateVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewNormage());
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class ServiceViewNormage extends InteractorNorme {
 	 */
 
 	public String sortNormage(Model model) {
-		return sortVobject(model, RESULT_SUCCESS, this.views.getViewMapping());
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewNormage());
 	}
 
 	/**

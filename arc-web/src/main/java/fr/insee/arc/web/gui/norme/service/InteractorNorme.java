@@ -187,25 +187,23 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	 * Initialize the {@link VObject} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeChargement(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
+	public void initializeChargement(VObject viewChargement, VObject viewRulesSet, VObject viewModules, String theTableName) {
+		
+		
+		Map<String, ArrayList<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
 		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
 				
-		if (!selection.isEmpty() && !moduleSelection.isEmpty()
+		if (!viewRulesSetSelectedRecords.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.load)))
 		{
-		    HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,type_fichier, delimiter, format, commentaire from arc.ihm_chargement_regle");
-            whereRuleSetEquals(requete, selection, type);
-            
-            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+			dao.setSelectedRecords(viewRulesSetSelectedRecords);
+			dao.initializeViewChargement(viewChargement);
+			
 		} else {
-			vObjectService.destroy(moduleView);
+			vObjectService.destroy(viewChargement);
 		}
 	}
 
-	
 	/**
 	 * Initialize the {@link VObject} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
