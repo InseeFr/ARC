@@ -70,7 +70,12 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 					.get(this.repertoire + getBacASable().toUpperCase(), TraitementPhase.RECEPTION + "_" + writingRepo)
 					.toString();
 			LoggerHelper.trace(LOGGER, "repertoireUpload :", repertoireUpload);
-			this.vObjectService.upload(views.getViewPilotageBAS(), repertoireUpload);
+			
+			try {
+				this.vObjectService.upload(views.getViewPilotageBAS(), repertoireUpload);
+			} catch (ArcException e) {
+				this.views.getViewPilotageBAS().setMessage("Upload Failed");
+			}
 		} else {
 			String msg = "";
 			if (views.getViewPilotageBAS().getFileUpload() == null) {
