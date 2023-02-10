@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-92.2.13 2023-02-10
+## version-92.2.14 2023-02-10
 - upload data file via GUI is fixed to match with new security constraints
 
 ## version-92.2.12 2023-02-09
