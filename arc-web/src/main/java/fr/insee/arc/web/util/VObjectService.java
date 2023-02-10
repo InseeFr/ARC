@@ -1425,7 +1425,7 @@ public class VObjectService {
 
 						Path location = Paths.get(repertoireCible, fileName);
 						loggerDispatcher.info("Transfering uploaded file to  >> " + location, LOGGER);
-						Files.move(locationTmp, location, StandardCopyOption.REPLACE_EXISTING);
+						Files.copy(locationTmp, location, StandardCopyOption.REPLACE_EXISTING);
 
 					} catch (IOException ex) {
 						throw new ArcException(ex);
