@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
--web health-check is now public
+## version-92.2.13 2023-02-10
+- upload data file via GUI is fixed to match with new security constraints
+
+## version-92.2.12 2023-02-09
+- web health-check is now public
+- bug fix in normage view actions
 
 ## version-92.2.11 - 2023-01-30
 - bug fix FileUtils.cleanDirectory with symbolic lock
