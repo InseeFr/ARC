@@ -98,7 +98,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	this.listeNorme = Norme.getNormesBase(this.connexion.getExecutorConnection(), this.tableNorme);
 
 	// thread generic dao
-	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableChargementPilTemp, idSource);
+	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableChargementPilTemp, tablePrevious, paramBatch, idSource);
 	
     }
 

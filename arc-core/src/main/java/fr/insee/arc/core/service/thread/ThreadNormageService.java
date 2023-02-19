@@ -88,7 +88,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         this.setParamBatch(theApi.getParamBatch());
         
 		// arc thread dao
-		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableNormagePilTemp, idSource);
+		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableNormagePilTemp, tablePrevious, paramBatch, idSource);
 
     }
 
@@ -238,7 +238,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     	query.append(createTableInherit(this.tableNormageOKTemp, tableIdSourceOK));
         String tableIdSourceKO=tableOfIdSource(this.tableNormageKO ,this.idSource);
         query.append(createTableInherit(this.tableNormageKOTemp, tableIdSourceKO));
-
+		
         // mark file as done into global pilotage table
         arcThreadGenericDao.marquageFinalDefaultDao(query);
         

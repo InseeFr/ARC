@@ -63,7 +63,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         this.tablePil = anApi.getTablePil();
         
     	// thread generic dao
-    	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableMappingPilTemp, idSource);
+    	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableMappingPilTemp, tablePrevious, paramBatch, idSource);
     	
     }
 

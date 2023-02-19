@@ -86,7 +86,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.tableOutKo = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO;
 		
 		// arc thread dao
-		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableControlePilTemp, idSource);
+		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableControlePilTemp, tablePrevious, paramBatch, idSource);
 	}
 
 	@Override

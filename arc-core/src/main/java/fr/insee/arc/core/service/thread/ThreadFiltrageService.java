@@ -77,7 +77,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.setParamBatch(theApi.getParamBatch());
 		
 		// thread generic dao
-		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableFiltragePilTemp, idSource);
+		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableFiltragePilTemp, tablePrevious, paramBatch, idSource);
 
 	}
 

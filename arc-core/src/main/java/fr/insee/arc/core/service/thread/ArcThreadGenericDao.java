@@ -13,6 +13,8 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class ArcThreadGenericDao {
 	
+	private static SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	
 	private ScalableConnection connexion;
 
 	private String tablePilotageGlobale;
@@ -20,18 +22,33 @@ public class ArcThreadGenericDao {
 	private String tablePilotagePhase;
 	
 	private String tablePilotageThread;
-	
-	private String idSource;
-	
-	
 
+	private String tablePrevious;
+	
+	private String paramBatch;	
+
+	private String idSource;
+
+	
+	/**
+	 * instaciate parameters requires to build a common dao threads between phases 
+	 * @param connexion
+	 * @param tablePilotageGlobale
+	 * @param tablePilotagePhase
+	 * @param tablePilotageThread
+	 * @param tablePrevious
+	 * @param paramBatch
+	 * @param idSource
+	 */
 	public ArcThreadGenericDao(ScalableConnection connexion, String tablePilotageGlobale, String tablePilotagePhase, String tablePilotageThread,
-			String idSource) {
+			String tablePrevious, String paramBatch, String idSource) {
 		super();
 		this.connexion = connexion;
 		this.tablePilotageGlobale = tablePilotageGlobale;
 		this.tablePilotagePhase = tablePilotagePhase;
 		this.tablePilotageThread = tablePilotageThread;
+		this.tablePrevious = tablePrevious;
+		this.paramBatch = paramBatch;
 		this.idSource = idSource;
 	}
 
@@ -50,6 +67,9 @@ public class ArcThreadGenericDao {
 		// création des tables temporaires de données
 		query.append(ArcThreadGenericDao.createTablePilotageIdSource(tablePilotagePhase, tablePilotageThread, idSource));
 
+		// enregistrement de la date de traitement du fichier
+		query.append("UPDATE "+tablePilotageThread+" set date_traitement=to_timestamp('" + formatter.format(new Date()) + "','" + ApiService.bdDateFormat+"');" );
+		
 		// if scalable thread
 		if (connexion.isScaled()) {		
 			// create the pilotage table of the file on the coordinator nod
@@ -87,6 +107,10 @@ public class ArcThreadGenericDao {
 			query.append(marquageFinal(tablePilotageGlobale, tablePilotageThread, idSource));
 		}
 
+		if (paramBatch != null) {
+			query.append("DROP TABLE IF EXISTS "+ApiService.tableOfIdSource(this.tablePrevious,idSource)+";");
+		}
+		
 		UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 		query = new ArcPreparedStatementBuilder();
@@ -149,32 +173,29 @@ public class ArcThreadGenericDao {
 	 */
 	private static String marquageFinal(String tablePil, String tablePilTemp, String idSource) {
 		StringBuilder requete = new StringBuilder();
-		Date date = new Date();
-
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-
+		
 		requete.append("\n set enable_hashjoin=off; ");
 		requete.append("\n UPDATE " + tablePil + " a ");
-		requete.append("\n \t SET etat_traitement =  b.etat_traitement, ");
-		requete.append("\n \t   id_norme = b.id_norme, ");
-		requete.append("\n \t   validite = b.validite, ");
-		requete.append("\n \t   periodicite = b.periodicite, ");
-		requete.append("\n \t   taux_ko = b.taux_ko, ");
-		requete.append("\n \t   date_traitement = to_timestamp('" + formatter.format(date) + "','" + ApiService.bdDateFormat
+		requete.append("\n SET etat_traitement =  b.etat_traitement, ");
+		requete.append("\n id_norme = b.id_norme, ");
+		requete.append("\n validite = b.validite, ");
+		requete.append("\n periodicite = b.periodicite, ");
+		requete.append("\n taux_ko = b.taux_ko, ");
+		requete.append("\n date_traitement = to_timestamp('" + formatter.format(new Date()) + "','" + ApiService.bdDateFormat
 				+ "'), ");
-		requete.append("\n \t   nb_enr = b.nb_enr, ");
-		requete.append("\n \t   rapport = b.rapport, ");
-		requete.append("\n \t   validite_inf = b.validite_inf, ");
-		requete.append("\n \t   validite_sup = b.validite_sup, ");
-		requete.append("\n \t   version = b.version, ");
-		requete.append(
-				"\n \t   etape = case when b.etat_traitement='{" + TraitementEtat.KO + "}' then 2 else b.etape end, ");
-		requete.append("\n \t   jointure = b.jointure ");
+		requete.append("\n nb_enr = b.nb_enr, ");
+		requete.append("\n rapport = b.rapport, ");
+		requete.append("\n validite_inf = b.validite_inf, ");
+		requete.append("\n validite_sup = b.validite_sup, ");
+		requete.append("\n version = b.version, ");
+		requete.append("\n etape = case when b.etat_traitement='{" + TraitementEtat.KO + "}' then 2 else b.etape end, ");
+		requete.append("\n jointure = b.jointure, ");
+		requete.append("\n generation_composite = b.date_traitement::text ");
 
 		// Si on dispose d'un id source on met à jour seulement celui ci
-		requete.append("\n \t FROM " + tablePilTemp + " as b ");
-		requete.append("\n \t WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
-		requete.append("\n \t AND a.etape = 1 ; ");
+		requete.append("\n FROM " + tablePilTemp + " as b ");
+		requete.append("\n WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
+		requete.append("\n AND a.etape = 1 ; ");
 
 		requete.append(ApiService.resetPreviousPhaseMark(tablePil, idSource, null));
 
