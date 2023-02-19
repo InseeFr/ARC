@@ -479,7 +479,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				+ " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS  ");
 
 		requete.append("\n WITH prep AS (");
-		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, nb_essais, "+ColumnEnum.ID_SOURCE.getColumnName()+") as cum_enr ");
+		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, "+ColumnEnum.ID_SOURCE.getColumnName()+") as cum_enr ");
 		requete.append("\n FROM " + tablePil + " a ");
 		requete.append("\n WHERE phase_traitement='" + phaseAncien + "'  AND '" + TraitementEtat.OK
 				+ "'=ANY(etat_traitement) and etape=1 ) ");
@@ -494,11 +494,11 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		// insert the line in pilotage with etape=1 for the current step
 		requete.append("\n , insert as (INSERT INTO " + tablePil + " ");
 		requete.append(
-				"\n (container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, nb_essais, etape, generation_composite,jointure) ");
+				"\n (container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, etape, generation_composite,jointure) ");
 		requete.append("\n SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, '" + phaseNouveau
 				+ "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
 		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + ApiService.bdDateFormat
-				+ "') , rapport, taux_ko, nb_enr, nb_essais, 1 as etape, generation_composite, jointure ");
+				+ "') , rapport, taux_ko, nb_enr, 1 as etape, generation_composite, jointure ");
 		requete.append("\n FROM mark ");
 		requete.append("\n RETURNING *) ");
 
@@ -521,11 +521,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		try {
 			if (Boolean.TRUE.equals(this.todo)) {
 
-				if (!(this.getTablePrevious().contains(TraitementPhase.DUMMY.toString().toLowerCase())
-						|| this.getTablePrevious().contains(TraitementPhase.INITIALISATION.toString().toLowerCase())
-						|| this.getTablePrevious().contains(TraitementPhase.RECEPTION.toString().toLowerCase()))) {
-					deleteTodo(this.connexion.getCoordinatorConnection(), this.tablePilTemp, this.getTablePrevious(), this.paramBatch);
-				}
 				StringBuilder requete = new StringBuilder();
 				requete.append(FormatSQL.dropTable(this.tablePilTemp));
 				try {
@@ -545,43 +540,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			}
 
 		}
-	}
-
-	/**
-	 * Effacer les fichiers traités de la table to_do de la phase précédente
-	 * 
-	 * @param connexion
-	 * @param tablePilTemp
-	 * @param tablePrevious
-	 */
-	private static void deleteTodo(Connection connexion, String tablePilTemp, String tablePrevious, String paramBatch) {
-		try {
-
-			// Si on est en batch, on drop les tables source
-			// sinon on retire le lien avec la table héritée
-			StringBuilder query = new StringBuilder();
-			HashMap<String, ArrayList<String>> m = new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-					new ArcPreparedStatementBuilder("select "+ColumnEnum.ID_SOURCE.getColumnName()+" from " + tablePilTemp + ""))).mapContent();
-			int count = 0;
-			for (String z : m.get(ColumnEnum.ID_SOURCE.getColumnName())) {
-
-				count++;
-				if (paramBatch != null) {
-					query.append("DROP TABLE IF EXISTS " + tableOfIdSource(tablePrevious, z) + ";");
-
-				}
-				if (count > FormatSQL.MAX_LOCK_PER_TRANSACTION) {
-					UtilitaireDao.get(poolName).executeBlock(connexion, query);
-					query.setLength(0);
-					count = 0;
-				}
-			}
-			UtilitaireDao.get(poolName).executeBlock(connexion, query);
-
-		} catch (Exception ex) {
-			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "deleteTodo()", ex);
-		}
-
 	}
 
 	/**
