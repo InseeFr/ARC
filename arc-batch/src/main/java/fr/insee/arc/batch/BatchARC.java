@@ -54,8 +54,7 @@ class BatchARC implements IReturnCode {
 	 * je met tempo à la date du jour - je lance initialisation etc.
 	 */
 
-	private @Autowired
-	PropertiesHandler properties;
+	private @Autowired PropertiesHandler properties;
 
 	// the sandbox schema where batch process runs
 	private String envExecution;
@@ -79,13 +78,18 @@ class BatchARC implements IReturnCode {
 	// a un blocage
 	// et si un nouveau runner doit etre lancé
 	private Integer numberOfIterationBewteenBlockageCheck;
-	
-	// nombre d'iteration de la boucle batch entre chaque routine de maintenance de la base de données
+
+	// nombre d'iteration de la boucle batch entre chaque routine de maintenance de
+	// la base de données
 	private Integer numberOfIterationBewteenDatabaseMaintenanceRoutine;
 
-	// nombre d'iteration de la boucle batch entre chaque routine de vérification du reste à faire
+	// nombre d'iteration de la boucle batch entre chaque routine de vérification du
+	// reste à faire
 	private Integer numberOfIterationBewteenCheckTodo;
-	
+
+	// nombre de pods utilisés par ARC
+	private Integer numberOfPods;
+
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
 	// Maintenance initialization process can only occur in this case
@@ -103,7 +107,8 @@ class BatchARC implements IReturnCode {
 
 	private void initParameters() {
 
-		boolean keepInDatabase = Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
+		boolean keepInDatabase = Boolean
+				.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
 
 		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
 		// excéder une certaine taille
@@ -135,19 +140,22 @@ class BatchARC implements IReturnCode {
 		numberOfIterationBewteenBlockageCheck = BDParameters.getInt(null, "LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL",
 				120);
 
-		
-		// nombre d'iteration de la boucle batch entre chaque routine de maintenance de la base de données
-		numberOfIterationBewteenDatabaseMaintenanceRoutine = BDParameters.getInt(null, "LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL",
-				500);
-		
-		// nombre d'iteration de la boucle batch entre chaque routine de vérification du reste à faire
+		// nombre d'iteration de la boucle batch entre chaque routine de maintenance de
+		// la base de données
+		numberOfIterationBewteenDatabaseMaintenanceRoutine = BDParameters.getInt(null,
+				"LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL", 500);
+
+		// nombre d'iteration de la boucle batch entre chaque routine de vérification du
+		// reste à faire
 		numberOfIterationBewteenCheckTodo = BDParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
 				10);
-		
+
+		// the number of pods declared for scalability
+		numberOfPods = UtilitaireDao.get(0).computeNumberOfExecutorNods();
 
 		// the metadata schema
 		String env;
-		
+
 		// either we take env and envExecution from database or properties
 		// default is from properties
 		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
@@ -180,7 +188,7 @@ class BatchARC implements IReturnCode {
 	 * 
 	 * @param args
 	 */
-	void execute(String[] args) {
+	void execute() {
 
 		// fill the parameters
 		initParameters();
@@ -188,8 +196,8 @@ class BatchARC implements IReturnCode {
 		message("Main");
 
 		message("Batch ARC " + properties.fullVersionInformation().toString());
-		
-		Thread maintenance=new Thread();
+
+		Thread maintenance = new Thread();
 
 		try {
 
@@ -214,7 +222,7 @@ class BatchARC implements IReturnCode {
 				ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
 						new ArcPreparedStatementBuilder(
 								"select distinct container from " + envExecution + ".pilotage_fichier where etape=1")))
-										.mapContent().get("container");
+						.mapContent().get("container");
 
 				dejaEnCours = (aBouger != null);
 
@@ -366,33 +374,31 @@ class BatchARC implements IReturnCode {
 							// delay between phases not to overload
 							Sleep.sleep(delay);
 						}
-						
-						
-						if (iteration%numberOfIterationBewteenDatabaseMaintenanceRoutine==0)
-						{
-							if (!maintenance.isAlive())
-							{
-								message(iteration+": database maintenance started");
-								maintenance=new Thread() {
+
+						if (iteration % numberOfIterationBewteenDatabaseMaintenanceRoutine == 0) {
+							if (!maintenance.isAlive()) {
+								message(iteration + ": database maintenance started");
+								maintenance = new Thread() {
 									@Override
-									public void run(){
-										ApiService.maintenanceDatabaseClassic(null, envExecution);
+									public void run() {
+										for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
+											ApiService.maintenanceDatabaseClassic(poolIndex, null, envExecution);
+										}
 									}
 								};
 								maintenance.start();
 							}
 						}
-						
-						if (iteration%numberOfIterationBewteenCheckTodo==0)
-						{
+
+						if (iteration % numberOfIterationBewteenCheckTodo == 0) {
 							// check if production on
 							productionOn = productionOn();
-	
+
 							// check if batch must exit loop
 							// exit if nothing left to do or if the production had been turned OFF
 							exit = isNothingLeftToDo(envExecution) || !productionOn;
 						}
-						
+
 						Sleep.sleep(delay);
 						System.gc();
 
@@ -431,15 +437,13 @@ class BatchARC implements IReturnCode {
 		requete.append(
 				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
 		UtilitaireDao.get("arc").executeRequest(null, requete);
-		
-		
 
-		// Maintenance full du catalog
-		ApiService.maintenancePgCatalog(null, FormatSQL.VACUUM_OPTION_FULL);
-
-		// maintenance des tables métier de la base de données
-		ApiService.maintenanceDatabaseClassic(null, envExecution);
-		
+		for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
+			// Maintenance full du catalog
+			ApiService.maintenancePgCatalog(poolIndex, null, FormatSQL.VACUUM_OPTION_FULL);
+			// maintenance des tables métier de la base de données
+			ApiService.maintenanceDatabaseClassic(poolIndex, null, envExecution);
+		}
 	}
 
 	/**
@@ -461,7 +465,7 @@ class BatchARC implements IReturnCode {
 	 * test si la chaine batch est arrétée
 	 * 
 	 * @return
-	 * @throws ArcException 
+	 * @throws ArcException
 	 */
 	private static boolean productionOn() throws ArcException {
 		return UtilitaireDao.get("arc").hasResults(null,
@@ -488,8 +492,8 @@ class BatchARC implements IReturnCode {
 
 	}
 
-	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat)
-			throws IOException {
+	private static void cleanDirectory(String directory, String envExecution, String envDirectory,
+			TraitementEtat etat) {
 		File f = Paths.get(ApiReceptionService.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
 		if (!f.exists()) {
 			return;
@@ -503,7 +507,6 @@ class BatchARC implements IReturnCode {
 			}
 		}
 	}
-
 
 	/**
 	 * If the file has already been moved in the archive directory by ARC it is safe
@@ -571,7 +574,8 @@ class BatchARC implements IReturnCode {
 			message("Reception de nouveaux fichiers");
 			ArcThreadFactory recevoir = new ArcThreadFactory(mapParam, TraitementPhase.RECEPTION);
 			recevoir.execute();
-			message("Reception : " + recevoir.getReport().getNbObject() +" objets enregistrés en "+recevoir.getReport().getDuree() + " ms");
+			message("Reception : " + recevoir.getReport().getNbObject() + " objets enregistrés en "
+					+ recevoir.getReport().getDuree() + " ms");
 		}
 
 	}
@@ -591,7 +595,7 @@ class BatchARC implements IReturnCode {
 		try {
 			dLastInitialize = dateFormat.parse(lastInitialize);
 		} catch (ParseException e) {
-			throw new ArcException("Date retrieved from pilotage batch table cannot be parsed",e);
+			throw new ArcException("Date retrieved from pilotage batch table cannot be parsed", e);
 		}
 
 		// la nouvelle initialisation se lance si la date actuelle est postérieure à la
@@ -646,7 +650,7 @@ class BatchARC implements IReturnCode {
 	 * 
 	 * @return
 	 * @throws ArcException
-	 * @throws ArcException 
+	 * @throws ArcException
 	 */
 	private HashMap<TraitementPhase, Integer> elligible() throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();

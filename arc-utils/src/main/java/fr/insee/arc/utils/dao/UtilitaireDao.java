@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
@@ -35,6 +36,7 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.tar.TarEntry;
@@ -62,24 +64,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	private static final Logger LOGGER = LogManager.getLogger(UtilitaireDao.class);
 
 	public static final int READ_BUFFER_SIZE = 131072;
-    
-	
-	private static final String CONNECTION_SEPARATOR="\\|\\|\\|";
-	
-	/**
-	 * defaut number of tries to initialize an connexion to arc database
-	 */
-	private static final int DEFAULT_NUMBER_OF_CONNECTION_TRIES = 1;
-	
-	/**
-	 * delay between connection tries to arc database
-	 */
-	private static final int MILLISECOND_BETWEEN_CONNECTION_TRIES = 500;
 
-	/**
-	 * configurable parameter to set the number of try to get a connexion to arc database
-	 */
-	private int nbTryMax = DEFAULT_NUMBER_OF_CONNECTION_TRIES;
+	private static final String CONNECTION_SEPARATOR="\\|\\|\\|";
+
 	/**
 	 * Format des données utilisées dans la commande copy
 	 */
@@ -103,7 +90,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private String pool;
 	private static Map<String, UtilitaireDao> map;
-	private boolean silent = false;
 
 	PropertiesHandler properties;
 
@@ -131,13 +117,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public static final UtilitaireDao get(int aPool) {
 		return get(""+aPool);
 	}
-	
-
-	public static final UtilitaireDao get(String aPool, int nbTry) {
-		get(aPool).nbTryMax = nbTry;
-		return get(aPool);
-	}
-
 
 	/** 
 	 * Compute the number of executor nods according to he number of user declared in connexion
@@ -158,9 +137,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	{
 		return databaseUserName.split(CONNECTION_SEPARATOR).length-1;
 	}
-	
-	
-	
 	/**
 	 * Retourne une connexion vers la base de données
 	 *
@@ -180,33 +156,19 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			String password=properties.getDatabasePassword().split(CONNECTION_SEPARATOR)[connexionIndex];
 
 			Class.forName(driver);
-			boolean connectionOk = false;
-			int nbTry = 0;
 			Connection c = null;
-			
-			while (!connectionOk && nbTry < nbTryMax) {
-				nbTry++;
 
 			// renvoie la connexion relative au driver
 				try {
-				c = DriverManager.getConnection(uri, user,password);
-					connectionOk = true;
+					Properties props = new Properties();
+					props.setProperty("user", user);
+					props.setProperty("password", password);
+					props.setProperty("tcpKeepAlive" , "true");
+
+				c = DriverManager.getConnection(uri, props);
 				} catch (Exception e) {
-					if (nbTry < nbTryMax)
-					{
-					LoggerHelper.error(LOGGER,
-							"Connection failure. Tentative de reconnexion dans " + MILLISECOND_BETWEEN_CONNECTION_TRIES +" milisecondes", nbTry);
-							try {
-								Thread.sleep(MILLISECOND_BETWEEN_CONNECTION_TRIES);
-							} catch (InterruptedException e1) {
-								Thread.currentThread().interrupt();
-							}
-						}
+					throw new ArcException("La connexion n'a pu aboutir");
 				}
-			}
-		if (!connectionOk) {
-			throw new ArcException("La connexion n'a pu aboutir");
-		}
 		return c;
 		
 		} catch (ClassNotFoundException e1) {
@@ -229,7 +191,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	/** Returns true if the connection is valid. */
 	public static boolean isConnectionOk(String pool) {
 		try {
-			get(pool, 1).executeRequest(null, new GenericPreparedStatementBuilder("select true"));
+			get(pool).executeRequest(null, new GenericPreparedStatementBuilder("select true"));
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -290,10 +252,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException 
 	 */
-	public Boolean getBoolean(Connection connexion, GenericPreparedStatementBuilder sql, String... args) throws ArcException {
+	public Boolean getBoolean(Connection connexion, GenericPreparedStatementBuilder sql) throws ArcException {
 		
 		String returned;
-		returned = getString(connexion,sql,args);
+		returned = getString(connexion,sql);
 		
 		if (returned==null)
 		{
@@ -313,19 +275,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return null;
 	}
 
-
-	/**
-	 * Compter les lignes d'une requête
-	 *
-	 * @param connexion
-	 * @param requete   le résultat d'une requête non aliasée comme
-	 *                  <code>SELECT * FROM nom_table</code>
-	 * @return
-	 */
-	public Long getCountFromRequest(Connection connexion, String requete) {
-		return getCount(connexion, "(" + requete + ") foo");
-	}
-
 	/**
 	 * Exécute une requête qui renvoie exactement UN (unique) résultat de type
 	 * {@link String}.<br/>
@@ -338,9 +287,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public String getString(Connection connexion, GenericPreparedStatementBuilder requete, String... args) throws ArcException {
-			requete.setQuery(new StringBuilder(Format.parseStringAvecArguments(requete.getQuery().toString(), args)));
-			ArrayList<ArrayList<String>> returned=executeRequest(connexion, requete , ModeRequete.EXTRA_FLOAT_DIGIT);
+	public String getString(Connection connexion, GenericPreparedStatementBuilder requete) throws ArcException {
+			ArrayList<ArrayList<String>> returned=executeRequest(connexion, requete , new ModeRequete[] {ModeRequete.EXTRA_FLOAT_DIGIT});
 			return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? null : returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
 
 	}
@@ -357,26 +305,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 	
-
-
-	/**
-	 * Exécute une requête qui renvoie exactement un argument de type {@link Long}.
-	 *
-	 * @param connexion la connexion à la base
-	 * @param sql       la requête
-	 * @param args      les arguments de la requête (optionnels)
-	 * @return
-	 */
-	public Long getLong(Connection connexion, GenericPreparedStatementBuilder sql, String... args) {
-		String returned;
-		try {
-			returned = getString(connexion,sql,args);
-			return (returned == null ? Long.MIN_VALUE : Long.parseLong(returned));
-		} catch (ArcException e) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "getInt()", LOGGER, e);
-		}
-		return Long.MIN_VALUE;
-	}
 	
 	/**
 	 * Exécute une requête qui renvoie exactement un argument de type
@@ -410,39 +338,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) throws ArcException {
-		return getColumns(aConnexion, new HashSet<String>(), aNomTable).contains(aNomVariable);
-	}
-
-	/**
-	 *
-	 * @param connexion
-	 * @param aTable
-	 * @return La valeur prise par {@code SELECT COUNT(*) FROM <aTable>}
-	 */
-	public long getCount(Connection connexion, String aTable) {
-		return getCount(connexion, aTable, null);
-	}
-
-	/**
-	 *
-	 * @param connexion
-	 * @param aTable
-	 * @param clauseWhere
-	 * @return La valeur prise par
-	 *         {@code SELECT COUNT(*) FROM <aTable> WHERE <clauseWhere>}
-	 */
-	public long getCount(Connection connexion, String aTable, GenericPreparedStatementBuilder clauseWhere) {
-		
-		GenericPreparedStatementBuilder requete=new GenericPreparedStatementBuilder();
-		
-		requete.append("SELECT count(1) FROM " + aTable);
-		
-		if (clauseWhere.length()==0)
-				{
-				requete.append(" WHERE ");
-				requete.append(clauseWhere);
-				}
-		return getLong(connexion, requete );
+		return getColumns(aConnexion, new HashSet<>(), aNomTable).contains(aNomVariable);
 	}
 	
 	/**
@@ -473,9 +369,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 		long start = new Date().getTime();
 		
-		LoggerHelper.trace(LOGGER, "/* executeImmediate on */");
-		LoggerHelper.trace(LOGGER, "\n"+requete.trim());
-
+		if (LOGGER.isEnabled(Level.TRACE))
+		{
+			LoggerHelper.trace(LOGGER, "/* executeImmediate on */");
+			LoggerHelper.trace(LOGGER, "\n"+requete.trim());
+		}
+		
 		ConnectionWrapper connexionWrapper = initConnection(connexion);
 		try {		
 			connexionWrapper.getConnexion().setAutoCommit(true);
@@ -536,9 +435,15 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 *
 	 */
-	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,  ModeRequete... modes)
+	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,  ModeRequete[] modes)
 			throws ArcException {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
+
+	}
+	
+	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete)
+			throws ArcException {
+		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), new ModeRequete[] {});
 
 	}
 	
@@ -566,11 +471,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public <T> T executeStatement(Connection connexion, GenericPreparedStatementBuilder requete, EntityProvider<T> entityProvider) throws ArcException {
 
-		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
-		LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
-		LoggerHelper.trace(LOGGER, requete.getParameters());
+		if (LOGGER.isEnabled(Level.TRACE))
+		{
+			LoggerHelper.trace(LOGGER, "/* executeRequest on */");
+			LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
+			LoggerHelper.trace(LOGGER, requete.getParameters());
+		}
 		
-		this.silent=false;
 		
 		try {
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
@@ -582,28 +489,44 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 						ResultSet res = stmt.executeQuery(requete.getQuery().toString());
 						return entityProvider.apply(res);
 					} catch (SQLException e) {
-						if (!this.silent) {
-							LoggerHelper.error(LOGGER, stmt.toString());
-						}
+						LoggerHelper.error(LOGGER, stmt.toString());
 						throw e;
 					} finally {
 						connexionWrapper.getConnexion().commit();
 					}
 				}
 			} catch (SQLException e) {
-				if (!this.silent) {
 					LoggerHelper.error(LOGGER, "executeStatement()", e);
-				}
 				connexionWrapper.getConnexion().rollback();
 				throw e;
 			} finally {
 				connexionWrapper.close();
 			}
 		} catch (SQLException ex) {
-			if (!this.silent) {
-				LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
-			}
+			LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
 			throw new ArcException(ex);
+		}
+	}
+	
+	/**
+	 * Register in the targetPreparedStatement the bind variable of a request with correct type
+	 * @param requete
+	 * @param bindVariableIndex
+	 * @throws SQLException 
+	 */
+	private static void registerBindVariable(PreparedStatement targetPreparedStatement, GenericPreparedStatementBuilder requete, int bindVariableIndex) throws SQLException
+	{
+		if (requete.getParameters().get(bindVariableIndex).getType().equals(ParameterType.STRING))
+		{
+			targetPreparedStatement.setString(bindVariableIndex+1, (String) requete.getParameters().get(bindVariableIndex).getValue());
+		}
+		else if (requete.getParameters().get(bindVariableIndex).getType().equals(ParameterType.INT))
+		{
+			targetPreparedStatement.setInt(bindVariableIndex+1, (Integer) requete.getParameters().get(bindVariableIndex).getValue());
+		}
+		else if (requete.getParameters().get(bindVariableIndex).getType().equals(ParameterType.BYTES))
+		{
+			targetPreparedStatement.setBytes(bindVariableIndex+1, (byte[]) requete.getParameters().get(bindVariableIndex).getValue());
 		}
 	}
 	
@@ -625,15 +548,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 */
 	public <T> T executeRequest(Connection connexion, GenericPreparedStatementBuilder requete, EntityProvider<T> entityProvider,
-			ModeRequete... modes) throws ArcException {
+			ModeRequete[] modes) throws ArcException {
 
 		long start = new Date().getTime();
-		LoggerHelper.trace(LOGGER, "/* executeRequest on */");
-		LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
-		LoggerHelper.trace(LOGGER, requete.getParameters());
-		
-		this.silent=false;
-		
+		if (LOGGER.isEnabled(Level.TRACE))
+		{
+			LoggerHelper.trace(LOGGER, "/* executeRequest on */");
+			LoggerHelper.trace(LOGGER, "\n"+ModeRequete.configureQuery(requete.getQueryWithParameters()));
+			LoggerHelper.trace(LOGGER, requete.getParameters());
+		}
+	
 		try {
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
 			try {
@@ -642,9 +566,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				{
 					for (int i=0;i<requete.getParameters().size();i++)
 					{
-						stmt.setString(i+1, requete.getParameters().get(i));
-					}
-	
+						registerBindVariable(stmt, requete, i);
+					}	
 					try {
 						// the first result found will be output
 						boolean isresult = stmt.execute();
@@ -670,27 +593,21 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 						}
 						return null;
 					} catch (SQLException e) {
-						if (!this.silent) {
-							LoggerHelper.error(LOGGER, stmt.toString());
-						}
+						LoggerHelper.error(LOGGER, stmt.toString());
 						throw e;
 					} finally {
 						connexionWrapper.getConnexion().commit();
 					}
 				}
 			} catch (SQLException e) {
-				if (!this.silent) {
-					LoggerHelper.error(LOGGER, "executeRequest()", e);
-				}
+				LoggerHelper.error(LOGGER, "executeRequest()", e);
 				connexionWrapper.getConnexion().rollback();
 				throw e;
 			} finally {
 				connexionWrapper.close();
 			}
 		} catch (SQLException ex) {
-			if (!this.silent) {
-				LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
-			}
+			LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
 			throw new ArcException(ex);
 		}
 	}
@@ -891,7 +808,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 							// bind parameters
 							for (int i=0;i<requete.getParameters().size();i++)
 							{
-								stmt.setString(i+1, requete.getParameters().get(i));
+								registerBindVariable(stmt, requete, i);
 							}
 							
 							// build file output
@@ -1263,7 +1180,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	public List<String> getList(Connection connexion, String requete, List<String> returned) {
 		try {
-			LoggerHelper.trace(LOGGER, requete);
+			if (LOGGER.isEnabled(Level.TRACE))
+			{
+				LoggerHelper.trace(LOGGER, requete);
+			}
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
 			try {
 				Statement stmt = connexionWrapper.getConnexion().createStatement();
@@ -1764,14 +1684,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			boolean aHeader, String aDelim) throws ArcException {
 		importing(connexion, table, aColumnName, is, csv, aHeader, aDelim, null);
 
-	}
-
-	public boolean isSilent() {
-		return this.silent;
-	}
-
-	public void setSilent(boolean silent) {
-		this.silent = silent;
 	}
 
 }

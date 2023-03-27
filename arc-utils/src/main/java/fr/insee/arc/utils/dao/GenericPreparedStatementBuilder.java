@@ -1,6 +1,7 @@
 package fr.insee.arc.utils.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class GenericPreparedStatementBuilder {
 
 private StringBuilder query=new StringBuilder();
 	
-private List<String> parameters=new ArrayList<>();
+private List<Parameter<?>> parameters=new ArrayList<>();
 
 private static final String BIND_VARIABLE_PLACEHOLDER="  ?  ";
 
@@ -122,9 +123,32 @@ public GenericPreparedStatementBuilder appendQuoteText(String s)
  */
 public String quoteText(String s)
 {
-	parameters.add(s);
+	parameters.add(new Parameter<>(s, ParameterType.STRING));
 	return BIND_VARIABLE_PLACEHOLDER;
 }
+
+/**
+ * Register and return the SQL bind variable placeholder
+ * @param p
+ * @return
+ */
+public String quoteInt(Integer s)
+{
+	parameters.add(new Parameter<>(s, ParameterType.INT));
+	return BIND_VARIABLE_PLACEHOLDER;
+}
+
+/**
+ * Register and return the SQL bind variable placeholder
+ * @param p
+ * @return
+ */
+public String quoteBytes(byte[] s)
+{
+	parameters.add(new Parameter<>(s, ParameterType.BYTES));
+	return BIND_VARIABLE_PLACEHOLDER;
+}
+
 
 /**
  * Return the sql escaped quoted string
@@ -136,6 +160,12 @@ public String quoteTextWithoutBinding(String p)
 {
 	return p==null?"NULL":"'"+p.replace("'", "''")+"'";
 }
+
+public String quoteNumberWithoutBinding(String p)
+{
+	return p==null?"NULL":p;
+}
+
 
 /**
  * return ?,?,? and add the elements of the list as parameters
@@ -191,11 +221,6 @@ public StringBuilder sqlListeOfColumns(Collection<String> liste)
 
 // getters
 
-public List<String> getParameters() {
-	return parameters;
-}
-
-
 public StringBuilder getQuery() {
 	return query;
 }
@@ -206,9 +231,16 @@ public void setQuery(StringBuilder query) {
 }
 
 
-public void setParameters(List<String> parameters) {
+
+public List<Parameter<?>> getParameters() {
+	return parameters;
+}
+
+
+public void setParameters(List<Parameter<?>> parameters) {
 	this.parameters = parameters;
 }
+
 
 /**
  * Return the query with the real real parameters instead of bin variables
@@ -217,9 +249,18 @@ public void setParameters(List<String> parameters) {
 public String getQueryWithParameters() {
 	String q=this.query.toString();
 	
-	for (String p : this.parameters)
+	for (Parameter<?> p : this.parameters)
 	{
-		q = StringUtils.replaceOnce(q ,BIND_VARIABLE_PLACEHOLDER,quoteTextWithoutBinding(p));
+		String val=(p.getValue()==null)?null:(""+p.getValue());
+
+		if (Arrays.asList(ParameterType.INT).contains(p.getType()))
+		{
+			q = StringUtils.replaceOnce(q ,BIND_VARIABLE_PLACEHOLDER,quoteNumberWithoutBinding(val));
+		}
+		else
+		{
+			q = StringUtils.replaceOnce(q ,BIND_VARIABLE_PLACEHOLDER,quoteTextWithoutBinding(val));
+		}
 	}
 	
 	return q;

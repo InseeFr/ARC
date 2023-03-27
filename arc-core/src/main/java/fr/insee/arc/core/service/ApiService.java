@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,7 @@ import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.ScalableConnection;
 import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -85,9 +87,10 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	protected Integer nbEnr;
 	protected String tableCalendrier;
 	protected String directoryRoot;
-	protected String nullString = "[[[#NULL VALUE#]]]";
 	protected String paramBatch = null;
 	protected String currentIdSource;
+    protected String directoryIn;
+    protected List<Norme> listeNorme;
 	
 	// made to report the number of object processed by the phase
 	private int reportNumberOfObject = 0;
@@ -549,13 +552,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param envExecution
 	 * @param type
 	 */
-	private static void maintenancePilotage(Connection connexion, String envExecution, String type) {
+	private static void maintenancePilotage(Integer poolIndex, Connection connexion, String envExecution, String type) {
 		String tablePil = dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
 		StaticLoggerDispatcher.info("** Maintenance Pilotage **", LOGGER_APISERVICE);
 
 		try {
-			UtilitaireDao.get(poolName).executeImmediate(connexion, FormatSQL.analyzeSecured(tablePil));
-			UtilitaireDao.get(poolName).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePil, type));
+			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.analyzeSecured(tablePil));
+			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePil, type));
 		} catch (Exception e) {
 			StaticLoggerDispatcher.error("Error in ApiService.maintenancePilotage", LOGGER_APISERVICE);
 		}
@@ -570,10 +573,18 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		// postgres libere mal l'espace sur ces tables qaund on fait trop d'opération
 		// sur les colonnes
 		// vaccum full sinon ca fait quasiment rien ...
-		StaticLoggerDispatcher.info("** Maintenance Catalogue **", LOGGER_APISERVICE);
-		UtilitaireDao.get(poolName).maintenancePgCatalog(connexion, type);
+		maintenancePgCatalog(0,connexion, type);
 	}
 
+	public static void maintenancePgCatalog(Integer poolIndex, Connection connexion, String type) {
+		// postgres libere mal l'espace sur ces tables qaund on fait trop d'opération
+		// sur les colonnes
+		// vaccum full sinon ca fait quasiment rien ...
+		StaticLoggerDispatcher.info("** Maintenance Catalogue **", LOGGER_APISERVICE);
+		UtilitaireDao.get(poolIndex).maintenancePgCatalog(connexion, type);
+	}
+	
+	
 	/**
 	 * classic database maintenance routine 2 vacuum are sent successively to
 	 * analyze and remove dead tuple completely from
@@ -582,9 +593,13 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param envExecution the sandbox schema
 	 */
 	public static void maintenanceDatabaseClassic(Connection connexion, String envExecution) {
-		ApiService.maintenanceDatabase(connexion, envExecution, FormatSQL.VACUUM_OPTION_NONE);
+		maintenanceDatabaseClassic(0, connexion, envExecution);
 	}
 
+	public static void maintenanceDatabaseClassic(Integer poolIndex, Connection connexion, String envExecution) {
+		ApiService.maintenanceDatabase(poolIndex, connexion, envExecution, FormatSQL.VACUUM_OPTION_NONE);
+	}
+	
 	/**
 	 * analyze and vacuum on postgres catalog tables analyze and vacuum on the
 	 * pilotage table located in the sandbox schema
@@ -594,14 +609,14 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param typeMaintenance FormatSQL.VACUUM_OPTION_FULL or
 	 *                        FormatSQL.VACUUM_OPTION_NONE
 	 */
-	private static void maintenanceDatabase(Connection connexion, String envExecution, String typeMaintenance) {
-		ApiService.maintenancePgCatalog(connexion, typeMaintenance);
+	private static void maintenanceDatabase(Integer poolIndex, Connection connexion, String envExecution, String typeMaintenance) {
+		ApiService.maintenancePgCatalog(poolIndex, connexion, typeMaintenance);
 
-		ApiService.maintenancePilotage(connexion, envExecution, typeMaintenance);
+		ApiService.maintenancePilotage(poolIndex, connexion, envExecution, typeMaintenance);
 
 		StaticLoggerDispatcher.info("** Fin de maintenance **", LOGGER_APISERVICE);
 	}
-
+	
 	/**
 	 * Build a signifiant and collision free temporary table name
 	 * 
@@ -883,7 +898,24 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param idSource
 	 * @return
 	 */
+	/**
+	 * Generate the filename
+	 * 
+	 * @param tableName
+	 * @param idSource
+	 * @return
+	 */
 	public static String tableOfIdSource(String tableName, String idSource) {
+		return tableName + "_" + CHILD_TABLE_TOKEN + "_" + hashOfIdSource(idSource);
+	}
+
+	/**
+	 * get the hash value of a file
+	 * @param idSource
+	 * @return
+	 */
+	public static String hashOfIdSource(String idSource)
+	{
 		String hashText = "";
 		MessageDigest m;
 		try {
@@ -893,7 +925,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		} catch (NoSuchAlgorithmException e) {
 			return null;
 		}
-		return tableName + "_" + CHILD_TABLE_TOKEN + "_" + hashText;
+		return hashText;
 	}
 
 	
@@ -1336,6 +1368,22 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	public void setReportNumberOfObject(int reportNumberOfObject) {
 		this.reportNumberOfObject = reportNumberOfObject;
+	}
+
+	public String getDirectoryIn() {
+		return directoryIn;
+	}
+
+	public void setDirectoryIn(String directoryIn) {
+		this.directoryIn = directoryIn;
+	}
+
+	public List<Norme> getListeNorme() {
+		return listeNorme;
+	}
+
+	public void setListeNorme(List<Norme> listeNorme) {
+		this.listeNorme = listeNorme;
 	}
 
 	

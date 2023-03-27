@@ -3,10 +3,7 @@ package fr.insee.arc.core.service.engine.chargeur;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -24,6 +21,7 @@ import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.textUtils.FastList;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SecuredSaxParser;
@@ -37,11 +35,7 @@ import fr.insee.arc.utils.utils.SecuredSaxParser;
 public class ChargeurXml implements IChargeur{
     private static final Logger LOGGER = LogManager.getLogger(ChargeurXml.class);
     private String fileName;
-    private HashMap<String, Integer> col;
     private Connection connexion;
-    private HashMap<String, Integer> colData;
-    private List<String> allCols;
-    private StringBuilder requeteInsert;
     private String tableChargementPilTemp;
     private String currentPhase;
     private Norme norme;
@@ -49,10 +43,10 @@ public class ChargeurXml implements IChargeur{
     private InputStream f;    
 
     // temporary table where data will be loaded by the XML SAX engine
-    private String tableTempA = "A";
-    private ArrayList<String> tempTableAColumnsLongName=new ArrayList<>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName(),"id","date_integration","id_norme","periodicite","validite"));
-    private ArrayList<String> tempTableAColumnsShortName=new ArrayList<>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
-    private ArrayList<String> tempTableAColumnsType=new ArrayList<>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnType().getTypeCollated(),"int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
+    private String tableTempA;
+    private FastList<String> tempTableAColumnsLongName=new FastList<>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName(),"id","date_integration","id_norme","periodicite","validite"));
+    private FastList<String> tempTableAColumnsShortName=new FastList<>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
+    private FastList<String> tempTableAColumnsType=new FastList<>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnType().getTypeCollated(),"int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
 
     private String rapport = null;
     private Boolean error = false;
@@ -65,11 +59,7 @@ public class ChargeurXml implements IChargeur{
      */
     public ChargeurXml(ThreadChargementService threadChargementService, String fileName) {
         this.fileName = fileName;
-        this.col = threadChargementService.getCol();
         this.connexion = threadChargementService.getConnexion().getExecutorConnection();
-        this.colData = threadChargementService.getColData();
-        this.allCols = threadChargementService.getAllCols();
-        this.requeteInsert = threadChargementService.getRequeteInsert();
         this.tableTempA = threadChargementService.getTableTempA();
         this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
         this.currentPhase = threadChargementService.getCurrentPhase();
@@ -78,31 +68,6 @@ public class ChargeurXml implements IChargeur{
         this.validite = threadChargementService.validite;
     }
 
-    /**
-     * constructor with parameter
-     * @param connexion
-     * @param fileName
-     * @param f
-     * @param tableOut
-     * @param norme
-     * @param periodicite
-     * @param validite
-     */
-    public ChargeurXml(Connection connexion, String fileName, InputStream f, String tableOut, String norme, String periodicite, String validite) {
-    	
-    	this.col = new HashMap<>();
-        this.allCols= new ArrayList<>();
-        this.colData= new HashMap<>();
-        this.requeteInsert=new StringBuilder();
-
-        this.fileName = fileName;
-        this.connexion = connexion;
-        this.tableTempA = tableOut;
-        this.norme=new Norme(norme, periodicite, null, null);
-        this.validite = validite;
-        this.f=f;
-  }
-    
     /**
      * Autonomous execution with parameters constructor
      * @throws ArcException 
@@ -186,21 +151,11 @@ public class ChargeurXml implements IChargeur{
         StaticLoggerDispatcher.info("** execution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
-        for (String key : col.keySet()) {
-            col.put(key, 1);
-        }
-        
         // Création de la table de stockage
         XMLHandlerCharger4 handler = new XMLHandlerCharger4();
         handler.fileName = fileName;
         handler.connexion = connexion;
-        handler.col = col;
-        handler.colData = colData;
-        handler.allCols = allCols;
-        handler.requete = requeteInsert;
         handler.tempTableA = this.tableTempA;
-        handler.start = 0;
-        handler.sizeLimit=0;
         handler.normeCourante = norme;
         handler.validite = validite;
         handler.tempTableAColumnsLongName=this.tempTableAColumnsLongName;
@@ -214,7 +169,6 @@ public class ChargeurXml implements IChargeur{
             error = true;
             LoggerHelper.errorAsComment(LOGGER, "ChargeurXml.execution() - SAX parser failed to parse the xml file");
             rapport = e.getMessage().replace("'", "''");
-            handler.requete.setLength(0);
             throw new ArcException("ChargeurXml.execution() - SAX parser failed to parse the xml file",e);
         }
 

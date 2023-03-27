@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -25,6 +24,7 @@ import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.textUtils.FastList;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Pair;
@@ -43,11 +43,7 @@ import fr.insee.arc.utils.utils.SecuredSaxParser;
 public class ChargeurXmlComplexe implements IChargeur{
     private static final Logger LOGGER = LogManager.getLogger(ChargeurXmlComplexe.class);
     private String fileName;
-    private HashMap<String, Integer> col;
     private Connection connexion;
-    private HashMap<String, Integer> colData;
-    private List<String> allCols;
-    private StringBuilder requeteInsert;
     private String tableChargementPilTemp;
     private String tableChargementRegle;
     private String currentPhase;
@@ -58,10 +54,10 @@ public class ChargeurXmlComplexe implements IChargeur{
     private ArrayList<Pair<String,String>> format; 
 
     // temporary table where data will be loaded by the XML SAX engine
-    private String tableTempA = "A";
-    private ArrayList<String> tempTableAColumnsLongName=new ArrayList<String>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName(),"id","date_integration","id_norme","periodicite","validite"));
-    private ArrayList<String> tempTableAColumnsShortName=new ArrayList<String>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
-    private ArrayList<String> tempTableAColumnsType=new ArrayList<String>(Arrays.asList("text collate \"C\"","int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
+    private String tableTempA;
+    private FastList<String> tempTableAColumnsLongName=new FastList<>(Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName(),"id","date_integration","id_norme","periodicite","validite"));
+    private FastList<String> tempTableAColumnsShortName=new FastList<>(Arrays.asList("m0","m1","m2","m3","m4","m5"));
+    private FastList<String> tempTableAColumnsType=new FastList<>(Arrays.asList("text collate \"C\"","int","text collate \"C\"","text collate \"C\"","text collate \"C\"","text collate \"C\""));
 
     private String rapport;
     private Boolean error = false;
@@ -69,11 +65,7 @@ public class ChargeurXmlComplexe implements IChargeur{
     
     public ChargeurXmlComplexe(ThreadChargementService threadChargementService, String fileName) {
         this.fileName = fileName;
-        this.col = threadChargementService.getCol();
         this.connexion = threadChargementService.getConnexion().getExecutorConnection();
-        this.colData = threadChargementService.getColData();
-        this.allCols = threadChargementService.getAllCols();
-        this.requeteInsert = threadChargementService.getRequeteInsert();
         this.tableTempA = threadChargementService.getTableTempA();
         this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
         this.currentPhase = threadChargementService.getCurrentPhase();
@@ -85,12 +77,6 @@ public class ChargeurXmlComplexe implements IChargeur{
 
     
     public ChargeurXmlComplexe(Connection connexion, String fileName, InputStream f, String tableOut, String norme, String periodicite, String validite, String tableRegle) {
-    	
-    	this.col = new HashMap<>();
-        this.allCols= new ArrayList<String>();
-        this.colData= new HashMap<>();
-        this.requeteInsert=new StringBuilder();
-
     	this.fileName = fileName;
         this.connexion = connexion;
         this.tableTempA = tableOut;
@@ -124,9 +110,9 @@ public class ChargeurXmlComplexe implements IChargeur{
         try {
 			HashMap<String,ArrayList<String>> regle = ApiService.getBean(this.connexion,ApiService.getRegles(tableChargementRegle, normeFichier));
 			if (regle.get("format").get(0)!=null) {
-				for (String f:regle.get("format").get(0).split("\n"))
+				for (String rule:regle.get("format").get(0).split("\n"))
 				{
-					this.format.add(new Pair<>(f.split(",")[0].trim(),f.split(",")[1].trim()));
+					this.format.add(new Pair<>(rule.split(",")[0].trim(),rule.split(",")[1].trim()));
 				}
 			}
         } catch (ArcException e1) {
@@ -200,18 +186,10 @@ public class ChargeurXmlComplexe implements IChargeur{
         StaticLoggerDispatcher.info("** execution**", LOGGER);
         java.util.Date beginDate = new java.util.Date();
 
-        for (String key : col.keySet()) {
-            col.put(key, 1);
-        }
-        
         // Création de la table de stockage
         XMLComplexeHandlerCharger handler = new XMLComplexeHandlerCharger();
         handler.fileName = fileName;
         handler.connexion = connexion;
-        handler.col = col;
-        handler.colData = colData;
-        handler.allCols = allCols;
-        handler.requete = requeteInsert;
         handler.tempTableA = this.tableTempA;
         handler.start = 0;
         handler.sizeLimit=0;
@@ -229,7 +207,6 @@ public class ChargeurXmlComplexe implements IChargeur{
             error = true;
             StaticLoggerDispatcher.error("Error in ChargeurXML.execution()", LOGGER);
             rapport = e.getMessage().replace("'", "''");
-            handler.requete.setLength(0);
             throw new ArcException("Error in ChargeurXML.execution()");
         }
 

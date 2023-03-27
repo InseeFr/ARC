@@ -9,7 +9,7 @@ public class LanceurARC {
 		
 		try(AbstractApplicationContext  context = new AnnotationConfigApplicationContext(BatchConfig.class);)
 		{
-			context.getBean(BatchARC.class).execute(args);	
+			context.getBean(BatchARC.class).execute();	
 		}
 
 	}

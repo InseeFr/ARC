@@ -19,6 +19,8 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.Parameter;
+import fr.insee.arc.utils.dao.ParameterType;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
@@ -1281,9 +1283,11 @@ public class NormageEngine {
 
 			ArcPreparedStatementBuilder bloc4 = new ArcPreparedStatementBuilder();
 			bloc4.append("\n drop table if exists " + partitionTableName + ";");
-			bloc4.append("\n create temporary table " + partitionTableName + " as select * from "
-					+ partitionTableNameWithAllRecords + " where " + partitionIdentifier + ">=?::int and "
-					+ partitionIdentifier + "<?::int;");
+			bloc4.append("\n create temporary table " + partitionTableName + " as ");
+			bloc4.append("\n SELECT * FROM "+ partitionTableNameWithAllRecords + " ");
+			bloc4.append("\n WHERE " + partitionIdentifier + ">="+bloc4.quoteInt(null));
+			bloc4.append("\n AND "	+ partitionIdentifier + "<"+bloc4.quoteInt(null));
+			bloc4.append("\n ;");
 			bloc4.append("\n analyze " + partitionTableName + ";");
 			bloc4.append(blocInsert);
 
@@ -1292,9 +1296,12 @@ public class NormageEngine {
 			// iterate through chunks
 			int iterate = 1;
 			do {
-
-				bloc4.setParameters(Arrays.asList("" + (iterate), "" + (iterate + chunkSize)));
-
+				Parameter<Integer> lowerbound= new Parameter<>(iterate, ParameterType.INT);
+				Parameter<Integer> upperbound= new Parameter<>((iterate + chunkSize), ParameterType.INT);
+				
+				bloc4.getParameters().set(0, lowerbound);
+				bloc4.getParameters().set(1, upperbound);
+				
 				UtilitaireDao.get("arc").executeRequest(connection, bloc4);
 
 				iterate = iterate + chunkSize;

@@ -2,10 +2,7 @@ package fr.insee.arc.core.service.thread;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,55 +47,50 @@ public class ThreadChargementService extends ApiChargementService implements Run
     private String tableChargementPilTemp;
     
     private ArcThreadGenericDao arcThreadGenericDao;
-    
+        
     public String validite;
 
     public FilesInputStreamLoad filesInputStreamLoad;
 
     public Norme normeOk;
     
+    protected String tableChargementOK;
+    
+    private String tableTempA;
     
     @Override
     public void configThread(ScalableConnection connexion, int currentIndice, ApiChargementService aApi) {
 
-	this.indice = currentIndice;
-	this.setEnvExecution(aApi.getEnvExecution());
-	this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
-	this.connexion = connexion;
-	this.tableChargementPilTemp = "chargement_pil_temp";
+    	
+    	this.indice = currentIndice;
+    	this.setEnvExecution(aApi.getEnvExecution());
+    	this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
+    	this.connexion = connexion;
+    	this.container = aApi.getTabIdSource().get("container").get(this.indice);
+    	this.tableChargementRegle = aApi.getTableChargementRegle();
+    	this.tableNorme = aApi.getTableNorme();
+    	this.tablePilTemp = aApi.getTablePilTemp();
+    	this.currentPhase = aApi.getCurrentPhase();
+    	this.setTablePil(aApi.getTablePil());
+    	this.paramBatch = aApi.getParamBatch();
+    	this.directoryIn = aApi.getDirectoryIn();
+    	this.listeNorme = aApi.getListeNorme();
 
-	this.container = aApi.getTabIdSource().get("container").get(this.indice);
-	this.tableChargementRegle = aApi.getTableChargementRegle();
-	this.tableNorme = aApi.getTableNorme();
-	this.tablePilTemp = aApi.getTablePilTemp();
-	this.currentPhase = aApi.getCurrentPhase();
-	this.setTablePil(aApi.getTablePil());
-	this.paramBatch = aApi.getParamBatch();
+    	// Noms des tables temporaires utiles au chargement
+    	// nom court pour les perfs
 
-	this.directoryIn = Paths.get(
-			aApi.getDirectoryRoot(),
-			this.envExecution.toUpperCase().replace(".", "_"),
-			aApi.getPreviousPhase() + "_" + TraitementEtat.OK).toString() + File.separator;
+    	// table A de reception de l'ensemble des fichiers avec nom de colonnes
+    	// courts
+    	this.tableTempA="A";
+    	this.tableChargementPilTemp = "chargement_pil_temp";
 
-	// Noms des table temporaires utiles au chargement
-	// nom court pour les perfs
+    	// table de sortie des données dans l'application (hors du module)
+    	this.tableChargementOK = ApiService.globalTableName(envExecution, this.currentPhase,
+    		TraitementEtat.OK.toString());
 
-	// table A de reception de l'ensemble des fichiers avec nom de colonnes
-	// courts
-	this.setTableTempA("A");
-
-	// table B de reception de l'ensemble des fichiers brutalement
-	this.setTableChargementBrutal("B");
-
-	// table de sortie des données dans l'application (hors du module)
-	this.tableChargementOK = ApiService.globalTableName(envExecution, this.currentPhase,
-		TraitementEtat.OK.toString());
-
-	// récupération des différentes normes dans la base
-	this.listeNorme = Norme.getNormesBase(this.connexion.getExecutorConnection(), this.tableNorme);
-
-	// thread generic dao
-	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableChargementPilTemp, tablePrevious, paramBatch, idSource);
+    	// thread generic dao
+    	arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableChargementPilTemp, tablePrevious, paramBatch, idSource);
+    	
 	
     }
 
@@ -205,29 +197,14 @@ public class ThreadChargementService extends ApiChargementService implements Run
      */
     private void chargementFichiers() throws ArcException {
 
-	ArrayList<String> aAllCols = new ArrayList<String>();
-	HashMap<String, Integer> aColData = new HashMap<>();
-    	
-    	
 	StaticLoggerDispatcher.info("** chargementFichiers **", LOGGER);
 
 	java.util.Date beginDate = new java.util.Date();
-
-	this.setColData(aColData);
-	this.setAllCols(aAllCols);
-
-	this.setRequeteInsert(new StringBuilder());
-	this.requeteBilan = new StringBuilder();
 
 	// Traiter les fichiers avec container
 	if (container != null) {
 	    chargementFichierAvecContainer();
 	}
-
-	UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), this.requeteBilan);
-
-	this.getRequeteInsert().setLength(0);
-	this.requeteBilan.setLength(0);
 
 	java.util.Date endDate = new java.util.Date();
 	StaticLoggerDispatcher.info("** Fichier chargé en " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
@@ -417,6 +394,14 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
     public String getTableChargementPilTemp() {
 	return tableChargementPilTemp;
+    }
+    
+    public String getTableTempA() {
+        return tableTempA;
+    }
+
+    public void setTableTempA(String tableTempA) {
+        this.tableTempA = tableTempA;
     }
 
 }

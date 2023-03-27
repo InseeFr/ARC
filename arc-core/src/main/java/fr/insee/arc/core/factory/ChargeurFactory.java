@@ -22,7 +22,7 @@ import fr.insee.arc.core.util.TypeChargement;
  *
  */
 public class ChargeurFactory {
-    private Map<TypeChargement, IChargeur> map = new HashMap<TypeChargement, IChargeur>();
+    private Map<TypeChargement, IChargeur> map = new HashMap<>();
     private static final Logger LOGGER = LogManager.getLogger(ChargeurFactory.class);
 
 

@@ -20,6 +20,7 @@ import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
+import fr.insee.arc.utils.textUtils.FastList;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Pair;
@@ -36,8 +37,8 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		super();
 	}
 
-	public HashMap<String, Integer> col;
-	public HashMap<String, Integer> colData;
+	private HashMap<String, Integer> col = new HashMap<>();
+	private HashMap<String, Integer> colData= new HashMap<>();
 	
 	// @trees
 	private HashMap<Integer, Integer> tree = new HashMap<>();
@@ -80,21 +81,21 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	private Integer orderTreeStackQName=0;
 	
 	/* ancestors with database name*/
-	private List<String> treeStack = new ArrayList<String>();
-	private List<String> treeStackFather = new ArrayList<String>();
-	private List<String> treeStackFatherLag = new ArrayList<String>();
+	private List<String> treeStack = new ArrayList<>();
+	private List<String> treeStackFather = new ArrayList<>();
+	private List<String> treeStackFatherLag = new ArrayList<>();
 
-	public List<String> allCols;
-	private List<Integer> lineCols = new ArrayList<Integer>();
-	private List<Integer> lineCols11 = new ArrayList<Integer>();
-	private List<Integer> lineIds = new ArrayList<Integer>();
-	private List<String> lineValues = new ArrayList<String>();
+	private FastList<String> allCols = new FastList<>();
+	private List<Integer> lineCols = new ArrayList<>();
+	private List<Integer> lineCols11 = new ArrayList<>();
+	private List<Integer> lineIds = new ArrayList<>();
+	private List<String> lineValues = new ArrayList<>();
 
 	// parametrage des types de la base de données
 	private String textBdType = "text";
 	private String numBdType = "int";
 
-	public StringBuilder requete;
+	private StringBuilder requete = new StringBuilder();
 	private StringBuilder structure=new StringBuilder();
 
 	// indique que la balise courante a des données
@@ -107,8 +108,8 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
     
     // column of the load table A
 	public String tempTableA;
-    public ArrayList<String> tempTableAColumnsLongName;
-    public ArrayList<String> tempTableAColumnsShortName;
+    public FastList<String> tempTableAColumnsLongName;
+    public FastList<String> tempTableAColumnsShortName;
     
     // format to rename column with format rules
 	public ArrayList<Pair<String, String>> format;
@@ -595,7 +596,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
     		// construction de la requete de jointure
                 StringBuilder req= new StringBuilder();
                 
-                int[][] arr = Format.getTreeArrayByDistance(this.tree, this.colDist);
+                int[][] arr = TreeFunctions.getTreeArrayByDistance(this.tree, this.colDist);
 	            StringBuilder reqCreate = new StringBuilder(" \n");
 	
 	            StringBuilder reqInsert = new StringBuilder();
@@ -613,15 +614,15 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	
 	                if (arr[i][2] == 1) {
 	
-	                    String leaf = Format.getLeafs(arr[i][1], arr, this.colData, this.allCols);
+	                    String leaf = TreeFunctions.getLeafs(arr[i][1], arr, this.colData, this.allCols);
 	
 	                    // Version sans fonctions d'aggregation
-	                    String leafMax = Format.getLeafsMax(arr[i][1], arr, this.colData, this.allCols);
+	                    String leafMax = TreeFunctions.getLeafsMax(arr[i][1], arr, this.colData, this.allCols);
 	                    reqCreate.append("CREATE TEMPORARY TABLE t_" + this.allCols.get(arr[i][1]) + " as (select i_" + this.allCols.get(arr[i][1]) + " as m_" + this.allCols.get(arr[i][1]) + " ");
 	                    if (arr[i][0] >= 0) {
 	                        reqCreate.append(", i_" + this.allCols.get(arr[i][0]) + " as i_" + this.allCols.get(arr[i][0]) +" ");
 	                    }
-	                    reqCreate.append(Format.getLeafsSpace(arr[i][1], arr, this.colData, this.allCols));
+	                    reqCreate.append(TreeFunctions.getLeafsSpace(arr[i][1], arr, this.colData, this.allCols));
 	                    reqCreate.append(" FROM (SELECT i_" + this.allCols.get(arr[i][1])+" ");
 	                    reqCreate.append(leafMax);
 	                    reqCreate.append(" FROM {table_source} where i_" + this.allCols.get(arr[i][1]) + " is not null group by i_" + this.allCols.get(arr[i][1]) + ") a ");
