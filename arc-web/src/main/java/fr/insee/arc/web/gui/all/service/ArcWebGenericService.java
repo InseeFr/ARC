@@ -30,7 +30,6 @@ import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.dao.ArcWebGenericDao;
 import fr.insee.arc.web.gui.all.model.ArcModel;
-import fr.insee.arc.web.gui.all.model.SessionParameters;
 import fr.insee.arc.web.gui.home.HomeAction;
 import fr.insee.arc.web.gui.index.service.IndexAction;
 import fr.insee.arc.web.util.Session;
@@ -129,7 +128,6 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 	 * on all requests in ArcAction or ArcAction subclasses. 
 	 * Adds some generic information to the model.
 	 * VObject themselves are added to the model later by {@link ArcWebGenericService#generateDisplay()}.*/
-	@SuppressWarnings("unchecked")
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
@@ -149,13 +147,10 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 			ApiInitialisationService.bddScript(null);
 		}
 		
-		this.envMap=(Map<String, String>) getSession().get(SessionParameters.ENV_MAP);
 		
-		// adding production sandbox to session
-		if (this.envMap == null) {
-			this.envMap= indexDao.getSandboxList();
-			getSession().put(SessionParameters.ENV_MAP, this.envMap);
-		}
+		// get declared sandboxes
+		this.envMap= indexDao.getSandboxList();
+
 		if (this.bacASable == null) {
 			// by default bacASable is the first element of the linkedhashmap
 			List<String> keys=new ArrayList<>(((LinkedHashMap<String,String>) this.envMap).keySet());
@@ -207,9 +202,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 		putAllVObjects(arcModel);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void initializeArcActionWithProperties() {	 
-		this.envMap=(LinkedHashMap<String, String>) getSession().get(SessionParameters.ENV_MAP);
 		this.repertoire = properties.getBatchParametersDirectory();
 	}
 
@@ -222,7 +215,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 		LoggerHelper.debug(LOGGER, "getDataBaseStatus()");
 		// test the database connection
 		try {
-			UtilitaireDao.get(POOLNAME, 1).executeRequest(null, new ArcPreparedStatementBuilder("select true"));
+			UtilitaireDao.get(POOLNAME).executeRequest(null, new ArcPreparedStatementBuilder("select true"));
 			setDataBaseOk(true);
 	
 		} catch (Exception e) {
