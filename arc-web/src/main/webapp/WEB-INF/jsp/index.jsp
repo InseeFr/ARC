@@ -8,7 +8,7 @@
 <head>
 	<link rel="icon" href="data:,"/>
 
-	<title>Index</title>
+	<title><spring:message code="header.home" /></title>
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/index.js" />
 	</c:import>
@@ -41,6 +41,15 @@
 							<p>${version}</p>
 						</div>
 					</div>
+				</div>
+			</div>
+			<hr />
+			<div class="row justify-content-md-center">
+				<div class="col-md-4">
+					<c:set var="view" value="${viewIndex}" scope="request"/>
+					<c:import url="tiles/templateVObject.jsp">
+						<c:param name="taille" value ="col-md" />
+					</c:import>
 				</div>
 			</div>
 		</div>
