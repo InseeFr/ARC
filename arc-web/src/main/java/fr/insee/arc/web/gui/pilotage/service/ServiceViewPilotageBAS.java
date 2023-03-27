@@ -14,6 +14,7 @@ import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -173,8 +174,11 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 			ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA, getBacASable());
 		}
 
+		// Maximum number of files processed in each phase iteration
+		int maxFilesPerPhase = BDParameters.getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
+		
 		ApiServiceFactory.getService(phaseAExecuter.toString(), ApiService.IHM_SCHEMA, getBacASable(), this.repertoire,
-				"10000000"
+				maxFilesPerPhase+""
 		// ,"1" // to set batch mode or not
 		).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
