@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-92.2.15beta 2023-03-29
+- show sand box informations at the home page
+- loader performance enhancement
+
 ## version-92.2.14 2023-02-10
 - upload data file via GUI is fixed to match with new security constraints
 
