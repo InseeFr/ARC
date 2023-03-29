@@ -28,6 +28,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadControleService.class);
 
+	private Thread t = null;
+	
 	private int indice;
 
 	private String tableControleDataTemp;
@@ -112,11 +114,9 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	}
 
 	public void start() {
-		StaticLoggerDispatcher.debug("Starting ThreadContrôleService", LOGGER);
-		if (t == null) {
-			t = new Thread(this, indice + "");
-			t.start();
-		}
+		StaticLoggerDispatcher.debug("Starting ThreadControleService", LOGGER);
+		t = new Thread(this);
+	    t.start();
 	}
 
 	/**
@@ -321,10 +321,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	@Override
 	public Thread getT() {
 		return t;
-	}
-
-	public void setT(Thread t) {
-		this.t = t;
 	}
 
 	@Override

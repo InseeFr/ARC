@@ -375,7 +375,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      *            un suffixe
      * @return
      */
-    public final static String temporaryTableName(String aName, String suffix)
+    public static final String temporaryTableName(String aName, String suffix)
     {
         String newName = aName.split(_REGEX_TMP)[0];
         return temporaryTableName(newName + underscore + suffix);

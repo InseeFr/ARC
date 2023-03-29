@@ -32,7 +32,10 @@ import fr.insee.arc.utils.utils.Sleep;
  */
 public class ThreadFiltrageService extends ApiFiltrageService implements Runnable, ArcThread<ApiFiltrageService> {
 
-	private static final Logger logger = LogManager.getLogger(ThreadFiltrageService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ThreadFiltrageService.class);
+	
+    private Thread t;
+	
 	private int indice;
 
 	private String tableFiltragePilTemp;
@@ -105,12 +108,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	}
 
 	public void start() {
-		StaticLoggerDispatcher.debug("Starting ThreadFiltrageService", LOGGER_APISERVICE);
-		if (t == null) {
-			t = new Thread(this, indice + "");
-			t.start();
-		}
-
+		StaticLoggerDispatcher.debug("Starting ThreadFiltrageService", LOGGER);
+		t = new Thread(this);
+	    t.start();
 	}
 
 	/**
@@ -130,9 +130,9 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 
 		// création des tables temporaires de données
 		query.append(createTableTravailIdSource(this.getTablePrevious(), this.tableFiltrageDataTemp, this.idSource));
-		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ko", logger);
+		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ko", LOGGER);
 		query.append(FormatSQL.createAsSelectFrom(this.tableTempFiltrageKo, this.tableFiltrageDataTemp, "false"));
-		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ok", logger);
+		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ok", LOGGER);
 		query.append(FormatSQL.createAsSelectFrom(this.tableTempFiltrageOk, this.tableFiltrageDataTemp, "false"));
 
 		UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
@@ -177,7 +177,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 * @throws ArcException
 	 */
 	private void filtrer() throws ArcException {
-		StaticLoggerDispatcher.info("Table des données à filtrer utilisée : " + this.tableFiltrageDataTemp, logger);
+		StaticLoggerDispatcher.info("Table des données à filtrer utilisée : " + this.tableFiltrageDataTemp, LOGGER);
 
 		List<List<String>> regleActive = Format
 				.patch(UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion.getExecutorConnection(),
@@ -192,17 +192,17 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		ServiceCommunFiltrageMapping.parserRegleGlobale(this.connexion.getExecutorConnection(), this.envExecution,
 				this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, "expr_regle_filtre");
 
-		StaticLoggerDispatcher.info("calculerListeColonnes", logger);
+		StaticLoggerDispatcher.info("calculerListeColonnes", LOGGER);
 		Set<String> listeRubrique = ServiceCommunFiltrageMapping.calculerListeColonnes(this.connexion.getExecutorConnection(),
 				this.tableFiltrageDataTemp);
-		StaticLoggerDispatcher.info("Fin calculerListeColonnes", logger);
+		StaticLoggerDispatcher.info("Fin calculerListeColonnes", LOGGER);
 
-		StaticLoggerDispatcher.info("parserRegleCorrespondanceFonctionnelle", logger);
+		StaticLoggerDispatcher.info("parserRegleCorrespondanceFonctionnelle", LOGGER);
 		parserRegleCorrespondanceFonctionnelle(this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, listeRubrique,
 				"expr_regle_filtre");
-		StaticLoggerDispatcher.info("Fin parserRegleCorrespondanceFonctionnelle", logger);
+		StaticLoggerDispatcher.info("Fin parserRegleCorrespondanceFonctionnelle", LOGGER);
 
-		StaticLoggerDispatcher.info("Exécution du filtrage : insertion dans les tables de travail.", logger);
+		StaticLoggerDispatcher.info("Exécution du filtrage : insertion dans les tables de travail.", LOGGER);
 		StringBuilder requete = getRequeteFiltrageIntermediaire(this.envExecution, this.tableFiltrageDataTemp,
 				this.tableTempFiltrageOk, this.tableTempFiltrageKo,
 				this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, this.seuilExclusion,
@@ -411,10 +411,6 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	@Override
 	public Thread getT() {
 		return t;
-	}
-
-	public void setT(Thread t) {
-		this.t = t;
 	}
 
 	@Override

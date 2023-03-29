@@ -28,6 +28,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
     private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
 
+    private Thread t;
+    
     private int indice;
     private String tableTempFiltrageOk;
     private String tableMappingPilTemp;
@@ -68,12 +70,9 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
     }
 
     public void start() {
-        StaticLoggerDispatcher.debug("Starting ThreadmappingService", LOGGER);
-        if (t == null) {
-            t = new Thread(this, indice + "");
-            t.start();
-        }
-
+		StaticLoggerDispatcher.debug("Starting ThreadMappingService", LOGGER);
+    	t = new Thread(this);
+        t.start();
     }
 
     @Override
@@ -192,7 +191,6 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
         }
     }
-
 
 
     @Override

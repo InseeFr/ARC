@@ -40,6 +40,8 @@ import fr.insee.arc.utils.utils.Sleep;
 public class ThreadChargementService extends ApiChargementService implements Runnable, ArcThread<ApiChargementService> {
     private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
     
+	private Thread t;
+    
     private int indice;
 
     private String container;
@@ -95,11 +97,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
     }
 
     public void start() {
-	StaticLoggerDispatcher.debug("Starting ChargementService", LOGGER);
-	if (t == null) {
-	    t = new Thread(this, indice + "");
+		StaticLoggerDispatcher.debug("Starting ThreadChargementService", LOGGER);
+   	    this.t = new Thread(this);
 	    t.start();
-	}
     }
 
     @Override
@@ -377,10 +377,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
     @Override
 	public Thread getT() {
 	return t;
-    }
-
-    public void setT(Thread t) {
-	this.t = t;
     }
 
     @Override

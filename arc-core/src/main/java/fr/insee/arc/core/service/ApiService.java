@@ -105,8 +105,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	private HashMap<String, ArrayList<String>> tabIdSource;
 
-	public Thread t = null;
-
 	/**
 	 * Permet la rétro compatibilité pour la migration vers 1 schéma par
 	 * envirionnement d'execution
@@ -1273,11 +1271,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	public void setTableOutKo(String tableOutKo) {
 		this.tableOutKo = tableOutKo;
-	}
-
-
-	public Thread getT() {
-		return t;
 	}
 
 	public ScalableConnection getConnexion() {
