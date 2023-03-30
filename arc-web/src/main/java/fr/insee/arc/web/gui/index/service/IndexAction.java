@@ -46,7 +46,7 @@ public class IndexAction extends ArcWebGenericService<ModelIndex> {
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		this.vObjectService.initialize(views.getViewIndex(),
 				new ArcPreparedStatementBuilder(
-						"select id, val, env_description from arc.ext_etat_jeuderegle order by id"),
+						"SELECT nullif(substring(id from '[0123456789]+'),'')::int as id, upper(substring(id from '\\.(.*)')) as val, env_description FROM arc.ext_etat_jeuderegle where isenv"),
 				"arc.ext_etat_jeuderegle", defaultInputFields);
 	}
 

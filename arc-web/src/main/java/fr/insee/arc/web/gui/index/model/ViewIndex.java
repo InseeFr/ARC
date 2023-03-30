@@ -12,7 +12,7 @@ public class ViewIndex extends VObject {
 		super();
 		
 		this.setTitle("view.index");
-		this.setDefaultPaginationSize(10);
+		this.setDefaultPaginationSize(0);
 		this.setSessionName("viewIndex");
 		
 		this.setConstantVObject(new ConstantVObject(new HashMap<String, ColumnRendering>() {
@@ -23,8 +23,8 @@ public class ViewIndex extends VObject {
 
 			{
 				put("id", new ColumnRendering(false, "label.id", "", "text", null, false));
-				put("val", new ColumnRendering(true, "label.sandbox", "50%", "text", null, false));
-				put("env_description", new ColumnRendering(true, "label.sandbox.user", "50%", "text", null, false));
+				put("val", new ColumnRendering(true, "label.sandbox", "20%", "text", null, false));
+				put("env_description", new ColumnRendering(true, "label.sandbox.user", "80%", "text", null, false));
 			}
 		}
 		));
