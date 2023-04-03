@@ -2,8 +2,6 @@ package fr.insee.arc.core.service.handler;
 
 import java.sql.Connection;
 
-import org.xml.sax.SAXParseException;
-
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
