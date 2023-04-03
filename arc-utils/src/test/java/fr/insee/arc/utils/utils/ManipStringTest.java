@@ -131,14 +131,6 @@ public class ManipStringTest extends ManipString {
 		assertEquals("c", ManipString.substringAfterLast("a-b-c", "-"));
 	}
 	
-	// decompress string
-	@Test
-	public void decompress1() {
-		String testValue1="arêtes de poÿss▒n";
-		assertEquals(testValue1,ManipString.decompress(ManipString.compress(testValue1)));
-	}
-	
-	
 	// parseInteger
 	@Test
 	public void parseInteger1() {

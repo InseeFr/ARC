@@ -24,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
 public class ManipString implements IConstanteCaractere {
@@ -200,26 +199,8 @@ public class ManipString implements IConstanteCaractere {
         return returned.toString();
     }
 
-    public static final String[] tokenize(String string, String... tokens) {
-        return string.split("[" + Format.untokenize(tokens, empty) + "]");
-    }
 
-    /**
-     *
-     * @param string
-     *            une chaîne de caractères comprenant éventuellement des sous-chaînes de {@code tokens}.
-     * @param ordinal
-     *            un entier
-     * @param tokens
-     *            un ensemble de chaînes de caractères
-     * @return le token de position {@code ordinal} (première position : 0) obtenu après séparation de la chaîne selon les chaînes de
-     *         {@code token}.
-     */
-    public static final String getNthToken(String string, int ordinal, String... tokens) {
-        return tokenize(string, tokens)[ordinal];
-    }
-
-    static public String extractBetweenBrackets(String condition) {
+    public static String extractBetweenBrackets(String condition) {
         String rubrique = "";
         int i = condition.indexOf("{", 0);
         int j = condition.indexOf("}", i + 1);
@@ -390,10 +371,6 @@ public class ManipString implements IConstanteCaractere {
         return pad.substring(0, pad.length() - in.length()) + in;
     }
 
-    public static String padLeft(int in, String pattern, int precision) {
-        return padLeft(("" + in), pattern, precision);
-    }
-
     public static String translateAscii(String s) {
 
         if (s != null) {
@@ -527,106 +504,5 @@ public class ManipString implements IConstanteCaractere {
         }
     }
 
-    public static void replaceStringBuilder(StringBuilder sb, String toReplace, String replacement) {
-        int index = -1;
-        while ((index = sb.lastIndexOf(toReplace)) != -1) {
-            sb.replace(index, index + toReplace.length(), replacement);
-        }
-    }
-
-    /**
-     * Renommage d'un nom de fichier par adjounction d'un #1 ou incrémentation du numéro (si #1 =>#2) gestion de l'extension dans le nom
-     * (par exemple .dsn)
-     *
-     * @param nomFic
-     * @return
-     */
-    public static String renomme(String nomFic) {
-        String res = "";
-
-        int i_dieze = nomFic.lastIndexOf("_");
-        int i_extension = nomFic.lastIndexOf(".");
-        if (i_dieze < 0 && i_extension < 0) {// ni dièze ni extension, toto => toto#1
-            res = nomFic + "_1";
-        } else if (i_dieze < 0 && i_extension > 0) {// cas nominal pas encore de dièze et nom de fichier avec extention, toto.dsn =>
-                                                    // toto#1.dsn
-            res = nomFic.substring(0, i_extension) + "_1" + nomFic.substring(i_extension);
-        } else if (i_dieze > 0 && i_extension > 0) {
-            try {// on augmente le numéro de 1 si c'est bien un numéro, toto#1.dsn = > toto#2.dsn
-                int i = Integer.parseInt(nomFic.substring(i_dieze + 1, i_extension));
-                res = nomFic.substring(0, i_dieze + 1) + (i + 1) + nomFic.substring(i_extension);
-            } catch (Exception e) {// entre le dièze et l'extension ce n'est pas un numéro, to#to.dsn => to#to#1.dsn
-                res = nomFic.substring(0, i_extension) + "_1" + nomFic.substring(i_extension);
-            }
-        } else { // dernier cas j'ai un dièze mais pas d'extension
-            try {// on augmente le numéro de 1 si c'est bien un numéro, toto#1 => toto#2
-                int i = Integer.parseInt(nomFic.substring(i_dieze + 1));
-                res = nomFic.substring(0, i_dieze + 1) + (i + 1);
-            } catch (Exception e) {// entre le dièze et la fin du nom ce n'est pas un numéro, to#to => to#to#1
-                res = nomFic + "_1";
-            }
-        }
-
-        return res;
-    }
-
-    
-    /**
-     * Rajoute une accolade fermante si, et seulement si, il y en a besoin.
-     *
-     * @param radical
-     * @return
-     */
-    public static String reformerRadical(String radical) {
-	return radical + (radical.endsWith(closingBrace) ? empty : closingBrace);
-    }
-    
-    
-    // Zlib  compress
-    public static String compress(String data)
-    {
-        final Deflater deflater = new Deflater();
-        deflater.setLevel(Deflater.BEST_COMPRESSION);
-        deflater.setInput(data.getBytes(StandardCharsets.UTF_8));
-
-        try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.getBytes(StandardCharsets.UTF_8).length))
-        {
-            deflater.finish();
-            final byte[] buffer = new byte[1024];
-            while (!deflater.finished())
-            {
-                final int count = deflater.deflate(buffer);
-                outputStream.write(buffer, 0, count);
-            }
-
-            return outputStream.toString(StandardCharsets.ISO_8859_1.toString());
-        }
-        catch (Exception e) {
-			return null;
-		}
-    }
-
-    // Zlib uncompress
-    public static String decompress(String data)
-    {
-        final Inflater inflater = new Inflater();
-        inflater.setInput(data.getBytes(StandardCharsets.ISO_8859_1));
-
-        try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.getBytes(StandardCharsets.ISO_8859_1).length))
-        {
-            byte[] buffer = new byte[1024];
-            while (!inflater.finished())
-            {
-                final int count = inflater.inflate(buffer);
-                outputStream.write(buffer, 0, count);
-            }
-
-            return outputStream.toString(StandardCharsets.UTF_8.toString());
-        }
-        catch (Exception e) {
-			return null;
-		}
-    }
-    
 }
 

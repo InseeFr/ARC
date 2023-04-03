@@ -1,16 +1,9 @@
 package fr.insee.arc.utils.format;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,32 +13,6 @@ public class Format implements IConstanteCaractere {
 
     @SuppressWarnings("unused")
 	private static final Logger LOGGER = LogManager.getLogger(Format.class);
-    
-    public static final String removeJSONForbiddenChars(String string) {
-        if (StringUtils.isBlank(string)) {
-            return string;
-        }
-        return string.replaceAll("[\r\n\t]", " ");
-    }
-
-    public static <T> int size(ArrayList<T> o)
-    {
-		return o==null?0:o.size();
-    }
-    
-    /**
-     *
-     * @param list
-     * @return un hashcode pour la liste
-     */
-    public static final int hashCode(List<? extends Object> list) {
-        int returned = 0;
-        for (int i = 0; i < list.size(); i++) {
-            returned = 31 * returned + list.get(i).hashCode();
-        }
-        return returned;
-
-    }
 
     /**
      * @param array
@@ -53,37 +20,11 @@ public class Format implements IConstanteCaractere {
      * @return a List
      */
     public static <T> List<List<T>> patch(ArrayList<ArrayList<T>> array) {
-        List<List<T>> returned = new ArrayList<List<T>>();
+        List<List<T>> returned = new ArrayList<>();
         for (int i = 0; i < array.size(); i++) {
             returned.add(array.get(i));
         }
         return returned;
-    }
-
-    /**
-     * Renvoie "{k}"
-     *
-     * @param k
-     * @return
-     */
-    private static String numeroArgumentPourChaine(int k) {
-        return new StringBuilder("{").append(k).append("}").toString();
-    }
-
-    /**
-     * Remplace les occurences {k} de s par args[k]. Exemple : s = Bonjour, {0}, comment va {1}, args = {toi, ton chien} renvoie Bonjour,
-     * toi, comment va ton chien
-     *
-     * @param s
-     * @param args
-     * @return
-     */
-    public static String parseStringAvecArguments(String s, String... args) {
-        String parsedString = new String(s);
-        for (int i = 0; i < args.length; i++) {
-            parsedString = parsedString.replace(numeroArgumentPourChaine(i), args[i]);
-        }
-        return parsedString;
     }
 
     /**
@@ -116,41 +57,7 @@ public class Format implements IConstanteCaractere {
         return tokens == null ? empty : untokenize(tokens.toArray(new Object[tokens.size()]), separator);
     }
 
-    /**
-     *
-     *
-     * Concatène les éléments de toutes les listes de {@code listes}, comme le ferait la méthode
-     * {@link Format#untokenize(Collection, String)}. L'ordre des éléments de la chaîne retournée correspond à celui d'un parcourt en
-     * profondeur de l'arbre {@code listes}.
-     *
-     * @param listes
-     * @param separator
-     * @return
-     */
-    public static String untokenize(List<? extends List<String>> listes, String separator) {
-        List<String> tokens = new ArrayList<>();
-        for (int i = 0; i < listes.size(); i++) {
-            String token = untokenize(listes.get(i), separator);
-            if (StringUtils.isNotEmpty(token)) {
-                tokens.add(token);
-            }
-        }
-        return untokenize(tokens, separator);
-    }
-
-    public static String untokenize(Object[] array, String avantTout, String avantToken, String apresToken, String separateur, String apresTout) {
-        return new StringBuilder(avantTout)//
-                .append(avantToken)//
-                .append(untokenize(array, new StringBuilder(apresToken + separateur + avantToken).toString()))//
-                .append(array.length > 0 ? apresToken : empty)//
-                .append(apresTout)//
-                .toString();
-    }
-
-    public static String untokenize(Collection<?> array, String avantTout, String avantToken, String apresToken, String separateur, String apresTout) {
-        return untokenize(array.toArray(), avantTout, avantToken, apresToken, separateur, apresTout);
-    }
-
+ 
     /**
      * Transforme le nom d'une balise en nom compatible avec une base de donnees</br>
      * Exemple : </br>
@@ -189,39 +96,7 @@ public class Format implements IConstanteCaractere {
     	liste.subList(fatherIndex, liste.size()).clear();
     }
 
-    public static String asLetters(int num) {
-        StringBuilder sb = new StringBuilder();
-        int tempNum = num;
-        while (tempNum > 0) {
-
-            if (tempNum % 52 >= 26) {
-                sb.append((char) ('a' + ((tempNum % 52) - 26)));
-            } else {
-                sb.append((char) ('A' + (tempNum % 52)));
-            }
-
-            tempNum /= 52;
-        }
-        return sb.toString();
-    }
-
-    public static String getHash(String donnees) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] hash = md.digest(donnees.getBytes());
-
-        StringBuilder hashString = new StringBuilder();
-
-        for (int i = 0; i < hash.length; i++) {
-            hashString.append(asLetters(hash[i] + 129));
-        }
-
-        return hashString.toString();
-
-    }
-
-
-     public static String sqlListe(Collection<String> liste) {
+    public static String sqlListe(Collection<String> liste) {
         return new StringBuilder(openingParenthesis).append(quote).append(untokenize(liste, quote + comma + space + quote)).append(quote)
                 .append(closingParenthesis).toString();
     }
@@ -232,23 +107,6 @@ public class Format implements IConstanteCaractere {
 
     public static String toUpperCase(String string) {
         return string == null ? null : string.toUpperCase();
-    }
-
-    public static String toLowerCase(String string) {
-        return string == null ? null : string.toLowerCase();
-    }
-
-    public static String convertirFormatDate(String aDateAsString, String aSourceSimpleDateFormat, String aTargetSimpleDateFormat) throws ParseException {
-        return new SimpleDateFormat(aTargetSimpleDateFormat).format(new SimpleDateFormat(aSourceSimpleDateFormat).parse(aDateAsString));
-    }
-
-    public static final Long toLong(String aLong) {
-        return StringUtils.isBlank(aLong)? null:Long.parseLong(aLong);
-    }
-
-    @SafeVarargs
-    public static <T> T coalesce(T... objects) {
-        return Arrays.asList(objects).stream().filter((t) -> t != null).findFirst().orElse(null);
     }
 
 }
