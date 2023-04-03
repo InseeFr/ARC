@@ -78,7 +78,7 @@
 											doAction="filesUploadBAS"
 											scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;viewArchiveBAS;viewEntrepotBAS;"
 											multipart="true"
-											ajax="false"
+											ajax="true"
 										><span class="fa fa-upload">&nbsp;</span> <spring:message code="managementSandbox.load"/></button>
 									</div>
 								</div>

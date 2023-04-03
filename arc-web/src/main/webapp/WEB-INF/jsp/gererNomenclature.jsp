@@ -83,9 +83,9 @@
 								id="btnFileUpload"
 								type="submit"
 								doAction="importListNomenclatures"
-								scope=""
+								scope="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;"
 								multipart="true"
-								ajax="false"
+								ajax="true"
 								onclick="submitForm()"
 							><span class="fa fa-upload">&nbsp;</span> <spring:message code="managementSandbox.load"/></button>
 						</div>

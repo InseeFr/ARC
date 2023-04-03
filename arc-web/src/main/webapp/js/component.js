@@ -846,6 +846,7 @@ function ajaxConfigurationCall()
 					url: $this.attr('action'),
 					type: 'POST',
 					data: formdata,
+					enctype: 'multipart/form-data',
 					processData: false,
 					contentType: false,
 		            beforeSend: function(xhr) {

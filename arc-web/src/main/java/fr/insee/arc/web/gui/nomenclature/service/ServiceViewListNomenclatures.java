@@ -193,7 +193,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
         // Ouverture du fichier
         if (fileUpload == null || fileUpload.isEmpty()) {
-            this.views.getViewListNomenclatures().setMessage("You must select a file for import.");
+            this.views.getViewListNomenclatures().setMessage("Vous devez selectionner un fichier pour l'importation.");
             return;
         }
         try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))){
@@ -214,7 +214,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         	creationTableDefinitif();
         } catch (IOException e) {
 			LoggerHelper.error(LOGGER, e, "Error during import");
-			this.views.getViewListNomenclatures().setMessage("An error occurred while reading the file.");
+			this.views.getViewListNomenclatures().setMessage("Le fichier n'a pu être lu. Il doit être au format csv non compressé, le nom des colonnes en première ligne, le type des colonne en 2ieme ligne.");
 		}
 
     }
@@ -267,7 +267,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
     
     private List<String> convertListToLowerTrim(String[] tab) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (int i = 0; i < tab.length; i++) {
             list.add(tab[i].toLowerCase().trim());
         }
