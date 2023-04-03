@@ -95,7 +95,7 @@ public class SendResponse {
 
     private static final Logger LOGGER = LogManager.getLogger(SendResponse.class);
 
-	public ServletOutputStream wr;
+	private ServletOutputStream wr;
 
 	public SendResponse( HttpServletResponse response ){
 		try {

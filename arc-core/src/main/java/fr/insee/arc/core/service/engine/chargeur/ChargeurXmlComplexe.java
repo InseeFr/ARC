@@ -104,7 +104,7 @@ public class ChargeurXmlComplexe implements IChargeur{
         java.util.Date beginDate = new java.util.Date();
 
         NormeFichier normeFichier=new NormeFichier(this.norme.getIdNorme(), validite, this.norme.getPeriodicite());
-        this.format=new ArrayList<Pair<String, String>>();
+        this.format=new ArrayList<>();
         
         // voir avec Pierre comment factoriser ce genre de truc
         try {
