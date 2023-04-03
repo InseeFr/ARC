@@ -7,6 +7,10 @@ public class ArcException extends Exception {
 	 */
 	private static final long serialVersionUID = -6127318245282541168L;
 
+	public ArcException(ArcExceptionMessage error) {
+		super(error.toString());
+	}
+	
 	public ArcException(String error) {
 		super(error);
 	}
@@ -16,7 +20,7 @@ public class ArcException extends Exception {
 	}
 
 	public ArcException(String error, Exception ex) {
-		super(ex);
+		super(error, ex);
 	}
 
 }

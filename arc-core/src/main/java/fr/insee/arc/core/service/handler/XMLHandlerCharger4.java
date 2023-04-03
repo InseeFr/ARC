@@ -15,7 +15,6 @@ import org.xml.sax.SAXParseException;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.FastList;
@@ -130,21 +129,12 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 		StringBuilder requete=new StringBuilder(computeFinalQuery());
 		renameColumns(requete);
 
-		try {
-			pi.join();
-		} catch (InterruptedException e) {
-			pi.interrupt();
-			throw new SAXParseException("Error sending insert query to database ", "", "", 0, 0);
-		}				
+		waitForParallelInsertAndReport();
 		
-		try {
-			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "startElement()", LOGGER, ex);
-			 throw new SAXParseException("Fichier XML : erreur de requete insertion  : "+ex.getMessage() , "", "", 0, 0);
-		}
-		requetes=new HashMap<>();
-				
+		pi =  new ParallelInsert(this.connexion, requete.toString()); 
+		pi.start();
+		waitForParallelInsertAndReport();
+		
 		// construction de la requete de jointure
 		requeteJointureXML();
 		
@@ -294,23 +284,16 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 		) {
 
 			insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols, this.lineIds, this.lineValues);
-
 			
 			if (this.requetesLength > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
-				
-				try {
-					pi.join();
-				} catch (InterruptedException e) {
-					pi.interrupt();
-					throw new SAXParseException("Error sending insert query to database ", "", "", 0, 0);
-				}
 
-				pi =  new ParallelInsert(this.connexion, computeFinalQuery()); 
+				String query=computeFinalQuery();
+				
+				waitForParallelInsertAndReport();
+				
+				pi =  new ParallelInsert(this.connexion, query); 
 				pi.start();
-				
-				
-				this.requetes=new HashMap<>();
-				this.requetesLength=0;
+
 			}
 
 			// On va alors dépiler ligneCols, lineIds, lineValues jusqu'au père
@@ -340,6 +323,19 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	}
 
 
+	/**
+	 * Wait for the parallel insert to be done and report a sax exception if an error occured
+	 * @throws SAXParseException
+	 */
+	private void waitForParallelInsertAndReport() throws SAXParseException
+	{
+		try {
+			pi.waitAndReport();
+		} catch (ArcException e) {
+			throw new SAXParseException(e.getMessage(), "", "", idLigne, 0);
+		}
+	}
+	
 
 	/**
 	 * Requete d'insertion des données parsées
@@ -485,6 +481,9 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 				result.append(s).append(requetes.get(s)).append(";");
 			}
 		}
+		
+		this.requetes=new HashMap<>();
+		this.requetesLength=0;
 				
 		return result.toString();
 		
@@ -606,5 +605,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
     	}
     		
     }
+
 
 }
