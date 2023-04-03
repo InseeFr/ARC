@@ -1,6 +1,6 @@
-package fr.insee.arc.batch.threadrunners.parameter;
+package fr.insee.arc.batch.threadrunners;
 
-public class ParameterKey {
+public class PhaseParameterKeys {
 
 
 	// keys name for the hashmap mapParam containing the batch parameters
@@ -14,7 +14,7 @@ public class ParameterKey {
 	public static final String KEY_FOR_KEEP_IN_DATABASE = "keepInDatabase";
 	
 	
-	 private ParameterKey() {
+	 private PhaseParameterKeys() {
 		    throw new IllegalStateException("Utility class");
 		  }
 

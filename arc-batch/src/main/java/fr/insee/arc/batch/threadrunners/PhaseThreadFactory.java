@@ -1,27 +1,19 @@
 package fr.insee.arc.batch.threadrunners;
 
-import java.util.HashMap;
+import java.util.Map;
 
-import fr.insee.arc.batch.threadrunners.parameter.ParameterKey;
-import fr.insee.arc.batch.unitarylauncher.ChargerBatch;
-import fr.insee.arc.batch.unitarylauncher.ComputeBatchArgs;
-import fr.insee.arc.batch.unitarylauncher.ControlerBatch;
-import fr.insee.arc.batch.unitarylauncher.FiltrerBatch;
-import fr.insee.arc.batch.unitarylauncher.InitialiserBatch;
-import fr.insee.arc.batch.unitarylauncher.MapperBatch;
-import fr.insee.arc.batch.unitarylauncher.NormerBatch;
-import fr.insee.arc.batch.unitarylauncher.RecevoirBatch;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 
-public class ArcThreadFactory extends Thread {
+public class PhaseThreadFactory extends Thread {
 
 	// parameters map for the thread
 	// keys in parameterKey class
-	private HashMap<String, String> mapParam;
+	private Map<String, String> mapParam;
 
 	private TraitementPhase phaseName;
 
@@ -31,7 +23,7 @@ public class ArcThreadFactory extends Thread {
 	private ServiceReporting report = new ServiceReporting();
 	
 	
-	public ArcThreadFactory(HashMap<String, String> mapParam, TraitementPhase phase) {
+	public PhaseThreadFactory(Map<String, String> mapParam, TraitementPhase phase) {
 		initializeThreadRunnerTemplate(mapParam, phase);
 	}
 
@@ -43,54 +35,43 @@ public class ArcThreadFactory extends Thread {
 	
 	
 	public void execute() {
+		this.report = ApiServiceFactory.getService(getPhaseName().toString(), PhaseComputeArgs.batchArgs(this.getMapParam(), capacityParameterName())).invokeApi();
+	}
 
+	/**
+	 * The capacity parameter is the maximum number of objects that must take care a phase launch
+	 * this method returns the parameter name to pick for the phase
+	 * @return
+	 */
+	protected String capacityParameterName()
+	{
+		
+		String capacityParameter;
+
+		
 		switch (getPhaseName()) {
 		case INITIALISATION:
-			InitialiserBatch i = new InitialiserBatch(
-					ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_SIZE_RECEPTION));
-			i.execute();
+			capacityParameter = PhaseParameterKeys.KEY_FOR_MAX_SIZE_RECEPTION;
 			break;
 
 		case RECEPTION:
-			RecevoirBatch r = new RecevoirBatch(
-					ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_SIZE_RECEPTION));
-			r.execute();
-			setReport(r.getReport());
+			capacityParameter = PhaseParameterKeys.KEY_FOR_MAX_SIZE_RECEPTION;
 			break;
 
 		case CHARGEMENT:
-			new ChargerBatch(ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_FILES_TO_LOAD))
-					.execute();
-			break;
-
-		case NORMAGE:
-			new NormerBatch(ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_FILES_PER_PHASE))
-					.execute();
-			break;
-
-		case CONTROLE:
-			new ControlerBatch(ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_FILES_PER_PHASE))
-					.execute();
-			break;
-			
-		case FILTRAGE:
-			new FiltrerBatch(ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_FILES_PER_PHASE))
-					.execute();
-			break;
-
-		case MAPPING:
-			new MapperBatch(ComputeBatchArgs.batchArgs(this.getMapParam(), ParameterKey.KEY_FOR_MAX_FILES_PER_PHASE))
-					.execute();
+			capacityParameter = PhaseParameterKeys.KEY_FOR_MAX_FILES_TO_LOAD;
 			break;
 
 		default:
+			capacityParameter = PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE;
 			break;
 		}
+		
+		return capacityParameter;
 
 	}
 
-
-	private void initializeThreadRunnerTemplate(HashMap<String, String> mapParam, TraitementPhase phaseName) {
+	private void initializeThreadRunnerTemplate(Map<String, String> mapParam, TraitementPhase phaseName) {
 		setPhaseName(phaseName);
 		setMapParam(mapParam);
 	}
@@ -108,7 +89,7 @@ public class ArcThreadFactory extends Thread {
 		
 		// count the number of file left to be processed in the phase
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append("SELECT count(*) FROM " + this.getMapParam().get(ParameterKey.KEY_FOR_EXECUTION_ENVIRONMENT)
+		query.append("SELECT count(*) FROM " + this.getMapParam().get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT)
 				+ ".pilotage_fichier WHERE etape=1 and phase_traitement='" + this.getPhaseName()
 				+ "' and etat_traitement='{" + TraitementEtat.ENCOURS + "}'");
 
@@ -125,11 +106,11 @@ public class ArcThreadFactory extends Thread {
 		return blocked;
 	}
 
-	public HashMap<String, String> getMapParam() {
+	public Map<String, String> getMapParam() {
 		return mapParam;
 	}
 
-	public void setMapParam(HashMap<String, String> mapParam) {
+	public void setMapParam(Map<String, String> mapParam) {
 		this.mapParam = mapParam;
 	}
 

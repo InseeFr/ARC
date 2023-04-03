@@ -15,8 +15,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fr.insee.arc.batch.threadrunners.ArcThreadFactory;
-import fr.insee.arc.batch.threadrunners.parameter.ParameterKey;
+import fr.insee.arc.batch.threadrunners.PhaseThreadFactory;
+import fr.insee.arc.batch.threadrunners.PhaseParameterKeys;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -170,14 +170,14 @@ class BatchARC implements IReturnCode {
 
 		repertoire = properties.getBatchParametersDirectory();
 
-		mapParam.put(ParameterKey.KEY_FOR_DIRECTORY_LOCATION, repertoire);
-		mapParam.put(ParameterKey.KEY_FOR_BATCH_CHUNK_ID, new SimpleDateFormat("yyyyMMddHH").format(new Date()));
-		mapParam.put(ParameterKey.KEY_FOR_METADATA_ENVIRONMENT, env);
-		mapParam.put(ParameterKey.KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
-		mapParam.put(ParameterKey.KEY_FOR_MAX_SIZE_RECEPTION, String.valueOf(tailleMaxReceptionEnMb));
-		mapParam.put(ParameterKey.KEY_FOR_MAX_FILES_TO_LOAD, String.valueOf(maxFilesToLoad));
-		mapParam.put(ParameterKey.KEY_FOR_MAX_FILES_PER_PHASE, String.valueOf(maxFilesPerPhase));
-		mapParam.put(ParameterKey.KEY_FOR_KEEP_IN_DATABASE, String.valueOf(keepInDatabase));
+		mapParam.put(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION, repertoire);
+		mapParam.put(PhaseParameterKeys.KEY_FOR_BATCH_CHUNK_ID, new SimpleDateFormat("yyyyMMddHH").format(new Date()));
+		mapParam.put(PhaseParameterKeys.KEY_FOR_METADATA_ENVIRONMENT, env);
+		mapParam.put(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
+		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_SIZE_RECEPTION, String.valueOf(tailleMaxReceptionEnMb));
+		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_FILES_TO_LOAD, String.valueOf(maxFilesToLoad));
+		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE, String.valueOf(maxFilesPerPhase));
+		mapParam.put(PhaseParameterKeys.KEY_FOR_KEEP_IN_DATABASE, String.valueOf(keepInDatabase));
 
 		message(mapParam.toString());
 
@@ -261,7 +261,7 @@ class BatchARC implements IReturnCode {
 					}
 
 					// initialiser le pool de thread
-					HashMap<TraitementPhase, ArrayList<ArcThreadFactory>> pool = new HashMap<>();
+					HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> pool = new HashMap<>();
 					for (TraitementPhase phase : phases) {
 						pool.put(phase, new ArrayList<>());
 					}
@@ -277,11 +277,11 @@ class BatchARC implements IReturnCode {
 						message("> batch lock check iteration : " + iteration, iteration);
 
 						// delete dead thread i.e. keep only living thread in the pool
-						HashMap<TraitementPhase, ArrayList<ArcThreadFactory>> poolToKeep = new HashMap<>();
+						HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> poolToKeep = new HashMap<>();
 						for (TraitementPhase phase : phases) {
 							poolToKeep.put(phase, new ArrayList<>());
 							if (!pool.get(phase).isEmpty()) {
-								for (ArcThreadFactory thread : pool.get(phase)) {
+								for (PhaseThreadFactory thread : pool.get(phase)) {
 									if (thread.isAlive()) {
 										poolToKeep.get(phase).add(thread);
 										message(phase + " is still alive", iteration);
@@ -298,7 +298,7 @@ class BatchARC implements IReturnCode {
 						for (TraitementPhase phase : phases) {
 							// if no thread in phase, start one
 							if (pool.get(phase).isEmpty()) {
-								ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
+								PhaseThreadFactory a = new PhaseThreadFactory(mapParam, phase);
 								a.start();
 								pool.get(phase).add(a);
 
@@ -315,7 +315,7 @@ class BatchARC implements IReturnCode {
 									// check if all the phase threads are blocked
 									boolean blocked = true;
 									// iterate thru the thread pool
-									for (ArcThreadFactory thread : pool.get(phase)) {
+									for (PhaseThreadFactory thread : pool.get(phase)) {
 										// if one thread is not considered as blocked, exit, nothing to do
 										if (!thread.isBlocked()) {
 											blocked = false;
@@ -343,7 +343,7 @@ class BatchARC implements IReturnCode {
 											// can start a new thread if no more than the
 											// maxNumberOfThreadsOfTheSamePhaseAtTheSameTime in the stack
 
-											ArcThreadFactory a = new ArcThreadFactory(mapParam, phase);
+											PhaseThreadFactory a = new PhaseThreadFactory(mapParam, phase);
 											a.start();
 											pool.get(phase).add(a);
 
@@ -572,7 +572,7 @@ class BatchARC implements IReturnCode {
 			resetPending(envExecution);
 		} else {
 			message("Reception de nouveaux fichiers");
-			ArcThreadFactory recevoir = new ArcThreadFactory(mapParam, TraitementPhase.RECEPTION);
+			PhaseThreadFactory recevoir = new PhaseThreadFactory(mapParam, TraitementPhase.RECEPTION);
 			recevoir.execute();
 			message("Reception : " + recevoir.getReport().getNbObject() + " objets enregistrés en "
 					+ recevoir.getReport().getDuree() + " ms");
@@ -581,7 +581,7 @@ class BatchARC implements IReturnCode {
 	}
 
 	private void initialize() throws ArcException {
-		ArcThreadFactory initialiser = new ArcThreadFactory(mapParam, TraitementPhase.INITIALISATION);
+		PhaseThreadFactory initialiser = new PhaseThreadFactory(mapParam, TraitementPhase.INITIALISATION);
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
 
