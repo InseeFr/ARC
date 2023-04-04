@@ -73,7 +73,7 @@
 							class="btn btn-secondary btn-sm"
 							type="submit"
 							doAction="select${viewType}"
-							scope="${view.sessionName};${param.extraScopeSee}"
+							scope="${view.sessionName};<spring:message code="tabNavScope.${param.extraScopeSee}"/>"
 							value="<spring:message code="gui.button.see"/>"
 						><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.see"/></button>
 				</div>

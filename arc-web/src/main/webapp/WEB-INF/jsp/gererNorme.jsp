@@ -114,7 +114,7 @@
 			<!-- rule set list -->
 			<c:set var="view" value="${viewModules}"  scope="request"/>
 			<c:import url="tiles/templateTabnav.jsp">
-				<c:param name="extraScopeSee" value ="viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;viewExpression;-viewJeuxDeReglesCopie;" />
+				<c:param name="extraScopeSee" value ="phase" />
 			</c:import>
 		</div>
 	</div>
