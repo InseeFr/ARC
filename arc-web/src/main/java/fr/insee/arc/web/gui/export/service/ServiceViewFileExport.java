@@ -17,86 +17,77 @@ import fr.insee.arc.utils.files.FileUtilsArc;
 @Service
 public class ServiceViewFileExport extends InteractorExport {
 
+	public String selectFileExport(Model model) {
+		return basicAction(model, RESULT_SUCCESS);
+	}
 
-    public String selectFileExport(Model model) {
-        return basicAction(model, RESULT_SUCCESS);
-    }
+	public String sortFileExport(Model model) {
+		this.vObjectService.sort(views.getViewFileExport());
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
 
-    public String sortFileExport(Model model) {
-        this.vObjectService.sort(views.getViewFileExport());
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-
-    public String deleteFileExport(Model model) {
-    	String dirOut=initExportDir();
-    	HashMap<String, ArrayList<String>> selection = this.views.getViewFileExport().mapContentSelected();
-    	if (!selection.isEmpty())
-    	{
-    		for (String s:selection.get("filename"))
-    		{
-    			try {
+	public String deleteFileExport(Model model) {
+		String dirOut = initExportDir();
+		HashMap<String, ArrayList<String>> selection = this.views.getViewFileExport().mapContentSelected();
+		if (!selection.isEmpty()) {
+			for (String s : selection.get("filename")) {
+				try {
 					FileUtilsArc.delete(new File(dirOut + File.separator + s));
 				} catch (ArcException e) {
-					this.views.getViewFileExport().setMessage("La suppression du fichier "+s+" a échouée");
+					this.views.getViewFileExport().setMessage("La suppression du fichier " + s + " a échouée");
 				}
-    		}
-    	}
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-    
-    public String updateFileExport(Model model) {
-    	String dirOut=initExportDir();
+			}
+		}
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
 
-    	 HashMap<String,ArrayList<String>> m=this.views.getViewFileExport().mapContentBeforeUpdate();
-         HashMap<String,ArrayList<String>> n=this.views.getViewFileExport().mapContentAfterUpdate();
+	public String updateFileExport(Model model) {
+		String dirOut = initExportDir();
 
-         if (!m.isEmpty())
-         {
-             for (int i=0; i<m.get("filename").size();i++)
-             {
-               File fileIn = new File(dirOut + File.separator + m.get("filename").get(i));
-               File fileOut = new File(dirOut + File.separator + n.get("filename").get(i));
-               
-               if (!fileIn.renameTo(fileOut))
-               {
-            	   this.views.getViewFileExport().setMessage("Le renommage a échoué");
-               }
-             }
-         }
-       return generateDisplay(model, RESULT_SUCCESS);
-    }
-    
-    public String downloadFileExport(Model model, HttpServletResponse response) {
-    	HashMap<String, ArrayList<String>> selection = this.views.getViewFileExport().mapContentSelected();
-    	if (!selection.isEmpty())
-    	{
-    		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
-    		boolean first=true;
-    		for (String s:selection.get("filename"))
-    		{
-    			if (first)
-    			{
-    				first=false;
-    			}
-    			else
-    			{
-    				requete.append("\n UNION ALL ");
-    			}
-    			requete.append("SELECT "+requete.quoteText(s)+" as nom_fichier ");
-    		}
-    		
-        	String repertoire = properties.getBatchParametersDirectory();
-       		String envDir =  getBacASable() .replace(".", "_").toUpperCase();
-    		String dirOut = repertoire + envDir;
-    		
-    		ArrayList<String> r=new ArrayList<>(Arrays.asList("EXPORT"));
-    		
-            this.vObjectService.downloadEnveloppe(views.getViewFileExport(), response, requete, dirOut, r);
+		HashMap<String, ArrayList<String>> m = this.views.getViewFileExport().mapContentBeforeUpdate();
+		HashMap<String, ArrayList<String>> n = this.views.getViewFileExport().mapContentAfterUpdate();
 
-    	}
-        return "none";
+		if (!m.isEmpty()) {
+			for (int i = 0; i < m.get("filename").size(); i++) {
+				File fileIn = new File(dirOut + File.separator + m.get("filename").get(i));
+				File fileOut = new File(dirOut + File.separator + n.get("filename").get(i));
 
-    }
-    
-	
+				try {
+					FileUtilsArc.renameTo(fileIn, fileOut);
+				} catch (ArcException e) {
+					this.views.getViewFileExport().setMessage("Le renommage a échoué");
+				}
+
+			}
+		}
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+
+	public String downloadFileExport(Model model, HttpServletResponse response) {
+		HashMap<String, ArrayList<String>> selection = this.views.getViewFileExport().mapContentSelected();
+		if (!selection.isEmpty()) {
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+			boolean first = true;
+			for (String s : selection.get("filename")) {
+				if (first) {
+					first = false;
+				} else {
+					requete.append("\n UNION ALL ");
+				}
+				requete.append("SELECT " + requete.quoteText(s) + " as nom_fichier ");
+			}
+
+			String repertoire = properties.getBatchParametersDirectory();
+			String envDir = getBacASable().replace(".", "_").toUpperCase();
+			String dirOut = repertoire + envDir;
+
+			ArrayList<String> r = new ArrayList<>(Arrays.asList("EXPORT"));
+
+			this.vObjectService.downloadEnveloppe(views.getViewFileExport(), response, requete, dirOut, r);
+
+		}
+		return "none";
+
+	}
+
 }
