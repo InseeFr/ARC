@@ -3,7 +3,7 @@ package fr.insee.arc.core.service.engine.mapping.regles;
 import java.util.HashSet;
 import java.util.Set;
 
-import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.TableMapping;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.utils.exception.ArcException;
@@ -96,7 +96,7 @@ public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
     @Override
     public String getExpressionSQL() {
         Set<String> retenu = new HashSet<>(this.ensembleIdentifiantsRubriques);
-        retenu.removeAll(RequeteMapping.setIdSource);
+        retenu.remove(ColumnEnum.ID_SOURCE.getColumnName());
         if (retenu.isEmpty()) {
             return "null::text collate \"C\"";
         }
@@ -119,7 +119,7 @@ public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
     public String getExpressionSQL(Integer aNumeroGroupe) {
         Set<String> retenu = new HashSet<>(this.ensembleIdentifiantsRubriques);
         retenu.addAll(this.tableMappingIdentifiee.getEnsembleIdentifiantsRubriques(aNumeroGroupe));
-        retenu.removeAll(RequeteMapping.setIdSource);
+        retenu.remove(ColumnEnum.ID_SOURCE.getColumnName());
        
         if (retenu.isEmpty()) {
             return "''::text collate \"C\"";

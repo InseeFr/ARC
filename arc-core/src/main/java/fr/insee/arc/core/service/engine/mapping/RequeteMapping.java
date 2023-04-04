@@ -95,13 +95,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
     // thread number is necesary to be sure that table name don't collide
     private int threadId;
-    
-    public static final Set<String> setIdSource = new HashSet<String>() {
-        private static final long serialVersionUID = 9031984127160616029L;
-        {
-            this.add(ColumnEnum.ID_SOURCE.getColumnName());
-        }
-    };
 
     private static final String ID_TABLE = "id_table";
 
@@ -576,7 +569,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
 		// i_g
 		Set<String> ensembleIdentifiantsGroupesRetenus = new HashSet<>(table.getEnsembleIdentifiantsRubriques(groupe));
-		ensembleIdentifiantsGroupesRetenus.removeAll(setIdSource);
+		ensembleIdentifiantsGroupesRetenus.remove(ColumnEnum.ID_SOURCE.getColumnName());
 
 
 		// on concatene i_g et v_g
