@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
 public class FileUtilsArc {
@@ -85,40 +86,62 @@ public class FileUtilsArc {
 	 * 
 	 * @param directoryToBeDeleted
 	 * @return
+	 * @throws IOException 
 	 */
-	public static boolean deleteDirectory(File directoryToBeDeleted) {
+	public static void deleteDirectory(File directoryToBeDeleted) throws ArcException {
 		File[] allContents = directoryToBeDeleted.listFiles();
 		if (allContents != null) {
 			for (File file : allContents) {
 				deleteDirectory(file);
 			}
 		}
-		return directoryToBeDeleted.delete();
+		delete(directoryToBeDeleted);
 	}
+	
 
-	public static void deleteAndRecreateDirectory(File directoryToBeDeletedAndRecreated) {
-		deleteDirectory(directoryToBeDeletedAndRecreated);
+	/**
+	 * delete and recreate directory
+	 * @param directoryToBeDeletedAndRecreated
+	 * @throws ArcException
+	 */
+	public static void deleteAndRecreateDirectory(File directoryToBeDeletedAndRecreated) throws ArcException {
+		if (directoryToBeDeletedAndRecreated.exists())
+		{
+			deleteDirectory(directoryToBeDeletedAndRecreated);			
+		}
 		directoryToBeDeletedAndRecreated.mkdir();
 	}
-	
-	
+
 	/**
 	 * Rename fileInput into fileOutput. Send a log is rename wasn't successful
+	 * 
 	 * @param fileInput
 	 * @param fileOutput
 	 * @return
+	 * @throws IOException 
 	 */
-	public static boolean renameTo(File fileInput, File fileOutput)
-	{
+	public static void renameTo(File fileInput, File fileOutput) throws ArcException {
 		boolean renameResult = fileInput.renameTo(fileOutput);
-		
-		if (!renameResult)
-		{
-			LoggerHelper.warnAsComment(LOGGER, "Le fichier", fileInput.getName(), " n'a pas pu être renommé vers ", fileOutput.getName());
+
+		if (!renameResult) {
+			throw new ArcException("Le fichier" + fileInput.getName() + " n'a pas pu être renommé vers " +
+					fileOutput.getName());
 		}
-		
-		return renameResult;
-		
+	}
+
+	/**
+	 * Delete fileInput. Send a log is rename wasn't successful
+	 * 
+	 * @param fileInput
+	 * @return
+	 * @throws IOException 
+	 */
+	public static void delete(File fileInput) throws ArcException {
+		boolean deleteResult = fileInput.delete();
+
+		if (!deleteResult) {
+			throw new ArcException("Le fichier" + fileInput.getName() + " n'a pas pu être effacé");
+		}
 	}
 
 }

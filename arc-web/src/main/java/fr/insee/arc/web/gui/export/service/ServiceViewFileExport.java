@@ -7,11 +7,11 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.tools.ant.util.FileUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 
 @Service
@@ -34,7 +34,11 @@ public class ServiceViewFileExport extends InteractorExport {
     	{
     		for (String s:selection.get("filename"))
     		{
-    			FileUtils.delete(new File(dirOut + File.separator + s));
+    			try {
+					FileUtilsArc.delete(new File(dirOut + File.separator + s));
+				} catch (ArcException e) {
+					this.views.getViewFileExport().setMessage("La suppression du fichier "+s+" a échouée");
+				}
     		}
     	}
         return generateDisplay(model, RESULT_SUCCESS);
@@ -53,7 +57,7 @@ public class ServiceViewFileExport extends InteractorExport {
                File fileIn = new File(dirOut + File.separator + m.get("filename").get(i));
                File fileOut = new File(dirOut + File.separator + n.get("filename").get(i));
                
-               if (!FileUtilsArc.renameTo(fileIn, fileOut))
+               if (!fileIn.renameTo(fileOut))
                {
             	   this.views.getViewFileExport().setMessage("Le renommage a échoué");
                }

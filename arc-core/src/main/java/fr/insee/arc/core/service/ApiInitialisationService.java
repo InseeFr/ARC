@@ -206,7 +206,7 @@ public class ApiInitialisationService extends ApiService {
                     		try {
 								if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
 								{
-									fichier.delete();
+									FileUtilsArc.delete(fichier);
 								}
 							} catch (IOException e) {
 								throw new ArcException(e);
@@ -220,7 +220,7 @@ public class ApiInitialisationService extends ApiService {
                         		try {
 									if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
 									{
-										fichier.delete();
+										FileUtilsArc.delete(fichier);
 									}
 								} catch (IOException e) {
 									throw new ArcException(e);
@@ -1181,7 +1181,6 @@ public class ApiInitialisationService extends ApiService {
                 if (entrepotList!=null)
                 {
 	                for (String s : entrepotList) {
-	                	
 	                	FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, s)).toFile());
 	                	FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, env, s)).toFile());
 	                }

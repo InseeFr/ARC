@@ -118,7 +118,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 			for (String f : m.get(VC_FILENAME)) {
 				File fileSource = Paths.get(dirSource, f).toFile();
 				File fileTarget = Paths.get(dirTarget, f).toFile();
-				if (!FileUtilsArc.renameTo(fileSource, fileTarget))
+				if (!fileSource.renameTo(fileTarget))
 				{
 					viewSource.setMessage("An error occured while tranfering the file "+fileSource);
 				}
@@ -128,7 +128,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 				if (!fileSource.isDirectory()) {
 					File fileTarget = Paths.get(dirTarget, fileSource.getName()).toFile();
 					
-					if (!FileUtilsArc.renameTo(fileSource, fileTarget))
+					if (!fileSource.renameTo(fileTarget))
 					{
 						viewSource.setMessage("An error occured while tranfering the file "+fileSource);
 					}
@@ -224,7 +224,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 			File fileIn = new File(dirSource+ m0.get(VC_FILENAME).get(i));
 			File fileOut = new File(dirSource + m1.get(VC_FILENAME).get(i));
 			
-			if (!FileUtilsArc.renameTo(fileIn, fileOut))
+			if (!fileIn.renameTo(fileOut))
 			{
 				viewSource.setMessage("Rename operation failed. Check if filesystem isn't locked");
 			}

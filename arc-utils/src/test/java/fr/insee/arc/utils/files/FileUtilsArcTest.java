@@ -9,6 +9,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import fr.insee.arc.utils.exception.ArcException;
+
 public class FileUtilsArcTest {
 
 	@Rule
@@ -16,8 +18,10 @@ public class FileUtilsArcTest {
 		
 	@Test
 	/** Test if deleteDirectory function delete the target directory and its content
+	 * @throws IOException 
+	 * @throws ArcException 
 	 */
-	public void deleteDirectoryTest() throws IOException {
+	public void deleteDirectoryTest() throws IOException, ArcException {
 
 		File root=testFolder.newFolder("root");
 		
@@ -52,12 +56,13 @@ public class FileUtilsArcTest {
 		
 	}
 	
-	@Test
+	@Test(expected = ArcException.class)
 	/** Test for not existing directory
 	 *  must return false
 	 * @throws IOException
+	 * @throws ArcException 
 	 */
-	public void deleteDirectoryTestDirectoryNotExists() throws IOException {
+	public void deleteDirectoryTestDirectoryNotExists() throws IOException, ArcException {
 
 		File root=testFolder.newFolder("root");
 		
@@ -66,16 +71,18 @@ public class FileUtilsArcTest {
 		
 		File directoryNotExists=new File(testDir, "dirnotexists");
 		
-		assertEquals(false, FileUtilsArc.deleteDirectory(directoryNotExists));
+		FileUtilsArc.deleteDirectory(directoryNotExists);
+
 	}
 	
 	
 	/**
 	 * Test if deleteAndRecreateDirectory erase the content of target directory and recreate it well
 	 * @throws IOException
+	 * @throws ArcException 
 	 */
 	@Test
-	public void deleteAndRecreateDirectoryTest() throws IOException {
+	public void deleteAndRecreateDirectoryTest() throws IOException, ArcException {
 		File root=testFolder.newFolder("root");
 		
 		File testDir=new File(root,"testDir");
@@ -126,7 +133,7 @@ public class FileUtilsArcTest {
 	}
 	
 	@Test
-	public void renameToTest() throws IOException
+	public void renameToTest() throws IOException, ArcException
 	{
 		File root=testFolder.newFolder("root");
 		File testDir=new File(root,"testDir");
@@ -144,18 +151,14 @@ public class FileUtilsArcTest {
 
 		
 		// renommage de fileToRename en fileRenamed
-		// le fichier a-t-il été bien renommé ?
+		FileUtilsArc.renameTo(fileToRename, fileRenamed);
 		
-		// l'opération de renommage a du fonctionner
-		assertTrue(FileUtilsArc.renameTo(fileToRename, fileRenamed));
+		// le fichier a-t-il été bien renommé ?
+				// l'opération de renommage a du fonctionner
 		// fileToRename ne doit plus exister
 		assertFalse(fileToRename.exists());
 		// fileRenamed doit exister
 		assertTrue(fileRenamed.exists());
-
-		// rename fail
-		assertFalse(FileUtilsArc.renameTo(fileToRename, fileRenamed));
-
 		
 	}
 	

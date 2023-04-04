@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -56,13 +57,17 @@ public class ZipDecompressor implements ArchiveExtractor {
 
 					// rename the file when over makes it thread safe and available for other
 					// threads waiting
-					FileUtilsArc.renameTo(
-							new File(dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName())
-									+ ".tmp"),
-							new File(
-									dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()))
-					//
-					);
+					try {
+						FileUtilsArc.renameTo(
+								new File(dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName())
+										+ ".tmp"),
+								new File(
+										dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()))
+						//
+						);
+					} catch (ArcException e) {
+						throw new IOException(e);
+					}
 
 				}
 			}

@@ -254,7 +254,7 @@ public class ApiReceptionService extends ApiService {
 											throw new ArcException("Files copy in the ENCOURS directory failed",e);
 										}
 										// on efface le fichier source
-										f.delete();
+										FileUtilsArc.delete(f);
 									}
 									
 									fileSize = fileSize + (int)(fileOutArchive.length()/1024/1024);
@@ -592,10 +592,10 @@ public class ApiReceptionService extends ApiService {
 						File fileOut = new File(dirOut + File.separator + containerNewName);
 
 						if (fileOut.exists()) {
-							fileOut.delete();
+							FileUtilsArc.delete(fileOut);
 						}
 						UtilitaireDao.generateTarGzFromFile(fileIn, fileOut, ManipString.substringAfterFirst(fileIn.getName(), "_"));
-						fileIn.delete();
+						FileUtilsArc.delete(fileIn);
 						insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName, etat, rapport);
 
 					}
@@ -703,13 +703,14 @@ public class ApiReceptionService extends ApiService {
 	 *            , répertoire en sortie, pas de slash à la fin
 	 * @param FileName
 	 *            , nom du fichier
+	 * @throws ArcException 
 	 */
-	public static void deplacerFichier(String dirIn, String dirOut, String fileNameIn, String fileNameOut) {
+	public static void deplacerFichier(String dirIn, String dirOut, String fileNameIn, String fileNameOut) throws ArcException {
 		if (!dirIn.equals(dirOut)) {
 			File fileIn = new File(dirIn + File.separator + fileNameIn); 
 			File fileOut = new File(dirOut + File.separator + fileNameOut);
 			if (fileOut.exists()) {
-				fileOut.delete();
+				FileUtilsArc.delete(fileOut);
 			}
 			FileUtilsArc.renameTo(fileIn, fileOut);
 		}

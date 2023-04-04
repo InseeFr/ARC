@@ -479,7 +479,7 @@ class BatchARC implements IReturnCode {
 	 * @param envExecution
 	 * @throws IOException
 	 */
-	private static void effacerRepertoireChargement(String directory, String envExecution) throws IOException {
+	private static void effacerRepertoireChargement(String directory, String envExecution) throws ArcException {
 
 		// Effacer les fichiers des répertoires OK et KO
 		String envDirectory = envExecution.replace(".", "_").toUpperCase();
@@ -493,7 +493,7 @@ class BatchARC implements IReturnCode {
 	}
 
 	private static void cleanDirectory(String directory, String envExecution, String envDirectory,
-			TraitementEtat etat) {
+			TraitementEtat etat) throws ArcException {
 		File f = Paths.get(ApiReceptionService.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
 		if (!f.exists()) {
 			return;
@@ -516,8 +516,9 @@ class BatchARC implements IReturnCode {
 	 * @param envExecution
 	 * @param z
 	 * @return
+	 * @throws IOException 
 	 */
-	private static boolean deleteIfArchived(String repertoire, String envExecution, File z) {
+	private static void deleteIfArchived(String repertoire, String envExecution, File z) throws ArcException {
 
 		String entrepot = ManipString.substringBeforeFirst(z.getName(), "_");
 		String filename = ManipString.substringAfterFirst(z.getName(), "_");
@@ -529,9 +530,9 @@ class BatchARC implements IReturnCode {
 				.toFile();
 
 		if (fCheck.exists()) {
-			return z.delete();
+			FileUtilsArc.delete(z);
 		} else {
-			return z.renameTo(fCheck);
+			FileUtilsArc.renameTo(z, fCheck);
 		}
 	}
 
