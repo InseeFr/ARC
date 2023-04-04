@@ -22,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.file.model.ModelFile;
 import fr.insee.arc.web.util.VObject;
@@ -117,11 +118,9 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 			for (String f : m.get(VC_FILENAME)) {
 				File fileSource = Paths.get(dirSource, f).toFile();
 				File fileTarget = Paths.get(dirTarget, f).toFile();
-				if (!fileSource.renameTo(fileTarget))
+				if (!FileUtilsArc.renameTo(fileSource, fileTarget))
 				{
-					String errorMessage = "An error occured while tranfering the file "+fileSource;
-					loggerDispatcher.error(errorMessage, LOGGER);
-					viewSource.setMessage(errorMessage);
+					viewSource.setMessage("An error occured while tranfering the file "+fileSource);
 				}
 			}
 		} else {
@@ -129,11 +128,9 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 				if (!fileSource.isDirectory()) {
 					File fileTarget = Paths.get(dirTarget, fileSource.getName()).toFile();
 					
-					if (!fileSource.renameTo(fileTarget))
+					if (!FileUtilsArc.renameTo(fileSource, fileTarget))
 					{
-						String errorMessage = "An error occured while tranfering the file "+fileSource;
-						loggerDispatcher.error(errorMessage, LOGGER);
-						viewSource.setMessage(errorMessage);
+						viewSource.setMessage("An error occured while tranfering the file "+fileSource);
 					}
 					
 				}
@@ -226,7 +223,8 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 		{
 			File fileIn = new File(dirSource+ m0.get(VC_FILENAME).get(i));
 			File fileOut = new File(dirSource + m1.get(VC_FILENAME).get(i));
-			if (!fileIn.renameTo(fileOut))
+			
+			if (!FileUtilsArc.renameTo(fileIn, fileOut))
 			{
 				viewSource.setMessage("Rename operation failed. Check if filesystem isn't locked");
 			}

@@ -100,5 +100,25 @@ public class FileUtilsArc {
 		deleteDirectory(directoryToBeDeletedAndRecreated);
 		directoryToBeDeletedAndRecreated.mkdir();
 	}
+	
+	
+	/**
+	 * Rename fileInput into fileOutput. Send a log is rename wasn't successful
+	 * @param fileInput
+	 * @param fileOutput
+	 * @return
+	 */
+	public static boolean renameTo(File fileInput, File fileOutput)
+	{
+		boolean renameResult = fileInput.renameTo(fileOutput);
+		
+		if (!renameResult)
+		{
+			LoggerHelper.warnAsComment(LOGGER, "Le fichier", fileInput.getName(), " n'a pas pu être renommé vers ", fileOutput.getName());
+		}
+		
+		return renameResult;
+		
+	}
 
 }

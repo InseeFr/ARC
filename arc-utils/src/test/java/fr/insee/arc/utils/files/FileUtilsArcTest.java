@@ -125,5 +125,39 @@ public class FileUtilsArcTest {
 			
 	}
 	
+	@Test
+	public void renameToTest() throws IOException
+	{
+		File root=testFolder.newFolder("root");
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
+		
+		File fileToRename=new File(testDir,"fileToRename.txt");
+		fileToRename.createNewFile();
+
+		// vérifier que le fichier fileToRename existe bien
+		assertTrue(fileToRename.exists());
+
+		File fileRenamed=new File(testDir,"fileRenamed.txt");
+		// le fichier fileRenamed n'existe pas
+		assertFalse(fileRenamed.exists());
+
+		
+		// renommage de fileToRename en fileRenamed
+		// le fichier a-t-il été bien renommé ?
+		
+		// l'opération de renommage a du fonctionner
+		assertTrue(FileUtilsArc.renameTo(fileToRename, fileRenamed));
+		// fileToRename ne doit plus exister
+		assertFalse(fileToRename.exists());
+		// fileRenamed doit exister
+		assertTrue(fileRenamed.exists());
+
+		// rename fail
+		assertFalse(FileUtilsArc.renameTo(fileToRename, fileRenamed));
+
+		
+	}
+	
 	
 }

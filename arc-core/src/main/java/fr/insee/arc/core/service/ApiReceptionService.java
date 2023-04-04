@@ -34,6 +34,7 @@ import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -710,7 +711,7 @@ public class ApiReceptionService extends ApiService {
 			if (fileOut.exists()) {
 				fileOut.delete();
 			}
-			fileIn.renameTo(fileOut);
+			FileUtilsArc.renameTo(fileIn, fileOut);
 		}
 	}
 

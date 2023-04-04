@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.files.FileUtilsArc;
 
 @Service
 public class ServiceViewFileExport extends InteractorExport {
@@ -51,7 +52,8 @@ public class ServiceViewFileExport extends InteractorExport {
              {
                File fileIn = new File(dirOut + File.separator + m.get("filename").get(i));
                File fileOut = new File(dirOut + File.separator + n.get("filename").get(i));
-               if (!fileIn.renameTo(fileOut))
+               
+               if (!FileUtilsArc.renameTo(fileIn, fileOut))
                {
             	   this.views.getViewFileExport().setMessage("Le renommage a échoué");
                }

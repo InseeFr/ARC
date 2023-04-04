@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.ManipString;
 
 /**
@@ -25,49 +26,52 @@ import fr.insee.arc.utils.utils.ManipString;
  *
  */
 public class TarGzDecompressor implements ArchiveExtractor {
-    private static final Logger LOGGER = LogManager.getLogger(TarGzDecompressor.class);
+	private static final Logger LOGGER = LogManager.getLogger(TarGzDecompressor.class);
 
-    @Override
-    public void extract(File archiveFile) throws IOException {
-	StaticLoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
-	File dir = new File(archiveFile + ".dir");
+	@Override
+	public void extract(File archiveFile) throws IOException {
+		StaticLoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
+		File dir = new File(archiveFile + ".dir");
 
-	
-	try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(archiveFile),ApiReceptionService.READ_BUFFER_SIZE));
-			TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
-	    TarArchiveEntry entry;
+		try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(
+				new BufferedInputStream(new FileInputStream(archiveFile), ApiReceptionService.READ_BUFFER_SIZE));
+				TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
+			TarArchiveEntry entry;
 
-	    while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
-		/** If the entry is a directory, create the directory. **/
-	    	
-		// directories if not empty are automatically read in tar entries list   	
-		if (!entry.isDirectory()) {
-		    int count;
-		    byte data[] = new byte[32738];
-		    
-		    // temporary name for the file being uncompress
-		    try(
-		    FileOutputStream fos = new FileOutputStream(
-			    dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()) + ".tmp", false);
-		    BufferedOutputStream dest = new BufferedOutputStream(fos, 32738);
-		    GZIPOutputStream zdest=new GZIPOutputStream(dest);
-		    	)
-		    {
-			while ((count = tarIn.read(data, 0, 32738)) != -1) {
-				zdest.write(data, 0, count);
+			while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
+				/** If the entry is a directory, create the directory. **/
+
+				// directories if not empty are automatically read in tar entries list
+				if (!entry.isDirectory()) {
+					int count;
+					byte data[] = new byte[32738];
+
+					// temporary name for the file being uncompress
+					try (FileOutputStream fos = new FileOutputStream(dir.getAbsolutePath() + File.separator
+							+ ManipString.redoEntryName(entry.getName()) + ".tmp", false);
+							BufferedOutputStream dest = new BufferedOutputStream(fos, 32738);
+							GZIPOutputStream zdest = new GZIPOutputStream(dest);) {
+						while ((count = tarIn.read(data, 0, 32738)) != -1) {
+							zdest.write(data, 0, count);
+						}
+					}
+
+					// rename the file when over makes it thread safe and available for other
+					// threads waiting
+					FileUtilsArc.renameTo(
+							new File(dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName())
+									+ ".tmp"),
+							new File(
+									dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()))
+					//
+					);
 				}
-	    	}
-		    
-		    // rename the file when over makes it thread safe and available for other threads waiting
-		    new File( dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()) + ".tmp")
-				.renameTo(new File(dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName())));
+			}
+
 		}
-	    }
+
+		StaticLoggerDispatcher.info("Untar completed successfully!", LOGGER);
 
 	}
-
-	StaticLoggerDispatcher.info("Untar completed successfully!", LOGGER);
-
-    }
 
 }
