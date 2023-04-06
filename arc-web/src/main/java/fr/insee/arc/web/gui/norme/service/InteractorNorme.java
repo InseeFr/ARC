@@ -79,8 +79,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 		//
 		putVObject(views.getViewModules(), t -> initializeViewModules(t, views.getViewJeuxDeRegles()));
 		//
-		putVObject(views.getViewChargement(), t -> initializeChargement(t, views.getViewJeuxDeRegles(), views.getViewModules(),
-				dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE) ));
+		putVObject(views.getViewChargement(), t -> initializeChargement(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
 		putVObject(views.getViewNormage(), t -> initializeNormage(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE) ));
@@ -170,7 +169,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 		if (!viewRulesSetSelectedRecords.isEmpty()) {
 			
 			dao.setSelectedRecords(viewRulesSetSelectedRecords);
-			dao.initializeViewModules(viewModules, t -> moduleIdentifier(t));
+			dao.initializeViewModules(viewModules, InteractorNorme::moduleIdentifier);
 			
 			// select the first panel if nothing is selected in the module
 			if (viewModules.mapContentSelected().isEmpty())
@@ -187,7 +186,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	 * Initialize the {@link VObject} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeChargement(VObject viewChargement, VObject viewRulesSet, VObject viewModules, String theTableName) {
+	public void initializeChargement(VObject viewChargement, VObject viewRulesSet, VObject viewModules) {
 		
 		
 		Map<String, ArrayList<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
@@ -208,21 +207,17 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 	 * Initialize the {@link VObject} of a load ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeNormage(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
+	public void initializeNormage(VObject viewNormage, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
 		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
 		
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.structurize)))
 		{
-            HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique,rubrique_nmcl,commentaire from arc.ihm_normage_regle");
-            whereRuleSetEquals(requete, selection, type);
-            
-            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+			dao.setSelectedRecords(selection);
+			dao.initializeNormage(viewNormage);
 		} else {
-			vObjectService.destroy(moduleView);
+			vObjectService.destroy(viewNormage);
 		}
 	}
 	

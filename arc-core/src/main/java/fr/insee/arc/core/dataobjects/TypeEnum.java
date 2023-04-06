@@ -4,10 +4,14 @@ public enum TypeEnum {
 
 	TEXT("text",true)
 	, TEXT_ARRAY("text[]", true)
-	, INT("int", false)
+	, INTEGER("int", false)
 	, BIGINT("bigint", false)
+	, NUMERIC("numeric",false)
 	, SERIAL("serial",false)
 	, DATE("date",false)
+	, NAME("name",false)
+	, TIMESTAMP("timestamp",false)
+	, BOOLEAN("boolean",false)
 	;
 	
 	private TypeEnum(String typeName, boolean isCollated) {

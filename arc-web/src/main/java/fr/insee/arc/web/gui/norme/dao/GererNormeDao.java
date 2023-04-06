@@ -204,8 +204,35 @@ public class GererNormeDao extends VObjectHelperDao {
 		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
 				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
 
-		vObjectService.initialize(viewChargement, query, dataObjectService.getView(dataModelChargement), defaultInputFields);
-		
+		vObjectService.initialize(viewChargement, query, dataObjectService.getView(dataModelChargement), defaultInputFields);		
 	}
 
+	
+	public void initializeNormage(VObject viewNormage) {
+		
+		ViewEnum dataModelChargement = ViewEnum.IHM_NORMAGE_REGLE;
+
+	    ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+	    
+	    query.append(SQL.SELECT);
+	    query.append(query.sqlListeOfColumnsFromModel(dataModelChargement));
+	    query.append(SQL.FROM);
+		query.append(dataObjectService.getView(dataModelChargement));
+		query.append(SQL.WHERE);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_NORME));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.PERIODICITE));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_INF));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_SUP));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VERSION));
+		
+		// build the default value when adding a record
+		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+						ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
+				
+		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelChargement), defaultInputFields);
+	}
 }

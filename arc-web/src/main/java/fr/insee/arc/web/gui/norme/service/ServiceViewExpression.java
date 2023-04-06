@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
-import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 
 @Service
@@ -15,11 +14,6 @@ public class ServiceViewExpression extends InteractorNorme {
 	}
 
 	public String addExpression(Model model) {
-		String exprNameHeader = ColumnEnum.EXPR_NOM.getColumnName();
-
-		// trim the inserted expression
-		views.getViewExpression().setInputFieldFor(exprNameHeader, views.getViewExpression().getInputFieldFor(exprNameHeader).trim());
-
 		return addLineVobject(model, RESULT_SUCCESS, this.views.getViewExpression());
 	}
 
