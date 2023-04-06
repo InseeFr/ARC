@@ -32,7 +32,7 @@ public enum ViewEnum {
 	, IHM_MOD_VARIABLE_METIER("ihm_mod_variable_metier", false, ColumnEnum.ID_FAMILLE, ColumnEnum.NOM_TABLE_METIER, ColumnEnum.NOM_VARIABLE_METIER, ColumnEnum.TYPE_VARIABLE_METIER, ColumnEnum.DESCRIPTION_VARIABLE_METIER, ColumnEnum.TYPE_CONSOLIDATION) //
 	, IHM_NMCL("ihm_nmcl", false, ColumnEnum.NOM_TABLE, ColumnEnum.DESCRIPTION) //
 	, IHM_NORMAGE_REGLE("ihm_normage_regle", false, ColumnEnum.ID_REGLE_INT, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ID_CLASSE, ColumnEnum.RUBRIQUE, ColumnEnum.RUBRIQUE_NMCL, ColumnEnum.TODO, ColumnEnum.COMMENTAIRE) //
-	, IHM_NORME("ihm_norme", false, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT, ColumnEnum.ID_FAMILLE) //
+	, IHM_NORME("ihm_norme", false, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT) //
 	, IHM_SCHEMA_NMCL("ihm_schema_nmcl", false, ColumnEnum.TYPE_NMCL, ColumnEnum.NOM_COLONNE, ColumnEnum.TYPE_COLONNE) //
 	, IHM_SEUIL("ihm_seuil", false, ColumnEnum.NOM, ColumnEnum.VALEUR) //
 	, IHM_USER("ihm_user", false, ColumnEnum.IDEP, ColumnEnum.PROFIL) //
