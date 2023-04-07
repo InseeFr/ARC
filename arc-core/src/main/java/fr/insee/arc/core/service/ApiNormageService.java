@@ -6,6 +6,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
@@ -35,7 +36,7 @@ public class ApiNormageService extends ApiService {
     public ApiNormageService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
-        this.setTableNorme(dbEnv(this.getEnvExecution()) + TraitementTableParametre.NORME);
+        this.setTableNorme(ServiceTableNaming.dbEnv(this.getEnvExecution()) + TraitementTableParametre.NORME);
     }
 
     @Override

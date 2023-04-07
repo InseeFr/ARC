@@ -11,6 +11,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
+import fr.insee.arc.core.service.utility.ServiceFileSystemManagement;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -44,23 +45,16 @@ public class ApiChargementService extends ApiService {
             String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
     }
-    
-    /**
-     * Add configuration not natively provided by the ApiService configuration class
-     */
-    private void extraConfiguration(String aEnvExecution)
-    {
-        this.directoryIn = ApiService.directoryPhaseEtatOK(this.getDirectoryRoot(), aEnvExecution, TraitementPhase.valueOf(previousPhase)) + File.separator;
 
-        // récupération des différentes normes dans la base
-        this.listeNorme = Norme.getNormesBase(this.connexion.getCoordinatorConnection(), this.tableNorme);
-    }
 
     @Override
     public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER);
         
-        extraConfiguration(this.envExecution);
+        this.directoryIn = ServiceFileSystemManagement.directoryPhaseEtatOK(this.getDirectoryRoot(), this.envExecution, TraitementPhase.valueOf(previousPhase)) + File.separator;
+
+        // récupération des différentes normes dans la base
+        this.listeNorme = Norme.getNormesBase(this.connexion.getCoordinatorConnection(), this.tableNorme);
  
         this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiChargementService.MAX_PARALLEL_WORKERS",4);
 

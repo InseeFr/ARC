@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ServiceDatabaseConfiguration;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -274,7 +275,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	 */
 	private static void configAndRestrictConnexion(int poolId, String anEnvExecution, String restrictedUsername,
 			Connection connection) throws ArcException {
-		UtilitaireDao.get(poolId).executeImmediate(connection, ApiService.configConnection(anEnvExecution)
+		UtilitaireDao.get(poolId).executeImmediate(connection, ServiceDatabaseConfiguration.configConnection(anEnvExecution)
 				+ (restrictedUsername.equals("") ? "" : FormatSQL.changeRole(restrictedUsername)));
 	}
 

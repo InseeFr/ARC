@@ -6,9 +6,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.TableMapping;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -76,7 +76,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
             if (start > end) {
                 returned.append(intermediaire.substring(end, start));
             }
-            returned.append(ApiService.dbEnv(this.environnement) + intermediaire.substring(start + TWO, matcher.end() - ONE));
+            returned.append(ServiceTableNaming.dbEnv(this.environnement) + intermediaire.substring(start + TWO, matcher.end() - ONE));
             end = matcher.end();
         }
         returned.append(intermediaire.substring(end));
@@ -90,7 +90,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
     private String obtenirRequeteExecutable() {
         String returned = this.getExpression().replaceAll(tokenRegexDebutOuFin, empty);
         for (TableMapping table : this.ensembleTableMapping) {
-            returned = returned.replace(tokenTable(table.getNomTableCourt()), ApiService.dbEnv(this.environnement) + table);
+            returned = returned.replace(tokenTable(table.getNomTableCourt()), ServiceTableNaming.dbEnv(this.environnement) + table);
         }
         return returned;
     }

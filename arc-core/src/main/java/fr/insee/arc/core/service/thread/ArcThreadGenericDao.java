@@ -7,6 +7,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ServiceHashFileName;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -108,7 +109,7 @@ public class ArcThreadGenericDao {
 		}
 
 		if (paramBatch != null) {
-			query.append("DROP TABLE IF EXISTS "+ApiService.tableOfIdSource(this.tablePrevious,idSource)+";");
+			query.append("DROP TABLE IF EXISTS "+ServiceHashFileName.tableOfIdSource(this.tablePrevious,idSource)+";");
 		}
 		
 		UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());

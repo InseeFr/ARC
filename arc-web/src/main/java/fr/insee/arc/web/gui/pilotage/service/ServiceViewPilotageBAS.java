@@ -14,7 +14,7 @@ import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.core.service.utility.ResetEnvironment;
+import fr.insee.arc.core.service.utility.ServiceResetEnvironment;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -119,7 +119,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		loggerDispatcher.debug("undoBatch", LOGGER);
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 
-		ResetEnvironment.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
+		ServiceResetEnvironment.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -155,7 +155,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 */
 	public String resetBAS(Model model) {
 
-		ResetEnvironment.resetBAS(getBacASable(), this.repertoire);
+		ServiceResetEnvironment.resetBAS(getBacASable(), this.repertoire);
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

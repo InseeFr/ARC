@@ -25,6 +25,9 @@ import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.service.utility.ServiceDatabaseMaintenance;
+import fr.insee.arc.core.service.utility.ServiceFileSystemManagement;
+import fr.insee.arc.core.service.utility.ServiceHashFileName;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -107,7 +110,7 @@ public class ApiInitialisationService extends ApiService {
     	String repertoire = properties.getBatchParametersDirectory();
 
     	
-    	String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
+    	String nomTableArchive = ServiceTableNaming.dbEnv(envExecution) + "pilotage_archive";
 
         // pour chaque en trepot de données,
         // Comparer les archives du répertoire aux archives enregistrées dans la table d'archive :
@@ -123,7 +126,7 @@ public class ApiInitialisationService extends ApiService {
             for (String entrepot : entrepotList) {
             	
             	
-            	String fullEnvDir = ApiService.directoryEnvRoot(repertoire, this.envExecution);
+            	String fullEnvDir = ServiceFileSystemManagement.directoryEnvRoot(repertoire, this.envExecution);
             	File envDirFile = new File(fullEnvDir);
             	makeDir(envDirFile);
  
@@ -372,7 +375,7 @@ public class ApiInitialisationService extends ApiService {
              * Récupérer la table qui mappe : famille / table métier / variable métier et type de la variable
              */
         	ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
-        	requeteRef.append("SELECT lower(id_famille), lower('" + ApiService.dbEnv(envExecution)
+        	requeteRef.append("SELECT lower(id_famille), lower('" + ServiceTableNaming.dbEnv(envExecution)
                     + "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM " + envParameters + "_mod_variable_metier");
 
             List<List<String>> relationalViewRef = Format.patch(UtilitaireDao.get(poolName).executeRequestWithoutMetadata(connexion, requeteRef));
@@ -391,10 +394,10 @@ public class ApiInitialisationService extends ApiService {
             requete.append(", case when lower(data_type)='array' then replace(replace(replace(ltrim(udt_name,'_'),'int4','int'),'int8','bigint'),'float8','float')||'[]' ");
             requete.append("	else replace(replace(lower(data_type),'double precision','float'),'integer','int') end type_variable_metier ");
             requete.append("\n FROM information_schema.columns, " + envParameters + "_famille ");
-            requete.append("\n WHERE table_schema='" + ManipString.substringBeforeFirst(ApiService.dbEnv(envExecution), ".").toLowerCase() + "' ");
-            requete.append("\n and table_name LIKE '" + ManipString.substringAfterFirst(ApiService.dbEnv(envExecution), ".").toLowerCase()
+            requete.append("\n WHERE table_schema='" + ManipString.substringBeforeFirst(ServiceTableNaming.dbEnv(envExecution), ".").toLowerCase() + "' ");
+            requete.append("\n and table_name LIKE '" + ManipString.substringAfterFirst(ServiceTableNaming.dbEnv(envExecution), ".").toLowerCase()
                     + "mapping\\_%' ");
-            requete.append("\n and table_name LIKE '" + ManipString.substringAfterFirst(ApiService.dbEnv(envExecution), ".").toLowerCase()
+            requete.append("\n and table_name LIKE '" + ManipString.substringAfterFirst(ServiceTableNaming.dbEnv(envExecution), ".").toLowerCase()
                     + "mapping\\_'||lower(id_famille)||'\\_%';");
 
             List<List<String>> relationalView = Format.patch(UtilitaireDao.get(poolName).executeRequestWithoutMetadata(connexion, requete));
@@ -536,8 +539,8 @@ public class ApiInitialisationService extends ApiService {
         
         NB_FICHIER_PER_ARCHIVE = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiInitialisationService.NB_FICHIER_PER_ARCHIVE",10000);
 
-        String nomTablePilotage = dbEnv(envExecution) + "pilotage_fichier";
-        String nomTableArchive = dbEnv(envExecution) + "pilotage_archive";
+        String nomTablePilotage = ServiceTableNaming.dbEnv(envExecution) + "pilotage_fichier";
+        String nomTableArchive = ServiceTableNaming.dbEnv(envExecution) + "pilotage_archive";
 
         ArcPreparedStatementBuilder requete;
         
@@ -738,8 +741,8 @@ public class ApiInitialisationService extends ApiService {
                 // on créé une table image de la table venant de l'ihm
                 // (environnement de parametre)
                 TraitementTableParametre parameterTable = r[i];
-				tableCurrent = ApiService.dbEnv(anExecutionEnvironment) + parameterTable;
-                tableImage = FormatSQL.temporaryTableName(ApiService.dbEnv(anExecutionEnvironment) + parameterTable);
+				tableCurrent = ServiceTableNaming.dbEnv(anExecutionEnvironment) + parameterTable;
+                tableImage = FormatSQL.temporaryTableName(ServiceTableNaming.dbEnv(anExecutionEnvironment) + parameterTable);
 
                 // recopie partielle (en fonction de l'environnement
                 // d'exécution)
@@ -811,7 +814,7 @@ public class ApiInitialisationService extends ApiService {
             
             if (requetesDeCreationTablesNmcl!=null){
 	            for (String tableName : requetesDeCreationTablesNmcl) {
-	                requete.append("\n CREATE TABLE " + ApiService.dbEnv(anExecutionEnvironment) + tableName
+	                requete.append("\n CREATE TABLE " + ServiceTableNaming.dbEnv(anExecutionEnvironment) + tableName
 	                        + " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT * FROM arc." + tableName + ";");
 	            }
             }
@@ -965,9 +968,9 @@ public class ApiInitialisationService extends ApiService {
             if (i > 2) {
                 requete.append(" UNION ALL ");
             }
-            requete.append(FormatSQL.tableExists(ApiService.dbEnv(this.envExecution) + phase[i] + "$%$tmp$%", " "));
+            requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(this.envExecution) + phase[i] + "$%$tmp$%", " "));
             requete.append(" UNION ALL ");
-            requete.append(FormatSQL.tableExists(ApiService.dbEnv(this.envExecution) + phase[i] + "\\_%$tmp$%", " "));
+            requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(this.envExecution) + phase[i] + "\\_%$tmp$%", " "));
         }
         return requete;
     }
@@ -1003,7 +1006,7 @@ public class ApiInitialisationService extends ApiService {
                 if (j > 0) {
                     requete.append(" UNION ALL ");
                 }
-                requete.append(FormatSQL.tableExists(ApiService.dbEnv(env) + "%" + phase + "%\\_" + etat[j], " "));
+                requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(env) + "%" + phase + "%\\_" + etat[j], " "));
             }
         }
         return requete;
@@ -1062,7 +1065,7 @@ public class ApiInitialisationService extends ApiService {
                     HashMap<String, ArrayList<String>> m;
                     do {
                     	m=new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
-                    			new ArcPreparedStatementBuilder("\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_"+CHILD_TABLE_TOKEN+"\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION+" ) "
+                    			new ArcPreparedStatementBuilder("\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"+nomTable+"\\_"+ServiceHashFileName.CHILD_TABLE_TOKEN+"\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "+FormatSQL.MAX_LOCK_PER_TRANSACTION+" ) "
            		 					+"\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
            		 					+"\n SELECT tablename from TMP_SELECT ")
            		 					)).mapContent();
@@ -1172,8 +1175,8 @@ public class ApiInitialisationService extends ApiService {
 
 
     public static void clearPilotageAndDirectories(String repertoire, String env) throws ArcException {
-        	 UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_fichier; ");
-             UtilitaireDao.get("arc").executeBlock(null, "truncate " + dbEnv(env) + "pilotage_archive; ");
+        	 UtilitaireDao.get("arc").executeBlock(null, "truncate " + ServiceTableNaming.dbEnv(env) + "pilotage_fichier; ");
+             UtilitaireDao.get("arc").executeBlock(null, "truncate " + ServiceTableNaming.dbEnv(env) + "pilotage_archive; ");
 
 
             if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
@@ -1190,7 +1193,7 @@ public class ApiInitialisationService extends ApiService {
             FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, env)).toFile());
             FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, env)).toFile());
             FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, env)).toFile());
-            FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ApiService.directoryEnvExport(repertoire, env)).toFile());
+            FileUtilsArc.deleteAndRecreateDirectory(Paths.get(ServiceFileSystemManagement.directoryEnvExport(repertoire, env)).toFile());
     }
 
      

@@ -16,8 +16,11 @@ import fr.insee.arc.core.factory.ChargeurFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiChargementService;
-import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.chargeur.IChargeur;
+import fr.insee.arc.core.service.utility.ServiceHashFileName;
+import fr.insee.arc.core.service.utility.ServicePilotageOperation;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
+import fr.insee.arc.core.service.utility.ServiceTableOperation;
 import fr.insee.arc.core.util.ChargementBrutalTable;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.RegleChargement;
@@ -87,7 +90,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
     	this.tableChargementPilTemp = "chargement_pil_temp";
 
     	// table de sortie des données dans l'application (hors du module)
-    	this.tableChargementOK = ApiService.globalTableName(envExecution, this.currentPhase,
+    	this.tableChargementOK = ServiceTableNaming.globalTableName(envExecution, this.currentPhase,
     		TraitementEtat.OK.toString());
 
     	// thread generic dao
@@ -158,7 +161,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    query.append(truncateTableIfKO());
 	    
 	    // mise à jour du nombre d'enregistrement
-	    query.append(updateNbEnr(this.tableChargementPilTemp, this.getTableTempA()));	
+	    query.append(ServicePilotageOperation.updateNbEnr(this.tableChargementPilTemp, this.getTableTempA()));	
 	    
 	    // Mettre à jour le nombre d'enregistrement dans la table de
 	    // pilotage temporaire
@@ -320,13 +323,13 @@ public class ThreadChargementService extends ApiChargementService implements Run
    	StaticLoggerDispatcher.info("** insertTableOK **", LOGGER);
 
    	StringBuilder query = new StringBuilder();
-	String tableIdSource = tableOfIdSource(tableName, this.idSource);
+	String tableIdSource = ServiceHashFileName.tableOfIdSource(tableName, this.idSource);
 
 	// promote the application user account to full right
 	query.append(switchToFullRightRole());
 	
 	// Créer la table des données de la table des donénes chargées
-	query.append(createTableInherit(getTableTempA(), tableIdSource));
+	query.append(ServiceTableOperation.createTableInherit(getTableTempA(), tableIdSource));
 
 	return query.toString();
     }

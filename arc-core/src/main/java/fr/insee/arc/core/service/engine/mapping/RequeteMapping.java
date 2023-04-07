@@ -17,8 +17,8 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
-import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -121,8 +121,8 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         this.jeuDeRegle = aJeuDeRegle;
         this.environnement = anEnvironnement;
         this.nomTablePrecedente = aNomTablePrecedente;
-        this.nomTableModVariableMetier = ApiService.dbEnv(this.environnement) + "mod_variable_metier";
-        this.nomTableRegleMapping = ApiService.dbEnv(this.environnement) + "mapping_regle";
+        this.nomTableModVariableMetier = ServiceTableNaming.dbEnv(this.environnement) + "mod_variable_metier";
+        this.nomTableRegleMapping = ServiceTableNaming.dbEnv(this.environnement) + "mapping_regle";
         this.threadId=threadId;
     }
 

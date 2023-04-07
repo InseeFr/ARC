@@ -14,6 +14,7 @@ import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
 import fr.insee.arc.core.service.ApiMappingService;
 import fr.insee.arc.core.service.engine.mapping.RequeteMapping;
 import fr.insee.arc.core.service.engine.mapping.ServiceMapping;
+import fr.insee.arc.core.service.utility.ServiceTableOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -108,9 +109,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
          */
     	query.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
         
-        query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
+        query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
         UtilitaireDao.get(poolName).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
-
 
     }
 

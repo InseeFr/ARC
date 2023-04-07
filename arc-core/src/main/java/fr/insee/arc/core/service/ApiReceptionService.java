@@ -30,6 +30,9 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
+import fr.insee.arc.core.service.utility.ServiceFileSystemManagement;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
+import fr.insee.arc.core.service.utility.ServiceTableOperation;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -277,7 +280,7 @@ public class ApiReceptionService extends ApiService {
 									// enregistrer le fichier
 									UtilitaireDao.get("arc").executeBlock(
 											this.connexion.getCoordinatorConnection(),
-											"INSERT INTO " + dbEnv(this.envExecution) + "pilotage_archive (entrepot,nom_archive) values ('" + d + "','" + fname
+											"INSERT INTO " + ServiceTableNaming.dbEnv(this.envExecution) + "pilotage_archive (entrepot,nom_archive) values ('" + d + "','" + fname
 											+ "'); ");
 									break;
 								}
@@ -558,7 +561,7 @@ public class ApiReceptionService extends ApiService {
 		
 			StringBuilder requete = new StringBuilder();
 			requete.append(FormatSQL.dropTable(this.tablePilTemp));
-			requete.append(creationTableResultat(this.tablePil, this.tablePilTemp));
+			requete.append(ServiceTableOperation.creationTableResultat(this.tablePil, this.tablePilTemp));
 			soumettreRequete(requete);
 
 			if (!g.content.isEmpty()) {
@@ -733,7 +736,7 @@ public class ApiReceptionService extends ApiService {
 
 		StringBuilder requete = new StringBuilder();
 		requete.append(FormatSQL.dropTable(this.tablePilTemp));
-		requete.append(creationTableResultat(this.tablePil, this.tablePilTemp));
+		requete.append(ServiceTableOperation.creationTableResultat(this.tablePil, this.tablePilTemp));
 		String fileName;
 		String container;
 		String type;
@@ -884,47 +887,44 @@ public class ApiReceptionService extends ApiService {
      * @param env
      * @return
      */
-
-
-
 	public static String directoryReceptionRoot(String rootDirectory, String env)
 	{
-		return ApiService.directoryPhaseRoot(rootDirectory, env, TraitementPhase.RECEPTION);
+		return ServiceFileSystemManagement.directoryPhaseRoot(rootDirectory, env, TraitementPhase.RECEPTION);
 	}
 	
 	public static String directoryReceptionEntrepot(String rootDirectory, String env, String entrepot)
 	{
-		return directoryPhaseEntrepot(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
+		return ServiceFileSystemManagement.directoryPhaseEntrepot(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
 	}
 	
 	public static String directoryReceptionEntrepotArchive(String rootDirectory, String env, String entrepot)
 	{
-		return directoryPhaseEntrepotArchive(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
+		return ServiceFileSystemManagement.directoryPhaseEntrepotArchive(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
 	}
 
 	public static String directoryReceptionEntrepotArchiveOld(String rootDirectory, String env, String entrepot)
 	{
-		return directoryPhaseEntrepotArchiveOld(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
+		return ServiceFileSystemManagement.directoryPhaseEntrepotArchiveOld(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
 	}
 	
 	public static String directoryReceptionEtat(String rootDirectory, String env, TraitementEtat e)
 	{
-		return directoryPhaseEtat(rootDirectory, env, TraitementPhase.RECEPTION, e);
+		return ServiceFileSystemManagement.directoryPhaseEtat(rootDirectory, env, TraitementPhase.RECEPTION, e);
 	}
 	
 	public static String directoryReceptionEtatOK(String rootDirectory, String env)
 	{
-		return directoryPhaseEtatOK(rootDirectory, env, TraitementPhase.RECEPTION);
+		return ServiceFileSystemManagement.directoryPhaseEtatOK(rootDirectory, env, TraitementPhase.RECEPTION);
 	}
 	
 	public static String directoryReceptionEtatKO(String rootDirectory, String env)
 	{
-		return directoryPhaseEtatKO(rootDirectory, env, TraitementPhase.RECEPTION);
+		return ServiceFileSystemManagement.directoryPhaseEtatKO(rootDirectory, env, TraitementPhase.RECEPTION);
 	}
 	
 	public static String directoryReceptionEtatEnCours(String rootDirectory, String env)
 	{
-		return directoryPhaseEtatEnCours(rootDirectory, env, TraitementPhase.RECEPTION);
+		return ServiceFileSystemManagement.directoryPhaseEtatEnCours(rootDirectory, env, TraitementPhase.RECEPTION);
 	}
 
 }

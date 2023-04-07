@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -98,7 +99,7 @@ public class ImportStep1InitializeClientTablesService {
             executeIf(ServletArc.METADATA, () -> this.clientDao.createTableFamille(this.timestamp, client, environnement));
             executeIf(ServletArc.METADATA, () -> this.clientDao.createTablePeriodicite(this.timestamp, client, environnement));
             // on renvoie l'id du client avec son timestamp
-            resp.send(ApiService.dbEnv(environnement) + client + "_" + this.timestamp);
+            resp.send(ServiceTableNaming.dbEnv(environnement) + client + "_" + this.timestamp);
             resp.endSending();
         } catch (ArcException e) {
 			StaticLoggerDispatcher.error("** Error in servlet ImportStep1InitializeClientTablesService **", LOGGER);

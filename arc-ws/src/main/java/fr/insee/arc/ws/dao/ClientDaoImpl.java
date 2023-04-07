@@ -15,6 +15,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -80,18 +81,18 @@ public class ClientDaoImpl implements ClientDao {
         Connection connection = null;
         ArrayList<ArrayList<String>> tablesMetierNames = new ArrayList<ArrayList<String>>();
 
-        StringBuilder request = new StringBuilder("DROP TABLE IF EXISTS " + ApiService.dbEnv(environnement) + client + "_" + timestamp
+        StringBuilder request = new StringBuilder("DROP TABLE IF EXISTS " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp
                 + "_"+ColumnEnum.ID_SOURCE.getColumnName()+"; ");
 
-        request.append("CREATE TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_"+ColumnEnum.ID_SOURCE.getColumnName()+" ");
-        request.append("AS SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + ApiService.dbEnv(environnement) + "pilotage_fichier T1 ");
+        request.append("CREATE TABLE " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_"+ColumnEnum.ID_SOURCE.getColumnName()+" ");
+        request.append("AS SELECT "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + ServiceTableNaming.dbEnv(environnement) + "pilotage_fichier T1 ");
         request.append("WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) AND T1.periodicite='" + periodicite + "' ");
 
         if (!StringUtils.isEmpty(validiteInf)) {
             request.append("AND validite>='" + validiteInf + "' ");
         }
         request.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TraitementPhase.MAPPING + "' ");
-        request.append("AND EXISTS (SELECT 1 FROM " + ApiService.dbEnv(environnement) + "norme T2 WHERE T2.id_famille='" + idFamille
+        request.append("AND EXISTS (SELECT 1 FROM " + ServiceTableNaming.dbEnv(environnement) + "norme T2 WHERE T2.id_famille='" + idFamille
                 + "' AND T1.id_norme=T2.id_norme) ");
         if (!reprise) {
             LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = false");
@@ -101,22 +102,22 @@ public class ClientDaoImpl implements ClientDao {
             request.append("GROUP BY "+ColumnEnum.ID_SOURCE.getColumnName()+"");
         }
         request.append("; ");
-        request.append("DROP TABLE IF EXISTS " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier; ");
+        request.append("DROP TABLE IF EXISTS " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier; ");
 
-        request.append("CREATE TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier ");
-        request.append("AS SELECT nom_table_metier FROM " + ApiService.dbEnv(environnement) + "mod_table_metier T1 ");
+        request.append("CREATE TABLE " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier ");
+        request.append("AS SELECT nom_table_metier FROM " + ServiceTableNaming.dbEnv(environnement) + "mod_table_metier T1 ");
         request.append("WHERE T1.id_famille='" + idFamille + "' ");
         request.append("AND exists (select 1 from pg_tables T2 where ");
-        request.append("T2.schemaname='" + ManipString.substringBeforeFirst(ApiService.dbEnv(environnement), ".") + "' ");
-        request.append("AND '" + ManipString.substringAfterFirst(ApiService.dbEnv(environnement), ".") + "'||T1.nom_table_metier=T2.tablename);");
+        request.append("T2.schemaname='" + ManipString.substringBeforeFirst(ServiceTableNaming.dbEnv(environnement), ".") + "' ");
+        request.append("AND '" + ManipString.substringAfterFirst(ServiceTableNaming.dbEnv(environnement), ".") + "'||T1.nom_table_metier=T2.tablename);");
 
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
             UtilitaireDao.get("arc").executeBlock(connection, request);
             tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
-                    new ArcPreparedStatementBuilder("SELECT nom_table_metier FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;"));
+                    new ArcPreparedStatementBuilder("SELECT nom_table_metier FROM " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;"));
             UtilitaireDao.get("arc").executeImmediate(connection,
-                    "DROP TABLE " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;");
+                    "DROP TABLE " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;");
         } finally {
             close(connection);
         }
@@ -131,7 +132,7 @@ public class ClientDaoImpl implements ClientDao {
         // Initialisation des variables
         Connection connection = null;
         ArrayList<ArrayList<String>> tablesMetierNames = new ArrayList<ArrayList<String>>();
-        final String env = ApiService.dbEnv(requeteJSON.getString(JsonKeys.ENVIRONNEMENT.getKey()));
+        final String env = ServiceTableNaming.dbEnv(requeteJSON.getString(JsonKeys.ENVIRONNEMENT.getKey()));
         final String client = requeteJSON.getString(JsonKeys.CLIENT.getKey());
         final String periodicite = requeteJSON.getString(JsonKeys.PERIODICITE.getKey());
         final String validiteSup = requeteJSON.getString(JsonKeys.VALSUP.getKey());
@@ -264,7 +265,7 @@ public class ClientDaoImpl implements ClientDao {
     public void addImage(long timestamp, String client, String environnement, ArrayList<String> tableMetier, ArrayList<String> mesTablesImagesCrees) throws ArcException {
         Connection connection = null;
         StringBuilder request = new StringBuilder();
-        String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
+        String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                 .append("_").toString();
 
         String nomTableImage = prefixeNomTableImage + tableMetier.get(0);
@@ -273,8 +274,8 @@ public class ClientDaoImpl implements ClientDao {
 
         request.append("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS ");
         request.append("SELECT * ");
-        request.append("FROM " + ApiService.dbEnv(environnement) + tableMetier.get(0) + " T1 WHERE true ");
-        request.append("AND exists (SELECT 1 FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp
+        request.append("FROM " + ServiceTableNaming.dbEnv(environnement) + tableMetier.get(0) + " T1 WHERE true ");
+        request.append("AND exists (SELECT 1 FROM " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp
                 + "_"+ColumnEnum.ID_SOURCE.getColumnName()+" T2 where T2."+ColumnEnum.ID_SOURCE.getColumnName()+"=T1."+ColumnEnum.ID_SOURCE.getColumnName()+"); ");
 
         mesTablesImagesCrees.add(nomTableImage);
@@ -307,16 +308,16 @@ public class ClientDaoImpl implements ClientDao {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
 
             nbLines = UtilitaireDao.get("arc").getInt(connection,
-            		 new ArcPreparedStatementBuilder("select max(rowid) FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName));
+            		 new ArcPreparedStatementBuilder("select max(rowid) FROM " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName));
             nbBlock = (nbLines - 1) / blockSize + 1;
 
             for (int i = 0; i < nbBlock; i++) {
                 LoggerHelper.debugAsComment(LOGGER, "Traitement du bloc ", i, "/", (nbBlock - 1));
                 result = UtilitaireDao.get("arc").executeRequest(
                         connection,
-                        new ArcPreparedStatementBuilder("SELECT * FROM " + ApiService.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName + " u where rowid>" + i
+                        new ArcPreparedStatementBuilder("SELECT * FROM " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName + " u where rowid>" + i
                                 * blockSize + " and rowid<=" + blockSize * (i + 1)));
-                resp.send("{\"" + JsonKeys.ID.getKey() + "\":\"" + ManipString.substringAfterFirst(ApiService.dbEnv(environnement), ".")
+                resp.send("{\"" + JsonKeys.ID.getKey() + "\":\"" + ManipString.substringAfterFirst(ServiceTableNaming.dbEnv(environnement), ".")
                         + tableMetierName + "\",\"" + JsonKeys.TABLE.getKey() + "\":");
                 mapJsonResponse(result, resp);
                 resp.send("}");
@@ -337,7 +338,7 @@ public class ClientDaoImpl implements ClientDao {
         String client = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(tableSource, "."), "_").toUpperCase();
 
         StringBuilder columnClient = new StringBuilder();
-        columnClient.append("UPDATE " + ApiService.dbEnv(environnement) + "pilotage_fichier T1 ");
+        columnClient.append("UPDATE " + ServiceTableNaming.dbEnv(environnement) + "pilotage_fichier T1 ");
         columnClient.append("SET client = array_append(client, '" + client + "') ");
         columnClient.append(", date_client = array_append( date_client, localtimestamp ) ");
         columnClient.append("WHERE true ");
@@ -361,7 +362,7 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createNmcl()");
         Connection connection = null;
         ArrayList<ArrayList<String>> nmclNames = new ArrayList<>();
-        String schema = ManipString.substringBeforeFirst(ApiService.dbEnv(environnement), ".");
+        String schema = ManipString.substringBeforeFirst(ServiceTableNaming.dbEnv(environnement), ".");
 
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
@@ -374,7 +375,7 @@ public class ClientDaoImpl implements ClientDao {
             
             nmclNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,requete);
 
-            String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
+            String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
 
             for (ArrayList<String> nmcl : nmclNames) {
@@ -399,13 +400,13 @@ public class ClientDaoImpl implements ClientDao {
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
 
-            String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
+            String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "mod_variable_metier";
 
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
-            requete.append("\n SELECT * FROM " + ApiService.dbEnv(environnement) + "mod_variable_metier");
+            requete.append("\n SELECT * FROM " + ServiceTableNaming.dbEnv(environnement) + "mod_variable_metier");
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
             UtilitaireDao.get("arc").executeRequest(connection,requete);
@@ -425,7 +426,7 @@ public class ClientDaoImpl implements ClientDao {
         Connection connection = null;
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
-            String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
+            String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_famille";
 
@@ -451,7 +452,7 @@ public class ClientDaoImpl implements ClientDao {
         Connection connection = null;
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
-            String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
+            String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_periodicite";
             UtilitaireDao.get("arc").executeImmediate(connection,
@@ -472,12 +473,12 @@ public class ClientDaoImpl implements ClientDao {
         try {
             connection = UtilitaireDao.get("arc").getDriverConnexion();
 
-            String prefixeNomTableImage = new StringBuilder().append(ApiService.dbEnv(environnement)).append(client).append("_").append(timestamp)
+            String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "mod_table_metier";
 
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder("\n CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
-            requete.append("\n SELECT * FROM " + ApiService.dbEnv(environnement) + "mod_table_metier");
+            requete.append("\n SELECT * FROM " + ServiceTableNaming.dbEnv(environnement) + "mod_table_metier");
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
             UtilitaireDao.get("arc").executeRequest(connection, requete);

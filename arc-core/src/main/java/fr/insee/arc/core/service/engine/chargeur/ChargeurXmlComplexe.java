@@ -20,6 +20,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.handler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
+import fr.insee.arc.core.service.utility.ServiceRules;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -108,7 +109,7 @@ public class ChargeurXmlComplexe implements IChargeur{
         
         // voir avec Pierre comment factoriser ce genre de truc
         try {
-			HashMap<String,ArrayList<String>> regle = ApiService.getBean(this.connexion,ApiService.getRegles(tableChargementRegle, normeFichier));
+			HashMap<String,ArrayList<String>> regle = ServiceRules.getBean(this.connexion,ServiceRules.getRegles(tableChargementRegle, normeFichier));
 			if (regle.get("format").get(0)!=null) {
 				for (String rule:regle.get("format").get(0).split("\n"))
 				{

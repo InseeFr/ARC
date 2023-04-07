@@ -11,6 +11,9 @@ import fr.insee.arc.core.service.ApiControleService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.controle.ServiceJeuDeRegle;
 import fr.insee.arc.core.service.engine.controle.ServiceRequeteSqlRegle;
+import fr.insee.arc.core.service.utility.ServiceHashFileName;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
+import fr.insee.arc.core.service.utility.ServiceTableOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -84,8 +87,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.tableControlePilTemp = FormatSQL.temporaryTableName("controle_pil_temp");
 
 		// tables finales
-		this.tableOutOk = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK;
-		this.tableOutKo = dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO;
+		this.tableOutOk = ServiceTableNaming.dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK;
+		this.tableOutKo = ServiceTableNaming.dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO;
 		
 		// arc thread dao
 		arcThreadGenericDao=new ArcThreadGenericDao(connexion, tablePil, tablePilTemp, tableControlePilTemp, tablePrevious, paramBatch, idSource);
@@ -145,7 +148,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 		// Fabrication de la table de controle temporaire
 		StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
-		query.append(createTableTravailIdSource(this.getTablePrevious(), this.tableControleDataTemp, this.idSource,
+		query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(), this.tableControleDataTemp, this.idSource,
 				"'" + ServiceRequeteSqlRegle.RECORD_WITH_NOERROR
 						+ "'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
@@ -202,8 +205,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		// bien créées
 		// ensuite dans le java on s'appuie sur le dessin de ces tables pour ecrire du
 		// SQL
-		blocFin.append(ApiService.creationTableResultat(this.tableControleDataTemp, tableOutOkTemp));
-		blocFin.append(ApiService.creationTableResultat(this.tableControleDataTemp, tableOutKoTemp));
+		blocFin.append(ServiceTableOperation.creationTableResultat(this.tableControleDataTemp, tableOutOkTemp));
+		blocFin.append(ServiceTableOperation.creationTableResultat(this.tableControleDataTemp, tableOutKoTemp));
 
 		// Marquage des résultat du control dans la table de pilotage
 		StaticLoggerDispatcher.info("Marquage dans la table de pilotage", LOGGER);
@@ -245,10 +248,10 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		query.append(switchToFullRightRole());
 
 		// Créer les tables héritées
-		String tableIdSourceOK = tableOfIdSource(tableOutOk, this.idSource);
-		query.append(createTableInherit(tableOutOkTemp, tableIdSourceOK));
-		String tableIdSourceKO = tableOfIdSource(tableOutKo, this.idSource);
-		query.append(createTableInherit(tableOutKoTemp, tableIdSourceKO));
+		String tableIdSourceOK = ServiceHashFileName.tableOfIdSource(tableOutOk, this.idSource);
+		query.append(ServiceTableOperation.createTableInherit(tableOutOkTemp, tableIdSourceOK));
+		String tableIdSourceKO = ServiceHashFileName.tableOfIdSource(tableOutKo, this.idSource);
+		query.append(ServiceTableOperation.createTableInherit(tableOutKoTemp, tableIdSourceKO));
 
 		// mark file as done in the pilotage table
 		arcThreadGenericDao.marquageFinalDefaultDao(query);

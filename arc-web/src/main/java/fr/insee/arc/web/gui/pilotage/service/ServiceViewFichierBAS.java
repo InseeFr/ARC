@@ -19,6 +19,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ServiceHashFileName;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -203,7 +204,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 				// for each files, generate the download query
 				for (String idSource : idSources) {
 					tableauRequete.add(new ArcPreparedStatementBuilder(
-							"SELECT * FROM " + ApiService.tableOfIdSource(t, idSource)));
+							"SELECT * FROM " + ServiceHashFileName.tableOfIdSource(t, idSource)));
 					fileNames.add(t + "_" + idSource);
 				}
 

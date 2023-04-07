@@ -11,6 +11,11 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.ApiNormageService;
 import fr.insee.arc.core.service.engine.normage.NormageEngine;
+import fr.insee.arc.core.service.utility.ServiceHashFileName;
+import fr.insee.arc.core.service.utility.ServicePilotageOperation;
+import fr.insee.arc.core.service.utility.ServiceRules;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
+import fr.insee.arc.core.service.utility.ServiceTableOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -68,8 +73,8 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         this.tableNormageOKTemp = FormatSQL.temporaryTableName("ok_Temp");
         this.tableNormageKOTemp = FormatSQL.temporaryTableName("ko_Temp");       
         
-        this.tableNormageOK = globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK.toString());
-        this.tableNormageKO = globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO.toString());
+        this.tableNormageOK = ServiceTableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK.toString());
+        this.tableNormageKO = ServiceTableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO.toString());
 
         // tables héritées
         this.setTableNormageRegle(theApi.getTableNormageRegle());
@@ -138,7 +143,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
         // Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
     	// création des tables temporaires de données
-        query.append(createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
+        query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
        
         //On indique que le normage s'est bien passé
         query.append("\n UPDATE "+this.tableNormagePilTemp);
@@ -146,7 +151,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         query.append("\n , phase_traitement = '"+this.currentPhase+"'");
         query.append("\n WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='"+this.idSource+"';");
         
-        query.append(this.createTableTravail("", this.tableNormageDataTemp, this.tableNormageKOTemp, this.tableNormagePilTemp, TraitementEtat.KO.toString()));
+        query.append(ServiceTableOperation.createTableTravail("", this.tableNormageDataTemp, this.tableNormageKOTemp, this.tableNormagePilTemp, TraitementEtat.KO.toString()));
                 
         UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), query.getQueryWithParameters());
 
@@ -175,10 +180,10 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
 
         		// récupérer les caractéristiques du fichier
-			    HashMap<String, ArrayList<String>> pil = getBean(this.connexion.getExecutorConnection(),getNormeAttributes(this.idSource, tableNormagePilTemp));
+			    HashMap<String, ArrayList<String>> pil = ServiceRules.getBean(this.connexion.getExecutorConnection(),ServiceRules.getNormeAttributes(this.idSource, tableNormagePilTemp));
 
 			    // récupéreration des règles relative au fichier pour la phase courante
-			    HashMap<String,ArrayList<String>> regle = getBean(this.connexion.getExecutorConnection(),getRegles(this.tableNormageRegle, this.tableNormagePilTemp));
+			    HashMap<String,ArrayList<String>> regle = ServiceRules.getBean(this.connexion.getExecutorConnection(),ServiceRules.getRegles(this.tableNormageRegle, this.tableNormagePilTemp));
 			    
 			    
 		        // récupéreration des rubriques utilisées dans règles relative au fichier pour l'ensemble des phases
@@ -192,10 +197,10 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 			        		this.connexion.getExecutorConnection(),
 			        		"\n DROP TABLE IF EXISTS "+tableTmpRubriqueDansregles+"; "
 			        		+ "\n CREATE TEMPORARY TABLE "+tableTmpRubriqueDansregles+" AS "
-			        		+ getAllRubriquesInRegles(this.tableNormagePilTemp, this.tableNormageRegle, this.tableControleRegle, this.tableFiltrageRegle, this.tableMappingRegle)
+			        		+ ServiceRules.getAllRubriquesInRegles(this.tableNormagePilTemp, this.tableNormageRegle, this.tableControleRegle, this.tableFiltrageRegle, this.tableMappingRegle)
 			        		);
 				    
-				    rubriqueUtiliseeDansRegles = getBean(this.connexion.getExecutorConnection(),getRegles(tableTmpRubriqueDansregles, this.tableNormagePilTemp));
+				    rubriqueUtiliseeDansRegles = ServiceRules.getBean(this.connexion.getExecutorConnection(),ServiceRules.getRegles(tableTmpRubriqueDansregles, this.tableNormagePilTemp));
 			    }
 		    
 			    NormageEngine n=new NormageEngine(this.connexion.getExecutorConnection() , pil, regle, rubriqueUtiliseeDansRegles, this.tableNormageDataTemp, this.tableNormageOKTemp, this.paramBatch);
@@ -229,15 +234,15 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     	ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
     	
     	// update the number of record ans structure in the pilotage table
-    	query.append(updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure));
+    	query.append(ServicePilotageOperation.updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure));
     
     	// promote the application user account to full right
     	query.append(switchToFullRightRole());
     	
-    	String tableIdSourceOK=tableOfIdSource(this.tableNormageOK ,this.idSource);
-    	query.append(createTableInherit(this.tableNormageOKTemp, tableIdSourceOK));
-        String tableIdSourceKO=tableOfIdSource(this.tableNormageKO ,this.idSource);
-        query.append(createTableInherit(this.tableNormageKOTemp, tableIdSourceKO));
+    	String tableIdSourceOK=ServiceHashFileName.tableOfIdSource(this.tableNormageOK ,this.idSource);
+    	query.append(ServiceTableOperation.createTableInherit(this.tableNormageOKTemp, tableIdSourceOK));
+        String tableIdSourceKO=ServiceHashFileName.tableOfIdSource(this.tableNormageKO ,this.idSource);
+        query.append(ServiceTableOperation.createTableInherit(this.tableNormageKOTemp, tableIdSourceKO));
 		
         // mark file as done into global pilotage table
         arcThreadGenericDao.marquageFinalDefaultDao(query);

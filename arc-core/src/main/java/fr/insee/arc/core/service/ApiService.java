@@ -1,14 +1,8 @@
 package fr.insee.arc.core.service;
 
-import java.io.File;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,17 +15,18 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.core.model.NormeFichier;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.thread.ScalableConnection;
+import fr.insee.arc.core.service.utility.ServiceDatabaseConfiguration;
+import fr.insee.arc.core.service.utility.ServicePilotageOperation;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -40,7 +35,6 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 
 @Component
 public abstract class ApiService implements IDbConstant, IConstanteNumerique {
@@ -51,7 +45,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	protected int maxParallelWorkers;
 
-	public static final String CHILD_TABLE_TOKEN = "child";
 
 	// racine xml
 	public static final String ROOT = "root";
@@ -104,17 +97,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	private HashMap<String, ArrayList<String>> tabIdSource;
 
-	/**
-	 * Permet la rétro compatibilité pour la migration vers 1 schéma par
-	 * envirionnement d'execution
-	 * 
-	 * @param anEnv
-	 * @return
-	 */
-	public static String dbEnv(String env) {
-		return env.replace(".", "_") + ".";
-	}
-
 	public ApiService() {
 		super();
 		springInit();
@@ -140,23 +122,23 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this.envParameters = aParametersEnvironment;
 		this.setDirectoryRoot(aDirectoryRoot);
 
-		this.setTablePrevious((dbEnv(aEnvExecution) + this.getPreviousPhase() + "_" + TraitementEtat.OK).toLowerCase());
+		this.setTablePrevious((ServiceTableNaming.dbEnv(aEnvExecution) + this.getPreviousPhase() + "_" + TraitementEtat.OK).toLowerCase());
 
 		// Tables de pilotage et pilotage temporaire
-		this.setTablePil(dbEnv(aEnvExecution) + TraitementTableExecution.PILOTAGE_FICHIER);
-		this.tablePilTemp = temporaryTableName(aEnvExecution, aCurrentPhase,
+		this.setTablePil(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableExecution.PILOTAGE_FICHIER);
+		this.tablePilTemp = ServiceTableNaming.temporaryTableName(aEnvExecution, aCurrentPhase,
 				TraitementTableExecution.PILOTAGE_FICHIER.toString(), "0");
-		this.setTableNorme(dbEnv(aEnvExecution) + TraitementTableParametre.NORME);
-		this.tableCalendrier = dbEnv(aEnvExecution) + TraitementTableParametre.CALENDRIER;
+		this.setTableNorme(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.NORME);
+		this.tableCalendrier = ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CALENDRIER;
 		// Tables venant de l'initialisation globale
-		this.setTableJeuDeRegle(dbEnv(aEnvExecution) + TraitementTableParametre.JEUDEREGLE);
-		this.setTableChargementRegle(dbEnv(aEnvExecution) + TraitementTableParametre.CHARGEMENT_REGLE);
-		this.setTableNormageRegle(dbEnv(aEnvExecution) + TraitementTableParametre.NORMAGE_REGLE);
-		this.setTableControleRegle(dbEnv(aEnvExecution) + TraitementTableParametre.CONTROLE_REGLE);
-		this.setTableFiltrageRegle(dbEnv(aEnvExecution) + TraitementTableParametre.FILTRAGE_REGLE);
-		this.setTableMappingRegle(dbEnv(aEnvExecution) + TraitementTableParametre.MAPPING_REGLE);
-		this.setTableSeuil(dbEnv(aEnvExecution) + TraitementTableParametre.SEUIL);
-		this.setTableOutKo((dbEnv(aEnvExecution) + this.getCurrentPhase() + "_" + TraitementEtat.KO).toLowerCase());
+		this.setTableJeuDeRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.JEUDEREGLE);
+		this.setTableChargementRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CHARGEMENT_REGLE);
+		this.setTableNormageRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.NORMAGE_REGLE);
+		this.setTableControleRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CONTROLE_REGLE);
+		this.setTableFiltrageRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.FILTRAGE_REGLE);
+		this.setTableMappingRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.MAPPING_REGLE);
+		this.setTableSeuil(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.SEUIL);
+		this.setTableOutKo((ServiceTableNaming.dbEnv(aEnvExecution) + this.getCurrentPhase() + "_" + TraitementEtat.KO).toLowerCase());
 		this.setNbEnr(aNbEnr);
 
 		StaticLoggerDispatcher.info("** Fin constructeur ApiService **", LOGGER_APISERVICE);
@@ -180,7 +162,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		// Vérifie si y'a des sources à traiter
 		if (this.todo) {
 			try {
-				UtilitaireDao.get(poolName).executeBlock(this.connexion.getCoordinatorConnection(), configConnection());
+				UtilitaireDao.get(poolName).executeBlock(this.connexion.getCoordinatorConnection(), ServiceDatabaseConfiguration.configConnection(this.getEnvExecution()));
 			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
 			}
@@ -201,19 +183,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	}
 
 	/**
-	 * Permet de configurer la connexion Mettre un timeout par exemple
-	 */
-	private StringBuilder configConnection() {
-		return configConnection(this.getEnvExecution());
-	}
-
-	public static StringBuilder configConnection(String anEnvExecution) {
-		StringBuilder requete = new StringBuilder();
-		requete.append(ModeRequeteImpl.arcModeRequeteEngine(ManipString.substringBeforeFirst(ApiService.dbEnv(anEnvExecution), ".")));
-		return requete;
-	}
-
-	/**
 	 * Vérifier si y'a des fichiers à traiter on teste dans la phase précédente si
 	 * on trouve des fichiers OK avec etape=1
 	 *
@@ -223,18 +192,18 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 */
 	private boolean checkTodo(String tablePil, String phaseAncien, String phaseNouveau) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		boolean todo = false;
+		boolean checkTodoResult = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
 		requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien) + " AND "
 				+ requete.quoteText(TraitementEtat.OK.toString()) + "=ANY(etat_traitement) ");
 		requete.append("and etape=1 ");
 		requete.append("limit 1 ");
 		try {
-			todo = UtilitaireDao.get(poolName).hasResults(this.connexion.getCoordinatorConnection(), requete);
+			checkTodoResult = UtilitaireDao.get(poolName).hasResults(this.connexion.getCoordinatorConnection(), requete);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "checkTodo()", ex);
 		}
-		return todo;
+		return checkTodoResult;
 	}
 
 	/**
@@ -256,7 +225,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		loggerDispatcher.info("** register **", LOGGER_APISERVICE);
 		try {
 			UtilitaireDao.get(poolName).executeBlock(connexion,
-					copieTablePilotage(phase, tablePil, tablePilTemp, phaseIn, phase, nbEnr));
+					ServicePilotageOperation.copieTablePilotage(phase, tablePil, tablePilTemp, phaseIn, phase, nbEnr));
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "register()", ex);
 		}
@@ -292,144 +261,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	}
 
 	/**
-	 * Requete permettant de récupérer les règles pour un id_source donnée et une
-	 * table de regle
-	 * 
-	 * @param idSource      : identifiant du fichier
-	 * @param tableRegle    : table de regle
-	 * @param tablePilotage : table de pilotage
-	 * @return
-	 */
-	public static String getRegles(String tableRegle, String tablePilotage) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT * FROM " + tableRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		return requete.toString();
-	}
-
-	public static String getRegles(String tableRegle, NormeFichier normeFichier) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT * FROM " + tableRegle + " a WHERE ");
-		requete.append(conditionRegle(normeFichier));
-		return requete.toString();
-	}
-
-	/**
-	 * Récupère toutes les rubriques utilisées dans les regles relatives au fichier
-	 * 
-	 * @param idSource
-	 * @param tablePilotage
-	 * @param tableNormageRegle
-	 * @param tableControleRegle
-	 * @param tableFiltrageRegle
-	 * @param tableMappingRegle
-	 * @return
-	 */
-	public static String getAllRubriquesInRegles(String tablePilotage, String tableNormageRegle,
-			String tableControleRegle, String tableFiltrageRegle, String tableMappingRegle) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT * FROM ( ");
-		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_col),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
-						+ tableMappingRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_filtre),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
-						+ tableFiltrageRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append("\n SELECT id_norme, validite_inf, validite_sup, periodicite, lower(rubrique_pere) as var from "
-				+ tableControleRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append("\n SELECT id_norme, validite_inf, validite_sup, periodicite, lower(rubrique_fils) as var from "
-				+ tableControleRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(condition),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
-						+ tableControleRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(pre_action),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
-						+ tableControleRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append("\n SELECT id_norme, validite_inf, validite_sup, periodicite, lower(rubrique) as var from "
-				+ tableNormageRegle + " a where id_classe!='suppression' AND ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append("\n SELECT id_norme, validite_inf, validite_sup, periodicite, lower(rubrique_nmcl) as var from "
-				+ tableNormageRegle + " a where id_classe!='suppression' AND ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n ) ww where var is NOT NULL; ");
-		return requete.toString();
-	}
-
-	/**
-	 * Retourne la clause WHERE SQL qui permet de selectionne les bonne regles pour
-	 * un fichier
-	 * 
-	 * @param idSource
-	 * @param tablePilotage
-	 * @return
-	 */
-	private static String conditionRegle(String tablePilotage) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n ");
-		requete.append("EXISTS ( SELECT * FROM " + tablePilotage + " b ");
-		requete.append("WHERE a.id_norme=b.id_norme ");
-		requete.append("AND a.periodicite=b.periodicite ");
-		requete.append("AND a.validite_inf<=to_date(b.validite,'YYYY-MM-DD') ");
-		requete.append("AND a.validite_sup>=to_date(b.validite,'YYYY-MM-DD') ");
-		requete.append(") ");
-		return requete.toString();
-	}
-
-	private static String conditionRegle(NormeFichier normeFichier) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n ");
-		requete.append("a.id_norme='" + normeFichier.getIdNorme() + "' ");
-		requete.append("AND a.periodicite='" + normeFichier.getPeriodicite() + "' ");
-		requete.append("AND a.validite_inf<=to_date('" + normeFichier.getValidite() + "','YYYY-MM-DD') ");
-		requete.append("AND a.validite_sup>=to_date('" + normeFichier.getValidite() + "','YYYY-MM-DD') ");
-		requete.append(";");
-		return requete.toString();
-	}
-
-	/**
-	 * Requete permettant de récupérer les règles pour un id_source donnée et une
-	 * table de regle
-	 * 
-	 * @param id_source
-	 * @param tableRegle
-	 * @return SQL pil.id_source, pil.jointure, pil.id_norme, pil.validite,
-	 *         pil.periodicite, pil.validite
-	 */
-	public static String getNormeAttributes(String idSource, String tablePilotage) {
-		StringBuilder requete = new StringBuilder();
-		requete.append(
-				"\n SELECT pil."+ColumnEnum.ID_SOURCE.getColumnName()+", pil.jointure, pil.id_norme, pil.validite, pil.periodicite, pil.validite "
-						+ "FROM " + tablePilotage + " pil " + " WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "' ");
-		return requete.toString();
-	}
-
-	/**
-	 * récupere le contenu d'une requete dans un map
-	 * 
-	 * @param c
-	 * @param req
-	 * @return
-	 * @throws ArcException
-	 */
-	public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws ArcException {
-		GenericBean gb = new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new ArcPreparedStatementBuilder(req)));
-		return gb.mapContent(true);
-	}
-
-	/**
 	 * promote the application to the full right user role if required. required is
 	 * true if the restrictedUserAccount exists
 	 * 
@@ -442,68 +273,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return "";
 	}
 
-	/**
-	 * Selection d'un lot d'id_source pour appliquer le traitement Les id_sources
-	 * sont selectionnés parmi les id_source présent dans la phase précédentes avec
-	 * etape =1 Ces id_source sont alors mis à jour dans la phase précédente à étape
-	 * =0 et une nouvelle ligne est créee pour la phase courante et pour chaque
-	 * id_source avec etape=1 Fabrique une copie de la table de pilotage avec
-	 * uniquement les fichiers concernés par le traitement
-	 * 
-	 * @param phase
-	 * @param tablePil
-	 * @param tablePilTemp
-	 * @param phaseAncien
-	 * @param phaseNouveau
-	 * @param nbEnr
-	 * @return
-	 */
-	private String copieTablePilotage(String phase, String tablePil, String tablePilTemp, String phaseAncien,
-			String phaseNouveau, Integer nbEnr) {
-		StringBuilder requete = new StringBuilder();
-
-		Date date = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-
-		requete.append("\n DROP TABLE IF EXISTS " + tablePilTemp + "; ");
-
-		requete.append("\n CREATE ");
-		if (!tablePilTemp.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append(" ");
-		}
-		requete.append("\n TABLE " + tablePilTemp
-				+ " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS  ");
-
-		requete.append("\n WITH prep AS (");
-		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, "+ColumnEnum.ID_SOURCE.getColumnName()+") as cum_enr ");
-		requete.append("\n FROM " + tablePil + " a ");
-		requete.append("\n WHERE phase_traitement='" + phaseAncien + "'  AND '" + TraitementEtat.OK
-				+ "'=ANY(etat_traitement) and etape=1 ) ");
-		requete.append("\n , mark AS (SELECT a.* FROM prep a WHERE cum_enr<" + nbEnr + " ");
-		requete.append("\n UNION   (SELECT a.* FROM prep a LIMIT 1)) ");
-
-		// update the line in pilotage with etape=3 for the previous step
-		requete.append("\n , update as ( UPDATE " + tablePil
-				+ " a set etape=3 from mark b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" and a.etape=1 AND a.phase_traitement='"
-				+ phaseAncien + "'  AND '" + TraitementEtat.OK + "'=ANY(a.etat_traitement)) ");
-
-		// insert the line in pilotage with etape=1 for the current step
-		requete.append("\n , insert as (INSERT INTO " + tablePil + " ");
-		requete.append(
-				"\n (container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, etape, generation_composite,jointure) ");
-		requete.append("\n SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, '" + phaseNouveau
-				+ "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
-		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + ApiService.bdDateFormat
-				+ "') , rapport, taux_ko, nb_enr, 1 as etape, generation_composite, jointure ");
-		requete.append("\n FROM mark ");
-		requete.append("\n RETURNING *) ");
-
-		requete.append("\n SELECT * from insert; ");
-		requete.append("\n ANALYZE " + tablePilTemp + ";");
-		return requete.toString();
-	}
 
 	public abstract void executer() throws ArcException;
 
@@ -539,33 +308,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 		}
 	}
-	
-	/**
-	 * Build a signifiant and collision free temporary table name
-	 * 
-	 * @param aEnvExecution the sandbox schema
-	 * @param aCurrentPhase the phase TraitementPhase that will be used as part of
-	 *                      the builded name
-	 * @param tableName     the based tablename that will be used as part of the
-	 *                      builded name
-	 * @param suffix        optionnal suffix added to the temporary name
-	 * @return
-	 */
-	private static String temporaryTableName(String aEnvExecution, String aCurrentPhase, String tableName,
-			String... suffix) {
-
-		if (suffix != null && suffix.length > 0) {
-			String suffixJoin = String.join("$", suffix);
-			return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName, suffixJoin);
-		} else {
-			return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName);
-		}
-	}
-
-	public static String globalTableName(String aEnvExecution, String aCurrentPhase, String tableName) {
-		return dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName;
-	}
-
 
 	/**
 	 * liste les id_source pour une phase et un etat donnée dans une table de
@@ -666,237 +408,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		return requete;
 	}
 
-	/**
-	 * Créer une table image vide d'une autre table Si le schema est spécifié, la
-	 * table est créée dans le schema; sinon elle est crée en temporary
-	 *
-	 * @param tableIn
-	 * @param tableToBeCreated
-	 * @return
-	 */
-	public static String creationTableResultat(String tableIn, String tableToBeCreated, Boolean... image) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n CREATE ");
-		if (!tableToBeCreated.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append(" ");
-		}
-		requete.append("TABLE " + tableToBeCreated + " ");
-		requete.append("" + FormatSQL.WITH_NO_VACUUM + " ");
-		requete.append("as SELECT * FROM " + tableIn + " ");
-		if (image.length == 0 || image[0] == false) {
-			requete.append("where 1=0 ");
-		}
-		requete.append("; ");
-		return requete.toString();
-	}
-
-	/**
-	 * Directory management
-	 */
-	private static final String DIRECTORY_EXPORT_QUALIFIIER = "EXPORT";
-
-	private static final String DIRECTORY_TOKEN = "_";
-
-	private static final String DIRECTORY_ARCHIVE_QUALIFIIER = "ARCHIVE";
-
-	private static final String DIRECTORY_OLD_QUALIFIIER = "OLD";
-
-	public static String directoryEnvRoot(String rootDirectory, String env) {
-		return rootDirectory + File.separator + env.replace(".", "_").toUpperCase();
-	}
-
-	public static String directoryPhaseRoot(String rootDirectory, String env, TraitementPhase t) {
-		return directoryEnvRoot(rootDirectory, env) + File.separator + t.toString();
-	}
-
-	public static String directoryEnvExport(String rootDirectory, String env) {
-		return directoryEnvRoot(rootDirectory, env) + File.separator + DIRECTORY_EXPORT_QUALIFIIER;
-	}
-
-	public static String directoryPhaseEntrepot(String rootDirectory, String env, TraitementPhase t, String entrepot) {
-		return directoryPhaseRoot(rootDirectory, env, t) + DIRECTORY_TOKEN + entrepot;
-	}
-
-	public static String directoryPhaseEntrepotArchive(String rootDirectory, String env, TraitementPhase t,
-			String entrepot) {
-		return directoryPhaseEntrepot(rootDirectory, env, t, entrepot) + DIRECTORY_TOKEN + DIRECTORY_ARCHIVE_QUALIFIIER;
-	}
-
-	public static String directoryPhaseEntrepotArchiveOld(String rootDirectory, String env, TraitementPhase t,
-			String entrepot) {
-		return directoryPhaseEntrepotArchive(rootDirectory, env, t, entrepot) + File.separator
-				+ DIRECTORY_OLD_QUALIFIIER;
-	}
-
-	public static String directoryPhaseEtat(String rootDirectory, String env, TraitementPhase t, TraitementEtat e) {
-		return directoryPhaseRoot(rootDirectory, env, t) + DIRECTORY_TOKEN + e.toString();
-	}
-
-	public static String directoryPhaseEtatOK(String rootDirectory, String env, TraitementPhase t) {
-		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.OK);
-	}
-
-	public static String directoryPhaseEtatKO(String rootDirectory, String env, TraitementPhase t) {
-		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.KO);
-	}
-
-	public static String directoryPhaseEtatEnCours(String rootDirectory, String env, TraitementPhase t) {
-		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.ENCOURS);
-	}
-
-	/**
-	 * Creation de la table de travail contenant les données en entrée d'une phase et pour un fichier donné
-	 * La table en sortie est temporaire ou unlogged car elle est volatile et utilisée que durant l'execution de la phase
-	 * La table en entrée est dans le ca d'utilisation principale la table résultat des données 
-	 * en sortie la phase précédente pour le fichier donnée.
-	 * @param extraColumns
-	 * @param tableIn	la table des données en entrée de la phase
-	 * @param tableOut	la table des données du fichier en sortie
-	 * @param tablePilTemp	la table de pilotage relative à la phase; c'est la liste des fichiers selectionnés pour la phase
-	 * @param idSource	le nom du fichier
-	 * @param isIdSource	le nom du fichier est-il spécifié ?
-	 * @param etatTraitement	l'état du traitement  si on souhaite crée une table en sortie relative à un état particulier
-	 * @return
-	 */
-	public String createTableTravail(String extraColumns, String tableIn, String tableOut, String tablePilTemp
-			, String... etatTraitement) {
-		StringBuilder requete = new StringBuilder();
-
-		requete.append("\n DROP TABLE IF EXISTS " + tableOut + " CASCADE; \n");
-
-		requete.append("\n CREATE ");
-		if (!tableOut.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append("UNLOGGED ");
-		}
-
-		requete.append(
-				"TABLE " + tableOut + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ");
-		requete.append("( ");
-		requete.append("\n    SELECT * " + extraColumns);
-		requete.append("\n    FROM " + tableIn + " stk ");
-		requete.append("\n    WHERE exists ( SELECT 1  ");
-		requete.append("\n            FROM " + tablePilTemp + " pil  ");
-		requete.append("\n  where pil."+ColumnEnum.ID_SOURCE.getColumnName()+"=stk."+ColumnEnum.ID_SOURCE.getColumnName()+" ");
-		if (etatTraitement.length > 0) {
-			requete.append(" AND '" + etatTraitement[0] + "'=ANY(pil.etat_traitement) ");
-		}
-		requete.append(" ) ");
-		requete.append(");\n");
-
-		return requete.toString();
-	}
-
-	/**
-	 * 
-	 * @param connexion
-	 * @param tableIn
-	 * @param tableIdSource
-	 * @return
-	 */
-	public String createTableInherit(String tableIn, String tableIdSource) {
-		StaticLoggerDispatcher.info("** createTableOK ** : " + tableIdSource, LOGGER_APISERVICE);
-
-		// si la table in n'est pas vide
-		StringBuilder queryToTest = new StringBuilder();
-		queryToTest.append("SELECT count(*)>0 FROM (SELECT 1 FROM " + tableIn + " LIMIT 1) u");
-
-		StringBuilder queryToExecute = new StringBuilder();
-
-		// on créé la table héritée que si la table a des enregistrements
-		queryToExecute.append("DROP TABLE IF EXISTS " + tableIdSource + ";");
-		queryToExecute.append("CREATE TABLE " + tableIdSource + " " + FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM "
-				+ tableIn + ";");
-
-		return FormatSQL.executeIf(queryToTest, queryToExecute);
-	}
-
-	/**
-	 * Generate the filename
-	 * 
-	 * @param tableName
-	 * @param idSource
-	 * @return
-	 */
-	/**
-	 * Generate the filename
-	 * 
-	 * @param tableName
-	 * @param idSource
-	 * @return
-	 */
-	public static String tableOfIdSource(String tableName, String idSource) {
-		return tableName + "_" + CHILD_TABLE_TOKEN + "_" + hashOfIdSource(idSource);
-	}
-
-	/**
-	 * get the hash value of a file
-	 * @param idSource
-	 * @return
-	 */
-	public static String hashOfIdSource(String idSource)
-	{
-		String hashText = "";
-		MessageDigest m;
-		try {
-			m = MessageDigest.getInstance("SHA1");
-			m.update(idSource.getBytes(), 0, idSource.length());
-			hashText = String.format("%1$032x", new BigInteger(1, m.digest()));
-		} catch (NoSuchAlgorithmException e) {
-			return null;
-		}
-		return hashText;
-	}
-
-	
-
-
-	/**
-	 * Met à jour le comptage du nombre d'enregistrement par fichier; nos fichiers
-	 * de blocs XML sont devenus tous plats :)
-	 * 
-	 * @throws ArcException
-	 */
-	public String updateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) {
-		StringBuilder query = new StringBuilder();
-
-		// mise à jour du nombre d'enregistrement et du type composite
-		StaticLoggerDispatcher.info("** updateNbEnr **", LOGGER_APISERVICE);
-		query.append("\n UPDATE " + tablePilTemp + " a ");
-		query.append("\n \t SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
-
-		if (jointure.length > 0) {
-			query.append(", jointure= " + FormatSQL.textToSql(jointure[0]) + "");
-		}
-		query.append(";");
-
-		return query.toString();
-	}
-
-	public String createTableTravailIdSource(String tableIn, String tableOut, String idSource, String... extraCols) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n CREATE ");
-		if (!tableOut.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append("UNLOGGED ");
-		}
-		requete.append(
-				"TABLE " + tableOut + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ");
-
-		requete.append("\n SELECT * ");
-
-		if (extraCols.length > 0) {
-			requete.append(", " + extraCols[0]);
-		}
-
-		requete.append("\n FROM " + tableOfIdSource(tableIn, idSource) + "; ");
-
-		return requete.toString();
-	}
 
 	/**
 	 *
@@ -980,7 +491,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		}
 
 		requete.append("WITH t0 AS ( ");
-		requete.append(updatePilotageErrorQuery(phase, tablePil, exception));
+		requete.append(ServicePilotageOperation.updatePilotageErrorQuery(phase, tablePil, exception));
 		requete.append("\n RETURNING "+ColumnEnum.ID_SOURCE.getColumnName()+") ");
 
 		requete.append(resetPreviousPhaseMark(tablePil, null, "t0"));
@@ -1022,7 +533,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		for (int i = 0; i < tableDrop.length; i++) {
 			requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");
 		}
-		requete.append(updatePilotageErrorQuery(phase, tablePil, exception));
+		requete.append(ServicePilotageOperation.updatePilotageErrorQuery(phase, tablePil, exception));
 
 		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		requete.append("\n ;");
@@ -1032,22 +543,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		UtilitaireDao.get(poolName).executeBlock(connexion, requete);
 	}
 
-	/**
-	 * Query to update pilotage table when error occurs
-	 * 
-	 * @param phase
-	 * @param tablePil
-	 * @param exception
-	 * @return
-	 */
-	private static StringBuilder updatePilotageErrorQuery(String phase, String tablePil, Exception exception) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("UPDATE " + tablePil + " SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport='"
-				+ exception.toString().replace("'", "''").replace("\r", "") + "' ");
-		requete.append(
-				"\n WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
-		return requete;
-	}
 
 	/**
 	 * permet de récupérer un tableau de la forme id_source | id1 , id2, id3 ...

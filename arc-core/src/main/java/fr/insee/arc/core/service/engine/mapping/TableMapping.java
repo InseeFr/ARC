@@ -10,8 +10,8 @@ import java.util.TreeSet;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.IDbConstant;
-import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -61,7 +61,7 @@ public class TableMapping implements IConstanteCaractere, IDbConstant, IConstant
 
     public TableMapping(String anEnvironnement, String aNomTableCourt, int threadId) {
         this.nomTableCourt = aNomTableCourt;
-        this.nomTable = new StringBuilder(ApiService.dbEnv(anEnvironnement)).append(aNomTableCourt).toString();
+        this.nomTable = new StringBuilder(ServiceTableNaming.dbEnv(anEnvironnement)).append(aNomTableCourt).toString();
         this.ensembleVariableMapping = new TreeSet<>();
         this.environnement = anEnvironnement;
         this.ensembleRegleMappingClefPrimaire = new HashSet<RegleMappingClePrimaire>();

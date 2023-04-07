@@ -13,7 +13,7 @@ import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ServiceDatabaseMaintenance {
 
-	protected static final Logger LOGGER = LogManager.getLogger(ResetEnvironment.class);
+	protected static final Logger LOGGER = LogManager.getLogger(ServiceResetEnvironment.class);
 
 	/**
 	 * Maintenance sur la table de pilotage
@@ -23,7 +23,7 @@ public class ServiceDatabaseMaintenance {
 	 * @param type
 	 */
 	private static void maintenancePilotage(Integer poolIndex, Connection connexion, String envExecution, String type) {
-		String tablePil = ApiService.dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
+		String tablePil = ServiceTableNaming.dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
 		StaticLoggerDispatcher.info("** Maintenance Pilotage **", LOGGER);
 
 		try {

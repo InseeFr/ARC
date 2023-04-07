@@ -14,6 +14,10 @@ import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.ApiFiltrageService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
+import fr.insee.arc.core.service.utility.ServiceHashFileName;
+import fr.insee.arc.core.service.utility.ServiceRules;
+import fr.insee.arc.core.service.utility.ServiceTableNaming;
+import fr.insee.arc.core.service.utility.ServiceTableOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -64,8 +68,8 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		this.tableTempFiltrageKo = "tableTempFiltrageKo";
 		this.tableTempFiltrageOk = "tableTempFiltrageOk";
 
-		this.tableFiltrageKo = ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ko");
-		this.tableFiltrageOk = ApiService.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ok");
+		this.tableFiltrageKo = ServiceTableNaming.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ko");
+		this.tableFiltrageOk = ServiceTableNaming.globalTableName(this.getEnvExecution(), this.getCurrentPhase(), "ok");
 
 		this.setTableFiltrageRegle(theApi.getTableFiltrageRegle());
 		this.setTableJeuDeRegle(theApi.getTableJeuDeRegle());
@@ -129,7 +133,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		query.append(marqueJeuDeRegleApplique(this.tableFiltragePilTemp));
 
 		// création des tables temporaires de données
-		query.append(createTableTravailIdSource(this.getTablePrevious(), this.tableFiltrageDataTemp, this.idSource));
+		query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(), this.tableFiltrageDataTemp, this.idSource));
 		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ko", LOGGER);
 		query.append(FormatSQL.createAsSelectFrom(this.tableTempFiltrageKo, this.tableFiltrageDataTemp, "false"));
 		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ok", LOGGER);
@@ -184,7 +188,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 						/**
 						 * La requête de sélection de la relation
 						 */
-						new ArcPreparedStatementBuilder(getRegles(this.tableFiltrageRegle, this.tableFiltragePilTemp))));
+						new ArcPreparedStatementBuilder(ServiceRules.getRegles(this.tableFiltrageRegle, this.tableFiltragePilTemp))));
 
 		this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle = calculerNormeToPeriodiciteToValiditeInfToValiditeSupToRegle(
 				regleActive);
@@ -232,10 +236,10 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		query.append(switchToFullRightRole());
 
 		// créer les tables héritées
-		String tableIdSourceOK = tableOfIdSource(this.tableFiltrageOk, this.idSource);
-		query.append(createTableInherit(this.tableTempFiltrageOk, tableIdSourceOK));
-		String tableIdSourceKO = tableOfIdSource(this.tableFiltrageKo, this.idSource);
-		query.append(createTableInherit(this.tableTempFiltrageKo, tableIdSourceKO));
+		String tableIdSourceOK = ServiceHashFileName.tableOfIdSource(this.tableFiltrageOk, this.idSource);
+		query.append(ServiceTableOperation.createTableInherit(this.tableTempFiltrageOk, tableIdSourceOK));
+		String tableIdSourceKO = ServiceHashFileName.tableOfIdSource(this.tableFiltrageKo, this.idSource);
+		query.append(ServiceTableOperation.createTableInherit(this.tableTempFiltrageKo, tableIdSourceKO));
 
 	    // mark file as done in the pilotage table
 	    arcThreadGenericDao.marquageFinalDefaultDao(query);

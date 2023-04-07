@@ -13,9 +13,9 @@ import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
-public class ResetEnvironment {
+public class ServiceResetEnvironment {
 
-	protected static final Logger LOGGER = LogManager.getLogger(ResetEnvironment.class);
+	protected static final Logger LOGGER = LogManager.getLogger(ServiceResetEnvironment.class);
 
 	
 	/**

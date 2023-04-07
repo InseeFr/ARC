@@ -128,7 +128,7 @@ public class GenericBean {
 		}
 		return m;
 	}
-
+	
 	public HashMap<String, Record> mapRecord() {
 		if (this.content == null || this.content.size() == 0) {
 			return new HashMap<>();
