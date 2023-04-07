@@ -82,7 +82,7 @@
 
 		<!-- weak weak hashing algorithms. Not a risk here : just used to generate tablename but not used for security purpose -->
 		<sonar.issue.ignore.multicriteria.e14.ruleKey>java:S4790</sonar.issue.ignore.multicriteria.e14.ruleKey>
-		<sonar.issue.ignore.multicriteria.e14.resourceKey>**/ApiService.java</sonar.issue.ignore.multicriteria.e14.resourceKey>
+		<sonar.issue.ignore.multicriteria.e14.resourceKey>**/ServiceHashFileName.java</sonar.issue.ignore.multicriteria.e14.resourceKey>
 
 		<!-- temporary directory is safe here. Used by user to upload and discareded very fast -->
 		<sonar.issue.ignore.multicriteria.e15.ruleKey>java:S5443</sonar.issue.ignore.multicriteria.e15.ruleKey>
