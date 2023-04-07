@@ -41,16 +41,14 @@ public class ApiChargementService extends ApiService {
     }
 
     public ApiChargementService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
-            String... paramBatch) {
+            String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
-
-        extraConfiguration(aEnvExecution);
     }
     
     /**
      * Add configuration not natively provided by the ApiService configuration class
      */
-    public void extraConfiguration(String aEnvExecution)
+    private void extraConfiguration(String aEnvExecution)
     {
         this.directoryIn = ApiService.directoryPhaseEtatOK(this.getDirectoryRoot(), aEnvExecution, TraitementPhase.valueOf(previousPhase)) + File.separator;
 
@@ -61,6 +59,8 @@ public class ApiChargementService extends ApiService {
     @Override
     public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER);
+        
+        extraConfiguration(this.envExecution);
  
         this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiChargementService.MAX_PARALLEL_WORKERS",4);
 

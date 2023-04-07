@@ -33,7 +33,7 @@ public class ApiControleService extends ApiService {
     }
 
     public ApiControleService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
-            String... paramBatch) {
+            String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
     }
 

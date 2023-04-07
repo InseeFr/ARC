@@ -80,7 +80,7 @@ public class ApiReceptionService extends ApiService {
 	private static final Pattern p = Pattern.compile("^[A-Z]{6}-W.*");
 		
 	
-	public ApiReceptionService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
+	public ApiReceptionService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String paramBatch) {
 		super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}
 

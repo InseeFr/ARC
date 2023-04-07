@@ -14,15 +14,8 @@ public class ApiReceptionServiceFactory implements IServiceFactory {
 	 * @param aDirectoryRoot
 	 * @param aNbEnr
 	 */
-	public ApiService get(String... args) {
-		if (args.length==5)
-		{
-			return new ApiReceptionService(args[0], args[1], args[2], args[3], Integer.valueOf(args[4]));
-		}
-		else
-		{
-			return new ApiReceptionService(args[0], args[1], args[2], args[3], Integer.valueOf(args[4]), args[5]);
-		}
+	public ApiService get(String phaseService, String metaDataSchema, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
+		return new ApiReceptionService(phaseService, metaDataSchema, executionSchema, directory, capacityParameter, paramBatch);
 	}
 
 	public static IServiceFactory getInstance() {

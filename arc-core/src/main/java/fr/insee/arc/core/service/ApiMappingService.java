@@ -50,7 +50,7 @@ public class ApiMappingService extends ApiService {
      * @param aNbEnr
      */
     public ApiMappingService(String aCurrentPhase, String anParametersEnvironment, String anEnvironnementExecution, String aDirectoryRoot,
-            Integer aNbEnr, String... paramBatch) {
+            Integer aNbEnr, String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, anEnvironnementExecution, null, aNbEnr, paramBatch);
     }
 

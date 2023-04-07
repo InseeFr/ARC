@@ -40,7 +40,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
      * @param aDirectoryRoot
      * @param aNbEnr
      */
-    public ApiFiltrageService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String... paramBatch) {
+    public ApiFiltrageService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr, String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, null, aNbEnr, paramBatch);
     }
 

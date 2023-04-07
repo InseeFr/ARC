@@ -25,6 +25,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ResetEnvironment;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -75,7 +76,7 @@ public class ExecuteServiceController {
 			}
 			
 			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), ApiService.IHM_SCHEMA, env,
-							repertoire, Integer.MAX_VALUE+"").invokeApi();
+							repertoire, Integer.MAX_VALUE, null).invokeApi();
 			
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
@@ -110,7 +111,7 @@ public class ExecuteServiceController {
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
 
-			ApiService.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArcPreparedStatementBuilder());
+			ResetEnvironment.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArcPreparedStatementBuilder());
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
 
@@ -152,7 +153,7 @@ public class ExecuteServiceController {
 			}
 			
 			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), ApiService.IHM_SCHEMA, env,
-							repertoire, Integer.MAX_VALUE+"").invokeApi();
+							repertoire, Integer.MAX_VALUE, null).invokeApi();
 			
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);

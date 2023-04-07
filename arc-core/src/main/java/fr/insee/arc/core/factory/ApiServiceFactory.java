@@ -39,36 +39,22 @@ public class ApiServiceFactory {
 	private static final ApiServiceFactory getInstance() {
 		if (instance == null) {
 			instance = new ApiServiceFactory(
-					new HashMap<String, IServiceFactory>());
+					new HashMap<>());
 		}
 		return instance;
 	}
 
 	/**
-	 * Méthode d'entrée unique pour cette factory. Fournir le nom de la phase et
-	 * les arguments de type {@code String} au constructeur.
-	 * 
+	 * instanciate an arc service with the parameters
 	 * @param phaseService
-	 *            la phase en question
-	 * @param args
-	 *            seule la méthode {@link IServiceFactory#get(String...)}
-	 *            connaît le sens des arguments injectés au constructeur. Seule
-	 *            contrainte : le premier argument de cette méthode est la phase
-	 *            courante.
+	 * @param metaDataSchema
+	 * @param executionSchema
+	 * @param directory
+	 * @param capacityParameter
+	 * @param paramBatch
+	 * @return
 	 */
-	public static final ApiService getService(String phaseService,
-			String... args) {
-
-		// on repercute la phase dans les parametre à envoyer en premiere
-		// position
-		String[] args2 = new String[args.length + 1];
-		args2[0] = phaseService;
-
-		for (int i = 0; i < args.length; i++) {
-			args2[i + 1] = args[i];
-		}
-
-		return getInstance().map.get(phaseService).get(args2);
+	public static final ApiService getService(String phaseService, String metaDataSchema, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
+		return getInstance().map.get(phaseService).get(phaseService, metaDataSchema, executionSchema, directory, capacityParameter, paramBatch);
 	}
-
 }

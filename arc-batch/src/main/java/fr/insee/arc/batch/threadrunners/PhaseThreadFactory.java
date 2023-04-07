@@ -19,36 +19,41 @@ public class PhaseThreadFactory extends Thread {
 
 	private int previousNumberOfFilesLeft = -1;
 
-	
 	private ServiceReporting report = new ServiceReporting();
-	
-	
+
 	public PhaseThreadFactory(Map<String, String> mapParam, TraitementPhase phase) {
 		initializeThreadRunnerTemplate(mapParam, phase);
 	}
 
 	@Override
-	public void run()
-	{
+	public void run() {
 		execute();
 	}
-	
-	
+
 	public void execute() {
-		this.report = ApiServiceFactory.getService(getPhaseName().toString(), PhaseComputeArgs.batchArgs(this.getMapParam(), capacityParameterName())).invokeApi();
+
+		this.report = ApiServiceFactory.getService( //
+				getPhaseName().toString(), //
+				mapParam.get(PhaseParameterKeys.KEY_FOR_METADATA_ENVIRONMENT), //
+				mapParam.get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT), //
+				mapParam.get(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION), //
+				Integer.parseInt(mapParam.get(capacityParameterName())), //
+				Boolean.parseBoolean(PhaseParameterKeys.KEY_FOR_KEEP_IN_DATABASE) ? null
+						: mapParam.get(PhaseParameterKeys.KEY_FOR_BATCH_CHUNK_ID)) //
+				.invokeApi();
+
 	}
 
 	/**
-	 * The capacity parameter is the maximum number of objects that must take care a phase launch
-	 * this method returns the parameter name to pick for the phase
+	 * The capacity parameter is the maximum number of objects that must take care a
+	 * phase launch this method returns the parameter name to pick for the phase
+	 * 
 	 * @return
 	 */
-	protected String capacityParameterName()
-	{
-		
+	protected String capacityParameterName() {
+
 		String capacityParameter;
 
-		
 		switch (getPhaseName()) {
 		case INITIALISATION:
 			capacityParameter = PhaseParameterKeys.KEY_FOR_MAX_SIZE_RECEPTION;
@@ -66,7 +71,7 @@ public class PhaseThreadFactory extends Thread {
 			capacityParameter = PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE;
 			break;
 		}
-		
+
 		return capacityParameter;
 
 	}
@@ -76,17 +81,17 @@ public class PhaseThreadFactory extends Thread {
 		setMapParam(mapParam);
 	}
 
-	
 	/**
-	 * return the status of the thread
-	 * it queries the pilotage table to see if there is a blockage in the thread 
-	 * by comparing the current files left with the previous recorded files left
+	 * return the status of the thread it queries the pilotage table to see if there
+	 * is a blockage in the thread by comparing the current files left with the
+	 * previous recorded files left
+	 * 
 	 * @return
 	 */
 	public boolean isBlocked() {
 
 		boolean blocked;
-		
+
 		// count the number of file left to be processed in the phase
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("SELECT count(*) FROM " + this.getMapParam().get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT)
@@ -96,8 +101,9 @@ public class PhaseThreadFactory extends Thread {
 		int currentNumberOfFilesLeft = UtilitaireDao.get("arc").getInt(null, query);
 
 		// compare it to the previous recorded number of files left
-		// if still some files to go and if the stack hadn't moved, the thread will be marked as blocked
-		if (currentNumberOfFilesLeft>0 && currentNumberOfFilesLeft == previousNumberOfFilesLeft) {
+		// if still some files to go and if the stack hadn't moved, the thread will be
+		// marked as blocked
+		if (currentNumberOfFilesLeft > 0 && currentNumberOfFilesLeft == previousNumberOfFilesLeft) {
 			blocked = true;
 		} else {
 			this.previousNumberOfFilesLeft = currentNumberOfFilesLeft;
@@ -118,11 +124,9 @@ public class PhaseThreadFactory extends Thread {
 		return phaseName;
 	}
 
-
 	public void setPhaseName(TraitementPhase phaseName) {
 		this.phaseName = phaseName;
 	}
-
 
 	public ServiceReporting getReport() {
 		return report;
@@ -131,5 +135,5 @@ public class PhaseThreadFactory extends Thread {
 	public void setReport(ServiceReporting report) {
 		this.report = report;
 	}
-	
+
 }

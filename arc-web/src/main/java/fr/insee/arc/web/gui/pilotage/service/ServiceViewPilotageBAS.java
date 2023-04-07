@@ -14,6 +14,7 @@ import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiInitialisationService;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ResetEnvironment;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -95,11 +96,11 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 			// Lancement de l'initialisation dans la foulée
 			ApiServiceFactory
 					.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, getBacASable(),
-							this.repertoire, String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter()))
+							this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
 					.invokeApi();
 			ApiServiceFactory
 					.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, getBacASable(),
-							this.repertoire, String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter()))
+							this.repertoire, TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
 					.invokeApi();
 		}
 
@@ -118,7 +119,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		loggerDispatcher.debug("undoBatch", LOGGER);
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 
-		ApiService.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
+		ResetEnvironment.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -154,7 +155,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 */
 	public String resetBAS(Model model) {
 
-		ApiService.resetBAS(getBacASable(), this.repertoire);
+		ResetEnvironment.resetBAS(getBacASable(), this.repertoire);
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -178,8 +179,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		int maxFilesPerPhase = BDParameters.getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
 		
 		ApiServiceFactory.getService(phaseAExecuter.toString(), ApiService.IHM_SCHEMA, getBacASable(), this.repertoire,
-				maxFilesPerPhase+""
-		// ,"1" // to set batch mode or not
+				maxFilesPerPhase, null
 		).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

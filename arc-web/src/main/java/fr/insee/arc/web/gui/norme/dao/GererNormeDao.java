@@ -178,7 +178,10 @@ public class GererNormeDao extends VObjectHelperDao {
 		return query;
 	}
 	
-	
+	/**
+	 * Query to get load rules view
+	 * @param viewNormage
+	 */
 	public void initializeViewChargement(VObject viewChargement) {
 
 		ViewEnum dataModelChargement = ViewEnum.IHM_CHARGEMENT_REGLE;
@@ -207,7 +210,10 @@ public class GererNormeDao extends VObjectHelperDao {
 		vObjectService.initialize(viewChargement, query, dataObjectService.getView(dataModelChargement), defaultInputFields);		
 	}
 
-	
+	/**
+	 * Query to get normage rules view
+	 * @param viewNormage
+	 */
 	public void initializeNormage(VObject viewNormage) {
 		
 		ViewEnum dataModelChargement = ViewEnum.IHM_NORMAGE_REGLE;

@@ -110,11 +110,11 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
 			ApiServiceFactory
 					.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, getBacASable(),
-							this.repertoire, String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter()))
+							this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
 					.invokeApi();
 			ApiServiceFactory
 					.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, getBacASable(),
-							this.repertoire, String.valueOf(TraitementPhase.RECEPTION.getNbLigneATraiter()))
+							this.repertoire, TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
 					.invokeApi();
 		}
 		this.views.getViewPilotageBAS().setMessage(message);
@@ -301,7 +301,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
 			ApiServiceFactory
 					.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, getBacASable(),
-							this.repertoire, String.valueOf(TraitementPhase.INITIALISATION.getNbLigneATraiter()))
+							this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
 					.invokeApi();
 		}
 
@@ -401,7 +401,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		// Lancement du retour arrière
 		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
 				ApiService.IHM_SCHEMA, getBacASable(), this.repertoire,
-				TraitementPhase.INITIALISATION.getNbLigneATraiter());
+				TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
 		try {
 			serv.retourPhasePrecedente(TraitementPhase.valueOf(phase), querySelection, null);
 		} finally {

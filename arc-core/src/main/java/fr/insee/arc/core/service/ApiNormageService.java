@@ -33,7 +33,7 @@ public class ApiNormageService extends ApiService {
     }
     
     public ApiNormageService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
-            String... paramBatch) {
+            String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
         this.setTableNorme(dbEnv(this.getEnvExecution()) + TraitementTableParametre.NORME);
     }

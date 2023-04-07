@@ -15,13 +15,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fr.insee.arc.batch.threadrunners.PhaseThreadFactory;
 import fr.insee.arc.batch.threadrunners.PhaseParameterKeys;
+import fr.insee.arc.batch.threadrunners.PhaseThreadFactory;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.ApiReceptionService;
 import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.utility.ServiceDatabaseMaintenance;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.batch.IReturnCode;
@@ -382,7 +383,7 @@ class BatchARC implements IReturnCode {
 									@Override
 									public void run() {
 										for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
-											ApiService.maintenanceDatabaseClassic(poolIndex, null, envExecution);
+											ServiceDatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null, envExecution);
 										}
 									}
 								};
@@ -440,9 +441,9 @@ class BatchARC implements IReturnCode {
 
 		for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
 			// Maintenance full du catalog
-			ApiService.maintenancePgCatalog(poolIndex, null, FormatSQL.VACUUM_OPTION_FULL);
+			ServiceDatabaseMaintenance.maintenancePgCatalog(poolIndex, null, FormatSQL.VACUUM_OPTION_FULL);
 			// maintenance des tables métier de la base de données
-			ApiService.maintenanceDatabaseClassic(poolIndex, null, envExecution);
+			ServiceDatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null, envExecution);
 		}
 	}
 

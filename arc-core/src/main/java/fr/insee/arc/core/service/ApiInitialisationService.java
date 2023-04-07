@@ -24,6 +24,7 @@ import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
+import fr.insee.arc.core.service.utility.ServiceDatabaseMaintenance;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -63,7 +64,7 @@ public class ApiInitialisationService extends ApiService {
     private static final Logger LOGGER = LogManager.getLogger(ApiInitialisationService.class);
 
     public ApiInitialisationService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution, String aDirectoryRoot,
-            Integer aNbEnr, String... paramBatch) {
+            Integer aNbEnr, String paramBatch) {
         super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
     }
 
@@ -935,7 +936,7 @@ public class ApiInitialisationService extends ApiService {
         }
 
         if (nbLignes > 0) {
-            ApiService.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
+        	ServiceDatabaseMaintenance.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
         }
 
         // Penser à tuer la connexion
@@ -944,7 +945,7 @@ public class ApiInitialisationService extends ApiService {
     public void resetEnvironnement() {
         try {
 	        synchroniserEnvironmentByPilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
-	        ApiService.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
+	        ServiceDatabaseMaintenance.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
         } catch (Exception e) {
         	loggerDispatcher.error(e, LOGGER);
         }
@@ -1109,7 +1110,7 @@ public class ApiInitialisationService extends ApiService {
 
         // maintenance des tables de catalogue car postgres ne le réalise pas correctement sans mettre en oeuvre
         // une stratégie de vacuum hyper agressive et donc ajouter une spécificité pour les DBAs
-        ApiService.maintenanceDatabaseClassic(connexion, envExecution);
+        ServiceDatabaseMaintenance.maintenanceDatabaseClassic(connexion, envExecution);
 		
     }
 

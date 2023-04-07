@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -121,19 +120,17 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		springInit();
 	}
 
-	public ApiService(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution, String aDirectoryRoot,
-			Integer aNbEnr, String... paramBatch) {
+	protected ApiService(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution, String aDirectoryRoot,
+			Integer aNbEnr, String paramBatch) {
 		this();
-		loggerDispatcher.info("** initialiserVariable **", LOGGER_APISERVICE);
+		StaticLoggerDispatcher.info("** initialiserVariable **", LOGGER_APISERVICE);
 		try {
 			this.connexion = new ScalableConnection(UtilitaireDao.get(poolName).getDriverConnexion());
 		} catch (Exception ex) {
-			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "ApiService()", ex);
+			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}
 
-		if (paramBatch != null && paramBatch.length > 0) {
-			this.setParamBatch(paramBatch[0]);
-		}
+		this.setParamBatch(paramBatch);
 
 		// Initialisation de la phase
 		this.setCurrentPhase(aCurrentPhase);
@@ -162,7 +159,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this.setTableOutKo((dbEnv(aEnvExecution) + this.getCurrentPhase() + "_" + TraitementEtat.KO).toLowerCase());
 		this.setNbEnr(aNbEnr);
 
-		loggerDispatcher.info("** Fin constructeur ApiService **", LOGGER_APISERVICE);
+		StaticLoggerDispatcher.info("** Fin constructeur ApiService **", LOGGER_APISERVICE);
 	}
 
 	/**
@@ -541,78 +538,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			}
 
 		}
-	}
-
-	/**
-	 * Maintenance sur la table de pilotage
-	 * 
-	 * @param connexion
-	 * @param envExecution
-	 * @param type
-	 */
-	private static void maintenancePilotage(Integer poolIndex, Connection connexion, String envExecution, String type) {
-		String tablePil = dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
-		StaticLoggerDispatcher.info("** Maintenance Pilotage **", LOGGER_APISERVICE);
-
-		try {
-			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.analyzeSecured(tablePil));
-			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePil, type));
-		} catch (Exception e) {
-			StaticLoggerDispatcher.error("Error in ApiService.maintenancePilotage", LOGGER_APISERVICE);
-		}
-	}
-
-/**
- * 
- * @param connexion
- * @param type
- */
-	public static void maintenancePgCatalog(Connection connexion, String type) {
-		// postgres libere mal l'espace sur ces tables qaund on fait trop d'opération
-		// sur les colonnes
-		// vaccum full sinon ca fait quasiment rien ...
-		maintenancePgCatalog(0,connexion, type);
-	}
-
-	public static void maintenancePgCatalog(Integer poolIndex, Connection connexion, String type) {
-		// postgres libere mal l'espace sur ces tables qaund on fait trop d'opération
-		// sur les colonnes
-		// vaccum full sinon ca fait quasiment rien ...
-		StaticLoggerDispatcher.info("** Maintenance Catalogue **", LOGGER_APISERVICE);
-		UtilitaireDao.get(poolIndex).maintenancePgCatalog(connexion, type);
-	}
-	
-	
-	/**
-	 * classic database maintenance routine 2 vacuum are sent successively to
-	 * analyze and remove dead tuple completely from
-	 * 
-	 * @param connexion    the jdbc connexion
-	 * @param envExecution the sandbox schema
-	 */
-	public static void maintenanceDatabaseClassic(Connection connexion, String envExecution) {
-		maintenanceDatabaseClassic(0, connexion, envExecution);
-	}
-
-	public static void maintenanceDatabaseClassic(Integer poolIndex, Connection connexion, String envExecution) {
-		ApiService.maintenanceDatabase(poolIndex, connexion, envExecution, FormatSQL.VACUUM_OPTION_NONE);
-	}
-	
-	/**
-	 * analyze and vacuum on postgres catalog tables analyze and vacuum on the
-	 * pilotage table located in the sandbox schema
-	 * 
-	 * @param connexion       the jdbc connexion
-	 * @param envExecution    the sandbox schema
-	 * @param typeMaintenance FormatSQL.VACUUM_OPTION_FULL or
-	 *                        FormatSQL.VACUUM_OPTION_NONE
-	 */
-	private static void maintenanceDatabase(Integer poolIndex, Connection connexion, String envExecution, String typeMaintenance) {
-		ApiService.maintenancePgCatalog(poolIndex, connexion, typeMaintenance);
-
-		ApiService.maintenancePilotage(poolIndex, connexion, envExecution, typeMaintenance);
-
-		StaticLoggerDispatcher.info("** Fin de maintenance **", LOGGER_APISERVICE);
 	}
 	
 	/**
@@ -1014,51 +939,6 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 	}
 
-	/**
-	 * Retour arriere vers une phase
-	 * 
-	 * @param phaseAExecuter
-	 * @param env
-	 * @param rootDirectory
-	 * @param undoFilesSelection
-	 */
-	public static void backToTargetPhase(TraitementPhase phaseAExecuter, String env, String rootDirectory,
-			ArcPreparedStatementBuilder undoFilesSelection) {
-		if (phaseAExecuter.getOrdre() == TraitementPhase.INITIALISATION.getOrdre()) {
-			resetBAS(env, rootDirectory);
-		} else {
-			ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-					IHM_SCHEMA, env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter());
-			try {
-				serv.retourPhasePrecedente(phaseAExecuter, undoFilesSelection,
-						new ArrayList<>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
-			} finally {
-				serv.finaliser();
-			}
-		}
-	}
-
-	/**
-	 * reset data in the sandbox
-	 * 
-	 * @param model
-	 * @param env
-	 * @param rootDirectory
-	 */
-	public static void resetBAS(String env, String rootDirectory) {
-		try {
-			ApiInitialisationService.clearPilotageAndDirectories(rootDirectory, env);
-		} catch (Exception e) {
-			StaticLoggerDispatcher.info(e, LOGGER_APISERVICE);
-		}
-		ApiInitialisationService service = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-				IHM_SCHEMA, env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter());
-		try {
-			service.resetEnvironnement();
-		} finally {
-			service.finaliser();
-		}
-	}
 
 	public String getTablePilTemp() {
 		return this.tablePilTemp;
