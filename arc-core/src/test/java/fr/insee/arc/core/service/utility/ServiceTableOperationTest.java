@@ -24,6 +24,10 @@ public class ServiceTableOperationTest {
     static int numberOfRecordsForTest = 5; 
 	
 	@Test
+	/**
+	 * test the query creating a table image of another table
+	 * @throws ArcException
+	 */
 	public void creationTableResultatTestSchemaTables() throws ArcException {
 
 		String tableIn = "public.table_test_in";
@@ -50,6 +54,10 @@ public class ServiceTableOperationTest {
 	}
 	
 	@Test
+	/**
+	 * test the query creating a temporary table image of another table
+	 * @throws ArcException
+	 */
 	public void creationTableResultatTestTemporaryTables() throws ArcException {
 
 		String tableIn = "table_test_in";
@@ -75,9 +83,51 @@ public class ServiceTableOperationTest {
 		u.dropTable(c, tableIn, tableOut);
 		
 	}
+
+	
+	@Test
+	/**
+	 * Test the query creating the image of another table under records exist condition
+	 * The query creates an image if and only if there are some records in the source table
+	 * @throws ArcException 
+	 */
+	public void createTableInheritTest() throws ArcException
+	{
+		
+		String tableIn = "table_test_in";
+		String tableOut = "public.table_test_out";
+		
+		// test 1: tableIn is not empty
+		// create a table with 5 records and 2 columns (i,j)
+		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+numberOfRecordsForTest+") i");
+
+		// execute createTableInherit to create the table duplication
+		u.executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
+		
+		// test
+		// tableOut must exists
+		testTableExists(tableOut,1);
+		// the data must be same as tableIn
+		testCreationTableResultatResult(tableOut,numberOfRecordsForTest);
+		u.dropTable(c, tableIn, tableOut);
+	
+		
+		// test 2: tableIn is empty
+		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+numberOfRecordsForTest+") i where false");
+		// execute createTableInherit to create the table duplication
+		u.executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
+
+		// test
+		// tableOut shouldn't have been created and doesn't exist
+		testTableExists(tableOut,0);
+		u.dropTable(c, tableIn, tableOut);
+		
+	}
+
+	
 	
 	/**
-	 * check the table meta data and that the table is empty
+	 * check the table columns and the number of lines in the table
 	 * @param tableOut
 	 * @throws ArcException
 	 */
@@ -96,5 +146,24 @@ public class ServiceTableOperationTest {
 		assertEquals(numberOfRecordsInTableOut, content.get("i").size());
 		assertEquals(numberOfRecordsInTableOut, content.get("j").size());
 	}
+	
+	private void testTableExists(String tableOut, int expectedNumber) throws ArcException
+	{
+		HashMap<String, ArrayList<String>> content;
+		
+		if (tableOut.contains("."))
+		{
+		content= new GenericBean(
+			    u.executeRequest(c, new GenericPreparedStatementBuilder("SELECT count(*) as number_of_table FROM pg_tables where schemaname||'.'||tablename='"+tableOut+"'"))).mapContent(true);
+		}
+		else
+		{
+			content= new GenericBean(
+				    u.executeRequest(c, new GenericPreparedStatementBuilder("SELECT count(*) as number_of_table FROM pg_tables where tablename='"+tableOut+"'"))).mapContent(true);
+		}
+		
+		assertEquals(expectedNumber, Integer.parseInt(content.get("number_of_table").get(0)));
 
+	}
+	
 }

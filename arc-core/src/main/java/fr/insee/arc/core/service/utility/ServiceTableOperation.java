@@ -35,7 +35,7 @@ public class ServiceTableOperation {
 		requete.append("TABLE " + tableToBeCreated + " ");
 		requete.append("" + FormatSQL.WITH_NO_VACUUM + " ");
 		requete.append("as SELECT * FROM " + tableIn + " ");
-		if (image.length == 0 || image[0] == false) {
+		if (image.length == 0 || Boolean.FALSE.equals(image[0])) {
 			requete.append("where 1=0 ");
 		}
 		requete.append("; ");
