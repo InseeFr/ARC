@@ -4,7 +4,13 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import fr.insee.arc.utils.exception.ArcException;
+
 public class ServiceHashFileName {
+
+	private ServiceHashFileName() {
+		throw new IllegalStateException("Utility class");
+	}
 
 	public static final String CHILD_TABLE_TOKEN = "child";
 
@@ -14,8 +20,9 @@ public class ServiceHashFileName {
 	 * @param tableName
 	 * @param idSource
 	 * @return
+	 * @throws ArcException
 	 */
-	public static String tableOfIdSource(String tableName, String idSource) {
+	public static String tableOfIdSource(String tableName, String idSource) throws ArcException {
 		return tableName + "_" + CHILD_TABLE_TOKEN + "_" + hashOfIdSource(idSource);
 	}
 
@@ -24,8 +31,9 @@ public class ServiceHashFileName {
 	 * 
 	 * @param idSource
 	 * @return
+	 * @throws ArcException
 	 */
-	public static String hashOfIdSource(String idSource) {
+	public static String hashOfIdSource(String idSource) throws ArcException {
 		String hashText = "";
 		MessageDigest m;
 		try {
@@ -33,7 +41,7 @@ public class ServiceHashFileName {
 			m.update(idSource.getBytes(), 0, idSource.length());
 			hashText = String.format("%1$032x", new BigInteger(1, m.digest()));
 		} catch (NoSuchAlgorithmException e) {
-			return null;
+			throw new ArcException("Hashing idsource was not possible because hash algorithm is not implemented");
 		}
 		return hashText;
 	}

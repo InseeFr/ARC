@@ -4,7 +4,10 @@ import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ServiceTableNaming {
 
-	
+	private ServiceTableNaming() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	/**
 	 * Build a signifiant and collision free temporary table name
 	 * 
@@ -30,7 +33,6 @@ public class ServiceTableNaming {
 	public static String globalTableName(String aEnvExecution, String aCurrentPhase, String tableName) {
 		return dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName;
 	}
-	
 
 	/**
 	 * Permet la rétro compatibilité pour la migration vers 1 schéma par
@@ -42,5 +44,5 @@ public class ServiceTableNaming {
 	public static String dbEnv(String env) {
 		return env.replace(".", "_") + ".";
 	}
-	
+
 }

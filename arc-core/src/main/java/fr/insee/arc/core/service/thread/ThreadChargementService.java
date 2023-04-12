@@ -163,9 +163,8 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	    // mise à jour du nombre d'enregistrement
 	    query.append(ServicePilotageOperation.updateNbEnr(this.tableChargementPilTemp, this.getTableTempA()));	
 	    
-	    // Mettre à jour le nombre d'enregistrement dans la table de
-	    // pilotage temporaire
-	    query.append(insertionFinale(this.connexion.getExecutorConnection(), this.tableChargementOK, this.idSource));
+	    // Créer la table chargement OK 
+	    query.append(insertionFinale(this.tableChargementOK, this.idSource));
 
 	    // mark file as done in the pilotage table
 	    arcThreadGenericDao.marquageFinalDefaultDao(query);
@@ -319,11 +318,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
      * @param tableName
      * @throws ArcException
      */
-    private String insertionFinale(Connection connexion, String tableName, String idSource) {
+    private String insertionFinale(String tableName, String idSource) throws ArcException {
    	StaticLoggerDispatcher.info("** insertTableOK **", LOGGER);
 
    	StringBuilder query = new StringBuilder();
-	String tableIdSource = ServiceHashFileName.tableOfIdSource(tableName, this.idSource);
+	String tableIdSource = ServiceHashFileName.tableOfIdSource(tableName, idSource);
 
 	// promote the application user account to full right
 	query.append(switchToFullRightRole());

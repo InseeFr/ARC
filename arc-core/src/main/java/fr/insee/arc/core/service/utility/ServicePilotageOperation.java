@@ -15,8 +15,12 @@ import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ServicePilotageOperation {
 
+	private ServicePilotageOperation() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ServicePilotageOperation.class);
-	
+
 	/**
 	 * Met à jour le comptage du nombre d'enregistrement par fichier; nos fichiers
 	 * de blocs XML sont devenus tous plats :)
@@ -38,7 +42,7 @@ public class ServicePilotageOperation {
 
 		return query.toString();
 	}
-	
+
 	/**
 	 * Selection d'un lot d'id_source pour appliquer le traitement Les id_sources
 	 * sont selectionnés parmi les id_source présent dans la phase précédentes avec
@@ -74,7 +78,8 @@ public class ServicePilotageOperation {
 				+ " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS  ");
 
 		requete.append("\n WITH prep AS (");
-		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, "+ColumnEnum.ID_SOURCE.getColumnName()+") as cum_enr ");
+		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, " + ColumnEnum.ID_SOURCE.getColumnName()
+				+ ") as cum_enr ");
 		requete.append("\n FROM " + tablePil + " a ");
 		requete.append("\n WHERE phase_traitement='" + phaseAncien + "'  AND '" + TraitementEtat.OK
 				+ "'=ANY(etat_traitement) and etape=1 ) ");
@@ -82,16 +87,18 @@ public class ServicePilotageOperation {
 		requete.append("\n UNION   (SELECT a.* FROM prep a LIMIT 1)) ");
 
 		// update the line in pilotage with etape=3 for the previous step
-		requete.append("\n , update as ( UPDATE " + tablePil
-				+ " a set etape=3 from mark b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+" and a.etape=1 AND a.phase_traitement='"
-				+ phaseAncien + "'  AND '" + TraitementEtat.OK + "'=ANY(a.etat_traitement)) ");
+		requete.append("\n , update as ( UPDATE " + tablePil + " a set etape=3 from mark b where a."
+				+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName()
+				+ " and a.etape=1 AND a.phase_traitement='" + phaseAncien + "'  AND '" + TraitementEtat.OK
+				+ "'=ANY(a.etat_traitement)) ");
 
 		// insert the line in pilotage with etape=1 for the current step
 		requete.append("\n , insert as (INSERT INTO " + tablePil + " ");
-		requete.append(
-				"\n (container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, etape, generation_composite,jointure) ");
-		requete.append("\n SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+", date_entree, id_norme, validite, periodicite, '" + phaseNouveau
-				+ "' as phase_traitement, '{" + TraitementEtat.ENCOURS + "}' as etat_traitement ");
+		requete.append("\n (container, " + ColumnEnum.ID_SOURCE.getColumnName()
+				+ ", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, etape, generation_composite,jointure) ");
+		requete.append("\n SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName()
+				+ ", date_entree, id_norme, validite, periodicite, '" + phaseNouveau + "' as phase_traitement, '{"
+				+ TraitementEtat.ENCOURS + "}' as etat_traitement ");
 		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + ApiService.bdDateFormat
 				+ "') , rapport, taux_ko, nb_enr, 1 as etape, generation_composite, jointure ");
 		requete.append("\n FROM mark ");
@@ -101,6 +108,7 @@ public class ServicePilotageOperation {
 		requete.append("\n ANALYZE " + tablePilTemp + ";");
 		return requete.toString();
 	}
+
 	/**
 	 * Query to update pilotage table when error occurs
 	 * 
@@ -116,6 +124,6 @@ public class ServicePilotageOperation {
 		requete.append(
 				"\n WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
 		return requete;
-	}	
+	}
 
 }

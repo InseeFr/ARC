@@ -6,14 +6,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TraitementTableExecution;
-import fr.insee.arc.core.service.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ServiceDatabaseMaintenance {
 
-	protected static final Logger LOGGER = LogManager.getLogger(ServiceResetEnvironment.class);
+	private ServiceDatabaseMaintenance() {
+		throw new IllegalStateException("Utility class");
+	}
+
+	protected static final Logger LOGGER = LogManager.getLogger(ServiceDatabaseMaintenance.class);
 
 	/**
 	 * Maintenance sur la table de pilotage
@@ -34,11 +37,11 @@ public class ServiceDatabaseMaintenance {
 		}
 	}
 
-/**
- * 
- * @param connexion
- * @param type
- */
+	/**
+	 * 
+	 * @param connexion
+	 * @param type
+	 */
 	public static void maintenancePgCatalog(Integer poolIndex, Connection connexion, String type) {
 		// postgres libere mal l'espace sur ces tables qaund on fait trop d'opération
 		// sur les colonnes
@@ -46,8 +49,7 @@ public class ServiceDatabaseMaintenance {
 		StaticLoggerDispatcher.info("** Maintenance Catalogue **", LOGGER);
 		UtilitaireDao.get(poolIndex).maintenancePgCatalog(connexion, type);
 	}
-	
-	
+
 	/**
 	 * classic database maintenance routine 2 vacuum are sent successively to
 	 * analyze and remove dead tuple completely from
@@ -62,7 +64,7 @@ public class ServiceDatabaseMaintenance {
 	public static void maintenanceDatabaseClassic(Integer poolIndex, Connection connexion, String envExecution) {
 		maintenanceDatabase(poolIndex, connexion, envExecution, FormatSQL.VACUUM_OPTION_NONE);
 	}
-	
+
 	/**
 	 * analyze and vacuum on postgres catalog tables analyze and vacuum on the
 	 * pilotage table located in the sandbox schema
@@ -72,12 +74,13 @@ public class ServiceDatabaseMaintenance {
 	 * @param typeMaintenance FormatSQL.VACUUM_OPTION_FULL or
 	 *                        FormatSQL.VACUUM_OPTION_NONE
 	 */
-	private static void maintenanceDatabase(Integer poolIndex, Connection connexion, String envExecution, String typeMaintenance) {
+	private static void maintenanceDatabase(Integer poolIndex, Connection connexion, String envExecution,
+			String typeMaintenance) {
 		maintenancePgCatalog(poolIndex, connexion, typeMaintenance);
 
 		maintenancePilotage(poolIndex, connexion, envExecution, typeMaintenance);
 
 		StaticLoggerDispatcher.info("** Fin de maintenance **", LOGGER);
 	}
-	
+
 }

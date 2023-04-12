@@ -5,6 +5,9 @@ import fr.insee.arc.utils.utils.ManipString;
 
 public class ServiceDatabaseConfiguration {
 
+	private ServiceDatabaseConfiguration() {
+		throw new IllegalStateException("Utility class");
+	}
 
 	/**
 	 * Permet de configurer la connexion Mettre un timeout par exemple

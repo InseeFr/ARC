@@ -93,6 +93,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	PropertiesHandler properties;
 
+	public UtilitaireDao()
+	{
+		super();
+	}
+	
 	private UtilitaireDao(String aPool) {
 		this.pool = aPool;
 		if (map == null) {

@@ -15,9 +15,12 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 public class ServiceResetEnvironment {
 
+	private ServiceResetEnvironment() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	protected static final Logger LOGGER = LogManager.getLogger(ServiceResetEnvironment.class);
 
-	
 	/**
 	 * Retour arriere vers une phase
 	 * 
@@ -32,7 +35,8 @@ public class ServiceResetEnvironment {
 			resetBAS(env, rootDirectory);
 		} else {
 			ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-					ApiService.IHM_SCHEMA, env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
+					ApiService.IHM_SCHEMA, env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter(),
+					null);
 			try {
 				serv.retourPhasePrecedente(phaseAExecuter, undoFilesSelection,
 						new ArrayList<>(Arrays.asList(TraitementEtat.OK, TraitementEtat.KO)));
@@ -63,5 +67,5 @@ public class ServiceResetEnvironment {
 			service.finaliser();
 		}
 	}
-	
+
 }

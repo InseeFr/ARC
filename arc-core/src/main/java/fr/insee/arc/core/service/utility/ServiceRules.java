@@ -13,6 +13,10 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class ServiceRules {
 
+	private ServiceRules() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	/**
 	 * Requete permettant de récupérer les règles pour un id_source donnée et une
 	 * table de regle
@@ -132,9 +136,9 @@ public class ServiceRules {
 	 */
 	public static String getNormeAttributes(String idSource, String tablePilotage) {
 		StringBuilder requete = new StringBuilder();
-		requete.append(
-				"\n SELECT pil."+ColumnEnum.ID_SOURCE.getColumnName()+", pil.jointure, pil.id_norme, pil.validite, pil.periodicite, pil.validite "
-						+ "FROM " + tablePilotage + " pil " + " WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "' ");
+		requete.append("\n SELECT pil." + ColumnEnum.ID_SOURCE.getColumnName()
+				+ ", pil.jointure, pil.id_norme, pil.validite, pil.periodicite, pil.validite " + "FROM " + tablePilotage
+				+ " pil " + " WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "' ");
 		return requete.toString();
 	}
 
@@ -147,7 +151,8 @@ public class ServiceRules {
 	 * @throws ArcException
 	 */
 	public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws ArcException {
-		GenericBean gb = new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new ArcPreparedStatementBuilder(req)));
+		GenericBean gb = new GenericBean(
+				UtilitaireDao.get("arc").executeRequest(c, new ArcPreparedStatementBuilder(req)));
 		return gb.mapContent(true);
 	}
 }

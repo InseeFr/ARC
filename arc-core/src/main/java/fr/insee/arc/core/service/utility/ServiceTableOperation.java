@@ -5,13 +5,17 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ServiceTableOperation {
 
+	private ServiceTableOperation() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ServiceTableOperation.class);
 
-	
 	/**
 	 * Créer une table image vide d'une autre table Si le schema est spécifié, la
 	 * table est créée dans le schema; sinon elle est crée en temporary
@@ -37,10 +41,10 @@ public class ServiceTableOperation {
 		requete.append("; ");
 		return requete.toString();
 	}
-	
-	
+
 	/**
 	 * Query to create a target table if the source table has records
+	 * 
 	 * @param connexion
 	 * @param tableIn
 	 * @param tableIdSource
@@ -64,21 +68,25 @@ public class ServiceTableOperation {
 	}
 
 	/**
-	 * Creation de la table de travail contenant les données en entrée d'une phase et pour un fichier donné
-	 * La table en sortie est temporaire ou unlogged car elle est volatile et utilisée que durant l'execution de la phase
-	 * La table en entrée est dans le ca d'utilisation principale la table résultat des données 
+	 * Creation de la table de travail contenant les données en entrée d'une phase
+	 * et pour un fichier donné La table en sortie est temporaire ou unlogged car
+	 * elle est volatile et utilisée que durant l'execution de la phase La table en
+	 * entrée est dans le ca d'utilisation principale la table résultat des données
 	 * en sortie la phase précédente pour le fichier donnée.
+	 * 
 	 * @param extraColumns
-	 * @param tableIn	la table des données en entrée de la phase
-	 * @param tableOut	la table des données du fichier en sortie
-	 * @param tablePilTemp	la table de pilotage relative à la phase; c'est la liste des fichiers selectionnés pour la phase
-	 * @param idSource	le nom du fichier
-	 * @param isIdSource	le nom du fichier est-il spécifié ?
-	 * @param etatTraitement	l'état du traitement  si on souhaite crée une table en sortie relative à un état particulier
+	 * @param tableIn        la table des données en entrée de la phase
+	 * @param tableOut       la table des données du fichier en sortie
+	 * @param tablePilTemp   la table de pilotage relative à la phase; c'est la
+	 *                       liste des fichiers selectionnés pour la phase
+	 * @param idSource       le nom du fichier
+	 * @param isIdSource     le nom du fichier est-il spécifié ?
+	 * @param etatTraitement l'état du traitement si on souhaite crée une table en
+	 *                       sortie relative à un état particulier
 	 * @return
 	 */
-	public static String createTableTravail(String extraColumns, String tableIn, String tableOut, String tablePilTemp
-			, String... etatTraitement) {
+	public static String createTableTravail(String extraColumns, String tableIn, String tableOut, String tablePilTemp,
+			String... etatTraitement) {
 		StringBuilder requete = new StringBuilder();
 
 		requete.append("\n DROP TABLE IF EXISTS " + tableOut + " CASCADE; \n");
@@ -97,7 +105,8 @@ public class ServiceTableOperation {
 		requete.append("\n    FROM " + tableIn + " stk ");
 		requete.append("\n    WHERE exists ( SELECT 1  ");
 		requete.append("\n            FROM " + tablePilTemp + " pil  ");
-		requete.append("\n  where pil."+ColumnEnum.ID_SOURCE.getColumnName()+"=stk."+ColumnEnum.ID_SOURCE.getColumnName()+" ");
+		requete.append("\n  where pil." + ColumnEnum.ID_SOURCE.getColumnName() + "=stk."
+				+ ColumnEnum.ID_SOURCE.getColumnName() + " ");
 		if (etatTraitement.length > 0) {
 			requete.append(" AND '" + etatTraitement[0] + "'=ANY(pil.etat_traitement) ");
 		}
@@ -107,8 +116,8 @@ public class ServiceTableOperation {
 		return requete.toString();
 	}
 
-
-	public static String createTableTravailIdSource(String tableIn, String tableOut, String idSource, String... extraCols) {
+	public static String createTableTravailIdSource(String tableIn, String tableOut, String idSource,
+			String... extraCols) throws ArcException {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n CREATE ");
 		if (!tableOut.contains(".")) {
@@ -129,5 +138,5 @@ public class ServiceTableOperation {
 
 		return requete.toString();
 	}
-	
+
 }

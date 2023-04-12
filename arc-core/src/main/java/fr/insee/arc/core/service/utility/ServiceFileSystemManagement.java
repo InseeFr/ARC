@@ -7,6 +7,10 @@ import fr.insee.arc.core.model.TraitementPhase;
 
 public class ServiceFileSystemManagement {
 
+	private ServiceFileSystemManagement() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	/**
 	 * Directory management
 	 */
@@ -60,5 +64,5 @@ public class ServiceFileSystemManagement {
 	public static String directoryPhaseEtatEnCours(String rootDirectory, String env, TraitementPhase t) {
 		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.ENCOURS);
 	}
-	
+
 }
