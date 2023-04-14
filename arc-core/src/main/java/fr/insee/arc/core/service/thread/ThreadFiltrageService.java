@@ -134,10 +134,12 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 
 		// création des tables temporaires de données
 		query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(), this.tableFiltrageDataTemp, this.idSource));
+		
 		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ko", LOGGER);
-		query.append(FormatSQL.createAsSelectFrom(this.tableTempFiltrageKo, this.tableFiltrageDataTemp, "false"));
+		query.append(ServiceTableOperation.creationTableResultat(this.tableFiltrageDataTemp,this.tableTempFiltrageKo));
+		
 		StaticLoggerDispatcher.info("Création de la table temporaire filtrage_ok", LOGGER);
-		query.append(FormatSQL.createAsSelectFrom(this.tableTempFiltrageOk, this.tableFiltrageDataTemp, "false"));
+		query.append(ServiceTableOperation.creationTableResultat(this.tableFiltrageDataTemp,this.tableTempFiltrageOk));
 
 		UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 

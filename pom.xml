@@ -285,7 +285,14 @@
 			<artifactId>commons-configuration2</artifactId>
 			<version>2.8.0</version>
 		</dependency>
-
+		
+		<dependency>
+		    <groupId>io.zonky.test</groupId>
+		    <artifactId>embedded-postgres</artifactId>
+		    <version>2.0.3</version>
+		    <scope>test</scope>
+		</dependency>
+		
 	</dependencies>
 	
 	<dependencyManagement>

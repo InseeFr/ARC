@@ -130,7 +130,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         return "BEGIN;RESET statement_timeout;COMMIT;";
     }
     
-    
     /**
      * essaie d'exectuer une requete et si elle n'échoue ne fait rien
      */
@@ -215,35 +214,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         return requete;
     }
 
-    /**
-     *
-     * Méthode de création d'une requête
-     * {@code CREATE TABLE aNomTableCible AS SELECT columns FROM aNomTableSource WHERE clauseWhere;}
-     * , éventuellement précédée d'un {@code DROP}
-     *
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @param columns
-     * @param clauseWhere
-     * @param dropFirst
-     * @return
-     */
-    public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, String columns,
-            String clauseWhere, boolean dropFirst)
-    {
-        // Si la table contient un . on est dans un schema, sinon c'est du temps
-        if (aNomTableCible.contains(".")) {
-            return createObjectAsSelectFrom(ObjectType.TABLE, aNomTableCible, aNomTableSource, columns, clauseWhere,
-                    dropFirst);
-        } else {
-            return createObjectAsSelectFrom(ObjectType.TEMPORARY_TABLE, aNomTableCible, aNomTableSource, columns, clauseWhere,
-                    dropFirst);
-        }
-        
-       
-    }
-
-    
     
     /**
      * this sql block test is the query to test is true to execute the other query
@@ -270,52 +240,15 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     }
 
     /**
-     * 
-     * @param tableOrView
-     * @param aNomTableCible
-     * @param aNomTableSource
-     * @param columns
-     * @param clauseWhere
-     * @param dropFirst
+     * query that return true is the query as at least one record
+     * @param tableIn
      * @return
      */
-    private static String createObjectAsSelectFrom(ObjectType tableOrView, String aNomTableCible,
-            String aNomTableSource, String columns, String clauseWhere, boolean dropFirst)
+    public static String hasRecord(String tableIn)
     {
-        StringBuilder requete = new StringBuilder();
-        if (dropFirst)
-        {
-            requete.append(dropObjectCascade(tableOrView, aNomTableCible));
-        }
-        String where = ((StringUtils.isBlank(clauseWhere)) ? empty : " WHERE " + clauseWhere);
-        /*
-         * Attention ! Les vues ne peuvent être créées avec un
-         * autovacuum_enabled
-         */
-        String vacuumIfNeeded = tableOrView.equals(ObjectType.TABLE) ? " " + FormatSQL.WITH_NO_VACUUM : "";
-        String orReplaceForViewsOnly = tableOrView.equals(ObjectType.VIEW) ? "OR REPLACE " : "";
-        requete.append(
-                "\n CREATE " + orReplaceForViewsOnly + tableOrView + " " + aNomTableCible + vacuumIfNeeded + " AS ");
-        requete.append("\n SELECT " + columns + " FROM " + aNomTableSource);
-        requete.append(where + ";");
-        return requete.toString();
+    	return "SELECT (count(*)>0) as has_record FROM (SELECT 1 FROM " + tableIn + " LIMIT 1) u";
     }
 
-    /**
-    *
-    * @param aNomTableCible
-    * @param aNomTableSource
-    * @param clauseWhere
-    *            le WHERE n'y est pas, je le rajouterai tout seul merci.
-    * @return
-    */
-   public static String createAsSelectFrom(String aNomTableCible, String aNomTableSource, String clauseWhere)
-   {
-       return createAsSelectFrom(aNomTableCible, aNomTableSource, "*", clauseWhere, DROP_FIRST_FALSE);
-   }
-    
-    
-    
     /**
      * @param table
      * @return

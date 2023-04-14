@@ -1,31 +1,16 @@
 package fr.insee.arc.core.service.api.query;
 
-import static org.junit.Assert.assertEquals;
-
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.junit.Test;
 
-import fr.insee.arc.core.TestDatabase;
-import fr.insee.arc.core.service.api.query.ServiceHashFileName;
-import fr.insee.arc.core.service.api.query.ServiceTableOperation;
-import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.query.InitializeQueryTest;
 
 
-public class ServiceTableOperationTest {
+public class ServiceTableOperationTest extends InitializeQueryTest {
+   
+	int expectedNumberOfRecordsForTest = 5;
+	String[] expectedColumnsForTest = new String[] {"i", "j"};
 
-    UtilitaireDao u = new UtilitaireDao();
-    
-    Connection c = TestDatabase.testConnection;
-    
-    static int defaultExpectedNumberOfRecordsForTest = 5; 
-    static String[] defaultExpectedColumnsForTest = new String[] {"i", "j"};
-    
 	@Test
 	/**
 	 * test the query creating a table image of another table
@@ -37,21 +22,21 @@ public class ServiceTableOperationTest {
 		String tableOut = "public.table_test_out";
 		
 		// create a table with 5 records and 2 columns (i,j)
-		u.executeImmediate(c, "CREATE TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+defaultExpectedNumberOfRecordsForTest+") i");
+		u.executeImmediate(c, "CREATE TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 		
 		// create tableOut as an empty image of tableIn
 		u.executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut));
-		testCreationTableResultatResult(tableOut, 0);
+		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
 		u.dropTable(c, tableOut);
 		
 		// create tableOut as an empty image of tableIn (false argument)
 		u.executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, false));
-		testCreationTableResultatResult(tableOut, 0);
+		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
 		u.dropTable(c, tableOut);
 
 		// create tableOut as the exact image of tableIn (true argument)
 		u.executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, true));
-		testCreationTableResultatResult(tableOut, defaultExpectedNumberOfRecordsForTest);
+		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
 		
 		u.dropTable(c, tableIn, tableOut);
 	}
@@ -67,21 +52,21 @@ public class ServiceTableOperationTest {
 		String tableOut = "table_test_out";
 		
 		// create a table with 5 records and 2 columns (i,j)
-		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+defaultExpectedNumberOfRecordsForTest+") i");
+		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 		
 		// create tableOut as an empty image of tableIn
 		u.executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut));
-		testCreationTableResultatResult(tableOut, 0);
+		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
 		u.dropTable(c, tableOut);
 		
 		// create tableOut as an empty image of tableIn (false argument)
 		u.executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, false));
-		testCreationTableResultatResult(tableOut, 0);
+		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
 		u.dropTable(c, tableOut);
 
 		// create tableOut as the exact image of tableIn (true argument)
 		u.executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, true));
-		testCreationTableResultatResult(tableOut, defaultExpectedNumberOfRecordsForTest);
+		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
 		
 		u.dropTable(c, tableIn, tableOut);
 		
@@ -102,7 +87,7 @@ public class ServiceTableOperationTest {
 		
 		// test 1: tableIn is not empty
 		// create a table with 5 records and 2 columns (i,j)
-		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+defaultExpectedNumberOfRecordsForTest+") i");
+		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// execute createTableInherit to create the table duplication
 		u.executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
@@ -111,12 +96,12 @@ public class ServiceTableOperationTest {
 		// tableOut must exists
 		testTableExists(tableOut,1);
 		// the data must be same as tableIn
-		testCreationTableResultatResult(tableOut,defaultExpectedNumberOfRecordsForTest);
+		testMetadataAndNumberOfRecords(tableOut,this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
 		u.dropTable(c, tableIn, tableOut);
 	
 		
 		// test 2: tableIn is empty
-		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+defaultExpectedNumberOfRecordsForTest+") i where false");
+		u.executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i where false");
 		// execute createTableInherit to create the table duplication
 		u.executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
 
@@ -138,91 +123,30 @@ public class ServiceTableOperationTest {
 
 		
 		// creation de la table de données relative au fichier
-		u.executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+defaultExpectedNumberOfRecordsForTest+") i");
+		u.executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// creation de la table temporaire de données relative copie de la table de données du fichier
 		u.executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOut, idSource));
 				
 		// test if content is the same
-		testCreationTableResultatResult(tableOut, defaultExpectedNumberOfRecordsForTest);
+		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
 		u.dropTable(c, tableOfIdSource, tableOut);
 
 		
 		// testing with extra columns definition
 		// creation de la table de données relative au fichier
-		u.executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+defaultExpectedNumberOfRecordsForTest+") i");
+		u.executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// creation de la table temporaire de données relative copie de la table de données du fichier
 		u.executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOut, idSource, "null::text as k, 8::int as l"));
 		
 		String[] expectedColumns = new String[] {"i", "j", "k", "l"};
-		testCreationTableResultatResult(tableOut, defaultExpectedNumberOfRecordsForTest, expectedColumns);
+		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, expectedColumns);
 		
 		u.dropTable(c, tableOfIdSource, tableOut);
 
 	}
 	
 	
-	/**
-	 * check the table columns and the number of lines in the table
-	 * @param tableOut
-	 * @throws ArcException
-	 */
-	private void testCreationTableResultatResult(String tableOut, int numberOfRecordsInTableOut, String... columns) throws ArcException
-	{
-		
-		// query the content in tableOut
-		HashMap<String, ArrayList<String>> content = new GenericBean(
-				    u.executeRequest(c, new GenericPreparedStatementBuilder("SELECT * FROM "+tableOut))).mapContent(true);
 
-		// test that there is exactly 2 columns in tableOut
-		assertEquals(columns.length, content.keySet().size());
-		
-		// test that tableOut has a 2 columns called i and j
-		// and that tableOut is empty
-		for (int columnIndex=0; columnIndex<columns.length; columnIndex++)
-		{
-			assertEquals(numberOfRecordsInTableOut, content.get(columns[columnIndex]).size());
-		}
-	}
-	
-	private void testCreationTableResultatResult(String tableOut, int numberOfRecordsInTableOut) throws ArcException
-	{
-		String[] columns = defaultExpectedColumnsForTest;
-		
-		// query the content in tableOut
-		HashMap<String, ArrayList<String>> content = new GenericBean(
-				    u.executeRequest(c, new GenericPreparedStatementBuilder("SELECT * FROM "+tableOut))).mapContent(true);
-
-		// test that there is exactly 2 columns in tableOut
-		assertEquals(columns.length, content.keySet().size());
-		
-		// test that tableOut has a 2 columns called i and j
-		// and that tableOut is empty
-		for (int columnIndex=0; columnIndex<columns.length; columnIndex++)
-		{
-			assertEquals(numberOfRecordsInTableOut, content.get(columns[columnIndex]).size());
-		}
-	}
-	
-	
-	private void testTableExists(String tableOut, int expectedNumber) throws ArcException
-	{
-		HashMap<String, ArrayList<String>> content;
-		
-		if (tableOut.contains("."))
-		{
-		content= new GenericBean(
-			    u.executeRequest(c, new GenericPreparedStatementBuilder("SELECT count(*) as number_of_table FROM pg_tables where schemaname||'.'||tablename='"+tableOut+"'"))).mapContent(true);
-		}
-		else
-		{
-			content= new GenericBean(
-				    u.executeRequest(c, new GenericPreparedStatementBuilder("SELECT count(*) as number_of_table FROM pg_tables where tablename='"+tableOut+"'"))).mapContent(true);
-		}
-		
-		assertEquals(expectedNumber, Integer.parseInt(content.get("number_of_table").get(0)));
-
-	}
-	
 }

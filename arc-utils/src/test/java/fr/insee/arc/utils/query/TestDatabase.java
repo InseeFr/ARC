@@ -1,4 +1,4 @@
-package fr.insee.arc.core;
+package fr.insee.arc.utils.query;
 
 import java.io.IOException;
 import java.sql.Connection;

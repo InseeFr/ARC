@@ -55,19 +55,7 @@ public class ServiceTableOperation {
 	 */
 	public static String createTableInherit(String tableIn, String tableIdSource) {
 		StaticLoggerDispatcher.info("** createTableOK ** : " + tableIdSource, LOGGER_APISERVICE);
-
-		// si la table in n'est pas vide
-		StringBuilder queryToTest = new StringBuilder();
-		queryToTest.append("SELECT count(*)>0 FROM (SELECT 1 FROM " + tableIn + " LIMIT 1) u");
-
-		StringBuilder queryToExecute = new StringBuilder();
-
-		// on créé la table héritée que si la table a des enregistrements
-		queryToExecute.append("DROP TABLE IF EXISTS " + tableIdSource + ";");
-		queryToExecute.append("CREATE TABLE " + tableIdSource + " " + FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM "
-				+ tableIn + ";");
-
-		return FormatSQL.executeIf(queryToTest, queryToExecute);
+		return FormatSQL.executeIf(FormatSQL.hasRecord(tableIn), creationTableResultat(tableIn, tableIdSource, true));
 	}
 
 
