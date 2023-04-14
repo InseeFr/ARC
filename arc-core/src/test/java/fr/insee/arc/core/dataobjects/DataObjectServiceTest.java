@@ -18,6 +18,18 @@ public class DataObjectServiceTest {
 	}
 	
 	@Test
+	public void testGetViewInTemporary() {
+		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
+		Assert.assertEquals(ViewEnum.TABLE_TEST_IN_TEMPORARY.getTableName(), dataObjectService.getView(ViewEnum.TABLE_TEST_IN_TEMPORARY));
+	}
+
+	@Test
+	public void testGetViewInPublic() {
+		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
+		Assert.assertEquals("public."+ViewEnum.TABLE_TEST_IN_PUBLIC.getTableName(), dataObjectService.getView(ViewEnum.TABLE_TEST_IN_PUBLIC));
+	}
+	
+	@Test
 	public void testGetFullTableNameInMetadata() {
 		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
 		Assert.assertEquals("arc.toto", dataObjectService.getFullTableNameInMetadata("toto"));

@@ -198,8 +198,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		StringBuilder blocFin = new StringBuilder();
 		// Creation des tables temporaires ok et ko
 		StaticLoggerDispatcher.info("Creation des tables temporaires ok et ko", LOGGER);
-		blocFin.append(FormatSQL.dropTable(tableOutOkTemp));
-		blocFin.append(FormatSQL.dropTable(tableOutKoTemp));
 
 		// Execution à mi parcours du bloc de requete afin que les tables tempo soit
 		// bien créées

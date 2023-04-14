@@ -18,7 +18,7 @@ public class ArcPreparedStatementBuilderTest {
 	public void sqlListeColumnsByView() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		Assert.assertEquals(new StringBuilder("test1,test2").toString(),
-				query.sqlListeOfColumnsFromModel(ViewEnum.TEST).toString());
+				query.sqlListeOfColumnsFromModel(ViewEnum.TABLE_TEST_IN_TEMPORARY).toString());
 	}
 
 }

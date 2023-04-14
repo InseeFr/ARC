@@ -207,7 +207,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		StaticLoggerDispatcher.info("Fin parserRegleCorrespondanceFonctionnelle", LOGGER);
 
 		StaticLoggerDispatcher.info("Exécution du filtrage : insertion dans les tables de travail.", LOGGER);
-		StringBuilder requete = getRequeteFiltrageIntermediaire(this.envExecution, this.tableFiltrageDataTemp,
+		StringBuilder requete = getRequeteFiltrageIntermediaire(this.tableFiltrageDataTemp,
 				this.tableTempFiltrageOk, this.tableTempFiltrageKo,
 				this.normeToPeriodiciteToValiditeInfToValiditeSupToRegle, this.seuilExclusion,
 				this.tableFiltragePilTemp);
@@ -258,10 +258,10 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 	 * @return
 	 * @throws ArcException
 	 */
-	private StringBuilder getRequeteFiltrageIntermediaire(String envExecution, String aTableControleOk,
+	private StringBuilder getRequeteFiltrageIntermediaire(String aTableControleOk,
 			String aTableFiltrageOk, String aTableFiltrageKo,
 			HierarchicalView aNormeToPeriodiciteToValiditeInfToValiditeSupToRegle, String excludedRate,
-			String aTablePilotage) throws ArcException {
+			String aTablePilotage) {
 		StringBuilder requete = new StringBuilder();
 
 		/**

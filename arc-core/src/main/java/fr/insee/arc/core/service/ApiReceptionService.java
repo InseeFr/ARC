@@ -560,7 +560,6 @@ public class ApiReceptionService extends ApiService {
 		try {
 		
 			StringBuilder requete = new StringBuilder();
-			requete.append(FormatSQL.dropTable(this.tablePilTemp));
 			requete.append(ServiceTableOperation.creationTableResultat(this.tablePil, this.tablePilTemp));
 			soumettreRequete(requete);
 
@@ -735,7 +734,6 @@ public class ApiReceptionService extends ApiService {
 		StaticLoggerDispatcher.info("Recherche de doublons de fichiers", LOGGER);
 
 		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.dropTable(this.tablePilTemp));
 		requete.append(ServiceTableOperation.creationTableResultat(this.tablePil, this.tablePilTemp));
 		String fileName;
 		String container;

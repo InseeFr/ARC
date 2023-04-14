@@ -14,6 +14,12 @@ public class DataObjectService {
 	
 	
 	/**
+	 * database public schema
+	 */
+	public static final String PUBLIC_SCHEMA="public";
+
+	
+	/**
 	 * database collation
 	 */
 	public static final String DATABASE_COLLATION="collate \"C\"";
@@ -50,7 +56,21 @@ public class DataObjectService {
 	 */
 	public String getView(ViewEnum e)
 	{
-		return e.isTableInSanbox()?this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName():ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
+		switch (e.getTableLocation()) {
+			case METADATA:
+				return ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
+
+			case SANDBOX:
+				return this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName();
+				
+			case TEMPORARY:
+				return e.getTableName();
+				
+			case PUBLIC:	
+				return PUBLIC_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
+
+		}
+		return e.getTableName();		
 	}
 	
 	public String getFullTableNameInMetadata(String tablename)

@@ -145,13 +145,13 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     	// création des tables temporaires de données
         query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(),this.tableNormageDataTemp, this.idSource));
        
-        //On indique que le normage s'est bien passé
+        //On indique que le normage s'est bien passé par défaut
         query.append("\n UPDATE "+this.tableNormagePilTemp);
         query.append("\n SET etat_traitement = '{"+TraitementEtat.OK+"}'");
         query.append("\n , phase_traitement = '"+this.currentPhase+"'");
         query.append("\n WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='"+this.idSource+"';");
         
-        query.append(ServiceTableOperation.createTableTravail("", this.tableNormageDataTemp, this.tableNormageKOTemp, this.tableNormagePilTemp, TraitementEtat.KO.toString()));
+        query.append(ServiceTableOperation.creationTableResultat(this.tableNormageDataTemp, this.tableNormageKOTemp));
                 
         UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), query.getQueryWithParameters());
 
