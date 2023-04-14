@@ -59,7 +59,7 @@ public class ServicePilotageOperation {
 	 * @param nbEnr
 	 * @return
 	 */
-	public static String copieTablePilotage(String phase, String tablePil, String tablePilTemp, String phaseAncien,
+	public static String copieTablePilotage(String tablePil, String tablePilTemp, String phaseAncien,
 			String phaseNouveau, Integer nbEnr) {
 		StringBuilder requete = new StringBuilder();
 

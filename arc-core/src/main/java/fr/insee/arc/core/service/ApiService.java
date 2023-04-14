@@ -225,7 +225,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		loggerDispatcher.info("** register **", LOGGER_APISERVICE);
 		try {
 			UtilitaireDao.get(poolName).executeBlock(connexion,
-					ServicePilotageOperation.copieTablePilotage(phase, tablePil, tablePilTemp, phaseIn, phase, nbEnr));
+					ServicePilotageOperation.copieTablePilotage(tablePil, tablePilTemp, phaseIn, phase, nbEnr));
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "register()", ex);
 		}
