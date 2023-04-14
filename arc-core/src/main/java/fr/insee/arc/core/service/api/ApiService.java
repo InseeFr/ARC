@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service;
+package fr.insee.arc.core.service.api;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,10 +20,10 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.api.query.ServiceDatabaseConfiguration;
+import fr.insee.arc.core.service.api.query.ServicePilotageOperation;
+import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.thread.ScalableConnection;
-import fr.insee.arc.core.service.utility.ServiceDatabaseConfiguration;
-import fr.insee.arc.core.service.utility.ServicePilotageOperation;
-import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;

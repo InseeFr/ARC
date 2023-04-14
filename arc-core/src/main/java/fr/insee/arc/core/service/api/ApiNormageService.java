@@ -1,12 +1,12 @@
-package fr.insee.arc.core.service;
+package fr.insee.arc.core.service.api;
 
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadNormageService;
-import fr.insee.arc.core.service.utility.ServiceTableNaming;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;

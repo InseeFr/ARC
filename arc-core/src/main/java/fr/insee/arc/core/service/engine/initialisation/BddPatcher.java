@@ -7,7 +7,7 @@ import java.sql.Connection;
 import org.apache.commons.io.IOUtils;
 
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.ApiInitialisationService;
+import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

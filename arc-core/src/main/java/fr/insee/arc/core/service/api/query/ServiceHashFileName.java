@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.utility;
+package fr.insee.arc.core.service.api.query;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

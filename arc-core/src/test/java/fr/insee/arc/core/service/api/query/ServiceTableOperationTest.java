@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.utility;
+package fr.insee.arc.core.service.api.query;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,6 +9,8 @@ import java.util.HashMap;
 import org.junit.Test;
 
 import fr.insee.arc.core.TestDatabase;
+import fr.insee.arc.core.service.api.query.ServiceHashFileName;
+import fr.insee.arc.core.service.api.query.ServiceTableOperation;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

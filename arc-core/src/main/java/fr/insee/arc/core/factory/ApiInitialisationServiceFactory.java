@@ -1,7 +1,7 @@
 package fr.insee.arc.core.factory;
 
-import fr.insee.arc.core.service.ApiInitialisationService;
-import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.api.ApiInitialisationService;
+import fr.insee.arc.core.service.api.ApiService;
 
 public class ApiInitialisationServiceFactory implements IServiceFactory {
 

@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.utility;
+package fr.insee.arc.core.service.api.query;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

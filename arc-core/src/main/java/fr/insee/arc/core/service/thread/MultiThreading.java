@@ -10,8 +10,8 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.ApiService;
-import fr.insee.arc.core.service.utility.ServiceDatabaseConfiguration;
+import fr.insee.arc.core.service.api.ApiService;
+import fr.insee.arc.core.service.api.query.ServiceDatabaseConfiguration;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

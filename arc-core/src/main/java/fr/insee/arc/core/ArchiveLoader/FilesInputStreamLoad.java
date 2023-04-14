@@ -11,7 +11,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.ApiReceptionService;
+import fr.insee.arc.core.service.api.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 /**

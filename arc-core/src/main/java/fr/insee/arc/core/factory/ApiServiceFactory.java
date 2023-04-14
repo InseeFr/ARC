@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.api.ApiService;
 
 /**
  * 

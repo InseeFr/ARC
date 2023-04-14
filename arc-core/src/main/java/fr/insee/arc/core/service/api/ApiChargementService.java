@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service;
+package fr.insee.arc.core.service.api;
 
 import java.io.File;
 
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
 import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
-import fr.insee.arc.core.service.utility.ServiceFileSystemManagement;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;

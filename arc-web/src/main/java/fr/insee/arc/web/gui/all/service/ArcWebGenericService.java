@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
-import fr.insee.arc.core.service.ApiInitialisationService;
+import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;

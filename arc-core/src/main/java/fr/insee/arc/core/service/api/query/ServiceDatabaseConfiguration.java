@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.utility;
+package fr.insee.arc.core.service.api.query;
 
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.utils.ManipString;

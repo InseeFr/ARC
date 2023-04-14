@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.utility;
+package fr.insee.arc.core.service.api.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.ApiInitialisationService;
-import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.api.ApiInitialisationService;
+import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
 public class ServiceResetEnvironment {

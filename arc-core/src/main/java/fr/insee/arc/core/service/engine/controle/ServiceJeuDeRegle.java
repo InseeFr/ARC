@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.RegleControleEntity;
 import fr.insee.arc.core.rulesobjects.RegleDao;
-import fr.insee.arc.core.service.ApiService;
+import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

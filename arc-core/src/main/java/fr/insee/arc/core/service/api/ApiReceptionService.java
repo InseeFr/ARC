@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service;
+package fr.insee.arc.core.service.api;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -30,9 +30,9 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
-import fr.insee.arc.core.service.utility.ServiceFileSystemManagement;
-import fr.insee.arc.core.service.utility.ServiceTableNaming;
-import fr.insee.arc.core.service.utility.ServiceTableOperation;
+import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
+import fr.insee.arc.core.service.api.query.ServiceTableNaming;
+import fr.insee.arc.core.service.api.query.ServiceTableOperation;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;

@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service;
+package fr.insee.arc.core.service.api;
 
 import org.springframework.stereotype.Component;
 
