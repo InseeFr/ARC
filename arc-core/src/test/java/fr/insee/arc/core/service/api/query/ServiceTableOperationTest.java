@@ -117,8 +117,9 @@ public class ServiceTableOperationTest extends InitializeQueryTest {
 	{
 		String idSource="mon_fichier.txt";
 		String tableIn="public.chargement_ok";
-		String tableOut="table_temporaire_data";
-		
+		String tableOutTemporaire="table_temporaire_data";
+		String tableOutPublic="public.table_temporaire_data";
+
 		String tableOfIdSource=ServiceHashFileName.tableOfIdSource(tableIn, idSource);
 
 		
@@ -126,11 +127,11 @@ public class ServiceTableOperationTest extends InitializeQueryTest {
 		u.executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// creation de la table temporaire de données relative copie de la table de données du fichier
-		u.executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOut, idSource));
+		u.executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutTemporaire, idSource));
 				
 		// test if content is the same
-		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
-		u.dropTable(c, tableOfIdSource, tableOut);
+		testMetadataAndNumberOfRecords(tableOutTemporaire, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
+		u.dropTable(c, tableOfIdSource, tableOutTemporaire);
 
 		
 		// testing with extra columns definition
@@ -138,13 +139,24 @@ public class ServiceTableOperationTest extends InitializeQueryTest {
 		u.executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// creation de la table temporaire de données relative copie de la table de données du fichier
-		u.executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOut, idSource, "null::text as k, 8::int as l"));
+		u.executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutTemporaire, idSource, "null::text as k, 8::int as l"));
 		
 		String[] expectedColumns = new String[] {"i", "j", "k", "l"};
-		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, expectedColumns);
+		testMetadataAndNumberOfRecords(tableOutTemporaire, this.expectedNumberOfRecordsForTest, expectedColumns);
 		
-		u.dropTable(c, tableOfIdSource, tableOut);
+		u.dropTable(c, tableOfIdSource, tableOutTemporaire);
 
+		// creation de la table de données relative au fichier
+		u.executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
+
+		// creation de la table temporaire de données relative copie de la table de données du fichier
+		u.executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutPublic, idSource));
+				
+		// test if content is the same
+		testMetadataAndNumberOfRecords(tableOutTemporaire, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
+		u.dropTable(c, tableOfIdSource, tableOutTemporaire);
+		
+		
 	}
 	
 	

@@ -18,61 +18,61 @@ public class FormatSQLTest extends InitializeQueryTest {
 	String tableIn = "tableIn";
 	String tableInPublic = "public.tableIn";
 
-	
 	@Test
-	public void tableExists_true() throws ArcException
-	{
-		
+	public void tableExists_true() throws ArcException {
+
 		// test for table not exists
 		assertFalse(u.isTableExiste(c, tableIn));
-		
+
 		// test for temporary table
-		u.executeImmediate(c, "CREATE TEMPORARY TABLE " + tableIn + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
+		u.executeImmediate(c,
+				"CREATE TEMPORARY TABLE " + tableIn + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 		assertTrue(u.isTableExiste(c, tableIn));
 		u.dropTable(c, tableIn);
 
 		// test for schema table
-		u.executeImmediate(c, "CREATE TABLE " + tableInPublic + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
+		u.executeImmediate(c,
+				"CREATE TABLE " + tableInPublic + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 		assertTrue(u.isTableExiste(c, tableInPublic));
 		u.dropTable(c, tableInPublic);
 	}
-	
+
 	@Test
 	public void changeRole_Test() throws ArcException {
-	
-		String myTestRole="arc";
-		
+
+		String myTestRole = "arc";
+
 		// create a role
-		u.executeImmediate(c, "CREATE ROLE "+myTestRole+" with NOINHERIT;");
-		
+		u.executeImmediate(c, "CREATE ROLE " + myTestRole + " with NOINHERIT;");
+
 		// change role test
 		u.executeImmediate(c, FormatSQL.changeRole(myTestRole));
 
 		// check the current role used
-		GenericPreparedStatementBuilder testQuery = new GenericPreparedStatementBuilder("SELECT current_user as current_role");
+		GenericPreparedStatementBuilder testQuery = new GenericPreparedStatementBuilder(
+				"SELECT current_user as current_role");
 		HashMap<String, ArrayList<String>> content = new GenericBean(u.executeRequest(c, testQuery)).mapContent(true);
-		
+
 		assertEquals(myTestRole, content.get("current_role").get(0));
 	}
-	
-	
+
 	@Test
-	public void listeColonneByHeaders_Test() throws ArcException
-	{
+	public void listeColonneByHeaders_Test() throws ArcException {
 		// create a test table
-		u.executeImmediate(c, "CREATE TEMPORARY TABLE " + tableIn + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
+		u.executeImmediate(c,
+				"CREATE TEMPORARY TABLE " + tableIn + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 
 		// execute query
-		List<String> columns=u.getColumns(c, tableIn);
-		
+		List<String> columns = u.getColumns(c, tableIn);
+
 		// check if the headers are found and ok
 		assertEquals(2, columns.size());
 		assertEquals("col_1", columns.get(0));
-		assertEquals("col_2", columns.get(1));	
-		
+		assertEquals("col_2", columns.get(1));
+
 		u.dropTable(c, tableIn);
 	}
-	
+
 	@Test
 	public void hasRecord_TableWithRecords() throws ArcException {
 		// create a non empty table
@@ -103,7 +103,24 @@ public class FormatSQLTest extends InitializeQueryTest {
 		assertEquals("f", content.get("has_record").get(0));
 		u.dropTable(c, tableIn);
 	}
-	
-	
+
+	@Test
+	public void rebuildTableAsSelectWhere() throws ArcException {
+
+		String indexCreationQuery = "CREATE index idx1_test_index on " + tableInPublic + " (i);";
+
+		// create a table with an index
+		u.executeImmediate(c,
+				"CREATE TABLE " + tableInPublic + " as SELECT i FROM generate_series(1,20) i");
+		u.executeImmediate(c, indexCreationQuery);
+
+		// execute the rebuild with a where condition
+		u.executeImmediate(c, FormatSQL.rebuildTableAsSelectWhere(tableInPublic, "i<=15", indexCreationQuery));
+
+		// test
+		// the table must exists and should have only 15 records left
+		testMetadataAndNumberOfRecords(tableInPublic, 15, new String[] { "i" });
+
+	}
 
 }

@@ -3,7 +3,6 @@ package fr.insee.arc.core.service.api.query;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -25,24 +24,10 @@ public class ServiceTableOperation {
 	 * @return
 	 */
 	public static String creationTableResultat(String tableIn, String tableToBeCreated, Boolean... image) {
-		StringBuilder requete = new StringBuilder();
 		
-		requete.append(FormatSQL.dropTable(tableToBeCreated));
-		
-		requete.append("\n CREATE ");
-		if (!tableToBeCreated.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append(" ");
-		}
-		requete.append("TABLE " + tableToBeCreated + " ");
-		requete.append("" + FormatSQL.WITH_NO_VACUUM + " ");
-		requete.append("as SELECT * FROM " + tableIn + " ");
-		if (image.length == 0 || Boolean.FALSE.equals(image[0])) {
-			requete.append("where 1=0 ");
-		}
-		requete.append("; ");
-		return requete.toString();
+		String where= (image.length == 0 || Boolean.FALSE.equals(image[0]))?"false":"true";
+
+		return FormatSQL.createTableAsSelectWhere(tableIn, tableToBeCreated, where);
 	}
 
 	/**

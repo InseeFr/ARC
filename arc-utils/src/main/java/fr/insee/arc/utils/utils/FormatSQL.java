@@ -179,6 +179,34 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     }
     
     /**
+     * CREATE TABLE @tableOut as SELECT all_columns FROM @tableIn WHERE @where
+     * @param tableIn
+     * @param tableOut
+     * @param where
+     * @return
+     */
+    public static String createTableAsSelectWhere(String tableIn, String tableOut, String where)
+    {
+        StringBuilder requete = new StringBuilder();
+		requete.append(FormatSQL.dropTable(tableOut));
+
+        requete.append("\n CREATE ");
+        if (!tableOut.contains("."))
+        {
+            requete.append("TEMPORARY ");
+        }
+        else
+        {
+            requete.append(" ");
+        }
+        requete.append("TABLE ").append(tableOut).append(" ").append(FormatSQL.WITH_NO_VACUUM)
+        .append(" AS SELECT * FROM ").append(tableIn).append(" a WHERE ").append(where);
+        requete.append("; ");
+        return requete.toString();
+    }
+    
+    
+    /**
      * Recopie une table à l'identique
      *
      * @param table
@@ -189,21 +217,14 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static StringBuilder rebuildTableAsSelectWhere(String table, String where, String... triggersAndIndexes)
     {
         String tableRebuild = temporaryTableName(table, "RB");
+        
         StringBuilder requete = new StringBuilder();
         requete.append("set enable_nestloop=off; ");
-        requete.append("\n DROP TABLE IF EXISTS " + tableRebuild + " CASCADE; ");
-        requete.append("\n CREATE ");
-        if (!table.contains("."))
-        {
-            requete.append("TEMPORARY ");
-        }
-        else
-        {
-            requete.append(" ");
-        }
-        requete.append("TABLE " + tableRebuild + " " + FormatSQL.WITH_NO_VACUUM + " as select * FROM " + table
-                + " a WHERE " + where + "; ");
-        requete.append("\n DROP TABLE IF EXISTS " + table + " CASCADE;");
+        
+        requete.append(createTableAsSelectWhere(table, tableRebuild, where));
+        
+		requete.append(FormatSQL.dropTable(table));
+        
         requete.append(
                 "\n ALTER TABLE " + tableRebuild + " RENAME TO " + ManipString.substringAfterFirst(table, ".") + " ;");
         requete.append("set enable_nestloop=on; ");
@@ -211,6 +232,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         {
             requete.append(triggersAndIndexes[i]);
         }
+                
         return requete;
     }
 
