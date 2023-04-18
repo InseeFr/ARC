@@ -211,7 +211,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public Boolean isTableExiste(Connection connexion, String table) {
 		Boolean b = null;
 		try {
-			b = getBoolean(connexion, FormatSQL.isTableExists(table));
+			b = hasResults(connexion, FormatSQL.tableExists(table));
 		} catch (Exception e) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "isTableExiste()", LOGGER, e);
 		}
@@ -1281,7 +1281,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws ArcException
 	 */
 	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn) throws ArcException {
-			liste.addAll(new GenericBean(get(this.pool).executeStatement(connexion, FormatSQL.listeColonneByHeaders(tableIn)))
+			liste.addAll(new GenericBean(executeStatement(connexion, FormatSQL.listeColonneByHeaders(tableIn)))
 					.getHeaders());
 		return liste;
 	}

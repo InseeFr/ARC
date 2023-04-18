@@ -8,9 +8,9 @@ import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 
 public class TestDatabase {
 
-	public static Connection testConnection = instanciateDatabase();
+	public static Connection testConnection = instanciateTestDatabase();
 
-	private static Connection instanciateDatabase()
+	private static Connection instanciateTestDatabase()
 	{
 	    EmbeddedPostgres pg;
 	    Connection connection=null;

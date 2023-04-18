@@ -249,38 +249,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     	return "SELECT (count(*)>0) as has_record FROM (SELECT 1 FROM " + tableIn + " LIMIT 1) u";
     }
 
-    /**
-     * @param table
-     * @return
-     */
-    public static GenericPreparedStatementBuilder isTableExists(String table)
-    {
-        String tokenJoin = table.contains(".") ?
-        /*
-         * Le nom de la table contient "." ? Il est précédé du nom du schéma.
-         */
-                " INNER JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid" :
-                /*
-                 * Sinon, aucune jointure sur le nom de schéma.
-                 */
-                "";
-        String tokenCond = table.contains(".") ?
-        /*
-         * Le nom de la table contient "." ? Il est précédé du nom de schéma.
-         */
-                "lower(pg_namespace.nspname||'.'||pg_class.relname)" :
-                /*
-                 * Sinon, la condition d'égalité porte sur le nom de la table
-                 */
-                "pg_class.relname";
-        GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder(
-                "SELECT CASE WHEN count(1)>0 THEN TRUE ELSE FALSE END table_existe\n");
-        requete.append("  FROM pg_class" + tokenJoin);
-        requete.append("  WHERE " + tokenCond + " = lower(" + requete.quoteText(table) + ")");
-        return requete;
-    }
-
-    /**
+     /**
      * Ajoute un suffixe de table temporaire au nom de table {@code aName}
      *
      * @param aName
