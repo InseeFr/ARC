@@ -16,7 +16,8 @@
 		<project.springboot.version>2.6.7</project.springboot.version>
 		<project.jackson.version>2.13.2</project.jackson.version>
 		<project.postgres.version>42.5.1</project.postgres.version>
-		
+		<project.org.json>20230227</project.org.json>
+
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20140107</version>
+			<version>${project.org.json}</version>
 		</dependency>
 
 		<!-- Spring Security -->
