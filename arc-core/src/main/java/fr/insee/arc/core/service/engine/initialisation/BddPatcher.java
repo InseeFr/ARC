@@ -232,7 +232,6 @@ public class BddPatcher {
 						}
 						
 					} catch (Exception e) {
-						e.printStackTrace();
 						setBddScriptVersion(connexion,databaseOldGitVersion);
 					}
 					
