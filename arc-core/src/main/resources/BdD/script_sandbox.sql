@@ -2,10 +2,10 @@
 CREATE SCHEMA IF NOT EXISTS {{envExecution}} AUTHORIZATION current_user; 
 
 -- grant full right to application user and read write for arc_restricted
--- TODO : secure arc_restricted to table level ??
 REVOKE ALL ON SCHEMA {{envExecution}} FROM public; 
 GRANT ALL ON SCHEMA {{envExecution}} TO current_user;
 
+-- user with restricted right can only play with temporary tables
 do $$ begin
 if ('{{userRestricted}}'!='') then 
 	execute 'GRANT USAGE ON SCHEMA {{envExecution}} TO {{userRestricted}}; GRANT SELECT on ALL TABLES IN schema {{envExecution}} TO {{userRestricted}}; ALTER DEFAULT privileges IN SCHEMA {{envExecution}} GRANT SELECT ON TABLES to {{userRestricted}};';

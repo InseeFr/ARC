@@ -144,19 +144,19 @@ public class BddPatcher {
 	 * @param p
 	 * @throws ArcException
 	 */
-	private static void bddScriptGlobalExecutor(Connection connexion, PropertiesHandler p) throws ArcException
+	private static void bddScriptGlobalExecutor(Connection connexion, String userNameWithRestrictedRights) throws ArcException
 	{
-		Integer nbSandboxes = BDParameters.getInt(null, "ApiInitialisationService.nbSandboxes", 8);
+		Integer nbSandboxes = BDParameters.getInt(connexion, "ApiInitialisationService.nbSandboxes", 8);
 		
-		executeBddScript(connexion, "BdD/script_global.sql", p.getDatabaseRestrictedUsername(), nbSandboxes, null);
-		executeBddScript(connexion, "BdD/script_function.sql", p.getDatabaseRestrictedUsername(), nbSandboxes,
+		executeBddScript(connexion, "BdD/script_global.sql", userNameWithRestrictedRights, nbSandboxes, null);
+		executeBddScript(connexion, "BdD/script_function.sql", userNameWithRestrictedRights, nbSandboxes,
 				null);
 
 		// iterate over each phase and try to load its global script
 
 		for (TraitementPhase t : TraitementPhase.values()) {
 			executeBddScript(connexion, "BdD/script_global_phase_" + t.toString().toLowerCase() + ".sql",
-					p.getDatabaseRestrictedUsername(), nbSandboxes, null);
+					userNameWithRestrictedRights, nbSandboxes, null);
 		}
 	}
 	
@@ -168,11 +168,11 @@ public class BddPatcher {
 	 * @param envExecutions
 	 * @throws ArcException
 	 */
-	private static void bddScriptEnvironmentExecutor(Connection connexion, PropertiesHandler p, String[] envExecutions) throws ArcException
+	private static void bddScriptEnvironmentExecutor(Connection connexion, String userNameWithRestrictedRights, String[] envExecutions) throws ArcException
 	{
 		for (String envExecution: envExecutions)
 		{
-			executeBddScript(connexion, "BdD/script_sandbox.sql", p.getDatabaseRestrictedUsername(), null, envExecution);
+			executeBddScript(connexion, "BdD/script_sandbox.sql", userNameWithRestrictedRights, null, envExecution);
 		}
 	    
 	    // iterate over each sandbox environment
@@ -180,7 +180,7 @@ public class BddPatcher {
 	    {
 	        // iterate over each phase for its sandbox relating script
 			for (TraitementPhase t : TraitementPhase.values()) {
-	            executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", p.getDatabaseRestrictedUsername(), null, envExecution);
+	            executeBddScript(connexion, "BdD/script_sandbox_phase_"+t.toString().toLowerCase()+".sql", userNameWithRestrictedRights, null, envExecution);
 			}
 	    }
 	}
@@ -196,34 +196,50 @@ public class BddPatcher {
 		
 		String databaseOldGitVersion=checkBddScriptVersion(connexion, envExecutions);
 		String applicationNewGitVersion=p.getGitCommitId();
+		String userNameWithRestrictedRights=p.getDatabaseRestrictedUsername();
 		
+		bddScript(databaseOldGitVersion, applicationNewGitVersion, userNameWithRestrictedRights, connexion, envExecutions);
+		
+	}	
+	
+	/**
+	 * Méthode pour initialiser ou patcher la base de données la base de donnée.
+	 * @param databaseOldGitVersion
+	 * @param applicationNewGitVersion
+	 * @param userNameWithRestrictedRights
+	 * @param connexion
+	 * @param envExecutions
+	 */
+	public static void bddScript(String databaseOldGitVersion, String applicationNewGitVersion, String userNameWithRestrictedRights, Connection connexion, String...envExecutions)
+	{
 		// if database registered git number is not the same as the application git number
 		
-		if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {
+				if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {
 
-			setBddScriptVersionWithoutDescription(connexion,applicationNewGitVersion, envExecutions);
-			
+					setBddScriptVersionWithoutDescription(connexion,applicationNewGitVersion, envExecutions);
+					
 
-			// global script. Mainly to build the arc schema
-			try {
-				
-				if (envExecutions==null || envExecutions.length==0)
-				{
-					bddScriptGlobalExecutor(connexion,p);
+					// global script. Mainly to build the arc schema
+					try {
+						
+						if (envExecutions==null || envExecutions.length==0)
+						{
+							bddScriptGlobalExecutor(connexion,userNameWithRestrictedRights);
+						}
+						else
+						{
+							bddScriptEnvironmentExecutor(connexion,userNameWithRestrictedRights,envExecutions);
+						}
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+						setBddScriptVersion(connexion,databaseOldGitVersion);
+					}
+					
+					// set version number when the update scripts are over
+					setBddScriptVersion(connexion,applicationNewGitVersion, envExecutions);
+					
 				}
-				else
-				{
-					bddScriptEnvironmentExecutor(connexion,p,envExecutions);
-				}
-				
-			} catch (Exception e) {
-				setBddScriptVersion(connexion,databaseOldGitVersion);
-			}
-			
-			// set version number when the update scripts are over
-			setBddScriptVersion(connexion,applicationNewGitVersion, envExecutions);
-			
-		}
-	}	
+	}
 	
 }

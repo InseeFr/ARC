@@ -87,7 +87,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public static final int EXECUTE_REQUEST_TYPES_START_INDEX = 1;
 	public static final int EXECUTE_REQUEST_DATA_START_INDEX = 2;
 
-
+	/**
+	 * default pool name used in properties
+	 */
+	public static final String DEFAULT_CONNECTION_POOL="arc";
+	
 	private String pool;
 	private static Map<String, UtilitaireDao> map;
 
@@ -96,6 +100,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public UtilitaireDao()
 	{
 		super();
+		map = new HashMap<>();
+		map.put(DEFAULT_CONNECTION_POOL, this);
 	}
 	
 	private UtilitaireDao(String aPool) {
@@ -154,7 +160,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		try {
 			
 			
-			int connexionIndex=this.pool.equals("arc")?0:Integer.parseInt(this.pool);
+			int connexionIndex=this.pool.equals(DEFAULT_CONNECTION_POOL)?0:Integer.parseInt(this.pool);
 			String driver=properties.getDatabaseDriverClassName().split(CONNECTION_SEPARATOR)[connexionIndex];
 			String uri=properties.getDatabaseUrl().split(CONNECTION_SEPARATOR)[connexionIndex];
 			String user=properties.getDatabaseUsername().split(CONNECTION_SEPARATOR)[connexionIndex];

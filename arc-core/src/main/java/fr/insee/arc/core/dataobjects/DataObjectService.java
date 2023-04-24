@@ -1,12 +1,7 @@
 package fr.insee.arc.core.dataobjects;
 
 public class DataObjectService {
-	
-	/**
-	 * the name of the poolname that jdbc connexions must use
-	 */
-	public static final String POOL_NAME_USED="arc";
-	
+
 	/**
 	 * the proprietary application schema
 	 */

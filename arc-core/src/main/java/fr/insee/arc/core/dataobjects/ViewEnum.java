@@ -50,18 +50,12 @@ public enum ViewEnum {
 	, PILOTAGE_ARCHIVE("pilotage_archive", SchemaEnum.SANDBOX)
 	
 	// tables utilisés pour les tests
-	, TABLE_TEST_IN_METADATA("table_test_in",SchemaEnum.METADATA,ColumnEnum.TEST1,ColumnEnum.TEST2)
-	, TABLE_TEST_OUT_METADATA("table_test_out",SchemaEnum.METADATA,ColumnEnum.TEST1,ColumnEnum.TEST2)
-	
-	, TABLE_TEST_IN_SANDBOX("table_test_in",SchemaEnum.SANDBOX,ColumnEnum.TEST1,ColumnEnum.TEST2)
-	, TABLE_TEST_OUT_SANDBOX("table_test_out",SchemaEnum.SANDBOX,ColumnEnum.TEST1,ColumnEnum.TEST2)
-	
-	, TABLE_TEST_IN_PUBLIC("table_test_in",SchemaEnum.PUBLIC,ColumnEnum.TEST1,ColumnEnum.TEST2)
-	, TABLE_TEST_OUT_PUBLIC("table_test_out",SchemaEnum.PUBLIC,ColumnEnum.TEST1,ColumnEnum.TEST2)
 
+	, TABLE_TEST_IN_PUBLIC("table_test_in_public",SchemaEnum.PUBLIC,ColumnEnum.TEST1,ColumnEnum.TEST2)
+	, TABLE_TEST_OUT_PUBLIC("table_test_out_public",SchemaEnum.PUBLIC,ColumnEnum.TEST1,ColumnEnum.TEST2)
 	
-	, TABLE_TEST_IN_TEMPORARY("table_test_in",SchemaEnum.TEMPORARY,ColumnEnum.TEST1,ColumnEnum.TEST2)
-	, TABLE_TEST_OUT_TEMPORARY("table_test_out",SchemaEnum.TEMPORARY,ColumnEnum.TEST1,ColumnEnum.TEST2)
+	, TABLE_TEST_IN_TEMPORARY("table_test_in_temp",SchemaEnum.TEMPORARY,ColumnEnum.TEST1,ColumnEnum.TEST2)
+	, TABLE_TEST_OUT_TEMPORARY("table_test_out_temp",SchemaEnum.TEMPORARY,ColumnEnum.TEST1,ColumnEnum.TEST2)
 
 	;
 

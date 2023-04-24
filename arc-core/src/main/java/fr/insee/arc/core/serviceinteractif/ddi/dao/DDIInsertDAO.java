@@ -76,7 +76,7 @@ public class DDIInsertDAO {
 		query.append(")");
 
 		List<String> famillesDejaExistante = new GenericBean(
-				UtilitaireDao.get(DataObjectService.POOL_NAME_USED).executeRequest(null, query)).mapContent()
+				UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(null, query)).mapContent()
 						.get("famille_deja_existante");
 
 		// keep only family found in ddi but not found in already existing arc family
@@ -100,7 +100,7 @@ public class DDIInsertDAO {
 		query.append(insertFamily(familyToInsert));
 		query.append(insertTables(familyToInsert, modeler));
 		query.append(insertVariables(familyToInsert, modeler));
-		UtilitaireDao.get(DataObjectService.POOL_NAME_USED).executeRequest(null, query);
+		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(null, query);
 	}
 
 	/**

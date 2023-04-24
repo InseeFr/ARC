@@ -56,12 +56,12 @@ public class ServiceRules {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n SELECT * FROM ( ");
 		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_col),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
+				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_col),'([iv]_{1,1}[[:alnum:]\\_\\$]+)','g')) as var from "
 						+ tableMappingRegle + " a WHERE ");
 		requete.append(conditionRegle(tablePilotage));
 		requete.append("\n UNION ");
 		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_filtre),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
+				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_filtre),'([iv]_{1,1}[[:alnum:]\\_\\$]+)','g')) as var from "
 						+ tableFiltrageRegle + " a WHERE ");
 		requete.append(conditionRegle(tablePilotage));
 		requete.append("\n UNION ");
@@ -74,12 +74,12 @@ public class ServiceRules {
 		requete.append(conditionRegle(tablePilotage));
 		requete.append("\n UNION ");
 		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(condition),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
+				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(condition),'([iv]_{1,1}[[:alnum:]\\_\\$]+)','g')) as var from "
 						+ tableControleRegle + " a WHERE ");
 		requete.append(conditionRegle(tablePilotage));
 		requete.append("\n UNION ");
 		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(pre_action),'{([iv]_{1,1}[^{}]+)}','g')) as var from "
+				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(pre_action),'([iv]_{1,1}[[:alnum:]\\_\\$]+)','g')) as var from "
 						+ tableControleRegle + " a WHERE ");
 		requete.append(conditionRegle(tablePilotage));
 		requete.append("\n UNION ");
