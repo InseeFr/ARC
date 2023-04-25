@@ -1,6 +1,5 @@
 package fr.insee.arc.core.service.handler;
 import java.sql.Connection;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.util.EDateFormat;
+import fr.insee.arc.core.service.api.query.ServiceDate;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -97,10 +96,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
     
     
     // initialize the integration date with current
-	private final String integrationDate = FormatSQL.toDate(
-			FormatSQL.quoteText(new SimpleDateFormat(EDateFormat.DATE_DASH.getApplicationFormat()).format(new Date()))
-			,FormatSQL.quoteText(EDateFormat.DATE_DASH.getDatastoreFormat())
-			);
+	private final String integrationDate = ServiceDate.queryDateConversion(new Date());
     
     
 	/**

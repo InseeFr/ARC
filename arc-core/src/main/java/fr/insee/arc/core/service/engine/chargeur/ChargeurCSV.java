@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,15 +19,14 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.api.ApiService;
+import fr.insee.arc.core.service.api.query.ServiceDate;
 import fr.insee.arc.core.service.thread.ThreadChargementService;
-import fr.insee.arc.core.util.EDateFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.XMLUtil;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
 /**
@@ -60,9 +58,7 @@ public class ChargeurCSV implements IChargeur {
 	private InputStream streamContent;
 	private String env;
 	private String validite;
-	private final String integrationDate = FormatSQL.toDate(
-			FormatSQL.quoteText(new SimpleDateFormat(EDateFormat.DATE_DASH.getApplicationFormat()).format(new Date())),
-			FormatSQL.quoteText(EDateFormat.DATE_DASH.getDatastoreFormat()));
+	private final String integrationDate = ServiceDate.queryDateConversion(new Date());
 
 	public ChargeurCSV(ThreadChargementService threadChargementService, String fileName) {
 		this.fileName = fileName;
