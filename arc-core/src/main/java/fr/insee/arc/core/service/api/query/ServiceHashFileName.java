@@ -13,6 +13,8 @@ public class ServiceHashFileName {
 	}
 
 	public static final String CHILD_TABLE_TOKEN = "child";
+	
+	private static final String HASH_ALGORITHM="SHA1";
 
 	/**
 	 * Generate the filename
@@ -27,17 +29,28 @@ public class ServiceHashFileName {
 	}
 
 	/**
-	 * get the hash value of a file
+	 * get the hash value of a file using SHA1
 	 * 
 	 * @param idSource
 	 * @return
 	 * @throws ArcException
 	 */
 	public static String hashOfIdSource(String idSource) throws ArcException {
+		return hashOfIdSource(idSource,HASH_ALGORITHM);
+	}
+	
+	/**
+	 * get the hash value of a file
+	 * 
+	 * @param idSource
+	 * @return
+	 * @throws ArcException
+	 */
+	public static String hashOfIdSource(String idSource, String hashAlgorithm) throws ArcException {
 		String hashText = "";
 		MessageDigest m;
 		try {
-			m = MessageDigest.getInstance("SHA1");
+			m = MessageDigest.getInstance(hashAlgorithm);
 			m.update(idSource.getBytes(), 0, idSource.length());
 			hashText = String.format("%1$032x", new BigInteger(1, m.digest()));
 		} catch (NoSuchAlgorithmException e) {
