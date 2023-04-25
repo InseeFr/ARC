@@ -16,20 +16,20 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class FormatSQLTest extends InitializeQueryTest {
 
-	String tableIn = "tableIn";
+	String tableInTemporary = "tableIn";
 	String tableInPublic = "public.tableIn";
 
 	@Test
 	public void tableExists_true() throws ArcException {
 
 		// test for table not exists
-		assertFalse(UtilitaireDao.get("arc").isTableExiste(c, tableIn));
+		assertFalse(UtilitaireDao.get("arc").isTableExiste(c, tableInTemporary));
 
 		// test for temporary table
 		UtilitaireDao.get("arc").executeImmediate(c,
-				"CREATE TEMPORARY TABLE " + tableIn + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
-		assertTrue(UtilitaireDao.get("arc").isTableExiste(c, tableIn));
-		UtilitaireDao.get("arc").dropTable(c, tableIn);
+				"CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
+		assertTrue(UtilitaireDao.get("arc").isTableExiste(c, tableInTemporary));
+		UtilitaireDao.get("arc").dropTable(c, tableInTemporary);
 
 		// test for schema table
 		UtilitaireDao.get("arc").executeImmediate(c,
@@ -61,31 +61,31 @@ public class FormatSQLTest extends InitializeQueryTest {
 	public void listeColonneByHeaders_Test() throws ArcException {
 		// create a test table
 		UtilitaireDao.get("arc").executeImmediate(c,
-				"CREATE TEMPORARY TABLE " + tableIn + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
+				"CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 
 		// execute query
-		List<String> columns = UtilitaireDao.get("arc").getColumns(c, tableIn);
+		List<String> columns = UtilitaireDao.get("arc").getColumns(c, tableInTemporary);
 
 		// check if the headers are found and ok
 		assertEquals(2, columns.size());
 		assertEquals("col_1", columns.get(0));
 		assertEquals("col_2", columns.get(1));
 
-		UtilitaireDao.get("arc").dropTable(c, tableIn);
+		UtilitaireDao.get("arc").dropTable(c, tableInTemporary);
 	}
 
 	@Test
 	public void hasRecord_TableWithRecords() throws ArcException {
 		// create a non empty table
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TEMPORARY TABLE " + tableIn + " as SELECT i FROM generate_series(1,5) i");
+		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i FROM generate_series(1,5) i");
 
 		// execute the query "hasRecord"
-		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder(FormatSQL.hasRecord(tableIn));
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder(FormatSQL.hasRecord(tableInTemporary));
 		HashMap<String, ArrayList<String>> content = new GenericBean(UtilitaireDao.get("arc").executeRequest(c, query)).mapContent(true);
 
 		// result must be true ('t' in postgres)
 		assertEquals("t", content.get("has_record").get(0));
-		UtilitaireDao.get("arc").dropTable(c, tableIn);
+		UtilitaireDao.get("arc").dropTable(c, tableInTemporary);
 
 	}
 
@@ -94,34 +94,67 @@ public class FormatSQLTest extends InitializeQueryTest {
 
 		// create an empty table
 		UtilitaireDao.get("arc").executeImmediate(c,
-				"CREATE TEMPORARY TABLE " + tableIn + " as SELECT i FROM generate_series(1,5) i WHERE false");
+				"CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i FROM generate_series(1,5) i WHERE false");
 
 		// execute the query "hasRecord"
-		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder(FormatSQL.hasRecord(tableIn));
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder(FormatSQL.hasRecord(tableInTemporary));
 		HashMap<String, ArrayList<String>> content = new GenericBean(UtilitaireDao.get("arc").executeRequest(c, query)).mapContent(true);
 
 		// result must be false ('f' in postgres)
 		assertEquals("f", content.get("has_record").get(0));
-		UtilitaireDao.get("arc").dropTable(c, tableIn);
+		UtilitaireDao.get("arc").dropTable(c, tableInTemporary);
 	}
 
 	@Test
 	public void rebuildTableAsSelectWhere() throws ArcException {
-
-		String indexCreationQuery = "CREATE index idx1_test_index on " + tableInPublic + " (i);";
+		rebuildTableAsSelectWhere(tableInPublic);
+		rebuildTableAsSelectWhere(tableInTemporary);
+	}
+	
+	/**
+	 * test that rebuildTable give a good copy of the table
+	 * @param aTable
+	 * @throws ArcException
+	 */
+	private static void rebuildTableAsSelectWhere(String aTable) throws ArcException
+	{
+		String indexCreationQuery = "CREATE index idx1_test_index on " + aTable + " (i);";
 
 		// create a table with an index
 		UtilitaireDao.get("arc").executeImmediate(c,
-				"CREATE TABLE " + tableInPublic + " as SELECT i FROM generate_series(1,20) i");
+				"CREATE TABLE " + aTable + " as SELECT i FROM generate_series(1,20) i");
 		UtilitaireDao.get("arc").executeImmediate(c, indexCreationQuery);
 
 		// execute the rebuild with a where condition
-		UtilitaireDao.get("arc").executeImmediate(c, FormatSQL.rebuildTableAsSelectWhere(tableInPublic, "i<=15", indexCreationQuery));
+		UtilitaireDao.get("arc").executeImmediate(c, FormatSQL.rebuildTableAsSelectWhere(aTable, "i<=15", indexCreationQuery));
 
 		// test
 		// the table must exists and should have only 15 records left
-		testMetadataAndNumberOfRecords(tableInPublic, 15, new String[] { "i" });
-
+		testMetadataAndNumberOfRecords(aTable, 15, new String[] { "i" });
+		
+		UtilitaireDao.get("arc").dropTable(c, aTable);
 	}
 
+	@Test
+	public void analyzeAndVacuumSecuredTest() throws ArcException
+	{
+		UtilitaireDao.get("arc").executeImmediate(c,
+				"CREATE TABLE " + tableInPublic + " as SELECT i FROM generate_series(1,5) i WHERE false");
+
+		boolean maintenanceSucess=true;
+		
+		// test if maintenance is a success
+		try {
+			UtilitaireDao.get("arc").executeImmediate(c,FormatSQL.vacuumSecured(tableInPublic,"full"));
+			UtilitaireDao.get("arc").executeImmediate(c,FormatSQL.analyzeSecured(tableInPublic));
+		} catch (ArcException e) {
+			maintenanceSucess=false;
+		}
+		
+		assertTrue(maintenanceSucess);
+		
+		UtilitaireDao.get("arc").dropTable(c, tableInPublic);
+
+	}
+	
 }

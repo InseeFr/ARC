@@ -33,7 +33,7 @@ public class InitializeQueryTest {
 	 * @param tableOut
 	 * @throws ArcException
 	 */
-	protected void testMetadataAndNumberOfRecords(String tableOut, int numberOfRecordsInTableOut, String[] columns) throws ArcException
+	protected static void testMetadataAndNumberOfRecords(String tableOut, int numberOfRecordsInTableOut, String[] columns) throws ArcException
 	{
 		
 		// query the content in tableOut
