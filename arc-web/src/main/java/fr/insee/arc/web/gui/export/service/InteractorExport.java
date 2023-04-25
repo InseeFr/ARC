@@ -15,8 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.export.dao.ExportDao;
 import fr.insee.arc.web.gui.export.model.ModelExport;
+import fr.insee.arc.web.util.VObject;
 
 
 @Service
@@ -29,20 +32,26 @@ public class InteractorExport extends ArcWebGenericService<ModelExport>  {
 
 	@Autowired
 	protected ModelExport views;
+	
+	private ExportDao dao;
 
 
 	@Override
 	protected void putAllVObjects(ModelExport arcModel) {
+		loggerDispatcher.debug("putAllVObjects()", LOGGER);
+		
+		dao = new ExportDao(vObjectService, dataObjectService);
+		
 		views.setViewExport(this.vObjectService.preInitialize(arcModel.getViewExport()));
 		views.setViewFileExport(this.vObjectService.preInitialize(arcModel.getViewFileExport()));
 		
-		putVObject(views.getViewExport(), t -> initializeExport());
+		putVObject(views.getViewExport(), t -> initializeExport(t));
 		putVObject(views.getViewFileExport(), t -> initializeFileExport());
 	}
 
-    public void initializeExport() {
-        HashMap<String, String> defaultInputFields = new HashMap<>();
-        this.vObjectService.initialize(views.getViewExport(), new ArcPreparedStatementBuilder("SELECT file_name, zip, table_to_export, headers, nulls, filter_table, order_table, nomenclature_export, columns_array_header, columns_array_value, etat  from "+ getBacASable() +".export"),  getBacASable() +".export", defaultInputFields);
+    public void initializeExport(VObject viewExport) {
+    	LoggerHelper.debug(LOGGER, "/* initializeExport */");
+		dao.initializeViewExport(viewExport, getBacASable());
     }
 
  

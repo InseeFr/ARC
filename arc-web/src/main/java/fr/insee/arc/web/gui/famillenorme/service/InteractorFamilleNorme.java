@@ -20,9 +20,11 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 import fr.insee.arc.web.gui.famillenorme.model.ModelGererFamille;
 import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -51,10 +53,14 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 	public String getActionName() {
 		return "familyManagement";
 	}
+	
+	private GererFamilleNormeDao dao;
 
 	@Override
 	public void putAllVObjects(ModelGererFamille arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
+		
+		dao = new GererFamilleNormeDao(vObjectService, dataObjectService);
 
 		views.setViewClient(vObjectService.preInitialize(arcModel.getViewClient()));
 		views.setViewFamilleNorme(vObjectService.preInitialize(arcModel.getViewFamilleNorme()));
@@ -62,107 +68,94 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 		views.setViewHostAllowed(vObjectService.preInitialize(arcModel.getViewHostAllowed()));
 		views.setViewVariableMetier(vObjectService.preInitialize(arcModel.getViewVariableMetier()));
 
-		putVObject(views.getViewFamilleNorme(), t -> initializeFamilleNorme());
-		putVObject(views.getViewClient(), t -> initializeClient());
-		putVObject(views.getViewTableMetier(), t -> initializeTableMetier());
-		putVObject(views.getViewHostAllowed(), t -> initializeHostAllowed());
+		putVObject(views.getViewFamilleNorme(), t -> initializeFamilleNorme(t));
+		putVObject(views.getViewClient(), t -> initializeClient(t, views.getViewFamilleNorme()));
+		putVObject(views.getViewTableMetier(), t -> initializeTableMetier(t, views.getViewFamilleNorme()));
+		putVObject(views.getViewHostAllowed(), t -> initializeHostAllowed(t, views.getViewClient()));
 		putVObject(views.getViewVariableMetier(), t -> initializeVariableMetier());
 
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
 	}
 
-	/*
-	 * FAMILLES DE NORMES
+	/**
+	 * Initializes {@code ModelGererFamille#viewFamilleNorme}. Calls dao to create the view.
+	 * 
+	 * @param viewFamilleNorme
 	 */
-	private void initializeFamilleNorme() {
-		HashMap<String, String> defaultInputFields = new HashMap<>();
-		this.vObjectService.initialize(views.getViewFamilleNorme(),
-				new ArcPreparedStatementBuilder(
-						"select " + ID_FAMILLE + " from arc.ihm_famille order by " + ID_FAMILLE + ""),
-				"arc.ihm_famille", defaultInputFields);
+	private void initializeFamilleNorme(VObject viewFamilleNorme) {
+		LoggerHelper.debug(LOGGER, "/* initializeFamilleNorme */");
+		dao.initializeViewFamilleNorme(viewFamilleNorme);
 	}
 
-	/*
-	 * CLIENT
+	/**
+	 * Initializes {@code ModelGererFamille#viewClient}. Only gets the clients linked
+	 * to the selected norm family.
+	 * 
+	 * @param viewClient
+	 * @param viewFamilleNorme
 	 */
-	private void initializeClient() {
-		LoggerHelper.info(LOGGER, "/* initializeClient */");
+	private void initializeClient(VObject viewClient, VObject viewFamilleNorme) {
+		LoggerHelper.debug(LOGGER, "/* initializeClient */");
 		try {
-			Map<String, ArrayList<String>> selection = views.getViewFamilleNorme().mapContentSelected();
-			
-			if (!selection.isEmpty()) {
-
-				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-				requete.append("SELECT id_famille, id_application FROM arc.ihm_client ");
-				requete.append("WHERE id_famille=" + requete.quoteText(selection.get(ID_FAMILLE).get(0)));
-
-				HashMap<String, String> defaultInputFields = new HashMap<>();
-				defaultInputFields.put(ID_FAMILLE, selection.get(ID_FAMILLE).get(0));
-
-				this.vObjectService.initialize(views.getViewClient(), requete, "arc.ihm_client", defaultInputFields);
+			// get the norm family selected records
+			Map<String, ArrayList<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
+			// if norm family selected, trigger call to dao to construct client view
+			if (!selectionFamilleNorme.isEmpty()) {
+				dao.setSelectedRecords(selectionFamilleNorme);
+				dao.initializeViewClient(viewClient);
 			} else {
-				this.vObjectService.destroy(views.getViewClient());
-
+				vObjectService.destroy(viewClient);
 			}
-
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeClient", LOGGER);
+			StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeClient", LOGGER);
 		}
 	}
 
-
-	/*
-	 * TABLES HOSTS AUTORISES
+	/**
+	 * Initializes {@code ModelGererFamille#viewHostAllowed}. Only gets the allowed hosts
+	 * linked to the selected client.
+	 * 
+	 * @param viewHostAllowed
+	 * @param viewClient
 	 */
-	private void initializeHostAllowed() {
+	private void initializeHostAllowed(VObject viewHostAllowed, VObject viewClient) {
+		LoggerHelper.debug(LOGGER, "/* initializeHostAllowed */");
 		try {
-			Map<String, ArrayList<String>> selection = views.getViewClient().mapContentSelected();
-
-			if (!selection.isEmpty()) {
-				HashMap<String, String> type = views.getViewClient().mapHeadersType();
-				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-				requete.append("SELECT * FROM arc.ihm_webservice_whitelist");
-				requete.append(
-						" WHERE id_famille" + requete.sqlEqual(selection.get(ID_FAMILLE).get(0), type.get(ID_FAMILLE)));
-				requete.append(" AND id_application"
-						+ requete.sqlEqual(selection.get(ID_APPLICATION).get(0), type.get(ID_APPLICATION)));
-
-				HashMap<String, String> defaultInputFields = new HashMap<>();
-				defaultInputFields.put(ID_FAMILLE, selection.get(ID_FAMILLE).get(0));
-				defaultInputFields.put(ID_APPLICATION, selection.get(ID_APPLICATION).get(0));
-
-				this.vObjectService.initialize(views.getViewHostAllowed(), requete, "arc.ihm_webservice_whitelist",
-						defaultInputFields);
+			// get the client selected records
+			Map<String, ArrayList<String>> selectionClient = viewClient.mapContentSelected();
+			// if client selected, trigger call to dao to construct host allowed view
+			if (!selectionClient.isEmpty()) {
+				dao.setSelectedRecords(selectionClient);
+				dao.initializeViewHostAllowed(viewHostAllowed);
 			} else {
-				this.vObjectService.destroy(views.getViewHostAllowed());
+				vObjectService.destroy(viewHostAllowed);
 			}
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeHostAllowed", LOGGER);
+			StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeHostAllowed", LOGGER);
 		}
 	}
 
-	/*
-	 * TABLES METIER
+	/**
+	 * Initializes {@code ModelGererFamille#viewTableMetier}. Only gets the business tables
+	 * linked to the selected norm family.
+	 * 
+	 * @param viewTableMetier
+	 * @param viewFamilleNorme
 	 */
-	private void initializeTableMetier() {
+	private void initializeTableMetier(VObject viewTableMetier, VObject viewFamilleNorme) {
+		LoggerHelper.debug(LOGGER, "/* initializeTableMetier */");
 		try {
-			Map<String, ArrayList<String>> selection = views.getViewFamilleNorme().mapContentSelected();
-			if (!selection.isEmpty()) {
-				HashMap<String, String> type = views.getViewFamilleNorme().mapHeadersType();
-				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-				requete.append("select * from arc.ihm_mod_table_metier");
-				requete.append(
-						" where id_famille" + requete.sqlEqual(selection.get(ID_FAMILLE).get(0), type.get(ID_FAMILLE)));
-				HashMap<String, String> defaultInputFields = new HashMap<>();
-				defaultInputFields.put(ID_FAMILLE, selection.get(ID_FAMILLE).get(0));
-
-				this.vObjectService.initialize(views.getViewTableMetier(), requete, "arc.ihm_mod_table_metier",
-						defaultInputFields);
+			// get the norm family selected records
+			Map<String, ArrayList<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
+			// if norm family selected, trigger call to dao to construct business table view
+			if (!selectionFamilleNorme.isEmpty()) {
+				dao.setSelectedRecords(selectionFamilleNorme);
+				dao.initializeViewTableMetier(viewTableMetier);
 			} else {
-				this.vObjectService.destroy(views.getViewTableMetier());
+				vObjectService.destroy(viewTableMetier);
 			}
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeTableMetier", LOGGER);
+			StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeTableMetier", LOGGER);
 		}
 	}
 
