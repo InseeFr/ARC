@@ -49,6 +49,9 @@ public enum ViewEnum {
 	, PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX)
 	, PILOTAGE_ARCHIVE("pilotage_archive", SchemaEnum.SANDBOX)
 	
+	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE)
+
+	
 	// tables utilisés pour les tests
 
 	, TABLE_TEST_IN_PUBLIC("table_test_in_public",SchemaEnum.PUBLIC,ColumnEnum.TEST1,ColumnEnum.TEST2)

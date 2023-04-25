@@ -89,6 +89,8 @@ public class VObjectService {
 
 	private String pool = "arc";
 
+	private Connection connection = null;
+
 	/**
 	 * Try to set some informations based on the data saved in session.
 	 * 
@@ -189,7 +191,7 @@ public class VObjectService {
 			LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
 
 			if (data.getBeforeSelectQuery() != null) {
-				UtilitaireDao.get(this.pool).executeRequest(null, data.getBeforeSelectQuery());
+				UtilitaireDao.get(this.pool).executeRequest(this.connection, data.getBeforeSelectQuery());
 			}
 
 			// on sauvegarde le contenu des lignes selectionnées avant la nouvelle
@@ -224,7 +226,7 @@ public class VObjectService {
 
 			ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 			try {
-				aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(null, requete,
+				aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(this.connection, requete,
 						ModeRequeteImpl.arcModeRequeteIHM()));
 			} catch (ArcException ex) {
 				data.setMessage(ex.getMessage());
@@ -335,7 +337,7 @@ public class VObjectService {
 					requete.append(") alias_de_table ");
 					requete.append(buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel()));
 
-					aContent = UtilitaireDao.get(this.pool).executeRequest(null, requete,
+					aContent = UtilitaireDao.get(this.pool).executeRequest(this.connection, requete,
 							ModeRequeteImpl.arcModeRequeteIHM());
 				} catch (ArcException ex) {
 					currentData.setMessage(ex.getMessage());
@@ -507,7 +509,7 @@ public class VObjectService {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null
 					&& data.getConstantVObject().getColumnRender().get(headers.get(i)).query != null) {
 				try {
-					arrayVSelect = UtilitaireDao.get(this.pool).executeRequest(null,
+					arrayVSelect = UtilitaireDao.get(this.pool).executeRequest(this.connection,
 							data.getConstantVObject().getColumnRender().get(headers.get(i)).query);
 					arrayVSelect.remove(0);
 					arrayVSelect.remove(0);
@@ -615,7 +617,7 @@ public class VObjectService {
 			requete.append("END;");
 
 			if (!allNull) {
-				UtilitaireDao.get(this.pool).executeRequest(null, requete);
+				UtilitaireDao.get(this.pool).executeRequest(this.connection, requete);
 			}
 
 		} catch (Exception ex) {
@@ -632,7 +634,8 @@ public class VObjectService {
 	public void delete(VObject currentData, String... tables) {
 		LoggerHelper.traceAsComment(LOGGER, "delete()", currentData.getSessionName());
 		try {
-			UtilitaireDao.get(this.pool).executeRequest(null, deleteQuery(currentData, tables).asTransaction());
+			UtilitaireDao.get(this.pool).executeRequest(this.connection,
+					deleteQuery(currentData, tables).asTransaction());
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("Error in VObjectService.delete");
@@ -735,7 +738,7 @@ public class VObjectService {
 		}
 		reqDelete.append("END; ");
 		try {
-			UtilitaireDao.get(this.pool).executeRequest(null, reqDelete);
+			UtilitaireDao.get(this.pool).executeRequest(this.connection, reqDelete);
 		} catch (ArcException e) {
 			currentData.setMessage(e.getMessage());
 		}
@@ -828,7 +831,7 @@ public class VObjectService {
 			}
 			reqUpdate.append("END;");
 			if (!toBeUpdated.isEmpty()) {
-				UtilitaireDao.get(this.pool).executeRequest(null, reqUpdate);
+				UtilitaireDao.get(this.pool).executeRequest(this.connection, reqUpdate);
 			}
 			session.put(currentData.getSessionName(), v0);
 		} catch (ArcException ex) {
@@ -860,7 +863,8 @@ public class VObjectService {
 	public HashMap<String, ArrayList<String>> mapView(VObject currentData) {
 		HashMap<String, ArrayList<String>> result = new HashMap<>();
 		try {
-			GenericBean g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(null, queryView(currentData)));
+			GenericBean g = new GenericBean(
+					UtilitaireDao.get(this.pool).executeRequest(this.connection, queryView(currentData)));
 			result = g.mapContent();
 		} catch (ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "mapView()", LOGGER, ex);
@@ -1291,7 +1295,7 @@ public class VObjectService {
 			requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
 			// Récupération de la liste d'id_source par paquet de fetchSize
 			try {
-				g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(null, requeteLimit));
+				g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(this.connection, requeteLimit));
 				HashMap<String, ArrayList<String>> m = g.mapContent();
 				listIdSource = m.get(ColumnEnum.ID_SOURCE.getColumnName());
 				listContainer = m.get("container");
@@ -1396,8 +1400,9 @@ public class VObjectService {
 	}
 
 	/**
-	 * Upload file to directory
-	 * The method uses temporary folder because writing directly file to a mounted path may be not allowed 
+	 * Upload file to directory The method uses temporary folder because writing
+	 * directly file to a mounted path may be not allowed
+	 * 
 	 * @param data
 	 * @param repertoireCible
 	 * @throws ArcException
@@ -1419,7 +1424,7 @@ public class VObjectService {
 						loggerDispatcher.info("Upload >> " + locationTmp, LOGGER);
 
 						File newFileTmp = locationTmp.toFile();
-						
+
 						// security fix : transferTo not allowed on non temporary directory
 						uploadedFile.transferTo(newFileTmp);
 
@@ -1573,6 +1578,22 @@ public class VObjectService {
 			}
 		}
 		return filterExist;
+	}
+
+	public Connection getConnection() {
+		return connection;
+	}
+
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+
+	public Session getSession() {
+		return session;
+	}
+
+	public void setSession(Session session) {
+		this.session = session;
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
@@ -24,8 +25,19 @@ public class PilotageDao extends VObjectHelperDao {
 		this.dataObjectService = dataObjectService;
 	}
 	
-	public void initializePilotageBAS(VObject viewPilotageBAS) {
+	public void initializePilotageBAS(VObject viewPilotageBAS) {		
 
+		// the most recent files processed must be shown first by default
+        // set this default order
+        if (viewPilotageBAS.getHeaderSortDLabels() == null) {
+        	viewPilotageBAS.setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ColumnEnum.DATE_ENTREE.getColumnName())));
+        	viewPilotageBAS.setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
+        }
+		
+        viewPilotageBAS.setNoCount(true);
+        viewPilotageBAS.setNoLimit(true);
+        
+		
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		
     	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();		

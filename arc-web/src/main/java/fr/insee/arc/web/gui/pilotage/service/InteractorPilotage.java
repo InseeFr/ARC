@@ -19,7 +19,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -41,32 +40,30 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 
 	protected static final String ENTRY_DATE = "date_entree";
 
-
 	private static final String ACTION_NAME = "EnvManagement";
 
 	protected static final String RESULT_SUCCESS = "jsp/gererPilotageBAS.jsp";
 
-
 	private static final Logger LOGGER = LogManager.getLogger(InteractorPilotage.class);
-	
+
 	@Autowired
 	protected MessageSource messageSource;
-	
-	
+
 	private PilotageDao dao;
-	
+
 	/**
-	 * Liste des phase pour générer les boutons d'actions executer et retour arriere sur chaque phase.
+	 * Liste des phase pour générer les boutons d'actions executer et retour arriere
+	 * sur chaque phase.
 	 */
 	private List<TraitementPhase> listePhase;
-	
+
 	@Autowired
 	protected ModelPilotage views;
 
-	public InteractorPilotage() {	
-		this.setListePhase(TraitementPhase.getListPhaseC());	
+	public InteractorPilotage() {
+		this.setListePhase(TraitementPhase.getListPhaseC());
 	}
-	
+
 	@ModelAttribute
 	public void specificModelAttributes(Model model) {
 		model.addAttribute("listePhase", listePhase);
@@ -74,16 +71,16 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 
 	@Override
 	public void putAllVObjects(ModelPilotage arcModel) {
-		loggerDispatcher.debug("putAllVObjects()", LOGGER);	
-		
+		loggerDispatcher.debug("putAllVObjects()", LOGGER);
+
 		dao = new PilotageDao(vObjectService, dataObjectService);
 
 		views.setViewPilotageBAS(vObjectService.preInitialize(arcModel.getViewPilotageBAS()));
-		views.setViewRapportBAS(vObjectService.preInitialize(arcModel.getViewRapportBAS()));	
+		views.setViewRapportBAS(vObjectService.preInitialize(arcModel.getViewRapportBAS()));
 		views.setViewArchiveBAS(vObjectService.preInitialize(arcModel.getViewArchiveBAS()));
 		views.setViewEntrepotBAS(vObjectService.preInitialize(arcModel.getViewEntrepotBAS()));
 		views.setViewFichierBAS(vObjectService.preInitialize(arcModel.getViewFichierBAS()));
-		
+
 		// If the sandbox changed, have to destroy all table and re create later
 		if (this.isRefreshMonitoring) {
 			vObjectService.destroy(views.getViewPilotageBAS());
@@ -99,7 +96,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 		putVObject(views.getViewArchiveBAS(), t -> initializeArchiveBAS());
 		putVObject(views.getViewEntrepotBAS(), t -> initializeEntrepotBAS());
 		putVObject(views.getViewFichierBAS(), t -> initializeFichierBAS());
-	
+
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
 	}
 
@@ -107,55 +104,36 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 	public void initializePilotageBAS(VObject viewPilotageBAS) {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS *");
 
-		// the most recent files processed must be shown first by default
-        // set this default order
-        if (viewPilotageBAS.getHeaderSortDLabels() == null) {
-        	viewPilotageBAS.setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
-        	viewPilotageBAS.setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
-        }
-		
-        viewPilotageBAS.setNoCount(true);
-        viewPilotageBAS.setNoLimit(true);
+		dao.initializePilotageBAS(viewPilotageBAS);
 
-        
-        dao.initializePilotageBAS(viewPilotageBAS);
-		
-		ArrayList<String> columns=viewPilotageBAS.getHeadersDLabel();
-		Map<String, ColumnRendering> columnRendering=viewPilotageBAS.getConstantVObject().columnRender;
-		
+		ArrayList<String> columns = viewPilotageBAS.getHeadersDLabel();
+		Map<String, ColumnRendering> columnRendering = viewPilotageBAS.getConstantVObject().columnRender;
+
 		// for all columns, set rendering visibility to false
-		for (int i=1; i<columns.size();i++)
-		{
-			ColumnRendering renderAttributes=new ColumnRendering(false, ManipString.translateAscii(columns.get(i)), null, "text", null, false);
+		for (int i = 1; i < columns.size(); i++) {
+			ColumnRendering renderAttributes = new ColumnRendering(false, ManipString.translateAscii(columns.get(i)),
+					null, "text", null, false);
 			columnRendering.put(columns.get(i), renderAttributes);
 		}
-		
 
 		// now display the columns only which have positive values
 
-		for (LineObject l:viewPilotageBAS.getContent())
-		{
-			for (int i=1; i<columns.size();i++)
-			{
-				if (!l.getD().get(i).equals("0"))
-				{
-					columnRendering.get(columns.get(i)).visible=true;
+		for (LineObject l : viewPilotageBAS.getContent()) {
+			for (int i = 1; i < columns.size(); i++) {
+				if (!l.getD().get(i).equals("0")) {
+					columnRendering.get(columns.get(i)).visible = true;
 				}
 			}
 		}
-		
-		
-		
+
 		this.vObjectService.initialiserColumnRendering(viewPilotageBAS, columnRendering);
 		this.vObjectService.applyColumnRendering(viewPilotageBAS, columns);
-
 
 		// display comment for the sandbox
 		ArcPreparedStatementBuilder envQuery = new ArcPreparedStatementBuilder();
 		envQuery.append("select env_description from arc.ext_etat_jeuderegle where replace(id,'.','_') = ");
 		envQuery.append(envQuery.quoteText(getBacASable()));
-		
-		
+
 		try {
 			String envDescription = UtilitaireDao.get(POOLNAME).getString(null, envQuery);
 			viewPilotageBAS.setCustomValue(ENV_DESCRIPTION, envDescription);
@@ -164,18 +142,16 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 		}
 	}
 
-
-
 	// visual des Pilotages du bac à sable
 	public void initializeRapportBAS() {
 		LoggerHelper.debug(LOGGER, "* initializeRapportBAS *");
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-		
-        if (views.getViewRapportBAS().getHeaderSortDLabels() == null) {
-        	views.getViewRapportBAS().setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
-        	views.getViewRapportBAS().setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
-        }
-		
+
+		if (views.getViewRapportBAS().getHeaderSortDLabels() == null) {
+			views.getViewRapportBAS().setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
+			views.getViewRapportBAS().setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
+		}
+
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(
 				"select date_entree, phase_traitement, array_to_string(etat_traitement,'$') as etat_traitement, rapport, count(1) as nb ");
@@ -186,11 +162,6 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 		this.vObjectService.initialize(views.getViewRapportBAS(), requete, null, defaultInputFields);
 	}
 
-
-
-
-    
-
 	/**
 	 * Initialisation de la vue sur la table contenant la liste des fichiers du
 	 * répertoire d'archive
@@ -198,13 +169,12 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 	public void initializeArchiveBAS() {
 		LoggerHelper.debug(LOGGER, "* /* initializeArchiveBAS  */ *");
 		String entrepotLecture = this.views.getViewEntrepotBAS().getCustomValue("entrepotLecture");
-		if (entrepotLecture != null
-				&& !entrepotLecture.equals("")) {
+		if (entrepotLecture != null && !entrepotLecture.equals("")) {
 			HashMap<String, String> defaultInputFields = new HashMap<>();
-			
+
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-			requete.append("select * from "+dataObjectService.getView(ViewEnum.PILOTAGE_ARCHIVE)+" where entrepot="
-	                    + requete.quoteText(entrepotLecture) + " ");
+			requete.append("select * from " + dataObjectService.getView(ViewEnum.PILOTAGE_ARCHIVE) + " where entrepot="
+					+ requete.quoteText(entrepotLecture) + " ");
 
 			this.vObjectService.initialize(views.getViewArchiveBAS(), requete, null, defaultInputFields);
 		} else {
@@ -215,12 +185,13 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 
 	public void initializeEntrepotBAS() {
 		LoggerHelper.debug(LOGGER, "* initializeEntrepotBAS *");
-	
+
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-	
+
 		try {
-			if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
+			if (Boolean.TRUE
+					.equals(UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
 				requete.append("select id_entrepot from arc.ihm_entrepot");
 			} else {
 				requete.append("select ''::text as id_entrepot");
@@ -228,7 +199,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 		} catch (Exception e) {
 			LoggerHelper.error(LOGGER, "error when initialize repository", e);
 		}
-	
+
 		this.vObjectService.initialize(this.views.getViewEntrepotBAS(), requete, null, defaultInputFields);
 	}
 
@@ -248,37 +219,39 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 			String etat = ManipString.substringAfterLast(selectionColonne.get(0), "_").toUpperCase();
 
 			// get the file with the selected date_entree, state, and phase_tratement
-				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-	            requete.append("SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
-	            requete.append(" FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" ");
-	            requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigne.get(ENTRY_DATE).get(0), "text"));
-	            requete.append(" AND array_to_string(etat_traitement,'$')" + requete.sqlEqual(etat, "text"));
-	            requete.append(" AND phase_traitement" + requete.sqlEqual(phase, "text"));
-			
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+			requete.append(
+					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
+			requete.append(" FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " ");
+			requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigne.get(ENTRY_DATE).get(0), "text"));
+			requete.append(" AND array_to_string(etat_traitement,'$')" + requete.sqlEqual(etat, "text"));
+			requete.append(" AND phase_traitement" + requete.sqlEqual(phase, "text"));
+
 			this.vObjectService.initialize(views.getViewFichierBAS(), requete, null, defaultInputFields);
-			
+
 		} else if (!selectionLigneRapport.isEmpty()) {
 			HashMap<String, String> type = views.getViewRapportBAS().mapHeadersType();
 			HashMap<String, String> defaultInputFields = new HashMap<>();
-		
+
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-            requete.append("SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
-            requete.append(" FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" ");
-            requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigneRapport.get(ENTRY_DATE).get(0), "text"));
-            requete.append(" AND array_to_string(etat_traitement,'$')"
-                    + requete.sqlEqual(selectionLigneRapport.get("etat_traitement").get(0), type.get("etat_traitement")));
-            requete.append(" AND phase_traitement"
-                    + requete.sqlEqual(selectionLigneRapport.get("phase_traitement").get(0), type.get("phase_traitement")));
-            requete.append(" AND rapport" + requete.sqlEqual(selectionLigneRapport.get("rapport").get(0), type.get("rapport")));
-			
+			requete.append(
+					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
+			requete.append(" FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " ");
+			requete.append(
+					" WHERE date_entree" + requete.sqlEqual(selectionLigneRapport.get(ENTRY_DATE).get(0), "text"));
+			requete.append(" AND array_to_string(etat_traitement,'$')" + requete
+					.sqlEqual(selectionLigneRapport.get("etat_traitement").get(0), type.get("etat_traitement")));
+			requete.append(" AND phase_traitement" + requete
+					.sqlEqual(selectionLigneRapport.get("phase_traitement").get(0), type.get("phase_traitement")));
+			requete.append(" AND rapport"
+					+ requete.sqlEqual(selectionLigneRapport.get("rapport").get(0), type.get("rapport")));
 
 			this.vObjectService.initialize(views.getViewFichierBAS(), requete, null, defaultInputFields);
-			
+
 		} else {
 			this.vObjectService.destroy(views.getViewFichierBAS());
 		}
 	}
-
 
 	@Override
 	public String getActionName() {

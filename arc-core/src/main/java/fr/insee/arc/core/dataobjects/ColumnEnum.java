@@ -88,6 +88,7 @@ public enum ColumnEnum {
 	, XSD_ORDRE("xsd_ordre", TypeEnum.INTEGER, "") // ihm_controle_regle
 	, XSD_ROLE("xsd_role", TypeEnum.TEXT, "") // ihm_controle_regle
 	
+	, DATE_ENTREE("date_entree", TypeEnum.TEXT, "") // date_entree
 	
 	, ID_SOURCE("id_source", TypeEnum.TEXT, "the entry filename contatenated with entry repository") //
 

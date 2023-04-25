@@ -1,9 +1,5 @@
 package fr.insee.arc.web.util;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +17,23 @@ public class Session {
 	}
 
 	public void put(String attributeName, Object attributeValue) {
-		httpSession.setAttribute(attributeName, attributeValue);
+		if (httpSession!=null)
+		{
+			httpSession.setAttribute(attributeName, attributeValue);
+		}
 	}
 
 	public void remove(String attributeName) {
 		httpSession.removeAttribute(attributeName);		
 	}
 
+	public HttpSession getHttpSession() {
+		return httpSession;
+	}
+
+	public void setHttpSession(HttpSession httpSession) {
+		this.httpSession = httpSession;
+	}
+
+	
 }

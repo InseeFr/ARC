@@ -18,62 +18,68 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class BddPatcherTest extends InitializeQueryTest {
 
+	private static String oldVersion = "v1";
+	private static String newVersion = "v2";
+	private static String userWithRestrictedRights = "arc_restricted";
+	public static String testSandbox = "arc_bas1";
+
 	@Test
 	/**
 	 * test the database initialization
-	 * @throws ArcException 
+	 * 
+	 * @throws ArcException
 	 */
 	public void bddScript() throws ArcException {
-
-		String oldVersion="v1";
-		String newVersion="v2";	
-		String userWithRestrictedRights="arc_restricted";
-		String testSandbox="arc_bas1";
-				
+		
+		createDatabase();
+		
 		GenericPreparedStatementBuilder query;
-		
-		// clean database
-		query = new GenericPreparedStatementBuilder();
-		query.append("DROP SCHEMA IF EXISTS "+DataObjectService.ARC_METADATA_SCHEMA+" CASCADE;");
-		query.append("DROP SCHEMA IF EXISTS "+testSandbox+" CASCADE;");
-		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query);		
-		
-		
+
 		// test the meta data schema creation
-		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c);
-		
 		query = new GenericPreparedStatementBuilder();
-		query.append("select tablename from pg_tables where schemaname=").append(query.quoteText(DataObjectService.ARC_METADATA_SCHEMA));
-		
-		HashMap<String,ArrayList<String>> content;
-		
-		content=new GenericBean(UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query)).mapContent();
-		
+		query.append("select tablename from pg_tables where schemaname=")
+				.append(query.quoteText(DataObjectService.ARC_METADATA_SCHEMA));
+
+		HashMap<String, ArrayList<String>> content;
+
+		content = new GenericBean(UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query))
+				.mapContent();
+
 		// check if all metadata view had been created
-		for (ViewEnum v : ViewEnum.values())
-		{
-			if (v.getTableLocation().equals(SchemaEnum.METADATA))
-			{
+		for (ViewEnum v : ViewEnum.values()) {
+			if (v.getTableLocation().equals(SchemaEnum.METADATA)) {
 				assertTrue(content.get("tablename").contains(v.getTableName()));
 			}
 		}
-		
-		// test a sandbox schema creation
-		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c, testSandbox);
 
+		// test a sandbox schema creation
 		query = new GenericPreparedStatementBuilder();
 		query.append("select tablename from pg_tables where schemaname=").append(query.quoteText(testSandbox));
-		
-		content=new GenericBean(UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query)).mapContent();
-		
+
+		content = new GenericBean(UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query))
+				.mapContent();
+
 		// check if the sandbox views had been created
-		for (ViewEnum v : ViewEnum.values())
-		{
-			if (v.getTableLocation().equals(SchemaEnum.SANDBOX))
-			{
+		for (ViewEnum v : ViewEnum.values()) {
+			if (v.getTableLocation().equals(SchemaEnum.SANDBOX)) {
 				assertTrue(content.get("tablename").contains(v.getTableName()));
 			}
 		}
+	}
+
+	public static void createDatabase() throws ArcException {
+		GenericPreparedStatementBuilder query;
+
+		// clean database
+		query = new GenericPreparedStatementBuilder();
+		query.append("DROP SCHEMA IF EXISTS " + DataObjectService.ARC_METADATA_SCHEMA + " CASCADE;");
+		query.append("DROP SCHEMA IF EXISTS " + testSandbox + " CASCADE;");
+		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query);
+
+		// metadata schema creation
+		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c);
+		// sandbox schema creation
+		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c, testSandbox);
 	}
 
 }
