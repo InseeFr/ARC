@@ -20,7 +20,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 
 	@Test
 	/**
-	 * test the database iniitalization
+	 * test the database initialization
 	 * @throws ArcException 
 	 */
 	public void bddScript() throws ArcException {
@@ -30,10 +30,17 @@ public class BddPatcherTest extends InitializeQueryTest {
 		String userWithRestrictedRights="arc_restricted";
 		String testSandbox="arc_bas1";
 				
+		GenericPreparedStatementBuilder query;
+		
+		// clean database
+		query = new GenericPreparedStatementBuilder();
+		query.append("DROP SCHEMA IF EXISTS "+DataObjectService.ARC_METADATA_SCHEMA+" CASCADE;");
+		query.append("DROP SCHEMA IF EXISTS "+testSandbox+" CASCADE;");
+		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query);		
+		
+		
 		// test the meta data schema creation
 		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c);
-		
-		GenericPreparedStatementBuilder query;
 		
 		query = new GenericPreparedStatementBuilder();
 		query.append("select tablename from pg_tables where schemaname=").append(query.quoteText(DataObjectService.ARC_METADATA_SCHEMA));
