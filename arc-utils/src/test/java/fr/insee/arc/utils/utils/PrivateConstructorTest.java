@@ -7,11 +7,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
-import org.junit.Test;
-
 public class PrivateConstructorTest {
 
-	@Test
 	public static void testConstructorIsPrivate(final Class<?> clazz) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
 	    Constructor<?> constructor = clazz.getDeclaredConstructor();
 	    assertTrue(Modifier.isPrivate(constructor.getModifiers())); //this tests that the constructor is private
