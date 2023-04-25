@@ -27,9 +27,11 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.pilotage.dao.PilotageDao;
 import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
 import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.LineObject;
+import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -49,6 +51,9 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 	
 	@Autowired
 	protected MessageSource messageSource;
+	
+	
+	private PilotageDao dao;
 	
 	/**
 	 * Liste des phase pour générer les boutons d'actions executer et retour arriere sur chaque phase.
@@ -70,6 +75,8 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 	@Override
 	public void putAllVObjects(ModelPilotage arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);	
+		
+		dao = new PilotageDao(vObjectService, dataObjectService);
 
 		views.setViewPilotageBAS(vObjectService.preInitialize(arcModel.getViewPilotageBAS()));
 		views.setViewRapportBAS(vObjectService.preInitialize(arcModel.getViewRapportBAS()));	
@@ -87,7 +94,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 			this.isRefreshMonitoring = false;
 		}
 
-		putVObject(views.getViewPilotageBAS(), t -> initializePilotageBAS());
+		putVObject(views.getViewPilotageBAS(), t -> initializePilotageBAS(t));
 		putVObject(views.getViewRapportBAS(), t -> initializeRapportBAS());
 		putVObject(views.getViewArchiveBAS(), t -> initializeArchiveBAS());
 		putVObject(views.getViewEntrepotBAS(), t -> initializeEntrepotBAS());
@@ -97,53 +104,24 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 	}
 
 	// visual des Pilotages du bac à sable
-	public void initializePilotageBAS() {
+	public void initializePilotageBAS(VObject viewPilotageBAS) {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS *");
-		HashMap<String, String> defaultInputFields = new HashMap<>();
 
-        
-        
-        // the most recent files processed must be shown first by default
+		// the most recent files processed must be shown first by default
         // set this default order
-        if (views.getViewPilotageBAS().getHeaderSortDLabels() == null) {
-        	views.getViewPilotageBAS().setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
-        	views.getViewPilotageBAS().setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
+        if (viewPilotageBAS.getHeaderSortDLabels() == null) {
+        	viewPilotageBAS.setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
+        	viewPilotageBAS.setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
         }
 		
-        views.getViewPilotageBAS().setNoCount(true);
-        views.getViewPilotageBAS().setNoLimit(true);
+        viewPilotageBAS.setNoCount(true);
+        viewPilotageBAS.setNoLimit(true);
 
-    	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+        
+        dao.initializePilotageBAS(viewPilotageBAS);
 		
-    	requete.append("SELECT date_entree ");
-		for (TraitementPhase phase:TraitementPhase.listPhasesAfterPhase(TraitementPhase.RECEPTION))
-		{
-			for (TraitementEtat etat:new ArrayList<>(Arrays.asList(TraitementEtat.valuesByOrdreAffichage())))
-			{
-				String columnName=phase.toString().toLowerCase()+"_"+etat.toString().toLowerCase();
-				requete.append("\n, max(CASE WHEN phase_traitement='"+phase+"' and etat_traitement='"+etat.getSqlArrayExpression()+"' THEN n ELSE 0 END) as "+columnName+" ");
-			}
-			
-		}
-		requete.append("\n FROM (");
-        requete.append("\n SELECT date_entree, phase_traitement, etat_traitement, count(*) as n ");
-		requete.append("\n FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" b ");
-		requete.append("\n WHERE date_entree IN ( ");
-		requete.append("\n SELECT DISTINCT date_entree FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER)+" a ");
-        requete.append(this.vObjectService.buildFilter(views.getViewPilotageBAS().getFilterFields(), views.getViewPilotageBAS().getHeadersDLabel()));
-        requete.append("\n AND phase_traitement='"+TraitementPhase.RECEPTION+"' ");
-        requete.append(this.vObjectService.buildOrderBy(views.getViewPilotageBAS().getHeaderSortDLabels(), views.getViewPilotageBAS().getHeaderSortDOrders()));
-        requete.append(this.vObjectService.buildLimit(views.getViewPilotageBAS(), this.vObjectService.pageManagement(null, views.getViewPilotageBAS())));
-		requete.append("\n ) ");
-		requete.append("\n GROUP BY date_entree, phase_traitement, etat_traitement ");
-		requete.append(") ttt ");
-		requete.append("group by date_entree ");
-
-		this.vObjectService.initialize(
-				views.getViewPilotageBAS(), requete, null, defaultInputFields);
-		
-		ArrayList<String> columns=views.getViewPilotageBAS().getHeadersDLabel();
-		Map<String, ColumnRendering> columnRendering=views.getViewPilotageBAS().getConstantVObject().columnRender;
+		ArrayList<String> columns=viewPilotageBAS.getHeadersDLabel();
+		Map<String, ColumnRendering> columnRendering=viewPilotageBAS.getConstantVObject().columnRender;
 		
 		// for all columns, set rendering visibility to false
 		for (int i=1; i<columns.size();i++)
@@ -155,7 +133,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 
 		// now display the columns only which have positive values
 
-		for (LineObject l:views.getViewPilotageBAS().getContent())
+		for (LineObject l:viewPilotageBAS.getContent())
 		{
 			for (int i=1; i<columns.size();i++)
 			{
@@ -168,8 +146,8 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 		
 		
 		
-		this.vObjectService.initialiserColumnRendering(views.getViewPilotageBAS(), columnRendering);
-		this.vObjectService.applyColumnRendering(views.getViewPilotageBAS(), columns);
+		this.vObjectService.initialiserColumnRendering(viewPilotageBAS, columnRendering);
+		this.vObjectService.applyColumnRendering(viewPilotageBAS, columns);
 
 
 		// display comment for the sandbox
@@ -180,7 +158,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 		
 		try {
 			String envDescription = UtilitaireDao.get(POOLNAME).getString(null, envQuery);
-			views.getViewPilotageBAS().setCustomValue(ENV_DESCRIPTION, envDescription);
+			viewPilotageBAS.setCustomValue(ENV_DESCRIPTION, envDescription);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
 		}

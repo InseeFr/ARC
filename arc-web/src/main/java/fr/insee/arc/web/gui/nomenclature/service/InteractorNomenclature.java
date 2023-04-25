@@ -16,116 +16,128 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.IDbConstant;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.nomenclature.dao.GererNomenclatureDao;
 import fr.insee.arc.web.gui.nomenclature.model.ModelNomenclature;
 import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclature> implements IDbConstant{
+public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclature> implements IDbConstant {
 
 	protected static final String RESULT_SUCCESS = "/jsp/gererNomenclature.jsp";
 
-    private static final Logger LOGGER = LogManager.getLogger(InteractorNomenclature.class);
+	private static final Logger LOGGER = LogManager.getLogger(InteractorNomenclature.class);
 
-    @Autowired
-    protected ModelNomenclature views;
-    
-    @Override
-    public void putAllVObjects(ModelNomenclature model) {
-    	loggerDispatcher.debug("putAllVObjects()", LOGGER);
-    	views.setViewListNomenclatures(vObjectService.preInitialize(model.getViewListNomenclatures()));
-    	views.setViewNomenclature(vObjectService.preInitialize(model.getViewNomenclature()));
-    	views.setViewSchemaNmcl(vObjectService.preInitialize(model.getViewSchemaNmcl()));
-  	
-    	putVObject(views.getViewListNomenclatures(), t -> initializeViewListNomenclatures(t,
-    			dataObjectService.getView(ViewEnum.IHM_NMCL)));
+	@Autowired
+	protected ModelNomenclature views;
 
-    	putVObject(views.getViewNomenclature(), t -> initializeViewNomenclature(t,
-    			views.getViewListNomenclatures()));
+	private GererNomenclatureDao dao;
 
-    	putVObject(views.getViewSchemaNmcl(), t -> intializeViewSchemaNmcl(t, views.getViewListNomenclatures()));
+	@Override
+	public void putAllVObjects(ModelNomenclature model) {
+		loggerDispatcher.debug("putAllVObjects()", LOGGER);
 
-    	loggerDispatcher.debug("putAllVObjects() end", LOGGER);
-    }
-    
-    @Override
+		dao = new GererNomenclatureDao(vObjectService, dataObjectService);
+
+		views.setViewListNomenclatures(vObjectService.preInitialize(model.getViewListNomenclatures()));
+		views.setViewNomenclature(vObjectService.preInitialize(model.getViewNomenclature()));
+		views.setViewSchemaNmcl(vObjectService.preInitialize(model.getViewSchemaNmcl()));
+
+		putVObject(views.getViewListNomenclatures(), t -> initializeListNomenclatures(t));
+
+		putVObject(views.getViewNomenclature(), t -> initializeNomenclature(t, views.getViewListNomenclatures()));
+
+		putVObject(views.getViewSchemaNmcl(), t -> initializeSchemaNmcl(t, views.getViewListNomenclatures()));
+
+		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
+	}
+
+	@Override
 	public String getActionName() {
 		return "externalFileManagement";
 	}
-    
 
-    private static final String NOM_TABLE = "nom_table";
-    
-    public void initializeViewListNomenclatures(VObject viewListNomenclatures, String table) {
-        loggerDispatcher.debug("/* initializeListeNomenclatures */", LOGGER);
-        
-        HashMap<String, String> defaultInputFields = new HashMap<>();
-        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-        requete.append(SQL.SELECT);
-        requete.append(requete.sqlListeOfColumnsFromModel(ViewEnum.IHM_NMCL));
-        requete.append(SQL.FROM).append(table);
+	private static final String NOM_TABLE = "nom_table";
 
-        vObjectService.initialize(viewListNomenclatures, requete, table, defaultInputFields);
-    }
+	/**
+	 * Initializes {@code ModelNomenclature#viewListNomenclatures}. Calls dao to
+	 * create the view.
+	 * 
+	 * @param viewListNomenclatures
+	 */
+	public void initializeListNomenclatures(VObject viewListNomenclatures) {
+		LoggerHelper.debug(LOGGER, "/* initializeListeNomenclatures */");
+		dao.initializeViewListNomenclatures(viewListNomenclatures);
+	}
 
-    
-    public void initializeViewNomenclature(VObject viewNomenclature, VObject viewListNomenclatures) {
-    	loggerDispatcher.debug( "/* initializeViewNomenclature */", LOGGER);
+	/**
+	 * Initializes {@code ModelNomenclature#viewNomenclature}. Only gets the
+	 * nomenclature linked to the selection in the nomenclature list.
+	 * 
+	 * @param viewNomenclature
+	 * @param viewListNomenclatures
+	 */
+	public void initializeNomenclature(VObject viewNomenclature, VObject viewListNomenclatures) {
+		LoggerHelper.debug(LOGGER, "/* initializeViewNomenclature */");
+		try {
+			// get the list nomenclatures selected record
+			Map<String, ArrayList<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
+			// if nomenclature selected, trigger call to dao to construct nomenclature view
+			if (!selectionListNomenclatures.isEmpty() && Boolean.TRUE.equals(UtilitaireDao.get(poolName)
+					.isTableExiste(null, "arc." + selectionListNomenclatures.get(NOM_TABLE).get(0)))) {
+				dao.setSelectedRecords(selectionListNomenclatures);
+				dao.initializeViewNomenclature(viewNomenclature, NOM_TABLE,
+						selectionListNomenclatures.get(NOM_TABLE).get(0));
+			} else {
+				vObjectService.destroy(viewNomenclature);
+			}
+		} catch (Exception ex) {
+			StaticLoggerDispatcher.error("Error in InteractorNomenclature.initializeNomenclature", LOGGER);
+		}
+	}
 
-    	Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
+	/**
+	 * Initializes {@code ModelNomenclature#viewSchemaNmcl}. Only gets the
+	 * schema linked to the selection in the nomenclature list.
+	 * 
+	 * @param viewSchemaNmcl
+	 * @param viewListNomenclatures
+	 */
+	public void initializeSchemaNmcl(VObject viewSchemaNmcl, VObject viewListNomenclatures) {
+		LoggerHelper.debug(LOGGER, "/* initializeSchemaNmcl */");
+		try {
+			// get the list nomenclatures selected record
+			Map<String, ArrayList<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
+			// if nomenclature selected, trigger call to dao to construct schema
+			if (!selectionListNomenclatures.isEmpty()) {
+				dao.setSelectedRecords(selectionListNomenclatures);
+				dao.initializeViewSchemaNmcl(viewSchemaNmcl);
+			} else {
+				vObjectService.destroy(viewSchemaNmcl);
+			}
+		} catch (Exception ex) {
+			StaticLoggerDispatcher.error("Error in InteractorNomenclature.initializeSchemaNmcl", LOGGER);
+		}
+	}
 
-        if (!selection.isEmpty() && Boolean.TRUE.equals(UtilitaireDao.get(poolName).isTableExiste(null, "arc." + selection.get(NOM_TABLE).get(0)))) {
-        	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-            requete.append("select * from arc." + selection.get(NOM_TABLE).get(0) + " ");
-
-            HashMap<String, String> defaultInputFields = new HashMap<>();
-            defaultInputFields.put(NOM_TABLE, selection.get(NOM_TABLE).get(0));
-
-            vObjectService.initialize(viewNomenclature, requete, "arc." + selection.get(NOM_TABLE).get(0), defaultInputFields);
-        } else {
-        	vObjectService.destroy(viewNomenclature);
-        }
-
-    }
-    
-    public void intializeViewSchemaNmcl(VObject viewSchemaNmcl, VObject viewListNomenclatures) {
-        loggerDispatcher.debug("/* initializeSchemaNmcl */", LOGGER);
-        Map<String, ArrayList<String>> selection = viewListNomenclatures.mapContentSelected();
-
-        if (!selection.isEmpty()) {
-        	ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-        	requete.append(SQL.SELECT);
-        	requete.append(requete.sqlListeOfColumnsFromModel(ViewEnum.IHM_SCHEMA_NMCL));
-        	requete.append(SQL.FROM);
-        	requete.append("arc.ihm_schema_nmcl");
-        	requete.append(SQL.WHERE);
-        	requete.append(ColumnEnum.TYPE_NMCL).append("=");
-            requete.append(requete.quoteText(typeNomenclature(selection.get(NOM_TABLE).get(0))));
-         
-            HashMap<String, String> defaultInputFields = new HashMap<>();
-            defaultInputFields.put(ColumnEnum.TYPE_NMCL.getColumnName(), typeNomenclature(selection.get(NOM_TABLE).get(0)));
-            vObjectService.initialize(viewSchemaNmcl, requete, "arc.ihm_schema_nmcl", defaultInputFields);
-            
-        } else {
-        	vObjectService.destroy(viewSchemaNmcl);
-        }
-    }
-
-    /**
-     * 
-     * @param nomTable
-     * @return
-     */
-    private static String typeNomenclature(String nomTable) {
-        String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore);
-        StringBuilder typeNomenclature = new StringBuilder();
-        for (int i = 0; i < tokens.length - 1; i++) {
-            typeNomenclature.append((i > 0 ? fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore : "") + tokens[i]);
-        }
-        return typeNomenclature.toString();
-    }
+	/**
+	 * 
+	 * @param nomTable
+	 * @return
+	 */
+	private static String typeNomenclature(String nomTable) {
+		String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore);
+		StringBuilder typeNomenclature = new StringBuilder();
+		for (int i = 0; i < tokens.length - 1; i++) {
+			typeNomenclature
+					.append((i > 0 ? fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore : "") + tokens[i]);
+		}
+		return typeNomenclature.toString();
+	}
 
 }
