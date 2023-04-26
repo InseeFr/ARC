@@ -51,7 +51,7 @@ public class InteractorExport extends ArcWebGenericService<ModelExport>  {
 
     public void initializeExport(VObject viewExport) {
     	LoggerHelper.debug(LOGGER, "/* initializeExport */");
-		dao.initializeViewExport(viewExport, getBacASable());
+		dao.initializeViewExport(viewExport);
     }
 
  
