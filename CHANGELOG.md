@@ -2,9 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-92.2.15beta 2023-03-29
+## version-92.2.15b04
 - show sand box informations at the home page
 - loader performance enhancement
+- gui quality refactor
+- wrong xsd location in webservice configuration
+- unit test for technical and core class (part 1)
 
 ## version-92.2.14 2023-02-10
 - upload data file via GUI is fixed to match with new security constraints

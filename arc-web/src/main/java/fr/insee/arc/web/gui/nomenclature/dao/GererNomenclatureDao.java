@@ -62,6 +62,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		vObjectService.initialize(viewNomenclature, query, "arc." + tableSelected, defaultInputFields);
 	}
 	
+    
 	public void initializeViewSchemaNmcl(VObject viewSchemaNmcl) {
 		ViewEnum dataModelSchemaNmcl = ViewEnum.IHM_SCHEMA_NMCL;
 		// view query
@@ -71,12 +72,31 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		query.append(SQL.FROM);
 		query.append(dataObjectService.getView(dataModelSchemaNmcl));
 		query.append(SQL.WHERE);
-		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.TYPE_NMCL));
+		query.append(ColumnEnum.TYPE_NMCL).append("=");
+		query.append(query.quoteText(typeNomenclature(selectedRecords.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0))));
+
 		// default value
-		HashMap<String, String> defaultInputFields =
-				buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.TYPE_NMCL);
+		HashMap<String, String> defaultInputFields = new HashMap<>();
+	    defaultInputFields.put(ColumnEnum.TYPE_NMCL.getColumnName(), typeNomenclature(selectedRecords.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0)));
+	    
 		// initialize vobject
 		vObjectService.initialize(viewSchemaNmcl, query, dataObjectService.getView(dataModelSchemaNmcl), defaultInputFields);
 	}
 
+	
+	/**
+	 * compute the nomenclature type
+	 * @param nomTable
+	 * @return
+	 */
+	private static String typeNomenclature(String nomTable) {
+		String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore);
+		StringBuilder typeNomenclature = new StringBuilder();
+		for (int i = 0; i < tokens.length - 1; i++) {
+			typeNomenclature
+					.append((i > 0 ? fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore : "") + tokens[i]);
+		}
+		return typeNomenclature.toString();
+	}
+	
 }

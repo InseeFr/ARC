@@ -30,6 +30,7 @@ public class IndexDao extends VObjectHelperDao {
 	public void initializeViewIndex(VObject viewIndex) {
 		ViewEnum dataModelIndex = ViewEnum.EXT_ETAT_JEUDEREGLE;
 		// view query
+
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(SQL.SELECT);
 		query.append("nullif(substring(id from '[0123456789]+'),'')"); // ?
@@ -38,7 +39,7 @@ public class IndexDao extends VObjectHelperDao {
 		query.append(SQL.AS);
 		query.append(ColumnEnum.ID);
 		query.append(SQL.COMMA);
-		query.append("upper(substring(id from '\\\\.(.*)'))"); // ?
+		query.append("upper(substring(id from '\\.(.*)'))"); // ?
 		query.append(SQL.AS);
 		query.append(ColumnEnum.VAL);
 		query.append(SQL.COMMA);
