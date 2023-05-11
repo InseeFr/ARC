@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-92.2.16 2023-11-03
+## version-92.2.17 2023-11-03
 - show sand box informations at the home page
 - loader performance enhancement
 - gui quality refactor
