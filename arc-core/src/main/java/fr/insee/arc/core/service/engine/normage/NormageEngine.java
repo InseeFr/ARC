@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +22,7 @@ import fr.insee.arc.utils.dao.Parameter;
 import fr.insee.arc.utils.dao.ParameterType;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.ManipString;
 
 public class NormageEngine {
@@ -163,7 +163,7 @@ public class NormageEngine {
 		try {
 			validite = this.formatter.parse(pilotageIdSource.get("validite").get(0));
 		} catch (ParseException e) {
-			throw new ArcException("the validite field is not parsable as date",e);
+			throw new ArcException(e,ArcExceptionMessage.NORMAGE_VALIDITE_DATE_PARSE_FAILED,pilotageIdSource.get("validite").get(0));
 		}
 		String periodicite = pilotageIdSource.get("periodicite").get(0);
 		String validiteText = pilotageIdSource.get("validite").get(0);
@@ -665,9 +665,7 @@ public class NormageEngine {
 						// si on trouve la rubrique mais qu'elle n'est pas identifiant de bloc (m_), on
 						// sort
 						if (!blocCreate.contains(m_rubrique)) {
-							StaticLoggerDispatcher.info("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc",
-									LOGGER);
-							throw new ArcException("La rubrique " + rubriqueRegle[i] + " n'identifie pas un bloc");
+							throw new ArcException(ArcExceptionMessage.NORMAGE_INDEPENDANCE_BLOC_INVALID_IDENTIFIER, rubriqueRegle[i]);
 						}
 
 						rubriqueRegle[i] = m_rubrique;
@@ -678,11 +676,7 @@ public class NormageEngine {
 							fatherSav = getFatherM(blocCreate, rubriqueRegle[i]);
 						} else {
 							if (!fatherSav.equals(getFatherM(blocCreate, rubriqueRegle[i]))) {
-								StaticLoggerDispatcher.info(
-										"La rubrique " + rubriqueRegle[i] + " n'a pas le même pere que les autres",
-										LOGGER);
-								throw new ArcException(
-										"La rubrique " + rubriqueRegle[i] + " n'a pas le même pere que les autres");
+								throw new ArcException(ArcExceptionMessage.NORMAGE_INDEPENDANCE_BLOC_INVALID_FATHER, rubriqueRegle[i]);
 							}
 						}
 

@@ -34,12 +34,12 @@ public class ParallelInsert extends Thread {
 			this.join();
 		} catch (InterruptedException e) {
 			this.interrupt();
-			throw new ArcException(ArcExceptionMessage.PARALLEL_INSERT_THREAD_FAILED);
+			throw new ArcException(ArcExceptionMessage.LOAD_PARALLEL_INSERT_THREAD_FAILED);
 		}
 				
 		if (this.getThreadException()!=null)
 		{
-			throw new ArcException(ArcExceptionMessage.PARALLEL_INSERT_THREAD_FAILED);
+			throw new ArcException(ArcExceptionMessage.LOAD_PARALLEL_INSERT_THREAD_FAILED);
 		}
 	}
 

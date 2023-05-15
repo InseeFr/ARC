@@ -29,6 +29,7 @@ import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -430,7 +431,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			if (this.initialiser()) {
 				try {
 					this.executer();
-				} catch (Exception ex) {
+				} catch (ArcException ex) {
 					loggerDispatcher.error("Erreur dans " + this.getCurrentPhase() + ". ", ex, LOGGER_APISERVICE);
 					try {
 						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.getTablePil(), ex,
@@ -470,7 +471,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @param tableDrop
 	 * @throws ArcException
 	 */
-	private void repriseSurErreur(Connection connexion, String phase, String tablePil, Exception exception,
+	private void repriseSurErreur(Connection connexion, String phase, String tablePil, ArcException exception,
 			String... tableDrop) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
@@ -481,8 +482,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		try {
 			this.connexion.getCoordinatorConnection().setAutoCommit(false);
 			this.connexion.getCoordinatorConnection().rollback();
-		} catch (SQLException e) {
-			throw new ArcException("Error in database connection rollback",e);
+		} catch (SQLException rollbackException) {
+			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
 		}
 		StringBuilder requete = new StringBuilder();
 
@@ -511,7 +512,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @throws ArcException
 	 */
 	public void repriseSurErreur(Connection connexion, String phase, String tablePil, String idSource,
-			Exception exception, String... tableDrop) throws ArcException {
+			ArcException exception, String... tableDrop) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
 		// la transaction
@@ -521,8 +522,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		try {
 			this.connexion.getCoordinatorConnection().setAutoCommit(false);
 			this.connexion.getCoordinatorConnection().rollback();
-		} catch (SQLException e) {
-			throw new ArcException("Error in database connection rollback",e);
+		} catch (SQLException rollbackException) {
+			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
 		}
 
 		// promote the application user account to full right
@@ -551,7 +552,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected HashMap<String, ArrayList<String>> recuperationIdSource(String phaseTraiement) throws ArcException {
+	protected HashMap<String, ArrayList<String>> recuperationIdSource() throws ArcException {
 		
 		ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 		query.append("SELECT p."+ColumnEnum.ID_SOURCE.getColumnName()+" ");

@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 public class ServiceHashFileName {
 
@@ -53,8 +54,8 @@ public class ServiceHashFileName {
 			m = MessageDigest.getInstance(hashAlgorithm);
 			m.update(idSource.getBytes(), 0, idSource.length());
 			hashText = String.format("%1$032x", new BigInteger(1, m.digest()));
-		} catch (NoSuchAlgorithmException e) {
-			throw new ArcException("Hashing idsource was not possible because hash algorithm is not implemented");
+		} catch (NoSuchAlgorithmException exception) {
+			throw new ArcException(exception, ArcExceptionMessage.HASH_FAILED, idSource);
 		}
 		return hashText;
 	}

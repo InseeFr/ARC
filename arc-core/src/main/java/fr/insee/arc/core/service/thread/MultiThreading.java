@@ -10,11 +10,11 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.service.api.query.ServiceDatabaseConfiguration;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 /**
@@ -63,7 +63,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 			return (T) new ThreadMappingService();
 		}
 
-		throw new ArcException("Illegal class call");
+		throw new ArcException(ArcExceptionMessage.MULTITHREADING_CLASS_NOT_USEABLE);
 	}
 
 	/**
@@ -136,7 +136,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 			try {
 				connection.closeAll();
 			} catch (SQLException e) {
-				throw new ArcException("Error in closing thread connections", e);
+				throw new ArcException(e, ArcExceptionMessage.MULTITHREADING_CONNECTIONS_CLOSE_FAILED);
 			}
 		}
 	}

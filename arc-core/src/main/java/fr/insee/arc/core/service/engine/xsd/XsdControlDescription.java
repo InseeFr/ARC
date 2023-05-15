@@ -21,6 +21,7 @@ import fr.insee.arc.core.service.engine.xsd.groups.XsdGroup;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdSequence;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdSet;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.Pair;
 
 /** Description of a sets of a control rules re-organized for easier manipulations
@@ -130,8 +131,7 @@ public class XsdControlDescription {
 			String complementString = stringifyComplements(complement);
 			XsdElement xsdElement = new XsdElement(childElement, minOccurs, maxOccurs, position);
 			if (relationExists(parentElement, childElement)) {
-				throw new ArcException("La relation entre " + childElement + " et "
-						+ parentElement + " est déjà décrite sous forme de séquence.");
+				throw new ArcException(ArcExceptionMessage.CONTROLE_XSD_RUBRIQUE_RELATION_ALREADY_DEFINED, childElement, parentElement);
 			}
 
 			groupMap.putIfAbsent(parentElement, new HashMap<>());
@@ -167,8 +167,7 @@ public class XsdControlDescription {
 				if (aliasMap.get(columnName).equals(alias)) {
 					return this;
 				}
-				throw new ArcException("Un alias " + alias
-						+ "est déjà défini pour " + columnName + ".");
+				throw new ArcException(ArcExceptionMessage.CONTROLE_XSD_ALIAS_ALREADY_SET, alias, columnName);
 			}
 			aliasMap.put(columnName, alias);
 			return this;
@@ -297,8 +296,7 @@ public class XsdControlDescription {
 				throws ArcException {
 			SortedSet<XsdElement> sortedSet = new TreeSet<>(unsortedSet);
 			if (sortedSet.size() != unsortedSet.size()) {
-				throw new ArcException("Au moins un élément parmi les enfants de "
-			+ elementName + " a été écrasé parce que les positions sont mal définies.");
+				throw new ArcException(ArcExceptionMessage.CONTROLE_XSD_INVALID_CHILDREN_POSITION, elementName);
 			}
 			return sortedSet;
 		}
@@ -312,7 +310,7 @@ public class XsdControlDescription {
 
 		private void checkLoop(XsdElement el, Map<String, XsdGroup> builtTree, LinkedList<String> path) throws ArcException {
 			if (path.contains(el.getName())) {
-				throw new ArcException(el.getName() + " appartient à une relation cyclique : " + path.stream().collect(Collectors.joining(" > ")));
+				throw new ArcException(ArcExceptionMessage.CONTROLE_XSD_INFINITE_LOOP, el.getName(), path.stream().collect(Collectors.joining(" > ")));
 			}
 			path.addLast(el.getName());
 			for (XsdElement el2 : builtTree.getOrDefault(el.getName(), XsdSequence.fromElements(new TreeSet<>()))) {

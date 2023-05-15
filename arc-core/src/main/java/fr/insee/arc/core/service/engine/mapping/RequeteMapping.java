@@ -22,6 +22,7 @@ import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
@@ -159,7 +160,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
         
         List<List<String>> resultTemp = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
         if (resultTemp.size() == 2) {
-        	throw new ArcException("No mapping rules found for this ruleset.");
+        	throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND);
         }
         ArrayList<ArrayList<String>> result= new ArrayList<>();
         
@@ -186,10 +187,15 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
             temp.add(sb.toString());
             result.add(temp);
         }
-        
-        
+                
         for (int i = ARRAY_THIRD_COLUMN_INDEX; i < result.size(); i++) {
-            mapVariable.get(result.get(i).get(ARRAY_FIRST_COLUMN_INDEX)).setExpressionRegle(result.get(i)
+
+            if (mapVariable.get(result.get(i).get(ARRAY_FIRST_COLUMN_INDEX))==null)
+            {
+            	throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND, result.get(i).get(ARRAY_FIRST_COLUMN_INDEX));
+            }
+            
+        	mapVariable.get(result.get(i).get(ARRAY_FIRST_COLUMN_INDEX)).setExpressionRegle(result.get(i)
                     .get(ARRAY_SECOND_COLUMN_INDEX));
         }
     }

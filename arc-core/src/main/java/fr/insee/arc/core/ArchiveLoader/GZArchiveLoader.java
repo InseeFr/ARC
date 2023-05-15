@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.service.api.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 
 /**
@@ -34,8 +35,8 @@ public class GZArchiveLoader extends AbstractArchiveFileLoader {
 		this.filesInputStreamLoad.setTmpInxChargement(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
 		this.filesInputStreamLoad.setTmpInxCSV(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
 		this.filesInputStreamLoad.setTmpInxNormage(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
-	} catch (IOException e) {
-		throw new ArcException(e);
+	} catch (IOException ioReadException) {
+		throw new ArcException(ioReadException, ArcExceptionMessage.FILE_READ_FAILED, this.archiveChargement);
 	}
 	
 	StaticLoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);

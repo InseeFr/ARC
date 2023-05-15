@@ -11,6 +11,7 @@ import fr.insee.arc.core.service.engine.mapping.TableMapping;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 /**
  *
@@ -59,7 +60,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
          * La requête doit contenir uniquement du SQL, sans "{" ni "}".
          */
         if (!requete.matches(CodeSQL.REGEXP_TO_FIND_IDENTIFIER_RUBRIQUE) || !requete.matches(CodeSQL.REGEXP_TO_FIND_NONIDENTIFIER_RUBRIQUE)) {
-            throw new ArcException("La règle " + this.getExpression() + " contient des noms de tables inexistants.");
+            throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_REFERS_NON_EXISTING_TABLES, this.getExpression());
         }
         this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new ArcPreparedStatementBuilder(requete));
     }

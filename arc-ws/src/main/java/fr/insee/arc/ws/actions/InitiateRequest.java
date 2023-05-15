@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Services;
@@ -65,7 +66,7 @@ public class InitiateRequest implements IDbConstant {
 		else {
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"Le service n'est pas reconnu.\"}");
 			resp.endSending();
-			throw new ArcException("Le JSON n'est pas conforme");
+			throw new ArcException(ArcExceptionMessage.JSON_PARSING_FAILED);
 		}
 	}
 }

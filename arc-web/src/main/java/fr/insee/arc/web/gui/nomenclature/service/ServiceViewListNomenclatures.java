@@ -22,6 +22,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -142,11 +143,8 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
     	loggerDispatcher.debug("importListNomenclatures",LOGGER);
     	try {
             importNomenclatureDansBase(fileUpload);
-        } catch (Exception ex) {
-            if (ManipString.isStringNull(this.views.getViewListNomenclatures().getMessage())) {
-            	this.views.getViewListNomenclatures().setMessage(ex.toString());
-            }
-            loggerDispatcher.error("Error in GererNomenclatureAction.importListNomenclatures",LOGGER);
+        } catch (ArcException ex) {
+           	this.views.getViewListNomenclatures().setMessage(ex.toString());
         }
 
         return generateDisplay(model, RESULT_SUCCESS);
@@ -213,8 +211,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         	// Création de la table définitive
         	creationTableDefinitif();
         } catch (IOException e) {
-			LoggerHelper.error(LOGGER, e, "Error during import");
-			this.views.getViewListNomenclatures().setMessage("Le fichier n'a pu être lu. Il doit être au format csv non compressé, le nom des colonnes en première ligne, le type des colonne en 2ieme ligne.");
+        	throw new ArcException(e, ArcExceptionMessage.IHM_NMCL_IMPORT_FAILED);
 		}
 
     }
@@ -248,19 +245,14 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
     private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl, String elementDescription) throws ArcException {
         for (String e : listeFichier) {
             if (!listIhmSchemaNmcl.contains(e)) {
-                String message = "externalFilesManagement.import.error.extraImport";
-                this.views.getViewListNomenclatures().setMessage(message);
-                this.views.getViewListNomenclatures().setMessageArgs(elementDescription, e);
-                throw new ArcException(message);
+                throw new ArcException(ArcExceptionMessage.IHM_NMCL_COLUMN_IN_FILE_BUT_NOT_IN_SCHEMA, e);
             }
         }
 
         // Et réciproquement si toutes les colonnes sont présentes dans le fichier
         for (String e : listIhmSchemaNmcl) {
             if (!listeFichier.contains(e)) {
-                String message = "L'element de la table arc.ihm_schema_nmcl '" + e + "' n'est pas dans le fichier de nomenclature";
-                this.views.getViewSchemaNmcl().setMessage(message);
-                throw new ArcException(message);
+                throw new ArcException(ArcExceptionMessage.IHM_NMCL_COLUMN_IN_SCHEMA_BUT_NOT_IN_FILE, e);
             }
         }
     }
@@ -290,7 +282,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
     private void remplissageTableTemporaire(BufferedReader rd) throws ArcException {
 		String newNomenclatureName = views.getViewListNomenclatures().mapContentSelected().get(NOM_TABLE).get(0);
-    	UtilitaireDao.get(poolName).importing(null, "arc.temp_" + newNomenclatureName, rd, true, false, ";");
+    	UtilitaireDao.get(poolName).importingWithReader(null, "arc.temp_" + newNomenclatureName, rd, false, ";");
     }
 
     private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws ArcException {

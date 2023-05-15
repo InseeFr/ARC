@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.Pair;
 
 
@@ -111,15 +112,13 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
             return new Pair<List<Integer>, AbstractRegleMapping>(listeGroupe, this.regleMappingFactory.get(expressionGroupeReturned,
                     this.variableMapping));
         }
-        throw new ArcException("L'expression " + anExpressionGroupe + " dans la règle " + this.getExpression()
-                + " n'est pas reconnue comme valide.");
+        throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_GROUP_INVALID, anExpressionGroupe, this.getExpression());
     }
 
     private void majMapRegleGroupe(Pair<List<Integer>, AbstractRegleMapping> aPairRegleGroupe) throws ArcException {
         for (int i = 0; i < aPairRegleGroupe.getFirst().size(); i++) {
             if (this.mapRegleGroupe.containsKey(aPairRegleGroupe.getFirst().get(i))) {
-                throw new ArcException("L'expression " + this.getExpression() + " comporte plusieurs références au numéro de groupe "
-                        + aPairRegleGroupe.getFirst().get(i));
+                throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_GROUP_MULTI_REFERENCE, this.getExpression() , aPairRegleGroupe.getFirst().get(i));
             }
             this.mapRegleGroupe.put(aPairRegleGroupe.getFirst().get(i), aPairRegleGroupe.getSecond());
         }
@@ -187,7 +186,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
 
     @Override
     public String getExpressionSQL() throws ArcException {
-        throw new ArcException("Cette méthode ne devrait pas être appelée par RegleMappingGroupe");
+        throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_GROUP_ILLEGAL_CALL);
     }
 
     /**

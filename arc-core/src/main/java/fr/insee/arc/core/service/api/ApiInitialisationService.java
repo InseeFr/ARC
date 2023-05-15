@@ -32,6 +32,7 @@ import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -189,45 +190,45 @@ public class ApiInitialisationService extends ApiService {
                 fichiers = f.listFiles();
                 
                 for (File fichier : fichiers) {
-                	String name_no_ext=ManipString.substringBeforeFirst(fichier.getName(),".");
+                	String filenameWithoutExtension=ManipString.substringBeforeFirst(fichier.getName(),".");
                 	String ext = "."+ ManipString.substringAfterFirst(fichier.getName(),".");
 
                 	
-                	if (name_no_ext.contains("#"))
+                	if (filenameWithoutExtension.contains("#"))
                 	{
-                    	Integer number=ManipString.parseInteger(ManipString.substringAfterLast(name_no_ext,"#"));
+                    	Integer number=ManipString.parseInteger(ManipString.substringAfterLast(filenameWithoutExtension,"#"));
                     	
                     	// c'est un fichier valide
                     	if (number!=null)
                     	{
                     		
-                        	String name_source=ManipString.substringBeforeLast(name_no_ext,"#");
+                        	String originalIdSource=ManipString.substringBeforeLast(filenameWithoutExtension,"#");
 
                     		// tester ce qu'on doit en faire
                         	
                         	// comparer au fichier sans index
-                    		File autreFichier=new File (dirOut + File.separator + name_source + ext);
+                    		File autreFichier=new File (dirOut + File.separator + originalIdSource + ext);
                     		try {
 								if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
 								{
 									FileUtilsArc.delete(fichier);
 								}
-							} catch (IOException e) {
-								throw new ArcException(e);
+							} catch (IOException exception) {
+								throw new ArcException(exception, ArcExceptionMessage.FILE_DELETE_FAILED,fichier);
 							}
                     		
                     		// comparer aux fichier avec un index précédent
                     		for (int i=2;i<number;i++)
                     		{
-                    			autreFichier=new File (dirOut + File.separator + name_source + "#" + i + ext);
+                    			autreFichier=new File (dirOut + File.separator + originalIdSource + "#" + i + ext);
                         		
                         		try {
 									if (autreFichier.exists() && FileUtils.contentEquals(autreFichier, fichier))
 									{
 										FileUtilsArc.delete(fichier);
 									}
-								} catch (IOException e) {
-									throw new ArcException(e);
+								} catch (IOException exception) {
+									throw new ArcException(exception, ArcExceptionMessage.FILE_DELETE_FAILED,fichier);
 								}
 
                     		}

@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.ManipString;
 
 /**
@@ -120,8 +121,8 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 	FilesInputStreamLoad filesInputStreamLoadReturned = null;
 	try {
 		filesInputStreamLoadReturned = new FilesInputStreamLoad (toRead);
-	} catch (IOException e) {
-		throw new ArcException(e);
+	} catch (IOException ioReadException) {
+		throw new ArcException(ioReadException, ArcExceptionMessage.FILE_READ_FAILED, toRead);
 	}
 	return filesInputStreamLoadReturned;
     }

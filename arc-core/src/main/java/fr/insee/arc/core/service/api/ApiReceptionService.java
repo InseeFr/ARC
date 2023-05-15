@@ -37,6 +37,7 @@ import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -239,8 +240,8 @@ public class ApiReceptionService extends ApiService {
 										// copie dans archive avec le nouveau nom
 										try {
 											Files.copy(Paths.get(f.getAbsolutePath()), Paths.get(fileOutArchive.getAbsolutePath()));
-										} catch (IOException e) {
-											throw new ArcException("Files copy in the ARCHIVE directory failed",e);
+										} catch (IOException exception) {
+											throw new ArcException(exception, ArcExceptionMessage.FILE_COPY_FAILED, f, fileOutArchive);
 										}
 										// déplacer le fichier dans encours
 										deplacerFichier(dirIn, dirOut, f.getName(), d + "_" + fname);
@@ -253,8 +254,8 @@ public class ApiReceptionService extends ApiService {
 										File fOut=new File(dirOut + File.separator + d + "_"+ fname);
 										try {
 											Files.copy(Paths.get(fileOutArchive.getAbsolutePath()), Paths.get(fOut.getAbsolutePath()));
-										} catch (IOException e) {
-											throw new ArcException("Files copy in the ENCOURS directory failed",e);
+										} catch (IOException exception) {
+											throw new ArcException(exception, ArcExceptionMessage.FILE_COPY_FAILED, fileOutArchive, fOut);
 										}
 										// on efface le fichier source
 										FileUtilsArc.delete(f);

@@ -15,6 +15,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 /**
  * Chargement brutalement d'un fichier pour déterminer la norme et la validité associées.
@@ -48,10 +49,10 @@ public class ChargementBrutalTable {
 		try {
 			line = br.readLine();
 		} catch (IOException e) {
-    		throw new ArcException("File line cannot be read",e);
+    		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 		}
     	if (line == null) {
-    		throw new ArcException("The file is empty.");
+    		throw new ArcException(ArcExceptionMessage.FILE_IS_EMPTY, idSource);
     	}
     	boolean start=true;
     	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
@@ -70,7 +71,7 @@ public class ChargementBrutalTable {
               try {
 				line = br.readLine();
 			} catch (IOException e) {
-	    		throw new ArcException("File line cannot be read",e);
+	    		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 			}
           }
        }
@@ -106,11 +107,11 @@ public class ChargementBrutalTable {
 	    	}
 
 	    } catch (IOException e) {
-	    	throw new ArcException("Erreur de lecture du fichier " + idSource , e);
+	    	throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 	    }
 
 	    if (normeOk[0].getIdNorme()==null) {
-	        throw new ArcException("Aucune norme trouvée");
+	        throw new ArcException(ArcExceptionMessage.LOAD_NORM_NOT_FOUND, idSource);
 	    }
     }
 
@@ -153,10 +154,10 @@ public class ChargementBrutalTable {
 	    		normsFound.append(resultLine.get(2));
 	    		normsFound.append("}");
         	}
-        	throw new ArcException("More than one norm and/or validity match the expression:" + normsFound);
+        	throw new ArcException(ArcExceptionMessage.LOAD_SEVERAL_NORM_FOUND, normsFound);
         } else if (result.isEmpty())
         {
-        	throw new ArcException("Zero norm and/or validity match the expression");
+        	throw new ArcException(ArcExceptionMessage.LOAD_ZERO_NORM_FOUND);
         }
 
         normeOk[0]=listeNorme.get(Integer.parseInt(result.get(0).get(0)));

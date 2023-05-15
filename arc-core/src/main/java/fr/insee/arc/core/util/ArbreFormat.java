@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.service.handler.FormatFichierHandler;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.SecuredSaxParser;
 
 
@@ -30,7 +31,7 @@ import fr.insee.arc.utils.utils.SecuredSaxParser;
 public class ArbreFormat {
 
     //L'arbre
-    private HashMap<String, String> arbreFormat;
+    private HashMap<String, String> arbreHierachieDuFichier;
     
     //éléments terminaux
     private ArrayList<String> feuilles = new ArrayList<>();
@@ -42,18 +43,18 @@ public class ArbreFormat {
         super();
         
         try {
-        // Récupérer le 'format' lié à la norme
+        // Récupérer et parser le 'format' lié à la norme
 
         SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
         FormatFichierHandler formatHandler = new FormatFichierHandler();
 
         saxParser.parse(new InputSource(new StringReader(aNorme.getRegleChargement().getFormat())), formatHandler);
 
-        this.arbreFormat = formatHandler.getArbre();
+        this.arbreHierachieDuFichier = formatHandler.getArbre();
         calculerFeuilles();
         } catch (SAXException | IOException | ParserConfigurationException e)
         {
-        	throw new ArcException(e);
+        	throw new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED,"spécifié dans le champ format des règles de chargement");
         }
         
     }
@@ -63,8 +64,8 @@ public class ArbreFormat {
      */
     private void calculerFeuilles(){
         this.feuilles.clear();
-        Collection<String> listeValeur = this.arbreFormat.values();
-        for (String element : this.arbreFormat.keySet()) {
+        Collection<String> listeValeur = this.arbreHierachieDuFichier.values();
+        for (String element : this.arbreHierachieDuFichier.keySet()) {
             if (!listeValeur.contains(element)) {
                 this.feuilles.add(element.toUpperCase());
             } else {
@@ -82,11 +83,11 @@ public class ArbreFormat {
     public ArrayList<String> getPeres (String fils){
         ArrayList<String> listePere = new ArrayList<String>();
         listePere.add(fils);
-        String pere = this.arbreFormat.get(fils);
+        String pere = this.arbreHierachieDuFichier.get(fils);
        
         while (pere != null && !pere.equalsIgnoreCase("root")) {
             listePere.add(pere);
-            pere = arbreFormat.get(pere);
+            pere = arbreHierachieDuFichier.get(pere);
         }
 
         return listePere;
@@ -100,14 +101,14 @@ public class ArbreFormat {
      * @return the arbreFormat
      */
     public HashMap<String, String> getArbreFormat() {
-        return arbreFormat;
+        return arbreHierachieDuFichier;
     }
 
     /**
      * @param arbreFormat the arbreFormat to set
      */
     public void setArbreFormat(HashMap<String, String> arbreFormat) {
-        this.arbreFormat = arbreFormat;
+        this.arbreHierachieDuFichier = arbreFormat;
     }
 
     /**

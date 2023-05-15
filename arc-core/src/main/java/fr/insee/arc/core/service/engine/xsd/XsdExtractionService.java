@@ -9,6 +9,7 @@ import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.xsd.controls.ControlForXsd;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdGroup;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 /** Produces an XSD-format export of a set of control rules.*/
 public class XsdExtractionService {
@@ -188,8 +189,7 @@ public class XsdExtractionService {
 			}
 		}
 		if (typesFound.size() > 1) {
-			throw new ArcException(
-					"Plus d'un type est possible : le type XSD n'est pas déterminable.");
+			throw new ArcException(ArcExceptionMessage.EXTRACT_XSD_TYPE_UNSOLVED);
 		}
 		String typeFound = typesFound.pollFirst();
 		return typeFound != null ? typeFound : "xs:string";

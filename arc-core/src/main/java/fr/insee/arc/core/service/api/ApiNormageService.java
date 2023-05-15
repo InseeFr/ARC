@@ -46,7 +46,7 @@ public class ApiNormageService extends ApiService {
         this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiNormageService.MAX_PARALLEL_WORKERS",4);
 
         // récupère le nombre de fichier à traiter
-        this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
+        this.setTabIdSource(recuperationIdSource());
         
         MultiThreading<ApiNormageService,ThreadNormageService> mt=new MultiThreading<>(this, new ThreadNormageService());
         mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());

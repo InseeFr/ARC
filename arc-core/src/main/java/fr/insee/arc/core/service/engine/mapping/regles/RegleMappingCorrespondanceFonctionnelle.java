@@ -13,6 +13,7 @@ import fr.insee.arc.core.service.engine.mapping.RegleMappingFactory;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.core.service.engine.mapping.regles.AbstractRegleMappingSimple.RubriqueMapping;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 /**
  *
@@ -88,7 +89,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
         for (int i = 0; i < triplet.size(); i++) {
             if (triplet.get(i).equals(this.getExpression())) {
 
-                throw new ArcException("L'expression \"" + this.getExpression() + "\" n'est pas valide.");
+                throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_INVALID, this.getExpression());
             }
         }
         if (!triplet.get(ARRAY_FIRST_COLUMN_INDEX).equalsIgnoreCase(empty)) {

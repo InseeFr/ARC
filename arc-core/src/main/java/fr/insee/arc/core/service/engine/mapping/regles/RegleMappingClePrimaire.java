@@ -7,6 +7,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.engine.mapping.TableMapping;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.LoggerHelper;
 /**
@@ -82,8 +83,7 @@ public class RegleMappingClePrimaire extends AbstractRegleMappingSimple {
         String nomVariable = this.getExpression().replaceFirst(regexDebut.toLowerCase(), "id").replaceFirst(boutDeux, empty);
         LoggerHelper.traceAsComment(LOGGER, "regexDebut :" + regexDebut + " , Nom variable : " + nomVariable);
         if (!nomVariable.equalsIgnoreCase(this.variableMapping.getNomVariable())) {
-            throw new ArcException("La règle de clé primaire pour la variable " + this.getVariableMapping().getNomVariable()
-                    + " n'est pas de la forme : \"{\"pk:mapping_<famille>_<variable>_ok\"}\"");
+            throw new ArcException(ArcExceptionMessage.MAPPING_PRIMARY_KEY_INVALID_FORMAT, this.getVariableMapping().getNomVariable());
         }
     }
 

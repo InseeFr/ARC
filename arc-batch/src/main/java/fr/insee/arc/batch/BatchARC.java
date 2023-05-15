@@ -28,6 +28,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -596,8 +597,8 @@ class BatchARC implements IReturnCode {
 
 		try {
 			dLastInitialize = dateFormat.parse(lastInitialize);
-		} catch (ParseException e) {
-			throw new ArcException("Date retrieved from pilotage batch table cannot be parsed", e);
+		} catch (ParseException dateParseException) {
+			throw new ArcException(dateParseException, ArcExceptionMessage.BATCH_INITIALIZATION_DATE_PARSE_FAILED);
 		}
 
 		// la nouvelle initialisation se lance si la date actuelle est postérieure à la

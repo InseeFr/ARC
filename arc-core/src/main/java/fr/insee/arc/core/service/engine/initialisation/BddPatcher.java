@@ -11,6 +11,7 @@ import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class BddPatcher {
@@ -69,8 +70,8 @@ public class BddPatcher {
 			{
 				try {
 					return applyBddScriptParameters(IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(scriptName), StandardCharsets.UTF_8), userRestricted, nbSandboxes, envExecution);
-				} catch (IOException e) {
-					throw new ArcException("Database script couldn't be read", e);
+				} catch (IOException fileReadExceptione) {
+					throw new ArcException(fileReadExceptione, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED);
 				}
 			}
 		return null;

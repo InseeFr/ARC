@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.ManipString;
 
 /**
@@ -47,14 +48,18 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 		// seek the file inside archive to be loaded
 		// idSource format is datastorage_filename
 		// thus the real filename can be found as the second token of idSource
+		
+		String entryName = ManipString.substringAfterFirst(this.idSource, "_");
+		
 		this.filesInputStreamLoad.setTmpInxChargement(zipFileChargement
-			.getInputStream(zipFileChargement.getEntry(ManipString.substringAfterFirst(this.idSource, "_"))));
+			.getInputStream(zipFileChargement.getEntry(entryName)));
 		this.filesInputStreamLoad.setTmpInxCSV(zipFileNormage
-			.getInputStream(zipFileNormage.getEntry(ManipString.substringAfterFirst(this.idSource, "_"))));
+			.getInputStream(zipFileNormage.getEntry(entryName)));
 		this.filesInputStreamLoad.setTmpInxNormage(
-			zipFileCSV.getInputStream(zipFileCSV.getEntry(ManipString.substringAfterFirst(this.idSource, "_"))));
-	} catch (IOException e) {
-		throw new ArcException(e);
+			zipFileCSV.getInputStream(zipFileCSV.getEntry(entryName)));
+		
+	} catch (IOException ioReadException) {
+		throw new ArcException(ioReadException, ArcExceptionMessage.FILE_READ_FAILED, this.idSource);
 	}
 		
 	StaticLoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);

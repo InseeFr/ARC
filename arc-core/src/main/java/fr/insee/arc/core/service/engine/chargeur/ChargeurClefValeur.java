@@ -20,6 +20,7 @@ import fr.insee.arc.core.util.ArbreFormat;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -65,12 +66,13 @@ public class ChargeurClefValeur implements IChargeur {
                 // stream en un autre stream
 
                 clefValeurToXml(arbreFormat.getArbreFormat(), tmpInxChargement);
-            } catch (Exception e) {
-                exceptionThrown = e;
+            } catch (Exception parseFileException) {
+                exceptionThrown = parseFileException;
             } finally {
                 try {
                     outputStream.close();
-                } catch (IOException e) {
+                } catch (IOException closeFileException) {
+                    exceptionThrown = closeFileException;
                     LoggerHelper.errorAsComment(LOGGER, "ChargeurCleValeur.run - xml conversion failed for IO reason");
                 }
             }
@@ -97,13 +99,12 @@ public class ChargeurClefValeur implements IChargeur {
 
             chargeurXml.charger();
         } catch (Exception e) {        	
-        	StaticLoggerDispatcher.error("An error occurred when loading a key value file", e, LOGGER);
         	/** If an error occurred in the key-value to XML conversion, we assume this is the real error.*/
             Optional<Exception> exceptionThrown = kRunnable.getExceptionThrown();
             if (exceptionThrown.isPresent()) {
-            	 e = exceptionThrown.get();
+                throw new ArcException(exceptionThrown.get(), ArcExceptionMessage.XML_KEYVALUE_CONVERSION_FAILED, this.idSource);
             }
-            throw new ArcException(e);
+            throw new ArcException(e, ArcExceptionMessage.XML_KEYVALUE_CONVERSION_FAILED, this.idSource);
         }
     }
 
@@ -150,8 +151,8 @@ public class ChargeurClefValeur implements IChargeur {
 	        }
 	
 	        finaliserOutputStream(listePeresRubriquePrecedante);
-        } catch (IOException e) {
-			throw new ArcException(e);
+        } catch (IOException readFileException) {
+			throw new ArcException(readFileException, ArcExceptionMessage.FILE_READ_FAILED, this.idSource);
 		}
 
         java.util.Date endDate = new java.util.Date();
@@ -170,7 +171,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws ArcException 
      */
     private ArrayList<String> initialisationOutputStream(HashMap<String, String> arbreFormat, HashMap<String, ArrayList<String>> mapRubriquesFilles,
-            String ligne) throws IOException, ArcException {
+            String ligne) throws ArcException {
         // ecriture de l'entete du fichier
 
         ecrireXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -185,7 +186,7 @@ public class ChargeurClefValeur implements IChargeur {
         donnee = StringEscapeUtils.escapeXml11(donnee);
 
         if (!arbreFormat.containsKey(rubrique)) {
-            throw new ArcException("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
+            throw new ArcException(ArcExceptionMessage.LOAD_KEYVALUE_VAR_NOT_EXISTS_IN_FORMAT_RULES, rubrique);
         }
         ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
         // On remonte dans l'arbre des pères jusqu'à la racine
@@ -247,7 +248,7 @@ public class ChargeurClefValeur implements IChargeur {
         // StaticLoggerDispatcher.info("rubrique " + rubrique, LOGGER);
         // On verifi si la rubrique existe bien dans notre arbre format. Sinon on lance un exception
         if (!arbreFormat.containsKey(pere)) {
-            throw new ArcException("La rubrique fille " + rubrique + " n'existe pas dans le fichier format");
+            throw new ArcException(ArcExceptionMessage.LOAD_KEYVALUE_VAR_NOT_EXISTS_IN_FORMAT_RULES, rubrique);
         }
         ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
         while (pere != null) {
@@ -337,8 +338,8 @@ public class ChargeurClefValeur implements IChargeur {
     private void ecrireXML(String donnee) throws ArcException {
         try {
 			getOutputStream().write((donnee).getBytes());
-		} catch (IOException e) {
-			throw new ArcException(e);
+		} catch (IOException writeFileException) {
+			throw new ArcException(writeFileException, ArcExceptionMessage.FILE_WRITE_FAILED, this.idSource);
 		}
     }
 

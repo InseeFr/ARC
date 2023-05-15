@@ -18,6 +18,7 @@ import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -60,7 +61,7 @@ public class ClientDaoImpl implements ClientDao {
             LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.verificationClientFamille() : ExecuteQuery Done -", time2, "ms");
 
             if (!bool.equals("t")) {
-                throw new ArcException("Vous ne pouvez pas accéder à cette famille de norme.");
+                throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_FAMILY_FORBIDDEN);
             }
         } finally {
             close(connection);
@@ -523,7 +524,7 @@ public class ClientDaoImpl implements ClientDao {
                 try {
 					connection.close();
 				} catch (SQLException e) {
-					throw new ArcException(e);
+					throw new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 				}
         }
     }

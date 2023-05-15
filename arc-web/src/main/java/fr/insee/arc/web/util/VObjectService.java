@@ -41,6 +41,7 @@ import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -1433,7 +1434,7 @@ public class VObjectService {
 						Files.copy(locationTmp, location, StandardCopyOption.REPLACE_EXISTING);
 
 					} catch (IOException ex) {
-						throw new ArcException(ex);
+						throw new ArcException(ex, ArcExceptionMessage.FILE_COPY_FAILED, fileName);
 					} finally {
 						if (temporaryFolder != null) {
 							FileUtilsArc.deleteDirectory(temporaryFolder);

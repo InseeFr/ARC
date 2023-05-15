@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
 public class FileUtilsArc {
@@ -124,8 +125,7 @@ public class FileUtilsArc {
 		boolean renameResult = fileInput.renameTo(fileOutput);
 
 		if (!renameResult) {
-			throw new ArcException("Le fichier" + fileInput.getName() + " n'a pas pu être renommé vers " +
-					fileOutput.getName());
+			throw new ArcException(ArcExceptionMessage.FILE_RENAME_FAILED,fileInput.getName(),fileOutput.getName());
 		}
 	}
 
@@ -140,7 +140,7 @@ public class FileUtilsArc {
 		boolean deleteResult = fileInput.delete();
 
 		if (!deleteResult) {
-			throw new ArcException("Le fichier" + fileInput.getName() + " n'a pas pu être effacé");
+			throw new ArcException(ArcExceptionMessage.FILE_DELETE_FAILED, fileInput.getName());
 		}
 	}
 

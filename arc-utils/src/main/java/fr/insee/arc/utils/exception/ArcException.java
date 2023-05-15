@@ -1,26 +1,50 @@
 package fr.insee.arc.utils.exception;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import fr.insee.arc.utils.utils.LoggerHelper;
+
 public class ArcException extends Exception {
+
+	private static final Logger LOGGER = LogManager.getLogger(ArcException.class);
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6127318245282541168L;
-
-	public ArcException(ArcExceptionMessage error) {
-		super(error.toString());
+	
+	/**
+	 * build a custom business exception
+	 * @param error
+	 * @param parameters
+	 */
+	public ArcException(ArcExceptionMessage error, Object...parameters) {
+		super(error.formatException(parameters));
+		this.initCause(new Throwable(error.formatException(parameters)));
 	}
 	
-	public ArcException(String error) {
-		super(error);
+	/**
+	 * build a custom technical exception
+	 * @param rootException
+	 * @param error
+	 * @param parameters
+	 */
+	public ArcException(Exception rootException, ArcExceptionMessage error, Object...parameters) {
+		super(error.formatException(parameters),rootException);
+	}
+
+	public ArcException logFullException()
+	{
+		LoggerHelper.error(LOGGER, this.getCause(), this.getMessage());
+		return this;
 	}
 	
-	public ArcException(Exception ex) {
-		super(ex);
+	public ArcException logMessageException()
+	{
+		LoggerHelper.error(LOGGER, this.getMessage());
+		return this;
 	}
-
-	public ArcException(String error, Exception ex) {
-		super(error, ex);
-	}
-
+	
 }

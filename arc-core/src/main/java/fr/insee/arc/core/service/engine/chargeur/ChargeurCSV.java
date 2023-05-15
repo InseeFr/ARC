@@ -25,6 +25,7 @@ import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.XMLUtil;
 import fr.insee.arc.utils.utils.ManipString;
@@ -128,9 +129,9 @@ public class ChargeurCSV implements IChargeur {
 				} finally {
 					streamHeader.close();
 				}
-			} catch (IOException e)
+			} catch (IOException fileReadException)
 			{
-				throw new ArcException(e);
+				throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, this.fileName);
 			}
 		} else {
 			this.headers = userDefinedHeaders.replaceAll(" ", "").split(",");
@@ -169,13 +170,13 @@ public class ChargeurCSV implements IChargeur {
 				columnForCopy.setLength(columnForCopy.length() - 1);
 				columnForCopy.append(")");
 	
-				UtilitaireDao.get("arc").importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent, true,
+				UtilitaireDao.get("arc").importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent,
 						this.userDefinedHeaders == null, this.separateur, this.quote, this.encoding);
 			} finally {
 					streamContent.close();
 			}
-		} catch (IOException e) {
-			throw new ArcException(e);
+		} catch (IOException fileReadException) {
+			throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, this.fileName);
 		}
 	}
 

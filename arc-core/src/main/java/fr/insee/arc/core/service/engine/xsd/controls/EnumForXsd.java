@@ -3,6 +3,7 @@ package fr.insee.arc.core.service.engine.xsd.controls;
 import java.util.List;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 public class EnumForXsd implements ControlForXsd {
 
@@ -10,7 +11,7 @@ public class EnumForXsd implements ControlForXsd {
 
 	public EnumForXsd(List<String> enumeration) throws ArcException {
 		if (enumeration == null || enumeration.isEmpty()) {
-			throw new ArcException("Une énumération XSD ne peut pas être vide.");
+			throw new ArcException(ArcExceptionMessage.CONTROLE_XSD_ENUM_EMPTY);
 		}
 		this.enumeration = enumeration;
 	}

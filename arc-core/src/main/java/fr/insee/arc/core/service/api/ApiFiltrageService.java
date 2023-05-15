@@ -54,7 +54,7 @@ public class ApiFiltrageService extends ApiService implements IConstanteCaracter
         
         this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiFiltrageService.MAX_PARALLEL_WORKERS",2);
     	
-        this.setTabIdSource(recuperationIdSource(getPreviousPhase()));
+        this.setTabIdSource(recuperationIdSource());
         
         MultiThreading<ApiFiltrageService,ThreadFiltrageService> mt=new MultiThreading<>(this, new ThreadFiltrageService());
         mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());

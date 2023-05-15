@@ -45,6 +45,7 @@ import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -67,18 +68,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static final String CONNECTION_SEPARATOR="\\|\\|\\|";
 
-	/**
-	 * Format des données utilisées dans la commande copy
-	 */
-	public static final String FORMAT_BINARY = "BINARY";
-	/**
-	 * Format des données utilisées dans la commande copy
-	 */
-	public static final String FORMAT_TEXT = "TEXT";
-	/**
-	 * Format des données utilisées dans la commande copy
-	 */
-	public static final String FORMAT_CSV = "CSV";
 	/**
 	 * execute request returns a table with headers, type and data
 	 * provide the indexes of these elements
@@ -178,12 +167,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 				c = DriverManager.getConnection(uri, props);
 				} catch (Exception e) {
-					throw new ArcException("La connexion n'a pu aboutir");
+					throw new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 				}
 		return c;
 		
 		} catch (ClassNotFoundException e1) {
-			throw new ArcException("L'initialisation de la connexion a échouée");
+			throw new ArcException(e1, ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
 	}
 
@@ -306,13 +295,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	
 
-	public Date getDate(Connection aConnexion, GenericPreparedStatementBuilder aRequete, SimpleDateFormat aSimpleDateFomrat)
+	public Date getDate(Connection aConnexion, GenericPreparedStatementBuilder aRequete, SimpleDateFormat aSimpleDateFormat)
 			throws ArcException {
 		String resultat = getString(aConnexion, aRequete);
 		try {
-			return resultat == null ? null : aSimpleDateFomrat.parse(resultat);
+			return resultat == null ? null : aSimpleDateFormat.parse(resultat);
 		} catch (ParseException e) {
-			throw new ArcException(e);
+			throw new ArcException(e, ArcExceptionMessage.SQL_DATE_PARSE_FAILED, resultat, aSimpleDateFormat);
 		}
 	}
 	
@@ -396,14 +385,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
 				} catch (SQLException e) {
 					st.cancel();
-					LoggerHelper.error(LOGGER, e);
 					LoggerHelper.error(LOGGER, requete);
 					throw e;
 				}
 			}
 		} catch (SQLException e) {
-			LoggerHelper.error(LOGGER, e);
-			throw new ArcException(e);
+			throw new ArcException(e, ArcExceptionMessage.SQL_EXECUTE_FAILED ).logFullException();
 		} finally {
 			if (connexionWrapper.isLocal()) {
 				connexionWrapper.close();
@@ -513,9 +500,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} finally {
 				connexionWrapper.close();
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException sqlException) {
 			LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
-			throw new ArcException(ex);
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED ).logFullException();
 		}
 	}
 	
@@ -617,9 +604,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} finally {
 				connexionWrapper.close();
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException sqlException) {
 			LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
-			throw new ArcException(ex);
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED ).logFullException();
 		}
 	}
 
@@ -627,12 +614,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * 
 	 * Classe bridge qui permet d'utiliser l'interface de {@link UtilitaireDao} dans
 	 * d'autres classes du projet.<br/>
-	 * Pourquoi ?<br/>
-	 * Parce que les autres classes étaient initialement prévues pour faire partie
-	 * d'un package d'ORM complet, mais inachevé. La gestion des COMMIT, ROLLBACK ne
-	 * s'y fait pas de façon unifiée, donc l'interface de ce package ORM fait appel
-	 * à {@link UtilitaireDAO}.
-	 *
 	 * @param <T>
 	 */
 	public static abstract class EntityProvider<T> implements Function<ResultSet, T> {
@@ -756,9 +737,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 		return result;
 		}
-		catch (SQLException e)
+		catch (SQLException sqlException)
 		{
-			throw new ArcException(e);
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED ).logFullException();
 		}
 	}
 
@@ -770,8 +751,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				result.add(orm.apply(res));
 			}
 		return result;
-		} catch (SQLException e) {
-			throw new ArcException(e);
+		} catch (SQLException sqlException) {
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED ).logFullException();
 		}
 	}
 
@@ -903,7 +884,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				taos.closeArchiveEntry();
 			}
 		} catch (IOException e) {
-			throw new ArcException(e);
+			throw new ArcException(e, ArcExceptionMessage.TGZ_CONVERSION_FAILED, fileIn);
 		}
 	}
 
@@ -1446,53 +1427,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} else {
 				copyManager.copyOut("COPY " + table + " TO STDOUT WITH (FORMAT BINARY)", os);
 			}
-		} catch (SQLException e) {
-			throw new ArcException(e);
+		} catch (SQLException sqlException) {
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED ).logFullException();
 		} catch (IOException e) {
-			throw new ArcException(e);
-		} finally {
-			conn.close();
-		}
-	}
-
-	/**
-	 *
-	 * @param connexion
-	 * @param table
-	 * @param os
-	 * @param csv       : true / false (binary)
-	 * @throws ArcException
-	 * @throws IOException
-	 */
-	public void exportingWithoutHeader(Connection connexion, String table, OutputStream os, boolean csv,
-			boolean... forceQuote) throws ArcException, IOException {
-		ConnectionWrapper conn = initConnection(connexion);
-
-		boolean forceQuoteBis;
-		if (forceQuote != null && forceQuote.length > 0) {
-			forceQuoteBis = forceQuote[0];
-		} else {
-			forceQuoteBis = true;
-		}
-
-		try {
-			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
-			if (csv) {
-				if (forceQuoteBis) {
-					copyManager.copyOut("COPY " + table
-							+ " TO STDOUT WITH (FORMAT csv, HEADER false , DELIMITER ';' , FORCE_QUOTE *, ENCODING 'UTF8') ",
-							os);
-				} else {
-					copyManager.copyOut(
-							"COPY " + table
-									+ " TO STDOUT WITH (FORMAT csv, HEADER false , DELIMITER ';' , ENCODING 'UTF8') ",
-							os);
-				}
-			} else {
-				copyManager.copyOut("COPY " + table + " TO STDOUT WITH (FORMAT BINARY)", os);
-			}
-		} catch (SQLException e) {
-			throw new ArcException(e);
+			throw new ArcException(e, ArcExceptionMessage.STREAM_WRITE_FAILED);
 		} finally {
 			conn.close();
 		}
@@ -1509,7 +1447,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param aDelim
 	 * @throws ArcException
 	 */
-	public void importing(Connection connexion, String table, Reader aReader, boolean csv, boolean header,
+	public void importingWithReader(Connection connexion, String table, Reader aReader, boolean header,
 			String... aDelim) throws ArcException {
 		ConnectionWrapper conn = initConnection(connexion);
 		try {
@@ -1528,11 +1466,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 			String h = (header ? ", HEADER true " : "");
 
-			if (csv) {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", aReader);
-			} else {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", aReader);
-			}
+			copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT CSV " + h + delimiter + ") ", aReader);
+
 			conn.getConnexion().commit();
 		} catch (SQLException | IOException e) {
 
@@ -1541,58 +1476,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			try {
 				conn.getConnexion().rollback();
 			} catch (SQLException e1) {
-				throw new ArcException("Error in connection rollback",e1);
+				throw new ArcException(e1, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
 			}
 			
-			throw new ArcException(e);
+			throw new ArcException(e, ArcExceptionMessage.IMPORTING_FAILED);
 
 		} finally {
 			conn.close();
 		}
 	}
 
-	/**
-	 * Copie brutal de fichier plat dans une table SQL.
-	 * 
-	 * @param connexion
-	 * @param table
-	 * @param aColumnName
-	 * @param is
-	 * @param csv
-	 * @param header
-	 * @param aDelim
-	 * @param aQuote
-	 * @throws ArcException
-	 */
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean header, String aDelim, String aQuote) throws ArcException {
-		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote);
-	}
-
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean header, String aDelim, String aQuote, String encoding) throws ArcException {
-		importing(connexion, table, aColumnName, is, csv ? FORMAT_CSV : FORMAT_BINARY, header, aDelim, aQuote,
-				encoding);
-	}
-
-	/**
-	 * Copie brutal de fichier plat dans une table SQL.
-	 * 
-	 * @param connexion
-	 * @param table       nom de la table à remplir
-	 * @param aColumnName
-	 * @param is
-	 * @param format      le format des données (CSV, TEXT ou BINARY)
-	 * @param header      le flux de données contient-il en première ligne la liste
-	 *                    des colonnes ?
-	 * @param aDelim      le délimiter (exemple le point virgule)
-	 * @param aQuote
-	 * @throws ArcException
-	 */
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
-			boolean header, String aDelim, String aQuote) throws ArcException {
-		importing(connexion, table, aColumnName, is, format, header, aDelim, aQuote, null);
-	}
 
 	/**
 	 * Copie brutal de fichier plat dans une table SQL.
@@ -1610,7 +1503,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws ArcException 
 	 * @throws ArcException
 	 */
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, String format,
+	public void importing(Connection connexion, String table, String aColumnName, InputStream is, 
 			boolean header, String aDelim, String aQuote, String encoding) throws ArcException {
 		LoggerHelper.info(LOGGER, "importing()");
 		try (ConnectionWrapper conn = initConnection(connexion);)
@@ -1630,7 +1523,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				quote = ", QUOTE '" + aQuote + "'";
 			}
 
-			if (aColumnName != null && aColumnName != "") {
+			if (aColumnName != null && !aColumnName.equals("")) {
 				columnName = aColumnName;
 			}
 
@@ -1639,62 +1532,31 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 
 			String h = (header ? ", HEADER true " : "");
-			if (format.equals(FORMAT_CSV) || format.equals(FORMAT_TEXT)) {
-				copyManager.copyIn("COPY " + table + columnName + " FROM STDIN WITH (FORMAT " + format + ", ENCODING '"
+			
+			copyManager.copyIn("COPY " + table + columnName + " FROM STDIN WITH (FORMAT CSV, ENCODING '"
 						+ encode + "' " + h + delimiter + quote + ") ", is);
-			}
-
-			if (format.equals(FORMAT_BINARY)) {
-				copyManager.copyIn("COPY " + table + " FROM STDIN WITH (FORMAT BINARY)", is);
-			}
-
+			
 			conn.getConnexion().commit();
 
 			LoggerHelper.info(LOGGER, "importing done");
+			
+			
 		} catch (IOException e) {
+			if (e.getMessage().startsWith(ArcExceptionMessage.IMPORTING_JAVA_EXCEPTION_DATA_MISSING.getMessage())) {
 
-			LoggerHelper.error(LOGGER, e);
+				throw new ArcException(e, ArcExceptionMessage.IMPORTING_COLUMNS_MISSING).logFullException();
 
-			if (e.getMessage().startsWith("ERROR: missing data for column")) {
+			} else if (e.getMessage().startsWith(ArcExceptionMessage.IMPORTING_JAVA_EXCEPTION_HEADERS_MISSING.getMessage())) {
 
-				throw new ArcException("Il manque une/des colonne dans le corps du fichier",e);
-
-			} else if (e.getMessage().startsWith("ERROR: extra data after last expected column")) {
-
-				throw new ArcException("Il manque un/des headers",e);
+				throw new ArcException(e, ArcExceptionMessage.IMPORTING_HEADERS_MISSING).logFullException();
 
 			} else {
-				throw new ArcException(e);
+				throw new ArcException(e, ArcExceptionMessage.STREAM_READ_FAILED).logFullException();
 			}
 
-		} catch (SQLException e) {
-			throw new ArcException(e);
+		} catch (SQLException sqlException) {
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED ).logFullException();
 		}
-	}
-
-	public void importing(Connection connexion, String table, InputStream is, boolean csv, String aDelim)
-			throws ArcException {
-		importing(connexion, table, null, is, csv, true, aDelim, null);
-	}
-
-	public void importing(Connection connexion, String table, InputStream is, boolean csv) throws ArcException {
-		importing(connexion, table, null, is, csv, true, null, null);
-	}
-
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv)
-			throws ArcException {
-		importing(connexion, table, aColumnName, is, csv, true, null, null);
-	}
-
-	public void importing(Connection connexion, String table, InputStream is, boolean csv, boolean aHeader,
-			String aDelim) throws ArcException {
-		importing(connexion, table, null, is, csv, aHeader, aDelim, null);
-	}
-
-	public void importing(Connection connexion, String table, String aColumnName, InputStream is, boolean csv,
-			boolean aHeader, String aDelim) throws ArcException {
-		importing(connexion, table, aColumnName, is, csv, aHeader, aDelim, null);
-
 	}
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 /**
  * Result of a select query given by UtilitaireDao.execute request is a list of
@@ -160,13 +161,12 @@ public class GenericBean {
 		HashMap<String, String> r = new HashMap<>();
 
 		if (!this.content.isEmpty() && this.content.get(0).size() != 2) {
-			throw new ArcException(
-					"GenericBean keyValue : the set hasn't exactly 2 elements and cannot be mapped to key>value format");
+			throw new ArcException(ArcExceptionMessage.GENERIC_BEAN_KEY_VALUE_FAILED);
 		}
 
 		for (ArrayList<String> line : this.content) {
 			if (r.get(line.get(0)) != null) {
-				throw new ArcException("GenericBean keyValue : duplicate key " + line.get(0) + " ");
+				throw new ArcException(ArcExceptionMessage.GENERIC_BEAN_DUPLICATE_KEY, line.get(0));
 			}
 			r.put(line.get(0), line.get(1));
 		}

@@ -17,6 +17,7 @@ import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class DDIInsertDAO {
@@ -44,7 +45,7 @@ public class DDIInsertDAO {
 		List<String> familyToInsert = selectFamilleToInsert(modeler);
 
 		if (familyToInsert.isEmpty()) {
-			throw new ArcException("Les familles présentent dans le DDI existe déjà");
+			throw new ArcException(ArcExceptionMessage.DDI_FAMILY_ALREADY_EXISTS);
 		}
 
 		// insert ddi rules

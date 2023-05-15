@@ -9,6 +9,7 @@ import javax.xml.parsers.SAXParser;
 import org.xml.sax.SAXException;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.SecuredSaxParser;
 
 public class DDIParser {
@@ -40,7 +41,7 @@ public class DDIParser {
 			return ddiModeler;
 
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new ArcException("DDI parsing failed");
+			throw new ArcException(ArcExceptionMessage.DDI_PARSING_FAILED);
 		}
 
 	}

@@ -452,7 +452,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 				
 
 				// Importing the file in the database (COPY command)
-				UtilitaireDao.get("arc").importing(null, nomTableImage, bufferedReader, true, false,
+				UtilitaireDao.get("arc").importingWithReader(null, nomTableImage, bufferedReader, false,
 						IConstanteCaractere.semicolon);
 
 			} catch (Exception ex) {

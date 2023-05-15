@@ -21,6 +21,7 @@ import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.textUtils.FastList;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -167,9 +168,9 @@ public class ChargeurXml implements IChargeur{
             saxParser.parse(f, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             error = true;
-            LoggerHelper.errorAsComment(LOGGER, "ChargeurXml.execution() - SAX parser failed to parse the xml file");
-            rapport = e.getMessage().replace("'", "''");
-            throw new ArcException("ChargeurXml.execution() - SAX parser failed to parse the xml file",e);
+            ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED, this.fileName).logMessageException();
+            rapport = businessException.getMessage().replace("'", "''");
+            throw businessException;
         }
 
         this.jointure=handler.jointure;

@@ -18,9 +18,11 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String NULL = "null";
     public static final String NO_VACUUM = " (autovacuum_enabled = false, toast.autovacuum_enabled = false) ";
     public static final String WITH_NO_VACUUM = " WITH" + NO_VACUUM;
-    public static final String defaultSeparator = ";\n";
-    public static final String _TMP = "$tmp$";
-    public static final String _REGEX_TMP = "\\$tmp\\$";
+    public static final String DEFAULT_SEPARATOR = ";\n";
+    
+    // temporary table generation token name
+    public static final String TMP = "$tmp$";
+    public static final String REGEX_TMP = "\\$tmp\\$";
 
     
     public static final boolean DROP_FIRST_FALSE = false;
@@ -59,7 +61,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         String end;
         if (separator == null || separator.length == 0)
         {
-            end = defaultSeparator;
+            end = DEFAULT_SEPARATOR;
         }
         else
         {
@@ -279,7 +281,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static final String temporaryTableName(String aName)
     {
-        String newName = aName.split(_REGEX_TMP)[0];
+        String newName = aName.split(REGEX_TMP)[0];
         // on met la date du jour dans le nom de la table
         String l = System.currentTimeMillis() + "";
         // on prend que les 10 derniers chiffres (durrée de vie : 6 mois)
@@ -287,7 +289,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         // on inverse la chaine de caractere pour avoir les millisecondes en
         // premier en cas de troncature
         l = new StringBuffer(l).reverse().toString();
-        return new StringBuilder(newName).append(_TMP).append(l).append(dollar).append(randomNumber(4)).toString();
+        return new StringBuilder(newName).append(TMP).append(l).append(dollar).append(randomNumber(4)).toString();
     }
 
     /**
@@ -301,7 +303,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static final String temporaryTableName(String aName, String suffix)
     {
-        String newName = aName.split(_REGEX_TMP)[0];
+        String newName = aName.split(REGEX_TMP)[0];
         return temporaryTableName(newName + underscore + suffix);
     }
 
@@ -380,7 +382,12 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 		}
     }
     
-    
+    /**
+     * query expression to convert a date format
+     * @param dateTextIn
+     * @param formatIn
+     * @return
+     */
     public static String toDate(String dateTextIn, String formatIn)
     {
     	return "to_date("+dateTextIn+"::text,"+formatIn+")";
