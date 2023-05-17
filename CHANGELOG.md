@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-92.2.18
+- github workflow java 11
+
 ## version-92.2.17 2023-11-03
 - show sand box informations at the home page
 - loader performance enhancement
