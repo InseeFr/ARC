@@ -2,17 +2,22 @@ package fr.insee.arc.core.service.engine.initialisation;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.structure.GenericBean;
 
@@ -23,16 +28,17 @@ public class BddPatcherTest extends InitializeQueryTest {
 	private static String userWithRestrictedRights = "arc_restricted";
 	public static String testSandbox = "arc_bas1";
 
-	@Test
 	/**
 	 * test the database initialization
 	 * 
 	 * @throws ArcException
 	 */
-	public void bddScript() throws ArcException {
+	@Test
+	public void bddScriptTest() throws ArcException {
 		
+		// test an arc database
 		createDatabase();
-		
+
 		GenericPreparedStatementBuilder query;
 
 		// test the meta data schema creation
@@ -80,6 +86,23 @@ public class BddPatcherTest extends InitializeQueryTest {
 		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c);
 		// sandbox schema creation
 		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c, testSandbox);
+		
+		// insert test data
+		insertTestData();
 	}
 
+	public static void insertTestData() throws ArcException {
+		//
+		
+		String scriptDataTest;
+		try {
+			scriptDataTest = IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream("BdDTest/script_sirene4.sql"), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED);
+		}
+		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeImmediate(c, scriptDataTest);
+		
+	}
+	
+	
 }
