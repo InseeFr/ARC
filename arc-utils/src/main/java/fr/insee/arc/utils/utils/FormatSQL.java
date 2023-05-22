@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.postgresql.core.Utils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
@@ -18,7 +19,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String NULL = "null";
     public static final String NO_VACUUM = " (autovacuum_enabled = false, toast.autovacuum_enabled = false) ";
     public static final String WITH_NO_VACUUM = " WITH" + NO_VACUUM;
-    public static final String DEFAULT_SEPARATOR = ";\n";
     
     // temporary table generation token name
     public static final String TMP = "$tmp$";
@@ -37,50 +37,24 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final String VACUUM_OPTION_FULL="full";
     
     private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
-
     
-    public enum ObjectType
-    {
-        TABLE("TABLE"), VIEW("VIEW"), TEMPORARY_TABLE ("TEMPORARY TABLE");
-        private String name;
-
-        private ObjectType(String aName)
-        {
-            this.name = aName;
-        }
-
-        @Override
-        public String toString()
-        {
-            return this.name;
-        }
-    }
-
-    public static String end(String[] separator)
-    {
-        String end;
-        if (separator == null || separator.length == 0)
-        {
-            end = DEFAULT_SEPARATOR;
-        }
-        else
-        {
-            end = separator[0];
-        }
-        return end;
-    }
-
-    public static String dropObjectCascade(ObjectType tableOrView, String anObjectName, String... separator)
-    {
-        StringBuilder sql = new StringBuilder("\n DROP " + tableOrView + " IF EXISTS " + anObjectName + " CASCADE "+end(separator));
-        return sql.toString();
+    /**
+     * query to drop a table in database
+     * @param tableName
+     * @return
+     */
+    public static String dropTableCascade(String tableName) {
+    	GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+    	query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, tableName, SQL.CASCADE, SQL.END_QUERY, SQL.BR);
+        return query.toString();
     }
     
-    public static String dropTable(String tableName, String... separator) {
-	return dropObjectCascade(ObjectType.TABLE,tableName,separator);
-    }
-    
-    public static GenericPreparedStatementBuilder tableExists(String table, String... separator) {
+    /**
+     * query to retrieve
+     * @param table
+     * @return
+     */
+    public static GenericPreparedStatementBuilder tableExists(String table) {
 	String tableSchema = ManipString.substringBeforeFirst(table, DOT);
 	String tableName = ManipString.substringAfterLast(table, DOT);
 	GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
@@ -89,8 +63,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 	if (table.contains(DOT)) {
 		requete.append("\n AND schemaname = " + requete.quoteText(tableSchema.toLowerCase()) + " ");
 	}
-	requete.append(end(separator));
-
 	return requete;
     }
 
@@ -190,7 +162,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static String createTableAsSelectWhere(String tableIn, String tableOut, String where)
     {
         StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.dropTable(tableOut));
+		requete.append(FormatSQL.dropTableCascade(tableOut));
 
         requete.append("\n CREATE ");
         if (!tableOut.contains("."))
@@ -225,7 +197,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         
         requete.append(createTableAsSelectWhere(table, tableRebuild, where));
         
-		requete.append(FormatSQL.dropTable(table));
+		requete.append(FormatSQL.dropTableCascade(table));
         
         requete.append(
                 "\n ALTER TABLE " + tableRebuild + " RENAME TO " + ManipString.substringAfterFirst(table, ".") + " ;");

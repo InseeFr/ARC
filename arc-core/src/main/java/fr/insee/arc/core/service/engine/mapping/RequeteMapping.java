@@ -360,10 +360,10 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 				calculerRequeteArrayAggGroup(requeteGlobale, table, tablesFilles);
 				calculerRequeteFinale(requeteGlobale, table);
 				
-				requeteGlobale.append(FormatSQL.dropTable(this.nomTableTemporairePrepUnion));
-				requeteGlobale.append(FormatSQL.dropTable(this.nomTableTemporaireIdTable));
+				requeteGlobale.append(FormatSQL.dropTableCascade(this.nomTableTemporairePrepUnion));
+				requeteGlobale.append(FormatSQL.dropTableCascade(this.nomTableTemporaireIdTable));
 			}
-			requeteGlobale.append(FormatSQL.dropTable(this.nomTableFichierCourant));
+			requeteGlobale.append(FormatSQL.dropTableCascade(this.nomTableFichierCourant));
 
 			this.requeteTextuelleInsertion = requeteGlobale.toString();
 			this.isRequeteCalculee = true;

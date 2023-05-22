@@ -19,6 +19,23 @@ public class FormatSQLTest extends InitializeQueryTest {
 	String tableInTemporary = "tableIn";
 	String tableInPublic = "public.tableIn";
 
+	
+	@Test
+	public void dropTableCascade() throws ArcException
+	{
+		// create table
+		UtilitaireDao.get("arc").executeImmediate(c,
+				"CREATE TABLE " + tableInPublic + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
+		assertTrue(UtilitaireDao.get("arc").isTableExiste(c, tableInPublic));
+		
+		
+		// test the query
+		UtilitaireDao.get("arc").executeImmediate(c, FormatSQL.dropTableCascade(tableInPublic));
+		// the table must have been drop
+		assertFalse(UtilitaireDao.get("arc").isTableExiste(c, tableInPublic));
+	}
+	
+	
 	@Test
 	public void tableExists_true() throws ArcException {
 

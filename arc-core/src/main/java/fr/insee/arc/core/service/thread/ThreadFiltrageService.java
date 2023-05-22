@@ -270,7 +270,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 		 * Sont traités tous les fichiers pour lesquels un jeu de règles est trouvé.
 		 */
 		String aTableControleCount = aTableControleOk.replace(".", "_") + "_COUNT";
-		requete.append(FormatSQL.dropTable(aTableControleCount));
+		requete.append(FormatSQL.dropTableCascade(aTableControleCount));
 
 		requete.append("\n BEGIN; ");
 		requete.append("\n create temporary table " + aTableControleCount + " " + FormatSQL.WITH_NO_VACUUM
@@ -360,7 +360,7 @@ public class ThreadFiltrageService extends ApiFiltrageService implements Runnabl
 				"\n AND exists (SELECT * FROM " + aTablePilotage + " b WHERE etat_traitement in ('{" + TraitementEtat.OK
 						+ "}','{" + TraitementEtat.OK + "," + TraitementEtat.KO + "}')  and a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+");");
 
-		requete.append(FormatSQL.dropTable(aTableControleCount));
+		requete.append(FormatSQL.dropTableCascade(aTableControleCount));
 
 		return requete;
 	}

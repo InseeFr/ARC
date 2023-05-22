@@ -776,13 +776,13 @@ public class ApiInitialisationService extends ApiService {
                                     + "_jeuderegle b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup AND a.version=b.version and b.etat=lower('"
                                     + modaliteEtat + "'))");
                 }
-                requete.append(FormatSQL.dropTable(tableImage));
+                requete.append(FormatSQL.dropTableCascade(tableImage));
                 
                 requete.append("CREATE TABLE " + tableImage
                         + " "+FormatSQL.WITH_NO_VACUUM+" AS SELECT a.* FROM " + anParametersEnvironment + "_"
                         + r[i] + " AS a " + condition + ";\n");
                 
-                requete.append(FormatSQL.dropTable(tableCurrent));
+                requete.append(FormatSQL.dropTableCascade(tableCurrent));
                 requete.append("ALTER TABLE " + tableImage + " rename to " + ManipString.substringAfterLast(tableCurrent, ".") + "; \n");
             }
             UtilitaireDao.get("arc").executeBlock(connexion, requete);
@@ -969,9 +969,9 @@ public class ApiInitialisationService extends ApiService {
             if (i > 2) {
                 requete.append(" UNION ALL ");
             }
-            requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(this.envExecution) + phase[i] + "$%$tmp$%", " "));
+            requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(this.envExecution) + phase[i] + "$%$tmp$%"));
             requete.append(" UNION ALL ");
-            requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(this.envExecution) + phase[i] + "\\_%$tmp$%", " "));
+            requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(this.envExecution) + phase[i] + "\\_%$tmp$%"));
         }
         return requete;
     }
@@ -1007,7 +1007,7 @@ public class ApiInitialisationService extends ApiService {
                 if (j > 0) {
                     requete.append(" UNION ALL ");
                 }
-                requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(env) + "%" + phase + "%\\_" + etat[j], " "));
+                requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(env) + "%" + phase + "%\\_" + etat[j]));
             }
         }
         return requete;
@@ -1041,7 +1041,7 @@ public class ApiInitialisationService extends ApiService {
             if (!g.mapContent().isEmpty()) {
                 ArrayList<String> envTables = g.mapContent().get("table_name");
                 for (String nomTable : envTables) {
-                    UtilitaireDao.get("arc").executeBlock(connexion, FormatSQL.dropTable(nomTable));
+                    UtilitaireDao.get("arc").executeBlock(connexion, FormatSQL.dropTableCascade(nomTable));
                 }
             }
 

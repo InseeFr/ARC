@@ -131,7 +131,7 @@ public class ServiceRequeteSqlRegle {
 
 	public String dropControleTemporaryTables() {
 		return 
-				FormatSQL.dropTable(TABLE_TEMP_MARK).toString();
+				FormatSQL.dropTableCascade(TABLE_TEMP_MARK).toString();
 	}
 
 

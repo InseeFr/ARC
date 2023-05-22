@@ -32,6 +32,15 @@ public GenericPreparedStatementBuilder(StringBuilder query) {
 	this.query = query;
 }
 
+public GenericPreparedStatementBuilder build(Object...queryElements)
+{
+	for (Object queryElement:queryElements)
+	{
+		query.append(queryElement);
+	}
+	return this;
+}
+
 public GenericPreparedStatementBuilder append(SQL s)
 {
 	query.append(s.toString());
@@ -69,7 +78,7 @@ public GenericPreparedStatementBuilder asTransaction()
 
 @Override
 public String toString() {
-	throw new IllegalStateException("ToString is not allowed for PreparedStatementBuilder");
+	return getQueryWithParameters();
 }
 
 public GenericPreparedStatementBuilder append(GenericPreparedStatementBuilder s)

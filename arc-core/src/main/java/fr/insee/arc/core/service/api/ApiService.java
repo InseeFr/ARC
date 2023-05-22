@@ -290,7 +290,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			if (Boolean.TRUE.equals(this.todo)) {
 
 				StringBuilder requete = new StringBuilder();
-				requete.append(FormatSQL.dropTable(this.tablePilTemp));
+				requete.append(FormatSQL.dropTableCascade(this.tablePilTemp));
 				try {
 					UtilitaireDao.get(poolName).executeBlock(this.connexion.getCoordinatorConnection(), requete);
 				} catch (Exception ex) {

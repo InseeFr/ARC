@@ -81,7 +81,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 			loggerDispatcher.debug("/* Delete nomenclature : " + nomTable + " */", LOGGER);
 			
 			
-            UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropTable(nomTable));
+            UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropTableCascade(nomTable));
             
                         
             StringBuilder requete = new StringBuilder();
