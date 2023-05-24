@@ -43,9 +43,12 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @param tableName
      * @return
      */
-    public static String dropTableCascade(String tableName) {
+    public static String dropTable(String... someTables) {
     	GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-    	query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, tableName, SQL.CASCADE, SQL.END_QUERY, SQL.BR);
+    	for (String tableName:someTables)
+    	{
+    		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, tableName, SQL.END_QUERY, SQL.BR);
+    	}
         return query.toString();
     }
     
@@ -162,7 +165,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static String createTableAsSelectWhere(String tableIn, String tableOut, String where)
     {
         StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.dropTableCascade(tableOut));
+		requete.append(FormatSQL.dropTable(tableOut));
 
         requete.append("\n CREATE ");
         if (!tableOut.contains("."))
@@ -197,7 +200,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         
         requete.append(createTableAsSelectWhere(table, tableRebuild, where));
         
-		requete.append(FormatSQL.dropTableCascade(table));
+		requete.append(FormatSQL.dropTable(table));
         
         requete.append(
                 "\n ALTER TABLE " + tableRebuild + " RENAME TO " + ManipString.substringAfterFirst(table, ".") + " ;");

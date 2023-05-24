@@ -219,27 +219,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param someTables le nom des tables
 	 * @return
 	 */
-	public void dropTable(Connection connexion, List<String> someTables) {
-		try {
-			if (someTables != null && !someTables.isEmpty()) {
-				executeBlock(connexion, //
-						new StringBuilder("DROP TABLE IF EXISTS ")//
-								.append(Format.untokenize(someTables, ";\n DROP TABLE IF EXISTS "))//
-								.append(";")//
-				);
-			}
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "dropTable()", LOGGER, ex);
-		}
-	}
-
-	/**
-	 * @param connexion  la connexion à la base
-	 * @param someTables le nom des tables
-	 * @return
-	 */
 	public void dropTable(Connection connexion, String... someTables) {
-		dropTable(connexion, Arrays.asList(someTables));
+		try {
+			executeBlock(connexion, FormatSQL.dropTable(someTables));
+		} catch (ArcException ex) {
+			ex.logFullException();
+		}
 	}
 
 	/**

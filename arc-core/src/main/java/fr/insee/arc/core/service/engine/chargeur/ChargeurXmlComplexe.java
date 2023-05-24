@@ -122,7 +122,7 @@ public class ChargeurXmlComplexe implements IChargeur{
 
         
         StringBuilder requete = new StringBuilder();
-        requete.append(FormatSQL.dropTableCascade(this.tableTempA));
+        requete.append(FormatSQL.dropTable(this.tableTempA));
         requete.append("CREATE ");
 
         if (!this.tableTempA.contains(".")) {
