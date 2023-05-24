@@ -9,6 +9,8 @@
 
 [ARC functionnalities and architecture](https://hackmd.io/cg4xbdLoRFqHVky-lx5DiA?view)
 
+[Functionnal diagram](https://github.com/InseeFr/ARC/raw/master/user-guide/diagrammes_fonctionnels.pdf)
+
 ## Workbench for acquisition and normalization of data sets
 [![Build Status](https://travis-ci.org/InseeFr/ARC.svg?branch=master)](https://travis-ci.org/InseeFr/ARC)
 

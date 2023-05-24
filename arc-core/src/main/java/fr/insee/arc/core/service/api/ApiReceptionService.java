@@ -874,7 +874,7 @@ public class ApiReceptionService extends ApiService {
 		    LoggerHelper.errorGenTextAsComment(getClass(), "dispatchFiles()", LOGGER, ex);
 		}
 		requete.setLength(0);
-		requete.append(FormatSQL.dropTableCascade(this.tablePilTemp));
+		requete.append(FormatSQL.dropTable(this.tablePilTemp));
 		soumettreRequete(requete);
 		return new GenericBean(headers, types, content);
 	}

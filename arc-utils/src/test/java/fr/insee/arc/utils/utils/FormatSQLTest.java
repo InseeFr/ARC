@@ -19,9 +19,12 @@ public class FormatSQLTest extends InitializeQueryTest {
 	String tableInTemporary = "tableIn";
 	String tableInPublic = "public.tableIn";
 
-	
+	/**
+	 * Test the query that drop table cascade
+	 * @throws ArcException
+	 */
 	@Test
-	public void dropTableCascade() throws ArcException
+	public void dropTable() throws ArcException
 	{
 		// create table
 		UtilitaireDao.get("arc").executeImmediate(c,
@@ -30,12 +33,15 @@ public class FormatSQLTest extends InitializeQueryTest {
 		
 		
 		// test the query
-		UtilitaireDao.get("arc").executeImmediate(c, FormatSQL.dropTableCascade(tableInPublic));
+		UtilitaireDao.get("arc").executeImmediate(c, FormatSQL.dropTable(tableInPublic));
 		// the table must have been drop
 		assertFalse(UtilitaireDao.get("arc").isTableExiste(c, tableInPublic));
 	}
 	
-	
+	/**
+	 * Test the method that check if a table or a temporary exists in database
+	 * @throws ArcException
+	 */
 	@Test
 	public void tableExists_true() throws ArcException {
 
