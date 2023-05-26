@@ -65,7 +65,6 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 		views.setViewChargement(vObjectService.preInitialize(model.getViewChargement()));
 		views.setViewNormage(vObjectService.preInitialize(model.getViewNormage()));
 		views.setViewControle(vObjectService.preInitialize(model.getViewControle()));
-		views.setViewFiltrage(vObjectService.preInitialize(model.getViewFiltrage()));
 		views.setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
 		views.setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
 		views.setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
@@ -86,9 +85,6 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 		//
 		putVObject(views.getViewControle(), t -> initializeControle(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE) ));
-		//
-		putVObject(views.getViewFiltrage(), t -> initializeFiltrage(t, views.getViewJeuxDeRegles(), views.getViewModules(),
-				dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE) ));
 		//
 		putVObject(views.getViewMapping(), t -> initializeMapping(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)  ));
@@ -235,30 +231,6 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
             HashMap<String, String> type = viewRulesSet.mapHeadersType();
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,blocking_threshold,error_row_processing,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
-            whereRuleSetEquals(requete, selection, type);
-            
-            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
-		} else {
-			vObjectService.destroy(moduleView);
-		}
-	}
-
-	
-	/**
-	 * Initialize the {@link VObject} of a filter ruleset. Only
-	 * get the load rule link to the selected rule set.
-	 */
-	public void initializeFiltrage(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
-		
-		if (!selection.isEmpty() && !moduleSelection.isEmpty()
-				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.filter)))
-		{
-            HashMap<String, String> type = viewRulesSet.mapHeadersType();
-            
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-            requete.append("select * from arc.ihm_filtrage_regle");
             whereRuleSetEquals(requete, selection, type);
             
             vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));

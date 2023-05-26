@@ -105,12 +105,12 @@ UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p2.xmlSt
 
 INSERT INTO arc.parameter VALUES ('ApiControleService.MAX_PARALLEL_WORKERS','3');
 UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p3.control' where key='ApiControleService.MAX_PARALLEL_WORKERS';
- 
-INSERT INTO arc.parameter VALUES ('ApiFiltrageService.MAX_PARALLEL_WORKERS','2');
-UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.filter' where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
+
+-- effacer le parametrage de la phase de filtrage
+delete from arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
 
 INSERT INTO arc.parameter VALUES ('MappingService.MAX_PARALLEL_WORKERS','4');
-UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p5.mapmodel' where key='MappingService.MAX_PARALLEL_WORKERS';
+UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.mapmodel' where key='MappingService.MAX_PARALLEL_WORKERS';
 
 
 -- table de pilotage du batch de production
@@ -319,13 +319,7 @@ nom_colonne text,
 type_colonne text 
 ); 
 
-CREATE TABLE IF NOT EXISTS arc.ihm_seuil (
-	nom text NOT NULL,
-	valeur numeric NULL,
-	CONSTRAINT ihm_seuil_pkey PRIMARY KEY (nom)
-);
-
-INSERT INTO arc.ihm_seuil values ('filtrage_taux_exclusion_accepte',1.0) ,('s_taux_erreur',1.0) ON CONFLICT DO NOTHING;
+DROP TABLE IF EXISTS arc.ihm_seuil;
 
 -- table des users
 CREATE TABLE IF NOT EXISTS arc.ihm_user 
@@ -421,4 +415,176 @@ if ('{{userRestricted}}'!='') then
 end if; 
 exception when others then end;
 $$;
+
+
+/*
+ *  PATCHS version
+ */
+-- PATCH SUPPRESION DES TABLES OBSOLETES arc.test_ihm_...
+do $$
+declare
+	table_test text;
+BEGIN
+for table_test in (select schemaname||'.'||tablename from pg_tables where tablename like 'test_ihm%' and schemaname='arc')
+loop
+execute 'drop table if exists '||table_test;
+end loop;
+end;
+$$;
+
+
+-- PATCH SUPPRESSION FILTRAGE
+-- 1. mise à jour des tables de pilotage
+do $$
+declare table_to_update text;
+BEGIN
+for table_to_update in (select schemaname||'.'||tablename from pg_tables where tablename='pilotage_fichier' and schemaname like 'arc%')
+loop
+
+execute 'delete from '||table_to_update||' where phase_traitement=''FILTRAGE'' and etat_traitement=''{OK}'' and etape=0;';
+commit;
+
+execute '
+with tmp_filtrage_etape1 as
+(
+	select id_source, etape, rapport, etat_traitement from '||table_to_update||' where phase_traitement=''FILTRAGE'' and etape in (1,2)
+)
+, update_controle_etape1 as
+(
+	update '||table_to_update||' a set etape=b.etape, rapport=b.rapport
+	, etat_traitement=case when b.etat_traitement=''{OK}'' and a.etat_traitement=''{OK,KO}'' then ''{OK,KO}'' else b.etat_traitement end
+	from tmp_filtrage_etape1 b
+	where a.id_source=b.id_source and a.phase_traitement=''CONTROLE''
+)
+delete from '||table_to_update||' where phase_traitement=''FILTRAGE'' and etape in (1,2);
+';
+commit;
+end loop;
+end;
+$$;
+
+-- 2. recopie des règles de filtrage dans le contrôle + suppression des tables de regles de filtrage
+do $$
+declare
+	table_filtrage text;
+	table_controle text;
+BEGIN
+for table_filtrage in (select schemaname||'.'||tablename from pg_tables where tablename like '%filtrage_regle' and schemaname like 'arc%')
+loop
+
+table_controle:=replace(table_filtrage,'filtrage_regle','controle_regle');
+	
+execute 'insert into '||table_controle||' (id_regle, id_norme, validite_inf, validite_sup, version, periodicite, id_classe, condition, blocking_threshold, error_row_processing, commentaire)
+select 
+(select coalesce(max(id_regle),0)+1 from '||table_controle||' b  where a.id_norme=b.id_norme 
+and a.validite_inf=b.validite_inf 
+and a.validite_sup=b.validite_sup
+and a.version=b.version
+and a.periodicite=b.periodicite),
+id_norme, validite_inf, validite_sup, version, periodicite, ''CONDITION'', ''NOT(''||expr_regle_filtre||'')'', ''>0u'', ''k'', coalesce(a.commentaire, ''règle de filtrage'')
+from '||table_filtrage||' a
+where not exists (select from '||table_controle||' b 
+where a.id_norme=b.id_norme 
+and a.validite_inf=b.validite_inf 
+and a.validite_sup=b.validite_sup
+and a.version=b.version
+and a.periodicite=b.periodicite
+and ''NOT(''||a.expr_regle_filtre||'')''=b.condition
+)
+and trim(expr_regle_filtre) is not null and trim(expr_regle_filtre)!='''' and lower(trim(expr_regle_filtre))!=''false''
+'
+;
+commit;
+
+execute 'DROP TABLE IF EXISTS '||table_filtrage||' cascade;';
+commit;
+
+end loop;
+end;
+$$;
+
+
+-- 3. suppression et recopie des tables de filtrage de données
+do $$
+declare
+	table_filtrage text;
+BEGIN
+for table_filtrage in (select schemaname||'.'||tablename from pg_tables where tablename in ('filtrage_ok','filtrage_ko','filtrage_ok_todo') and schemaname like 'arc%')
+loop
+execute 'drop table if exists '||table_filtrage||' cascade;';
+commit;
+end loop;
+end;
+$$;
+
+-- cas des filtrages ko
+do $$
+declare
+	table_filtrage_ko text;
+	table_filtrage_ok text;
+	table_controle_ok text;
+	table_controle_ko text;
+	test_controle_ko int;
+	test_filtrage_ok int;
+
+BEGIN
+	
+-- cas des tables filtrage ko
+for table_filtrage_ko in (select schemaname||'.'||tablename from pg_tables where tablename like 'filtrage_ko_child%' and schemaname like 'arc%')
+loop
+
+-- pour retrouver les tables de filtrage et controles correspondantes
+table_filtrage_ok:=replace(table_filtrage_ko,'_ko_child','_ok_child');
+table_controle_ok:=replace(table_filtrage_ok,'filtrage','controle');
+table_controle_ko:=replace(table_filtrage_ko,'filtrage','controle');
+
+select count(1) into test_controle_ko from pg_tables where schemaname||'.'||tablename=table_controle_ko;
+select count(1) into test_filtrage_ok from pg_tables where schemaname||'.'||tablename=table_filtrage_ok;
+
+-- si la table controle_ko_child existe déjà, on la merge avec filtrage_ko_child
+-- sinon on crée controle_ko_child en recopiant filtrage_ko_child
+if (test_controle_ko>0) then
+	execute 'INSERT INTO '||table_controle_ko||' SELECT * FROM '||table_filtrage_ko||';';
+	commit;
+	else
+	execute 'CREATE TABLE '||table_controle_ko||' with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS SELECT * FROM '||table_filtrage_ko||';';
+	commit;
+end if;
+
+-- on drop la table filtrage_ko
+execute 'DROP TABLE IF EXISTS '||table_filtrage_ko||';';
+
+-- si la table filtrage_ok existe, on remplace la table controle ok par la table filtrage_ok
+if (test_filtrage_ok>0) then
+	execute 'drop table if exists '||table_controle_ok||';';
+	commit;
+	execute 'alter table '||table_filtrage_ok||' rename to '||substring(table_controle_ok,strpos(table_controle_ok,'.')+1)||';';
+	commit;
+end if;
+
+end loop;
+end;
+$$;
+
+-- cas simple des filtrages ok
+do $$
+declare
+	table_filtrage_ok text;
+	table_controle_ok text;
+BEGIN
+	
+for table_filtrage_ok in (select schemaname||'.'||tablename from pg_tables where tablename like 'filtrage_ok_child%' and schemaname like 'arc%')
+loop
+-- on remplace la table controle ok par la table filtrage_ok
+table_controle_ok:=replace(table_filtrage_ok,'filtrage','controle');
+
+execute 'drop table if exists '||table_controle_ok||';';
+commit;
+execute 'alter table '||table_filtrage_ok||' rename to '||substring(table_controle_ok,strpos(table_controle_ok,'.')+1)||';';
+commit;
+
+end loop;
+end;
+$$;
+
 

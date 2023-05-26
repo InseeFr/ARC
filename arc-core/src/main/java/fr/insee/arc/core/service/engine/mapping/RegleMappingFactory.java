@@ -22,7 +22,7 @@ public class RegleMappingFactory {
 
     /**
      * Ensemble des rubriques qui ont été rencontrées dans les tables de chargement pour les données issues d'un même entrepot.<br/>
-     * Plus concrètement, c'est le nom des colonnes de la table physique de l'étape précédente (filtrage pour l'instant).
+     * Plus concrètement, c'est le nom des colonnes de la table physique de l'étape précédente.
      */
     private Set<String> ensembleNomRubriqueExistante;
     private Set<String> ensembleIdentifiantRubriqueExistante;

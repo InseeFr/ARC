@@ -10,7 +10,7 @@ public enum ColumnEnum {
 	, BORNE_INF("borne_inf", TypeEnum.TEXT, "") // ihm_controle_regle
 	, BORNE_SUP("borne_sup", TypeEnum.TEXT, "") // ihm_controle_regle
 	, CALL_ID("call_id", TypeEnum.INTEGER, "") // ihm_ws_context,ihm_ws_query
-	, COMMENTAIRE("commentaire", TypeEnum.TEXT, "") // ihm_controle_regle,ihm_mapping_regle,ihm_normage_regle,ihm_chargement_regle,ihm_filtrage_regle,ihm_expression
+	, COMMENTAIRE("commentaire", TypeEnum.TEXT, "") // ihm_controle_regle,ihm_mapping_regle,ihm_normage_regle,ihm_chargement_regle,ihm_expression
 	, CONDITION("condition", TypeEnum.TEXT, "") // ihm_controle_regle
 	, DATE_INACTIF("date_inactif", TypeEnum.DATE, "") // ihm_jeuderegle
 	, DATE_PRODUCTION("date_production", TypeEnum.DATE, "") // ihm_jeuderegle
@@ -29,7 +29,6 @@ public enum ColumnEnum {
 	, EXPRESSION("expression", TypeEnum.TEXT, "") // ihm_ws_query
 	, EXPR_NOM("expr_nom", TypeEnum.TEXT, "") // ihm_expression
 	, EXPR_REGLE_COL("expr_regle_col", TypeEnum.TEXT, "") // ihm_mapping_regle
-	, EXPR_REGLE_FILTRE("expr_regle_filtre", TypeEnum.TEXT, "") // ihm_filtrage_regle
 	, EXPR_VALEUR("expr_valeur", TypeEnum.TEXT, "") // ihm_expression
 	, FORMAT("format", TypeEnum.TEXT, "") // ihm_chargement_regle
 	, HOST_ALLOWED("host_allowed", TypeEnum.TEXT, "") // ihm_webservice_whitelist,ihm_webservice_log
@@ -40,8 +39,8 @@ public enum ColumnEnum {
 	, ID_ENTREPOT("id_entrepot", TypeEnum.TEXT, "") // ihm_entrepot
 	, ID_FAMILLE("id_famille", TypeEnum.TEXT, "") // ihm_norme,ihm_webservice_log,ihm_mod_variable_metier,ihm_famille,ihm_mod_table_metier,ihm_webservice_whitelist,ihm_client
 	, ID_LOADER("id_loader", TypeEnum.TEXT, "") // ihm_entrepot
-	, ID_NORME("id_norme", TypeEnum.TEXT, "") // ihm_calendrier,ihm_expression,ihm_controle_regle,ihm_jeuderegle,ihm_norme,ihm_filtrage_regle,ihm_chargement_regle,ihm_normage_regle,ihm_mapping_regle
-	, ID_REGLE("id_regle", TypeEnum.BIGINT, "") // ihm_chargement_regle,ihm_filtrage_regle,ihm_expression,ihm_mapping_regle, ihm_controle_regle,ihm_normage_regle
+	, ID_NORME("id_norme", TypeEnum.TEXT, "") // ihm_calendrier,ihm_expression,ihm_controle_regle,ihm_jeuderegle,ihm_norme,ihm_chargement_regle,ihm_normage_regle,ihm_mapping_regle
+	, ID_REGLE("id_regle", TypeEnum.BIGINT, "") // ihm_chargement_regle,ihm_expression,ihm_mapping_regle, ihm_controle_regle,ihm_normage_regle
 	, ID_REGLE_INT("id_regle", TypeEnum.INTEGER, "") // ihm_controle_regle,ihm_normage_regle
 	, ID_WEBSERVICE_LOGGING("id_webservice_logging", TypeEnum.BIGINT, "") // ihm_webservice_log
 	, ISENV("isenv", TypeEnum.BOOLEAN, "") // ext_etat_jeuderegle
@@ -49,7 +48,6 @@ public enum ColumnEnum {
 	, KEY("key", TypeEnum.TEXT, "") // parameter
 	, LAST_INIT("last_init", TypeEnum.TEXT, "") // pilotage_batch
 	, MISE_A_JOUR_IMMEDIATE("mise_a_jour_immediate", TypeEnum.BOOLEAN, "") // ext_etat_jeuderegle
-	, NOM("nom", TypeEnum.TEXT, "") // ihm_seuil
 	, NOM_COLONNE("nom_colonne", TypeEnum.TEXT, "") // ihm_schema_nmcl
 	, NOM_TABLE("nom_table", TypeEnum.TEXT, "") // ihm_nmcl
 	, NOM_TABLE_METIER("nom_table_metier", TypeEnum.TEXT, "") // ihm_mod_table_metier,ihm_mod_variable_metier
@@ -58,7 +56,7 @@ public enum ColumnEnum {
 	, NORME("norme", TypeEnum.TEXT, "") // ihm_ws_context
 	, OPERATION("operation", TypeEnum.TEXT, "") // pilotage_batch
 	, ORDRE("ordre", TypeEnum.INTEGER, "") // ext_type_fichier_chargement,ext_type_controle,ext_type_normage
-	, PERIODICITE("periodicite", TypeEnum.TEXT, "") // ihm_controle_regle,ihm_jeuderegle,ihm_calendrier,ihm_mapping_regle,ihm_normage_regle,ihm_expression,ihm_ws_context,ihm_norme,ihm_chargement_regle,ihm_filtrage_regle
+	, PERIODICITE("periodicite", TypeEnum.TEXT, "") // ihm_controle_regle,ihm_jeuderegle,ihm_calendrier,ihm_mapping_regle,ihm_normage_regle,ihm_expression,ihm_ws_context,ihm_norme,ihm_chargement_regle
 	, PRE_ACTION("pre_action", TypeEnum.TEXT, "") // ihm_controle_regle
 	, PROFIL("profil", TypeEnum.TEXT, "") // ihm_user
 	, QUERY_ID("query_id", TypeEnum.INTEGER, "") // ihm_ws_query
@@ -78,12 +76,11 @@ public enum ColumnEnum {
 	, TYPE_NMCL("type_nmcl", TypeEnum.TEXT, "") // ihm_schema_nmcl
 	, TYPE_VARIABLE_METIER("type_variable_metier", TypeEnum.NAME, "") // ihm_mod_variable_metier
 	, VAL("val", TypeEnum.TEXT, "") // ext_export_format,ext_etat_jeuderegle,ext_webservice_queryview,ext_webservice_type,ext_etat,parameter,ext_mod_periodicite
-	, VALEUR("valeur", TypeEnum.NUMERIC, "") // ihm_seuil
 	, VALIDITE("validite", TypeEnum.TEXT, "") // ihm_ws_context
-	, VALIDITE_INF("validite_inf", TypeEnum.DATE, "") // ihm_expression,ihm_normage_regle,ihm_chargement_regle,ihm_filtrage_regle,ihm_mapping_regle,ihm_calendrier,ihm_jeuderegle,ihm_controle_regle
-	, VALIDITE_SUP("validite_sup", TypeEnum.DATE, "") // ihm_mapping_regle,ihm_expression,ihm_filtrage_regle,ihm_normage_regle,ihm_controle_regle,ihm_chargement_regle,ihm_calendrier,ihm_jeuderegle
+	, VALIDITE_INF("validite_inf", TypeEnum.DATE, "") // ihm_expression,ihm_normage_regle,ihm_chargement_regle,ihm_mapping_regle,ihm_calendrier,ihm_jeuderegle,ihm_controle_regle
+	, VALIDITE_SUP("validite_sup", TypeEnum.DATE, "") // ihm_mapping_regle,ihm_expression,ihm_normage_regle,ihm_controle_regle,ihm_chargement_regle,ihm_calendrier,ihm_jeuderegle
 	, VARIABLE_SORTIE("variable_sortie", TypeEnum.TEXT, "") // ihm_mapping_regle
-	, VERSION("version", TypeEnum.TEXT, "") // ihm_filtrage_regle,ihm_normage_regle,ihm_controle_regle,ihm_chargement_regle,ihm_mapping_regle,ihm_expression,ihm_jeuderegle
+	, VERSION("version", TypeEnum.TEXT, "") // ihm_normage_regle,ihm_controle_regle,ihm_chargement_regle,ihm_mapping_regle,ihm_expression,ihm_jeuderegle
 	, XSD_LABEL_FILS("xsd_label_fils", TypeEnum.TEXT, "") // ihm_controle_regle
 	, XSD_ORDRE("xsd_ordre", TypeEnum.INTEGER, "") // ihm_controle_regle
 	, XSD_ROLE("xsd_role", TypeEnum.TEXT, "") // ihm_controle_regle

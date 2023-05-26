@@ -87,24 +87,24 @@ public class ExecuteEngineController {
 						break;
 					case NORMAGE:
 						HashMap<String, ArrayList<String>> pil = new HashMap<>();
-						pil.put(ColumnEnum.ID_SOURCE.getColumnName(), new ArrayList<String>(Arrays.asList(bodyPojo.fileName)));
-						pil.put("id_norme", new ArrayList<String>(Arrays.asList(bodyPojo.norme)));
-						pil.put("validite", new ArrayList<String>(Arrays.asList(bodyPojo.validite)));
-						pil.put("periodicite", new ArrayList<String>(Arrays.asList(bodyPojo.periodicite)));
-						pil.put("jointure", new ArrayList<String>(Arrays.asList(structure)));
+						pil.put(ColumnEnum.ID_SOURCE.getColumnName(), new ArrayList<>(Arrays.asList(bodyPojo.fileName)));
+						pil.put("id_norme", new ArrayList<>(Arrays.asList(bodyPojo.norme)));
+						pil.put("validite", new ArrayList<>(Arrays.asList(bodyPojo.validite)));
+						pil.put("periodicite", new ArrayList<>(Arrays.asList(bodyPojo.periodicite)));
+						pil.put("jointure", new ArrayList<>(Arrays.asList(structure)));
 
 						HashMap<String, ArrayList<String>> regle = new HashMap<>();
-						regle.put("id_regle", new ArrayList<String>());
-						regle.put("id_norme", new ArrayList<String>());
-						regle.put("periodicite", new ArrayList<String>());
-						regle.put("validite_inf", new ArrayList<String>());
-						regle.put("validite_sup", new ArrayList<String>());
-						regle.put("id_classe", new ArrayList<String>());
-						regle.put("rubrique", new ArrayList<String>());
-						regle.put("rubrique_nmcl", new ArrayList<String>());
+						regle.put("id_regle", new ArrayList<>());
+						regle.put("id_norme", new ArrayList<>());
+						regle.put("periodicite", new ArrayList<>());
+						regle.put("validite_inf", new ArrayList<>());
+						regle.put("validite_sup", new ArrayList<>());
+						regle.put("id_classe", new ArrayList<>());
+						regle.put("rubrique", new ArrayList<>());
+						regle.put("rubrique_nmcl", new ArrayList<>());
 
 						HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles = new HashMap<>();
-						rubriqueUtiliseeDansRegles.put("var", new ArrayList<String>());
+						rubriqueUtiliseeDansRegles.put("var", new ArrayList<>());
 
 						NormageEngine normage = new NormageEngine(connection, pil, regle, rubriqueUtiliseeDansRegles, previousTemporaryTable(i), currentTemporaryTable(i),
 								null);
@@ -126,19 +126,16 @@ public class ExecuteEngineController {
 						sjdr.fillRegleControle(connection, jdr, env + ".controle_regle", currentTemporaryTable(i));
 						sjdr.executeJeuDeRegle(connection, jdr, currentTemporaryTable(i), structure);
 						break;
-					case FILTRAGE:
-						UtilitaireDao.get("arc").executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"');");
-						break;
 					case MAPPING:
-						UtilitaireDao.get("arc").executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+";");
-						String tableTempFiltrageOk = previousTemporaryTable(i);
-						List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(connection, tableTempFiltrageOk, env + ".mapping_regle");
+						UtilitaireDao.get("arc").executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"');");
+						String tableTempControleOk = previousTemporaryTable(i);
+						List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(connection, tableTempControleOk, env + ".mapping_regle");
 						ServiceMapping serviceMapping = new ServiceMapping();
-						RegleMappingFactory regleMappingFactory = serviceMapping.construireRegleMappingFactory(connection, env, tableTempFiltrageOk, "v_");
+						RegleMappingFactory regleMappingFactory = serviceMapping.construireRegleMappingFactory(connection, env, tableTempControleOk, "v_");
 						String idFamille = serviceMapping.fetchIdFamille(connection, listeJeuxDeRegles.get(0), env + ".norme");
 
 			            RequeteMapping requeteMapping = new RequeteMapping(connection, regleMappingFactory, idFamille, listeJeuxDeRegles.get(0),
-			                        env, tableTempFiltrageOk, 0);
+			                        env, tableTempControleOk, 0);
 			            requeteMapping.construire();
 			            UtilitaireDao.get("arc").executeBlock(connection, requeteMapping.requeteCreationTablesTemporaires());
 

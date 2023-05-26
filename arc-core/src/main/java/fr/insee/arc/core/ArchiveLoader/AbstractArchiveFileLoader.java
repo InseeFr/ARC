@@ -62,11 +62,12 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
      * 
      * @param decompressor
      *            : the way to extract
+     * @throws ArcException 
      * @throws IOException 
      * @throws InterruptedException 
      */
     @Override
-    public void extractArchive(ArchiveExtractor decompressor) {
+    public void extractArchive(ArchiveExtractor decompressor) throws ArcException {
 
 	String fileName = ManipString.substringAfterFirst(this.idSource, "_");
 
@@ -83,7 +84,7 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 		}
 		 catch (Exception ex)
 		{
-			    StaticLoggerDispatcher.error("extractArchive() " + ex, LOGGER);
+			 throw new ArcException(ex, ArcExceptionMessage.FILE_EXTRACT_FAILED, this.archiveChargement).logFullException();
 		}
 	}
 	

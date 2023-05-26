@@ -83,11 +83,6 @@ public class SetRulesController {
 			replaceRulesDAO(bodyPojo,"arc.ihm_normage_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
 		}
 		
-		if (bodyPojo.targetRule.equals("filter"))
-		{
-			replaceRulesDAO(bodyPojo,"arc.ihm_filtrage_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");
-		}
-		
 		if (bodyPojo.targetRule.equals("map"))
 		{
 			replaceRulesDAO(bodyPojo,"arc.ihm_mapping_regle", "id_norme", "periodicite", "validite_inf", "validite_sup", "version");

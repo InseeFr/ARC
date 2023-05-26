@@ -3,7 +3,7 @@
 DROP FUNCTION IF EXISTS arc.transpose_pilotage_calcul() CASCADE;
 DROP FUNCTION IF EXISTS arc.update_list_param(n text, dt text) CASCADE;
 DROP FUNCTION IF EXISTS arc.transpose_pilotage_fin() CASCADE;
-
+DROP FUNCTION IF EXISTS arc.verif_doublon() CASCADE;
 
 -- fonctions technique sur les tableaux
 do $$ begin create type public.cle_valeur as (i bigint, v text collate "C"); exception when others then end; $$;
@@ -125,40 +125,6 @@ $BODY$
 LANGUAGE plpgsql IMMUTABLE 
 COST 100; 
 
--- TODO : change that with exclusion constraint        
-CREATE OR REPLACE FUNCTION arc.verif_doublon() 
-RETURNS trigger AS 
-$BODY$ 
-DECLARE 
-n integer; 
-k integer; 
-nom_table text := quote_ident(TG_TABLE_SCHEMA) || '.'|| quote_ident(TG_TABLE_NAME); 
-query text; 
-BEGIN  
---RAISE NOTICE 'Nom de la table : %', nom_table; 
-query := 'SELECT count(1) FROM (SELECT count(1)	FROM '|| nom_table ||' b WHERE id_classe=''CARDINALITE'' 
-GROUP BY id_norme, periodicite, validite_inf, validite_sup, version, lower(rubrique_pere), lower(rubrique_fils), condition 
-HAVING count(1)>1) AS foo'; 
---RAISE NOTICE 'Query vaut : %', query; 
-EXECUTE query INTO n; 
-query := 'SELECT count(1) FROM 	(SELECT count(1) FROM '|| nom_table ||' b WHERE id_classe IN(''NUM'',''DATE'',''ALPHANUM'',''REGEXP'') 
-GROUP BY id_norme, periodicite, validite_inf, validite_sup, version, lower(rubrique_pere), condition 
-HAVING count(1)>1) AS foo'; 
---RAISE NOTICE 'Query vaut : %', query; 
-EXECUTE query INTO k; 
-RAISE NOTICE 'Variable de comptage n : %', n; 
-RAISE NOTICE 'Variable de comptage k : %', k; 
-if n>0 then  
-RAISE EXCEPTION 'Règles de CARDINALITE en doublon'; 
-end if; 
-if k>0 then  
-RAISE EXCEPTION 'Règles de TYPE en doublon'; 
-end if; 
-RETURN NEW; 
-END; 
-$BODY$ 
-LANGUAGE plpgsql VOLATILE 
-COST 100; 
 
 CREATE OR REPLACE FUNCTION arc.insert_controle() 
 RETURNS trigger AS 

@@ -341,13 +341,12 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 
 			construireTablePrecedente(requeteGlobale);
 
-			Map<String, String> nomsVariablesIdentifiantes = new HashMap<>();
 			Map<String, String> reglesIdentifiantes = new HashMap<>();
 			Map<String, String> nomsVariablesGroupe  = new HashMap<>();
 			HashMap<String,String>  linkedIds  = new  HashMap<> ();
 
-			construireListeIdentifiants(nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
-			construireTableFiltrageCalculIdentifiantsFichierCourant(requeteGlobale, nomsVariablesIdentifiantes, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
+			construireListeIdentifiants(reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
+			construireTableIdentifiantsFichierCourant(requeteGlobale, reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
 			HashMap<TableMapping,ArrayList<TableMapping>> tablesFilles=ordonnerTraitementTable();
 					
 			for (TableMapping table : this.ensembleTableMapping) {
@@ -355,7 +354,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 				this.nomTableTemporaireIdTable="table_id";
 				this.nomTableTemporaireFinale="table_finale_"+table.getNomTableCourt();
 
-				creerTablePrepUnion(requeteGlobale, table, nomsVariablesIdentifiantes, reglesIdentifiantes);
+				creerTablePrepUnion(requeteGlobale, table, reglesIdentifiantes);
 				insererTablePrepUnion(requeteGlobale, table, reglesIdentifiantes);
 				calculerRequeteArrayAggGroup(requeteGlobale, table, tablesFilles);
 				calculerRequeteFinale(requeteGlobale, table);
@@ -680,8 +679,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		return returned;
 	}
 
-	private StringBuilder creerTablePrepUnion(StringBuilder returned, TableMapping aTable,
-	        Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes) {
+	private StringBuilder creerTablePrepUnion(StringBuilder returned, TableMapping aTable, Map<String, String> reglesIdentifiantes) {
 		returned.append(newline);
 
 
@@ -711,16 +709,15 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	}
 
 	/**
-	 * f Ajoute à la liste des requêtes à exécuter la requête de création de la table des identifiants techniques et enregistrements de la
-	 * table filtrage pour le fichier courant.
+	 * Ajoute à la liste des requêtes à exécuter la requête de création de la table des identifiants techniques et enregistrements de la
+	 * table pour le fichier courant.
 	 *
 	 * @param returned
 	 * @param nomsVariablesIdentifiantes
 	 * @param reglesIdentifiantes
 	 * @return
 	 */
-	private StringBuilder construireTableFiltrageCalculIdentifiantsFichierCourant(StringBuilder returned,
-	        Map<String, String> nomsVariablesIdentifiantes, Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe, HashMap<String,String>  linkedIds
+	private StringBuilder construireTableIdentifiantsFichierCourant(StringBuilder returned, Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe, HashMap<String,String>  linkedIds
 	        ) {
 		this.nomTableFichierCourant = "fichier";
 		HashSet<String> alreadyAdded=new HashSet<>();
@@ -783,8 +780,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 	 * @param nomsVariablesIdentifiantes
 	 * @param reglesIdentifiantes
 	 */
-	private void construireListeIdentifiants(Map<String, String> nomsVariablesIdentifiantes,
-	        Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe, HashMap<String,String> linkedIds) {
+	private void construireListeIdentifiants(Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe, HashMap<String,String> linkedIds) {
 		
 		
 		Set<RegleMappingClePrimaire> reglesClefs = new HashSet<>();
@@ -805,9 +801,6 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 							, regle.getVariableMapping().getNomVariable());
 
 				} else {
-					nomsVariablesIdentifiantes.put(nomIdentifiantSuffixeGroupe(regle.getVariableMapping()
-					        .getNomVariable(), groupe), regle.getVariableMapping().getNomVariable());
-
 					nomsVariablesGroupe.put(
 							nomIdentifiantSuffixeGroupe(regle.getVariableMapping().getNomVariable(), groupe)
 							, null);

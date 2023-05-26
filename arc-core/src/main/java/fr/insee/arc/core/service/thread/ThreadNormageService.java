@@ -79,7 +79,6 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         // tables héritées
         this.setTableNormageRegle(theApi.getTableNormageRegle());
         this.setTableControleRegle(theApi.getTableControleRegle());
-        this.setTableFiltrageRegle(theApi.getTableFiltrageRegle());
         this.setTableMappingRegle(theApi.getTableMappingRegle());
         
         this.setTablePil(theApi.getTablePil());
@@ -197,7 +196,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 			        		this.connexion.getExecutorConnection(),
 			        		"\n DROP TABLE IF EXISTS "+tableTmpRubriqueDansregles+"; "
 			        		+ "\n CREATE TEMPORARY TABLE "+tableTmpRubriqueDansregles+" AS "
-			        		+ ServiceRules.getAllRubriquesInRegles(this.tableNormagePilTemp, this.tableNormageRegle, this.tableControleRegle, this.tableFiltrageRegle, this.tableMappingRegle)
+			        		+ ServiceRules.getAllRubriquesInRegles(this.tableNormagePilTemp, this.tableNormageRegle, this.tableControleRegle, this.tableMappingRegle)
 			        		);
 				    
 				    rubriqueUtiliseeDansRegles = ServiceRules.getBean(this.connexion.getExecutorConnection(),ServiceRules.getRegles(tableTmpRubriqueDansregles, this.tableNormagePilTemp));

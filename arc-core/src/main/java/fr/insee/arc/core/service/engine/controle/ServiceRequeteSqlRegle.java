@@ -154,6 +154,7 @@ public class ServiceRequeteSqlRegle {
     	// tableTempMeta contains the errors id, their types, and their results of the blockingThreshold evaluation (to know if the file must be fully rejected or not if a particular error occurs) 
     	
     	// case for no blocking threshold
+    	// by default not blocking
 		if (blockingThreshold==null || blockingThreshold.isEmpty())
 		{
 	    	requete.append("\n, ins as (INSERT into "+TABLE_TEMP_MARK+" select id, '"+regleId+"', '"+ mapRowProcessing.get(errorRowProcessing) +"' as controle from ctl returning true) ");

@@ -50,10 +50,10 @@
 				<c:param name="ligneFilter" value ="true" />
 				<c:param name="checkbox" value ="true" />
 				<c:param name="checkboxVisible" value ="true" />
-				<c:param name="extraScopeAdd" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
-				<c:param name="extraScopeDelete" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
-				<c:param name="extraScopeUpdate" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
-				<c:param name="extraScopeSee" value ="viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeAdd" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeDelete" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeUpdate" value ="-viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeSee" value ="viewCalendrier;-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
 	
 			</c:import>
 		</div>
@@ -71,10 +71,10 @@
 				<c:param name="ligneFilter" value ="true" />
 				<c:param name="checkbox" value ="true" />
 				<c:param name="checkboxVisible" value ="true" />
-				<c:param name="extraScopeAdd" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
-				<c:param name="extraScopeDelete" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
-				<c:param name="extraScopeUpdate" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
-				<c:param name="extraScopeSee" value ="viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeAdd" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeDelete" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeUpdate" value ="-viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
+				<c:param name="extraScopeSee" value ="viewJeuxDeRegles;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;-viewModules;" />
 	
 			</c:import>
 		</div>
@@ -92,10 +92,10 @@
 			<c:param name="ligneFilter" value ="true" />
 			<c:param name="checkbox" value ="true" />
 			<c:param name="checkboxVisible" value ="true" />
-			<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
-			<c:param name="extraScopeDelete" value ="-viewModules;-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
-			<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewFiltrage;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
-			<c:param name="extraScopeSee" value ="viewModules;viewChargement;viewNormage;viewControle;viewFiltrage;viewMapping;viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeDelete" value ="-viewModules;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeSee" value ="viewModules;viewChargement;viewNormage;viewControle;viewMapping;viewExpression;-viewJeuxDeReglesCopie;" />
 			<c:param name="otherButton">
 				<button
 					class="btn btn-primary btn-sm"
@@ -306,77 +306,6 @@
 								</c:param>
 							</c:import>
 							
-						<%-- FILTER TAB --%>
-							<c:set var="view" value="${viewFiltrage}"  scope="request"/>
-							<c:import url="tiles/templateVObject.jsp">
-								<c:param name="btnSelect" value ="true" />
-								<c:param name="btnSee" value ="true" />
-								<c:param name="btnSort" value ="true" />
-								<c:param name="btnUpdate" value ="true" />
-								<c:param name="btnDelete" value ="true" />
-								<c:param name="ligneFilter" value ="true" />
-								<c:param name="checkbox" value ="true" />
-								<c:param name="checkboxVisible" value ="true" />
-								<c:param name="multiSelection" value ="true" />
-								<c:param name="otherButton">
-									<c:if
-										test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
-									>
-										<input
-											class="btn btn-primary btn-sm"
-											id="viewFiltrage.truncate"
-											type="submit"
-											doAction="viderFiltrage"
-											scope="viewFiltrage;"
-											value="<spring:message code="gui.button.deleteRuleset"/>"
-										></input>
-										<input
-											class="btn btn-primary btn-sm"
-											id="viewFiltrage.copie"
-											type="submit"
-											doAction="selectJeuxDeReglesFiltrageCopie"
-											scope="viewFiltrage;viewJeuxDeReglesCopie;"
-											value="<spring:message code="gui.button.replaceRuleset"/>"
-										></input>
-
-										<c:if test="${viewFiltrage.content.t.size()==0}">
-											<input
-												class="btn btn-primary btn-sm"
-												id="viewFiltrage.creerNouveau"
-												type="submit"
-												doAction="preGenererRegleFiltrage"
-												scope="viewFiltrage;"
-												value="<spring:message code="gui.button.generateRuleset"/>"
-											></input>
-										</c:if>
-										<div class="input-group my-3">
-											<div class="custom-file">
-												<input
-													name="fileUploadFilter"
-													type="file"
-													class="custom-file-input"
-													id="inputGroupFileFilter"
-												/> <label
-													class="custom-file-label"
-													for="inputGroupFileFilter"
-													aria-describedby="Choose file to upload for filter module"
-												><spring:message code="general.chooseFile"/></label>
-											</div>
-											<div class="input-group-append">
-												<button
-													class="btn btn-primary btn-sm"
-													id="viewFiltrage.import"
-													type="submit"
-													doAction="importFiltrage"
-													scope="viewFiltrage;"
-													multipart="true"
-												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
-											</div>
-										</div>
-									</c:if>
-								</c:param>
-							</c:import>
-
 						<%-- MAPPING TAB --%>
 							<c:set var="view" value="${viewMapping}"  scope="request"/>
 							<c:import url="tiles/templateVObject.jsp">

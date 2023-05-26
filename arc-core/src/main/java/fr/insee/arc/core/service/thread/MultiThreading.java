@@ -55,10 +55,6 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 			return (T) new ThreadControleService();
 		}
 
-		if (threadTemplate instanceof ThreadFiltrageService) {
-			return (T) new ThreadFiltrageService();
-		}
-
 		if (threadTemplate instanceof ThreadMappingService) {
 			return (T) new ThreadMappingService();
 		}
