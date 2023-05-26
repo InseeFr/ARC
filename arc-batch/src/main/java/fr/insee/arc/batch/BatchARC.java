@@ -350,24 +350,6 @@ class BatchARC implements IReturnCode {
 											pool.get(phase).add(a);
 
 											message(">> starting new " + phase, iteration);
-										} else {
-
-											boolean nothingToDoInPrevious = true;
-											// if nothing to do in the previous phases
-											for (int i = phases.indexOf(phase) - 2; i >= 0; i--) {
-												if (elligibleFiles.get(phases.get(i)) != null) {
-													nothingToDoInPrevious = false;
-													break;
-												}
-											}
-
-											if (nothingToDoInPrevious) {
-												message(">> starting new reception", iteration);
-												receive(envExecution, false);
-												// exit loop if new files are recieved not to trigger it several times
-												break;
-											}
-
 										}
 									}
 
