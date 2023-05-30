@@ -73,10 +73,8 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 	protected String tableJeuDeRegle;
 	protected String tableChargementRegle;
 	protected String tableNormageRegle;
-	protected String tableFiltrageRegle;
 	protected String tableMappingRegle;
 	protected String tableControleRegle;
-	protected String tableSeuil;
 	protected Integer nbEnr;
 	protected String tableCalendrier;
 	protected String directoryRoot;
@@ -136,9 +134,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this.setTableChargementRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CHARGEMENT_REGLE);
 		this.setTableNormageRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.NORMAGE_REGLE);
 		this.setTableControleRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CONTROLE_REGLE);
-		this.setTableFiltrageRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.FILTRAGE_REGLE);
 		this.setTableMappingRegle(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.MAPPING_REGLE);
-		this.setTableSeuil(ServiceTableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.SEUIL);
 		this.setTableOutKo((ServiceTableNaming.dbEnv(aEnvExecution) + this.getCurrentPhase() + "_" + TraitementEtat.KO).toLowerCase());
 		this.setNbEnr(aNbEnr);
 
@@ -693,28 +689,12 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this.tableNormageRegle = tableNormageRegle;
 	}
 
-	public String getTableSeuil() {
-		return tableSeuil;
-	}
-
-	public void setTableSeuil(String tableSeuil) {
-		this.tableSeuil = tableSeuil;
-	}
-
 	public String getDirectoryRoot() {
 		return directoryRoot;
 	}
 
 	public void setDirectoryRoot(String directoryRoot) {
 		this.directoryRoot = directoryRoot;
-	}
-
-	public String getTableFiltrageRegle() {
-		return tableFiltrageRegle;
-	}
-
-	public void setTableFiltrageRegle(String tableFiltrageRegle) {
-		this.tableFiltrageRegle = tableFiltrageRegle;
 	}
 
 	/**

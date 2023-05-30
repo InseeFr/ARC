@@ -82,9 +82,10 @@ public class ChargeurCSV implements IChargeur {
 	 * 
 	 * Charger le csv directement en base avec COPY, on s'occupera des i et v plus
 	 * tard
-	 * @throws ArcException 
-	 * @throws IOException 
-	 * @throws ArcException 
+	 * 
+	 * @throws ArcException
+	 * @throws IOException
+	 * @throws ArcException
 	 * 
 	 * @throws ArcException
 	 */
@@ -124,13 +125,13 @@ public class ChargeurCSV implements IChargeur {
 			try {
 				try (InputStreamReader inputStreamReader = new InputStreamReader(streamHeader);
 						BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-						CSVReader readerCSV = new CSVReader(bufferedReader, (separateur==null)?';':separateur.charAt(0));) {
+						CSVReader readerCSV = new CSVReader(bufferedReader,
+								(separateur == null) ? ';' : separateur.charAt(0));) {
 					this.headers = getHeader(readerCSV);
 				} finally {
 					streamHeader.close();
 				}
-			} catch (IOException fileReadException)
-			{
+			} catch (IOException fileReadException) {
 				throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, this.fileName);
 			}
 		} else {
@@ -155,7 +156,8 @@ public class ChargeurCSV implements IChargeur {
 
 	/**
 	 * Start the postgres copy in commande with the right parameters
-	 * @param quote	the csv separator
+	 * 
+	 * @param quote the csv separator
 	 * @throws ArcException
 	 */
 	private void importCsvDataToTable() throws ArcException {
@@ -169,11 +171,11 @@ public class ChargeurCSV implements IChargeur {
 				}
 				columnForCopy.setLength(columnForCopy.length() - 1);
 				columnForCopy.append(")");
-	
+
 				UtilitaireDao.get("arc").importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent,
 						this.userDefinedHeaders == null, this.separateur, this.quote, this.encoding);
 			} finally {
-					streamContent.close();
+				streamContent.close();
 			}
 		} catch (IOException fileReadException) {
 			throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, this.fileName);
@@ -234,11 +236,12 @@ public class ChargeurCSV implements IChargeur {
 			 */
 
 			StringBuilder req;
-			
+
 			if (!indexExpression.isEmpty()) {
 				req = new StringBuilder();
 				for (int i = 0; i < indexExpression.size(); i++) {
-					req.append("CREATE INDEX idx"+i+"_chargeurcsvidxrule ON "+ this.tableTempA +"("+indexExpression.get(i)+");\n");
+					req.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + this.tableTempA + "("
+							+ indexExpression.get(i) + ");\n");
 				}
 				UtilitaireDao.get("arc").executeImmediate(connexion, req);
 			}
@@ -306,8 +309,10 @@ public class ChargeurCSV implements IChargeur {
 			 * nouvelle colonne est créée
 			 */
 			if (!cols.isEmpty()) {
-				List<String> colsIn = UtilitaireDao.get("arc").executeRequest(this.connexion,
-						new ArcPreparedStatementBuilder("select * from " + this.tableTempA + " limit 0")).get(0);
+				List<String> colsIn = UtilitaireDao.get("arc")
+						.executeRequest(this.connexion,
+								new ArcPreparedStatementBuilder("select * from " + this.tableTempA + " limit 0"))
+						.get(0);
 
 				String renameSuffix = "$new$";
 				String partitionNumberPLaceHolder = "#pn#";
@@ -429,6 +434,7 @@ public class ChargeurCSV implements IChargeur {
 
 	/**
 	 * Create the table where the csv file data will be stored
+	 * 
 	 * @throws ArcException
 	 */
 	private void initializeCsvTableContainer() throws ArcException {
@@ -446,7 +452,6 @@ public class ChargeurCSV implements IChargeur {
 		UtilitaireDao.get("arc").executeImmediate(connexion, req);
 	}
 
-
 	/**
 	 * @param bufferedReader
 	 * @return
@@ -459,10 +464,11 @@ public class ChargeurCSV implements IChargeur {
 	}
 
 	/**
-	 * Transform the raw data table from csv file (col1, col2, col3, ...) to an ARC standard table
-	 * (col1, col2, col3, ...) becomes (i_col1, v_col1, i_col2, v_col2, i_col3, v_col3, ...)
-	 * where i are line index and v the value
-	 * also meta data column (filename, norme, validite) are added to the ARC standard table
+	 * Transform the raw data table from csv file (col1, col2, col3, ...) to an ARC
+	 * standard table (col1, col2, col3, ...) becomes (i_col1, v_col1, i_col2,
+	 * v_col2, i_col3, v_col3, ...) where i are line index and v the value also meta
+	 * data column (filename, norme, validite) are added to the ARC standard table
+	 * 
 	 * @throws ArcException
 	 */
 	private void transformCsvDataToArcData() throws ArcException {
@@ -480,7 +486,7 @@ public class ChargeurCSV implements IChargeur {
 
 		req.append(" TABLE " + this.tableTempA);
 		req.append(" AS (SELECT ");
-		req.append("\n '" + this.fileName + "'::text collate \"C\" as "+ColumnEnum.ID_SOURCE.getColumnName());
+		req.append("\n '" + this.fileName + "'::text collate \"C\" as " + ColumnEnum.ID_SOURCE.getColumnName());
 		req.append("\n ,id::integer as id");
 		req.append("\n ," + integrationDate + "::text collate \"C\" as date_integration ");
 		req.append("\n ,'" + this.norme.getIdNorme() + "'::text collate \"C\" as id_norme ");
@@ -532,7 +538,8 @@ public class ChargeurCSV implements IChargeur {
 		// On met le fichier en base
 		copyCsvFileToDatabase();
 
-		// on retraduit le fichier à la mode ARC avec des i_ et v_ pour chacune des colonnes et en ajoutant les meta data
+		// on retraduit le fichier à la mode ARC avec des i_ et v_ pour chacune des
+		// colonnes et en ajoutant les meta data
 		transformCsvDataToArcData();
 
 	}

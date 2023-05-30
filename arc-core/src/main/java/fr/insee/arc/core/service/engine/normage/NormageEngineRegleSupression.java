@@ -33,7 +33,7 @@ public class NormageEngineRegleSupression {
 			String periodicite, String jointure, HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles)
 			throws ArcException {
 		// on va jouer au "qui enleve-t-on" ??
-		// on va parcourir les regles de normage, controle, filtrage, mapping et voir
+		// on va parcourir les regles de normage, controle, mapping et voir
 		// quelles sont les rubriques utilisées
 
 		// op 1 : identifier les blocs inutiles

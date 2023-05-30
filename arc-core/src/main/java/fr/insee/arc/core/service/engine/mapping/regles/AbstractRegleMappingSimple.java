@@ -76,7 +76,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
      * 1. <code>{v_xxxx}</code><br/>
      * 2. <code>{i_xxxx}</code><br/>
      * 3. <code>xxxx</code><br/>
-     * Où {@code xxxx} est un nom de rubrique valide ou bien un nom de colonne présent dans la table de filtrage.
+     * Où {@code xxxx} est un nom de rubrique valide ou bien un nom de colonne présent dans la table de la phase précédente.
      */
     public static final class RubriqueMapping extends AbstractRegleMappingSimple {
         public static final String DATABASECOLUMN_START_FOR_RUBRIQUE = "i_";
@@ -125,7 +125,7 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
         }
 
         /**
-         * Si la rubrique n'existe pas (n'est pas une colonne de la table de filtrage), on remplace son nom par {@code null}.<br/>
+         * Si la rubrique n'existe pas (n'est pas une colonne de la table de la phase précédente), on remplace son nom par {@code null}.<br/>
          * 1. {@code id_source} va dans les identifiants.<br/>
          * 2. Les {@code v_xxxx} vont dans les noms et leurs {@code i_xxxx} associés vont dans les identifiants.<br/>
          * 3. Les noms qui ne sont pas des {@code v_xxxx} vont dans les noms.<br/>

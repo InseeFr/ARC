@@ -30,8 +30,6 @@ public class ApiServiceFactory {
 				ApiNormageServiceFactory.getInstance());
 		this.map.put(TraitementPhase.CONTROLE.toString(),
 				ApiControleServiceFactory.getInstance());
-		this.map.put(TraitementPhase.FILTRAGE.toString(),
-				ApiFiltrageServiceFactory.getInstance());
 		this.map.put(TraitementPhase.MAPPING.toString(),
 				ApiMappingServiceFactory.getInstance());
 	}

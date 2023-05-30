@@ -20,7 +20,6 @@ public class ArcThreadFactoryTest {
 		assertEquals(PhaseParameterKeys.KEY_FOR_MAX_FILES_TO_LOAD, new PhaseThreadFactory(null, TraitementPhase.CHARGEMENT).capacityParameterName());
 		assertEquals(PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE, new PhaseThreadFactory(null, TraitementPhase.NORMAGE).capacityParameterName());
 		assertEquals(PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE, new PhaseThreadFactory(null, TraitementPhase.CONTROLE).capacityParameterName());
-		assertEquals(PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE, new PhaseThreadFactory(null, TraitementPhase.FILTRAGE).capacityParameterName());
 		assertEquals(PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE, new PhaseThreadFactory(null, TraitementPhase.MAPPING).capacityParameterName());
 		
 	}

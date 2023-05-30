@@ -11,7 +11,7 @@ import fr.insee.arc.utils.exception.ArcException;
 
 
 /**
- * Le mapping récupère les données filtrées (voir {@link ApiFiltrageService}) qui sont dans la table {@code <environnement>_filtrage_ok} et
+ * Le mapping récupère les données du controle (voir {@link ApiControleService}) qui sont dans les tables {@code <environnement>.controle_ok_child} et
  * transforme les variables administratives qu'elle contient en variables statistiques réparties dans des tables métier de nom
  * {@code <environnement>_mapping_<application_cliente>}_ok}, en respectant un modèle relationnel :<br/>
  * 1. Le modèle relationnel est dépendant de la famille (donc de l'application cliente qui récupère le produit du mapping), et est stocké

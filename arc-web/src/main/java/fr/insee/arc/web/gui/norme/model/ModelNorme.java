@@ -29,9 +29,6 @@ public class ModelNorme implements ArcModel {
 	// The control rules view
 	private VObject viewControle;
 
-	// The filter rules view
-	private VObject viewFiltrage;
-
 	// The map to format rules view
 	private VObject viewMapping;
 	
@@ -49,7 +46,6 @@ public class ModelNorme implements ArcModel {
 		this.viewModules = new ViewModules();
 		this.viewNormage = new ViewNormage();
 		this.viewControle = new ViewControle();
-		this.viewFiltrage = new ViewFiltrage();
 		this.viewMapping = new ViewMapping();
 		this.viewExpression = new ViewExpression();
 		this.viewJeuxDeReglesCopie = new ViewJeuxDeReglesCopie();
@@ -108,14 +104,6 @@ public class ModelNorme implements ArcModel {
 
 	public void setViewControle(VObject viewControle) {
 		this.viewControle = viewControle;
-	}
-
-	public VObject getViewFiltrage() {
-		return viewFiltrage;
-	}
-
-	public void setViewFiltrage(VObject viewFiltrage) {
-		this.viewFiltrage = viewFiltrage;
 	}
 
 	public VObject getViewMapping() {

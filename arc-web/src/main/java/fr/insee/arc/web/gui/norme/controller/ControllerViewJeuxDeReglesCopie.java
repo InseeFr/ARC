@@ -43,17 +43,6 @@ public class ControllerViewJeuxDeReglesCopie extends ServiceViewJeuxDeReglesCopi
 	}
 
 	/**
-	 * Action trigger by requesting the filter rules of the register rule set to
-	 * copy in the actual rule set
-	 * 
-	 * @return
-	 */
-	@RequestMapping("selectJeuxDeReglesFiltrageCopie")
-	public String selectJeuxDeReglesFiltrageCopieAction(Model model) {
-		return selectJeuxDeReglesFiltrageCopie(model);
-	}
-
-	/**
 	 * Action to copy mapping rules
 	 * 
 	 * @param model

@@ -59,19 +59,6 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 	}
 
 	/**
-	 * Action trigger by requesting the filter rules of the register rule set to
-	 * copy in the actual rule set
-	 * 
-	 * @return
-	 */
-	public String selectJeuxDeReglesFiltrageCopie(Model model) {
-
-		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewFiltrage().getTable());
-		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewFiltrage().getSessionName());
-		return generateDisplay(model, RESULT_SUCCESS);
-	}
-
-	/**
 	 * Action trigger by requesting the map rules of the register rule set to copy
 	 * in the actual rule set
 	 * 
@@ -177,8 +164,6 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_controle_regle")) {
 				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
-			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_filtrage_regle")) {
-				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE));
 			} else if (this.getSelectedJeuDeRegle().equals("arc.ihm_mapping_regle")) {
 				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 			}

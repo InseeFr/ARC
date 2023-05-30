@@ -44,4 +44,6 @@ INSERT INTO arc.ext_type_controle values ('ENUM_BRUTE', '7') ON CONFLICT DO NOTH
 INSERT INTO arc.ext_type_controle values ('ENUM_TABLE', '8') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_type_controle values ('STRUCTURE', '9') ON CONFLICT DO NOTHING;
 
+DROP TRIGGER IF EXISTS doublon ON arc.ihm_controle_regle CASCADE;
+
 do $$ begin CREATE TRIGGER tg_insert_controle BEFORE INSERT ON arc.ihm_controle_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;

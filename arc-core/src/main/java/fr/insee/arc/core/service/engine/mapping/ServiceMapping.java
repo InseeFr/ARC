@@ -1,13 +1,13 @@
 package fr.insee.arc.core.service.engine.mapping;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
-import fr.insee.arc.core.service.engine.ServiceCommunFiltrageMapping;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -24,10 +24,10 @@ public class ServiceMapping implements IDbConstant {
      *
      * @throws ArcException
      */
-    public RegleMappingFactory construireRegleMappingFactory(Connection connexion, String envExecution, String tableTempFiltrageOk, String prefixIdentifiantRubrique) throws ArcException {
+    public RegleMappingFactory construireRegleMappingFactory(Connection connexion, String envExecution, String tableTempControleOk, String prefixIdentifiantRubrique) throws ArcException {
         Set<String> ensembleIdentifiantRubriqueExistante = new HashSet<>();
         Set<String> ensembleNomRubriqueExistante = new HashSet<>();
-        for (String nomColonne : ServiceCommunFiltrageMapping.calculerListeColonnes(connexion, tableTempFiltrageOk)) {
+        for (String nomColonne : calculerListeColonnes(connexion, tableTempControleOk)) {
             if (nomColonne.startsWith(prefixIdentifiantRubrique)) {
                 ensembleIdentifiantRubriqueExistante.add(nomColonne);
             } else {
@@ -37,6 +37,20 @@ public class ServiceMapping implements IDbConstant {
         return new RegleMappingFactory(connexion, envExecution, ensembleIdentifiantRubriqueExistante, ensembleNomRubriqueExistante);
     }
 
+    
+
+    /**
+     * return distinct column of a table in a set
+     * @param aConnexion
+     * @param table
+     *
+     * @return
+     * @throws ArcException
+     */
+    private static Set<String> calculerListeColonnes(Connection aConnexion, String aTable) throws ArcException {
+		return new HashSet<>(UtilitaireDao.get("arc").getColumns(aConnexion, new ArrayList<>(), aTable));
+    }
+    
 
     /**
      *

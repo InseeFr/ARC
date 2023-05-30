@@ -938,10 +938,6 @@ public class NormageEngine {
 
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 
-				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" -
-				// "+rubriqueNmcl,
-				// logger);
-
 				// vérifier l'existance des rubriques
 				if (returned.contains(" " + rubrique + " ")) {
 
@@ -1035,10 +1031,6 @@ public class NormageEngine {
 
 				String rubrique = regle.get("rubrique").get(j).toLowerCase();
 				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
-
-				// StaticLoggerDispatcher.info("Filtrage relationnel : "+rubrique+" -
-				// "+rubriqueNmcl,
-				// logger);
 
 				// cérifier l'existance des rubriques
 				if (returned.contains(" " + rubriqueNmcl + " ") && returned.contains(" " + rubrique + " ")) {

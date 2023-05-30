@@ -9,6 +9,7 @@ public enum ArcExceptionMessage {
 	FILE_COPY_FAILED("Le fichier %s n'a pas pu être copié vers %s "),
 	FILE_DELETE_FAILED("Le fichier %s n'a pas pu être effacé"),
 	FILE_READ_FAILED("Le fichier %s n'a pas pu être lu"),
+	FILE_EXTRACT_FAILED("Le fichier archive %s n'a pas pu être extrait"),
 	FILE_WRITE_FAILED("Le fichier %s n'a pas pu être écrit"),
 	FILE_CLOSE_FAILED("Le fichier %s n'a pas pu être fermé"),
 	STREAM_READ_FAILED("Le stream de données n'a pas pu être lu"),

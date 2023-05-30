@@ -279,7 +279,6 @@ To do that, each thread get all the variables use by the full process of Arc for
 
 - TRANSFORMATION_REGLE
 - CONTROLE_REGLE
-- FILTRAGE_REGLE
 - MAPPING_REGLE
 
 Then the module update the SQL join request with the rules in this order :

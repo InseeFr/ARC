@@ -21,7 +21,7 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Sleep;
 
 /**
- * Comme pour le normage et le filtrage, on parallélise en controlant chaque
+ * Comme pour le normage, on parallélise en controlant chaque
  * fichier dans des threads séparés.
  * 
  * @author S4LWO8
@@ -79,8 +79,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 		this.sjdr = new ServiceJeuDeRegle(theApi.getTableControleRegle());
 		this.jdr = new JeuDeRegle();
-
-		this.setTableSeuil(theApi.getTableSeuil());
 
 		// Nom des tables temporaires
 		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");

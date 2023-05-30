@@ -25,7 +25,6 @@ public enum ViewEnum {
 	, IHM_ENTREPOT("ihm_entrepot", SchemaEnum.METADATA, ColumnEnum.ID_ENTREPOT, ColumnEnum.ID_LOADER) //
 	, IHM_EXPRESSION("ihm_expression", SchemaEnum.METADATA, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE, ColumnEnum.EXPR_NOM, ColumnEnum.EXPR_VALEUR, ColumnEnum.COMMENTAIRE) //
 	, IHM_FAMILLE("ihm_famille", SchemaEnum.METADATA, ColumnEnum.ID_FAMILLE) //
-	, IHM_FILTRAGE_REGLE("ihm_filtrage_regle", SchemaEnum.METADATA, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE, ColumnEnum.EXPR_REGLE_FILTRE, ColumnEnum.COMMENTAIRE) //
 	, IHM_JEUDEREGLE("ihm_jeuderegle", SchemaEnum.METADATA, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ETAT, ColumnEnum.DATE_PRODUCTION, ColumnEnum.DATE_INACTIF) //
 	, IHM_MAPPING_REGLE("ihm_mapping_regle", SchemaEnum.METADATA, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE, ColumnEnum.VARIABLE_SORTIE, ColumnEnum.EXPR_REGLE_COL, ColumnEnum.COMMENTAIRE) //
 	, IHM_MOD_TABLE_METIER("ihm_mod_table_metier", SchemaEnum.METADATA, ColumnEnum.ID_FAMILLE, ColumnEnum.NOM_TABLE_METIER, ColumnEnum.DESCRIPTION_TABLE_METIER) //
@@ -34,7 +33,6 @@ public enum ViewEnum {
 	, IHM_NORMAGE_REGLE("ihm_normage_regle", SchemaEnum.METADATA, ColumnEnum.ID_REGLE_INT, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ID_CLASSE, ColumnEnum.RUBRIQUE, ColumnEnum.RUBRIQUE_NMCL, ColumnEnum.TODO, ColumnEnum.COMMENTAIRE) //
 	, IHM_NORME("ihm_norme", SchemaEnum.METADATA, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT) //
 	, IHM_SCHEMA_NMCL("ihm_schema_nmcl", SchemaEnum.METADATA, ColumnEnum.TYPE_NMCL, ColumnEnum.NOM_COLONNE, ColumnEnum.TYPE_COLONNE) //
-	, IHM_SEUIL("ihm_seuil", SchemaEnum.METADATA, ColumnEnum.NOM, ColumnEnum.VALEUR) //
 	, IHM_USER("ihm_user", SchemaEnum.METADATA, ColumnEnum.IDEP, ColumnEnum.PROFIL) //
 	, IHM_WEBSERVICE_LOG("ihm_webservice_log", SchemaEnum.METADATA, ColumnEnum.ID_WEBSERVICE_LOGGING, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION, ColumnEnum.HOST_ALLOWED, ColumnEnum.EVENT_TIMESTAMP) //
 	, IHM_WEBSERVICE_WHITELIST("ihm_webservice_whitelist", SchemaEnum.METADATA, ColumnEnum.HOST_ALLOWED, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION, ColumnEnum.IS_SECURED) //

@@ -32,7 +32,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
     private Thread t;
     
     private int indice;
-    private String tableTempFiltrageOk;
+    private String tableTempControleOk;
     private String tableMappingPilTemp;
 
 	private ArcThreadGenericDao arcThreadGenericDao;
@@ -57,7 +57,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
         this.setParamBatch(anApi.getParamBatch());
         
-        this.tableTempFiltrageOk = "tableTempFiltrageOk".toLowerCase();
+        this.tableTempControleOk = "tableTempControleOk".toLowerCase();
         this.tableMappingPilTemp = "tableMappingPilTemp".toLowerCase();
         
         this.setTableJeuDeRegle(anApi.getTableJeuDeRegle());
@@ -109,7 +109,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
          */
     	query.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
         
-        query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(),this.tableTempFiltrageOk, this.idSource));
+        query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(),this.tableTempControleOk, this.idSource));
         UtilitaireDao.get(poolName).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
     }
@@ -120,13 +120,13 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         /*
          * Construire l'ensemble des jeux de règles
          */
-        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(), this.tableTempFiltrageOk, this.getTableJeuDeRegle());
+        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(), this.tableTempControleOk, this.getTableJeuDeRegle());
 
         /*
          * Construction de la factory pour les règles de mapping
          */
         ServiceMapping serviceMapping = new ServiceMapping();
-		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(), this.getEnvExecution(), this.tableTempFiltrageOk, getPrefixidentifiantrubrique());
+		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(), this.getEnvExecution(), this.tableTempControleOk, getPrefixidentifiantrubrique());
         /*
          * Pour chaque jeu de règles
          */
@@ -139,7 +139,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
              * Instancier une requête de mapping générique pour ce jeu de règles.
              */
             RequeteMapping requeteMapping = new RequeteMapping(this.connexion.getExecutorConnection(), this.regleMappingFactory, idFamille, listeJeuxDeRegles.get(i),
-                    this.getEnvExecution(), this.tableTempFiltrageOk, this.indice);
+                    this.getEnvExecution(), this.tableTempControleOk, this.indice);
             /*
              * Construire la requête de mapping (dérivation des règles)
              */

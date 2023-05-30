@@ -47,22 +47,16 @@ public class ServiceRules {
 	 * @param tablePilotage
 	 * @param tableNormageRegle
 	 * @param tableControleRegle
-	 * @param tableFiltrageRegle
 	 * @param tableMappingRegle
 	 * @return
 	 */
 	public static String getAllRubriquesInRegles(String tablePilotage, String tableNormageRegle,
-			String tableControleRegle, String tableFiltrageRegle, String tableMappingRegle) {
+			String tableControleRegle, String tableMappingRegle) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n SELECT * FROM ( ");
 		requete.append(
 				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_col),'([iv]_{1,1}[[:alnum:]\\_\\$]+)','g')) as var from "
 						+ tableMappingRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		requete.append("\n UNION ");
-		requete.append(
-				"\n SELECT id_norme, validite_inf, validite_sup, periodicite, unnest(regexp_matches(lower(expr_regle_filtre),'([iv]_{1,1}[[:alnum:]\\_\\$]+)','g')) as var from "
-						+ tableFiltrageRegle + " a WHERE ");
 		requete.append(conditionRegle(tablePilotage));
 		requete.append("\n UNION ");
 		requete.append("\n SELECT id_norme, validite_inf, validite_sup, periodicite, lower(rubrique_pere) as var from "

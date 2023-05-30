@@ -149,9 +149,6 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 			ArcPreparedStatementBuilder requeteRegleMapping = new ArcPreparedStatementBuilder();
 			requeteRegleMapping.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)));
-			ArcPreparedStatementBuilder requeteRegleFiltrage = new ArcPreparedStatementBuilder();
-			requeteRegleFiltrage.append(recupRegle(this.views.getViewJeuxDeRegles(),
-					dataObjectService.getView(ViewEnum.IHM_FILTRAGE_REGLE)));
 			ArcPreparedStatementBuilder requeteRegleExpression = new ArcPreparedStatementBuilder();
 			requeteRegleExpression.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_EXPRESSION)));
@@ -170,7 +167,6 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 									, requeteRegleNormage
 									, requeteRegleControle
 									, requeteRegleMapping
-									, requeteRegleFiltrage
 									, requeteRegleExpression
 									)
 							)
