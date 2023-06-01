@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.1b
+- version beta avec suppression de la phase de filtrage
+
 ## version-92.2.18
 - github workflow java 11
 
