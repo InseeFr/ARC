@@ -10,7 +10,7 @@ import fr.insee.arc.utils.utils.PrivateConstructorTest;
 public class ServiceHashFileNameTest {
 
 	@Test
-	public void testUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+	public void testServiceHashFileNameIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		PrivateConstructorTest.testConstructorIsPrivate(ServiceHashFileName.class);
 	}
 	

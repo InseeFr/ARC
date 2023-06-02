@@ -29,7 +29,7 @@ public class NormageEngineRegleSupression {
 	 * @throws ArcException
 	 */
 
-	protected static void ajouterRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+	protected static void ajouterRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme,
 			String periodicite, String jointure, HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles)
 			throws ArcException {
 		// on va jouer au "qui enleve-t-on" ??
@@ -101,7 +101,7 @@ public class NormageEngineRegleSupression {
 					}
 
 					if (!foundRubriquePere) {
-						String rubriquePereBloc = NormageEngine.getCoreVariableName(rubriquePere);
+						String rubriquePereBloc = NormageEngineGlobal.getCoreVariableName(rubriquePere);
 
 						// ajouter le bloc aux regles de suppression si pas dans la table de regle
 						if (!regle.get("rubrique").contains(rubriquePere)
@@ -145,7 +145,7 @@ public class NormageEngineRegleSupression {
 					// ceux sont les deux premieres variables
 					// d'un bloc)
 					if (nbMatch > 2) {
-						String rubrique = NormageEngine.getCoreVariableName(ManipString.substringAfterFirst(m.group(), " as "));
+						String rubrique = NormageEngineGlobal.getCoreVariableName(ManipString.substringAfterFirst(m.group(), " as "));
 						String rubriqueI = "i_" + rubrique;
 						String rubriqueV = "v_" + rubrique;
 
@@ -187,13 +187,13 @@ public class NormageEngineRegleSupression {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected static String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws ArcException {
+	protected static String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme,
+			Date validite, String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info("appliquerRegleSuppression()", LOGGER);
 
 		String returned = jointure;
-		
+
 		// ajout des regles
 		// parcourt des regles : faut parcourir les suppression d'abord
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -202,58 +202,58 @@ public class NormageEngineRegleSupression {
 			String rubrique = regle.get("rubrique").get(j).toLowerCase();
 
 			if (type.equals("deletion")) {
-				returned=appliquerRegleSuppressionCore(returned, rubrique);
+				returned = appliquerRegleSuppressionCore(returned, rubrique);
 			}
 
 		}
 		return returned;
 	}
-	
+
 	/**
 	 * rework the query for a rubrique marked as to be suppressed
+	 * 
 	 * @param returned
 	 * @param rubrique
 	 * @return
 	 */
-	private static String appliquerRegleSuppressionCore(String returned, String rubrique)
-	{
+	private static String appliquerRegleSuppressionCore(String returned, String rubrique) {
 		String[] lines = returned.split("\n");
-		
-		ArrayList<String> grpAEnlever=new ArrayList<>();
-		ArrayList<Integer> ligneAEnlever=new ArrayList<>();
+
+		ArrayList<String> grpAEnlever = new ArrayList<>();
+		ArrayList<Integer> ligneAEnlever = new ArrayList<>();
 		ArrayList<String> rubriqueAEnlever = new ArrayList<String>();
 
 		// identifier les groupes a enlever de la requete
 		identifierGroupeAEnlever(lines, rubrique, grpAEnlever, ligneAEnlever);
-		
+
 		// identifier les rubriques a enlever de la requete
 		identifierRubriqueAEnlever(lines, rubrique, grpAEnlever, ligneAEnlever, rubriqueAEnlever);
 
 		// on en termine : calculer la requete
 		return calculerRequeteSupression(lines, ligneAEnlever, rubriqueAEnlever);
 	}
-	
-	private static String calculerRequeteSupression(String[] lines, ArrayList<Integer> ligneAEnlever, ArrayList<String> rubriqueAEnlever)
-	{
+
+	private static String calculerRequeteSupression(String[] lines, ArrayList<Integer> ligneAEnlever,
+			ArrayList<String> rubriqueAEnlever) {
 		StringBuilder f = new StringBuilder();
 
 		int max = lines.length - 1;
-		
+
 		int k = 0;
 		while (k <= max) {
 			String line = lines[k];
 
-				line = line + ",";
-				for (String r : rubriqueAEnlever) {
-					line = line.replace("," + r + ",", ",");
-					line = line.replace(", " + r + " as " + r + " ,", ",");
-					line = line.replace(", " + r + " as " + r + "  ", " ");
-					line = line.replace(",min( " + r + " ) as " + r + ",", ",");
-					line = line.replace(",min( " + r + " ) as  " + r + ",", ",");
-					line = line.replace(",min( " + r + " ) as " + r + " ", " ");
-					line = line.replace(",min( " + r + " ) as  " + r + " ", " ");
-				}
-				line = line.substring(0, line.length() - 1);
+			line = line + ",";
+			for (String r : rubriqueAEnlever) {
+				line = line.replace("," + r + ",", ",");
+				line = line.replace(", " + r + " as " + r + " ,", ",");
+				line = line.replace(", " + r + " as " + r + "  ", " ");
+				line = line.replace(",min( " + r + " ) as " + r + ",", ",");
+				line = line.replace(",min( " + r + " ) as  " + r + ",", ",");
+				line = line.replace(",min( " + r + " ) as " + r + " ", " ");
+				line = line.replace(",min( " + r + " ) as  " + r + " ", " ");
+			}
+			line = line.substring(0, line.length() - 1);
 
 			if (!ligneAEnlever.contains(k)) {
 				f.append(line + "\n");
@@ -263,10 +263,9 @@ public class NormageEngineRegleSupression {
 		}
 		return f.toString();
 	}
-	
-	
-	private static void identifierRubriqueAEnlever(String[] lines, String rubrique, ArrayList<String> grpAEnlever, ArrayList<Integer> ligneAEnlever, ArrayList<String> rubriqueAEnlever)
-	{
+
+	private static void identifierRubriqueAEnlever(String[] lines, String rubrique, ArrayList<String> grpAEnlever,
+			ArrayList<Integer> ligneAEnlever, ArrayList<String> rubriqueAEnlever) {
 		int max = lines.length - 1;
 
 		int k = 1;
@@ -320,7 +319,7 @@ public class NormageEngineRegleSupression {
 			rubriqueAEnlever.add("v_" + rubrique);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param lines
@@ -328,8 +327,8 @@ public class NormageEngineRegleSupression {
 	 * @param grpAEnlever
 	 * @param ligneAEnlever
 	 */
-	private static void identifierGroupeAEnlever(String[] lines, String rubrique, ArrayList<String> grpAEnlever, ArrayList<Integer> ligneAEnlever)
-	{
+	private static void identifierGroupeAEnlever(String[] lines, String rubrique, ArrayList<String> grpAEnlever,
+			ArrayList<Integer> ligneAEnlever) {
 		int max = lines.length - 1;
 
 		// on va iterer sur les lignes pour identifier les groupes à enlever
@@ -344,37 +343,37 @@ public class NormageEngineRegleSupression {
 			if (!ligneAEnlever.contains(k) && lines[k].startsWith(" left join ")) {
 
 				String line = lines[k];
-					String grpTrouve = null;
-					// tester si les rubriques de grpAEnlever sont pere d'une autre rubrique
-					for (String r : grpAEnlever) {
-						// cas 1 : ajouter la rubrique trouvée à la liste des rubrique a enlever
-						if (line.endsWith("i_" + r)) {
-							// extraire la rubrique à enlever et la mettre dans variable grpTrouve
-							grpTrouve = ManipString
-									.substringBeforeFirst(ManipString.substringAfterLast(line, "=t_"), ".");
-							// marquer la ligne à enlever;
-							ligneAEnlever.add(k);
-							// revenir au début
-							k = max - 1;
-							break;
-						}
-
-						// cas 2 : tester si la rubrique est fille
-						if (line.startsWith(" left join t_" + r + " ")) {
-							ligneAEnlever.add(k);
-							break;
-						}
-
+				String grpTrouve = null;
+				// tester si les rubriques de grpAEnlever sont pere d'une autre rubrique
+				for (String r : grpAEnlever) {
+					// cas 1 : ajouter la rubrique trouvée à la liste des rubrique a enlever
+					if (line.endsWith("i_" + r)) {
+						// extraire la rubrique à enlever et la mettre dans variable grpTrouve
+						grpTrouve = ManipString.substringBeforeFirst(ManipString.substringAfterLast(line, "=t_"), ".");
+						// marquer la ligne à enlever;
+						ligneAEnlever.add(k);
+						// revenir au début
+						k = max - 1;
+						break;
 					}
 
-					// code note : grpTrouve added here to the list grpAEnlever because it iterates over grpAEnlever list in last for loop
-					if (grpTrouve != null) {
-						grpAEnlever.add(grpTrouve);
+					// cas 2 : tester si la rubrique est fille
+					if (line.startsWith(" left join t_" + r + " ")) {
+						ligneAEnlever.add(k);
+						break;
 					}
+
+				}
+
+				// code note : grpTrouve added here to the list grpAEnlever because it iterates
+				// over grpAEnlever list in last for loop
+				if (grpTrouve != null) {
+					grpAEnlever.add(grpTrouve);
+				}
 
 			}
 			k = k - 1;
 		}
 	}
-	
+
 }

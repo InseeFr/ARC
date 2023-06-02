@@ -481,7 +481,7 @@ and a.validite_inf=b.validite_inf
 and a.validite_sup=b.validite_sup
 and a.version=b.version
 and a.periodicite=b.periodicite),
-id_norme, validite_inf, validite_sup, version, periodicite, ''CONDITION'', ''NOT(''||expr_regle_filtre||'')'', ''>0u'', ''k'', coalesce(a.commentaire, ''règle de filtrage'')
+id_norme, validite_inf, validite_sup, version, periodicite, ''CONDITION'', ''NOT(''||expr_regle_filtre||'')'', ''>0u'', ''e'', coalesce(a.commentaire, ''règle de filtrage'')
 from '||table_filtrage||' a
 where not exists (select from '||table_controle||' b 
 where a.id_norme=b.id_norme 
