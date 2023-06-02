@@ -12,7 +12,7 @@
 [Functionnal diagram](https://github.com/InseeFr/ARC/raw/master/user-guide/diagrammes_fonctionnels.pdf)
 
 ## Workbench for acquisition and normalization of data sets
-[![Build Status](https://travis-ci.org/InseeFr/ARC.svg?branch=master)](https://travis-ci.org/InseeFr/ARC)
+[![Build Status](https://github.com/InseeFr/ARC/actions/workflows/build.yml/badge.svg)](https://github.com/InseeFr/ARC/actions/workflows/build.yml)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=fr.insee%3Aarc&metric=alert_status)](https://sonarcloud.io/dashboard?id=fr.insee%3Aarc)
 
