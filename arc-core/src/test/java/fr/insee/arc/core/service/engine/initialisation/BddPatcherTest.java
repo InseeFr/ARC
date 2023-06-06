@@ -73,6 +73,10 @@ public class BddPatcherTest extends InitializeQueryTest {
 		}
 	}
 
+	/**
+	 * create a blank arc database based on bddScript method
+	 * @throws ArcException
+	 */
 	public static void createDatabase() throws ArcException {
 		GenericPreparedStatementBuilder query;
 
@@ -87,16 +91,18 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// sandbox schema creation
 		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c, testSandbox);
 		
-		// insert test data
-		insertTestData();
 	}
 
+	/**
+	 * insert data for functional tests
+	 * @throws ArcException
+	 */
 	public static void insertTestData() throws ArcException {
 		//
 		
 		String scriptDataTest;
 		try {
-			scriptDataTest = IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream("BdDTest/script_sirene4.sql"), StandardCharsets.UTF_8);
+			scriptDataTest = IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream("BdDTest/script_test_fonctionnel.sql"), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED);
 		}

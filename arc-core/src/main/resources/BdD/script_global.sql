@@ -473,7 +473,15 @@ for table_filtrage in (select schemaname||'.'||tablename from pg_tables where ta
 loop
 
 table_controle:=replace(table_filtrage,'filtrage_regle','controle_regle');
+
+-- patch table model if control table model is still in an old state
+execute 'ALTER TABLE '||table_controle||' add column IF NOT exists xsd_ordre int;';
+execute 'ALTER TABLE '||table_controle||' add column IF NOT exists xsd_label_fils text;';
+execute 'ALTER TABLE '||table_controle||' add column IF NOT exists xsd_role text;';
+execute 'ALTER TABLE '||table_controle||' add column IF NOT exists blocking_threshold text;';
+execute 'ALTER TABLE '||table_controle||' add column IF NOT exists error_row_processing text;';
 	
+-- add the filter rule to control rule table
 execute 'insert into '||table_controle||' (id_regle, id_norme, validite_inf, validite_sup, version, periodicite, id_classe, condition, blocking_threshold, error_row_processing, commentaire)
 select 
 (select coalesce(max(id_regle),0)+1 from '||table_controle||' b  where a.id_norme=b.id_norme 
