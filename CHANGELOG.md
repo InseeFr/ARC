@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.3
+- passage en production
+
 ## version-93.1.1b
 - version beta avec suppression de la phase de filtrage
 
