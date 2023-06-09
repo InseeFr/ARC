@@ -64,9 +64,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 		this.nomTable = new StringBuilder(ServiceTableNaming.dbEnv(anEnvironnement)).append(aNomTableCourt).toString();
 		this.ensembleVariableMapping = new TreeSet<>();
 		this.environnement = anEnvironnement;
-		this.ensembleRegleMappingClefPrimaire = new HashSet<RegleMappingClePrimaire>();
-		// this.nomTableTemporaire=FormatSQL.temporaryTableName(ApiService.dbEnv(this.environnement)
-		// + this.nomTableCourt+"_" + encours + "$" + threadId);
+		this.ensembleRegleMappingClefPrimaire = new HashSet<>();
 		this.nomTableTemporaire = "tableMappingTemp_" + this.nomTableCourt;
 		this.ensembleIdentifiantsRubriques = new HashSet<>();
 		this.mapGroupeToEnsembleIdentifiantsRubriques = new TreeMap<>();
@@ -104,7 +102,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 	}
 
 	public Set<String> getEnsembleVarMapping() {
-		Set<String> s = new HashSet<String>();
+		Set<String> s = new HashSet<>();
 
 		for (VariableMapping v : this.ensembleVariableMapping) {
 			s.add(v.toString());
@@ -128,8 +126,8 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 			this.ensembleNomsRubriques.addAll(variable.getEnsembleNomsRubriques());
 			for (Integer groupe : variable.getEnsembleGroupes()) {
 				if (!this.mapGroupeToEnsembleIdentifiantsRubriques.containsKey(groupe)) {
-					this.mapGroupeToEnsembleIdentifiantsRubriques.put(groupe, new HashSet<String>());
-					this.mapGroupeToEnsembleNomsRubriques.put(groupe, new HashSet<String>());
+					this.mapGroupeToEnsembleIdentifiantsRubriques.put(groupe, new HashSet<>());
+					this.mapGroupeToEnsembleNomsRubriques.put(groupe, new HashSet<>());
 				}
 				this.mapGroupeToEnsembleIdentifiantsRubriques.get(groupe)
 						.addAll(variable.getEnsembleIdentifiantsRubriques(groupe));
@@ -558,7 +556,6 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 		}
 
 		return s.isEmpty() ? "" : "," + Format.untokenize(s, ",");
-//			return r.toString();
 	}
 
 	public void construireEnsembleVariablesTypes() {
@@ -616,7 +613,6 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 	}
 
 	public String getPrimaryKey() {
-		// mapping_<famille>_*table*_ok
 		return "id_" + ManipString
 				.substringBeforeLast(ManipString
 						.substringAfterFirst(ManipString.substringAfterFirst(this.getNomTableCourt(), "_"), "_"), "_")
