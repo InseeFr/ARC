@@ -106,7 +106,7 @@ public class NormageEngine {
 		reqSelect.append(ColumnEnum.ID_SOURCE.getColumnName()+", id, date_integration, id_norme, validite, periodicite");
 
 		List<String> listeRubriqueSource = new ArrayList<>();
-		UtilitaireDao.get("arc").getColumns(connection, listeRubriqueSource, tableSource);
+		UtilitaireDao.get(0).getColumns(connection, listeRubriqueSource, tableSource);
 
 		HashSet<String> alreadyAdded = new HashSet<>();
 
@@ -145,7 +145,7 @@ public class NormageEngine {
 		bloc3.append(reqSelect);
 		bloc3.append(" FROM " + tableSource + " ;");
 
-		UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
+		UtilitaireDao.get(0).executeImmediate(connection, bloc3);
 	}
 
 	/**
@@ -364,7 +364,7 @@ public class NormageEngine {
 		}
 
 		// No partition found; normal execution
-		UtilitaireDao.get("arc").executeImmediate(connection, applyQueryPlanParametersOnJointure(
+		UtilitaireDao.get(0).executeImmediate(connection, applyQueryPlanParametersOnJointure(
 				replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, idSource),
 				null));
 
@@ -421,7 +421,7 @@ public class NormageEngine {
 		blocInsert = replaceQueryParameters(blocInsert, norme, validite, periodicite, jointure, validiteText,
 				idSource);
 
-		int total = UtilitaireDao.get("arc").getInt(connection, new ArcPreparedStatementBuilder(blocCreate));
+		int total = UtilitaireDao.get(0).getInt(connection, new ArcPreparedStatementBuilder(blocCreate));
 
 		// partition if and only if enough records
 		if (total >= minSize) {
@@ -431,7 +431,7 @@ public class NormageEngine {
 			// rename the table to split
 			StringBuilder bloc3 = new StringBuilder(
 					"alter table " + partitionTableName + " rename to " + partitionTableNameWithAllRecords + ";");
-			UtilitaireDao.get("arc").executeImmediate(connection, bloc3);
+			UtilitaireDao.get(0).executeImmediate(connection, bloc3);
 
 			ArcPreparedStatementBuilder bloc4 = new ArcPreparedStatementBuilder();
 			bloc4.append("\n drop table if exists " + partitionTableName + ";");
@@ -454,7 +454,7 @@ public class NormageEngine {
 				bloc4.getParameters().set(0, lowerbound);
 				bloc4.getParameters().set(1, upperbound);
 				
-				UtilitaireDao.get("arc").executeRequest(connection, bloc4);
+				UtilitaireDao.get(0).executeRequest(connection, bloc4);
 
 				iterate = iterate + chunkSize;
 
@@ -463,7 +463,7 @@ public class NormageEngine {
 		} else
 		// no partitions needed
 		{
-			UtilitaireDao.get("arc").executeImmediate(connection,
+			UtilitaireDao.get(0).executeImmediate(connection,
 					applyQueryPlanParametersOnJointure(blocInsert, statementTimeOut));
 		}
 	}

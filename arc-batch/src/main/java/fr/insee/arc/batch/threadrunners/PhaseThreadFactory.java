@@ -98,7 +98,7 @@ public class PhaseThreadFactory extends Thread {
 				+ ".pilotage_fichier WHERE etape=1 and phase_traitement='" + this.getPhaseName()
 				+ "' and etat_traitement='{" + TraitementEtat.ENCOURS + "}'");
 
-		int currentNumberOfFilesLeft = UtilitaireDao.get("arc").getInt(null, query);
+		int currentNumberOfFilesLeft = UtilitaireDao.get(0).getInt(null, query);
 
 		// compare it to the previous recorded number of files left
 		// if still some files to go and if the stack hadn't moved, the thread will be

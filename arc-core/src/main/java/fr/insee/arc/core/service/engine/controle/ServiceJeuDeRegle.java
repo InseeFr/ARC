@@ -99,7 +99,7 @@ public class ServiceJeuDeRegle {
 	 */
 	private void registerRubriquesFromSourceTable(Connection connexion, String table) throws ArcException
 	{
-		this.listRubTable = UtilitaireDao.get("arc").getColumns(connexion, table);
+		this.listRubTable = UtilitaireDao.get(0).getColumns(connexion, table);
 		this.listRubTable.replaceAll(String::toUpperCase);
 	}
 	
@@ -138,8 +138,7 @@ public class ServiceJeuDeRegle {
 					String pa[]= p.toArray(new String[0]);
 					LoggerHelper.debug(logger, "Longueur de mon tableau de préaction :",pa.length);
 					LoggerHelper.debug(logger, "Contenu a priori :",p.toString());
-					UtilitaireDao.fastUpdate("arc",
-							connexion
+					UtilitaireDao.get(0).fastUpdate(connexion
 							, table
 							, "id"
 							, this.listRubTable
@@ -242,7 +241,7 @@ public class ServiceJeuDeRegle {
 
 				if (blocRequete.length()>FormatSQL.TAILLE_MAXIMAL_BLOC_SQL)
 				{
-					UtilitaireDao.get("arc").executeImmediate(connexion, "SET enable_nestloop=off; "+blocRequete.toString()+"SET enable_nestloop=on; ");
+					UtilitaireDao.get(0).executeImmediate(connexion, "SET enable_nestloop=off; "+blocRequete.toString()+"SET enable_nestloop=on; ");
 					blocRequete.setLength(0);
 				}
 
@@ -255,7 +254,7 @@ public class ServiceJeuDeRegle {
 		blocRequete.append(this.servSql.markTableResultat());
 		blocRequete.append(this.servSql.dropControleTemporaryTables());
 
-		UtilitaireDao.get("arc").executeImmediate(connexion, "SET enable_nestloop=off; "+blocRequete+"SET enable_nestloop=on; ");
+		UtilitaireDao.get(0).executeImmediate(connexion, "SET enable_nestloop=off; "+blocRequete+"SET enable_nestloop=on; ");
 		StaticLoggerDispatcher.info("Fin executeJeuDeRegle", logger);
 		
 	}

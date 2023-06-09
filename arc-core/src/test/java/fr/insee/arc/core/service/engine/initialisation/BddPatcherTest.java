@@ -48,7 +48,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 
 		HashMap<String, ArrayList<String>> content;
 
-		content = new GenericBean(UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query))
+		content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query))
 				.mapContent();
 
 		// check if all metadata view had been created
@@ -62,7 +62,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		query = new GenericPreparedStatementBuilder();
 		query.append("select tablename from pg_tables where schemaname=").append(query.quoteText(testSandbox));
 
-		content = new GenericBean(UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query))
+		content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query))
 				.mapContent();
 
 		// check if the sandbox views had been created
@@ -84,7 +84,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		query = new GenericPreparedStatementBuilder();
 		query.append("DROP SCHEMA IF EXISTS " + DataObjectService.ARC_METADATA_SCHEMA + " CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS " + testSandbox + " CASCADE;");
-		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(c, query);
+		UtilitaireDao.get(0).executeRequest(c, query);
 
 		// metadata schema creation
 		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c);
@@ -122,7 +122,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED);
 		}
-		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeImmediate(c, scriptDataTest);
+		UtilitaireDao.get(0).executeImmediate(c, scriptDataTest);
 		
 	}
 	

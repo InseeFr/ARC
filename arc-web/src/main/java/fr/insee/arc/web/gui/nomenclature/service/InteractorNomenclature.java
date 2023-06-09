@@ -1,7 +1,6 @@
 package fr.insee.arc.web.gui.nomenclature.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,12 +11,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
@@ -27,7 +21,7 @@ import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclature> implements IDbConstant {
+public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclature> {
 
 	protected static final String RESULT_SUCCESS = "/jsp/gererNomenclature.jsp";
 
@@ -88,7 +82,7 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 			// get the list nomenclatures selected record
 			Map<String, ArrayList<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
 			// if nomenclature selected, trigger call to dao to construct nomenclature view
-			if (!selectionListNomenclatures.isEmpty() && Boolean.TRUE.equals(UtilitaireDao.get(poolName)
+			if (!selectionListNomenclatures.isEmpty() && Boolean.TRUE.equals(UtilitaireDao.get(0)
 					.isTableExiste(null, "arc." + selectionListNomenclatures.get(NOM_TABLE).get(0)))) {
 				dao.setSelectedRecords(selectionListNomenclatures);
 				dao.initializeViewNomenclature(viewNomenclature, NOM_TABLE,

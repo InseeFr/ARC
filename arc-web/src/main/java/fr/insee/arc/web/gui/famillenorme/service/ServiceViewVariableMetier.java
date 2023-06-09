@@ -97,7 +97,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 					// mise à jour du nom de la variable dans les tables des environements
 					StringBuilder requeteListeEnvironnement = new StringBuilder(
 							"SELECT distinct replace(id,'.','_') FROM arc.ext_etat_jeuderegle where isenv");
-					List<String> listeEnvironnement = UtilitaireDao.get("arc").getList(null, requeteListeEnvironnement,
+					List<String> listeEnvironnement = UtilitaireDao.get(0).getList(null, requeteListeEnvironnement,
 							new ArrayList<String>());
 
 					for (String envName : listeEnvironnement) {
@@ -111,11 +111,11 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 								/**
 								 * Si la table existe, on tente une suppression de la colonne
 								 */
-								if (Boolean.TRUE.equals(UtilitaireDao.get("arc").isTableExiste(null, nomVeridique))) {
+								if (Boolean.TRUE.equals(UtilitaireDao.get(0).isTableExiste(null, nomVeridique))) {
 									/**
 									 * Pour cela, la colonne doit exister
 									 */
-									if (UtilitaireDao.get("arc").isColonneExiste(null, nomVeridique, nameBefore)) {
+									if (UtilitaireDao.get(0).isColonneExiste(null, nomVeridique, nameBefore)) {
 
 										requete.append("\n");
 										requete.append("ALTER TABLE " + nomVeridique + " RENAME " + nameBefore + " TO "
@@ -155,7 +155,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 
 	private static final void executeRequeteMiseAjourTableMetier(StringBuilder message, StringBuilder requete) {
 		try {
-			UtilitaireDao.get("arc").executeBlock(null, requete);
+			UtilitaireDao.get(0).executeBlock(null, requete);
 			message.append("La mise a jour a réussi");
 		} catch (Exception ex) {
 			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.executeRequeteMiseAjourTableMetier", LOGGER);
@@ -219,7 +219,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 		requete.append("SELECT count(1) FROM arc." + IHM_MOD_VARIABLE_METIER)//
 				.append("\n WHERE id_famille=" + requete.quoteText(inputFields.get(0)))//
 				.append("\n AND nom_variable_metier=" + requete.quoteText(inputFields.get(1)) + ";");
-		return UtilitaireDao.get("arc").getInt(null, requete) == 0;
+		return UtilitaireDao.get(0).getInt(null, requete) == 0;
 	}
 
 	/**

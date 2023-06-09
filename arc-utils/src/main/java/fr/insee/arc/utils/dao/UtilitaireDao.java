@@ -19,7 +19,6 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,7 +45,6 @@ import org.postgresql.core.BaseConnection;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -79,43 +77,26 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	/**
 	 * default pool name used in properties
 	 */
-	public static final String DEFAULT_CONNECTION_POOL = "arc";
-
-	private String pool;
-	private static Map<String, UtilitaireDao> map;
+	private Integer pool;
+	public static Map<Integer, UtilitaireDao> map = new HashMap<>();
 
 	PropertiesHandler properties;
 
-	public UtilitaireDao() {
-		super();
-		map = new HashMap<>();
-		map.put(DEFAULT_CONNECTION_POOL, this);
-	}
-
-	private UtilitaireDao(String aPool) {
+	private UtilitaireDao(Integer aPool) {
 		this.pool = aPool;
-		if (map == null) {
-			map = new HashMap<>();
-		}
 		if (!map.containsKey(aPool)) {
 			properties = PropertiesHandler.getInstance();
 			map.put(aPool, this);
 		}
 	}
 
-	public static final UtilitaireDao get(String aPool) {
-		if (map == null) {
-			map = new HashMap<>();
-		}
+	public static final UtilitaireDao get(Integer aPool) {
 		if (!map.containsKey(aPool)) {
 			map.put(aPool, new UtilitaireDao(aPool));
 		}
 		return map.get(aPool);
 	}
 
-	public static final UtilitaireDao get(int aPool) {
-		return get("" + aPool);
-	}
 
 	/**
 	 * Compute the number of executor nods according to he number of user declared
@@ -150,11 +131,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		// invocation du driver
 		try {
 
-			int connexionIndex = this.pool.equals(DEFAULT_CONNECTION_POOL) ? 0 : Integer.parseInt(this.pool);
-			String driver = properties.getDatabaseDriverClassName().split(CONNECTION_SEPARATOR)[connexionIndex];
-			String uri = properties.getDatabaseUrl().split(CONNECTION_SEPARATOR)[connexionIndex];
-			String user = properties.getDatabaseUsername().split(CONNECTION_SEPARATOR)[connexionIndex];
-			String password = properties.getDatabasePassword().split(CONNECTION_SEPARATOR)[connexionIndex];
+			String driver = properties.getDatabaseDriverClassName().split(CONNECTION_SEPARATOR)[this.pool];
+			String uri = properties.getDatabaseUrl().split(CONNECTION_SEPARATOR)[this.pool];
+			String user = properties.getDatabaseUsername().split(CONNECTION_SEPARATOR)[this.pool];
+			String password = properties.getDatabasePassword().split(CONNECTION_SEPARATOR)[this.pool];
 
 			Class.forName(driver);
 			Connection c = null;
@@ -190,9 +170,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/** Returns true if the connection is valid. */
-	public static boolean isConnectionOk(String pool) {
+	public boolean isConnectionOk() {
 		try {
-			get(pool).executeRequest(null, new GenericPreparedStatementBuilder("select true"));
+			executeRequest(null, new GenericPreparedStatementBuilder("select true"));
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -387,9 +367,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public Boolean testResultRequest(Connection connexion, GenericPreparedStatementBuilder requete) {
 		GenericPreparedStatementBuilder requeteLimit = new GenericPreparedStatementBuilder();
-		requeteLimit.append("SELECT * from (").append(requete).append(") dummyTable0000000 LIMIT 1");
+		requeteLimit.append("SELECT * from (").append(requete).append(") dummy LIMIT 1");
 		try {
-			return hasResults(null, requeteLimit);
+			return hasResults(connexion, requeteLimit);
 		} catch (Exception e) {
 			return false;
 		}
@@ -585,85 +565,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
-	/**
-	 * 
-	 * Classe bridge qui permet d'utiliser l'interface de {@link UtilitaireDao} dans
-	 * d'autres classes du projet.<br/>
-	 * 
-	 * @param <T>
-	 */
-	public static abstract class EntityProvider<T> implements Function<ResultSet, T> {
-		private static final class ArrayOfArrayProvider extends EntityProvider<ArrayList<ArrayList<String>>> {
-			@Override
-			public ArrayList<ArrayList<String>> apply(ResultSet res) {
-				try {
-					return fromResultSetToArray(res);
-				} catch (ArcException ex) {
-					throw new IllegalStateException(ex);
-				}
-			}
-		}
-
-		public static final EntityProvider<ArrayList<ArrayList<String>>> getArrayOfArrayProvider() {
-			return new ArrayOfArrayProvider();
-		}
-
-		private static final class GenericBeanProvider extends EntityProvider<GenericBean> {
-			@Override
-			public GenericBean apply(ResultSet res) {
-				return new GenericBean(getArrayOfArrayProvider().apply(res));
-			}
-		}
-
-		public static final EntityProvider<GenericBean> getGenericBeanProvider() {
-			return new GenericBeanProvider();
-		}
-
-		private static final class TypedListProvider<T> extends EntityProvider<List<T>> {
-			private Function<ResultSet, T> orm;
-
-			/**
-			 * @param orm
-			 */
-			TypedListProvider(Function<ResultSet, T> orm) {
-				this.orm = orm;
-			}
-
-			@Override
-			public List<T> apply(ResultSet res) {
-				try {
-					return fromResultSetToListOfT(() -> new ArrayList<>(), this.orm, res);
-				} catch (ArcException ex) {
-					throw new IllegalStateException(ex);
-				}
-			}
-		}
-
-		public static final <T> EntityProvider<List<T>> getTypedListProvider(Function<ResultSet, T> orm) {
-			return new TypedListProvider<>(orm);
-		}
-
-		private static final class DefaultEntityProvider<T> extends EntityProvider<T> {
-			private Function<ResultSet, T> orm;
-
-			/**
-			 * @param orm
-			 */
-			DefaultEntityProvider(Function<ResultSet, T> orm) {
-				this.orm = orm;
-			}
-
-			@Override
-			public T apply(ResultSet res) {
-				return this.orm.apply(res);
-			}
-		}
-
-		public static final <T> EntityProvider<T> getDefaultEntityProvider(Function<ResultSet, T> orm) {
-			return new DefaultEntityProvider<>(orm);
-		}
-	}
-
 	public static final GenericBean fromResultSetToGenericBean(ResultSet res) {
 		try {
 			return new GenericBean(fromResultSetToArray(res));
@@ -823,17 +724,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "outStreamRequeteSelect()", LOGGER, ex);
 		}
-	}
-
-	public static void createDirIfNotexist(File f) {
-		if (!f.exists()) {
-			f.mkdirs();
-		}
-	}
-
-	public static void createDirIfNotexist(String fPath) {
-		File f = new File(fPath);
-		createDirIfNotexist(f);
 	}
 
 	/**
@@ -1264,7 +1154,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *                   jour "12 as a"
 	 * @throws ArcException
 	 */
-	public static void fastUpdate(String poolName, Connection aConnexion, String tableName, String keys,
+	public void fastUpdate(Connection aConnexion, String tableName, String keys,
 			List<String> colList, String where, String... set) throws ArcException {
 		// récupérer la liste des colonnes
 		// liste de toutes les colonnes
@@ -1357,7 +1247,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		requete.append(
 				"\n alter table " + tableImage + " rename to " + ManipString.substringAfterFirst(tableName, ".") + ";");
 		requete.append("analyze " + tableName + " (" + keys + ");");
-		get(poolName).executeImmediate(aConnexion, requete);
+		executeImmediate(aConnexion, requete);
 		requete.setLength(0);
 	}
 

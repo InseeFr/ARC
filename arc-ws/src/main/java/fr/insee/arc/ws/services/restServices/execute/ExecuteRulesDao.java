@@ -39,7 +39,7 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 	requete.append("\n ;");
 
 	// Récupération des parametres
-	gb=new GenericBean(UtilitaireDao.get("arc").executeRequest(c, requete));
+	gb=new GenericBean(UtilitaireDao.get(0).executeRequest(c, requete));
 	HashMap<String, ArrayList<String>> m=gb.mapContent();
 
 	if (!m.isEmpty())
@@ -72,7 +72,7 @@ public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnVie
 	r.setDataSetView(new ArrayList<DataSetView>());
 	
 	// searchpath to the current sandbow to be able to query rules of the sandbox simply and without any risk of confusion with user rules
-	UtilitaireDao.get("arc").executeImmediate(c,"SET search_path=public, "+p.sandbox.replace(".", "_")+", arc; ");
+	UtilitaireDao.get(0).executeImmediate(c,"SET search_path=public, "+p.sandbox.replace(".", "_")+", arc; ");
 	
 	if (p.queries!=null)
 	{
@@ -81,7 +81,7 @@ public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnVie
 		DataSetView ds=new DataSetView(
 				Integer.parseInt(p.queries.get(i).query_id)
 				,p.queries.get(i).query_name
-				,new GenericBean(UtilitaireDao.get("arc").executeRequest(c, new ArcPreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
+				,new GenericBean(UtilitaireDao.get(0).executeRequest(c, new ArcPreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
 				);
 			r.getDataSetView().add(ds);
 		}

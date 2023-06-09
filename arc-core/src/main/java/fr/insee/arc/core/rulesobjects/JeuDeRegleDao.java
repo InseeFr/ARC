@@ -40,7 +40,7 @@ public class JeuDeRegleDao {
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
         requete.append("\n FROM " + tableJeuDeRegle + " a ");
 
-		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
+		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
         return extractRuleSetObjects(g);
     }
     
@@ -68,7 +68,7 @@ public class JeuDeRegleDao {
         requete.append("\n    AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup); ");
 
 
-		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
+		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
 
 		ArrayList<JeuDeRegle> listJdr = extractRuleSetObjects(g);
 

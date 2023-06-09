@@ -127,8 +127,8 @@ public class ApiInitialisationService extends ApiService {
 		// on peut remettre dans le repertoire de reception les archives qu'on ne
 		// retouvent pas dans la table
 
-		if (UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
-			ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+		if (UtilitaireDao.get(0).hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
+			ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
 					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent()
 					.get("id_entrepot");
 
@@ -159,7 +159,7 @@ public class ApiInitialisationService extends ApiService {
 					for (File fichier : fichiers) {
 						if (!fichier.isDirectory()) {
 							if (first || requete.length() > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
-								UtilitaireDao.get("arc").executeImmediate(this.connexion.getCoordinatorConnection(),
+								UtilitaireDao.get(0).executeImmediate(this.connexion.getCoordinatorConnection(),
 										requete + ";");
 								requete = new StringBuilder();
 								requete.append(
@@ -170,7 +170,7 @@ public class ApiInitialisationService extends ApiService {
 							}
 						}
 					}
-					UtilitaireDao.get("arc").executeImmediate(this.connexion.getCoordinatorConnection(), requete + ";");
+					UtilitaireDao.get(0).executeImmediate(this.connexion.getCoordinatorConnection(), requete + ";");
 
 					// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table
 					// archive
@@ -182,7 +182,7 @@ public class ApiInitialisationService extends ApiService {
 					requete2.append(
 							" WHERE NOT EXISTS (SELECT * FROM " + nomTableArchive + " b WHERE b.nom_archive=a.fname) ");
 
-					ArrayList<String> fileToBeMoved = new GenericBean(UtilitaireDao.get("arc")
+					ArrayList<String> fileToBeMoved = new GenericBean(UtilitaireDao.get(0)
 							.executeRequest(this.connexion.getCoordinatorConnection(), requete2)).mapContent()
 							.get("fname");
 
@@ -276,7 +276,7 @@ public class ApiInitialisationService extends ApiService {
 		HashMap<String, ArrayList<String>> entrepotList = new HashMap<>();
 
 		try {
-			entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion,
+			entrepotList = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion,
 					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
 
 		} catch (ArcException ex) {
@@ -288,18 +288,18 @@ public class ApiInitialisationService extends ApiService {
 
 			if (!entrepotList.isEmpty()) {
 				for (String d : entrepotList.get("id_entrepot")) {
-					UtilitaireDao.createDirIfNotexist(ApiReceptionService
+					FileUtilsArc.createDirIfNotexist(ApiReceptionService
 							.directoryReceptionEntrepot(properties.getBatchParametersDirectory(), envExecution, d));
-					UtilitaireDao.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepotArchive(
+					FileUtilsArc.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepotArchive(
 							properties.getBatchParametersDirectory(), envExecution, d));
 				}
 			}
 
-			UtilitaireDao.createDirIfNotexist(ApiReceptionService
+			FileUtilsArc.createDirIfNotexist(ApiReceptionService
 					.directoryReceptionEtatEnCours(properties.getBatchParametersDirectory(), envExecution));
-			UtilitaireDao.createDirIfNotexist(ApiReceptionService
+			FileUtilsArc.createDirIfNotexist(ApiReceptionService
 					.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
-			UtilitaireDao.createDirIfNotexist(ApiReceptionService
+			FileUtilsArc.createDirIfNotexist(ApiReceptionService
 					.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
 		}
 
@@ -329,7 +329,7 @@ public class ApiInitialisationService extends ApiService {
 		// on cherche tous les containers contenant un fichier à rejouer
 		// on remet l'archive à la racine
 
-		ArrayList<String> containerList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+		ArrayList<String> containerList = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
 				new ArcPreparedStatementBuilder(
 						"select distinct container from " + tablePil + " where to_delete in ('R','RA')")))
 				.mapContent().get("container");
@@ -353,7 +353,7 @@ public class ApiInitialisationService extends ApiService {
 		}
 
 		// effacer les archives marquées en RA
-		UtilitaireDao.get("arc").executeImmediate(connexion,
+		UtilitaireDao.get(0).executeImmediate(connexion,
 				"DELETE FROM " + this.tablePil + " a where exists (select 1 from " + this.tablePil
 						+ " b where a.container=b.container and b.to_delete='RA')");
 
@@ -390,7 +390,7 @@ public class ApiInitialisationService extends ApiService {
 				+ "_mod_variable_metier");
 
 		List<List<String>> relationalViewRef = Format
-				.patch(UtilitaireDao.get(poolName).executeRequestWithoutMetadata(connexion, requeteRef));
+				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(connexion, requeteRef));
 		HierarchicalView familleToTableToVariableToTypeRef = HierarchicalView.asRelationalToHierarchical(
 				"(Réf) Famille -> Table -> Variable -> Type",
 				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
@@ -421,7 +421,7 @@ public class ApiInitialisationService extends ApiService {
 				+ "mapping\\_'||lower(id_famille)||'\\_%';");
 
 		List<List<String>> relationalView = Format
-				.patch(UtilitaireDao.get(poolName).executeRequestWithoutMetadata(connexion, requete));
+				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(connexion, requete));
 
 		HierarchicalView familleToTableToVariableToType = HierarchicalView.asRelationalToHierarchical(
 				"(Phy) Famille -> Table -> Variable -> Type",
@@ -533,7 +533,7 @@ public class ApiInitialisationService extends ApiService {
 				}
 			}
 		}
-		UtilitaireDao.get("arc").executeBlock(connexion, requeteMAJSchema);
+		UtilitaireDao.get(0).executeBlock(connexion, requeteMAJSchema);
 	}
 
 	/**
@@ -551,7 +551,7 @@ public class ApiInitialisationService extends ApiService {
 		requete.append("DELETE FROM " + tablePil + " a WHERE exists (select 1 from " + tablePil
 				+ " b where b.to_delete='1' and a." + ColumnEnum.ID_SOURCE.getColumnName() + "=b."
 				+ ColumnEnum.ID_SOURCE.getColumnName() + " and a.container=b.container); ");
-		UtilitaireDao.get("arc").executeBlock(connexion, requete);
+		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
 
 	/**
@@ -612,7 +612,7 @@ public class ApiInitialisationService extends ApiService {
 				// on filtre selon RG2
 				.append("HAVING (current_date - max(t) ::date ) >=" + Nb_Jour_A_Conserver + " ").append("; ");
 
-		UtilitaireDao.get("arc").executeRequest(connexion, requete);
+		UtilitaireDao.get(0).executeRequest(connexion, requete);
 
 		// requete sur laquelle on va itérer : on selectionne un certain nombre de
 		// fichier et on itere
@@ -654,7 +654,7 @@ public class ApiInitialisationService extends ApiService {
 		do {
 			// récupérer le résultat de la requete
 			loggerDispatcher.info("Archivage de " + NB_FICHIER_PER_ARCHIVE + " fichiers - Début", LOGGER);
-			n = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, requete)).mapContent();
+			n = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, requete)).mapContent();
 
 			// ajouter à la liste m les enregistrements qu'ils n'existent pas déjà dans m
 
@@ -683,7 +683,7 @@ public class ApiInitialisationService extends ApiService {
 			}
 			loggerDispatcher.info("Archivage Fin", LOGGER);
 
-		} while (UtilitaireDao.get("arc").hasResults(connexion,
+		} while (UtilitaireDao.get(0).hasResults(connexion,
 				new ArcPreparedStatementBuilder("select 1 from fichier_to_delete limit 1")));
 
 		// y'a-til des choses à faire ?
@@ -716,7 +716,7 @@ public class ApiInitialisationService extends ApiService {
 			StringBuilder requeteMaintenance = new StringBuilder();
 			requete.append("vacuum analyze " + nomTablePilotage + "; ");
 			requete.append("vacuum analyze " + nomTableArchive + "; ");
-			UtilitaireDao.get("arc").executeImmediate(connexion, requeteMaintenance);
+			UtilitaireDao.get(0).executeImmediate(connexion, requeteMaintenance);
 		}
 
 	}
@@ -811,7 +811,7 @@ public class ApiInitialisationService extends ApiService {
 				requete.append("ALTER TABLE " + tableImage + " rename to "
 						+ ManipString.substringAfterLast(tableCurrent, ".") + "; \n");
 			}
-			UtilitaireDao.get("arc").executeBlock(connexion, requete);
+			UtilitaireDao.get(0).executeBlock(connexion, requete);
 
 			// Dernière étape : recopie des tables de nomenclature et des tables prefixées
 			// par ext_ du schéma arc vers schéma courant
@@ -829,7 +829,7 @@ public class ApiInitialisationService extends ApiService {
 			requeteSelectDrop.append(" AND tablename SIMILAR TO '%nmcl%|%ext%'");
 
 			ArrayList<String> requetesDeSuppressionTablesNmcl = new GenericBean(
-					UtilitaireDao.get("arc").executeRequest(connexion, requeteSelectDrop)).mapContent()
+					UtilitaireDao.get(0).executeRequest(connexion, requeteSelectDrop)).mapContent()
 					.get("requete_drop");
 
 			if (requetesDeSuppressionTablesNmcl != null) {
@@ -839,7 +839,7 @@ public class ApiInitialisationService extends ApiService {
 			}
 
 			// 2.Préparation des requêtes de création des tables
-			ArrayList<String> requetesDeCreationTablesNmcl = new GenericBean(UtilitaireDao.get("arc")
+			ArrayList<String> requetesDeCreationTablesNmcl = new GenericBean(UtilitaireDao.get(0)
 					.executeRequest(connexion, new ArcPreparedStatementBuilder(
 							"select tablename from pg_tables where (tablename like 'nmcl\\_%' OR tablename like 'ext\\_%') and schemaname='arc'")))
 					.mapContent().get("tablename");
@@ -852,7 +852,7 @@ public class ApiInitialisationService extends ApiService {
 			}
 
 			// 3.Execution du script Sql de suppression/création
-			UtilitaireDao.get("arc").executeBlock(connexion, requete);
+			UtilitaireDao.get(0).executeBlock(connexion, requete);
 
 		} catch (Exception e) {
 			StaticLoggerDispatcher.trace(
@@ -885,11 +885,11 @@ public class ApiInitialisationService extends ApiService {
 			// Apply
 			expressions = expressionService.fetchOrderedExpressions(connexion, anExecutionEnvironment, ruleSet);
 			if (expressionService.isExpressionSyntaxPresentInControl(connexion, anExecutionEnvironment, ruleSet)) {
-				UtilitaireDao.get(poolName).executeRequest(connexion,
+				UtilitaireDao.get(0).executeRequest(connexion,
 						expressionService.applyExpressionsToControl(ruleSet, expressions, anExecutionEnvironment));
 			}
 			if (expressionService.isExpressionSyntaxPresentInMapping(connexion, anExecutionEnvironment, ruleSet)) {
-				UtilitaireDao.get(poolName).executeRequest(connexion,
+				UtilitaireDao.get(0).executeRequest(connexion,
 						expressionService.applyExpressionsToMapping(ruleSet, expressions, anExecutionEnvironment));
 			}
 		}
@@ -914,7 +914,7 @@ public class ApiInitialisationService extends ApiService {
 
 		// reset etape=3 file to etape=0
 		try {
-			UtilitaireDao.get("arc").executeRequest(this.connexion.getCoordinatorConnection(),
+			UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(),
 					new ArcPreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
 		} catch (Exception e) {
 			loggerDispatcher.error(e, LOGGER);
@@ -933,7 +933,7 @@ public class ApiInitialisationService extends ApiService {
 				requete.append(") q1 ) ");
 			}
 			requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
-			nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion.getCoordinatorConnection(), requete);
+			nbLignes = nbLignes + UtilitaireDao.get(0).getInt(this.connexion.getCoordinatorConnection(), requete);
 		}
 
 		// Mark the selected file entries to be reload then rebuild the file system for
@@ -949,7 +949,7 @@ public class ApiInitialisationService extends ApiService {
 				requete.append(") q1 ) ");
 			}
 			try {
-				UtilitaireDao.get("arc").executeRequest(connexion.getCoordinatorConnection(), requete);
+				UtilitaireDao.get(0).executeRequest(connexion.getCoordinatorConnection(), requete);
 			} catch (ArcException e) {
 				loggerDispatcher.error(e, LOGGER);
 			}
@@ -974,7 +974,7 @@ public class ApiInitialisationService extends ApiService {
 			requete.append(") q1 ) ");
 		}
 		requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
-		nbLignes = nbLignes + UtilitaireDao.get("arc").getInt(this.connexion.getCoordinatorConnection(), requete);
+		nbLignes = nbLignes + UtilitaireDao.get(0).getInt(this.connexion.getCoordinatorConnection(), requete);
 
 		// Run a database synchronization with the pilotage table
 		try {
@@ -1071,9 +1071,9 @@ public class ApiInitialisationService extends ApiService {
 			// maintenance de la table de pilotage
 			// retirer les "encours" de la table de pilotage
 			loggerDispatcher.info("** Maintenance table de pilotage **", LOGGER);
-			UtilitaireDao.get("arc").executeBlock(connexion,
+			UtilitaireDao.get(0).executeBlock(connexion,
 					"alter table " + this.tablePil + " alter column date_entree type text COLLATE pg_catalog.\"C\"; ");
-			UtilitaireDao.get("arc").executeBlock(connexion,
+			UtilitaireDao.get(0).executeBlock(connexion,
 					"delete from " + this.tablePil + " where etat_traitement='{ENCOURS}';");
 
 			// pour chaque fichier de la phase de pilotage, remet à etape='1' pour sa
@@ -1085,17 +1085,17 @@ public class ApiInitialisationService extends ApiService {
 
 			// drop des tables temporaires
 			GenericBean g = new GenericBean(
-					UtilitaireDao.get("arc").executeRequest(connexion, requeteListAllTablesEnvTmp(envExecution)));
+					UtilitaireDao.get(0).executeRequest(connexion, requeteListAllTablesEnvTmp(envExecution)));
 			if (!g.mapContent().isEmpty()) {
 				ArrayList<String> envTables = g.mapContent().get("table_name");
 				for (String nomTable : envTables) {
-					UtilitaireDao.get("arc").executeBlock(connexion, FormatSQL.dropTable(nomTable));
+					UtilitaireDao.get(0).executeBlock(connexion, FormatSQL.dropTable(nomTable));
 				}
 			}
 
 			// pour chaque table de l'environnement d'execution courant
 			g = new GenericBean(
-					UtilitaireDao.get("arc").executeRequest(connexion, requeteListAllTablesEnv(envExecution)));
+					UtilitaireDao.get(0).executeRequest(connexion, requeteListAllTablesEnv(envExecution)));
 			if (!g.mapContent().isEmpty()) {
 				ArrayList<String> envTables = g.mapContent().get("table_name");
 				for (String nomTable : envTables) {
@@ -1108,7 +1108,7 @@ public class ApiInitialisationService extends ApiService {
 					if (!nomTable.contains(TraitementPhase.MAPPING.toString().toLowerCase())) {
 
 						// temporary table to store inherit table already checked
-						UtilitaireDao.get(poolName).executeImmediate(connexion,
+						UtilitaireDao.get(0).executeImmediate(connexion,
 								"DROP TABLE IF EXISTS TMP_INHERITED_TABLES_TO_CHECK; CREATE TEMPORARY TABLE TMP_INHERITED_TABLES_TO_CHECK (tablename text);");
 
 						// Does the table have some inherited table left to check ?
@@ -1116,7 +1116,7 @@ public class ApiInitialisationService extends ApiService {
 						// iteration is required
 						HashMap<String, ArrayList<String>> m;
 						do {
-							m = new GenericBean(UtilitaireDao.get(poolName).executeRequest(connexion,
+							m = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion,
 									new ArcPreparedStatementBuilder(
 											"\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"
 													+ nomTable + "\\_" + ServiceHashFileName.CHILD_TABLE_TOKEN
@@ -1134,7 +1134,7 @@ public class ApiInitialisationService extends ApiService {
 								for (String t : m.get("tablename")) {
 									// on récupère la variable etape dans la phase
 									// si on ne trouve la source de la table dans la phase, on drop !
-									String etape = UtilitaireDao.get(poolName).getString(connexion,
+									String etape = UtilitaireDao.get(0).getString(connexion,
 											new ArcPreparedStatementBuilder(
 													"SELECT etape FROM " + tablePil + " WHERE phase_traitement='"
 															+ phase + "' AND '" + etat + "'=ANY(etat_traitement) AND "
@@ -1147,16 +1147,16 @@ public class ApiInitialisationService extends ApiService {
 									}
 								}
 
-								UtilitaireDao.get(poolName).executeImmediate(connexion, query);
+								UtilitaireDao.get(0).executeImmediate(connexion, query);
 
 							}
 
 						} while (!m.isEmpty());
 
 					} else {
-						UtilitaireDao.get("arc").executeBlock(this.connexion.getCoordinatorConnection(),
+						UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(),
 								deleteTableByPilotage(nomTable, nomTable, this.tablePil, phase, etat, ""));
-						UtilitaireDao.get("arc").executeImmediate(connexion,
+						UtilitaireDao.get(0).executeImmediate(connexion,
 								"set default_statistics_target=1; vacuum analyze " + nomTable + "("
 										+ ColumnEnum.ID_SOURCE.getColumnName()
 										+ "); set default_statistics_target=100;");
@@ -1180,7 +1180,7 @@ public class ApiInitialisationService extends ApiService {
 	}
 
 	private static void rebuildPilotage(Connection connexion, String tablePilotage) throws ArcException {
-		UtilitaireDao.get("arc").executeBlock(connexion,
+		UtilitaireDao.get(0).executeBlock(connexion,
 				FormatSQL.rebuildTableAsSelectWhere(tablePilotage, "true",
 						"create index idx1_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on "
 								+ tablePilotage + " (" + ColumnEnum.ID_SOURCE.getColumnName() + ");",
@@ -1195,7 +1195,7 @@ public class ApiInitialisationService extends ApiService {
 						"create index idx7_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on "
 								+ tablePilotage + " (date_entree, phase_traitement, etat_traitement);"));
 
-		UtilitaireDao.get("arc").executeBlock(connexion, "analyze " + tablePilotage + ";");
+		UtilitaireDao.get(0).executeBlock(connexion, "analyze " + tablePilotage + ";");
 	}
 
 	/**
@@ -1232,17 +1232,17 @@ public class ApiInitialisationService extends ApiService {
 		}
 		requete.append("end ; ");
 
-		UtilitaireDao.get("arc").executeBlock(this.connexion.getCoordinatorConnection(), requete);
+		UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), requete);
 
 		return true;
 	}
 
 	public static void clearPilotageAndDirectories(String repertoire, String env) throws ArcException {
-		UtilitaireDao.get("arc").executeBlock(null, "truncate " + ServiceTableNaming.dbEnv(env) + "pilotage_fichier; ");
-		UtilitaireDao.get("arc").executeBlock(null, "truncate " + ServiceTableNaming.dbEnv(env) + "pilotage_archive; ");
+		UtilitaireDao.get(0).executeBlock(null, "truncate " + ServiceTableNaming.dbEnv(env) + "pilotage_fichier; ");
+		UtilitaireDao.get(0).executeBlock(null, "truncate " + ServiceTableNaming.dbEnv(env) + "pilotage_archive; ");
 
-		if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
-			ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+		if (Boolean.TRUE.equals(UtilitaireDao.get(0).hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
+			ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
 					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent()
 					.get("id_entrepot");
 			if (entrepotList != null) {

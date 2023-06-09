@@ -74,7 +74,7 @@ public class ArcThreadGenericDao {
 		// if scalable thread
 		if (connexion.isScaled()) {		
 			// create the pilotage table of the file on the coordinator nod
-			UtilitaireDao.get("arc").executeBlock(connexion.getCoordinatorConnection(), query.getQueryWithParameters());
+			UtilitaireDao.get(0).executeBlock(connexion.getCoordinatorConnection(), query.getQueryWithParameters());
 		
 			query = new ArcPreparedStatementBuilder();
 
@@ -84,7 +84,7 @@ public class ArcThreadGenericDao {
 			// création des tables temporaires de données
 			// get the records from tablePilotageThread in coordinator
 			GenericBean gb = new GenericBean(
-					UtilitaireDao.get("arc").executeRequest(connexion.getCoordinatorConnection(),
+					UtilitaireDao.get(0).executeRequest(connexion.getCoordinatorConnection(),
 							new ArcPreparedStatementBuilder("SELECT * FROM " + tablePilotageThread)));
 			// copy them in the table tablePilotageThread lcoated on the executor nod
 			query.append(query.copyFromGenericBean(tablePilotageThread, gb));
@@ -112,18 +112,18 @@ public class ArcThreadGenericDao {
 			query.append("DROP TABLE IF EXISTS "+ServiceHashFileName.tableOfIdSource(this.tablePrevious,idSource)+";");
 		}
 		
-		UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());
+		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 		query = new ArcPreparedStatementBuilder();
 		if (connexion.isScaled()) {
-			GenericBean gb = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion.getExecutorConnection(),
+			GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion.getExecutorConnection(),
 					new ArcPreparedStatementBuilder("SELECT * FROM " + tablePilotageThread)));
 			// copy them on the nod
 			query.append(query.copyFromGenericBean(tablePilotageThread, gb));
 
 			query.append(marquageFinal(tablePilotageGlobale, tablePilotageThread, idSource));
 
-			UtilitaireDao.get("arc").executeBlock(connexion.getCoordinatorConnection(), query.getQueryWithParameters());
+			UtilitaireDao.get(0).executeBlock(connexion.getCoordinatorConnection(), query.getQueryWithParameters());
 		}
 	}
 

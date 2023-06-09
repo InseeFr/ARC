@@ -1,4 +1,4 @@
-package fr.insee.arc.core.serviceinteractif.ddi.dao;
+package fr.insee.arc.web.gui.famillenorme.dao;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,12 +13,12 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.famille.ModelTable;
 import fr.insee.arc.core.model.famille.ModelVariable;
-import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.web.gui.famillenorme.ddi.DDIModeler;
 
 public class DDIInsertDAO {
 
@@ -77,7 +77,7 @@ public class DDIInsertDAO {
 		query.append(")");
 
 		List<String> famillesDejaExistante = new GenericBean(
-				UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(null, query)).mapContent()
+				UtilitaireDao.get(0).executeRequest(null, query)).mapContent()
 						.get("famille_deja_existante");
 
 		// keep only family found in ddi but not found in already existing arc family
@@ -101,7 +101,7 @@ public class DDIInsertDAO {
 		query.append(insertFamily(familyToInsert));
 		query.append(insertTables(familyToInsert, modeler));
 		query.append(insertVariables(familyToInsert, modeler));
-		UtilitaireDao.get(UtilitaireDao.DEFAULT_CONNECTION_POOL).executeRequest(null, query);
+		UtilitaireDao.get(0).executeRequest(null, query);
 	}
 
 	/**

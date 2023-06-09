@@ -146,7 +146,7 @@ public class ServiceRules {
 	 */
 	public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws ArcException {
 		GenericBean gb = new GenericBean(
-				UtilitaireDao.get("arc").executeRequest(c, new ArcPreparedStatementBuilder(req)));
+				UtilitaireDao.get(0).executeRequest(c, new ArcPreparedStatementBuilder(req)));
 		return gb.mapContent(true);
 	}
 }

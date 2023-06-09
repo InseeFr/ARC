@@ -135,7 +135,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 		envQuery.append(envQuery.quoteText(getBacASable()));
 
 		try {
-			String envDescription = UtilitaireDao.get(POOLNAME).getString(null, envQuery);
+			String envDescription = UtilitaireDao.get(0).getString(null, envQuery);
 			viewPilotageBAS.setCustomValue(ENV_DESCRIPTION, envDescription);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
@@ -191,7 +191,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 
 		try {
 			if (Boolean.TRUE
-					.equals(UtilitaireDao.get("arc").hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
+					.equals(UtilitaireDao.get(0).hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
 				requete.append("select id_entrepot from arc.ihm_entrepot");
 			} else {
 				requete.append("select ''::text as id_entrepot");

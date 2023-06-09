@@ -152,7 +152,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         
         query.append(ServiceTableOperation.creationTableResultat(this.tableNormageDataTemp, this.tableNormageKOTemp));
                 
-        UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), query.getQueryWithParameters());
+        UtilitaireDao.get(0).executeBlock(this.getConnexion().getExecutorConnection(), query.getQueryWithParameters());
 
     }
 
@@ -192,7 +192,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 			    if (paramBatch!=null)
 			    {
 				    String tableTmpRubriqueDansregles="TMP_RUBRIQUE_DANS_REGLES";
-			        UtilitaireDao.get("arc").executeImmediate(
+			        UtilitaireDao.get(0).executeImmediate(
 			        		this.connexion.getExecutorConnection(),
 			        		"\n DROP TABLE IF EXISTS "+tableTmpRubriqueDansregles+"; "
 			        		+ "\n CREATE TEMPORARY TABLE "+tableTmpRubriqueDansregles+" AS "

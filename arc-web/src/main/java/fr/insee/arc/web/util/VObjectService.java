@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.util.LoggerDispatcher;
@@ -88,7 +89,8 @@ public class VObjectService {
 	@Autowired
 	private LoggerDispatcher loggerDispatcher;
 
-	private String pool = "arc";
+	// default database target for query is META_DATA
+	private Integer databaseTarget = ArcDatabase.META_DATA.getIndex();
 
 	private Connection connection = null;
 
@@ -192,7 +194,7 @@ public class VObjectService {
 			LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
 
 			if (data.getBeforeSelectQuery() != null) {
-				UtilitaireDao.get(this.pool).executeRequest(this.connection, data.getBeforeSelectQuery());
+				UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, data.getBeforeSelectQuery());
 			}
 
 			// on sauvegarde le contenu des lignes selectionnées avant la nouvelle
@@ -227,7 +229,7 @@ public class VObjectService {
 
 			ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 			try {
-				aContent = reworkContent.apply(UtilitaireDao.get(this.pool).executeRequest(this.connection, requete,
+				aContent = reworkContent.apply(UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requete,
 						ModeRequeteImpl.arcModeRequeteIHM()));
 			} catch (ArcException ex) {
 				data.setMessage(ex.getMessage());
@@ -338,7 +340,7 @@ public class VObjectService {
 					requete.append(") alias_de_table ");
 					requete.append(buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel()));
 
-					aContent = UtilitaireDao.get(this.pool).executeRequest(this.connection, requete,
+					aContent = UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requete,
 							ModeRequeteImpl.arcModeRequeteIHM());
 				} catch (ArcException ex) {
 					currentData.setMessage(ex.getMessage());
@@ -510,7 +512,7 @@ public class VObjectService {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null
 					&& data.getConstantVObject().getColumnRender().get(headers.get(i)).query != null) {
 				try {
-					arrayVSelect = UtilitaireDao.get(this.pool).executeRequest(this.connection,
+					arrayVSelect = UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection,
 							data.getConstantVObject().getColumnRender().get(headers.get(i)).query);
 					arrayVSelect.remove(0);
 					arrayVSelect.remove(0);
@@ -571,7 +573,7 @@ public class VObjectService {
 			Arrays.asList(attributeValues).forEach((t) -> map.put(t.getFirst().toLowerCase(), t.getSecond()));
 
 			// Récupération des colonnes de la table cible
-			List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null,
+			List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.databaseTarget).getColumns(this.connection,
 					new ArrayList<>(), currentData.getTable());
 
 			Boolean allNull = true;
@@ -618,7 +620,7 @@ public class VObjectService {
 			requete.append("END;");
 
 			if (!allNull) {
-				UtilitaireDao.get(this.pool).executeRequest(this.connection, requete);
+				UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requete);
 			}
 
 		} catch (Exception ex) {
@@ -635,7 +637,7 @@ public class VObjectService {
 	public void delete(VObject currentData, String... tables) {
 		LoggerHelper.traceAsComment(LOGGER, "delete()", currentData.getSessionName());
 		try {
-			UtilitaireDao.get(this.pool).executeRequest(this.connection,
+			UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection,
 					deleteQuery(currentData, tables).asTransaction());
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
@@ -655,7 +657,7 @@ public class VObjectService {
 
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 
-		ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null,
+		ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.databaseTarget).getColumns(this.connection,
 				new ArrayList<>(), currentData.getTable());
 		ArcPreparedStatementBuilder reqDelete = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
@@ -739,7 +741,7 @@ public class VObjectService {
 		}
 		reqDelete.append("END; ");
 		try {
-			UtilitaireDao.get(this.pool).executeRequest(this.connection, reqDelete);
+			UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, reqDelete);
 		} catch (ArcException e) {
 			currentData.setMessage(e.getMessage());
 		}
@@ -765,7 +767,7 @@ public class VObjectService {
 		}
 
 		try {
-			ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.pool).getColumns(null,
+			ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.databaseTarget).getColumns(this.connection,
 					new ArrayList<>(), currentData.getTable());
 
 			// SQL update query
@@ -832,7 +834,7 @@ public class VObjectService {
 			}
 			reqUpdate.append("END;");
 			if (!toBeUpdated.isEmpty()) {
-				UtilitaireDao.get(this.pool).executeRequest(this.connection, reqUpdate);
+				UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, reqUpdate);
 			}
 			session.put(currentData.getSessionName(), v0);
 		} catch (ArcException ex) {
@@ -865,7 +867,7 @@ public class VObjectService {
 		HashMap<String, ArrayList<String>> result = new HashMap<>();
 		try {
 			GenericBean g = new GenericBean(
-					UtilitaireDao.get(this.pool).executeRequest(this.connection, queryView(currentData)));
+					UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, queryView(currentData)));
 			result = g.mapContent();
 		} catch (ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "mapView()", LOGGER, ex);
@@ -1160,7 +1162,7 @@ public class VObjectService {
 					ZipEntry entry = new ZipEntry(fileNames.get(i) + ".csv");
 					zos.putNextEntry(entry);
 					// Ecriture dans le fichier
-					UtilitaireDao.get(this.pool).outStreamRequeteSelect(null, requetes[i], zos);
+					UtilitaireDao.get(this.databaseTarget).outStreamRequeteSelect(this.connection, requetes[i], zos);
 					zos.closeEntry();
 				}
 			} finally {
@@ -1245,7 +1247,7 @@ public class VObjectService {
 		TarArchiveOutputStream taos = null;
 		try {
 			taos = new TarArchiveOutputStream(new GZIPOutputStream(response.getOutputStream()));
-			zipOutStreamRequeteSelect(null, requete, taos, repertoire, anEnvExcecution, phase, "ARCHIVE");
+			zipOutStreamRequeteSelect(this.connection, requete, taos, repertoire, anEnvExcecution, phase, "ARCHIVE");
 		} catch (IOException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
 		} finally {
@@ -1296,7 +1298,7 @@ public class VObjectService {
 			requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
 			// Récupération de la liste d'id_source par paquet de fetchSize
 			try {
-				g = new GenericBean(UtilitaireDao.get(this.pool).executeRequest(this.connection, requeteLimit));
+				g = new GenericBean(UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requeteLimit));
 				HashMap<String, ArrayList<String>> m = g.mapContent();
 				listIdSource = m.get(ColumnEnum.ID_SOURCE.getColumnName());
 				listContainer = m.get("container");
@@ -1386,7 +1388,7 @@ public class VObjectService {
 				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar");
 
 		try (TarArchiveOutputStream taos = new TarArchiveOutputStream(response.getOutputStream());) {
-			UtilitaireDao.get(this.pool).getFilesDataStreamFromListOfInputDirectories(null, requete, taos, repertoire,
+			UtilitaireDao.get(this.databaseTarget).getFilesDataStreamFromListOfInputDirectories(this.connection, requete, taos, repertoire,
 					listRepertoire);
 		} catch (IOException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
@@ -1502,15 +1504,15 @@ public class VObjectService {
 	/**
 	 * @return the pool
 	 */
-	public final String getPool() {
-		return this.pool;
+	public final Integer getDatabaseTarget() {
+		return this.databaseTarget;
 	}
 
 	/**
 	 * @param pool the pool to set
 	 */
-	public final void setPool(String pool) {
-		this.pool = pool;
+	public final void setDatabaseTarget(Integer databaseTarget) {
+		this.databaseTarget = databaseTarget;
 	}
 
 	public final void setColumnRendering(VObject data, HashMap<String, ColumnRendering> columnRender) {

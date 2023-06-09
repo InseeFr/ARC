@@ -97,7 +97,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		String message;
 		try {
 
-			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
+			UtilitaireDao.get(0).executeRequest(null, updateToDelete);
 			message = messageOk;
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBASAction.restore", LOGGER);
@@ -139,7 +139,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		// mapping 1 sinon)
 		ArrayList<String> tableDownload = new ArrayList<>();
 		try {
-			GenericBean g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+			GenericBean g = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
 					ApiInitialisationService.requeteListAllTablesEnv(getBacASable())));
 			if (!g.mapContent().isEmpty()) {
 				ArrayList<String> envTables = g.mapContent().get("table_name");
@@ -175,7 +175,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 					ManipString.substringAfterFirst(t, ".")));
 			requete.append(" LIMIT 1");
 
-			if (Boolean.TRUE.equals(UtilitaireDao.get("arc").hasResults(null, requete))) {
+			if (Boolean.TRUE.equals(UtilitaireDao.get(0).hasResults(null, requete))) {
 
 				// Get the files to download
 				requete = new ArcPreparedStatementBuilder();
@@ -198,7 +198,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 					requete.append(")");
 				}
 
-				ArrayList<String> idSources = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, requete))
+				ArrayList<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
 						.mapContent().get("id_source");
 
 				// for each files, generate the download query
@@ -289,7 +289,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		ArcPreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "'1'");
 		String message;
 		try {
-			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
+			UtilitaireDao.get(0).executeRequest(null, updateToDelete);
 			message = "managementSandbox.batch.delete.ok";
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBASAction.toDeleteBAS", LOGGER);
@@ -325,7 +325,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		ArcPreparedStatementBuilder updateToDelete = requeteUpdateToMark(querySelection, "null");
 		try {
 
-			UtilitaireDao.get("arc").executeRequest(null, updateToDelete);
+			UtilitaireDao.get(0).executeRequest(null, updateToDelete);
 		} catch (ArcException e) {
 			loggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "

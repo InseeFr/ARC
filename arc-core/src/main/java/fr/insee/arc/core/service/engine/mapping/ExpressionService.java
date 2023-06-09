@@ -6,13 +6,12 @@ import java.util.Optional;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
-public class ExpressionService implements IDbConstant {
+public class ExpressionService {
 
 	public Optional<String> loopInExpressionSet(GenericBean expressions){
 		return loopInExpressionSet(
@@ -64,7 +63,7 @@ public class ExpressionService implements IDbConstant {
 		request.append(".expression where ");
 		request.append(ruleSet.getSqlEquals());
 		return new GenericBean(
-				UtilitaireDao.get(poolName).executeRequest(connexion, request)
+				UtilitaireDao.get(0).executeRequest(connexion, request)
 				);
 		
 	}
@@ -90,7 +89,7 @@ public class ExpressionService implements IDbConstant {
 		request.append("    ON t.expr_valeur like '%{@'||sub.expr_nom||'@}%' )\n");
 		request.append("select expr_nom, expr_valeur, level from tree\n");
 		return new GenericBean(
-				UtilitaireDao.get(poolName).executeRequest(connexion, request)
+				UtilitaireDao.get(0).executeRequest(connexion, request)
 				);
 	}
 
@@ -115,7 +114,7 @@ public class ExpressionService implements IDbConstant {
 		request.append(" where ");
 		request.append(ruleSet.getSqlEquals());
 		request.append(" and " + field + " ~ '(?<=\\{@)(.+?)(?=@\\})'");
-		return 	UtilitaireDao.get(poolName).hasResults(connexion, request);
+		return 	UtilitaireDao.get(0).hasResults(connexion, request);
 	}
 
 	/** Returns a request applying the given expressions to the control rules of the given ruleset.*/

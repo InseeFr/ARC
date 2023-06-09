@@ -5,7 +5,6 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.engine.mapping.VariableMapping;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -16,7 +15,7 @@ import fr.insee.arc.utils.textUtils.IConstanteNumerique;
  * Abstraction pour les règles de mapping. Pour obtenir l'expression SQL d'une règle : {@link #deriver()}.
  *
  */
-public abstract class AbstractRegleMapping implements IDbConstant, IConstanteCaractere, IConstanteNumerique {
+public abstract class AbstractRegleMapping implements IConstanteCaractere, IConstanteNumerique {
 
     protected static final Logger LOGGER = LogManager.getLogger(AbstractRegleMapping.class);
 

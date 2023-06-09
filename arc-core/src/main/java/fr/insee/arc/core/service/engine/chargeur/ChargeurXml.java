@@ -117,7 +117,7 @@ public class ChargeurXml implements IChargeur{
      	requete.append(";");
 
         try {
-			UtilitaireDao.get("arc").executeBlock(this.connexion, requete);
+			UtilitaireDao.get(0).executeBlock(this.connexion, requete);
 		} catch (ArcException e) {
 		    LoggerHelper.errorAsComment(LOGGER, "ChargeurXML.initialisation - creation failed on the temporary table A which is the temporary recipient for the xml file to be loaded");
 		    throw e;
@@ -141,7 +141,7 @@ public class ChargeurXml implements IChargeur{
         }
 
         try {
-            UtilitaireDao.get("arc").executeBlock(this.connexion, requeteBilan);
+            UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
         } catch (ArcException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "chargerXml()", LOGGER, ex);
         }

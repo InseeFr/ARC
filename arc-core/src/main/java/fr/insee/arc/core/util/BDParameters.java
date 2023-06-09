@@ -27,7 +27,7 @@ public class BDParameters {
 	private static String getString(Connection c, String key) {
 		String r = null;
 		try {
-			r = UtilitaireDao.get("arc").getString(c, parameterQuery(key));
+			r = UtilitaireDao.get(0).getString(c, parameterQuery(key));
 		} catch (Exception e) {
 	        // Création de la table de parametre
 			StringBuilder requete=new StringBuilder();
@@ -44,7 +44,7 @@ public class BDParameters {
 	        
 	        
 	        try {
-				UtilitaireDao.get("arc").executeImmediate(c, requete);
+				UtilitaireDao.get(0).executeImmediate(c, requete);
 			} catch (ArcException e1) {
 				StaticLoggerDispatcher.error("Error on selecting key in parameter table", LOGGER);
 			}
@@ -78,7 +78,7 @@ public class BDParameters {
 	private static void insertDefaultValue(Connection c,String key, String defaultValue)
 	{
 		try {
-			UtilitaireDao.get("arc").executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
+			UtilitaireDao.get(0).executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error on inserting key in parameter table", LOGGER);
 		}
@@ -107,7 +107,7 @@ public class BDParameters {
 			requete.append("WHERE key="+requete.quoteText(key)+" ");
 			
 			
-			UtilitaireDao.get("arc").executeRequest(c,requete);
+			UtilitaireDao.get(0).executeRequest(c,requete);
 			
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);

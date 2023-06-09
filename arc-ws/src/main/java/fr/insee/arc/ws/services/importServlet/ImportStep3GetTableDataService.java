@@ -41,7 +41,7 @@ public class ImportStep3GetTableDataService {
 			client = this.dsnRequest.getString(JsonKeys.CLIENT.getKey());
 
 			// binary transfer
-			UtilitaireDao.get("arc").exporting(null, client, resp.getWr(), false);
+			UtilitaireDao.get(0).exporting(null, client, resp.getWr(), false);
 			this.clientDao.dropTable(client);
 
 			resp.endSending();

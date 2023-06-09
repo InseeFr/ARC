@@ -58,7 +58,7 @@ public class ExecuteServiceController {
 	
 		try {
 		
-		try (Connection connection = UtilitaireDao.get("arc").getDriverConnexion()) {
+		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
 						
 			ExecuteRulesDao.fillRules(connection, bodyPojo, serviceName, serviceId);
 						
@@ -105,7 +105,7 @@ public class ExecuteServiceController {
 
 		try {
 		
-		try (Connection connection = UtilitaireDao.get("arc").getDriverConnexion()) {
+		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
 						
 						
 			String env = bodyPojo.sandbox;
@@ -136,7 +136,7 @@ public class ExecuteServiceController {
 		
 		try {
 		
-		try (Connection connection = UtilitaireDao.get("arc").getDriverConnexion()) {
+		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
 												
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();

@@ -48,7 +48,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		envQuery.append("where replace(id,'.','_') = ");
 		envQuery.append(envQuery.quoteText(getBacASable()));
 		try {
-			UtilitaireDao.get(POOLNAME).executeRequest(null, envQuery);
+			UtilitaireDao.get(0).executeRequest(null, envQuery);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in updateEnvDescription", e, LOGGER);
 		}

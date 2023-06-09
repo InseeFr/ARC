@@ -65,7 +65,7 @@ public class ServiceViewExport extends InteractorExport {
 
 			// Requêter les exports à réaliser
 			HashMap<String, ArrayList<String>> rules = new GenericBean(
-					UtilitaireDao.get("arc").executeRequest(null, requete)).mapContent();
+					UtilitaireDao.get(0).executeRequest(null, requete)).mapContent();
 
 			ArrayList<String> fileName = rules.get("file_name");
 			ArrayList<String> zip = rules.get("zip");
@@ -79,7 +79,7 @@ public class ServiceViewExport extends InteractorExport {
 				requete.append("UPDATE " + getBacASable() + ".export set etat="
 						+ requete.quoteText(TraitementEtat.ENCOURS.toString()) + " where file_name="
 						+ requete.quoteText(fileName.get(fileIndex)) + " ");
-				UtilitaireDao.get("arc").executeRequest(null, requete);
+				UtilitaireDao.get(0).executeRequest(null, requete);
 
 				switch (zip.get(fileIndex)) {
 				case "1": // Zip
@@ -97,7 +97,7 @@ public class ServiceViewExport extends InteractorExport {
 						+ ".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') ");
 				requete.append("WHERE file_name=" + requete.quoteText(fileName.get(fileIndex)) + " ");
 
-				UtilitaireDao.get("arc").executeRequest(null, requete);
+				UtilitaireDao.get(0).executeRequest(null, requete);
 			}
 		} catch (ArcException | SQLException e) {
 			views.getViewExport().setMessage("Export failed because of database query");
@@ -182,7 +182,7 @@ public class ServiceViewExport extends InteractorExport {
 
 		// lire la table how to export pour voir comment on va s'y prendre
 		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
-		h = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+		h = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
 				new ArcPreparedStatementBuilder(
 						"SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "
 								+ howToExportReworked + " order by pos::int ")))
@@ -203,7 +203,7 @@ public class ServiceViewExport extends InteractorExport {
 
 		int maxPos = Integer.parseInt(h.get("maxp").get(0));
 
-		Connection c = UtilitaireDao.get("arc").getDriverConnexion();
+		Connection c = UtilitaireDao.get(0).getDriverConnexion();
 		c.setAutoCommit(false);
 
 		Statement stmt = c.createStatement();

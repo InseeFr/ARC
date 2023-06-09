@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -38,7 +37,7 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
 @Component
-public abstract class ApiService implements IDbConstant, IConstanteNumerique {
+public abstract class ApiService implements IConstanteNumerique {
 
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ApiService.class);
 
@@ -106,7 +105,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		this();
 		StaticLoggerDispatcher.info("** initialiserVariable **", LOGGER_APISERVICE);
 		try {
-			this.connexion = new ScalableConnection(UtilitaireDao.get(poolName).getDriverConnexion());
+			this.connexion = new ScalableConnection(UtilitaireDao.get(0).getDriverConnexion());
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}
@@ -159,7 +158,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		// Vérifie si y'a des sources à traiter
 		if (this.todo) {
 			try {
-				UtilitaireDao.get(poolName).executeBlock(this.connexion.getCoordinatorConnection(), ServiceDatabaseConfiguration.configConnection(this.getEnvExecution()));
+				UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), ServiceDatabaseConfiguration.configConnection(this.getEnvExecution()));
 			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
 			}
@@ -196,7 +195,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("and etape=1 ");
 		requete.append("limit 1 ");
 		try {
-			checkTodoResult = UtilitaireDao.get(poolName).hasResults(this.connexion.getCoordinatorConnection(), requete);
+			checkTodoResult = UtilitaireDao.get(0).hasResults(this.connexion.getCoordinatorConnection(), requete);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "checkTodo()", ex);
 		}
@@ -221,7 +220,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 			Integer nbEnr) {
 		loggerDispatcher.info("** register **", LOGGER_APISERVICE);
 		try {
-			UtilitaireDao.get(poolName).executeBlock(connexion,
+			UtilitaireDao.get(0).executeBlock(connexion,
 					ServicePilotageOperation.copieTablePilotage(tablePil, tablePilTemp, phaseIn, phase, nbEnr));
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "register()", ex);
@@ -288,7 +287,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 				StringBuilder requete = new StringBuilder();
 				requete.append(FormatSQL.dropTable(this.tablePilTemp));
 				try {
-					UtilitaireDao.get(poolName).executeBlock(this.connexion.getCoordinatorConnection(), requete);
+					UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), requete);
 				} catch (Exception ex) {
 					LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "finaliser()", ex);
 				}
@@ -323,7 +322,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase) + " ");
 		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
 		try {
-			return new GenericBean(UtilitaireDao.get(poolName).executeRequest(this.connexion.getCoordinatorConnection(), requete)).mapContent();
+			return new GenericBean(UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), requete)).mapContent();
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "pilotageListIdSource()", ex);
 		}
@@ -493,7 +492,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 		requete.append(resetPreviousPhaseMark(tablePil, null, "t0"));
 
-		UtilitaireDao.get(poolName).executeBlock(connexion, requete);
+		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
 
 	/**
@@ -523,7 +522,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		}
 
 		// promote the application user account to full right
-		UtilitaireDao.get("arc").executeImmediate(connexion, switchToFullRightRole());
+		UtilitaireDao.get(0).executeImmediate(connexion, switchToFullRightRole());
 
 		StringBuilder requete = new StringBuilder();
 
@@ -537,7 +536,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 
 		requete.append(resetPreviousPhaseMark(tablePil, idSource, null));
 
-		UtilitaireDao.get(poolName).executeBlock(connexion, requete);
+		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
 
 
@@ -557,7 +556,7 @@ public abstract class ApiService implements IDbConstant, IConstanteNumerique {
 		query.append(";");
 		
 		HashMap<String, ArrayList<String>> pil = new GenericBean(
-				UtilitaireDao.get(poolName)
+				UtilitaireDao.get(0)
 						.executeRequest(this.connexion.getCoordinatorConnection(), query ))
 										.mapContent();
 

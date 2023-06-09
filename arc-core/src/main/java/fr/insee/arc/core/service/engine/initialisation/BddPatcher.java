@@ -83,7 +83,7 @@ public class BddPatcher {
 
 		if ((query=readBddScript(scriptName, userRestricted, nbSandboxes, envExecution))!=null)
 		{
-				UtilitaireDao.get("arc").executeImmediate(connexion,query);
+				UtilitaireDao.get(0).executeImmediate(connexion,query);
 		}
 	}
 	

@@ -117,7 +117,7 @@ public class SetRulesController {
 		System.out.println(requete.getQuery());
 		System.out.println(requete.getParameters());
 
-		UtilitaireDao.get("arc").executeRequest(null, requete);
+		UtilitaireDao.get(0).executeRequest(null, requete);
 	}
 	
 	

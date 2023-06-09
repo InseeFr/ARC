@@ -110,7 +110,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
     	query.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
         
         query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(),this.tableTempControleOk, this.idSource));
-        UtilitaireDao.get(poolName).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
+        UtilitaireDao.get(0).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
     }
 

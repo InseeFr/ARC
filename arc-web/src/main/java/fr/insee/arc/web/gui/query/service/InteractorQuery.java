@@ -32,10 +32,6 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 
 	@Override
 	protected void putAllVObjects(ModelQuery model) {
-		
-		System.out.println(model);
-		System.out.println(model.getViewQuery());
-		
 		views.setViewQuery(vObjectService.preInitialize(model.getViewQuery()));
 		views.setViewTable(vObjectService.preInitialize(model.getViewTable()));
 
@@ -73,14 +69,14 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 
 			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder(m);
 			
-			if (Boolean.TRUE.equals(UtilitaireDao.get("arc").testResultRequest(null, requete)))
+			if (Boolean.TRUE.equals(UtilitaireDao.get(0).testResultRequest(null, requete)))
 			{
-				this.vObjectService.initialize(views.getViewQuery(), requete, "arc.ihm_Query", defaultInputFields);
+				this.vObjectService.initialize(views.getViewQuery(), requete, "arc.ihm_query", defaultInputFields);
 			}
 			else
 			{
 				try {
-					UtilitaireDao.get("arc").executeImmediate(null, this.myQuery);
+					UtilitaireDao.get(0).executeImmediate(null, this.myQuery);
 					this.vObjectService.destroy(views.getViewQuery());
 					this.views.getViewQuery().setMessage("Requete terminée !");
 				} catch (Exception e) {

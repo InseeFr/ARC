@@ -57,7 +57,7 @@ public class ServiceViewArchiveBAS extends InteractorPilotage {
 			requete.append(this.views.getViewArchiveBAS().getMainQuery());
 			requete.append(") alias_de_table ");
 
-			g = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, requete));
+			g = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete));
 			entrepot = g.mapContent().get("entrepot").get(0);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBasAction.downloadEnveloppeFromArchiveBAS()", LOGGER);

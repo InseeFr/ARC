@@ -13,14 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.webservice.model.ModelWebservice;
 import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorWebservice extends ArcWebGenericService<ModelWebservice> implements IDbConstant {
+public class InteractorWebservice extends ArcWebGenericService<ModelWebservice> {
 
 	protected static final String RESULT_SUCCESS = "/jsp/gererWebservice.jsp";
 	private static final Logger LOGGER = LogManager.getLogger(InteractorWebservice.class);

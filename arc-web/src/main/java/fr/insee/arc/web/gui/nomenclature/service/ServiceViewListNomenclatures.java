@@ -81,7 +81,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 			loggerDispatcher.debug("/* Delete nomenclature : " + nomTable + " */", LOGGER);
 			
 			
-            UtilitaireDao.get(poolName).executeImmediate(null, FormatSQL.dropTable(nomTable));
+            UtilitaireDao.get(0).executeImmediate(null, FormatSQL.dropTable(nomTable));
             
                         
             StringBuilder requete = new StringBuilder();
@@ -89,14 +89,14 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
             requete.append("\n WHERE nom_table like '" + typeNomenclature(nomTable) + "%'");
             requete.append("\n AND nom_table <> '" + nomTable + "'");
             
-            List<String> listeTables = UtilitaireDao.get(poolName).getList(null, requete.toString(), new ArrayList<>());
+            List<String> listeTables = UtilitaireDao.get(0).getList(null, requete.toString(), new ArrayList<>());
             loggerDispatcher.debug("# Liste tables : " + Format.untokenize(listeTables, ", "), LOGGER);
             
             if (listeTables.isEmpty()) {
                 requete = new StringBuilder();
                 requete.append("\n DELETE FROM arc.ihm_schema_nmcl");
                 requete.append("\n WHERE type_nmcl = '" + typeNomenclature(nomTable) + "'");
-                UtilitaireDao.get(poolName).executeImmediate(null, requete.toString());
+                UtilitaireDao.get(0).executeImmediate(null, requete.toString());
             }
 
             this.vObjectService.delete(views.getViewListNomenclatures());
@@ -230,13 +230,13 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         // Verification des noms de colonnes et des types
         String selectNomColonne = "SELECT nom_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> colonnesDansTableIhmSchemaNmcl = new ArrayList<String>();
-        UtilitaireDao.get(poolName).getList(null, selectNomColonne, colonnesDansTableIhmSchemaNmcl);
+        UtilitaireDao.get(0).getList(null, selectNomColonne, colonnesDansTableIhmSchemaNmcl);
         areListsEquals(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl, "field");
 
         // Verification des types
         String selectTypeColonne = "SELECT type_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature + "' ORDER BY nom_colonne";
         List<String> typesDansTableIhmSchemaNmcl = new ArrayList<String>();
-        UtilitaireDao.get(poolName).getList(null, selectTypeColonne, typesDansTableIhmSchemaNmcl);
+        UtilitaireDao.get(0).getList(null, selectTypeColonne, typesDansTableIhmSchemaNmcl);
         areListsEquals(typesDansFichier, typesDansTableIhmSchemaNmcl, "type");
 
     }
@@ -277,12 +277,12 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         creationTableDef.append("\n CREATE TABLE arc." + newNomenclatureName);
         creationTableDef.append("\n AS SELECT * FROM arc.temp_" + newNomenclatureName + ";");
         creationTableDef.append("\n DROP TABLE arc.temp_" + newNomenclatureName + ";");
-        UtilitaireDao.get(poolName).executeBlock(null, creationTableDef);
+        UtilitaireDao.get(0).executeBlock(null, creationTableDef);
     }
 
     private void remplissageTableTemporaire(BufferedReader rd) throws ArcException {
 		String newNomenclatureName = views.getViewListNomenclatures().mapContentSelected().get(NOM_TABLE).get(0);
-    	UtilitaireDao.get(poolName).importingWithReader(null, "arc.temp_" + newNomenclatureName, rd, false, ";");
+    	UtilitaireDao.get(0).importingWithReader(null, "arc.temp_" + newNomenclatureName, rd, false, ";");
     }
 
     private void creationTableDeNomenclatureTemporaire(String[] colonnes, String[] types) throws ArcException {
@@ -298,7 +298,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         }
         createTableRequest.append(");");
 
-        UtilitaireDao.get(poolName).executeImmediate(null, createTableRequest);
+        UtilitaireDao.get(0).executeImmediate(null, createTableRequest);
     }
     
 }

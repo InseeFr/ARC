@@ -59,7 +59,7 @@ public class ExecuteEngineController {
 		
 		loggerDispatcher.info(identifiantLog + " received", LOGGER);
 
-		try (Connection connection = UtilitaireDao.get("arc").getDriverConnexion()) {
+		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
 			
 			ExecuteRulesDao.fillRules(connection, bodyPojo, serviceName, serviceId);
 			
@@ -116,7 +116,7 @@ public class ExecuteEngineController {
 						requete = new StringBuilder();
 						requete.append(
 								"CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select *, '0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules from "+previousTemporaryTable(i)+";");
-						UtilitaireDao.get("arc").executeImmediate(connection, requete);
+						UtilitaireDao.get(0).executeImmediate(connection, requete);
 
 						ServiceJeuDeRegle sjdr = new ServiceJeuDeRegle(env + ".controle_regle");
 
@@ -127,7 +127,7 @@ public class ExecuteEngineController {
 						sjdr.executeJeuDeRegle(connection, jdr, currentTemporaryTable(i), structure);
 						break;
 					case MAPPING:
-						UtilitaireDao.get("arc").executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"');");
+						UtilitaireDao.get(0).executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"');");
 						String tableTempControleOk = previousTemporaryTable(i);
 						List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(connection, tableTempControleOk, env + ".mapping_regle");
 						ServiceMapping serviceMapping = new ServiceMapping();
@@ -137,18 +137,18 @@ public class ExecuteEngineController {
 			            RequeteMapping requeteMapping = new RequeteMapping(connection, regleMappingFactory, idFamille, listeJeuxDeRegles.get(0),
 			                        env, tableTempControleOk, 0);
 			            requeteMapping.construire();
-			            UtilitaireDao.get("arc").executeBlock(connection, requeteMapping.requeteCreationTablesTemporaires());
+			            UtilitaireDao.get(0).executeBlock(connection, requeteMapping.requeteCreationTablesTemporaires());
 
 			            StringBuilder req = new StringBuilder();
 			            req.append(requeteMapping.getRequete(bodyPojo.fileName));
-			            UtilitaireDao.get("arc").executeBlock(connection,"set enable_nestloop=off;"+req.toString()+"set enable_nestloop=on;");
+			            UtilitaireDao.get(0).executeBlock(connection,"set enable_nestloop=off;"+req.toString()+"set enable_nestloop=on;");
 			            req.setLength(0);
 
 		                StringBuilder requeteMAJFinale = new StringBuilder();
 		                requeteMAJFinale.append(requeteMapping.requeteTransfertVersTablesMetierDefinitives());
-		                UtilitaireDao.get("arc").executeBlock(connection, requeteMAJFinale);
+		                UtilitaireDao.get(0).executeBlock(connection, requeteMAJFinale);
 
-		                UtilitaireDao.get("arc").dropTable(connection, requeteMapping.tableauNomsTablesTemporaires());
+		                UtilitaireDao.get(0).dropTable(connection, requeteMapping.tableauNomsTablesTemporaires());
 						break;
 
 					default:

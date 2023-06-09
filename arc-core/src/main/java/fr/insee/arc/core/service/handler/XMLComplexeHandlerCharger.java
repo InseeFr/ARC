@@ -150,7 +150,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		multiLeafUpdate();
 
 		try {
-			UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);
+			UtilitaireDao.get(0).executeImmediate(this.connexion, this.requete);
 		} catch (ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "XMLComplexeHandlerCharger.startElement()", LOGGER, ex);
 			throw new SAXParseException("Fichier XML : erreur de requete insertion  : " + ex.getMessage(), "", "", 0,
@@ -419,7 +419,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 			if (this.requete.length() > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
 				try {
-					UtilitaireDao.get("arc").executeImmediate(this.connexion, this.requete);
+					UtilitaireDao.get(0).executeImmediate(this.connexion, this.requete);
 				} catch (ArcException ex) {
 					LoggerHelper.errorGenTextAsComment(getClass(), "startElement()", LOGGER, ex);
 					throw new SAXParseException("Fichier XML : erreur de requete insertion  : " + ex.getMessage(), "",

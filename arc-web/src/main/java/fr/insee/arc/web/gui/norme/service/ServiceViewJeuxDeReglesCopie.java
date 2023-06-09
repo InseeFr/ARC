@@ -110,7 +110,7 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 			getTableSpecificColumns.append(
 					"\n ('" + inCommonColumns.replace(",", "','") + "','" + ConstanteBD.ID_REGLE.getValue() + "') ");
 
-			String specificColumns = UtilitaireDao.get(poolName).getString(null, getTableSpecificColumns);
+			String specificColumns = UtilitaireDao.get(0).getString(null, getTableSpecificColumns);
 
 			// Build the copy query
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
@@ -168,7 +168,7 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 				emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 			}
 
-				UtilitaireDao.get("arc").executeRequest(null, requete);
+				UtilitaireDao.get(0).executeRequest(null, requete);
 			} catch (ArcException ex) {
 				loggerDispatcher.error("Error in copieJeuxDeRegles", ex, LOGGER);
 			}

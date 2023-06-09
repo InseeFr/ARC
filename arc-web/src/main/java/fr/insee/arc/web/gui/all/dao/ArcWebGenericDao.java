@@ -30,7 +30,7 @@ public class ArcWebGenericDao {
 		
 		HashMap<String, ArrayList<String>> m;
 		try {
-			m = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, requete)).mapContent();
+			m = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete)).mapContent();
 			
 			LinkedHashMap<String, String> envMap=new LinkedHashMap<>();
 			

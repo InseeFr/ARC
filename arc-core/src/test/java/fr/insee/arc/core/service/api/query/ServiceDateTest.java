@@ -27,7 +27,7 @@ public class ServiceDateTest extends InitializeQueryTest {
 		GenericPreparedStatementBuilder gb=new GenericPreparedStatementBuilder();
 		gb.append("SELECT "+ServiceDate.queryDateConversion(testDate)+" as test_date");
 		
-		HashMap<String, ArrayList<String>> content= new GenericBean(UtilitaireDao.get("arc").executeRequest(c, gb)).mapContent();
+		HashMap<String, ArrayList<String>> content= new GenericBean(UtilitaireDao.get(0).executeRequest(c, gb)).mapContent();
 
 		assertEquals("1975-12-16", content.get("test_date").get(0));
 		

@@ -52,11 +52,11 @@ public class ClientDaoImpl implements ClientDao {
 
         try {
             long beginning1 = System.currentTimeMillis();
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
+            connection = UtilitaireDao.get(0).getDriverConnexion();
             long time1 = System.currentTimeMillis() - beginning1;
             LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#verificationClientFamille() : Connection Done -", time1, "ms");
             long beginning2 = System.currentTimeMillis();
-            String bool = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection, request).get(0).get(0);
+            String bool = UtilitaireDao.get(0).executeRequestWithoutMetadata(connection, request).get(0).get(0);
             long time2 = System.currentTimeMillis() - beginning2;
             LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.verificationClientFamille() : ExecuteQuery Done -", time2, "ms");
 
@@ -113,11 +113,11 @@ public class ClientDaoImpl implements ClientDao {
         request.append("AND '" + ManipString.substringAfterFirst(ServiceTableNaming.dbEnv(environnement), ".") + "'||T1.nom_table_metier=T2.tablename);");
 
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
-            UtilitaireDao.get("arc").executeBlock(connection, request);
-            tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
+            connection = UtilitaireDao.get(0).getDriverConnexion();
+            UtilitaireDao.get(0).executeBlock(connection, request);
+            tablesMetierNames = UtilitaireDao.get(0).executeRequestWithoutMetadata(connection,
                     new ArcPreparedStatementBuilder("SELECT nom_table_metier FROM " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;"));
-            UtilitaireDao.get("arc").executeImmediate(connection,
+            UtilitaireDao.get(0).executeImmediate(connection,
                     "DROP TABLE " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_mod_table_metier;");
         } finally {
             close(connection);
@@ -230,11 +230,11 @@ public class ClientDaoImpl implements ClientDao {
         request.append("AND '" + ManipString.substringAfterFirst(env, ".") + "'||T1.nom_table_metier=T2.tablename);");
 
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
-            UtilitaireDao.get("arc").executeBlock(connection, request);
-            tablesMetierNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,
+            connection = UtilitaireDao.get(0).getDriverConnexion();
+            UtilitaireDao.get(0).executeBlock(connection, request);
+            tablesMetierNames = UtilitaireDao.get(0).executeRequestWithoutMetadata(connection,
             		 new ArcPreparedStatementBuilder("SELECT nom_table_metier FROM " + env + client + "_" + timestamp + "_mod_table_metier;"));
-            UtilitaireDao.get("arc").executeImmediate(connection, "DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_mod_table_metier;");
+            UtilitaireDao.get(0).executeImmediate(connection, "DROP TABLE IF EXISTS " + env + client + "_" + timestamp + "_mod_table_metier;");
         } finally {
             close(connection);
         }
@@ -282,8 +282,8 @@ public class ClientDaoImpl implements ClientDao {
         mesTablesImagesCrees.add(nomTableImage);
 
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
-            UtilitaireDao.get("arc").executeBlock(connection, request);
+            connection = UtilitaireDao.get(0).getDriverConnexion();
+            UtilitaireDao.get(0).executeBlock(connection, request);
         } finally {
             close(connection);
         }
@@ -306,15 +306,15 @@ public class ClientDaoImpl implements ClientDao {
         int nbBlock = 0;
 
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
+            connection = UtilitaireDao.get(0).getDriverConnexion();
 
-            nbLines = UtilitaireDao.get("arc").getInt(connection,
+            nbLines = UtilitaireDao.get(0).getInt(connection,
             		 new ArcPreparedStatementBuilder("select max(rowid) FROM " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName));
             nbBlock = (nbLines - 1) / blockSize + 1;
 
             for (int i = 0; i < nbBlock; i++) {
                 LoggerHelper.debugAsComment(LOGGER, "Traitement du bloc ", i, "/", (nbBlock - 1));
-                result = UtilitaireDao.get("arc").executeRequest(
+                result = UtilitaireDao.get(0).executeRequest(
                         connection,
                         new ArcPreparedStatementBuilder("SELECT * FROM " + ServiceTableNaming.dbEnv(environnement) + client + "_" + timestamp + "_" + tableMetierName + " u where rowid>" + i
                                 * blockSize + " and rowid<=" + blockSize * (i + 1)));
@@ -347,8 +347,8 @@ public class ClientDaoImpl implements ClientDao {
         columnClient.append("AND T1.phase_traitement='" + TraitementPhase.MAPPING + "';");
 
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
-            UtilitaireDao.get("arc").executeBlock(connection, columnClient.toString());
+            connection = UtilitaireDao.get(0).getDriverConnexion();
+            UtilitaireDao.get(0).executeBlock(connection, columnClient.toString());
         } finally {
             close(connection);
         }
@@ -366,7 +366,7 @@ public class ClientDaoImpl implements ClientDao {
         String schema = ManipString.substringBeforeFirst(ServiceTableNaming.dbEnv(environnement), ".");
 
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
+            connection = UtilitaireDao.get(0).getDriverConnexion();
             
             ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
             requete.append("SELECT tablename FROM pg_tables ")
@@ -374,7 +374,7 @@ public class ClientDaoImpl implements ClientDao {
             .append(" AND tablename LIKE "+ requete.quoteText("nmcl_%"))
             ;
             
-            nmclNames = UtilitaireDao.get("arc").executeRequestWithoutMetadata(connection,requete);
+            nmclNames = UtilitaireDao.get(0).executeRequestWithoutMetadata(connection,requete);
 
             String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
@@ -382,7 +382,7 @@ public class ClientDaoImpl implements ClientDao {
             for (ArrayList<String> nmcl : nmclNames) {
                 String nomTableImage = prefixeNomTableImage + nmcl.get(0);
 
-                UtilitaireDao.get("arc").executeImmediate(connection,
+                UtilitaireDao.get(0).executeImmediate(connection,
                         "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM " + schema + "." + nmcl.get(0) + ";");
             }
         } finally {
@@ -399,7 +399,7 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createVarMetier()");
         Connection connection = null;
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
+            connection = UtilitaireDao.get(0).getDriverConnexion();
 
             String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
@@ -410,7 +410,7 @@ public class ClientDaoImpl implements ClientDao {
             requete.append("\n SELECT * FROM " + ServiceTableNaming.dbEnv(environnement) + "mod_variable_metier");
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
-            UtilitaireDao.get("arc").executeRequest(connection,requete);
+            UtilitaireDao.get(0).executeRequest(connection,requete);
         } finally {
             close(connection);
         }
@@ -426,7 +426,7 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTableFamille()");
         Connection connection = null;
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
+            connection = UtilitaireDao.get(0).getDriverConnexion();
             String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_famille";
@@ -436,7 +436,7 @@ public class ClientDaoImpl implements ClientDao {
                     + " AS SELECT DISTINCT f.id_famille FROM arc.ihm_famille f INNER JOIN  "
                     + "arc.ihm_client c ON f.id_famille = c.id_famille WHERE lower(c.id_application) = lower(" + requete.quoteText(client) + ");"
                     );
-            UtilitaireDao.get("arc").executeRequest(connection,requete);
+            UtilitaireDao.get(0).executeRequest(connection,requete);
         } finally {
             close(connection);
         }
@@ -452,11 +452,11 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTablePeriodicite()");
         Connection connection = null;
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
+            connection = UtilitaireDao.get(0).getDriverConnexion();
             String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
             String nomTableImage = prefixeNomTableImage + "ext_mod_periodicite";
-            UtilitaireDao.get("arc").executeImmediate(connection,
+            UtilitaireDao.get(0).executeImmediate(connection,
                     "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS SELECT DISTINCT id, val FROM " + "arc.ext_mod_periodicite;");
         } finally {
             close(connection);
@@ -472,7 +472,7 @@ public class ClientDaoImpl implements ClientDao {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.sendTableMetier()");
         Connection connection = null;
         try {
-            connection = UtilitaireDao.get("arc").getDriverConnexion();
+            connection = UtilitaireDao.get(0).getDriverConnexion();
 
             String prefixeNomTableImage = new StringBuilder().append(ServiceTableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
@@ -482,7 +482,7 @@ public class ClientDaoImpl implements ClientDao {
             requete.append("\n SELECT * FROM " + ServiceTableNaming.dbEnv(environnement) + "mod_table_metier");
             requete.append("\n WHERE lower(id_famille) = lower(" + requete.quoteText(idFamille) + ")");
             requete.append(";");
-            UtilitaireDao.get("arc").executeRequest(connection, requete);
+            UtilitaireDao.get(0).executeRequest(connection, requete);
         } finally {
             close(connection);
         }
@@ -551,7 +551,7 @@ public class ClientDaoImpl implements ClientDao {
         	.append(" AND tablename "+(isSourceListTable?"":"NOT")+" like "+requete.quoteText("%id\\_source%"));
         
         
-        String r = UtilitaireDao.get("arc").getString(null,requete);
+        String r = UtilitaireDao.get(0).getString(null,requete);
         if (r != null) {
             r = r.replace(realClient.toLowerCase(), realClient);
         }
@@ -572,7 +572,7 @@ public class ClientDaoImpl implements ClientDao {
         if (StringUtils.isBlank(clientTable)) {
             return;
         }
-        UtilitaireDao.get("arc").dropTable(null, clientTable);
+        UtilitaireDao.get(0).dropTable(null, clientTable);
     }
 
 }

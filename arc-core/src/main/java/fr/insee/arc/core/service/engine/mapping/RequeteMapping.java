@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
@@ -48,7 +47,7 @@ import fr.insee.arc.utils.utils.ManipString;
  * première invocation calcule la requête, les suivantes la restituent telle que
  * calculée la première fois.
  */
-public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConstanteNumerique {
+public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique {
 	public static final String TOKEN_ID_SOURCE = "{:idSource}";
 	public static final String ALIAS_TABLE = "{:alias}";
 	public static final String FUNCTION_BEFORE = "{:functionBefore}";
@@ -163,7 +162,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 				.append(";");
 
 		List<List<String>> resultTemp = Format
-				.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
+				.patch(UtilitaireDao.get(0).executeRequest(this.connexion, requete));
 		if (resultTemp.size() == 2) {
 			throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND);
 		}
@@ -294,7 +293,7 @@ public class RequeteMapping implements IDbConstant, IConstanteCaractere, IConsta
 		requete.append(this.nomTableModVariableMetier);
 		requete.append("\n WHERE id_famille = " + requete.quoteText(this.idFamille) + ";");
 
-		List<List<String>> result = Format.patch(UtilitaireDao.get(poolName).executeRequest(this.connexion, requete));
+		List<List<String>> result = Format.patch(UtilitaireDao.get(0).executeRequest(this.connexion, requete));
 
 		for (int i = ARRAY_THIRD_COLUMN_INDEX; i < result.size(); i++) {
 			/*

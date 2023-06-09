@@ -9,7 +9,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.engine.mapping.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.exception.ArcException;
@@ -29,7 +28,7 @@ import fr.insee.arc.utils.utils.ManipString;
  *
  *
  */
-public class TableMapping implements IConstanteCaractere, IDbConstant, IConstanteNumerique {
+public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
 	private static final String ARC_PROCESSING_TABLE = "ArcProcessingTable";
 

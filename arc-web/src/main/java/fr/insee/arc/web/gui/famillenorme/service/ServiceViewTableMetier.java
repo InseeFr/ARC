@@ -33,7 +33,7 @@ public class ServiceViewTableMetier extends InteractorFamilleNorme {
 					views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 			query.asTransaction();
 
-			UtilitaireDao.get("arc").executeRequest(null, query);
+			UtilitaireDao.get(0).executeRequest(null, query);
 		} catch (ArcException e) {
 			this.views.getViewTableMetier().setMessage("La suppression des tables a échoué");
 		}

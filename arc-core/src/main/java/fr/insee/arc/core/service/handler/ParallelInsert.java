@@ -21,7 +21,7 @@ public class ParallelInsert extends Thread {
 	@Override
 	public void run() {
 		try {
-			UtilitaireDao.get("arc").executeImmediate(this.connexion, query);
+			UtilitaireDao.get(0).executeImmediate(this.connexion, query);
 		} catch (ArcException e) {
 			this.threadException = e;
 		}

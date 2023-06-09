@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -36,7 +35,7 @@ import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements IDbConstant {
+public class InteractorNorme extends ArcWebGenericService<ModelNorme> {
 	
 	protected static final String RESULT_SUCCESS = "/jsp/gererNorme.jsp";
 	
@@ -374,7 +373,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
         requete.append(" ;");
 
 		try {
-			UtilitaireDao.get("arc").executeRequest(null, requete);
+			UtilitaireDao.get(0).executeRequest(null, requete);
 		} catch (ArcException e) {
 			LoggerHelper.error(LOGGER, String.format("Error when emptying the rules %s", e.toString()));
 
@@ -416,7 +415,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 				    + "\n\t WHERE false");
 
 
-				UtilitaireDao.get("arc").executeRequest(null, requete);
+				UtilitaireDao.get(0).executeRequest(null, requete);
 
 				// Throwing away the first line
 				String uselessLine = bufferedReader.readLine();
@@ -424,7 +423,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 				
 
 				// Importing the file in the database (COPY command)
-				UtilitaireDao.get("arc").importingWithReader(null, nomTableImage, bufferedReader, false,
+				UtilitaireDao.get(0).importingWithReader(null, nomTableImage, bufferedReader, false,
 						IConstanteCaractere.semicolon);
 
 			} catch (Exception ex) {
@@ -462,7 +461,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> implements
 			requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
 
 			try {
-				UtilitaireDao.get("arc").executeRequest(null, requete);
+				UtilitaireDao.get(0).executeRequest(null, requete);
 			} catch (Exception ex) {
 				vObjectToUpdate.setMessage("Error when uploading the file : " + ex.getMessage());
 				LoggerHelper.error(LOGGER, ex, "uploadOutils()");

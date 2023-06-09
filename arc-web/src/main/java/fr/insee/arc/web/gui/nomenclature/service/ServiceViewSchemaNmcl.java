@@ -79,7 +79,7 @@ public class ServiceViewSchemaNmcl extends InteractorNomenclature {
      */
     private boolean isColonneValide(String nomColonne) {
         try {
-            UtilitaireDao.get(poolName).executeImmediate(null, "SELECT null as " + nomColonne);
+            UtilitaireDao.get(0).executeImmediate(null, "SELECT null as " + nomColonne);
         } catch (Exception e) {
             String message = nomColonne + " n'est pas un nom de colonne valide.";
             this.views.getViewSchemaNmcl().setMessage(message);
@@ -98,7 +98,7 @@ public class ServiceViewSchemaNmcl extends InteractorNomenclature {
      */
     private boolean isTypeValide(String typeColonne) {
         try {
-            UtilitaireDao.get(poolName).executeImmediate(null, "SELECT null::" + typeColonne);
+            UtilitaireDao.get(0).executeImmediate(null, "SELECT null::" + typeColonne);
         } catch (Exception e) {
             String message = typeColonne + " n'est pas un type valide.";
             this.views.getViewSchemaNmcl().setMessage(message);

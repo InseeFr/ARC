@@ -118,7 +118,7 @@ public class ServiceViewMapping extends InteractorNorme {
 							views.getViewNorme().mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0)))
 					.append(") liste_colonne");
 
-			UtilitaireDao.get("arc").executeRequest(null, requete);
+			UtilitaireDao.get(0).executeRequest(null, requete);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in preGenererRegleMapping", e, LOGGER);
 		}

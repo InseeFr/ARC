@@ -154,7 +154,7 @@ public class ChargeurXmlComplexe implements IChargeur{
      	requete.append(";");
 
         try {
-			UtilitaireDao.get("arc").executeImmediate(this.connexion, requete);
+			UtilitaireDao.get(0).executeImmediate(this.connexion, requete);
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error in ChargeurXML.initialisation()",LOGGER);
 		}
@@ -177,7 +177,7 @@ public class ChargeurXmlComplexe implements IChargeur{
         }
 
         try {
-            UtilitaireDao.get("arc").executeBlock(this.connexion, requeteBilan);
+            UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
         } catch (ArcException ex) {
             LoggerHelper.errorGenTextAsComment(getClass(), "chargerXml()", LOGGER, ex);
         }

@@ -192,7 +192,7 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 			ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
 			requete.append("update " + theTable + " set last_init='"+ dateFormat.format(dNow) + "', operation=case when operation='R' then 'O' else operation end;");
 			
-			UtilitaireDao.get("arc").executeRequest(null, requete);
+			UtilitaireDao.get(0).executeRequest(null, requete);
 			viewRulesSet.setMessage("Go to production registered");
 
 		} catch (ArcException e) {

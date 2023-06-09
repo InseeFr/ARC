@@ -141,7 +141,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	private void preparation() throws ArcException {
 
 		ArcPreparedStatementBuilder query = arcThreadGenericDao.preparationDefaultDao();
-		UtilitaireDao.get("arc").executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());
+		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 	}
 
@@ -296,7 +296,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 				.append(" WHERE id_norme =" + requete.quoteText(norme.getIdNorme()) + ";");
 
 		GenericBean g = new GenericBean(
-				UtilitaireDao.get(poolName).executeRequest(this.getConnexion().getExecutorConnection(), requete));
+				UtilitaireDao.get(0).executeRequest(this.getConnexion().getExecutorConnection(), requete));
 		if (g.mapContent().isEmpty()) {
 			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, norme.getIdNorme());
 		}
@@ -360,7 +360,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 		bloc3.append("where " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "' AND phase_traitement='"
 				+ this.currentPhase + "'; \n");
-		UtilitaireDao.get(poolName).executeBlock(this.getConnexion().getExecutorConnection(), bloc3);
+		UtilitaireDao.get(0).executeBlock(this.getConnexion().getExecutorConnection(), bloc3);
 		java.util.Date endDate = new java.util.Date();
 
 		StaticLoggerDispatcher.info(

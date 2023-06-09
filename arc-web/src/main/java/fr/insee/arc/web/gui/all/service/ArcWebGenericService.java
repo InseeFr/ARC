@@ -215,7 +215,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 		LoggerHelper.debug(LOGGER, "getDataBaseStatus()");
 		// test the database connection
 		try {
-			UtilitaireDao.get(POOLNAME).executeRequest(null, new ArcPreparedStatementBuilder("select true"));
+			UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("select true"));
 			setDataBaseOk(true);
 	
 		} catch (Exception e) {

@@ -1,4 +1,4 @@
-package fr.insee.arc.core.serviceinteractif.ddi;
+package fr.insee.arc.web.gui.famillenorme.ddi;
 
 import java.util.ArrayList;
 import java.util.HashMap;

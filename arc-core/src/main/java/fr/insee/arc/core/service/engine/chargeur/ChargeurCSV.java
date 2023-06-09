@@ -109,14 +109,14 @@ public class ChargeurCSV implements IChargeur {
 		if (this.quote != null && this.quote.length() > 1 && this.quote.length() < 8) {
 			ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
 			req.append("SELECT " + this.quote + " ");
-			this.quote = UtilitaireDao.get("arc").executeRequest(this.connexion, req).get(2).get(0);
+			this.quote = UtilitaireDao.get(0).executeRequest(this.connexion, req).get(2).get(0);
 		}
 
 		// si le séparateur est une expression complexe, l'interpreter par postgres
 		if (this.separateur != null && this.separateur.length() > 1 && this.separateur.length() < 8) {
 			ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
 			req.append("select " + this.separateur + " ");
-			this.separateur = UtilitaireDao.get("arc").executeRequest(this.connexion, req).get(2).get(0);
+			this.separateur = UtilitaireDao.get(0).executeRequest(this.connexion, req).get(2).get(0);
 		}
 
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
@@ -172,7 +172,7 @@ public class ChargeurCSV implements IChargeur {
 				columnForCopy.setLength(columnForCopy.length() - 1);
 				columnForCopy.append(")");
 
-				UtilitaireDao.get("arc").importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent,
+				UtilitaireDao.get(0).importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent,
 						this.userDefinedHeaders == null, this.separateur, this.quote, this.encoding);
 			} finally {
 				streamContent.close();
@@ -243,7 +243,7 @@ public class ChargeurCSV implements IChargeur {
 					req.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + this.tableTempA + "("
 							+ indexExpression.get(i) + ");\n");
 				}
-				UtilitaireDao.get("arc").executeImmediate(connexion, req);
+				UtilitaireDao.get(0).executeImmediate(connexion, req);
 			}
 
 			if (!joinTable.isEmpty()) {
@@ -268,7 +268,7 @@ public class ChargeurCSV implements IChargeur {
 
 					// récupération des colonnes de la table
 					List<String> colsIn = new ArrayList<String>();
-					colsIn = UtilitaireDao.get("arc")
+					colsIn = UtilitaireDao.get(0)
 							.executeRequest(this.connexion,
 									new ArcPreparedStatementBuilder(
 											"select " + joinSelect.get(i) + " from " + joinTable.get(i) + " limit 0"))
@@ -301,7 +301,7 @@ public class ChargeurCSV implements IChargeur {
 				req.append("\n ALTER TABLE TTT RENAME COLUMN id$new$ TO id; ");
 				req.append("\n DROP TABLE " + this.tableTempA + ";");
 				req.append("\n ALTER TABLE TTT RENAME TO " + this.tableTempA + ";");
-				UtilitaireDao.get("arc").executeImmediate(connexion, req);
+				UtilitaireDao.get(0).executeImmediate(connexion, req);
 			}
 
 			/*
@@ -309,7 +309,7 @@ public class ChargeurCSV implements IChargeur {
 			 * nouvelle colonne est créée
 			 */
 			if (!cols.isEmpty()) {
-				List<String> colsIn = UtilitaireDao.get("arc")
+				List<String> colsIn = UtilitaireDao.get(0)
 						.executeRequest(this.connexion,
 								new ArcPreparedStatementBuilder("select * from " + this.tableTempA + " limit 0"))
 						.get(0);
@@ -349,7 +349,7 @@ public class ChargeurCSV implements IChargeur {
 					req.append("\n AND " + s);
 				}
 				req.append(";");
-				UtilitaireDao.get("arc").executeImmediate(connexion, req);
+				UtilitaireDao.get(0).executeImmediate(connexion, req);
 
 				// Itération
 
@@ -363,14 +363,14 @@ public class ChargeurCSV implements IChargeur {
 				// creation de l'index de partitionnement
 				if (partitionedProcess) {
 					// comptage rapide su échantillon à 1/10000 pour trouver le nombre de partiton
-					nbPartition = UtilitaireDao.get("arc").getInt(connexion,
+					nbPartition = UtilitaireDao.get(0).getInt(connexion,
 							new ArcPreparedStatementBuilder("select ((count(*)*10000)/" + partitionSize + ")+1 from "
 									+ this.tableTempA + " tablesample system(0.01)"));
 
 					req = new StringBuilder();
 					req.append("\n CREATE INDEX idx_a on " + this.tableTempA + " ((abs(hashtext("
 							+ partitionExpression.get(0) + "::text)) % " + nbPartition + "));");
-					UtilitaireDao.get("arc").executeImmediate(connexion, req);
+					UtilitaireDao.get(0).executeImmediate(connexion, req);
 				}
 
 				int nbIteration = nbPartition;
@@ -411,7 +411,7 @@ public class ChargeurCSV implements IChargeur {
 						req.append("\n AND " + s);
 					}
 					req.append(";");
-					UtilitaireDao.get("arc").executeImmediate(connexion, req);
+					UtilitaireDao.get(0).executeImmediate(connexion, req);
 				}
 
 				req = new StringBuilder();
@@ -427,7 +427,7 @@ public class ChargeurCSV implements IChargeur {
 				req.append("\n DROP TABLE " + this.tableTempA + ";");
 				req.append("\n ALTER TABLE TTT RENAME TO " + this.tableTempA + ";");
 
-				UtilitaireDao.get("arc").executeImmediate(connexion, req);
+				UtilitaireDao.get(0).executeImmediate(connexion, req);
 			}
 		}
 	}
@@ -449,7 +449,7 @@ public class ChargeurCSV implements IChargeur {
 		req.append("\n\t id SERIAL");
 		req.append(");");
 
-		UtilitaireDao.get("arc").executeImmediate(connexion, req);
+		UtilitaireDao.get(0).executeImmediate(connexion, req);
 	}
 
 	/**
@@ -505,7 +505,7 @@ public class ChargeurCSV implements IChargeur {
 		req.append("\n FROM " + TABLE_TEMP_T + ");");
 		req.append("DROP TABLE IF EXISTS " + TABLE_TEMP_T + ";");
 
-		UtilitaireDao.get("arc").executeImmediate(this.connexion, req);
+		UtilitaireDao.get(0).executeImmediate(this.connexion, req);
 
 		applyFormat();
 
@@ -513,7 +513,7 @@ public class ChargeurCSV implements IChargeur {
 		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName, this.currentPhase,
 				TraitementEtat.OK.toString(), null));
 
-		UtilitaireDao.get("arc").executeBlock(this.connexion, requeteBilan);
+		UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
 
 		java.util.Date endDate = new java.util.Date();
 		StaticLoggerDispatcher

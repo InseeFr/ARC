@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
+import fr.insee.arc.web.gui.famillenorme.ddi.DDIModeler;
 
 public class ServiceViewFamilleNormeTest extends ServiceViewFamilleNorme {
 

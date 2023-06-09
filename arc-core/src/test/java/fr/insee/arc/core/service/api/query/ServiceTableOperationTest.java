@@ -23,23 +23,23 @@ public class ServiceTableOperationTest extends InitializeQueryTest {
 		String tableOut = "public.table_test_out";
 		
 		// create a table with 5 records and 2 columns (i,j)
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 		
 		// create tableOut as an empty image of tableIn
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut));
 		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
-		UtilitaireDao.get("arc").dropTable(c, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableOut);
 		
 		// create tableOut as an empty image of tableIn (false argument)
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, false));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, false));
 		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
-		UtilitaireDao.get("arc").dropTable(c, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableOut);
 
 		// create tableOut as the exact image of tableIn (true argument)
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, true));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, true));
 		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
 		
-		UtilitaireDao.get("arc").dropTable(c, tableIn, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableIn, tableOut);
 	}
 	
 	@Test
@@ -53,23 +53,23 @@ public class ServiceTableOperationTest extends InitializeQueryTest {
 		String tableOut = "table_test_out";
 		
 		// create a table with 5 records and 2 columns (i,j)
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 		
 		// create tableOut as an empty image of tableIn
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut));
 		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
-		UtilitaireDao.get("arc").dropTable(c, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableOut);
 		
 		// create tableOut as an empty image of tableIn (false argument)
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, false));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, false));
 		testMetadataAndNumberOfRecords(tableOut, 0, this.expectedColumnsForTest);
-		UtilitaireDao.get("arc").dropTable(c, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableOut);
 
 		// create tableOut as the exact image of tableIn (true argument)
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, true));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.creationTableResultat(tableIn, tableOut, true));
 		testMetadataAndNumberOfRecords(tableOut, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
 		
-		UtilitaireDao.get("arc").dropTable(c, tableIn, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableIn, tableOut);
 		
 	}
 
@@ -88,28 +88,28 @@ public class ServiceTableOperationTest extends InitializeQueryTest {
 		
 		// test 1: tableIn is not empty
 		// create a table with 5 records and 2 columns (i,j)
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// execute createTableInherit to create the table duplication
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
 		
 		// test
 		// tableOut must exists
 		testTableExists(tableOut,1);
 		// the data must be same as tableIn
 		testMetadataAndNumberOfRecords(tableOut,this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
-		UtilitaireDao.get("arc").dropTable(c, tableIn, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableIn, tableOut);
 	
 		
 		// test 2: tableIn is empty
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i where false");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TEMPORARY TABLE "+tableIn+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i where false");
 		// execute createTableInherit to create the table duplication
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.createTableInherit(tableIn, tableOut));
 
 		// test
 		// tableOut shouldn't have been created and doesn't exist
 		testTableExists(tableOut,0);
-		UtilitaireDao.get("arc").dropTable(c, tableIn, tableOut);
+		UtilitaireDao.get(0).dropTable(c, tableIn, tableOut);
 		
 	}
 
@@ -125,37 +125,37 @@ public class ServiceTableOperationTest extends InitializeQueryTest {
 
 		
 		// creation de la table de données relative au fichier
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// creation de la table temporaire de données relative copie de la table de données du fichier
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutTemporaire, idSource));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutTemporaire, idSource));
 				
 		// test if content is the same
 		testMetadataAndNumberOfRecords(tableOutTemporaire, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
-		UtilitaireDao.get("arc").dropTable(c, tableOfIdSource, tableOutTemporaire);
+		UtilitaireDao.get(0).dropTable(c, tableOfIdSource, tableOutTemporaire);
 
 		
 		// testing with extra columns definition
 		// creation de la table de données relative au fichier
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// creation de la table temporaire de données relative copie de la table de données du fichier
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutTemporaire, idSource, "null::text as k, 8::int as l"));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutTemporaire, idSource, "null::text as k, 8::int as l"));
 		
 		String[] expectedColumns = new String[] {"i", "j", "k", "l"};
 		testMetadataAndNumberOfRecords(tableOutTemporaire, this.expectedNumberOfRecordsForTest, expectedColumns);
 		
-		UtilitaireDao.get("arc").dropTable(c, tableOfIdSource, tableOutTemporaire);
+		UtilitaireDao.get(0).dropTable(c, tableOfIdSource, tableOutTemporaire);
 
 		// creation de la table de données relative au fichier
-		UtilitaireDao.get("arc").executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+tableOfIdSource+" as SELECT i, i+1 as j FROM generate_series(1,"+this.expectedNumberOfRecordsForTest+") i");
 
 		// creation de la table temporaire de données relative copie de la table de données du fichier
-		UtilitaireDao.get("arc").executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutPublic, idSource));
+		UtilitaireDao.get(0).executeImmediate(c, ServiceTableOperation.createTableTravailIdSource(tableIn, tableOutPublic, idSource));
 				
 		// test if content is the same
 		testMetadataAndNumberOfRecords(tableOutTemporaire, this.expectedNumberOfRecordsForTest, this.expectedColumnsForTest);
-		UtilitaireDao.get("arc").dropTable(c, tableOfIdSource, tableOutTemporaire);
+		UtilitaireDao.get(0).dropTable(c, tableOfIdSource, tableOutTemporaire);
 		
 		
 	}

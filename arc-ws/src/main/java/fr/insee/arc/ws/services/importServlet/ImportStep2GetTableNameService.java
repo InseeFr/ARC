@@ -70,7 +70,7 @@ public class ImportStep2GetTableNameService {
 				tableName = "";
 			} else {
 				// récupération du type
-				ArrayList<ArrayList<String>> l = UtilitaireDao.get("arc").executeRequest(null,
+				ArrayList<ArrayList<String>> l = UtilitaireDao.get(0).executeRequest(null,
 						new ArcPreparedStatementBuilder("select * from " + tableName + " where false "));
 
 				for (int j = 0; j < l.get(0).size(); j++) {

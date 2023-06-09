@@ -48,7 +48,7 @@ public class XsdRulesRetrievalService {
         request.append(" and validite_sup" + request.sqlEqual(jdr.getValiditeSupString(), "date"));
         request.append(" and version" + request.sqlEqual(jdr.getVersion(), "text"));
 
-		ArrayList<ArrayList<String>> executeRequest = UtilitaireDao.get("arc").executeRequest(connection,request);
+		ArrayList<ArrayList<String>> executeRequest = UtilitaireDao.get(0).executeRequest(connection,request);
 		return parseSqlResults(executeRequest, connection);
 	}
 
@@ -112,7 +112,7 @@ public class XsdRulesRetrievalService {
 				builder.addRuleTo(rubriquePere, new EnumForXsd(enumList));
 			break;
 			case "ENUM_TABLE":
-				GenericBean enumAsSqlResults = new GenericBean(UtilitaireDao.get("arc").executeRequest(connection, new ArcPreparedStatementBuilder(condition)));
+				GenericBean enumAsSqlResults = new GenericBean(UtilitaireDao.get(0).executeRequest(connection, new ArcPreparedStatementBuilder(condition)));
 				String columNameInResult = enumAsSqlResults.getHeaders().get(0);
 				builder.addRuleTo(rubriquePere, new EnumForXsd(enumAsSqlResults.mapContent().get(columNameInResult)));
 			break;

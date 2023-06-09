@@ -100,7 +100,7 @@ public class ServletArc extends HttpServlet {
 		query.append("WHERE id_famille=" + query.quoteText(familyName) + " ");
 		query.append("AND id_application=" + query.quoteText(clientRealName) + " ");
 
-		if (UtilitaireDao.get("arc").getInt(null, query) == 0) {
+		if (UtilitaireDao.get(0).getInt(null, query) == 0) {
 			LoggerHelper.warn(LOGGER, "Security is not enabled for (" + familyName + "," + clientRealName + ")");
 			return true;
 		}
@@ -123,7 +123,7 @@ public class ServletArc extends HttpServlet {
 
 		HashMap<String, ArrayList<String>> result = new HashMap<>();
 		try {
-			result = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, query)).mapContent();
+			result = new GenericBean(UtilitaireDao.get(0).executeRequest(null, query)).mapContent();
 		} catch (ArcException e1) {
 			LoggerHelper.error(LOGGER, "Error in querying host allowed");
 		}
@@ -162,7 +162,7 @@ public class ServletArc extends HttpServlet {
 				+ query.quoteText(hostName) + ", current_timestamp;");
 
 		try {
-			UtilitaireDao.get("arc").executeRequest(null, query);
+			UtilitaireDao.get(0).executeRequest(null, query);
 		} catch (ArcException e) {
 			LoggerHelper.error(LOGGER, "Error in querying to register the connection entry");
 		}

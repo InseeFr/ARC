@@ -141,7 +141,7 @@ public class ChargementBrutalTable {
         query.append("\n ) vv ");
         query.append("\n where norme is not null ");
 
-        ArrayList<ArrayList<String>> result =UtilitaireDao.get("arc").executeRequestWithoutMetadata(this.connexion, new ArcPreparedStatementBuilder(query));
+        ArrayList<ArrayList<String>> result =UtilitaireDao.get(0).executeRequestWithoutMetadata(this.connexion, new ArcPreparedStatementBuilder(query));
         if (result.size()>1)
         {
         	StringBuilder normsFound = new StringBuilder();

@@ -40,7 +40,7 @@ public class RegleDao {
 		sb.append(" AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup) ");
 		sb.append("; ");
 
-		HashMap<String, ArrayList<String>> g = new GenericBean(UtilitaireDao.get("arc").executeRequest(connexion, sb))
+		HashMap<String, ArrayList<String>> g = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, sb))
 				.mapContent();
 
 		if (!g.isEmpty()) {

@@ -62,7 +62,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
         if (!requete.matches(CodeSQL.REGEXP_TO_FIND_IDENTIFIER_RUBRIQUE) || !requete.matches(CodeSQL.REGEXP_TO_FIND_NONIDENTIFIER_RUBRIQUE)) {
             throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_REFERS_NON_EXISTING_TABLES, this.getExpression());
         }
-        this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new ArcPreparedStatementBuilder(requete));
+        this.expressionSQL = UtilitaireDao.get(0).getString(this.connexion, new ArcPreparedStatementBuilder(requete));
     }
 
     @Override
@@ -81,7 +81,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
             end = matcher.end();
         }
         returned.append(intermediaire.substring(end));
-        this.expressionSQL = UtilitaireDao.get(poolName).getString(this.connexion, new ArcPreparedStatementBuilder(returned));
+        this.expressionSQL = UtilitaireDao.get(0).getString(this.connexion, new ArcPreparedStatementBuilder(returned));
     }
 
     private final static String tokenTable(String nomCourt) {

@@ -150,12 +150,12 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 				"'" + ServiceRequeteSqlRegle.RECORD_WITH_NOERROR
 						+ "'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
-		UtilitaireDao.get("arc").executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
+		UtilitaireDao.get(0).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 		// Récupération des Jeux de règles associés
 		this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, this.getTableControleRegle(),
 				this.tableControleDataTemp);
-		this.structure = UtilitaireDao.get("arc").getString(this.connexion.getExecutorConnection(),
+		this.structure = UtilitaireDao.get(0).getString(this.connexion.getExecutorConnection(),
 				new ArcPreparedStatementBuilder("SELECT jointure FROM " + this.tableControlePilTemp));
 	}
 

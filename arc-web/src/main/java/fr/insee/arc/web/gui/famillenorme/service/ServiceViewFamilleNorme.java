@@ -25,12 +25,12 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.famille.ModelTable;
 import fr.insee.arc.core.model.famille.ModelVariable;
-import fr.insee.arc.core.serviceinteractif.ddi.DDIModeler;
-import fr.insee.arc.core.serviceinteractif.ddi.DDIParser;
-import fr.insee.arc.core.serviceinteractif.ddi.dao.DDIInsertDAO;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.web.gui.famillenorme.dao.DDIInsertDAO;
+import fr.insee.arc.web.gui.famillenorme.ddi.DDIModeler;
+import fr.insee.arc.web.gui.famillenorme.ddi.DDIParser;
 
 @Service
 public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
@@ -56,7 +56,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 					views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 			query.asTransaction();
 
-			UtilitaireDao.get("arc").executeRequest(null, query);
+			UtilitaireDao.get(0).executeRequest(null, query);
 		} catch (ArcException e) {
 			this.views.getViewFamilleNorme().setMessage("La suppression des tables a échoué");
 		}

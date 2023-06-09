@@ -82,7 +82,9 @@ public enum ArcExceptionMessage {
 	IHM_NMCL_IMPORT_FAILED("Le fichier n'a pu être lu. Il doit être au format csv non compressé, le nom des colonnes en première ligne, le type des colonne en 2ieme ligne."),
 	
 	GENERIC_BEAN_KEY_VALUE_FAILED("GenericBean keyValue : the set hasn't exactly 2 elements and cannot be mapped to key>value format"),
-	GENERIC_BEAN_DUPLICATE_KEY("GenericBean keyValue : duplicate key %s");
+	GENERIC_BEAN_DUPLICATE_KEY("GenericBean keyValue : duplicate key %s"),
+	
+	SPRING_BEAN_PROPERTIES_NOTFOUND("Bean properties not found");
 	
 	;
 	

@@ -167,7 +167,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 	private static List<String> getListeTableMetierFamille(String idFamille) {
 		StringBuilder requete = new StringBuilder("SELECT nom_table_metier\n")
 				.append("  FROM arc.ihm_mod_table_metier\n").append("  WHERE id_famille='" + idFamille + "'");
-		return UtilitaireDao.get("arc").getList(null, requete, new ArrayList<String>());
+		return UtilitaireDao.get(0).getList(null, requete, new ArrayList<String>());
 	}
 	
 	

@@ -221,7 +221,7 @@ class BatchARC implements IReturnCode {
 				effacerRepertoireChargement(repertoire, envExecution);
 
 				// des archives n'ont elles pas été traitées jusqu'au bout ?
-				ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get("arc").executeRequest(null,
+				ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
 						new ArcPreparedStatementBuilder(
 								"select distinct container from " + envExecution + ".pilotage_fichier where etape=1")))
 						.mapContent().get("container");
@@ -420,7 +420,7 @@ class BatchARC implements IReturnCode {
 		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
 		requete.append(
 				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
-		UtilitaireDao.get("arc").executeRequest(null, requete);
+		UtilitaireDao.get(0).executeRequest(null, requete);
 
 		for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
 			// Maintenance full du catalog
@@ -438,7 +438,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private boolean isNothingLeftToDo(String envExecution) {
 		boolean isNothingLeftToDo = false;
-		if (UtilitaireDao.get("arc").getInt(null, new ArcPreparedStatementBuilder("select count(*) from (select 1 from "
+		if (UtilitaireDao.get(0).getInt(null, new ArcPreparedStatementBuilder("select count(*) from (select 1 from "
 				+ envExecution + ".pilotage_fichier where etape=1 limit 1) ww")) == 0) {
 			isNothingLeftToDo = true;
 		}
@@ -452,7 +452,7 @@ class BatchARC implements IReturnCode {
 	 * @throws ArcException
 	 */
 	private static boolean productionOn() throws ArcException {
-		return UtilitaireDao.get("arc").hasResults(null,
+		return UtilitaireDao.get(0).hasResults(null,
 				new ArcPreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 	}
 
@@ -538,7 +538,7 @@ class BatchARC implements IReturnCode {
 		query.append("\n WHERE etape=3");
 		query.append(";");
 
-		UtilitaireDao.get("arc").executeBlock(null, query);
+		UtilitaireDao.get(0).executeBlock(null, query);
 
 	}
 
@@ -571,7 +571,7 @@ class BatchARC implements IReturnCode {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
 
 		String lastInitialize = null;
-		lastInitialize = UtilitaireDao.get("arc").getString(null,
+		lastInitialize = UtilitaireDao.get(0).getString(null,
 				new ArcPreparedStatementBuilder("select last_init from arc.pilotage_batch "));
 
 		Date dNow = new Date();
@@ -595,7 +595,7 @@ class BatchARC implements IReturnCode {
 
 			message("Initialisation terminée : " + initialiser.getReport().getDuree() + " ms");
 
-			UtilitaireDao.get("arc").executeRequest(null,
+			UtilitaireDao.get(0).executeRequest(null,
 					new ArcPreparedStatementBuilder(
 							"update arc.pilotage_batch set last_init=to_char(current_date+interval '"
 									+ intervalForInitializationInDay + " days','yyyy-mm-dd')||':"
@@ -646,7 +646,7 @@ class BatchARC implements IReturnCode {
 		query.append("GROUP BY phase_traitement ");
 		query.append("HAVING COUNT(*)>0 ");
 
-		HashMap<String, String> keyValue = new GenericBean(UtilitaireDao.get("arc").executeRequest(null, query))
+		HashMap<String, String> keyValue = new GenericBean(UtilitaireDao.get(0).executeRequest(null, query))
 				.keyValue();
 		HashMap<TraitementPhase, Integer> r = new HashMap<>();
 

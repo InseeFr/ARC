@@ -32,7 +32,7 @@ public class WebUtils {
 	 */
 	public static boolean getHealthCheckStatus(Map<String, Object> map) {
 
-		String status = UtilitaireDao.isConnectionOk("arc") ? HEALTHCHECK_RESULT_UP : HEALTHCHECK_RESULT_DOWN;
+		String status = UtilitaireDao.get(0).isConnectionOk() ? HEALTHCHECK_RESULT_UP : HEALTHCHECK_RESULT_DOWN;
 
 		map.put(HEALTHCHECK_ATTRIBUTE_STATUS, status);
 

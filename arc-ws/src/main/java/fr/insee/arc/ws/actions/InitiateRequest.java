@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import fr.insee.arc.core.model.IDbConstant;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.JsonKeys;
@@ -20,7 +19,7 @@ import fr.insee.arc.ws.services.importServlet.ImportStep3GetTableDataService;
  * @author N6YF91
  *
  */
-public class InitiateRequest implements IDbConstant {
+public class InitiateRequest {
 
 	protected static final Logger LOGGER = LogManager.getLogger(InitiateRequest.class);
 	private JSONObject dsnRequest;
