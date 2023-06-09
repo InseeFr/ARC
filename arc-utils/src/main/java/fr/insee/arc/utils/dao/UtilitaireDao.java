@@ -3,7 +3,6 @@ package fr.insee.arc.utils.dao;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,8 +15,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -26,25 +23,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarInputStream;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -62,7 +52,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(UtilitaireDao.class);
 
-	public static final int READ_BUFFER_SIZE = 131072;
 
 	private static final String CONNECTION_SEPARATOR = "\\|\\|\\|";
 
@@ -84,16 +73,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private UtilitaireDao(Integer aPool) {
 		this.pool = aPool;
-		if (!map.containsKey(aPool)) {
-			properties = PropertiesHandler.getInstance();
-			map.put(aPool, this);
-		}
+		properties = PropertiesHandler.getInstance();
 	}
 
 	public static final UtilitaireDao get(Integer aPool) {
-		if (!map.containsKey(aPool)) {
-			map.put(aPool, new UtilitaireDao(aPool));
-		}
+		map.computeIfAbsent(aPool, UtilitaireDao::new);
 		return map.get(aPool);
 	}
 
@@ -207,36 +191,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	/**
-	 * Exécute une requête {@code sql} avec des arguments {@code args}, renvoie le
-	 * booléen (unique) que cette requête est censée rendre<br/>
-	 *
-	 *
-	 * @param sql
-	 * @param args
-	 * @return
-	 * @throws ArcException
-	 */
-	public Boolean getBoolean(Connection connexion, GenericPreparedStatementBuilder sql) throws ArcException {
-
-		String returned;
-		returned = getString(connexion, sql);
-
-		if (returned == null) {
-			return null;
-		}
-
-		if (returned.equals("f")) {
-			return false;
-		}
-
-		if (returned.equals("t")) {
-			return true;
-		}
-
-		return null;
-	}
-
-	/**
 	 * Exécute une requête qui renvoie exactement UN (unique) résultat de type
 	 * {@link String}.<br/>
 	 * Si plusieurs enregistrements devaient être récupérés par la requete
@@ -254,16 +208,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? null
 				: returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
 
-	}
-
-	public Date getDate(Connection aConnexion, GenericPreparedStatementBuilder aRequete,
-			SimpleDateFormat aSimpleDateFormat) throws ArcException {
-		String resultat = getString(aConnexion, aRequete);
-		try {
-			return resultat == null ? null : aSimpleDateFormat.parse(resultat);
-		} catch (ParseException e) {
-			throw new ArcException(e, ArcExceptionMessage.SQL_DATE_PARSE_FAILED, resultat, aSimpleDateFormat);
-		}
 	}
 
 	/**
@@ -286,19 +230,15 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return ZERO;
 	}
 
-	/**
-	 *
-	 * @param connexion
-	 * @param table
-	 * @param column
-	 * @return la valeur maximale obtenue sur la colonne {@code column} de la table
-	 *         {@code table}
-	 */
-	public int getMax(Connection connexion, String table, String column) {
-		return getInt(connexion,
-				new GenericPreparedStatementBuilder("select max(" + column + ") max_value from " + table));
-	}
 
+	/**
+	 * Check if a column exists in a table
+	 * @param aConnexion
+	 * @param aNomTable
+	 * @param aNomVariable
+	 * @return
+	 * @throws ArcException
+	 */
 	public boolean isColonneExiste(Connection aConnexion, String aNomTable, String aNomVariable) throws ArcException {
 		return getColumns(aConnexion, new HashSet<>(), aNomTable).contains(aNomVariable);
 	}
@@ -660,205 +600,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
-	/**
-	 *
-	 * @param fileIn
-	 * @param fileOut
-	 * @param entryName
-	 * @throws IOException
-	 */
-	public static void generateTarGzFromFile(File fileIn, File fileOut, String entryName) throws ArcException {
-
-		try (BufferedInputStream fis = new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE);) {
-			try (TarArchiveOutputStream taos = new TarArchiveOutputStream(
-					new GZIPOutputStream(new FileOutputStream(fileOut)));) {
-				TarArchiveEntry entry = new TarArchiveEntry(entryName);
-				entry.setSize(fileIn.length());
-				taos.putArchiveEntry(entry);
-				copyFromInputstreamToOutputStream(fis, taos);
-				taos.closeArchiveEntry();
-			}
-		} catch (IOException e) {
-			throw new ArcException(e, ArcExceptionMessage.TGZ_CONVERSION_FAILED, fileIn);
-		}
-	}
-
-	/**
-	 * Verifie que l'archive zip existe, lit les fichiers de la listIdSource et les
-	 * copie dans un TarArchiveOutputStream
-	 *
-	 * @param receptionDirectoryRoot
-	 * @param phase
-	 * @param etat
-	 * @param currentContainer
-	 * @param listIdSourceContainer
-	 */
-	public static void generateEntryFromFile(String receptionDirectoryRoot, String idSource,
-			TarArchiveOutputStream taos) {
-		File fileIn = Paths.get(receptionDirectoryRoot, idSource).toFile();
-		if (fileIn.exists()) {
-			try {
-				TarArchiveEntry entry = new TarArchiveEntry(fileIn.getName());
-				entry.setSize(fileIn.length());
-				taos.putArchiveEntry(entry);
-				// Ecriture dans le fichier
-				copyFromInputstreamToOutputStream(
-						new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE), taos);
-				taos.closeArchiveEntry();
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromFile()", LOGGER, ex);
-			}
-		}
-	}
-
-	/**
-	 * Verifie que l'archive zip existe, lit les fichiers de la listIdSource et les
-	 * copie dans un TarArchiveOutputStream
-	 *
-	 * @param receptionDirectoryRoot
-	 * @param phase
-	 * @param etat
-	 * @param currentContainer
-	 * @param listIdSourceContainer
-	 */
-	public static void generateEntryFromZip(String receptionDirectoryRoot, String currentContainer,
-			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
-		File fileIn = Paths.get(receptionDirectoryRoot, currentContainer).toFile();
-		if (fileIn.exists()) {
-			try {
-				try (ZipInputStream tarInput = new ZipInputStream(
-						new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE));) {
-					ZipEntry currentEntry = tarInput.getNextEntry();
-					// si le fichier est trouvé, on ajoute
-					while (currentEntry != null) {
-						if (listIdSourceContainer.contains(currentEntry.getName())) {
-							TarArchiveEntry entry = new TarArchiveEntry(currentEntry.getName());
-							entry.setSize(currentEntry.getSize());
-							taos.putArchiveEntry(entry);
-							for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
-								taos.write(c);
-							}
-							taos.closeArchiveEntry();
-						}
-						currentEntry = tarInput.getNextEntry();
-					}
-				}
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromZip()", LOGGER, ex);
-			}
-		}
-	}
-
-	/**
-	 * Verifie que l'archive .tar.gz existe, lit les fichiers de la listIdSource et
-	 * les copie dans un TarArchiveOutputStream
-	 *
-	 * @param receptionDirectoryRoot
-	 * @param entryPrefix
-	 * @param currentContainer
-	 * @param listIdSourceContainer
-	 * @param taos
-	 */
-	public static void generateEntryFromTarGz(String receptionDirectoryRoot, String currentContainer,
-			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
-		File fileIn = new File(receptionDirectoryRoot + File.separator + currentContainer);
-		LoggerHelper.traceAsComment(LOGGER, "#generateEntryFromTarGz()", receptionDirectoryRoot, "/", currentContainer);
-
-		if (fileIn.exists()) {
-			// on crée le stream pour lire à l'interieur de
-			// l'archive
-			try {
-				try (TarInputStream tarInput = new TarInputStream(
-						new GZIPInputStream(new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE)));) {
-					TarEntry currentEntry = tarInput.getNextEntry();
-					// si le fichier est trouvé, on ajoute
-					while (currentEntry != null) {
-						if (listIdSourceContainer.contains(currentEntry.getName())) {
-							TarArchiveEntry entry = new TarArchiveEntry(currentEntry.getName());
-							entry.setSize(currentEntry.getSize());
-							taos.putArchiveEntry(entry);
-							tarInput.copyEntryContents(taos);
-							taos.closeArchiveEntry();
-						}
-						currentEntry = tarInput.getNextEntry();
-					}
-				}
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromTarGz()", LOGGER, ex);
-			}
-		}
-	}
-
-	/**
-	 * Verifie que l'archive .gz existe, lit les fichiers de la listIdSource et les
-	 * copie dans un TarArchiveOutputStream
-	 *
-	 * @param receptionDirectoryRoot
-	 * @param entryPrefix
-	 * @param currentContainer
-	 * @param listIdSourceContainer
-	 * @param taos
-	 */
-	public static void generateEntryFromGz(String receptionDirectoryRoot, String currentContainer,
-			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
-		File fileIn = new File(receptionDirectoryRoot + "/" + currentContainer);
-		if (fileIn.exists()) {
-			try {
-				// on crée le stream pour lire à l'interieur de
-				// l'archive
-				long size = 0;
-
-				try (GZIPInputStream tarInput = new GZIPInputStream(
-						new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE));) {
-					// on recupere d'abord la taille du stream; gzip ne permet pas
-					// de le faire directement
-					for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
-						size++;
-					}
-				}
-
-				TarArchiveEntry entry = new TarArchiveEntry(listIdSourceContainer.get(0));
-				entry.setSize(size);
-				taos.putArchiveEntry(entry);
-				try (GZIPInputStream tarInput = new GZIPInputStream(
-						new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE));) {
-					for (int c = tarInput.read(); c != -1; c = tarInput.read()) {
-						taos.write(c);
-					}
-					taos.closeArchiveEntry();
-				}
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(UtilitaireDao.class, "generateEntryFromGz()", LOGGER, ex);
-			}
-		}
-	}
-
-	private static final int BUFFER_SIZE = 1024;
-
-	/**
-	 *
-	 * copy input to output stream - available in several StreamUtils or Streams
-	 * classes
-	 *
-	 * @param input
-	 * @param output
-	 * @throws IOException
-	 */
-	public static void copyFromInputstreamToOutputStream(InputStream input, OutputStream output) throws IOException {
-		try {
-			byte[] buffer = new byte[BUFFER_SIZE];
-			int n = 0;
-			while (-1 != (n = input.read(buffer))) {
-				output.write(buffer, 0, n);
-			}
-		} finally {
-			try {
-				input.close();
-			} catch (IOException ioe) {
-				LoggerHelper.errorAsComment(LOGGER, ioe, "Lors de la clôture de InputStream");
-			}
-		}
-	}
 
 	/**
 	 * Les fichiers à copier sont potentiellement dans des dossiers différents
@@ -908,8 +649,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					entry.setSize(fileIn.length());
 					taos.putArchiveEntry(entry);
 					// Ecriture dans le fichier
-					copyFromInputstreamToOutputStream(
-							new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE), taos);
+					CompressedUtils.copyFromInputstreamToOutputStream(
+							new BufferedInputStream(new FileInputStream(fileIn), CompressedUtils.READ_BUFFER_SIZE), taos);
 					taos.closeArchiveEntry();
 				}
 			}
@@ -992,32 +733,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return returned;
 	}
 
-	public List<String> getList(Connection connexion, StringBuilder requete, String nomColonne, List<String> returned) {
-		try {
-			ConnectionWrapper connexionWrapper = initConnection(connexion);
-			try {
-				Statement stmt = connexionWrapper.getConnexion().createStatement();
-				try {
-					ResultSet rs = stmt.executeQuery(requete.toString());
-					while (rs.next()) {
-						returned.add(rs.getString(nomColonne));
-					}
-				} finally {
-					stmt.close();
-				}
-			} finally {
-				connexionWrapper.close();
-			}
-		} catch (Exception ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "getList()", LOGGER, ex);
-		}
-		return returned;
-	}
-
-	public static boolean isNotArchive(String fname) {
-		return !fname.endsWith(".tar.gz") && !fname.endsWith(".tgz") && !fname.endsWith(".zip")
-				&& !fname.endsWith(".gz");
-	}
 
 	/**
 	 * Postgres libère mal l'espace sur les tables quand on fait trop d'opération
@@ -1093,8 +808,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		// récupérer la liste des colonnes
 		// liste de toutes les colonnes
 		// liste des colonnes à mettre à jour
-		ArrayList<String> colSetList = new ArrayList<String>();
-		ArrayList<String> setList = new ArrayList<String>();
+		ArrayList<String> colSetList = new ArrayList<>();
+		ArrayList<String> setList = new ArrayList<>();
 		for (int i = 0; i < set.length; i++) {
 			// extraire la colonne à mettre à jour; la garder ssi elle existe
 			// dans le modèle de la table à mettre à
@@ -1106,7 +821,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 		}
 		// liste des colonnes de la jointure (clé primaire de la table initiale)
-		ArrayList<String> colKeyList = new ArrayList<String>();
+		ArrayList<String> colKeyList = new ArrayList<>();
 		for (int i = 0; i < keys.split(",").length; i++) {
 			colKeyList.add(keys.split(",")[i].trim().toUpperCase());
 		}

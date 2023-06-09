@@ -1,21 +1,31 @@
 package fr.insee.arc.utils.files;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.utils.PrivateConstructorTest;
 
 public class FileUtilsArcTest {
 
 	@Rule
 	public TemporaryFolder testFolder= new TemporaryFolder();
-		
+
+	@Test
+	public void testServiceHashFileNameIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+		PrivateConstructorTest.testConstructorIsPrivate(FileUtilsArc.class);
+	}
+	
+	
 	@Test
 	/** Test if deleteDirectory function delete the target directory and its content
 	 * @throws IOException 

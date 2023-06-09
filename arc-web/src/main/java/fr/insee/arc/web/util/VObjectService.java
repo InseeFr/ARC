@@ -43,6 +43,7 @@ import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -1324,8 +1325,8 @@ public class VObjectService {
 						nomPhase + "_" + ManipString.substringBeforeFirst(listIdSource.get(i), "_") + "_" + dirSuffix)
 						.toString();
 				// fichier non archivé
-				if (UtilitaireDao.isNotArchive(listContainer.get(i))) {
-					UtilitaireDao.generateEntryFromFile(receptionDirectoryRoot,
+				if (CompressedUtils.isNotArchive(listContainer.get(i))) {
+					CompressedUtils.generateEntryFromFile(receptionDirectoryRoot,
 							ManipString.substringAfterFirst(listIdSource.get(i), "_"), taos);
 					i++;
 				} else {
@@ -1344,17 +1345,17 @@ public class VObjectService {
 					}
 					// archive .tar.gz
 					if (currentContainer.endsWith(".tar.gz") || currentContainer.endsWith(".tgz")) {
-						UtilitaireDao.generateEntryFromTarGz(receptionDirectoryRoot, currentContainer,
+						CompressedUtils.generateEntryFromTarGz(receptionDirectoryRoot, currentContainer,
 								listIdSourceContainer, taos);
 						i = i + listIdSourceContainer.size();
 					} else if (currentContainer.endsWith(".zip")) {
-						UtilitaireDao.generateEntryFromZip(receptionDirectoryRoot, currentContainer,
+						CompressedUtils.generateEntryFromZip(receptionDirectoryRoot, currentContainer,
 								listIdSourceContainer, taos);
 						i = i + listIdSourceContainer.size();
 					}
 					// archive .gz
 					else if (listContainer.get(i).endsWith(".gz")) {
-						UtilitaireDao.generateEntryFromGz(receptionDirectoryRoot, currentContainer,
+						CompressedUtils.generateEntryFromGz(receptionDirectoryRoot, currentContainer,
 								listIdSourceContainer, taos);
 						i = i + listIdSourceContainer.size();
 					}

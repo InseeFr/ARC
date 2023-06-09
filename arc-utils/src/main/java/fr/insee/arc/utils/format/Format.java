@@ -4,15 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 
 public class Format implements IConstanteCaractere {
 
-    @SuppressWarnings("unused")
-	private static final Logger LOGGER = LogManager.getLogger(Format.class);
+	private Format() {
+		throw new IllegalStateException("Utility class");
+	}
 
     /**
      * @param array
@@ -34,7 +32,7 @@ public class Format implements IConstanteCaractere {
      * @param separator
      * @return
      */
-    public static String untokenize(Object[] array, String separator) {
+    private static String untokenize(Object[] array, String separator) {
         StringBuilder sb = new StringBuilder(empty);
         for (int i = 0; i < array.length; i++) {
             if (i > 0) {

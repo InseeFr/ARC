@@ -147,7 +147,7 @@ public class HierarchicalView implements ITree<String, String> {
         // Adding every column
         for (int i = 0; i < aColumnList.size(); i++) {
             returned.levelOrder.add(i, aColumnList.get(i));
-            returned.levelView.put(aColumnList.get(i), new ArrayList<HierarchicalView>());
+            returned.levelView.put(aColumnList.get(i), new ArrayList<>());
         }
         HierarchicalView local;
         for (int ligne = 0; ligne < aRelationalView.size(); ligne++) {
@@ -225,7 +225,7 @@ public class HierarchicalView implements ITree<String, String> {
         }
         if (!this.levelView.containsKey(aName)) {
             this.levelOrder.add(aName);
-            this.levelView.put(aName, new ArrayList<HierarchicalView>());
+            this.levelView.put(aName, new ArrayList<>());
         }
         for (HierarchicalView view : this.children()) {
             view.addLevelDescending(aName);

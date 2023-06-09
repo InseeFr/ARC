@@ -72,10 +72,10 @@ public class LogConfigurator {
 			.setName("File")
 			.withBufferSize(8192)
 			.setLayout(
-				(Layout<? extends Serializable>) PatternLayout.newBuilder()
+				PatternLayout.newBuilder()
 				.withPattern("%d %p %c [%t] %m%n").build())
 			.withPolicy(
-				(TriggeringPolicy) TimeBasedTriggeringPolicy.newBuilder()
+				TimeBasedTriggeringPolicy.newBuilder()
 				.withInterval(1).withModulate(true).build())
 			.build();
 		

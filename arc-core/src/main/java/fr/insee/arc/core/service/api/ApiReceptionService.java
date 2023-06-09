@@ -38,6 +38,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -209,7 +210,7 @@ public class ApiReceptionService extends ApiService {
 							boolean isArchive = true;
 
 							// les fichiers non archive sont archivés
-							if (UtilitaireDao.isNotArchive(fname)) {
+							if (CompressedUtils.isNotArchive(fname)) {
 								fname = fname + ".tar.gz";
 								isArchive = false;
 							}
@@ -243,7 +244,7 @@ public class ApiReceptionService extends ApiService {
 									deplacerFichier(dirIn, dirOut, f.getName(), d + "_" + fname);
 								} else {
 									// on génére le tar.gz dans archive
-									UtilitaireDao.generateTarGzFromFile(f, fileOutArchive, f.getName());
+									CompressedUtils.generateTarGzFromFile(f, fileOutArchive, f.getName());
 									// on copie le tar.gz dans encours
 									File fOut = new File(dirOut + File.separator + d + "_" + fname);
 									try {
@@ -592,7 +593,7 @@ public class ApiReceptionService extends ApiService {
 						if (fileOut.exists()) {
 							FileUtilsArc.delete(fileOut);
 						}
-						UtilitaireDao.generateTarGzFromFile(fileIn, fileOut,
+						CompressedUtils.generateTarGzFromFile(fileIn, fileOut,
 								ManipString.substringAfterFirst(fileIn.getName(), "_"));
 						FileUtilsArc.delete(fileIn);
 						insertPilotage(requete, this.tablePilTemp, container, containerNewName, v_container, fileName,

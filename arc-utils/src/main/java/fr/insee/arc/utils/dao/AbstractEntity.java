@@ -17,7 +17,7 @@ public abstract class AbstractEntity {
     private String table;
 
     public AbstractEntity() {
-        this(new HashMap<String, ArrayList<String>>());
+        this(new HashMap<>());
 
     }
 

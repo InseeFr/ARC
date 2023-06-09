@@ -131,7 +131,7 @@ public class GenericBean {
 	}
 	
 	public HashMap<String, Record> mapRecord() {
-		if (this.content == null || this.content.size() == 0) {
+		if (this.content == null || this.content.isEmpty()) {
 			return new HashMap<>();
 		}
 
