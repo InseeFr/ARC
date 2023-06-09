@@ -409,7 +409,7 @@ public class ApiInitialisationService extends ApiService {
 		requete.append(
 				", case when lower(data_type)='array' then replace(replace(replace(ltrim(udt_name,'_'),'int4','int'),'int8','bigint'),'float8','float')||'[]' ");
 		requete.append(
-				"	else replace(replace(lower(data_type),'double precision','float'),'integer','int') end type_variable_metier ");
+				" else replace(replace(lower(data_type),'double precision','float'),'integer','int') end type_variable_metier ");
 		requete.append("\n FROM information_schema.columns, " + envParameters + "_famille ");
 		requete.append("\n WHERE table_schema='"
 				+ ManipString.substringBeforeFirst(ServiceTableNaming.dbEnv(envExecution), ".").toLowerCase() + "' ");

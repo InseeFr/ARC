@@ -358,7 +358,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 				this.nomTableTemporaireIdTable = "table_id";
 				this.nomTableTemporaireFinale = "table_finale_" + table.getNomTableCourt();
 
-				creerTablePrepUnion(requeteGlobale, table, reglesIdentifiantes);
+				creerTablePrepUnion(requeteGlobale, table);
 				insererTablePrepUnion(requeteGlobale, table, reglesIdentifiantes);
 				calculerRequeteArrayAggGroup(requeteGlobale, table, tablesFilles);
 				calculerRequeteFinale(requeteGlobale, table);
@@ -450,7 +450,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 				addTableInTreeHierarchy(tableTree, table2, table);
 
 				// the index of the table is the maximum index of its ancestor table + 1
-				// we compute the index of ancestor tables recursivly
+				// we compute the index of ancestor tables recursively
 				int kTemp = computeTableNumber(order, tableTree, table2) + 1;
 				if (kTemp > k) {
 					k = kTemp;
@@ -671,18 +671,17 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 		return returned;
 	}
 
-	private StringBuilder creerTablePrepUnion(StringBuilder returned, TableMapping aTable,
-			Map<String, String> reglesIdentifiantes) {
+	private StringBuilder creerTablePrepUnion(StringBuilder returned, TableMapping aTable) {
 		returned.append(newline);
 
 		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporairePrepUnion + "  CASCADE; ");
-		returned.append("\n CREATE temporary TABLE " + this.nomTableTemporairePrepUnion + " (");
+		returned.append("\n CREATE TEMPORARY TABLE " + this.nomTableTemporairePrepUnion + " (");
 
 		listeVariablesTypesPrepUnion(returned, aTable, space, true);
 		returned.append(") " + FormatSQL.WITH_NO_VACUUM + ";");
 
 		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporaireIdTable + "  CASCADE; ");
-		returned.append("\n CREATE temporary TABLE " + this.nomTableTemporaireIdTable + " (");
+		returned.append("\n CREATE TEMPORARY TABLE " + this.nomTableTemporaireIdTable + " (");
 		returned.append(ID_TABLE + " bigint ");
 		returned.append(") " + FormatSQL.WITH_NO_VACUUM + ";");
 
@@ -719,7 +718,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 
 		returned.append("\n DROP TABLE IF EXISTS " + nomTableFichierCourant + " CASCADE;");
 		returned.append(
-				"\n CREATE temporary TABLE " + nomTableFichierCourant + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+				"\n CREATE TEMPORARY TABLE " + nomTableFichierCourant + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 
 		// bloc 1 : calcul de l'identifiant groupe et non groupe
 
@@ -968,14 +967,6 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 		}
 		return returned.toString();
 	}
-
-//  public void showAllrubrique() {
-//      StringBuilder returned = new StringBuilder();
-//      boolean isFirstTable = true;
-//      for (TableMapping table : this.ensembleTableMapping) {
-//          System.out.println(table.getEnsembleNomsRubriques());
-//      }
-//  }
 
 	public String requeteTransfertVersTablesMetierDefinitives() {
 		StringBuilder returned = new StringBuilder();
