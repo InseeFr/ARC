@@ -113,12 +113,10 @@ public class BddPatcherTest extends InitializeQueryTest {
 	 * insert data for functional tests
 	 * @throws ArcException
 	 */
-	private static void insertTestData(String sqlFileResource) throws ArcException {
-		//
-		
+	private static void insertTestData(String sqlFileResource) throws ArcException {		
 		String scriptDataTest;
 		try {
-			scriptDataTest = IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream("BdDTest/script_test_fonctionnel_sans_cog.sql"), StandardCharsets.UTF_8);
+			scriptDataTest = IOUtils.toString(ApiInitialisationService.class.getClassLoader().getResourceAsStream(sqlFileResource), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED);
 		}
