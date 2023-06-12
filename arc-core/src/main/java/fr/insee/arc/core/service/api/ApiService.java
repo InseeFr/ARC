@@ -41,8 +41,6 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ApiService.class);
 
-	public static final String FICHIER_MISE_EN_PRODUCTION = "production.dummy";
-
 	protected int maxParallelWorkers;
 
 
