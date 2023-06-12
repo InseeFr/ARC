@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -145,7 +146,7 @@ public class FileUtilsArcTest {
 	}
 	
 	@Test
-	public void renameToTest() throws IOException, ArcException
+	public void renameToTest_OK() throws IOException, ArcException
 	{
 		File root=testFolder.newFolder("root");
 		File testDir=new File(root,"testDir");
@@ -172,6 +173,26 @@ public class FileUtilsArcTest {
 		// fileRenamed doit exister
 		assertTrue(fileRenamed.exists());
 		
+	}
+	
+	@Test(expected = ArcException.class)
+	public void renameToTest_KO() throws IOException, ArcException
+	{
+		File root=testFolder.newFolder("root");
+		File testDirA=new File(root,"a");
+		testDirA.mkdir();
+		
+		File testDirB=new File(root,"a/b");
+		testDirB.mkdir();
+		
+		File fileToRenameA=new File(testDirA,"fileToRename.txt");
+		fileToRenameA.createNewFile();
+		
+		File fileToRenameB=new File(testDirB,"fileToRename.txt");
+		fileToRenameB.createNewFile();
+		
+		// file already exists; rename will fail
+		FileUtilsArc.renameTo(fileToRenameA, fileToRenameB);
 	}
 	
 	@Test
