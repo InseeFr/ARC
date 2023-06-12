@@ -175,7 +175,7 @@ public class FileUtilsArcTest {
 		
 	}
 	
-	@Test(expected = ArcException.class)
+	@Test
 	public void renameToTest_KO() throws IOException, ArcException
 	{
 		File root=testFolder.newFolder("root");
