@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -170,6 +172,33 @@ public class FileUtilsArcTest {
 		// fileRenamed doit exister
 		assertTrue(fileRenamed.exists());
 		
+	}
+	
+	@Test
+	public void createDirIfNotexistTest() throws IOException
+	{
+		File root=testFolder.newFolder("root");
+		File testDir=new File(root,"/a/b/c");
+		String testDirPath=testDir.getAbsoluteFile().toString();
+		File testDirB=new File(root,"/a/b");
+		File testDirA=new File(root,"/a");
+		
+		// Création du répertoire A
+		testDirA.mkdir();
+		assertTrue(testDirA.exists());
+		
+		// avant la création les répertoire B et C n'existent pas
+		assertFalse(testDirB.exists());
+		assertFalse(testDir.exists());
+
+		// création des répertoires en cascade
+		FileUtilsArc.createDirIfNotexist(testDirPath);
+		
+		// aprés la création le repértoire intermédiaire B a été créé ainsi que le répertoire final
+		assertTrue(testDirA.exists());
+		assertTrue(testDirB.exists());
+		assertTrue(testDir.exists());
+
 	}
 	
 	
