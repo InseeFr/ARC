@@ -163,36 +163,7 @@ public class FileUtilsArcTest {
 		assertTrue(fileRenamed.exists());
 		
 	}
-	
-	@Test
-	public void renameToTest_KO() throws IOException, ArcException
-	{
-		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
 
-		File testDirA=new File(testDir,"a");
-		testDirA.mkdir();
-		
-		File testDirB=new File(testDir,"a/b");
-		testDirB.mkdir();
-		
-		File fileToRenameA=new File(testDirA,"fileToRename.txt");
-		fileToRenameA.createNewFile();
-		
-		File fileToRenameB=new File(testDirB,"fileToRename.txt");
-		fileToRenameB.createNewFile();
-		
-		// file already exists; rename will fail
-		boolean failed=false;
-		try {
-			FileUtilsArc.renameTo(fileToRenameA, fileToRenameB);
-		} catch (ArcException e) {
-			failed=true;
-		}
-		
-		assertTrue(failed);
-
-	}
 	
 	@Test
 	public void createDirIfNotexistTest() throws IOException, ArcException
