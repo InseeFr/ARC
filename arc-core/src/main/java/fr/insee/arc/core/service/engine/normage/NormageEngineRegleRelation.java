@@ -34,7 +34,6 @@ public class NormageEngineRegleRelation {
 		// extraction de la clause select
 		String blocCreate = ManipString.substringBeforeFirst(returned, "\n insert into {table_destination}");
 
-		String viewAndInsert = ManipString.substringBeforeLast(returned, " select ");
 		String selectBase = " select " + ManipString.substringAfterLast(returned, " select ");
 		String finBase = "\n)" + ManipString.substringAfterLast(selectBase, ")");
 		selectBase = ManipString.substringBeforeLast(selectBase, ")");
@@ -89,7 +88,7 @@ public class NormageEngineRegleRelation {
 		// donc sauter la premiere ligne qui est juste un placeholder)
 		// on ajoute une premiere ligne : discard temp
 
-		viewAndInsert = "";
+		String viewAndInsert = "";
 		for (int k = 0; k < lines.length; k++) {
 			viewAndInsert += lines[k] + "\n";
 		}

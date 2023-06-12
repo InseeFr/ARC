@@ -17,9 +17,7 @@ import fr.insee.arc.utils.utils.ManipString;
 
 public class NormageEngineRegleIndependance {
 
-	
 	private static final Logger LOGGER = LogManager.getLogger(NormageEngineRegleIndependance.class);
-
 
 	/**
 	 * On va parse la jointure ; on rend les frères indépendants On exclus de
@@ -32,8 +30,8 @@ public class NormageEngineRegleIndependance {
 	 * @param jointure
 	 * @throws ArcException
 	 */
-	protected static void ajouterRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) {
+	protected static void ajouterRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme,
+			Date validite, String periodicite, String jointure) {
 		StaticLoggerDispatcher.info("ajouterRegleIndependance()", LOGGER);
 
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
@@ -98,14 +96,11 @@ public class NormageEngineRegleIndependance {
 
 		// ARC compute which rubriques are independant and set the independance rules
 		ArrayList<String> r = new ArrayList<>();
-		addIndependanceToChildren(r, blocCreate, NormageEngineGlobal.getM(blocCreate), regle, rubriquesAvecRegleDIndependance, norme,
-				periodicite, rubriqueExclusion);
+		addIndependanceToChildren(r, blocCreate, NormageEngineGlobal.getM(blocCreate), regle,
+				rubriquesAvecRegleDIndependance, norme, periodicite, rubriqueExclusion);
 
 	}
 
-
-	
-	
 	/**
 	 * Modifie la requete pour appliquer les regles d'indépendance
 	 * 
@@ -117,8 +112,8 @@ public class NormageEngineRegleIndependance {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected static String appliquerRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
-			String periodicite, String jointure) throws ArcException {
+	protected static String appliquerRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme,
+			Date validite, String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info("appliquerRegleIndependance()", LOGGER);
 
@@ -133,11 +128,11 @@ public class NormageEngineRegleIndependance {
 
 			if (type.equals("bloc_independance")) {
 
-				String rubriqueRegle[] = regle.get("rubrique").get(j).replace(" ", "").toLowerCase().split(",");
-				String rubriqueNmclRegle[] = regle.get("rubrique_nmcl").get(j).replace(" ", "").toLowerCase()
+				String[] rubriqueRegle = regle.get("rubrique").get(j).replace(" ", "").toLowerCase().split(",");
+				String[] rubriqueNmclRegle = regle.get("rubrique_nmcl").get(j).replace(" ", "").toLowerCase()
 						.split(",");
 
-				ArrayList<String> rubrique = new ArrayList<String>();
+				ArrayList<String> rubrique = new ArrayList<>();
 				HashMap<String, String> rubriqueNmcl = new HashMap<>();
 
 				// ne garder que les rubriques qui existent dans la requete
@@ -145,15 +140,16 @@ public class NormageEngineRegleIndependance {
 				String fatherSav = null;
 				for (int i = 0; i < rubriqueRegle.length; i++) {
 					if (blocCreate.contains(" " + rubriqueRegle[i] + " ")) {
-						String m_rubrique = "m_" + NormageEngineGlobal.getCoreVariableName(rubriqueRegle[i]);
+						String rubriqueM = "m_" + NormageEngineGlobal.getCoreVariableName(rubriqueRegle[i]);
 
 						// si on trouve la rubrique mais qu'elle n'est pas identifiant de bloc (m_), on
 						// sort
-						if (!blocCreate.contains(m_rubrique)) {
-							throw new ArcException(ArcExceptionMessage.NORMAGE_INDEPENDANCE_BLOC_INVALID_IDENTIFIER, rubriqueRegle[i]);
+						if (!blocCreate.contains(rubriqueM)) {
+							throw new ArcException(ArcExceptionMessage.NORMAGE_INDEPENDANCE_BLOC_INVALID_IDENTIFIER,
+									rubriqueRegle[i]);
 						}
 
-						rubriqueRegle[i] = m_rubrique;
+						rubriqueRegle[i] = rubriqueM;
 						rubrique.add(rubriqueRegle[i]);
 						rubriqueNmcl.put(rubriqueRegle[i], rubriqueNmclRegle[i]);
 
@@ -161,7 +157,8 @@ public class NormageEngineRegleIndependance {
 							fatherSav = NormageEngineGlobal.getFatherM(blocCreate, rubriqueRegle[i]);
 						} else {
 							if (!fatherSav.equals(NormageEngineGlobal.getFatherM(blocCreate, rubriqueRegle[i]))) {
-								throw new ArcException(ArcExceptionMessage.NORMAGE_INDEPENDANCE_BLOC_INVALID_FATHER, rubriqueRegle[i]);
+								throw new ArcException(ArcExceptionMessage.NORMAGE_INDEPENDANCE_BLOC_INVALID_FATHER,
+										rubriqueRegle[i]);
 							}
 						}
 
@@ -176,9 +173,9 @@ public class NormageEngineRegleIndependance {
 					// calcul du rang
 					String[] lines = blocCreate.split("\n");
 
-					HashMap<String, String> table = new HashMap<String, String>();
-					HashMap<String, String> pere = new HashMap<String, String>();
-					HashMap<String, String> autreCol = new HashMap<String, String>();
+					HashMap<String, String> table = new HashMap<>();
+					HashMap<String, String> pere = new HashMap<>();
+					HashMap<String, String> autreCol = new HashMap<>();
 
 					StringBuilder blocCreateNew = new StringBuilder();
 					StringBuilder blocInsertNew = new StringBuilder();
@@ -253,8 +250,7 @@ public class NormageEngineRegleIndependance {
 		return returned;
 
 	}
-	
-	
+
 	/**
 	 * Method that calculate the query to create the tables for independant rules
 	 * The goal is to put the lines of independant block front to front For
@@ -389,10 +385,11 @@ public class NormageEngineRegleIndependance {
 		blocRequete.append(") ;\n");
 		return isThereAnyValue;
 	}
-	
+
 	/**
 	 * A partir du blocCreate, determine récursivement les enfant d'une rubrique
 	 * "m_<***>"
+	 * 
 	 * @param r
 	 * @param blocCreate
 	 * @param mRubrique
@@ -407,9 +404,7 @@ public class NormageEngineRegleIndependance {
 			String norme, String periodicite, HashSet<String> exclusion) {
 		ArrayList<String> s = NormageEngineGlobal.getChildren(blocCreate, mRubrique);
 
-		if (s.isEmpty()) {
-			return;
-		} else {
+		if (!s.isEmpty()) {
 			r.addAll(s);
 
 			// si on a exclus le bloc, on ne le met pas dans la regle
@@ -453,5 +448,5 @@ public class NormageEngineRegleIndependance {
 		}
 
 	}
-	
+
 }
