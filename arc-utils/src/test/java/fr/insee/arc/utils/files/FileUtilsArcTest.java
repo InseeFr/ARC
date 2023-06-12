@@ -6,7 +6,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,7 +37,9 @@ public class FileUtilsArcTest {
 	public void deleteDirectoryTest() throws IOException, ArcException {
 
 		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
+		
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
 		
 		// create files at root level
 		new File(testDir,"file1.txt").createNewFile();
@@ -73,8 +78,9 @@ public class FileUtilsArcTest {
 	public void deleteDirectoryTestDirectoryNotExists() throws IOException, ArcException {
 
 		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
 		
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
 		
 		File directoryNotExists=new File(testDir, "dirnotexists");
 		
@@ -91,7 +97,9 @@ public class FileUtilsArcTest {
 	@Test
 	public void deleteAndRecreateDirectoryTest() throws IOException, ArcException {
 		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
+		
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
 		
 		File directoryToTest=new File(testDir, "directoryToTest");
 		directoryToTest.mkdir();
@@ -120,13 +128,15 @@ public class FileUtilsArcTest {
 	/**
 	 * Test is file is file is completly written
 	 * @throws IOException
-	 * @throws ArcException 
 	 */
 	@Test
-	public void isCompletelyWrittenTest() throws IOException, ArcException
+	public void isCompletelyWrittenTest() throws IOException
 	{
 		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
+		
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
+
 		
 		File fileInDirectoryToTest=new File(testDir,"fileInDirectory.txt");
 		fileInDirectoryToTest.createNewFile();
@@ -139,7 +149,8 @@ public class FileUtilsArcTest {
 	public void renameToTest_OK() throws IOException, ArcException
 	{
 		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
+		File testDir=new File(root,"testDir");
+		testDir.mkdir();
 		
 		File fileToRename=new File(testDir,"fileToRename.txt");
 		fileToRename.createNewFile();
@@ -164,16 +175,14 @@ public class FileUtilsArcTest {
 		
 	}
 	
-	@Test
+	@Test(expected = ArcException.class)
 	public void renameToTest_KO() throws IOException, ArcException
 	{
 		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
-
-		File testDirA=new File(testDir,"a");
+		File testDirA=new File(root,"a");
 		testDirA.mkdir();
 		
-		File testDirB=new File(testDir,"b");
+		File testDirB=new File(root,"b");
 		testDirB.mkdir();
 		
 		File fileToRenameA=new File(testDirA,"fileToRename.txt");
@@ -183,27 +192,17 @@ public class FileUtilsArcTest {
 		fileToRenameB.createNewFile();
 		
 		// file already exists; rename will fail
-		boolean failed=false;
-		try {
-			FileUtilsArc.renameTo(fileToRenameA, fileToRenameB);
-		} catch (ArcException e) {
-			failed=true;
-		}
-		
-		assertTrue(failed);
-
+		FileUtilsArc.renameTo(fileToRenameA, fileToRenameB);
 	}
 	
 	@Test
-	public void createDirIfNotexistTest() throws IOException, ArcException
+	public void createDirIfNotexistTest() throws IOException
 	{
 		File root=testFolder.newFolder("root");
-		File testDir=clearAndCreateTestDirectory(root);
-		
-		File testDirABC=new File(testDir,"/a/b/c");
-		String testDirPath=testDirABC.getAbsoluteFile().toString();
-		File testDirB=new File(testDir,"/a/b");
-		File testDirA=new File(testDir,"/a");
+		File testDir=new File(root,"/a/b/c");
+		String testDirPath=testDir.getAbsoluteFile().toString();
+		File testDirB=new File(root,"/a/b");
+		File testDirA=new File(root,"/a");
 		
 		// Création du répertoire A
 		testDirA.mkdir();
@@ -211,7 +210,7 @@ public class FileUtilsArcTest {
 		
 		// avant la création les répertoire B et C n'existent pas
 		assertFalse(testDirB.exists());
-		assertFalse(testDirABC.exists());
+		assertFalse(testDir.exists());
 
 		// création des répertoires en cascade
 		FileUtilsArc.createDirIfNotexist(testDirPath);
@@ -219,19 +218,8 @@ public class FileUtilsArcTest {
 		// aprés la création le repértoire intermédiaire B a été créé ainsi que le répertoire final
 		assertTrue(testDirA.exists());
 		assertTrue(testDirB.exists());
-		assertTrue(testDirABC.exists());
+		assertTrue(testDir.exists());
 
-	}
-	
-	private File clearAndCreateTestDirectory(File root) throws ArcException
-	{
-		File testDir=new File(root,"testDir");
-		if (testDir.exists())
-		{
-			FileUtilsArc.deleteDirectory(testDir);
-		}
-		testDir.mkdir();
-		return testDir;
 	}
 	
 	
