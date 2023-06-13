@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.structure.GenericBean;
 
 /**
  * 
@@ -40,69 +39,6 @@ public abstract class EntityProvider<T> implements Function<ResultSet, T> {
 
 	public static final EntityProvider<ArrayList<ArrayList<String>>> getArrayOfArrayProvider() {
 		return new ArrayOfArrayProvider();
-	}
-
-	private static final class GenericBeanProvider extends EntityProvider<GenericBean> {
-		@Override
-		public GenericBean apply(ResultSet res) {
-			return new GenericBean(getArrayOfArrayProvider().apply(res));
-		}
-	}
-
-	public static final EntityProvider<GenericBean> getGenericBeanProvider() {
-		return new GenericBeanProvider();
-	}
-
-	private static final class TypedListProvider<T> extends EntityProvider<List<T>> {
-		private Function<ResultSet, T> orm;
-
-		/**
-		 * @param orm
-		 */
-		TypedListProvider(Function<ResultSet, T> orm) {
-			this.orm = orm;
-		}
-
-		@Override
-		public List<T> apply(ResultSet res) {
-			try {
-				return fromResultSetToListOfT(() -> new ArrayList<>(), this.orm, res);
-			} catch (ArcException ex) {
-				throw new IllegalStateException(ex);
-			}
-		}
-	}
-
-	public static final <T> EntityProvider<List<T>> getTypedListProvider(Function<ResultSet, T> orm) {
-		return new TypedListProvider<>(orm);
-	}
-
-	private static final class DefaultEntityProvider<T> extends EntityProvider<T> {
-		private Function<ResultSet, T> orm;
-
-		/**
-		 * @param orm
-		 */
-		DefaultEntityProvider(Function<ResultSet, T> orm) {
-			this.orm = orm;
-		}
-
-		@Override
-		public T apply(ResultSet res) {
-			return this.orm.apply(res);
-		}
-	}
-
-	public static final <T> EntityProvider<T> getDefaultEntityProvider(Function<ResultSet, T> orm) {
-		return new DefaultEntityProvider<>(orm);
-	}
-
-	public static final GenericBean fromResultSetToGenericBean(ResultSet res) {
-		try {
-			return new GenericBean(fromResultSetToArray(res));
-		} catch (ArcException ex) {
-			throw new IllegalStateException(ex);
-		}
 	}
 
 	public static ArrayList<ArrayList<String>> fromResultSetToArray(ResultSet res) throws ArcException {
@@ -150,16 +86,4 @@ public abstract class EntityProvider<T> implements Function<ResultSet, T> {
 		}
 	}
 
-	public static <T, U extends List<T>> U fromResultSetToListOfT(Supplier<U> newList, Function<ResultSet, T> orm,
-			ResultSet res) throws ArcException {
-		try {
-			U result = newList.get();
-			while (res.next()) {
-				result.add(orm.apply(res));
-			}
-			return result;
-		} catch (SQLException sqlException) {
-			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED).logFullException();
-		}
-	}
 }

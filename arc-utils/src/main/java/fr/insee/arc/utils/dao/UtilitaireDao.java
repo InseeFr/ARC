@@ -678,16 +678,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param requete
 	 * @throws ArcException
 	 */
-	public void executeBlockNoError(Connection connexion, StringBuilder requete) throws ArcException {
-		executeImmediate(connexion, "do $$ BEGIN " + requete.toString() + " exception when others then END; $$;\n");
-	}
-
-	/**
-	 *
-	 * @param connexion
-	 * @param requete
-	 * @throws ArcException
-	 */
 	public void executeBlock(Connection connexion, StringBuilder requete) throws ArcException {
 		executeBlock(connexion, requete.toString());
 	}
