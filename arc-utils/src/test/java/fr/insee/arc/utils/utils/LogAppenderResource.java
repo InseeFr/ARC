@@ -48,7 +48,13 @@ public class LogAppenderResource extends ExternalResource {
     }
 
     public String getOutputAsString() {
-        return outContent.toString();
+    	String output= outContent.toString();
+    	return output;
+    }
+
+    public void resetOutput()
+    {
+    	outContent.reset();
     }
     
     public String[] getOutput() {

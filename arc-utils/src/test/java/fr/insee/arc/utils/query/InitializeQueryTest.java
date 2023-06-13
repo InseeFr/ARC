@@ -17,9 +17,9 @@ import fr.insee.arc.utils.structure.GenericBean;
 public class InitializeQueryTest {
 
 
-    private static UtilitaireDao u = UtilitaireDao.get(0);
+	public static UtilitaireDao u = UtilitaireDao.get(0);
     
-    protected static Connection c = TestDatabase.testConnection;
+    public static Connection c = TestDatabase.testConnection;
     
 
     @Test

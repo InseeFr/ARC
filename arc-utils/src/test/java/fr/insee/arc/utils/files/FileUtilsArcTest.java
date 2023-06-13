@@ -24,7 +24,7 @@ public class FileUtilsArcTest {
 	public TemporaryFolder testFolder= new TemporaryFolder();
 
 	@Test
-	public void testServiceHashFileNameIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+	public void testServiceFileUtilsArcIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		PrivateConstructorTest.testConstructorIsPrivate(FileUtilsArc.class);
 	}
 	

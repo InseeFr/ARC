@@ -23,7 +23,6 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class BddPatcherTest extends InitializeQueryTest {
 
-	private static String oldVersion = "v1";
 	private static String newVersion = "v2";
 	private static String userWithRestrictedRights = "arc_restricted";
 	public static String testSandbox = "arc_bas1";
@@ -87,9 +86,9 @@ public class BddPatcherTest extends InitializeQueryTest {
 		UtilitaireDao.get(0).executeRequest(c, query);
 
 		// metadata schema creation
-		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c);
+		BddPatcher.bddScript(newVersion, userWithRestrictedRights, c);
 		// sandbox schema creation
-		BddPatcher.bddScript(oldVersion, newVersion, userWithRestrictedRights, c, testSandbox);
+		BddPatcher.bddScript(newVersion, userWithRestrictedRights, c, testSandbox);
 		
 	}
 

@@ -38,6 +38,11 @@ public class DataObjectService {
 	 */
 	private String sandboxSchema;
 
+	public DataObjectService() {
+		super();
+	}
+
+	
 	public DataObjectService(String sandboxSchema) {
 		super();
 		this.sandboxSchema = sandboxSchema;

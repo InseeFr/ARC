@@ -26,7 +26,6 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 
 @Service
 public class ServiceViewListNomenclatures extends InteractorNomenclature {

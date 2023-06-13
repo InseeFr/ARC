@@ -7,15 +7,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
 public class BDParameters {
 
     private static final Logger LOGGER = LogManager.getLogger(BDParameters.class);
-
 	
-	private static final String PARAMETER_TABLE="arc.parameter";
+	private static final String PARAMETER_TABLE=new DataObjectService().getView(ViewEnum.PARAMETER);
 	private static final String PARAMETER_SQL_QUERY = "SELECT val FROM "+PARAMETER_TABLE+" ";
 
 	private static ArcPreparedStatementBuilder parameterQuery(String key) {
@@ -28,13 +29,14 @@ public class BDParameters {
 		String r = null;
 		try {
 			r = UtilitaireDao.get(0).getString(c, parameterQuery(key));
-		} catch (Exception e) {
+		} catch (ArcException e) {
 	        // Création de la table de parametre
 			StringBuilder requete=new StringBuilder();
 			
 	        requete.append("\n CREATE SCHEMA IF NOT EXISTS arc; ");
 			
-	        requete.append("\n CREATE TABLE IF NOT EXISTS arc.parameter ");
+	        requete.append("\n CREATE TABLE IF NOT EXISTS ");
+	        requete.append(PARAMETER_TABLE);
 	        requete.append("\n ( ");
 	        requete.append("\n key text, ");
 	        requete.append("\n val text, ");
@@ -75,7 +77,7 @@ public class BDParameters {
 		return s == null ? defaultValue : s;
 	}
 	
-	private static void insertDefaultValue(Connection c,String key, String defaultValue)
+	protected static void insertDefaultValue(Connection c,String key, String defaultValue)
 	{
 		try {
 			UtilitaireDao.get(0).executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");

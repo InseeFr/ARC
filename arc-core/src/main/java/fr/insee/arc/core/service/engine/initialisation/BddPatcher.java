@@ -117,7 +117,6 @@ public class BddPatcher {
 	
 	private static void setBddScriptVersionWithoutDescription (Connection connexion, String commitId, String... envExecution)
 	{
-		
 		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId);
 	}
 
@@ -195,11 +194,10 @@ public class BddPatcher {
 
 		PropertiesHandler p = PropertiesHandler.getInstance();
 		
-		String databaseOldGitVersion=checkBddScriptVersion(connexion, envExecutions);
 		String applicationNewGitVersion=p.getGitCommitId();
 		String userNameWithRestrictedRights=p.getDatabaseRestrictedUsername();
 		
-		bddScript(databaseOldGitVersion, applicationNewGitVersion, userNameWithRestrictedRights, connexion, envExecutions);
+		bddScript(applicationNewGitVersion, userNameWithRestrictedRights, connexion, envExecutions);
 		
 	}	
 	
@@ -211,8 +209,12 @@ public class BddPatcher {
 	 * @param connexion
 	 * @param envExecutions
 	 */
-	public static void bddScript(String databaseOldGitVersion, String applicationNewGitVersion, String userNameWithRestrictedRights, Connection connexion, String...envExecutions)
+	public static void bddScript(String applicationNewGitVersion, String userNameWithRestrictedRights, Connection connexion, String...envExecutions)
 	{
+		// retrieve the old version from the parameter table
+		// if param not found, parameter table is created and parameter added
+		String databaseOldGitVersion=checkBddScriptVersion(connexion, envExecutions);
+		
 		// if database registered git number is not the same as the application git number
 		
 				if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {

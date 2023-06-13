@@ -105,8 +105,6 @@ public class ArcExceptionTest {
 		} catch (ArcException e) {
 			e.logFullException();
 		}
-
-		System.out.println(appender.getOutputAsString());
 		
 		// first line in logger must be message
 		assertEquals(EXPECTED_MESSAGE_BUSINESS_EXCEPTION, appender.getOutput()[0]);
