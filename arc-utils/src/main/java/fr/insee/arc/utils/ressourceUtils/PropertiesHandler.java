@@ -4,7 +4,6 @@ package fr.insee.arc.utils.ressourceUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.exception.ArcException;
@@ -70,7 +69,7 @@ public class PropertiesHandler {
     		return (PropertiesHandler) SpringApplicationContext.getBean("properties");
     	} catch( NullPointerException e ) {
     		new ArcException(ArcExceptionMessage.SPRING_BEAN_PROPERTIES_NOTFOUND).logMessageException();
-    		return null;
+    		return new PropertiesHandler();
     	}
     	
     }

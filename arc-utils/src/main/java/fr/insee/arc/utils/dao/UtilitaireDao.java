@@ -1057,4 +1057,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
+	public PropertiesHandler getProperties() {
+		return properties;
+	}
+
+	public void setProperties(PropertiesHandler properties) {
+		this.properties = properties;
+	}
+
 }
