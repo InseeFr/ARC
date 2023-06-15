@@ -36,8 +36,18 @@ public class BddPatcherTest extends InitializeQueryTest {
 	public void bddScriptTest() throws ArcException {
 		
 		// test an arc database
-		createDatabase();
+		createDatabase(userWithRestrictedRights);
+		testDatabaseCreation();
 
+		createDatabase("");
+		testDatabaseCreation();
+		
+		createDatabase(null);
+		testDatabaseCreation();
+	}
+	
+	public static void testDatabaseCreation() throws ArcException
+	{
 		GenericPreparedStatementBuilder query;
 
 		// test the meta data schema creation
@@ -76,7 +86,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 	 * create a blank arc database based on bddScript method
 	 * @throws ArcException
 	 */
-	public static void createDatabase() throws ArcException {
+	public static void createDatabase(String restrictedUser) throws ArcException {
 		GenericPreparedStatementBuilder query;
 
 		// clean database
@@ -94,6 +104,14 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// sandbox schema creation
 		patcher.bddScript(c, testSandbox);
 		
+	}
+	
+	/**
+	 * create a blank arc database based on bddScript method
+	 * @throws ArcException
+	 */
+	public static void createDatabase() throws ArcException {
+		createDatabase(userWithRestrictedRights);		
 	}
 
 	/**

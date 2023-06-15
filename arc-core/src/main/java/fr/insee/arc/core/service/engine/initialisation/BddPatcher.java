@@ -195,7 +195,6 @@ public class BddPatcher {
      * @param connexion
      */
 	public void bddScript(Connection connexion, String...envExecutions) {
-
 		
 		String applicationNewGitVersion=properties.getGitCommitId();
 		String userNameWithRestrictedRights=properties.getDatabaseRestrictedUsername();
@@ -249,10 +248,6 @@ public class BddPatcher {
 
 	public PropertiesHandler getProperties() {
 		return properties;
-	}
-
-	public void setProperties(PropertiesHandler properties) {
-		this.properties = properties;
 	}
 
 }
