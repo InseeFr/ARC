@@ -36,9 +36,13 @@ public class BddPatcher {
 	 */
 	private static final String SANDBOX_ENVIRONMENT_PLACEHOLDER="{{envExecution}}";
 	
+	private PropertiesHandler properties;
+		
+	public BddPatcher() {
+		super();
+		properties = PropertiesHandler.getInstance();
+	}
 
-	
-	
 	/**
 	 * inject in sql database initialization scripts the input parameters
 	 * @param query
@@ -141,7 +145,7 @@ public class BddPatcher {
 	/**
 	 * execute the global sql scripts
 	 * @param connexion
-	 * @param p
+	 * @param properties
 	 * @throws ArcException
 	 */
 	private static void bddScriptGlobalExecutor(Connection connexion, String userNameWithRestrictedRights) throws ArcException
@@ -164,7 +168,7 @@ public class BddPatcher {
 	/**
 	 * Execute the sql script for environements
 	 * @param connexion
-	 * @param p
+	 * @param properties
 	 * @param envExecutions
 	 * @throws ArcException
 	 */
@@ -190,12 +194,11 @@ public class BddPatcher {
      * La version de la base de données correpond au numéro de commit de git 
      * @param connexion
      */
-	public static void bddScript(Connection connexion, String...envExecutions) {
+	public void bddScript(Connection connexion, String...envExecutions) {
 
-		PropertiesHandler p = PropertiesHandler.getInstance();
 		
-		String applicationNewGitVersion=p.getGitCommitId();
-		String userNameWithRestrictedRights=p.getDatabaseRestrictedUsername();
+		String applicationNewGitVersion=properties.getGitCommitId();
+		String userNameWithRestrictedRights=properties.getDatabaseRestrictedUsername();
 		
 		bddScript(applicationNewGitVersion, userNameWithRestrictedRights, connexion, envExecutions);
 		
@@ -209,7 +212,7 @@ public class BddPatcher {
 	 * @param connexion
 	 * @param envExecutions
 	 */
-	public static void bddScript(String applicationNewGitVersion, String userNameWithRestrictedRights, Connection connexion, String...envExecutions)
+	private static void bddScript(String applicationNewGitVersion, String userNameWithRestrictedRights, Connection connexion, String...envExecutions)
 	{
 		// retrieve the old version from the parameter table
 		// if param not found, parameter table is created and parameter added
@@ -243,5 +246,13 @@ public class BddPatcher {
 					
 				}
 	}
-	
+
+	public PropertiesHandler getProperties() {
+		return properties;
+	}
+
+	public void setProperties(PropertiesHandler properties) {
+		this.properties = properties;
+	}
+
 }

@@ -262,7 +262,7 @@ public class ApiInitialisationService extends ApiService {
 	 * Méthode pour initialiser ou patcher la base de données la base de donnée.
 	 */
 	public static void bddScript(Connection connexion, String... envExecutions) {
-		BddPatcher.bddScript(connexion, envExecutions);
+		new BddPatcher().bddScript(connexion, envExecutions);
 	}
 
 	/**
@@ -862,6 +862,12 @@ public class ApiInitialisationService extends ApiService {
 		}
 	}
 
+	/**
+	 * replace an expression in rules
+	 * @param connexion
+	 * @param anExecutionEnvironment
+	 * @throws ArcException
+	 */
 	private static void applyExpressions(Connection connexion, String anExecutionEnvironment) throws ArcException {
 		// Checks expression validity
 		ExpressionService expressionService = new ExpressionService();

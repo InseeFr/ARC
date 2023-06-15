@@ -84,11 +84,15 @@ public class BddPatcherTest extends InitializeQueryTest {
 		query.append("DROP SCHEMA IF EXISTS " + DataObjectService.ARC_METADATA_SCHEMA + " CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS " + testSandbox + " CASCADE;");
 		UtilitaireDao.get(0).executeRequest(c, query);
+		
+		BddPatcher patcher=new BddPatcher();
+		patcher.getProperties().setGitCommitId(newVersion);
+		patcher.getProperties().setDatabaseRestrictedUsername(userWithRestrictedRights);
 
 		// metadata schema creation
-		BddPatcher.bddScript(newVersion, userWithRestrictedRights, c);
+		patcher.bddScript(c);
 		// sandbox schema creation
-		BddPatcher.bddScript(newVersion, userWithRestrictedRights, c, testSandbox);
+		patcher.bddScript(c, testSandbox);
 		
 	}
 
