@@ -131,6 +131,14 @@ public class BddPatcherTest extends InitializeQueryTest {
 	}
 	
 	/**
+	 * insert data for export unit tests
+	 * @throws ArcException
+	 */
+	public static void insertTestDataExport() throws ArcException {
+		insertTestData("BdDTest/script_test_export.sql");
+	}
+	
+	/**
 	 * insert data for functional tests
 	 * @throws ArcException
 	 */

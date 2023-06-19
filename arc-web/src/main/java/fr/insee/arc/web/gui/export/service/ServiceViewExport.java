@@ -21,11 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.web.util.VObject;
 
 @Service
 public class ServiceViewExport extends InteractorExport {
@@ -57,15 +55,10 @@ public class ServiceViewExport extends InteractorExport {
 	public String startExport(Model model) {
 
 		try {
-			// Récupérer les exports sélectionnés
-			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-			requete.append("SELECT * FROM " + getBacASable() + ".export ");
-			requete.append("WHERE file_name IN ("
-					+ requete.sqlListeOfValues(views.getViewExport().mapContentSelected().get("file_name")) + ") ");
-
 			// Requêter les exports à réaliser
-			HashMap<String, ArrayList<String>> rules = new GenericBean(
-					UtilitaireDao.get(0).executeRequest(null, requete)).mapContent();
+			VObject viewExport = views.getViewExport();
+			dao.setSelectedRecords(viewExport.mapContentSelected());
+			HashMap<String, ArrayList<String>> rules = dao.startExportRetrieve(viewExport);
 
 			ArrayList<String> fileName = rules.get("file_name");
 			ArrayList<String> zip = rules.get("zip");
@@ -75,11 +68,8 @@ public class ServiceViewExport extends InteractorExport {
 
 			// Itérer sur les exports à réaliser
 			for (int fileIndex = 0; fileIndex < fileName.size(); fileIndex++) {
-				requete = new ArcPreparedStatementBuilder();
-				requete.append("UPDATE " + getBacASable() + ".export set etat="
-						+ requete.quoteText(TraitementEtat.ENCOURS.toString()) + " where file_name="
-						+ requete.quoteText(fileName.get(fileIndex)) + " ");
-				UtilitaireDao.get(0).executeRequest(null, requete);
+				
+				dao.startExportUpdateState(fileName, fileIndex, false);
 
 				switch (zip.get(fileIndex)) {
 				case "1": // Zip
@@ -92,12 +82,7 @@ public class ServiceViewExport extends InteractorExport {
 					exportPlainText(dirOut, rules, fileIndex);
 				}
 
-				requete = new ArcPreparedStatementBuilder();
-				requete.append("UPDATE " + getBacASable()
-						+ ".export set etat=to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') ");
-				requete.append("WHERE file_name=" + requete.quoteText(fileName.get(fileIndex)) + " ");
-
-				UtilitaireDao.get(0).executeRequest(null, requete);
+				dao.startExportUpdateState(fileName, fileIndex, true);
 			}
 		} catch (ArcException | SQLException e) {
 			views.getViewExport().setMessage("Export failed because of database query");
@@ -171,22 +156,7 @@ public class ServiceViewExport extends InteractorExport {
 		HashMap<String, Integer> pos = new HashMap<>();
 		ArrayList<String> headerLine = new ArrayList<>();
 
-		// if columns,orders table is specified, get the information from database metadata
-		String howToExportReworked;
-		if (howToExport.get(n) == null) {
-			howToExportReworked = "(select column_name as varbdd, ordinal_position as pos from information_schema.columns where table_schema||'.'||table_name = '"
-					+ getBacASable().toLowerCase() + "." + tablesToExport.get(n) + "') ww ";
-		} else {
-			howToExportReworked = "arc." + howToExport.get(n);
-		}
-
-		// lire la table how to export pour voir comment on va s'y prendre
-		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
-		h = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
-				new ArcPreparedStatementBuilder(
-						"SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "
-								+ howToExportReworked + " order by pos::int ")))
-				.mapContent();
+		h = dao.exportFileRetrieve(n, howToExport, tablesToExport, getBacASable());
 
 		for (int i = 0; i < h.get("varbdd").size(); i++) {
 			pos.put(h.get("varbdd").get(i), Integer.parseInt(h.get("pos").get(i)));
@@ -209,9 +179,7 @@ public class ServiceViewExport extends InteractorExport {
 		Statement stmt = c.createStatement();
 		stmt.setFetchSize(5000);
 
-		try (ResultSet res = stmt.executeQuery("SELECT * FROM " + getBacASable() + "." + tablesToExport.get(n)
-				+ " WHERE " + (StringUtils.isEmpty(filterTable.get(n)) ? "true" : filterTable.get(n)) + " "
-				+ (StringUtils.isEmpty(orderTable.get(n)) ? "" : "ORDER BY " + orderTable.get(n) + " "))) {
+		try (ResultSet res = dao.exportFileFilteredOrdered(stmt, n, tablesToExport, filterTable, orderTable, getBacASable())) {
 			ResultSetMetaData rsmd = res.getMetaData();
 
 			ArrayList<String> output;
