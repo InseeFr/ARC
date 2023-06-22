@@ -1,4 +1,4 @@
-package fr.insee.arc.web.gui.pilotage.dao;
+package fr.insee.arc.web.gui.maintenanceparametre.dao;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,16 +13,16 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
-import fr.insee.arc.web.gui.pilotage.model.ViewPilotageBAS;
+import fr.insee.arc.web.gui.maintenanceparametre.model.ViewParameters;
 import fr.insee.arc.web.util.Session;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectService;
 
-public class PilotageDaoTest extends InitializeQueryTest {
+public class MaintenanceParametreDaoTest extends InitializeQueryTest {
 
 	private static VObjectService vObjectService;
 	private static DataObjectService dao;
-	private static PilotageDao pdao;
+	private static MaintenanceParametreDao pdao;
 
 	@BeforeClass
 	public static void setup() throws ArcException {
@@ -31,21 +31,21 @@ public class PilotageDaoTest extends InitializeQueryTest {
 		vObjectService.setConnection(c);
 		vObjectService.setSession(new Session());
 		dao = new DataObjectService(BddPatcherTest.testSandbox);
-		pdao = new PilotageDao(vObjectService, dao);
+		pdao = new MaintenanceParametreDao(vObjectService, dao);
 	}
 
 	@Test
-	public void initializePilotageBAS() {
+	public void initializeViewParameters() {
 
-		VObject viewPilotageBAS = new ViewPilotageBAS();
+		VObject viewParameters = new ViewParameters();
 		
 		// execute query
-		pdao.initializePilotageBAS(viewPilotageBAS);
+		pdao.initializeViewParameters(viewParameters);
 
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum
-				.listColumnEnumByName(ViewEnum.VIEW_PILOTAGE_FICHIER.getColumns().keySet());
-		viewColumns.removeAll(viewPilotageBAS.getHeadersDLabel());
+				.listColumnEnumByName(ViewEnum.PARAMETER.getColumns().keySet());
+		viewColumns.removeAll(viewParameters.getHeadersDLabel());
 
 		assertEquals(0, viewColumns.size());
 

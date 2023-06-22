@@ -245,7 +245,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		// récupération de la liste des noms d'enloppe
 		Map<String, ArrayList<String>> selection = views.getViewFichierBAS().mapContentSelected();
 
-		initializeFichierBAS();
+		initializeFichierBAS(views.getViewFichierBAS(), views.getViewPilotageBAS(), views.getViewRapportBAS());
 
 		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
 

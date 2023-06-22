@@ -62,7 +62,11 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		vObjectService.initialize(viewNomenclature, query, "arc." + tableSelected, defaultInputFields);
 	}
 	
-    
+	/**
+	 * dao call to build nomenclature schema vobject
+	 * 
+	 * @param viewSchemaNmcl
+	 */
 	public void initializeViewSchemaNmcl(VObject viewSchemaNmcl) {
 		ViewEnum dataModelSchemaNmcl = ViewEnum.IHM_SCHEMA_NMCL;
 		// view query
@@ -98,5 +102,23 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		}
 		return typeNomenclature.toString();
 	}
+
+	public VObjectService getvObjectService() {
+		return vObjectService;
+	}
+
+	public void setvObjectService(VObjectService vObjectService) {
+		this.vObjectService = vObjectService;
+	}
+
+	public DataObjectService getDataObjectService() {
+		return dataObjectService;
+	}
+
+	public void setDataObjectService(DataObjectService dataObjectService) {
+		this.dataObjectService = dataObjectService;
+	}
+	
+	
 	
 }

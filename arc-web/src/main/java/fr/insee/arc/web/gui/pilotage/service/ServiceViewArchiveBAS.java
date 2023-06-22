@@ -33,7 +33,7 @@ public class ServiceViewArchiveBAS extends InteractorPilotage {
 		// récupération de la liste des noms d'enveloppe
 		Map<String, ArrayList<String>> selection = views.getViewArchiveBAS().mapContentSelected();
 
-		initializeArchiveBAS();
+		initializeArchiveBAS(views.getViewArchiveBAS(), views.getViewEntrepotBAS());
 
 		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
 

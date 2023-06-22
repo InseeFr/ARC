@@ -1,11 +1,9 @@
 package fr.insee.arc.web.gui.famillenorme.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +12,12 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 import fr.insee.arc.web.gui.famillenorme.model.ModelGererFamille;
-import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.util.VObject;
 
 @Service
@@ -72,7 +66,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 		putVObject(views.getViewClient(), t -> initializeClient(t, views.getViewFamilleNorme()));
 		putVObject(views.getViewTableMetier(), t -> initializeTableMetier(t, views.getViewFamilleNorme()));
 		putVObject(views.getViewHostAllowed(), t -> initializeHostAllowed(t, views.getViewClient()));
-		putVObject(views.getViewVariableMetier(), t -> initializeVariableMetier());
+		putVObject(views.getViewVariableMetier(), t -> initializeVariableMetier(t, views.getViewFamilleNorme()));
 
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
 	}
@@ -158,87 +152,31 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 			StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeTableMetier", LOGGER);
 		}
 	}
-
+	
 	/**
-	 *
-	 * @param idFamille
-	 * @return la liste des tables métier associées à {@code idFamille}
+	 * Initializes {@code ModelGererFamille#viewVariableMetier}. Only gets the business variables
+	 * linked to the selected norm family.
+	 * 
+	 * @param viewVariableMetier
+	 * @param viewFamilleNorme
 	 */
-	private static List<String> getListeTableMetierFamille(String idFamille) {
-		StringBuilder requete = new StringBuilder("SELECT nom_table_metier\n")
-				.append("  FROM arc.ihm_mod_table_metier\n").append("  WHERE id_famille='" + idFamille + "'");
-		return UtilitaireDao.get(0).getList(null, requete, new ArrayList<String>());
-	}
-	
-	
-	private void initializeVariableMetier() {
-		if (CollectionUtils.isNotEmpty(views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE))) {
-			List<String> listeTableFamille = getListeTableMetierFamille(
-					views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0));
-			HashMap<String, ColumnRendering> rendering = ViewVariableMetier
-					.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
-			rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
-			this.vObjectService.initialiserColumnRendering(views.getViewVariableMetier(), rendering);
+	private void initializeVariableMetier(VObject viewVariableMetier, VObject viewFamilleNorme) {
+		// get the norm family selected records
+		Map<String, ArrayList<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
+		// if norm family selected, trigger call to dao to render column
+		if (!selectionFamilleNorme.isEmpty()) {
+			dao.setSelectedRecords(selectionFamilleNorme);
+			List<String> listeTableFamille = dao.getListeTableMetierFamille();
+			dao.initializeColumnRenderingVariableMetier(viewVariableMetier, listeTableFamille);
 			try {
-				System.out.println("/* initializeVariableMetier */");
-				ArcPreparedStatementBuilder requete = getRequeteListeVariableMetierTableMetier(listeTableFamille,
-						views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0));
-				HashMap<String, String> defaultInputFields = new HashMap<>();
-				defaultInputFields.put(ID_FAMILLE, views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0));
-				this.vObjectService.initialize(views.getViewVariableMetier(), requete, "arc." + IHM_MOD_VARIABLE_METIER,
-						defaultInputFields);
-
+				LoggerHelper.debug(LOGGER, "/* initializeVariableMetier */");
+				dao.initializeViewVariableMetier(viewVariableMetier, listeTableFamille);
 			} catch (Exception ex) {
-				StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.initializeVariableMetier", LOGGER);
+				StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeVariableMetier", LOGGER);
 			}
-
 		} else {
-			this.vObjectService.destroy(views.getViewVariableMetier());
+			vObjectService.destroy(viewVariableMetier);
 		}
-
-	}
-
-	/**
-	 *
-	 * @param listeVariableMetier
-	 * @param idFamille
-	 * @return La requête permettant d'obtenir le croisement variable*table pour les
-	 *         variables de la famille
-	 */
-	private static ArcPreparedStatementBuilder getRequeteListeVariableMetierTableMetier(List<String> listeTableMetier,
-			String idFamille) {
-
-		ArcPreparedStatementBuilder left = new ArcPreparedStatementBuilder("\n (SELECT nom_variable_metier");
-		for (int i = 0; i < listeTableMetier.size(); i++) {
-			left.append(
-					",\n  CASE WHEN '['||string_agg(nom_table_metier,'][' ORDER BY nom_table_metier)||']' LIKE '%['||'"
-							+ listeTableMetier.get(i) + "'||']%' then 'x' else '' end " + listeTableMetier.get(i));
-		}
-		left.append("\n FROM arc." + IHM_MOD_VARIABLE_METIER + " ");
-		left.append("\n WHERE id_famille=" + left.quoteText(idFamille));
-		left.append("\n GROUP BY nom_variable_metier) left_side");
-
-		ArcPreparedStatementBuilder right = new ArcPreparedStatementBuilder();
-		right.append(
-				"\n (SELECT id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier\n");
-		right.append("\n FROM arc." + IHM_MOD_VARIABLE_METIER + "\n");
-		right.append("\n WHERE id_famille=" + right.quoteText(idFamille));
-		right.append(
-				"\n GROUP BY id_famille, nom_variable_metier, type_variable_metier, type_consolidation, description_variable_metier) right_side");
-
-		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder(
-				"SELECT right_side.id_famille, right_side.nom_variable_metier, right_side.type_variable_metier, right_side.type_consolidation, right_side.description_variable_metier");
-		for (int i = 0; i < listeTableMetier.size(); i++) {
-			returned.append(", " + listeTableMetier.get(i));
-		}
-		returned.append("\n FROM ");
-		returned.append(left);
-		returned.append(" INNER JOIN ");
-		returned.append(right);
-
-		returned.append("\n ON left_side.nom_variable_metier = right_side.nom_variable_metier");
-
-		return returned;
 	}
 
 	protected static String synchronizeRegleWithVariableMetier(String idFamille) {

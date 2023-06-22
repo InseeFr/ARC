@@ -241,4 +241,23 @@ public class GererNormeDao extends VObjectHelperDao {
 				
 		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelChargement), defaultInputFields);
 	}
+
+	public VObjectService getvObjectService() {
+		return vObjectService;
+	}
+
+	public void setvObjectService(VObjectService vObjectService) {
+		this.vObjectService = vObjectService;
+	}
+
+	public DataObjectService getDataObjectService() {
+		return dataObjectService;
+	}
+
+	public void setDataObjectService(DataObjectService dataObjectService) {
+		this.dataObjectService = dataObjectService;
+	}
+	
+	
+	
 }
