@@ -139,6 +139,14 @@ public class BddPatcherTest extends InitializeQueryTest {
 	}
 	
 	/**
+	 * insert data for norm family unit tests
+	 * @throws ArcException
+	 */
+	public static void insertTestDataFamilleNorme() throws ArcException {
+		insertTestData("BdDTest/script_test_famille_norme.sql");
+	}
+	
+	/**
 	 * insert data for functional tests
 	 * @throws ArcException
 	 */

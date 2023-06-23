@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.famillenorme.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,9 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 import fr.insee.arc.web.gui.famillenorme.model.ModelGererFamille;
+import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
 import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -167,7 +170,12 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 		if (!selectionFamilleNorme.isEmpty()) {
 			dao.setSelectedRecords(selectionFamilleNorme);
 			List<String> listeTableFamille = dao.getListeTableMetierFamille();
-			dao.initializeColumnRenderingVariableMetier(viewVariableMetier, listeTableFamille);
+			// render column
+			HashMap<String, ColumnRendering> rendering = ViewVariableMetier
+					.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
+			rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
+			// initialize column rendering
+			vObjectService.initialiserColumnRendering(viewVariableMetier, rendering);
 			try {
 				LoggerHelper.debug(LOGGER, "/* initializeVariableMetier */");
 				dao.initializeViewVariableMetier(viewVariableMetier, listeTableFamille);

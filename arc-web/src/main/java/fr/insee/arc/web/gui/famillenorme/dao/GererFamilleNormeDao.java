@@ -10,11 +10,9 @@ import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
 import fr.insee.arc.web.util.VObject;
 import fr.insee.arc.web.util.VObjectHelperDao;
 import fr.insee.arc.web.util.VObjectService;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
 
 public class GererFamilleNormeDao extends VObjectHelperDao {
 	
@@ -130,22 +128,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		query.append(SQL.WHERE);
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_FAMILLE));
 		// return list
-		return UtilitaireDao.get(0).getList(null, query.toString(), new ArrayList<String>());
-	}
-	
-	/**
-	 * dao call to initialize column rendering
-	 *
-	 * @param viewVariableMetier
-	 * @param listeTableFamille
-	 */
-	public void initializeColumnRenderingVariableMetier(VObject viewVariableMetier, List<String> listeTableFamille) {
-		// render column
-		HashMap<String, ColumnRendering> rendering = ViewVariableMetier
-				.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
-		rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
-		// initialize column rendering
-		vObjectService.initialiserColumnRendering(viewVariableMetier, rendering);
+		return UtilitaireDao.get(0).getList(null, query.toString(), new ArrayList<>());
 	}
 	
 	/**
@@ -154,14 +137,14 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @param viewVariableMetier
 	 * @param listeTableMetier 
 	 */
-	public void initializeViewVariableMetier(VObject viewVariableMetier, List<String> listeTableMetier) {
+	public void initializeViewVariableMetier(VObject viewVariableMetier, List<String> listeTableFamille) {
 		ViewEnum dataModelVariableMetier = ViewEnum.IHM_MOD_VARIABLE_METIER;
 
 		ArcPreparedStatementBuilder left = new ArcPreparedStatementBuilder("\n (SELECT nom_variable_metier");
-		for (int i = 0; i < listeTableMetier.size(); i++) {
+		for (int i = 0; i < listeTableFamille.size(); i++) {
 			left.append(
 					",\n  CASE WHEN '['||string_agg(nom_table_metier,'][' ORDER BY nom_table_metier)||']' LIKE '%['||'"
-							+ listeTableMetier.get(i) + "'||']%' then 'x' else '' end " + listeTableMetier.get(i));
+							+ listeTableFamille.get(i) + "'||']%' then 'x' else '' end " + listeTableFamille.get(i));
 		}
 		left.append("\n FROM " + dataObjectService.getView(dataModelVariableMetier) + " ");
 		left.append("\n WHERE ");
@@ -179,8 +162,8 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(
 				"SELECT right_side.id_famille, right_side.nom_variable_metier, right_side.type_variable_metier, right_side.type_consolidation, right_side.description_variable_metier");
-		for (int i = 0; i < listeTableMetier.size(); i++) {
-			query.append(", " + listeTableMetier.get(i));
+		for (int i = 0; i < listeTableFamille.size(); i++) {
+			query.append(", " + listeTableFamille.get(i));
 		}
 		query.append("\n FROM ");
 		query.append(left);
@@ -191,7 +174,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		
 		HashMap<String, String> defaultInputFields = 
 				buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_FAMILLE);
-		this.vObjectService.initialize(viewVariableMetier, query, dataObjectService.getView(dataModelVariableMetier),
+		vObjectService.initialize(viewVariableMetier, query, dataObjectService.getView(dataModelVariableMetier),
 				defaultInputFields);
 	}
 
