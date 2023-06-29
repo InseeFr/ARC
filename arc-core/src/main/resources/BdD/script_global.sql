@@ -1,6 +1,7 @@
 -- schéma global arc
 CREATE SCHEMA IF NOT EXISTS arc; 
-        
+CREATE SCHEMA IF NOT EXISTS public;
+
 -- table de parametrage de l'application
 CREATE TABLE IF NOT EXISTS arc.parameter 
 ( 

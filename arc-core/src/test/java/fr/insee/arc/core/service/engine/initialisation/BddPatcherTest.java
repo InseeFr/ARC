@@ -86,13 +86,14 @@ public class BddPatcherTest extends InitializeQueryTest {
 	 * create a blank arc database based on bddScript method
 	 * @throws ArcException
 	 */
-	public static void createDatabase(String restrictedUser) throws ArcException {
+	private static void createDatabase(String restrictedUser) throws ArcException {
 		GenericPreparedStatementBuilder query;
 
 		// clean database
 		query = new GenericPreparedStatementBuilder();
 		query.append("DROP SCHEMA IF EXISTS " + DataObjectService.ARC_METADATA_SCHEMA + " CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS " + testSandbox + " CASCADE;");
+		query.append("DROP SCHEMA IF EXISTS public CASCADE;");
 		UtilitaireDao.get(0).executeRequest(c, query);
 		
 		BddPatcher patcher=new BddPatcher();

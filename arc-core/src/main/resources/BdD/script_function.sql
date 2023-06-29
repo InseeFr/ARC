@@ -152,9 +152,9 @@ COST 100;
 
 
 CREATE OR REPLACE FUNCTION public.array_agg_distinct_gather(
-    tab cle_valeur[],
-    src cle_valeur)
-  RETURNS cle_valeur[] AS
+    tab public.cle_valeur[],
+    src public.cle_valeur)
+  RETURNS public.cle_valeur[] AS
 $BODY$
 DECLARE
 BEGIN
@@ -173,7 +173,7 @@ $BODY$
   COST 100;
 
 
-CREATE OR REPLACE FUNCTION public.array_agg_distinct_result(cle_valeur[])
+CREATE OR REPLACE FUNCTION public.array_agg_distinct_result(public.cle_valeur[])
   RETURNS text[] AS
 $BODY$ 
  -- select array_agg(v) from (select m.v from unnest($1) m where m.i is not null order by m.i, m.v ) t0 
@@ -183,9 +183,9 @@ $BODY$
   COST 100;
 
 do $$ begin
-CREATE AGGREGATE public.array_agg_distinct(cle_valeur) (
+CREATE AGGREGATE public.array_agg_distinct(public.cle_valeur) (
   SFUNC=array_agg_distinct_gather,
-  STYPE=cle_valeur[],
+  STYPE=public.cle_valeur[],
   FINALFUNC=array_agg_distinct_result
 );
 exception when others then end; $$;
