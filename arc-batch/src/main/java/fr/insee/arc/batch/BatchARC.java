@@ -499,10 +499,10 @@ class BatchARC implements IReturnCode {
 	 * @param pool
 	 * @return
 	 */
-	private int initializeBatchLoop(ArrayList<TraitementPhase> phases,
+	private void initializeBatchLoop(ArrayList<TraitementPhase> phases,
 			HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> pool) {
 		int stepNumber = (TraitementPhase.MAPPING.getOrdre() - TraitementPhase.CHARGEMENT.getOrdre()) + 2;
-		int delay = poolingDelay / stepNumber;
+		this.delay = poolingDelay / stepNumber;
 
 		message("Initialisation boucle Chargement->Mapping");
 
@@ -519,7 +519,7 @@ class BatchARC implements IReturnCode {
 		for (TraitementPhase phase : phases) {
 			pool.put(phase, new ArrayList<>());
 		}
-		return delay;
+
 	}
 
 	/**
@@ -536,7 +536,7 @@ class BatchARC implements IReturnCode {
 			return;
 		}
 		
-		this.delay = initializeBatchLoop(phases, pool);
+		initializeBatchLoop(phases, pool);
 
 		// boucle de chargement
 		message("Début de la boucle d'itération");
