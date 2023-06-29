@@ -112,6 +112,10 @@ delete from arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
 INSERT INTO arc.parameter VALUES ('MappingService.MAX_PARALLEL_WORKERS','4');
 UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.mapmodel' where key='MappingService.MAX_PARALLEL_WORKERS';
 
+-- patch 23/06/2023
+-- remove deprecated parameters
+DELETE FROM arc.parameter WHERE key='LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE';
+DELETE FROM arc.parameter WHERE key='LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL';
 
 -- table de pilotage du batch de production
 CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text);

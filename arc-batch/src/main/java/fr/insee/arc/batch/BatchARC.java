@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.insee.arc.batch.threadrunners.PhaseParameterKeys;
 import fr.insee.arc.batch.threadrunners.PhaseThreadFactory;
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -73,14 +74,6 @@ class BatchARC implements IReturnCode {
 	// interval entre chaque initialisation en nb de jours
 	private Integer intervalForInitializationInDay;
 
-	// nombre de runner maximum pour une phase donnée (cas de blocage)
-	private Integer maxNumberOfThreadsOfTheSamePhaseAtTheSameTime;
-
-	// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y
-	// a un blocage
-	// et si un nouveau runner doit etre lancé
-	private Integer numberOfIterationBewteenBlockageCheck;
-
 	// nombre d'iteration de la boucle batch entre chaque routine de maintenance de
 	// la base de données
 	private Integer numberOfIterationBewteenDatabaseMaintenanceRoutine;
@@ -97,72 +90,71 @@ class BatchARC implements IReturnCode {
 	// Maintenance initialization process can only occur in this case
 	private boolean dejaEnCours;
 
+	// Array of phases
+	private ArrayList<TraitementPhase> phases = new ArrayList<>();
+	// Map of thread by phase
+	private HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> pool = new HashMap<>();
+	// delay between phase start
+	private int delay;
+	
+	// loop attribute
+	Thread maintenance=new Thread();
+	private boolean productionOn;
+	private boolean exit=false;
+	private int iteration = 0;
+
 	private static void message(String msg) {
 		StaticLoggerDispatcher.warn(msg, LOGGER);
 	}
 
-	private void message(String msg, int iteration) {
-		if (iteration % numberOfIterationBewteenBlockageCheck == 0) {
-			message(msg);
-		}
-	}
-
 	private void initParameters() {
 
+		BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
+		
 		boolean keepInDatabase = Boolean
-				.parseBoolean(BDParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
+				.parseBoolean(bdParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
 
 		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
 		// excéder une certaine taille
-		int tailleMaxReceptionEnMb = BDParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb", 10);
+		int tailleMaxReceptionEnMb = bdParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb", 10);
 
 		// Maximum number of files to load
-		int maxFilesToLoad = BDParameters.getInt(null, "LanceurARC.maxFilesToLoad", 101);
+		int maxFilesToLoad = bdParameters.getInt(null, "LanceurARC.maxFilesToLoad", 101);
 
 		// Maximum number of files processed in each phase iteration
-		int maxFilesPerPhase = BDParameters.getInt(null, "LanceurARC.maxFilesPerPhase", 1000000);
+		int maxFilesPerPhase = bdParameters.getInt(null, "LanceurARC.maxFilesPerPhase", 1000000);
 
 		// fréquence à laquelle les phases sont démarrées
-		this.poolingDelay = BDParameters.getInt(null, "LanceurARC.poolingDelay", 1000);
+		this.poolingDelay = bdParameters.getInt(null, "LanceurARC.poolingDelay", 1000);
 
 		// heure d'initalisation en production
-		hourToTriggerInitializationInProduction = BDParameters.getInt(null,
+		hourToTriggerInitializationInProduction = bdParameters.getInt(null,
 				"ApiService.HEURE_INITIALISATION_PRODUCTION", 22);
 
 		// interval entre chaque initialisation en nb de jours
-		intervalForInitializationInDay = BDParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION", 7);
-
-		// nombre de runner maximum pour une phase donnée (cas de blocage)
-		maxNumberOfThreadsOfTheSamePhaseAtTheSameTime = BDParameters.getInt(null,
-				"LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE", 1);
-
-		// nombre d'itération de la boucle batch au bout duquel le batch vérifie s'il y
-		// a un blocage
-		// et si un nouveau runner doit etre lancé
-		numberOfIterationBewteenBlockageCheck = BDParameters.getInt(null, "LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL",
-				120);
+		intervalForInitializationInDay = bdParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION", 7);
 
 		// nombre d'iteration de la boucle batch entre chaque routine de maintenance de
 		// la base de données
-		numberOfIterationBewteenDatabaseMaintenanceRoutine = BDParameters.getInt(null,
+		numberOfIterationBewteenDatabaseMaintenanceRoutine = bdParameters.getInt(null,
 				"LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL", 500);
 
 		// nombre d'iteration de la boucle batch entre chaque routine de vérification du
 		// reste à faire
-		numberOfIterationBewteenCheckTodo = BDParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
+		numberOfIterationBewteenCheckTodo = bdParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
 				10);
 
-		// the number of pods declared for scalability
-		numberOfPods = UtilitaireDao.get(0).computeNumberOfExecutorNods();
+		// the number of executor nods declared for scalability
+		numberOfPods = ArcDatabase.numberOfExecutorNods();
 
 		// the metadata schema
 		String env;
 
 		// either we take env and envExecution from database or properties
 		// default is from properties
-		if (Boolean.parseBoolean(BDParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
-			env = BDParameters.getString(null, "LanceurARC.env", ApiService.IHM_SCHEMA);
-			envExecution = BDParameters.getString(null, "LanceurARC.envExecution", "arc_prod");
+		if (Boolean.parseBoolean(bdParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
+			env = bdParameters.getString(null, "LanceurARC.env", ApiService.IHM_SCHEMA);
+			envExecution = bdParameters.getString(null, "LanceurARC.envExecution", "arc_prod");
 		} else {
 			env = properties.getBatchArcEnvironment();
 			envExecution = properties.getBatchExecutionEnvironment();
@@ -199,201 +191,36 @@ class BatchARC implements IReturnCode {
 
 		message("Batch ARC " + properties.fullVersionInformation().toString());
 
-		Thread maintenance = new Thread();
-
 		try {
+			this.productionOn = productionOn();
 
-			boolean productionOn = productionOn();
-
-			if (!productionOn) {
+			if (!this.productionOn) {
 
 				message("La production est arretée !");
 
 			} else {
 
-				resetPending(envExecution);
+				message("Traitement Début");
+				
+				resetPendingFilesInPilotageTable(envExecution);
 
+				// database maintenance on pilotage table so that index won't bloat
 				maintenanceTablePilotageBatch();
 
-				message("Déplacements de fichiers");
-
-				// on vide les repertoires de chargement OK, KO, ENCOURS
-				effacerRepertoireChargement(repertoire, envExecution);
-
-				// des archives n'ont elles pas été traitées jusqu'au bout ?
-				ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
-						new ArcPreparedStatementBuilder(
-								"select distinct container from " + envExecution + ".pilotage_fichier where etape=1")))
-						.mapContent().get("container");
-
-				dejaEnCours = (aBouger != null);
-
-				// si oui, on essaie de recopier les archives dans chargement OK
-				if (dejaEnCours) {
-					copyFileFromArchiveDirectoryToOK(envExecution, repertoire, aBouger);
-
-				}
-				message("Fin des déplacements de fichiers");
-
-				message("Traitement Début");
+				// delete work directories and move back files that were pending but not finished
+				resetWorkDirectory();
 
 				// initialize. Phase d'initialisation
 				initialize();
 
 				// register file. Phase de reception.
-				receive(envExecution, dejaEnCours);
+				executePhaseReception(envExecution);
 
-				productionOn = productionOn();
-				// Vérifier si la production est activée
-				if (productionOn) {
+				// execute the main batch process. return false if user had interrupted the process
+				executeLoopOverPhases();
 
-					int delay = poolingDelay / 6;
-					boolean exit = false;
-
-					message("Début boucle Chargement->Mapping");
-
-					// initialiser le tableau de phase
-					int startingPhase = TraitementPhase.CHARGEMENT.getOrdre();
-
-					ArrayList<TraitementPhase> phases = new ArrayList<>();
-					for (TraitementPhase phase : TraitementPhase.values()) {
-						if (phase.getOrdre() >= startingPhase) {
-							phases.add(phase.getOrdre() - startingPhase, phase);
-						}
-					}
-
-					// initialiser le pool de thread
-					HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> pool = new HashMap<>();
-					for (TraitementPhase phase : phases) {
-						pool.put(phase, new ArrayList<>());
-					}
-
-					// boucle de chargement
-					int iteration = 0;
-					message("> iteration " + iteration);
-
-					do {
-
-						iteration++;
-
-						message("> batch lock check iteration : " + iteration, iteration);
-
-						// delete dead thread i.e. keep only living thread in the pool
-						HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> poolToKeep = new HashMap<>();
-						for (TraitementPhase phase : phases) {
-							poolToKeep.put(phase, new ArrayList<>());
-							if (!pool.get(phase).isEmpty()) {
-								for (PhaseThreadFactory thread : pool.get(phase)) {
-									if (thread.isAlive()) {
-										poolToKeep.get(phase).add(thread);
-										message(phase + " is still alive", iteration);
-									}
-								}
-							}
-						}
-						pool = poolToKeep;
-
-						// add new thread and start
-
-						HashMap<TraitementPhase, Integer> elligibleFiles = new HashMap<TraitementPhase, Integer>();
-
-						for (TraitementPhase phase : phases) {
-							// if no thread in phase, start one
-							if (pool.get(phase).isEmpty()) {
-								PhaseThreadFactory a = new PhaseThreadFactory(mapParam, phase);
-								a.start();
-								pool.get(phase).add(a);
-
-								message(">> start " + phase, iteration);
-
-							} else {
-								// if a thread is blocked, add the right thread
-
-								// we test blocked thread every nth iteration and only if extra runners are
-								// allowed
-								if (iteration % numberOfIterationBewteenBlockageCheck == 0
-										&& (pool.get(phase).size() < maxNumberOfThreadsOfTheSamePhaseAtTheSameTime)) {
-
-									// check if all the phase threads are blocked
-									boolean blocked = true;
-									// iterate thru the thread pool
-									for (PhaseThreadFactory thread : pool.get(phase)) {
-										// if one thread is not considered as blocked, exit, nothing to do
-										if (!thread.isBlocked()) {
-											blocked = false;
-											break;
-										}
-									}
-
-									// if ALL threads for the phase are blocked, something has to be done
-									if (blocked) {
-
-										message(">> blocked " + phase, iteration);
-
-										// retrieve what phase still have some things to do
-										// this will retrieved only once
-										if (elligibleFiles.isEmpty()) {
-											elligibleFiles = elligible();
-										}
-
-										// now start the right thread
-										// we will iterate through the phase to see what thread to start
-
-										// if something to do in previous phase and that the thread is blocked
-										// start a new thread for the phase
-										if (elligibleFiles.get(phase.previousPhase()) != null) {
-											// can start a new thread if no more than the
-											// maxNumberOfThreadsOfTheSamePhaseAtTheSameTime in the stack
-
-											PhaseThreadFactory a = new PhaseThreadFactory(mapParam, phase);
-											a.start();
-											pool.get(phase).add(a);
-
-											message(">> starting new " + phase, iteration);
-										}
-									}
-
-								}
-							}
-							// delay between phases not to overload
-							Sleep.sleep(delay);
-						}
-
-						if (iteration % numberOfIterationBewteenDatabaseMaintenanceRoutine == 0) {
-							if (!maintenance.isAlive()) {
-								message(iteration + ": database maintenance started");
-								maintenance = new Thread() {
-									@Override
-									public void run() {
-										for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
-											ServiceDatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null, envExecution);
-										}
-									}
-								};
-								maintenance.start();
-							}
-						}
-
-						if (iteration % numberOfIterationBewteenCheckTodo == 0) {
-							// check if production on
-							productionOn = productionOn();
-
-							// check if batch must exit loop
-							// exit if nothing left to do or if the production had been turned OFF
-							exit = isNothingLeftToDo(envExecution) || !productionOn;
-						}
-
-						Sleep.sleep(delay);
-						System.gc();
-
-					} while (!exit);
-
-					if (productionOn) {
-						// Effacer les fichiers du répertoire OK
-						effacerRepertoireChargement(repertoire, envExecution);
-					}
-
-				}
+				// Delete entry files if no interruption or no problems
+				effacerRepertoireChargement(repertoire, envExecution);
 
 				message("Traitement Fin");
 				System.exit(STATUS_SUCCESS);
@@ -420,7 +247,7 @@ class BatchARC implements IReturnCode {
 		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
 		requete.append(
 				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
-		UtilitaireDao.get(0).executeRequest(null, requete);
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, requete);
 
 		for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
 			// Maintenance full du catalog
@@ -438,7 +265,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private boolean isNothingLeftToDo(String envExecution) {
 		boolean isNothingLeftToDo = false;
-		if (UtilitaireDao.get(0).getInt(null, new ArcPreparedStatementBuilder("select count(*) from (select 1 from "
+		if (UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getInt(null, new ArcPreparedStatementBuilder("select count(*) from (select 1 from "
 				+ envExecution + ".pilotage_fichier where etape=1 limit 1) ww")) == 0) {
 			isNothingLeftToDo = true;
 		}
@@ -452,7 +279,7 @@ class BatchARC implements IReturnCode {
 	 * @throws ArcException
 	 */
 	private static boolean productionOn() throws ArcException {
-		return UtilitaireDao.get(0).hasResults(null,
+		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(null,
 				new ArcPreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
 	}
 
@@ -463,8 +290,11 @@ class BatchARC implements IReturnCode {
 	 * @param envExecution
 	 * @throws IOException
 	 */
-	private static void effacerRepertoireChargement(String directory, String envExecution) throws ArcException {
-
+	private void effacerRepertoireChargement(String directory, String envExecution) throws ArcException {
+		if (!this.productionOn) {
+			return;
+		}
+		
 		// Effacer les fichiers des répertoires OK et KO
 		String envDirectory = envExecution.replace(".", "_").toUpperCase();
 
@@ -476,8 +306,8 @@ class BatchARC implements IReturnCode {
 
 	}
 
-	private static void cleanDirectory(String directory, String envExecution, String envDirectory,
-			TraitementEtat etat) throws ArcException {
+	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat)
+			throws ArcException {
 		File f = Paths.get(ApiReceptionService.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
 		if (!f.exists()) {
 			return;
@@ -500,7 +330,7 @@ class BatchARC implements IReturnCode {
 	 * @param envExecution
 	 * @param z
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private static void deleteIfArchived(String repertoire, String envExecution, File z) throws ArcException {
 
@@ -525,7 +355,7 @@ class BatchARC implements IReturnCode {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	private static void resetPending(String envExecution) throws ArcException {
+	private static void resetPendingFilesInPilotageTable(String envExecution) throws ArcException {
 		// delete files that are en cours
 		StringBuilder query = new StringBuilder();
 		query.append("\n DELETE FROM " + envExecution + ".pilotage_fichier ");
@@ -538,7 +368,7 @@ class BatchARC implements IReturnCode {
 		query.append("\n WHERE etape=3");
 		query.append(";");
 
-		UtilitaireDao.get(0).executeBlock(null, query);
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeBlock(null, query);
 
 	}
 
@@ -551,10 +381,10 @@ class BatchARC implements IReturnCode {
 	 * @param recevoir
 	 * @throws ArcException
 	 */
-	private static void receive(String envExecution, boolean repriseEnCOurs) throws ArcException {
-		if (repriseEnCOurs) {
+	private void executePhaseReception(String envExecution) throws ArcException {
+		if (dejaEnCours) {
 			message("Reprise des fichiers en cours de traitement");
-			resetPending(envExecution);
+			resetPendingFilesInPilotageTable(envExecution);
 		} else {
 			message("Reception de nouveaux fichiers");
 			PhaseThreadFactory recevoir = new PhaseThreadFactory(mapParam, TraitementPhase.RECEPTION);
@@ -566,12 +396,14 @@ class BatchARC implements IReturnCode {
 	}
 
 	private void initialize() throws ArcException {
+		message("Traitement Début");
+
 		PhaseThreadFactory initialiser = new PhaseThreadFactory(mapParam, TraitementPhase.INITIALISATION);
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
 
 		String lastInitialize = null;
-		lastInitialize = UtilitaireDao.get(0).getString(null,
+		lastInitialize = UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(null,
 				new ArcPreparedStatementBuilder("select last_init from arc.pilotage_batch "));
 
 		Date dNow = new Date();
@@ -595,7 +427,7 @@ class BatchARC implements IReturnCode {
 
 			message("Initialisation terminée : " + initialiser.getReport().getDuree() + " ms");
 
-			UtilitaireDao.get(0).executeRequest(null,
+			UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
 					new ArcPreparedStatementBuilder(
 							"update arc.pilotage_batch set last_init=to_char(current_date+interval '"
 									+ intervalForInitializationInDay + " days','yyyy-mm-dd')||':"
@@ -630,30 +462,175 @@ class BatchARC implements IReturnCode {
 		}
 	}
 
-	/**
-	 * return if there is
-	 * 
-	 * @return
-	 * @throws ArcException
-	 * @throws ArcException
-	 */
-	private HashMap<TraitementPhase, Integer> elligible() throws ArcException {
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+	private void deplacerFichiersNonTraites() throws ArcException, IOException {
 
-		query.append("SELECT phase_traitement, count(*) as n ");
-		query.append("FROM " + this.envExecution + ".pilotage_fichier ");
-		query.append("WHERE etape=1 and etat_traitement!='{" + TraitementEtat.ENCOURS + "}' ");
-		query.append("GROUP BY phase_traitement ");
-		query.append("HAVING COUNT(*)>0 ");
+		ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
+				new ArcPreparedStatementBuilder(
+						"select distinct container from " + envExecution + ".pilotage_fichier where etape=1")))
+				.mapContent().get("container");
 
-		HashMap<String, String> keyValue = new GenericBean(UtilitaireDao.get(0).executeRequest(null, query))
-				.keyValue();
-		HashMap<TraitementPhase, Integer> r = new HashMap<>();
+		dejaEnCours = (aBouger != null);
 
-		for (String k : keyValue.keySet()) {
-			r.put(TraitementPhase.valueOf(k), Integer.parseInt(keyValue.get(k)));
+		// si oui, on essaie de recopier les archives dans chargement OK
+		if (dejaEnCours) {
+			copyFileFromArchiveDirectoryToOK(envExecution, repertoire, aBouger);
 		}
-		return r;
 	}
 
+	private void resetWorkDirectory() throws ArcException, IOException {
+
+		message("Déplacements de fichiers");
+
+		// on vide les repertoires de chargement OK, KO, ENCOURS
+		effacerRepertoireChargement(repertoire, envExecution);
+
+		// des archives n'ont elles pas été traitées jusqu'au bout ?
+		deplacerFichiersNonTraites();
+
+		message("Fin des déplacements de fichiers");
+	}
+
+	/**
+	 * initalize the arraylist of phases to be looped over and the thread pool per
+	 * phase
+	 * calculated sleep delay between phase
+	 * 
+	 * @param phases
+	 * @param pool
+	 * @return
+	 */
+	private int initializeBatchLoop(ArrayList<TraitementPhase> phases,
+			HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> pool) {
+		int stepNumber = (TraitementPhase.MAPPING.getOrdre() - TraitementPhase.CHARGEMENT.getOrdre()) + 2;
+		int delay = poolingDelay / stepNumber;
+
+		message("Initialisation boucle Chargement->Mapping");
+
+		// initialiser le tableau de phase
+		int startingPhase = TraitementPhase.CHARGEMENT.getOrdre();
+
+		for (TraitementPhase phase : TraitementPhase.values()) {
+			if (phase.getOrdre() >= startingPhase) {
+				phases.add(phase.getOrdre() - startingPhase, phase);
+			}
+		}
+
+		// initialiser le pool de thread
+		for (TraitementPhase phase : phases) {
+			pool.put(phase, new ArrayList<>());
+		}
+		return delay;
+	}
+
+	/**
+	 * start paralell thread 
+	 * @throws ArcException
+	 */
+	private void executeLoopOverPhases() throws ArcException
+	{
+		this.productionOn=productionOn();
+		
+		// test if production is running or exit
+		if (!productionOn)
+		{
+			return;
+		}
+		
+		this.delay = initializeBatchLoop(phases, pool);
+
+		// boucle de chargement
+		message("Début de la boucle d'itération");
+		
+		do {
+
+			this.iteration++;
+
+			updateThreadPoolStatus();
+			
+			startPhaseThread();
+			
+			startMaintenanceThread();
+
+			updateProductionOn();
+			
+			updateExit();
+			
+			waitAndClear();
+
+		} while (!exit);
+		
+	}
+
+	
+	private void waitAndClear() {
+		Sleep.sleep(delay);
+		System.gc();
+	}
+
+	private void updateProductionOn() throws ArcException {
+		if (iteration % numberOfIterationBewteenCheckTodo == 0) {
+			// check if production on
+			this.productionOn = productionOn();
+		}
+	}
+
+	// updtate the thread pool by phase by deleting the dead and finished thread
+	private void updateThreadPoolStatus() {
+		// delete dead thread i.e. keep only living thread in the pool
+					HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> poolToKeep = new HashMap<>();
+					for (TraitementPhase phase : phases) {
+						poolToKeep.put(phase, new ArrayList<>());
+						if (!pool.get(phase).isEmpty()) {
+							for (PhaseThreadFactory thread : pool.get(phase)) {
+								if (thread.isAlive()) {
+									poolToKeep.get(phase).add(thread);
+								}
+							}
+						}
+					}
+		this.pool=poolToKeep;
+	}
+
+	// build and start a new phase thread if the former created thread has died
+	private void startPhaseThread()
+	{
+		// add new thread and start
+		for (TraitementPhase phase : phases) {
+			// if no thread in phase, start one
+			if (pool.get(phase).isEmpty()) {
+				PhaseThreadFactory a = new PhaseThreadFactory(mapParam, phase);
+				a.start();
+				pool.get(phase).add(a);
+			}
+			// delay between phases not to overload
+			Sleep.sleep(delay);
+		}
+	}
+	
+	private void startMaintenanceThread() {
+		if (iteration % numberOfIterationBewteenDatabaseMaintenanceRoutine == 0) {
+			if (!maintenance.isAlive()) {
+				message(iteration + ": database maintenance started");
+				maintenance = new Thread() {
+					@Override
+					public void run() {
+						for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
+							ServiceDatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null,
+									envExecution);
+						}
+					}
+				};
+				maintenance.start();
+			}
+		}
+	}
+	
+	private void updateExit() {
+		if (iteration % numberOfIterationBewteenCheckTodo == 0) {
+			// check if batch must exit loop
+			// exit if nothing left to do or if the production had been turned OFF
+			exit = isNothingLeftToDo(envExecution) || !productionOn;
+		}
+	}
+	
 }
