@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -51,12 +52,14 @@ public class ApiChargementService extends ApiService {
     public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER);
         
+        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
+        
         this.directoryIn = ServiceFileSystemManagement.directoryPhaseEtatOK(this.getDirectoryRoot(), this.envExecution, TraitementPhase.valueOf(previousPhase)) + File.separator;
 
         // récupération des différentes normes dans la base
         this.listeNorme = Norme.getNormesBase(this.connexion.getCoordinatorConnection(), this.tableNorme);
  
-        this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiChargementService.MAX_PARALLEL_WORKERS",4);
+        this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiChargementService.MAX_PARALLEL_WORKERS",4);
 
         // Récupérer la liste des fichiers selectionnés
         StaticLoggerDispatcher.info("Récupérer la liste des fichiers selectionnés", LOGGER);

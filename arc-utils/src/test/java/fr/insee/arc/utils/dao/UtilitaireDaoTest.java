@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LogAppenderResource;
 
 public class UtilitaireDaoTest extends InitializeQueryTest {
@@ -19,23 +20,25 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 	public LogAppenderResource appender = new LogAppenderResource(LogManager.getLogger(UtilitaireDao.class));
 	
 	@Test
-	public void computeNumberOfExecutorNods_test() {
+	public void numberOfNods_test() {
 		// settings 4 database
-		// 1 is meta data
-		// 2 is coordinator
-		// 3+ are executor
 		u.getProperties().setDatabaseUsername("arc|||arc|||arc|||arc");
-		assertEquals(3,u.computeNumberOfExecutorNods());
+		// must return 4 nods
+		assertEquals(4,u.numberOfNods());
 	}
 	
 	@Test
 	public void getDriverConnexion_OK() throws SQLException, ArcException {
-		u.getProperties().setDatabaseDriverClassName("org.postgresql.Driver");
-		u.getProperties().setDatabaseUrl(c.getMetaData().getURL());
-		u.getProperties().setDatabaseUsername(c.getMetaData().getUserName());
-		// user password is not relevant in zonky
-		u.getProperties().setDatabasePassword("NA");
 		
+		PropertiesHandler testProperties=new PropertiesHandler();
+		testProperties.setDatabaseDriverClassName("org.postgresql.Driver");
+		testProperties.setDatabaseUrl(c.getMetaData().getURL());
+		testProperties.setDatabaseUsername(c.getMetaData().getUserName());
+		// user password is not relevant in zonky
+		testProperties.setDatabasePassword("NA");
+		
+		u.setProperties(testProperties);
+
 		Connection z=u.getDriverConnexion();
 		
 		int testQuery=u.getInt(z, new GenericPreparedStatementBuilder("select 1"));

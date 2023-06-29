@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.api;
 
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
@@ -43,7 +44,9 @@ public class ApiNormageService extends ApiService {
     public void executer() throws ArcException {
         StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
         
-        this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiNormageService.MAX_PARALLEL_WORKERS",4);
+        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
+
+        this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiNormageService.MAX_PARALLEL_WORKERS",4);
 
         // récupère le nombre de fichier à traiter
         this.setTabIdSource(recuperationIdSource());

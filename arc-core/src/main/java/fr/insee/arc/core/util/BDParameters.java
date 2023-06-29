@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
@@ -25,10 +26,18 @@ public class BDParameters {
 		return requete;
 	}
 
-	private static String getString(Connection c, String key) {
+	private ArcDatabase targetDatabase;
+	
+	
+	public BDParameters(ArcDatabase targetDatabase) {
+		super();
+		this.targetDatabase = targetDatabase;
+	}
+
+	private String getString(Connection c, String key) {
 		String r = null;
 		try {
-			r = UtilitaireDao.get(0).getString(c, parameterQuery(key));
+			r = UtilitaireDao.get(targetDatabase.getIndex()).getString(c, parameterQuery(key));
 		} catch (ArcException e) {
 	        // Création de la table de parametre
 			StringBuilder requete=new StringBuilder();
@@ -46,7 +55,7 @@ public class BDParameters {
 	        
 	        
 	        try {
-				UtilitaireDao.get(0).executeImmediate(c, requete);
+				UtilitaireDao.get(targetDatabase.getIndex()).executeImmediate(c, requete);
 			} catch (ArcException e1) {
 				StaticLoggerDispatcher.error("Error on selecting key in parameter table", LOGGER);
 			}
@@ -54,7 +63,7 @@ public class BDParameters {
 		return r;
 	}
 
-	public static String getString(Connection c, String key, String defaultValue) {
+	public String getString(Connection c, String key, String defaultValue) {
 		String s = getString(c, key);
 		if (s==null)
 		{
@@ -63,12 +72,12 @@ public class BDParameters {
 		return s == null ? defaultValue : s;
 	}
 
-	private static Integer getInt(Connection c, String key) {
+	private Integer getInt(Connection c, String key) {
 		String val=getString(c, key);
 		return val==null?null:Integer.parseInt(val);
 	}
 
-	public static Integer getInt(Connection c, String key, Integer defaultValue) {
+	public Integer getInt(Connection c, String key, Integer defaultValue) {
 		Integer s = getInt(c, key);
 		if (s==null)
 		{
@@ -77,10 +86,10 @@ public class BDParameters {
 		return s == null ? defaultValue : s;
 	}
 	
-	protected static void insertDefaultValue(Connection c,String key, String defaultValue)
+	protected void insertDefaultValue(Connection c,String key, String defaultValue)
 	{
 		try {
-			UtilitaireDao.get(0).executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
+			UtilitaireDao.get(targetDatabase.getIndex()).executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error on inserting key in parameter table", LOGGER);
 		}
@@ -94,7 +103,7 @@ public class BDParameters {
 	 * @param val
 	 * @param description
 	 */
-	public static void setString(Connection c,String key, String val, String description)
+	public void setString(Connection c,String key, String val, String description)
 	{
 		try {
 			
@@ -109,7 +118,7 @@ public class BDParameters {
 			requete.append("WHERE key="+requete.quoteText(key)+" ");
 			
 			
-			UtilitaireDao.get(0).executeRequest(c,requete);
+			UtilitaireDao.get(targetDatabase.getIndex()).executeRequest(c,requete);
 			
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);
@@ -123,9 +132,9 @@ public class BDParameters {
 	 * @param key
 	 * @param val
 	 */
-	public static void setString(Connection c,String key, String val)
+	public void setString(Connection c,String key, String val)
 	{
 		setString (c,key, val, null);
 	}
-	
+
 }

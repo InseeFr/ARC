@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.api;
 
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadControleService;
@@ -50,8 +51,10 @@ public class ApiControleService extends ApiService {
     public void executer() throws ArcException {
 
         StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
+        
+        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 
-        this.maxParallelWorkers = BDParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiControleService.MAX_PARALLEL_WORKERS",3);
+        this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiControleService.MAX_PARALLEL_WORKERS",3);
 
         this.setTabIdSource(recuperationIdSource());
         

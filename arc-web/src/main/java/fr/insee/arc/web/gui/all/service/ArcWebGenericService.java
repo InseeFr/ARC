@@ -18,9 +18,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.service.api.ApiInitialisationService;
+import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -144,7 +146,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 		if (getActionName().equals(IndexAction.ACTION_NAME))
 		{
 	    	// run the initialization script
-			ApiInitialisationService.bddScript(null);
+			new BddPatcher().bddScript(null);
 		}
 		
 		
@@ -384,7 +386,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 
 	/** Return true if the environment is a production environment.*/
 	private boolean checkEnv(String env) {
-		JSONArray j=new JSONArray(BDParameters.getString(null, "ArcAction.productionEnvironments",DEFAULT_PRODUCTION_ENVIRONMENTS));
+		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.META_DATA).getString(null, "ArcAction.productionEnvironments",DEFAULT_PRODUCTION_ENVIRONMENTS));
 		Set<String> found=new HashSet<>();
 		
 		j.forEach(item -> {

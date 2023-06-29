@@ -6,6 +6,7 @@ import java.sql.Connection;
 
 import org.apache.commons.io.IOUtils;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
@@ -87,7 +88,7 @@ public class BddPatcher {
 
 		if ((query=readBddScript(scriptName, userRestricted, nbSandboxes, envExecution))!=null)
 		{
-				UtilitaireDao.get(0).executeImmediate(connexion,query);
+				UtilitaireDao.get(ArcDatabase.META_DATA.getIndex()).executeImmediate(connexion,query);
 		}
 	}
 	
@@ -109,19 +110,19 @@ public class BddPatcher {
 	private static String checkBddScriptVersion (Connection connexion, String... envExecution)
 	{
 		
-		return BDParameters.getString(connexion, gitCommitIdParameterKey(envExecution),GIT_COMMIT_ID_PARAMETER_VALUE_NOVERSION);
+		return new BDParameters(ArcDatabase.META_DATA).getString(connexion, gitCommitIdParameterKey(envExecution),GIT_COMMIT_ID_PARAMETER_VALUE_NOVERSION);
 	}
 
 
 	private static void setBddScriptVersion (Connection connexion, String commitId, String... envExecution)
 	{
 		
-		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId, bddParameterDescription(envExecution));
+		new BDParameters(ArcDatabase.META_DATA).setString(connexion, gitCommitIdParameterKey(envExecution), commitId, bddParameterDescription(envExecution));
 	}
 	
 	private static void setBddScriptVersionWithoutDescription (Connection connexion, String commitId, String... envExecution)
 	{
-		 BDParameters.setString(connexion, gitCommitIdParameterKey(envExecution), commitId);
+		new BDParameters(ArcDatabase.META_DATA).setString(connexion, gitCommitIdParameterKey(envExecution), commitId);
 	}
 
 	/**
@@ -150,7 +151,8 @@ public class BddPatcher {
 	 */
 	private static void bddScriptGlobalExecutor(Connection connexion, String userNameWithRestrictedRights) throws ArcException
 	{
-		Integer nbSandboxes = BDParameters.getInt(connexion, "ApiInitialisationService.nbSandboxes", 8);
+		
+		Integer nbSandboxes = new BDParameters(ArcDatabase.META_DATA).getInt(connexion, "ApiInitialisationService.nbSandboxes", 8);
 		
 		executeBddScript(connexion, "BdD/script_global.sql", userNameWithRestrictedRights, nbSandboxes, null);
 		executeBddScript(connexion, "BdD/script_function.sql", userNameWithRestrictedRights, nbSandboxes,

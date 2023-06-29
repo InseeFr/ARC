@@ -26,6 +26,7 @@ import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.service.api.ApiReceptionService;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.service.api.query.ServiceResetEnvironment;
+import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -174,9 +175,9 @@ public class ExecuteServiceController {
 
 		ReturnView returnView=new ReturnView();
 		
-		
-		ApiInitialisationService.bddScript(null);
-		ApiInitialisationService.bddScript(null, new String[] {env});
+		BddPatcher patcher = new BddPatcher();
+		patcher.bddScript(null);
+		patcher.bddScript(null, env);
 		ApiInitialisationService.buildFileSystem(null,new String[] {env});
 
 		return ResponseEntity.status(HttpStatus.OK).body(returnView);		

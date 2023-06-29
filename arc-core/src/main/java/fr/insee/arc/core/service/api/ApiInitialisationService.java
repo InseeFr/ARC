@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
@@ -256,13 +257,6 @@ public class ApiInitialisationService extends ApiService {
 		if (!f.exists()) {
 			f.mkdirs();
 		}
-	}
-
-	/**
-	 * Méthode pour initialiser ou patcher la base de données la base de donnée.
-	 */
-	public static void bddScript(Connection connexion, String... envExecutions) {
-		new BddPatcher().bddScript(connexion, envExecutions);
 	}
 
 	/**
@@ -568,11 +562,14 @@ public class ApiInitialisationService extends ApiService {
 	private void nettoyerTablePilotage(Connection connexion, String envExecution) throws ArcException {
 
 		loggerDispatcher.info("nettoyerTablePilotage", LOGGER);
+		
+        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 
-		Nb_Jour_A_Conserver = BDParameters.getInt(this.connexion.getCoordinatorConnection(),
+
+		Nb_Jour_A_Conserver = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiInitialisationService.Nb_Jour_A_Conserver", 365);
 
-		NB_FICHIER_PER_ARCHIVE = BDParameters.getInt(this.connexion.getCoordinatorConnection(),
+		NB_FICHIER_PER_ARCHIVE = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiInitialisationService.NB_FICHIER_PER_ARCHIVE", 10000);
 
 		String nomTablePilotage = ServiceTableNaming.dbEnv(envExecution) + "pilotage_fichier";
@@ -1162,10 +1159,7 @@ public class ApiInitialisationService extends ApiService {
 					} else {
 						UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(),
 								deleteTableByPilotage(nomTable, nomTable, this.tablePil, phase, etat, ""));
-						UtilitaireDao.get(0).executeImmediate(connexion,
-								"set default_statistics_target=1; vacuum analyze " + nomTable + "("
-										+ ColumnEnum.ID_SOURCE.getColumnName()
-										+ "); set default_statistics_target=100;");
+						UtilitaireDao.get(0).executeImmediate(connexion, fastMaintenanceOnWorkTable(nomTable));
 					}
 
 				}
@@ -1313,4 +1307,20 @@ public class ApiInitialisationService extends ApiService {
 
 	}
 
+	/**
+	 * trigger a fast maintenance on a working table
+	 * @param nomTable
+	 * @return
+	 */
+	private static String fastMaintenanceOnWorkTable(String nomTable)
+	{
+		StringBuilder requete = new StringBuilder();
+		requete.append("SET default_statistics_target=1;");
+		requete.append("COMMIT;");
+		requete.append("VACUUM ANALYZE ").append(nomTable).append("(").append(ColumnEnum.ID_SOURCE.getColumnName()).append(");");
+		requete.append("COMMIT;");
+		requete.append("SET default_statistics_target=100;");
+		return requete.toString();
+	}
+	
 }

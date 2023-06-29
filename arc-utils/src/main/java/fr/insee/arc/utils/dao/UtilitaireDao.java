@@ -81,7 +81,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return map.get(aPool);
 	}
 
-
 	/**
 	 * Compute the number of executor nods according to he number of user declared
 	 * in connexion Users are split by ||| . See regexp :
@@ -89,8 +88,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * 
 	 * @return
 	 */
-	public int computeNumberOfExecutorNods() {
-		return computeNumberOfExecutorNods(properties.getDatabaseUsername());
+	public int numberOfNods() {
+		return numberOfNods(properties.getDatabaseUsername());
 	}
 
 	/**
@@ -100,10 +99,23 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param databaseUserName
 	 * @return
 	 */
-	public static int computeNumberOfExecutorNods(String databaseUserName) {
-		return databaseUserName.split(CONNECTION_SEPARATOR).length - 1;
+	public static int numberOfNods(String databaseUserName) {
+		return databaseUserName.split(CONNECTION_SEPARATOR).length;
 	}
 
+	
+	/** return a valid connection index according to the given connection in properties
+	 * @param aPool
+	 * @return
+	 */
+	private int validConnectionIndex(Integer aPool) {
+		
+		int numberOfNodsDeclaredInProperties = numberOfNods();
+		
+		return (aPool<numberOfNodsDeclaredInProperties)?aPool:numberOfNodsDeclaredInProperties-1;
+	}
+	
+	
 	/**
 	 * Retourne une connexion vers la base de données
 	 *
@@ -114,11 +126,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public final Connection getDriverConnexion() throws ArcException {
 		// invocation du driver
 		try {
-
-			String driver = properties.getDatabaseDriverClassName().split(CONNECTION_SEPARATOR)[this.pool];
-			String uri = properties.getDatabaseUrl().split(CONNECTION_SEPARATOR)[this.pool];
-			String user = properties.getDatabaseUsername().split(CONNECTION_SEPARATOR)[this.pool];
-			String password = properties.getDatabasePassword().split(CONNECTION_SEPARATOR)[this.pool];
+			
+			int validConnectionIndex=validConnectionIndex(this.pool);
+			
+			String driver = properties.getDatabaseDriverClassName().split(CONNECTION_SEPARATOR)[validConnectionIndex];
+			String uri = properties.getDatabaseUrl().split(CONNECTION_SEPARATOR)[validConnectionIndex];
+			String user = properties.getDatabaseUsername().split(CONNECTION_SEPARATOR)[validConnectionIndex];
+			String password = properties.getDatabasePassword().split(CONNECTION_SEPARATOR)[validConnectionIndex];
 
 			Class.forName(driver);
 			Connection c = null;

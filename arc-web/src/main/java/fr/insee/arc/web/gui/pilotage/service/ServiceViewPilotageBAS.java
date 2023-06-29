@@ -9,12 +9,14 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.service.api.query.ServiceResetEnvironment;
+import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -33,7 +35,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 * @return
 	 */
 	public String enterPilotageBAS(Model model) {
-		ApiInitialisationService.bddScript(null, new String[] { getBacASable() });
+		new BddPatcher().bddScript(null, getBacASable());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -176,7 +178,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		}
 
 		// Maximum number of files processed in each phase iteration
-		int maxFilesPerPhase = BDParameters.getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
+		int maxFilesPerPhase = new BDParameters(ArcDatabase.META_DATA).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
 		
 		ApiServiceFactory.getService(phaseAExecuter.toString(), ApiService.IHM_SCHEMA, getBacASable(), this.repertoire,
 				maxFilesPerPhase, null

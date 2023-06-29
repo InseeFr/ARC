@@ -22,6 +22,7 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
@@ -88,11 +89,13 @@ public class ApiReceptionService extends ApiService {
 		// Déplacement et archivage des fichiers
 
 		int maxNumberOfFiles;
+		
+        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 
 		if (paramBatch != null) {
-			maxNumberOfFiles = BDParameters.getInt(null, "ApiReceptionService.batch.maxNumberOfFiles", 25000);
+			maxNumberOfFiles = bdParameters.getInt(null, "ApiReceptionService.batch.maxNumberOfFiles", 25000);
 		} else {
-			maxNumberOfFiles = BDParameters.getInt(null, "ApiReceptionService.ihm.maxNumberOfFiles", 5000);
+			maxNumberOfFiles = bdParameters.getInt(null, "ApiReceptionService.ihm.maxNumberOfFiles", 5000);
 		}
 		// Enregistrement des fichiers
 		GenericBean archiveContent = moveAndCheckClientFiles(this.nbEnr, maxNumberOfFiles);
