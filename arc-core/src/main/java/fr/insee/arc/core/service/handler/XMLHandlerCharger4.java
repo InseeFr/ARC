@@ -411,21 +411,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 		req.append(")values");
 		req2.append(")");
 
-		// attention; on doit insérer au bon endroit;
-//		int z=aRequete.indexOf(req.toString(),this.start);
-//
-//		if (z>-1)
-//		{
-//		    req2.append(",");
-//		    aRequete.insert(z+req.length(), req2);
-//		}
-//		else
-//		{
-//		    req2.append(";");
-//		    aRequete.append(req);
-//		    aRequete.append(req2);
-//		}
-
 		String reqString = req.toString();
 		addQuery(reqString, req2);
 	}
