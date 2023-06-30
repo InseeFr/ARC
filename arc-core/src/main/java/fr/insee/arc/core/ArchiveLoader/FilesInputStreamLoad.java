@@ -37,7 +37,7 @@ public class FilesInputStreamLoad {
 	    this.tmpInxNormage =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
 	    this.tmpInxCSV =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
 	} catch (FileNotFoundException e) {
-	    StaticLoggerDispatcher.error("Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
+	    StaticLoggerDispatcher.error(LOGGER, "Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName());
 	    throw e;
 	}
 	this.theFileToRead = theFileToRead;
@@ -62,7 +62,7 @@ public class FilesInputStreamLoad {
 			 this.tmpInxCSV.close();
 		 }
 	} catch (IOException e) {
-	    StaticLoggerDispatcher.error("Can't close all FilesInputStreamLoad for file " + theFileToRead.getName(), LOGGER);
+	    StaticLoggerDispatcher.error(LOGGER, "Can't close all FilesInputStreamLoad for file " + theFileToRead.getName());
 	    throw e;
 	}
     }

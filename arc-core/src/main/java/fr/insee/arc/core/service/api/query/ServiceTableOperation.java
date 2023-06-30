@@ -39,7 +39,7 @@ public class ServiceTableOperation {
 	 * @return
 	 */
 	public static String createTableInherit(String tableIn, String tableIdSource) {
-		StaticLoggerDispatcher.info("** createTableOK ** : " + tableIdSource, LOGGER_APISERVICE);
+		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** createTableOK ** : " + tableIdSource);
 		return FormatSQL.executeIf(FormatSQL.hasRecord(tableIn), creationTableResultat(tableIn, tableIdSource, true));
 	}
 

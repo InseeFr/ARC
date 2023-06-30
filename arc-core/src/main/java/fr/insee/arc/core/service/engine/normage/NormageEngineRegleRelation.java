@@ -28,7 +28,7 @@ public class NormageEngineRegleRelation {
 	 */
 	protected static String appliquerRegleRelation(HashMap<String, ArrayList<String>> regle, String jointure) {
 
-		StaticLoggerDispatcher.info("appliquerRegleRelation()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleRelation()");
 
 		String returned = jointure;
 		// extraction de la clause select

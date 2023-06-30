@@ -49,6 +49,8 @@ public class PropertiesHandler {
 
     private String gitCommitId;
     
+    private static PropertiesHandler instanceOfPropertiesHandler;
+    
     public void initializeLog() {
     	LogConfigurator logConf = new LogConfigurator(logConfiguration);
     	
@@ -69,7 +71,13 @@ public class PropertiesHandler {
     		return (PropertiesHandler) SpringApplicationContext.getBean("properties");
     	} catch( NullPointerException e ) {
     		new ArcException(ArcExceptionMessage.SPRING_BEAN_PROPERTIES_NOTFOUND).logMessageException();
-    		return new PropertiesHandler();
+    		
+    		// create a blank instance singleton
+    		if (instanceOfPropertiesHandler==null)
+    		{
+    			instanceOfPropertiesHandler=new PropertiesHandler();
+    		}
+    		return instanceOfPropertiesHandler;
     	}
     	
     }

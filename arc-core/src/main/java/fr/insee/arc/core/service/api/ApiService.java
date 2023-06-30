@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -23,7 +21,6 @@ import fr.insee.arc.core.service.api.query.ServiceDatabaseConfiguration;
 import fr.insee.arc.core.service.api.query.ServicePilotageOperation;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.thread.ScalableConnection;
-import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -49,13 +46,6 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	// anti-spam delay when thread chain error
 	protected static final int PREVENT_ERROR_SPAM_DELAY = 100;
-
-	@Autowired
-	protected PropertiesHandler properties;
-
-	@Autowired
-	@Qualifier("activeLoggerDispatcher")
-	protected LoggerDispatcher loggerDispatcher;
 
 	protected ScalableConnection connexion;
 	
@@ -101,7 +91,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	protected ApiService(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution, String aDirectoryRoot,
 			Integer aNbEnr, String paramBatch) {
 		this();
-		StaticLoggerDispatcher.info("** initialiserVariable **", LOGGER_APISERVICE);
+		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");
 		try {
 			this.connexion = new ScalableConnection(UtilitaireDao.get(0).getDriverConnexion());
 		} catch (Exception ex) {
@@ -135,7 +125,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		this.setTableOutKo((ServiceTableNaming.dbEnv(aEnvExecution) + this.getCurrentPhase() + "_" + TraitementEtat.KO).toLowerCase());
 		this.setNbEnr(aNbEnr);
 
-		StaticLoggerDispatcher.info("** Fin constructeur ApiService **", LOGGER_APISERVICE);
+		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** Fin constructeur ApiService **");
 	}
 
 	/**
@@ -152,7 +142,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param aNbEnr
 	 */
 	private boolean initialiser() {
-		loggerDispatcher.info("** initialiser **", LOGGER_APISERVICE);
+		LoggerHelper.info(LOGGER_APISERVICE, "** initialiser **");
 		// Vérifie si y'a des sources à traiter
 		if (this.todo) {
 			try {
@@ -216,7 +206,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 */
 	private void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp,
 			Integer nbEnr) {
-		loggerDispatcher.info("** register **", LOGGER_APISERVICE);
+		LoggerHelper.info(LOGGER_APISERVICE, "** register **");
 		try {
 			UtilitaireDao.get(0).executeBlock(connexion,
 					ServicePilotageOperation.copieTablePilotage(tablePil, tablePilTemp, phaseIn, phase, nbEnr));
@@ -261,6 +251,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @throws ArcException
 	 */
 	public String switchToFullRightRole() {
+		PropertiesHandler properties = PropertiesHandler.getInstance();
 		if (!properties.getDatabaseRestrictedUsername().equals("")) {
 			return FormatSQL.changeRole(properties.getDatabaseUsername());
 		}
@@ -277,7 +268,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * temporaires (tables, type, ...)
 	 */
 	public void finaliser() {
-		loggerDispatcher.info("finaliser", LOGGER_APISERVICE);
+		LoggerHelper.info(LOGGER_APISERVICE, "finaliser");
 
 		try {
 			if (Boolean.TRUE.equals(this.todo)) {
@@ -314,7 +305,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 */
 	public HashMap<String, ArrayList<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase,
 			String etat) {
-		loggerDispatcher.info("pilotageListIdsource", LOGGER_APISERVICE);
+		LoggerHelper.info(LOGGER_APISERVICE, "pilotageListIdsource");
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + tablePilotage + " ");
 		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase) + " ");
@@ -410,7 +401,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	public ServiceReporting invokeApi() {
 		double start = System.currentTimeMillis();
 
-		loggerDispatcher.info("****** Execution " + this.getCurrentPhase() + " *******", LOGGER_APISERVICE);
+		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " *******");
 		try {
 
 			if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString())
@@ -419,18 +410,18 @@ public abstract class ApiService implements IConstanteNumerique {
 			} else {
 				this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase(), this.getCurrentPhase());
 			}
-			loggerDispatcher.info("A faire - " + this.getCurrentPhase() + " : " + this.todo, LOGGER_APISERVICE);
+			LoggerHelper.info(LOGGER_APISERVICE, "A faire - " + this.getCurrentPhase() + " : " + this.todo);
 
 			if (this.initialiser()) {
 				try {
 					this.executer();
 				} catch (ArcException ex) {
-					loggerDispatcher.error("Erreur dans " + this.getCurrentPhase() + ". ", ex, LOGGER_APISERVICE);
+					LoggerHelper.error(LOGGER_APISERVICE, "Erreur dans " + this.getCurrentPhase() + ". ", ex);
 					try {
 						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.getTablePil(), ex,
 								"aucuneTableADroper");
 					} catch (Exception ex2) {
-						loggerDispatcher.error("Error in ApiService.invokeApi.repriseSurErreur", LOGGER_APISERVICE);
+						LoggerHelper.error(LOGGER_APISERVICE, "Error in ApiService.invokeApi.repriseSurErreur");
 					}
 				}
 			}
@@ -438,7 +429,7 @@ public abstract class ApiService implements IConstanteNumerique {
 			this.finaliser();
 		}
 
-		loggerDispatcher.info("****** Fin " + this.getCurrentPhase() + " *******", LOGGER_APISERVICE);
+		LoggerHelper.info(LOGGER_APISERVICE, "****** Fin " + this.getCurrentPhase() + " *******");
 
 		return new ServiceReporting(this.reportNumberOfObject, System.currentTimeMillis() - start);
 

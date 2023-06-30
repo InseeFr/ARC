@@ -225,7 +225,7 @@ public class NormageEngine {
 	}
 
 	private String optimisation96(String jointure, int subjoinNumber) {
-		StaticLoggerDispatcher.info("optimisation96()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "optimisation96()");
 
 		// on enleve l'id
 		String r = jointure;

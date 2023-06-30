@@ -26,6 +26,7 @@ ALTER TABLE arc.ihm_controle_regle add column IF NOT exists xsd_label_fils text;
 ALTER TABLE arc.ihm_controle_regle add column IF NOT exists xsd_role text;
 ALTER TABLE arc.ihm_controle_regle add column IF NOT exists blocking_threshold text;
 ALTER TABLE arc.ihm_controle_regle add column IF NOT exists error_row_processing text default 'e';
+ALTER TABLE arc.ihm_controle_regle drop constraint if exists ihm_controle_regle_seuil_bloquant_check;
 do $$ begin ALTER TABLE arc.ihm_controle_regle add constraint ihm_controle_regle_seuil_bloquant_check check (blocking_threshold ~ '^(>|>=)[0123456789.]+[%u]$'); exception when others then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ext_type_controle 

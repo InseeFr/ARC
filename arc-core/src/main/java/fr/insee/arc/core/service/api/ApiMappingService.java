@@ -9,6 +9,7 @@ import fr.insee.arc.core.service.thread.MultiThreading;
 import fr.insee.arc.core.service.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 
 /**
@@ -60,6 +61,8 @@ public class ApiMappingService extends ApiService {
      */
     @Override
     public void executer() throws ArcException {
+    	
+		PropertiesHandler properties = PropertiesHandler.getInstance();
     	
         BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 

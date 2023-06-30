@@ -40,7 +40,7 @@ public class ChargementBrutalTable {
      * @param nbBoucle étape dans la lecture
      * */
     private String requeteFichierBrutalement(String idSource, BufferedReader br, int nbBoucle) throws ArcException {
-        StaticLoggerDispatcher.info("** chargerFichierBrutalement **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** chargerFichierBrutalement **");
 
     	
     	StringBuilder requete=new StringBuilder();
@@ -84,7 +84,7 @@ public class ChargementBrutalTable {
      * @throws ArcException si aucune norme ou plus d'une norme trouvée */
     public void calculeNormeAndValiditeFichiers(String idSource, InputStream file, Norme[] normeOk, String[] validiteOk)
     		throws ArcException {
-    	StaticLoggerDispatcher.info("** calculeNormeFichiers **", LOGGER);
+    	StaticLoggerDispatcher.info(LOGGER, "** calculeNormeFichiers **");
     	
 	    normeOk[0] = new Norme();
 	    validiteOk[0]= null;
@@ -121,7 +121,7 @@ public class ChargementBrutalTable {
      * @throws ArcException 
      * @throws ArcException si aucune norme ou plus d'une norme trouvée*/
     private void calculerNormeAndValidite(Norme[] normeOk, String[] validiteOk, String requeteFichier) throws ArcException {
-        StaticLoggerDispatcher.info("** calculerNorme **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** calculerNorme **");
 
         StringBuilder query=new StringBuilder();
         query.append("\n WITH alias_table AS ("+requeteFichier+" )");

@@ -89,7 +89,7 @@ public class ImportStep2GetTableNameService {
 			resp.endSending();
 
 		} catch (ArcException e) {
-			StaticLoggerDispatcher.error("** Error in servlet ImportStep2GetTableNameService **", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep2GetTableNameService **");
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
 			resp.endSending();
 		}

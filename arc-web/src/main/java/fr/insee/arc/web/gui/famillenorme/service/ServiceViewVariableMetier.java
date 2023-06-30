@@ -158,7 +158,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 			UtilitaireDao.get(0).executeBlock(null, requete);
 			message.append("La mise a jour a réussi");
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in GererFamilleNormeAction.executeRequeteMiseAjourTableMetier", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in GererFamilleNormeAction.executeRequeteMiseAjourTableMetier");
 			message.append("La mise a jour a échoué");
 		}
 	}

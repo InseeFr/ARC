@@ -49,7 +49,7 @@ public class ImportStep3GetTableDataService {
 			// renvoie un nom de table du client si il en reste une
 
 		} catch (ArcException e) {
-			StaticLoggerDispatcher.error("** Error in servlet ImportStep3GetTableDataService **", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep3GetTableDataService **");
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
 			resp.endSending();
 		}

@@ -33,7 +33,7 @@ public class NormageEngineRegleDuplication {
 	 */
 	protected static void ajouterRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) {
-		StaticLoggerDispatcher.info("ajouterRegleDuplication()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "ajouterRegleDuplication()");
 
 		// pour toutes les règles de relation,
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -97,7 +97,7 @@ public class NormageEngineRegleDuplication {
 	protected static String appliquerRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, StringBuilder columnToBeAdded) {
 
-		StaticLoggerDispatcher.info("appliquerRegleDuplication()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleDuplication()");
 
 		String returned = jointure;
 

@@ -43,7 +43,7 @@ public class ArcWebGenericDao {
 			return envMap;
 			
 		} catch (ArcException e) {
-			StaticLoggerDispatcher.error("Sandbox list couldn't be initialized", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Sandbox list couldn't be initialized");
 		}
 
 		return new LinkedHashMap<>();

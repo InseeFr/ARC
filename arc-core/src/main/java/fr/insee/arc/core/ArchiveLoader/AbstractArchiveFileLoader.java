@@ -77,7 +77,7 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 		try {
 		    if (dir.mkdir())
 		    {
-		    	StaticLoggerDispatcher.debug("$$"+Thread.currentThread().getId()+" is decompressing "+dir.getAbsolutePath(),LOGGER);
+		    	StaticLoggerDispatcher.debug(LOGGER,"$$"+Thread.currentThread().getId()+" is decompressing "+dir.getAbsolutePath());
 		    	decompressor.extract(this.archiveChargement);
 		    	uncompressInProgress=true;
 		    }
@@ -96,7 +96,7 @@ public abstract class AbstractArchiveFileLoader implements IArchiveFileLoader {
 				Thread.sleep(MILLISECOND_UNCOMPRESSION_CHECK_INTERVAL);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-			    StaticLoggerDispatcher.error("Error in thread sleep extractArchive()", LOGGER);
+			    StaticLoggerDispatcher.error(LOGGER, "Error in thread sleep extractArchive()");
 			}
 	    	toRead = new File(dir + File.separator + ManipString.redoEntryName(fileName));
 	    }

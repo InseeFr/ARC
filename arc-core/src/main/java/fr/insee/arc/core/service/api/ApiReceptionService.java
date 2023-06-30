@@ -116,7 +116,7 @@ public class ApiReceptionService extends ApiService {
 
 		GenericBean archivesContent = null;
 
-		StaticLoggerDispatcher.info("moveAndCheckClientFiles", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "moveAndCheckClientFiles");
 
 		try {
 			// Create target directories if they don't exist
@@ -153,7 +153,7 @@ public class ApiReceptionService extends ApiService {
 		int fileSize = 0;
 		int fileNb = 0;
 
-		StaticLoggerDispatcher.info("Taille limite de fichiers à charger : " + fileSizeLimit, LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Taille limite de fichiers à charger : " + fileSizeLimit);
 
 		for (String d : entrepotIdList) {
 
@@ -304,7 +304,7 @@ public class ApiReceptionService extends ApiService {
 				l.add(TraitementEtat.OK.toString());
 				l.add(null);
 				l.add(null);
-				StaticLoggerDispatcher.info("Insertion du cas rebus : " + l.toString(), LOGGER);
+				StaticLoggerDispatcher.info(LOGGER, "Insertion du cas rebus : " + l.toString());
 				content.add(l);
 			}
 		}
@@ -533,7 +533,7 @@ public class ApiReceptionService extends ApiService {
 	 * pilotage
 	 */
 	private void registerAndDispatchFiles(Connection connexion, GenericBean archiveContent) {
-		StaticLoggerDispatcher.info("registerAndDispatchFiles", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "registerAndDispatchFiles");
 		// la bean (fileName,type, etat) contient pour chaque fichier, le type
 		// du fichier et l'action à réaliser
 		GenericBean g = findDuplicates(archiveContent);
@@ -730,7 +730,7 @@ public class ApiReceptionService extends ApiService {
 		// Localiser les doublons
 		// Note : l'insertion est redondante mais au niveau métier, c'est
 		// beaucoup plus logique
-		StaticLoggerDispatcher.info("Recherche de doublons de fichiers", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Recherche de doublons de fichiers");
 
 		StringBuilder requete = new StringBuilder();
 		requete.append(ServiceTableOperation.creationTableResultat(this.tablePil, this.tablePilTemp));

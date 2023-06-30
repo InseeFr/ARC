@@ -190,7 +190,7 @@ public class NormageEngineRegleSupression {
 	protected static String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme,
 			Date validite, String periodicite, String jointure) throws ArcException {
 
-		StaticLoggerDispatcher.info("appliquerRegleSuppression()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleSuppression()");
 
 		String returned = jointure;
 

@@ -32,7 +32,7 @@ public class NormageEngineRegleIndependance {
 	 */
 	protected static void ajouterRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme,
 			Date validite, String periodicite, String jointure) {
-		StaticLoggerDispatcher.info("ajouterRegleIndependance()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "ajouterRegleIndependance()");
 
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
 		HashSet<String> rubriqueExclusion = new HashSet<String>();
@@ -115,7 +115,7 @@ public class NormageEngineRegleIndependance {
 	protected static String appliquerRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme,
 			Date validite, String periodicite, String jointure) throws ArcException {
 
-		StaticLoggerDispatcher.info("appliquerRegleIndependance()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleIndependance()");
 
 		String returned = jointure;
 

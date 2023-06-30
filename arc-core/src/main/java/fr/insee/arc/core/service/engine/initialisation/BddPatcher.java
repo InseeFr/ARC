@@ -110,7 +110,7 @@ public class BddPatcher {
 	private static String checkBddScriptVersion (Connection connexion, String... envExecution)
 	{
 		
-		return new BDParameters(ArcDatabase.META_DATA).getString(connexion, gitCommitIdParameterKey(envExecution),GIT_COMMIT_ID_PARAMETER_VALUE_NOVERSION);
+		return new BDParameters(ArcDatabase.META_DATA).getStringNoError(connexion, gitCommitIdParameterKey(envExecution),GIT_COMMIT_ID_PARAMETER_VALUE_NOVERSION);
 	}
 
 

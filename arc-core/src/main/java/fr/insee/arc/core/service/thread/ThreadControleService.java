@@ -102,19 +102,19 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 			insertionFinale();
 
 		} catch (ArcException e) {
-			StaticLoggerDispatcher.error("Error in control Thread", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in control Thread");
 			try {
 				this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil,
 						this.idSource, e, "aucuneTableADroper");
 			} catch (ArcException e2) {
-				StaticLoggerDispatcher.error(e2, LOGGER);
+				StaticLoggerDispatcher.error(LOGGER, e2);
 			}
 			Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
 		}
 	}
 
 	public void start() {
-		StaticLoggerDispatcher.debug("Starting ThreadControleService", LOGGER);
+		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadControleService");
 		t = new Thread(this);
 	    t.start();
 	}
@@ -135,16 +135,16 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	 * @throws ArcException
 	 */
 	private void preparation() throws ArcException {
-		StaticLoggerDispatcher.info("** preparation **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** preparation **");
 
     	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
 
 		// Marquage du jeux de règles appliqué
-		StaticLoggerDispatcher.info("Marquage du jeux de règles appliqués ", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Marquage du jeux de règles appliqués ");
 		query.append(marqueJeuDeRegleApplique(this.tableControlePilTemp, TraitementEtat.OK.toString()));
 
 		// Fabrication de la table de controle temporaire
-		StaticLoggerDispatcher.info("Fabrication de la table de controle temporaire ", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Fabrication de la table de controle temporaire ");
 		query.append(ServiceTableOperation.createTableTravailIdSource(this.getTablePrevious(), this.tableControleDataTemp, this.idSource,
 				"'" + ServiceRequeteSqlRegle.RECORD_WITH_NOERROR
 						+ "'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
@@ -168,7 +168,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	 * @throws ArcException
 	 */
 	private void execute() throws ArcException {
-		StaticLoggerDispatcher.info("** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **");
 
 		this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), jdr, this.tableControleDataTemp,
 				this.structure);
@@ -190,11 +190,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	 * @throws ArcException
 	 */
 	private StringBuilder calculSeuilControle() throws ArcException {
-		StaticLoggerDispatcher.info("finControle", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "finControle");
 
 		StringBuilder blocFin = new StringBuilder();
 		// Creation des tables temporaires ok et ko
-		StaticLoggerDispatcher.info("Creation des tables temporaires ok et ko", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Creation des tables temporaires ok et ko");
 
 		// Execution à mi parcours du bloc de requete afin que les tables tempo soit
 		// bien créées
@@ -204,13 +204,13 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		blocFin.append(ServiceTableOperation.creationTableResultat(this.tableControleDataTemp, tableOutKoTemp));
 
 		// Marquage des résultat du control dans la table de pilotage
-		StaticLoggerDispatcher.info("Marquage dans la table de pilotage", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Marquage dans la table de pilotage");
 		blocFin.append(marquagePilotage());
 
 		// insert in OK when
 		// etat traitement in OK or OK,KO
 		// AND records which have no error or errors that can be kept
-		StaticLoggerDispatcher.info("Insertion dans OK", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Insertion dans OK");
 		blocFin.append(ajoutTableControle(this.tableControleDataTemp, tableOutOkTemp, this.tableControlePilTemp,
 				"etat_traitement in ('{" + TraitementEtat.OK + "}','{" + TraitementEtat.OK + "," + TraitementEtat.KO
 						+ "}') ",
@@ -220,7 +220,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		// insert in OK when
 		// etat traitement in KO
 		// OR records which have errors that must be excluded
-		StaticLoggerDispatcher.info("Insertion dans KO", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Insertion dans KO");
 		blocFin.append(ajoutTableControle(this.tableControleDataTemp, tableOutKoTemp, this.tableControlePilTemp,
 				"etat_traitement ='{" + TraitementEtat.KO + "}' ",
 				"controle='" + ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_EXCLUDE + "' OR "));

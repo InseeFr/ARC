@@ -71,7 +71,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
     }
 
     public void start() {
-		StaticLoggerDispatcher.debug("Starting ThreadMappingService", LOGGER);
+		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadMappingService");
     	t = new Thread(this);
         t.start();
     }
@@ -84,13 +84,13 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             executionMapping();
 
         } catch (ArcException e) {
-            StaticLoggerDispatcher.error(e, LOGGER);
+            StaticLoggerDispatcher.error(LOGGER, e);
 
 	    try {
 			this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
 				"aucuneTableADroper");
 		    } catch (ArcException e2) {
-	            StaticLoggerDispatcher.error(e, LOGGER);
+	            StaticLoggerDispatcher.error(LOGGER, e);
 	
 		    }
             Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
@@ -152,7 +152,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             listeFichier.add(idSource);
 
 
-            StaticLoggerDispatcher.trace("Mapping : " + listeFichier.get(0), LOGGER);                
+            StaticLoggerDispatcher.trace(LOGGER, "Mapping : " + listeFichier.get(0));                
 
             ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
 

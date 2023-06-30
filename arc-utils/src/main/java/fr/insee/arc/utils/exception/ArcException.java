@@ -45,5 +45,5 @@ public class ArcException extends Exception {
 		LoggerHelper.error(LOGGER, this.getMessage());
 		return this;
 	}
-	
+
 }

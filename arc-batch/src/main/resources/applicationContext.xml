@@ -45,6 +45,4 @@
 		<property name="batchArcEnvironment" value="${fr.insee.arc.batch.parametre.env:arc.ihm}"></property>
 		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution:arc.prod}"></property>
 	</bean>
-	
-	<bean id="activeLoggerDispatcher" class="fr.insee.arc.core.util.DefaultLoggerDispatcher"></bean>
 </beans>

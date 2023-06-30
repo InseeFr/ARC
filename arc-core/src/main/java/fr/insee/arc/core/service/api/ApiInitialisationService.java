@@ -27,10 +27,8 @@ import fr.insee.arc.core.service.api.query.ServiceDatabaseMaintenance;
 import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
 import fr.insee.arc.core.service.api.query.ServiceHashFileName;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
-import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -114,9 +112,10 @@ public class ApiInitialisationService extends ApiService {
 	 * @throws ArcException
 	 */
 	private void rebuildFileSystem() throws ArcException {
-		loggerDispatcher.info("rebuildFileSystem", LOGGER);
+		LoggerHelper.info(LOGGER, "rebuildFileSystem");
 
 		// parcourir toutes les archives dans le répertoire d'archive
+		PropertiesHandler properties = PropertiesHandler.getInstance();
 		String repertoire = properties.getBatchParametersDirectory();
 
 		String nomTableArchive = ServiceTableNaming.dbEnv(envExecution) + "pilotage_archive";
@@ -318,7 +317,7 @@ public class ApiInitialisationService extends ApiService {
 	 * @throws ArcException
 	 */
 	private void reinstate(Connection connexion, String tablePil) throws ArcException {
-		loggerDispatcher.info("reinstateWithRename", LOGGER);
+		LoggerHelper.info(LOGGER, "reinstateWithRename");
 
 		// on cherche tous les containers contenant un fichier à rejouer
 		// on remet l'archive à la racine
@@ -329,6 +328,7 @@ public class ApiInitialisationService extends ApiService {
 				.mapContent().get("container");
 
 		if (containerList != null) {
+			PropertiesHandler properties = PropertiesHandler.getInstance();
 			String repertoire = properties.getBatchParametersDirectory();
 			String envDir = this.envExecution.replace(".", "_").toUpperCase();
 
@@ -363,17 +363,17 @@ public class ApiInitialisationService extends ApiService {
 
 	private static void mettreAJourSchemaTableMetier(Connection connexion, String envParameters, String envExecution) {
 		try {
-			StaticLoggerDispatcher.info("Mettre à jour le schéma des tables métiers avec la famille", LOGGER);
+			LoggerHelper.info(LOGGER, "Mettre à jour le schéma des tables métiers avec la famille");
 			mettreAJourSchemaTableMetierThrow(connexion, envParameters, envExecution);
 		} catch (Exception e) {
-			StaticLoggerDispatcher.error("Error in ApiInitialisation.mettreAJourSchemaTableMetier", LOGGER);
+			LoggerHelper.error(LOGGER, "Error in ApiInitialisation.mettreAJourSchemaTableMetier", LOGGER);
 		}
 
 	}
 
 	private static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters,
 			String envExecution) throws ArcException {
-		StaticLoggerDispatcher.info("mettreAJourSchemaTableMetier", LOGGER);
+		LoggerHelper.info(LOGGER, "mettreAJourSchemaTableMetier");
 		/*
 		 * Récupérer la table qui mappe : famille / table métier / variable métier et
 		 * type de la variable
@@ -539,7 +539,7 @@ public class ApiInitialisationService extends ApiService {
 	 * @throws ArcException
 	 */
 	private void cleanToDelete(Connection connexion, String tablePil) throws ArcException {
-		loggerDispatcher.info("cleanToDelete", LOGGER);
+		LoggerHelper.info(LOGGER, "cleanToDelete");
 
 		StringBuilder requete = new StringBuilder();
 		requete.append("DELETE FROM " + tablePil + " a WHERE exists (select 1 from " + tablePil
@@ -560,8 +560,7 @@ public class ApiInitialisationService extends ApiService {
 	 * @throws ArcException
 	 */
 	private void nettoyerTablePilotage(Connection connexion, String envExecution) throws ArcException {
-
-		loggerDispatcher.info("nettoyerTablePilotage", LOGGER);
+		LoggerHelper.info(LOGGER, "nettoyerTablePilotage");
 		
         BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 
@@ -650,7 +649,7 @@ public class ApiInitialisationService extends ApiService {
 		// on continue jusqu'a ce qu'on ne trouve plus rien à effacer
 		do {
 			// récupérer le résultat de la requete
-			loggerDispatcher.info("Archivage de " + NB_FICHIER_PER_ARCHIVE + " fichiers - Début", LOGGER);
+			LoggerHelper.info(LOGGER, "Archivage de " + NB_FICHIER_PER_ARCHIVE + " fichiers - Début");
 			n = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, requete)).mapContent();
 
 			// ajouter à la liste m les enregistrements qu'ils n'existent pas déjà dans m
@@ -678,7 +677,7 @@ public class ApiInitialisationService extends ApiService {
 
 				}
 			}
-			loggerDispatcher.info("Archivage Fin", LOGGER);
+			LoggerHelper.info(LOGGER,"Archivage Fin");
 
 		} while (UtilitaireDao.get(0).hasResults(connexion,
 				new ArcPreparedStatementBuilder("select 1 from fichier_to_delete limit 1")));
@@ -687,6 +686,7 @@ public class ApiInitialisationService extends ApiService {
 		if (m.get("entrepot").size() > 0) {
 
 			// 7. Déplacer les archives effacées dans le répertoire de sauvegarde "OLD"
+			PropertiesHandler properties = PropertiesHandler.getInstance();
 			String repertoire = properties.getBatchParametersDirectory();
 
 			String entrepotSav = "";
@@ -731,10 +731,10 @@ public class ApiInitialisationService extends ApiService {
 	public static void copyTablesToExecution(Connection connexion, String anParametersEnvironment,
 			String anExecutionEnvironment) {
 		try {
-			StaticLoggerDispatcher.info("Recopie des regles dans l'environnement", LOGGER);
+			LoggerHelper.info(LOGGER, "Recopie des regles dans l'environnement");
 			copyTablesToExecutionThrow(connexion, anParametersEnvironment, anExecutionEnvironment);
 		} catch (Exception e) {
-			StaticLoggerDispatcher.error("Error in ApiInitialisation.copyTablesToExecution", LOGGER);
+			LoggerHelper.error(LOGGER, "Error in ApiInitialisation.copyTablesToExecution");
 		}
 	}
 
@@ -755,7 +755,7 @@ public class ApiInitialisationService extends ApiService {
 	 */
 	private static void copyRulesTablesToExecution(Connection connexion, String anParametersEnvironment,
 			String anExecutionEnvironment) throws ArcException {
-		StaticLoggerDispatcher.info("copyTablesToExecution", LOGGER);
+		LoggerHelper.info(LOGGER, "copyTablesToExecution");
 		try {
 
 			anExecutionEnvironment = anExecutionEnvironment.replace(".", "_");
@@ -852,9 +852,9 @@ public class ApiInitialisationService extends ApiService {
 			UtilitaireDao.get(0).executeBlock(connexion, requete);
 
 		} catch (Exception e) {
-			StaticLoggerDispatcher.trace(
-					"Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment, LOGGER);
-			StaticLoggerDispatcher.error("Error in ApiInitialisation.copyRulesTablesToExecution", LOGGER);
+			LoggerHelper.trace(LOGGER, 
+					"Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment);
+			LoggerHelper.error(LOGGER, "Error in ApiInitialisation.copyRulesTablesToExecution");
 			throw e;
 		}
 	}
@@ -879,9 +879,9 @@ public class ApiInitialisationService extends ApiService {
 
 			Optional<String> loopInExpressionSet = expressionService.loopInExpressionSet(expressions);
 			if (loopInExpressionSet.isPresent()) {
-				StaticLoggerDispatcher.info("A loop is present in the expression set : " + loopInExpressionSet.get(),
-						LOGGER);
-				StaticLoggerDispatcher.info("The expression set is not applied", LOGGER);
+				LoggerHelper.info(LOGGER, "A loop is present in the expression set : " + loopInExpressionSet.get()
+						);
+				LoggerHelper.info(LOGGER, "The expression set is not applied");
 				continue;
 			}
 
@@ -920,7 +920,7 @@ public class ApiInitialisationService extends ApiService {
 			UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(),
 					new ArcPreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
 		} catch (Exception e) {
-			loggerDispatcher.error(e, LOGGER);
+			LoggerHelper.error(LOGGER, e);
 		}
 
 		// Delete the selected file entries from the pilotage table from all the phases
@@ -954,13 +954,13 @@ public class ApiInitialisationService extends ApiService {
 			try {
 				UtilitaireDao.get(0).executeRequest(connexion.getCoordinatorConnection(), requete);
 			} catch (ArcException e) {
-				loggerDispatcher.error(e, LOGGER);
+				LoggerHelper.error(LOGGER, e);
 			}
 
 			try {
 				reinstate(this.connexion.getCoordinatorConnection(), this.tablePil);
 			} catch (Exception e) {
-				loggerDispatcher.error(e, LOGGER);
+				LoggerHelper.error(LOGGER, e);
 			}
 
 			nbLignes++;
@@ -983,7 +983,7 @@ public class ApiInitialisationService extends ApiService {
 		try {
 			synchroniserEnvironmentByPilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
 		} catch (Exception e) {
-			loggerDispatcher.error(e, LOGGER);
+			LoggerHelper.error(LOGGER, e);
 		}
 
 		if (nbLignes > 0) {
@@ -998,7 +998,7 @@ public class ApiInitialisationService extends ApiService {
 			synchroniserEnvironmentByPilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
 			ServiceDatabaseMaintenance.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
 		} catch (Exception e) {
-			loggerDispatcher.error(e, LOGGER);
+			LoggerHelper.error(LOGGER, e);
 		}
 	}
 
@@ -1069,11 +1069,11 @@ public class ApiInitialisationService extends ApiService {
 	 * @throws ArcException
 	 */
 	private void synchroniserEnvironmentByPilotage(Connection connexion, String envExecution) throws ArcException {
-		loggerDispatcher.info("synchronisationEnvironmentByPilotage", LOGGER);
+		LoggerHelper.info(LOGGER, "synchronisationEnvironmentByPilotage");
 		try {
 			// maintenance de la table de pilotage
 			// retirer les "encours" de la table de pilotage
-			loggerDispatcher.info("** Maintenance table de pilotage **", LOGGER);
+			LoggerHelper.info(LOGGER, "** Maintenance table de pilotage **");
 			UtilitaireDao.get(0).executeBlock(connexion,
 					"alter table " + this.tablePil + " alter column date_entree type text COLLATE pg_catalog.\"C\"; ");
 			UtilitaireDao.get(0).executeBlock(connexion,

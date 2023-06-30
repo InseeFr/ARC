@@ -27,16 +27,16 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 
     @Override
 	public FilesInputStreamLoad loadArchive() throws ArcException {
-		StaticLoggerDispatcher.info("begin loadArchive() ", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "begin loadArchive() ");
 		readFileWithoutExtracting();
-		StaticLoggerDispatcher.info("end loadArchive() ", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "end loadArchive() ");
 		return this.filesInputStreamLoad;
 	}
 
     @SuppressWarnings("resource")
     @Override
     public FilesInputStreamLoad readFileWithoutExtracting() throws ArcException {
-	StaticLoggerDispatcher.info("begin readFileWithoutExtracting() ", LOGGER);
+	StaticLoggerDispatcher.info(LOGGER, "begin readFileWithoutExtracting() ");
 	ZipFile zipFileChargement;
 	try {
 		zipFileChargement = new ZipFile(this.archiveChargement);
@@ -62,7 +62,7 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 		throw new ArcException(ioReadException, ArcExceptionMessage.FILE_READ_FAILED, this.idSource);
 	}
 		
-	StaticLoggerDispatcher.info("end readFileWithoutExtracting() ", LOGGER);
+	StaticLoggerDispatcher.info(LOGGER, "end readFileWithoutExtracting() ");
 	return filesInputStreamLoad;
 
     }

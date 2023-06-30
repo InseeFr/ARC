@@ -31,7 +31,7 @@ public class ServicePilotageOperation {
 		StringBuilder query = new StringBuilder();
 
 		// mise à jour du nombre d'enregistrement et du type composite
-		StaticLoggerDispatcher.info("** updateNbEnr **", LOGGER_APISERVICE);
+		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** updateNbEnr **");
 		query.append("\n UPDATE " + tablePilTemp + " a ");
 		query.append("\n \t SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
 

@@ -91,14 +91,14 @@ public class ChargeurCSV implements IChargeur {
 	 */
 
 	private void copyCsvFileToDatabase() throws ArcException {
-		StaticLoggerDispatcher.info("** CSVtoBase **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase **");
 
 		java.util.Date beginDate = new java.util.Date();
 
-		StaticLoggerDispatcher.debug(String.format("contenu delimiter %s", norme.getRegleChargement().getDelimiter()),
-				LOGGER);
-		StaticLoggerDispatcher.debug(String.format("contenu format %s", norme.getRegleChargement().getFormat()),
-				LOGGER);
+		StaticLoggerDispatcher.debug(LOGGER,
+				String.format("contenu delimiter %s", norme.getRegleChargement().getDelimiter()));
+		StaticLoggerDispatcher.debug(LOGGER,
+				String.format("contenu format %s", norme.getRegleChargement().getFormat()));
 
 		this.separateur = norme.getRegleChargement().getDelimiter().trim();
 		this.encoding = XMLUtil.parseXML(norme.getRegleChargement().getFormat(), "encoding");
@@ -150,7 +150,7 @@ public class ChargeurCSV implements IChargeur {
 
 		java.util.Date endDate = new java.util.Date();
 
-		StaticLoggerDispatcher.info("** CSVtoBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms");
 
 	}
 
@@ -472,7 +472,7 @@ public class ChargeurCSV implements IChargeur {
 	 * @throws ArcException
 	 */
 	private void transformCsvDataToArcData() throws ArcException {
-		StaticLoggerDispatcher.info("** FlatBaseToIdedFlatBase **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** FlatBaseToIdedFlatBase **");
 		java.util.Date beginDate = new java.util.Date();
 
 		StringBuilder req = new StringBuilder();
@@ -517,7 +517,7 @@ public class ChargeurCSV implements IChargeur {
 
 		java.util.Date endDate = new java.util.Date();
 		StaticLoggerDispatcher
-				.info("** FlatBaseToIdedFlatBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
+				.info(LOGGER, "** FlatBaseToIdedFlatBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms");
 
 	}
 
@@ -533,7 +533,7 @@ public class ChargeurCSV implements IChargeur {
 
 	@Override
 	public void execution() throws ArcException {
-		StaticLoggerDispatcher.info("execution", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "execution");
 
 		// On met le fichier en base
 		copyCsvFileToDatabase();

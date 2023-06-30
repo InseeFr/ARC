@@ -104,7 +104,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 				vObjectService.destroy(viewClient);
 			}
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeClient", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in InteractorFamilleNorme.initializeClient");
 		}
 	}
 
@@ -128,7 +128,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 				vObjectService.destroy(viewHostAllowed);
 			}
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeHostAllowed", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in InteractorFamilleNorme.initializeHostAllowed");
 		}
 	}
 
@@ -152,7 +152,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 				vObjectService.destroy(viewTableMetier);
 			}
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeTableMetier", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in InteractorFamilleNorme.initializeTableMetier");
 		}
 	}
 	
@@ -180,7 +180,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 				LoggerHelper.debug(LOGGER, "/* initializeVariableMetier */");
 				dao.initializeViewVariableMetier(viewVariableMetier, listeTableFamille);
 			} catch (Exception ex) {
-				StaticLoggerDispatcher.error("Error in InteractorFamilleNorme.initializeVariableMetier", LOGGER);
+				StaticLoggerDispatcher.error(LOGGER, "Error in InteractorFamilleNorme.initializeVariableMetier");
 			}
 		} else {
 			vObjectService.destroy(viewVariableMetier);

@@ -29,14 +29,14 @@ public class TarGzArchiveLoader extends AbstractArchiveFileLoader {
 
     @Override
     public FilesInputStreamLoad loadArchive() throws ArcException {
-	StaticLoggerDispatcher.info("begin loadArchive() ", LOGGER);
+	StaticLoggerDispatcher.info(LOGGER, "begin loadArchive() ");
 
 	// Mandatory for multithreading to decompress tar.gz archive
 	// as it is not possible to address a specific entry in targz
     extractArchive(fileDecompresor);
 	this.filesInputStreamLoad = readFile();
 
-	StaticLoggerDispatcher.info("end loadArchive() ", LOGGER);
+	StaticLoggerDispatcher.info(LOGGER, "end loadArchive() ");
 	return this.filesInputStreamLoad;
 
     }

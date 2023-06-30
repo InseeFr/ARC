@@ -99,7 +99,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     }
 
     public void start() {
-		StaticLoggerDispatcher.debug("Starting ThreadNormageService", LOGGER);
+		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadNormageService");
         t = new Thread(this);
         t.start();
     }
@@ -118,12 +118,12 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
             insertionFinale();
 
         } catch (ArcException e) {
-            StaticLoggerDispatcher.error(e, LOGGER);
+            StaticLoggerDispatcher.error(LOGGER, e);
 	    try {
 			this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
 				"aucuneTableADroper");
 		    } catch (ArcException e2) {
-	            StaticLoggerDispatcher.error(e2, LOGGER);
+	            StaticLoggerDispatcher.error(LOGGER, e2);
 		    }
             Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
         }
@@ -137,7 +137,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
      * @throws ArcException
      */
     private void creerTableTravail() throws ArcException {
-        StaticLoggerDispatcher.info("Créer les tables images", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "Créer les tables images");
     	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
 
         // Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
@@ -171,7 +171,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
      */
     private void jointureBlocXML() throws ArcException {
 
-        StaticLoggerDispatcher.info("jointureBlocXML()", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "jointureBlocXML()");
 
         // on parcours les fichiers pour effectuer la requete de jointure avec les regles de normage
         // c'est une des requete la plus couteuse de l'application (reconstitution de la structure plate à partir du modele xml)

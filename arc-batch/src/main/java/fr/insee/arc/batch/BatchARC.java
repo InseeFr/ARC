@@ -25,7 +25,6 @@ import fr.insee.arc.core.service.api.ApiReceptionService;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.service.api.query.ServiceDatabaseMaintenance;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -104,7 +103,7 @@ class BatchARC implements IReturnCode {
 	private int iteration = 0;
 
 	private static void message(String msg) {
-		StaticLoggerDispatcher.warn(msg, LOGGER);
+		LoggerHelper.warn(LOGGER, msg);
 	}
 
 	private void initParameters() {

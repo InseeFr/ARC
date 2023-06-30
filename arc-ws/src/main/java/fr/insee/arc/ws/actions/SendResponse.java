@@ -103,7 +103,7 @@ public class SendResponse {
 			this.wr=response.getOutputStream();
 		}
 		catch (IOException e) {
-			StaticLoggerDispatcher.error("** Error in servlet SendResponse **", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet SendResponse **");
 		}
 	}
 

@@ -28,7 +28,7 @@ public class NormageEngineRegleUnicite {
 	 * @throws ArcException
 	 */
 	protected static String appliquerRegleUnicite(HashMap<String, ArrayList<String>> regle, String jointure) {
-		StaticLoggerDispatcher.info("appliquerRegleUnicite()", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleUnicite()");
 
 		String returned = jointure;
 		// extraction de la clause select

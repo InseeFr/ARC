@@ -39,7 +39,7 @@ public class ChargeurFactory {
     }
     
     public IChargeur getChargeur(TypeChargement typeChargement){
-        StaticLoggerDispatcher.info("** getChargeur **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** getChargeur **");
         return this.map.get(typeChargement);
     }
 

@@ -119,7 +119,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws ArcException 
      */
     private void clefValeurToXml(HashMap<String, String> arbreFormat, InputStream tmpInx2) throws ArcException {
-        StaticLoggerDispatcher.info("** Conversion du fichier clef valeur en XML **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** Conversion du fichier clef valeur en XML **");
         java.util.Date beginDate = new java.util.Date();
         // contient la liste des pères pour l'élément précédent
         ArrayList<String> listePeresRubriquePrecedante = new ArrayList<>();
@@ -156,7 +156,7 @@ public class ChargeurClefValeur implements IChargeur {
 		}
 
         java.util.Date endDate = new java.util.Date();
-        StaticLoggerDispatcher.info("** clefValeurToXml temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** clefValeurToXml temps : " + (endDate.getTime() - beginDate.getTime()) + " ms **");
     }
 
     /**

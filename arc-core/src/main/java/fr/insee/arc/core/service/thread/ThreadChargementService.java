@@ -98,14 +98,14 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	}
 
 	public void start() {
-		StaticLoggerDispatcher.debug("Starting ThreadChargementService", LOGGER);
+		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadChargementService");
 		this.t = new Thread(this);
 		t.start();
 	}
 
 	@Override
 	public void run() {
-		StaticLoggerDispatcher.info("Chargement des Fichiers", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Chargement des Fichiers");
 
 		try {
 			// preparer le chargement
@@ -174,7 +174,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * @throws ArcException
 	 */
 	private String truncateTableIfKO() {
-		StaticLoggerDispatcher.info("** clean **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** clean **");
 
 		StringBuilder queryTest = new StringBuilder();
 		queryTest.append("select count(*)>0 from (select " + ColumnEnum.ID_SOURCE.getColumnName() + " from "
@@ -196,7 +196,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 */
 	private void chargementFichiers() throws ArcException {
 
-		StaticLoggerDispatcher.info("** chargementFichiers **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** chargementFichiers **");
 
 		java.util.Date beginDate = new java.util.Date();
 
@@ -206,8 +206,8 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		}
 
 		java.util.Date endDate = new java.util.Date();
-		StaticLoggerDispatcher.info("** Fichier chargé en " + (endDate.getTime() - beginDate.getTime()) + " ms **",
-				LOGGER);
+		StaticLoggerDispatcher.info(LOGGER,
+				"** Fichier chargé en " + (endDate.getTime() - beginDate.getTime()) + " ms **");
 
 	}
 
@@ -245,7 +245,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * @throws ArcException
 	 */
 	private void choixChargeur() throws ArcException {
-		StaticLoggerDispatcher.info("** choixChargeur : " + this.idSource + " **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** choixChargeur : " + this.idSource + " **");
 		// Si on a pas 1 seule norme alors le fichier est en erreur
 		ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
 		chgrBrtl.setConnexion(getConnexion().getExecutorConnection());
@@ -314,7 +314,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * @throws ArcException
 	 */
 	private String insertionFinale(String tableName, String idSource) throws ArcException {
-		StaticLoggerDispatcher.info("** insertTableOK **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** insertTableOK **");
 
 		StringBuilder query = new StringBuilder();
 		String tableIdSource = ServiceHashFileName.tableOfIdSource(tableName, idSource);
@@ -339,7 +339,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	private boolean majPilotage(String idSource, Norme normeOk, String validite) throws ArcException {
 		boolean erreur = false;
-		StaticLoggerDispatcher.info("Mettre à jour la table de pilotage", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Mettre à jour la table de pilotage");
 		java.util.Date beginDate = new java.util.Date();
 		StringBuilder bloc3 = new StringBuilder();
 
@@ -364,8 +364,8 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		java.util.Date endDate = new java.util.Date();
 
 		StaticLoggerDispatcher.info(
-				"Mettre à jour la table de pilotage temps : " + (endDate.getTime() - beginDate.getTime()) + " ms",
-				LOGGER);
+				LOGGER,
+				"Mettre à jour la table de pilotage temps : " + (endDate.getTime() - beginDate.getTime()) + " ms");
 		return erreur;
 	}
 

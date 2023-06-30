@@ -125,7 +125,7 @@ La méthode `putAllVObjects` permet d'initialiser toutes les vues de la page :
 ```java=
 @Override
 public void putAllVObjects(ModelGererFamille arcModel) {
-    loggerDispatcher.debug("putAllVObjects()", LOGGER);
+    LoggerHelper.debug(LOGGER, "putAllVObjects()");
 
     views.setViewUn(vObjectService.preInitialize(arcModel.getViewUn()));
     views.setViewDeux(vObjectService.preInitialize(arcModel.getViewDeux()));
@@ -137,7 +137,7 @@ public void putAllVObjects(ModelGererFamille arcModel) {
     putVObject(views.getViewTrois(), t -> initializeTrois());
     // ...
 
-    loggerDispatcher.debug("putAllVObjects() end", LOGGER);
+    LoggerHelper.debug(LOGGER, "putAllVObjects() end");
 }
 ```
 

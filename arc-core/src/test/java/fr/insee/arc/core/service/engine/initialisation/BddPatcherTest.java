@@ -24,8 +24,9 @@ import fr.insee.arc.utils.structure.GenericBean;
 public class BddPatcherTest extends InitializeQueryTest {
 
 	private static String newVersion = "v2";
-	private static String userWithRestrictedRights = "arc_restricted";
-	public static String testSandbox = "arc_bas1";
+	private static String userWithRestrictedRights = "";
+	public static String testSandbox1 = "arc_bas1";
+	public static String testSandbox2 = "arc_bas2";
 
 	/**
 	 * test the database initialization
@@ -69,7 +70,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 
 		// test a sandbox schema creation
 		query = new GenericPreparedStatementBuilder();
-		query.append("select tablename from pg_tables where schemaname=").append(query.quoteText(testSandbox));
+		query.append("select tablename from pg_tables where schemaname=").append(query.quoteText(testSandbox1));
 
 		content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query))
 				.mapContent();
@@ -92,7 +93,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// clean database
 		query = new GenericPreparedStatementBuilder();
 		query.append("DROP SCHEMA IF EXISTS " + DataObjectService.ARC_METADATA_SCHEMA + " CASCADE;");
-		query.append("DROP SCHEMA IF EXISTS " + testSandbox + " CASCADE;");
+		query.append("DROP SCHEMA IF EXISTS " + testSandbox1 + " CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS public CASCADE;");
 		UtilitaireDao.get(0).executeRequest(c, query);
 		
@@ -103,7 +104,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// metadata schema creation
 		patcher.bddScript(c);
 		// sandbox schema creation
-		patcher.bddScript(c, testSandbox);
+		patcher.bddScript(c, testSandbox1, testSandbox2);
 		
 	}
 	

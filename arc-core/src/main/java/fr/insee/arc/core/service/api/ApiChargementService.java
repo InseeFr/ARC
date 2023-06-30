@@ -17,6 +17,7 @@ import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 
 /**
@@ -50,7 +51,9 @@ public class ApiChargementService extends ApiService {
 
     @Override
     public void executer() throws ArcException {
-        StaticLoggerDispatcher.info("** executer **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** executer **");
+        
+		PropertiesHandler properties = PropertiesHandler.getInstance();
         
         BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
         
@@ -62,7 +65,7 @@ public class ApiChargementService extends ApiService {
         this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiChargementService.MAX_PARALLEL_WORKERS",4);
 
         // Récupérer la liste des fichiers selectionnés
-        StaticLoggerDispatcher.info("Récupérer la liste des fichiers selectionnés", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "Récupérer la liste des fichiers selectionnés");
         setTabIdSource(pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString()));
         
         MultiThreading<ApiChargementService,ThreadChargementService> mt=new MultiThreading<>(this, new ThreadChargementService());

@@ -25,7 +25,7 @@ public class ZipDecompressor implements ArchiveExtractor {
 
 	@Override
 	public void extract(File archiveFile) throws IOException {
-		StaticLoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "decompress()" + archiveFile.getName());
 		File dir = new File(archiveFile + ".dir");
 
 		try (ZipArchiveInputStream zipIn = new ZipArchiveInputStream(
@@ -39,7 +39,7 @@ public class ZipDecompressor implements ArchiveExtractor {
 					boolean created = f.mkdir();
 					if (!created) {
 						StaticLoggerDispatcher.error(
-								"Unable to create directory '%s', during extraction of archive contents.\n", LOGGER);
+								LOGGER, "Unable to create directory '%s', during extraction of archive contents.\n");
 					}
 				} else {
 					int count;
@@ -74,7 +74,7 @@ public class ZipDecompressor implements ArchiveExtractor {
 
 		}
 
-		StaticLoggerDispatcher.info("Untar completed successfully!", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Untar completed successfully!");
 
 	}
 

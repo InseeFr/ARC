@@ -24,7 +24,7 @@ public class RegleDao {
 
 	public static ArrayList<RegleControleEntity> getRegle(Connection connexion, String tableRegle, String tableIn)
 			throws ArcException {
-		StaticLoggerDispatcher.debug("getRegle", logger);
+		StaticLoggerDispatcher.debug(logger, "getRegle");
 
 		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
 
@@ -64,7 +64,7 @@ public class RegleDao {
 			}
 		}
 
-		StaticLoggerDispatcher.debug("J'ai trouvé " + listRegle.size() + " rattaché à ce jeu de règle", logger);
+		StaticLoggerDispatcher.debug(logger, "J'ai trouvé " + listRegle.size() + " rattaché à ce jeu de règle");
 		return listRegle;
 	}
 

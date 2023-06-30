@@ -504,7 +504,7 @@ public class ServiceRequeteSqlRegle {
 	 * @return le résultat est en MAJUSCULE
 	 */
 	private String rewriteCondition(Map<String, RegleControleEntity> mapRubrique, String condition0) {
-		StaticLoggerDispatcher.debug("Je rentre dans la méthode rewriteCondition", logger);
+		StaticLoggerDispatcher.debug(logger, "Je rentre dans la méthode rewriteCondition");
 		// Passage en MAJUSCULE car la map contient des elements en majuscule
 		// bétonnage du code pour que le .uppercase ne lève pas de null pointerException
 		String cond;
@@ -516,21 +516,21 @@ public class ServiceRequeteSqlRegle {
 		String rubrique = "";
 		String format = "";
 		for (Entry<String, RegleControleEntity> entry : mapRubrique.entrySet()) {
-			StaticLoggerDispatcher.debug("A l'intérieur de la boucle FOR", logger);
+			StaticLoggerDispatcher.debug(logger, "A l'intérieur de la boucle FOR");
 			type = entry.getValue().getIdClasse().trim();
 			rubrique = entry.getKey().trim();
-			StaticLoggerDispatcher.debug("Mon type : " + type + ", ma rubrique : " + rubrique, logger);
+			StaticLoggerDispatcher.debug(logger, "Mon type : " + type + ", ma rubrique : " + rubrique);
 			switch (type) {
 			case "NUM":
 				cond = cond.replace("{" + rubrique + "}", "cast(" + rubrique + " as numeric)");
-				StaticLoggerDispatcher.debug("la nouvelle condition : " + cond, logger);
+				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + cond);
 				break;
 			case "DATE":
 
 				format = entry.getValue().getCondition().trim();
-				StaticLoggerDispatcher.debug("format vaut : " + format, logger);
+				StaticLoggerDispatcher.debug(logger, "format vaut : " + format);
 				cond = cond.replace("{" + rubrique + "}", "to_date(" + rubrique + ",'" + format + "')");
-				StaticLoggerDispatcher.debug("la nouvelle condition : " + cond, logger);
+				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + cond);
 				break;
 			default:
 				cond = cond.replace("{" + rubrique + "}", rubrique);
@@ -584,7 +584,7 @@ public class ServiceRequeteSqlRegle {
 			filtre = filtre + " TRUE ";
 		}
 
-		StaticLoggerDispatcher.debug("Mon filtre est le suivant : " + filtre, logger);
+		StaticLoggerDispatcher.debug(logger, "Mon filtre est le suivant : " + filtre);
 		return filtre;
 	}
 

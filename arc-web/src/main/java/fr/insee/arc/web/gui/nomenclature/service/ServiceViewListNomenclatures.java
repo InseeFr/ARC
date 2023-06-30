@@ -100,7 +100,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
             this.vObjectService.delete(views.getViewListNomenclatures());
         } catch (Exception e) {
-        	StaticLoggerDispatcher.error("Error in GeerFamilleNormeAction.executeRequeteMiseAjourTableMetier", LOGGER);
+        	StaticLoggerDispatcher.error(LOGGER, "Error in GeerFamilleNormeAction.executeRequeteMiseAjourTableMetier");
         }
         return basicAction(model, RESULT_SUCCESS);
     }

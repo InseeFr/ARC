@@ -39,28 +39,45 @@ public class BDParameters {
 		try {
 			r = UtilitaireDao.get(targetDatabase.getIndex()).getString(c, parameterQuery(key));
 		} catch (ArcException e) {
-	        // Création de la table de parametre
-			StringBuilder requete=new StringBuilder();
-			
-	        requete.append("\n CREATE SCHEMA IF NOT EXISTS arc; ");
-			
-	        requete.append("\n CREATE TABLE IF NOT EXISTS ");
-	        requete.append(PARAMETER_TABLE);
-	        requete.append("\n ( ");
-	        requete.append("\n key text, ");
-	        requete.append("\n val text, ");
-	        requete.append("\n description text, ");
-	        requete.append("\n CONSTRAINT parameter_pkey PRIMARY KEY (key) ");
-	        requete.append("\n ); ");
-	        
-	        
-	        try {
-				UtilitaireDao.get(targetDatabase.getIndex()).executeImmediate(c, requete);
-			} catch (ArcException e1) {
-				StaticLoggerDispatcher.error("Error on selecting key in parameter table", LOGGER);
-			}
+			createParameterTableIfNotExists(c);
 		}
 		return r;
+	}
+	
+	private String getStringNoError(Connection c, String key) {
+		String r = null;
+		createParameterTableIfNotExists(c);
+		try {
+			r = UtilitaireDao.get(targetDatabase.getIndex()).getString(c, parameterQuery(key));
+		} catch (ArcException e) {
+			StaticLoggerDispatcher.error(LOGGER, "Error on selecting key in parameter table");
+		}
+		return r;
+	}
+	
+	
+	private void createParameterTableIfNotExists(Connection c)
+	{
+		 // Création de la table de parametre
+		StringBuilder requete=new StringBuilder();
+		
+        requete.append("\n CREATE SCHEMA IF NOT EXISTS arc; ");
+		
+        requete.append("\n CREATE TABLE IF NOT EXISTS ");
+        requete.append(PARAMETER_TABLE);
+        requete.append("\n ( ");
+        requete.append("\n key text, ");
+        requete.append("\n val text, ");
+        requete.append("\n description text, ");
+        requete.append("\n CONSTRAINT parameter_pkey PRIMARY KEY (key) ");
+        requete.append("\n ); ");
+        
+        
+        try {
+			UtilitaireDao.get(targetDatabase.getIndex()).executeImmediate(c, requete);
+		} catch (ArcException e1) {
+			StaticLoggerDispatcher.error(LOGGER, "Error on selecting key in parameter table");
+		}
 	}
 
 	public String getString(Connection c, String key, String defaultValue) {
@@ -72,6 +89,16 @@ public class BDParameters {
 		return s == null ? defaultValue : s;
 	}
 
+	public String getStringNoError(Connection c, String key, String defaultValue) {
+		String s = getStringNoError(c, key);
+		if (s==null)
+		{
+			insertDefaultValue(c, key, defaultValue);
+		}
+		return s == null ? defaultValue : s;
+	}
+	
+	
 	private Integer getInt(Connection c, String key) {
 		String val=getString(c, key);
 		return val==null?null:Integer.parseInt(val);
@@ -91,7 +118,7 @@ public class BDParameters {
 		try {
 			UtilitaireDao.get(targetDatabase.getIndex()).executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
 		} catch (ArcException e) {
-			StaticLoggerDispatcher.error("Error on inserting key in parameter table", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error on inserting key in parameter table");
 		}
 	}
 	
@@ -121,7 +148,7 @@ public class BDParameters {
 			UtilitaireDao.get(targetDatabase.getIndex()).executeRequest(c,requete);
 			
 		} catch (ArcException e) {
-			StaticLoggerDispatcher.error("Error on updating key in parameter table", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error on updating key in parameter table");
 		}
 	}
 	

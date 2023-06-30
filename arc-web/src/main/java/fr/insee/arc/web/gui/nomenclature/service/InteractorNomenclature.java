@@ -91,7 +91,7 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 				vObjectService.destroy(viewNomenclature);
 			}
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in InteractorNomenclature.initializeNomenclature", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in InteractorNomenclature.initializeNomenclature");
 		}
 	}
 
@@ -115,7 +115,7 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 				vObjectService.destroy(viewSchemaNmcl);
 			}
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("Error in InteractorNomenclature.initializeSchemaNmcl", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in InteractorNomenclature.initializeSchemaNmcl");
 		}
 	}
 

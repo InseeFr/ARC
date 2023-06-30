@@ -43,7 +43,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		vObjectService = new VObjectService();
 		vObjectService.setConnection(c);
 		vObjectService.setSession(new Session());
-		dao = new DataObjectService(BddPatcherTest.testSandbox);
+		dao = new DataObjectService(BddPatcherTest.testSandbox1);
 		pdao = new ExportDao(vObjectService, dao);
 	}
 
@@ -116,7 +116,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		tablesToExport.add("export");
 
 		// execute query
-		HashMap<String, ArrayList<String>> retrievedData = pdao.exportFileRetrieve(0, howToExport, tablesToExport, BddPatcherTest.testSandbox);
+		HashMap<String, ArrayList<String>> retrievedData = pdao.exportFileRetrieve(0, howToExport, tablesToExport, BddPatcherTest.testSandbox1);
 
 		// test the content of the view
 		assertEquals(3, retrievedData.keySet().size()); // 3 columns selected
@@ -141,7 +141,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		orderTable.add(null);
 
 		// execute query
-		ResultSet res = pdao.exportFileFilteredOrdered(stmt, 0, tablesToExport, filterTable, orderTable, BddPatcherTest.testSandbox);
+		ResultSet res = pdao.exportFileFilteredOrdered(stmt, 0, tablesToExport, filterTable, orderTable, BddPatcherTest.testSandbox1);
 
 		// test the content of the view
 		ResultSetMetaData rsmd = res.getMetaData();

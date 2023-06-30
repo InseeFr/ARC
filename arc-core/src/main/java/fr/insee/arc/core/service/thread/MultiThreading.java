@@ -77,7 +77,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 	public void execute(int maxParallelWorkers, List<String> listIdSource, String envExecution,
 			String restrictedUserName) throws ArcException {
 
-		StaticLoggerDispatcher.info("/* Generation des threads pour " + threadTemplate.getClass() + " */", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "/* Generation des threads pour " + threadTemplate.getClass() + " */");
 
 		
 		long dateDebut = java.lang.System.currentTimeMillis();
@@ -116,8 +116,8 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 
 		long dateFin = java.lang.System.currentTimeMillis();
 
-		StaticLoggerDispatcher.info("Temp chargement des " + nbFichier + " fichiers : "
-				+ Math.round((dateFin - dateDebut) / 1000F) + " sec", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Temp chargement des " + nbFichier + " fichiers : "
+						+ Math.round((dateFin - dateDebut) / 1000F) + " sec");
 
 	}
 	
@@ -255,7 +255,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 			}
 
 		} catch (Exception ex) {
-			StaticLoggerDispatcher.error("prepareThreads()", ex, LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "prepareThreads()", ex);
 		}
 		return connexionList;
 

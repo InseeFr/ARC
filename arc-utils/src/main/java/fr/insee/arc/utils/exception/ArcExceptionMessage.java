@@ -84,7 +84,7 @@ public enum ArcExceptionMessage {
 	GENERIC_BEAN_KEY_VALUE_FAILED("GenericBean keyValue : the set hasn't exactly 2 elements and cannot be mapped to key>value format"),
 	GENERIC_BEAN_DUPLICATE_KEY("GenericBean keyValue : duplicate key %s"),
 	
-	SPRING_BEAN_PROPERTIES_NOTFOUND("Bean properties not found");
+	SPRING_BEAN_PROPERTIES_NOTFOUND("Spring bean properties not found. Creating a blank singleton PropertiesHandler to be filled with right attributes.");
 	
 	;
 	

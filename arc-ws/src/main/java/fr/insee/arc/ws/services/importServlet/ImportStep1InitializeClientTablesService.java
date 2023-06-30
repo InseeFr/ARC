@@ -102,7 +102,7 @@ public class ImportStep1InitializeClientTablesService {
             resp.send(ServiceTableNaming.dbEnv(environnement) + client + "_" + this.timestamp);
             resp.endSending();
         } catch (ArcException e) {
-			StaticLoggerDispatcher.error("** Error in servlet ImportStep1InitializeClientTablesService **", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep1InitializeClientTablesService **");
             resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
             resp.endSending();
         }

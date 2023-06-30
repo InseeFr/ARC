@@ -80,7 +80,7 @@ public class ChargeurXml implements IChargeur{
 
     @Override
     public void initialisation() throws ArcException {
-        StaticLoggerDispatcher.info("** requeteCreateA **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** requeteCreateA **");
 
         java.util.Date beginDate = new java.util.Date();
         
@@ -124,7 +124,7 @@ public class ChargeurXml implements IChargeur{
 		}
         java.util.Date endDate = new java.util.Date();
         
-        StaticLoggerDispatcher.info("** requeteCreateA en " + (endDate.getTime() - beginDate.getTime()) + " ms **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** requeteCreateA en " + (endDate.getTime() - beginDate.getTime()) + " ms **");
 
         
     }
@@ -149,7 +149,7 @@ public class ChargeurXml implements IChargeur{
 
     @Override
     public void execution() throws ArcException {
-        StaticLoggerDispatcher.info("** execution**", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** execution**");
         java.util.Date beginDate = new java.util.Date();
 
         // Création de la table de stockage
@@ -176,7 +176,7 @@ public class ChargeurXml implements IChargeur{
         this.jointure=handler.jointure;
         
         java.util.Date endDate = new java.util.Date();
-        StaticLoggerDispatcher.info("** excecution temps" + (endDate.getTime() - beginDate.getTime()) + " ms", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** excecution temps" + (endDate.getTime() - beginDate.getTime()) + " ms");
 
         
 

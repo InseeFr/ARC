@@ -34,7 +34,7 @@ public class JeuDeRegleDao {
      * @throws ArcException
      */
     public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableJeuDeRegle) throws ArcException {
-        StaticLoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "Recherche des jeux de règles à appliquer");
 
         StringBuilder requete = new StringBuilder();
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
@@ -55,7 +55,7 @@ public class JeuDeRegleDao {
      * @throws ArcException
      */
     public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws ArcException {
-        StaticLoggerDispatcher.info("Recherche des jeux de règles à appliquer", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "Recherche des jeux de règles à appliquer");
 
         StringBuilder requete = new StringBuilder();
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
@@ -72,7 +72,7 @@ public class JeuDeRegleDao {
 
 		ArrayList<JeuDeRegle> listJdr = extractRuleSetObjects(g);
 
-        StaticLoggerDispatcher.info("J'ai trouvé " + listJdr.size() + " jeux de règle, utiles pour controler", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "J'ai trouvé " + listJdr.size() + " jeux de règle, utiles pour controler");
         return listJdr;
     }
 

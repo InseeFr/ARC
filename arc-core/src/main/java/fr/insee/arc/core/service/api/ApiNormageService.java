@@ -11,6 +11,7 @@ import fr.insee.arc.core.service.thread.ThreadNormageService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 
 /**
@@ -42,7 +43,8 @@ public class ApiNormageService extends ApiService {
 
     @Override
     public void executer() throws ArcException {
-        StaticLoggerDispatcher.info("** executer **", LOGGER_APISERVICE);
+        StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** executer **");
+		PropertiesHandler properties = PropertiesHandler.getInstance();
         
         BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 

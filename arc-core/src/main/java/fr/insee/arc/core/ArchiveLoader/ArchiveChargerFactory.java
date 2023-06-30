@@ -30,13 +30,13 @@ public class ArchiveChargerFactory {
     }
     
     private IArchiveFileLoader getChargeur(TypeArchive typeArchive){
-        StaticLoggerDispatcher.info("** getLoader from type **", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** getLoader from type **");
         return this.map.get(typeArchive);
     }
 
     
     public IArchiveFileLoader getChargeur(String container){
-        StaticLoggerDispatcher.info("** getChargeur from container**", LOGGER);
+        StaticLoggerDispatcher.info(LOGGER, "** getChargeur from container**");
         IArchiveFileLoader returned = null;
 	    if (container.endsWith(".tar.gz") || container.endsWith(".tgz")) {
 		returned = getChargeur(TypeArchive.TARGZ);

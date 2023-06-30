@@ -57,7 +57,7 @@ public class ServiceResetEnvironment {
 		try {
 			ApiInitialisationService.clearPilotageAndDirectories(rootDirectory, env);
 		} catch (Exception e) {
-			StaticLoggerDispatcher.info(e, LOGGER);
+			StaticLoggerDispatcher.info(LOGGER, e);
 		}
 		ApiInitialisationService service = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
 				ApiService.IHM_SCHEMA, env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);

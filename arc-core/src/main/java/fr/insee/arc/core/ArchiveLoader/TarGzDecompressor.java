@@ -31,7 +31,7 @@ public class TarGzDecompressor implements ArchiveExtractor {
 
 	@Override
 	public void extract(File archiveFile) throws IOException {
-		StaticLoggerDispatcher.info("decompress()" + archiveFile.getName(), LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "decompress()" + archiveFile.getName());
 		File dir = new File(archiveFile + ".dir");
 
 		try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(
@@ -75,7 +75,7 @@ public class TarGzDecompressor implements ArchiveExtractor {
 
 		}
 
-		StaticLoggerDispatcher.info("Untar completed successfully!", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "Untar completed successfully!");
 
 	}
 

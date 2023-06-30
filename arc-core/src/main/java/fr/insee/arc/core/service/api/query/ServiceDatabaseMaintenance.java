@@ -27,13 +27,13 @@ public class ServiceDatabaseMaintenance {
 	 */
 	private static void maintenancePilotage(Integer poolIndex, Connection connexion, String envExecution, String type) {
 		String tablePil = ServiceTableNaming.dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
-		StaticLoggerDispatcher.info("** Maintenance Pilotage **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** Maintenance Pilotage **");
 
 		try {
 			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.analyzeSecured(tablePil));
 			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePil, type));
 		} catch (Exception e) {
-			StaticLoggerDispatcher.error("Error in ApiService.maintenancePilotage", LOGGER);
+			StaticLoggerDispatcher.error(LOGGER, "Error in ApiService.maintenancePilotage");
 		}
 	}
 
@@ -46,7 +46,7 @@ public class ServiceDatabaseMaintenance {
 		// postgres libere mal l'espace sur ces tables qaund on fait trop d'opération
 		// sur les colonnes
 		// vaccum full sinon ca fait quasiment rien ...
-		StaticLoggerDispatcher.info("** Maintenance Catalogue **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** Maintenance Catalogue **");
 		UtilitaireDao.get(poolIndex).maintenancePgCatalog(connexion, type);
 	}
 
@@ -80,7 +80,7 @@ public class ServiceDatabaseMaintenance {
 
 		maintenancePilotage(poolIndex, connexion, envExecution, typeMaintenance);
 
-		StaticLoggerDispatcher.info("** Fin de maintenance **", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, "** Fin de maintenance **");
 	}
 
 }
