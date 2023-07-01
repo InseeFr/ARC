@@ -51,7 +51,8 @@ public class PropertiesHandler {
     
     private static PropertiesHandler instanceOfPropertiesHandler;
     
-    public void initializeLog() {
+
+	public void initializeLog() {
     	LogConfigurator logConf = new LogConfigurator(logConfiguration);
     	
     	// if logDirectory (fr.insee.arc.log.directory) is set
@@ -66,20 +67,18 @@ public class PropertiesHandler {
 
 
     public static PropertiesHandler getInstance() {
-    	
-    	try {
-    		return (PropertiesHandler) SpringApplicationContext.getBean("properties");
-    	} catch( NullPointerException e ) {
-    		new ArcException(ArcExceptionMessage.SPRING_BEAN_PROPERTIES_NOTFOUND).logMessageException();
-    		
-    		// create a blank instance singleton
-    		if (instanceOfPropertiesHandler==null)
-    		{
-    			instanceOfPropertiesHandler=new PropertiesHandler();
-    		}
-    		return instanceOfPropertiesHandler;
-    	}
-    	
+		if (instanceOfPropertiesHandler==null)
+		{
+	    	try {
+	    		instanceOfPropertiesHandler= (PropertiesHandler) SpringApplicationContext.getBean("properties");
+	    	} catch( NullPointerException e ) {
+	    		ArcException ex= new ArcException(ArcExceptionMessage.SPRING_BEAN_PROPERTIES_NOTFOUND);
+	    		ex.logMessageException();
+	    		// create a blank instance singleton
+	    		instanceOfPropertiesHandler=new PropertiesHandler();
+	    	}
+		}
+		return instanceOfPropertiesHandler;
     }
 
 

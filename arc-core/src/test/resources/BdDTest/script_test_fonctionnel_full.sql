@@ -1114,9 +1114,7 @@ INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_iden
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_identification_pp_ok', 'id_source', 'text', 'nom du fichier source', '{exclus}');
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_identification_pp_ok', 'cess_pp_motif', 'boolean', 'Cessation consécutive au décès de l’exploitant', 'null');
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_dirigeant_ok', 'id_dirigeant', 'bigint', 'identifiant dirigeant', '{exclus}');
-INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_service_ok', 'liasse_numero_ant
-liasse_numero_ant
-liasse_numero_ant', 'text', 'rappel du numéro de liasse antérieure', 'null');
+INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_service_ok', 'liasse_numero_ant', 'text', 'rappel du numéro de liasse antérieure', 'null');
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_service_ok', 'diff_donnee_insee', 'text', 'diffusion des données Insee', 'null');
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_service_ok', 'corr_tel2', 'text', 'numéro de téléphone n°2 pour les relations administratives', 'null');
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('SIRENE4', 'mapping_sirene4_adresse_ok', 'depcom', 'text', 'code officiel géographique (commune ou pays)', '{clef}');
