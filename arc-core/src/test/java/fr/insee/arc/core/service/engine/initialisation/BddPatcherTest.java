@@ -121,7 +121,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 	 * @throws ArcException
 	 */
 	public static void insertTestDataFull() throws ArcException {
-		insertTestData("BdDTest/script_test_fonctionnel_full.sql");
+		insertTestData("BdDTest/script_test_fonctionnel_sirene.sql");
 	}
 	
 	/**
@@ -129,7 +129,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 	 * @throws ArcException
 	 */
 	public static void insertTestDataLight() throws ArcException {
-		insertTestData("BdDTest/script_test_fonctionnel_light.sql");
+		insertTestData("BdDTest/script_test_fonctionnel_sample.sql");
 	}
 	
 	/**

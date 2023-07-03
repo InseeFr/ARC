@@ -17,12 +17,14 @@ CONSTRAINT ihm_normage_regle_jeuderegle_fkey FOREIGN KEY (id_norme, periodicite,
      ON UPDATE CASCADE ON DELETE CASCADE 
 );
 
+
+DROP TABLE IF EXISTS arc.ext_type_normage;
 CREATE TABLE IF NOT EXISTS arc.ext_type_normage 
 ( 
   id text NOT NULL, 
   ordre integer, 
   CONSTRAINT ext_type_normage_pkey PRIMARY KEY (id) 
-); 
+);
 INSERT INTO arc.ext_type_normage values ('relation','1'),('cartesian','2'),('suppression','3'),('unicité','4') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_type_normage values ('reduction','5') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_type_normage values ('partition','6') ON CONFLICT DO NOTHING;
