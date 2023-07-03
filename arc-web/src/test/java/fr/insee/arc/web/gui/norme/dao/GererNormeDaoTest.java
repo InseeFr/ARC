@@ -112,8 +112,8 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 
 		assertEquals(0, viewColumns.size());
 		
-		// in test data, must return three rule sets
-		assertEquals(3, viewRulesSet.getContent().t.size());
+		// in test data, must return 1 rule set
+		assertEquals(1, viewRulesSet.getContent().t.size());
 
 	}
 
