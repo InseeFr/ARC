@@ -117,11 +117,19 @@ public class BddPatcherTest extends InitializeQueryTest {
 	}
 
 	/**
-	 * insert data for functional tests
+	 * insert data for functional tests sirene
 	 * @throws ArcException
 	 */
-	public static void insertTestDataFull() throws ArcException {
+	public static void insertTestDataSirene() throws ArcException {
 		insertTestData("BdDTest/script_test_fonctionnel_sirene.sql");
+	}
+	
+	/**
+	 * insert data for functional tests siera
+	 * @throws ArcException
+	 */
+	public static void insertTestDataSiera() throws ArcException {
+		insertTestData("BdDTest/script_test_fonctionnel_siera.sql");
 	}
 	
 	/**

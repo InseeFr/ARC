@@ -56,20 +56,26 @@ public class DataObjectService {
 	 */
 	public String getView(ViewEnum e)
 	{
-		switch (e.getTableLocation()) {
-			case METADATA:
-				return ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
-
-			case SANDBOX:
-				return this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName();
-				
-			case TEMPORARY:
-				return e.getTableName();
-				
-			case PUBLIC:	
-				return PUBLIC_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
-
+		if (e.getTableLocation().equals(SchemaEnum.METADATA))
+		{
+			return ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
 		}
+		
+		if (e.getTableLocation().equals(SchemaEnum.TEMPORARY))
+		{
+			return e.getTableName();
+		}
+		
+		if (e.getTableLocation().equals(SchemaEnum.PUBLIC))
+		{
+			return PUBLIC_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
+		}
+
+		if (e.getTableLocation().equals(SchemaEnum.SANDBOX) && this.sandboxSchema != null )
+		{
+			return this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName();
+		}
+		
 		return e.getTableName();		
 	}
 	
