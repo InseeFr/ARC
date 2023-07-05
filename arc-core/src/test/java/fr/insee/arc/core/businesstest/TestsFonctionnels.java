@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLException;
 
-import org.assertj.core.util.Arrays;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -45,9 +44,12 @@ public class TestsFonctionnels extends InitializeQueryTest
 		
 		buildProperties(repertoire);
 		
-		executeTestSirene(repertoire);
+		executeTestSirene("arc_bas1", repertoire);
 		
-		executeTestSiera(repertoire);
+		executeTestSiera("arc_bas2", repertoire);
+		
+		executeTestAnimal("arc_bas8", repertoire);
+
 		
 	}
 	
@@ -66,11 +68,18 @@ public class TestsFonctionnels extends InitializeQueryTest
 
 	}
 	
-	
-	private void executeTestSirene(String repertoire) throws IOException, ArcException, SQLException
-	{
-		String sandbox="arc_bas1";
-		
+	/**
+	 * COVERAGE
+	 * complex xml load test
+	 * 
+	 * @param sandbox
+	 * @param repertoire
+	 * @throws IOException
+	 * @throws ArcException
+	 * @throws SQLException
+	 */
+	private void executeTestSirene(String sandbox, String repertoire) throws IOException, ArcException, SQLException
+	{		
 		BddPatcherTest.insertTestDataSirene();
 
 		
@@ -80,7 +89,6 @@ public class TestsFonctionnels extends InitializeQueryTest
 		
 		String repertoireDeDepot = ApiReceptionService.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
 		
-		// 1- copy files to folder
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/Cas_test_V2008.11.zip"), new File(repertoireDeDepot, "Cas_test_V2008.11.zip").toPath());
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/Cas_test_V2016.02.zip"), new File(repertoireDeDepot, "Cas_test_V2016.02.zip").toPath());
 		
@@ -108,10 +116,21 @@ public class TestsFonctionnels extends InitializeQueryTest
 
 	}
 	
-	private void executeTestSiera(String repertoire) throws IOException, ArcException, SQLException
-	{
-		String sandbox="arc_bas2";
-		
+	/**
+	 * COVERAGE
+	 * xml load test
+	 * normage complexe rule test
+	 * filtering controle rule test
+	 * complex mapping rules test
+	 * 
+	 * @param sandbox
+	 * @param repertoire
+	 * @throws IOException
+	 * @throws ArcException
+	 * @throws SQLException
+	 */
+	private void executeTestSiera(String sandbox, String repertoire) throws IOException, ArcException, SQLException
+	{		
 		BddPatcherTest.insertTestDataSiera();
 		
 		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
@@ -121,9 +140,6 @@ public class TestsFonctionnels extends InitializeQueryTest
 		String repertoireDeDepot = ApiReceptionService.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
 		
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/siera_ano.xml"), new File(repertoireDeDepot, "siera_ano.xml").toPath());
-
-		System.out.println(Arrays.asList(new File(repertoire).listFiles()));
-		System.out.println(Arrays.asList(new File(repertoireDeDepot).listFiles()));
 		
 		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
 				10000000, null
@@ -150,6 +166,53 @@ public class TestsFonctionnels extends InitializeQueryTest
 				10000000, null
 		).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.MAPPING, TraitementEtat.OK));
+		
+	}
+	
+	/**
+	 * COVERAGE
+	 * simple csv file load test
+	 * tar.gz load test
+	 * doublon detection test
+	 * 
+	 * @param sandbox
+	 * @param repertoire
+	 * @throws IOException
+	 * @throws ArcException
+	 * @throws SQLException
+	 */
+	private void executeTestAnimal(String sandbox, String repertoire) throws IOException, ArcException, SQLException
+	{		
+		BddPatcherTest.insertTestDataAnimal();
+		
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+				10000000, null
+		).invokeApi();
+		
+		String repertoireDeDepot = ApiReceptionService.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
+		
+		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/animals.tar.gz"), new File(repertoireDeDepot, "animals.tar.gz").toPath());
+		
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+				10000000, null
+		).invokeApi();
+		
+		assertEquals(2, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
+		
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+				10000000, null
+		).invokeApi();
+		assertEquals(2, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
+		
+		
+		// doublon detection test
+		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/animals-001.csv"), new File(repertoireDeDepot, "animals-001.csv").toPath());
+
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+				10000000, null
+		).invokeApi();
+		
+		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.KO));
 		
 	}
 	

@@ -27,7 +27,9 @@ public class BddPatcherTest extends InitializeQueryTest {
 	private static String userWithRestrictedRights = "";
 	public static String testSandbox1 = "arc_bas1";
 	public static String testSandbox2 = "arc_bas2";
+	public static String testSandbox8 = "arc_bas8";
 
+	
 	/**
 	 * test the database initialization
 	 * 
@@ -104,7 +106,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// metadata schema creation
 		patcher.bddScript(c);
 		// sandbox schema creation
-		patcher.bddScript(c, testSandbox1, testSandbox2);
+		patcher.bddScript(c, testSandbox1, testSandbox2, testSandbox8);
 		
 	}
 	
@@ -130,6 +132,14 @@ public class BddPatcherTest extends InitializeQueryTest {
 	 */
 	public static void insertTestDataSiera() throws ArcException {
 		insertTestData("BdDTest/script_test_fonctionnel_siera.sql");
+	}
+	
+	/**
+	 * insert data for functional tests siera
+	 * @throws ArcException
+	 */
+	public static void insertTestDataAnimal() throws ArcException {
+		insertTestData("BdDTest/script_test_fonctionnel_animal.sql");
 	}
 	
 	/**
