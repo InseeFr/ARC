@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-93.1.4b
+## version-93.1.6b
+- functionnal tests
+- pg 14.8 bug fix
 - bug fix in gui file report
 - scalability connection management
 
