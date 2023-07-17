@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.4b
+- bug fix in gui file report
+- scalability connection management
+
+## version-93.1.3
+- passage en production
+
 ## version-93.1.3
 - passage en production
 

@@ -57,7 +57,7 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 		if (!properties.getDisableDebugGui().isEmpty())
 		{
 			// disable query debugging gui actions
-			http.authorizeRequests().antMatchers("/selectQuery/**","/sortQuery/**","/selectTable/**","/sortTable/**").denyAll();
+			http.authorizeRequests().antMatchers("/selectQuery/**","/selectQueryFromTextBox/**","/sortQuery/**","/selectTable/**","/sortTable/**").denyAll();
 			
 			// disable file debugging gui actions
 			http.authorizeRequests().antMatchers("/selectFile/**","/**DirIn/**","/**DirOut**").denyAll();

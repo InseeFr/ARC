@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.ServiceReporting;
@@ -93,7 +94,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		this();
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");
 		try {
-			this.connexion = new ScalableConnection(UtilitaireDao.get(0).getDriverConnexion());
+			this.connexion = new ScalableConnection(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getDriverConnexion());
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}

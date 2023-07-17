@@ -15,6 +15,11 @@ public class ControllerViewQuery extends ServiceViewQuery {
 		return selectQuery(model);
 	}
 
+	@RequestMapping("/selectQueryFromTextBox")
+	public String selectQueryFromTextBoxAction(Model model) {
+		return selectQuery(model);
+	}
+	
 	@RequestMapping("/sortQuery")
 	public String sortQueryAction(Model model) {
 		return sortQuery(model);

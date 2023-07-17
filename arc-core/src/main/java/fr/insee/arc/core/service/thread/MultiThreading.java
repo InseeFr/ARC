@@ -231,10 +231,10 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 			// add thread connexions
 			for (int i = 0; i < parallelDegree; i++) {
 
-				Connection coordinatorConnexionTemp = UtilitaireDao.get(0).getDriverConnexion();
+				Connection coordinatorConnexionTemp = UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getDriverConnexion();
 				// demote application user account to temporary restricted operations and
 				// readonly or non-temporary schema
-				configAndRestrictConnexion(0, anEnvExecution, restrictedUsername, coordinatorConnexionTemp);
+				configAndRestrictConnexion(ArcDatabase.COORDINATOR.getIndex(), anEnvExecution, restrictedUsername, coordinatorConnexionTemp);
 
 				// prepare the thread connections for a BOTH COORDINATOR AND EXECUTOR NOD thread
 				// only one connection on coordinator is required for such a thread
@@ -245,7 +245,7 @@ public class MultiThreading<U, T extends ArcThread<U>> {
 				// for this type of thread, it will require 2 connections
 				// one for coordinator and one for executor
 				else {
-					Connection executorConnexionTemp = UtilitaireDao.get(executorNodTarget).getDriverConnexion();
+					Connection executorConnexionTemp = UtilitaireDao.get(ArcDatabase.EXECUTOR.getIndex()-1+executorNodTarget).getDriverConnexion();
 					connexionList.add(
 							new ScalableConnection(executorNodTarget, coordinatorConnexionTemp, executorConnexionTemp));
 					configAndRestrictConnexion(executorNodTarget, anEnvExecution, restrictedUsername,

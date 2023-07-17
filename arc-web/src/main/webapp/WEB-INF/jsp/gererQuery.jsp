@@ -23,7 +23,7 @@
 	</div>
 	<div class="col-8" id="viewQuerySql">
 	   	<textarea m="" name="myQuery" cols="500" aria-label="Query">${myQuery}</textarea>
-	   	<input id="viewQuery.select" type="submit" doAction="selectQuery" scope="viewQuery;viewTable;" value="Execute query"></input>
+	   	<input id="viewQuery.selectFromTextBox" type="submit" doAction="selectQueryFromTextBox" scope="viewQuery;" value="Execute query"></input>
 	</div>
 </div>
  <div class="row  align-items-start">
@@ -39,13 +39,14 @@
 			<c:param name="checkbox" value="true" />
 			<c:param name="checkboxVisible" value="true" />
 			<c:param name="allowResize" value="true" />
-			<c:param name="extraScopeSee" value="viewQuerySql;viewQuery;" />
 		</c:import>
 	</div>
 	<div class="col-md-8">
 	  <c:set var="view" value="${viewQuery}"  scope="request"/>
 		<c:import url="tiles/templateVObject.jsp">
 			<c:param name="taille" value ="col-md" />
+			<c:param name="btnSelect" value="false" />
+			<c:param name="btnSee" value="false" />
 		</c:import>
     </div>
   </div>
