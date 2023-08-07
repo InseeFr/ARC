@@ -267,8 +267,7 @@ public class ChargeurCSV implements IChargeur {
 							joinTable.get(i).contains(".") ? joinTable.get(i) : this.env + "." + joinTable.get(i));
 
 					// récupération des colonnes de la table
-					List<String> colsIn = new ArrayList<String>();
-					colsIn = UtilitaireDao.get(0)
+					List<String> colsIn = UtilitaireDao.get(0)
 							.executeRequest(this.connexion,
 									new ArcPreparedStatementBuilder(
 											"select " + joinSelect.get(i) + " from " + joinTable.get(i) + " limit 0"))
@@ -346,7 +345,7 @@ public class ChargeurCSV implements IChargeur {
 				req.append("\n FROM " + this.tableTempA + " u ) v ) w ");
 				req.append("\n WHERE false ");
 				for (String s : wheres) {
-					req.append("\n AND " + s);
+					req.append("\n AND (" + s + ")");
 				}
 				req.append(";");
 				UtilitaireDao.get(0).executeImmediate(connexion, req);
@@ -408,7 +407,7 @@ public class ChargeurCSV implements IChargeur {
 					req.append("\n ) v ) w ");
 					req.append("\n WHERE true ");
 					for (String s : wheres) {
-						req.append("\n AND " + s);
+						req.append("\n AND (" + s +")");
 					}
 					req.append(";");
 					UtilitaireDao.get(0).executeImmediate(connexion, req);
