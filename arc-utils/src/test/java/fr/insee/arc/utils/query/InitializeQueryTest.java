@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,6 +13,7 @@ import org.junit.Test;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class InitializeQueryTest {
@@ -27,6 +29,19 @@ public class InitializeQueryTest {
     {
     	assertNotNull(c);
     }
+    
+	protected void buildProperties(String repertoire) throws SQLException
+	{
+		PropertiesHandler testProperties=PropertiesHandler.getInstance();
+		testProperties.setDatabaseDriverClassName("org.postgresql.Driver");
+		testProperties.setDatabaseUrl(c.getMetaData().getURL());
+		testProperties.setDatabaseUsername(c.getMetaData().getUserName());
+		// user password is not relevant in zonky
+		testProperties.setDatabasePassword("NA");
+		testProperties.setBatchParametersDirectory(repertoire);
+		u.setProperties(testProperties);		
+
+	}
     
 	/**
 	 * check the table columns and the number of lines in the table

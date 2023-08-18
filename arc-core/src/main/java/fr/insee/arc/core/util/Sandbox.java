@@ -9,6 +9,10 @@ import fr.insee.arc.core.dataobjects.ArcDatabase;
 
 public class Sandbox {
 
+	private Sandbox() {
+		throw new IllegalStateException("Utility class");
+	}
+	
 	private static final String DEFAULT_PRODUCTION_ENVIRONMENTS="[\"arc_prod\"]";
 
 	/** Return true if the environment is a production environment.*/

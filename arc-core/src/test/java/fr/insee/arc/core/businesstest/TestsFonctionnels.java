@@ -22,7 +22,6 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class TestsFonctionnels extends InitializeQueryTest 
 {
@@ -30,10 +29,6 @@ public class TestsFonctionnels extends InitializeQueryTest
 	@Rule
 	public TemporaryFolder testFolder= new TemporaryFolder();
 	
-
-	
-	
-		
 	@Test
 	public void executeFunctionnalTests() throws IOException, SQLException, ArcException {
 		BddPatcherTest.createDatabase();
@@ -55,18 +50,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 	
 	
 	
-	private void buildProperties(String repertoire) throws SQLException
-	{
-		PropertiesHandler testProperties=PropertiesHandler.getInstance();
-		testProperties.setDatabaseDriverClassName("org.postgresql.Driver");
-		testProperties.setDatabaseUrl(c.getMetaData().getURL());
-		testProperties.setDatabaseUsername(c.getMetaData().getUserName());
-		// user password is not relevant in zonky
-		testProperties.setDatabasePassword("NA");
-		testProperties.setBatchParametersDirectory(repertoire);
-		u.setProperties(testProperties);		
 
-	}
 	
 	/**
 	 * COVERAGE
