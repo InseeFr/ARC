@@ -12,6 +12,13 @@ public class DataObjectServiceTest {
 	}
 
 	@Test
+	public void testGetViewInSandboxGenerated() {
+		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
+		Assert.assertEquals("arc_bas1.norme", dataObjectService.getView(ViewEnum.NORME));
+	}
+	
+	
+	@Test
 	public void testGetViewInMetadata() {
 		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
 		Assert.assertEquals("arc.ihm_norme", dataObjectService.getView(ViewEnum.IHM_NORME));
@@ -31,8 +38,7 @@ public class DataObjectServiceTest {
 	
 	@Test
 	public void testGetFullTableNameInMetadata() {
-		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
-		Assert.assertEquals("arc.toto", dataObjectService.getFullTableNameInMetadata("toto"));
+		Assert.assertEquals("arc.toto", DataObjectService.getFullTableNameInMetadata("toto"));
 	}
 
 }

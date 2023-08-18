@@ -1,5 +1,6 @@
 package fr.insee.arc.core.service.engine.initialisation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 	private static String userWithRestrictedRights = "";
 	public static String testSandbox1 = "arc_bas1";
 	public static String testSandbox2 = "arc_bas2";
+	public static String testSandbox3 = "arc_bas3";
 	public static String testSandbox8 = "arc_bas8";
 
 	
@@ -76,7 +78,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 
 		content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query))
 				.mapContent();
-
+	
 		// check if the sandbox views had been created
 		for (ViewEnum v : ViewEnum.values()) {
 			if (v.getTableLocation().equals(SchemaEnum.SANDBOX)) {
@@ -181,5 +183,60 @@ public class BddPatcherTest extends InitializeQueryTest {
 		
 	}
 	
+	
+	@Test
+	public void retrieveRulesTablesFromSchemaTest() throws ArcException {
+		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS "+testSandbox3+";");
+
+		// tables que la fonction testée ne doit pas retenir
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".pilotage_fichier (a text);");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".reception_regle (a text);");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".fake_regle (a text);");
+		
+		// tables que la fonction testée doit retenir
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".chargement_regle (regle text);");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".mapping_regle (id_norme text, regle text, commentaire text);");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_variable_metier (a text);");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_table_metier (a text);");
+
+		// invocation de la fonction à tester
+		ArrayList<String> result;
+		
+		result = BddPatcher.retrieveRulesTablesFromSchema(c, testSandbox3);
+
+		// test : on enleve tous les éléments à retenir et l'array list devra être au final vide
+		assertTrue(result.contains(testSandbox3+".chargement_regle"));
+		assertTrue(result.contains(testSandbox3+".mapping_regle"));
+		assertTrue(result.contains(testSandbox3+".mod_variable_metier"));
+		assertTrue(result.contains(testSandbox3+".mod_table_metier"));
+		assertEquals(4, result.size());
+
+		
+		UtilitaireDao.get(0).executeImmediate(c, "INSERT INTO arc.ihm_nmcl (nom_table) values ('nmcl_code_pays_etranger_2023'), ('nmcl_sicore_2014'), ('nmcl_vs3');");
+		UtilitaireDao.get(0).executeImmediate(c, "INSERT INTO "+testSandbox3+".mapping_regle (id_norme, regle, commentaire) values ('PHASE1V3', '{v0012}','relation avec la colonne nmcl_sicore_2014'), ('PHASE1V3', 'select codegeo from nmcl_code_pays_etranger_2023 where pays={v008}','relation avec la colonne nmcl_code_pays_etranger_2021');");
+		UtilitaireDao.get(0).executeImmediate(c, "INSERT INTO "+testSandbox3+".chargement_regle (regle) values ('select * from arc.nmcl_vs3 where pcs={v001');");
+
+		result = BddPatcher.retrieveExternalTablesUsedInRules(c, testSandbox3);
+		
+		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
+		assertTrue(result.contains("arc.nmcl_code_pays_etranger_2023"));
+		assertTrue(result.contains("arc.nmcl_vs3"));
+		assertTrue(result.contains(testSandbox3+".nmcl_vs3"));
+		assertTrue(result.contains(testSandbox3+".nmcl_vs3"));
+		assertEquals(4, result.size());
+
+	}
+	
+//	@Test
+//	public void retrieveExternalTablesUsedInRulesTest()
+//	{
+//		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA arc CASCADE;");
+//		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA arc_bas2 CASCADE;");
+//		UtilitaireDao.get(0).executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS arc_bas2;");
+//		
+//		
+//		ArrayList<String> result = BddPatcher.retrieveRulesTablesFromSchema(c, "arc_bas2");
+//	}
 	
 }

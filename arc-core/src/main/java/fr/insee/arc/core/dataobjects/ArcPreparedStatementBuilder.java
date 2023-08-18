@@ -67,5 +67,7 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 		return (ArcPreparedStatementBuilder) this.append(column.getColumnName());
 	}
 
-	
+	public String quoteText(ColumnEnum column) {
+		return quoteText(column.getColumnName());
+	}
 }

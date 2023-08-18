@@ -53,6 +53,15 @@ public enum ViewEnum {
 	// tables représentant le contenu des vobject (utilisées pour les tests)
 	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE)
 	
+	// family model table in sandbox
+	, MOD_TABLE_METIER("mod_table_metier", SchemaEnum.SANDBOX_GENERATED , ColumnEnum.ID_FAMILLE, ColumnEnum.NOM_TABLE_METIER, ColumnEnum.DESCRIPTION_TABLE_METIER) //
+	, MOD_VARIABLE_METIER("mod_variable_metier", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_FAMILLE, ColumnEnum.NOM_TABLE_METIER, ColumnEnum.NOM_VARIABLE_METIER, ColumnEnum.TYPE_VARIABLE_METIER, ColumnEnum.DESCRIPTION_VARIABLE_METIER, ColumnEnum.TYPE_CONSOLIDATION) //
+	
+	// rule model tables in sandbox
+	, NORME("norme", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT) //
+	, CALENDRIER("calendrier", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.ETAT) //
+	, JEUDEREGLE("jeuderegle", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ETAT, ColumnEnum.DATE_PRODUCTION, ColumnEnum.DATE_INACTIF) //
+
 	// tables utilisés pour les tests
 
 	, TABLE_TEST_IN_PUBLIC("table_test_in_public",SchemaEnum.PUBLIC,ColumnEnum.TEST1,ColumnEnum.TEST2)

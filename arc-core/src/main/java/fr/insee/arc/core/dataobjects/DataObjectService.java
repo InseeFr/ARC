@@ -58,7 +58,7 @@ public class DataObjectService {
 	{
 		if (e.getTableLocation().equals(SchemaEnum.METADATA))
 		{
-			return ARC_METADATA_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
+			return getFullTableNameInMetadata(e.getTableName());
 		}
 		
 		if (e.getTableLocation().equals(SchemaEnum.TEMPORARY))
@@ -71,7 +71,7 @@ public class DataObjectService {
 			return PUBLIC_SCHEMA+SCHEMA_SEPARATOR+e.getTableName();
 		}
 
-		if (e.getTableLocation().equals(SchemaEnum.SANDBOX) && this.sandboxSchema != null )
+		if ((e.getTableLocation().equals(SchemaEnum.SANDBOX) || e.getTableLocation().equals(SchemaEnum.SANDBOX_GENERATED)) && this.sandboxSchema != null )
 		{
 			return this.sandboxSchema+SCHEMA_SEPARATOR+e.getTableName();
 		}
@@ -79,9 +79,9 @@ public class DataObjectService {
 		return e.getTableName();		
 	}
 	
-	public String getFullTableNameInMetadata(String tablename)
+	public static String getFullTableNameInMetadata(String tablename)
 	{
-		return ARC_METADATA_SCHEMA+"."+tablename;
+		return ARC_METADATA_SCHEMA + SCHEMA_SEPARATOR + tablename;
 	}
 	
 	

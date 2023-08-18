@@ -25,6 +25,7 @@ import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.core.util.Sandbox;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -50,8 +51,6 @@ import fr.insee.arc.web.util.VObjectService;
 public abstract class ArcWebGenericService<T extends ArcModel> implements IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(ArcWebGenericService.class);
-
-	private static final String DEFAULT_PRODUCTION_ENVIRONMENTS="[\"arc_prod\"]";
 	
 	protected static final String POOLNAME = "arc"; 
 	
@@ -167,7 +166,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 			loggerDispatcher.info(String.format("env selected %s", bacASable), LOGGER);
 			this.bacASable = bacASable;
 		}
-		this.isEnvProd = checkEnv(this.bacASable);
+		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
 		this.dataObjectService = new DataObjectService(this.bacASable);
 		this.scope = scope;
 		
@@ -382,20 +381,6 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 
 	public void setListVObjectOrder(List<VObject> listVObjectOrder) {
 		this.listVObjectOrder = listVObjectOrder;
-	}
-
-	/** Return true if the environment is a production environment.*/
-	private boolean checkEnv(String env) {
-		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.META_DATA).getString(null, "ArcAction.productionEnvironments",DEFAULT_PRODUCTION_ENVIRONMENTS));
-		Set<String> found=new HashSet<>();
-		
-		j.forEach(item -> {
-            if (item.toString().equals(env))
-            {
-            	found.add(item.toString());
-            }
-        });
-		return !found.isEmpty();
 	}
 	
 	public String getVersion() {

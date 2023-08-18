@@ -38,7 +38,7 @@ public class BDParametersTest {
 
 	@Test
 	public void insertDefaultValue_Exception() {
-        BDParameters bdParameters=new BDParameters(ArcDatabase.META_DATA);
+        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 		
         bdParameters.insertDefaultValue(c, "'a", "10");
 		assertTrue(appender.getOutputAsString().startsWith("ERROR"));
@@ -51,7 +51,7 @@ public class BDParametersTest {
 		String testValue="test.value";
 		
 		// insert the key value into the parameter table
-        BDParameters bdParameters=new BDParameters(ArcDatabase.META_DATA);
+        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
         bdParameters.getString(c, testKey, testValue);
 		
 		// check if the parameter had been well registered in the parameter table

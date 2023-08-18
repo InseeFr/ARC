@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -115,7 +116,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 			
 			ArcPreparedStatementBuilder requeteNomenclature = new ArcPreparedStatementBuilder();
 			requeteNomenclature.append(SQL.SELECT).append("a.*").append(SQL.FROM);
-			requeteNomenclature.append(dataObjectService.getFullTableNameInMetadata(selectedNomenclature));
+			requeteNomenclature.append(DataObjectService.getFullTableNameInMetadata(selectedNomenclature));
 			requeteNomenclature.append(" a");
 			
 			this.vObjectService.download(views.getViewListNomenclatures(), response, Arrays.asList(selectedNomenclature)

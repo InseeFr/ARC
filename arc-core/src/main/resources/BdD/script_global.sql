@@ -403,25 +403,6 @@ CONSTRAINT ext_export_format_pkey PRIMARY KEY (id)
 INSERT INTO arc.ext_export_format VALUES ('0','NA'), ('1','ZIP'), ('2','GZ') ON CONFLICT DO NOTHING; 
 
 
--- grant / revoke
-REVOKE ALL ON SCHEMA public FROM public;
-REVOKE ALL ON SCHEMA arc FROM public; 
-
--- restricted role for service execution
-do $$ begin
-if ('{{userRestricted}}'!='') then 
-	execute 'CREATE ROLE {{userRestricted}} with NOINHERIT;';
-end if;
-exception when others then end; $$;
-
-do $$ begin
-if ('{{userRestricted}}'!='') then 
-	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public to {{userRestricted}};';
-end if; 
-exception when others then end;
-$$;
-
-
 /*
  *  PATCHS version
  */

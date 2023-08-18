@@ -91,7 +91,7 @@ public class VObjectService {
 	private LoggerDispatcher loggerDispatcher;
 
 	// default database target for query is META_DATA
-	private Integer databaseTarget = ArcDatabase.META_DATA.getIndex();
+	private Integer databaseTarget = ArcDatabase.COORDINATOR.getIndex();
 
 	private Connection connection = null;
 

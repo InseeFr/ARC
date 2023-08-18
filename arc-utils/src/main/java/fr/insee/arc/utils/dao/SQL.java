@@ -11,15 +11,25 @@ public enum SQL {
 
 	BEGIN("BEGIN;"), END("END;"),
 
-	AND("AND"), UNION_ALL("UNION ALL"),
+	AND("AND"), OR("OR"), UNION_ALL("UNION ALL"), IN("IN"),
 	
 	LIMIT("LIMIT"), OFFSET("OFFSET"),
 
 	CREATE("CREATE"), DROP("DROP"), TEMPORARY("TEMPORARY"), TABLE("TABLE"), IF_EXISTS("IF EXISTS"), CASCADE("CASCADE"),
 
+	LIKE("LIKE"),
+	
+	GROUP_BY("GROUP BY"),
+	
+	TRUE("TRUE"), FALSE("FALSE"),
+	
+	EXISTS("EXISTS"), DISTINCT("DISTINCT"),
+	
+	UNNEST("UNNEST"),
+	
 	// symbol
-	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false)
-
+	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false),
+	
 	;
 
 	private String sqlCode;

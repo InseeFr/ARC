@@ -32,7 +32,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		// view query
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(SQL.SELECT);
-		query.append(query.sqlListeOfColumnsFromModel(ViewEnum.IHM_NMCL));
+		query.append(query.sqlListeOfColumnsFromModel(dataModelListNomenclatures));
 		query.append(SQL.FROM);
 		query.append(dataObjectService.getView(dataModelListNomenclatures));
 		// default value

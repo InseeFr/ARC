@@ -94,4 +94,12 @@ public enum TraitementPhase {
 		return listPhasesAfterPhase(TraitementPhase.INITIALISATION);
 	}
 	
+	public String tableRegleOfPhaseInMetadata() {
+		return "ihm_"+this.toString().toLowerCase()+"_regle";
+	}
+	
+	public String tableRegleOfPhaseInSandbox() {
+		return this.toString().toLowerCase()+"_regle";
+	}
+	
 }

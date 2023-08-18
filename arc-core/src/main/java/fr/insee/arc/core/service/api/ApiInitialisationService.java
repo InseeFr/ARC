@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +29,7 @@ import fr.insee.arc.core.service.api.query.ServiceDatabaseMaintenance;
 import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
 import fr.insee.arc.core.service.api.query.ServiceHashFileName;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
+import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -1323,4 +1326,61 @@ public class ApiInitialisationService extends ApiService {
 		return requete.toString();
 	}
 	
+	
+	/**
+	 * Instanciate the data into executors pod
+	 * @param envExecution
+	 * @throws ArcException
+	 */
+	public static void copyMetadataToExecutors(Connection coordinatorConnexion, String envExecution) {
+
+		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
+		// meta data copy is only necessary when scaled
+		if (ArcDatabase.numberOfExecutorNods()==0)
+		{
+			return;
+		}
+
+		PropertiesHandler properties=PropertiesHandler.getInstance();
+		
+		// itérer sur les executor
+		for (int executorConnectionIndex=ArcDatabase.EXECUTOR.getIndex(); executorConnectionIndex<ArcDatabase.EXECUTOR.getIndex()+numberOfExecutorNods; executorConnectionIndex++ )
+		{
+			
+			// instanciate connexion
+			try (Connection executorConnection = UtilitaireDao.get(executorConnectionIndex).getDriverConnexion())
+			{
+				
+				// add utility functions
+				BddPatcher.executeBddScript(executorConnection, "BdD/script_function_utility.sql", properties.getDatabaseRestrictedUsername(), null,
+						null);
+				
+				// add tables for phases if required
+				BddPatcher.bddScriptEnvironmentExecutor(executorConnection, properties.getDatabaseRestrictedUsername(), new String[] {envExecution});
+				
+				// copy tables 
+				
+				ArrayList<String> tablesToCopyIntoExecutor = 
+						BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion, envExecution);
+				tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
+				tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
+				
+				
+				for (String table:new HashSet<String> (tablesToCopyIntoExecutor))
+				{
+					GenericBean gb = new GenericBean(
+					UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
+							new ArcPreparedStatementBuilder("SELECT * FROM " + table)));
+					ArcPreparedStatementBuilder query= new ArcPreparedStatementBuilder();
+					UtilitaireDao.get(0).executeRequest(executorConnection, query.copyFromGenericBean(table, gb, false));
+				}
+				
+				
+			} catch (SQLException | ArcException e) {
+				new ArcException(e, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED).logFullException();
+			}
+	
+		}
+
+	}
 }

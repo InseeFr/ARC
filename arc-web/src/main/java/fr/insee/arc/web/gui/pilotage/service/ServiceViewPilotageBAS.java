@@ -172,13 +172,16 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	public String executerBatch(Model model, TraitementPhase phaseAExecuter) {
 		loggerDispatcher.debug("executerBatch", LOGGER);
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
-
+		
 		if (!phaseAExecuter.equals(TraitementPhase.INITIALISATION)) {
 			ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA, getBacASable());
 		}
 
+		// copy to executor
+		ApiInitialisationService.copyMetadataToExecutors(null, getBacASable());
+		
 		// Maximum number of files processed in each phase iteration
-		int maxFilesPerPhase = new BDParameters(ArcDatabase.META_DATA).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
+		int maxFilesPerPhase = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
 		
 		ApiServiceFactory.getService(phaseAExecuter.toString(), ApiService.IHM_SCHEMA, getBacASable(), this.repertoire,
 				maxFilesPerPhase, null

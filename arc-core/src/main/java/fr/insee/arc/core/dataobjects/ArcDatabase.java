@@ -4,7 +4,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 
 public enum ArcDatabase {
 
-	META_DATA(0), COORDINATOR(1), EXECUTOR(2);
+	COORDINATOR(0), EXECUTOR(1);
 
 	private int index;
 
