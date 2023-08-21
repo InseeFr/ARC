@@ -37,7 +37,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 		File root=testFolder.newFolder("root");
 		String repertoire = root.getAbsolutePath();
 		
-		buildProperties(repertoire);
+		buildPropertiesWithNoScalability(repertoire);
 		
 		executeTestSirene("arc_bas1", repertoire);
 		

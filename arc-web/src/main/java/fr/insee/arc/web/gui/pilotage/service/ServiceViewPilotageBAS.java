@@ -178,7 +178,14 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		}
 
 		// copy to executor
-		ApiInitialisationService.copyMetadataToExecutors(null, getBacASable());
+		try{
+			ApiInitialisationService.copyMetadataToExecutors(null, getBacASable());
+		}
+		catch (ArcException e)
+		{
+			this.views.getViewPilotageBAS().setMessage(e.getMessage());
+			return generateDisplay(model, RESULT_SUCCESS);
+		}
 		
 		// Maximum number of files processed in each phase iteration
 		int maxFilesPerPhase = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);

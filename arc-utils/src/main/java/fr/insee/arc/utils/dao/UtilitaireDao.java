@@ -53,6 +53,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	private static final Logger LOGGER = LogManager.getLogger(UtilitaireDao.class);
 
 
+	public static final String CONNECTION_SEPARATOR_RAW = "|||";
 	private static final String CONNECTION_SEPARATOR = "\\|\\|\\|";
 
 	/**

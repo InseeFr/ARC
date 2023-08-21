@@ -21,8 +21,10 @@ public class InitializeQueryTest {
 
 	public static UtilitaireDao u = UtilitaireDao.get(0);
     
-    public static Connection c = TestDatabase.testConnection;
-    
+    public static Connection c = new TestDatabase().testConnection;
+
+    public static Connection e;
+
 
     @Test
     public void testConnection()
@@ -30,19 +32,59 @@ public class InitializeQueryTest {
     	assertNotNull(c);
     }
     
-	protected void buildProperties(String repertoire) throws SQLException
+    protected void buildPropertiesWithNoScalability(String repertoire) throws SQLException
 	{
-		PropertiesHandler testProperties=PropertiesHandler.getInstance();
-		testProperties.setDatabaseDriverClassName("org.postgresql.Driver");
-		testProperties.setDatabaseUrl(c.getMetaData().getURL());
-		testProperties.setDatabaseUsername(c.getMetaData().getUserName());
-		// user password is not relevant in zonky
-		testProperties.setDatabasePassword("NA");
-		testProperties.setBatchParametersDirectory(repertoire);
-		u.setProperties(testProperties);		
-
+    	buildProperties(repertoire, new Connection[] {c});	
 	}
     
+    
+	protected void buildPropertiesWithScalability(String repertoire) throws SQLException
+	{
+		e = new TestDatabase().testConnection;
+    	buildProperties(repertoire, new Connection[] {c, e});	
+	}
+    
+	protected static void buildProperties(String repertoire, Connection[] connections) throws SQLException
+	{
+		PropertiesHandler testProperties=PropertiesHandler.getInstance();
+		
+		boolean first=true;
+		StringBuilder url=new StringBuilder();
+		StringBuilder username=new StringBuilder();
+		StringBuilder password=new StringBuilder();
+		StringBuilder driver=new StringBuilder();
+
+		for (Connection singleConnection:connections)
+		{
+			if (first)
+			{
+				first=false;
+			}
+			else
+			{
+				url.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
+				username.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
+				password.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
+				driver.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
+			}
+			url.append(singleConnection.getMetaData().getURL());
+			username.append(singleConnection.getMetaData().getUserName());
+			// user password is not relevant in zonky
+			password.append("NA");
+			driver.append("org.postgresql.Driver");
+		}
+		
+		testProperties.setDatabaseUrl(url.toString());
+		testProperties.setDatabaseUsername(username.toString());
+		testProperties.setDatabasePassword(password.toString());
+		testProperties.setDatabaseDriverClassName(driver.toString());
+
+		testProperties.setBatchParametersDirectory(repertoire);
+		
+		u.setProperties(testProperties);		
+	}
+
+	
 	/**
 	 * check the table columns and the number of lines in the table
 	 * @param tableOut

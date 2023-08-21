@@ -1332,13 +1332,14 @@ public class ApiInitialisationService extends ApiService {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static void copyMetadataToExecutors(Connection coordinatorConnexion, String envExecution) {
+	public static int copyMetadataToExecutors(Connection coordinatorConnexion, String envExecution) throws ArcException {
 
 		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
+		
 		// meta data copy is only necessary when scaled
 		if (ArcDatabase.numberOfExecutorNods()==0)
 		{
-			return;
+			return ArcDatabase.numberOfExecutorNods();
 		}
 
 		PropertiesHandler properties=PropertiesHandler.getInstance();
@@ -1362,9 +1363,7 @@ public class ApiInitialisationService extends ApiService {
 				
 				ArrayList<String> tablesToCopyIntoExecutor = 
 						BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion, envExecution);
-				tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
-				tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
-				
+				tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));			
 				
 				for (String table:new HashSet<String> (tablesToCopyIntoExecutor))
 				{
@@ -1377,10 +1376,14 @@ public class ApiInitialisationService extends ApiService {
 				
 				
 			} catch (SQLException | ArcException e) {
-				new ArcException(e, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED).logFullException();
+				 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED);
+				 customException.logFullException();
+				 throw customException;
 			}
 	
 		}
+		
+		return ArcDatabase.numberOfExecutorNods();
 
 	}
 }

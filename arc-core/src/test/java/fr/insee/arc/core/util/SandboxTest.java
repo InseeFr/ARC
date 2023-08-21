@@ -36,7 +36,7 @@ public class SandboxTest extends InitializeQueryTest {
 		File root = testFolder.newFolder("root");
 		String repertoire = root.getAbsolutePath();
 
-		buildProperties(repertoire);
+		buildPropertiesWithNoScalability(repertoire);
 
 		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc CASCADE;");
 		u.executeImmediate(c, "CREATE schema arc;");

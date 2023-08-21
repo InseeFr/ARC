@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -182,27 +183,48 @@ public class BddPatcherTest extends InitializeQueryTest {
 		UtilitaireDao.get(0).executeImmediate(c, scriptDataTest);
 		
 	}
+		
+	public static void initializeDatabaseForRetrieveTablesFromSchemaTest(UtilitaireDao u) throws ArcException
+	{
+		
+		createDatabase(null);
+		
+		u.executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
+		u.executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS "+testSandbox3+";");
+
+		// tables que la fonction testée ne doit pas retenir
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".pilotage_fichier (a text);");
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".reception_regle (a text);");
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".fake_regle (a text);");
+		
+		// tables que la fonction testée doit retenir
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".chargement_regle (regle text);");
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mapping_regle (id_norme text, regle text, commentaire text);");
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_variable_metier (a text);");
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_table_metier (a text);");
+		
+		u.executeImmediate(c, "CREATE TABLE arc.nmcl_vs3 as select '1' as cod_metier, 'ee' as cod_sicore;");
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".nmcl_vs3 as select * from arc.nmcl_vs3;");
+
+		u.executeImmediate(c, "CREATE TABLE arc.nmcl_code_pays_etranger_2023 as select '19000' as codcom, 'fr' as pays;");
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".nmcl_code_pays_etranger_2023 as select * from arc.nmcl_code_pays_etranger_2023;");
+
+		
+		u.executeImmediate(c, "INSERT INTO arc.ihm_nmcl (nom_table) values ('nmcl_code_pays_etranger_2023'), ('nmcl_sicore_2014'), ('nmcl_vs3');");
+		u.executeImmediate(c, "INSERT INTO "+testSandbox3+".mapping_regle (id_norme, regle, commentaire) values ('PHASE1V3', '{v0012}','relation avec la colonne nmcl_sicore_2014'), ('PHASE1V3', 'select codegeo from nmcl_code_pays_etranger_2023 where pays={v008}','relation avec la colonne nmcl_code_pays_etranger_2021');");
+		u.executeImmediate(c, "INSERT INTO "+testSandbox3+".chargement_regle (regle) values ('select * from arc.nmcl_vs3 where pcs={v001');");
+
+	}
 	
 	
 	@Test
 	public void retrieveRulesTablesFromSchemaTest() throws ArcException {
-		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS "+testSandbox3+";");
-
-		// tables que la fonction testée ne doit pas retenir
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".pilotage_fichier (a text);");
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".reception_regle (a text);");
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".fake_regle (a text);");
+	
 		
-		// tables que la fonction testée doit retenir
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".chargement_regle (regle text);");
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".mapping_regle (id_norme text, regle text, commentaire text);");
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_variable_metier (a text);");
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_table_metier (a text);");
-
+		initializeDatabaseForRetrieveTablesFromSchemaTest(u);
+		
 		// invocation de la fonction à tester
 		ArrayList<String> result;
-		
 		result = BddPatcher.retrieveRulesTablesFromSchema(c, testSandbox3);
 
 		// test : on enleve tous les éléments à retenir et l'array list devra être au final vide
@@ -212,31 +234,15 @@ public class BddPatcherTest extends InitializeQueryTest {
 		assertTrue(result.contains(testSandbox3+".mod_table_metier"));
 		assertEquals(4, result.size());
 
-		
-		UtilitaireDao.get(0).executeImmediate(c, "INSERT INTO arc.ihm_nmcl (nom_table) values ('nmcl_code_pays_etranger_2023'), ('nmcl_sicore_2014'), ('nmcl_vs3');");
-		UtilitaireDao.get(0).executeImmediate(c, "INSERT INTO "+testSandbox3+".mapping_regle (id_norme, regle, commentaire) values ('PHASE1V3', '{v0012}','relation avec la colonne nmcl_sicore_2014'), ('PHASE1V3', 'select codegeo from nmcl_code_pays_etranger_2023 where pays={v008}','relation avec la colonne nmcl_code_pays_etranger_2021');");
-		UtilitaireDao.get(0).executeImmediate(c, "INSERT INTO "+testSandbox3+".chargement_regle (regle) values ('select * from arc.nmcl_vs3 where pcs={v001');");
-
 		result = BddPatcher.retrieveExternalTablesUsedInRules(c, testSandbox3);
 		
-		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
 		assertTrue(result.contains("arc.nmcl_code_pays_etranger_2023"));
 		assertTrue(result.contains("arc.nmcl_vs3"));
-		assertTrue(result.contains(testSandbox3+".nmcl_vs3"));
+		assertTrue(result.contains(testSandbox3+".nmcl_code_pays_etranger_2023"));
 		assertTrue(result.contains(testSandbox3+".nmcl_vs3"));
 		assertEquals(4, result.size());
 
+		u.executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
+		
 	}
-	
-//	@Test
-//	public void retrieveExternalTablesUsedInRulesTest()
-//	{
-//		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA arc CASCADE;");
-//		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA arc_bas2 CASCADE;");
-//		UtilitaireDao.get(0).executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS arc_bas2;");
-//		
-//		
-//		ArrayList<String> result = BddPatcher.retrieveRulesTablesFromSchema(c, "arc_bas2");
-//	}
-	
 }
