@@ -99,7 +99,7 @@ public class ServicePilotageOperation {
 		requete.append("\n SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName()
 				+ ", date_entree, id_norme, validite, periodicite, '" + phaseNouveau + "' as phase_traitement, '{"
 				+ TraitementEtat.ENCOURS + "}' as etat_traitement ");
-		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + ApiService.bdDateFormat
+		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + ApiService.DATABASE_DATE_FORMAT
 				+ "') , rapport, taux_ko, nb_enr, 1 as etape, generation_composite, jointure ");
 		requete.append("\n FROM mark ");
 		requete.append("\n RETURNING *) ");

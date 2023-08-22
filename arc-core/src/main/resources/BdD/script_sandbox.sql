@@ -35,6 +35,7 @@ PRIMARY KEY (file_name)
 DROP TABLE IF EXISTS {{envExecution}}.pilotage_fichier_t;
 
 CREATE TABLE IF NOT EXISTS {{envExecution}}.pilotage_fichier (id_source text COLLATE pg_catalog."C",  id_norme text COLLATE pg_catalog."C",  validite text COLLATE pg_catalog."C",  periodicite text COLLATE pg_catalog."C",  phase_traitement text COLLATE pg_catalog."C",  etat_traitement text[] COLLATE pg_catalog."C",  date_traitement timestamp without time zone,  rapport text COLLATE pg_catalog."C",  taux_ko numeric,  nb_enr integer,  nb_essais integer,  etape integer,  validite_inf date,  validite_sup date,  version text COLLATE pg_catalog."C",  date_entree text,  container text COLLATE pg_catalog."C",  v_container text COLLATE pg_catalog."C",  o_container text COLLATE pg_catalog."C",  to_delete text COLLATE pg_catalog."C",  client text[],  date_client timestamp without time zone[],  jointure text, generation_composite text COLLATE pg_catalog."C") WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);
+ALTER TABLE {{envExecution}}.pilotage_fichier alter column date_entree type text COLLATE pg_catalog."C";
 
 CREATE TABLE IF NOT EXISTS {{envExecution}}.pilotage_archive (  entrepot text COLLATE pg_catalog."C",  nom_archive text COLLATE pg_catalog."C") WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);
 

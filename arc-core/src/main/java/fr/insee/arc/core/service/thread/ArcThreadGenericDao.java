@@ -14,7 +14,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class ArcThreadGenericDao {
 	
-	private static SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	private final static String JAVA_DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 	
 	private ScalableConnection connexion;
 
@@ -69,7 +69,7 @@ public class ArcThreadGenericDao {
 		query.append(ArcThreadGenericDao.createTablePilotageIdSource(tablePilotagePhase, tablePilotageThread, idSource));
 
 		// enregistrement de la date de traitement du fichier
-		query.append("UPDATE "+tablePilotageThread+" set date_traitement=to_timestamp('" + formatter.format(new Date()) + "','" + ApiService.bdDateFormat+"');" );
+		query.append("UPDATE "+tablePilotageThread+" set date_traitement=to_timestamp('" + new SimpleDateFormat(JAVA_DATE_FORMAT).format(new Date()) + "','" + ApiService.DATABASE_DATE_FORMAT+"');" );
 		
 		// if scalable thread
 		if (connexion.isScaled()) {		
@@ -182,7 +182,7 @@ public class ArcThreadGenericDao {
 		requete.append("\n validite = b.validite, ");
 		requete.append("\n periodicite = b.periodicite, ");
 		requete.append("\n taux_ko = b.taux_ko, ");
-		requete.append("\n date_traitement = to_timestamp('" + formatter.format(new Date()) + "','" + ApiService.bdDateFormat
+		requete.append("\n date_traitement = to_timestamp('" + new SimpleDateFormat(JAVA_DATE_FORMAT).format(new Date()) + "','" + ApiService.DATABASE_DATE_FORMAT
 				+ "'), ");
 		requete.append("\n nb_enr = b.nb_enr, ");
 		requete.append("\n rapport = b.rapport, ");

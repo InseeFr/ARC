@@ -74,7 +74,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	// made to report the number of object processed by the phase
 	private int reportNumberOfObject = 0;
 
-	public static final String bdDateFormat = "DD/MM/YYYY HH24:MI:SS";
+	public static final String DATABASE_DATE_FORMAT = "DD/MM/YYYY HH24:MI:SS";
 
 	public static final String IHM_SCHEMA = "arc.ihm";
 

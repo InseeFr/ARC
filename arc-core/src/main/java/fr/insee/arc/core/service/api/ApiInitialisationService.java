@@ -123,12 +123,12 @@ public class ApiInitialisationService extends ApiService {
 
 		String nomTableArchive = ServiceTableNaming.dbEnv(envExecution) + "pilotage_archive";
 
-		// pour chaque en trepot de données,
+		// pour chaque entrepot de données,
 		// Comparer les archives du répertoire aux archives enregistrées dans la table
 		// d'archive :
 		// comme la table d'archive serait dans l'ancien état de données
 		// on peut remettre dans le repertoire de reception les archives qu'on ne
-		// retouvent pas dans la table
+		// retrouvent pas dans la table
 
 		if (UtilitaireDao.get(0).hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot"))) {
 			ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
@@ -552,9 +552,9 @@ public class ApiInitialisationService extends ApiService {
 	}
 
 	/**
-	 * Suppression dans la table de pilotage des fichiers inutils. r.g :- une copie
-	 * des données du fichier doit être envoyée à chacun de ses clients RG1; - pour
-	 * un fichier donné, l'ancienneté de son dernier transfert doit dépasser 7 jours
+	 * Suppression dans la table de pilotage des fichiers consommés
+	 * 1- une copie des données du fichier doit avoir été récupérée par tous les clients décalrés
+	 * 2- pour un fichier donné, l'ancienneté de son dernier transfert doit dépasser Nb_Jour_A_Conserver jours
 	 * RG2.
 	 *
 	 * @param connexion
@@ -643,11 +643,11 @@ public class ApiInitialisationService extends ApiService {
 				.append("SELECT entrepot, nom_archive FROM delete_archive ");
 
 		// initialisation de la liste contenant les archives à déplacer
-		HashMap<String, ArrayList<String>> m = new HashMap<String, ArrayList<String>>();
+		HashMap<String, ArrayList<String>> m = new HashMap<>();
 		m.put("entrepot", new ArrayList<String>());
 		m.put("nom_archive", new ArrayList<String>());
 
-		HashMap<String, ArrayList<String>> n = new HashMap<String, ArrayList<String>>();
+		HashMap<String, ArrayList<String>> n = new HashMap<>();
 
 		// on continue jusqu'a ce qu'on ne trouve plus rien à effacer
 		do {
@@ -1077,8 +1077,7 @@ public class ApiInitialisationService extends ApiService {
 			// maintenance de la table de pilotage
 			// retirer les "encours" de la table de pilotage
 			LoggerHelper.info(LOGGER, "** Maintenance table de pilotage **");
-			UtilitaireDao.get(0).executeBlock(connexion,
-					"alter table " + this.tablePil + " alter column date_entree type text COLLATE pg_catalog.\"C\"; ");
+
 			UtilitaireDao.get(0).executeBlock(connexion,
 					"delete from " + this.tablePil + " where etat_traitement='{ENCOURS}';");
 

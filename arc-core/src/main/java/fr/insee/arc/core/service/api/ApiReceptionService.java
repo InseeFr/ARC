@@ -692,7 +692,7 @@ public class ApiReceptionService extends ApiService {
 				+ FormatSQL.cast(v_container) + ", " + FormatSQL.cast(fileName) + ","
 				+ FormatSQL.cast(dateFormat.format(d)) + "," + FormatSQL.cast(TraitementPhase.RECEPTION.toString())
 				+ "," + FormatSQL.cast("{" + etat + "}") + "," + "to_timestamp(" + FormatSQL.cast(formatter.format(d))
-				+ ",'" + ApiService.bdDateFormat + "')" + "," + FormatSQL.cast(rapport) + ",1," + etape + ") ");
+				+ ",'" + ApiService.DATABASE_DATE_FORMAT + "')" + "," + FormatSQL.cast(rapport) + ",1," + etape + ") ");
 	}
 
 	/**
