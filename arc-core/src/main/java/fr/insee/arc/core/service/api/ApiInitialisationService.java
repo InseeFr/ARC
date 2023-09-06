@@ -4,15 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -28,10 +30,15 @@ import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
 import fr.insee.arc.core.service.api.query.ServiceDatabaseMaintenance;
 import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
 import fr.insee.arc.core.service.api.query.ServiceHashFileName;
+import fr.insee.arc.core.service.api.query.ServicePhase;
+import fr.insee.arc.core.service.api.query.ServicePilotageOperation;
+import fr.insee.arc.core.service.api.query.ServiceScalability;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.consumer.ThrowingConsumer;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -84,14 +91,13 @@ public class ApiInitialisationService extends ApiService {
 
 		// Supprime les lignes devenues inutiles récupérées par le webservice de la
 		// table pilotage_fichier
+		// Déplace les archives dans OLD
 		nettoyerTablePilotage(this.connexion.getCoordinatorConnection(), this.envExecution);
 
 		// Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
 		// l'environnement d'excécution courant
-		copyTablesToExecutionThrow(connexion.getCoordinatorConnection(), envParameters, envExecution);
-
 		// mettre à jour les tables métier avec les paramêtres de la famille de norme
-		mettreAJourSchemaTableMetierThrow(connexion.getCoordinatorConnection(), envParameters, envExecution);
+		synchroniserSchemaExecutionAllNods(connexion.getCoordinatorConnection(), envParameters, envExecution);
 
 		// marque les fichiers ou les archives à rejouer
 		reinstate(this.connexion.getCoordinatorConnection(), this.tablePil);
@@ -140,7 +146,7 @@ public class ApiInitialisationService extends ApiService {
 
 					String fullEnvDir = ServiceFileSystemManagement.directoryEnvRoot(repertoire, this.envExecution);
 					File envDirFile = new File(fullEnvDir);
-					makeDir(envDirFile);
+					FileUtilsArc.createDirIfNotexist(envDirFile);
 
 					String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, this.envExecution,
 							entrepot);
@@ -149,7 +155,7 @@ public class ApiInitialisationService extends ApiService {
 
 					// on itère sur les fichiers trouvé dans le répertoire d'archive
 					File f = new File(dirIn);
-					makeDir(f);
+					FileUtilsArc.createDirIfNotexist(f);
 
 					File[] fichiers = f.listFiles();
 
@@ -185,9 +191,9 @@ public class ApiInitialisationService extends ApiService {
 					requete2.append(
 							" WHERE NOT EXISTS (SELECT * FROM " + nomTableArchive + " b WHERE b.nom_archive=a.fname) ");
 
-					ArrayList<String> fileToBeMoved = new GenericBean(UtilitaireDao.get(0)
-							.executeRequest(this.connexion.getCoordinatorConnection(), requete2)).mapContent()
-							.get("fname");
+					ArrayList<String> fileToBeMoved = new GenericBean(
+							UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), requete2))
+							.mapContent().get("fname");
 
 					if (fileToBeMoved != null) {
 						for (String fname : fileToBeMoved) {
@@ -199,7 +205,7 @@ public class ApiInitialisationService extends ApiService {
 					// on efface les # dont le fichier existe déjà avec un autre nom sans # ou un
 					// numéro # inférieur
 					f = new File(dirOut);
-					makeDir(f);
+					FileUtilsArc.createDirIfNotexist(f);
 
 					fichiers = f.listFiles();
 
@@ -255,12 +261,6 @@ public class ApiInitialisationService extends ApiService {
 		}
 	}
 
-	private void makeDir(File f) {
-		if (!f.exists()) {
-			f.mkdirs();
-		}
-	}
-
 	/**
 	 * Build directories for the sandbox
 	 * 
@@ -302,16 +302,55 @@ public class ApiInitialisationService extends ApiService {
 	}
 
 	/**
-	 * Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
-	 * l'environnement d'excécution courant
-	 * 
+	 * Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans 
+	 * Met à jour le schéma des tables métiers correspondant aux règles définies dans les familles
+	 * @param connexion
+	 * @param envParameters
+	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static void synchroniserSchemaExecution(Connection connexion, String envParameters, String envExecution) {
-		copyTablesToExecution(connexion, envParameters, envExecution);
-		mettreAJourSchemaTableMetier(connexion, envParameters, envExecution);
+	public static void synchroniserSchemaExecutionAllNods(Connection connexion, String envParameters, String envExecution) throws ArcException {
+
+		copyMetadataAllNods(connexion, envParameters, envExecution);
+		
+		mettreAJourSchemaTableMetierOnNods(connexion, envParameters, envExecution);
 	}
 
+	/**
+	 * drop the unused temporary table on coordinator and on executors if there is
+	 * any
+	 * 
+	 * @param coordinatorConnexion
+	 * @return the number of executor nods in order to know if method worked on
+	 *         executors too
+	 * @throws ArcException
+	 */
+	private int dropUnusedTemporaryTablesAllNods(Connection coordinatorConnexion) throws ArcException {
+	
+		ThrowingConsumer<Connection, ArcException> function = c -> {
+			dropUnusedTemporaryTablesOnConnection(c);
+		};
+	
+		return ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
+	
+	}
+
+	/**
+	 * Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans l'environnement d'excécution courant
+	 * sur tous les noeuds postgres (coordinator et executors)
+	 * @param connexion
+	 * @param envParameters
+	 * @param envExecution
+	 * @throws ArcException
+	 */
+	public static void copyMetadataAllNods(Connection connexion, String envParameters, String envExecution) throws ArcException
+	{
+		copyMetadataToSandbox(connexion, envParameters, envExecution);
+
+		copyMetadataToExecutorsAllNods(connexion, envExecution);
+	}
+	
+	
 	/**
 	 * Méthode pour rejouer des fichiers
 	 *
@@ -355,6 +394,19 @@ public class ApiInitialisationService extends ApiService {
 						+ " b where a.container=b.container and b.to_delete='RA')");
 
 	}
+	
+	private static void mettreAJourSchemaTableMetierOnNods(Connection connexion, String envParameters,
+			String envExecution) throws ArcException {
+		
+		ThrowingConsumer<Connection, ArcException> function = executorConnection -> {
+			mettreAJourSchemaTableMetier(executorConnection, envParameters,envExecution);
+		};
+		
+		ServiceScalability.dispatchOnNods(connexion, function, function);
+		
+	}
+	
+	
 
 	/**
 	 * Créer ou detruire les colonnes ou les tables métiers en comparant ce qu'il y
@@ -363,18 +415,7 @@ public class ApiInitialisationService extends ApiService {
 	 * @param connexion
 	 * @throws ArcException
 	 */
-
-	private static void mettreAJourSchemaTableMetier(Connection connexion, String envParameters, String envExecution) {
-		try {
-			LoggerHelper.info(LOGGER, "Mettre à jour le schéma des tables métiers avec la famille");
-			mettreAJourSchemaTableMetierThrow(connexion, envParameters, envExecution);
-		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, "Error in ApiInitialisation.mettreAJourSchemaTableMetier", LOGGER);
-		}
-
-	}
-
-	private static void mettreAJourSchemaTableMetierThrow(Connection connexion, String envParameters,
+	private static void mettreAJourSchemaTableMetier(Connection connexion, String envParameters,
 			String envExecution) throws ArcException {
 		LoggerHelper.info(LOGGER, "mettreAJourSchemaTableMetier");
 		/*
@@ -385,6 +426,9 @@ public class ApiInitialisationService extends ApiService {
 		requeteRef.append("SELECT lower(id_famille), lower('" + ServiceTableNaming.dbEnv(envExecution)
 				+ "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM " + envParameters
 				+ "_mod_variable_metier");
+		
+		
+		
 
 		List<List<String>> relationalViewRef = Format
 				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(connexion, requeteRef));
@@ -552,10 +596,10 @@ public class ApiInitialisationService extends ApiService {
 	}
 
 	/**
-	 * Suppression dans la table de pilotage des fichiers consommés
-	 * 1- une copie des données du fichier doit avoir été récupérée par tous les clients décalrés
-	 * 2- pour un fichier donné, l'ancienneté de son dernier transfert doit dépasser Nb_Jour_A_Conserver jours
-	 * RG2.
+	 * Suppression dans la table de pilotage des fichiers consommés 1- une copie des
+	 * données du fichier doit avoir été récupérée par tous les clients décalrés 2-
+	 * pour un fichier donné, l'ancienneté de son dernier transfert doit dépasser
+	 * Nb_Jour_A_Conserver jours RG2.
 	 *
 	 * @param connexion
 	 * @param tablePil
@@ -564,9 +608,8 @@ public class ApiInitialisationService extends ApiService {
 	 */
 	private void nettoyerTablePilotage(Connection connexion, String envExecution) throws ArcException {
 		LoggerHelper.info(LOGGER, "nettoyerTablePilotage");
-		
-        BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 
+		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
 
 		Nb_Jour_A_Conserver = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiInitialisationService.Nb_Jour_A_Conserver", 365);
@@ -680,7 +723,7 @@ public class ApiInitialisationService extends ApiService {
 
 				}
 			}
-			LoggerHelper.info(LOGGER,"Archivage Fin");
+			LoggerHelper.info(LOGGER, "Archivage Fin");
 
 		} while (UtilitaireDao.get(0).hasResults(connexion,
 				new ArcPreparedStatementBuilder("select 1 from fichier_to_delete limit 1")));
@@ -698,13 +741,13 @@ public class ApiInitialisationService extends ApiService {
 				String archive = m.get("nom_archive").get(i);
 				String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, this.envExecution,
 						entrepot);
-				String dirOut = ApiReceptionService.directoryReceptionEntrepotArchiveOld(repertoire, this.envExecution,
+				String dirOut = ApiReceptionService.directoryReceptionEntrepotArchiveOldYearStamped(repertoire, this.envExecution,
 						entrepot);
 
 				// création du répertoire "OLD" s'il n'existe pas
 				if (!entrepotSav.equals(entrepot)) {
 					File f = new File(dirOut);
-					makeDir(f);
+					FileUtilsArc.createDirIfNotexist(f);
 					entrepotSav = entrepot;
 				}
 
@@ -730,18 +773,7 @@ public class ApiInitialisationService extends ApiService {
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
 	 */
-
-	public static void copyTablesToExecution(Connection connexion, String anParametersEnvironment,
-			String anExecutionEnvironment) {
-		try {
-			LoggerHelper.info(LOGGER, "Recopie des regles dans l'environnement");
-			copyTablesToExecutionThrow(connexion, anParametersEnvironment, anExecutionEnvironment);
-		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, "Error in ApiInitialisation.copyTablesToExecution");
-		}
-	}
-
-	private static void copyTablesToExecutionThrow(Connection connexion, String anParametersEnvironment,
+	private static void copyMetadataToSandbox(Connection connexion, String anParametersEnvironment,
 			String anExecutionEnvironment) throws ArcException {
 		copyRulesTablesToExecution(connexion, anParametersEnvironment, anExecutionEnvironment);
 		applyExpressions(connexion, anExecutionEnvironment);
@@ -751,12 +783,12 @@ public class ApiInitialisationService extends ApiService {
 	 * Copy the table containing user rules to the sandbox so they will be used by
 	 * the sandbox process
 	 * 
-	 * @param connexion
+	 * @param coordinatorConnexion
 	 * @param anParametersEnvironment
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
 	 */
-	private static void copyRulesTablesToExecution(Connection connexion, String anParametersEnvironment,
+	private static void copyRulesTablesToExecution(Connection coordinatorConnexion, String anParametersEnvironment,
 			String anExecutionEnvironment) throws ArcException {
 		LoggerHelper.info(LOGGER, "copyTablesToExecution");
 		try {
@@ -811,7 +843,7 @@ public class ApiInitialisationService extends ApiService {
 				requete.append("ALTER TABLE " + tableImage + " rename to "
 						+ ManipString.substringAfterLast(tableCurrent, ".") + "; \n");
 			}
-			UtilitaireDao.get(0).executeBlock(connexion, requete);
+			UtilitaireDao.get(0).executeBlock(coordinatorConnexion, requete);
 
 			// Dernière étape : recopie des tables de nomenclature et des tables prefixées
 			// par ext_ du schéma arc vers schéma courant
@@ -829,8 +861,7 @@ public class ApiInitialisationService extends ApiService {
 			requeteSelectDrop.append(" AND tablename SIMILAR TO '%nmcl%|%ext%'");
 
 			ArrayList<String> requetesDeSuppressionTablesNmcl = new GenericBean(
-					UtilitaireDao.get(0).executeRequest(connexion, requeteSelectDrop)).mapContent()
-					.get("requete_drop");
+					UtilitaireDao.get(0).executeRequest(coordinatorConnexion, requeteSelectDrop)).mapContent().get("requete_drop");
 
 			if (requetesDeSuppressionTablesNmcl != null) {
 				for (String requeteDeSuppression : requetesDeSuppressionTablesNmcl) {
@@ -840,7 +871,7 @@ public class ApiInitialisationService extends ApiService {
 
 			// 2.Préparation des requêtes de création des tables
 			ArrayList<String> requetesDeCreationTablesNmcl = new GenericBean(UtilitaireDao.get(0)
-					.executeRequest(connexion, new ArcPreparedStatementBuilder(
+					.executeRequest(coordinatorConnexion, new ArcPreparedStatementBuilder(
 							"select tablename from pg_tables where (tablename like 'nmcl\\_%' OR tablename like 'ext\\_%') and schemaname='arc'")))
 					.mapContent().get("tablename");
 
@@ -852,10 +883,10 @@ public class ApiInitialisationService extends ApiService {
 			}
 
 			// 3.Execution du script Sql de suppression/création
-			UtilitaireDao.get(0).executeBlock(connexion, requete);
+			UtilitaireDao.get(0).executeBlock(coordinatorConnexion, requete);
 
 		} catch (Exception e) {
-			LoggerHelper.trace(LOGGER, 
+			LoggerHelper.trace(LOGGER,
 					"Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment);
 			LoggerHelper.error(LOGGER, "Error in ApiInitialisation.copyRulesTablesToExecution");
 			throw e;
@@ -864,6 +895,7 @@ public class ApiInitialisationService extends ApiService {
 
 	/**
 	 * replace an expression in rules
+	 * 
 	 * @param connexion
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
@@ -882,8 +914,7 @@ public class ApiInitialisationService extends ApiService {
 
 			Optional<String> loopInExpressionSet = expressionService.loopInExpressionSet(expressions);
 			if (loopInExpressionSet.isPresent()) {
-				LoggerHelper.info(LOGGER, "A loop is present in the expression set : " + loopInExpressionSet.get()
-						);
+				LoggerHelper.info(LOGGER, "A loop is present in the expression set : " + loopInExpressionSet.get());
 				LoggerHelper.info(LOGGER, "The expression set is not applied");
 				continue;
 			}
@@ -1028,43 +1059,6 @@ public class ApiInitialisationService extends ApiService {
 	}
 
 	/**
-	 * recupere toutes les tables d'état d'un envrionnement
-	 *
-	 * @param env
-	 * @return
-	 */
-	public static ArcPreparedStatementBuilder requeteListAllTablesEnv(String env) {
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		TraitementPhase[] phase = TraitementPhase.values();
-		boolean insert = false;
-
-		for (int i = 0; i < phase.length; i++) {
-			if (insert) {
-				requete.append(" UNION ALL ");
-			}
-			ArcPreparedStatementBuilder r = requeteListTableEnv(env, phase[i].toString());
-			insert = (r.length() > 0);
-			requete.append(r);
-		}
-		return requete;
-	}
-
-	private static ArcPreparedStatementBuilder requeteListTableEnv(String env, String phase) {
-		// Les tables dans l'environnement sont de la forme
-		TraitementEtat[] etat = TraitementEtat.values();
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		for (int j = 0; j < etat.length; j++) {
-			if (!etat[j].equals(TraitementEtat.ENCOURS)) {
-				if (j > 0) {
-					requete.append(" UNION ALL ");
-				}
-				requete.append(FormatSQL.tableExists(ServiceTableNaming.dbEnv(env) + "%" + phase + "%\\_" + etat[j]));
-			}
-		}
-		return requete;
-	}
-
-	/**
 	 * Remise en coherence des tables de données avec la table de pilotage
 	 *
 	 * @param connexion
@@ -1078,95 +1072,19 @@ public class ApiInitialisationService extends ApiService {
 			// retirer les "encours" de la table de pilotage
 			LoggerHelper.info(LOGGER, "** Maintenance table de pilotage **");
 
-			UtilitaireDao.get(0).executeBlock(connexion,
-					"delete from " + this.tablePil + " where etat_traitement='{ENCOURS}';");
-
 			// pour chaque fichier de la phase de pilotage, remet à etape='1' pour sa
 			// derniere phase valide
-			remettreEtapePilotage();
+			remettreEtapePilotage(connexion);
 
 			// recrée la table de pilotage, ses index, son trigger
 			rebuildPilotage(connexion, this.tablePil);
 
-			// drop des tables temporaires
-			GenericBean g = new GenericBean(
-					UtilitaireDao.get(0).executeRequest(connexion, requeteListAllTablesEnvTmp(envExecution)));
-			if (!g.mapContent().isEmpty()) {
-				ArrayList<String> envTables = g.mapContent().get("table_name");
-				for (String nomTable : envTables) {
-					UtilitaireDao.get(0).executeBlock(connexion, FormatSQL.dropTable(nomTable));
-				}
-			}
+			// drop des tables temporaires de travail
+			dropUnusedTemporaryTablesAllNods(connexion);
 
 			// pour chaque table de l'environnement d'execution courant
-			g = new GenericBean(
-					UtilitaireDao.get(0).executeRequest(connexion, requeteListAllTablesEnv(envExecution)));
-			if (!g.mapContent().isEmpty()) {
-				ArrayList<String> envTables = g.mapContent().get("table_name");
-				for (String nomTable : envTables) {
+			dropAndDeleteUnusedBusinessDataAllNods(connexion, envExecution, tablePil);
 
-					String phase = ManipString.substringBeforeFirst(nomTable.substring(envExecution.length() + 1), "_")
-							.toUpperCase();
-					String etat = ManipString.substringAfterLast(nomTable, "_").toUpperCase();
-
-					// Cas des tables non MAPPING
-					if (!nomTable.contains(TraitementPhase.MAPPING.toString().toLowerCase())) {
-
-						// temporary table to store inherit table already checked
-						UtilitaireDao.get(0).executeImmediate(connexion,
-								"DROP TABLE IF EXISTS TMP_INHERITED_TABLES_TO_CHECK; CREATE TEMPORARY TABLE TMP_INHERITED_TABLES_TO_CHECK (tablename text);");
-
-						// Does the table have some inherited table left to check ?
-						// Only MAX_LOCK_PER_TRANSACTION tables can be proceed at the same time so
-						// iteration is required
-						HashMap<String, ArrayList<String>> m;
-						do {
-							m = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion,
-									new ArcPreparedStatementBuilder(
-											"\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"
-													+ nomTable + "\\_" + ServiceHashFileName.CHILD_TABLE_TOKEN
-													+ "\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "
-													+ FormatSQL.MAX_LOCK_PER_TRANSACTION + " ) "
-													+ "\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
-													+ "\n SELECT tablename from TMP_SELECT ")))
-									.mapContent();
-
-							StringBuilder query = new StringBuilder();
-							// Oui elle a des héritages
-							if (!m.isEmpty()) {
-
-								// on parcourt les tables héritées
-								for (String t : m.get("tablename")) {
-									// on récupère la variable etape dans la phase
-									// si on ne trouve la source de la table dans la phase, on drop !
-									String etape = UtilitaireDao.get(0).getString(connexion,
-											new ArcPreparedStatementBuilder(
-													"SELECT etape FROM " + tablePil + " WHERE phase_traitement='"
-															+ phase + "' AND '" + etat + "'=ANY(etat_traitement) AND "
-															+ ColumnEnum.ID_SOURCE.getColumnName() + "=(select "
-															+ ColumnEnum.ID_SOURCE.getColumnName() + " from " + t
-															+ " limit 1)"));
-
-									if (etape == null) {
-										query.append("\n BEGIN; DROP TABLE IF EXISTS " + t + "; COMMIT;");
-									}
-								}
-
-								UtilitaireDao.get(0).executeImmediate(connexion, query);
-
-							}
-
-						} while (!m.isEmpty());
-
-					} else {
-						UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(),
-								deleteTableByPilotage(nomTable, nomTable, this.tablePil, phase, etat, ""));
-						UtilitaireDao.get(0).executeImmediate(connexion, fastMaintenanceOnWorkTable(nomTable));
-					}
-
-				}
-
-			}
 
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "synchroniserEnvironnementByPilotage()", LOGGER, ex);
@@ -1179,6 +1097,164 @@ public class ApiInitialisationService extends ApiService {
 		// les DBAs
 		ServiceDatabaseMaintenance.maintenanceDatabaseClassic(connexion, envExecution);
 
+	}
+
+	public static void dropAndDeleteUnusedBusinessDataAllNods(Connection coordinatorConnexion, String envExecution, String tablePilotage) throws ArcException {
+		
+		ThrowingConsumer<Connection, ArcException> function = executorConnection -> 
+			dropAndDeleteUnusedBusinessData(coordinatorConnexion, executorConnection, envExecution, tablePilotage);
+		;
+		
+		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
+		
+	}
+	
+	private static void dropAndDeleteUnusedBusinessData(Connection coordinatorConnexion, Connection executorConnection, String envExecution, String tablePilotage) throws ArcException
+	{
+		
+		ArrayList<String> envTables = new GenericBean(UtilitaireDao.get(0).executeRequest(executorConnection,
+				ServicePhase.selectPhaseTablesFoundInEnv(envExecution))).mapContent().get(ColumnEnum.TABLE_NAME.getColumnName());
+
+		// if no phase tables, exit
+		if (envTables == null) {
+			return;	
+		}
+		
+		dropTablesWithUnusedData(coordinatorConnexion, executorConnection, envExecution, tablePilotage, envTables);
+		
+		deleteRecordsWithUnusedData(coordinatorConnexion, executorConnection, tablePilotage, envTables, TraitementPhase.MAPPING, TraitementEtat.OK);
+
+		deleteRecordsWithUnusedData(coordinatorConnexion, executorConnection, tablePilotage, envTables, TraitementPhase.MAPPING, TraitementEtat.KO);
+		
+	}
+	
+	private static void deleteRecordsWithUnusedData(Connection coordinatorConnexion, Connection executorConnection, String tablePilotage, List<String> envTables, TraitementPhase phase, TraitementEtat etat) throws ArcException
+	{
+		// récupérer la liste des tables de la phase
+		List<String> envTablesWithRecords = envTables.stream().filter(nomTable -> ServicePhase.extractPhaseFromTableName(nomTable).equals(phase) && ServicePhase.extractEtatFromTableName(nomTable).equals(etat)).collect(Collectors.toList());
+		
+		// quels enregistrements à effacer
+		if (envTablesWithRecords.isEmpty())
+		{
+			return;
+		}
+		
+		
+		ArrayList<String> idSourceInPilotage =
+				ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion, ServicePilotageOperation.retrieveIdSourceFromPilotageQuery(tablePilotage, phase, etat))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName())
+						, new ArrayList<String>());
+
+		for (String dataTable : envTablesWithRecords) {
+
+			// retrieve the idSource that shouldn't be in data table according to pilotage table 
+			List<String> idSourceInDataTableThatShouldntBe = 
+					ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(executorConnection, ServicePilotageOperation.retrieveIdSourceFromDataTableQuery(dataTable))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName())
+							, new ArrayList<String>());
+						
+			idSourceInDataTableThatShouldntBe.removeAll(idSourceInPilotage);
+			
+			if (!idSourceInDataTableThatShouldntBe.isEmpty())
+			{
+				ArcPreparedStatementBuilder query= new ArcPreparedStatementBuilder();
+				GenericBean gb = 
+						new GenericBean((ArrayList<String>) Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName()), (ArrayList<String>) Arrays.asList("text"), idSourceInDataTableThatShouldntBe, true);
+				
+				query.copyFromGenericBean(ViewEnum.T1.getTableName(), gb, true);
+				
+				query= new ArcPreparedStatementBuilder();
+				query.build(SQL.DELETE, envTablesWithRecords);
+				query.build(SQL.WHERE, ColumnEnum.ID_SOURCE, SQL.IN );
+				query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getTableName(), ")");
+				UtilitaireDao.get(0).executeRequest(executorConnection, query);
+			}
+			
+			
+		}
+		
+	}
+	
+	
+	
+	private static void dropTablesWithUnusedData(Connection coordinatorConnexion, Connection executorConnection, String envExecution, String tablePilotage, List<String> envTables) throws ArcException
+	{
+		// les tables de mapping sont traitées différemment car elle ne peuvent pas être dropées
+		List<String> envTablesThatCanBeDropped = envTables.stream().filter(nomTable -> !ServicePhase.extractPhaseFromTableName(nomTable).equals(TraitementPhase.MAPPING)).collect(Collectors.toList());
+		
+		for (String nomTable : envTablesThatCanBeDropped) {
+
+			TraitementPhase phase = ServicePhase.extractPhaseFromTableName(nomTable);
+			TraitementEtat etat = ServicePhase.extractEtatFromTableName(nomTable);
+
+			// Cas des tables non MAPPING
+			// temporary table to store inherit table already checked
+				UtilitaireDao.get(0).executeImmediate(executorConnection,
+						"DROP TABLE IF EXISTS TMP_INHERITED_TABLES_TO_CHECK; CREATE TEMPORARY TABLE TMP_INHERITED_TABLES_TO_CHECK (tablename text);");
+
+				// Does the table have some inherited table left to check ?
+				// Only MAX_LOCK_PER_TRANSACTION tables can be proceed at the same time so
+				// iteration is required
+				HashMap<String, ArrayList<String>> m;
+				do {
+					m = new GenericBean(UtilitaireDao.get(0).executeRequest(executorConnection,
+							new ArcPreparedStatementBuilder(
+									"\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"
+											+ nomTable + "\\_" + ServiceHashFileName.CHILD_TABLE_TOKEN
+											+ "\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "
+											+ FormatSQL.MAX_LOCK_PER_TRANSACTION + " ) "
+											+ "\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
+											+ "\n SELECT tablename from TMP_SELECT ")))
+							.mapContent();
+					StringBuilder query = new StringBuilder();
+					// Oui elle a des héritages
+					if (!m.isEmpty()) {
+
+						// on parcourt les tables héritées
+						for (String t : m.get("tablename")) {
+							
+							// on récupère la variable etape dans la phase
+							// si on ne trouve pas la source de la table dans la phase, on drop !
+							
+							ArcPreparedStatementBuilder queryIdSource = new ArcPreparedStatementBuilder();
+							queryIdSource.append("SELECT "
+									+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + t
+									+ " LIMIT 1");
+							String idSource = UtilitaireDao.get(0).getString(executorConnection,queryIdSource);
+							
+							ArcPreparedStatementBuilder queryEtape = new ArcPreparedStatementBuilder();
+							queryEtape.append("SELECT etape FROM " + tablePilotage + " WHERE phase_traitement='"
+													+ phase + "' AND '" + etat + "'=ANY(etat_traitement) AND "
+													+ ColumnEnum.ID_SOURCE.getColumnName() + "="+ queryEtape.quoteText(idSource));
+							String etape = UtilitaireDao.get(0).getString(coordinatorConnexion,queryEtape);
+
+							if (etape == null) {
+								query.append("\n BEGIN; DROP TABLE IF EXISTS " + t + "; COMMIT;");
+							}
+						}
+
+						UtilitaireDao.get(0).executeImmediate(executorConnection, query);
+
+					}
+
+				} while (!m.isEmpty());
+		}
+	}
+	
+	
+	/**
+	 * drop the unused temporary table on the target connection
+	 * 
+	 * @param targetConnexion
+	 * @throws ArcException
+	 */
+	private void dropUnusedTemporaryTablesOnConnection(Connection targetConnexion) throws ArcException {
+		GenericBean g = new GenericBean(
+				UtilitaireDao.get(0).executeRequest(targetConnexion, requeteListAllTablesEnvTmp(envExecution)));
+		if (!g.mapContent().isEmpty()) {
+			ArrayList<String> envTables = g.mapContent().get("table_name");
+			for (String nomTable : envTables) {
+				UtilitaireDao.get(0).executeBlock(targetConnexion, FormatSQL.dropTable(nomTable));
+			}
+		}
 	}
 
 	private static void rebuildPilotage(Connection connexion, String tablePilotage) throws ArcException {
@@ -1207,9 +1283,11 @@ public class ApiInitialisationService extends ApiService {
 	 * @return
 	 * @throws ArcException
 	 */
-	private boolean remettreEtapePilotage() throws ArcException {
-
+	private boolean remettreEtapePilotage(Connection connexion) throws ArcException {
+		
 		StringBuilder requete = new StringBuilder();
+		
+		requete.append("DELETE FROM " + this.tablePil + " WHERE etat_traitement='{ENCOURS}';");
 
 		requete.append(ApiService.resetPreviousPhaseMark(this.tablePil, null, null));
 
@@ -1234,7 +1312,7 @@ public class ApiInitialisationService extends ApiService {
 		}
 		requete.append("end ; ");
 
-		UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), requete);
+		UtilitaireDao.get(0).executeBlock(connexion, requete);
 
 		return true;
 	}
@@ -1265,124 +1343,61 @@ public class ApiInitialisationService extends ApiService {
 		FileUtilsArc.deleteAndRecreateDirectory(
 				Paths.get(ServiceFileSystemManagement.directoryEnvExport(repertoire, env)).toFile());
 	}
-
-	/**
-	 * Rebuild des grosses tables attention si on touche parameteres de requetes ou
-	 * à la clause exists; forte volumétrie !
-	 */
-	private static String deleteTableByPilotage(String nomTable, String nomTableSource, String tablePil, String phase,
-			String etat, String extraCond) {
-		StringBuilder requete = new StringBuilder();
-
-		String tableDestroy = FormatSQL.temporaryTableName(nomTable, "D");
-		requete.append("\n SET enable_nestloop=off; ");
-
-		requete.append("\n DROP TABLE IF EXISTS " + tableDestroy + " CASCADE; ");
-		requete.append("\n DROP TABLE IF EXISTS TMP_SOURCE_SELECTED CASCADE; ");
-
-		// PERF : selection des id_source dans une table temporaire pour que postgres
-		// puisse partir en semi-hash join
-		requete.append("\n CREATE TEMPORARY TABLE TMP_SOURCE_SELECTED AS ");
-		requete.append("\n SELECT " + ColumnEnum.ID_SOURCE.getColumnName() + " from " + tablePil + " ");
-		requete.append("\n WHERE phase_traitement='" + phase + "' ");
-		requete.append("\n AND '" + etat + "'=ANY(etat_traitement) ");
-		requete.append("\n " + extraCond + " ");
-		requete.append("\n ; ");
-
-		requete.append("\n ANALYZE TMP_SOURCE_SELECTED; ");
-
-		requete.append("\n CREATE  TABLE " + tableDestroy + " " + FormatSQL.WITH_NO_VACUUM + " ");
-		requete.append("\n AS select * from " + nomTableSource + " a ");
-		requete.append("\n WHERE exists (select 1 from TMP_SOURCE_SELECTED b WHERE a."
-				+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName() + ") ");
-		requete.append("\n ; ");
-
-		requete.append("\n DROP TABLE IF EXISTS " + nomTable + " CASCADE; ");
-		requete.append("\n ALTER TABLE " + tableDestroy + " rename to " + ManipString.substringAfterFirst(nomTable, ".")
-				+ ";\n");
-
-		requete.append("\n DROP TABLE IF EXISTS TMP_SOURCE_SELECTED; ");
-
-		requete.append("\n SET enable_nestloop=on; ");
-
-		return requete.toString();
-
-	}
-
-	/**
-	 * trigger a fast maintenance on a working table
-	 * @param nomTable
-	 * @return
-	 */
-	private static String fastMaintenanceOnWorkTable(String nomTable)
-	{
-		StringBuilder requete = new StringBuilder();
-		requete.append("SET default_statistics_target=1;");
-		requete.append("COMMIT;");
-		requete.append("VACUUM ANALYZE ").append(nomTable).append("(").append(ColumnEnum.ID_SOURCE.getColumnName()).append(");");
-		requete.append("COMMIT;");
-		requete.append("SET default_statistics_target=100;");
-		return requete.toString();
-	}
-	
 	
 	/**
-	 * Instanciate the data into executors pod
+	 * Instanciate the metadata required into all executors pod
+	 * 
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static int copyMetadataToExecutors(Connection coordinatorConnexion, String envExecution) throws ArcException {
+	public static int copyMetadataToExecutorsAllNods(Connection coordinatorConnexion, String envExecution)
+			throws ArcException {
 
-		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
-		
-		// meta data copy is only necessary when scaled
-		if (ArcDatabase.numberOfExecutorNods()==0)
-		{
-			return ArcDatabase.numberOfExecutorNods();
-		}
+		ThrowingConsumer<Connection, ArcException> onCoordinator = c -> {
+		};
 
-		PropertiesHandler properties=PropertiesHandler.getInstance();
-		
-		// itérer sur les executor
-		for (int executorConnectionIndex=ArcDatabase.EXECUTOR.getIndex(); executorConnectionIndex<ArcDatabase.EXECUTOR.getIndex()+numberOfExecutorNods; executorConnectionIndex++ )
-		{
-			
-			// instanciate connexion
-			try (Connection executorConnection = UtilitaireDao.get(executorConnectionIndex).getDriverConnexion())
-			{
-				
-				// add utility functions
-				BddPatcher.executeBddScript(executorConnection, "BdD/script_function_utility.sql", properties.getDatabaseRestrictedUsername(), null,
-						null);
-				
-				// add tables for phases if required
-				BddPatcher.bddScriptEnvironmentExecutor(executorConnection, properties.getDatabaseRestrictedUsername(), new String[] {envExecution});
-				
-				// copy tables 
-				
-				ArrayList<String> tablesToCopyIntoExecutor = 
-						BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion, envExecution);
-				tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));			
-				
-				for (String table:new HashSet<String> (tablesToCopyIntoExecutor))
-				{
-					GenericBean gb = new GenericBean(
-					UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
-							new ArcPreparedStatementBuilder("SELECT * FROM " + table)));
-					ArcPreparedStatementBuilder query= new ArcPreparedStatementBuilder();
-					UtilitaireDao.get(0).executeRequest(executorConnection, query.copyFromGenericBean(table, gb, false));
-				}
-				
-				
-			} catch (SQLException | ArcException e) {
-				 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED);
-				 customException.logFullException();
-				 throw customException;
-			}
-	
-		}
-		
-		return ArcDatabase.numberOfExecutorNods();
+		ThrowingConsumer<Connection, ArcException> onExecutor = executorConnection -> {
+			copyMetaDataToExecutors(coordinatorConnexion, executorConnection, envExecution);
+		};
+
+		return ServiceScalability.dispatchOnNods(coordinatorConnexion, onCoordinator, onExecutor);
 
 	}
+	
+	/**
+	 * Instanciate the metadata required into the given executor pod
+	 * @param coordinatorConnexion
+	 * @param executorConnection
+	 * @param envExecution
+	 * @throws ArcException
+	 */
+	public static void copyMetaDataToExecutors(Connection coordinatorConnexion, Connection executorConnection, String envExecution) throws ArcException
+	{
+		PropertiesHandler properties = PropertiesHandler.getInstance();
+
+		// add utility functions
+		BddPatcher.executeBddScript(executorConnection, "BdD/script_function_utility.sql",
+				properties.getDatabaseRestrictedUsername(), null, null);
+
+		// add tables for phases if required
+		BddPatcher.bddScriptEnvironmentExecutor(executorConnection, properties.getDatabaseRestrictedUsername(),
+				new String[] { envExecution });
+
+		// copy tables
+
+		ArrayList<String> tablesToCopyIntoExecutor = BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion,
+				envExecution);
+		tablesToCopyIntoExecutor
+				.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
+		tablesToCopyIntoExecutor
+				.addAll(BddPatcher.retrieveModelTablesFromSchema(coordinatorConnexion, envExecution));
+
+		for (String table : new HashSet<String>(tablesToCopyIntoExecutor)) {
+			GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
+					new ArcPreparedStatementBuilder("SELECT * FROM " + table)));
+			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+			UtilitaireDao.get(0).executeRequest(executorConnection, query.copyFromGenericBean(table, gb, false));
+		}
+	}
+	
 }

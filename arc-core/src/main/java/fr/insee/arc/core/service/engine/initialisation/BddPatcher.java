@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
 
@@ -15,7 +17,9 @@ import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.api.ApiInitialisationService;
+import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -262,28 +266,68 @@ public class BddPatcher {
 	}
 
 	/**
-	 * return a query that retrieve the rules tables in schema This table will be
-	 * copied to the executor
-	 * 
+	 * build and execute query to retrieve tables in postgres metadata
+	 * according to a condition defined in the functional interface
+	 * @param connexion
 	 * @param envExecution
+	 * @param condition
+	 * @return
 	 * @throws ArcException
 	 */
-	public static ArrayList<String> retrieveRulesTablesFromSchema(Connection connexion, String envExecution)
+	private static ArrayList<String> retrieveTablesFromSchema(Connection connexion, String envExecution, Function<String, ArcPreparedStatementBuilder> condition)
 			throws ArcException {
-
+		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, ColumnEnum.TABLE_SCHEMA, "||'.'||", ColumnEnum.TABLE_NAME, SQL.AS, "full_tablename");
-		query.build(SQL.FROM, "information_schema.tables");
-		query.build(conditionToRetrieveRulesTablesInSchema(envExecution));
-
+		query.append(ServiceTableNaming.queryTablesFromPgMetadata());
+		query.append(condition.apply(envExecution));
+	
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, query)).mapContent()
-				.get("full_tablename");
+				.get(ColumnEnum.TABLE_NAME.getColumnName());
+		
+	}
+	
+		
+	
+	/**
+	 * Build the condition to retrieve tables that contains models
+	 * @param envExecution
+	 * @return
+	 */
+	private static ArcPreparedStatementBuilder conditionToRetrieveModelTablesInSchema(String envExecution) {
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.WHERE);
+		
+		// mapping tables
+		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(envExecution));
+		query.build(SQL.AND);
+		query.build(ColumnEnum.TABLE_NAME, SQL.LIKE, query.quoteText(TraitementPhase.MAPPING.toString().toLowerCase()+"\\_%ok"));
+
+		query.build(SQL.OR);
+		
+		// family tables			
+		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(DataObjectService.ARC_METADATA_SCHEMA));
+		query.build(SQL.AND);
+		query.build(ColumnEnum.TABLE_NAME, SQL.IN, "(");
+		query.build(query.quoteText(ViewEnum.IHM_MOD_TABLE_METIER.getTableName()), ",");
+		query.build(query.quoteText(ViewEnum.IHM_MOD_VARIABLE_METIER.getTableName()), ",");
+		query.build(query.quoteText(ViewEnum.IHM_FAMILLE.getTableName()));
+
+		query.build(")");
+				
+		return query;		
 	}
 
+	/**
+	 * Build the condition to retrieve tables that cotnains rules
+	 * @param envExecution
+	 * @return
+	 */
 	private static ArcPreparedStatementBuilder conditionToRetrieveRulesTablesInSchema(String envExecution) {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.WHERE, ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(envExecution));
-		query.build(SQL.AND, "(");
+		query.build(SQL.WHERE);
+		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(envExecution));
+		query.build(SQL.AND);
 		query.build(ColumnEnum.TABLE_NAME, SQL.IN, "(");
 
 		query.build(query.quoteText(ViewEnum.MOD_TABLE_METIER.getTableName()), ",");
@@ -301,10 +345,6 @@ public class BddPatcher {
 		// close IN
 		query.build(")");
 		
-		// mapping tables
-		query.build(SQL.OR, ColumnEnum.TABLE_NAME, SQL.LIKE, query.quoteText(TraitementPhase.MAPPING.toString().toLowerCase()+"\\_%"));
-		
-		query.build(")");
 		
 		return query;
 	}
@@ -317,8 +357,11 @@ public class BddPatcher {
 		ArcPreparedStatementBuilder query;
 		query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT);
-		query.build(ColumnEnum.TABLE_SCHEMA, "||'.'||", ColumnEnum.TABLE_NAME, SQL.AS, "full_tablename");
-		query.build(",", "'concat('||string_agg('a.'||column_name,',')||')' as sql_cols");
+		query.build(ColumnEnum.TABLE_SCHEMA, "||'.'||", ColumnEnum.TABLE_NAME, SQL.AS, ColumnEnum.TABLE_NAME);
+		query.build(",", "'concat('||string_agg(");
+		// table alias is use in next query for exists subquery
+		query.build("'", ViewEnum.T1, ".", "'", "||");
+		query.build(ColumnEnum.COLUMN_NAME,",',')||')' as sql_cols");
 		query.build(SQL.FROM, "information_schema.columns");
 		query.build(conditionToRetrieveRulesTablesInSchema(envExecution));
 		query.build(SQL.AND, ColumnEnum.COLUMN_NAME, "!=", query.quoteText(ColumnEnum.COMMENTAIRE));
@@ -335,8 +378,8 @@ public class BddPatcher {
 		// search if a nomenclature table is quoted in the columns concatenation of rules tables
 		// if so, it must be returned
 		query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, SQL.DISTINCT, "u||'.'||", ColumnEnum.NOM_TABLE, SQL.AS, "full_tablename");
-		query.build(SQL.FROM, new DataObjectService().getView(ViewEnum.IHM_NMCL));
+		query.build(SQL.SELECT, SQL.DISTINCT, "u||'.'||", ColumnEnum.NOM_TABLE, SQL.AS, ColumnEnum.TABLE_NAME);
+		query.build(SQL.FROM, new DataObjectService().getView(ViewEnum.IHM_NMCL), SQL.AS,ViewEnum.T2);
 		query.build(",", SQL.UNNEST, "(ARRAY[", query.quoteText(envExecution), ",", query.quoteText(DataObjectService.ARC_METADATA_SCHEMA), "]) u");
 		query.build(SQL.WHERE, SQL.FALSE);
 		
@@ -344,14 +387,33 @@ public class BddPatcher {
 		{
 			
 			query.build(SQL.OR, SQL.EXISTS, "(");
-			query.build(SQL.SELECT, SQL.FROM, result.get("full_tablename").get(i), " a");
-			query.build(SQL.WHERE, result.get("sql_cols").get(i), SQL.LIKE, "'%'||", ColumnEnum.NOM_TABLE, "||'%'" );
+			query.build(SQL.SELECT, SQL.FROM, result.get(ColumnEnum.TABLE_NAME.getColumnName()).get(i), SQL.AS, ViewEnum.T1);
+			query.build(SQL.WHERE, result.get("sql_cols").get(i), SQL.LIKE, "'%'||", ViewEnum.T2, ".", ColumnEnum.NOM_TABLE, "||'%'" );
 			query.build(")");
 		}
 		
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, query)).mapContent()
-				.get("full_tablename");
+				.get(ColumnEnum.TABLE_NAME.getColumnName());
 		
 	}
+	
+
+	/**
+	 * return a query that retrieve the rules tables in schema This table will be
+	 * copied to the executor
+	 * 
+	 * @param envExecution
+	 * @throws ArcException
+	 */
+	public static ArrayList<String> retrieveRulesTablesFromSchema(Connection connexion, String envExecution)
+			throws ArcException {
+		return retrieveTablesFromSchema(connexion, envExecution, BddPatcher::conditionToRetrieveRulesTablesInSchema );
+	}
+	
+	public static ArrayList<String> retrieveModelTablesFromSchema(Connection connexion, String envExecution)
+			throws ArcException {
+		return retrieveTablesFromSchema(connexion, envExecution, BddPatcher::conditionToRetrieveModelTablesInSchema );
+	}
+	
 
 }

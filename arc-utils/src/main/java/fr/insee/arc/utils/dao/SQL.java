@@ -1,11 +1,11 @@
 package fr.insee.arc.utils.dao;
 
 public enum SQL {
-	SELECT("SELECT"), FROM("FROM"), WHERE("WHERE"), ORDER_BY("ORDER BY"),
+	SELECT("SELECT"), FROM("FROM"), WHERE("WHERE"), ORDER_BY("ORDER BY"), DISTINCT("DISTINCT"),
 
 	AS("AS"),
 
-	INSERT_INTO("INSERT INTO"),
+	INSERT_INTO("INSERT INTO"), DELETE ("DELETE FROM"),
 
 	ON_CONFLICT_DO_NOTHING("ON CONFLICT DO NOTHING"),
 
@@ -23,9 +23,11 @@ public enum SQL {
 	
 	TRUE("TRUE"), FALSE("FALSE"),
 	
-	EXISTS("EXISTS"), DISTINCT("DISTINCT"),
+	EXISTS("EXISTS"), 
 	
 	UNNEST("UNNEST"),
+	
+	VALUES("VALUES"),
 	
 	// symbol
 	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false),

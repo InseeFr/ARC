@@ -2,6 +2,7 @@ package fr.insee.arc.utils.structure;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ public class GenericBeanTest {
 	public void mapContentEmpty() {
 		genericBean = new GenericBean(headers, types, new ArrayList<ArrayList<String>>());
 		assertTrue(genericBean.mapContent().isEmpty());
+		assertNull(genericBean.mapContent().get("col"));
 	}
 	
 	@Test

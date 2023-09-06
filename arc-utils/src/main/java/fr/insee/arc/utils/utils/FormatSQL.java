@@ -58,8 +58,9 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @return
      */
     public static GenericPreparedStatementBuilder tableExists(String table) {
-	String tableSchema = ManipString.substringBeforeFirst(table, DOT);
-	String tableName = ManipString.substringAfterLast(table, DOT);
+	String tableSchema = extractSchemaNameToken(table);
+	String tableName = extractTableNameToken(table);
+	
 	GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
 	requete.append("SELECT schemaname||'.'||tablename AS table_name FROM pg_tables ");
 	requete.append("\n WHERE tablename like " + requete.quoteText(tableName.toLowerCase()) + " ");
@@ -69,6 +70,18 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 	return requete;
     }
 
+    
+    public static String extractSchemaNameToken(String fullTableName)
+    {
+    	return fullTableName.contains(DOT) ? ManipString.substringBeforeFirst(fullTableName, DOT) : null;
+    }
+    
+    public static String extractTableNameToken(String fullTableName)
+    {
+    	return ManipString.substringAfterFirst(fullTableName, DOT);
+    }
+
+    
    
     /**
      * Pour récupérer la liste des colonnes d'une table rapidement

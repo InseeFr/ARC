@@ -172,19 +172,18 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	public String executerBatch(Model model, TraitementPhase phaseAExecuter) {
 		loggerDispatcher.debug("executerBatch", LOGGER);
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
-		
-		if (!phaseAExecuter.equals(TraitementPhase.INITIALISATION)) {
-			ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA, getBacASable());
-		}
 
-		// copy to executor
-		try{
-			ApiInitialisationService.copyMetadataToExecutors(null, getBacASable());
-		}
-		catch (ArcException e)
-		{
-			this.views.getViewPilotageBAS().setMessage(e.getMessage());
-			return generateDisplay(model, RESULT_SUCCESS);
+		// by default, running an ARC step by GUI will synchronize the sandbox rules first
+		// no need to do that if selected phase is INITIALISATION as INITIALISATION will synchronize the sandbox
+		if (!phaseAExecuter.equals(TraitementPhase.INITIALISATION)) {
+			try{
+				ApiInitialisationService.synchroniserSchemaExecutionAllNods(null, ApiService.IHM_SCHEMA, getBacASable());
+			}
+			catch (ArcException e)
+			{
+				this.views.getViewPilotageBAS().setMessage(e.getMessage());
+				return generateDisplay(model, RESULT_SUCCESS);
+			}
 		}
 		
 		// Maximum number of files processed in each phase iteration

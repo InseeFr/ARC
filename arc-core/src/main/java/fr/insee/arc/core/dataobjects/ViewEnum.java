@@ -51,7 +51,7 @@ public enum ViewEnum {
 	, EXPORT("export", SchemaEnum.SANDBOX, ColumnEnum.FILE_NAME, ColumnEnum.ZIP, ColumnEnum.TABLE_TO_EXPORT, ColumnEnum.HEADERS, ColumnEnum.NULLS, ColumnEnum.FILTER_TABLE, ColumnEnum.ORDER_TABLE, ColumnEnum.NOMENCLATURE_EXPORT, ColumnEnum.COLUMNS_ARRAY_HEADER, ColumnEnum.COLUMNS_ARRAY_VALUE, ColumnEnum.ETAT) //
 	
 	// tables représentant le contenu des vobject (utilisées pour les tests)
-	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE)
+	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE, ColumnEnum.PHASE_TRAITEMENT, ColumnEnum.ETAT_TRAITEMENT)
 	
 	// family model table in sandbox
 	, MOD_TABLE_METIER("mod_table_metier", SchemaEnum.SANDBOX_GENERATED , ColumnEnum.ID_FAMILLE, ColumnEnum.NOM_TABLE_METIER, ColumnEnum.DESCRIPTION_TABLE_METIER) //
@@ -70,6 +70,10 @@ public enum ViewEnum {
 	, TABLE_TEST_IN_TEMPORARY("table_test_in_temp",SchemaEnum.TEMPORARY,ColumnEnum.TEST1,ColumnEnum.TEST2)
 	, TABLE_TEST_OUT_TEMPORARY("table_test_out_temp",SchemaEnum.TEMPORARY,ColumnEnum.TEST1,ColumnEnum.TEST2)
 
+	
+	// view for table aliases or temporary table in query
+	, T1("t1",SchemaEnum.TEMPORARY), T2("t2",SchemaEnum.TEMPORARY), T3("t3",SchemaEnum.TEMPORARY)
+	
 	;
 
 	private ViewEnum(String tableName, SchemaEnum location, ColumnEnum...columns) {

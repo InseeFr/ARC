@@ -6,10 +6,13 @@ import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 
@@ -126,4 +129,36 @@ public class ServicePilotageOperation {
 		return requete;
 	}
 
+	
+	/**
+	 * retrieve the list of documents (i.e. files referenced in the field "id_source") for the given phase and state
+	 * @param tablePilotage
+	 * @param phase
+	 * @param etat
+	 * @return
+	 */
+	public static ArcPreparedStatementBuilder retrieveIdSourceFromPilotageQuery(String tablePilotage, TraitementPhase phase, TraitementEtat etat)
+	{
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
+		
+		query.build(SQL.SELECT, ColumnEnum.ID_SOURCE.getColumnName(), SQL.FROM, tablePilotage);
+		query.build(SQL.WHERE, ColumnEnum.PHASE_TRAITEMENT, "=" , query.quoteText(phase.toString()));
+		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.getSqlArrayExpression()), SQL.CAST_OPERATOR, "text[]");		
+		return query;
+	}
+	
+	/**
+	 * retrieve the list of documents (i.e. files referenced in the field "id_source") in the data table 
+	 * @param dataTable
+	 * @return
+	 */
+	public static ArcPreparedStatementBuilder retrieveIdSourceFromDataTableQuery(String dataTable)
+	{
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
+		
+		query.build(SQL.SELECT, SQL.DISTINCT, ColumnEnum.ID_SOURCE.getColumnName(), SQL.FROM, dataTable);		
+		return query;
+	}
+	
+	
 }

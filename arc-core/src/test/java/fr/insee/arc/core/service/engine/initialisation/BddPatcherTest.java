@@ -203,6 +203,8 @@ public class BddPatcherTest extends InitializeQueryTest {
 		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_variable_metier (a text);");
 		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_table_metier (a text);");
 		
+		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mapping_dsn_employeur_ok (id_source text);");
+		
 		u.executeImmediate(c, "CREATE TABLE arc.nmcl_vs3 as select '1' as cod_metier, 'ee' as cod_sicore;");
 		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".nmcl_vs3 as select * from arc.nmcl_vs3;");
 
@@ -226,7 +228,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// invocation de la fonction à tester
 		ArrayList<String> result;
 		result = BddPatcher.retrieveRulesTablesFromSchema(c, testSandbox3);
-
+		
 		// test : on enleve tous les éléments à retenir et l'array list devra être au final vide
 		assertTrue(result.contains(testSandbox3+".chargement_regle"));
 		assertTrue(result.contains(testSandbox3+".mapping_regle"));
@@ -241,6 +243,8 @@ public class BddPatcherTest extends InitializeQueryTest {
 		assertTrue(result.contains(testSandbox3+".nmcl_code_pays_etranger_2023"));
 		assertTrue(result.contains(testSandbox3+".nmcl_vs3"));
 		assertEquals(4, result.size());
+
+		result = BddPatcher.retrieveModelTablesFromSchema(c, testSandbox3);
 
 		u.executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
 		

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -30,6 +31,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
 import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
+import fr.insee.arc.core.service.api.query.ServicePhase;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.api.query.ServiceTableOperation;
 import fr.insee.arc.core.util.BDParameters;
@@ -596,7 +598,7 @@ public class ApiReceptionService extends ApiService {
 
 				boolean fichierARejouer = UtilitaireDao.get(0).hasResults(connexion,
 						new ArcPreparedStatementBuilder("select 1 from " + this.tablePil
-								+ " where phase_traitement='RECEPTION' and to_delete in ('R','F') limit 1;"));
+								+ " where phase_traitement='RECEPTION' and to_delete = 'R' limit 1;"));
 
 				if (fichierARejouer) {
 					// marque les fichiers à effacer (ils vont etre rechargés)
@@ -605,23 +607,6 @@ public class ApiReceptionService extends ApiService {
 							+ " a where to_delete='R' and exists (select 1 from " + this.tablePilTemp + " b where a."
 							+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName()
 							+ "); ");
-
-					// balayer toutes les tables; effacer les enregistrements
-
-					g = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion,
-							ApiInitialisationService.requeteListAllTablesEnv(envExecution)));
-					if (!g.mapContent().isEmpty()) {
-						ArrayList<String> envTables = g.mapContent().get("table_name");
-						for (String nomTable : envTables) {
-
-							requete.append(
-									"DELETE FROM " + nomTable + " a where exists (select 1 from a_rejouer b where a."
-											+ ColumnEnum.ID_SOURCE.getColumnName() + "=b."
-											+ ColumnEnum.ID_SOURCE.getColumnName() + "); ");
-							requete.append("vacuum " + nomTable + "; ");
-
-						}
-					}
 
 					// effacer de la table pilotage des to_delete à R
 					requete.append("DELETE FROM " + this.tablePil + " a using a_rejouer b where a."
@@ -635,6 +620,11 @@ public class ApiReceptionService extends ApiService {
 				requete.append("INSERT INTO " + this.tablePil + " select * from " + this.tablePilTemp + "; \n");
 				requete.append("DISCARD TEMP; \n");
 				soumettreRequete(requete);
+				
+				if (fichierARejouer) {
+					ApiInitialisationService.dropAndDeleteUnusedBusinessDataAllNods(connexion, this.envExecution, this.tablePil);
+				}
+				
 
 			}
 		} catch (Exception ex) {
@@ -906,6 +896,10 @@ public class ApiReceptionService extends ApiService {
 	public static String directoryReceptionEntrepotArchiveOld(String rootDirectory, String env, String entrepot) {
 		return ServiceFileSystemManagement.directoryPhaseEntrepotArchiveOld(rootDirectory, env,
 				TraitementPhase.RECEPTION, entrepot);
+	}
+	
+	public static String directoryReceptionEntrepotArchiveOldYearStamped(String rootDirectory, String env, String entrepot) {
+		return directoryReceptionEntrepotArchiveOld(rootDirectory, env, entrepot) + File.separator + 	Year.now().getValue();
 	}
 
 	public static String directoryReceptionEtat(String rootDirectory, String env, TraitementEtat e) {

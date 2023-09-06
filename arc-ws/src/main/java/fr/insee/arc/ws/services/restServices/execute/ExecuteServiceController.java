@@ -29,6 +29,7 @@ import fr.insee.arc.core.service.api.query.ServiceResetEnvironment;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
 import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteQueryPojo;
@@ -190,8 +191,13 @@ public class ExecuteServiceController {
 	)
 	{
 		ReturnView returnView=new ReturnView();
-		ApiInitialisationService.synchroniserSchemaExecution(null, ApiService.IHM_SCHEMA, env);		
-		return ResponseEntity.status(HttpStatus.OK).body(returnView);		
+		try {
+			ApiInitialisationService.synchroniserSchemaExecutionAllNods(null, ApiService.IHM_SCHEMA, env);
+			return ResponseEntity.status(HttpStatus.OK).body(returnView);		
+
+		} catch (ArcException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(returnView);		
+		}		
 	}
 
 }

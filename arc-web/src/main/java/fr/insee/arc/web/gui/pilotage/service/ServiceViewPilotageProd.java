@@ -121,7 +121,14 @@ public class ServiceViewPilotageProd extends InteractorPilotage {
      * @return
      */
     public String applyRulesProd(Model model) {
-    	ApiInitialisationService.copyTablesToExecution(null, ApiService.IHM_SCHEMA,getBacASable());
+    	try {
+    		ApiInitialisationService.copyMetadataAllNods(null, ApiService.IHM_SCHEMA, getBacASable());
+    	}
+		catch (ArcException e)
+		{
+			this.views.getViewPilotageBAS().setMessage(e.getMessage());
+			return generateDisplay(model, RESULT_SUCCESS);
+		}
     	return generateDisplay(model, RESULT_SUCCESS);
     }
     

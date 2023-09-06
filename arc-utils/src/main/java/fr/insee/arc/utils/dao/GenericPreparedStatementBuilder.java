@@ -147,7 +147,7 @@ public class GenericPreparedStatementBuilder {
 		parameters.add(new Parameter<>(s, ParameterType.BYTES));
 		return BIND_VARIABLE_PLACEHOLDER;
 	}
-
+	
 	/**
 	 * Return the sql escaped quoted string The bind variable is not registered
 	 * 
@@ -304,7 +304,7 @@ public class GenericPreparedStatementBuilder {
 	{
 		if (!gb.getContent().isEmpty()) {
 
-			query.append(SQL.INSERT_INTO).append(tableName);
+			query.append(SQL.INSERT_INTO).append(tableName).append(SQL.VALUES);
 			boolean firstLine = true;
 
 			for (int i = 0; i < gb.getContent().size(); i++) {
@@ -313,12 +313,12 @@ public class GenericPreparedStatementBuilder {
 				if (firstLine) {
 					firstLine = false;
 				} else {
-					query.append(SQL.UNION_ALL);
+					query.append(",");
 				}
 
 				boolean firstCell = true;
 
-				query.append(SQL.SELECT);
+				query.append("(");
 
 				for (int j = 0; j < line.size(); j++) {
 
@@ -330,9 +330,14 @@ public class GenericPreparedStatementBuilder {
 						query.append(",");
 					}
 					query.append(quoteText(cell));
-					query.append(SQL.CAST_OPERATOR);
-					query.append(gb.getTypes().get(j));
+					if (!gb.getTypes().get(j).equals("text"))
+					{
+						query.append(SQL.CAST_OPERATOR);
+						query.append(gb.getTypes().get(j));
+					}
 				}
+				
+				query.append(")");
 			}
 			query.append(SQL.END_QUERY);
 		}

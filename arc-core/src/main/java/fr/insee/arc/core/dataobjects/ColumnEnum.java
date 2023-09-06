@@ -113,6 +113,10 @@ public enum ColumnEnum {
 	
 	, TABLENAME("tablename", TypeEnum.TEXT, "table name in pg_tables")
 	, SCHEMANAME("schemaname", TypeEnum.TEXT, "schema name in pg_tables")
+
+	, PHASE_TRAITEMENT("phase_traitement", TypeEnum.TEXT, "phase identifier in pilotage")
+	, ETAT_TRAITEMENT("etat_traitement", TypeEnum.TEXT_ARRAY, "phase identifier in pilotage")
+	
 	
 	;
 

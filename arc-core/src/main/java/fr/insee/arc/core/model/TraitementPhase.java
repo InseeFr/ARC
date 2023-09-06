@@ -20,7 +20,7 @@ public enum TraitementPhase {
 
     public int getNbLigneATraiter() {
         return this.nbLigneATraiter;
-    }
+    }  
 
     /**
      * Renvoie la phase en fonction de l'ordre

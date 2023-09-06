@@ -180,4 +180,19 @@ public class FormatSQLTest extends InitializeQueryTest {
 
 	}
 	
+	@Test
+	 public void extractSchemaNameTokenTest()
+    {
+		assertEquals("arc", FormatSQL.extractSchemaNameToken("arc.zzz"));
+		assertNull(FormatSQL.extractSchemaNameToken("zzz"));
+    }
+	
+	@Test
+	 public void extractTableNameTokenTest()
+	 {
+		assertEquals("zzz", FormatSQL.extractTableNameToken("arc.zzz"));
+		assertEquals("zzz", FormatSQL.extractTableNameToken("zzz"));	
+	 }
+	
+	
 }

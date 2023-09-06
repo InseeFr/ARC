@@ -20,6 +20,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.api.ApiInitialisationService;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.service.api.query.ServiceHashFileName;
+import fr.insee.arc.core.service.api.query.ServicePhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -140,7 +141,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		ArrayList<String> tableDownload = new ArrayList<>();
 		try {
 			GenericBean g = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
-					ApiInitialisationService.requeteListAllTablesEnv(getBacASable())));
+					ServicePhase.selectPhaseTablesFoundInEnv(getBacASable())));
 			if (!g.mapContent().isEmpty()) {
 				ArrayList<String> envTables = g.mapContent().get("table_name");
 				for (String table : envTables) {

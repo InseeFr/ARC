@@ -1,7 +1,9 @@
 package fr.insee.arc.utils.structure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -34,7 +36,18 @@ public class GenericBean {
 		this.types = types;
 		this.content = content;
 	}
-
+	
+	public GenericBean(ArrayList<String> headers, ArrayList<String> types, List<String> content, boolean signature) {
+		this.headers = headers;
+		this.types = types;
+		
+		this.content=new ArrayList<>();
+		for (int i=0; i<content.size(); i++)
+		{
+			this.content.add((ArrayList<String>) Arrays.asList(content.get(i)));
+		}	
+	}
+	
 	/**
 	 * @param requestResult
 	 */
@@ -93,13 +106,17 @@ public class GenericBean {
 			return new HashMap<>();
 		}
 
-		HashMap<String, ArrayList<String>> r = new HashMap<String, ArrayList<String>>();
+		HashMap<String, ArrayList<String>> r = new HashMap<>();
+		
+		// initialisation
+		int jMax = this.content.get(0).size();
+		for (int j = 0; j < jMax; j++) {
+			r.put(this.headers.get(j), new ArrayList<>());
+		}
+		
+		// alimentation
 		for (int i = 0; i < this.content.size(); i++) {
-
-			for (int j = 0; j < this.content.get(i).size(); j++) {
-				if (r.get(this.headers.get(j)) == null) {
-					r.put(this.headers.get(j), new ArrayList<String>());
-				}
+			for (int j = 0; j < jMax; j++) {
 				r.get(this.headers.get(j)).add(this.content.get(i).get(j));
 			}
 		}
