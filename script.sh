@@ -17,7 +17,6 @@ MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyPort=${Dhttp_proxyPort%/*}";
 MAVEN_CONF="$MAVEN_CONF -Dhttp.proxyHost=${Dhttp_proxyHost#//}";
 fi
 
-
 VAR_HTTPS_PROXY=$HTTPS_PROXY
 
 echo $VAR_HTTPS_PROXY;
