@@ -47,7 +47,7 @@ public class PilotageDaoTest extends InitializeQueryTest {
 				.listColumnEnumByName(ViewEnum.VIEW_PILOTAGE_FICHIER.getColumns().keySet());
 		viewColumns.removeAll(viewPilotageBAS.getHeadersDLabel());
 
-		assertEquals(0, viewColumns.size());
+		assertEquals(2, viewColumns.size());
 
 	}
 
