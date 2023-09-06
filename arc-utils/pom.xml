@@ -17,6 +17,16 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${project.maven.compiler.version}</version>
+				<configuration>
+					<compilerArgument>-Xlint:unchecked</compilerArgument>
+					<source>${project.java.version}</source>
+					<target>${project.java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
 			   <groupId>org.apache.maven.plugins</groupId>
 			   <artifactId>maven-jar-plugin</artifactId>
 			   <version>3.3.0</version>

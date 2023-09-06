@@ -17,6 +17,7 @@
 		<project.jackson.version>2.13.2</project.jackson.version>
 		<project.postgres.version>42.5.1</project.postgres.version>
 		<project.java.version>11</project.java.version>
+		<project.maven.compiler.version>3.11.0</project.maven.compiler.version>
 		
 		<project.org.json>20230227</project.org.json>
 
@@ -124,7 +125,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>${project.maven.compiler.version}</version>
 				<configuration>
 					<compilerArgument>-Xlint:unchecked</compilerArgument>
 					<source>${project.java.version}</source>
@@ -134,8 +135,8 @@
 
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.2</version>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+   				<version>3.0-r1756463</version>
 				<configuration>
 					<port>8080</port>
 					<path>/</path>
