@@ -64,7 +64,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
 	GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
 	requete.append("SELECT schemaname||'.'||tablename AS table_name FROM pg_tables ");
 	requete.append("\n WHERE tablename like " + requete.quoteText(tableName.toLowerCase()) + " ");
-	if (table.contains(DOT)) {
+	if (tableSchema!=null) {
 		requete.append("\n AND schemaname = " + requete.quoteText(tableSchema.toLowerCase()) + " ");
 	}
 	return requete;
