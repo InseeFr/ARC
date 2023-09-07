@@ -14,6 +14,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.service.api.query.ServiceDate;
 import fr.insee.arc.core.util.Norme;
@@ -90,10 +91,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	private List<Integer> lineCols11 = new ArrayList<>();
 	private List<Integer> lineIds = new ArrayList<>();
 	private List<String> lineValues = new ArrayList<>();
-
-	// parametrage des types de la base de données
-	private String textBdType = "text";
-	private String numBdType = "int";
 
 	private StringBuilder requete = new StringBuilder();
 	private StringBuilder structure = new StringBuilder();
@@ -183,7 +180,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			if (this.colData.get(this.currentTag) == null) {
 				this.colData.put(this.currentTag, 1);
 				this.requete.append("alter table " + this.tempTableA + " add v" + this.allCols.indexOf(this.currentTag)
-						+ " " + this.textBdType + ";");
+						+ " " + TypeEnum.TEXT.getTypeName() + ";");
 			}
 
 			this.lineValues.remove(this.lineValues.size() - 1);
@@ -210,7 +207,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			if (o == null) {
 				this.allCols.add(closedTagHeader1);
 				this.requete.append("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(closedTagHeader1)
-						+ " " + this.numBdType + ";");
+						+ " " + TypeEnum.INTEGER.getTypeName() + ";");
 			}
 
 			String fatherOfTheBlock = this.treeStackFatherLag.get(this.treeStackFatherLag.size() - 1);
@@ -371,7 +368,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			this.allCols.add(this.currentTag);
 
 			this.requete.append("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag)
-					+ " " + this.numBdType + ";");
+					+ " " + TypeEnum.INTEGER.getTypeName() + ";");
 
 		} else {
 			// ajouter 1 a son index si la colonne existe dejà

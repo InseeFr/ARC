@@ -13,6 +13,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.service.api.query.ServiceDate;
 import fr.insee.arc.core.util.Norme;
 import fr.insee.arc.utils.exception.ArcException;
@@ -70,10 +71,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private List<Integer> lineCols11 = new ArrayList<>();
 	private List<Integer> lineIds = new ArrayList<>();
 	private List<String> lineValues = new ArrayList<>();
-
-	// parametrage des types de la base de données
-	private String textBdType = "text";
-	private String numBdType = "int";
 
 	// indique que la balise courante a des données
 	private boolean hasData = false;
@@ -148,7 +145,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 			if (this.colData.get(this.currentTag) == null) {
 				this.colData.put(this.currentTag, 1);
 				addQuery(ALTER, "alter table " + this.tempTableA + " add v" + this.allCols.indexOf(this.currentTag)
-						+ " " + this.textBdType + ";");
+						+ " " + TypeEnum.TEXT.getTypeName() + ";");
 			}
 
 			this.lineValues.remove(this.lineValues.size() - 1);
@@ -245,7 +242,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 			this.col.put(this.currentTag, 1);
 			this.allCols.add(this.currentTag);
 			addQuery(ALTER, "alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag) + " "
-					+ this.numBdType + ";");
+					+ TypeEnum.INTEGER.getTypeName() + ";");
 
 		} else {
 			// ajouter 1 a son index si la colonne existe dejà

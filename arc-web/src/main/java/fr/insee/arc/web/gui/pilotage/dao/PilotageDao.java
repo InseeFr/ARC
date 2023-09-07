@@ -8,6 +8,7 @@ import java.util.Map;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -144,9 +145,9 @@ public class PilotageDao extends VObjectHelperDao {
 			requete.append(
 					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
 			requete.append(" FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " ");
-			requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigne.get("date_entree").get(0), "text"));
-			requete.append(" AND array_to_string(etat_traitement,'$')" + requete.sqlEqual(etat, "text"));
-			requete.append(" AND phase_traitement" + requete.sqlEqual(phase, "text"));
+			requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigne.get("date_entree").get(0), TypeEnum.TEXT.getTypeName()));
+			requete.append(" AND array_to_string(etat_traitement,'$')" + requete.sqlEqual(etat, TypeEnum.TEXT.getTypeName()));
+			requete.append(" AND phase_traitement" + requete.sqlEqual(phase, TypeEnum.TEXT.getTypeName()));
 
 			this.vObjectService.initialize(viewFichierBAS, requete, null, defaultInputFields);
 
@@ -159,7 +160,7 @@ public class PilotageDao extends VObjectHelperDao {
 					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
 			requete.append(" FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " ");
 			requete.append(
-					" WHERE date_entree" + requete.sqlEqual(selectionLigneRapport.get("date_entree").get(0), "text"));
+					" WHERE date_entree" + requete.sqlEqual(selectionLigneRapport.get("date_entree").get(0), TypeEnum.TEXT.getTypeName()));
 			requete.append(" AND array_to_string(etat_traitement,'$')" + requete
 					.sqlEqual(selectionLigneRapport.get("etat_traitement").get(0), type.get("etat_traitement")));
 			requete.append(" AND phase_traitement" + requete

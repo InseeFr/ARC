@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.model.TraitementEtat;
@@ -516,7 +517,7 @@ public class ApiInitialisationService extends ApiService {
 							 */
 							requeteMAJSchema.append("ALTER TABLE " + table.getLocalRoot() + " ADD COLUMN "
 									+ variable.getLocalRoot() + " " + variable.getUniqueChild().getLocalRoot() + " ");
-							if (variable.getUniqueChild().getLocalRoot().equals("text")) {
+							if (variable.getUniqueChild().getLocalRoot().equals(TypeEnum.TEXT.getTypeName())) {
 								requeteMAJSchema.append(" collate \"C\" ");
 							}
 							requeteMAJSchema.append(";");
@@ -536,7 +537,7 @@ public class ApiInitialisationService extends ApiService {
 							requeteMAJSchema.append(", ");
 						}
 						requeteMAJSchema.append(attr[j].getFirst() + " " + attr[j].getSecond());
-						if (attr[j].getSecond().equals("text")) {
+						if (attr[j].getSecond().equals(TypeEnum.TEXT.getTypeName())) {
 							requeteMAJSchema.append(" collate \"C\" ");
 						}
 					}
@@ -1157,12 +1158,11 @@ public class ApiInitialisationService extends ApiService {
 			{
 				ArcPreparedStatementBuilder query= new ArcPreparedStatementBuilder();
 				GenericBean gb = 
-						new GenericBean((ArrayList<String>) Arrays.asList(ColumnEnum.ID_SOURCE.getColumnName()), (ArrayList<String>) Arrays.asList("text"), idSourceInDataTableThatShouldntBe, true);
+						new GenericBean(ColumnEnum.ID_SOURCE.getColumnName(), TypeEnum.TEXT.getTypeName(), idSourceInDataTableThatShouldntBe);
 				
 				query.copyFromGenericBean(ViewEnum.T1.getTableName(), gb, true);
 				
-				query= new ArcPreparedStatementBuilder();
-				query.build(SQL.DELETE, envTablesWithRecords);
+				query.build(SQL.DELETE, dataTable);
 				query.build(SQL.WHERE, ColumnEnum.ID_SOURCE, SQL.IN );
 				query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getTableName(), ")");
 				UtilitaireDao.get(0).executeRequest(executorConnection, query);

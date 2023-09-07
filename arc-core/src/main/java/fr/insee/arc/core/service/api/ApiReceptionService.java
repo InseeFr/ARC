@@ -26,12 +26,12 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
 import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
-import fr.insee.arc.core.service.api.query.ServicePhase;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.api.query.ServiceTableOperation;
 import fr.insee.arc.core.util.BDParameters;
@@ -71,7 +71,7 @@ public class ApiReceptionService extends ApiService {
 	private static final ArrayList<String> GENERIC_BEAN_HEADERS = new ArrayList<>(
 			Arrays.asList(GB_CONTAINER, GB_FILENAME, GB_TYPE, GB_STATE, GB_REPORT, GB_VCONTAINER));
 	private static final ArrayList<String> GENERIC_BEAN_TYPES = new ArrayList<>(
-			Arrays.asList("text", "text", "text", "text", "text", "text"));
+			Arrays.asList(TypeEnum.TEXT.getTypeName(), TypeEnum.TEXT.getTypeName(), TypeEnum.TEXT.getTypeName(), TypeEnum.TEXT.getTypeName(), TypeEnum.TEXT.getTypeName(), TypeEnum.TEXT.getTypeName()));
 
 	public ApiReceptionService() {
 		super();

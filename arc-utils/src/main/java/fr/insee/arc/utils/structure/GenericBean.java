@@ -37,15 +37,26 @@ public class GenericBean {
 		this.content = content;
 	}
 	
-	public GenericBean(ArrayList<String> headers, ArrayList<String> types, List<String> content, boolean signature) {
-		this.headers = headers;
-		this.types = types;
+	/**
+	 * @param headers
+	 * @param types
+	 * @param content
+	 */
+	public GenericBean(String headers, String types, List<String> contentList) {
+		this.headers = new ArrayList<>(Arrays.asList(headers));
+		this.types = new ArrayList<>(Arrays.asList(types));
+		this.content = reworkListAsContent(contentList);
+	}
+	
+	
+	protected static ArrayList<ArrayList<String>> reworkListAsContent(List<String> contentList) {
 		
-		this.content=new ArrayList<>();
-		for (int i=0; i<content.size(); i++)
+		ArrayList<ArrayList<String>> contentReworked =new ArrayList<>();
+		for (int i=0; i<contentList.size(); i++)
 		{
-			this.content.add((ArrayList<String>) Arrays.asList(content.get(i)));
+			contentReworked.add(new ArrayList<>(Arrays.asList(contentList.get(i))));
 		}	
+		return contentReworked;
 	}
 	
 	/**

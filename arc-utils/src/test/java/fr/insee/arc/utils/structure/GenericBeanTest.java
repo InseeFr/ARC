@@ -6,7 +6,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -98,4 +100,34 @@ public class GenericBeanTest {
 		assertTrue(!genericBean.isEmpty());
 	}
 
+	@Test
+	public void reworkListAsContentTest() {
+		
+		// initalize a list a record value
+		List<String> records = new ArrayList<String>(Arrays.asList("1","2","3"));
+		
+		// rework the list as a GenericBean content
+		ArrayList<ArrayList<String>> content = GenericBean.reworkListAsContent(records);
+		assertEquals("1", content.get(0).get(0));
+		assertEquals("2", content.get(1).get(0));
+		assertEquals("3", content.get(2).get(0));
+		assertEquals(3, content.size());
+		assertEquals(1, content.get(0).size());
+		assertEquals(1, content.get(1).size());
+		assertEquals(1, content.get(2).size());
+		
+		// test the constructor with signle column, single type and list of record
+		genericBean= new GenericBean("id", "int", records);
+		
+		// a single column GenericBean must be set
+		assertEquals(1, genericBean.mapContent().keySet().size());
+		ArrayList<String> gbRecords= genericBean.mapContent().get("id");
+		
+		// we must retrieve exactly the list of records when quering the column name id
+		assertEquals(records.size(), gbRecords.size());
+		gbRecords.removeAll(records);
+		assertEquals(0, gbRecords.size());
+
+	}
+	
 }

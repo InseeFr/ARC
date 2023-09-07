@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.controle.ControleRegleService;
 import fr.insee.arc.core.service.engine.xsd.XsdControlDescription.XsdControlDescriptionBuilder;
@@ -42,11 +43,11 @@ public class XsdRulesRetrievalService {
 		} else {
 			request.append(" where true ");
 		}
-		request.append(" and id_norme" + request.sqlEqual(jdr.getIdNorme(), "text"));
-        request.append(" and periodicite" + request.sqlEqual(jdr.getPeriodicite(), "text"));
-        request.append(" and validite_inf" + request.sqlEqual(jdr.getValiditeInfString(), "date"));
-        request.append(" and validite_sup" + request.sqlEqual(jdr.getValiditeSupString(), "date"));
-        request.append(" and version" + request.sqlEqual(jdr.getVersion(), "text"));
+		request.append(" and id_norme" + request.sqlEqual(jdr.getIdNorme(), TypeEnum.TEXT.getTypeName()));
+        request.append(" and periodicite" + request.sqlEqual(jdr.getPeriodicite(), TypeEnum.TEXT.getTypeName()));
+        request.append(" and validite_inf" + request.sqlEqual(jdr.getValiditeInfString(), TypeEnum.DATE.getTypeName()));
+        request.append(" and validite_sup" + request.sqlEqual(jdr.getValiditeSupString(), TypeEnum.DATE.getTypeName()));
+        request.append(" and version" + request.sqlEqual(jdr.getVersion(), TypeEnum.TEXT.getTypeName()));
 
 		ArrayList<ArrayList<String>> executeRequest = UtilitaireDao.get(0).executeRequest(connection,request);
 		return parseSqlResults(executeRequest, connection);
