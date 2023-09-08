@@ -27,6 +27,9 @@ public class BddPatcherTest extends InitializeQueryTest {
 
 	private static String newVersion = "v2";
 	private static String userWithRestrictedRights = "";
+	
+	public static String testMetaDataSchema= "arc";
+
 	public static String testSandbox1 = "arc_bas1";
 	public static String testSandbox2 = "arc_bas2";
 	public static String testSandbox3 = "arc_bas3";
@@ -59,7 +62,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// test the meta data schema creation
 		query = new GenericPreparedStatementBuilder();
 		query.append("select tablename from pg_tables where schemaname=")
-				.append(query.quoteText(DataObjectService.ARC_METADATA_SCHEMA));
+				.append(query.quoteText(testMetaDataSchema));
 
 		HashMap<String, ArrayList<String>> content;
 
@@ -68,7 +71,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 
 		// check if all metadata view had been created
 		for (ViewEnum v : ViewEnum.values()) {
-			if (v.getTableLocation().equals(SchemaEnum.METADATA)) {
+			if (v.getTableLocation().equals(SchemaEnum.ARC_METADATA)) {
 				assertTrue(content.get("tablename").contains(v.getTableName()));
 			}
 		}
@@ -97,7 +100,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 
 		// clean database
 		query = new GenericPreparedStatementBuilder();
-		query.append("DROP SCHEMA IF EXISTS " + DataObjectService.ARC_METADATA_SCHEMA + " CASCADE;");
+		query.append("DROP SCHEMA IF EXISTS " + testMetaDataSchema + " CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS " + testSandbox1 + " CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS public CASCADE;");
 		UtilitaireDao.get(0).executeRequest(c, query);

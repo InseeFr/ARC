@@ -37,8 +37,13 @@ public class DataObjectServiceTest {
 	}
 	
 	@Test
-	public void testGetFullTableNameInMetadata() {
-		Assert.assertEquals("arc.toto", DataObjectService.getFullTableNameInMetadata("toto"));
+	public void testGetFullTableNameInSchema() {
+		Assert.assertEquals("arc.toto", DataObjectService.getFullTableNameInSchema(SchemaEnum.ARC_METADATA, "toto"));
+		Assert.assertEquals("public.toto", DataObjectService.getFullTableNameInSchema(SchemaEnum.PUBLIC, "toto"));
+		Assert.assertEquals("toto", DataObjectService.getFullTableNameInSchema(SchemaEnum.TEMPORARY, "toto"));
+		Assert.assertEquals("arc_bas.toto", DataObjectService.getFullTableNameInSchema(SchemaEnum.SANDBOX, "toto"));
+		Assert.assertEquals("pg_catalog.pg_tables", DataObjectService.getFullTableNameInSchema(SchemaEnum.CATALOG, "pg_tables"));
+		Assert.assertEquals("information_schema.columns", DataObjectService.getFullTableNameInSchema(SchemaEnum.INFORMATION_SCHEMA, "columns"));
 	}
 
 }

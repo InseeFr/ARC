@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class GenericPreparedStatementBuilder {
@@ -330,7 +331,7 @@ public class GenericPreparedStatementBuilder {
 						query.append(",");
 					}
 					query.append(quoteText(cell));
-					if (!gb.getTypes().get(j).equals("text"))
+					if (!gb.getTypes().get(j).equals(TypeEnum.TEXT.getTypeName()))
 					{
 						query.append(SQL.CAST_OPERATOR);
 						query.append(gb.getTypes().get(j));

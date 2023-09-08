@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import fr.insee.arc.utils.dataobjects.PgColumnEnum;
+import fr.insee.arc.utils.dataobjects.PgSchemaEnum;
+import fr.insee.arc.utils.dataobjects.TypeEnum;
+
 public enum ColumnEnum {
 
 	  BLOCKING_THRESHOLD("blocking_threshold", TypeEnum.TEXT, "") // ihm_controle_regle
@@ -100,22 +104,20 @@ public enum ColumnEnum {
 	
 	, ID_SOURCE("id_source", TypeEnum.TEXT, "the entry filename contatenated with entry repository") //
 
-	
 	, MODULE_ORDER("module_order", TypeEnum.INTEGER, "index of rules module")
 	, MODULE_NAME("module_name", TypeEnum.TEXT, "name of rules module")
 	
-	, TEST1("test1", TypeEnum.TEXT, "test column 1"), TEST2("test2", TypeEnum.TEXT, "test column 2")
-
+	, TEST1(PgColumnEnum.TEST1), TEST2(PgColumnEnum.TEST2)
 	
-	, COLUMN_NAME("column_name", TypeEnum.TEXT, "column name in information schema")
-	, TABLE_NAME("table_name", TypeEnum.TEXT, "table name in information schema")
-	, TABLE_SCHEMA("table_schema", TypeEnum.TEXT, "schema name in information schema")
+	, COLUMN_NAME(PgColumnEnum.COLUMN_NAME)
+	, TABLE_NAME(PgColumnEnum.TABLE_NAME)
+	, TABLE_SCHEMA(PgColumnEnum.TABLE_SCHEMA)
 	
-	, TABLENAME("tablename", TypeEnum.TEXT, "table name in pg_tables")
-	, SCHEMANAME("schemaname", TypeEnum.TEXT, "schema name in pg_tables")
+	, TABLENAME(PgColumnEnum.TABLENAME)
+	, SCHEMANAME(PgColumnEnum.SCHEMANAME)
 
-	, PHASE_TRAITEMENT("phase_traitement", TypeEnum.TEXT, "phase identifier in pilotage")
-	, ETAT_TRAITEMENT("etat_traitement", TypeEnum.TEXT_ARRAY, "phase identifier in pilotage")
+	, PHASE_TRAITEMENT(PgColumnEnum.PHASE_TRAITEMENT)
+	, ETAT_TRAITEMENT(PgColumnEnum.ETAT_TRAITEMENT)
 	
 	
 	;
@@ -129,6 +131,14 @@ public enum ColumnEnum {
 		this.columnType = columnType;
 		this.columnExplanation = columnExplanation;
 	}
+	
+	/** contructor from PgColumnEnum */
+	private ColumnEnum(PgColumnEnum c) {
+		this.columnName = c.getColumnName();
+		this.columnType = c.getColumnType();
+		this.columnExplanation = c.getColumnExplanation();
+	}
+	
 
 	public String getColumnName() {
 		return columnName;
@@ -157,4 +167,11 @@ public enum ColumnEnum {
 		return this.getColumnName();
 	}
 
+
+	public static SchemaEnum convert(PgSchemaEnum pgSchema)
+	{
+		return SchemaEnum.valueOf(pgSchema.toString());
+	}
+	
+	
 }

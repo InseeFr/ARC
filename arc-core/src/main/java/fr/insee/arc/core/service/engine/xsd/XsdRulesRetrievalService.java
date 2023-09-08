@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.model.JeuDeRegle;
 import fr.insee.arc.core.service.engine.controle.ControleRegleService;
 import fr.insee.arc.core.service.engine.xsd.XsdControlDescription.XsdControlDescriptionBuilder;
@@ -21,6 +20,7 @@ import fr.insee.arc.core.service.engine.xsd.controls.RegexForXsd;
 import fr.insee.arc.core.service.engine.xsd.controls.TimeForXsd;
 import fr.insee.arc.core.service.engine.xsd.groups.XsdChoice;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;

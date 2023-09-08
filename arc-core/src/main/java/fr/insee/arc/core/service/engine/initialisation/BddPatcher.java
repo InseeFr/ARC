@@ -14,6 +14,7 @@ import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.api.ApiInitialisationService;
@@ -306,7 +307,7 @@ public class BddPatcher {
 		query.build(SQL.OR);
 		
 		// family tables			
-		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(DataObjectService.ARC_METADATA_SCHEMA));
+		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(SchemaEnum.ARC_METADATA.getSchemaName()));
 		query.build(SQL.AND);
 		query.build(ColumnEnum.TABLE_NAME, SQL.IN, "(");
 		query.build(query.quoteText(ViewEnum.IHM_MOD_TABLE_METIER.getTableName()), ",");
@@ -380,7 +381,7 @@ public class BddPatcher {
 		query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, SQL.DISTINCT, "u||'.'||", ColumnEnum.NOM_TABLE, SQL.AS, ColumnEnum.TABLE_NAME);
 		query.build(SQL.FROM, new DataObjectService().getView(ViewEnum.IHM_NMCL), SQL.AS,ViewEnum.T2);
-		query.build(",", SQL.UNNEST, "(ARRAY[", query.quoteText(envExecution), ",", query.quoteText(DataObjectService.ARC_METADATA_SCHEMA), "]) u");
+		query.build(",", SQL.UNNEST, "(ARRAY[", query.quoteText(envExecution), ",", query.quoteText(SchemaEnum.ARC_METADATA.getSchemaName()), "]) u");
 		query.build(SQL.WHERE, SQL.FALSE);
 		
 		for (int i=0; i<result.get("sql_cols").size(); i++)

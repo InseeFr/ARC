@@ -13,9 +13,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.TypeEnum;
 import fr.insee.arc.core.service.api.query.ServiceDate;
 import fr.insee.arc.core.util.Norme;
+import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.FastList;
