@@ -18,7 +18,7 @@ public enum PgViewEnum {
 	, T1("t1",PgSchemaEnum.TEMPORARY), T2("t2",PgSchemaEnum.TEMPORARY), T3("t3",PgSchemaEnum.TEMPORARY)
 	
 	// postgres meta table
-	, PG_TABLES("pg_tables", PgSchemaEnum.TEMPORARY, PgColumnEnum.SCHEMANAME, PgColumnEnum.TABLENAME)
+	, PG_TABLES("pg_tables", PgSchemaEnum.CATALOG, PgColumnEnum.SCHEMANAME, PgColumnEnum.TABLENAME)
 	;
 
 	private PgViewEnum(String tableName, PgSchemaEnum location, PgColumnEnum...columns) {
