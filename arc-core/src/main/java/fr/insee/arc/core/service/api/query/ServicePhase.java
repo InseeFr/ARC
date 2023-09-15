@@ -89,7 +89,7 @@ public class ServicePhase {
 	 */
 	public static List<String> selectAllChildrenPhaseDataTables(Connection connection, String phaseTemplateTable) throws ArcException {
 		return ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(connection,
-				FormatSQL.tableExists(phaseTemplateTable + "\\_" + ServiceHashFileName.CHILD_TABLE_TOKEN + "\\_%'"))).mapContent().get(ColumnEnum.TABLE_NAME.getColumnName()), new ArrayList<String>());
+				FormatSQL.tableExists(phaseTemplateTable + "\\_" + ServiceHashFileName.CHILD_TABLE_TOKEN + "\\_%"))).mapContent().get(ColumnEnum.TABLE_NAME.getColumnName()), new ArrayList<String>());
 	}
 	
 	/**

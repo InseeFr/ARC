@@ -155,7 +155,7 @@ public class ServicePilotageOperation {
 		
 		query.build(SQL.SELECT, ColumnEnum.ETAPE, SQL.FROM, tablePilotage);
 		query.build(SQL.WHERE, ColumnEnum.PHASE_TRAITEMENT, "=", query.quoteText(phase.toString()));
-		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.toString()), SQL.CAST_OPERATOR, ColumnEnum.ETAT_TRAITEMENT.getColumnType().getTypeName() );
+		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.getSqlArrayExpression()), SQL.CAST_OPERATOR, ColumnEnum.ETAT_TRAITEMENT.getColumnType().getTypeName() );
 		query.build(SQL.AND, ColumnEnum.ID_SOURCE.getColumnName(), "=", query.quoteText(idSource));
 
 		return UtilitaireDao.get(0).getString(connection,query);

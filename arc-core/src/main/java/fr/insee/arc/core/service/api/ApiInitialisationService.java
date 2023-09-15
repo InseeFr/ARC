@@ -1112,7 +1112,7 @@ public class ApiInitialisationService extends ApiService {
 	
 		ListIdSourceInPilotage listIdSourceInPilotage = new ListIdSourceInPilotage();
 		
-		if (providedIdSourceToDelete!=null)
+		if (providedIdSourceToDelete==null)
 		{
 			listIdSourceInPilotage
 			.addSource(coordinatorConnexion, tablePilotage, TraitementPhase.MAPPING, TraitementEtat.OK)
@@ -1287,7 +1287,7 @@ public class ApiInitialisationService extends ApiService {
 			if (providedIdSourceToDrop != null)
 			{
 				// if list of idSource is provided, calculate the corresponding tablenames and add it to drop list
-				for (String idSource:templateDataTablesThatCanBeDropped)
+				for (String idSource:providedIdSourceToDrop)
 				{
 					childDataTablesToBeDropped.add(ServiceHashFileName.tableOfIdSource(templateDataTable, idSource));
 				}
@@ -1306,7 +1306,7 @@ public class ApiInitialisationService extends ApiService {
 					// retrieve the idSource of the childDataTable
 					String idSource = ServicePhase.selectIdSourceOfChildDataTable(executorConnection, childDataTable);
 					String etape = ServicePilotageOperation.accessSelectEtapeForIdSource(coordinatorConnexion, tablePilotage, phase, etat, idSource);
-					
+
 					// if no references in pilotage table, mark for drop
 					if (etape == null) {
 						childDataTablesToBeDropped.add(childDataTable);

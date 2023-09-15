@@ -602,17 +602,18 @@ public class ApiReceptionService extends ApiService {
 				requete.append(";");
 				soumettreRequete(requete);
 
-				boolean fichierARejouer = UtilitaireDao.get(0).hasResults(connexion,
-						new ArcPreparedStatementBuilder("select 1 from " + this.tablePil
-								+ " where phase_traitement='RECEPTION' and to_delete = 'R' limit 1;"));
-
-				if (fichierARejouer) {
-					// marque les fichiers à effacer (ils vont etre rechargés)
-					requete.append("CREATE TEMPORARY TABLE a_rejouer " + FormatSQL.WITH_NO_VACUUM
-							+ " as select distinct " + ColumnEnum.ID_SOURCE.getColumnName() + " from " + this.tablePil
+				StringBuilder query= new StringBuilder("select distinct " + ColumnEnum.ID_SOURCE.getColumnName() + " from " + this.tablePil
 							+ " a where to_delete='R' and exists (select 1 from " + this.tablePilTemp + " b where a."
 							+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName()
-							+ "); ");
+							+ ")");
+				
+				List<String> idSourceToBeDeleted = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(query))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName());
+
+				if (idSourceToBeDeleted!=null) {
+					// marque les fichiers à effacer (ils vont etre rechargés)
+					requete.append("CREATE TEMPORARY TABLE a_rejouer " + FormatSQL.WITH_NO_VACUUM +" AS ");
+					requete.append(query);
+					requete.append(";");
 
 					// effacer de la table pilotage des to_delete à R
 					requete.append("DELETE FROM " + this.tablePil + " a using a_rejouer b where a."
@@ -627,8 +628,7 @@ public class ApiReceptionService extends ApiService {
 				requete.append("DISCARD TEMP; \n");
 				soumettreRequete(requete);
 				
-				if (fichierARejouer) {
-					List<String> idSourceToBeDeleted = ServicePhase.selectIdSourceOfDataTable(connexion, "a_rejouer");
+				if (idSourceToBeDeleted!=null) {
 					ApiInitialisationService.dropUnusedDataTablesAllNods(connexion, this.envExecution, this.tablePil, idSourceToBeDeleted);
 					ApiInitialisationService.deleteUnusedDataRecordsAllNods(connexion, envExecution, tablePil, idSourceToBeDeleted);
 				}

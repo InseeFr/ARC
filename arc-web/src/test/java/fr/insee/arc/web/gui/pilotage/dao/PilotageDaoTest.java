@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.pilotage.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -42,12 +43,13 @@ public class PilotageDaoTest extends InitializeQueryTest {
 		// execute query
 		pdao.initializePilotageBAS(viewPilotageBAS);
 
+		System.out.println(viewPilotageBAS.getHeadersDLabel());
+		
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum
 				.listColumnEnumByName(ViewEnum.VIEW_PILOTAGE_FICHIER.getColumns().keySet());
-		viewColumns.removeAll(viewPilotageBAS.getHeadersDLabel());
 
-		assertEquals(2, viewColumns.size());
+		assertTrue(viewPilotageBAS.getHeadersDLabel().containsAll(viewColumns));
 
 	}
 

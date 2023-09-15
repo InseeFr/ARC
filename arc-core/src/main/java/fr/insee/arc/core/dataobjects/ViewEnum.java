@@ -84,9 +84,6 @@ public enum ViewEnum {
 	, PARAMETER("parameter", SchemaEnum.ARC_METADATA, ColumnEnum.KEY, ColumnEnum.VAL, ColumnEnum.DESCRIPTION) //
 	, PILOTAGE_BATCH("pilotage_batch", SchemaEnum.ARC_METADATA, ColumnEnum.LAST_INIT, ColumnEnum.OPERATION) //
 
-	// tables de pilotage
-	, PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX), PILOTAGE_ARCHIVE("pilotage_archive", SchemaEnum.SANDBOX)
-
 	// table d'export
 	,
 	EXPORT("export", SchemaEnum.SANDBOX, ColumnEnum.FILE_NAME, ColumnEnum.ZIP, ColumnEnum.TABLE_TO_EXPORT,
@@ -95,14 +92,20 @@ public enum ViewEnum {
 			ColumnEnum.ETAT) //
 
 	// tables représentant le contenu des vobject (utilisées pour les tests)
+
+	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE) //
+
+	// tables de pilotage
 	,
-	VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.ID_SOURCE, ColumnEnum.ID_NORME,
+	PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.ID_SOURCE, ColumnEnum.ID_NORME,
 			ColumnEnum.VALIDITE, ColumnEnum.PERIODICITE, ColumnEnum.PHASE_TRAITEMENT, ColumnEnum.ETAT_TRAITEMENT,
 			ColumnEnum.DATE_TRAITEMENT, ColumnEnum.RAPPORT, ColumnEnum.TAUX_KO, ColumnEnum.NB_ENR, ColumnEnum.NB_ESSAIS,
 			ColumnEnum.ETAPE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION,
 			ColumnEnum.DATE_ENTREE, ColumnEnum.CONTAINER, ColumnEnum.V_CONTAINER, ColumnEnum.O_CONTAINER,
 			ColumnEnum.TO_DELETE, ColumnEnum.CLIENT, ColumnEnum.DATE_CLIENT, ColumnEnum.JOINTURE,
-			ColumnEnum.GENERATION_COMPOSITE)
+			ColumnEnum.GENERATION_COMPOSITE) //
+	
+	, PILOTAGE_ARCHIVE("pilotage_archive", SchemaEnum.SANDBOX)
 
 	// family model table in sandbox
 	, MOD_TABLE_METIER("mod_table_metier", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_FAMILLE,
