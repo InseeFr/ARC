@@ -26,7 +26,7 @@ public class ServicePilotageOperationTest extends InitializeQueryTest {
 		
 		
 		ArrayList<String> listOfIdSource  = new GenericBean(u.executeRequest(c,
-				ServicePilotageOperation.retrieveIdSourceFromPilotageQuery(tablePil, TraitementPhase.MAPPING, TraitementEtat.OK)
+				ServicePilotageOperation.querySelectIdSourceFromPilotage(tablePil, TraitementPhase.MAPPING, TraitementEtat.OK)
 				)).mapContent().get("id_source");
 		
 		assertEquals(2, listOfIdSource.size());

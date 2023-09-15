@@ -210,7 +210,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		LoggerHelper.info(LOGGER_APISERVICE, "** register **");
 		try {
 			UtilitaireDao.get(0).executeBlock(connexion,
-					ServicePilotageOperation.copieTablePilotage(tablePil, tablePilTemp, phaseIn, phase, nbEnr));
+					ServicePilotageOperation.queryCopieTablePilotage(tablePil, tablePilTemp, phaseIn, phase, nbEnr));
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "register()", ex);
 		}
@@ -477,7 +477,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		}
 
 		requete.append("WITH t0 AS ( ");
-		requete.append(ServicePilotageOperation.updatePilotageErrorQuery(phase, tablePil, exception));
+		requete.append(ServicePilotageOperation.queryUpdatePilotageError(phase, tablePil, exception));
 		requete.append("\n RETURNING "+ColumnEnum.ID_SOURCE.getColumnName()+") ");
 
 		requete.append(resetPreviousPhaseMark(tablePil, null, "t0"));
@@ -519,7 +519,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		for (int i = 0; i < tableDrop.length; i++) {
 			requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");
 		}
-		requete.append(ServicePilotageOperation.updatePilotageErrorQuery(phase, tablePil, exception));
+		requete.append(ServicePilotageOperation.queryUpdatePilotageError(phase, tablePil, exception));
 
 		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		requete.append("\n ;");

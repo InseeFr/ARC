@@ -4,6 +4,7 @@ public enum TypeEnum {
 
 	TEXT("text",true)
 	, TEXT_ARRAY("text[]", true)
+	, TIMESTAMP_ARRAY("timestamp[]", true)
 	, INTEGER("int", false)
 	, BIGINT("bigint", false)
 	, NUMERIC("numeric",false)

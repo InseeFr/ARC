@@ -236,7 +236,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     	ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
     	
     	// update the number of record ans structure in the pilotage table
-    	query.append(ServicePilotageOperation.updateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure));
+    	query.append(ServicePilotageOperation.queryUpdateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure));
     
     	// promote the application user account to full right
     	query.append(switchToFullRightRole());

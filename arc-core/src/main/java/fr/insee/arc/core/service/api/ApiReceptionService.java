@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -30,11 +32,15 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
+import fr.insee.arc.core.service.api.initialisation.ListIdSourceInPilotage;
 import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
+import fr.insee.arc.core.service.api.query.ServicePhase;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
 import fr.insee.arc.core.service.api.query.ServiceTableOperation;
+import fr.insee.arc.core.service.api.scalability.ServiceScalability;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
@@ -622,15 +628,17 @@ public class ApiReceptionService extends ApiService {
 				soumettreRequete(requete);
 				
 				if (fichierARejouer) {
-					ApiInitialisationService.dropAndDeleteUnusedBusinessDataAllNods(connexion, this.envExecution, this.tablePil);
+					List<String> idSourceToBeDeleted = ServicePhase.selectIdSourceOfDataTable(connexion, "a_rejouer");
+					ApiInitialisationService.dropUnusedDataTablesAllNods(connexion, this.envExecution, this.tablePil, idSourceToBeDeleted);
+					ApiInitialisationService.deleteUnusedDataRecordsAllNods(connexion, envExecution, tablePil, idSourceToBeDeleted);
 				}
-				
 
 			}
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "registerFiles()", LOGGER, ex);
 		}
 	}
+	
 
 	private String buildContainerName(String container) {
 		String newContainerName = "";

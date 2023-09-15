@@ -158,7 +158,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		query.append(truncateTableIfKO());
 
 		// mise à jour du nombre d'enregistrement
-		query.append(ServicePilotageOperation.updateNbEnr(this.tableChargementPilTemp, this.getTableTempA()));
+		query.append(ServicePilotageOperation.queryUpdateNbEnr(this.tableChargementPilTemp, this.getTableTempA()));
 
 		// Créer la table chargement OK
 		query.append(insertionFinale(this.tableChargementOK, this.idSource));

@@ -27,13 +27,14 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.rulesobjects.JeuDeRegleDao;
+import fr.insee.arc.core.service.api.initialisation.ListIdSourceInPilotage;
 import fr.insee.arc.core.service.api.query.ServiceDatabaseMaintenance;
 import fr.insee.arc.core.service.api.query.ServiceFileSystemManagement;
 import fr.insee.arc.core.service.api.query.ServiceHashFileName;
 import fr.insee.arc.core.service.api.query.ServicePhase;
 import fr.insee.arc.core.service.api.query.ServicePilotageOperation;
-import fr.insee.arc.core.service.api.query.ServiceScalability;
 import fr.insee.arc.core.service.api.query.ServiceTableNaming;
+import fr.insee.arc.core.service.api.scalability.ServiceScalability;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
 import fr.insee.arc.core.service.engine.mapping.ExpressionService;
 import fr.insee.arc.core.util.BDParameters;
@@ -73,13 +74,6 @@ public class ApiInitialisationService extends ApiService {
 		super();
 	}
 
-	// nombre de fichier à traiter lors à chaque itération d'archivage
-	private int NB_FICHIER_PER_ARCHIVE;
-
-	// indique combien de jour doivent etre conservé les fichiers apres avoir été
-	// récupérés par le web service
-	private int Nb_Jour_A_Conserver;
-
 	private static final Logger LOGGER = LogManager.getLogger(ApiInitialisationService.class);
 
 	public ApiInitialisationService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution,
@@ -101,7 +95,7 @@ public class ApiInitialisationService extends ApiService {
 		synchroniserSchemaExecutionAllNods(connexion.getCoordinatorConnection(), envParameters, envExecution);
 
 		// marque les fichiers ou les archives à rejouer
-		reinstate(this.connexion.getCoordinatorConnection(), this.tablePil);
+		reinstate(this.connexion.getCoordinatorConnection());
 
 		// efface des fichiers de la table de pilotage
 		cleanToDelete(this.connexion.getCoordinatorConnection(), this.tablePil);
@@ -276,28 +270,27 @@ public class ApiInitialisationService extends ApiService {
 			entrepotList = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion,
 					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent();
 
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(ApiInitialisationService.class, "buildFileSystem(envExecutions)", LOGGER,
-					ex);
-		}
+			for (String envExecution : Arrays.asList(envExecutions)) {
 
-		for (String envExecution : Arrays.asList(envExecutions)) {
-
-			if (!entrepotList.isEmpty()) {
-				for (String d : entrepotList.get("id_entrepot")) {
-					FileUtilsArc.createDirIfNotexist(ApiReceptionService
-							.directoryReceptionEntrepot(properties.getBatchParametersDirectory(), envExecution, d));
-					FileUtilsArc.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepotArchive(
-							properties.getBatchParametersDirectory(), envExecution, d));
+				if (!entrepotList.isEmpty()) {
+					for (String d : entrepotList.get("id_entrepot")) {
+						FileUtilsArc.createDirIfNotexist(ApiReceptionService
+								.directoryReceptionEntrepot(properties.getBatchParametersDirectory(), envExecution, d));
+						FileUtilsArc.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepotArchive(
+								properties.getBatchParametersDirectory(), envExecution, d));
+					}
 				}
-			}
 
-			FileUtilsArc.createDirIfNotexist(ApiReceptionService
-					.directoryReceptionEtatEnCours(properties.getBatchParametersDirectory(), envExecution));
-			FileUtilsArc.createDirIfNotexist(ApiReceptionService
-					.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
-			FileUtilsArc.createDirIfNotexist(ApiReceptionService
-					.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
+				FileUtilsArc.createDirIfNotexist(ApiReceptionService
+						.directoryReceptionEtatEnCours(properties.getBatchParametersDirectory(), envExecution));
+				FileUtilsArc.createDirIfNotexist(ApiReceptionService
+						.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
+				FileUtilsArc.createDirIfNotexist(ApiReceptionService
+						.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
+			}
+	
+		} catch (ArcException ex) {
+			ex.logFullException();
 		}
 
 	}
@@ -359,7 +352,7 @@ public class ApiInitialisationService extends ApiService {
 	 * @param tablePil
 	 * @throws ArcException
 	 */
-	private void reinstate(Connection connexion, String tablePil) throws ArcException {
+	private void reinstate(Connection connexion) throws ArcException {
 		LoggerHelper.info(LOGGER, "reinstateWithRename");
 
 		// on cherche tous les containers contenant un fichier à rejouer
@@ -612,10 +605,12 @@ public class ApiInitialisationService extends ApiService {
 
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
 
-		Nb_Jour_A_Conserver = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
+		// indique combien de jour doivent etre conservé les fichiers apres avoir été
+		int numberOfDaysToKeepFiles = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiInitialisationService.Nb_Jour_A_Conserver", 365);
 
-		NB_FICHIER_PER_ARCHIVE = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
+		// nombre de fichier à traiter lors à chaque itération d'archivage
+		int numberOfFilesToProceed = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiInitialisationService.NB_FICHIER_PER_ARCHIVE", 10000);
 
 		String nomTablePilotage = ServiceTableNaming.dbEnv(envExecution) + "pilotage_fichier";
@@ -653,7 +648,7 @@ public class ApiInitialisationService extends ApiService {
 						+ ", container FROM isFichierToDelete) ww ")
 				.append("GROUP BY " + ColumnEnum.ID_SOURCE.getColumnName() + ", container ")
 				// on filtre selon RG2
-				.append("HAVING (current_date - max(t) ::date ) >=" + Nb_Jour_A_Conserver + " ").append("; ");
+				.append("HAVING (current_date - max(t) ::date ) >=" + numberOfDaysToKeepFiles + " ").append("; ");
 
 		UtilitaireDao.get(0).executeRequest(connexion, requete);
 
@@ -664,7 +659,7 @@ public class ApiInitialisationService extends ApiService {
 		// 3b. on selectionne les fichiers éligibles et on limite le nombre de retour
 		// pour que l'update ne soit pas trop massif (perf)
 		requete.append("WITH fichier_to_delete_limit AS ( ")
-				.append(" SELECT * FROM fichier_to_delete LIMIT " + NB_FICHIER_PER_ARCHIVE + " ").append(") ")
+				.append(" SELECT * FROM fichier_to_delete LIMIT " + numberOfFilesToProceed + " ").append(") ")
 
 				// 4. suppression des archive de la table d'archive (bien retirer le nom de
 				// l'entrepot du début du container)
@@ -696,7 +691,7 @@ public class ApiInitialisationService extends ApiService {
 		// on continue jusqu'a ce qu'on ne trouve plus rien à effacer
 		do {
 			// récupérer le résultat de la requete
-			LoggerHelper.info(LOGGER, "Archivage de " + NB_FICHIER_PER_ARCHIVE + " fichiers - Début");
+			LoggerHelper.info(LOGGER, "Archivage de " + numberOfFilesToProceed + " fichiers - Début");
 			n = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, requete)).mapContent();
 
 			// ajouter à la liste m les enregistrements qu'ils n'existent pas déjà dans m
@@ -993,7 +988,7 @@ public class ApiInitialisationService extends ApiService {
 			}
 
 			try {
-				reinstate(this.connexion.getCoordinatorConnection(), this.tablePil);
+				reinstate(this.connexion.getCoordinatorConnection());
 			} catch (Exception e) {
 				LoggerHelper.error(LOGGER, e);
 			}
@@ -1084,7 +1079,10 @@ public class ApiInitialisationService extends ApiService {
 			dropUnusedTemporaryTablesAllNods(connexion);
 
 			// pour chaque table de l'environnement d'execution courant
-			dropAndDeleteUnusedBusinessDataAllNods(connexion, envExecution, tablePil);
+			dropUnusedDataTablesAllNods(connexion, envExecution, tablePil, null);
+
+			// pour chaque table de l'environnement d'execution courant
+			deleteUnusedDataRecordsAllNods(connexion, envExecution, tablePil, null);
 
 
 		} catch (Exception ex) {
@@ -1099,37 +1097,69 @@ public class ApiInitialisationService extends ApiService {
 		ServiceDatabaseMaintenance.maintenanceDatabaseClassic(connexion, envExecution);
 
 	}
-
-	public static void dropAndDeleteUnusedBusinessDataAllNods(Connection coordinatorConnexion, String envExecution, String tablePilotage) throws ArcException {
+	
+	/**
+	 * delete the record from the data tables on all nods
+	 * - according to pilotage table if providedIdSourceToDelete is not provided
+	 * - according to providedIdSourceToDelete if provided
+	 * @param coordinatorConnexion
+	 * @param envExecution
+	 * @param tablePilotage
+	 * @param providedIdSourceToDelete
+	 * @throws ArcException
+	 */
+	public static void deleteUnusedDataRecordsAllNods(Connection coordinatorConnexion, String envExecution, String tablePilotage, List<String> providedIdSourceToDelete) throws ArcException {
+	
+		ListIdSourceInPilotage listIdSourceInPilotage = new ListIdSourceInPilotage();
+		
+		if (providedIdSourceToDelete!=null)
+		{
+			listIdSourceInPilotage
+			.addSource(coordinatorConnexion, tablePilotage, TraitementPhase.MAPPING, TraitementEtat.OK)
+			.addSource(coordinatorConnexion, tablePilotage, TraitementPhase.MAPPING, TraitementEtat.KO)
+			;
+		}
 		
 		ThrowingConsumer<Connection, ArcException> function = executorConnection -> 
-			dropAndDeleteUnusedBusinessData(coordinatorConnexion, executorConnection, envExecution, tablePilotage);
-		;
+		deleteUnusedDataRecordsAllTables(executorConnection, envExecution, listIdSourceInPilotage, providedIdSourceToDelete);
 		
 		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
 		
 	}
 	
-	private static void dropAndDeleteUnusedBusinessData(Connection coordinatorConnexion, Connection executorConnection, String envExecution, String tablePilotage) throws ArcException
+	/**
+	 * Delete the unreferenced data records found in all tables that may contains data
+	 * i.e. currently tables of the "mapping" phase
+	 * @param executorConnection
+	 * @param envExecution
+	 * @param listIdSourceInPilotage
+	 * @throws ArcException
+	 */
+	private static void deleteUnusedDataRecordsAllTables(Connection executorConnection, String envExecution, ListIdSourceInPilotage listIdSourceInPilotage, List<String> providedIdSourceToDelete) throws ArcException
 	{
 		
-		ArrayList<String> envTables = new GenericBean(UtilitaireDao.get(0).executeRequest(executorConnection,
-				ServicePhase.selectPhaseTablesFoundInEnv(envExecution))).mapContent().get(ColumnEnum.TABLE_NAME.getColumnName());
+		List<String> dataTables = ServicePhase.selectPhaseDataTablesFoundInEnv(executorConnection, envExecution);
 
 		// if no phase tables, exit
-		if (envTables == null) {
+		if (dataTables.isEmpty()) {
 			return;	
 		}
 		
-		dropTablesWithUnusedData(coordinatorConnexion, executorConnection, envExecution, tablePilotage, envTables);
-		
-		deleteRecordsWithUnusedData(coordinatorConnexion, executorConnection, tablePilotage, envTables, TraitementPhase.MAPPING, TraitementEtat.OK);
+		deleteUnusedDataRecords(executorConnection, listIdSourceInPilotage, dataTables, TraitementPhase.MAPPING, TraitementEtat.OK, providedIdSourceToDelete);
 
-		deleteRecordsWithUnusedData(coordinatorConnexion, executorConnection, tablePilotage, envTables, TraitementPhase.MAPPING, TraitementEtat.KO);
+		deleteUnusedDataRecords(executorConnection, listIdSourceInPilotage, dataTables, TraitementPhase.MAPPING, TraitementEtat.KO, providedIdSourceToDelete);
 		
 	}
+
 	
-	private static void deleteRecordsWithUnusedData(Connection coordinatorConnexion, Connection executorConnection, String tablePilotage, List<String> envTables, TraitementPhase phase, TraitementEtat etat) throws ArcException
+	/**
+	 * Delete the unreferenced data records found in the tables corresponding to a given phase and state
+	 * @param executorConnection
+	 * @param envExecution
+	 * @param listIdSourceInPilotage
+	 * @throws ArcException
+	 */
+	private static void deleteUnusedDataRecords(Connection executorConnection, ListIdSourceInPilotage listIdSourceInPilotage, List<String> envTables, TraitementPhase phase, TraitementEtat etat, List<String> providedIdSourceToDelete) throws ArcException
 	{
 		// récupérer la liste des tables de la phase
 		List<String> envTablesWithRecords = envTables.stream().filter(nomTable -> ServicePhase.extractPhaseFromTableName(nomTable).equals(phase) && ServicePhase.extractEtatFromTableName(nomTable).equals(etat)).collect(Collectors.toList());
@@ -1140,105 +1170,159 @@ public class ApiInitialisationService extends ApiService {
 			return;
 		}
 		
-		
-		ArrayList<String> idSourceInPilotage =
-				ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion, ServicePilotageOperation.retrieveIdSourceFromPilotageQuery(tablePilotage, phase, etat))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName())
-						, new ArrayList<String>());
-
 		for (String dataTable : envTablesWithRecords) {
 
 			// retrieve the idSource that shouldn't be in data table according to pilotage table 
-			List<String> idSourceInDataTableThatShouldntBe = 
-					ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(executorConnection, ServicePilotageOperation.retrieveIdSourceFromDataTableQuery(dataTable))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName())
-							, new ArrayList<String>());
-						
-			idSourceInDataTableThatShouldntBe.removeAll(idSourceInPilotage);
+			List<String> idSourceInDataTableThatShouldntBe;
 			
-			if (!idSourceInDataTableThatShouldntBe.isEmpty())
+			if (providedIdSourceToDelete!=null)
 			{
-				ArcPreparedStatementBuilder query= new ArcPreparedStatementBuilder();
-				GenericBean gb = 
-						new GenericBean(ColumnEnum.ID_SOURCE.getColumnName(), TypeEnum.TEXT.getTypeName(), idSourceInDataTableThatShouldntBe);
-				
-				query.copyFromGenericBean(ViewEnum.T1.getTableName(), gb, true);
-				
-				query.build(SQL.DELETE, dataTable);
-				query.build(SQL.WHERE, ColumnEnum.ID_SOURCE, SQL.IN );
-				query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getTableName(), ")");
-				UtilitaireDao.get(0).executeRequest(executorConnection, query);
+				idSourceInDataTableThatShouldntBe = providedIdSourceToDelete;
+			}
+			else
+			{
+				idSourceInDataTableThatShouldntBe= ServicePhase.selectIdSourceOfDataTable(executorConnection, dataTable);
+				idSourceInDataTableThatShouldntBe.removeAll(listIdSourceInPilotage.getIdSourceInPilotage(phase, etat));
 			}
 			
 			
+			if (!idSourceInDataTableThatShouldntBe.isEmpty())
+			{
+				deleteDataRecords(executorConnection, idSourceInDataTableThatShouldntBe, dataTable);
+			}
 		}
 		
 	}
+
 	
 	
-	
-	private static void dropTablesWithUnusedData(Connection coordinatorConnexion, Connection executorConnection, String envExecution, String tablePilotage, List<String> envTables) throws ArcException
+	/**
+	 * Delete data records from a target table according to a given list of source to delete 
+	 * @param executorConnection
+	 * @param idSourceToDelete
+	 * @param targetDataTable
+	 * @throws ArcException
+	 */
+	private static void deleteDataRecords(Connection executorConnection, List<String> idSourceToDelete, String targetDataTable) throws ArcException
 	{
-		// les tables de mapping sont traitées différemment car elle ne peuvent pas être dropées
-		List<String> envTablesThatCanBeDropped = envTables.stream().filter(nomTable -> !ServicePhase.extractPhaseFromTableName(nomTable).equals(TraitementPhase.MAPPING)).collect(Collectors.toList());
+		ArcPreparedStatementBuilder query= new ArcPreparedStatementBuilder();
 		
-		for (String nomTable : envTablesThatCanBeDropped) {
-
-			TraitementPhase phase = ServicePhase.extractPhaseFromTableName(nomTable);
-			TraitementEtat etat = ServicePhase.extractEtatFromTableName(nomTable);
-
-			// Cas des tables non MAPPING
-			// temporary table to store inherit table already checked
-				UtilitaireDao.get(0).executeImmediate(executorConnection,
-						"DROP TABLE IF EXISTS TMP_INHERITED_TABLES_TO_CHECK; CREATE TEMPORARY TABLE TMP_INHERITED_TABLES_TO_CHECK (tablename text);");
-
-				// Does the table have some inherited table left to check ?
-				// Only MAX_LOCK_PER_TRANSACTION tables can be proceed at the same time so
-				// iteration is required
-				HashMap<String, ArrayList<String>> m;
-				do {
-					m = new GenericBean(UtilitaireDao.get(0).executeRequest(executorConnection,
-							new ArcPreparedStatementBuilder(
-									"\n WITH TMP_SELECT AS (SELECT schemaname||'.'||tablename as tablename FROM pg_tables WHERE schemaname||'.'||tablename like '"
-											+ nomTable + "\\_" + ServiceHashFileName.CHILD_TABLE_TOKEN
-											+ "\\_%' AND schemaname||'.'||tablename NOT IN (select tablename from TMP_INHERITED_TABLES_TO_CHECK) LIMIT "
-											+ FormatSQL.MAX_LOCK_PER_TRANSACTION + " ) "
-											+ "\n , TMP_INSERT AS (INSERT INTO TMP_INHERITED_TABLES_TO_CHECK SELECT * FROM TMP_SELECT) "
-											+ "\n SELECT tablename from TMP_SELECT ")))
-							.mapContent();
-					StringBuilder query = new StringBuilder();
-					// Oui elle a des héritages
-					if (!m.isEmpty()) {
-
-						// on parcourt les tables héritées
-						for (String t : m.get("tablename")) {
-							
-							// on récupère la variable etape dans la phase
-							// si on ne trouve pas la source de la table dans la phase, on drop !
-							
-							ArcPreparedStatementBuilder queryIdSource = new ArcPreparedStatementBuilder();
-							queryIdSource.append("SELECT "
-									+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + t
-									+ " LIMIT 1");
-							String idSource = UtilitaireDao.get(0).getString(executorConnection,queryIdSource);
-							
-							ArcPreparedStatementBuilder queryEtape = new ArcPreparedStatementBuilder();
-							queryEtape.append("SELECT etape FROM " + tablePilotage + " WHERE phase_traitement='"
-													+ phase + "' AND '" + etat + "'=ANY(etat_traitement) AND "
-													+ ColumnEnum.ID_SOURCE.getColumnName() + "="+ queryEtape.quoteText(idSource));
-							String etape = UtilitaireDao.get(0).getString(coordinatorConnexion,queryEtape);
-
-							if (etape == null) {
-								query.append("\n BEGIN; DROP TABLE IF EXISTS " + t + "; COMMIT;");
-							}
-						}
-
-						UtilitaireDao.get(0).executeImmediate(executorConnection, query);
-
-					}
-
-				} while (!m.isEmpty());
-		}
+		GenericBean gb = 
+				new GenericBean(ColumnEnum.ID_SOURCE.getColumnName(), TypeEnum.TEXT.getTypeName(), idSourceToDelete);
+		query.copyFromGenericBean(ViewEnum.T1.getTableName(), gb, true);
+		
+		query.build(SQL.DELETE, targetDataTable);
+		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE, SQL.IN );
+		query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getTableName(), ")");
+		
+		UtilitaireDao.get(0).executeRequest(executorConnection, query);
+		
 	}
 	
+
+	/**
+	 * dispatch on every nods the void that drop unused data tables
+	 * @param coordinatorConnexion
+	 * @param envExecution
+	 * @param tablePilotage
+	 * @throws ArcException
+	 */
+	public static void dropUnusedDataTablesAllNods(Connection coordinatorConnexion, String envExecution, String tablePilotage, List<String> providedIdSourceToDrop) throws ArcException {
+		
+		ThrowingConsumer<Connection, ArcException> function = executorConnection -> 
+		dropUnusedDataTables(coordinatorConnexion, executorConnection, envExecution, tablePilotage, providedIdSourceToDrop);
+		
+		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
+		
+	}
+	
+	
+	/**
+	 * call method to drop the unused data table found on an given executor nod
+	 * @param coordinatorConnexion
+	 * @param executorConnection
+	 * @param envExecution
+	 * @param tablePilotage
+	 * @throws ArcException
+	 */
+	private static void dropUnusedDataTables(Connection coordinatorConnexion, Connection executorConnection, String envExecution, String tablePilotage, List<String> providedIdSourceToDrop) throws ArcException
+	{		
+		// This returns the list of the template data table for phases
+		// For example, "chargement_ok" is the template table for the phase called "CHARGEMENT" in an "OK" state
+		// The table names from the files proceeded in the phase "CHARGEMENT" will be based on the table template name
+		// chargement_ok_child_<hash_of_filename1>
+		// chargement_ok_child_<hash_of_filename2>
+		// ...
+		// Historically there was an inheritance link between template table (parent) and all the real data tables (children)
+		// but it had been removed for performance issue
+		List<String> templateDataTablesThatCanBeDropped = ServicePhase.selectPhaseDataTablesFoundInEnv(executorConnection, envExecution)
+				.stream().filter(nomTable -> !ServicePhase.extractPhaseFromTableName(nomTable).equals(TraitementPhase.MAPPING)).collect(Collectors.toList());
+
+		// no data tables to check ? exit
+		if (templateDataTablesThatCanBeDropped.isEmpty()) {
+			return;	
+		}
+		
+		dropUnusedDataTables(coordinatorConnexion, executorConnection, tablePilotage, templateDataTablesThatCanBeDropped, providedIdSourceToDrop);
+
+	}
+	
+	/**
+	 * iterate over data table found in executor nod
+	 * drop the ones that are no longer referenced in the pilotage table found on coordinator nod
+	 * @param coordinatorConnexion
+	 * @param executorConnection
+	 * @param tablePilotage
+	 * @param dataTablesThatCanBeDropped
+	 * @throws ArcException
+	 */
+	private static void dropUnusedDataTables(Connection coordinatorConnexion, Connection executorConnection, String tablePilotage, List<String> templateDataTablesThatCanBeDropped, List<String> providedIdSourceToDrop) throws ArcException
+	{
+		// Build the list of child data tables to drop
+		
+		List<String> childDataTablesToBeDropped = new ArrayList<>();
+		
+		for (String templateDataTable : templateDataTablesThatCanBeDropped) {
+
+			if (providedIdSourceToDrop != null)
+			{
+				// if list of idSource is provided, calculate the corresponding tablenames and add it to drop list
+				for (String idSource:templateDataTablesThatCanBeDropped)
+				{
+					childDataTablesToBeDropped.add(ServiceHashFileName.tableOfIdSource(templateDataTable, idSource));
+				}
+			}
+			else
+			{
+				TraitementPhase phase = ServicePhase.extractPhaseFromTableName(templateDataTable);
+				TraitementEtat etat = ServicePhase.extractEtatFromTableName(templateDataTable);
+				
+				// retrieve all the children tables of the template table
+				List<String> childDataTables = ServicePhase.selectAllChildrenPhaseDataTables(executorConnection, templateDataTable);
+				
+				// it could be more bulky but it would be less readable and useless; this is rarely triggered and access 10000 objects at max
+				for (String childDataTable : childDataTables) {
+					
+					// retrieve the idSource of the childDataTable
+					String idSource = ServicePhase.selectIdSourceOfChildDataTable(executorConnection, childDataTable);
+					String etape = ServicePilotageOperation.accessSelectEtapeForIdSource(coordinatorConnexion, tablePilotage, phase, etat, idSource);
+					
+					// if no references in pilotage table, mark for drop
+					if (etape == null) {
+						childDataTablesToBeDropped.add(childDataTable);
+					}
+				}
+			}
+		}
+		
+		dropDataTables (executorConnection, childDataTablesToBeDropped);
+	}
+		
+	
+	public static void dropDataTables(Connection executorConnection, List<String> dataTablesToDrop)
+	{
+		UtilitaireDao.get(0).dropTable(executorConnection, dataTablesToDrop);
+	}
 	
 	/**
 	 * drop the unused temporary table on the target connection

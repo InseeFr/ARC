@@ -88,9 +88,7 @@ public enum ColumnEnum {
 	, XSD_LABEL_FILS("xsd_label_fils", TypeEnum.TEXT, "") // ihm_controle_regle
 	, XSD_ORDRE("xsd_ordre", TypeEnum.INTEGER, "") // ihm_controle_regle
 	, XSD_ROLE("xsd_role", TypeEnum.TEXT, "") // ihm_controle_regle
-	
-	, DATE_ENTREE("date_entree", TypeEnum.TEXT, "") // date_entree
-	
+
 	, FILE_NAME("file_name", TypeEnum.TEXT, "") // export
 	, TABLE_TO_EXPORT("table_to_export", TypeEnum.TEXT, "") // export
 	, NOMENCLATURE_EXPORT("nomenclature_export", TypeEnum.TEXT, "") // export
@@ -107,6 +105,25 @@ public enum ColumnEnum {
 	, MODULE_ORDER("module_order", TypeEnum.INTEGER, "index of rules module")
 	, MODULE_NAME("module_name", TypeEnum.TEXT, "name of rules module")
 	
+	, PHASE_TRAITEMENT("phase_traitement", TypeEnum.TEXT, "phase of the process of file in pilotage")
+	, ETAT_TRAITEMENT("etat_traitement", TypeEnum.TEXT_ARRAY, "state of the process of file in pilotage")
+	, DATE_TRAITEMENT("date_traitement", TypeEnum.TIMESTAMP, "timestamp of the beginning of the process of file in pilotage")
+	, RAPPORT("rapport", TypeEnum.INTEGER, "report of the process of file in pilotage")
+	, TAUX_KO("taux_ko", TypeEnum.NUMERIC, "deprecated")
+	, NB_ENR("nb_enr", TypeEnum.INTEGER, "number records of the process of file in pilotage")
+	, NB_ESSAIS("nb_essais", TypeEnum.INTEGER, "deprecated")
+	, ETAPE("etape", TypeEnum.INTEGER, "status of the process of file in pilotage")
+	, DATE_ENTREE("date_entree", TypeEnum.TEXT, "entry date of the file")
+	, CONTAINER("container", TypeEnum.TEXT, "name of the file container reworked by arc")
+	, V_CONTAINER("v_container", TypeEnum.TEXT, "version of the container")
+	, O_CONTAINER("o_container", TypeEnum.TEXT, "genuine name of the file container")
+	, TO_DELETE("to_delete", TypeEnum.TEXT, "flag to mark a user maintenance operation for a file")
+	, CLIENT("client", TypeEnum.TEXT_ARRAY, "clients who have already retrieved the file")
+	, DATE_CLIENT("date_client", TypeEnum.TIMESTAMP_ARRAY, "dates when the clients retrieved the file")
+	, JOINTURE("jointure", TypeEnum.TEXT, "data structure query of the processing file")
+	, GENERATION_COMPOSITE("generation_composite", TypeEnum.TEXT, "timestamp of the end of the process of the file in pilotage")
+
+	
 	, TEST1(PgColumnEnum.TEST1), TEST2(PgColumnEnum.TEST2)
 	
 	, COLUMN_NAME(PgColumnEnum.COLUMN_NAME)
@@ -115,9 +132,6 @@ public enum ColumnEnum {
 	
 	, TABLENAME(PgColumnEnum.TABLENAME)
 	, SCHEMANAME(PgColumnEnum.SCHEMANAME)
-
-	, PHASE_TRAITEMENT(PgColumnEnum.PHASE_TRAITEMENT)
-	, ETAT_TRAITEMENT(PgColumnEnum.ETAT_TRAITEMENT)
 	
 	
 	;

@@ -140,11 +140,11 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		// mapping 1 sinon)
 		ArrayList<String> tableDownload = new ArrayList<>();
 		try {
-			GenericBean g = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
-					ServicePhase.selectPhaseTablesFoundInEnv(getBacASable())));
-			if (!g.mapContent().isEmpty()) {
-				ArrayList<String> envTables = g.mapContent().get("table_name");
-				for (String table : envTables) {
+			
+			List<String> dataTables = ServicePhase.selectPhaseDataTablesFoundInEnv(null, getBacASable());
+
+			if (!dataTables.isEmpty()) {
+				for (String table : dataTables) {
 					// selection des tables qui contiennent la phase dans leur nom
 					for (int i = 0; i < etatList.length; i++) {
 						if (ManipString.substringAfterFirst(table.toUpperCase(), ".")

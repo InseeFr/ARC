@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.api.query;
+package fr.insee.arc.core.service.api.scalability;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,7 +11,10 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 public class ServiceScalability {
 
-	
+	  private ServiceScalability() {
+		    throw new IllegalStateException("Utility class to dispatch a treatment over connections");
+		  }
+
 	
 	/**
 	 * Execute actions on coordinator and on all the executors

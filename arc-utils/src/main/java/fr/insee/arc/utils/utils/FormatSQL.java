@@ -29,7 +29,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     public static final boolean DROP_FIRST_TRUE = true;
     
     public static final int TAILLE_MAXIMAL_BLOC_SQL = 700000;
-    public static final int MAX_LOCK_PER_TRANSACTION = 50;
 
     public static final int TIMEOUT_MAINTENANCE = 600000;
     

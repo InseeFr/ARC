@@ -229,7 +229,7 @@ public class GenericPreparedStatementBuilder {
 	}
 
 	/**
-	 * Return the query with the real real parameters instead of bin variables
+	 * Return the query with the real real parameters instead of bounded variables
 	 * 
 	 * @return
 	 */

@@ -1,5 +1,6 @@
 package fr.insee.arc.core.service.api.query;
 
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -13,6 +14,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 
@@ -30,13 +32,13 @@ public class ServicePilotageOperation {
 	 * 
 	 * @throws ArcException
 	 */
-	public static String updateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) {
+	public static String queryUpdateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) {
 		StringBuilder query = new StringBuilder();
 
 		// mise à jour du nombre d'enregistrement et du type composite
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** updateNbEnr **");
 		query.append("\n UPDATE " + tablePilTemp + " a ");
-		query.append("\n \t SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
+		query.append("\n SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
 
 		if (jointure.length > 0) {
 			query.append(", jointure= " + FormatSQL.textToSql(jointure[0]) + "");
@@ -62,7 +64,7 @@ public class ServicePilotageOperation {
 	 * @param nbEnr
 	 * @return
 	 */
-	public static String copieTablePilotage(String tablePil, String tablePilTemp, String phaseAncien,
+	public static String queryCopieTablePilotage(String tablePil, String tablePilTemp, String phaseAncien,
 			String phaseNouveau, Integer nbEnr) {
 		StringBuilder requete = new StringBuilder();
 
@@ -120,7 +122,7 @@ public class ServicePilotageOperation {
 	 * @param exception
 	 * @return
 	 */
-	public static StringBuilder updatePilotageErrorQuery(String phase, String tablePil, Exception exception) {
+	public static StringBuilder queryUpdatePilotageError(String phase, String tablePil, Exception exception) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("UPDATE " + tablePil + " SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport='"
 				+ exception.toString().replace("'", "''").replace("\r", "") + "' ");
@@ -137,7 +139,7 @@ public class ServicePilotageOperation {
 	 * @param etat
 	 * @return
 	 */
-	public static ArcPreparedStatementBuilder retrieveIdSourceFromPilotageQuery(String tablePilotage, TraitementPhase phase, TraitementEtat etat)
+	public static ArcPreparedStatementBuilder querySelectIdSourceFromPilotage(String tablePilotage, TraitementPhase phase, TraitementEtat etat)
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
 		
@@ -146,19 +148,16 @@ public class ServicePilotageOperation {
 		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.getSqlArrayExpression()), SQL.CAST_OPERATOR, "text[]");		
 		return query;
 	}
-	
-	/**
-	 * retrieve the list of documents (i.e. files referenced in the field "id_source") in the data table 
-	 * @param dataTable
-	 * @return
-	 */
-	public static ArcPreparedStatementBuilder retrieveIdSourceFromDataTableQuery(String dataTable)
+
+	public static String accessSelectEtapeForIdSource(Connection connection, String tablePilotage, TraitementPhase phase, TraitementEtat etat, String idSource) throws ArcException
 	{
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		
-		query.build(SQL.SELECT, SQL.DISTINCT, ColumnEnum.ID_SOURCE.getColumnName(), SQL.FROM, dataTable);		
-		return query;
+		query.build(SQL.SELECT, ColumnEnum.ETAPE, SQL.FROM, tablePilotage);
+		query.build(SQL.WHERE, ColumnEnum.PHASE_TRAITEMENT, "=", query.quoteText(phase.toString()));
+		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.toString()), SQL.CAST_OPERATOR, ColumnEnum.ETAT_TRAITEMENT.getColumnType().getTypeName() );
+		query.build(SQL.AND, ColumnEnum.ID_SOURCE.getColumnName(), "=", query.quoteText(idSource));
+
+		return UtilitaireDao.get(0).getString(connection,query);
 	}
-	
-	
 }

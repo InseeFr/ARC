@@ -199,11 +199,25 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public void dropTable(Connection connexion, String... someTables) {
 		try {
-			executeBlock(connexion, FormatSQL.dropTable(someTables));
+			executeImmediate(connexion, FormatSQL.dropTable(someTables));
 		} catch (ArcException ex) {
 			ex.logFullException();
 		}
 	}
+	
+	/**
+	 * @param connexion  la connexion à la base
+	 * @param someTables le nom des tables
+	 * @return
+	 */
+	public void dropTable(Connection connexion, List<String> someTables) {
+		try {
+			executeImmediate(connexion, FormatSQL.dropTable(someTables.toArray(new String[0])));
+		} catch (ArcException ex) {
+			ex.logFullException();
+		}
+	}
+	
 
 	/**
 	 * Exécute une requête qui renvoie exactement UN (unique) résultat de type
@@ -279,6 +293,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public void executeImmediate(Connection connexion, StringBuilder requete, ModeRequete... modes)
 			throws ArcException {
 		executeImmediate(connexion, requete.toString(), modes);
+	}
+	
+	public void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes)
+			throws ArcException {
+		executeImmediate(connexion, requete.getQueryWithParameters(), modes);
 	}
 
 	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes) throws ArcException {

@@ -1,9 +1,5 @@
 package fr.insee.arc.utils.dataobjects;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public enum PgColumnEnum {
 	
 	// columns for testing
@@ -16,10 +12,6 @@ public enum PgColumnEnum {
 	, TABLENAME("tablename", TypeEnum.TEXT, "table name in pg_tables")
 	, SCHEMANAME("schemaname", TypeEnum.TEXT, "schema name in pg_tables")
 
-	, PHASE_TRAITEMENT("phase_traitement", TypeEnum.TEXT, "phase identifier in pilotage")
-	, ETAT_TRAITEMENT("etat_traitement", TypeEnum.TEXT_ARRAY, "phase identifier in pilotage")
-	
-	
 	;
 
 	private String columnName;
