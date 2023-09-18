@@ -1,4 +1,4 @@
-package fr.insee.arc.core.util;
+package fr.insee.arc.web.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +17,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.utils.PrivateConstructorTest;
+import fr.insee.arc.web.gui.all.util.Sandbox;
 
 public class SandboxTest extends InitializeQueryTest {
 
