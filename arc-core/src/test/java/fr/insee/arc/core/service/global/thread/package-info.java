@@ -1,1 +1,0 @@
-package fr.insee.arc.core.service.global.thread;
