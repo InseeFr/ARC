@@ -3,8 +3,8 @@ package fr.insee.arc.batch.threadrunners;
 import java.util.Map;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
-import fr.insee.arc.core.model.ServiceReporting;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.global.ServiceReporting;
 
 public class PhaseThreadFactory extends Thread {
 

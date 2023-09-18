@@ -21,9 +21,9 @@ import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.api.ApiReceptionService;
-import fr.insee.arc.core.service.api.ApiService;
-import fr.insee.arc.core.service.api.query.ServiceDatabaseMaintenance;
+import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
+import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -250,9 +250,9 @@ class BatchARC implements IReturnCode {
 
 		for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
 			// Maintenance full du catalog
-			ServiceDatabaseMaintenance.maintenancePgCatalog(poolIndex, null, FormatSQL.VACUUM_OPTION_FULL);
+			DatabaseMaintenance.maintenancePgCatalog(poolIndex, null, FormatSQL.VACUUM_OPTION_FULL);
 			// maintenance des tables métier de la base de données
-			ServiceDatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null, envExecution);
+			DatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null, envExecution);
 		}
 	}
 
@@ -614,7 +614,7 @@ class BatchARC implements IReturnCode {
 					@Override
 					public void run() {
 						for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
-							ServiceDatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null,
+							DatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null,
 									envExecution);
 						}
 					}
