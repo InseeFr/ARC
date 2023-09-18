@@ -1,7 +1,7 @@
 package fr.insee.arc.core.factory;
 
-import fr.insee.arc.core.service.api.ApiNormageService;
-import fr.insee.arc.core.service.api.ApiService;
+import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.p3normage.ApiNormageService;
 
 public class ApiNormageServiceFactory implements IServiceFactory {
 

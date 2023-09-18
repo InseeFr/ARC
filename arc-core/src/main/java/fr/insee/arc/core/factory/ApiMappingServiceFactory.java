@@ -1,7 +1,7 @@
 package fr.insee.arc.core.factory;
 
-import fr.insee.arc.core.service.api.ApiMappingService;
-import fr.insee.arc.core.service.api.ApiService;
+import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.p5mapping.ApiMappingService;
 
 public class ApiMappingServiceFactory implements IServiceFactory {
 

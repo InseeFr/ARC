@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.api.ApiService;
+import fr.insee.arc.core.service.global.ApiService;
 
 public class ApiServiceFactoryTest {
 

@@ -1,6 +1,6 @@
 package fr.insee.arc.core.factory;
 
-import fr.insee.arc.core.service.api.ApiService;
+import fr.insee.arc.core.service.global.ApiService;
 
 public interface IServiceFactory {
 	

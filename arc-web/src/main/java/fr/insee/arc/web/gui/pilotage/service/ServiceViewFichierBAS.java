@@ -17,10 +17,10 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.api.ApiInitialisationService;
-import fr.insee.arc.core.service.api.ApiService;
-import fr.insee.arc.core.service.api.query.ServiceHashFileName;
-import fr.insee.arc.core.service.api.query.ServicePhase;
+import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
+import fr.insee.arc.core.service.global.dao.PhaseOperations;
+import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -141,7 +141,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		ArrayList<String> tableDownload = new ArrayList<>();
 		try {
 			
-			List<String> dataTables = ServicePhase.selectPhaseDataTablesFoundInEnv(null, getBacASable());
+			List<String> dataTables = PhaseOperations.selectPhaseDataTablesFoundInEnv(null, getBacASable());
 
 			if (!dataTables.isEmpty()) {
 				for (String table : dataTables) {
@@ -205,7 +205,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 				// for each files, generate the download query
 				for (String idSource : idSources) {
 					tableauRequete.add(new ArcPreparedStatementBuilder(
-							"SELECT * FROM " + ServiceHashFileName.tableOfIdSource(t, idSource)));
+							"SELECT * FROM " + HashFileNameConversion.tableOfIdSource(t, idSource)));
 					fileNames.add(t + "_" + idSource);
 				}
 

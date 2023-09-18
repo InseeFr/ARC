@@ -13,10 +13,10 @@ import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.api.ApiInitialisationService;
-import fr.insee.arc.core.service.api.ApiService;
-import fr.insee.arc.core.service.api.query.ServiceResetEnvironment;
-import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
+import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.dao.ResetEnvironmentOperations;
+import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
+import fr.insee.arc.core.service.p0initialisation.engine.BddPatcher;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -121,7 +121,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		loggerDispatcher.debug("undoBatch", LOGGER);
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 
-		ServiceResetEnvironment.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
+		ResetEnvironmentOperations.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -157,7 +157,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 */
 	public String resetBAS(Model model) {
 
-		ServiceResetEnvironment.resetBAS(getBacASable(), this.repertoire);
+		ResetEnvironmentOperations.resetBAS(getBacASable(), this.repertoire);
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

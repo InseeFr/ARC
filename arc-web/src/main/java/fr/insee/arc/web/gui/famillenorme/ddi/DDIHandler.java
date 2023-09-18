@@ -7,11 +7,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import fr.insee.arc.core.model.ddi.DDIDatabase;
-import fr.insee.arc.core.model.ddi.DDIRepresentedVariable;
-import fr.insee.arc.core.model.ddi.DDITable;
-import fr.insee.arc.core.model.ddi.DDIVariable;
-import fr.insee.arc.core.model.ddi.DDIVariableOfTable;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIDatabase;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIRepresentedVariable;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDITable;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIVariable;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIVariableOfTable;
 
 /**
  * Classe handler intégrant un modèle de données décrit dans un XML DDI dans le modèle Java {@code ddi}

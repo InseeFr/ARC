@@ -22,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.api.ApiInitialisationService;
-import fr.insee.arc.core.service.api.ApiReceptionService;
-import fr.insee.arc.core.service.api.ApiService;
-import fr.insee.arc.core.service.api.query.ServiceResetEnvironment;
-import fr.insee.arc.core.service.engine.initialisation.BddPatcher;
+import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.dao.ResetEnvironmentOperations;
+import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
+import fr.insee.arc.core.service.p0initialisation.engine.BddPatcher;
+import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -113,7 +113,7 @@ public class ExecuteServiceController {
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
 
-			ServiceResetEnvironment.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArcPreparedStatementBuilder());
+			ResetEnvironmentOperations.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArcPreparedStatementBuilder());
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
 

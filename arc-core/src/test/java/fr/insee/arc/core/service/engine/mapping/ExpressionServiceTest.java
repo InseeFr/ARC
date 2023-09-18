@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.insee.arc.core.service.p5mapping.engine.ExpressionService;
+
 public class ExpressionServiceTest {
 
 	private ExpressionService expressionService;

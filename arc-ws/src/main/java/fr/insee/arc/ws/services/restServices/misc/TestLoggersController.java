@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.insee.arc.core.model.TestLoggers;
+import fr.insee.arc.core.util.TestLoggers;
 
 @RestController
 

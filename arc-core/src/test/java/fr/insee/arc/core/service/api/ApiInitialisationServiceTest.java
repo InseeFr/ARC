@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
+import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 

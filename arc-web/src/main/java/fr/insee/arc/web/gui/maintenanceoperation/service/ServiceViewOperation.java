@@ -3,7 +3,7 @@ package fr.insee.arc.web.gui.maintenanceoperation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-import fr.insee.arc.core.model.TestLoggers;
+import fr.insee.arc.core.util.TestLoggers;
 
 
 @Service

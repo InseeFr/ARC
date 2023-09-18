@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fr.insee.arc.core.model.ddi.DDIDatabase;
-import fr.insee.arc.core.model.ddi.DDIRepresentedVariable;
-import fr.insee.arc.core.model.ddi.DDITable;
-import fr.insee.arc.core.model.ddi.DDIVariable;
-import fr.insee.arc.core.model.ddi.DDIVariableOfTable;
-import fr.insee.arc.core.model.famille.ModelTable;
-import fr.insee.arc.core.model.famille.ModelVariable;
-import fr.insee.arc.core.model.famille.ModelVariableTypeEnum;
+import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelTable;
+import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelVariable;
+import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelVariableTypeEnum;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIDatabase;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIRepresentedVariable;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDITable;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIVariable;
+import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIVariableOfTable;
 
 /**
  * Classe intégrant un modèle de données en sortie de {@link DDIHandler} dans le modèle {@code famille} de ARC
