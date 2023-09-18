@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import fr.insee.arc.web.gui.all.util.ArcStringUtils;
+
 public class ArcStringUtilsTest {
 
 	//cleanUpVariable(String)

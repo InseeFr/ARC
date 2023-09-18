@@ -23,11 +23,11 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.util.LineObject;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.gui.pilotage.dao.PilotageDao;
 import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
-import fr.insee.arc.web.util.LineObject;
-import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

@@ -26,8 +26,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.ressourceUtils.PropertySourcesHelper;
-import fr.insee.arc.web.interceptor.ArcInterceptor;
-import fr.insee.arc.web.util.WebLoggerDispatcher;
+import fr.insee.arc.web.gui.all.interceptor.ArcInterceptor;
+import fr.insee.arc.web.gui.all.util.WebLoggerDispatcher;
 
 @EnableWebMvc
 @Configuration

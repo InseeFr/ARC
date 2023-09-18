@@ -10,9 +10,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.index.dao.IndexDao;
 import fr.insee.arc.web.gui.index.model.ModelIndex;
-import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

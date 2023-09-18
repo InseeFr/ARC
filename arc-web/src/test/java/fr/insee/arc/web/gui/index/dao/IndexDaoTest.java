@@ -13,10 +13,10 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
+import fr.insee.arc.web.gui.all.util.Session;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObjectService;
 import fr.insee.arc.web.gui.index.model.ViewIndex;
-import fr.insee.arc.web.util.Session;
-import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectService;
 
 public class IndexDaoTest extends InitializeQueryTest {
 

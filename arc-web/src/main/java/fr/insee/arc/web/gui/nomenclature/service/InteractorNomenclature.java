@@ -15,9 +15,9 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.nomenclature.dao.GererNomenclatureDao;
 import fr.insee.arc.web.gui.nomenclature.model.ModelNomenclature;
-import fr.insee.arc.web.util.VObject;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)

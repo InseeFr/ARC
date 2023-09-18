@@ -20,8 +20,8 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.web.util.ConstanteBD;
-import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstanteBD;
+import fr.insee.arc.web.gui.all.util.VObject;
 
 @Service
 public class ServiceViewJeuxDeRegles extends InteractorNorme {

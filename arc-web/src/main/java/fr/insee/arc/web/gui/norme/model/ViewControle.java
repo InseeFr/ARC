@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 
 public class ViewControle extends AbstractViewRule {
 	public ViewControle() {

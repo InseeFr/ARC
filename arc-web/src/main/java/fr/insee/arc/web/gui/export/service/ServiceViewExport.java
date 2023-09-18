@@ -23,7 +23,7 @@ import org.springframework.ui.Model;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObject;
 
 @Service
 public class ServiceViewExport extends InteractorExport {

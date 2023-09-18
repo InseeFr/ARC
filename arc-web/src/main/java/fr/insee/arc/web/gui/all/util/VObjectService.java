@@ -1,4 +1,4 @@
-package fr.insee.arc.web.util;
+package fr.insee.arc.web.gui.all.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +49,7 @@ import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 
 /**
  * A service to easily manipulate and display in the app any database object (or

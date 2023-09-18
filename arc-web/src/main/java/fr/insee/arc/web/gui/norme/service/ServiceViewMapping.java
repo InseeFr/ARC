@@ -11,7 +11,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.api.ApiService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.web.util.ConstanteBD;
+import fr.insee.arc.web.gui.all.util.ConstanteBD;
 
 @Service
 public class ServiceViewMapping extends InteractorNorme {

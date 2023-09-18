@@ -6,9 +6,9 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
-import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectHelperDao;
-import fr.insee.arc.web.util.VObjectService;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
+import fr.insee.arc.web.gui.all.util.VObjectService;
 
 public class MaintenanceParametreDao extends VObjectHelperDao {
 	

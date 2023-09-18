@@ -33,11 +33,11 @@ import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.dao.ArcWebGenericDao;
 import fr.insee.arc.web.gui.all.model.ArcModel;
+import fr.insee.arc.web.gui.all.util.Session;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObjectService;
 import fr.insee.arc.web.gui.home.HomeAction;
 import fr.insee.arc.web.gui.index.service.IndexAction;
-import fr.insee.arc.web.util.Session;
-import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectService;
 
 /**
  * An abstract class that all the controllers using VObject should extend. 

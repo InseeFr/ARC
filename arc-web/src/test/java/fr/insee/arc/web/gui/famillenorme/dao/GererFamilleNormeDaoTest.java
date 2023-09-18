@@ -19,14 +19,14 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.web.gui.all.util.Session;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObjectService;
 import fr.insee.arc.web.gui.famillenorme.model.ViewClient;
 import fr.insee.arc.web.gui.famillenorme.model.ViewFamilleNorme;
 import fr.insee.arc.web.gui.famillenorme.model.ViewHostAllowed;
 import fr.insee.arc.web.gui.famillenorme.model.ViewTableMetier;
 import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
-import fr.insee.arc.web.util.Session;
-import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectService;
 
 public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 

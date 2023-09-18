@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.insee.arc.web.gui.all.util.TableObject;
+import fr.insee.arc.web.gui.all.util.VObject;
+
 public class VObjectTest {
 	
 	private VObject defaultTestVobject;

@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.web.util.ConstantVObject;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
-import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstantVObject;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 
 public class ViewVariableMetier  extends VObject {
 

@@ -16,9 +16,9 @@ import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectHelperDao;
-import fr.insee.arc.web.util.VObjectService;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
+import fr.insee.arc.web.gui.all.util.VObjectService;
 
 public class PilotageDao extends VObjectHelperDao {
 

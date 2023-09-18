@@ -1,4 +1,4 @@
-package fr.insee.arc.web.util;
+package fr.insee.arc.web.gui.all.util;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package fr.insee.arc.web.interceptor;
+package fr.insee.arc.web.gui.all.interceptor;
 
 import java.nio.charset.StandardCharsets;
 

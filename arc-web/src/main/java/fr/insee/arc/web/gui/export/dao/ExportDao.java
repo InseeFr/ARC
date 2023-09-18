@@ -18,9 +18,9 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.web.util.VObject;
-import fr.insee.arc.web.util.VObjectHelperDao;
-import fr.insee.arc.web.util.VObjectService;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
+import fr.insee.arc.web.gui.all.util.VObjectService;
 
 public class ExportDao extends VObjectHelperDao {
 

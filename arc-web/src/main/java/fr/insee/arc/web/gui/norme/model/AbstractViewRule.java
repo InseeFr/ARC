@@ -3,9 +3,9 @@ package fr.insee.arc.web.gui.norme.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import fr.insee.arc.web.util.ConstantVObject;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
-import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstantVObject;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 
 /** Abstract class for rules display (load, control,...)*/
 abstract class AbstractViewRule extends VObject {

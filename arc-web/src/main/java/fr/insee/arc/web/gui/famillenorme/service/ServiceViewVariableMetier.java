@@ -14,8 +14,8 @@ import org.springframework.ui.Model;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.web.util.ArcStringUtils;
-import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.gui.all.util.ArcStringUtils;
+import fr.insee.arc.web.gui.all.util.VObject;
 
 @Service
 public class ServiceViewVariableMetier extends InteractorFamilleNorme {

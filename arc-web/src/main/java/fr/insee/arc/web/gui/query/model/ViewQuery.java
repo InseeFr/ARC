@@ -2,9 +2,9 @@ package fr.insee.arc.web.gui.query.model;
 
 import java.util.HashMap;
 
-import fr.insee.arc.web.util.ConstantVObject;
-import fr.insee.arc.web.util.ConstantVObject.ColumnRendering;
-import fr.insee.arc.web.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstantVObject;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 
 public class ViewQuery extends VObject {
     public ViewQuery() {
