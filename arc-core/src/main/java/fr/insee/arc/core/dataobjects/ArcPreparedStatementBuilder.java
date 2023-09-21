@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
+import fr.insee.arc.utils.dao.SQL;
 
 public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder {
 
@@ -63,6 +64,10 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 		return sqlListeOfColumnsFromModel(tableEnum.getColumns());
 	}
 
+	public ArcPreparedStatementBuilder append(ViewEnum view) {
+		return (ArcPreparedStatementBuilder) this.append(view.getTableName());
+	}
+	
 	public ArcPreparedStatementBuilder append(ColumnEnum column) {
 		return (ArcPreparedStatementBuilder) this.append(column.getColumnName());
 	}
@@ -70,4 +75,13 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	public String quoteText(ColumnEnum column) {
 		return quoteText(column.getColumnName());
 	}
+	
+	@Override
+	public ArcPreparedStatementBuilder build(Object... queryElements) {
+		for (Object queryElement : queryElements) {
+			getQuery().append(queryElement);
+		}
+		return this;
+	}
+	
 }

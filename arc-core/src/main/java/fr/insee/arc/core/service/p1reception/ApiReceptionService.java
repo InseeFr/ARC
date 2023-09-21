@@ -39,7 +39,8 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
-import fr.insee.arc.core.service.p0initialisation.model.ListIdSourceInPilotage;
+import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
+import fr.insee.arc.core.service.p0initialisation.pilotage.bo.ListIdSourceInPilotage;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
@@ -631,8 +632,9 @@ public class ApiReceptionService extends ApiService {
 				soumettreRequete(requete);
 				
 				if (idSourceToBeDeleted!=null) {
-					ApiInitialisationService.dropUnusedDataTablesAllNods(connexion, this.envExecution, this.tablePil, idSourceToBeDeleted);
-					ApiInitialisationService.deleteUnusedDataRecordsAllNods(connexion, envExecution, tablePil, idSourceToBeDeleted);
+					SynchronizeDataByPilotage synchronizationInstance =  new SynchronizeDataByPilotage(this.coordinatorSandbox);
+					synchronizationInstance.dropUnusedDataTablesAllNods(idSourceToBeDeleted);
+					synchronizationInstance.deleteUnusedDataRecordsAllNods(idSourceToBeDeleted);
 				}
 
 			}

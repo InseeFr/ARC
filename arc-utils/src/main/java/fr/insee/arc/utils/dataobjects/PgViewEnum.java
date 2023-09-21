@@ -17,6 +17,9 @@ public enum PgViewEnum {
 	// view for table aliases or temporary table in query
 	, T1("t1",PgSchemaEnum.TEMPORARY), T2("t2",PgSchemaEnum.TEMPORARY), T3("t3",PgSchemaEnum.TEMPORARY)
 	
+	, ALIAS_A("a",PgSchemaEnum.TEMPORARY), ALIAS_B("b",PgSchemaEnum.TEMPORARY), ALIAS_C("c",PgSchemaEnum.TEMPORARY)
+
+
 	// postgres meta table
 	, PG_TABLES("pg_tables", PgSchemaEnum.CATALOG, PgColumnEnum.SCHEMANAME, PgColumnEnum.TABLENAME)
 	;

@@ -72,12 +72,12 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     
     public static String extractSchemaNameToken(String fullTableName)
     {
-    	return fullTableName.contains(DOT) ? ManipString.substringBeforeFirst(fullTableName, DOT) : null;
+    	return fullTableName.contains(SQL.DOT.getSqlCode()) ? ManipString.substringBeforeFirst(fullTableName, SQL.DOT.getSqlCode()) : null;
     }
     
     public static String extractTableNameToken(String fullTableName)
     {
-    	return ManipString.substringAfterFirst(fullTableName, DOT);
+    	return ManipString.substringAfterFirst(fullTableName, SQL.DOT.getSqlCode());
     }
 
     
@@ -203,7 +203,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @param triggersAndIndexes
      * @return
      */
-    public static StringBuilder rebuildTableAsSelectWhere(String table, String where, String... triggersAndIndexes)
+    public static StringBuilder rebuildTableAsSelectWhere(String table, String where)
     {
         String tableRebuild = temporaryTableName(table, "RB");
         
@@ -217,11 +217,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
         requete.append(
                 "\n ALTER TABLE " + tableRebuild + " RENAME TO " + ManipString.substringAfterFirst(table, ".") + " ;");
         requete.append("set enable_nestloop=on; ");
-        for (int i = 0; i < triggersAndIndexes.length; i++)
-        {
-            requete.append(triggersAndIndexes[i]);
-        }
-                
         return requete;
     }
 
@@ -260,6 +255,17 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
     	return "SELECT (count(*)>0) as has_record FROM (SELECT 1 FROM " + tableIn + " LIMIT 1) u";
     }
 
+    /**
+     * check if table is temporary according to its name
+     * no SQL.DOT in temporary
+     * @return
+     */
+    public static boolean isTemporary(String tablename)
+    {
+    	return !tablename.contains(SQL.DOT.getSqlCode());
+    }
+    
+    
      /**
      * Ajoute un suffixe de table temporaire au nom de table {@code aName}
      *
@@ -313,14 +319,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      */
     public static String textToSql(String val)
     {
-        if (val == null || val.trim().equals(""))
-        {
-            return "null";
-        }
-        else
-        {
-            return "'" + val.replace("'", "''") + "'";
-        }
+    	return val == null ? "NULL" : "'" + val.replace("'", "''") + "'";
     }
 
     /**

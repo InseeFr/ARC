@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 public class GenericPreparedStatementBuilder {
 
@@ -156,7 +157,7 @@ public class GenericPreparedStatementBuilder {
 	 * @return
 	 */
 	public String quoteTextWithoutBinding(String p) {
-		return p == null ? "NULL" : "'" + p.replace("'", "''") + "'";
+		return FormatSQL.textToSql(p);
 	}
 
 	public String quoteNumberWithoutBinding(String p) {
@@ -254,15 +255,12 @@ public class GenericPreparedStatementBuilder {
 	 * 
 	 * @return
 	 */
-	public GenericPreparedStatementBuilder copyFromGenericBean(String tableName, GenericBean gb, boolean temporary) {
-		// drop target table if exists
-		query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(tableName).append(SQL.END_QUERY);
-
+	public GenericPreparedStatementBuilder copyFromGenericBean(String tableName, GenericBean gb) {
 		// create the table structure
-		createWithGenericBean(tableName, gb, temporary);
+		createWithGenericBean(tableName, gb);
 		
 		// insert
-		insertWithGenericBean(tableName, gb);
+		insertWithGenericBeanByChunk(tableName, gb, 0, gb.getContent().size());
 
 		return this;
 	}
@@ -273,10 +271,14 @@ public class GenericPreparedStatementBuilder {
 	 * @param gb
 	 * @return
 	 */
-	public GenericPreparedStatementBuilder createWithGenericBean(String tableName, GenericBean gb, boolean temporary)
+	public GenericPreparedStatementBuilder createWithGenericBean(String tableName, GenericBean gb)
 	{
+		// drop target table if exists
+		query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(tableName).append(SQL.END_QUERY);
+		
 		query.append(SQL.CREATE);
-		if (temporary) {
+		
+		if (FormatSQL.isTemporary(tableName)) {
 			query.append(SQL.TEMPORARY);
 		}
 
@@ -301,14 +303,19 @@ public class GenericPreparedStatementBuilder {
 	 * @param tableName
 	 * @param gb
 	 */
-	public GenericPreparedStatementBuilder insertWithGenericBean(String tableName, GenericBean gb)
+	public GenericPreparedStatementBuilder insertWithGenericBeanByChunk(String tableName, GenericBean gb, int chunkStart, int chunkStop)
 	{
 		if (!gb.getContent().isEmpty()) {
 
 			query.append(SQL.INSERT_INTO).append(tableName).append(SQL.VALUES);
 			boolean firstLine = true;
+			
+			// if chunkstop too high, limit it to the size of generic bean content
+			chunkStop = (chunkStop > gb.getContent().size()) ? gb.getContent().size() : chunkStop;
 
-			for (int i = 0; i < gb.getContent().size(); i++) {
+			ArrayList<String> types = gb.getTypes();
+		
+			for (int i = chunkStart; i < chunkStop; i++) {
 				ArrayList<String> line = gb.getContent().get(i);
 
 				if (firstLine) {
@@ -317,32 +324,43 @@ public class GenericPreparedStatementBuilder {
 					query.append(",");
 				}
 
-				boolean firstCell = true;
+				insertLine(types, line);
 
-				query.append("(");
-
-				for (int j = 0; j < line.size(); j++) {
-
-					String cell = line.get(j);
-
-					if (firstCell) {
-						firstCell = false;
-					} else {
-						query.append(",");
-					}
-					query.append(quoteText(cell));
-					if (!gb.getTypes().get(j).equals(TypeEnum.TEXT.getTypeName()))
-					{
-						query.append(SQL.CAST_OPERATOR);
-						query.append(gb.getTypes().get(j));
-					}
-				}
-				
-				query.append(")");
 			}
 			query.append(SQL.END_QUERY);
 		}
 		return this;
+	}
+	
+	/**
+	 * insert in the query the corresponding tuple of a given list of values 
+	 * @param types
+	 * @param line
+	 */
+	private void insertLine(List<String> types, List<String> line)
+	{
+		boolean firstCell = true;
+
+		query.append("(");
+
+		for (int j = 0; j < line.size(); j++) {
+
+			String cell = line.get(j);
+
+			if (firstCell) {
+				firstCell = false;
+			} else {
+				query.append(",");
+			}
+			// cannot use bind variables here : potentially too many bounded values
+			query.append(quoteTextWithoutBinding(cell));
+			if (!types.get(j).equals(TypeEnum.TEXT.getTypeName()))
+			{
+				query.append(SQL.CAST_OPERATOR);
+				query.append(types.get(j));
+			}
+		}
+		query.append(")");
 	}
 	
 }

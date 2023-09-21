@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
+import fr.insee.arc.core.service.p0initialisation.userdata.SynchronizeUserRulesAndMetadata;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -122,7 +123,7 @@ public class ServiceViewPilotageProd extends InteractorPilotage {
      */
     public String applyRulesProd(Model model) {
     	try {
-    		ApiInitialisationService.copyMetadataAllNods(null, ApiService.IHM_SCHEMA, getBacASable());
+    		SynchronizeUserRulesAndMetadata.copyMetadataAllNods(null, getBacASable());
     	}
 		catch (ArcException e)
 		{

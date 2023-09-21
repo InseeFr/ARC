@@ -299,7 +299,7 @@ public class ClientDaoImpl implements ClientDao {
     public void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.getResponse()");
         Connection connection = null;
-        ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> result = new ArrayList<>();
 
         int nbLines = 0;
         int blockSize = 10000;

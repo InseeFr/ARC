@@ -11,7 +11,7 @@ public enum SQL {
 
 	BEGIN("BEGIN;"), END("END;"),
 
-	AND("AND"), OR("OR"), UNION_ALL("UNION ALL"), IN("IN"),
+	AND("AND"), OR("OR"), UNION_ALL("UNION ALL"), IN("IN"), NOT("NOT"),
 	
 	LIMIT("LIMIT"), OFFSET("OFFSET"),
 
@@ -29,16 +29,16 @@ public enum SQL {
 	
 	VALUES("VALUES"),
 	
+	SPACE(" "),
+	
 	// symbol
-	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false),
+	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false), DOT(".",false)
 	
 	;
 
 	private String sqlCode;
 
 	private boolean escapeWithSpace;
-
-	private static final String SPACE = " ";
 
 	private SQL(String sqlCode, boolean escapeWithSpace) {
 		this.sqlCode = sqlCode;
@@ -57,7 +57,7 @@ public enum SQL {
 	@Override
 	public String toString() {
 		if (escapeWithSpace) {
-			return SPACE + this.sqlCode + SPACE;
+			return SPACE.sqlCode + this.sqlCode + SPACE.sqlCode;
 		} else {
 			return this.sqlCode;
 		}

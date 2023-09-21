@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
@@ -17,6 +18,7 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.ManipString;
 
 public class PilotageOperations {
 
@@ -41,10 +43,9 @@ public class PilotageOperations {
 		query.append("\n SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
 
 		if (jointure.length > 0) {
-			query.append(", jointure= " + FormatSQL.textToSql(jointure[0]) + "");
+			query.append(", jointure= " + FormatSQL.textToSql(ManipString.nullIfEmptyTrim(jointure[0])));
 		}
 		query.append(";");
-
 		return query.toString();
 	}
 
@@ -139,21 +140,21 @@ public class PilotageOperations {
 	 * @param etat
 	 * @return
 	 */
-	public static ArcPreparedStatementBuilder querySelectIdSourceFromPilotage(String tablePilotage, TraitementPhase phase, TraitementEtat etat)
+	public static ArcPreparedStatementBuilder querySelectIdSourceFromPilotage(String envExecution, TraitementPhase phase, TraitementEtat etat)
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
 		
-		query.build(SQL.SELECT, ColumnEnum.ID_SOURCE.getColumnName(), SQL.FROM, tablePilotage);
+		query.build(SQL.SELECT, ColumnEnum.ID_SOURCE.getColumnName(), SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
 		query.build(SQL.WHERE, ColumnEnum.PHASE_TRAITEMENT, "=" , query.quoteText(phase.toString()));
 		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.getSqlArrayExpression()), SQL.CAST_OPERATOR, "text[]");		
 		return query;
 	}
 
-	public static String accessSelectEtapeForIdSource(Connection connection, String tablePilotage, TraitementPhase phase, TraitementEtat etat, String idSource) throws ArcException
+	public static String accessSelectEtapeForIdSource(Connection connection, String envExecution, TraitementPhase phase, TraitementEtat etat, String idSource) throws ArcException
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		
-		query.build(SQL.SELECT, ColumnEnum.ETAPE, SQL.FROM, tablePilotage);
+		query.build(SQL.SELECT, ColumnEnum.ETAPE, SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
 		query.build(SQL.WHERE, ColumnEnum.PHASE_TRAITEMENT, "=", query.quoteText(phase.toString()));
 		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.getSqlArrayExpression()), SQL.CAST_OPERATOR, ColumnEnum.ETAT_TRAITEMENT.getColumnType().getTypeName() );
 		query.build(SQL.AND, ColumnEnum.ID_SOURCE.getColumnName(), "=", query.quoteText(idSource));

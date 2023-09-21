@@ -9,21 +9,11 @@ public interface IConstanteCaractere {
 	    // Marker
 	    public static final String comma = ",";
 	    public static final String empty = "";
-	    public static final String BOM = "\uFEFF";
-	    public static final String colon = ":";
-	    public static final String closingBrace = "}";
 	    public static final String closingParenthesis = ")";
-	    public static final String dash = "-";
 	    public static final String dollar = "$";
-	    public static final String DOT = ".";
-	    public static final String equals = "=";
 	    public static final String newline = "\n";
-	    public static final String openingBrace = "{";
 	    public static final String openingParenthesis = "(";
-	    public static final String percent = "%";
-	    public static final String plus = "+";
 	    public static final String quote = "'";
-	    public static final String quotequote = "''";
 	    public static final String semicolon = ";";
 	    public static final String sharp = "#";
 	    public static final String space = " ";

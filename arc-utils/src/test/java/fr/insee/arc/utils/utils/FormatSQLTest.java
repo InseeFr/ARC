@@ -141,15 +141,12 @@ public class FormatSQLTest extends InitializeQueryTest {
 	 */
 	private static void rebuildTableAsSelectWhere(String aTable) throws ArcException
 	{
-		String indexCreationQuery = "CREATE index idx1_test_index on " + aTable + " (i);";
-
 		// create a table with an index
 		UtilitaireDao.get(0).executeImmediate(c,
 				"CREATE TABLE " + aTable + " as SELECT i FROM generate_series(1,20) i");
-		UtilitaireDao.get(0).executeImmediate(c, indexCreationQuery);
 
 		// execute the rebuild with a where condition
-		UtilitaireDao.get(0).executeImmediate(c, FormatSQL.rebuildTableAsSelectWhere(aTable, "i<=15", indexCreationQuery));
+		UtilitaireDao.get(0).executeImmediate(c, FormatSQL.rebuildTableAsSelectWhere(aTable, "i<=15"));
 
 		// test
 		// the table must exists and should have only 15 records left

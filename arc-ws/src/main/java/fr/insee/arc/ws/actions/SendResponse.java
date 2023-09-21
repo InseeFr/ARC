@@ -15,27 +15,8 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 
 /**Cette classe permet d'envoyer la réponse au client via un flux compressé.
  * La réponse aura une des formes suivantes :
- *
- * - dans le cas d'un appel au service "query" :
- * {
- *	"type":"jsonwsp/response",
- *	"responses":
- *		[
- *			{
- *				"id":"int",
- *				"table":
- *					[
- *						"nomColonne1;nomColonne2;...;nomColonnen;",
- *						"typeColonne1;typeColonne2;...;typeColonnen;",
- *						"a11;a12;...;a1n;",
- *						"...",
- *						"an1;an2;...;ann;"
- *					]
- *			},
- *		]
- * }
- *
- * - dans le cas d'un appel au service "arcClient" :
+ * 
+ * Dans le cas d'un appel au service "arcClient" :
  * {
  *	"type":"jsonwsp/response",
  *	"responses":

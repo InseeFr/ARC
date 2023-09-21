@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dataobjects.PgColumnEnum;
 import fr.insee.arc.utils.dataobjects.PgSchemaEnum;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
@@ -123,6 +124,8 @@ public enum ColumnEnum {
 	, JOINTURE("jointure", TypeEnum.TEXT, "data structure query of the processing file")
 	, GENERATION_COMPOSITE("generation_composite", TypeEnum.TEXT, "timestamp of the end of the process of the file in pilotage")
 
+	, ENTREPOT("entrepot", TypeEnum.TEXT, "name of the datastore that recieve archive file")
+	, NOM_ARCHIVE("nom_archive", TypeEnum.TEXT, "name of archive file")
 	
 	, TEST1(PgColumnEnum.TEST1), TEST2(PgColumnEnum.TEST2)
 	
@@ -187,5 +190,9 @@ public enum ColumnEnum {
 		return SchemaEnum.valueOf(pgSchema.toString());
 	}
 	
+	public String alias(ViewEnum v)
+	{
+		return v.getTableName()+SQL.DOT.getSqlCode()+this.columnName;
+	}
 	
 }

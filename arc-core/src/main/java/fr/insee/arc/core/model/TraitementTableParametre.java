@@ -1,21 +1,24 @@
 package fr.insee.arc.core.model;
 
+import fr.insee.arc.core.dataobjects.ViewEnum;
+
 public enum TraitementTableParametre {
-    CALENDRIER("CALENDRIER"), //
-    NORME("NORME"), //
-    JEUDEREGLE("JEUDEREGLE"), //
-    CHARGEMENT_REGLE("CHARGEMENT_REGLE"), //
-    NORMAGE_REGLE("NORMAGE_REGLE"), //
-    CONTROLE_REGLE("CONTROLE_REGLE"), //
-    MAPPING_REGLE("MAPPING_REGLE"), //
-    EXPRESSION("EXPRESSION"), //
-    MOD_TABLE_METIER("MOD_TABLE_METIER"), //
-    MOD_VARIABLE_METIER("MOD_VARIABLE_METIER");
-    private TraitementTableParametre(String anExpression) {
-        this.expression = anExpression;
+    CALENDRIER(ViewEnum.IHM_CALENDRIER), //
+    NORME(ViewEnum.IHM_NORME), //
+    JEUDEREGLE(ViewEnum.IHM_JEUDEREGLE), //
+    CHARGEMENT_REGLE(ViewEnum.IHM_CHARGEMENT_REGLE), //
+    NORMAGE_REGLE(ViewEnum.IHM_NORMAGE_REGLE), //
+    CONTROLE_REGLE(ViewEnum.IHM_CONTROLE_REGLE), //
+    MAPPING_REGLE(ViewEnum.IHM_MAPPING_REGLE), //
+    EXPRESSION(ViewEnum.IHM_EXPRESSION), //
+    MOD_TABLE_METIER(ViewEnum.MOD_TABLE_METIER), //
+    MOD_VARIABLE_METIER(ViewEnum.MOD_VARIABLE_METIER);
+    
+	private TraitementTableParametre(ViewEnum tablename) {
+        this.tablename = tablename;
     }
 
-    private String expression;
+    private ViewEnum tablename;
     
     public boolean isPartOfRuleset() {
     	return this == TraitementTableParametre.CHARGEMENT_REGLE 
@@ -27,6 +30,6 @@ public enum TraitementTableParametre {
 
     @Override
     public String toString() {
-        return this.expression;
+        return this.tablename.getFullName();
     }
 }

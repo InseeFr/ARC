@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
@@ -200,6 +202,17 @@ public class GenericBean {
 		}
 		return r;
 	}
+	
+	/**
+	 * return column values as list
+	 * @param columnName
+	 * @return
+	 */
+	public List<String> getColumnValues(String columnName)
+	{
+		return ObjectUtils.firstNonNull(this.mapContent().get(columnName), new ArrayList<String>()); 
+	}
+	
 
 	public ArrayList<String> getHeaders() {
 		return headers;

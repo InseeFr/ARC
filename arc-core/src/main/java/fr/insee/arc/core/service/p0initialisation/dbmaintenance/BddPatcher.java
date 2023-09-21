@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p0initialisation.engine;
+package fr.insee.arc.core.service.p0initialisation.dbmaintenance;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

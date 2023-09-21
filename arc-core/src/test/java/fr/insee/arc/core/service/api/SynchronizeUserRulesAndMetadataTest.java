@@ -1,23 +1,22 @@
 package fr.insee.arc.core.service.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.sql.SQLException;
 
 import org.junit.Test;
 
-import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
-import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
+import fr.insee.arc.core.service.p0initialisation.userdata.SynchronizeUserRulesAndMetadata;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 
-public class ApiInitialisationServiceTest extends InitializeQueryTest {
+public class SynchronizeUserRulesAndMetadataTest extends InitializeQueryTest {
 	
 	@Test
 	public void copyMetadataToExecutorsTestNotScalable() throws SQLException, ArcException {
 		buildPropertiesWithNoScalability(null);
-		int result=ApiInitialisationService.copyMetadataToExecutorsAllNods(c, BddPatcherTest.testSandbox3);
+		int result=SynchronizeUserRulesAndMetadata.copyMetadataToExecutorsAllNods(c, BddPatcherTest.testSandbox3);
 		assertEquals(0, result);
 	}
 
@@ -29,7 +28,7 @@ public class ApiInitialisationServiceTest extends InitializeQueryTest {
 		
 		BddPatcherTest.initializeDatabaseForRetrieveTablesFromSchemaTest(u);
 		
-		int result=ApiInitialisationService.copyMetadataToExecutorsAllNods(c, BddPatcherTest.testSandbox3);
+		int result=SynchronizeUserRulesAndMetadata.copyMetadataToExecutorsAllNods(c, BddPatcherTest.testSandbox3);
 		
 		// copy should be a success
 		assertEquals(1, result);

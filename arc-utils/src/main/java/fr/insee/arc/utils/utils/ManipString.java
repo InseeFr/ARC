@@ -64,6 +64,19 @@ public class ManipString implements IConstanteCaractere {
                              .collect(Collectors.toList());
     }
     
+    
+    /**
+     * return null String if trim expression if empty
+     * @param element
+     * @return
+     */
+    public static String nullIfEmptyTrim(String element)
+    {
+    	return (element == null || element.trim().equals(""))?null:element;
+    }
+    
+    
+    
     /**
      * Convert a variadic elements into an arrayList
      * @param elements

@@ -78,14 +78,4 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 		return undoActionBAS(model);
 	}
 
-	/**
-	 * retour arriere d'une phase
-	 *
-	 * @return
-	 */
-	@RequestMapping("/resetPhaseBAS")
-	public String resetPhaseBASAction(Model model) {
-		return resetPhaseBAS(model);
-	}
-	
 }

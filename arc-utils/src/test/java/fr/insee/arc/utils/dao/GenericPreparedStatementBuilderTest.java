@@ -1,7 +1,5 @@
 package fr.insee.arc.utils.dao;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import fr.insee.arc.utils.exception.ArcException;
@@ -23,7 +21,7 @@ public class GenericPreparedStatementBuilderTest extends InitializeQueryTest {
 		
 		// copy the content into a target table using copyFromGenericBean
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.copyFromGenericBean("test.table_test_copy", gb , false);
+		query.copyFromGenericBean("test.table_test_copy", gb);
 		UtilitaireDao.get(0).executeRequest(c, query);
 		
 		// test result

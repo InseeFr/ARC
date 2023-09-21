@@ -1,9 +1,19 @@
 package fr.insee.arc.core.service.global.dao;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.FileUtilsArc;
+import fr.insee.arc.utils.structure.GenericBean;
 
 public class FileSystemManagement {
 
@@ -65,4 +75,21 @@ public class FileSystemManagement {
 		return directoryPhaseEtat(rootDirectory, env, t, TraitementEtat.ENCOURS);
 	}
 
+	/**
+	 * delete a file if it is the same as another reference file
+	 * @param fileToDeleteIfSame
+	 * @param fileToCompare
+	 * @throws ArcException
+	 */
+	public static void deleteFileIfSameAs(File fileToDeleteIfSame, File fileToCompare) throws ArcException
+	{
+		try {
+			if (fileToCompare.exists() && FileUtils.contentEquals(fileToCompare, fileToDeleteIfSame)) {
+				FileUtilsArc.delete(fileToDeleteIfSame);
+			}
+		} catch (IOException exception) {
+			throw new ArcException(exception, ArcExceptionMessage.FILE_DELETE_FAILED, fileToDeleteIfSame);
+		}
+	}
+	
 }

@@ -380,36 +380,4 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		return updateToDelete;
 	}
 
-	/**
-	 * retour arriere d'une phase
-	 *
-	 * @return
-	 */
-	public String resetPhaseBAS(Model model) {
-		Map<String, ArrayList<String>> selection = views.getViewFichierBAS().mapContentSelected();
-		ArcPreparedStatementBuilder querySelection = this.vObjectService.queryView(views.getViewFichierBAS());
-
-		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
-		// choisis pour le retour arriere
-		//
-		if (!selection.isEmpty()) {
-			querySelection
-					.append(" AND id_source IN " + querySelection.sqlListeOfValues(selection.get("id_source")) + " ");
-		}
-
-		// On recupere la phase
-		String phase = views.getViewFichierBAS().mapContent().get("phase_traitement").get(0);
-
-		// Lancement du retour arrière
-		ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-				ApiService.IHM_SCHEMA, getBacASable(), this.repertoire,
-				TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
-		try {
-			serv.retourPhasePrecedente(TraitementPhase.valueOf(phase), querySelection, null);
-		} finally {
-			serv.finaliser();
-		}
-		return generateDisplay(model, RESULT_SUCCESS);
-	}
-
 }

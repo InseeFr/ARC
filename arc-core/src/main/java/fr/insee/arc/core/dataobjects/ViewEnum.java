@@ -3,6 +3,7 @@ package fr.insee.arc.core.dataobjects;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dataobjects.PgColumnEnum;
 import fr.insee.arc.utils.dataobjects.PgViewEnum;
 
@@ -104,8 +105,8 @@ public enum ViewEnum {
 			ColumnEnum.DATE_ENTREE, ColumnEnum.CONTAINER, ColumnEnum.V_CONTAINER, ColumnEnum.O_CONTAINER,
 			ColumnEnum.TO_DELETE, ColumnEnum.CLIENT, ColumnEnum.DATE_CLIENT, ColumnEnum.JOINTURE,
 			ColumnEnum.GENERATION_COMPOSITE) //
-	
-	, PILOTAGE_ARCHIVE("pilotage_archive", SchemaEnum.SANDBOX)
+
+	, PILOTAGE_ARCHIVE("pilotage_archive", SchemaEnum.SANDBOX, ColumnEnum.ENTREPOT , ColumnEnum.NOM_ARCHIVE)
 
 	// family model table in sandbox
 	, MOD_TABLE_METIER("mod_table_metier", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_FAMILLE,
@@ -133,7 +134,11 @@ public enum ViewEnum {
 	TABLE_TEST_OUT_TEMPORARY(PgViewEnum.TABLE_TEST_OUT_TEMPORARY)
 
 	// view for table aliases or temporary table in query
-	, T1(PgViewEnum.T1), T2(PgViewEnum.T1), T3(PgViewEnum.T1)
+	, T1(PgViewEnum.T1), T2(PgViewEnum.T2), T3(PgViewEnum.T3)
+
+	, ALIAS_A(PgViewEnum.ALIAS_A), ALIAS_B(PgViewEnum.ALIAS_B), ALIAS_C(PgViewEnum.ALIAS_C)
+
+	, TMP_FILES("tmp_files", SchemaEnum.TEMPORARY, ColumnEnum.FILE_NAME)
 
 	, PG_TABLES(PgViewEnum.PG_TABLES)
 
@@ -183,4 +188,22 @@ public enum ViewEnum {
 		return columns;
 	}
 
+	public String getFullName() {
+		return DataObjectService.getFullTableNameInSchema(this.tableLocation, this.tableName);
+	}
+
+	public String getFullName(String schema) {
+		return schema + SQL.DOT.getSqlCode() + this.tableName;
+	}
+
+	public ColumnEnum col(ColumnEnum e) {
+		return this.getColumns().get(e);
+	}
+	
+	@Override
+	public String toString()
+	{
+		return this.getTableName();
+	}
+	
 }

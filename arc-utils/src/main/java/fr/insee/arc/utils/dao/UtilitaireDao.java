@@ -547,11 +547,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param l
 	 * @return
 	 */
-	public static Boolean hasResults(ArrayList<ArrayList<String>> l) {
+	public static boolean hasResults(ArrayList<ArrayList<String>> l) {
 		return (l.size() > 2);
 	}
 
-	public Boolean hasResults(Connection connexion, GenericPreparedStatementBuilder requete) throws ArcException {
+	public boolean hasResults(Connection connexion, GenericPreparedStatementBuilder requete) throws ArcException {
 		return hasResults(executeRequest(connexion, requete));
 	}
 

@@ -25,7 +25,9 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.dao.ResetEnvironmentOperations;
 import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
-import fr.insee.arc.core.service.p0initialisation.engine.BddPatcher;
+import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
+import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
+import fr.insee.arc.core.service.p0initialisation.userdata.SynchronizeUserRulesAndMetadata;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -179,7 +181,7 @@ public class ExecuteServiceController {
 		BddPatcher patcher = new BddPatcher();
 		patcher.bddScript(null);
 		patcher.bddScript(null, env);
-		ApiInitialisationService.buildFileSystem(null,new String[] {env});
+		new BuildFileSystem(null,new String[] {env}).execute();
 
 		return ResponseEntity.status(HttpStatus.OK).body(returnView);		
 
@@ -192,7 +194,7 @@ public class ExecuteServiceController {
 	{
 		ReturnView returnView=new ReturnView();
 		try {
-			ApiInitialisationService.synchroniserSchemaExecutionAllNods(null, ApiService.IHM_SCHEMA, env);
+			SynchronizeUserRulesAndMetadata.synchroniserSchemaExecutionAllNods(null, env);
 			return ResponseEntity.status(HttpStatus.OK).body(returnView);		
 
 		} catch (ArcException e) {

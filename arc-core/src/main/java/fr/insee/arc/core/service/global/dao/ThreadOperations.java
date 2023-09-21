@@ -86,8 +86,8 @@ public class ThreadOperations {
 			GenericBean gb = new GenericBean(
 					UtilitaireDao.get(0).executeRequest(connexion.getCoordinatorConnection(),
 							new ArcPreparedStatementBuilder("SELECT * FROM " + tablePilotageThread)));
-			// copy them in the table tablePilotageThread lcoated on the executor nod
-			query.append(query.copyFromGenericBean(tablePilotageThread, gb, true));
+			// copy them in the table tablePilotageThread located on the executor nod
+			query.append(query.copyFromGenericBean(tablePilotageThread, gb));
 
 		}
 		return query;
@@ -119,7 +119,7 @@ public class ThreadOperations {
 			GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion.getExecutorConnection(),
 					new ArcPreparedStatementBuilder("SELECT * FROM " + tablePilotageThread)));
 			// copy them on the nod
-			query.append(query.copyFromGenericBean(tablePilotageThread, gb, true));
+			query.append(query.copyFromGenericBean(tablePilotageThread, gb));
 
 			query.append(marquageFinal(tablePilotageGlobale, tablePilotageThread, idSource));
 

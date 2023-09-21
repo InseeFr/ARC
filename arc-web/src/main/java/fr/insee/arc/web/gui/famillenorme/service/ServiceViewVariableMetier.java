@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.gui.all.util.ArcStringUtils;
 import fr.insee.arc.web.gui.all.util.VObject;
 
@@ -363,7 +364,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 		if (content.get(columnName) == null || content.get(columnName).get(index) == null) {
 			return columnName;
 		} else {
-			return "'" + content.get(columnName).get(index).replace(quote, quotequote) + "'";
+			return FormatSQL.textToSql(content.get(columnName).get(index));
 		}
 	}
 

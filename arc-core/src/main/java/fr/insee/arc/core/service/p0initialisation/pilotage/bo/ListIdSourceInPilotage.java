@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p0initialisation.model;
+package fr.insee.arc.core.service.p0initialisation.pilotage.bo;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -27,11 +27,10 @@ public class ListIdSourceInPilotage {
 	}
 
 
-	public ListIdSourceInPilotage addSource(Connection coordinatorConnexion, String tablePilotage, TraitementPhase phase, TraitementEtat etat) throws ArcException
+	public ListIdSourceInPilotage addSource(Connection coordinatorConnexion, String envExecution, TraitementPhase phase, TraitementEtat etat) throws ArcException
 	{
 		String key= serializeAsKey(phase, etat);
-		this.idSourceInPilotage.put(key, ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion, PilotageOperations.querySelectIdSourceFromPilotage(tablePilotage, phase, etat))).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName())
-				, new ArrayList<String>()));
+		this.idSourceInPilotage.put(key, new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion, PilotageOperations.querySelectIdSourceFromPilotage(envExecution, phase, etat))).getColumnValues(ColumnEnum.ID_SOURCE.getColumnName()));
 		return this;
 	}
 

@@ -1,12 +1,8 @@
 package fr.insee.arc.core.dataobjects;
 
-public class DataObjectService {
+import fr.insee.arc.utils.dao.SQL;
 
-	/**
-	 * database characters convention
-	 */
-	public static final String SCHEMA_SEPARATOR = ".";
-	public static final String QUERY_SEPARATOR = ";";
+public class DataObjectService {
 
 	/**
 	 * ARC special parameter
@@ -40,7 +36,7 @@ public class DataObjectService {
 		}
 		if ((e.getTableLocation().equals(SchemaEnum.SANDBOX)
 				|| e.getTableLocation().equals(SchemaEnum.SANDBOX_GENERATED)) && this.sandboxSchema != null) {
-			return this.sandboxSchema + SCHEMA_SEPARATOR + e.getTableName();
+			return this.sandboxSchema + SQL.DOT.getSqlCode() + e.getTableName();
 		}
 
 		return getFullTableNameInSchema(e.getTableLocation(), e.getTableName());
@@ -48,7 +44,7 @@ public class DataObjectService {
 	}
 
 	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename) {
-		return schema.getSchemaName().equals("") ? tablename : schema.getSchemaName() + SCHEMA_SEPARATOR + tablename;
+		return schema.getSchemaName().equals("") ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename;
 	}
 
 	public String getSandboxSchema() {

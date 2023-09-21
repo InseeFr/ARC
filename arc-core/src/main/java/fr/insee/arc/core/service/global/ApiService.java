@@ -17,6 +17,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
@@ -69,6 +70,8 @@ public abstract class ApiService implements IConstanteNumerique {
 	protected String currentIdSource;
     protected String directoryIn;
     protected List<Norme> listeNorme;
+    
+    protected Sandbox coordinatorSandbox;
 	
 	// made to report the number of object processed by the phase
 	private int reportNumberOfObject = 0;
@@ -98,6 +101,8 @@ public abstract class ApiService implements IConstanteNumerique {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}
 
+		this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), this.envExecution);
+		
 		this.setParamBatch(paramBatch);
 
 		// Initialisation de la phase

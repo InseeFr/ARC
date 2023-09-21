@@ -76,8 +76,8 @@ public class PhaseOperations {
 	 * @throws ArcException
 	 */
 	public static List<String> selectPhaseDataTablesFoundInEnv(Connection connection, String env) throws ArcException {
-		return ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(connection,
-				PhaseOperations.selectPhaseDataTablesFoundInEnv(env))).mapContent().get(ColumnEnum.TABLE_NAME.getColumnName()), new ArrayList<String>());
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(connection,
+				PhaseOperations.selectPhaseDataTablesFoundInEnv(env))).getColumnValues(ColumnEnum.TABLE_NAME.getColumnName());
 	}
 
 	/**
@@ -88,8 +88,8 @@ public class PhaseOperations {
 	 * @throws ArcException
 	 */
 	public static List<String> selectAllChildrenPhaseDataTables(Connection connection, String phaseTemplateTable) throws ArcException {
-		return ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(connection,
-				FormatSQL.tableExists(phaseTemplateTable + "\\_" + HashFileNameConversion.CHILD_TABLE_TOKEN + "\\_%"))).mapContent().get(ColumnEnum.TABLE_NAME.getColumnName()), new ArrayList<String>());
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(connection,
+				FormatSQL.tableExists(phaseTemplateTable + "\\_" + HashFileNameConversion.CHILD_TABLE_TOKEN + "\\_%"))).getColumnValues(ColumnEnum.TABLE_NAME.getColumnName());
 	}
 	
 	/**
@@ -119,8 +119,7 @@ public class PhaseOperations {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
 		query.build(SQL.SELECT, SQL.DISTINCT, ColumnEnum.ID_SOURCE.getColumnName(), SQL.FROM, dataTable);
 		
-		return ObjectUtils.firstNonNull(new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query)).mapContent().get(ColumnEnum.ID_SOURCE.getColumnName())
-				, new ArrayList<String>());
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query)).getColumnValues(ColumnEnum.ID_SOURCE.getColumnName());
 	}
 	
 	
