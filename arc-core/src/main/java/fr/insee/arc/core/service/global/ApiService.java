@@ -100,9 +100,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}
-
-		this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), this.envExecution);
-		
 		this.setParamBatch(paramBatch);
 
 		// Initialisation de la phase
@@ -110,6 +107,9 @@ public abstract class ApiService implements IConstanteNumerique {
 		this.setPreviousPhase(TraitementPhase.valueOf(this.getCurrentPhase()).previousPhase().toString());
 		// Table en entrée
 		this.setEnvExecution(aEnvExecution);
+		
+		this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), aEnvExecution);
+		
 		this.envParameters = aParametersEnvironment;
 		this.setDirectoryRoot(aDirectoryRoot);
 
