@@ -33,7 +33,6 @@ public class PropertiesHandler {
     /* Batch */
     private String batchParametersDirectory;
     private String batchExecutionEnvironment;
-    private String batchArcEnvironment;
     /* Miscellaneous */
     private String version;
     private String versionDate;
@@ -242,17 +241,6 @@ public class PropertiesHandler {
     public void setBatchExecutionEnvironment(String batchExecutionEnvironment) {
         this.batchExecutionEnvironment = batchExecutionEnvironment;
     }
-
-
-    public String getBatchArcEnvironment() {
-        return batchArcEnvironment;
-    }
-
-
-    public void setBatchArcEnvironment(String batchArcEnvironment) {
-        this.batchArcEnvironment = batchArcEnvironment;
-    }
-
 
      public String getVersion() {
         return version;

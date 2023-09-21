@@ -42,7 +42,6 @@
 		<property name="versionDate" value="${git.commit.time:}"></property>
 		<property name="gitCommitId" value="${git.commit.id:}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
-		<property name="batchArcEnvironment" value="${fr.insee.arc.batch.parametre.env:arc.ihm}"></property>
 		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution:arc.prod}"></property>
 	</bean>
 </beans>

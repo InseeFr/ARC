@@ -29,7 +29,6 @@ public class PhaseThreadFactory extends Thread {
 
 		this.report = ApiServiceFactory.getService( //
 				getPhaseName().toString(), //
-				mapParam.get(PhaseParameterKeys.KEY_FOR_METADATA_ENVIRONMENT), //
 				mapParam.get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT), //
 				mapParam.get(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION), //
 				Integer.parseInt(mapParam.get(capacityParameterName())), //

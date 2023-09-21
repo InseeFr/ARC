@@ -35,7 +35,7 @@ public class ResetEnvironmentOperations {
 			resetBAS(env, rootDirectory);
 		} else {
 			ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-					ApiService.IHM_SCHEMA, env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter(),
+					env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter(),
 					null);
 			try {
 				serv.retourPhasePrecedente(phaseAExecuter, undoFilesSelection,
@@ -60,7 +60,7 @@ public class ResetEnvironmentOperations {
 			StaticLoggerDispatcher.info(LOGGER, e);
 		}
 		ApiInitialisationService service = new ApiInitialisationService(TraitementPhase.INITIALISATION.toString(),
-				ApiService.IHM_SCHEMA, env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
+				env, rootDirectory, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
 		try {
 			service.resetEnvironnement();
 		} finally {

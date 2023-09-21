@@ -68,9 +68,6 @@ UPDATE arc.parameter set description='parameter.batch.execution.sleepingDelayDur
 INSERT INTO arc.parameter VALUES ('LanceurARC.envFromDatabase','false');
 UPDATE arc.parameter set description='parameter.batch.execution.booleanUseEnvironmentDeclaredInDatabase' where key='LanceurARC.envFromDatabase';
 
-INSERT INTO arc.parameter VALUES ('LanceurARC.env','arc.ihm');
-UPDATE arc.parameter set description='parameter.batch.execution.environmentOfRuleset' where key='LanceurARC.env';
-
 INSERT INTO arc.parameter VALUES ('LanceurARC.envExecution','arc_prod');
 UPDATE arc.parameter set description='parameter.batch.execution.environmentForExecution' where key='LanceurARC.envExecution';
 
@@ -117,6 +114,7 @@ UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.mapmo
 -- remove deprecated parameters
 DELETE FROM arc.parameter WHERE key='LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE';
 DELETE FROM arc.parameter WHERE key='LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL';
+DELETE FROM arc.parameter WHERE key='LanceurARC.env';
 
 -- table de pilotage du batch de production
 CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text);

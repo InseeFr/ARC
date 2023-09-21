@@ -21,7 +21,6 @@ import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.BDParameters;
@@ -146,16 +145,11 @@ class BatchARC implements IReturnCode {
 		// the number of executor nods declared for scalability
 		numberOfPods = ArcDatabase.numberOfExecutorNods();
 
-		// the metadata schema
-		String env;
-
 		// either we take env and envExecution from database or properties
 		// default is from properties
 		if (Boolean.parseBoolean(bdParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
-			env = bdParameters.getString(null, "LanceurARC.env", ApiService.IHM_SCHEMA);
 			envExecution = bdParameters.getString(null, "LanceurARC.envExecution", "arc_prod");
 		} else {
-			env = properties.getBatchArcEnvironment();
 			envExecution = properties.getBatchExecutionEnvironment();
 		}
 
@@ -165,7 +159,6 @@ class BatchARC implements IReturnCode {
 
 		mapParam.put(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION, repertoire);
 		mapParam.put(PhaseParameterKeys.KEY_FOR_BATCH_CHUNK_ID, new SimpleDateFormat("yyyyMMddHH").format(new Date()));
-		mapParam.put(PhaseParameterKeys.KEY_FOR_METADATA_ENVIRONMENT, env);
 		mapParam.put(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
 		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_SIZE_RECEPTION, String.valueOf(tailleMaxReceptionEnMb));
 		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_FILES_TO_LOAD, String.valueOf(maxFilesToLoad));

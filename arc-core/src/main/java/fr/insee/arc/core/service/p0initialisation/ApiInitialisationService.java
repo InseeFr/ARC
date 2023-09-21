@@ -52,14 +52,14 @@ public class ApiInitialisationService extends ApiService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ApiInitialisationService.class);
 
-	public ApiInitialisationService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution,
-			String aDirectoryRoot, Integer aNbEnr, String paramBatch) {
-		super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
+	public ApiInitialisationService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+			String paramBatch) {
+		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}
 
 	@Override
 	public void executer() throws ArcException {
-		
+
 		// Supprime les lignes devenues inutiles récupérées par le webservice de la
 		// table pilotage_fichier
 		// Déplace les archives dans OLD
@@ -68,7 +68,8 @@ public class ApiInitialisationService extends ApiService {
 		// Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
 		// l'environnement d'excécution courant
 		// mettre à jour les tables métier avec les paramêtres de la famille de norme
-		SynchronizeUserRulesAndMetadata.synchroniserSchemaExecutionAllNods(connexion.getCoordinatorConnection(), envExecution);
+		SynchronizeUserRulesAndMetadata.synchroniserSchemaExecutionAllNods(connexion.getCoordinatorConnection(),
+				envExecution);
 
 		// marque les fichiers ou les archives à rejouer
 		reinstate(this.connexion.getCoordinatorConnection());
@@ -85,10 +86,6 @@ public class ApiInitialisationService extends ApiService {
 		new RestoreFileSystem(this.connexion.getCoordinatorConnection(), envExecution).execute();
 
 	}
-
-
-
-
 
 	/**
 	 * Méthode pour rejouer des fichiers
@@ -134,8 +131,6 @@ public class ApiInitialisationService extends ApiService {
 
 	}
 
-
-
 	/**
 	 * Suppression dans la table de pilotage des fichiers qui ont été marqué par la
 	 * MOA (via la colonne to_delete de la table de pilotage);
@@ -153,8 +148,6 @@ public class ApiInitialisationService extends ApiService {
 				+ ColumnEnum.ID_SOURCE.getColumnName() + " and a.container=b.container); ");
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
-
-
 
 	/**
 	 * Méthode pour remettre le système d'information dans la phase précédente
@@ -259,10 +252,6 @@ public class ApiInitialisationService extends ApiService {
 		}
 	}
 
-
-
-
-
 	public static void clearPilotageAndDirectories(String repertoire, String env) throws ArcException {
 		UtilitaireDao.get(0).executeBlock(null, "truncate " + TableNaming.dbEnv(env) + "pilotage_fichier; ");
 		UtilitaireDao.get(0).executeBlock(null, "truncate " + TableNaming.dbEnv(env) + "pilotage_archive; ");
@@ -289,7 +278,5 @@ public class ApiInitialisationService extends ApiService {
 		FileUtilsArc.deleteAndRecreateDirectory(
 				Paths.get(FileSystemManagement.directoryEnvExport(repertoire, env)).toFile());
 	}
-
-
 
 }

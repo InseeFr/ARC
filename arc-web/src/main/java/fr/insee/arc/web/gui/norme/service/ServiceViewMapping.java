@@ -114,8 +114,7 @@ public class ServiceViewMapping extends InteractorNorme {
 							+ ", ")
 					.append("  liste_colonne.nom_variable_metier,").append("  null,").append("  null")
 					.append("  FROM (")
-					.append(ApiService.listeColonneTableMetierSelonFamilleNorme(ApiService.IHM_SCHEMA,
-							views.getViewNorme().mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0)))
+					.append(ApiService.listeColonneTableMetierSelonFamilleNorme(views.getViewNorme().mapContentSelected().get(ConstanteBD.ID_FAMILY.getValue()).get(0)))
 					.append(") liste_colonne");
 
 			UtilitaireDao.get(0).executeRequest(null, requete);

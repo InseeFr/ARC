@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTableExecution;
@@ -51,7 +52,6 @@ public abstract class ApiService implements IConstanteNumerique {
 	protected ScalableConnection connexion;
 	
 	protected String envExecution;
-	protected String envParameters;
 	protected String tablePrevious;
 	protected String previousPhase;
 	protected String currentPhase;
@@ -78,8 +78,6 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	public static final String DATABASE_DATE_FORMAT = "DD/MM/YYYY HH24:MI:SS";
 
-	public static final String IHM_SCHEMA = "arc.ihm";
-
 	protected String idSource;
 
 	protected Boolean todo = false;
@@ -91,12 +89,13 @@ public abstract class ApiService implements IConstanteNumerique {
 		springInit();
 	}
 
-	protected ApiService(String aCurrentPhase, String aParametersEnvironment, String aEnvExecution, String aDirectoryRoot,
+	protected ApiService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot,
 			Integer aNbEnr, String paramBatch) {
 		this();
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");
 		try {
 			this.connexion = new ScalableConnection(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getDriverConnexion());
+			this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), aEnvExecution);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}
@@ -108,9 +107,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		// Table en entrée
 		this.setEnvExecution(aEnvExecution);
 		
-		this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), aEnvExecution);
-		
-		this.envParameters = aParametersEnvironment;
 		this.setDirectoryRoot(aDirectoryRoot);
 
 		this.setTablePrevious((TableNaming.dbEnv(aEnvExecution) + this.getPreviousPhase() + "_" + TraitementEtat.OK).toLowerCase());
@@ -360,12 +356,11 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param listeTable
 	 * @return
 	 */
-	public static ArcPreparedStatementBuilder listeColonneTableMetierSelonFamilleNorme(String anEnvironnement,
-			String idFamille) {
+	public static ArcPreparedStatementBuilder listeColonneTableMetierSelonFamilleNorme(String idFamille) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 		requete.append("SELECT DISTINCT nom_variable_metier, type_variable_metier\n")
-				.append("  FROM " + anEnvironnement + "_mod_variable_metier\n")
+				.append("  FROM " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " \n")
 				.append("  WHERE lower(id_famille)=lower(" + requete.quoteText(idFamille) + ")");
 
 		return requete;

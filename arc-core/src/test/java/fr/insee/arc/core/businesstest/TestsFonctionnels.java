@@ -67,7 +67,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 		BddPatcherTest.insertTestDataSirene();
 
 		
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		
@@ -76,24 +76,24 @@ public class TestsFonctionnels extends InitializeQueryTest
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/Cas_test_V2008.11.zip"), new File(repertoireDeDepot, "Cas_test_V2008.11.zip").toPath());
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/Cas_test_V2016.02.zip"), new File(repertoireDeDepot, "Cas_test_V2016.02.zip").toPath());
 		
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		
 		
 		assertEquals(114, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
 		
-		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(114, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(114, nbFileInPhase(sandbox, TraitementPhase.NORMAGE, TraitementEtat.OK));
 		
-		ApiServiceFactory.getService(TraitementPhase.CONTROLE.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.CONTROLE.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(47, nbFileInPhase(sandbox, TraitementPhase.CONTROLE, TraitementEtat.OK));
@@ -117,7 +117,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 	{		
 		BddPatcherTest.insertTestDataSiera();
 		
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		
@@ -125,28 +125,28 @@ public class TestsFonctionnels extends InitializeQueryTest
 		
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/siera_ano.xml"), new File(repertoireDeDepot, "siera_ano.xml").toPath());
 		
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
 		
-		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.NORMAGE.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.NORMAGE, TraitementEtat.OK));
 		
-		ApiServiceFactory.getService(TraitementPhase.CONTROLE.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.CONTROLE.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.CONTROLE, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.MAPPING.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.MAPPING.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.MAPPING, TraitementEtat.OK));
@@ -169,7 +169,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 	{		
 		BddPatcherTest.insertTestDataAnimal();
 		
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		
@@ -177,13 +177,13 @@ public class TestsFonctionnels extends InitializeQueryTest
 		
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/animals.tar.gz"), new File(repertoireDeDepot, "animals.tar.gz").toPath());
 		
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		
 		assertEquals(2, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
 		
-		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		assertEquals(2, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
@@ -192,7 +192,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 		// doublon detection test
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/animals-001.csv"), new File(repertoireDeDepot, "animals-001.csv").toPath());
 
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), ApiService.IHM_SCHEMA, sandbox, repertoire,
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION.toString(), sandbox, repertoire,
 				10000000, null
 		).invokeApi();
 		

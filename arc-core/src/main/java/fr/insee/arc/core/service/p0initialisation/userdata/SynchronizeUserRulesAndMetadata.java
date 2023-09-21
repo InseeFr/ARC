@@ -213,14 +213,11 @@ public class SynchronizeUserRulesAndMetadata {
 			TraitementTableParametre[] r = TraitementTableParametre.values();
 			StringBuilder condition = new StringBuilder();
 			String modaliteEtat = anExecutionEnvironment.replace("_", ".");
-			String tableImage;
-			String tableCurrent;
 			for (int i = 0; i < r.length; i++) {
 				// on créé une table image de la table venant de l'ihm
 				// (environnement de parametre)
 				TraitementTableParametre parameterTable = r[i];
-				tableCurrent = TableNaming.dbEnv(anExecutionEnvironment) + parameterTable;
-				tableImage = FormatSQL.temporaryTableName(TableNaming.dbEnv(anExecutionEnvironment) + parameterTable);
+				String tableImage = FormatSQL.temporaryTableName(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment));
 
 				// recopie partielle (en fonction de l'environnement
 				// d'exécution)
@@ -250,11 +247,11 @@ public class SynchronizeUserRulesAndMetadata {
 				requete.append(FormatSQL.dropTable(tableImage));
 
 				requete.append("CREATE TABLE " + tableImage + " " + FormatSQL.WITH_NO_VACUUM + " AS SELECT a.* FROM "
-						+ r[i] + " AS a " + condition + ";\n");
+						+ r[i].getTablenameInMetadata().getFullName() + " AS a " + condition + ";\n");
 
-				requete.append(FormatSQL.dropTable(tableCurrent));
+				requete.append(FormatSQL.dropTable(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment)));
 				requete.append("ALTER TABLE " + tableImage + " rename to "
-						+ ManipString.substringAfterLast(tableCurrent, ".") + "; \n");
+						+ ManipString.substringAfterLast(parameterTable.getTablenameInSandbox().getTableName(), ".") + "; \n");
 			}
 			UtilitaireDao.get(0).executeBlock(coordinatorConnexion, requete);
 
@@ -333,7 +330,7 @@ public class SynchronizeUserRulesAndMetadata {
 		 */
 		ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
 		requeteRef.append("SELECT lower(id_famille), lower('" + TableNaming.dbEnv(envExecution)
-				+ "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM " + ViewEnum.MOD_VARIABLE_METIER.getFullName());
+				+ "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
 
 		List<List<String>> relationalViewRef = Format
 				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(connexion, requeteRef));

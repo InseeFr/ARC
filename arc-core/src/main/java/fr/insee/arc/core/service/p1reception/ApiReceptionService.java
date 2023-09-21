@@ -90,9 +90,9 @@ public class ApiReceptionService extends ApiService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ApiReceptionService.class);
 
-	public ApiReceptionService(String aCurrentPhase, String anParametersEnvironment, String aEnvExecution,
+	public ApiReceptionService(String aCurrentPhase, String aEnvExecution,
 			String aDirectoryRoot, Integer aNbEnr, String paramBatch) {
-		super(aCurrentPhase, anParametersEnvironment, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
+		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}
 
 	@Override

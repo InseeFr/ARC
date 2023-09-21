@@ -4,7 +4,6 @@ public class PhaseParameterKeys {
 
 
 	// keys name for the hashmap mapParam containing the batch parameters
-	public static final String KEY_FOR_METADATA_ENVIRONMENT = "env";
 	public static final String KEY_FOR_EXECUTION_ENVIRONMENT = "envExecution";
 	public static final String KEY_FOR_DIRECTORY_LOCATION = "repertoire";
 	public static final String KEY_FOR_BATCH_CHUNK_ID = "numlot";

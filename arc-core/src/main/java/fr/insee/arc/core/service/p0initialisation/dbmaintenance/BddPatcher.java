@@ -320,7 +320,7 @@ public class BddPatcher {
 	}
 
 	/**
-	 * Build the condition to retrieve tables that cotnains rules
+	 * Build the condition to retrieve tables that contains rules
 	 * @param envExecution
 	 * @return
 	 */

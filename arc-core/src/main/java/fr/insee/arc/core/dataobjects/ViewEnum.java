@@ -125,7 +125,12 @@ public enum ViewEnum {
 	JEUDEREGLE("jeuderegle", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE,
 			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ETAT,
 			ColumnEnum.DATE_PRODUCTION, ColumnEnum.DATE_INACTIF) //
-
+	,CHARGEMENT_REGLE("chargement_regle", SchemaEnum.SANDBOX_GENERATED) //
+	,NORMAGE_REGLE("normage_regle", SchemaEnum.SANDBOX_GENERATED) //
+	,CONTROLE_REGLE("controle_regle", SchemaEnum.SANDBOX_GENERATED) //
+	,MAPPING_REGLE("mapping_regle", SchemaEnum.SANDBOX_GENERATED) //
+	,EXPRESSION("expression", SchemaEnum.SANDBOX_GENERATED) //
+			
 	// tables utilisés pour les tests
 
 	, TABLE_TEST_IN_PUBLIC(PgViewEnum.TABLE_TEST_IN_PUBLIC), TABLE_TEST_OUT_PUBLIC(PgViewEnum.TABLE_TEST_OUT_PUBLIC)
