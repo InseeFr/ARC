@@ -32,7 +32,6 @@ public class CleanPilotage {
 
 	private static final Logger LOGGER = LogManager.getLogger(CleanPilotage.class);
 
-	
 	public CleanPilotage(Sandbox sandbox) {
 		super();
 		this.sandbox = sandbox;
@@ -51,7 +50,7 @@ public class CleanPilotage {
 	 * @param tablePil
 	 * @throws ArcException
 	 */
-	public void execute() throws ArcException {
+	public void removeDeprecatedFiles() throws ArcException {
 		LoggerHelper.info(LOGGER, "nettoyerTablePilotage");
 
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);

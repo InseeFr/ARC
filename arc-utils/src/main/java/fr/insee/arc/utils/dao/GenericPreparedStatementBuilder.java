@@ -164,6 +164,15 @@ public class GenericPreparedStatementBuilder {
 		return p == null ? "NULL" : p;
 	}
 
+	
+	
+	// return a tuple of values (val1, val2, ... valn)
+	public StringBuilder tuple(String...liste) {
+		StringBuilder requete = new StringBuilder();
+		requete.append("(").append(sqlListeOfValues(Arrays.asList(liste))).append(")");
+		return requete;
+	}
+	
 	/**
 	 * return ?,?,? and add the elements of the list as parameters
 	 * 

@@ -17,9 +17,10 @@ import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p0initialisation.filesystem.RestoreFileSystem;
+import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
 import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotage;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
-import fr.insee.arc.core.service.p0initialisation.userdata.SynchronizeUserRulesAndMetadata;
+import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFiles;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -63,90 +64,25 @@ public class ApiInitialisationService extends ApiService {
 		// Supprime les lignes devenues inutiles récupérées par le webservice de la
 		// table pilotage_fichier
 		// Déplace les archives dans OLD
-		new CleanPilotage(this.coordinatorSandbox).execute();
+		new CleanPilotage(this.coordinatorSandbox).removeDeprecatedFiles();
 
 		// Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
 		// l'environnement d'excécution courant
 		// mettre à jour les tables métier avec les paramêtres de la famille de norme
-		SynchronizeUserRulesAndMetadata.synchroniserSchemaExecutionAllNods(connexion.getCoordinatorConnection(),
-				envExecution);
+		new SynchronizeUserRulesAndMetadata(this.coordinatorSandbox).synchroniserSchemaExecutionAllNods();
 
 		// marque les fichiers ou les archives à rejouer
-		reinstate(this.connexion.getCoordinatorConnection());
-
-		// efface des fichiers de la table de pilotage
-		cleanToDelete(this.connexion.getCoordinatorConnection(), this.tablePil);
+		// efface des fichiers de la table de pilotage marqués par l'utilisateur comme étant à effacer
+		new ReplayOrDeleteFiles(this.coordinatorSandbox).replay();
 
 		// Met en cohérence les table de données avec la table de pilotage de
 		// l'environnement
 		// La table de pilotage fait foi
-		new SynchronizeDataByPilotage(this.coordinatorSandbox).execute();
+		new SynchronizeDataByPilotage(this.coordinatorSandbox).synchronizeDataByPilotage();
 
 		// remettre les archives ou elle doivent etre en cas de restauration de la base
 		new RestoreFileSystem(this.connexion.getCoordinatorConnection(), envExecution).execute();
 
-	}
-
-	/**
-	 * Méthode pour rejouer des fichiers
-	 *
-	 * @param connexion
-	 * @param tablePil
-	 * @throws ArcException
-	 */
-	private void reinstate(Connection connexion) throws ArcException {
-		LoggerHelper.info(LOGGER, "reinstateWithRename");
-
-		// on cherche tous les containers contenant un fichier à rejouer
-		// on remet l'archive à la racine
-
-		ArrayList<String> containerList = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
-				new ArcPreparedStatementBuilder(
-						"select distinct container from " + tablePil + " where to_delete in ('R','RA')")))
-				.mapContent().get("container");
-
-		if (containerList != null) {
-			PropertiesHandler properties = PropertiesHandler.getInstance();
-			String repertoire = properties.getBatchParametersDirectory();
-			String envDir = this.envExecution.replace(".", "_").toUpperCase();
-
-			for (String s : containerList) {
-
-				String entrepot = ManipString.substringBeforeFirst(s, "_");
-				String archive = ManipString.substringAfterFirst(s, "_");
-
-				String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envDir, entrepot);
-				String dirOut = ApiReceptionService.directoryReceptionEntrepot(repertoire, envDir, entrepot);
-
-				ApiReceptionService.deplacerFichier(dirIn, dirOut, archive, archive);
-
-			}
-
-		}
-
-		// effacer les archives marquées en RA
-		UtilitaireDao.get(0).executeImmediate(connexion,
-				"DELETE FROM " + this.tablePil + " a where exists (select 1 from " + this.tablePil
-						+ " b where a.container=b.container and b.to_delete='RA')");
-
-	}
-
-	/**
-	 * Suppression dans la table de pilotage des fichiers qui ont été marqué par la
-	 * MOA (via la colonne to_delete de la table de pilotage);
-	 *
-	 * @param connexion
-	 * @param tablePil
-	 * @throws ArcException
-	 */
-	private void cleanToDelete(Connection connexion, String tablePil) throws ArcException {
-		LoggerHelper.info(LOGGER, "cleanToDelete");
-
-		StringBuilder requete = new StringBuilder();
-		requete.append("DELETE FROM " + tablePil + " a WHERE exists (select 1 from " + tablePil
-				+ " b where b.to_delete='1' and a." + ColumnEnum.ID_SOURCE.getColumnName() + "=b."
-				+ ColumnEnum.ID_SOURCE.getColumnName() + " and a.container=b.container); ");
-		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
 
 	/**
@@ -208,7 +144,7 @@ public class ApiInitialisationService extends ApiService {
 			}
 
 			try {
-				reinstate(this.connexion.getCoordinatorConnection());
+				new ReplayOrDeleteFiles(this.coordinatorSandbox).reinstate();
 			} catch (Exception e) {
 				LoggerHelper.error(LOGGER, e);
 			}
@@ -231,7 +167,7 @@ public class ApiInitialisationService extends ApiService {
 
 		// Run a database synchronization with the pilotage table
 		try {
-			new SynchronizeDataByPilotage(this.coordinatorSandbox).execute();
+			new SynchronizeDataByPilotage(this.coordinatorSandbox).synchronizeDataByPilotage();
 		} catch (Exception e) {
 			LoggerHelper.error(LOGGER, e);
 		}
@@ -243,9 +179,11 @@ public class ApiInitialisationService extends ApiService {
 		// Penser à tuer la connexion
 	}
 
+	
+
 	public void resetEnvironnement() {
 		try {
-			new SynchronizeDataByPilotage(this.coordinatorSandbox).execute();
+			new SynchronizeDataByPilotage(this.coordinatorSandbox).synchronizeDataByPilotage();
 			DatabaseMaintenance.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
 		} catch (Exception e) {
 			LoggerHelper.error(LOGGER, e);

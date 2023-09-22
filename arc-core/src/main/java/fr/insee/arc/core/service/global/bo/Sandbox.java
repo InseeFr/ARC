@@ -1,9 +1,18 @@
 package fr.insee.arc.core.service.global.bo;
 
 import java.sql.Connection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.json.JSONArray;
+
+import fr.insee.arc.core.dataobjects.ArcDatabase;
+import fr.insee.arc.core.util.BDParameters;
 
 public class Sandbox {
 
+	private static final String DEFAULT_PRODUCTION_ENVIRONMENTS="[\"arc_prod\"]";
+	
 	private Connection connection;
 	
 	private String schema;
@@ -27,5 +36,25 @@ public class Sandbox {
 	public String getSchema() {
 		return schema;
 	}
+	
+
+	public boolean isEnvSetForProduction() {
+		return isEnvSetForProduction(this.schema);
+	}
+	
+	/** Return true if the environment is defined as a production environment.*/
+	public static boolean isEnvSetForProduction(String env) {
+		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.productionEnvironments",DEFAULT_PRODUCTION_ENVIRONMENTS));
+		Set<String> found=new HashSet<>();
+		
+		j.forEach(item -> {
+            if (item.toString().equals(env))
+            {
+            	found.add(item.toString());
+            }
+        });
+		return !found.isEmpty();
+	}
+	
 
 }

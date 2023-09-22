@@ -22,12 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.ResetEnvironmentOperations;
-import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
-import fr.insee.arc.core.service.p0initialisation.userdata.SynchronizeUserRulesAndMetadata;
+import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -194,7 +193,7 @@ public class ExecuteServiceController {
 	{
 		ReturnView returnView=new ReturnView();
 		try {
-			SynchronizeUserRulesAndMetadata.synchroniserSchemaExecutionAllNods(null, env);
+			new SynchronizeUserRulesAndMetadata(new Sandbox(null, env)).synchroniserSchemaExecutionAllNods();
 			return ResponseEntity.status(HttpStatus.OK).body(returnView);		
 
 		} catch (ArcException e) {

@@ -5,9 +5,8 @@ import java.sql.Connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.TraitementTableExecution;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -29,7 +28,7 @@ public class DatabaseMaintenance {
 	 * @param type
 	 */
 	private static void maintenancePilotage(Integer poolIndex, Connection connexion, String envExecution, String type) {
-		String tablePil = TableNaming.dbEnv(envExecution) + TraitementTableExecution.PILOTAGE_FICHIER;
+		String tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
 		StaticLoggerDispatcher.info(LOGGER, "** Maintenance Pilotage **");
 
 		try {
@@ -86,24 +85,4 @@ public class DatabaseMaintenance {
 		StaticLoggerDispatcher.info(LOGGER, "** Fin de maintenance **");
 	}
 	
-
-	/**
-	 * trigger a fast maintenance on a working table
-	 * 
-	 * @param nomTable
-	 * @return
-	 * @throws ArcException 
-	 */
-	public static void maintenanceAndStatisticsOnWorkTable(Connection connexion, String nomTable) throws ArcException {
-		StringBuilder requete = new StringBuilder();
-		requete.append("SET default_statistics_target=1;");
-		requete.append("COMMIT;");
-		requete.append("VACUUM ANALYZE ").append(nomTable).append("(").append(ColumnEnum.ID_SOURCE.getColumnName())
-				.append(");");
-		requete.append("COMMIT;");
-		requete.append("SET default_statistics_target=100;");
-		UtilitaireDao.get(0).executeImmediate(connexion, requete);
-	}
-
-
 }

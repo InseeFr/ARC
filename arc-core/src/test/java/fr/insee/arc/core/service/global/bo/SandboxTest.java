@@ -1,4 +1,4 @@
-package fr.insee.arc.web.util;
+package fr.insee.arc.core.service.global.bo;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -13,11 +13,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.utils.PrivateConstructorTest;
-import fr.insee.arc.web.gui.all.util.Sandbox;
 
 public class SandboxTest extends InitializeQueryTest {
 
@@ -37,7 +35,7 @@ public class SandboxTest extends InitializeQueryTest {
 		File root = testFolder.newFolder("root");
 		String repertoire = root.getAbsolutePath();
 
-		buildPropertiesWithNoScalability(repertoire);
+		buildPropertiesWithoutScalability(repertoire);
 
 		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc CASCADE;");
 		u.executeImmediate(c, "CREATE schema arc;");

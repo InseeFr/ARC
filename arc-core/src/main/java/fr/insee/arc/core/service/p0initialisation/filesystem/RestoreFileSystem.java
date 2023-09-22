@@ -39,7 +39,7 @@ public class RestoreFileSystem {
 	 * @throws ArcException
 	 */
 	public void execute() throws ArcException {
-		LoggerHelper.info(LOGGER, RestoreFileSystem.class.getName());
+		LoggerHelper.info(LOGGER, "Reconstruction du filesystem");
 
 		// parcourir toutes les archives dans le répertoire d'archive
 		String rootDirectory = PropertiesHandler.getInstance().getBatchParametersDirectory();

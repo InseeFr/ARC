@@ -9,8 +9,9 @@ import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
-import fr.insee.arc.core.service.p0initialisation.userdata.SynchronizeUserRulesAndMetadata;
+import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -123,7 +124,7 @@ public class ServiceViewPilotageProd extends InteractorPilotage {
      */
     public String applyRulesProd(Model model) {
     	try {
-    		SynchronizeUserRulesAndMetadata.copyMetadataAllNods(null, getBacASable());
+    		new SynchronizeUserRulesAndMetadata(new Sandbox(null, getBacASable())).copyMetadataAllNods();
     	}
 		catch (ArcException e)
 		{

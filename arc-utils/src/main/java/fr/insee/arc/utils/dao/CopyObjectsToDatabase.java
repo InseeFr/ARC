@@ -4,6 +4,7 @@ import java.sql.Connection;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 public class CopyObjectsToDatabase {
 
@@ -42,19 +43,28 @@ public class CopyObjectsToDatabase {
 		query.append(query.createWithGenericBean(tableName, gb));
 
 		int cursor = 0;
-
+		boolean stillToDo = true;
+		
 		do {
 			int startChunk = cursor;
 			int endChunk = cursor + chunkSize;
-
-			query.insertWithGenericBeanByChunk(tableName, gb, startChunk, endChunk);
-
-			UtilitaireDao.get(0).executeImmediate(connection, query);
-
-			query = new GenericPreparedStatementBuilder();
 			cursor = endChunk;
-
-		} while (cursor < gb.getContent().size());
+			stillToDo=(cursor < gb.getContent().size());
+			
+			query.insertWithGenericBeanByChunk(tableName, gb, startChunk, endChunk);
+			
+			// analyze on the table at the end
+			if (!stillToDo)
+			{
+				query.append(SQL.COMMIT).append(SQL.END_QUERY);
+				query.append(FormatSQL.analyzeSecured(tableName));
+			}
+			
+			UtilitaireDao.get(0).executeImmediate(connection, query);
+			query = new GenericPreparedStatementBuilder();
+			
+		} while (stillToDo);
+		
 	}
 
 }

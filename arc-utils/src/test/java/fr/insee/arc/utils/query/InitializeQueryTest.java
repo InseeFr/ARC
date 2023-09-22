@@ -32,19 +32,19 @@ public class InitializeQueryTest {
     	assertNotNull(c);
     }
     
-    protected void buildPropertiesWithNoScalability(String repertoire) throws SQLException
+    protected static void buildPropertiesWithoutScalability(String repertoire) throws SQLException
 	{
     	buildProperties(repertoire, new Connection[] {c});	
 	}
     
     
-	protected void buildPropertiesWithScalability(String repertoire) throws SQLException
+    protected static void buildPropertiesWithScalability(String repertoire) throws SQLException
 	{
 		e = new TestDatabase().testConnection;
     	buildProperties(repertoire, new Connection[] {c, e});	
 	}
     
-	protected static void buildProperties(String repertoire, Connection[] connections) throws SQLException
+    protected static void buildProperties(String repertoire, Connection[] connections) throws SQLException
 	{
 		PropertiesHandler testProperties=PropertiesHandler.getInstance();
 		
@@ -90,7 +90,7 @@ public class InitializeQueryTest {
 	 * @param tableOut
 	 * @throws ArcException
 	 */
-	protected static void testMetadataAndNumberOfRecords(String tableOut, int numberOfRecordsInTableOut, String[] columns) throws ArcException
+    protected static void testMetadataAndNumberOfRecords(String tableOut, int numberOfRecordsInTableOut, String[] columns) throws ArcException
 	{
 		
 		// query the content in tableOut
@@ -108,7 +108,7 @@ public class InitializeQueryTest {
 		}
 	}
 	
-	protected void testTableExists(String tableOut, int expectedNumber) throws ArcException
+    protected static void testTableExists(String tableOut, int expectedNumber) throws ArcException
 	{
 		HashMap<String, ArrayList<String>> content;
 		

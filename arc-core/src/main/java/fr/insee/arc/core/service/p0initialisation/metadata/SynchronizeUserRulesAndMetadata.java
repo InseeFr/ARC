@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p0initialisation.userdata;
+package fr.insee.arc.core.service.p0initialisation.metadata;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -57,11 +57,11 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static void synchroniserSchemaExecutionAllNods(Connection connexion, String envExecution) throws ArcException {
+	public void synchroniserSchemaExecutionAllNods() throws ArcException {
 
-		copyMetadataAllNods(connexion, envExecution);
+		copyMetadataAllNods();
 
-		mettreAJourSchemaTableMetierOnNods(connexion, envExecution);
+		mettreAJourSchemaTableMetierOnNods();
 	}
 	
 	
@@ -75,11 +75,11 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static void copyMetadataAllNods(Connection connexion, String envExecution)
+	public void copyMetadataAllNods()
 			throws ArcException {
-		copyMetadataToSandbox(connexion, envExecution);
+		copyMetadataToSandbox();
 
-		copyMetadataToExecutorsAllNods(connexion, envExecution);
+		copyMetadataToExecutorsAllNods();
 	}
 
 	/**
@@ -91,9 +91,9 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
 	 */
-	private static void copyMetadataToSandbox(Connection connexion, String anExecutionEnvironment) throws ArcException {
-		copyRulesTablesToExecution(connexion, anExecutionEnvironment);
-		applyExpressions(connexion, anExecutionEnvironment);
+	private void copyMetadataToSandbox() throws ArcException {
+		copyRulesTablesToExecution();
+		applyExpressions();
 	}
 	
 	/**
@@ -102,8 +102,11 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static int copyMetadataToExecutorsAllNods(Connection coordinatorConnexion, String envExecution)
+	protected int copyMetadataToExecutorsAllNods()
 			throws ArcException {
+		
+		Connection coordinatorConnexion = sandbox.getConnection();
+		String envExecution = sandbox.getSchema();
 
 		ThrowingConsumer<Connection, ArcException> onCoordinator = c -> {
 		};
@@ -124,7 +127,7 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static void copyMetaDataToExecutors(Connection coordinatorConnexion, Connection executorConnection,
+	private static void copyMetaDataToExecutors(Connection coordinatorConnexion, Connection executorConnection,
 			String envExecution) throws ArcException {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 
@@ -160,7 +163,11 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
 	 */
-	private static void applyExpressions(Connection connexion, String anExecutionEnvironment) throws ArcException {
+	private void applyExpressions() throws ArcException {
+		
+		Connection connexion = sandbox.getConnection();
+		String anExecutionEnvironment = sandbox.getSchema();
+		
 		// Checks expression validity
 		ExpressionService expressionService = new ExpressionService();
 		ArrayList<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion,
@@ -203,8 +210,12 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
 	 */
-	private static void copyRulesTablesToExecution(Connection coordinatorConnexion, String anExecutionEnvironment) throws ArcException {
+	private void copyRulesTablesToExecution() throws ArcException {
 		LoggerHelper.info(LOGGER, "copyTablesToExecution");
+		
+		Connection coordinatorConnexion = sandbox.getConnection();
+		String anExecutionEnvironment = sandbox.getSchema();
+		
 		try {
 
 			anExecutionEnvironment = anExecutionEnvironment.replace(".", "_");
@@ -304,13 +315,16 @@ public class SynchronizeUserRulesAndMetadata {
 		}
 	}
 	
-	private static void mettreAJourSchemaTableMetierOnNods(Connection connexion, String envExecution) throws ArcException {
+	private void mettreAJourSchemaTableMetierOnNods() throws ArcException {
 
+		Connection coordinatorConnexion = sandbox.getConnection();
+		String envExecution = sandbox.getSchema();
+		
 		ThrowingConsumer<Connection, ArcException> function = executorConnection -> {
 			mettreAJourSchemaTableMetier(executorConnection, envExecution);
 		};
 
-		ServiceScalability.dispatchOnNods(connexion, function, function);
+		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
 
 	}
 

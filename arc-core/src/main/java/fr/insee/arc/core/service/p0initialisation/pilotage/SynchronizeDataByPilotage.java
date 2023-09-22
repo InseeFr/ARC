@@ -17,7 +17,7 @@ import fr.insee.arc.core.service.global.dao.PhaseOperations;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.service.p0initialisation.pilotage.bo.ListIdSourceInPilotage;
-import fr.insee.arc.core.service.p0initialisation.pilotage.dao.PilotageDao;
+import fr.insee.arc.core.service.p0initialisation.pilotage.dao.SynchronizeDataByPilotageDao;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -44,7 +44,7 @@ public class SynchronizeDataByPilotage {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public void execute() throws ArcException {
+	public void synchronizeDataByPilotage() throws ArcException {
 		LoggerHelper.info(LOGGER, "synchronisationEnvironmentByPilotage");
 
 		// maintenance de la table de pilotage
@@ -84,13 +84,13 @@ public class SynchronizeDataByPilotage {
 	 * @throws ArcException
 	 */
 	private void resetEtapePilotage() throws ArcException {
-		PilotageDao.resetEtapePilotageDao(this.sandbox.getConnection(), this.sandbox.getSchema());
+		SynchronizeDataByPilotageDao.resetEtapePilotageDao(this.sandbox.getConnection(), this.sandbox.getSchema());
 	}
 	
 	
 
 	private void rebuildPilotage() throws ArcException {
-		PilotageDao.rebuildPilotageDao(this.sandbox.getConnection(), this.sandbox.getSchema());
+		SynchronizeDataByPilotageDao.rebuildPilotageDao(this.sandbox.getConnection(), this.sandbox.getSchema());
 	}
 
 
@@ -112,22 +112,21 @@ public class SynchronizeDataByPilotage {
 		return ServiceScalability.dispatchOnNods(this.sandbox.getConnection(), function, function);
 
 	}
-	
-	
+
 	/**
 	 * dispatch on every nods the void that drop unused data tables
-	 * 
-	 * @param coordinatorConnexion
-	 * @param envExecution
-	 * @param tablePilotage
+	 * @param optionalProvidedIdSourceToDrop
 	 * @throws ArcException
 	 */
 	public void dropUnusedDataTablesAllNods(List<String> optionalProvidedIdSourceToDrop) throws ArcException {
 
+		Connection coordinatorConnexion = sandbox.getConnection();
+		String envExecution = sandbox.getSchema();
+		
 		ThrowingConsumer<Connection, ArcException> function = executorConnection -> dropUnusedDataTables(
-				this.sandbox.getConnection(), executorConnection, this.sandbox.getSchema(), optionalProvidedIdSourceToDrop);
+				coordinatorConnexion, executorConnection, envExecution, optionalProvidedIdSourceToDrop);
 
-		ServiceScalability.dispatchOnNods(this.sandbox.getConnection(), function, function);
+		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
 
 	}
 
@@ -237,7 +236,7 @@ public class SynchronizeDataByPilotage {
 	 */
 	private void dropUnusedTemporaryTablesOnConnection(Connection targetConnexion) throws ArcException {
 		GenericBean g = new GenericBean(
-				UtilitaireDao.get(0).executeRequest(targetConnexion, PilotageDao.requeteListAllTemporaryTablesInEnv(this.sandbox.getSchema())));
+				UtilitaireDao.get(0).executeRequest(targetConnexion, SynchronizeDataByPilotageDao.requeteListAllTemporaryTablesInEnv(this.sandbox.getSchema())));
 		if (!g.mapContent().isEmpty()) {
 			ArrayList<String> envTables = g.mapContent().get("table_name");
 			for (String nomTable : envTables) {
@@ -260,18 +259,21 @@ public class SynchronizeDataByPilotage {
 	 */
 	public void deleteUnusedDataRecordsAllNods(List<String> optionalProvidedIdSourceToDelete) throws ArcException {
 
+		Connection coordinatorConnexion = sandbox.getConnection();
+		String envExecution = sandbox.getSchema();
+		
 		ListIdSourceInPilotage listIdSourceInPilotage = new ListIdSourceInPilotage();
 
 		if (optionalProvidedIdSourceToDelete == null) {
 			listIdSourceInPilotage
-					.addSource(this.sandbox.getConnection(), this.sandbox.getSchema(), TraitementPhase.MAPPING, TraitementEtat.OK)
-					.addSource(this.sandbox.getConnection(), this.sandbox.getSchema(), TraitementPhase.MAPPING, TraitementEtat.KO);
+					.addSource(coordinatorConnexion, envExecution, TraitementPhase.MAPPING, TraitementEtat.OK)
+					.addSource(coordinatorConnexion, envExecution, TraitementPhase.MAPPING, TraitementEtat.KO);
 		}
 
 		ThrowingConsumer<Connection, ArcException> function = executorConnection -> deleteUnusedDataRecordsAllTables(
-				executorConnection, this.sandbox.getSchema(), listIdSourceInPilotage, optionalProvidedIdSourceToDelete);
+				executorConnection, envExecution, listIdSourceInPilotage, optionalProvidedIdSourceToDelete);
 
-		ServiceScalability.dispatchOnNods(this.sandbox.getConnection(), function, function);
+		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
 
 	}
 
@@ -340,7 +342,7 @@ public class SynchronizeDataByPilotage {
 			}
 
 			if (!idSourceInDataTableThatShouldntBe.isEmpty()) {
-				PilotageDao.deleteDataRecords(executorConnection, idSourceInDataTableThatShouldntBe, dataTable);
+				SynchronizeDataByPilotageDao.deleteDataRecords(executorConnection, idSourceInDataTableThatShouldntBe, dataTable);
 			}
 		}
 

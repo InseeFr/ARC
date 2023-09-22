@@ -18,7 +18,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
-public class PilotageDao {
+public class SynchronizeDataByPilotageDao {
 
 	
 	/**

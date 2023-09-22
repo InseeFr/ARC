@@ -16,7 +16,6 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.model.TraitementTableExecution;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
@@ -112,9 +111,10 @@ public abstract class ApiService implements IConstanteNumerique {
 		this.setTablePrevious((TableNaming.dbEnv(aEnvExecution) + this.getPreviousPhase() + "_" + TraitementEtat.OK).toLowerCase());
 
 		// Tables de pilotage et pilotage temporaire
-		this.setTablePil(TableNaming.dbEnv(aEnvExecution) + TraitementTableExecution.PILOTAGE_FICHIER);
-		this.tablePilTemp = TableNaming.temporaryTableName(aEnvExecution, aCurrentPhase,
-				TraitementTableExecution.PILOTAGE_FICHIER.toString(), "0");
+		this.setTablePil(ViewEnum.PILOTAGE_FICHIER.getFullName(aEnvExecution));
+		this.tablePilTemp = TableNaming.temporaryTableName(aEnvExecution, aCurrentPhase, 
+				ViewEnum.PILOTAGE_FICHIER.getTableName(), "0");
+		
 		this.setTableNorme(TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.NORME);
 		this.tableCalendrier = TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CALENDRIER;
 		// Tables venant de l'initialisation globale

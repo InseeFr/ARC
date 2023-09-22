@@ -58,17 +58,17 @@ public class DataStorage {
 	 * pilotage_archive table
 	 * 
 	 * @param connection
-	 * @param sanbox
+	 * @param schema
 	 * @return
 	 * @throws ArcException
 	 */
-	public static List<String> execQuerySelectFilesNotInRegisteredArchives(Connection connection, String sanbox)
+	public static List<String> execQuerySelectFilesNotInRegisteredArchives(Connection connection, String schema)
 			throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, ColumnEnum.FILE_NAME, SQL.FROM, ViewEnum.TMP_FILES, SQL.AS, ViewEnum.ALIAS_A);
 		query.build(SQL.WHERE, SQL.NOT, SQL.EXISTS);
 		query.build("(");
-		query.build(SQL.SELECT, SQL.FROM, ViewEnum.PILOTAGE_ARCHIVE.getFullName(sanbox), SQL.AS, ViewEnum.ALIAS_B);
+		query.build(SQL.SELECT, SQL.FROM, ViewEnum.PILOTAGE_ARCHIVE.getFullName(schema), SQL.AS, ViewEnum.ALIAS_B);
 		query.build(SQL.WHERE, ColumnEnum.NOM_ARCHIVE.alias(ViewEnum.ALIAS_B), "=",
 				ColumnEnum.FILE_NAME.alias(ViewEnum.ALIAS_A));
 		query.build(")");
