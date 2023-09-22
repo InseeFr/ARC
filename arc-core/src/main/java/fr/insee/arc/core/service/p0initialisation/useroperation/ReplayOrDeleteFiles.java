@@ -26,11 +26,11 @@ public class ReplayOrDeleteFiles {
 	private Sandbox sandbox;
 	
 	
-	public void replay() throws ArcException
+	public void processMarkedFiles() throws ArcException
 	{
-		reinstate();
+		replayMarkedFiles();
 		
-		cleanToDelete();
+		deleteMarkedFiles();
 	}
 	
 	
@@ -41,7 +41,7 @@ public class ReplayOrDeleteFiles {
 	 * @param tablePil
 	 * @throws ArcException
 	 */
-	public void reinstate() throws ArcException {
+	public void replayMarkedFiles() throws ArcException {
 		LoggerHelper.info(LOGGER, "reinstateWithRename");
 
 		Connection connection=sandbox.getConnection();
@@ -82,7 +82,7 @@ public class ReplayOrDeleteFiles {
 	 * @param tablePil
 	 * @throws ArcException
 	 */
-	private void cleanToDelete() throws ArcException {
+	private void deleteMarkedFiles() throws ArcException {
 		LoggerHelper.info(LOGGER, "Delete file marked by user as to be deleted");
 		
 		Connection connection=sandbox.getConnection();

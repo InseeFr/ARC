@@ -8,6 +8,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
 import fr.insee.arc.utils.dao.SQL;
@@ -35,7 +36,7 @@ public class SynchronizeDataByPilotageDao {
 	
 		requete.append("DELETE FROM " + tablePil + " WHERE etat_traitement='{ENCOURS}';");
 	
-		requete.append(ApiService.resetPreviousPhaseMark(tablePil, null, null));
+		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, null, null));
 	
 		requete.append("WITH tmp_1 as (select " + ColumnEnum.ID_SOURCE.getColumnName() + ", max(");
 		new StringBuilder();

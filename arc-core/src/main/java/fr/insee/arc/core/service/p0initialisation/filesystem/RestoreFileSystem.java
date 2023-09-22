@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DataStorage;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
@@ -24,12 +25,10 @@ public class RestoreFileSystem {
 	private Connection connection;
 	private String envExecution;
 	
-	
-	
-	public RestoreFileSystem(Connection connection, String envExecution) {
+	public RestoreFileSystem(Sandbox sandbox) {
 		super();
-		this.connection = connection;
-		this.envExecution = envExecution;
+		this.connection = sandbox.getConnection();
+		this.envExecution = sandbox.getSchema();
 	}
 
 

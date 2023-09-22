@@ -208,7 +208,7 @@ public class SynchronizeDataByPilotage {
 					// retrieve the idSource of the childDataTable
 					String idSource = PhaseOperations.selectIdSourceOfChildDataTable(executorConnection,
 							childDataTable);
-					String etape = PilotageOperations.accessSelectEtapeForIdSource(coordinatorConnexion, envExecution,
+					String etape = PilotageOperations.execQuerySelectEtapeForIdSource(coordinatorConnexion, envExecution,
 							phase, etat, idSource);
 
 					// if no references in pilotage table, mark for drop

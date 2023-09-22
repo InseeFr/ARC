@@ -50,12 +50,15 @@ public class ReplayOrDeleteFilesDao {
 	public static void execQueryDeleteArchiveToReplay(Connection connection, String schema) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.DELETE, ViewEnum.PILOTAGE_FICHIER.getFullName(schema), SQL.AS, ViewEnum.ALIAS_A);
+		
 		query.build(SQL.WHERE, SQL.EXISTS, "(");
+		
 		query.build(SQL.SELECT, SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(schema), SQL.AS, ViewEnum.ALIAS_B);
 		query.build(SQL.WHERE, ColumnEnum.TO_DELETE.alias(ViewEnum.ALIAS_B), "=",
 				query.quoteText(TraitementOperationFichier.RA.getDbValue()));
 		query.build(SQL.AND, ColumnEnum.CONTAINER.alias(ViewEnum.ALIAS_A), "=",
 				ColumnEnum.CONTAINER.alias(ViewEnum.ALIAS_B));
+		
 		query.build(")");
 
 		UtilitaireDao.get(0).executeRequest(connection, query);
@@ -69,16 +72,20 @@ public class ReplayOrDeleteFilesDao {
 	 * @throws ArcException
 	 */
 	public static void execQueryDeleteFileToDelete(Connection connection, String schema) throws ArcException {
+
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		
 		query.build(SQL.DELETE, ViewEnum.PILOTAGE_FICHIER.getFullName(schema), SQL.AS, ViewEnum.ALIAS_A);
 		query.build(SQL.WHERE, SQL.EXISTS, "(");
 		query.build(SQL.SELECT, SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(schema), SQL.AS, ViewEnum.ALIAS_B);
+		
 		query.build(SQL.WHERE, ColumnEnum.TO_DELETE.alias(ViewEnum.ALIAS_B), "=",
 				query.quoteText(TraitementOperationFichier.D.getDbValue()));
 		query.build(SQL.AND, ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_A), "=",
 				ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_B));
 		query.build(SQL.AND, ColumnEnum.CONTAINER.alias(ViewEnum.ALIAS_A), "=",
 				ColumnEnum.CONTAINER.alias(ViewEnum.ALIAS_B));
+		
 		query.build(")");
 		UtilitaireDao.get(0).executeRequest(connection, query);
 	}

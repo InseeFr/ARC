@@ -23,7 +23,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.global.dao.ResetEnvironmentOperations;
+import fr.insee.arc.core.service.p0initialisation.ResetEnvironmentService;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
@@ -114,7 +114,7 @@ public class ExecuteServiceController {
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
 
-			ResetEnvironmentOperations.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArcPreparedStatementBuilder());
+			ResetEnvironmentService.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArcPreparedStatementBuilder());
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
 

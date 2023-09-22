@@ -366,33 +366,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		return requete;
 	}
 
-	/**
-	 * Return the query that marks the files or all file if idSource not provided
-	 * The mark indicates reset etape to 0 for the previous phase, meaning the file
-	 * is no longer processed in the current phase
-	 * 
-	 * @param idSource
-	 * @return
-	 */
-	public static StringBuilder resetPreviousPhaseMark(String tablePil, String idSource, String tableSource) {
-		StringBuilder requete = new StringBuilder();
-
-		// mettre à etape = 0 la phase marquée à 3
-		requete.append("\n UPDATE " + tablePil + " a ");
-		requete.append("\n SET etape=0 ");
-		requete.append("\n WHERE a.etape=3 ");
-		if (idSource != null) {
-			requete.append("\n AND a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
-		}
-
-		if (tableSource != null) {
-			requete.append("\n AND EXISTS (SELECT 1 FROM " + tableSource + " b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") ");
-		}
-
-		requete.append("\n ;");
-		return requete;
-	}
-
 
 	/**
 	 *
@@ -479,7 +452,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
 		requete.append("\n RETURNING "+ColumnEnum.ID_SOURCE.getColumnName()+") ");
 
-		requete.append(resetPreviousPhaseMark(tablePil, null, "t0"));
+		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, null, "t0"));
 
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
@@ -523,7 +496,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		requete.append("\n ;");
 
-		requete.append(resetPreviousPhaseMark(tablePil, idSource, null));
+		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, idSource, null));
 
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}

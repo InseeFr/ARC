@@ -1,15 +1,14 @@
 package fr.insee.arc.core.service.p0initialisation;
 
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
@@ -21,15 +20,14 @@ import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesA
 import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotage;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
 import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFiles;
+import fr.insee.arc.core.service.p0initialisation.useroperation.ResetEnvironmentOperation;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 
 /**
  * ApiNormageService
@@ -73,7 +71,7 @@ public class ApiInitialisationService extends ApiService {
 
 		// marque les fichiers ou les archives à rejouer
 		// efface des fichiers de la table de pilotage marqués par l'utilisateur comme étant à effacer
-		new ReplayOrDeleteFiles(this.coordinatorSandbox).replay();
+		new ReplayOrDeleteFiles(this.coordinatorSandbox).processMarkedFiles();
 
 		// Met en cohérence les table de données avec la table de pilotage de
 		// l'environnement
@@ -81,102 +79,13 @@ public class ApiInitialisationService extends ApiService {
 		new SynchronizeDataByPilotage(this.coordinatorSandbox).synchronizeDataByPilotage();
 
 		// remettre les archives ou elle doivent etre en cas de restauration de la base
-		new RestoreFileSystem(this.connexion.getCoordinatorConnection(), envExecution).execute();
+		new RestoreFileSystem(this.coordinatorSandbox).execute();
 
 	}
 
-	/**
-	 * Méthode pour remettre le système d'information dans la phase précédente
-	 * Nettoyage des tables _ok et _ko ainsi que mise à jour de la table de pilotage
-	 * de fichier
-	 *
-	 * @param phase
-	 * @param querySelection
-	 * @param listEtat
-	 */
 	public void retourPhasePrecedente(TraitementPhase phase, ArcPreparedStatementBuilder querySelection,
-			ArrayList<TraitementEtat> listEtat) {
-		LOGGER.info("Retour arrière pour la phase : {}", phase);
-		ArcPreparedStatementBuilder requete;
-		// MAJ de la table de pilotage
-		Integer nbLignes = 0;
-
-		// reset etape=3 file to etape=0
-		try {
-			UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(),
-					new ArcPreparedStatementBuilder(resetPreviousPhaseMark(this.tablePil, null, null)));
-		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, e);
-		}
-
-		// Delete the selected file entries from the pilotage table from all the phases
-		// after the undo phase
-		for (TraitementPhase phaseNext : phase.nextPhases()) {
-			requete = new ArcPreparedStatementBuilder();
-			requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = "
-					+ requete.quoteText(phaseNext.toString()) + " ");
-			if (querySelection.length() > 0) {
-				requete.append("AND " + ColumnEnum.ID_SOURCE.getColumnName() + " IN (SELECT distinct "
-						+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM (");
-				requete.append(querySelection);
-				requete.append(") q1 ) ");
-			}
-			requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
-			nbLignes = nbLignes + UtilitaireDao.get(0).getInt(this.connexion.getCoordinatorConnection(), requete);
-		}
-
-		// Mark the selected file entries to be reload then rebuild the file system for
-		// the reception phase
-		if (phase.equals(TraitementPhase.RECEPTION)) {
-			requete = new ArcPreparedStatementBuilder();
-			requete.append("UPDATE  " + this.tablePil + " set to_delete='R' WHERE phase_traitement = "
-					+ requete.quoteText(phase.toString()) + " ");
-			if (querySelection.length() > 0) {
-				requete.append("AND " + ColumnEnum.ID_SOURCE.getColumnName() + " IN (SELECT distinct "
-						+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM (");
-				requete.append(querySelection);
-				requete.append(") q1 ) ");
-			}
-			try {
-				UtilitaireDao.get(0).executeRequest(connexion.getCoordinatorConnection(), requete);
-			} catch (ArcException e) {
-				LoggerHelper.error(LOGGER, e);
-			}
-
-			try {
-				new ReplayOrDeleteFiles(this.coordinatorSandbox).reinstate();
-			} catch (Exception e) {
-				LoggerHelper.error(LOGGER, e);
-			}
-
-			nbLignes++;
-		}
-
-		// Delete the selected file entries from the pilotage table from the undo phase
-		requete = new ArcPreparedStatementBuilder();
-		requete.append("WITH TMP_DELETE AS (DELETE FROM " + this.tablePil + " WHERE phase_traitement = "
-				+ requete.quoteText(phase.toString()) + " ");
-		if (querySelection.length() > 0) {
-			requete.append("AND " + ColumnEnum.ID_SOURCE.getColumnName() + " IN (SELECT distinct "
-					+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM (");
-			requete.append(querySelection);
-			requete.append(") q1 ) ");
-		}
-		requete.append("RETURNING 1) select count(1) from TMP_DELETE;");
-		nbLignes = nbLignes + UtilitaireDao.get(0).getInt(this.connexion.getCoordinatorConnection(), requete);
-
-		// Run a database synchronization with the pilotage table
-		try {
-			new SynchronizeDataByPilotage(this.coordinatorSandbox).synchronizeDataByPilotage();
-		} catch (Exception e) {
-			LoggerHelper.error(LOGGER, e);
-		}
-
-		if (nbLignes > 0) {
-			DatabaseMaintenance.maintenanceDatabaseClassic(connexion.getCoordinatorConnection(), envExecution);
-		}
-
-		// Penser à tuer la connexion
+			List<TraitementEtat> listEtat) throws ArcException {
+		new ResetEnvironmentOperation(this.coordinatorSandbox).retourPhasePrecedente(phase, querySelection, listEtat);
 	}
 
 	

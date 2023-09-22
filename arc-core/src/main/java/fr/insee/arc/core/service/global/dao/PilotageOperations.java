@@ -150,7 +150,7 @@ public class PilotageOperations {
 		return query;
 	}
 
-	public static String accessSelectEtapeForIdSource(Connection connection, String envExecution, TraitementPhase phase, TraitementEtat etat, String idSource) throws ArcException
+	public static String execQuerySelectEtapeForIdSource(Connection connection, String envExecution, TraitementPhase phase, TraitementEtat etat, String idSource) throws ArcException
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		
@@ -160,5 +160,32 @@ public class PilotageOperations {
 		query.build(SQL.AND, ColumnEnum.ID_SOURCE.getColumnName(), "=", query.quoteText(idSource));
 
 		return UtilitaireDao.get(0).getString(connection,query);
+	}
+	
+	/**
+	 * Return the query that marks the files or all file if idSource not provided
+	 * The mark indicates reset etape to 0 for the previous phase, meaning the file
+	 * is no longer processed in the current phase
+	 * 
+	 * @param idSource
+	 * @return
+	 */
+	public static StringBuilder resetPreviousPhaseMark(String tablePil, String idSource, String tableSource) {
+		StringBuilder requete = new StringBuilder();
+
+		// mettre à etape = 0 la phase marquée à 3
+		requete.append("\n UPDATE " + tablePil + " a ");
+		requete.append("\n SET etape=0 ");
+		requete.append("\n WHERE a.etape=3 ");
+		if (idSource != null) {
+			requete.append("\n AND a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
+		}
+
+		if (tableSource != null) {
+			requete.append("\n AND EXISTS (SELECT 1 FROM " + tableSource + " b where a."+ColumnEnum.ID_SOURCE.getColumnName()+"=b."+ColumnEnum.ID_SOURCE.getColumnName()+") ");
+		}
+
+		requete.append("\n ;");
+		return requete;
 	}
 }

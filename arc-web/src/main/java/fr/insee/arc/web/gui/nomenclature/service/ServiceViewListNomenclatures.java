@@ -145,7 +145,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
     	try {
             importNomenclatureDansBase(fileUpload);
         } catch (ArcException ex) {
-           	this.views.getViewListNomenclatures().setMessage(ex.toString());
+           	this.views.getViewListNomenclatures().setMessage("Erreur dans l'import de la nomenclature");
         }
 
         return generateDisplay(model, RESULT_SUCCESS);

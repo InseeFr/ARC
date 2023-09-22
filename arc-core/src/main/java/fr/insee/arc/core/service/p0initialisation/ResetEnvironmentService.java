@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.global.dao;
+package fr.insee.arc.core.service.p0initialisation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,16 +9,16 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 
-public class ResetEnvironmentOperations {
+public class ResetEnvironmentService {
 
-	private ResetEnvironmentOperations() {
+	private ResetEnvironmentService() {
 		throw new IllegalStateException("Utility class");
 	}
 
-	protected static final Logger LOGGER = LogManager.getLogger(ResetEnvironmentOperations.class);
+	protected static final Logger LOGGER = LogManager.getLogger(ResetEnvironmentService.class);
 
 	/**
 	 * Retour arriere vers une phase
@@ -27,9 +27,10 @@ public class ResetEnvironmentOperations {
 	 * @param env
 	 * @param rootDirectory
 	 * @param undoFilesSelection
+	 * @throws ArcException 
 	 */
 	public static void backToTargetPhase(TraitementPhase phaseAExecuter, String env, String rootDirectory,
-			ArcPreparedStatementBuilder undoFilesSelection) {
+			ArcPreparedStatementBuilder undoFilesSelection) throws ArcException {
 		if (phaseAExecuter.getOrdre() == TraitementPhase.INITIALISATION.getOrdre()) {
 			resetBAS(env, rootDirectory);
 		} else {

@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -128,7 +126,7 @@ public class ServiceViewPilotageProd extends InteractorPilotage {
     	}
 		catch (ArcException e)
 		{
-			this.views.getViewPilotageBAS().setMessage(e.getMessage());
+			this.views.getViewPilotageBAS().setMessage("La mise a jour des règles a échoué");
 			return generateDisplay(model, RESULT_SUCCESS);
 		}
     	return generateDisplay(model, RESULT_SUCCESS);
