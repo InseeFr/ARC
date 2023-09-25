@@ -322,7 +322,7 @@ public abstract class ArcWebGenericService<T extends ArcModel> implements IConst
 		if (!selection.isEmpty()) {
 			vObjectService.delete(theVObjectToUpdate);
 		} else {
-			theVObjectToUpdate.setMessage("Please select some lines to delete");
+			theVObjectToUpdate.setMessage("vObject.delete.noSelection");
 		}
 		return generateDisplay(model, successUri);
 	}

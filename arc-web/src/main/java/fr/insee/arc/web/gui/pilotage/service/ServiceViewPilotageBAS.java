@@ -78,17 +78,17 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 			try {
 				this.vObjectService.upload(views.getViewPilotageBAS(), repertoireUpload);
 			} catch (ArcException e) {
-				this.views.getViewPilotageBAS().setMessage("Upload Failed");
+				this.views.getViewPilotageBAS().setMessage("managementSandbox.upload.fail");
 			}
 		} else {
 			String msg = "";
 			if (views.getViewPilotageBAS().getFileUpload() == null) {
-				msg = "Erreur : aucun fichier selectionné\n";
-				this.views.getViewPilotageBAS().setMessage("Erreur : aucun fichier selectionné.");
+				msg = "managementSandbox.upload.noSelection\n";
+				this.views.getViewPilotageBAS().setMessage("managementSandbox.upload.noSelection");
 			}
 
 			if (writingRepo == null || writingRepo.equals("")) {
-				msg += "Erreur : aucun entrepot selectionné\n";
+				msg += "managementSandbox.upload.noFilestoreSelection\n";
 			}
 
 			this.views.getViewPilotageBAS().setMessage(msg);
@@ -124,7 +124,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		try {
 			ResetEnvironmentService.backToTargetPhase(phaseAExecuter, getBacASable(), this.repertoire, undoFilesSelection());
 		} catch (ArcException e) {
-			this.views.getViewPilotageBAS().setMessage("Le retour arrière a échoué");
+			this.views.getViewPilotageBAS().setMessage("managementSandbox.undo.fail");
 		}
 
 		return generateDisplay(model, RESULT_SUCCESS);

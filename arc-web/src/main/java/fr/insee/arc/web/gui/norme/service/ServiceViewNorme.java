@@ -46,12 +46,12 @@ public class ServiceViewNorme extends InteractorNorme {
 			loggerDispatcher.info("Norm state : " + etat, LOGGER);
 			// Check actived norm (code 1)
 			if ("1".equals(etat)) {
-				views.getViewNorme().setMessage("Caution, cannot delete a activated norm");
+				views.getViewNorme().setMessage("normManagement.delete.warning");
 			} else {
 				this.vObjectService.delete(views.getViewNorme());
 			}
 		} else {
-			views.getViewNorme().setMessage("You didn't select anything");
+			views.getViewNorme().setMessage("general.noSelection");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

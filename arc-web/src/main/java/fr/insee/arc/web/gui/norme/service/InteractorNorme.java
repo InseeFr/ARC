@@ -390,7 +390,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> {
 		// Check if there is file
 		if (theFileToUpload == null || theFileToUpload.isEmpty()) {
 			// No file -> ko
-			vObjectToUpdate.setMessage("Please select a file.");
+			vObjectToUpdate.setMessage("normManagement.upload.noSelection");
 		} else {
 			// A file -> can process it
 			LoggerHelper.debug(LOGGER, " filesUpload  : " + theFileToUpload);
@@ -427,7 +427,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> {
 						IConstanteCaractere.semicolon);
 
 			} catch (Exception ex) {
-				vObjectToUpdate.setMessage("Error when uploading the file : " + ex.getMessage());
+				vObjectToUpdate.setMessage("normManagement.upload.error");
+				vObjectToUpdate.setMessageArgs(ex.getMessage());
 				LoggerHelper.error(LOGGER, ex, "uploadOutils()", "\n");
 				// After the exception, the methode cant go further, so the better thing to do
 				// is to quit it
@@ -463,7 +464,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> {
 			try {
 				UtilitaireDao.get(0).executeRequest(null, requete);
 			} catch (Exception ex) {
-				vObjectToUpdate.setMessage("Error when uploading the file : " + ex.getMessage());
+				vObjectToUpdate.setMessage("normManagement.upload.error");
+				vObjectToUpdate.setMessageArgs(ex.getMessage());
 				LoggerHelper.error(LOGGER, ex, "uploadOutils()");
 			}
 		}

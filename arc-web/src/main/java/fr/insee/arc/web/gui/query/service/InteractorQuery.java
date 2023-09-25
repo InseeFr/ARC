@@ -78,7 +78,7 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 				try {
 					UtilitaireDao.get(0).executeImmediate(null, this.myQuery);
 					this.vObjectService.destroy(views.getViewQuery());
-					this.views.getViewQuery().setMessage("Requete terminée !");
+					this.views.getViewQuery().setMessage("query.complete");
 				} catch (Exception e) {
 					this.vObjectService.destroy(views.getViewQuery());
 					this.views.getViewQuery().setMessage(e.getMessage());

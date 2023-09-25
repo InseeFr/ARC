@@ -41,12 +41,12 @@ public class ServiceViewCalendrier extends InteractorNorme {
 			String etat = selection.get("etat").get(0);
 			// Check actived calendar (code 1)
 			if ("1".equals(etat)) {
-				this.views.getViewCalendrier().setMessage("Caution, cannot delete a active calendar");
+				this.views.getViewCalendrier().setMessage("normManagement.calendar.warning");
 			} else {
 				this.vObjectService.delete(views.getViewCalendrier());
 			}
 		} else {
-			this.views.getViewJeuxDeRegles().setMessage("You didn't select anything");
+			this.views.getViewJeuxDeRegles().setMessage("general.noSelection");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

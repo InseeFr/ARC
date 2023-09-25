@@ -126,7 +126,7 @@ public class ServiceViewPilotageProd extends InteractorPilotage {
     	}
 		catch (ArcException e)
 		{
-			this.views.getViewPilotageBAS().setMessage("La mise a jour des règles a échoué");
+			this.views.getViewPilotageBAS().setMessage("managementSandbox.batch.update.error");
 			return generateDisplay(model, RESULT_SUCCESS);
 		}
     	return generateDisplay(model, RESULT_SUCCESS);

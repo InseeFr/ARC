@@ -49,7 +49,7 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-				this.views.getViewJeuxDeRegles().setMessage("Caution, cannot add a rule set in the PRODUCTION state");
+				this.views.getViewJeuxDeRegles().setMessage("normManagement.addRuleset.noProduction");
 			} else {
 				this.vObjectService.insert(views.getViewJeuxDeRegles());
 			}
@@ -74,12 +74,12 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 			// Check production state. If yes cancel the delete and send a message to the
 			// user
 			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-				this.views.getViewJeuxDeRegles().setMessage("Caution, cannot delete a rule set in the PRODUCTION state");
+				this.views.getViewJeuxDeRegles().setMessage("normManagement.deleteRuleset.noProduction");
 			} else {
 				this.vObjectService.delete(views.getViewJeuxDeRegles());
 			}
 		} else {
-			this.views.getViewJeuxDeRegles().setMessage("You didn't select anything");
+			this.views.getViewJeuxDeRegles().setMessage("general.noSelection");
 		}
 
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -173,7 +173,7 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 					);
 			return "none";
 		} else {
-			this.views.getViewJeuxDeRegles().setMessage("You didn't select anything");
+			this.views.getViewJeuxDeRegles().setMessage("general.noSelection");
 			return generateDisplay(model, RESULT_SUCCESS);
 		}
 
@@ -193,11 +193,11 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 			requete.append("update " + theTable + " set last_init='"+ dateFormat.format(dNow) + "', operation=case when operation='R' then 'O' else operation end;");
 			
 			UtilitaireDao.get(0).executeRequest(null, requete);
-			viewRulesSet.setMessage("Go to production registered");
+			viewRulesSet.setMessage("normManagement.goToProduction");
 
 		} catch (ArcException e) {
-			viewRulesSet.setMessage("Error in the go to production");
-			LoggerHelper.warn(LOGGER, "Error in the go to production");
+			viewRulesSet.setMessage("normManagement.goToProduction.error");
+			LoggerHelper.warn(LOGGER, "normManagement.goToProduction.error");
 
 		}
 	}

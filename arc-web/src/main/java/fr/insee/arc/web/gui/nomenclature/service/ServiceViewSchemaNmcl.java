@@ -81,8 +81,8 @@ public class ServiceViewSchemaNmcl extends InteractorNomenclature {
         try {
             UtilitaireDao.get(0).executeImmediate(null, "SELECT null as " + nomColonne);
         } catch (Exception e) {
-            String message = nomColonne + " n'est pas un nom de colonne valide.";
-            this.views.getViewSchemaNmcl().setMessage(message);
+            this.views.getViewSchemaNmcl().setMessage("nmclManagement.schema.error.invalidColumnName");
+            this.views.getViewSchemaNmcl().setMessageArgs(nomColonne);
             return false;
         }
         return true;
@@ -100,8 +100,8 @@ public class ServiceViewSchemaNmcl extends InteractorNomenclature {
         try {
             UtilitaireDao.get(0).executeImmediate(null, "SELECT null::" + typeColonne);
         } catch (Exception e) {
-            String message = typeColonne + " n'est pas un type valide.";
-            this.views.getViewSchemaNmcl().setMessage(message);
+            this.views.getViewSchemaNmcl().setMessage("nmclManagement.schema.error.invalidTypeName");
+            this.views.getViewSchemaNmcl().setMessageArgs(typeColonne);
             return false;
         }
         return true;

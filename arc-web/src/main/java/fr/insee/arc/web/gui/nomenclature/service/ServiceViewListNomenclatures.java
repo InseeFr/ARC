@@ -55,13 +55,14 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         if (this.views.getViewListNomenclatures().mapContentAfterUpdate().size() > 0) {
 			for (String nomTable : this.views.getViewListNomenclatures().mapContentAfterUpdate().get(NOM_TABLE)) {
                 if (!validationNomTable(nomTable)) {
-                    this.views.getViewListNomenclatures().setMessage(nomTable + "n'est pas un nom de table valide.");
+                    this.views.getViewListNomenclatures().setMessage("nmclManagement.update.invalidName");
+                    this.views.getViewListNomenclatures().setMessageArgs(nomTable);
                     zeroErreur = false;
                     break;
                 }
             }
         } else {
-            this.views.getViewListNomenclatures().setMessage("Pas de nomenclature renseignée.");
+            this.views.getViewListNomenclatures().setMessage("nmclManagement.update.noNomenclature");
         }
         if (zeroErreur) {
             this.vObjectService.update(this.views.getViewListNomenclatures());
@@ -102,7 +103,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
             this.vObjectService.delete(views.getViewListNomenclatures());
         } catch (Exception e) {
-        	StaticLoggerDispatcher.error(LOGGER, "Error in GeerFamilleNormeAction.executeRequeteMiseAjourTableMetier");
+        	StaticLoggerDispatcher.error(LOGGER, "Error in GererFamilleNormeAction.executeRequeteMiseAjourTableMetier");
         }
         return basicAction(model, RESULT_SUCCESS);
     }
@@ -125,7 +126,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 					);
 			return "none";
 		} else {
-			this.views.getViewListNomenclatures().setMessage("You didn't select anything");
+			this.views.getViewListNomenclatures().setMessage("general.noSelection");
 			return generateDisplay(model, RESULT_SUCCESS);
 		}
 
@@ -145,7 +146,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
     	try {
             importNomenclatureDansBase(fileUpload);
         } catch (ArcException ex) {
-           	this.views.getViewListNomenclatures().setMessage("Erreur dans l'import de la nomenclature");
+           	this.views.getViewListNomenclatures().setMessage("nmclManagement.import.error");
         }
 
         return generateDisplay(model, RESULT_SUCCESS);
@@ -153,7 +154,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
     private boolean validationNomTable(String nomTable) {
         if (nomTable == null) {
-            this.views.getViewListNomenclatures().setMessage("Erreur - le nom de table n'est pas renseigné");
+            this.views.getViewListNomenclatures().setMessage("nmclManagement.validateName.empty");
             return false;
         }
 
@@ -161,12 +162,12 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         // doit être de la forme nom_millesime
 
         if (!nomTable.startsWith(NMCL_PREFIX)) {
-            this.views.getViewListNomenclatures().setMessage("Erreur - le nom doit commencer par nmcl_");
+            this.views.getViewListNomenclatures().setMessage("nmclManagement.validateName.error.prefix");
             return false;
         }
 
         if (nomTable.split(underscore).length < 3) {
-            this.views.getViewListNomenclatures().setMessage("Erreur - le nom doit être de la forme nmcl_type_millesime (au moins deux underscore)");
+            this.views.getViewListNomenclatures().setMessage("nmclManagement.validateName.error.format");
             return false;
         }
 
@@ -178,7 +179,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
     
     private void importNomenclatureDansBase(MultipartFile fileUpload) throws ArcException {
 		if (views.getViewListNomenclatures().mapContentSelected().isEmpty()) {
-            this.views.getViewListNomenclatures().setMessage("Vous devez selectionner une nomenclature pour l'importation.");
+            this.views.getViewListNomenclatures().setMessage("nmclManagement.import.noSelection");
             return;
         }
 
@@ -186,13 +187,13 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         LoggerHelper.debug(LOGGER,"/* Import de la nomenclature : " + nouvelleNomenclature + "*/");
 
         if (StringUtils.isEmpty(nouvelleNomenclature)) {
-            this.views.getViewListNomenclatures().setMessage("Vous devez selectionner une nomenclature pour l'importation.");
+            this.views.getViewListNomenclatures().setMessage("nmclManagement.import.noSelection");
             return;
         }
 
         // Ouverture du fichier
         if (fileUpload == null || fileUpload.isEmpty()) {
-            this.views.getViewListNomenclatures().setMessage("Vous devez selectionner un fichier pour l'importation.");
+            this.views.getViewListNomenclatures().setMessage("general.import.noFileSelection");
             return;
         }
         try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))){

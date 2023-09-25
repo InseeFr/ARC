@@ -120,7 +120,8 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 				try {
 					FileUtilsArc.renameTo(fileSource, fileTarget);
 				} catch (ArcException e) {
-					viewSource.setMessage("An error occured while transfering the file " + fileSource);
+					viewSource.setMessage("fileManagement.transfer.error");
+					viewSource.setMessageArgs(fileSource);
 				}
 			}
 		} else {
@@ -131,7 +132,8 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 					try {
 						FileUtilsArc.renameTo(fileSource, fileTarget);
 					} catch (ArcException e) {
-						viewSource.setMessage("An error occured while transfering the file " + fileSource);
+						viewSource.setMessage("fileManagement.transfer.error");
+						viewSource.setMessageArgs(fileSource);
 					}
 				}
 			}
@@ -155,28 +157,27 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 				File fileSource = new File(dirSource + f);
 				if (fileSource.isFile()) {
 					if (!fileSource.getName().contains(DELETABLE)) {
-						String errorMessage = "file name must contain the word DELETE to be deleted : " + fileSource;
-						viewSource.setMessage(errorMessage);
+						viewSource.setMessage("fileManagement.delete.error.fileName");
+						viewSource.setMessageArgs(fileSource);
 					} else {
 						try {
 							Files.delete(fileSource.toPath());
 						} catch (IOException e) {
-							String errorMessage = "An error occured while deleting the file " + fileSource;
-							viewSource.setMessage(errorMessage);
+							viewSource.setMessage("fileManagement.delete.error.file");
+							viewSource.setMessageArgs(fileSource);
 						}
 					}
 				} else {
-					String errorMessage = "The selected directory cannot be deleted this way. Go under the directory to delete it."
-							+ fileSource;
-					viewSource.setMessage(errorMessage);
+					viewSource.setMessage("fileManagement.delete.directory");
+					viewSource.setMessageArgs(fileSource);
 				}
 			}
 			return false;
 		}
 
 		if (!dirSource.contains(DELETABLE)) {
-			String errorMessage = "directory name must contain the word DELETE to be deleted " + dirSource;
-			viewSource.setMessage(errorMessage);
+			viewSource.setMessage("fileManagement.delete.error.directoryName");
+			viewSource.setMessageArgs(dirSource);
 
 			return false;
 		}
@@ -186,8 +187,8 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 			try {
 				Files.delete(dirSourceFile.toPath());
 			} catch (IOException e) {
-				String errorMessage = "An error occured while deleting the directory " + dirSource;
-				viewSource.setMessage(errorMessage);
+				viewSource.setMessage("fileManagement.delete.error.directory");
+				viewSource.setMessageArgs(dirSource);
 			}
 			return true;
 		} else {
@@ -196,8 +197,8 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 					try {
 						Files.delete(f.toPath());
 					} catch (IOException e) {
-						String errorMessage = "An error occured while deleting the file " + f;
-						viewSource.setMessage(errorMessage);
+						viewSource.setMessage("fileManagement.delete.error.file");
+						viewSource.setMessageArgs(f);
 					}
 				}
 			}
@@ -223,7 +224,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 			try {
 				FileUtilsArc.renameTo(fileIn, fileOut);
 			} catch (ArcException e) {
-				viewSource.setMessage("Rename operation failed. Check if filesystem isn't locked");
+				viewSource.setMessage("fileManagement.rename.error");
 
 			}
 		}
@@ -266,9 +267,9 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 				try {
 					Files.copy(fileSource.toPath(), fileTarget.toPath());
 				} catch (IOException e) {
-					String errorMessage = "An error occured while copying the file " + fileSource;
-					loggerDispatcher.error(errorMessage, e, LOGGER);
-					viewSource.setMessage(errorMessage);
+					loggerDispatcher.error("fileManagement.copy.error" + fileSource, e, LOGGER);
+					viewSource.setMessage("fileManagement.copy.error");
+					viewSource.setMessageArgs(fileSource);
 				}
 			}
 		} else {
@@ -278,9 +279,9 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 					try {
 						Files.copy(fileSource.toPath(), fileTarget.toPath());
 					} catch (IOException e) {
-						String errorMessage = "An error occured while copying the file " + fileSource;
-						loggerDispatcher.error(errorMessage, e, LOGGER);
-						viewSource.setMessage(errorMessage);
+						loggerDispatcher.error("fileManagement.copy.error" + fileSource, e, LOGGER);
+						viewSource.setMessage("fileManagement.copy.error");
+						viewSource.setMessageArgs(fileSource);
 					}
 				}
 			}
@@ -302,7 +303,8 @@ public class InteractorFile extends ArcWebGenericService<ModelFile> {
 				try {
 					Files.createDirectory(directoryPath);
 				} catch (IOException e) {
-					viewSource.setMessage("directory creation failed " + directoryPath);
+					viewSource.setMessage("fileManagement.createDirectory.error");
+					viewSource.setMessageArgs(directoryPath);
 				}
 			}
 		}

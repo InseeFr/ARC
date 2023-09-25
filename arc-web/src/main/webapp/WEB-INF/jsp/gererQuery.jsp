@@ -6,7 +6,7 @@
 <html lang="${pageContext.response.locale}">
 <head>
 	<link rel="icon" href="data:,"/>
-	<title>Database Management</title>
+	<title><spring:message code="header.query"/></title>
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/gererQuery.js" />
 	</c:import>

@@ -6,7 +6,7 @@
 <html lang="${pageContext.response.locale}">
 <head>
 	<link rel="icon" href="data:,"/>
-	<title>Filesystem Management</title>
+	<title><spring:message code="header.filesystem"/></title>
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/gererFile.js" />
 	</c:import>	

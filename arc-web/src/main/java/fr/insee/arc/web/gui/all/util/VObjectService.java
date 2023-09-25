@@ -626,7 +626,7 @@ public class VObjectService {
 
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER, ex);
-			currentData.setMessage("Error in VObjectService.insert");
+			currentData.setMessage("vObject.insert.error");
 			return false;
 		}
 		return true;
@@ -642,7 +642,7 @@ public class VObjectService {
 					deleteQuery(currentData, tables).asTransaction());
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
-			currentData.setMessage("Error in VObjectService.delete");
+			currentData.setMessage("vObject.delete.error");
 		}
 	}
 
@@ -840,7 +840,7 @@ public class VObjectService {
 			session.put(currentData.getSessionName(), v0);
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
-			currentData.setMessage("Error in VObjectService.update");
+			currentData.setMessage("vObject.update.error");
 		}
 
 	}

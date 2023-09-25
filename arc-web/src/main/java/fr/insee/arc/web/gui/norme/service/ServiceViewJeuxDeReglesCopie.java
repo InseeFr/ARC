@@ -176,7 +176,7 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 			this.vObjectService.destroy(views.getViewJeuxDeReglesCopie());
 		} else {
 			loggerDispatcher.info("No rule set choosed", LOGGER);
-			this.views.getViewJeuxDeRegles().setMessage("Please choose a ruleset");
+			this.views.getViewJeuxDeRegles().setMessage("normManagement.copyRuleset.noSelection");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
