@@ -80,9 +80,6 @@ class BatchARC implements IReturnCode {
 	// reste à faire
 	private Integer numberOfIterationBewteenCheckTodo;
 
-	// nombre de pods utilisés par ARC
-	private Integer numberOfPods;
-
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
 	// Maintenance initialization process can only occur in this case
@@ -141,9 +138,6 @@ class BatchARC implements IReturnCode {
 		// reste à faire
 		numberOfIterationBewteenCheckTodo = bdParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
 				10);
-
-		// the number of executor nods declared for scalability
-		numberOfPods = ArcDatabase.numberOfExecutorNods();
 
 		// either we take env and envExecution from database or properties
 		// default is from properties
@@ -240,13 +234,10 @@ class BatchARC implements IReturnCode {
 		requete.append(
 				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
 		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, requete);
-
-		for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
-			// Maintenance full du catalog
-			DatabaseMaintenance.maintenancePgCatalog(poolIndex, null, FormatSQL.VACUUM_OPTION_FULL);
-			// maintenance des tables métier de la base de données
-			DatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null, envExecution);
-		}
+		
+		DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_FULL);
+		DatabaseMaintenance.maintenancePilotage(null, envExecution, FormatSQL.VACUUM_OPTION_NONE);
+	
 	}
 
 	/**
@@ -590,9 +581,9 @@ class BatchARC implements IReturnCode {
 		for (TraitementPhase phase : phases) {
 			// if no thread in phase, start one
 			if (pool.get(phase).isEmpty()) {
-				PhaseThreadFactory a = new PhaseThreadFactory(mapParam, phase);
-				a.start();
-				pool.get(phase).add(a);
+				PhaseThreadFactory thread = new PhaseThreadFactory(mapParam, phase);
+				thread.start();
+				pool.get(phase).add(thread);
 			}
 			// delay between phases not to overload
 			Sleep.sleep(delay);
@@ -606,10 +597,13 @@ class BatchARC implements IReturnCode {
 				maintenance = new Thread() {
 					@Override
 					public void run() {
-						for (int poolIndex = 0; poolIndex <= numberOfPods; poolIndex++) {
-							DatabaseMaintenance.maintenanceDatabaseClassic(poolIndex, null,
-									envExecution);
+						try {
+							DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_NONE);
+							DatabaseMaintenance.maintenancePilotage(null, envExecution, FormatSQL.VACUUM_OPTION_NONE);
+						} catch (ArcException e) {
+							 e.logMessageException();
 						}
+						
 					}
 				};
 				maintenance.start();

@@ -1,11 +1,11 @@
-package fr.insee.arc.ws.dao;
+package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.util.ArrayList;
 
 import org.json.JSONObject;
 
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.ws.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 
 public interface ClientDao {
 

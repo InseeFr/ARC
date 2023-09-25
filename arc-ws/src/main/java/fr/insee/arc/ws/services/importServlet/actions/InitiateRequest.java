@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.actions;
+package fr.insee.arc.ws.services.importServlet.actions;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,12 +6,12 @@ import org.json.JSONObject;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Services;
 import fr.insee.arc.ws.services.importServlet.ImportStep1InitializeClientTablesService;
 import fr.insee.arc.ws.services.importServlet.ImportStep2GetTableNameService;
 import fr.insee.arc.ws.services.importServlet.ImportStep3GetTableDataService;
+import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 
 /**
  * Cette classe permet d'initier le requêtage auprès de la base de données.

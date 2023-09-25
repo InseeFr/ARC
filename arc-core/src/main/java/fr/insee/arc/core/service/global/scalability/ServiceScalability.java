@@ -27,7 +27,23 @@ public class ServiceScalability {
 	 */
 	public static int dispatchOnNods(Connection coordinatorConnexion, ThrowingConsumer<Connection, ArcException> actionOnCoordinator, ThrowingConsumer<Connection, ArcException> actionOnExecutor) throws ArcException
 	{
-		actionOnCoordinator.accept(coordinatorConnexion);
+		if (coordinatorConnexion==null)
+		{
+			try (Connection newCoordinatorConnexion = UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getDriverConnexion())
+			{
+				actionOnCoordinator.accept(newCoordinatorConnexion);
+				
+			} catch (SQLException | ArcException e) {
+				 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED);
+				 customException.logFullException();
+				 throw customException;
+			}
+		}
+		else
+		{
+			actionOnCoordinator.accept(coordinatorConnexion);
+		}
+		
 
 		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
 		

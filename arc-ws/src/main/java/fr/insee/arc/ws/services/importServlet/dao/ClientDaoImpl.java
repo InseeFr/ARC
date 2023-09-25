@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.dao;
+package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,10 +21,10 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.ws.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 
 public class ClientDaoImpl implements ClientDao {
 
@@ -293,7 +293,7 @@ public class ClientDaoImpl implements ClientDao {
     /**
      *
      *
-     * @see fr.insee.arc.ws.dao.ClientDao#getResponse(long, java.lang.String, java.lang.String, fr.insee.arc.ws.actions.SendResponse)
+     * @see fr.insee.arc.ws.services.importServlet.dao.ClientDao#getResponse(long, java.lang.String, java.lang.String, fr.insee.arc.ws.services.importServlet.actions.SendResponse)
      */
     @Override
     public void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp) throws ArcException {

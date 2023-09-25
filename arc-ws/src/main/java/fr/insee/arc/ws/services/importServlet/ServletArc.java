@@ -27,12 +27,12 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.utils.JsonKeys;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.webutils.WebUtils;
-import fr.insee.arc.ws.actions.InitiateRequest;
-import fr.insee.arc.ws.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.actions.InitiateRequest;
+import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 
 public class ServletArc extends HttpServlet {
 

@@ -71,8 +71,9 @@ public class SynchronizeDataByPilotage {
 		// correctement sans mettre en oeuvre
 		// une stratégie de vacuum hyper agressive et donc ajouter une spécificité pour
 		// les DBAs
-		DatabaseMaintenance.maintenanceDatabaseClassic(this.sandbox.getConnection(), this.sandbox.getSchema());
-
+		
+		DatabaseMaintenance.maintenancePgCatalogAllNods(this.sandbox.getConnection(), FormatSQL.VACUUM_OPTION_NONE);
+	
 	}
 	
 	

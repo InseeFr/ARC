@@ -108,8 +108,10 @@ public class ApiReceptionService extends ApiService {
 		} else {
 			maxNumberOfFiles = bdParameters.getInt(null, "ApiReceptionService.ihm.maxNumberOfFiles", 5000);
 		}
+		
 		// Enregistrement des fichiers
 		GenericBean archiveContent = moveAndCheckClientFiles(this.nbEnr, maxNumberOfFiles);
+		
 		if (archiveContent != null) {
 			registerAndDispatchFiles(this.connexion.getCoordinatorConnection(), archiveContent);
 		}

@@ -12,10 +12,10 @@ import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.utils.JsonKeys;
-import fr.insee.arc.ws.actions.SendResponse;
-import fr.insee.arc.ws.dao.ClientDao;
-import fr.insee.arc.ws.dao.ClientDaoImpl;
+import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
+import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
+import fr.insee.arc.ws.services.importServlet.dao.ClientDaoImpl;
 
 public class ImportStep1InitializeClientTablesService {
 

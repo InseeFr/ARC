@@ -777,10 +777,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					"select tablename from pg_tables where schemaname='pg_catalog'")));
 			StringBuilder requete = new StringBuilder();
 			for (String t : gb.mapContent().get("tablename")) {
-				requete.append(FormatSQL.analyzeSecured(t));
-			}
-			for (String t : gb.mapContent().get("tablename")) {
 				requete.append(FormatSQL.vacuumSecured(t, type));
+				requete.append(FormatSQL.analyzeSecured(t));
 			}
 			executeImmediate(connexion, requete.toString());
 		} catch (Exception ex) {

@@ -696,6 +696,14 @@ public abstract class ApiService implements IConstanteNumerique {
 		this.listeNorme = listeNorme;
 	}
 
+	public Sandbox getCoordinatorSandbox() {
+		return coordinatorSandbox;
+	}
+
+	public void setCoordinatorSandbox(Sandbox coordinatorSandbox) {
+		this.coordinatorSandbox = coordinatorSandbox;
+	}
+
 	
 	
 }

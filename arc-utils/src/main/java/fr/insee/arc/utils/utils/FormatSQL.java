@@ -152,7 +152,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique
      * @return
      */
     public static String vacuumSecured(String table, String type)
-    {    		
+    {   
     	return "VACUUM "+ type +" " + table + "; COMMIT; \n"; 
     }
 

@@ -1,6 +1,8 @@
 package fr.insee.arc.core.service.p0initialisation.useroperation;
 
+import java.nio.file.Paths;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,10 +15,15 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
+import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
+import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.FileUtilsArc;
+import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ResetEnvironmentOperation {
 
@@ -40,12 +47,12 @@ public class ResetEnvironmentOperation {
 	 * @param listEtat
 	 * @throws ArcException 
 	 */
-	public void retourPhasePrecedente(TraitementPhase phase, ArcPreparedStatementBuilder querySelection,
-			List<TraitementEtat> listEtat) throws ArcException {
+	public void retourPhasePrecedente(TraitementPhase phase, ArcPreparedStatementBuilder querySelection) throws ArcException {
 		LOGGER.info("Retour arrière pour la phase : {}", phase);
 		
 		Connection connection = sandbox.getConnection();
 		String envExecution = sandbox.getSchema();
+		
 		String tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
 		
 		ArcPreparedStatementBuilder requete;
@@ -116,5 +123,41 @@ public class ResetEnvironmentOperation {
 		// Penser à tuer la connexion
 	}
 
+	
+	/**
+	 * Delete file and pilotage table to reset a sandbox
+	 * @param repertoire
+	 * @throws ArcException
+	 */
+	public void clearPilotageAndDirectories(String repertoire) throws ArcException {
+		
+		Connection connection = sandbox.getConnection();
+		String envExecution = sandbox.getSchema();
+		
+		UtilitaireDao.get(0).executeBlock(connection, "truncate " + ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution)+ ";");
+		UtilitaireDao.get(0).executeBlock(connection, "truncate " + ViewEnum.PILOTAGE_ARCHIVE.getFullName(envExecution) + ";");
+
+		if (Boolean.TRUE.equals(UtilitaireDao.get(0).hasResults(null, FormatSQL.tableExists("arc.ihm_entrepot")))) {
+			ArrayList<String> entrepotList = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
+					new ArcPreparedStatementBuilder("select id_entrepot from arc.ihm_entrepot"))).mapContent()
+					.get("id_entrepot");
+			if (entrepotList != null) {
+				for (String s : entrepotList) {
+					FileUtilsArc.deleteAndRecreateDirectory(
+							Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, envExecution, s)).toFile());
+					FileUtilsArc.deleteAndRecreateDirectory(Paths
+							.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, s)).toFile());
+				}
+			}
+		}
+		FileUtilsArc.deleteAndRecreateDirectory(
+				Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, envExecution)).toFile());
+		FileUtilsArc.deleteAndRecreateDirectory(
+				Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, envExecution)).toFile());
+		FileUtilsArc.deleteAndRecreateDirectory(
+				Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, envExecution)).toFile());
+		FileUtilsArc.deleteAndRecreateDirectory(
+				Paths.get(FileSystemManagement.directoryEnvExport(repertoire, envExecution)).toFile());
+	}
 	
 }

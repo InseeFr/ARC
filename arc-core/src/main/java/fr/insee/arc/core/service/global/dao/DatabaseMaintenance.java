@@ -1,13 +1,16 @@
 package fr.insee.arc.core.service.global.dao;
 
 import java.sql.Connection;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -20,6 +23,20 @@ public class DatabaseMaintenance {
 
 	protected static final Logger LOGGER = LogManager.getLogger(DatabaseMaintenance.class);
 
+	
+	/**
+	 * dispatch on every nods the mainteance of catalog
+	 * @param optionalProvidedIdSourceToDrop
+	 * @throws ArcException
+	 */
+	public static void maintenancePgCatalogAllNods(Connection coordinatorConnection, String type) throws ArcException {
+
+		ThrowingConsumer<Connection, ArcException> function = executorConnection -> UtilitaireDao.get(0).maintenancePgCatalog(executorConnection, type);
+
+		ServiceScalability.dispatchOnNods(coordinatorConnection, function, function);
+
+	}
+	
 	/**
 	 * Maintenance sur la table de pilotage
 	 * 
@@ -27,62 +44,32 @@ public class DatabaseMaintenance {
 	 * @param envExecution
 	 * @param type
 	 */
-	private static void maintenancePilotage(Integer poolIndex, Connection connexion, String envExecution, String type) {
-		String tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
+	public static void maintenancePilotage(Connection coordinatorConnection, String envExecution, String type) {
 		StaticLoggerDispatcher.info(LOGGER, "** Maintenance Pilotage **");
 
+		String tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
+		
 		try {
-			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.analyzeSecured(tablePil));
-			UtilitaireDao.get(poolIndex).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePil, type));
+			UtilitaireDao.get(0).executeImmediate(coordinatorConnection, FormatSQL.vacuumSecured(tablePil, type));
+			UtilitaireDao.get(0).executeImmediate(coordinatorConnection, FormatSQL.analyzeSecured(tablePil));
 		} catch (Exception e) {
 			StaticLoggerDispatcher.error(LOGGER, "Error in ApiService.maintenancePilotage");
 		}
 	}
 
 	/**
-	 * 
-	 * @param connexion
-	 * @param type
-	 */
-	public static void maintenancePgCatalog(Integer poolIndex, Connection connexion, String type) {
-		// postgres libere mal l'espace sur ces tables qaund on fait trop d'opération
-		// sur les colonnes
-		// vaccum full sinon ca fait quasiment rien ...
-		StaticLoggerDispatcher.info(LOGGER, "** Maintenance Catalogue **");
-		UtilitaireDao.get(poolIndex).maintenancePgCatalog(connexion, type);
-	}
-
-	/**
-	 * classic database maintenance routine 2 vacuum are sent successively to
-	 * analyze and remove dead tuple completely from
+	 * analyze and vacuum the postgres catalog tables analyze 
+	 * vacuum the pilotage table located in the sandbox schema
 	 * 
 	 * @param connexion    the jdbc connexion
 	 * @param envExecution the sandbox schema
+	 * @throws ArcException 
 	 */
-	public static void maintenanceDatabaseClassic(Connection connexion, String envExecution) {
-		maintenanceDatabaseClassic(0, connexion, envExecution);
-	}
-
-	public static void maintenanceDatabaseClassic(Integer poolIndex, Connection connexion, String envExecution) {
-		maintenanceDatabase(poolIndex, connexion, envExecution, FormatSQL.VACUUM_OPTION_NONE);
-	}
-
-	/**
-	 * analyze and vacuum on postgres catalog tables analyze and vacuum on the
-	 * pilotage table located in the sandbox schema
-	 * 
-	 * @param connexion       the jdbc connexion
-	 * @param envExecution    the sandbox schema
-	 * @param typeMaintenance FormatSQL.VACUUM_OPTION_FULL or
-	 *                        FormatSQL.VACUUM_OPTION_NONE
-	 */
-	private static void maintenanceDatabase(Integer poolIndex, Connection connexion, String envExecution,
-			String typeMaintenance) {
-		maintenancePgCatalog(poolIndex, connexion, typeMaintenance);
-
-		maintenancePilotage(poolIndex, connexion, envExecution, typeMaintenance);
-
-		StaticLoggerDispatcher.info(LOGGER, "** Fin de maintenance **");
+	public static void maintenanceDatabaseClassic(Connection coordinatorConnection, String envExecution) throws ArcException {
+		
+		maintenancePgCatalogAllNods(coordinatorConnection, FormatSQL.VACUUM_OPTION_NONE);
+		
+		maintenancePilotage(coordinatorConnection, envExecution, FormatSQL.VACUUM_OPTION_NONE);
 	}
 	
 }

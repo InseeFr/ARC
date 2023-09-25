@@ -1,4 +1,4 @@
-package fr.insee.arc.utils.utils;
+package fr.insee.arc.ws.services.importServlet.bo;
 
 public enum JsonKeys {
 	//Requête
