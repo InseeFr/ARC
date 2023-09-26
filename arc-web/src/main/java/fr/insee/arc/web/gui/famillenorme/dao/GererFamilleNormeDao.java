@@ -10,6 +10,7 @@ import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 import fr.insee.arc.web.gui.all.util.VObjectService;
@@ -176,6 +177,98 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 				buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_FAMILLE);
 		vObjectService.initialize(viewVariableMetier, query, dataObjectService.getView(dataModelVariableMetier),
 				defaultInputFields);
+	}
+	
+	public static String querySynchronizeRegleWithVariableMetier(String idFamille) {
+		StringBuilder requeteListeSupprRegleMapping = requeteListeSupprRegleMapping(idFamille);
+		StringBuilder requeteListeAddRegleMapping = requeteListeAddRegleMapping(idFamille);
+		
+		StringBuilder requete = new StringBuilder();
+		requete.append(requeteListeAddRegleMapping.toString() + ";\n");
+		requete.append(requeteListeSupprRegleMapping.toString() + ";");
+		return requete.toString();
+	}
+	
+	/**
+	 * Sélection des règles à détruire
+	 */
+	private static StringBuilder requeteListeSupprRegleMapping(String idFamille) {
+		StringBuilder requeteListeSupprRegleMapping = new StringBuilder("DELETE FROM " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + " regle\n");
+		requeteListeSupprRegleMapping.append("  WHERE NOT EXISTS (");
+		requeteListeSupprRegleMapping
+		.append("    SELECT 1 FROM " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " var INNER JOIN " + ViewEnum.IHM_FAMILLE.getFullName() + " fam\n");
+		requeteListeSupprRegleMapping.append("    ON var.id_famille=fam.id_famille\n");
+		requeteListeSupprRegleMapping.append("    AND regle.variable_sortie=var.nom_variable_metier\n");
+		requeteListeSupprRegleMapping.append("    INNER JOIN arc.ihm_norme norme\n");
+		requeteListeSupprRegleMapping.append("    ON norme.id_famille=fam.id_famille\n");
+		requeteListeSupprRegleMapping.append("    AND regle.id_norme=norme.id_norme\n");
+		requeteListeSupprRegleMapping.append("    WHERE fam.id_famille = '" + idFamille + "'");
+		requeteListeSupprRegleMapping.append("  )");
+		requeteListeSupprRegleMapping
+		.append("    AND EXISTS (SELECT 1 FROM " + ViewEnum.IHM_NORME.getFullName() + " norme INNER JOIN " + ViewEnum.IHM_FAMILLE.getFullName() + " fam");
+		requeteListeSupprRegleMapping.append("      ON norme.id_famille=fam.id_famille");
+		requeteListeSupprRegleMapping.append("      AND regle.id_norme=norme.id_norme");
+		requeteListeSupprRegleMapping.append("      WHERE fam.id_famille = '" + idFamille + "')");
+		return requeteListeSupprRegleMapping;
+	}
+
+	/**
+	 * Sélection des règles à créer
+	 */
+	private static StringBuilder requeteListeAddRegleMapping(String idFamille) {
+		StringBuilder requeteListeAddRegleMapping = new StringBuilder("INSERT INTO " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + "(");
+		requeteListeAddRegleMapping.append("id_regle");
+		requeteListeAddRegleMapping.append(", id_norme");
+		requeteListeAddRegleMapping.append(", validite_inf");
+		requeteListeAddRegleMapping.append(", validite_sup");
+		requeteListeAddRegleMapping.append(", version");
+		requeteListeAddRegleMapping.append(", periodicite");
+		requeteListeAddRegleMapping.append(", variable_sortie");
+		requeteListeAddRegleMapping.append(", expr_regle_col");
+		requeteListeAddRegleMapping.append(", commentaire)");
+		requeteListeAddRegleMapping
+				.append("\n  SELECT (SELECT max(id_regle) FROM " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + ") + row_number() over ()");
+		requeteListeAddRegleMapping.append(", norme.id_norme");
+		requeteListeAddRegleMapping.append(", calendrier.validite_inf");
+		requeteListeAddRegleMapping.append(", calendrier.validite_sup");
+		requeteListeAddRegleMapping.append(", jdr.version");
+		requeteListeAddRegleMapping.append(", norme.periodicite");
+		requeteListeAddRegleMapping.append(", var.nom_variable_metier");
+		requeteListeAddRegleMapping.append(", '" + FormatSQL.NULL + "'");
+		requeteListeAddRegleMapping.append(", " + FormatSQL.NULL + "::text ");
+		requeteListeAddRegleMapping.append("\n  FROM (SELECT DISTINCT id_famille, nom_variable_metier FROM "
+				+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + ") var INNER JOIN " + ViewEnum.IHM_FAMILLE.getFullName() + " fam");
+		requeteListeAddRegleMapping.append("\n    ON var.id_famille=fam.id_famille");
+		requeteListeAddRegleMapping.append("\n  INNER JOIN " + ViewEnum.IHM_NORME.getFullName() + " norme");
+		requeteListeAddRegleMapping.append("\n    ON fam.id_famille=norme.id_famille");
+		requeteListeAddRegleMapping.append("\n  INNER JOIN " + ViewEnum.IHM_CALENDRIER.getFullName() + " calendrier");
+		requeteListeAddRegleMapping
+				.append("\n    ON calendrier.id_norme=norme.id_norme AND calendrier.periodicite=norme.periodicite");
+		requeteListeAddRegleMapping.append("\n  INNER JOIN " + ViewEnum.IHM_JEUDEREGLE.getFullName() + " jdr");
+		requeteListeAddRegleMapping
+				.append("\n    ON calendrier.id_norme=jdr.id_norme AND calendrier.periodicite=jdr.periodicite");
+		requeteListeAddRegleMapping.append(
+				"\n      AND calendrier.validite_inf=jdr.validite_inf AND calendrier.validite_sup=jdr.validite_sup");
+		requeteListeAddRegleMapping.append("\n  WHERE fam.id_famille = '" + idFamille + "'");
+		requeteListeAddRegleMapping.append("\n    AND lower(jdr.etat) <> 'inactif'");
+		requeteListeAddRegleMapping.append("\n    AND lower(calendrier.etat) = '1'");
+		requeteListeAddRegleMapping.append("\n    AND NOT EXISTS (");
+		requeteListeAddRegleMapping.append("\n      SELECT 1 FROM " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + " regle");
+		requeteListeAddRegleMapping.append("\n      WHERE regle.variable_sortie=var.nom_variable_metier");
+		requeteListeAddRegleMapping.append("\n        AND regle.id_norme=norme.id_norme");
+		requeteListeAddRegleMapping.append("\n        AND regle.validite_inf=calendrier.validite_inf");
+		requeteListeAddRegleMapping.append("\n        AND regle.validite_sup=calendrier.validite_sup");
+		requeteListeAddRegleMapping.append("\n        AND regle.periodicite=norme.periodicite");
+		requeteListeAddRegleMapping.append("\n        AND regle.version=jdr.version");
+		requeteListeAddRegleMapping.append("\n    ) AND EXISTS (");
+		requeteListeAddRegleMapping.append("\n      SELECT 1 FROM " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + " regle");
+		requeteListeAddRegleMapping.append("\n      WHERE regle.id_norme=norme.id_norme");
+		requeteListeAddRegleMapping.append("\n        AND regle.validite_inf=calendrier.validite_inf");
+		requeteListeAddRegleMapping.append("\n        AND regle.validite_sup=calendrier.validite_sup");
+		requeteListeAddRegleMapping.append("\n        AND regle.periodicite=norme.periodicite");
+		requeteListeAddRegleMapping.append("\n        AND regle.version=jdr.version");
+		requeteListeAddRegleMapping.append("\n    )");
+		return requeteListeAddRegleMapping;
 	}
 
 	public VObjectService getvObjectService() {

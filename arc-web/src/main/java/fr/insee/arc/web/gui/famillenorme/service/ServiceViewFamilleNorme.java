@@ -29,6 +29,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.famillenorme.dao.DDIInsertDAO;
+import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 import fr.insee.arc.web.gui.famillenorme.ddi.DDIModeler;
 import fr.insee.arc.web.gui.famillenorme.ddi.DDIParser;
 
@@ -52,13 +53,13 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 		try {
 			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 			query.append(this.vObjectService.deleteQuery(views.getViewFamilleNorme()));
-			query.append(synchronizeRegleWithVariableMetier(
+			query.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(
 					views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 			query.asTransaction();
 
 			UtilitaireDao.get(0).executeRequest(null, query);
 		} catch (ArcException e) {
-			this.views.getViewFamilleNorme().setMessage("La suppression des tables a échoué");
+			this.views.getViewFamilleNorme().setMessage("familyManagement.delete.error");
 		}
 
 		return deleteLineVobject(model, RESULT_SUCCESS, views.getViewFamilleNorme());
@@ -103,7 +104,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 			this.vObjectService.download(views.getViewFamilleNorme(), response, fileNames, queries);
 			return "none";
 		} else {
-			this.views.getViewFamilleNorme().setMessage("You didn't select anything");
+			this.views.getViewFamilleNorme().setMessage("general.noSelection");
 			return generateDisplay(model, RESULT_SUCCESS);
 		}
 
@@ -123,14 +124,14 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 		// Ouverture du fichier
 		if (fileUpload == null || fileUpload.isEmpty()) {
-			this.views.getViewFamilleNorme().setMessage("You must select a file for import.");
+			this.views.getViewFamilleNorme().setMessage("general.import.noFileSelection");
 			return generateDisplay(model, RESULT_SUCCESS);
 		}
 
 		try {
 			new DDIInsertDAO(this.dataObjectService).insertDDI(uploadFamilleNormeDansBase(fileUpload.getInputStream()));
 		} catch (IOException | ArcException e) {
-			this.views.getViewFamilleNorme().setMessage("Import failed");
+			this.views.getViewFamilleNorme().setMessage("familyManagement.import.error");
 			loggerDispatcher.error("Error in ServiceViewFamilleNorme.uploadFamilleNorme", LOGGER);
 		}
 
@@ -219,7 +220,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 			new DDIInsertDAO(this.dataObjectService).insertDDI(modeler);
 
 		} catch (ArcException | IOException e) {
-			this.views.getViewFamilleNorme().setMessage("DDI import failed");
+			this.views.getViewFamilleNorme().setMessage("familyManagement.importDDI.error");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
