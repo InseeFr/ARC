@@ -40,16 +40,15 @@ public class ExportDao extends VObjectHelperDao {
 	 */
 	public void initializeViewExport(VObject viewExport) {
 		ViewEnum dataModelExport = ViewEnum.EXPORT;
+		String nameOfViewExport = dataObjectService.getView(dataModelExport);
 		// view query
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append(SQL.SELECT);
-		query.append(query.sqlListeOfColumnsFromModel(dataModelExport));
-		query.append(SQL.FROM);
-		query.append(dataObjectService.getView(dataModelExport));
+		StringBuilder columns = query.sqlListeOfColumnsFromModel(dataModelExport);
+		query.build(SQL.SELECT, columns, SQL.FROM, nameOfViewExport);
 		// default value
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
-		vObjectService.initialize(viewExport, query, dataObjectService.getView(dataModelExport), defaultInputFields);
+		vObjectService.initialize(viewExport, query, nameOfViewExport, defaultInputFields);
 	}
 
 	/**
@@ -59,18 +58,15 @@ public class ExportDao extends VObjectHelperDao {
 	 * @return A map of all exports to make with their associated rules
 	 * @throws ArcException
 	 */
-	public HashMap<String, ArrayList<String>> startExportRetrieve(VObject viewExport) throws ArcException {
+	public HashMap<String, ArrayList<String>> startExportRetrieve() throws ArcException {
 		ViewEnum dataModelExport = ViewEnum.EXPORT;
+		String nameOfViewExport = dataObjectService.getView(dataModelExport);
 		// Récupérer les exports sélectionnés
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append(SQL.SELECT);
-		query.append(query.sqlListeOfColumnsFromModel(dataModelExport));
-		query.append(SQL.FROM);
-		query.append(dataObjectService.getView(dataModelExport));
-		query.append(SQL.WHERE);
-		query.append(ColumnEnum.FILE_NAME);
-		query.append(" IN ");
-		query.append("(" + query.sqlListeOfValues(getSelectedRecords().get("file_name")) + ") ");
+		StringBuilder columns = query.sqlListeOfColumnsFromModel(dataModelExport);
+		StringBuilder selectedRecords = query.sqlListeOfValues(getSelectedRecords().get("file_name"));
+		query.build(SQL.SELECT, columns, SQL.FROM, nameOfViewExport,
+				SQL.WHERE, ColumnEnum.FILE_NAME, SQL.IN, "(", selectedRecords, ") ");
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), query)).mapContent();
 	}
 
@@ -85,22 +81,17 @@ public class ExportDao extends VObjectHelperDao {
 	 */
 	public void startExportUpdateState(List<String> fileName, int fileIndex, boolean isExported) throws ArcException {
 		ViewEnum dataModelExport = ViewEnum.EXPORT;
+		String nameOfViewExport = dataObjectService.getView(dataModelExport);
 		// Actualiser l'état de l'export
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append("UPDATE ");
-		query.append(dataObjectService.getView(dataModelExport));
-		query.append(" SET ");
-		query.append(ColumnEnum.ETAT);
-		query.append("=");
+		String etatSet;
 		if (isExported) {
-			query.append("to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') ");
+			etatSet = "to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') ";
 		} else {
-			query.append(query.quoteText(TraitementEtat.ENCOURS.toString()));
+			etatSet = query.quoteText(TraitementEtat.ENCOURS.toString());
 		}
-		query.append(SQL.WHERE);
-		query.append(ColumnEnum.FILE_NAME);
-		query.append("=");
-		query.append(query.quoteText(fileName.get(fileIndex)));
+		query.build(SQL.UPDATE, nameOfViewExport, SQL.SET, ColumnEnum.ETAT, "=", etatSet,
+				SQL.WHERE, ColumnEnum.FILE_NAME, "=", query.quoteText(fileName.get(fileIndex)));
 		UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), query);
 	}
 
@@ -117,23 +108,19 @@ public class ExportDao extends VObjectHelperDao {
 
 		// lire la table how to export pour voir comment on va s'y prendre
 		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
-		return new GenericBean(UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(),
-				new ArcPreparedStatementBuilder(
-						"SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "
-								+ howToExportReworked + " order by pos::int ")))
-				.mapContent();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, "lower(", ColumnEnum.VARBDD, ")", SQL.AS, ColumnEnum.VARBDD, SQL.COMMA,
+				ColumnEnum.POS, SQL.CAST_OPERATOR, "int-1", SQL.AS, ColumnEnum.POS, SQL.COMMA,
+				"max(", ColumnEnum.POS, SQL.CAST_OPERATOR, "int) over()", SQL.AS, ColumnEnum.MAXP, SQL.FROM,
+				howToExportReworked, SQL.ORDER_BY, ColumnEnum.POS, SQL.CAST_OPERATOR, "int");
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), query)).mapContent();
 	}
 	
 	public ResultSet exportFileFilteredOrdered(Statement stmt, int n, List<String> tablesToExport, List<String> filterTable, List<String> orderTable, String bacASable) throws SQLException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append(SQL.SELECT);
-		query.append("*");
-		query.append(SQL.FROM);
-		query.append(bacASable + "." + tablesToExport.get(n));
-		query.append(SQL.WHERE);
-		query.append((StringUtils.isEmpty(filterTable.get(n)) ? "true" : filterTable.get(n)) + " ");
-		query.append(StringUtils.isEmpty(orderTable.get(n)) ? "" : "ORDER BY " + orderTable.get(n) + " ");
-		
+		query.build(SQL.SELECT, "*", SQL.FROM, bacASable, SQL.DOT, tablesToExport.get(n),
+				SQL.WHERE, (StringUtils.isEmpty(filterTable.get(n)) ? SQL.TRUE : filterTable.get(n)), " ",
+				(StringUtils.isEmpty(orderTable.get(n)) ? "" : SQL.ORDER_BY + orderTable.get(n)), " ");
 		return stmt.executeQuery(query.getQuery().toString());
 	}
 
