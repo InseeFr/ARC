@@ -111,5 +111,26 @@ public class FileUtilsArc {
 			throw new ArcException(ArcExceptionMessage.FILE_DELETE_FAILED, fileInput.getName());
 		}
 	}
+	
+	/**
+	 * Deplacer un fichier d'un repertoire source vers répertoire cible (pas de
+	 * slash en fin du nom de repertoire) Si le fichier existe déjà, il est écrasé
+	 *
+	 * @param dirIn    , répertoire en entrée, pas de slash à la fin
+	 * @param dirOut   , répertoire en sortie, pas de slash à la fin
+	 * @param FileName , nom du fichier
+	 * @throws ArcException
+	 */
+	public static void deplacerFichier(String dirIn, String dirOut, String fileNameIn, String fileNameOut)
+			throws ArcException {
+		if (!dirIn.equals(dirOut)) {
+			File fileIn = new File(dirIn + File.separator + fileNameIn);
+			File fileOut = new File(dirOut + File.separator + fileNameOut);
+			if (fileOut.exists()) {
+				FileUtilsArc.delete(fileOut);
+			}
+			FileUtilsArc.renameTo(fileIn, fileOut);
+		}
+	}
 
 }

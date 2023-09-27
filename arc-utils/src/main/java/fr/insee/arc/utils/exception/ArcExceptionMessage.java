@@ -15,6 +15,8 @@ public enum ArcExceptionMessage {
 	STREAM_READ_FAILED("Le stream de données n'a pas pu être lu"),
 	STREAM_WRITE_FAILED("Le stream de données n'a pas pu être écrit"),
 	TGZ_CONVERSION_FAILED("Le fichier %s n'a pu être converti en tgz"),
+	
+	INVALID_FILE_FORMAT("Format de fichier non pris en charge"),
 
 	
 	IMPORTING_JAVA_EXCEPTION_HEADERS_MISSING("ERROR: extra data after last expected column"),

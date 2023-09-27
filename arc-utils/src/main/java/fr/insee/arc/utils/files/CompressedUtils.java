@@ -240,8 +240,8 @@ public class CompressedUtils {
 	
 
 	public static boolean isNotArchive(String fname) {
-		return !fname.endsWith(".tar.gz") && !fname.endsWith(".tgz") && !fname.endsWith(".zip")
-				&& !fname.endsWith(".gz");
+		return !fname.endsWith(CompressionExtension.TAR_GZ.getFileExtension()) && !fname.endsWith(CompressionExtension.TGZ.getFileExtension()) && !fname.endsWith(CompressionExtension.ZIP.getFileExtension())
+				&& !fname.endsWith(CompressionExtension.GZ.getFileExtension());
 	}
 	
 }

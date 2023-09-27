@@ -3,7 +3,6 @@ package fr.insee.arc.core.service.p0initialisation.useroperation;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,14 +10,13 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
@@ -144,18 +142,18 @@ public class ResetEnvironmentOperation {
 			if (entrepotList != null) {
 				for (String s : entrepotList) {
 					FileUtilsArc.deleteAndRecreateDirectory(
-							Paths.get(ApiReceptionService.directoryReceptionEntrepot(repertoire, envExecution, s)).toFile());
+							Paths.get(DirectoryPath.directoryReceptionEntrepot(repertoire, envExecution, s)).toFile());
 					FileUtilsArc.deleteAndRecreateDirectory(Paths
-							.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, s)).toFile());
+							.get(DirectoryPath.directoryReceptionEntrepotArchive(repertoire, envExecution, s)).toFile());
 				}
 			}
 		}
 		FileUtilsArc.deleteAndRecreateDirectory(
-				Paths.get(ApiReceptionService.directoryReceptionEtatEnCours(repertoire, envExecution)).toFile());
+				Paths.get(DirectoryPath.directoryReceptionEtatEnCours(repertoire, envExecution)).toFile());
 		FileUtilsArc.deleteAndRecreateDirectory(
-				Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, envExecution)).toFile());
+				Paths.get(DirectoryPath.directoryReceptionEtatOK(repertoire, envExecution)).toFile());
 		FileUtilsArc.deleteAndRecreateDirectory(
-				Paths.get(ApiReceptionService.directoryReceptionEtatKO(repertoire, envExecution)).toFile());
+				Paths.get(DirectoryPath.directoryReceptionEtatKO(repertoire, envExecution)).toFile());
 		FileUtilsArc.deleteAndRecreateDirectory(
 				Paths.get(FileSystemManagement.directoryEnvExport(repertoire, envExecution)).toFile());
 	}

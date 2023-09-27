@@ -8,8 +8,9 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.useroperation.dao.ReplayOrDeleteFilesDao;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
@@ -62,10 +63,10 @@ public class ReplayOrDeleteFiles {
 				String entrepot = ManipString.substringBeforeFirst(s, "_");
 				String archive = ManipString.substringAfterFirst(s, "_");
 
-				String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envDir, entrepot);
-				String dirOut = ApiReceptionService.directoryReceptionEntrepot(repertoire, envDir, entrepot);
+				String dirIn = DirectoryPath.directoryReceptionEntrepotArchive(repertoire, envDir, entrepot);
+				String dirOut = DirectoryPath.directoryReceptionEntrepot(repertoire, envDir, entrepot);
 
-				ApiReceptionService.deplacerFichier(dirIn, dirOut, archive, archive);
+				FileUtilsArc.deplacerFichier(dirIn, dirOut, archive, archive);
 
 			}
 

@@ -194,7 +194,6 @@ public class ChargeurXmlComplexe implements IChargeur{
         handler.connexion = connexion;
         handler.tempTableA = this.tableTempA;
         handler.start = 0;
-        handler.sizeLimit=0;
         handler.normeCourante = norme;
         handler.validite = validite;
         handler.tempTableAColumnsLongName=this.tempTableAColumnsLongName;

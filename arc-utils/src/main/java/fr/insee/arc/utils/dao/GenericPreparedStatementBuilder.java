@@ -167,7 +167,7 @@ public class GenericPreparedStatementBuilder {
 	
 	
 	// return a tuple of values (val1, val2, ... valn)
-	public StringBuilder tuple(String...liste) {
+	public StringBuilder tupleOfValues(String...liste) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("(").append(sqlListeOfValues(Arrays.asList(liste))).append(")");
 		return requete;
@@ -220,6 +220,13 @@ public class GenericPreparedStatementBuilder {
 		return new StringBuilder(String.join(",", liste));
 	}
 
+	public StringBuilder tupleOfColumn(String...liste) {
+		StringBuilder requete = new StringBuilder();
+		requete.append("(").append(sqlListeOfColumns(Arrays.asList(liste))).append(")");
+		return requete;
+	}
+	
+	
 // getters
 
 	public StringBuilder getQuery() {

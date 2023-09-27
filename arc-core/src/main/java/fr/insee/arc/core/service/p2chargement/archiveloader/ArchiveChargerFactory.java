@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TypeArchive;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.files.CompressionExtension;
 
 
 /**
@@ -38,13 +39,13 @@ public class ArchiveChargerFactory {
     public IArchiveFileLoader getChargeur(String container){
         StaticLoggerDispatcher.info(LOGGER, "** getChargeur from container**");
         IArchiveFileLoader returned = null;
-	    if (container.endsWith(".tar.gz") || container.endsWith(".tgz")) {
+	    if (container.endsWith(CompressionExtension.TAR_GZ.getFileExtension()) || container.endsWith(CompressionExtension.TGZ.getFileExtension())) {
 		returned = getChargeur(TypeArchive.TARGZ);
 
-	    } else if (container.endsWith(".gz")) {
+	    } else if (container.endsWith(CompressionExtension.GZ.getFileExtension())) {
 		returned = getChargeur(TypeArchive.GZ);
 
-	    } else if (container.endsWith(".zip")) {
+	    } else if (container.endsWith(CompressionExtension.ZIP.getFileExtension())) {
 		returned = getChargeur(TypeArchive.ZIP);
 	    }
 	    return returned;

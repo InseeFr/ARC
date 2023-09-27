@@ -14,7 +14,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.TableNaming;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -185,9 +185,9 @@ public class CleanPilotage {
 			for (int i = 0; i < m.get("entrepot").size(); i++) {
 				String entrepot = m.get("entrepot").get(i);
 				String archive = m.get("nom_archive").get(i);
-				String dirIn = ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, this.sandbox.getSchema(),
+				String dirIn = DirectoryPath.directoryReceptionEntrepotArchive(repertoire, this.sandbox.getSchema(),
 						entrepot);
-				String dirOut = ApiReceptionService.directoryReceptionEntrepotArchiveOldYearStamped(repertoire,
+				String dirOut = DirectoryPath.directoryReceptionEntrepotArchiveOldYearStamped(repertoire,
 						this.sandbox.getSchema(), entrepot);
 
 				// création du répertoire "OLD" s'il n'existe pas
@@ -198,7 +198,7 @@ public class CleanPilotage {
 				}
 
 				// déplacement de l'archive de dirIn vers dirOut
-				ApiReceptionService.deplacerFichier(dirIn, dirOut, archive, archive);
+				FileUtilsArc.deplacerFichier(dirIn, dirOut, archive, archive);
 
 			}
 

@@ -65,9 +65,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 	// this handler will keep the father reference to handle elements which have the
 	// same name but not the same parent
-	private String root_father = "*";
+	private String rootFather = "*";
 
-	private String father = root_father;
+	private String father = rootFather;
 	private StringBuilder currentData = new StringBuilder();
 
 	/*
@@ -98,7 +98,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	// indique que la balise courante a des données
 	private boolean hasData = false;
 
-	public int sizeLimit;
 
 	public Norme normeCourante;
 	public String validite;
@@ -386,8 +385,8 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		}
 
 		// enregistrement de la structure
-		structure.append(("," + (this.father.equals(root_father) ? ApiService.ROOT : "i_" + this.father)) + " "
-				+ (this.father.equals(root_father) ? "1" : this.col.get(this.father)) + " " + "i_" + this.currentTag);
+		structure.append(("," + (this.father.equals(rootFather) ? ApiService.ROOT : "i_" + this.father)) + " "
+				+ (this.father.equals(rootFather) ? "1" : this.col.get(this.father)) + " " + "i_" + this.currentTag);
 
 		if (this.tree.get(this.allCols.indexOf(this.currentTag)).equals(this.allCols.indexOf(this.father))
 				// cas des bloc multiples
@@ -539,13 +538,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			req2.append(";");
 			aRequete.append(req);
 			aRequete.append(req2);
-		}
-		// en production, on peut vouloir limiter la taille du fichier et le faire
-		// passer en KO
-		if (sizeLimit > 0) {
-			if (this.idLigne > sizeLimit) {
-				throw new SAXParseException("Fichier trop volumineux", "", "", sizeLimit, sizeLimit);
-			}
 		}
 	}
 

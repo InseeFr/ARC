@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DataStorage;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -61,9 +61,9 @@ public class RestoreFileSystem {
 	
 	private void rebuildFileSystemInEntrepot(String rootDirectory, String entrepot) throws ArcException
 	{
-		String dirEntrepotArchive = ApiReceptionService.directoryReceptionEntrepotArchive(rootDirectory, envExecution,
+		String dirEntrepotArchive = DirectoryPath.directoryReceptionEntrepotArchive(rootDirectory, envExecution,
 		entrepot);
-		String dirEntrepot = ApiReceptionService.directoryReceptionEntrepot(rootDirectory, envExecution, entrepot);
+		String dirEntrepot = DirectoryPath.directoryReceptionEntrepot(rootDirectory, envExecution, entrepot);
 
 		FileUtilsArc.createDirIfNotexist(dirEntrepotArchive);
 		FileUtilsArc.createDirIfNotexist(dirEntrepot);
@@ -79,7 +79,7 @@ public class RestoreFileSystem {
 
 		List<String> fileToBeMoved = DataStorage.execQuerySelectFilesNotInRegisteredArchives(connection, envExecution);
 		for (String fname : fileToBeMoved) {
-			ApiReceptionService.deplacerFichier(dirEntrepotArchive, dirEntrepot, fname, fname);
+			FileUtilsArc.deplacerFichier(dirEntrepotArchive, dirEntrepot, fname, fname);
 		}
 		
 		moveBackNotRegisteredFilesFromEntrepotArchiveToEntrepot(dirEntrepot, dirEntrepotArchive);
@@ -108,7 +108,7 @@ public class RestoreFileSystem {
 
 		List<String> fileToBeMoved = DataStorage.execQuerySelectFilesNotInRegisteredArchives(connection, envExecution);
 		for (String fname : fileToBeMoved) {
-			ApiReceptionService.deplacerFichier(dirEntrepotArchive, dirEntrepot, fname, fname);
+			FileUtilsArc.deplacerFichier(dirEntrepotArchive, dirEntrepot, fname, fname);
 		}
 	}
 	

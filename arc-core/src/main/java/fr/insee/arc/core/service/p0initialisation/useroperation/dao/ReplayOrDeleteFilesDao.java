@@ -33,7 +33,7 @@ public class ReplayOrDeleteFilesDao {
 		
 		query.build(SQL.WHERE, ColumnEnum.TO_DELETE, SQL.IN);
 		
-		query.build(query.tuple(TraitementOperationFichier.R.getDbValue(), TraitementOperationFichier.RA.getDbValue()));
+		query.build(query.tupleOfValues(TraitementOperationFichier.R.getDbValue(), TraitementOperationFichier.RA.getDbValue()));
 
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import fr.insee.arc.core.service.global.dao.DataStorage;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -45,17 +45,17 @@ public class BuildFileSystem {
 			for (String envExecution : Arrays.asList(envExecutions)) {
 
 				for (String d : listEntrepot) {
-					FileUtilsArc.createDirIfNotexist(ApiReceptionService
+					FileUtilsArc.createDirIfNotexist(DirectoryPath
 							.directoryReceptionEntrepot(properties.getBatchParametersDirectory(), envExecution, d));
-					FileUtilsArc.createDirIfNotexist(ApiReceptionService.directoryReceptionEntrepotArchive(
+					FileUtilsArc.createDirIfNotexist(DirectoryPath.directoryReceptionEntrepotArchive(
 							properties.getBatchParametersDirectory(), envExecution, d));
 				}
 
-				FileUtilsArc.createDirIfNotexist(ApiReceptionService
+				FileUtilsArc.createDirIfNotexist(DirectoryPath
 						.directoryReceptionEtatEnCours(properties.getBatchParametersDirectory(), envExecution));
-				FileUtilsArc.createDirIfNotexist(ApiReceptionService
+				FileUtilsArc.createDirIfNotexist(DirectoryPath
 						.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
-				FileUtilsArc.createDirIfNotexist(ApiReceptionService
+				FileUtilsArc.createDirIfNotexist(DirectoryPath
 						.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
 			}
 

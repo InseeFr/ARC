@@ -27,7 +27,7 @@ import fr.insee.arc.core.service.p0initialisation.ResetEnvironmentService;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -71,7 +71,7 @@ public class ExecuteServiceController {
 			
 			if (TraitementPhase.getPhase(bodyPojo.targetPhase).equals(TraitementPhase.RECEPTION))
 			{
-				try(FileOutputStream fos=new FileOutputStream(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, warehouse) + File.separator + bodyPojo.fileName))
+				try(FileOutputStream fos=new FileOutputStream(DirectoryPath.directoryReceptionEntrepot(repertoire, env, warehouse) + File.separator + bodyPojo.fileName))
 				{
 					IOUtils.write(bodyPojo.fileContent, fos, StandardCharsets.UTF_8);
 				}
@@ -148,7 +148,7 @@ public class ExecuteServiceController {
 			if (TraitementPhase.getPhase(bodyPojo.targetPhase).equals(TraitementPhase.RECEPTION))
 			{
 
-				try(FileOutputStream fos=new FileOutputStream(ApiReceptionService.directoryReceptionEntrepot(repertoire, env, warehouse) + File.separator + bodyPojo.fileName))
+				try(FileOutputStream fos=new FileOutputStream(DirectoryPath.directoryReceptionEntrepot(repertoire, env, warehouse) + File.separator + bodyPojo.fileName))
 				{
 					IOUtils.write(bodyPojo.fileContent, fos, StandardCharsets.UTF_8);
 				}

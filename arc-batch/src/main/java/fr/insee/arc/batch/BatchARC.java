@@ -22,7 +22,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -291,7 +291,7 @@ class BatchARC implements IReturnCode {
 
 	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat)
 			throws ArcException {
-		File f = Paths.get(ApiReceptionService.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
+		File f = Paths.get(DirectoryPath.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
 		if (!f.exists()) {
 			return;
 		}
@@ -322,7 +322,7 @@ class BatchARC implements IReturnCode {
 
 		// ajout d'un garde fou : si le fichier n'est pas archivé : pas touche
 		File fCheck = Paths
-				.get(ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepot),
+				.get(DirectoryPath.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepot),
 						filename)
 				.toFile();
 
@@ -435,10 +435,10 @@ class BatchARC implements IReturnCode {
 			String originalContainer = ManipString.substringAfterFirst(container, "_");
 
 			File fIn = Paths.get(
-					ApiReceptionService.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepotContainer),
+					DirectoryPath.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepotContainer),
 					originalContainer).toFile();
 
-			File fOut = Paths.get(ApiReceptionService.directoryReceptionEtatOK(repertoire, envExecution), container)
+			File fOut = Paths.get(DirectoryPath.directoryReceptionEtatOK(repertoire, envExecution), container)
 					.toFile();
 
 			Files.copy(fIn.toPath(), fOut.toPath());
