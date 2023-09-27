@@ -7,10 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,13 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,16 +29,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.AttributeValue;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
@@ -91,7 +80,7 @@ public class VObjectService {
 	private LoggerDispatcher loggerDispatcher;
 
 	// default database target for query is META_DATA
-	private Integer databaseTarget = ArcDatabase.COORDINATOR.getIndex();
+	private Integer connectionIndex = ArcDatabase.COORDINATOR.getIndex();
 
 	private Connection connection = null;
 
@@ -195,7 +184,7 @@ public class VObjectService {
 			LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
 
 			if (data.getBeforeSelectQuery() != null) {
-				UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, data.getBeforeSelectQuery());
+				UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, data.getBeforeSelectQuery());
 			}
 
 			// on sauvegarde le contenu des lignes selectionnées avant la nouvelle
@@ -230,7 +219,7 @@ public class VObjectService {
 
 			ArrayList<ArrayList<String>> aContent = new ArrayList<>();
 			try {
-				aContent = reworkContent.apply(UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requete,
+				aContent = reworkContent.apply(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete,
 						ModeRequeteImpl.arcModeRequeteIHM()));
 			} catch (ArcException ex) {
 				data.setMessage(ex.getMessage());
@@ -341,7 +330,7 @@ public class VObjectService {
 					requete.append(") alias_de_table ");
 					requete.append(buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel()));
 
-					aContent = UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requete,
+					aContent = UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete,
 							ModeRequeteImpl.arcModeRequeteIHM());
 				} catch (ArcException ex) {
 					currentData.setMessage(ex.getMessage());
@@ -393,15 +382,6 @@ public class VObjectService {
 		data.setHeadersVisible(buildHeadersVisible(data, headersDLabel));
 		data.setHeadersUpdatable(buildHeadersUpdatable(data, headersDLabel));
 		data.setHeadersRequired(buildHeadersRequired(data, headersDLabel));
-	}
-
-	/**
-	 * A vouaire
-	 */
-	public void lock(VObject data) {
-		for (String key : data.getConstantVObject().getColumnRender().keySet()) {
-			data.getConstantVObject().getColumnRender().get(key).isUpdatable = false;
-		}
 	}
 
 	/**
@@ -513,7 +493,7 @@ public class VObjectService {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null
 					&& data.getConstantVObject().getColumnRender().get(headers.get(i)).query != null) {
 				try {
-					arrayVSelect = UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection,
+					arrayVSelect = UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
 							data.getConstantVObject().getColumnRender().get(headers.get(i)).query);
 					arrayVSelect.remove(0);
 					arrayVSelect.remove(0);
@@ -574,7 +554,7 @@ public class VObjectService {
 			Arrays.asList(attributeValues).forEach((t) -> map.put(t.getFirst().toLowerCase(), t.getSecond()));
 
 			// Récupération des colonnes de la table cible
-			List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.databaseTarget).getColumns(this.connection,
+			List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
 					new ArrayList<>(), currentData.getTable());
 
 			Boolean allNull = true;
@@ -621,7 +601,7 @@ public class VObjectService {
 			requete.append("END;");
 
 			if (!allNull) {
-				UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requete);
+				UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete);
 			}
 
 		} catch (Exception ex) {
@@ -638,7 +618,7 @@ public class VObjectService {
 	public void delete(VObject currentData, String... tables) {
 		LoggerHelper.traceAsComment(LOGGER, "delete()", currentData.getSessionName());
 		try {
-			UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection,
+			UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
 					deleteQuery(currentData, tables).asTransaction());
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
@@ -658,7 +638,7 @@ public class VObjectService {
 
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 
-		ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.databaseTarget).getColumns(this.connection,
+		ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
 				new ArrayList<>(), currentData.getTable());
 		ArcPreparedStatementBuilder reqDelete = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
@@ -693,61 +673,6 @@ public class VObjectService {
 		return reqDelete;
 	}
 
-	/**
-	 * Méthode de suppression spécifique lors de l'action de UPDATE du controle
-	 */
-	public void deleteForUpdate(VObject currentData, String... tables) {
-		LoggerHelper.debugAsComment(LOGGER, "deleteBeforeUpdate()", currentData.getSessionName());
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-		// comparaison des lignes dans la table avant et aprés
-		// toBeUpdated contient l'identifiant des lignes à update
-		ArrayList<Integer> toBeUpdated = new ArrayList<>();
-		for (int i = 0; i < currentData.getContent().size(); i++) {
-			int j = 0;
-			boolean equals = true;
-			while (j < currentData.getContent().get(i).d.size() && equals) {
-				equals = ManipString.compareStringWithNull(v0.getContent().get(i).d.get(j),
-						currentData.getContent().get(i).d.get(j));
-				j++;
-			}
-			if (!equals) {
-				toBeUpdated.add(i);
-			}
-		}
-		LoggerHelper.traceAsComment(LOGGER, "toBeUpdated : ", toBeUpdated);
-
-		ArcPreparedStatementBuilder reqDelete = new ArcPreparedStatementBuilder();
-		reqDelete.append("BEGIN; ");
-		for (int i = 0; i < v0.getContent().size(); i++) {
-			if (toBeUpdated.contains(i)) {
-				if (tables.length == 0) {
-					reqDelete.append("DELETE FROM " + v0.getTable() + " WHERE ");
-				} else {
-					reqDelete.append("DELETE FROM " + tables[0] + " WHERE ");
-				}
-				for (int j = 0; j < v0.getHeadersDLabel().size(); j++) {
-					if (j > 0) {
-						reqDelete.append(" AND ");
-					}
-					reqDelete.append(v0.getHeadersDLabel().get(j));
-					if (v0.getContent().get(i).d.get(j) != null && v0.getContent().get(i).d.get(j).length() > 0) {
-						reqDelete.append("=" + reqDelete.quoteText(v0.getContent().get(i).d.get(j)) + "::"
-								+ v0.getHeadersDType().get(j));
-					} else {
-						reqDelete.append(" is null");
-					}
-				}
-				reqDelete.append("; ");
-			}
-		}
-		reqDelete.append("END; ");
-		try {
-			UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, reqDelete);
-		} catch (ArcException e) {
-			currentData.setMessage(e.getMessage());
-		}
-	}
-
 	public void update(VObject currentData) {
 		LoggerHelper.traceAsComment(LOGGER, "update()", currentData.getSessionName());
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
@@ -768,7 +693,7 @@ public class VObjectService {
 		}
 
 		try {
-			ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.databaseTarget).getColumns(this.connection,
+			ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
 					new ArrayList<>(), currentData.getTable());
 
 			// SQL update query
@@ -835,7 +760,7 @@ public class VObjectService {
 			}
 			reqUpdate.append("END;");
 			if (!toBeUpdated.isEmpty()) {
-				UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, reqUpdate);
+				UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, reqUpdate);
 			}
 			session.put(currentData.getSessionName(), v0);
 		} catch (ArcException ex) {
@@ -856,24 +781,6 @@ public class VObjectService {
 		requete.append(") alias_de_table ");
 		requete.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()));
 		return requete;
-	}
-
-	/**
-	 * Renvoie le contenu d'une vue sous la forme d'une HashMap(nom de colonne,
-	 * liste de valeur)
-	 *
-	 * @return
-	 */
-	public HashMap<String, ArrayList<String>> mapView(VObject currentData) {
-		HashMap<String, ArrayList<String>> result = new HashMap<>();
-		try {
-			GenericBean g = new GenericBean(
-					UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, queryView(currentData)));
-			result = g.mapContent();
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "mapView()", LOGGER, ex);
-		}
-		return result;
 	}
 
 	public void destroy(VObject data) {
@@ -1108,301 +1015,6 @@ public class VObjectService {
 		}
 	}
 
-	public void download(VObject currentData, HttpServletResponse response) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("select alias_de_table.* from (").append(v0.getMainQuery()).append(") alias_de_table ")
-				.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()))
-				.append(buildOrderBy(v0.getHeaderSortDLabels(), v0.getHeaderSortDOrders())).append(", alias_de_table ");
-		ArrayList<String> fileNames = new ArrayList<>();
-		fileNames.add("Vue");
-		this.download(currentData, response, fileNames, requete);
-	}
-
-	public void download(VObject currentData, HttpServletResponse response, List<String> fileNames,
-			List<ArcPreparedStatementBuilder> requetes) {
-
-		ArcPreparedStatementBuilder[] array = new ArcPreparedStatementBuilder[requetes.size()];
-		for (int i = 0; i < requetes.size(); i++) {
-			array[i] = requetes.get(i);
-		}
-
-		download(currentData, response, fileNames, array);
-
-	}
-
-	/**
-	 * Téléchargement dans un zip de N fichiers csv, les données étant extraites de
-	 * la base de données
-	 *
-	 * @param fileNames , liste des noms de fichiers obtenus
-	 * @param requetes  , liste des requetes SQL
-	 */
-	private void download(VObject currentData, HttpServletResponse response, List<String> fileNames,
-			ArcPreparedStatementBuilder... requetes) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-		response.reset();
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".csv.zip");
-		try {
-			// Rattachement du zip à la réponse de Struts2
-			ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
-			try {
-				for (int i = 0; i < requetes.length; i++) {
-					// Le nom des fichiers à l'interieur du zip seront simple :
-					// fichier1.csv, fichier2.csv etc.
-					// Ajout d'un nouveau fichier
-					ZipEntry entry = new ZipEntry(fileNames.get(i) + ".csv");
-					zos.putNextEntry(entry);
-					// Ecriture dans le fichier
-					UtilitaireDao.get(this.databaseTarget).outStreamRequeteSelect(this.connection, requetes[i], zos);
-					zos.closeEntry();
-				}
-			} finally {
-				zos.close();
-			}
-		} catch (IOException | ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
-		} finally {
-			try {
-				response.getOutputStream().flush();
-				response.getOutputStream().close();
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
-			}
-		}
-	}
-
-	public void downloadValues(VObject currentData, HttpServletResponse response, List<String> fileNames,
-			String... values) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-		response.reset();
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".csv.zip");
-		try {
-			// Rattachement du zip à la réponse de Struts2
-			ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
-			try {
-				for (int i = 0; i < fileNames.size(); i++) {
-					// Le nom des fichiers à l'interieur du zip seront simple :
-					// fichier1.csv, fichier2.csv etc.
-					// Ajout d'un nouveau fichier
-					ZipEntry entry = new ZipEntry(fileNames.get(i));
-					zos.putNextEntry(entry);
-					// Ecriture dans le fichier
-					zos.write(values[i].getBytes("UTF8"));
-					zos.closeEntry();
-				}
-			} finally {
-				zos.close();
-			}
-		} catch (Exception ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
-		} finally {
-			try {
-				response.getOutputStream().flush();
-				response.getOutputStream().close();
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
-			}
-		}
-	}
-
-	/**
-	 * Téléchargement d'une liste de fichier qui sont stockés dans le dossier
-	 * RECEPTION_OK ou RECEPTION_KO
-	 *
-	 * @param phase
-	 *
-	 * @param etatOk
-	 *
-	 * @param etatKo
-	 *
-	 * @param listIdSource
-	 */
-	public void downloadXML(VObject currentData, HttpServletResponse response, ArcPreparedStatementBuilder requete,
-			String repertoire, String anEnvExcecution, String phase, String etatOk, String etatKo) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-		response.reset();
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar.gz");
-
-		TarArchiveOutputStream taos = null;
-		try {
-			taos = new TarArchiveOutputStream(new GZIPOutputStream(response.getOutputStream()));
-			zipOutStreamRequeteSelect(this.connection, requete, taos, repertoire, anEnvExcecution, phase, "ARCHIVE");
-		} catch (IOException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
-		} finally {
-			try {
-				if (taos != null) {
-					try {
-						taos.close();
-					} catch (IOException ioe) {
-						// Silent catch
-					}
-				}
-				response.getOutputStream().flush();
-				response.getOutputStream().close();
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
-			}
-		}
-	}
-
-	/**
-	 * Ecrit le résultat de la requête {@code requete} dans le fichier compressé
-	 * {@code zos} !Important! la requete doit être ordonnée sur le container <br/>
-	 *
-	 *
-	 * @param connexion
-	 * @param requete
-	 * @param taos
-	 * @param nomPhase
-	 *
-	 * @param dirSuffix
-	 */
-	public void zipOutStreamRequeteSelect(Connection connexion, ArcPreparedStatementBuilder requete,
-			TarArchiveOutputStream taos, String repertoireIn, String anEnvExcecution, String nomPhase,
-			String dirSuffix) {
-		int k = 0;
-		int fetchSize = 5000;
-		GenericBean g;
-		ArrayList<String> listIdSource;
-		ArrayList<String> listIdSourceEtat;
-		ArrayList<String> listContainer;
-		String repertoire = repertoireIn + anEnvExcecution.toUpperCase().replace(".", "_") + File.separator;
-
-		String currentContainer;
-		while (true) {
-			// Réécriture de la requete pour avoir le i ème paquet
-			ArcPreparedStatementBuilder requeteLimit = new ArcPreparedStatementBuilder();
-			requeteLimit.append(requete);
-			requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
-			// Récupération de la liste d'id_source par paquet de fetchSize
-			try {
-				g = new GenericBean(UtilitaireDao.get(this.databaseTarget).executeRequest(this.connection, requeteLimit));
-				HashMap<String, ArrayList<String>> m = g.mapContent();
-				listIdSource = m.get(ColumnEnum.ID_SOURCE.getColumnName());
-				listContainer = m.get("container");
-				listIdSourceEtat = m.get("etat_traitement");
-			} catch (ArcException ex) {
-				LoggerHelper.errorGenTextAsComment(getClass(), "zipOutStreamRequeteSelect()", LOGGER, ex);
-				break;
-			}
-			if (listIdSource == null) {
-				LoggerHelper.traceAsComment(LOGGER, "listIdSource est null, sortie");
-				break;
-			}
-
-			LoggerHelper.traceAsComment(LOGGER, " listIdSource.size() =", listIdSource.size());
-
-			ArrayList<String> listIdSourceContainer = new ArrayList<>();
-			ArrayList<String> listIdSourceEtatContainer = new ArrayList<>();
-
-			// Ajout des fichiers à l'archive
-			int i = 0;
-			while (i < listIdSource.size()) {
-				String receptionDirectoryRoot = Paths.get(repertoire,
-						nomPhase + "_" + ManipString.substringBeforeFirst(listIdSource.get(i), "_") + "_" + dirSuffix)
-						.toString();
-				// fichier non archivé
-				if (CompressedUtils.isNotArchive(listContainer.get(i))) {
-					CompressedUtils.generateEntryFromFile(receptionDirectoryRoot,
-							ManipString.substringAfterFirst(listIdSource.get(i), "_"), taos);
-					i++;
-				} else {
-					// on sauvegarde la valeur du container courant
-					// on va extraire de la listIdSource tous les fichiers du
-					// même container
-					currentContainer = ManipString.substringAfterFirst(listContainer.get(i), "_");
-					listIdSourceContainer.clear();
-					listIdSourceEtatContainer.clear();
-					int j = i;
-					while (j < listContainer.size()
-							&& ManipString.substringAfterFirst(listContainer.get(j), "_").equals(currentContainer)) {
-						listIdSourceContainer.add(ManipString.substringAfterFirst(listIdSource.get(j), "_"));
-						listIdSourceEtatContainer.add(listIdSourceEtat.get(j));
-						j++;
-					}
-					// archive .tar.gz
-					if (currentContainer.endsWith(".tar.gz") || currentContainer.endsWith(".tgz")) {
-						CompressedUtils.generateEntryFromTarGz(receptionDirectoryRoot, currentContainer,
-								listIdSourceContainer, taos);
-						i = i + listIdSourceContainer.size();
-					} else if (currentContainer.endsWith(".zip")) {
-						CompressedUtils.generateEntryFromZip(receptionDirectoryRoot, currentContainer,
-								listIdSourceContainer, taos);
-						i = i + listIdSourceContainer.size();
-					}
-					// archive .gz
-					else if (listContainer.get(i).endsWith(".gz")) {
-						CompressedUtils.generateEntryFromGz(receptionDirectoryRoot, currentContainer,
-								listIdSourceContainer, taos);
-						i = i + listIdSourceContainer.size();
-					}
-				}
-			}
-			k++;
-		}
-	}
-
-	/**
-	 * Télécharger en tar gzip une liste de fichier
-	 *
-	 * @param requete        la selection de fichier avec la clé pertinente qui doit
-	 *                       d'appeler nom_fichier
-	 * @param repertoire     chemin jusqu'à l'avant dernier dossier
-	 * @param listRepertoire noms du dernier dossier (chaque fichier pouvant être
-	 *                       dans l'un de la liste)
-	 */
-	public void downloadEnveloppe(VObject currentData, HttpServletResponse response,
-			ArcPreparedStatementBuilder requete, String repertoire, ArrayList<String> listRepertoire) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-		response.reset();
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar");
-
-		try (TarArchiveOutputStream taos = new TarArchiveOutputStream(response.getOutputStream());) {
-			UtilitaireDao.get(this.databaseTarget).getFilesDataStreamFromListOfInputDirectories(this.connection, requete, taos, repertoire,
-					listRepertoire);
-		} catch (IOException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
-		} finally {
-			try {
-				response.getOutputStream().flush();
-				response.getOutputStream().close();
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
-			}
-		}
-	}
-
 	/**
 	 * Upload file to directory The method uses temporary folder because writing
 	 * directly file to a mounted path may be not allowed
@@ -1459,14 +1071,6 @@ public class VObjectService {
 		currentData.setHeaderSortDLabels(headerSortLabels);
 	}
 
-	public void addMessage(VObject data, String message) {
-		if (data.getMessage() != null) {
-			data.setMessage(data.getMessage() + "\n" + message);
-		} else {
-			data.setMessage(message);
-		}
-	}
-
 	/**
 	 * Calcule si la vue est active ou pas :
 	 * <ul>
@@ -1500,20 +1104,6 @@ public class VObjectService {
 
 	private VObject fetchVObjectData(String sessionName) {
 		return (VObject) session.get(sessionName);
-	}
-
-	/**
-	 * @return the pool
-	 */
-	public final Integer getDatabaseTarget() {
-		return this.databaseTarget;
-	}
-
-	/**
-	 * @param pool the pool to set
-	 */
-	public final void setDatabaseTarget(Integer databaseTarget) {
-		this.databaseTarget = databaseTarget;
 	}
 
 	public final void setColumnRendering(VObject data, HashMap<String, ColumnRendering> columnRender) {
@@ -1563,25 +1153,6 @@ public class VObjectService {
 	// give values to be added to a result row
 	public static void addRowToVObjectList(ArrayList<ArrayList<String>> result, String... elements) {
 		result.add(new ArrayList<>(Arrays.asList(Arrays.copyOf(elements, elements.length))));
-	}
-
-	/**
-	 * Determine si un filtre existe
-	 *
-	 * @return
-	 */
-	public Boolean filterExists(VObject data) {
-		boolean filterExist = false;
-		if (data.getFilterFields() != null && !data.getFilterFields().isEmpty()) {
-			for (int i = 0; i < data.getFilterFields().size(); i++) {
-				if (data.getFilterFields().get(i) != null && !data.getFilterFields().get(i).equals("")) {
-					filterExist = true;
-					break;
-				}
-
-			}
-		}
-		return filterExist;
 	}
 
 	public Connection getConnection() {
