@@ -127,8 +127,15 @@ public enum ColumnEnum {
 	, ENTREPOT("entrepot", TypeEnum.TEXT, "name of the datastore that recieve archive file")
 	, NOM_ARCHIVE("nom_archive", TypeEnum.TEXT, "name of archive file")
 	
-	, TEST1(PgColumnEnum.TEST1), TEST2(PgColumnEnum.TEST2)
+	// aliases
+	, VARBDD("varbdd", TypeEnum.TEXT, "variable in BDD") // export
+	, POS("pos", TypeEnum.BIGINT, "ordinal position") // export
+	, MAXP("maxp", TypeEnum.BIGINT, "highest position") // export
+	, I("i", TypeEnum.BIGINT, "row number index") // maintenanceparametre
 	
+	, TEST1(PgColumnEnum.TEST1)
+	, TEST2(PgColumnEnum.TEST2)
+		
 	, COLUMN_NAME(PgColumnEnum.COLUMN_NAME)
 	, TABLE_NAME(PgColumnEnum.TABLE_NAME)
 	, TABLE_SCHEMA(PgColumnEnum.TABLE_SCHEMA)

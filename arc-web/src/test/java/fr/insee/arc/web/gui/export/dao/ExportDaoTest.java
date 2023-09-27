@@ -69,8 +69,6 @@ public class ExportDaoTest extends InitializeQueryTest {
 	@Test
 	public void startExportRetrieve() throws ArcException {
 		
-		VObject viewExport = new ViewExport();
-		
 		// select the first record of viewNorm and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.EXPORT), SQL.WHERE, "file_name='test1'");
@@ -78,7 +76,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		pdao.setSelectedRecords(viewExportSelectedRecords);
 
 		// execute query
-		HashMap<String, ArrayList<String>> retrievedData = pdao.startExportRetrieve(viewExport);
+		HashMap<String, ArrayList<String>> retrievedData = pdao.startExportRetrieve();
 
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum

@@ -58,7 +58,7 @@ public class ServiceViewExport extends InteractorExport {
 			// Requêter les exports à réaliser
 			VObject viewExport = views.getViewExport();
 			dao.setSelectedRecords(viewExport.mapContentSelected());
-			HashMap<String, ArrayList<String>> rules = dao.startExportRetrieve(viewExport);
+			HashMap<String, ArrayList<String>> rules = dao.startExportRetrieve();
 
 			ArrayList<String> fileName = rules.get("file_name");
 			ArrayList<String> zip = rules.get("zip");
@@ -85,9 +85,9 @@ public class ServiceViewExport extends InteractorExport {
 				dao.startExportUpdateState(fileName, fileIndex, true);
 			}
 		} catch (ArcException | SQLException e) {
-			views.getViewExport().setMessage("Export failed because of database query");
+			views.getViewExport().setMessage("export.error.database");
 		} catch (IOException e) {
-			views.getViewExport().setMessage("Export failed because of file system problem");
+			views.getViewExport().setMessage("export.error.filesystem");
 		}
 
 		return generateDisplay(model, RESULT_SUCCESS);

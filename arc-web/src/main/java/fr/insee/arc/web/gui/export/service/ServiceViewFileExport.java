@@ -34,7 +34,8 @@ public class ServiceViewFileExport extends InteractorExport {
 				try {
 					FileUtilsArc.delete(new File(dirOut + File.separator + s));
 				} catch (ArcException e) {
-					this.views.getViewFileExport().setMessage("La suppression du fichier " + s + " a échouée");
+					this.views.getViewFileExport().setMessage("export.file.delete.error");
+					this.views.getViewFileExport().setMessageArgs(s);
 				}
 			}
 		}
@@ -55,7 +56,7 @@ public class ServiceViewFileExport extends InteractorExport {
 				try {
 					FileUtilsArc.renameTo(fileIn, fileOut);
 				} catch (ArcException e) {
-					this.views.getViewFileExport().setMessage("Le renommage a échoué");
+					this.views.getViewFileExport().setMessage("export.file.rename.error");
 				}
 
 			}
