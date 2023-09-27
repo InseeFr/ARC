@@ -18,6 +18,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -71,7 +72,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 				10000000, null
 		).invokeApi();
 		
-		String repertoireDeDepot = ApiReceptionService.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
+		String repertoireDeDepot = DirectoryPath.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
 		
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/Cas_test_V2008.11.zip"), new File(repertoireDeDepot, "Cas_test_V2008.11.zip").toPath());
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/Cas_test_V2016.02.zip"), new File(repertoireDeDepot, "Cas_test_V2016.02.zip").toPath());
@@ -121,7 +122,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 				10000000, null
 		).invokeApi();
 		
-		String repertoireDeDepot = ApiReceptionService.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
+		String repertoireDeDepot = DirectoryPath.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
 		
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/siera_ano.xml"), new File(repertoireDeDepot, "siera_ano.xml").toPath());
 		
@@ -173,7 +174,7 @@ public class TestsFonctionnels extends InitializeQueryTest
 				10000000, null
 		).invokeApi();
 		
-		String repertoireDeDepot = ApiReceptionService.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
+		String repertoireDeDepot = DirectoryPath.directoryReceptionEntrepot(repertoire, sandbox, "DEFAULT");
 		
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/animals.tar.gz"), new File(repertoireDeDepot, "animals.tar.gz").toPath());
 		
