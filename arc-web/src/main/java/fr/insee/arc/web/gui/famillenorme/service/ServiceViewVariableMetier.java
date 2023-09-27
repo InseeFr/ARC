@@ -17,6 +17,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.gui.all.util.ArcStringUtils;
 import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 
 @Service
 public class ServiceViewVariableMetier extends InteractorFamilleNorme {
@@ -36,7 +37,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 		if (!queryToAddNonExistingVaribales.equals(empty)) {
 			bloc.append(addNonExistingVariableMetierWithoutSync(message));
 			bloc.append(
-					synchronizeRegleWithVariableMetier(views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
+					GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 			executeRequeteMiseAjourTableMetier(message, bloc);
 		}
 		this.views.getViewVariableMetier().setMessage(message.toString());
@@ -52,7 +53,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 		StringBuilder bloc = new StringBuilder();
 		bloc.append(deleteVariableMetierWithoutSync(views.getViewVariableMetier().mapContentSelected(),
 				views.getViewVariableMetier().listContentSelected(), false));
-		bloc.append(synchronizeRegleWithVariableMetier(views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
+		bloc.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 		executeRequeteMiseAjourTableMetier(message, bloc);
 		this.views.getViewVariableMetier().setMessage(message.toString());
 		return generateDisplay(model, RESULT_SUCCESS);
@@ -139,7 +140,7 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 				requete.append(addExistingVariableMetierWithoutSync(message,
 						this.views.getViewVariableMetier().listOnlyUpdatedContent()));
 				requete.append(mettreAJourInformationsVariables(this.views.getViewVariableMetier()));
-				requete.append(synchronizeRegleWithVariableMetier(
+				requete.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(
 						views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 				executeRequeteMiseAjourTableMetier(message, requete);
 			}
@@ -157,10 +158,10 @@ public class ServiceViewVariableMetier extends InteractorFamilleNorme {
 	private static final void executeRequeteMiseAjourTableMetier(StringBuilder message, StringBuilder requete) {
 		try {
 			UtilitaireDao.get(0).executeBlock(null, requete);
-			message.append("La mise a jour a réussi");
+			message.append("La mise à jour a réussi");
 		} catch (Exception ex) {
 			StaticLoggerDispatcher.error(LOGGER, "Error in GererFamilleNormeAction.executeRequeteMiseAjourTableMetier");
-			message.append("La mise a jour a échoué");
+			message.append("La mise à jour a échoué");
 		}
 	}
 	

@@ -7,6 +7,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 
 @Service
 public class ServiceViewTableMetier extends InteractorFamilleNorme {
@@ -29,13 +30,13 @@ public class ServiceViewTableMetier extends InteractorFamilleNorme {
 		try {
 			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 			query.append(this.vObjectService.deleteQuery(views.getViewTableMetier()));
-			query.append(synchronizeRegleWithVariableMetier(
+			query.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(
 					views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
 			query.asTransaction();
 
 			UtilitaireDao.get(0).executeRequest(null, query);
 		} catch (ArcException e) {
-			this.views.getViewTableMetier().setMessage("La suppression des tables a échoué");
+			this.views.getViewTableMetier().setMessage("familyManagement.delete.error");
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

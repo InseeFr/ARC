@@ -14,11 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
-import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 import fr.insee.arc.web.gui.famillenorme.model.ModelGererFamille;
 import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
@@ -186,88 +185,6 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 			vObjectService.destroy(viewVariableMetier);
 		}
 	}
-
-	protected static String synchronizeRegleWithVariableMetier(String idFamille) {
-		/**
-		 * Sélection des règles à détruire
-		 */
-		StringBuilder requeteListeSupprRegleMapping = new StringBuilder("DELETE FROM arc.ihm_mapping_regle regle\n");
-		requeteListeSupprRegleMapping.append("  WHERE NOT EXISTS (");
-		requeteListeSupprRegleMapping
-				.append("    SELECT 1 FROM arc." + IHM_MOD_VARIABLE_METIER + " var INNER JOIN arc.ihm_famille fam\n");
-		requeteListeSupprRegleMapping.append("    ON var.id_famille=fam.id_famille\n");
-		requeteListeSupprRegleMapping.append("    AND regle.variable_sortie=var.nom_variable_metier\n");
-		requeteListeSupprRegleMapping.append("    INNER JOIN arc.ihm_norme norme\n");
-		requeteListeSupprRegleMapping.append("    ON norme.id_famille=fam.id_famille\n");
-		requeteListeSupprRegleMapping.append("    AND regle.id_norme=norme.id_norme\n");
-		requeteListeSupprRegleMapping.append("    WHERE fam.id_famille = '" + idFamille + "'");
-		requeteListeSupprRegleMapping.append("  )");
-		requeteListeSupprRegleMapping
-				.append("    AND EXISTS (SELECT 1 FROM arc.ihm_norme norme INNER JOIN arc.ihm_famille fam");
-		requeteListeSupprRegleMapping.append("      ON norme.id_famille=fam.id_famille");
-		requeteListeSupprRegleMapping.append("      AND regle.id_norme=norme.id_norme");
-		requeteListeSupprRegleMapping.append("      WHERE fam.id_famille = '" + idFamille + "')");
-		/**
-		 * Sélection des règles à créer
-		 */
-		StringBuilder requeteListeAddRegleMapping = new StringBuilder("INSERT INTO arc.ihm_mapping_regle (");
-		requeteListeAddRegleMapping.append("id_regle");
-		requeteListeAddRegleMapping.append(", id_norme");
-		requeteListeAddRegleMapping.append(", validite_inf");
-		requeteListeAddRegleMapping.append(", validite_sup");
-		requeteListeAddRegleMapping.append(", version");
-		requeteListeAddRegleMapping.append(", periodicite");
-		requeteListeAddRegleMapping.append(", variable_sortie");
-		requeteListeAddRegleMapping.append(", expr_regle_col");
-		requeteListeAddRegleMapping.append(", commentaire)");
-		requeteListeAddRegleMapping
-				.append("\n  SELECT (SELECT max(id_regle) FROM arc.ihm_mapping_regle) + row_number() over ()");
-		requeteListeAddRegleMapping.append(", norme.id_norme");
-		requeteListeAddRegleMapping.append(", calendrier.validite_inf");
-		requeteListeAddRegleMapping.append(", calendrier.validite_sup");
-		requeteListeAddRegleMapping.append(", jdr.version");
-		requeteListeAddRegleMapping.append(", norme.periodicite");
-		requeteListeAddRegleMapping.append(", var.nom_variable_metier");
-		requeteListeAddRegleMapping.append(", '" + FormatSQL.NULL + "'");
-		requeteListeAddRegleMapping.append(", " + FormatSQL.NULL + "::text ");
-		requeteListeAddRegleMapping.append("\n  FROM (SELECT DISTINCT id_famille, nom_variable_metier FROM arc."
-				+ IHM_MOD_VARIABLE_METIER + ") var INNER JOIN arc.ihm_famille fam");
-		requeteListeAddRegleMapping.append("\n    ON var.id_famille=fam.id_famille");
-		requeteListeAddRegleMapping.append("\n  INNER JOIN arc.ihm_norme norme");
-		requeteListeAddRegleMapping.append("\n    ON fam.id_famille=norme.id_famille");
-		requeteListeAddRegleMapping.append("\n  INNER JOIN arc.ihm_calendrier calendrier");
-		requeteListeAddRegleMapping
-				.append("\n    ON calendrier.id_norme=norme.id_norme AND calendrier.periodicite=norme.periodicite");
-		requeteListeAddRegleMapping.append("\n  INNER JOIN arc.ihm_jeuderegle jdr");
-		requeteListeAddRegleMapping
-				.append("\n    ON calendrier.id_norme=jdr.id_norme AND calendrier.periodicite=jdr.periodicite");
-		requeteListeAddRegleMapping.append(
-				"\n      AND calendrier.validite_inf=jdr.validite_inf AND calendrier.validite_sup=jdr.validite_sup");
-		requeteListeAddRegleMapping.append("\n  WHERE fam.id_famille = '" + idFamille + "'");
-		requeteListeAddRegleMapping.append("\n    AND lower(jdr.etat) <> 'inactif'");
-		requeteListeAddRegleMapping.append("\n    AND lower(calendrier.etat) = '1'");
-		requeteListeAddRegleMapping.append("\n    AND NOT EXISTS (");
-		requeteListeAddRegleMapping.append("\n      SELECT 1 FROM arc.ihm_mapping_regle regle");
-		requeteListeAddRegleMapping.append("\n      WHERE regle.variable_sortie=var.nom_variable_metier");
-		requeteListeAddRegleMapping.append("\n        AND regle.id_norme=norme.id_norme");
-		requeteListeAddRegleMapping.append("\n        AND regle.validite_inf=calendrier.validite_inf");
-		requeteListeAddRegleMapping.append("\n        AND regle.validite_sup=calendrier.validite_sup");
-		requeteListeAddRegleMapping.append("\n        AND regle.periodicite=norme.periodicite");
-		requeteListeAddRegleMapping.append("\n        AND regle.version=jdr.version");
-		requeteListeAddRegleMapping.append("\n    ) AND EXISTS (");
-		requeteListeAddRegleMapping.append("\n      SELECT 1 FROM arc.ihm_mapping_regle regle");
-		requeteListeAddRegleMapping.append("\n      WHERE regle.id_norme=norme.id_norme");
-		requeteListeAddRegleMapping.append("\n        AND regle.validite_inf=calendrier.validite_inf");
-		requeteListeAddRegleMapping.append("\n        AND regle.validite_sup=calendrier.validite_sup");
-		requeteListeAddRegleMapping.append("\n        AND regle.periodicite=norme.periodicite");
-		requeteListeAddRegleMapping.append("\n        AND regle.version=jdr.version");
-		requeteListeAddRegleMapping.append("\n    )");
-		StringBuilder requete = new StringBuilder();
-		requete.append(requeteListeAddRegleMapping.toString() + ";\n");
-		requete.append(requeteListeSupprRegleMapping.toString() + ";");
-		return requete.toString();
-	}
-
 
 	static final boolean isNomTableMetierValide(String nomTable, String phase, String famille) {
 		return nomTable.matches("(?i)^" + phase.toLowerCase() + "_" + famille + "_[a-z]([a-z]|[0-9]|_)+_ok$");
