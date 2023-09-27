@@ -7,8 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,7 +18,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +37,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressedUtils;
+import fr.insee.arc.utils.files.CompressionExtension;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.AttributeValue;
+import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
@@ -1011,6 +1023,235 @@ public class VObjectService {
 				currentData.getHeaderSortDOrders().remove(pos);
 				currentData.getHeaderSortDLabels().add(0, currentData.getHeaderSortDLabel());
 				currentData.getHeaderSortDOrders().add(0, true);
+			}
+		}
+	}
+
+	/**
+	 * Téléchargement dans un zip de N fichiers csv, les données étant extraites de
+	 * la base de données
+	 *
+	 * @param fileNames , liste des noms de fichiers obtenus
+	 * @param requetes  , liste des requetes SQL
+	 */
+	public void download(VObject currentData, HttpServletResponse response, List<String> fileNames,
+			List<ArcPreparedStatementBuilder> requetes) {
+		VObject v0 = fetchVObjectData(currentData.getSessionName());
+		if (currentData.getFilterFields() == null) {
+			currentData.setFilterFields(v0.getFilterFields());
+		}
+		Date dNow = new Date();
+		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
+		response.reset();
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".csv.zip");
+		try {
+			// Rattachement du zip à la réponse de Struts2
+			ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
+			try {
+				for (int i = 0; i < requetes.size(); i++) {
+					// Le nom des fichiers à l'interieur du zip seront simple :
+					// fichier1.csv, fichier2.csv etc.
+					// Ajout d'un nouveau fichier
+					ZipEntry entry = new ZipEntry(fileNames.get(i) + ".csv");
+					zos.putNextEntry(entry);
+					// Ecriture dans le fichier
+					UtilitaireDao.get(this.connectionIndex).outStreamRequeteSelect(this.connection, requetes.get(i), zos);
+					zos.closeEntry();
+				}
+			} finally {
+				zos.close();
+			}
+		} catch (IOException | ArcException ex) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
+		} finally {
+			try {
+				response.getOutputStream().flush();
+				response.getOutputStream().close();
+			} catch (IOException ex) {
+				LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
+			}
+		}
+	}
+
+	/**
+	 * Téléchargement d'une liste de fichier qui sont stockés dans le dossier
+	 * RECEPTION_OK ou RECEPTION_KO
+	 *
+	 * @param phase
+	 *
+	 * @param etatOk
+	 *
+	 * @param etatKo
+	 *
+	 * @param listIdSource
+	 */
+	public void downloadXML(VObject currentData, HttpServletResponse response, ArcPreparedStatementBuilder requete,
+			String repertoire, String anEnvExcecution, String phase) {
+		VObject v0 = fetchVObjectData(currentData.getSessionName());
+		if (currentData.getFilterFields() == null) {
+			currentData.setFilterFields(v0.getFilterFields());
+		}
+		Date dNow = new Date();
+		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
+		response.reset();
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar.gz");
+
+		TarArchiveOutputStream taos = null;
+		try {
+			taos = new TarArchiveOutputStream(new GZIPOutputStream(response.getOutputStream()));
+			zipOutStreamRequeteSelect(this.connection, requete, taos, repertoire, anEnvExcecution, phase, "ARCHIVE");
+		} catch (IOException ex) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
+		} finally {
+			try {
+				if (taos != null) {
+					try {
+						taos.close();
+					} catch (IOException ioe) {
+						// Silent catch
+					}
+				}
+				response.getOutputStream().flush();
+				response.getOutputStream().close();
+			} catch (IOException ex) {
+				LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
+			}
+		}
+	}
+
+	/**
+	 * Ecrit le résultat de la requête {@code requete} dans le fichier compressé
+	 * {@code zos} !Important! la requete doit être ordonnée sur le container <br/>
+	 *
+	 *
+	 * @param connexion
+	 * @param requete
+	 * @param taos
+	 * @param nomPhase
+	 *
+	 * @param dirSuffix
+	 */
+	public void zipOutStreamRequeteSelect(Connection connexion, ArcPreparedStatementBuilder requete,
+			TarArchiveOutputStream taos, String repertoireIn, String anEnvExcecution, String nomPhase,
+			String dirSuffix) {
+		int k = 0;
+		int fetchSize = 5000;
+		GenericBean g;
+		ArrayList<String> listIdSource;
+		ArrayList<String> listIdSourceEtat;
+		ArrayList<String> listContainer;
+		String repertoire = repertoireIn + anEnvExcecution.toUpperCase().replace(".", "_") + File.separator;
+
+		String currentContainer;
+		while (true) {
+			// Réécriture de la requete pour avoir le i ème paquet
+			ArcPreparedStatementBuilder requeteLimit = new ArcPreparedStatementBuilder();
+			requeteLimit.append(requete);
+			requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
+			// Récupération de la liste d'id_source par paquet de fetchSize
+			try {
+				g = new GenericBean(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requeteLimit));
+				HashMap<String, ArrayList<String>> m = g.mapContent();
+				listIdSource = m.get(ColumnEnum.ID_SOURCE.getColumnName());
+				listContainer = m.get("container");
+				listIdSourceEtat = m.get("etat_traitement");
+			} catch (ArcException ex) {
+				LoggerHelper.errorGenTextAsComment(getClass(), "zipOutStreamRequeteSelect()", LOGGER, ex);
+				break;
+			}
+			if (listIdSource == null) {
+				LoggerHelper.traceAsComment(LOGGER, "listIdSource est null, sortie");
+				break;
+			}
+
+			LoggerHelper.traceAsComment(LOGGER, " listIdSource.size() =", listIdSource.size());
+
+			ArrayList<String> listIdSourceContainer = new ArrayList<>();
+			ArrayList<String> listIdSourceEtatContainer = new ArrayList<>();
+
+			// Ajout des fichiers à l'archive
+			int i = 0;
+			while (i < listIdSource.size()) {
+				String receptionDirectoryRoot = Paths.get(repertoire,
+						nomPhase + "_" + ManipString.substringBeforeFirst(listIdSource.get(i), "_") + "_" + dirSuffix)
+						.toString();
+				// fichier non archivé
+				if (CompressedUtils.isNotArchive(listContainer.get(i))) {
+					CompressedUtils.generateEntryFromFile(receptionDirectoryRoot,
+							ManipString.substringAfterFirst(listIdSource.get(i), "_"), taos);
+					i++;
+				} else {
+					// on sauvegarde la valeur du container courant
+					// on va extraire de la listIdSource tous les fichiers du
+					// même container
+					currentContainer = ManipString.substringAfterFirst(listContainer.get(i), "_");
+					listIdSourceContainer.clear();
+					listIdSourceEtatContainer.clear();
+					int j = i;
+					while (j < listContainer.size()
+							&& ManipString.substringAfterFirst(listContainer.get(j), "_").equals(currentContainer)) {
+						listIdSourceContainer.add(ManipString.substringAfterFirst(listIdSource.get(j), "_"));
+						listIdSourceEtatContainer.add(listIdSourceEtat.get(j));
+						j++;
+					}
+					// archive .tar.gz
+					if (currentContainer.endsWith(CompressionExtension.TAR_GZ.getFileExtension()) || currentContainer.endsWith(CompressionExtension.TGZ.getFileExtension())) {
+						CompressedUtils.generateEntryFromTarGz(receptionDirectoryRoot, currentContainer,
+								listIdSourceContainer, taos);
+						i = i + listIdSourceContainer.size();
+					} else if (currentContainer.endsWith(CompressionExtension.ZIP.getFileExtension())) {
+						CompressedUtils.generateEntryFromZip(receptionDirectoryRoot, currentContainer,
+								listIdSourceContainer, taos);
+						i = i + listIdSourceContainer.size();
+					}
+					// archive .gz
+					else if (listContainer.get(i).endsWith(CompressionExtension.GZ.getFileExtension())) {
+						CompressedUtils.generateEntryFromGz(receptionDirectoryRoot, currentContainer,
+								listIdSourceContainer, taos);
+						i = i + listIdSourceContainer.size();
+					}
+				}
+			}
+			k++;
+		}
+	}
+
+	/**
+	 * Télécharger en tar gzip une liste de fichier
+	 *
+	 * @param requete        la selection de fichier avec la clé pertinente qui doit
+	 *                       d'appeler nom_fichier
+	 * @param repertoire     chemin jusqu'à l'avant dernier dossier
+	 * @param listRepertoire noms du dernier dossier (chaque fichier pouvant être
+	 *                       dans l'un de la liste)
+	 */
+	public void downloadEnveloppe(VObject currentData, HttpServletResponse response,
+			ArcPreparedStatementBuilder requete, String repertoire, ArrayList<String> listRepertoire) {
+		VObject v0 = fetchVObjectData(currentData.getSessionName());
+
+		if (currentData.getFilterFields() == null) {
+			currentData.setFilterFields(v0.getFilterFields());
+		}
+
+		Date dNow = new Date();
+		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
+		response.reset();
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar");
+
+		try (TarArchiveOutputStream taos = new TarArchiveOutputStream(response.getOutputStream());) {
+			UtilitaireDao.get(this.connectionIndex).getFilesDataStreamFromListOfInputDirectories(this.connection, requete, taos, repertoire,
+					listRepertoire);
+		} catch (IOException ex) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
+		} finally {
+			try {
+				response.getOutputStream().flush();
+				response.getOutputStream().close();
+			} catch (IOException ex) {
+				LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
 			}
 		}
 	}
