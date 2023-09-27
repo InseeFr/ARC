@@ -1096,7 +1096,7 @@ public class VObjectService {
 		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
 		response.reset();
 		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar.gz");
+				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + CompressionExtension.TAR_GZ.getFileExtension());
 
 		TarArchiveOutputStream taos = null;
 		try {

@@ -62,8 +62,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		querySelection.append(" ORDER by container ");
 
 		this.vObjectService.downloadXML(views.getViewFichierBAS(), response, querySelection, this.repertoire,
-				getBacASable(), TraitementPhase.RECEPTION.toString(), TraitementEtat.OK.toString(),
-				TraitementEtat.KO.toString());
+				getBacASable(), TraitementPhase.RECEPTION.toString());
 
 		loggerDispatcher.trace("*** Fin du téléchargement des fichiers XML ***", LOGGER);
 	}
