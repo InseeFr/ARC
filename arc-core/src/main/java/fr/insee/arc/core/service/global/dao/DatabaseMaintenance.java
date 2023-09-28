@@ -1,12 +1,10 @@
 package fr.insee.arc.core.service.global.dao;
 
 import java.sql.Connection;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;

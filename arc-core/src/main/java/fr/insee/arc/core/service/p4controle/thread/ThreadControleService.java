@@ -5,9 +5,12 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
+import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
@@ -35,8 +38,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 	private Thread t = null;
 	
-	private int indice;
-
 	private String tableControleDataTemp;
 	private String tableControlePilTemp;
 	private String tableOutOkTemp = "tableOutOkTemp";
@@ -56,30 +57,17 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	@Override
 	public void configThread(ScalableConnection connexion, int currentIndice, ApiControleService theApi) {
 
-		this.indice = currentIndice;
-		this.setEnvExecution(theApi.getEnvExecution());
-		this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
+		this.envExecution = theApi.getEnvExecution();
+		this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
 		this.connexion = connexion;
-		this.setTablePil(theApi.getTablePil());
+		this.tablePil = theApi.getTablePil();
 		this.tablePilTemp = theApi.getTablePilTemp();
+		this.currentPhase = theApi.getCurrentPhase();
+		this.tablePrevious = theApi.getTablePrevious();
+		this.tabIdSource=theApi.getTabIdSource();
+		this.paramBatch=theApi.getParamBatch();
 
-		this.setPreviousPhase(theApi.getPreviousPhase());
-		this.setCurrentPhase(theApi.getCurrentPhase());
-
-		this.setNbEnr(theApi.getNbEnr());
-
-		this.setTablePrevious(theApi.getTablePrevious());
-		this.setTabIdSource(theApi.getTabIdSource());
-
-		this.setTableNorme(theApi.getTableNorme());
-		this.setTableNormageRegle(theApi.getTableNormageRegle());
-
-		this.setParamBatch(theApi.getParamBatch());
-
-		this.setTableJeuDeRegle(theApi.getTableJeuDeRegle());
-		this.setTableControleRegle(theApi.getTableControleRegle());
-
-		this.sjdr = new ServiceJeuDeRegle(theApi.getTableControleRegle());
+		this.sjdr = new ServiceJeuDeRegle(ViewEnum.CONTROLE_REGLE.getFullName(envExecution));
 		this.jdr = new JeuDeRegle();
 
 		// Nom des tables temporaires
@@ -87,8 +75,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.tableControlePilTemp = FormatSQL.temporaryTableName("controle_pil_temp");
 
 		// tables finales
-		this.tableOutOk = TableNaming.dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.OK;
-		this.tableOutKo = TableNaming.dbEnv(this.getEnvExecution()) + this.getCurrentPhase() + "_" + TraitementEtat.KO;
+		this.tableOutOk = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK);
+		this.tableOutKo = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO);
 		
 		// arc thread dao
 		arcThreadGenericDao=new ThreadOperations(connexion, tablePil, tablePilTemp, tableControlePilTemp, tablePrevious, paramBatch, idSource);
@@ -107,8 +95,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error(LOGGER, "Error in control Thread");
 			try {
-				this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil,
-						this.idSource, e, "aucuneTableADroper");
+				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.tablePil,
+						this.idSource, e);
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(LOGGER, e2);
 			}
@@ -155,7 +143,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		UtilitaireDao.get(0).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
 
 		// Récupération des Jeux de règles associés
-		this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, this.getTableControleRegle(),
+		this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution),
 				this.tableControleDataTemp);
 		this.structure = UtilitaireDao.get(0).getString(this.connexion.getExecutorConnection(),
 				new ArcPreparedStatementBuilder("SELECT jointure FROM " + this.tableControlePilTemp));
@@ -243,7 +231,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		query.append(calculSeuilControle());
 
 		// promote the application user account to full right
-		query.append(switchToFullRightRole());
+		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
 
 		// Créer les tables héritées
 		String tableIdSourceOK = HashFileNameConversion.tableOfIdSource(tableOutOk, this.idSource);

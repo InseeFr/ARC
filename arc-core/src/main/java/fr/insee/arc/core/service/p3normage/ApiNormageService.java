@@ -4,9 +4,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
 import fr.insee.arc.core.service.p3normage.thread.ThreadNormageService;
 import fr.insee.arc.core.util.BDParameters;
@@ -39,7 +37,6 @@ public class ApiNormageService extends ApiService {
     public ApiNormageService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
             String paramBatch) {
         super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
-        this.setTableNorme(TableNaming.dbEnv(this.getEnvExecution()) + TraitementTableParametre.NORME);
     }
 
     @Override
@@ -52,7 +49,7 @@ public class ApiNormageService extends ApiService {
         this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "ApiNormageService.MAX_PARALLEL_WORKERS",4);
 
         // récupère le nombre de fichier à traiter
-        this.setTabIdSource(recuperationIdSource());
+        this.tabIdSource = recuperationIdSource();
         
         MultiThreading<ApiNormageService,ThreadNormageService> mt=new MultiThreading<>(this, new ThreadNormageService());
         mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());

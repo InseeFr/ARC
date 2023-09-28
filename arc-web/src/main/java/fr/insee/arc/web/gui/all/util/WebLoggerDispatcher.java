@@ -1,7 +1,6 @@
 package fr.insee.arc.web.gui.all.util;
 
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 

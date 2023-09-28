@@ -8,8 +8,10 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
+import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
@@ -47,7 +49,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	private Thread t;
 
-	private int indice;
 
 	private String container;
 
@@ -65,19 +66,17 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	private String tableTempA;
 
+
 	@Override
 	public void configThread(ScalableConnection connexion, int currentIndice, ApiChargementService aApi) {
 
-		this.indice = currentIndice;
-		this.setEnvExecution(aApi.getEnvExecution());
-		this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(this.indice);
+		this.envExecution = aApi.getEnvExecution();
+		this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
 		this.connexion = connexion;
-		this.container = aApi.getTabIdSource().get("container").get(this.indice);
-		this.tableChargementRegle = aApi.getTableChargementRegle();
-		this.tableNorme = aApi.getTableNorme();
+		this.container = aApi.getTabIdSource().get("container").get(currentIndice);
 		this.tablePilTemp = aApi.getTablePilTemp();
 		this.currentPhase = aApi.getCurrentPhase();
-		this.setTablePil(aApi.getTablePil());
+		this.tablePil = aApi.getTablePil();
 		this.paramBatch = aApi.getParamBatch();
 		this.directoryIn = aApi.getDirectoryIn();
 		this.listeNorme = aApi.getListeNorme();
@@ -92,7 +91,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 		// table de sortie des données dans l'application (hors du module)
 		this.tableChargementOK = TableNaming.globalTableName(envExecution, this.currentPhase,
-				TraitementEtat.OK.toString());
+				TraitementEtat.OK);
 
 		// thread generic dao
 		arcThreadGenericDao = new ThreadOperations(connexion, tablePil, tablePilTemp, tableChargementPilTemp,
@@ -121,13 +120,13 @@ public class ThreadChargementService extends ApiChargementService implements Run
 			finalisation();
 
 		} catch (ArcException processException) {
-
+			
 			processException.logFullException();
 
 			try {
 				// En cas d'erreur on met le fichier en KO avec l'erreur obtenu.
-				this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil,
-						this.idSource, processException, "aucuneTableADroper");
+				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.tablePil,
+						this.idSource, processException);
 			} catch (ArcException marquageException) {
 				marquageException.logFullException();
 			}
@@ -295,7 +294,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	private Norme calculerTypeFichier(Norme norme) throws ArcException {
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("SELECT type_fichier, delimiter, format ").append(" FROM " + this.getTableChargementRegle())
+		requete.append("SELECT type_fichier, delimiter, format ").append(" FROM " + ViewEnum.CHARGEMENT_REGLE.getFullName(this.getEnvExecution()))
 				.append(" WHERE id_norme =" + requete.quoteText(norme.getIdNorme()) + ";");
 
 		GenericBean g = new GenericBean(
@@ -323,7 +322,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		String tableIdSource = HashFileNameConversion.tableOfIdSource(tableName, idSource);
 
 		// promote the application user account to full right
-		query.append(switchToFullRightRole());
+		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
 
 		// Créer la table des données de la table des donénes chargées
 		query.append(TableOperations.createTableInherit(getTableTempA(), tableIdSource));

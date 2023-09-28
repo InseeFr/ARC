@@ -14,9 +14,9 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -35,7 +35,7 @@ public class TarGzDecompressor implements IArchiveExtractor {
 		File dir = new File(archiveFile + ".dir");
 
 		try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(
-				new BufferedInputStream(new FileInputStream(archiveFile), ApiReceptionService.READ_BUFFER_SIZE));
+				new BufferedInputStream(new FileInputStream(archiveFile), CompressedUtils.READ_BUFFER_SIZE));
 				TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
 			TarArchiveEntry entry;
 
@@ -45,7 +45,7 @@ public class TarGzDecompressor implements IArchiveExtractor {
 				// directories if not empty are automatically read in tar entries list
 				if (!entry.isDirectory()) {
 					int count;
-					byte data[] = new byte[32738];
+					byte[] data = new byte[32738];
 
 					// temporary name for the file being uncompress
 					try (FileOutputStream fos = new FileOutputStream(dir.getAbsolutePath() + File.separator

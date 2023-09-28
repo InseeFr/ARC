@@ -42,12 +42,7 @@ public class MoveFilesToRegisterDao {
 		query.build(SQL.END_QUERY);
 		
 		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
-//		
-		
-//		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(),
-//				"INSERT INTO " + TableNaming.dbEnv(sandbox.getSchema())
-//						+ "pilotage_archive (entrepot,nom_archive) values ('" + entrepot + "','" + reworkInstance.getReworkedArchiveName()
-//						+ "'); ");
+
 	}
 
 }

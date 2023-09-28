@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import fr.insee.arc.core.service.p1reception.registerarchive.dao.DirectoriesDao;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
@@ -69,7 +69,7 @@ public class ReworkArchiveOperation {
 						+ ManipString.substringAfterFirst(reworkedArchiveName, ".");
 			}
 
-			fileOutArchive = new File(directories.getDirEntrepotArchive() + File.separator + reworkedArchiveName);
+			fileOutArchive = new File(directories.getDirectoryEntrepotArchive() + File.separator + reworkedArchiveName);
 
 			if (!fileOutArchive.exists()) {
 				break;
@@ -98,13 +98,13 @@ public class ReworkArchiveOperation {
 				throw new ArcException(exception, ArcExceptionMessage.FILE_COPY_FAILED, inputFile, fileOutArchive);
 			}
 			// déplacer le fichier dans encours
-			FileUtilsArc.deplacerFichier(directories.getDirEntrepotIn(), directories.getDirEnCours(),
+			FileUtilsArc.deplacerFichier(directories.getDiretoryEntrepotIn(), directories.getDirectoryReceptionEnCours(),
 					inputFile.getName(), entrepot + "_" + reworkedArchiveName);
 		} else {
 			// on génére le tar.gz dans archive
 			CompressedUtils.generateTarGzFromFile(inputFile, fileOutArchive, inputFile.getName());
 			// on copie le tar.gz dans encours
-			File fOut = new File(directories.getDirEnCours() + File.separator + entrepot + "_" + reworkedArchiveName);
+			File fOut = new File(directories.getDirectoryReceptionEnCours() + File.separator + entrepot + "_" + reworkedArchiveName);
 			try {
 				Files.copy(Paths.get(fileOutArchive.getAbsolutePath()), Paths.get(fOut.getAbsolutePath()));
 			} catch (IOException exception) {
@@ -114,7 +114,7 @@ public class ReworkArchiveOperation {
 			FileUtilsArc.delete(inputFile);
 		}
 		
-		this.reworkedArchiveFile = new File(directories.getDirEnCours() + File.separator + entrepot + "_" + reworkedArchiveName);
+		this.reworkedArchiveFile = new File(directories.getDirectoryReceptionEnCours() + File.separator + entrepot + "_" + reworkedArchiveName);
 		this.reworkedArchiveSize = (int) (fileOutArchive.length() / 1024 / 1024);
 	}
 

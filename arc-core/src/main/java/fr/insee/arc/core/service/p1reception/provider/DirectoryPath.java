@@ -8,8 +8,11 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 
 public class DirectoryPath {
-	
-	
+
+	private DirectoryPath() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	/**
 	 * Methods to provide directories paths
 	 * 
@@ -22,8 +25,7 @@ public class DirectoryPath {
 	}
 
 	public static String directoryReceptionEntrepot(String rootDirectory, String env, String entrepot) {
-		return FileSystemManagement.directoryPhaseEntrepot(rootDirectory, env, TraitementPhase.RECEPTION,
-				entrepot);
+		return FileSystemManagement.directoryPhaseEntrepot(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
 	}
 
 	public static String directoryReceptionEntrepotArchive(String rootDirectory, String env, String entrepot) {
@@ -32,12 +34,14 @@ public class DirectoryPath {
 	}
 
 	public static String directoryReceptionEntrepotArchiveOld(String rootDirectory, String env, String entrepot) {
-		return FileSystemManagement.directoryPhaseEntrepotArchiveOld(rootDirectory, env,
-				TraitementPhase.RECEPTION, entrepot);
+		return FileSystemManagement.directoryPhaseEntrepotArchiveOld(rootDirectory, env, TraitementPhase.RECEPTION,
+				entrepot);
 	}
-	
-	public static String directoryReceptionEntrepotArchiveOldYearStamped(String rootDirectory, String env, String entrepot) {
-		return directoryReceptionEntrepotArchiveOld(rootDirectory, env, entrepot) + File.separator + 	Year.now().getValue();
+
+	public static String directoryReceptionEntrepotArchiveOldYearStamped(String rootDirectory, String env,
+			String entrepot) {
+		return directoryReceptionEntrepotArchiveOld(rootDirectory, env, entrepot) + File.separator
+				+ Year.now().getValue();
 	}
 
 	public static String directoryReceptionEtat(String rootDirectory, String env, TraitementEtat e) {

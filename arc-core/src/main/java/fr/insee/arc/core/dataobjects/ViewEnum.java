@@ -185,6 +185,10 @@ public enum ViewEnum {
 		return schema + SQL.DOT.getSqlCode() + this.tableName;
 	}
 
+	public static String getFullName(String schema, String providedTableName) {
+		return schema + SQL.DOT.getSqlCode() + providedTableName;
+	}
+	
 	public ColumnEnum col(ColumnEnum e) {
 		return this.getColumns().get(e);
 	}

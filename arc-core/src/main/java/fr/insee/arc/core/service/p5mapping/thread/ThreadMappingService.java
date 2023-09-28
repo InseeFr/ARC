@@ -8,9 +8,12 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
+import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
+import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
@@ -46,26 +49,16 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         this.connexion = connexion;
         this.indice = currentIndice;
         this.idSource = anApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
-        this.setEnvExecution(anApi.getEnvExecution());
-
-        
+        this.envExecution = anApi.getEnvExecution();
         this.tablePilTemp = anApi.getTablePilTemp();
-
-        this.setPreviousPhase(anApi.getPreviousPhase());
-        this.setCurrentPhase(anApi.getCurrentPhase());
-
-        this.setTablePrevious(anApi.getTablePrevious());
-
-        this.setTabIdSource(anApi.getTabIdSource());
-
-        this.setParamBatch(anApi.getParamBatch());
+        this.currentPhase = anApi.getCurrentPhase();
+        this.tablePrevious = anApi.getTablePrevious();
+        this.tabIdSource = anApi.getTabIdSource();
+        this.paramBatch = anApi.getParamBatch();
         
         this.tableTempControleOk = "tableTempControleOk".toLowerCase();
         this.tableMappingPilTemp = "tableMappingPilTemp".toLowerCase();
         
-        this.setTableJeuDeRegle(anApi.getTableJeuDeRegle());
-        this.setTableNorme(anApi.getTableNorme());
-        this.setTableOutKo(anApi.getTableOutKo());
         this.tablePil = anApi.getTablePil();
         
     	// thread generic dao
@@ -90,8 +83,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             StaticLoggerDispatcher.error(LOGGER, e);
 
 	    try {
-			this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
-				"aucuneTableADroper");
+				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e);
 		    } catch (ArcException e2) {
 	            StaticLoggerDispatcher.error(LOGGER, e);
 	
@@ -123,7 +115,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         /*
          * Construire l'ensemble des jeux de règles
          */
-        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(), this.tableTempControleOk, this.getTableJeuDeRegle());
+        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(), this.tableTempControleOk, ViewEnum.JEUDEREGLE.getFullName(this.getEnvExecution()));
 
         /*
          * Construction de la factory pour les règles de mapping
@@ -137,7 +129,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             /*
              * Récupération de l'id_famille
              */
-            String idFamille = serviceMapping.fetchIdFamille(this.connexion.getExecutorConnection(), listeJeuxDeRegles.get(i),	this.getTableNorme());
+            String idFamille = serviceMapping.fetchIdFamille(this.connexion.getExecutorConnection(), listeJeuxDeRegles.get(i), this.getEnvExecution());
             /*
              * Instancier une requête de mapping générique pour ce jeu de règles.
              */
@@ -184,7 +176,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
             query.append(requeteMapping.requeteTransfertVersTablesMetierDefinitives());
 
         	// promote the application user account to full right
-            query.append(switchToFullRightRole());
+            query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
             	
             /*
              * Transfert de la table mapping_ko temporaire vers la table mapping_ko définitive

@@ -8,11 +8,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.GzReader;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.TgzReader;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.ZipReader;
-import fr.insee.arc.core.service.p1reception.registerarchive.dao.DirectoriesDao;
 import fr.insee.arc.core.service.p1reception.registerarchive.dao.MoveFilesToRegisterDao;
 import fr.insee.arc.core.service.p1reception.registerarchive.operation.ArchiveCheckOperation;
 import fr.insee.arc.core.service.p1reception.registerarchive.operation.ReworkArchiveOperation;
@@ -112,7 +112,7 @@ public class ArchiveRegistration {
 
 	private void selectFilesInDatawarehouse(String entrepot) throws ArcException {
 
-		File fDirIn = new File(directories.getDirEntrepotIn());
+		File fDirIn = new File(directories.getDiretoryEntrepotIn());
 		// vérifier le type (répertoire)
 		if (fDirIn.isDirectory()) {
 

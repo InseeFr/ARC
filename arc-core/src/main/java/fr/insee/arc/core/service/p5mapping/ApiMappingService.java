@@ -71,7 +71,7 @@ public class ApiMappingService extends ApiService {
         this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "MappingService.MAX_PARALLEL_WORKERS",4);
         
         // récupère le nombre de fichier à traiter
-        this.setTabIdSource(recuperationIdSource());
+        this.tabIdSource = recuperationIdSource();
       
         MultiThreading<ApiMappingService,ThreadMappingService> mt=new MultiThreading<>(this, new ThreadMappingService());
         mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution, properties.getDatabaseRestrictedUsername());

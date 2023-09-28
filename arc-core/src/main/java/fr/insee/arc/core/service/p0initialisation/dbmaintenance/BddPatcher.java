@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
@@ -20,7 +19,6 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
-import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

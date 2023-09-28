@@ -14,7 +14,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class ThreadOperations {
 	
-	private final static String JAVA_DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
+	private static final String JAVA_DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 	
 	private ScalableConnection connexion;
 

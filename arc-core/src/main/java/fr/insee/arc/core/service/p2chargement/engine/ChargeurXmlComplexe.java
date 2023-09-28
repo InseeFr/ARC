@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.NormeFichier;
@@ -47,7 +48,7 @@ public class ChargeurXmlComplexe implements IChargeur{
     private String fileName;
     private Connection connexion;
     private String tableChargementPilTemp;
-    private String tableChargementRegle;
+    private String envExecution;
     private String currentPhase;
     private Norme norme;
     private String validite;
@@ -74,18 +75,18 @@ public class ChargeurXmlComplexe implements IChargeur{
         this.f =  threadChargementService.filesInputStreamLoad.getTmpInxChargement();
         this.norme = threadChargementService.normeOk;
         this.validite = threadChargementService.validite;
-        this.tableChargementRegle=threadChargementService.getTableChargementRegle();
+        this.envExecution=threadChargementService.getEnvExecution();
     }
 
     
-    public ChargeurXmlComplexe(Connection connexion, String fileName, InputStream f, String tableOut, String norme, String periodicite, String validite, String tableRegle) {
+    public ChargeurXmlComplexe(Connection connexion, String fileName, InputStream f, String tableOut, String norme, String periodicite, String validite, String envExecution) {
     	this.fileName = fileName;
         this.connexion = connexion;
         this.tableTempA = tableOut;
         this.norme=new Norme(norme, periodicite, null, null);
         this.validite = validite;
         this.f=f;
-        this.tableChargementRegle=tableRegle;
+        this.envExecution=envExecution;
     }
     
     
@@ -110,7 +111,7 @@ public class ChargeurXmlComplexe implements IChargeur{
         
         // voir avec Pierre comment factoriser ce genre de truc
         try {
-			HashMap<String,ArrayList<String>> regle = RulesOperations.getBean(this.connexion,RulesOperations.getRegles(tableChargementRegle, normeFichier));
+			HashMap<String,ArrayList<String>> regle = RulesOperations.getBean(this.connexion,RulesOperations.getRegles(ViewEnum.CHARGEMENT_REGLE.getFullName(this.envExecution), normeFichier));
 			if (regle.get("format").get(0)!=null) {
 				for (String rule:regle.get("format").get(0).split("\n"))
 				{
@@ -193,7 +194,6 @@ public class ChargeurXmlComplexe implements IChargeur{
         handler.fileName = fileName;
         handler.connexion = connexion;
         handler.tempTableA = this.tableTempA;
-        handler.start = 0;
         handler.normeCourante = norme;
         handler.validite = validite;
         handler.tempTableAColumnsLongName=this.tempTableAColumnsLongName;

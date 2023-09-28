@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.SQL;
 
 public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder {
 

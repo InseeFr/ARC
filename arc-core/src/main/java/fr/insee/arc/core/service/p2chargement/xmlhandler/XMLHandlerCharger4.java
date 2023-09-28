@@ -29,10 +29,33 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private static final Logger LOGGER = LogManager.getLogger(XMLHandlerCharger4.class);
 
-	public XMLHandlerCharger4() {
-		super();
+
+	
+	public XMLHandlerCharger4(Connection connexion, String fileName, Norme normeCourante, String validite,
+		String tempTableA, FastList<String> tempTableAColumnsLongName, FastList<String> tempTableAColumnsShortName) {
+	super();
+	this.connexion = connexion;
+	this.fileName = fileName;
+	this.normeCourante = normeCourante;
+	this.validite = validite;
+	this.tempTableA = tempTableA;
+	this.tempTableAColumnsLongName = tempTableAColumnsLongName;
+	this.tempTableAColumnsShortName = tempTableAColumnsShortName;
 	}
 
+	// input
+	private Connection connexion;
+	private String fileName;
+	private Norme normeCourante;
+	private String validite;
+	private String tempTableA;
+	private FastList<String> tempTableAColumnsLongName;
+	private FastList<String> tempTableAColumnsShortName;
+	
+	// output
+	private String jointure = "";
+	
+	
 	private HashMap<String, Integer> col = new HashMap<>();
 	private HashMap<String, Integer> colData = new HashMap<>();
 	private HashMap<Integer, Integer> tree = new HashMap<>();
@@ -42,19 +65,15 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private HashMap<Integer, String> keepLast = new HashMap<>();
 
 	private int idLigne = 0;
-
 	private int distance = 0;
 
-	public Connection connexion;
-
-	public String fileName;
-	public String jointure = "";
 
 	private String currentTag;
 	private String closedTag;
 
 	private String father = "*";
 	private StringBuilder currentData = new StringBuilder();
+
 
 	/*
 	 * pour les rubriques recursives (au cas ou...)
@@ -77,13 +96,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 	private ParallelInsert pi;
 
-	public Norme normeCourante;
-	public String validite;
 
-	// column of the load table A
-	public String tempTableA;
-	public FastList<String> tempTableAColumnsLongName;
-	public FastList<String> tempTableAColumnsShortName;
 
 	private static final String ALTER = "ALTER";
 
@@ -93,6 +106,8 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	// initialize the integration date with current
 	private final String integrationDate = DateConversion.queryDateConversion(new Date());
 
+	
+	
 	/**
 	 * Actions à réaliser sur les données
 	 */
@@ -564,4 +579,8 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 	}
 
+	public String getJointure() {
+		return jointure;
+	}
+	
 }

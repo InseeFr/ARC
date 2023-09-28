@@ -2,8 +2,6 @@ package fr.insee.arc.core.service.global.dao;
 
 import org.junit.Test;
 
-import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
-import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;

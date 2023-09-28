@@ -13,9 +13,9 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -29,7 +29,7 @@ public class ZipDecompressor implements IArchiveExtractor {
 		File dir = new File(archiveFile + ".dir");
 
 		try (ZipArchiveInputStream zipIn = new ZipArchiveInputStream(
-				new BufferedInputStream(new FileInputStream(archiveFile), ApiReceptionService.READ_BUFFER_SIZE))) {
+				new BufferedInputStream(new FileInputStream(archiveFile), CompressedUtils.READ_BUFFER_SIZE))) {
 			ZipArchiveEntry entry;
 
 			while ((entry = (ZipArchiveEntry) zipIn.getNextEntry()) != null) {
@@ -43,7 +43,7 @@ public class ZipDecompressor implements IArchiveExtractor {
 					}
 				} else {
 					int count;
-					byte data[] = new byte[32738];
+					byte[] data = new byte[32738];
 
 					// temporary name for the file being uncompress
 					try (FileOutputStream fos = new FileOutputStream(dir.getAbsolutePath() + File.separator

@@ -31,9 +31,6 @@ public class DataObjectService {
 	 */
 	public String getView(ViewEnum e) {
 
-		if (e.getTableLocation().equals(SchemaEnum.TEMPORARY)) {
-			return e.getTableName();
-		}
 		if ((e.getTableLocation().equals(SchemaEnum.SANDBOX)
 				|| e.getTableLocation().equals(SchemaEnum.SANDBOX_GENERATED)) && this.sandboxSchema != null) {
 			return this.sandboxSchema + SQL.DOT.getSqlCode() + e.getTableName();
@@ -44,7 +41,7 @@ public class DataObjectService {
 	}
 
 	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename) {
-		return schema.getSchemaName().equals("") ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename;
+		return schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename;
 	}
 
 	public String getSandboxSchema() {

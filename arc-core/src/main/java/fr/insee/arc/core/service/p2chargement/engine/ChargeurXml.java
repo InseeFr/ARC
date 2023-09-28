@@ -153,27 +153,20 @@ public class ChargeurXml implements IChargeur{
         java.util.Date beginDate = new java.util.Date();
 
         // Création de la table de stockage
-        XMLHandlerCharger4 handler = new XMLHandlerCharger4();
-        handler.fileName = fileName;
-        handler.connexion = connexion;
-        handler.tempTableA = this.tableTempA;
-        handler.normeCourante = norme;
-        handler.validite = validite;
-        handler.tempTableAColumnsLongName=this.tempTableAColumnsLongName;
-        handler.tempTableAColumnsShortName=this.tempTableAColumnsShortName;
+        XMLHandlerCharger4 handler = new XMLHandlerCharger4(connexion, fileName, norme, validite, this.tableTempA, this.tempTableAColumnsLongName, this.tempTableAColumnsShortName);
 
         // appel du parser et gestion d'erreur
         try {
             SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
             saxParser.parse(f, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            error = true;
+        	error = true;
             ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED, this.fileName).logMessageException();
             rapport = businessException.getMessage().replace("'", "''");
             throw businessException;
         }
 
-        this.jointure=handler.jointure;
+        this.jointure=handler.getJointure();
         
         java.util.Date endDate = new java.util.Date();
         StaticLoggerDispatcher.info(LOGGER, "** excecution temps" + (endDate.getTime() - beginDate.getTime()) + " ms");

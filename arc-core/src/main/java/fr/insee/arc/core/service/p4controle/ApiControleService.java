@@ -63,7 +63,7 @@ public class ApiControleService extends ApiService {
 		this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiControleService.MAX_PARALLEL_WORKERS", 3);
 
-		this.setTabIdSource(recuperationIdSource());
+		this.tabIdSource = recuperationIdSource();
 
 		MultiThreading<ApiControleService, ThreadControleService> mt = new MultiThreading<>(this,
 				new ThreadControleService());

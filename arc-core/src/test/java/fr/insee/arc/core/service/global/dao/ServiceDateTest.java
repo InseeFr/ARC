@@ -1,6 +1,6 @@
 package fr.insee.arc.core.service.global.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,7 +10,6 @@ import java.util.HashMap;
 
 import org.junit.Test;
 
-import fr.insee.arc.core.service.global.dao.DateConversion;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.p2chargement;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,10 +10,9 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.BDParameters;
@@ -49,6 +49,9 @@ public class ApiChargementService extends ApiService {
 			String paramBatch) {
 		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}
+	
+	protected List<Norme> listeNorme;
+	protected String directoryIn;
 
 	@Override
 	public void executer() throws ArcException {
@@ -58,18 +61,19 @@ public class ApiChargementService extends ApiService {
 
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
 
-		this.directoryIn = FileSystemManagement.directoryPhaseEtatOK(this.getDirectoryRoot(), this.envExecution,
-				TraitementPhase.valueOf(previousPhase)) + File.separator;
+		// input directory is reception_ok directory
+		this.directoryIn = new DirectoriesDao(this.coordinatorSandbox).getDirectoryReceptionOK() + File.separator;
 
 		// récupération des différentes normes dans la base
-		this.listeNorme = Norme.getNormesBase(this.connexion.getCoordinatorConnection(), this.tableNorme);
+		this.listeNorme = Norme.getNormesBase(this.connexion.getCoordinatorConnection(), this.envExecution);
 
 		this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiChargementService.MAX_PARALLEL_WORKERS", 4);
 
 		// Récupérer la liste des fichiers selectionnés
 		StaticLoggerDispatcher.info(LOGGER, "Récupérer la liste des fichiers selectionnés");
-		setTabIdSource(pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString()));
+		
+		this.tabIdSource = pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString());
 
 		MultiThreading<ApiChargementService, ThreadChargementService> mt = new MultiThreading<>(this,
 				new ThreadChargementService());
@@ -78,4 +82,13 @@ public class ApiChargementService extends ApiService {
 
 	}
 
+	public List<Norme> getListeNorme() {
+		return listeNorme;
+	}
+
+	public String getDirectoryIn() {
+		return directoryIn;
+	}
+	
+	
 }

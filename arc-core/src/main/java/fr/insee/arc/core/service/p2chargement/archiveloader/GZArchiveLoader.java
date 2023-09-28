@@ -9,10 +9,10 @@ import java.util.zip.GZIPInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressedUtils;
 
 
 /**
@@ -32,9 +32,9 @@ public class GZArchiveLoader extends AbstractArchiveFileLoader {
 
 	// Loading
 	try {
-		this.filesInputStreamLoad.setTmpInxChargement(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
-		this.filesInputStreamLoad.setTmpInxCSV(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
-		this.filesInputStreamLoad.setTmpInxNormage(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),ApiReceptionService.READ_BUFFER_SIZE)));
+		this.filesInputStreamLoad.setTmpInxChargement(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),CompressedUtils.READ_BUFFER_SIZE)));
+		this.filesInputStreamLoad.setTmpInxCSV(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),CompressedUtils.READ_BUFFER_SIZE)));
+		this.filesInputStreamLoad.setTmpInxNormage(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),CompressedUtils.READ_BUFFER_SIZE)));
 	} catch (IOException ioReadException) {
 		throw new ArcException(ioReadException, ArcExceptionMessage.FILE_READ_FAILED, this.archiveChargement);
 	}

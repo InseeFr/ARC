@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,18 +15,15 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
@@ -41,37 +37,25 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	protected int maxParallelWorkers;
 
-
-	// racine xml
-	public static final String ROOT = "root";
-
 	// anti-spam delay when thread chain error
 	protected static final int PREVENT_ERROR_SPAM_DELAY = 100;
 
 	protected ScalableConnection connexion;
-	
+
+	protected Sandbox coordinatorSandbox;
+
 	protected String envExecution;
 	protected String tablePrevious;
+
 	protected String previousPhase;
 	protected String currentPhase;
+
 	protected String tablePil;
 	protected String tablePilTemp;
-	protected String tableNorme;
-	protected String tableJeuDeRegle;
-	protected String tableChargementRegle;
-	protected String tableNormageRegle;
-	protected String tableMappingRegle;
-	protected String tableControleRegle;
-	protected Integer nbEnr;
-	protected String tableCalendrier;
-	protected String directoryRoot;
+
+	private Integer nbEnr;
 	protected String paramBatch = null;
-	protected String currentIdSource;
-    protected String directoryIn;
-    protected List<Norme> listeNorme;
-    
-    protected Sandbox coordinatorSandbox;
-	
+
 	// made to report the number of object processed by the phase
 	private int reportNumberOfObject = 0;
 
@@ -81,58 +65,51 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	protected Boolean todo = false;
 
-	private HashMap<String, ArrayList<String>> tabIdSource;
+	protected HashMap<String, ArrayList<String>> tabIdSource;
 
 	public ApiService() {
 		super();
 		springInit();
 	}
 
-	protected ApiService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot,
-			Integer aNbEnr, String paramBatch) {
-		this();
+	protected ApiService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+			String paramBatch) {
+
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");
+
 		try {
-			this.connexion = new ScalableConnection(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getDriverConnexion());
+			this.connexion = new ScalableConnection(
+					UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getDriverConnexion());
 			this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), aEnvExecution);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}
-		this.setParamBatch(paramBatch);
 
-		// Initialisation de la phase
-		this.setCurrentPhase(aCurrentPhase);
-		this.setPreviousPhase(TraitementPhase.valueOf(this.getCurrentPhase()).previousPhase().toString());
-		// Table en entrée
-		this.setEnvExecution(aEnvExecution);
+		this.envExecution = aEnvExecution;
+
 		
-		this.setDirectoryRoot(aDirectoryRoot);
+		// current phase and compute the previous phase
+		this.currentPhase = aCurrentPhase;
+		this.previousPhase = TraitementPhase.valueOf(this.getCurrentPhase()).previousPhase().toString();
 
-		this.setTablePrevious((TableNaming.dbEnv(aEnvExecution) + this.getPreviousPhase() + "_" + TraitementEtat.OK).toLowerCase());
+		// number of object to be proceed
+		this.nbEnr = aNbEnr;
+
+		// indicate if api is triggered by batch or not
+		this.paramBatch = paramBatch;
+
+
+		// inputTables
+		this.tablePrevious = (TableNaming.dbEnv(aEnvExecution) + this.getPreviousPhase() + "_" + TraitementEtat.OK).toLowerCase();
 
 		// Tables de pilotage et pilotage temporaire
-		this.setTablePil(ViewEnum.PILOTAGE_FICHIER.getFullName(aEnvExecution));
-		this.tablePilTemp = TableNaming.temporaryTableName(aEnvExecution, aCurrentPhase, 
+		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(aEnvExecution);
+		this.tablePilTemp = TableNaming.temporaryTableName(aEnvExecution, aCurrentPhase,
 				ViewEnum.PILOTAGE_FICHIER.getTableName(), "0");
 		
-		this.setTableNorme(TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.NORME);
-		this.tableCalendrier = TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CALENDRIER;
-		// Tables venant de l'initialisation globale
-		this.setTableJeuDeRegle(TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.JEUDEREGLE);
-		this.setTableChargementRegle(TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CHARGEMENT_REGLE);
-		this.setTableNormageRegle(TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.NORMAGE_REGLE);
-		this.setTableControleRegle(TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.CONTROLE_REGLE);
-		this.setTableMappingRegle(TableNaming.dbEnv(aEnvExecution) + TraitementTableParametre.MAPPING_REGLE);
-		this.setTableOutKo((TableNaming.dbEnv(aEnvExecution) + this.getCurrentPhase() + "_" + TraitementEtat.KO).toLowerCase());
-		this.setNbEnr(aNbEnr);
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** Fin constructeur ApiService **");
 	}
-
-	/**
-	 * Compteur simple pour tester la boucle d'execution
-	 */
-	private String tableOutKo;
 
 	/**
 	 * Initialisation des variable et des noms de table
@@ -147,12 +124,13 @@ public abstract class ApiService implements IConstanteNumerique {
 		// Vérifie si y'a des sources à traiter
 		if (this.todo) {
 			try {
-				UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), DatabaseConnexionConfiguration.configConnection(this.getEnvExecution()));
+				UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(),
+						DatabaseConnexionConfiguration.configConnection(this.getEnvExecution()));
 			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
 			}
-			register(this.connexion.getCoordinatorConnection(), this.getPreviousPhase(), this.getCurrentPhase(), this.getTablePil(),
-					this.tablePilTemp, this.getNbEnr());
+			register(this.connexion.getCoordinatorConnection(), this.getPreviousPhase(), this.getCurrentPhase(),
+					this.getTablePil(), this.tablePilTemp, this.nbEnr);
 		}
 
 		return this.todo;
@@ -175,7 +153,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param phaseAncien
 	 * @return
 	 */
-	private boolean checkTodo(String tablePil, String phaseAncien, String phaseNouveau) {
+	private boolean checkTodo(String tablePil, String phaseAncien) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		boolean checkTodoResult = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
@@ -229,10 +207,10 @@ public abstract class ApiService implements IConstanteNumerique {
 	protected String marqueJeuDeRegleApplique(String pilTemp, String defaultEtatTraitement) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("WITH ");
-		requete.append(
-				"prep AS (SELECT a."+ColumnEnum.ID_SOURCE.getColumnName()+", a.id_norme, a.periodicite, b.validite_inf, b.validite_sup, b.version ");
+		requete.append("prep AS (SELECT a." + ColumnEnum.ID_SOURCE.getColumnName()
+				+ ", a.id_norme, a.periodicite, b.validite_inf, b.validite_sup, b.version ");
 		requete.append("	FROM " + pilTemp + " a  ");
-		requete.append("	INNER JOIN " + this.getTableJeuDeRegle()
+		requete.append("	INNER JOIN " + ViewEnum.JEUDEREGLE.getFullName(this.envExecution)
 				+ " b ON a.id_norme=b.id_norme AND a.periodicite=b.periodicite AND b.validite_inf <=a.validite::date AND b.validite_sup>=a.validite::date ");
 		requete.append("	WHERE phase_traitement='" + this.getCurrentPhase() + "') ");
 		requete.append("UPDATE " + pilTemp + " AS a ");
@@ -244,21 +222,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		requete.append("WHERE a.phase_traitement='" + this.getCurrentPhase() + "'; ");
 		return requete.toString();
 	}
-
-	/**
-	 * promote the application to the full right user role if required. required is
-	 * true if the restrictedUserAccount exists
-	 * 
-	 * @throws ArcException
-	 */
-	public String switchToFullRightRole() {
-		PropertiesHandler properties = PropertiesHandler.getInstance();
-		if (!properties.getDatabaseRestrictedUsername().equals("")) {
-			return FormatSQL.changeRole(properties.getDatabaseUsername());
-		}
-		return "";
-	}
-
 
 	public abstract void executer() throws ArcException;
 
@@ -308,11 +271,13 @@ public abstract class ApiService implements IConstanteNumerique {
 			String etat) {
 		LoggerHelper.info(LOGGER_APISERVICE, "pilotageListIdsource");
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("SELECT container, "+ColumnEnum.ID_SOURCE.getColumnName()+" FROM " + tablePilotage + " ");
+		requete.append("SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + tablePilotage + " ");
 		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase) + " ");
 		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
 		try {
-			return new GenericBean(UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), requete)).mapContent();
+			return new GenericBean(
+					UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), requete))
+					.mapContent();
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "pilotageListIdSource()", ex);
 		}
@@ -344,10 +309,9 @@ public abstract class ApiService implements IConstanteNumerique {
 			requete.append(", jointure= '" + jointure[0] + "'");
 		}
 
-		requete.append("WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+"='" + idSource + "';\n");
+		requete.append("WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "';\n");
 		return requete;
 	}
-
 
 	/**
 	 * Requête de sélection de la liste des colonnes des tables métier associée à
@@ -366,7 +330,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		return requete;
 	}
 
-
 	/**
 	 *
 	 * @return le temps d'execution
@@ -381,7 +344,7 @@ public abstract class ApiService implements IConstanteNumerique {
 					|| this.getCurrentPhase().equals(TraitementPhase.RECEPTION.toString())) {
 				this.todo = true;
 			} else {
-				this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase(), this.getCurrentPhase());
+				this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase());
 			}
 			LoggerHelper.info(LOGGER_APISERVICE, "A faire - " + this.getCurrentPhase() + " : " + this.todo);
 
@@ -391,8 +354,8 @@ public abstract class ApiService implements IConstanteNumerique {
 				} catch (ArcException ex) {
 					LoggerHelper.error(LOGGER_APISERVICE, "Erreur dans " + this.getCurrentPhase() + ". ", ex);
 					try {
-						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.getTablePil(), ex,
-								"aucuneTableADroper");
+						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(),
+								this.getTablePil(), ex, "aucuneTableADroper");
 					} catch (Exception ex2) {
 						LoggerHelper.error(LOGGER_APISERVICE, "Error in ApiService.invokeApi.repriseSurErreur");
 					}
@@ -407,7 +370,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		return new ServiceReporting(this.reportNumberOfObject, System.currentTimeMillis() - start);
 
 	}
-
 
 	public String getTablePilTemp() {
 		return this.tablePilTemp;
@@ -450,57 +412,12 @@ public abstract class ApiService implements IConstanteNumerique {
 
 		requete.append("WITH t0 AS ( ");
 		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
-		requete.append("\n RETURNING "+ColumnEnum.ID_SOURCE.getColumnName()+") ");
+		requete.append("\n RETURNING " + ColumnEnum.ID_SOURCE.getColumnName() + ") ");
 
 		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, null, "t0"));
 
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
-
-	/**
-	 * Remise dans l'état juste avant le lancement des controles et insertion dans
-	 * une table d'erreur pour un fichier particulier
-	 *
-	 * @param connexion
-	 * @param phase
-	 * @param tablePil
-	 * @param exception
-	 * @param tableDrop
-	 * @throws ArcException
-	 */
-	public void repriseSurErreur(Connection connexion, String phase, String tablePil, String idSource,
-			ArcException exception, String... tableDrop) throws ArcException {
-		// nettoyage de la connexion
-		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
-		// la transaction
-		// si on lui renvoie une requete SQL, il la refuse avec le message
-		// ERROR: current transaction is aborted, commands ignored until end of
-		// transaction block
-		try {
-			this.connexion.getCoordinatorConnection().setAutoCommit(false);
-			this.connexion.getCoordinatorConnection().rollback();
-		} catch (SQLException rollbackException) {
-			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
-		}
-
-		// promote the application user account to full right
-		UtilitaireDao.get(0).executeImmediate(connexion, switchToFullRightRole());
-
-		StringBuilder requete = new StringBuilder();
-
-		for (int i = 0; i < tableDrop.length; i++) {
-			requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");
-		}
-		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
-
-		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
-		requete.append("\n ;");
-
-		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, idSource, null));
-
-		UtilitaireDao.get(0).executeBlock(connexion, requete);
-	}
-
 
 	/**
 	 * permet de récupérer un tableau de la forme id_source | id1 , id2, id3 ...
@@ -510,17 +427,15 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @throws ArcException
 	 */
 	protected HashMap<String, ArrayList<String>> recuperationIdSource() throws ArcException {
-		
-		ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
-		query.append("SELECT p."+ColumnEnum.ID_SOURCE.getColumnName()+" ");
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append("SELECT p." + ColumnEnum.ID_SOURCE.getColumnName() + " ");
 		query.append("FROM " + this.getTablePilTemp() + " p ");
-		query.append("ORDER BY "+ColumnEnum.ID_SOURCE.getColumnName());
+		query.append("ORDER BY " + ColumnEnum.ID_SOURCE.getColumnName());
 		query.append(";");
-		
+
 		HashMap<String, ArrayList<String>> pil = new GenericBean(
-				UtilitaireDao.get(0)
-						.executeRequest(this.connexion.getCoordinatorConnection(), query ))
-										.mapContent();
+				UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), query)).mapContent();
 
 		return (pil);
 
@@ -530,132 +445,32 @@ public abstract class ApiService implements IConstanteNumerique {
 		return envExecution;
 	}
 
-	public void setEnvExecution(String envExecution) {
-		this.envExecution = envExecution;
-	}
-
 	public HashMap<String, ArrayList<String>> getTabIdSource() {
 		return tabIdSource;
-	}
-
-	protected void setTabIdSource(HashMap<String, ArrayList<String>> tabIdSource) {
-		this.tabIdSource = tabIdSource;
 	}
 
 	public String getTablePil() {
 		return tablePil;
 	}
 
-	public void setTablePil(String tablePil) {
-		this.tablePil = tablePil;
-	}
-
 	public String getPreviousPhase() {
 		return previousPhase;
-	}
-
-	public void setPreviousPhase(String previousPhase) {
-		this.previousPhase = previousPhase;
 	}
 
 	public String getCurrentPhase() {
 		return currentPhase;
 	}
 
-	public void setCurrentPhase(String currentPhase) {
-		this.currentPhase = currentPhase;
-	}
-
 	public String getTablePrevious() {
 		return tablePrevious;
-	}
-
-	public void setTablePrevious(String tablePrevious) {
-		this.tablePrevious = tablePrevious;
 	}
 
 	public String getParamBatch() {
 		return paramBatch;
 	}
 
-	protected void setParamBatch(String paramBatch) {
-		this.paramBatch = paramBatch;
-	}
-
-	public String getTableJeuDeRegle() {
-		return tableJeuDeRegle;
-	}
-
-	public void setTableJeuDeRegle(String tableJeuDeRegle) {
-		this.tableJeuDeRegle = tableJeuDeRegle;
-	}
-
-	public String getTableNorme() {
-		return tableNorme;
-	}
-
-	public void setTableNorme(String tableNorme) {
-		this.tableNorme = tableNorme;
-	}
-
-	public String getTableOutKo() {
-		return tableOutKo;
-	}
-
-	public void setTableOutKo(String tableOutKo) {
-		this.tableOutKo = tableOutKo;
-	}
-
 	public ScalableConnection getConnexion() {
 		return connexion;
-	}
-
-	public String getTableControleRegle() {
-		return tableControleRegle;
-	}
-
-	public String getTableChargementRegle() {
-		return tableChargementRegle;
-	}
-
-	public void setTableChargementRegle(String tableChargementRegle) {
-		this.tableChargementRegle = tableChargementRegle;
-	}
-
-	public void setTableControleRegle(String tableControleRegle) {
-		this.tableControleRegle = tableControleRegle;
-	}
-
-	public String getTableMappingRegle() {
-		return tableMappingRegle;
-	}
-
-	public void setTableMappingRegle(String tableMappingRegle) {
-		this.tableMappingRegle = tableMappingRegle;
-	}
-
-	public Integer getNbEnr() {
-		return nbEnr;
-	}
-
-	public void setNbEnr(Integer nbEnr) {
-		this.nbEnr = nbEnr;
-	}
-
-	public String getTableNormageRegle() {
-		return tableNormageRegle;
-	}
-
-	public void setTableNormageRegle(String tableNormageRegle) {
-		this.tableNormageRegle = tableNormageRegle;
-	}
-
-	public String getDirectoryRoot() {
-		return directoryRoot;
-	}
-
-	public void setDirectoryRoot(String directoryRoot) {
-		this.directoryRoot = directoryRoot;
 	}
 
 	/**
@@ -663,13 +478,6 @@ public abstract class ApiService implements IConstanteNumerique {
 	 */
 	public String getIdSource() {
 		return idSource;
-	}
-
-	/**
-	 * @param idSource the idSource to set
-	 */
-	public void setIdSource(String idSource) {
-		this.idSource = idSource;
 	}
 
 	public int getReportNumberOfObject() {
@@ -680,30 +488,12 @@ public abstract class ApiService implements IConstanteNumerique {
 		this.reportNumberOfObject = reportNumberOfObject;
 	}
 
-	public String getDirectoryIn() {
-		return directoryIn;
-	}
-
-	public void setDirectoryIn(String directoryIn) {
-		this.directoryIn = directoryIn;
-	}
-
-	public List<Norme> getListeNorme() {
-		return listeNorme;
-	}
-
-	public void setListeNorme(List<Norme> listeNorme) {
-		this.listeNorme = listeNorme;
-	}
-
 	public Sandbox getCoordinatorSandbox() {
 		return coordinatorSandbox;
 	}
 
-	public void setCoordinatorSandbox(Sandbox coordinatorSandbox) {
-		this.coordinatorSandbox = coordinatorSandbox;
+	public Integer getNbEnr() {
+		return nbEnr;
 	}
 
-	
-	
 }

@@ -11,8 +11,8 @@ import java.util.zip.GZIPInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.files.CompressedUtils;
 
 /**
  * Just a map with inputstream in it. We have to read throught the file multiple time, this object is here to
@@ -33,9 +33,9 @@ public class FilesInputStreamLoad {
     public FilesInputStreamLoad(File theFileToRead) throws IOException {
 	super();
 	try {
-	    this.tmpInxChargement =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
-	    this.tmpInxNormage =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
-	    this.tmpInxCSV =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),ApiReceptionService.READ_BUFFER_SIZE));
+	    this.tmpInxChargement =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),CompressedUtils.READ_BUFFER_SIZE));
+	    this.tmpInxNormage =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),CompressedUtils.READ_BUFFER_SIZE));
+	    this.tmpInxCSV =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),CompressedUtils.READ_BUFFER_SIZE));
 	} catch (FileNotFoundException e) {
 	    StaticLoggerDispatcher.error(LOGGER, "Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName());
 	    throw e;

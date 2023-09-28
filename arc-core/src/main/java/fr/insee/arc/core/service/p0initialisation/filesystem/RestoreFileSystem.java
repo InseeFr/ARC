@@ -11,10 +11,9 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DataStorage;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
-import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -24,11 +23,14 @@ public class RestoreFileSystem {
 
 	private Connection connection;
 	private String envExecution;
+	private DirectoriesDao directories;
+	
 	
 	public RestoreFileSystem(Sandbox sandbox) {
 		super();
 		this.connection = sandbox.getConnection();
 		this.envExecution = sandbox.getSchema();
+		this.directories = new DirectoriesDao(sandbox);
 	}
 
 
@@ -41,9 +43,9 @@ public class RestoreFileSystem {
 		LoggerHelper.info(LOGGER, "Reconstruction du filesystem");
 
 		// parcourir toutes les archives dans le répertoire d'archive
-		String rootDirectory = PropertiesHandler.getInstance().getBatchParametersDirectory();
-		FileUtilsArc.createDirIfNotexist(FileSystemManagement.directoryEnvRoot(rootDirectory, envExecution));
 
+		directories.createSandboxDirectories();
+		
 		// pour chaque entrepot de données,
 		// Comparer les archives du répertoire aux archives enregistrées dans la table
 		// d'archive :
@@ -54,20 +56,17 @@ public class RestoreFileSystem {
 		List<String> entrepotList = DataStorage.execQuerySelectDatastorage(connection);
 		
 		for (String entrepot : entrepotList) {
-			rebuildFileSystemInEntrepot(rootDirectory, entrepot);
+			rebuildFileSystemInEntrepot(entrepot);
 		}
 	}
 	
 	
-	private void rebuildFileSystemInEntrepot(String rootDirectory, String entrepot) throws ArcException
+	private void rebuildFileSystemInEntrepot(String entrepot) throws ArcException
 	{
-		String dirEntrepotArchive = DirectoryPath.directoryReceptionEntrepotArchive(rootDirectory, envExecution,
-		entrepot);
-		String dirEntrepot = DirectoryPath.directoryReceptionEntrepot(rootDirectory, envExecution, entrepot);
+		directories.createSandboxDatawarehouseDirectories(entrepot);
+		String dirEntrepotArchive = directories.getDirectoryEntrepotArchive();
+		String dirEntrepot = directories.getDiretoryEntrepotIn();
 
-		FileUtilsArc.createDirIfNotexist(dirEntrepotArchive);
-		FileUtilsArc.createDirIfNotexist(dirEntrepot);
-		
 		// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table
 		// archive
 		// Si on en trouve ce n'est pas cohérent et on doit remettre ces fichiers dans

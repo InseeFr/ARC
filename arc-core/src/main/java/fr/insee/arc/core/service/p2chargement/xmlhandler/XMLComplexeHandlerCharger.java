@@ -14,6 +14,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.model.XMLConstant;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.dao.DateConversion;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
@@ -39,15 +40,13 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 	private HashMap<String, Integer> col = new HashMap<>();
 	private HashMap<String, Integer> colData = new HashMap<>();
-
-	// @trees
 	private HashMap<Integer, Integer> tree = new HashMap<>();
 	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
 
 	private HashMap<Integer, Integer> colDist = new HashMap<>();
 	private HashMap<Integer, String> keepLast = new HashMap<>();
 
-	public int start;
+	private int start = 0;
 	private int idLigne = 0;
 
 	private int distance = 0;
@@ -213,13 +212,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 			// mettre à jour la colonne si elle n'existe pas dans tree ou si elle ne pointe
 			// pas vers le bon pere
-			if (tree.get(this.allCols.indexOf(closedTagHeader1)) == null
-			/*
-			 * @trees ||
-			 * !tree.get(this.allCols.indexOf(closedTagHeader1)).equals(this.allCols.indexOf
-			 * (fatherOfTheBlock))
-			 */
-			) {
+			if (tree.get(this.allCols.indexOf(closedTagHeader1)) == null) {
 
 				// mettre à jour tree
 				this.tree.put(this.allCols.indexOf(closedTagHeader1), this.allCols.indexOf(fatherOfTheBlock));
@@ -253,7 +246,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		orderTreeStackQName--;
 
 		this.treeStack.remove(this.treeStack.size() - 1);
-		this.treeStackFatherLag = new ArrayList<String>(this.treeStackFather);
+		this.treeStackFatherLag = new ArrayList<>(this.treeStackFather);
 		this.father = this.treeStackFather.get(this.treeStackFather.size() - 1);
 		this.treeStackFather.remove(this.treeStackFather.size() - 1);
 
@@ -310,9 +303,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 */
 	@Override
 	public void startDocument() {
-		// intialisation de la connexion
-		// creation de la table
-
 		try {
 			this.colDist.put(-1, 0);
 		} catch (Exception ex) {
@@ -334,19 +324,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		orderTreeStackQName++;
 
 		this.currentTag = Format.toBdRaw(renameColumn(qName));
-//				+(this.father.equals(root_father)?"":
-//					(father_separator+
-//							ManipString.substringBeforeFirst(
-//									this.father
-//									,father_separator)
-//					)
-//					)
-		;
 
 		this.currentData.setLength(0);
 		this.hasData = false;
-//		this.firstData = true;
-		// distance++;
 
 		// on ajoute les colonnes si besoin
 		// on met à jour le numéro d'index
@@ -355,15 +335,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		// créer et enregistrer la colonne si elle n'existe pas
 		if (o == null) {
 			this.col.put(this.currentTag, 1);
-			// rootDistance.put(currentTag,distance);
-			// try {
-			// if (pst!=null){
-			// requete=Format.executeBlock(st, requete);
-			//
-			// pst.executeBatch();
-			// pst=null;
-			// }
-
 			this.allCols.add(this.currentTag);
 
 			this.requete.append("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag)
@@ -385,7 +356,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		}
 
 		// enregistrement de la structure
-		structure.append(("," + (this.father.equals(rootFather) ? ApiService.ROOT : "i_" + this.father)) + " "
+		structure.append(("," + (this.father.equals(rootFather) ? XMLConstant.ROOT : "i_" + this.father)) + " "
 				+ (this.father.equals(rootFather) ? "1" : this.col.get(this.father)) + " " + "i_" + this.currentTag);
 
 		if (this.tree.get(this.allCols.indexOf(this.currentTag)).equals(this.allCols.indexOf(this.father))
@@ -393,6 +364,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 				|| (this.tree.get(this.allCols.indexOf(this.currentTag + HEADER)) != null
 						&& this.tree.get(this.allCols.indexOf(this.currentTag + HEADER))
 								.equals(this.allCols.indexOf(this.father)))) {
+			// nothing
 		} else {
 			throw new SAXParseException("Le tag " + this.currentTag + " a des pères differents", "", "", 0, 0);
 		}
@@ -460,7 +432,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 * @throws SAXParseException
 	 */
 	private void insertQueryBuilder(StringBuilder aRequete, String tempTableI, String fileName, List<Integer> lineCols,
-			List<Integer> lineIds, List<String> lineValues) throws SAXParseException {
+			List<Integer> lineIds, List<String> lineValues) {
 
 		HashMap<Integer, String> keep = new HashMap<>();
 
@@ -685,7 +657,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 * @return
 	 */
 	private String renameColumn(String qName) {
-		Map<Integer, String> m = new TreeMap<Integer, String>();
+		Map<Integer, String> m = new TreeMap<>();
 
 		for (Pair<String, String> p : this.format) {
 			if (treeStackQName.get(p.getSecond()) != null && treeStackQName.get(p.getFirst()) != null

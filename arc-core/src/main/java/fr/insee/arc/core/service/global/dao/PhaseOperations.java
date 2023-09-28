@@ -1,10 +1,7 @@
 package fr.insee.arc.core.service.global.dao;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.lang3.ObjectUtils;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;

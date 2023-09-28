@@ -16,8 +16,6 @@ import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
-import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;

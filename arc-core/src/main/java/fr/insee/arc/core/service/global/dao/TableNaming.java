@@ -2,7 +2,8 @@ package fr.insee.arc.core.service.global.dao;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.utils.FormatSQL;
 
@@ -34,8 +35,8 @@ public class TableNaming {
 		}
 	}
 
-	public static String globalTableName(String aEnvExecution, String aCurrentPhase, String tableName) {
-		return dbEnv(aEnvExecution) + aCurrentPhase + "_" + tableName;
+	public static String globalTableName(String aEnvExecution, String aPhase, TraitementEtat etat) {
+		return ViewEnum.getFullName(aEnvExecution, aPhase + "_" + etat.toString());
 	}
 
 	/**

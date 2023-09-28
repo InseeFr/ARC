@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -79,14 +80,14 @@ public class Norme {
      * @return
      * @throws ArcException
      */
-    public static List<Norme> getNormesBase(Connection connexion, String tableNorme) {
+    public static List<Norme> getNormesBase(Connection connexion, String envExecution) {
 
         List<Norme> output = new ArrayList<Norme>() ;
         // Récupérer les régles de définition de normes
         ArrayList<ArrayList<String>> normes = new ArrayList<ArrayList<String>>();
         try {
             normes = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion,
-            		new ArcPreparedStatementBuilder( "select id_norme, periodicite, def_norme, def_validite from " + tableNorme + ";"))).content;
+            		new ArcPreparedStatementBuilder( "select id_norme, periodicite, def_norme, def_validite from " + ViewEnum.NORME.getFullName(envExecution) + ";"))).content;
         } catch (ArcException e) {
             LoggerHelper.errorAsComment(LOGGER, "Norme.getNormesBase - norms retrieval in database failed ");
         }

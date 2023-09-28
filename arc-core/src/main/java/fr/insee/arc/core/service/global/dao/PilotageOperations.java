@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.global.dao;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -17,6 +18,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -188,4 +190,47 @@ public class PilotageOperations {
 		requete.append("\n ;");
 		return requete;
 	}
+	
+	/**
+	 * Remise dans l'état juste avant le lancement des controles et insertion dans
+	 * une table d'erreur pour un fichier particulier
+	 *
+	 * @param connexion
+	 * @param phase
+	 * @param tablePil
+	 * @param exception
+	 * @param tableDrop
+	 * @throws ArcException
+	 */
+	public static void traitementSurErreur(Connection connexion, String phase, String tablePil, String idSource,
+			ArcException exception) throws ArcException {
+		// nettoyage de la connexion
+		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
+		// la transaction
+		// si on lui renvoie une requete SQL, il la refuse avec le message
+		// ERROR: current transaction is aborted, commands ignored until end of
+		// transaction block
+		try {
+			connexion.setAutoCommit(false);
+			connexion.rollback();
+		} catch (SQLException rollbackException) {
+			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
+		}
+
+		// promote the application user account to full right
+		UtilitaireDao.get(0).executeImmediate(connexion, DatabaseConnexionConfiguration.switchToFullRightRole());
+
+		StringBuilder requete = new StringBuilder();
+
+		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
+
+		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
+		requete.append("\n ;");
+
+		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, idSource, null));
+
+		UtilitaireDao.get(0).executeBlock(connexion, requete);
+	}
+
+	
 }

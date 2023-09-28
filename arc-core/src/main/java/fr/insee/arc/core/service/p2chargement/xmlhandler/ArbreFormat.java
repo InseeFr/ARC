@@ -12,6 +12,7 @@ import javax.xml.parsers.SAXParser;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import fr.insee.arc.core.model.XMLConstant;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -85,17 +86,14 @@ public class ArbreFormat {
         listePere.add(fils);
         String pere = this.arbreHierachieDuFichier.get(fils);
        
-        while (pere != null && !pere.equalsIgnoreCase("root")) {
+        while (pere != null && !pere.equalsIgnoreCase(XMLConstant.ROOT)) {
             listePere.add(pere);
             pere = arbreHierachieDuFichier.get(pere);
         }
 
         return listePere;
     }
-    
 
-
-    
     
     /**
      * @return the arbreFormat

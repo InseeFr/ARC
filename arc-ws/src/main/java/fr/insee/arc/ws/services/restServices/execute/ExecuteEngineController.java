@@ -75,12 +75,11 @@ public class ExecuteEngineController {
 					switch (TraitementPhase.getPhase(i)) {
 					case CHARGEMENT:
 						// register file
-						String tableRegleChargement = env + ".chargement_regle";
 
 						try (InputStream inputStream = new ByteArrayInputStream(
 								bodyPojo.fileContent.getBytes(StandardCharsets.UTF_8));) {
 							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, bodyPojo.fileName, inputStream, currentTemporaryTable(i),
-									bodyPojo.norme, bodyPojo.periodicite, bodyPojo.validite, tableRegleChargement);
+									bodyPojo.norme, bodyPojo.periodicite, bodyPojo.validite, env);
 							chargeur.executeEngine();
 							structure = chargeur.jointure.replace("''", "'");
 						}

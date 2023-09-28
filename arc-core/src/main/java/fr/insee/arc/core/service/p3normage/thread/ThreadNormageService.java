@@ -8,7 +8,9 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.RulesOperations;
@@ -45,9 +47,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
 
     private Thread t;
-    
-    private int indice ;
-    
+        
     private String tableNormageDataTemp;
     private String tableNormagePilTemp;
 
@@ -63,9 +63,8 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
     @Override
     public void configThread(ScalableConnection connexion, int currentIndice, ApiNormageService theApi) {
-        
-        this.indice = currentIndice;
-        this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
+    	
+        this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
         this.connexion = connexion;
 
         // tables du thread
@@ -76,25 +75,17 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         this.tableNormageOKTemp = FormatSQL.temporaryTableName("ok_Temp");
         this.tableNormageKOTemp = FormatSQL.temporaryTableName("ko_Temp");       
         
-        this.tableNormageOK = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK.toString());
-        this.tableNormageKO = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO.toString());
+        this.tableNormageOK = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK);
+        this.tableNormageKO = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO);
 
         // tables héritées
-        this.setTableNormageRegle(theApi.getTableNormageRegle());
-        this.setTableControleRegle(theApi.getTableControleRegle());
-        this.setTableMappingRegle(theApi.getTableMappingRegle());
-        
-        this.setTablePil(theApi.getTablePil());
-        this.setTablePilTemp(theApi.getTablePilTemp());
-        this.setPreviousPhase(theApi.getPreviousPhase());
-        this.setCurrentPhase(theApi.getCurrentPhase());
-        this.setNbEnr(theApi.getNbEnr());
-        this.setTablePrevious(theApi.getTablePrevious());
-        this.setTabIdSource(theApi.getTabIdSource());
-        this.setTableNorme(theApi.getTableNorme());
-        this.setTableNormageRegle(theApi.getTableNormageRegle());
-        this.setEnvExecution(theApi.getEnvExecution());
-        this.setParamBatch(theApi.getParamBatch());
+        this.tablePil = theApi.getTablePil();
+        this.tablePilTemp = theApi.getTablePilTemp();
+        this.currentPhase = theApi.getCurrentPhase();
+        this.tablePrevious = theApi.getTablePrevious();
+        this.tabIdSource=theApi.getTabIdSource();
+        this.envExecution=theApi.getEnvExecution();
+        this.paramBatch=theApi.getParamBatch();
         
 		// arc thread dao
 		arcThreadGenericDao=new ThreadOperations(connexion, tablePil, tablePilTemp, tableNormagePilTemp, tablePrevious, paramBatch, idSource);
@@ -123,8 +114,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         } catch (ArcException e) {
             StaticLoggerDispatcher.error(LOGGER, e);
 	    try {
-			this.repriseSurErreur(this.connexion.getExecutorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e,
-				"aucuneTableADroper");
+			PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.tablePil, this.idSource, e);
 		    } catch (ArcException e2) {
 	            StaticLoggerDispatcher.error(LOGGER, e2);
 		    }
@@ -185,7 +175,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 			    HashMap<String, ArrayList<String>> pil = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getNormeAttributes(this.idSource, tableNormagePilTemp));
 
 			    // récupéreration des règles relative au fichier pour la phase courante
-			    HashMap<String,ArrayList<String>> regle = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getRegles(this.tableNormageRegle, this.tableNormagePilTemp));
+			    HashMap<String,ArrayList<String>> regle = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getRegles(ViewEnum.NORMAGE_REGLE.getFullName(envExecution), this.tableNormagePilTemp));
 			    
 			    
 		        // récupéreration des rubriques utilisées dans règles relative au fichier pour l'ensemble des phases
@@ -199,7 +189,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 				    StringBuilder query=new StringBuilder();
 				    query.append("\n DROP TABLE IF EXISTS "+tableTmpRubriqueDansregles+";");
 				    query.append("\n CREATE TEMPORARY TABLE "+tableTmpRubriqueDansregles+" AS ");
-				    query.append(RulesOperations.getAllRubriquesInRegles(this.tableNormagePilTemp, this.tableNormageRegle, this.tableControleRegle, this.tableMappingRegle));
+				    query.append(RulesOperations.getAllRubriquesInRegles(this.tableNormagePilTemp, ViewEnum.NORMAGE_REGLE.getFullName(envExecution), ViewEnum.CONTROLE_REGLE.getFullName(envExecution), ViewEnum.MAPPING_REGLE.getFullName(envExecution)));
 			        UtilitaireDao.get(0).executeImmediate(
 			        		this.connexion.getExecutorConnection(),
 			        		query
@@ -242,7 +232,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
     	query.append(PilotageOperations.queryUpdateNbEnr(this.tableNormagePilTemp, this.tableNormageOKTemp, this.structure));
     
     	// promote the application user account to full right
-    	query.append(switchToFullRightRole());
+    	query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
     	
     	String tableIdSourceOK=HashFileNameConversion.tableOfIdSource(this.tableNormageOK ,this.idSource);
     	query.append(TableOperations.createTableInherit(this.tableNormageOKTemp, tableIdSourceOK));

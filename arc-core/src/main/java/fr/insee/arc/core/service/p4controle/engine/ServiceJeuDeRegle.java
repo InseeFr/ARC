@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.model.XMLConstant;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.RegleControleEntity;
@@ -196,7 +197,7 @@ public class ServiceJeuDeRegle {
 			case "CARDINALITE":
 				if (this.listRubTable.contains(reg.getRubriquePere()) 
 						// rules to set tree root and father label are ignored
-						&& !(reg.getRubriquePere().equalsIgnoreCase(ApiService.ROOT)))
+						&& !(reg.getRubriquePere().equalsIgnoreCase(XMLConstant.ROOT)))
 				{
 					blocRequete.append(executeRegleCardinalite(jdr, reg));
 					blocRequete.append(System.lineSeparator());

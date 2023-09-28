@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;

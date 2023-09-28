@@ -1,12 +1,7 @@
 package fr.insee.arc.core.service.p1reception.registerfiles;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -20,28 +15,18 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
-import fr.insee.arc.core.service.p1reception.ApiReceptionService;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FileDescriber;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
-import fr.insee.arc.core.service.p1reception.registerarchive.bo.GzReader;
-import fr.insee.arc.core.service.p1reception.registerarchive.bo.TgzReader;
-import fr.insee.arc.core.service.p1reception.registerarchive.bo.ZipReader;
-import fr.insee.arc.core.service.p1reception.registerarchive.dao.DirectoriesDao;
-import fr.insee.arc.core.service.p1reception.registerarchive.dao.MoveFilesToRegisterDao;
-import fr.insee.arc.core.service.p1reception.registerarchive.operation.ArchiveCheckOperation;
-import fr.insee.arc.core.service.p1reception.registerarchive.operation.ReworkArchiveOperation;
 import fr.insee.arc.core.service.p1reception.registerfiles.dao.FileRegistrationDao;
 import fr.insee.arc.core.service.p1reception.registerfiles.provider.ContainerName;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
-import fr.insee.arc.utils.files.CompressionExtension;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -87,7 +72,7 @@ public class FileRegistration {
 			if (archiveContent.getFilesAttribute().isEmpty()) {
 				return;
 			}
-				String dirIn = directories.getDirEnCours();
+				String dirIn = directories.getDirectoryReceptionEnCours();
 				
 				
 				for (FileDescriber f : archiveContent.getFilesAttribute()) {
