@@ -66,7 +66,7 @@ public class ResetEnvironmentOperation {
 		// after the undo phase
 		for (TraitementPhase phaseNext : phase.nextPhases()) {
 			requete = new ArcPreparedStatementBuilder();
-			requete.append("WITH TMP_DELETE AS (DELETE FROM " + connection + " WHERE phase_traitement = "
+			requete.append("WITH TMP_DELETE AS (DELETE FROM " + tablePil + " WHERE phase_traitement = "
 					+ requete.quoteText(phaseNext.toString()) + " ");
 			if (querySelection.length() > 0) {
 				requete.append("AND " + ColumnEnum.ID_SOURCE.getColumnName() + " IN (SELECT distinct "
