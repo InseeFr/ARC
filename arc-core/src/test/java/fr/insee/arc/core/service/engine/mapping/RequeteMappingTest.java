@@ -34,7 +34,7 @@ public class RequeteMappingTest {
 	@Test
 	public void mappingOrderOneTable() {
 		Set<TableMapping> tables = new HashSet<>();
-		tables.add(new TableMapping("", "table1", 0));
+		tables.add(new TableMapping("", "table1"));
 		mappingRequest.setEnsembleTableMapping(tables);
 
 		HashMap<TableMapping, ArrayList<TableMapping>> result = mappingRequest.ordonnerTraitementTable();
@@ -52,12 +52,12 @@ public class RequeteMappingTest {
 		
 		Set<TableMapping> tables = new HashSet<>();
 		
-		TableMapping parent = new TableMapping("", "parent", 0);
+		TableMapping parent = new TableMapping("", "parent");
 		parent.ajouterVariable(idParent);
 		parent.construireEnsembleVariablesTypes();
 		tables.add(parent);
 		
-		TableMapping child = new TableMapping("", "child", 0);
+		TableMapping child = new TableMapping("", "child");
 		child.ajouterVariable(idParent);
 		child.ajouterVariable(idChild);
 		child.construireEnsembleVariablesTypes();
