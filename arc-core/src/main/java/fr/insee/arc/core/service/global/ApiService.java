@@ -412,7 +412,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
 		requete.append("\n RETURNING " + ColumnEnum.ID_SOURCE.getColumnName() + ") ");
 
-		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, null, "t0"));
+		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, null, "t0"));
 
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}

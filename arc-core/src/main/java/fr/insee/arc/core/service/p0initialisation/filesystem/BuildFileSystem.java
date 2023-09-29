@@ -40,7 +40,7 @@ public class BuildFileSystem {
 
 		try {
 
-			List<String> listEntrepot = DataStorage.execQuerySelectDatastorage(connexion);
+			List<String> listEntrepot = DataStorage.execQuerySelectEntrepots(connexion);
 
 			for (String envExecution : Arrays.asList(envExecutions)) {
 

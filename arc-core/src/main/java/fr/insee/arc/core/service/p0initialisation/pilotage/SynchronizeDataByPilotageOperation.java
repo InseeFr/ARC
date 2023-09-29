@@ -25,11 +25,11 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
-public class SynchronizeDataByPilotage {
+public class SynchronizeDataByPilotageOperation {
 	
-	private static final Logger LOGGER = LogManager.getLogger(SynchronizeDataByPilotage.class);
+	private static final Logger LOGGER = LogManager.getLogger(SynchronizeDataByPilotageOperation.class);
 	
-	public SynchronizeDataByPilotage(Sandbox sandbox) {
+	public SynchronizeDataByPilotageOperation(Sandbox sandbox) {
 		super();
 		this.sandbox = sandbox;
 	}

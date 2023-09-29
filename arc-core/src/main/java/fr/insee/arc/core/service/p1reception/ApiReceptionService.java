@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.p1reception.registerarchive.ArchiveRegistration;
+import fr.insee.arc.core.service.p1reception.registerarchive.ArchiveRegistrationOperation;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
 import fr.insee.arc.core.service.p1reception.registerfiles.FileRegistration;
 import fr.insee.arc.core.util.BDParameters;
@@ -49,7 +49,7 @@ public class ApiReceptionService extends ApiService {
 		}
 		
 		// Enregistrement des fichiers
-		ArchiveRegistration archiveRegistration = new ArchiveRegistration(coordinatorSandbox, maxNumberOfFiles, maxNumberOfFiles);
+		ArchiveRegistrationOperation archiveRegistration = new ArchiveRegistrationOperation(coordinatorSandbox, maxNumberOfFiles, maxNumberOfFiles);
 		
 		FilesDescriber archiveContent = archiveRegistration.moveAndCheckClientFiles();
 		this.setReportNumberOfObject(archiveRegistration.getFileNb());

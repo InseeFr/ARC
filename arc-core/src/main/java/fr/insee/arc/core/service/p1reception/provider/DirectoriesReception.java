@@ -4,9 +4,9 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
-public class DirectoriesDao {
+public class DirectoriesReception {
 
-	public DirectoriesDao(Sandbox sandbox) {
+	public DirectoriesReception(Sandbox sandbox) {
 		this.sandbox = sandbox;
 		this.directoryRoot = PropertiesHandler.getInstance().getBatchParametersDirectory();
 		this.directoryReceptionEnCours = DirectoryPath.directoryReceptionEtatEnCours(directoryRoot, sandbox.getSchema());
@@ -34,9 +34,9 @@ public class DirectoriesDao {
 	}
 
 	/**
-	 * create datawarehouse sandbox directories if not exist and register their paths in class
+	 * create entrepot directories for sandbox if not exist and register their paths in class
 	 */
-	public void createSandboxDatawarehouseDirectories(String entrepot) {
+	public void createSandboxEntrepotDirectories(String entrepot) {
 
 		this.directoryEntrepotIn = DirectoryPath.directoryReceptionEntrepot(directoryRoot, sandbox.getSchema(),
 				entrepot);

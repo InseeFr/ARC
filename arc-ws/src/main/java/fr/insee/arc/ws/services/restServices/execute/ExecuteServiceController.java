@@ -114,7 +114,7 @@ public class ExecuteServiceController {
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
 
-			ResetEnvironmentService.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArcPreparedStatementBuilder());
+			ResetEnvironmentService.backToTargetPhase(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire, new ArrayList<>());
 			
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
 

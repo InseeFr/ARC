@@ -8,7 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
+import fr.insee.arc.core.service.global.dao.DataStorage;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.GzReader;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.TgzReader;
@@ -23,13 +24,13 @@ import fr.insee.arc.utils.files.CompressionExtension;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.ManipString;
 
-public class ArchiveRegistration {
+public class ArchiveRegistrationOperation {
 
-	private static final Logger LOGGER = LogManager.getLogger(ArchiveRegistration.class);
+	private static final Logger LOGGER = LogManager.getLogger(ArchiveRegistrationOperation.class);
 
 	private Sandbox sandbox;
 
-	private DirectoriesDao directories;
+	private DirectoriesReception directories;
 
 	private FilesDescriber selectedArchives;
 
@@ -38,13 +39,19 @@ public class ArchiveRegistration {
 	// max total number of selected files
 	private int maxNumberOfFiles;
 
-	public ArchiveRegistration(Sandbox sandbox, int fileSizeLimit, int maxNumberOfFiles) {
+	public ArchiveRegistrationOperation(Sandbox sandbox, int fileSizeLimit, int maxNumberOfFiles) {
 		super();
 		this.sandbox = sandbox;
 		this.fileSizeLimit = fileSizeLimit;
 		this.maxNumberOfFiles = maxNumberOfFiles;
-		this.directories = new DirectoriesDao(sandbox);
+		this.directories = new DirectoriesReception(sandbox);
+		
+		this.moveFilesToRegisterDao = new MoveFilesToRegisterDao(sandbox);
+		
 	}
+	
+	private MoveFilesToRegisterDao moveFilesToRegisterDao;
+	
 
 	// current size of files registered
 	private int fileSize = 0;
@@ -68,7 +75,7 @@ public class ArchiveRegistration {
 
 		this.selectedArchives = new FilesDescriber();
 
-		List<String> entrepotList = MoveFilesToRegisterDao.execQuerySelectDatawarehouses(sandbox.getConnection());
+		List<String> entrepotList = DataStorage.execQuerySelectEntrepots(sandbox.getConnection());
 
 		if (!entrepotList.isEmpty()) {
 			moveAndCheckUntilLimit(entrepotList);
@@ -92,9 +99,9 @@ public class ArchiveRegistration {
 			}
 
 			// create and register datawarehouse sandbox directories (entrepot)
-			directories.createSandboxDatawarehouseDirectories(entrepot);
+			directories.createSandboxEntrepotDirectories(entrepot);
 
-			selectFilesInDatawarehouse(entrepot);
+			selectFilesInEntrepot(entrepot);
 		}
 
 	}
@@ -110,7 +117,7 @@ public class ArchiveRegistration {
 		return (fileSize > fileSizeLimit || fileNb > maxNumberOfFiles);
 	}
 
-	private void selectFilesInDatawarehouse(String entrepot) throws ArcException {
+	private void selectFilesInEntrepot(String entrepot) throws ArcException {
 
 		File fDirIn = new File(directories.getDiretoryEntrepotIn());
 		// vérifier le type (répertoire)
@@ -148,7 +155,7 @@ public class ArchiveRegistration {
 
 				// enregistrer le fichier
 				
-				MoveFilesToRegisterDao.registerArchive(sandbox, entrepot, reworkInstance.getReworkedArchiveName());
+				moveFilesToRegisterDao.registerArchive(entrepot, reworkInstance.getReworkedArchiveName());
 
 			}
 		}

@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DataStorage;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
-import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -23,14 +23,14 @@ public class RestoreFileSystem {
 
 	private Connection connection;
 	private String envExecution;
-	private DirectoriesDao directories;
+	private DirectoriesReception directories;
 	
 	
 	public RestoreFileSystem(Sandbox sandbox) {
 		super();
 		this.connection = sandbox.getConnection();
 		this.envExecution = sandbox.getSchema();
-		this.directories = new DirectoriesDao(sandbox);
+		this.directories = new DirectoriesReception(sandbox);
 	}
 
 
@@ -53,7 +53,7 @@ public class RestoreFileSystem {
 		// on peut remettre dans le repertoire de reception les archives qu'on ne
 		// retrouvent pas dans la table
 
-		List<String> entrepotList = DataStorage.execQuerySelectDatastorage(connection);
+		List<String> entrepotList = DataStorage.execQuerySelectEntrepots(connection);
 		
 		for (String entrepot : entrepotList) {
 			rebuildFileSystemInEntrepot(entrepot);
@@ -63,7 +63,7 @@ public class RestoreFileSystem {
 	
 	private void rebuildFileSystemInEntrepot(String entrepot) throws ArcException
 	{
-		directories.createSandboxDatawarehouseDirectories(entrepot);
+		directories.createSandboxEntrepotDirectories(entrepot);
 		String dirEntrepotArchive = directories.getDirectoryEntrepotArchive();
 		String dirEntrepot = directories.getDiretoryEntrepotIn();
 

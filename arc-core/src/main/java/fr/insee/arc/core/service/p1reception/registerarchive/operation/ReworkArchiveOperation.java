@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
@@ -23,7 +23,7 @@ import fr.insee.arc.utils.utils.ManipString;
  */
 public class ReworkArchiveOperation {
 
-	public ReworkArchiveOperation(DirectoriesDao directories, String entrepot, File inputFile) {
+	public ReworkArchiveOperation(DirectoriesReception directories, String entrepot, File inputFile) {
 		super();
 		this.directories = directories;
 		this.entrepot = entrepot;
@@ -32,7 +32,7 @@ public class ReworkArchiveOperation {
 
 	private String entrepot;
 	private File inputFile;
-	private DirectoriesDao directories;
+	private DirectoriesReception directories;
 
 	private boolean isArchive;
 	private File fileOutArchive;

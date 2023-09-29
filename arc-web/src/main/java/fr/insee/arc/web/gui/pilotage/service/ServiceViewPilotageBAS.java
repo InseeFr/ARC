@@ -3,6 +3,7 @@ package fr.insee.arc.web.gui.pilotage.service;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
@@ -135,22 +137,12 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 * 
 	 * @return
 	 */
-	private ArcPreparedStatementBuilder undoFilesSelection() {
-		ArcPreparedStatementBuilder selectedSrc = new ArcPreparedStatementBuilder();
-
+	private List<String> undoFilesSelection() {
 		HashMap<String, ArrayList<String>> m = new HashMap<>(views.getViewFichierBAS().mapContentSelected());
-
-		if (!m.isEmpty() && m.get("id_source") != null) {
-			for (int i = 0; i < m.get("id_source").size(); i++) {
-				if (selectedSrc.length() > 0) {
-					selectedSrc.append("\n UNION ALL SELECT ");
-				} else {
-					selectedSrc.append("SELECT ");
-				}
-				selectedSrc.append(" " + selectedSrc.quoteText(m.get("id_source").get(i)) + "::text as id_source ");
-			}
+		if (!m.isEmpty() && m.get(ColumnEnum.ID_SOURCE.getColumnName()) != null) {
+			return m.get(ColumnEnum.ID_SOURCE.getColumnName());
 		}
-		return selectedSrc;
+		return new ArrayList<>();
 	}
 
 	/**

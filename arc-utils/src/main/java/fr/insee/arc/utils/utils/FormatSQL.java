@@ -36,6 +36,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 
 	public static final String VACUUM_OPTION_NONE = "";
 	public static final String VACUUM_OPTION_FULL = "full";
+	public static final String VACUUM_OPTION_ANALYZE = "analyze";
+
 
 	private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
 

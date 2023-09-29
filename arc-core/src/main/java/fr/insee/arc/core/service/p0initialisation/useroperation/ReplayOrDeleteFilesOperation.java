@@ -1,6 +1,5 @@
 package fr.insee.arc.core.service.p0initialisation.useroperation;
 
-import java.sql.Connection;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,16 +14,19 @@ import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
-public class ReplayOrDeleteFiles {
+public class ReplayOrDeleteFilesOperation {
 
-	private static final Logger LOGGER = LogManager.getLogger(ReplayOrDeleteFiles.class);
+	private static final Logger LOGGER = LogManager.getLogger(ReplayOrDeleteFilesOperation.class);
 
-	public ReplayOrDeleteFiles(Sandbox sandbox) {
+	public ReplayOrDeleteFilesOperation(Sandbox sandbox) {
 		super();
 		this.sandbox = sandbox;
+		this.replayOrDeleteFilesDao = new ReplayOrDeleteFilesDao(sandbox);
 	}
 	
 	private Sandbox sandbox;
+	
+	private ReplayOrDeleteFilesDao replayOrDeleteFilesDao;
 	
 	
 	public void processMarkedFiles() throws ArcException
@@ -45,13 +47,12 @@ public class ReplayOrDeleteFiles {
 	public void replayMarkedFiles() throws ArcException {
 		LoggerHelper.info(LOGGER, "reinstateWithRename");
 
-		Connection connection=sandbox.getConnection();
 		String envExecution=sandbox.getSchema();
 		
 		// on cherche tous les containers contenant un fichier à rejouer
 		// on remet l'archive à la racine
 		
-		List<String> containerList = ReplayOrDeleteFilesDao.execQuerySelectArchiveToReplay(connection, envExecution);
+		List<String> containerList = replayOrDeleteFilesDao.execQuerySelectArchiveToReplay();
 		
 		if (!containerList.isEmpty()) {
 			PropertiesHandler properties = PropertiesHandler.getInstance();
@@ -72,7 +73,7 @@ public class ReplayOrDeleteFiles {
 
 		}
 
-		ReplayOrDeleteFilesDao.execQueryDeleteArchiveToReplay(connection, envExecution);
+		replayOrDeleteFilesDao.execQueryDeleteArchiveToReplay();
 	}
 
 	/**
@@ -86,10 +87,7 @@ public class ReplayOrDeleteFiles {
 	private void deleteMarkedFiles() throws ArcException {
 		LoggerHelper.info(LOGGER, "Delete file marked by user as to be deleted");
 		
-		Connection connection=sandbox.getConnection();
-		String envExecution=sandbox.getSchema();
-		
-		ReplayOrDeleteFilesDao.execQueryDeleteFileToDelete(connection, envExecution);
+		replayOrDeleteFilesDao.execQueryDeleteFileToDelete();
 	}
 
 

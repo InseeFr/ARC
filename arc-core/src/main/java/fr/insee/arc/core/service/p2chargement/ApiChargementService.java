@@ -12,7 +12,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
-import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.BDParameters;
@@ -62,7 +62,7 @@ public class ApiChargementService extends ApiService {
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
 
 		// input directory is reception_ok directory
-		this.directoryIn = new DirectoriesDao(this.coordinatorSandbox).getDirectoryReceptionOK() + File.separator;
+		this.directoryIn = new DirectoriesReception(this.coordinatorSandbox).getDirectoryReceptionOK() + File.separator;
 
 		// récupération des différentes normes dans la base
 		this.listeNorme = Norme.getNormesBase(this.connexion.getCoordinatorConnection(), this.envExecution);

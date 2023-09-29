@@ -16,8 +16,8 @@ import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.model.TraitementTypeFichier;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.TableOperations;
-import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
-import fr.insee.arc.core.service.p1reception.provider.DirectoriesDao;
+import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FileDescriber;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
@@ -42,11 +42,11 @@ public class FileRegistration {
 		this.sandbox = sandbox;
 		this.tablePilTemp = tablePilTemp;
 		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema());
-		directories = new DirectoriesDao(sandbox);
+		directories = new DirectoriesReception(sandbox);
 	}
 
 	private Sandbox sandbox;
-	private DirectoriesDao directories;
+	private DirectoriesReception directories;
 	private String tablePilTemp;
 	private String tablePil;
 	
@@ -147,7 +147,7 @@ public class FileRegistration {
 				soumettreRequete(requete);
 				
 				if (idSourceToBeDeleted!=null) {
-					SynchronizeDataByPilotage synchronizationInstance =  new SynchronizeDataByPilotage(this.sandbox);
+					SynchronizeDataByPilotageOperation synchronizationInstance =  new SynchronizeDataByPilotageOperation(this.sandbox);
 					synchronizationInstance.dropUnusedDataTablesAllNods(idSourceToBeDeleted);
 					synchronizationInstance.deleteUnusedDataRecordsAllNods(idSourceToBeDeleted);
 				}

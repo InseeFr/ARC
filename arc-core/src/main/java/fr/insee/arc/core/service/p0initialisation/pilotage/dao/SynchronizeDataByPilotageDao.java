@@ -38,7 +38,7 @@ public class SynchronizeDataByPilotageDao {
 
 		requete.append("DELETE FROM " + tablePil + " WHERE etat_traitement='{ENCOURS}';");
 
-		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, null, null));
+		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, null, null));
 
 		requete.append("WITH tmp_1 as (select " + ColumnEnum.ID_SOURCE.getColumnName() + ", max(");
 		new StringBuilder();
@@ -112,10 +112,10 @@ public class SynchronizeDataByPilotageDao {
 		// on commence après la phase "initialisation". i=2
 		for (int i = 2; i < phase.length; i++) {
 			if (i > 2) {
-				requete.append(" UNION ALL ");
+				requete.append(SQL.UNION_ALL);
 			}
 			requete.append(FormatSQL.tableExists(TableNaming.dbEnv(envExecution) + phase[i] + "$%$tmp$%"));
-			requete.append(" UNION ALL ");
+			requete.append(SQL.UNION_ALL);
 			requete.append(FormatSQL.tableExists(TableNaming.dbEnv(envExecution) + phase[i] + "\\_%$tmp$%"));
 		}
 		return requete;

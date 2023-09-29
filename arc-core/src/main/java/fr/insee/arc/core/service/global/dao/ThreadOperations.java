@@ -196,7 +196,7 @@ public class ThreadOperations {
 		requete.append("\n WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		requete.append("\n AND a.etape = 1 ; ");
 
-		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, idSource, null));
+		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));
 
 		requete.append("\n set enable_hashjoin = on; ");
 		return requete.toString();

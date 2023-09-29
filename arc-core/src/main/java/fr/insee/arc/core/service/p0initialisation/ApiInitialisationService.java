@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p0initialisation.filesystem.RestoreFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
-import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotage;
-import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
-import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFiles;
+import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotageOperation;
+import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
+import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFilesOperation;
 import fr.insee.arc.utils.exception.ArcException;
 
 /**
@@ -41,7 +41,7 @@ public class ApiInitialisationService extends ApiService {
 		// Supprime les lignes devenues inutiles récupérées par le webservice de la
 		// table pilotage_fichier
 		// Déplace les archives dans OLD
-		new CleanPilotage(this.coordinatorSandbox).removeDeprecatedFiles();
+		new CleanPilotageOperation(this.coordinatorSandbox).removeDeprecatedFiles();
 
 		// Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
 		// l'environnement d'excécution courant
@@ -51,12 +51,12 @@ public class ApiInitialisationService extends ApiService {
 		// marque les fichiers ou les archives à rejouer
 		// efface des fichiers de la table de pilotage marqués par l'utilisateur comme
 		// étant à effacer
-		new ReplayOrDeleteFiles(this.coordinatorSandbox).processMarkedFiles();
+		new ReplayOrDeleteFilesOperation(this.coordinatorSandbox).processMarkedFiles();
 
-		// Met en cohérence les table de données avec la table de pilotage de
+		// Met en cohérence les tables de données avec la table de pilotage de
 		// l'environnement
 		// La table de pilotage fait foi
-		new SynchronizeDataByPilotage(this.coordinatorSandbox).synchronizeDataByPilotage();
+		new SynchronizeDataByPilotageOperation(this.coordinatorSandbox).synchronizeDataByPilotage();
 
 		// remettre les archives ou elle doivent etre en cas de restauration de la base
 		new RestoreFileSystem(this.coordinatorSandbox).execute();

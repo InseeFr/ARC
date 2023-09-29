@@ -1,11 +1,13 @@
 package fr.insee.arc.core.service.p0initialisation;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotage;
+import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.useroperation.ResetEnvironmentOperation;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -27,7 +29,7 @@ public class ResetEnvironmentService {
 	 * @throws ArcException
 	 */
 	public static void backToTargetPhase(TraitementPhase phaseAExecuter, String env, String rootDirectory,
-			ArcPreparedStatementBuilder undoFilesSelection) throws ArcException {
+			List<String> undoFilesSelection) throws ArcException {
 		if (phaseAExecuter.getOrdre() == TraitementPhase.INITIALISATION.getOrdre()) {
 			resetBAS(env, rootDirectory);
 		} else {
@@ -57,7 +59,7 @@ public class ResetEnvironmentService {
 			new ResetEnvironmentOperation(service.getCoordinatorSandbox()).clearPilotageAndDirectories(rootDirectory);
 			
 			// synchronize
-			new SynchronizeDataByPilotage(service.getCoordinatorSandbox()).synchronizeDataByPilotage();
+			new SynchronizeDataByPilotageOperation(service.getCoordinatorSandbox()).synchronizeDataByPilotage();
 			
 		} catch (ArcException e) {
 			e.logFullException();

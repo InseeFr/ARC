@@ -21,12 +21,12 @@ public class DataStorage {
 	}
 
 	/**
-	 * retrieve the data storage identifiers registered in database
+	 * retrieve the entrepot identifiers registered in database
 	 * 
 	 * @return
 	 * @throws ArcException
 	 */
-	public static List<String> execQuerySelectDatastorage(Connection connection) throws ArcException {
+	public static List<String> execQuerySelectEntrepots(Connection connection) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, ColumnEnum.ID_ENTREPOT, SQL.FROM, ViewEnum.IHM_ENTREPOT.getFullName());
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query))

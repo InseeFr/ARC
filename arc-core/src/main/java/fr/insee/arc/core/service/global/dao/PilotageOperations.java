@@ -171,7 +171,7 @@ public class PilotageOperations {
 	 * @param idSource
 	 * @return
 	 */
-	public static StringBuilder resetPreviousPhaseMark(String tablePil, String idSource, String tableSource) {
+	public static StringBuilder queryResetPreviousPhaseMark(String tablePil, String idSource, String tableSource) {
 		StringBuilder requete = new StringBuilder();
 
 		// mettre à etape = 0 la phase marquée à 3
@@ -189,7 +189,7 @@ public class PilotageOperations {
 		requete.append("\n ;");
 		return requete;
 	}
-	
+
 	/**
 	 * Remise dans l'état juste avant le lancement des controles et insertion dans
 	 * une table d'erreur pour un fichier particulier
@@ -226,7 +226,7 @@ public class PilotageOperations {
 		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
 		requete.append("\n ;");
 
-		requete.append(PilotageOperations.resetPreviousPhaseMark(tablePil, idSource, null));
+		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));
 
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
