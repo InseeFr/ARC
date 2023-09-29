@@ -124,8 +124,8 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 		
 		// select the first record of viewRulesSet and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_JEUDEREGLE),
-				SQL.WHERE, "id_norme='v2008-11'", SQL.AND, "version='vConformite'");
+		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_JEUDEREGLE));
+		query.build(SQL.WHERE, "id_norme='v2008-11'", SQL.AND, "version='vConformite'");
 		Map<String, ArrayList<String>> viewRulesSetSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewRulesSetSelectedRecords);
 		

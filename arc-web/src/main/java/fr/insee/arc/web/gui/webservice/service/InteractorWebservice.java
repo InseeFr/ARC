@@ -1,7 +1,6 @@
 package fr.insee.arc.web.gui.webservice.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,9 +11,10 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.webservice.dao.WebserviceDao;
 import fr.insee.arc.web.gui.webservice.model.ModelWebservice;
 
 @Service
@@ -26,62 +26,45 @@ public class InteractorWebservice extends ArcWebGenericService<ModelWebservice> 
 
 	@Autowired
     protected ModelWebservice views;
+	
+	private WebserviceDao dao;
     
 	@Override
 	public void putAllVObjects(ModelWebservice model) {
+		
+		dao = new WebserviceDao(vObjectService, dataObjectService);
+		
 		views.setViewWebserviceContext(vObjectService.preInitialize(model.getViewWebserviceContext()));
 		views.setViewWebserviceQuery(vObjectService.preInitialize(model.getViewWebserviceQuery()));
 		
-		putVObject(views.getViewWebserviceContext(),
-				t -> initializeWebserviceContext(t, "arc.ihm_ws_context"));
-		//
-		putVObject(views.getViewWebserviceQuery(), t -> initializeWebserviceQuery(t, views.getViewWebserviceContext(),
-				"arc.ihm_ws_query"));
+		putVObject(views.getViewWebserviceContext(), t -> initializeWebserviceContext(t));
+		putVObject(views.getViewWebserviceQuery(), t -> initializeWebserviceQuery(t, views.getViewWebserviceContext()));
 	}
     
-   
-
     /**
      * Retourne le nom des tables de WebserviceQuery présentes dans la base ainsi que le descriptif associé à chaque table
      */
-    public void initializeWebserviceContext(VObject c, String t) {
-        loggerDispatcher.debug("/* initializeWebserviceContext */", LOGGER);
-        HashMap<String, String> defaultInputFields = new HashMap<>();
-        
-        
-        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-        requete.append("\n SELECT * FROM "+t+" ");
-        
-        vObjectService.initialize(c, requete, t, defaultInputFields);
+    public void initializeWebserviceContext(VObject viewWsContext) {
+        LoggerHelper.debug(LOGGER, "/* initializeWebserviceContext */");
+        dao.initializeWebserviceContext(viewWsContext);
 
     }
 
-
-
-    private void initializeWebserviceQuery(VObject c, VObject d, String t) {
+    private void initializeWebserviceQuery(VObject viewWsQuery, VObject viewWsContext) {
         // visual des Calendriers
-    	loggerDispatcher.debug("/* initializeWebserviceQuery */",LOGGER);
+    	LoggerHelper.debug(LOGGER, "/* initializeWebserviceQuery */");
 
-        Map<String, ArrayList<String>> selection = d.mapContentSelected();
+    	// get the webservice selected records
+        Map<String, ArrayList<String>> viewWsContextSelectedRecords = viewWsContext.mapContentSelected();
 
-        if (!selection.isEmpty()) {
-            HashMap<String, String> type = d.mapHeadersType();
-
-            // requete de la vue
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-            requete.append("\n SELECT * FROM "+t+" ");
-            requete.append("\n WHERE service_name " + requete.sqlEqual(selection.get("service_name").get(0), type.get("service_name")) + " ");
-            requete.append("\n AND call_id " + requete.sqlEqual(selection.get("call_id").get(0), type.get("call_id")) + " ");
-            requete.append("\n ");
-
-            // // construction des valeurs par défaut pour les ajouts
-            HashMap<String, String> defaultInputFields = new HashMap<String, String>();
-            defaultInputFields.put("service_name", selection.get("service_name").get(0));
-            defaultInputFields.put("call_id", selection.get("call_id").get(0));
-
-            this.vObjectService.initialize(c, requete, "arc.ihm_ws_query", defaultInputFields);
+        // if a webservice is selected, trigger the call to dao to construct query view
+        if (!viewWsContextSelectedRecords.isEmpty()) {
+        	
+        	dao.setSelectedRecords(viewWsContextSelectedRecords);
+			dao.initializeWebserviceQuery(viewWsQuery);
+			
         } else {
-        	this.vObjectService.destroy(c);
+        	vObjectService.destroy(viewWsQuery);
         }
     }
 

@@ -6,13 +6,16 @@ import java.util.HashMap;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.web.gui.query.dao.QueryDao;
+
 @Service
 public class ServiceViewTable extends InteractorQuery {
 	
 	public String seeTable(Model model) {
 		HashMap<String, ArrayList<String>> mapContentSelected = views.getViewTable().mapContentSelected();
 		if (!mapContentSelected.isEmpty()) {
-			this.myQuery = "select * from " + this.mySchema+"." + mapContentSelected.get("tablename").get(0) + " limit 10 ";
+			this.myQuery = QueryDao.queryTableSelected(mySchema, mapContentSelected.get(ColumnEnum.TABLENAME.getColumnName()).get(0));
 			model.addAttribute("myQuery", myQuery);
 		}
 		return basicAction(model, RESULT_SUCCESS);

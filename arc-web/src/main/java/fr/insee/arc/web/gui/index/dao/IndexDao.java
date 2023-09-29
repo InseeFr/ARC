@@ -29,29 +29,16 @@ public class IndexDao extends VObjectHelperDao {
 	 */
 	public void initializeViewIndex(VObject viewIndex) {
 		ViewEnum dataModelIndex = ViewEnum.EXT_ETAT_JEUDEREGLE;
+		String nameOfViewIndex = dataObjectService.getView(dataModelIndex);
 		// view query
-
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append(SQL.SELECT);
-		query.append("nullif(substring(id from '[0123456789]+'),'')"); // ?
-		query.append(SQL.CAST_OPERATOR);
-		query.append("int");
-		query.append(SQL.AS);
-		query.append(ColumnEnum.ID);
-		query.append(SQL.COMMA);
-		query.append("upper(substring(id from '\\.(.*)'))"); // ?
-		query.append(SQL.AS);
-		query.append(ColumnEnum.VAL);
-		query.append(SQL.COMMA);
-		query.append(ColumnEnum.ENV_DESCRIPTION);
-		query.append(SQL.FROM);
-		query.append(dataObjectService.getView(dataModelIndex));
-		query.append(SQL.WHERE);
-		query.append(ColumnEnum.ISENV);
+		query.build(SQL.SELECT, "nullif(substring(id from '[0123456789]+'),'')", SQL.CAST_OPERATOR, "int", SQL.AS, ColumnEnum.ID, SQL.COMMA); 
+		query.build("upper(substring(id from '\\.(.*)'))", SQL.AS, ColumnEnum.VAL, SQL.COMMA, ColumnEnum.ENV_DESCRIPTION);
+		query.build(SQL.FROM, nameOfViewIndex, SQL.WHERE, ColumnEnum.ISENV);
 		// default value
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
-		vObjectService.initialize(viewIndex, query, dataObjectService.getView(dataModelIndex), defaultInputFields);
+		vObjectService.initialize(viewIndex, query, nameOfViewIndex, defaultInputFields);
 	}
 
 }

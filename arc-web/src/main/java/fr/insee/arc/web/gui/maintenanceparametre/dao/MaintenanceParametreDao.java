@@ -3,6 +3,7 @@ package fr.insee.arc.web.gui.maintenanceparametre.dao;
 import java.util.HashMap;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
@@ -28,20 +29,16 @@ public class MaintenanceParametreDao extends VObjectHelperDao {
 	 */
 	public void initializeViewParameters(VObject viewParameters) {
 		ViewEnum dataModelParameters = ViewEnum.PARAMETER;
+		String nameOfViewParameters = dataObjectService.getView(dataModelParameters);
 		// view query
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append(SQL.SELECT);
-		query.append("row_number() over (order by description,key,val)"); // ?
-		query.append(SQL.AS);
-		query.append("i");
-		query.append(SQL.COMMA);
-		query.append(query.sqlListeOfColumnsFromModel(dataModelParameters));
-		query.append(SQL.FROM);
-		query.append(dataObjectService.getView(dataModelParameters));
+		StringBuilder columns = query.sqlListeOfColumnsFromModel(dataModelParameters);
+		query.build(SQL.SELECT, "row_number() over (order by description,key,val)", SQL.AS, ColumnEnum.I, SQL.COMMA, columns);
+		query.build(SQL.FROM, nameOfViewParameters);
 		// default value
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
-		vObjectService.initialize(viewParameters, query, dataObjectService.getView(dataModelParameters), defaultInputFields);
+		vObjectService.initialize(viewParameters, query, nameOfViewParameters, defaultInputFields);
 	}
 
 }

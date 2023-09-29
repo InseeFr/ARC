@@ -1,7 +1,7 @@
 package fr.insee.arc.web.gui.query.service;
 
-import java.util.HashMap;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.query.dao.QueryDao;
 import fr.insee.arc.web.gui.query.model.ModelQuery;
 
 @Service
@@ -22,6 +23,7 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 	protected static final String RESULT_SUCCESS = "/jsp/gererQuery.jsp";
 
 	private static final String DEFAULT_SCHEMA = "arc";
+	private static final Logger LOGGER = LogManager.getLogger(InteractorQuery.class);
 
 	protected String myQuery;
 
@@ -29,9 +31,14 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 	
 	@Autowired
 	protected ModelQuery views;
+	
+	private QueryDao dao;
 
 	@Override
 	protected void putAllVObjects(ModelQuery model) {
+		
+		dao = new QueryDao(vObjectService, dataObjectService);
+		
 		views.setViewQuery(vObjectService.preInitialize(model.getViewQuery()));
 		views.setViewTable(vObjectService.preInitialize(model.getViewTable()));
 
@@ -42,8 +49,8 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 		}
 		this.myQuery = model.getMyQuery();
 
-		putVObject(views.getViewQuery(), t -> initializeQuery());
-		putVObject(views.getViewTable(), t -> initializeTable());
+		putVObject(views.getViewQuery(), t -> initializeQuery(t));
+		putVObject(views.getViewTable(), t -> initializeTable(t));
 	}
 	
 	@Override
@@ -57,44 +64,16 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 		return "databaseManagement";
 	}
 
-	public void initializeQuery() {
-		HashMap<String, String> defaultInputFields = new HashMap<>();
-
-		if (this.myQuery!=null){
-			String m=this.myQuery.trim();
-			if (m.endsWith(";"))
-			{
-				m=m.substring(0, m.length()-1);
-			}
-
-			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder(m);
-			
-			if (Boolean.TRUE.equals(UtilitaireDao.get(0).testResultRequest(null, requete)))
-			{
-				this.vObjectService.initialize(views.getViewQuery(), requete, "arc.ihm_query", defaultInputFields);
-			}
-			else
-			{
-				try {
-					UtilitaireDao.get(0).executeImmediate(null, this.myQuery);
-					this.vObjectService.destroy(views.getViewQuery());
-					this.views.getViewQuery().setMessage("query.complete");
-				} catch (Exception e) {
-					this.vObjectService.destroy(views.getViewQuery());
-					this.views.getViewQuery().setMessage(e.getMessage());
-				}
-
-			}
-		}
-
+	public void initializeQuery(VObject viewQuery) {
+		LoggerHelper.debug(LOGGER, "/* initializeQuery */");
+		dao.initializeTable(viewQuery, this.myQuery);
 	}
 
 
 	// Table list
-	public void initializeTable() {
-		HashMap<String, String> defaultInputFields = new HashMap<>();
-		this.vObjectService.initialize(views.getViewTable(), new ArcPreparedStatementBuilder("select tablename from pg_tables where schemaname='" + this.mySchema+"'"), "arc.ihm_Table", defaultInputFields);
-
+	public void initializeTable(VObject viewTable) {
+		LoggerHelper.debug(LOGGER, "/* initializeTable */");
+		dao.initializeTable(viewTable, this.mySchema);
 	}
 
 }
