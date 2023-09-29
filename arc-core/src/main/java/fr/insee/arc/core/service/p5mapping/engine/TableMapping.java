@@ -59,7 +59,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
 	private Set<RegleMappingClePrimaire> ensembleRegleMappingClefPrimaire;
 
-	public TableMapping(String anEnvironnement, String aNomTableCourt, int threadId) {
+	public TableMapping(String anEnvironnement, String aNomTableCourt) {
 		this.nomTableCourt = aNomTableCourt;
 		this.nomTable = new StringBuilder(TableNaming.dbEnv(anEnvironnement)).append(aNomTableCourt).toString();
 		this.ensembleVariableMapping = new TreeSet<>();

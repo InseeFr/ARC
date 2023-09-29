@@ -98,9 +98,6 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	private String nomTableTemporaireFinale;
 	private String nomTableFichierCourant;
 
-	// thread number is necesary to be sure that table name don't collide
-	private int threadId;
-
 	private static final String ID_TABLE = "id_table";
 
 	private RequeteMapping() {
@@ -129,7 +126,6 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 		this.nomTablePrecedente = aNomTablePrecedente;
 		this.nomTableModVariableMetier = TableNaming.dbEnv(this.environnement) + "mod_variable_metier";
 		this.nomTableRegleMapping = TableNaming.dbEnv(this.environnement) + "mapping_regle";
-		this.threadId = threadId;
 	}
 
 	public void construire() throws ArcException {
@@ -309,7 +305,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 			 */
 			if (!mapTable.containsKey(result.get(i).get(ARRAY_SECOND_COLUMN_INDEX))) {
 				mapTable.put(result.get(i).get(ARRAY_SECOND_COLUMN_INDEX), new TableMapping(this.environnement,
-						result.get(i).get(ARRAY_SECOND_COLUMN_INDEX), this.threadId));
+						result.get(i).get(ARRAY_SECOND_COLUMN_INDEX)));
 			}
 			/*
 			 * Ajout de la variable à la table
