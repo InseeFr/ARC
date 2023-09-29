@@ -6,16 +6,14 @@ import java.util.Date;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class ThreadOperations {
-	
-	private static final String JAVA_DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
-	
+		
 	private ScalableConnection connexion;
 
 	private String tablePilotageGlobale;
@@ -69,7 +67,7 @@ public class ThreadOperations {
 		query.append(ThreadOperations.createTablePilotageIdSource(tablePilotagePhase, tablePilotageThread, idSource));
 
 		// enregistrement de la date de traitement du fichier
-		query.append("UPDATE "+tablePilotageThread+" set date_traitement=to_timestamp('" + new SimpleDateFormat(JAVA_DATE_FORMAT).format(new Date()) + "','" + ApiService.DATABASE_DATE_FORMAT+"');" );
+		query.append("UPDATE "+tablePilotageThread+" set date_traitement=to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(new Date()) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()+"');" );
 		
 		// if scalable thread
 		if (connexion.isScaled()) {		
@@ -182,7 +180,7 @@ public class ThreadOperations {
 		requete.append("\n validite = b.validite, ");
 		requete.append("\n periodicite = b.periodicite, ");
 		requete.append("\n taux_ko = b.taux_ko, ");
-		requete.append("\n date_traitement = to_timestamp('" + new SimpleDateFormat(JAVA_DATE_FORMAT).format(new Date()) + "','" + ApiService.DATABASE_DATE_FORMAT
+		requete.append("\n date_traitement = to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(new Date()) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()
 				+ "'), ");
 		requete.append("\n nb_enr = b.nb_enr, ");
 		requete.append("\n rapport = b.rapport, ");

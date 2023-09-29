@@ -14,6 +14,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -84,14 +85,9 @@ public class ExportDao extends VObjectHelperDao {
 		String nameOfViewExport = dataObjectService.getView(dataModelExport);
 		// Actualiser l'état de l'export
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		String etatSet;
-		if (isExported) {
-			etatSet = "to_char(current_timestamp,'YYYY-MM-DD HH24:MI:SS') ";
-		} else {
-			etatSet = query.quoteText(TraitementEtat.ENCOURS.toString());
-		}
-		query.build(SQL.UPDATE, nameOfViewExport, SQL.SET, ColumnEnum.ETAT, "=", etatSet,
-				SQL.WHERE, ColumnEnum.FILE_NAME, "=", query.quoteText(fileName.get(fileIndex)));
+		query.build(SQL.UPDATE, nameOfViewExport);
+		query.build(SQL.SET, ColumnEnum.ETAT, "=", isExported ? "to_char(current_timestamp,'"+ArcDateFormat.TIMESTAMP_FORMAT_VIEW.getDatastoreFormat()+"')" : query.quoteText(TraitementEtat.ENCOURS.toString()));
+		query.build(SQL.WHERE, ColumnEnum.FILE_NAME, "=", query.quoteText(fileName.get(fileIndex)));
 		UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), query);
 	}
 

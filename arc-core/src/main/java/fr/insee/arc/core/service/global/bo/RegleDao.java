@@ -35,8 +35,8 @@ public class RegleDao {
 				+ " LIMIT 1) b ");
 		sb.append(" WHERE a.id_norme=b.id_norme ");
 		sb.append(" AND a.periodicite=b.periodicite ");
-		sb.append(" AND to_date(b.validite,'YYYY-MM-DD')>=a.validite_inf ");
-		sb.append(" AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup) ");
+		sb.append(" AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')>=a.validite_inf ");
+		sb.append(" AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')<=a.validite_sup) ");
 		sb.append("; ");
 
 		HashMap<String, ArrayList<String>> g = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, sb))

@@ -12,10 +12,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.XMLConstant;
-import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.RegleControleEntity;
 import fr.insee.arc.core.service.global.bo.RegleDao;
+import fr.insee.arc.core.service.p4controle.engine.dao.ServiceRequeteSqlRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

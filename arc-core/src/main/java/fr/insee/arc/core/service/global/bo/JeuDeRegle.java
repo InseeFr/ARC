@@ -14,8 +14,6 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 
 public class JeuDeRegle {
 
-    private static final String DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
-
 	private static final Logger LOGGER = LogManager.getLogger(JeuDeRegle.class);
 
     
@@ -30,7 +28,7 @@ public class JeuDeRegle {
     private String etat;
 
     public JeuDeRegle(String idNorme, String periodicite, String validiteInf, String validiteSup, String version) throws ParseException {
-        this(idNorme, periodicite, new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).parse(validiteInf), new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).parse(validiteSup), version);
+        this(idNorme, periodicite, new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).parse(validiteInf), new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).parse(validiteSup), version);
     }
 
     public JeuDeRegle(String idNorme, String periodicite, Date validiteInf, Date validiteSup, String version) {
@@ -69,7 +67,7 @@ public class JeuDeRegle {
     }
 
     public String getValiditeInfString() {
-        return new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).format(this.validiteInf);
+        return new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).format(this.validiteInf);
     }
 
     public void setValiditeInf(Date validiteInf) {
@@ -91,7 +89,7 @@ public class JeuDeRegle {
     }
 
     public String getValiditeSupString() {
-        return new SimpleDateFormat(DATABASE_TO_JAVA_SIMPLE_DATE_FORMAT).format(this.validiteSup);
+        return new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).format(this.validiteSup);
     }
 
     public void setValiditeSup(Date validiteSup) {

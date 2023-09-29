@@ -59,8 +59,6 @@ public abstract class ApiService implements IConstanteNumerique {
 	// made to report the number of object processed by the phase
 	private int reportNumberOfObject = 0;
 
-	public static final String DATABASE_DATE_FORMAT = "DD/MM/YYYY HH24:MI:SS";
-
 	protected String idSource;
 
 	protected Boolean todo = false;
@@ -105,7 +103,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		// Tables de pilotage et pilotage temporaire
 		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(aEnvExecution);
 		this.tablePilTemp = TableNaming.temporaryTableName(aEnvExecution, aCurrentPhase,
-				ViewEnum.PILOTAGE_FICHIER.getTableName(), "0");
+				ViewEnum.PILOTAGE_FICHIER, "0");
 		
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** Fin constructeur ApiService **");

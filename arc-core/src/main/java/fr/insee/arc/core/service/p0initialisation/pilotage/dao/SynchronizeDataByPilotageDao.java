@@ -136,12 +136,12 @@ public class SynchronizeDataByPilotageDao {
 		GenericBean gb = new GenericBean(ColumnEnum.ID_SOURCE.getColumnName(), TypeEnum.TEXT.getTypeName(),
 				idSourceToDelete);
 
-		CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, ViewEnum.T1.getTableName(), gb);
+		CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, ViewEnum.T1.getFullName(), gb);
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.DELETE, targetDataTable);
 		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE, SQL.IN);
-		query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getTableName(), ")");
+		query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getFullName(), ")");
 
 		UtilitaireDao.get(0).executeRequest(executorConnection, query);
 

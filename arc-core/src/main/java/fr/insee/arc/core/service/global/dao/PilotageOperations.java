@@ -13,7 +13,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -72,7 +72,6 @@ public class PilotageOperations {
 		StringBuilder requete = new StringBuilder();
 
 		Date date = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
 		requete.append("\n DROP TABLE IF EXISTS " + tablePilTemp + "; ");
 
@@ -107,7 +106,7 @@ public class PilotageOperations {
 		requete.append("\n SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName()
 				+ ", date_entree, id_norme, validite, periodicite, '" + phaseNouveau + "' as phase_traitement, '{"
 				+ TraitementEtat.ENCOURS + "}' as etat_traitement ");
-		requete.append("\n , to_timestamp('" + formatter.format(date) + "','" + ApiService.DATABASE_DATE_FORMAT
+		requete.append("\n , to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(date) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()
 				+ "') , rapport, taux_ko, nb_enr, 1 as etape, generation_composite, jointure ");
 		requete.append("\n FROM mark ");
 		requete.append("\n RETURNING *) ");

@@ -1,6 +1,5 @@
 package fr.insee.arc.web.gui.norme.service;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +16,7 @@ import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -183,14 +183,13 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 	 * Send a rule set to production.
 	 */
 	public void sendRuleSetToProduction(VObject viewRulesSet, String theTable) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
 		Date dNow = new Date();
 		loggerDispatcher.warn("Rule set send to production", LOGGER);
 
 		try {
 			
 			ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
-			requete.append("update " + theTable + " set last_init='"+ dateFormat.format(dNow) + "', operation=case when operation='R' then 'O' else operation end;");
+			requete.append("update " + theTable + " set last_init='"+ new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat()).format(dNow) + "', operation=case when operation='R' then 'O' else operation end;");
 			
 			UtilitaireDao.get(0).executeRequest(null, requete);
 			viewRulesSet.setMessage("normManagement.goToProduction");

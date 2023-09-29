@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.bo.NormeFichier;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -102,8 +103,8 @@ public class RulesOperations {
 		requete.append("EXISTS ( SELECT * FROM " + tablePilotage + " b ");
 		requete.append("WHERE a.id_norme=b.id_norme ");
 		requete.append("AND a.periodicite=b.periodicite ");
-		requete.append("AND a.validite_inf<=to_date(b.validite,'YYYY-MM-DD') ");
-		requete.append("AND a.validite_sup>=to_date(b.validite,'YYYY-MM-DD') ");
+		requete.append("AND a.validite_inf<=to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
+		requete.append("AND a.validite_sup>=to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
 		requete.append(") ");
 		return requete.toString();
 	}
@@ -113,8 +114,8 @@ public class RulesOperations {
 		requete.append("\n ");
 		requete.append("a.id_norme='" + normeFichier.getIdNorme() + "' ");
 		requete.append("AND a.periodicite='" + normeFichier.getPeriodicite() + "' ");
-		requete.append("AND a.validite_inf<=to_date('" + normeFichier.getValidite() + "','YYYY-MM-DD') ");
-		requete.append("AND a.validite_sup>=to_date('" + normeFichier.getValidite() + "','YYYY-MM-DD') ");
+		requete.append("AND a.validite_inf<=to_date('" + normeFichier.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
+		requete.append("AND a.validite_sup>=to_date('" + normeFichier.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
 		requete.append(";");
 		return requete.toString();
 	}

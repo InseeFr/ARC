@@ -28,7 +28,7 @@ import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.p2chargement.engine.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.p3normage.engine.NormageEngine;
 import fr.insee.arc.core.service.p4controle.engine.ServiceJeuDeRegle;
-import fr.insee.arc.core.service.p4controle.engine.ServiceRequeteSqlRegle;
+import fr.insee.arc.core.service.p4controle.engine.dao.ServiceRequeteSqlRegle;
 import fr.insee.arc.core.service.p5mapping.engine.RegleMappingFactory;
 import fr.insee.arc.core.service.p5mapping.engine.RequeteMapping;
 import fr.insee.arc.core.service.p5mapping.engine.ServiceMapping;

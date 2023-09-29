@@ -4,33 +4,32 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fr.insee.arc.batch.dao.BatchArcDao;
 import fr.insee.arc.batch.threadrunners.PhaseParameterKeys;
 import fr.insee.arc.batch.threadrunners.PhaseThreadFactory;
 import fr.insee.arc.core.dataobjects.ArcDatabase;
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.batch.IReturnCode;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
@@ -67,7 +66,7 @@ class BatchARC implements IReturnCode {
 	private int poolingDelay;
 
 	// heure d'initalisation en production
-	private int hourToTriggerInitializationInProduction;
+	private Integer hourToTriggerInitializationInProduction;
 
 	// interval entre chaque initialisation en nb de jours
 	private Integer intervalForInitializationInDay;
@@ -178,7 +177,7 @@ class BatchARC implements IReturnCode {
 		message("Batch ARC " + properties.fullVersionInformation().toString());
 
 		try {
-			this.productionOn = productionOn();
+			this.productionOn = isProductionOn();
 
 			if (!this.productionOn) {
 
@@ -187,8 +186,6 @@ class BatchARC implements IReturnCode {
 			} else {
 
 				message("Traitement Début");
-				
-				resetPendingFilesInPilotageTable(envExecution);
 
 				// database maintenance on pilotage table so that index won't bloat
 				maintenanceTablePilotageBatch();
@@ -222,20 +219,23 @@ class BatchARC implements IReturnCode {
 	}
 
 	/**
+	 * Remets les archive déjà en cours de traitement à la phase précédente
 	 * Créer la table de pilotage batch si elle n'existe pas déjà
 	 * 
 	 * @throws ArcException
 	 */
 	private void maintenanceTablePilotageBatch() throws ArcException {
 
-		// création de la table si elle n'existe pas
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("\n CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text); ");
-		requete.append(
-				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, requete);
-		
+		// reset the pending files status in pilotage
+		BatchArcDao.execQueryResetPendingFilesInPilotageTable(envExecution);
+
+		// create the pilotage batch table if it doesn't exists
+		BatchArcDao.execQueryCreatePilotageBatch();
+
+		// postgres catalog maintenance
 		DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_FULL);
+		
+		// arc pilotage table maintenance
 		DatabaseMaintenance.maintenancePilotage(null, envExecution, FormatSQL.VACUUM_OPTION_NONE);
 	
 	}
@@ -248,8 +248,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private boolean isNothingLeftToDo(String envExecution) {
 		boolean isNothingLeftToDo = false;
-		if (UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getInt(null, new ArcPreparedStatementBuilder("select count(*) from (select 1 from "
-				+ envExecution + ".pilotage_fichier where etape=1 limit 1) ww")) == 0) {
+		if ( BatchArcDao.execQueryAnythingLeftTodo(envExecution) == 0) {
 			isNothingLeftToDo = true;
 		}
 		return isNothingLeftToDo;
@@ -261,9 +260,10 @@ class BatchARC implements IReturnCode {
 	 * @return
 	 * @throws ArcException
 	 */
-	private static boolean productionOn() throws ArcException {
-		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(null,
-				new ArcPreparedStatementBuilder("select 1 from arc.pilotage_batch where operation='O'"));
+	private static boolean isProductionOn() throws ArcException {
+		
+		return BatchArcDao.execQueryIsProductionOn();
+
 	}
 
 	/**
@@ -334,28 +334,6 @@ class BatchARC implements IReturnCode {
 	}
 
 	/**
-	 * 
-	 * @param envExecution
-	 * @throws ArcException
-	 */
-	private static void resetPendingFilesInPilotageTable(String envExecution) throws ArcException {
-		// delete files that are en cours
-		StringBuilder query = new StringBuilder();
-		query.append("\n DELETE FROM " + envExecution + ".pilotage_fichier ");
-		query.append("\n WHERE etape=1 AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
-		query.append(";");
-
-		// update these files to etape=1
-		query.append("\n UPDATE " + envExecution + ".pilotage_fichier ");
-		query.append("\n set etape=1 ");
-		query.append("\n WHERE etape=3");
-		query.append(";");
-
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeBlock(null, query);
-
-	}
-
-	/**
 	 * si c'est une reprise de batch déjà en cours, on remet les fichiers en_cours à
 	 * l'état précédent dans la table de piltoage
 	 * 
@@ -367,7 +345,7 @@ class BatchARC implements IReturnCode {
 	private void executePhaseReception(String envExecution) throws ArcException {
 		if (dejaEnCours) {
 			message("Reprise des fichiers en cours de traitement");
-			resetPendingFilesInPilotageTable(envExecution);
+			BatchArcDao.execQueryResetPendingFilesInPilotageTable(envExecution);
 		} else {
 			message("Reception de nouveaux fichiers");
 			PhaseThreadFactory recevoir = new PhaseThreadFactory(mapParam, TraitementPhase.RECEPTION);
@@ -383,17 +361,13 @@ class BatchARC implements IReturnCode {
 
 		PhaseThreadFactory initialiser = new PhaseThreadFactory(mapParam, TraitementPhase.INITIALISATION);
 
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
-
-		String lastInitialize = null;
-		lastInitialize = UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(null,
-				new ArcPreparedStatementBuilder("select last_init from arc.pilotage_batch "));
+		String lastInitialize = BatchArcDao.execQueryLastInitialisationTimestamp();
 
 		Date dNow = new Date();
 		Date dLastInitialize;
 
 		try {
-			dLastInitialize = dateFormat.parse(lastInitialize);
+			dLastInitialize = new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat()).parse(lastInitialize);
 		} catch (ParseException dateParseException) {
 			throw new ArcException(dateParseException, ArcExceptionMessage.BATCH_INITIALIZATION_DATE_PARSE_FAILED);
 		}
@@ -410,12 +384,8 @@ class BatchARC implements IReturnCode {
 
 			message("Initialisation terminée : " + initialiser.getReport().getDuree() + " ms");
 
-			UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
-					new ArcPreparedStatementBuilder(
-							"update arc.pilotage_batch set last_init=to_char(current_date+interval '"
-									+ intervalForInitializationInDay + " days','yyyy-mm-dd')||':"
-									+ hourToTriggerInitializationInProduction
-									+ "' , operation=case when operation='R' then 'O' else operation end;"));
+			BatchArcDao.execUpdateLastInitialisationTimestamp(intervalForInitializationInDay, hourToTriggerInitializationInProduction);
+
 		}
 	}
 
@@ -427,7 +397,7 @@ class BatchARC implements IReturnCode {
 	 * @param aBouger
 	 * @throws IOException
 	 */
-	private void copyFileFromArchiveDirectoryToOK(String envExecution, String repertoire, ArrayList<String> aBouger)
+	private void copyFileFromArchiveDirectoryToOK(String envExecution, String repertoire, List<String> aBouger)
 			throws IOException {
 
 		for (String container : aBouger) {
@@ -445,14 +415,18 @@ class BatchARC implements IReturnCode {
 		}
 	}
 
+	
+	/**
+	 * mark if the batch has been interrupted
+	 * get the list of archives which process was interrupted to move them back in the input directory
+	 * @throws ArcException
+	 * @throws IOException
+	 */
 	private void deplacerFichiersNonTraites() throws ArcException, IOException {
-
-		ArrayList<String> aBouger = new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
-				new ArcPreparedStatementBuilder(
-						"select distinct container from " + envExecution + ".pilotage_fichier where etape=1")))
-				.mapContent().get("container");
-
-		dejaEnCours = (aBouger != null);
+		
+		List<String> aBouger = BatchArcDao.execQuerySelectArchiveEnCours(envExecution);
+		
+		dejaEnCours = (!aBouger.isEmpty());
 
 		// si oui, on essaie de recopier les archives dans chargement OK
 		if (dejaEnCours) {
@@ -511,7 +485,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private void executeLoopOverPhases() throws ArcException
 	{
-		this.productionOn=productionOn();
+		this.productionOn=isProductionOn();
 		
 		// test if production is running or exit
 		if (!productionOn)
@@ -553,7 +527,7 @@ class BatchARC implements IReturnCode {
 	private void updateProductionOn() throws ArcException {
 		if (iteration % numberOfIterationBewteenCheckTodo == 0) {
 			// check if production on
-			this.productionOn = productionOn();
+			this.productionOn = isProductionOn();
 		}
 	}
 

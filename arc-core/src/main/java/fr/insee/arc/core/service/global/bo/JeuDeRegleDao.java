@@ -63,8 +63,8 @@ public class JeuDeRegleDao {
         requete.append("\n WHERE EXISTS (SELECT 1 FROM (SELECT * FROM " + nomTableATraiter + " LIMIT 1) b ");
         requete.append("\n  WHERE a.id_norme=b.id_norme ");
         requete.append("\n    AND a.periodicite=b.periodicite ");
-        requete.append("\n    AND to_date(b.validite,'YYYY-MM-DD')>=a.validite_inf ");
-        requete.append("\n    AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup); ");
+        requete.append("\n    AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')>=a.validite_inf ");
+        requete.append("\n    AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')<=a.validite_sup); ");
 
 
 		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
@@ -76,7 +76,7 @@ public class JeuDeRegleDao {
     }
 
 	private static ArrayList<JeuDeRegle> extractRuleSetObjects(HashMap<String, ArrayList<String>> g) {
-		SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat formatDate = new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat());
         ArrayList<JeuDeRegle> listJdr = new ArrayList<>();
 		if (!g.isEmpty())
 		{

@@ -44,7 +44,7 @@ public class DataStorage {
 		List<String> filenames = files.stream().filter(e -> !e.isDirectory()).map(e -> e.getName())
 				.collect(Collectors.toList());
 
-		CopyObjectsToDatabase.execCopyFromGenericBean(connection, ViewEnum.TMP_FILES.getTableName(), new GenericBean(
+		CopyObjectsToDatabase.execCopyFromGenericBean(connection, ViewEnum.TMP_FILES.getFullName(), new GenericBean(
 				ColumnEnum.FILE_NAME.getColumnName(), ColumnEnum.FILE_NAME.getColumnType().getTypeName(), filenames));
 
 	}

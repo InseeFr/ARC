@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p4controle.engine;
+package fr.insee.arc.core.service.p4controle.engine.dao;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +11,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.bo.RegleControleEntity;
+import fr.insee.arc.core.service.p4controle.engine.bo.ControleRegleService;
+import fr.insee.arc.core.service.p4controle.engine.bo.XsdDate;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
@@ -20,8 +23,6 @@ import fr.insee.arc.utils.utils.ManipString;
 @Component
 public class ServiceRequeteSqlRegle {
 
-	/** Translations in SQL of the XSD date format ([-]CCYY-MM-DD[Z|(+|-)hh:mm]).*/
-
 	public static final String RECORD_WITH_NOERROR="0";
 	public static final String RECORD_WITH_ERROR_TO_EXCLUDE="1";
 	public static final String RECORD_WITH_ERROR_TO_KEEP="2";
@@ -29,44 +30,6 @@ public class ServiceRequeteSqlRegle {
 	private static final String ERROR_ROW_PROCESSING_KEEP="k";
 	private static final String ERROR_ROW_PROCESSING_EXCLUDE="e";
 	
-	private static final HashMap<String,String[]> XSD_DATE_RULES
-	=new HashMap<String,String[]>() {
-		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 6787891391781422042L;
-
-		{
-			put(ControleRegleService.XSD_DATE_NAME.toLowerCase()
-					,new String[] {
-							"YYYY-MM-DD"
-							,"YYYY-MM-DD\"Z\""
-							// it is not really the absolute hour and minute but a relative time zone delta
-							// TZ parameter would be a better implementation but need more info and likely not needed
-							//				,"YYYY-MM-DD+HH24:MI"
-							//				"YYYY-MM-DD-HH24:MI"	
-							}
-			);
-
-			put(ControleRegleService.XSD_DATETIME_NAME.toLowerCase()
-					,new String[] {
-							"YYYY-MM-DD\"T\"HH24:MI:SS"
-							,"YYYY-MM-DD\"T\"HH24:MI:SS\"Z\""
-							}
-			);
-
-			
-			put(ControleRegleService.XSD_TIME_NAME.toLowerCase()
-					,new String[] {
-							"HH24:MI:SS"
-							}
-			);
-			
-		}
-		
-	};
-
 	
 	private String tableResultat;
 	private String tableTempData;
@@ -237,11 +200,11 @@ public class ServiceRequeteSqlRegle {
 			||	reg.getCondition().equalsIgnoreCase(ControleRegleService.XSD_TIME_NAME)	
 				) {
 			reqBuilder.append("\n WHERE CASE WHEN ( ");
-			for (int i = 0 ; i < XSD_DATE_RULES.get(reg.getCondition().toLowerCase()).length ; i++) {
+			for (int i = 0 ; i < XsdDate.XSD_DATE_RULES.get(reg.getCondition().toLowerCase()).length ; i++) {
 				if (i > 0) {
 					reqBuilder.append(" OR ");
 				}
-				reqBuilder.append("arc.isdate({2}, '" + XSD_DATE_RULES.get(reg.getCondition().toLowerCase())[i] + "')");
+				reqBuilder.append("arc.isdate({2}, '" + XsdDate.XSD_DATE_RULES.get(reg.getCondition().toLowerCase())[i] + "')");
 			}
 			reqBuilder.append(") THEN false ");
 			reqBuilder.append("\n WHEN {2} is null THEN false ");
@@ -296,8 +259,8 @@ public class ServiceRequeteSqlRegle {
 		requete.append("\n AND EXISTS (SELECT 1 FROM (SELECT id_norme, periodicite, validite FROM "+this.tableTempData+" LIMIT 1) b "); 
 		requete.append("\n WHERE a.id_norme=b.id_norme ");
 		requete.append("\n AND a.periodicite=b.periodicite "); 
-		requete.append("\n AND to_date(b.validite,'YYYY-MM-DD')>=a.validite_inf "); 
-		requete.append("\n AND to_date(b.validite,'YYYY-MM-DD')<=a.validite_sup) ");
+		requete.append("\n AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')>=a.validite_inf "); 
+		requete.append("\n AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')<=a.validite_sup) ");
 		requete.append("\n )");
 		requete.append("\n , tmp_check as (");
 		requete.append("\n select pere, pere_id, fils from (");
@@ -325,7 +288,7 @@ public class ServiceRequeteSqlRegle {
 		
 		StringBuilder requete=new StringBuilder();
 		requete.append("WITH null_transform AS (");
-		requete.append("	SELECT "+reg.getRubriquePere());
+		requete.append("SELECT "+reg.getRubriquePere());
 
 		// rubrique fille
 		// cas 1 : présente dans la table
@@ -333,17 +296,17 @@ public class ServiceRequeteSqlRegle {
 		// cas 3 : non present dans la table et valeur
 		if (ListRubriqueTable.contains(reg.getRubriqueFils()))
 		{
-			requete.append("	,"+ reg.getRubriqueFils() +" ");
+			requete.append(","+ reg.getRubriqueFils() +" ");
 		}
 		else
 		{
 			if (reg.getRubriqueFils().toLowerCase().startsWith("i_"))
 			{
-				requete.append("	, null::int as "+ reg.getRubriqueFils() +" ");
+				requete.append(", null::int as "+ reg.getRubriqueFils() +" ");
 			}
 			else
 			{
-				requete.append("	, null::text as "+ reg.getRubriqueFils() +" ");
+				requete.append(", null::text as "+ reg.getRubriqueFils() +" ");
 			}
 		}
 		
@@ -380,11 +343,11 @@ public class ServiceRequeteSqlRegle {
 		requete.append(" ) ");
 		
 		requete.append(" , trav AS (");
-		requete.append(" 	SELECT {2} FROM ");
-		requete.append(" 		(SELECT DISTINCT {2}, {3} FROM ");
+		requete.append(" SELECT {2} FROM ");
+		requete.append("  (SELECT DISTINCT {2}, {3} FROM ");
 		
 		
-		requete.append("		(SELECT {2}, {3}, {2} IS NOT NULL ");
+		requete.append("   (SELECT {2}, {3}, {2} IS NOT NULL ");
 		
 		// condition is written as a boolean inside select clause to be able to use windows aggregate functions
 		if (reg.getCondition()!=null)
@@ -404,10 +367,10 @@ public class ServiceRequeteSqlRegle {
 		requete.append(" WHERE condition ");
 				
 		requete.append(") foo ");
-		requete.append(" 	GROUP BY {2} HAVING " + cond + ") ");
+		requete.append(" GROUP BY {2} HAVING " + cond + ") ");
 		requete.append(" , ctl AS (");
-		requete.append("	SELECT a.id FROM " + this.tableTempData + " a ");
-		requete.append(" 	INNER JOIN trav ON row(a.{2})::text collate \"C\"=row(trav.{2})::text collate \"C\" ");
+		requete.append("  SELECT a.id FROM " + this.tableTempData + " a ");
+		requete.append("  INNER JOIN trav ON row(a.{2})::text collate \"C\"=row(trav.{2})::text collate \"C\" ");
 		requete.append(" ) ");
 		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle()));
 

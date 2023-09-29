@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p4controle.engine;
+package fr.insee.arc.core.service.p4controle.engine.bo;
 
 public class ControleRegleService {
 

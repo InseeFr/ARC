@@ -18,7 +18,7 @@ import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
 import fr.insee.arc.core.service.p4controle.ApiControleService;
 import fr.insee.arc.core.service.p4controle.engine.ServiceJeuDeRegle;
-import fr.insee.arc.core.service.p4controle.engine.ServiceRequeteSqlRegle;
+import fr.insee.arc.core.service.p4controle.engine.dao.ServiceRequeteSqlRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

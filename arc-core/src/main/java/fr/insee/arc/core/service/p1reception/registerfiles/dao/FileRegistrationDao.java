@@ -6,7 +6,7 @@ import java.util.Date;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 public class FileRegistrationDao {
@@ -16,10 +16,8 @@ public class FileRegistrationDao {
 	}
 
 	public static void insertPilotage(StringBuilder requete, String tablePilotage, String originalContainer,
-			String newContainer, String v_container, String fileName, TraitementEtat etat, String rapport) {
+			String newContainer, String virtualContainer, String fileName, TraitementEtat etat, String rapport) {
 		Date d = new Date();
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:HH");
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
 		// si ko, etape vaut 2
 		String etape = etat.equals(TraitementEtat.KO) ? "2" : "1";
@@ -31,11 +29,20 @@ public class FileRegistrationDao {
 		} else {
 			requete.append("\n,");
 		}
-		requete.append(" (" + FormatSQL.cast(originalContainer) + "," + FormatSQL.cast(newContainer) + ","
-				+ FormatSQL.cast(v_container) + ", " + FormatSQL.cast(fileName) + ","
-				+ FormatSQL.cast(dateFormat.format(d)) + "," + FormatSQL.cast(TraitementPhase.RECEPTION.toString())
-				+ "," + FormatSQL.cast("{" + etat + "}") + "," + "to_timestamp(" + FormatSQL.cast(formatter.format(d))
-				+ ",'" + ApiService.DATABASE_DATE_FORMAT + "')" + "," + FormatSQL.cast(rapport) + ",1," + etape + ") ");
+		requete.append(" (");
+		requete.append(FormatSQL.cast(originalContainer));
+		requete.append("," + FormatSQL.cast(newContainer));
+		requete.append("," + FormatSQL.cast(virtualContainer));
+		requete.append("," + FormatSQL.cast(fileName));
+		requete.append("," + FormatSQL.cast(new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat()).format(d)));
+		requete.append("," + FormatSQL.cast(TraitementPhase.RECEPTION.toString()));
+		requete.append("," + FormatSQL.cast("{" + etat + "}"));
+		requete.append("," + "to_timestamp(" + FormatSQL.cast(new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(d))
+				+ ",'" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat() + "')");
+		requete.append("," + FormatSQL.cast(rapport));
+		requete.append(",1");
+		requete.append("," + etape);
+		requete.append(") ");
 	}
 
 }

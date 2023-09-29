@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.p2chargement.xmlhandler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.Parameter;
@@ -29,7 +30,7 @@ public class NormageEngine {
 
 	private static final Logger LOGGER = LogManager.getLogger(NormageEngine.class);
 
-	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	private SimpleDateFormat formatter = new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat());
 	private StringBuilder columnToBeAdded = new StringBuilder();
 
 	private Connection connection;
