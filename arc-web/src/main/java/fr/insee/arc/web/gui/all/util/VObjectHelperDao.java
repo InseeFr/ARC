@@ -4,10 +4,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.web.gui.all.dao.IDao;
 
-public class VObjectHelperDao {
+@Component
+public class VObjectHelperDao implements IDao  {
+	
+	protected VObjectService vObjectService;
+	protected DataObjectService dataObjectService;
+
+	@Override
+	public void initialize(VObjectService vObjectService, DataObjectService dataObjectService) {
+		this.vObjectService = vObjectService;
+		this.dataObjectService = dataObjectService;
+	}
+	
 
 	protected Map<String, ArrayList<String>> selectedRecords;
 

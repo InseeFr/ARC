@@ -11,14 +11,14 @@ import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelTable;
-import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelVariable;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.web.gui.famillenorme.ddi.DDIModeler;
+import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelTable;
+import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelVariable;
 
 public class DDIInsertDAO {
 

@@ -17,7 +17,7 @@ import fr.insee.arc.web.gui.maintenanceparametre.model.ModelMaintenanceParametre
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorMaintenanceParameters extends ArcWebGenericService<ModelMaintenanceParametre>  {
+public class InteractorMaintenanceParameters extends ArcWebGenericService<ModelMaintenanceParametre, MaintenanceParametreDao>  {
 
 	protected static final String RESULT_SUCCESS = "/jsp/maintenanceParameters.jsp";
 	
@@ -26,13 +26,9 @@ public class InteractorMaintenanceParameters extends ArcWebGenericService<ModelM
 	@Autowired
     protected ModelMaintenanceParametre views;
 	
-	private MaintenanceParametreDao dao;
-
 	@Override
 	protected void putAllVObjects(ModelMaintenanceParametre arcModel) {
-		
-		dao = new MaintenanceParametreDao(vObjectService, dataObjectService);
-		
+				
 		views.setViewParameters(this.vObjectService.preInitialize(arcModel.getViewParameters()));
 		
 		putVObject(views.getViewParameters(), t -> initializeParameters(t));

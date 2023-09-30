@@ -16,7 +16,7 @@ import fr.insee.arc.web.gui.index.model.ModelIndex;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class IndexAction extends ArcWebGenericService<ModelIndex> {
+public class IndexAction extends ArcWebGenericService<ModelIndex,IndexDao> {
 
 	public static final String ACTION_NAME = "index";
 	protected static final String RESULT_SUCCESS = "jsp/index.jsp";
@@ -25,15 +25,11 @@ public class IndexAction extends ArcWebGenericService<ModelIndex> {
 
 	@Autowired
 	protected ModelIndex views;
-	
-	private IndexDao dao;
-	
+		
 	@Override
 	public void putAllVObjects(ModelIndex arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
 		
-		dao = new IndexDao(vObjectService, dataObjectService);
-
 		views.setViewIndex(vObjectService.preInitialize(arcModel.getViewIndex()));
 		
 		putVObject(views.getViewIndex(), t -> initializeIndex(t));

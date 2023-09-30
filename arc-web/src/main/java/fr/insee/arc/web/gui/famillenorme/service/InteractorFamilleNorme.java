@@ -24,7 +24,7 @@ import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamille> {
+public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamille,GererFamilleNormeDao> {
 
 	protected static final String MODEL_VARIABLE_NAME = "nom_variable_metier";
 
@@ -49,15 +49,11 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 	public String getActionName() {
 		return "familyManagement";
 	}
-	
-	private GererFamilleNormeDao dao;
 
 	@Override
 	public void putAllVObjects(ModelGererFamille arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
 		
-		dao = new GererFamilleNormeDao(vObjectService, dataObjectService);
-
 		views.setViewClient(vObjectService.preInitialize(arcModel.getViewClient()));
 		views.setViewFamilleNorme(vObjectService.preInitialize(arcModel.getViewFamilleNorme()));
 		views.setViewTableMetier(vObjectService.preInitialize(arcModel.getViewTableMetier()));

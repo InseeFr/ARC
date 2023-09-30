@@ -18,7 +18,7 @@ import fr.insee.arc.web.gui.query.model.ModelQuery;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements  IConstanteCaractere {
+public class InteractorQuery extends ArcWebGenericService<ModelQuery, QueryDao> implements  IConstanteCaractere {
 
 	protected static final String RESULT_SUCCESS = "/jsp/gererQuery.jsp";
 
@@ -31,14 +31,10 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 	
 	@Autowired
 	protected ModelQuery views;
-	
-	private QueryDao dao;
 
 	@Override
 	protected void putAllVObjects(ModelQuery model) {
-		
-		dao = new QueryDao(vObjectService, dataObjectService);
-		
+
 		views.setViewQuery(vObjectService.preInitialize(model.getViewQuery()));
 		views.setViewTable(vObjectService.preInitialize(model.getViewTable()));
 
@@ -66,7 +62,7 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery> implements
 
 	public void initializeQuery(VObject viewQuery) {
 		LoggerHelper.debug(LOGGER, "/* initializeQuery */");
-		dao.initializeTable(viewQuery, this.myQuery);
+		dao.initializeQuery(viewQuery, this.myQuery);
 	}
 
 

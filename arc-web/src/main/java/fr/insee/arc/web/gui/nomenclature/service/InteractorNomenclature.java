@@ -21,7 +21,7 @@ import fr.insee.arc.web.gui.nomenclature.model.ModelNomenclature;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclature> {
+public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclature, GererNomenclatureDao> {
 
 	protected static final String RESULT_SUCCESS = "/jsp/gererNomenclature.jsp";
 
@@ -30,13 +30,9 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 	@Autowired
 	protected ModelNomenclature views;
 
-	private GererNomenclatureDao dao;
-
 	@Override
 	public void putAllVObjects(ModelNomenclature model) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
-
-		dao = new GererNomenclatureDao(vObjectService, dataObjectService);
 
 		views.setViewListNomenclatures(vObjectService.preInitialize(model.getViewListNomenclatures()));
 		views.setViewNomenclature(vObjectService.preInitialize(model.getViewNomenclature()));

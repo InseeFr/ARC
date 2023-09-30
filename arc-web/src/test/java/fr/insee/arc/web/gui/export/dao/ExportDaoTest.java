@@ -43,8 +43,10 @@ public class ExportDaoTest extends InitializeQueryTest {
 		vObjectService = new VObjectService();
 		vObjectService.setConnection(c);
 		vObjectService.setSession(new Session());
-		dao = new DataObjectService(BddPatcherTest.testSandbox1);
-		pdao = new ExportDao(vObjectService, dao);
+		dao = new DataObjectService();
+		dao.setSandboxSchema(BddPatcherTest.testSandbox1);
+		pdao = new ExportDao();
+		pdao.initialize(vObjectService, dao);
 	}
 
 	@Test

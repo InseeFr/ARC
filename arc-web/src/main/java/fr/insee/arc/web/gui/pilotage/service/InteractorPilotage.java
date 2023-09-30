@@ -31,7 +31,7 @@ import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
+public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, PilotageDao> {
 
 	protected static final String ENV_DESCRIPTION = "envDescription";
 
@@ -45,8 +45,6 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 
 	@Autowired
 	protected MessageSource messageSource;
-
-	private PilotageDao dao;
 
 	/**
 	 * Liste des phase pour générer les boutons d'actions executer et retour arriere
@@ -69,8 +67,6 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage> {
 	@Override
 	public void putAllVObjects(ModelPilotage arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
-
-		dao = new PilotageDao(vObjectService, dataObjectService);
 
 		views.setViewPilotageBAS(vObjectService.preInitialize(arcModel.getViewPilotageBAS()));
 		views.setViewRapportBAS(vObjectService.preInitialize(arcModel.getViewRapportBAS()));

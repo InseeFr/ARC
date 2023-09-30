@@ -24,7 +24,7 @@ import fr.insee.arc.web.gui.export.model.ModelExport;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorExport extends ArcWebGenericService<ModelExport>  {
+public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao>  {
 
 	protected static final String RESULT_SUCCESS = "/jsp/gererExport.jsp";
 
@@ -33,15 +33,11 @@ public class InteractorExport extends ArcWebGenericService<ModelExport>  {
 	@Autowired
 	protected ModelExport views;
 	
-	protected ExportDao dao;
-
 
 	@Override
 	protected void putAllVObjects(ModelExport arcModel) {
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
-		
-		dao = new ExportDao(vObjectService, dataObjectService);
-		
+				
 		views.setViewExport(this.vObjectService.preInitialize(arcModel.getViewExport()));
 		views.setViewFileExport(this.vObjectService.preInitialize(arcModel.getViewFileExport()));
 		

@@ -35,7 +35,7 @@ import fr.insee.arc.web.gui.norme.model.ModelNorme;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorNorme extends ArcWebGenericService<ModelNorme> {
+public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNormeDao> {
 	
 	protected static final String RESULT_SUCCESS = "/jsp/gererNorme.jsp";
 	
@@ -50,13 +50,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme> {
 	// The action Name
 	public static final String ACTION_NAME="normManagement";
 
-	private GererNormeDao dao;
-
 	@Override
 	public void putAllVObjects(ModelNorme model) {
-		
-		dao = new GererNormeDao(vObjectService, dataObjectService);
-		
+
 		views.setViewNorme(vObjectService.preInitialize(model.getViewNorme()));
 		views.setViewCalendrier(vObjectService.preInitialize(model.getViewCalendrier()));
 		views.setViewJeuxDeRegles(vObjectService.preInitialize(model.getViewJeuxDeRegles()));

@@ -19,20 +19,16 @@ import fr.insee.arc.web.gui.webservice.model.ModelWebservice;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorWebservice extends ArcWebGenericService<ModelWebservice> {
+public class InteractorWebservice extends ArcWebGenericService<ModelWebservice, WebserviceDao> {
 
 	protected static final String RESULT_SUCCESS = "/jsp/gererWebservice.jsp";
 	private static final Logger LOGGER = LogManager.getLogger(InteractorWebservice.class);
 
 	@Autowired
     protected ModelWebservice views;
-	
-	private WebserviceDao dao;
     
 	@Override
 	public void putAllVObjects(ModelWebservice model) {
-		
-		dao = new WebserviceDao(vObjectService, dataObjectService);
 		
 		views.setViewWebserviceContext(vObjectService.preInitialize(model.getViewWebserviceContext()));
 		views.setViewWebserviceQuery(vObjectService.preInitialize(model.getViewWebserviceQuery()));

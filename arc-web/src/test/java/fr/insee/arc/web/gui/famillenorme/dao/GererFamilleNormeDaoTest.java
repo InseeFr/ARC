@@ -41,8 +41,10 @@ public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 		vObjectService = new VObjectService();
 		vObjectService.setConnection(c);
 		vObjectService.setSession(new Session());
-		dao = new DataObjectService(BddPatcherTest.testSandbox1);
-		pdao = new GererFamilleNormeDao(vObjectService, dao);
+		dao = new DataObjectService();
+		dao.setSandboxSchema(BddPatcherTest.testSandbox1);
+		pdao = new GererFamilleNormeDao();
+		pdao.initialize(vObjectService, dao);
 	}
 
 	@Test

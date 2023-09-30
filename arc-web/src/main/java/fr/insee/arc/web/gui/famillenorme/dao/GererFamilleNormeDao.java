@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
@@ -15,17 +17,10 @@ import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 import fr.insee.arc.web.gui.all.util.VObjectService;
 
-public class GererFamilleNormeDao extends VObjectHelperDao {
-	
-	private VObjectService vObjectService;
-	private DataObjectService dataObjectService;
 
-	public GererFamilleNormeDao(VObjectService vObjectService, DataObjectService dataObjectService) {
-		super();
-		this.vObjectService = vObjectService;
-		this.dataObjectService = dataObjectService;
-	}
-	
+@Component
+public class GererFamilleNormeDao extends VObjectHelperDao {
+
 	/**
 	 * dao call to build norm family vobject
 	 * 

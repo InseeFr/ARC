@@ -2,26 +2,18 @@ package fr.insee.arc.web.gui.maintenanceparametre.dao;
 
 import java.util.HashMap;
 
+import org.springframework.stereotype.Component;
+
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
-import fr.insee.arc.web.gui.all.util.VObjectService;
 
+@Component
 public class MaintenanceParametreDao extends VObjectHelperDao {
-	
-	private VObjectService vObjectService;
-	private DataObjectService dataObjectService;
 
-	public MaintenanceParametreDao(VObjectService vObjectService, DataObjectService dataObjectService) {
-		super();
-		this.vObjectService = vObjectService;
-		this.dataObjectService = dataObjectService;
-	}
-	
 	/**
 	 * dao call to build parameters object
 	 * 

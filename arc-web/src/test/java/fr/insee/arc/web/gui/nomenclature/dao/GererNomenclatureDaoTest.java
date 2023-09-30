@@ -39,9 +39,10 @@ public class GererNomenclatureDaoTest extends InitializeQueryTest {
 		vObjectService = new VObjectService();
 		vObjectService.setConnection(c);
 		vObjectService.setSession(new Session());
-		dao = new DataObjectService(BddPatcherTest.testSandbox1);
-		pdao = new GererNomenclatureDao(vObjectService, dao);
-		
+		dao = new DataObjectService();
+		dao.setSandboxSchema(BddPatcherTest.testSandbox1);
+		pdao = new GererNomenclatureDao();
+		pdao.initialize(vObjectService, dao);
 	}
 
 	@Test

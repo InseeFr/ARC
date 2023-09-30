@@ -27,11 +27,12 @@ import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectService;
+import fr.insee.arc.web.gui.file.dao.FileDao;
 import fr.insee.arc.web.gui.file.model.ModelFile;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class InteractorFile extends ArcWebGenericService<ModelFile> {
+public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 
 	protected static final String IS_DIRECTORY = "isdirectory";
 

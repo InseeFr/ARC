@@ -30,8 +30,10 @@ public class PilotageDaoTest extends InitializeQueryTest {
 		vObjectService = new VObjectService();
 		vObjectService.setConnection(c);
 		vObjectService.setSession(new Session());
-		dao = new DataObjectService(BddPatcherTest.testSandbox1);
-		pdao = new PilotageDao(vObjectService, dao);
+		dao = new DataObjectService();
+		dao.setSandboxSchema(BddPatcherTest.testSandbox1);
+		pdao = new PilotageDao();
+		pdao.initialize(vObjectService, dao);
 	}
 
 	@Test
