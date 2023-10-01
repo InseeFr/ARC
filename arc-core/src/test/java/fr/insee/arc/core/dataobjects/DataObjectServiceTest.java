@@ -1,38 +1,43 @@
 package fr.insee.arc.core.dataobjects;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+
+import fr.insee.arc.utils.exception.ArcException;
 
 public class DataObjectServiceTest {
 
+	DataObjectService dataObjectService = new DataObjectService();
+	
+	@Before
+	public void setup() throws ArcException {
+		dataObjectService.setSandboxSchema("arc_bas1");
+	}
+	
 	@Test
 	public void testGetViewInSandbox() {
-		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
 		Assert.assertEquals("arc_bas1.pilotage_fichier", dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
 	}
 
 	@Test
 	public void testGetViewInSandboxGenerated() {
-		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
 		Assert.assertEquals("arc_bas1.norme", dataObjectService.getView(ViewEnum.NORME));
 	}
 	
 	
 	@Test
 	public void testGetViewInMetadata() {
-		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
 		Assert.assertEquals("arc.ihm_norme", dataObjectService.getView(ViewEnum.IHM_NORME));
 	}
 	
 	@Test
 	public void testGetViewInTemporary() {
-		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
 		Assert.assertEquals(ViewEnum.TABLE_TEST_IN_TEMPORARY.getTableName(), dataObjectService.getView(ViewEnum.TABLE_TEST_IN_TEMPORARY));
 	}
 
 	@Test
 	public void testGetViewInPublic() {
-		DataObjectService dataObjectService = new DataObjectService("arc_bas1");
 		Assert.assertEquals("public."+ViewEnum.TABLE_TEST_IN_PUBLIC.getTableName(), dataObjectService.getView(ViewEnum.TABLE_TEST_IN_PUBLIC));
 	}
 	
