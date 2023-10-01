@@ -1,7 +1,10 @@
 package fr.insee.arc.core.dataobjects;
 
+import org.springframework.stereotype.Component;
+
 import fr.insee.arc.utils.dao.SQL;
 
+@Component
 public class DataObjectService {
 
 	/**
@@ -13,15 +16,6 @@ public class DataObjectService {
 	 * the sandbox schema
 	 */
 	private String sandboxSchema;
-
-	public DataObjectService() {
-		super();
-	}
-
-	public DataObjectService(String sandboxSchema) {
-		super();
-		this.sandboxSchema = sandboxSchema;
-	}
 
 	/**
 	 * Return the SQL table name
