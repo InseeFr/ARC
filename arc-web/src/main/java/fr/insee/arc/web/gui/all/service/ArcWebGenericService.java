@@ -33,7 +33,6 @@ import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectService;
 import fr.insee.arc.web.gui.home.HomeAction;
 import fr.insee.arc.web.gui.index.service.IndexAction;
-import fr.insee.arc.web.gui.query.dao.QueryDao;
 
 /**
  * An abstract class that all the controllers using VObject should extend. 

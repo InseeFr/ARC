@@ -125,6 +125,10 @@ public enum ViewEnum {
 
 	// view for table aliases or temporary table in query
 	, T1(PgViewEnum.T1), T2(PgViewEnum.T2), T3(PgViewEnum.T3)
+	
+	, TMP_CHARGEMENT_ARC(PgViewEnum.ALIAS_A), TMP_CHARGEMENT_BRUT(PgViewEnum.ALIAS_B)
+
+	
 	, ALIAS_A(PgViewEnum.ALIAS_A), ALIAS_B(PgViewEnum.ALIAS_B), ALIAS_C(PgViewEnum.ALIAS_C)
 
 	, TMP_FILES("tmp_files", SchemaEnum.TEMPORARY, ColumnEnum.FILE_NAME)

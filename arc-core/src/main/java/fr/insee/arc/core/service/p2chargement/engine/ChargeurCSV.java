@@ -4,31 +4,31 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.opencsv.CSVReader;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.global.dao.DateConversion;
+import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
+import fr.insee.arc.core.service.p2chargement.bo.FileAttributes;
+import fr.insee.arc.core.service.p2chargement.bo.FormatRulesCsv;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.dao.ChargeurCsvDao;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.XMLUtil;
-import fr.insee.arc.utils.utils.ManipString;
 
 /**
  * Classe pour charger les fichier CSV. On lit les headers du fichier qu'on va
@@ -43,37 +43,40 @@ import fr.insee.arc.utils.utils.ManipString;
 public class ChargeurCSV implements IChargeur {
 	private static final Logger LOGGER = LogManager.getLogger(ChargeurCSV.class);
 
-	private String separateur = ";";
-	private String encoding = null;
-	private String quote = null;
-	private String userDefinedHeaders = null;
-	private String[] headers;
-	private String fileName;
-	private Connection connexion;
 	private String tableChargementPilTemp;
 	private String currentPhase;
-	private Norme norme;
-	private String tableTempA;
-	private static final String TABLE_TEMP_T = "T";
+	
 	private InputStream streamHeader;
 	private InputStream streamContent;
-	private String env;
-	private String validite;
-	private final String integrationDate = DateConversion.queryDateConversion(new Date());
+
+	private Sandbox sandbox;
+	private FileAttributes fileAttributes;
+	private Norme norme;
+	private ParseFormatRulesOperation<FormatRulesCsv> parser; 
+
+	private ChargeurCsvDao dao;
+	
 
 	public ChargeurCSV(ThreadChargementService threadChargementService, String fileName) {
-		this.fileName = fileName;
-		this.connexion = threadChargementService.getConnexion().getExecutorConnection();
-		this.tableTempA = threadChargementService.getTableTempA();
+
+		this.sandbox=new Sandbox(threadChargementService.getConnexion().getExecutorConnection(), threadChargementService.getEnvExecution());
+		this.fileAttributes= new FileAttributes(fileName, threadChargementService.validite);
+		this.norme = threadChargementService.normeOk;
+		this.parser = new ParseFormatRulesOperation<>(norme, FormatRulesCsv.class);
+		
+		this.dao = new ChargeurCsvDao(this.sandbox, this.fileAttributes, this.norme, this.parser);
+
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
+
 		this.currentPhase = threadChargementService.getCurrentPhase();
 		this.streamContent = threadChargementService.filesInputStreamLoad.getTmpInxCSV();
 		this.streamHeader = threadChargementService.filesInputStreamLoad.getTmpInxChargement();
-		this.env = threadChargementService.getEnvExecution();
-		this.norme = threadChargementService.normeOk;
-		this.validite = threadChargementService.validite;
+		
+		
+
 	}
 
+	
 	public ChargeurCSV() {
 	}
 
@@ -91,145 +94,105 @@ public class ChargeurCSV implements IChargeur {
 	 */
 
 	private void copyCsvFileToDatabase() throws ArcException {
-		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase **");
-
-		java.util.Date beginDate = new java.util.Date();
+		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase begin **");
 
 		StaticLoggerDispatcher.debug(LOGGER,
 				String.format("contenu delimiter %s", norme.getRegleChargement().getDelimiter()));
 		StaticLoggerDispatcher.debug(LOGGER,
 				String.format("contenu format %s", norme.getRegleChargement().getFormat()));
 
-		this.separateur = norme.getRegleChargement().getDelimiter().trim();
-		this.encoding = XMLUtil.parseXML(norme.getRegleChargement().getFormat(), "encoding");
-		this.userDefinedHeaders = XMLUtil.parseXML(norme.getRegleChargement().getFormat(), "headers");
-		this.quote = XMLUtil.parseXML(norme.getRegleChargement().getFormat(), "quote");
 
-		// si le quote est une expression complexe, l'interpreter par postgres
-		if (this.quote != null && this.quote.length() > 1 && this.quote.length() < 8) {
-			ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
-			req.append("SELECT " + this.quote + " ");
-			this.quote = UtilitaireDao.get(0).executeRequest(this.connexion, req).get(2).get(0);
-		}
+		// update delimiter
+		norme.getRegleChargement().setDelimiter(ObjectUtils.firstNonNull(dao.execQueryEvaluateCharExpression(norme.getRegleChargement().getDelimiter().trim()), Delimiters.DEFAULT_CSV_DELIMITER));
 
-		// si le séparateur est une expression complexe, l'interpreter par postgres
-		if (this.separateur != null && this.separateur.length() > 1 && this.separateur.length() < 8) {
-			ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
-			req.append("select " + this.separateur + " ");
-			this.separateur = UtilitaireDao.get(0).executeRequest(this.connexion, req).get(2).get(0);
-		}
+		// update quote
+		parser.setValue(FormatRulesCsv.QUOTE, dao.execQueryEvaluateCharExpression(parser.getValue(FormatRulesCsv.QUOTE)));
 
+		computeHeaders();
+
+		// On crée la table dans laquelle on va copier le tout
+		dao.initializeCsvTableContainer();
+
+		importCsvDataToTable();
+
+		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase end **");
+	}
+	
+	/**
+	 * compute the headers
+	 * if no headers defined, read headers from file
+	 * else set headers from the userDefinedHeaders defined in rules
+	 * Headers read from files or from rules are transformed by setting v_ as prefix as ARC naming convention
+	 * col1, col2, ... become v_col1, v_col2, ... 
+	 * @param userDefinedHeaders
+	 * @param separateur
+	 * @throws ArcException
+	 */
+	private void computeHeaders() throws ArcException
+	{
+		String userDefinedHeaders = parser.getValue(FormatRulesCsv.HEADERS);
+		String csvDelimiter = norme.getRegleChargement().getDelimiter();
+		
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
 		// premier ligne
-		if (this.userDefinedHeaders == null) {
+		if (userDefinedHeaders == null) {
 			try {
 				try (InputStreamReader inputStreamReader = new InputStreamReader(streamHeader);
 						BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-						CSVReader readerCSV = new CSVReader(bufferedReader,
-								(separateur == null) ? ';' : separateur.charAt(0));) {
-					this.headers = getHeader(readerCSV);
+						CSVReader readerCSV = new CSVReader(bufferedReader, csvDelimiter.charAt(0));) {
+						
+						String[] headers= getHeader(readerCSV);
+						registerHeaders(headers);
+
 				} finally {
 					streamHeader.close();
 				}
 			} catch (IOException fileReadException) {
-				throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, this.fileName);
+				throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, fileAttributes.getFileName());
 			}
 		} else {
-			this.headers = userDefinedHeaders.replaceAll(" ", "").split(",");
+			String[] headers = Format.tokenizeAndTrim(userDefinedHeaders, Delimiters.HEADERS_DELIMITER);
+			registerHeaders(headers);
 		}
-
-		// Make headers format to be database compliant
-		for (int i = 0; i < headers.length; i++) {
-			headers[i] = Format.toBdVal(headers[i]);
-		}
-
-		// On crée la table dans laquelle on va copier le tout
-		initializeCsvTableContainer();
-
-		importCsvDataToTable();
-
-		java.util.Date endDate = new java.util.Date();
-
-		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase temps**" + (endDate.getTime() - beginDate.getTime()) + " ms");
-
+	}
+	
+	
+	private void registerHeaders(String[] headers)
+	{
+		this.fileAttributes.setHeaders(headers);
+		this.fileAttributes.setHeadersI(Format.toBdId(headers));
+		this.fileAttributes.setHeadersV(Format.toBdVal(headers));
 	}
 
 	/**
-	 * Start the postgres copy in commande with the right parameters
+	 * Start the postgres copy command with the right parameters
 	 * 
 	 * @param quote the csv separator
 	 * @throws ArcException
 	 */
 	private void importCsvDataToTable() throws ArcException {
-
 		try {
 			try {
-				StringBuilder columnForCopy = new StringBuilder();
-				columnForCopy.append("(");
-				for (String nomCol : this.headers) {
-					columnForCopy.append("" + nomCol + " ,");
-				}
-				columnForCopy.setLength(columnForCopy.length() - 1);
-				columnForCopy.append(")");
 
-				UtilitaireDao.get(0).importing(connexion, TABLE_TEMP_T, columnForCopy.toString(), streamContent,
-						this.userDefinedHeaders == null, this.separateur, this.quote, this.encoding);
+				dao.execQueryCopyCsv(streamContent);
+
 			} finally {
 				streamContent.close();
 			}
 		} catch (IOException fileReadException) {
-			throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, this.fileName);
+			throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED, this.fileAttributes.getFileName());
 		}
 	}
 
+	
+	
+	
 	/**
 	 * restructure a flat file
 	 * 
 	 * @throws ArcException
 	 */
 	private void applyFormat() throws ArcException {
-		String format = norme.getRegleChargement().getFormat();
-		if (format != null && !format.isEmpty()) {
-			format = format.trim();
-			String[] lines = format.split("\n");
-
-			ArrayList<String> cols = new ArrayList<>();
-			ArrayList<String> exprs = new ArrayList<>();
-			ArrayList<String> wheres = new ArrayList<>();
-
-			ArrayList<String> joinTable = new ArrayList<>();
-			ArrayList<String> joinType = new ArrayList<>();
-			ArrayList<String> joinClause = new ArrayList<>();
-			ArrayList<String> joinSelect = new ArrayList<>();
-			ArrayList<String> partitionExpression = new ArrayList<>();
-			ArrayList<String> indexExpression = new ArrayList<>();
-
-			for (String line : lines) {
-				if (line.startsWith("<join-table>")) {
-					joinTable.add(ManipString.substringAfterFirst(line, ">").trim());
-				} else if (line.startsWith("<join-type>")) {
-					joinType.add(ManipString.substringAfterFirst(line, ">").trim());
-				} else if (line.startsWith("<join-clause>")) {
-					joinClause.add(ManipString.substringAfterFirst(line, ">").trim());
-				} else if (line.startsWith("<join-select")) {
-					joinSelect.add(ManipString.substringAfterFirst(line, ">").trim());
-				} else if (line.startsWith("<where>")) {
-					wheres.add(ManipString.substringAfterFirst(line, ">").trim());
-				} else if (line.startsWith("<partition-expression>")) {
-					partitionExpression.add(ManipString.substringAfterFirst(line, ">").trim());
-				} else if (line.startsWith("<index>")) {
-					indexExpression.add(ManipString.substringAfterFirst(line, ">").trim());
-				} else if (line.startsWith("<encoding>")) {
-				} else if (line.startsWith("<headers>")) {
-				} else if (line.startsWith("<quote>")) {
-				} else if (line.startsWith("/*")) {
-
-				} else {
-					cols.add(ManipString.substringBeforeFirst(line, "=").trim());
-					exprs.add(ManipString.substringAfterFirst(line, "=").trim());
-				}
-			}
-
 			/*
 			 * jointure
 			 * 
@@ -237,16 +200,16 @@ public class ChargeurCSV implements IChargeur {
 
 			StringBuilder req;
 
-			if (!indexExpression.isEmpty()) {
+			if (!parser.getValues(FormatRulesCsv.INDEX).isEmpty()) {
 				req = new StringBuilder();
-				for (int i = 0; i < indexExpression.size(); i++) {
-					req.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + this.tableTempA + "("
-							+ indexExpression.get(i) + ");\n");
+				for (int i = 0; i < parser.getValues(FormatRulesCsv.INDEX).size(); i++) {
+					req.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + "("
+							+ parser.getValues(FormatRulesCsv.INDEX).get(i) + ");\n");
 				}
-				UtilitaireDao.get(0).executeImmediate(connexion, req);
+				UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), req);
 			}
 
-			if (!joinTable.isEmpty()) {
+			if (!parser.getValues(FormatRulesCsv.JOIN_TABLE).isEmpty()) {
 				req = new StringBuilder();
 
 				req.append("\n DROP TABLE IF EXISTS TTT; ");
@@ -254,27 +217,26 @@ public class ChargeurCSV implements IChargeur {
 
 				// On renumérote les lignes après jointure pour etre cohérent
 				req.append("\n SELECT  (row_number() over ())::int as id$new$, l.* ");
-				for (int i = 0; i < joinTable.size(); i++) {
+				for (int i = 0; i < parser.getValues(FormatRulesCsv.JOIN_TABLE).size(); i++) {
 					req.append("\n , v" + i + ".* ");
 				}
-				req.append("FROM  " + this.tableTempA + " l ");
+				req.append("FROM  " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " l ");
 
-				for (int i = 0; i < joinTable.size(); i++) {
+				for (int i = 0; i < parser.getValues(FormatRulesCsv.JOIN_TABLE).size(); i++) {
 					// if schema precised in table name, keep it, if not , add execution schema to
 					// tablename
-
-					joinTable.set(i,
-							joinTable.get(i).contains(".") ? joinTable.get(i) : this.env + "." + joinTable.get(i));
+				parser.getValues(FormatRulesCsv.JOIN_TABLE).set(i,
+							parser.getValues(FormatRulesCsv.JOIN_TABLE).get(i).contains(".") ? parser.getValues(FormatRulesCsv.JOIN_TABLE).get(i) : this.sandbox.getSchema() + "." + parser.getValues(FormatRulesCsv.JOIN_TABLE).get(i));
 
 					// récupération des colonnes de la table
 					List<String> colsIn = UtilitaireDao.get(0)
-							.executeRequest(this.connexion,
+							.executeRequest(sandbox.getConnection(),
 									new ArcPreparedStatementBuilder(
-											"select " + joinSelect.get(i) + " from " + joinTable.get(i) + " limit 0"))
+											"select " + parser.getValues(FormatRulesCsv.JOIN_SELECT).get(i) + " from " + parser.getValues(FormatRulesCsv.JOIN_TABLE).get(i) + " limit 0"))
 							.get(0);
 
 					// join type
-					req.append("\n " + joinType.get(i) + " ");
+					req.append("\n " + parser.getValues(FormatRulesCsv.JOIN_TYPE).get(i) + " ");
 
 					req.append("\n (SELECT ");
 					// build column name to be suitable to load process aka : i_col, v_col
@@ -290,27 +252,27 @@ public class ChargeurCSV implements IChargeur {
 								+ " ");
 
 					}
-					req.append("\n FROM " + joinTable.get(i) + " ");
+					req.append("\n FROM " + parser.getValues(FormatRulesCsv.JOIN_TABLE).get(i) + " ");
 					req.append("\n ) v" + i + " ");
-					req.append("\n ON " + joinClause.get(i) + " ");
+					req.append("\n ON " + parser.getValues(FormatRulesCsv.JOIN_CLAUSE).get(i) + " ");
 
 				}
 				req.append("\n ;");
 				req.append("\n ALTER TABLE TTT DROP COLUMN id; ");
 				req.append("\n ALTER TABLE TTT RENAME COLUMN id$new$ TO id; ");
-				req.append("\n DROP TABLE " + this.tableTempA + ";");
-				req.append("\n ALTER TABLE TTT RENAME TO " + this.tableTempA + ";");
-				UtilitaireDao.get(0).executeImmediate(connexion, req);
+				req.append("\n DROP TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
+				req.append("\n ALTER TABLE TTT RENAME TO " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
+				UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), req);
 			}
 
 			/*
 			 * recalcule de colonnes si une colonne existe déjà, elle est écrasée sinon la
 			 * nouvelle colonne est créée
 			 */
-			if (!cols.isEmpty()) {
+			if (!parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).isEmpty()) {
 				List<String> colsIn = UtilitaireDao.get(0)
-						.executeRequest(this.connexion,
-								new ArcPreparedStatementBuilder("select * from " + this.tableTempA + " limit 0"))
+						.executeRequest(this.sandbox.getConnection(),
+								new ArcPreparedStatementBuilder("select * from " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " limit 0"))
 						.get(0);
 
 				String renameSuffix = "$new$";
@@ -322,38 +284,39 @@ public class ChargeurCSV implements IChargeur {
 				req.append("\n CREATE TEMPORARY TABLE TTT AS ");
 				req.append("\n SELECT w.* FROM ");
 				req.append("\n (SELECT v.* ");
-				for (int i = 0; i < cols.size(); i++) {
+
+				for (int i = 0; i < parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).size(); i++) {
 					// si on trouve dans l'expression le suffix alors on sait qu'on a voulu
 					// préalablement calculer la valeur
-					if (exprs.get(i).contains(renameSuffix)) {
+					if (parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).contains(renameSuffix)) {
 						req.append("\n ,");
-						req.append(exprs.get(i).replace(partitionNumberPLaceHolder, "0::bigint"));
+						req.append(parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).replace(partitionNumberPLaceHolder, "0::bigint"));
 						req.append(" as ");
-						req.append(cols.get(i) + renameSuffix + " ");
+						req.append(parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + renameSuffix + " ");
 					}
 				}
 				req.append("\n FROM ");
 				req.append("\n (SELECT u.* ");
-				for (int i = 0; i < cols.size(); i++) {
-					if (!exprs.get(i).contains(renameSuffix)) {
+				for (int i = 0; i < parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).size(); i++) {
+					if (!parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).contains(renameSuffix)) {
 						req.append("\n ,");
-						req.append(exprs.get(i).replace(partitionNumberPLaceHolder, "0::bigint"));
+						req.append(parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).replace(partitionNumberPLaceHolder, "0::bigint"));
 						req.append(" as ");
-						req.append(cols.get(i) + renameSuffix + " ");
+						req.append(parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + renameSuffix + " ");
 					}
 				}
-				req.append("\n FROM " + this.tableTempA + " u ) v ) w ");
+				req.append("\n FROM " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " u ) v ) w ");
 				req.append("\n WHERE false ");
-				for (String s : wheres) {
+				for (String s : parser.getValues(FormatRulesCsv.FILTER_WHERE)) {
 					req.append("\n AND (" + s + ")");
 				}
 				req.append(";");
-				UtilitaireDao.get(0).executeImmediate(connexion, req);
+				UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), req);
 
 				// Itération
 
 				// si pas de partition, nbIteration=1
-				boolean partitionedProcess = (partitionExpression.size() > 0);
+				boolean partitionedProcess = !parser.getValues(FormatRulesCsv.PARTITION_EXPRESSION).isEmpty();
 
 				// default value of the maximum records per partition
 				int partitionSize = DataObjectService.MAX_NUMBER_OF_RECORD_PER_PARTITION;
@@ -361,15 +324,15 @@ public class ChargeurCSV implements IChargeur {
 				int nbPartition = 1;
 				// creation de l'index de partitionnement
 				if (partitionedProcess) {
-					// comptage rapide su échantillon à 1/10000 pour trouver le nombre de partiton
-					nbPartition = UtilitaireDao.get(0).getInt(connexion,
+					// comptage rapide sur échantillon à 1/10000 pour trouver le nombre de partiton
+					nbPartition = UtilitaireDao.get(0).getInt(sandbox.getConnection(),
 							new ArcPreparedStatementBuilder("select ((count(*)*10000)/" + partitionSize + ")+1 from "
-									+ this.tableTempA + " tablesample system(0.01)"));
+									+ ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " tablesample system(0.01)"));
 
 					req = new StringBuilder();
-					req.append("\n CREATE INDEX idx_a on " + this.tableTempA + " ((abs(hashtext("
-							+ partitionExpression.get(0) + "::text)) % " + nbPartition + "));");
-					UtilitaireDao.get(0).executeImmediate(connexion, req);
+					req.append("\n CREATE INDEX idx_partition_by_arc on " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " ((abs(hashtext("
+							+ parser.getValues(FormatRulesCsv.PARTITION_EXPRESSION).get(0) + "::text)) % " + nbPartition + "));");
+					UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), req);
 				}
 
 				int nbIteration = nbPartition;
@@ -379,77 +342,56 @@ public class ChargeurCSV implements IChargeur {
 					req.append("\n INSERT INTO TTT ");
 					req.append("\n SELECT w.* FROM ");
 					req.append("\n (SELECT v.* ");
-					for (int i = 0; i < cols.size(); i++) {
+					for (int i = 0; i < parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).size(); i++) {
 						// si on trouve dans l'expression le suffix alors on sait qu'on a voulu
 						// préalablement calculer la valeur
-						if (exprs.get(i).contains(renameSuffix)) {
+						if (parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).contains(renameSuffix)) {
 							req.append("\n ,");
-							req.append(exprs.get(i).replace(partitionNumberPLaceHolder, part + "000000000000::bigint"));
+							req.append(parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).replace(partitionNumberPLaceHolder, part + "000000000000::bigint"));
 							req.append(" as ");
-							req.append(cols.get(i) + renameSuffix + " ");
+							req.append(parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + renameSuffix + " ");
 						}
 					}
 					req.append("\n FROM ");
 					req.append("\n (SELECT u.* ");
-					for (int i = 0; i < cols.size(); i++) {
-						if (!exprs.get(i).contains(renameSuffix)) {
+					for (int i = 0; i < parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).size(); i++) {
+						if (!parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).contains(renameSuffix)) {
 							req.append("\n ,");
-							req.append(exprs.get(i).replace(partitionNumberPLaceHolder, part + "000000000000::bigint"));
+							req.append(parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i).replace(partitionNumberPLaceHolder, part + "000000000000::bigint"));
 							req.append(" as ");
-							req.append(cols.get(i) + renameSuffix + " ");
+							req.append(parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + renameSuffix + " ");
 						}
 					}
-					req.append("\n FROM " + this.tableTempA + " u ");
+					req.append("\n FROM " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " u ");
 					if (partitionedProcess) {
-						req.append("\n WHERE abs(hashtext(" + partitionExpression.get(0) + "::text)) % " + nbPartition
+						req.append("\n WHERE abs(hashtext(" + parser.getValues(FormatRulesCsv.PARTITION_EXPRESSION).get(0) + "::text)) % " + nbPartition
 								+ "=" + part + " ");
 					}
 					req.append("\n ) v ) w ");
 					req.append("\n WHERE true ");
-					for (String s : wheres) {
+					for (String s : parser.getValues(FormatRulesCsv.FILTER_WHERE)) {
 						req.append("\n AND (" + s +")");
 					}
 					req.append(";");
-					UtilitaireDao.get(0).executeImmediate(connexion, req);
+					UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), req);
 				}
 
 				req = new StringBuilder();
-				for (int i = 0; i < cols.size(); i++) {
+				for (int i = 0; i < parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).size(); i++) {
 
-					if (colsIn.contains(cols.get(i))) {
-						req.append("\n ALTER TABLE TTT DROP COLUMN " + cols.get(i) + ";");
+					if (colsIn.contains(parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i))) {
+						req.append("\n ALTER TABLE TTT DROP COLUMN " + parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + ";");
 					}
-					req.append("\n ALTER TABLE TTT RENAME COLUMN " + cols.get(i) + renameSuffix + " TO " + cols.get(i)
+					req.append("\n ALTER TABLE TTT RENAME COLUMN " + parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + renameSuffix + " TO " + parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i)
 							+ ";");
 				}
 
-				req.append("\n DROP TABLE " + this.tableTempA + ";");
-				req.append("\n ALTER TABLE TTT RENAME TO " + this.tableTempA + ";");
+				req.append("\n DROP TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
+				req.append("\n ALTER TABLE TTT RENAME TO " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
 
-				UtilitaireDao.get(0).executeImmediate(connexion, req);
+				UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), req);
 			}
 		}
-	}
-
-	/**
-	 * Create the table where the csv file data will be stored
-	 * 
-	 * @throws ArcException
-	 */
-	private void initializeCsvTableContainer() throws ArcException {
-		StringBuilder req = new StringBuilder();
-		req.append("DROP TABLE IF EXISTS " + TABLE_TEMP_T + " ;");
-		req.append(" \nCREATE TEMPORARY TABLE " + TABLE_TEMP_T + " (");
-
-		for (String nomCol : this.headers) {
-			req.append("\n\t " + nomCol + " text,");
-		}
-
-		req.append("\n\t id SERIAL");
-		req.append(");");
-
-		UtilitaireDao.get(0).executeImmediate(connexion, req);
-	}
 
 	/**
 	 * @param bufferedReader
@@ -474,45 +416,16 @@ public class ChargeurCSV implements IChargeur {
 		StaticLoggerDispatcher.info(LOGGER, "** FlatBaseToIdedFlatBase **");
 		java.util.Date beginDate = new java.util.Date();
 
-		StringBuilder req = new StringBuilder();
-		req.append("DROP TABLE IF EXISTS " + tableTempA + ";");
-		req.append("CREATE ");
-		if (!tableTempA.contains(".")) {
-			req.append("TEMPORARY ");
-		} else {
-			req.append(" ");
-		}
-
-		req.append(" TABLE " + this.tableTempA);
-		req.append(" AS (SELECT ");
-		req.append("\n '" + this.fileName + "'::text collate \"C\" as " + ColumnEnum.ID_SOURCE.getColumnName());
-		req.append("\n ,id::integer as id");
-		req.append("\n ," + integrationDate + "::text collate \"C\" as date_integration ");
-		req.append("\n ,'" + this.norme.getIdNorme() + "'::text collate \"C\" as id_norme ");
-		req.append("\n ,'" + this.norme.getPeriodicite() + "'::text collate \"C\" as periodicite ");
-		req.append("\n ,'" + this.validite + "'::text collate \"C\" as validite ");
-		req.append("\n ,0::integer as nombre_colonne");
-
-		req.append("\n , ");
-
-		for (int i = 0; i < this.headers.length; i++) {
-			req.append("id as " + Format.toBdId(Format.toBdRemovePrefix(headers[i])) + ", " + headers[i] + ",");
-		}
-
-		req.setLength(req.length() - 1);
-
-		req.append("\n FROM " + TABLE_TEMP_T + ");");
-		req.append("DROP TABLE IF EXISTS " + TABLE_TEMP_T + ";");
-
-		UtilitaireDao.get(0).executeImmediate(this.connexion, req);
-
+		// create the container table to tran
+		dao.execQueryCreateContainerWithArcMetadata();
+		
 		applyFormat();
 
 		StringBuilder requeteBilan = new StringBuilder();
-		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName, this.currentPhase,
+		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileAttributes.getFileName(), this.currentPhase,
 				TraitementEtat.OK.toString(), null));
 
-		UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
+		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);
 
 		java.util.Date endDate = new java.util.Date();
 		StaticLoggerDispatcher
@@ -534,6 +447,10 @@ public class ChargeurCSV implements IChargeur {
 	public void execution() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "execution");
 
+		
+		// parse formatting rules
+		parser.parseFormatRules();		
+		
 		// On met le fichier en base
 		copyCsvFileToDatabase();
 
@@ -550,5 +467,7 @@ public class ChargeurCSV implements IChargeur {
 		finalisation();
 
 	}
+	
+	
 
 }
