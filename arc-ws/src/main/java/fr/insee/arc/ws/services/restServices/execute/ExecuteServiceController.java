@@ -26,7 +26,7 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.ResetEnvironmentService;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
-import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
+import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -193,7 +193,7 @@ public class ExecuteServiceController {
 	{
 		ReturnView returnView=new ReturnView();
 		try {
-			new SynchronizeUserRulesAndMetadata(new Sandbox(null, env)).synchroniserSchemaExecutionAllNods();
+			new SynchronizeRulesAndMetadataOperation(new Sandbox(null, env)).synchroniserSchemaExecutionAllNods();
 			return ResponseEntity.status(HttpStatus.OK).body(returnView);		
 
 		} catch (ArcException e) {

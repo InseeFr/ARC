@@ -1,11 +1,9 @@
-package fr.insee.arc.core.service.p0initialisation.metadata;
+package fr.insee.arc.core.service.p0initialisation.metadata.dao;
 
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,20 +11,13 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.TableNaming;
-import fr.insee.arc.core.service.global.scalability.ServiceScalability;
-import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
-import fr.insee.arc.core.service.p5mapping.engine.ExpressionService;
-import fr.insee.arc.utils.consumer.ThrowingConsumer;
-import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
+import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
@@ -34,172 +25,16 @@ import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 
-public class SynchronizeUserRulesAndMetadata {
+public class SynchronizeRulesAndMetadataDao {
 
-
-	private static final Logger LOGGER = LogManager.getLogger(SynchronizeUserRulesAndMetadata.class);
-
-	public SynchronizeUserRulesAndMetadata(Sandbox sandbox) {
+	private static final Logger LOGGER = LogManager.getLogger(SynchronizeRulesAndMetadataDao.class);
+	
+	public SynchronizeRulesAndMetadataDao(Sandbox sandbox) {
 		super();
 		this.sandbox = sandbox;
 	}
-	
+
 	private Sandbox sandbox;
-	
-
-	/**
-	 * Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
-	 * Met à jour le schéma des tables métiers correspondant aux règles définies
-	 * dans les familles
-	 * 
-	 * @param connexion
-	 * @param envParameters
-	 * @param envExecution
-	 * @throws ArcException
-	 */
-	public void synchroniserSchemaExecutionAllNods() throws ArcException {
-
-		copyMetadataAllNods();
-
-		mettreAJourSchemaTableMetierOnNods();
-	}
-	
-	
-	/**
-	 * Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
-	 * l'environnement d'excécution courant sur tous les noeuds postgres
-	 * (coordinator et executors)
-	 * 
-	 * @param connexion
-	 * @param envParameters
-	 * @param envExecution
-	 * @throws ArcException
-	 */
-	public void copyMetadataAllNods()
-			throws ArcException {
-		copyMetadataToSandbox();
-
-		copyMetadataToExecutorsAllNods();
-	}
-
-	/**
-	 * Recopier les tables de l'environnement de parametres (IHM) vers
-	 * l'environnement d'execution (batch, bas, ...)
-	 *
-	 * @param connexion
-	 * @param anParametersEnvironment
-	 * @param anExecutionEnvironment
-	 * @throws ArcException
-	 */
-	private void copyMetadataToSandbox() throws ArcException {
-		copyRulesTablesToExecution();
-		applyExpressions();
-	}
-	
-	/**
-	 * Instanciate the metadata required into all executors pod
-	 * 
-	 * @param envExecution
-	 * @throws ArcException
-	 */
-	protected int copyMetadataToExecutorsAllNods()
-			throws ArcException {
-		
-		Connection coordinatorConnexion = sandbox.getConnection();
-		String envExecution = sandbox.getSchema();
-
-		ThrowingConsumer<Connection, ArcException> onCoordinator = c -> {
-		};
-
-		ThrowingConsumer<Connection, ArcException> onExecutor = executorConnection -> {
-			copyMetaDataToExecutors(coordinatorConnexion, executorConnection, envExecution);
-		};
-
-		return ServiceScalability.dispatchOnNods(coordinatorConnexion, onCoordinator, onExecutor);
-
-	}
-
-	/**
-	 * Instanciate the metadata required into the given executor pod
-	 * 
-	 * @param coordinatorConnexion
-	 * @param executorConnection
-	 * @param envExecution
-	 * @throws ArcException
-	 */
-	private static void copyMetaDataToExecutors(Connection coordinatorConnexion, Connection executorConnection,
-			String envExecution) throws ArcException {
-		PropertiesHandler properties = PropertiesHandler.getInstance();
-
-		// add utility functions
-		BddPatcher.executeBddScript(executorConnection, "BdD/script_function_utility.sql",
-				properties.getDatabaseRestrictedUsername(), null, null);
-
-		// add tables for phases if required
-		BddPatcher.bddScriptEnvironmentExecutor(executorConnection, properties.getDatabaseRestrictedUsername(),
-				new String[] { envExecution });
-
-		// copy tables
-
-		ArrayList<String> tablesToCopyIntoExecutor = BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion,
-				envExecution);
-		tablesToCopyIntoExecutor
-				.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
-		tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveModelTablesFromSchema(coordinatorConnexion, envExecution));
-
-		for (String table : new HashSet<String>(tablesToCopyIntoExecutor)) {
-			GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
-					new ArcPreparedStatementBuilder("SELECT * FROM " + table)));
-
-			CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, table, gb);
-
-		}
-	}
-	
-	/**
-	 * replace an expression in rules
-	 * 
-	 * @param connexion
-	 * @param anExecutionEnvironment
-	 * @throws ArcException
-	 */
-	private void applyExpressions() throws ArcException {
-		
-		Connection connexion = sandbox.getConnection();
-		String anExecutionEnvironment = sandbox.getSchema();
-		
-		// Checks expression validity
-		ExpressionService expressionService = new ExpressionService();
-		ArrayList<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion,
-				anExecutionEnvironment + ".jeuderegle");
-		for (JeuDeRegle ruleSet : allRuleSets) {
-			// Check
-			GenericBean expressions = expressionService.fetchExpressions(connexion, anExecutionEnvironment, ruleSet);
-			if (expressions.isEmpty()) {
-				continue;
-			}
-
-			Optional<String> loopInExpressionSet = expressionService.loopInExpressionSet(expressions);
-			if (loopInExpressionSet.isPresent()) {
-				LoggerHelper.info(LOGGER, "A loop is present in the expression set : " + loopInExpressionSet.get());
-				LoggerHelper.info(LOGGER, "The expression set is not applied");
-				continue;
-			}
-
-			// Apply
-			expressions = expressionService.fetchOrderedExpressions(connexion, anExecutionEnvironment, ruleSet);
-			if (expressionService.isExpressionSyntaxPresentInControl(connexion, anExecutionEnvironment, ruleSet)) {
-				UtilitaireDao.get(0).executeRequest(connexion,
-						expressionService.applyExpressionsToControl(ruleSet, expressions, anExecutionEnvironment));
-			}
-			if (expressionService.isExpressionSyntaxPresentInMapping(connexion, anExecutionEnvironment, ruleSet)) {
-				UtilitaireDao.get(0).executeRequest(connexion,
-						expressionService.applyExpressionsToMapping(ruleSet, expressions, anExecutionEnvironment));
-			}
-		}
-
-	}
-
 	
 	/**
 	 * Copy the table containing user rules to the sandbox so they will be used by
@@ -210,12 +45,12 @@ public class SynchronizeUserRulesAndMetadata {
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
 	 */
-	private void copyRulesTablesToExecution() throws ArcException {
+	public void copyRulesTablesToExecution() throws ArcException {
 		LoggerHelper.info(LOGGER, "copyTablesToExecution");
-		
+
 		Connection coordinatorConnexion = sandbox.getConnection();
 		String anExecutionEnvironment = sandbox.getSchema();
-		
+
 		try {
 
 			anExecutionEnvironment = anExecutionEnvironment.replace(".", "_");
@@ -228,7 +63,8 @@ public class SynchronizeUserRulesAndMetadata {
 				// on créé une table image de la table venant de l'ihm
 				// (environnement de parametre)
 				TraitementTableParametre parameterTable = r[i];
-				String tableImage = FormatSQL.temporaryTableName(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment));
+				String tableImage = FormatSQL
+						.temporaryTableName(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment));
 
 				// recopie partielle (en fonction de l'environnement
 				// d'exécution)
@@ -260,9 +96,11 @@ public class SynchronizeUserRulesAndMetadata {
 				requete.append("CREATE TABLE " + tableImage + " " + FormatSQL.WITH_NO_VACUUM + " AS SELECT a.* FROM "
 						+ r[i].getTablenameInMetadata().getFullName() + " AS a " + condition + ";\n");
 
-				requete.append(FormatSQL.dropTable(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment)));
+				requete.append(FormatSQL
+						.dropTable(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment)));
 				requete.append("ALTER TABLE " + tableImage + " rename to "
-						+ ManipString.substringAfterLast(parameterTable.getTablenameInSandbox().getTableName(), ".") + "; \n");
+						+ ManipString.substringAfterLast(parameterTable.getTablenameInSandbox().getTableName(), ".")
+						+ "; \n");
 			}
 			UtilitaireDao.get(0).executeBlock(coordinatorConnexion, requete);
 
@@ -315,28 +153,16 @@ public class SynchronizeUserRulesAndMetadata {
 		}
 	}
 	
-	private void mettreAJourSchemaTableMetierOnNods() throws ArcException {
-
-		Connection coordinatorConnexion = sandbox.getConnection();
-		String envExecution = sandbox.getSchema();
-		
-		ThrowingConsumer<Connection, ArcException> function = executorConnection -> {
-			mettreAJourSchemaTableMetier(executorConnection, envExecution);
-		};
-
-		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
-
-	}
-
+	
+	
 	/**
 	 * Créer ou detruire les colonnes ou les tables métiers en comparant ce qu'il y
 	 * a en base à ce qu'il y a de déclaré dans la table des familles de norme
 	 *
-	 * @param connexion
+	 * @param coordinatorOrExecutorConnexion
 	 * @throws ArcException
 	 */
-	private static void mettreAJourSchemaTableMetier(Connection connexion, String envExecution)
-			throws ArcException {
+	public static void mettreAJourSchemaTableMetier(Connection coordinatorOrExecutorConnexion, String envExecution) throws ArcException {
 		LoggerHelper.info(LOGGER, "mettreAJourSchemaTableMetier");
 		/*
 		 * Récupérer la table qui mappe : famille / table métier / variable métier et
@@ -344,10 +170,11 @@ public class SynchronizeUserRulesAndMetadata {
 		 */
 		ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
 		requeteRef.append("SELECT lower(id_famille), lower('" + TableNaming.dbEnv(envExecution)
-				+ "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
+				+ "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
+				+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
 
 		List<List<String>> relationalViewRef = Format
-				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(connexion, requeteRef));
+				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef));
 		HierarchicalView familleToTableToVariableToTypeRef = HierarchicalView.asRelationalToHierarchical(
 				"(Réf) Famille -> Table -> Variable -> Type",
 				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
@@ -378,7 +205,7 @@ public class SynchronizeUserRulesAndMetadata {
 				+ "mapping\\_'||lower(id_famille)||'\\_%';");
 
 		List<List<String>> relationalView = Format
-				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(connexion, requete));
+				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete));
 
 		HierarchicalView familleToTableToVariableToType = HierarchicalView.asRelationalToHierarchical(
 				"(Phy) Famille -> Table -> Variable -> Type",
@@ -490,7 +317,15 @@ public class SynchronizeUserRulesAndMetadata {
 				}
 			}
 		}
-		UtilitaireDao.get(0).executeBlock(connexion, requeteMAJSchema);
+		UtilitaireDao.get(0).executeBlock(coordinatorOrExecutorConnexion, requeteMAJSchema);
 	}
+
+
+	public static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table) throws ArcException {
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
+				new ArcPreparedStatementBuilder("SELECT * FROM " + table)));
+	}
+	
+	
 	
 }

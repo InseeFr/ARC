@@ -13,7 +13,7 @@ import fr.insee.arc.utils.query.InitializeQueryTest;
 
 public class SynchronizeUserRulesAndMetadataTest  extends InitializeQueryTest  {
 	
-	private SynchronizeUserRulesAndMetadata synchronizationInstance= new SynchronizeUserRulesAndMetadata(new Sandbox(c, BddPatcherTest.testSandbox3));
+	private SynchronizeRulesAndMetadataOperation synchronizationInstance= new SynchronizeRulesAndMetadataOperation(new Sandbox(c, BddPatcherTest.testSandbox3));
 	
 	
 	@Test

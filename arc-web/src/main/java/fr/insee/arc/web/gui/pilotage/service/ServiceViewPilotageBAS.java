@@ -18,7 +18,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.ResetEnvironmentService;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
-import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
+import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -173,7 +173,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		// no need to do that if selected phase is INITIALISATION as INITIALISATION will synchronize the sandbox
 		if (!phaseAExecuter.equals(TraitementPhase.INITIALISATION)) {
 			try{
-				new SynchronizeUserRulesAndMetadata(new Sandbox(null, getBacASable())).synchroniserSchemaExecutionAllNods();
+				new SynchronizeRulesAndMetadataOperation(new Sandbox(null, getBacASable())).synchroniserSchemaExecutionAllNods();
 			}
 			catch (ArcException e)
 			{

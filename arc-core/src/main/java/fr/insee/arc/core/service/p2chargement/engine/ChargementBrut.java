@@ -24,7 +24,7 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
  * @author S4LWO8
  *
  */
-public class ChargementBrutalTable {
+public class ChargementBrut {
 
     
 	/** Combien de boucle au maximum */
@@ -32,7 +32,7 @@ public class ChargementBrutalTable {
     /** Combien de ligne on charge pour chacune des boucles */
     private static final int LIMIT_CHARGEMENT_BRUTAL = 50;
        
-    private static final Logger LOGGER = LogManager.getLogger(ChargementBrutalTable.class);
+    private static final Logger LOGGER = LogManager.getLogger(ChargementBrut.class);
     private Connection connexion;
     private List<Norme> listeNorme;
 

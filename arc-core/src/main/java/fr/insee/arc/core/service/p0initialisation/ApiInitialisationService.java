@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p0initialisation.filesystem.RestoreFileSystem;
-import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeUserRulesAndMetadata;
+import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFilesOperation;
@@ -46,7 +46,7 @@ public class ApiInitialisationService extends ApiService {
 		// Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
 		// l'environnement d'excécution courant
 		// mettre à jour les tables métier avec les paramêtres de la famille de norme
-		new SynchronizeUserRulesAndMetadata(this.coordinatorSandbox).synchroniserSchemaExecutionAllNods();
+		new SynchronizeRulesAndMetadataOperation(this.coordinatorSandbox).synchroniserSchemaExecutionAllNods();
 
 		// marque les fichiers ou les archives à rejouer
 		// efface des fichiers de la table de pilotage marqués par l'utilisateur comme

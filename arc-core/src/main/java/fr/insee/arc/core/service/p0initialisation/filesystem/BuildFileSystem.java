@@ -11,9 +11,11 @@ import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class BuildFileSystem {
-	
+
 	/**
-	 * Build the file system required for arc to proceed for a list of given sandboxes @param envExecutions
+	 * Build the file system required for arc to proceed for a list of given
+	 * sandboxes @param envExecutions
+	 * 
 	 * @param connexion
 	 * @param envExecutions
 	 */
@@ -24,12 +26,9 @@ public class BuildFileSystem {
 	}
 
 	private Connection connexion;
-	
+
 	private String[] envExecutions;
-	
-	
-	
-	
+
 	/**
 	 * Build directories for the sandbox
 	 * 
@@ -53,10 +52,10 @@ public class BuildFileSystem {
 
 				FileUtilsArc.createDirIfNotexist(DirectoryPath
 						.directoryReceptionEtatEnCours(properties.getBatchParametersDirectory(), envExecution));
-				FileUtilsArc.createDirIfNotexist(DirectoryPath
-						.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
-				FileUtilsArc.createDirIfNotexist(DirectoryPath
-						.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
+				FileUtilsArc.createDirIfNotexist(
+						DirectoryPath.directoryReceptionEtatOK(properties.getBatchParametersDirectory(), envExecution));
+				FileUtilsArc.createDirIfNotexist(
+						DirectoryPath.directoryReceptionEtatKO(properties.getBatchParametersDirectory(), envExecution));
 			}
 
 		} catch (ArcException ex) {

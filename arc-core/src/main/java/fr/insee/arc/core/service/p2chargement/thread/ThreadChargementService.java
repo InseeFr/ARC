@@ -25,7 +25,7 @@ import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad
 import fr.insee.arc.core.service.p2chargement.archiveloader.IArchiveFileLoader;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.core.service.p2chargement.bo.RegleChargement;
-import fr.insee.arc.core.service.p2chargement.engine.ChargementBrutalTable;
+import fr.insee.arc.core.service.p2chargement.engine.ChargementBrut;
 import fr.insee.arc.core.service.p2chargement.engine.IChargeur;
 import fr.insee.arc.core.service.p2chargement.factory.ChargeurFactory;
 import fr.insee.arc.core.service.p2chargement.factory.TypeChargement;
@@ -249,7 +249,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	private void choixChargeur() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "** choixChargeur : " + this.idSource + " **");
 		// Si on a pas 1 seule norme alors le fichier est en erreur
-		ChargementBrutalTable chgrBrtl = new ChargementBrutalTable();
+		ChargementBrut chgrBrtl = new ChargementBrut();
 		chgrBrtl.setConnexion(getConnexion().getExecutorConnection());
 		chgrBrtl.setListeNorme(listeNorme);
 
