@@ -20,6 +20,12 @@ public class ArcWebGenericDao {
 	
 	private static final Logger LOGGER = LogManager.getLogger(ArcWebGenericDao.class);
 	
+	
+	public void execQueryTestDatabaseConnection() throws ArcException
+	{
+		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("select true"));
+	}
+	
 	/**
 	 * Get the sandbox list to be show in GUI.
 	 */

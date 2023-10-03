@@ -1,6 +1,11 @@
 package fr.insee.arc.web.gui.export.dao;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -84,7 +89,16 @@ public class ExportDao extends VObjectHelperDao {
 		UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), query);
 	}
 
-	public HashMap<String, ArrayList<String>> exportFileRetrieve(int n, List<String> howToExport,
+	/**
+	 * retrieve rules
+	 * @param n
+	 * @param howToExport
+	 * @param tablesToExport
+	 * @param bacASable
+	 * @return
+	 * @throws ArcException
+	 */
+	private HashMap<String, ArrayList<String>> exportFileRetrieveRules(int n, List<String> howToExport,
 			List<String> tablesToExport, String bacASable) throws ArcException {
 		// if columns,orders table is specified, get the information from database metadata
 		String howToExportReworked;
@@ -113,6 +127,120 @@ public class ExportDao extends VObjectHelperDao {
 		return stmt.executeQuery(query.getQuery().toString());
 	}
 
+	
+	/**
+	 * parse rule and export file
+	 * @param h
+	 * @param n
+	 * @param bw
+	 * @param fw
+	 * @throws ArcException
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public void exportFile(HashMap<String, ArrayList<String>> h, int n, BufferedWriter bw, FileOutputStream fw)
+			throws ArcException, IOException, SQLException {
+		ArrayList<String> tablesToExport = h.get("table_to_export");
+		ArrayList<String> headers = h.get("headers");
+		ArrayList<String> nulls = h.get("nulls");
+		ArrayList<String> filterTable = h.get("filter_table");
+		ArrayList<String> orderTable = h.get("order_table");
+		ArrayList<String> howToExport = h.get("nomenclature_export");
+		ArrayList<String> headersToScan = h.get("columns_array_header");
+		ArrayList<String> valuesToScan = h.get("columns_array_value");
+
+		HashMap<String, Integer> pos = new HashMap<>();
+		ArrayList<String> headerLine = new ArrayList<>();
+
+		h = exportFileRetrieveRules(n, howToExport, tablesToExport, this.dataObjectService.getSandboxSchema());
+
+		for (int i = 0; i < h.get("varbdd").size(); i++) {
+			pos.put(h.get("varbdd").get(i), Integer.parseInt(h.get("pos").get(i)));
+			headerLine.add(h.get("varbdd").get(i));
+		}
+
+		// write header line if required
+		if (!StringUtils.isEmpty(headers.get(n))) {
+			for (String o : headerLine) {
+				bw.write(o + ";");
+			}
+			bw.write("\n");
+		}
+
+		int maxPos = Integer.parseInt(h.get("maxp").get(0));
+
+		Connection c = UtilitaireDao.get(0).getDriverConnexion();
+		c.setAutoCommit(false);
+
+		Statement stmt = c.createStatement();
+		stmt.setFetchSize(5000);
+
+		try (ResultSet res = exportFileFilteredOrdered(stmt, n, tablesToExport, filterTable, orderTable, this.dataObjectService.getSandboxSchema())) {
+			ResultSetMetaData rsmd = res.getMetaData();
+
+			ArrayList<String> output;
+			String[] tabH;
+			String[] tabV;
+			String colName;
+			while (res.next()) {
+				// reinitialiser l'arraylist de sortie
+				output = new ArrayList<String>();
+				for (int k = 0; k < maxPos; k++) {
+					output.add("");
+				}
+
+				boolean todo = false;
+				tabH = null;
+				tabV = null;
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					colName = rsmd.getColumnLabel(i).toLowerCase();
+
+					todo = true;
+					// cas ou on est dans un tableau
+					if (todo && colName.equals(headersToScan.get(n))) {
+						todo = false;
+						tabH = (String[]) res.getArray(i).getArray();
+					}
+					if (todo && colName.equals(valuesToScan.get(n))) {
+						todo = false;
+						tabV = (String[]) res.getArray(i).getArray();
+					}
+					if (todo) {
+						todo = false;
+						if (pos.get(colName) != null) {
+							// if nulls value musn't be quoted as "null" and element is null then don't write
+							if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(res.getString(i)))) {
+								output.set(pos.get(colName), res.getString(i));
+							}
+						}
+					}
+				}
+
+				// traitement des variables tableaux
+				if (tabH != null && tabV != null) {
+					for (int k = 0; k < tabH.length; k++) {
+						if (pos.get(tabH[k].toLowerCase()) != null) {
+							// if nulls value musn't be quoted as "null" and element is null then don't write
+							if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(tabV[k]))) {
+								output.set(pos.get(tabH[k].toLowerCase()), tabV[k]);
+							}
+						}
+					}
+				}
+
+				for (String o : output) {
+					bw.write(o + ";");
+				}
+				bw.write("\n");
+			}
+		}
+		c.close();
+		bw.flush();
+		fw.flush();
+
+	}
+	
+	
 	public VObjectService getvObjectService() {
 		return vObjectService;
 	}

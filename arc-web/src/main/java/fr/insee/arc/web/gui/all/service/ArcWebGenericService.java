@@ -15,12 +15,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.util.LoggerDispatcher;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -67,7 +65,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	protected String repertoire;
 	
 	@Autowired
-	private ArcWebGenericDao indexDao;
+	private ArcWebGenericDao arcWebGenericDao;
 
 	private Map<String, String> envMap;
 	
@@ -148,7 +146,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		
 		
 		// get declared sandboxes
-		this.envMap= indexDao.getSandboxList();
+		this.envMap= arcWebGenericDao.getSandboxList();
 
 		if (this.bacASable == null) {
 			// by default bacASable is the first element of the linkedhashmap
@@ -217,7 +215,9 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		LoggerHelper.debug(LOGGER, "getDataBaseStatus()");
 		// test the database connection
 		try {
-			UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("select true"));
+			
+			arcWebGenericDao.execQueryTestDatabaseConnection();
+			
 			setDataBaseOk(true);
 	
 		} catch (Exception e) {

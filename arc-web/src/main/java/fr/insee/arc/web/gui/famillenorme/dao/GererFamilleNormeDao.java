@@ -12,6 +12,7 @@ import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
@@ -265,6 +266,25 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		requeteListeAddRegleMapping.append("\n    )");
 		return requeteListeAddRegleMapping;
 	}
+	
+	
+
+	/**
+	 * Delete a model table
+	 * A synchronization with rules table is required after deletion
+	 * Full transaction is required for consistency
+	 * @param viewTableMetier
+	 * @param idFamille
+	 * @throws ArcException
+	 */
+	public void execQueryDeleteTableMetier(VObject viewTableMetier, String idFamille) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append(this.vObjectService.deleteQuery(viewTableMetier));
+		query.append(querySynchronizeRegleWithVariableMetier(idFamille));
+		query.asTransaction();
+
+		UtilitaireDao.get(0).executeRequest(null, query);
+	}
 
 	public VObjectService getvObjectService() {
 		return vObjectService;
@@ -281,6 +301,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	public void setDataObjectService(DataObjectService dataObjectService) {
 		this.dataObjectService = dataObjectService;
 	}
+
 	
 	
 
