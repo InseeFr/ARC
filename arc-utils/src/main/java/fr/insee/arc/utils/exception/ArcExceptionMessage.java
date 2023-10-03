@@ -72,7 +72,10 @@ public enum ArcExceptionMessage {
 	DDI_FAMILY_ALREADY_EXISTS("Les familles présentent dans le DDI existe déjà"),
 	DDI_PARSING_FAILED("Le fichier xml DDI n'a pas pu être parsé correctement"),
 	
-	DATABASE_CONNECTION_FAILED("L'initialisation de la connexion a échoué"),
+	DATABASE_CONNECTION_FAILED("La connexion a la base de données a échoué"),
+	DATABASE_CONNECTION_COORDINATOR_FAILED("La connexion a la base de données coordinator a échoué"),
+	DATABASE_CONNECTION_EXECUTOR_FAILED("La connexion a une base de données executor a échoué"),
+
 	
 	SQL_DATE_PARSE_FAILED("L'expression %s n'a pas pu être converti au format date java %s"),
 	SQL_EXECUTE_FAILED("L'excution de la requête dans la base de données a échoué"),

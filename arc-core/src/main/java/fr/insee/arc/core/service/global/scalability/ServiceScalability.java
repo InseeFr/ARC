@@ -34,7 +34,7 @@ public class ServiceScalability {
 				actionOnCoordinator.accept(newCoordinatorConnexion);
 				
 			} catch (SQLException | ArcException e) {
-				 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED);
+				 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_COORDINATOR_FAILED);
 				 customException.logFullException();
 				 throw customException;
 			}
@@ -62,7 +62,7 @@ public class ServiceScalability {
 				actionOnExecutor.accept(executorConnection);
 
 			} catch (SQLException | ArcException e) {
-				 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_INITIALISATION_SCRIPT_FAILED);
+				 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
 				 customException.logFullException();
 				 throw customException;
 			}
