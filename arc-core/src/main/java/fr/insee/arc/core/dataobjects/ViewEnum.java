@@ -190,7 +190,7 @@ public enum ViewEnum {
 	}
 
 	public static String getFullName(String schema, String providedTableName) {
-		return schema + SQL.DOT.getSqlCode() + providedTableName;
+		return providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName;
 	}
 	
 	public ColumnEnum col(ColumnEnum e) {

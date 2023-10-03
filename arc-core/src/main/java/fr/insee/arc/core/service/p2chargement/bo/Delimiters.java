@@ -8,5 +8,9 @@ public class Delimiters {
 
 	public static final String HEADERS_DELIMITER = ",";
 	public static final String DEFAULT_CSV_DELIMITER = ";";
+
+	public static final String RENAME_SUFFIX= "$new$";
+	public static final String PARTITION_NUMBER_PLACEHOLDER = "#pn#";
+	
 	
 }
