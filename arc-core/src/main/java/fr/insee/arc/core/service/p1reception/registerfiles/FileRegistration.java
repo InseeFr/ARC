@@ -265,7 +265,7 @@ public class FileRegistration {
 							content2.add(z);
 						}
 					} else {
-						// bien ajouter les caracteriqtique de l'archive à la nouvelle liste
+						// bien ajouter les caracteristique de l'archive à la nouvelle liste
 						content2.add(z);
 					}
 				}
@@ -287,7 +287,7 @@ public class FileRegistration {
 			container = z.getContainerName();
 			fileName = z.getFileName();
 
-			if (z.getTypeOfFile().equals(TraitementTypeFichier.AC.toString())) {
+			if (z.getTypeOfFile().equals(TraitementTypeFichier.AC)) {
 				requete.append(
 						"insert into " + this.tablePilTemp + " (container, " + ColumnEnum.ID_SOURCE.getColumnName()
 								+ ") values (" + FormatSQL.cast(container) + "," + FormatSQL.cast(fileName) + "); \n");
