@@ -5,8 +5,10 @@ import fr.insee.arc.utils.utils.ManipString;
 
 public class ContainerName {
 
-	
-	
+	private ContainerName() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	public static String buildContainerName(String container) {
 		String newContainerName = "";
 		newContainerName = "";
@@ -25,6 +27,5 @@ public class ContainerName {
 	private static String normalizeContainerName(String container, String extension) {
 		return ManipString.substringBeforeLast(container, extension) + extension;
 	}
-	
-	
+
 }

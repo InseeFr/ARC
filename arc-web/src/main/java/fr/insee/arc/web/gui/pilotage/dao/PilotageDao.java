@@ -1,10 +1,16 @@
 package fr.insee.arc.web.gui.pilotage.dao;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -15,14 +21,20 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.format.Format;
+import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
+import fr.insee.arc.web.gui.pilotage.service.ServiceViewArchiveBAS;
 
 @Component
 public class PilotageDao extends VObjectHelperDao {
 
+	private static final Logger LOGGER = LogManager.getLogger(PilotageDao.class);
+
+	
 	public void initializePilotageBAS(VObject viewPilotageBAS) {
 
 		// the most recent files processed must be shown first by default
@@ -165,6 +177,46 @@ public class PilotageDao extends VObjectHelperDao {
 		} else {
 			vObjectService.destroy(viewFichierBAS);
 		}
+	}
+
+	
+	/**
+	 * build query to return download stream 
+	 * @param response
+	 * @param viewArchiveBAS
+	 * @param selection
+	 * @param sandboxRootDirectory
+	 * @throws ArcException 
+	 */
+	public void execQueryDownloadArchive(HttpServletResponse response, VObject viewArchiveBAS, List<String> selection, String sandboxRootDirectory) throws ArcException {
+
+		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
+
+		querySelection.append("select distinct alias_de_table.nom_archive as nom_fichier from (");
+		querySelection.append(viewArchiveBAS.getMainQuery());
+		querySelection.append(") alias_de_table ");
+		querySelection.append(this.vObjectService.buildFilter(viewArchiveBAS.getFilterFields(),
+				viewArchiveBAS.getHeadersDLabel()));
+
+		if (selection!=null) {
+			querySelection.append(" AND nom_archive IN " + Format.sqlListe(selection) + " ");
+		}
+
+		ArrayList<String> listRepertoire = new ArrayList<>();
+
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("SELECT DISTINCT entrepot FROM (");
+		requete.append(viewArchiveBAS.getMainQuery());
+		requete.append(") alias_de_table ");
+
+		GenericBean g = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete));
+		String entrepot = g.mapContent().get("entrepot").get(0);
+		listRepertoire.add(TraitementPhase.RECEPTION + "_" + entrepot + "_ARCHIVE");
+
+		
+		this.vObjectService.downloadEnveloppe(viewArchiveBAS, response, querySelection, sandboxRootDirectory,
+				listRepertoire);
+		
 	}
 
 }
