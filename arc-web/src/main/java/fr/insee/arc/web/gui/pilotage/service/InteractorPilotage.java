@@ -16,16 +16,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
+import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.gui.all.util.LineObject;
 import fr.insee.arc.web.gui.all.util.VObject;
-import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.gui.pilotage.dao.PilotageDao;
 import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
 
@@ -124,12 +122,8 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		this.vObjectService.applyColumnRendering(viewPilotageBAS, columns);
 
 		// display comment for the sandbox
-		ArcPreparedStatementBuilder envQuery = new ArcPreparedStatementBuilder();
-		envQuery.append("select env_description from arc.ext_etat_jeuderegle where replace(id,'.','_') = ");
-		envQuery.append(envQuery.quoteText(getBacASable()));
-
 		try {
-			String envDescription = UtilitaireDao.get(0).getString(null, envQuery);
+			String envDescription = dao.getSandboxDescription(getBacASable());
 			viewPilotageBAS.setCustomValue(ENV_DESCRIPTION, envDescription);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);

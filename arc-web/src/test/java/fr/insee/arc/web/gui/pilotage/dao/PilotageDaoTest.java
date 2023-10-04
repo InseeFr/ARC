@@ -16,7 +16,10 @@ import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.web.gui.all.util.Session;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectService;
+import fr.insee.arc.web.gui.pilotage.model.ViewArchiveBAS;
+import fr.insee.arc.web.gui.pilotage.model.ViewEntrepotBAS;
 import fr.insee.arc.web.gui.pilotage.model.ViewPilotageBAS;
+import fr.insee.arc.web.gui.pilotage.model.ViewRapportBAS;
 
 public class PilotageDaoTest extends InitializeQueryTest {
 
@@ -51,6 +54,46 @@ public class PilotageDaoTest extends InitializeQueryTest {
 				.listColumnEnumByName(ViewEnum.VIEW_PILOTAGE_FICHIER.getColumns().keySet());
 
 		assertTrue(viewPilotageBAS.getHeadersDLabel().containsAll(viewColumns));
+
+	}
+	
+	@Test
+	public void initializeRapportBAS() {
+
+		VObject viewRapportBAS = new ViewRapportBAS();
+		
+		// execute query
+		pdao.initializeRapportBAS(viewRapportBAS);
+
+		System.out.println(viewRapportBAS.getHeadersDLabel());
+		
+		// test the content of the view
+		List<String> viewColumns = ColumnEnum
+				.listColumnEnumByName(ViewEnum.VIEW_RAPPORT_FICHIER.getColumns().keySet());
+
+		assertTrue(viewRapportBAS.getHeadersDLabel().containsAll(viewColumns));
+
+	}
+	
+	@Test
+	public void initializeArchiveBAS() throws ArcException {
+
+		VObject viewArchiveBAS = new ViewArchiveBAS();
+		VObject viewEntrepotBAS = new ViewEntrepotBAS();
+		
+		// select entrepot
+		viewEntrepotBAS.setCustomValue("entrepotLecture", "DEFAULT");
+		
+		// execute query
+		pdao.initializeArchiveBAS(viewArchiveBAS, viewEntrepotBAS);
+
+		System.out.println(viewArchiveBAS.getHeadersDLabel());
+		
+		// test the content of the view
+		List<String> viewColumns = ColumnEnum
+				.listColumnEnumByName(ViewEnum.PILOTAGE_ARCHIVE.getColumns().keySet());
+
+		assertTrue(viewArchiveBAS.getHeadersDLabel().containsAll(viewColumns));
 
 	}
 

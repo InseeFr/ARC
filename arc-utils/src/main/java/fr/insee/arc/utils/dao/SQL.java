@@ -23,6 +23,8 @@ public enum SQL {
 
 	LIKE("LIKE"),
 	
+	IS_NULL("IS NULL"), IS_NOT_NULL("IS NOT NULL"),
+	
 	GROUP_BY("GROUP BY"),
 	
 	TRUE("TRUE"), FALSE("FALSE"),
