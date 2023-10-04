@@ -116,7 +116,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		tablesToExport.add("export");
 
 		// execute query
-		HashMap<String, ArrayList<String>> retrievedData = pdao.exportFileRetrieve(0, howToExport, tablesToExport, BddPatcherTest.testSandbox1);
+		HashMap<String, ArrayList<String>> retrievedData = pdao.exportFileRetrieveRules(0, howToExport, tablesToExport, BddPatcherTest.testSandbox1);
 
 		// test the content of the view
 		assertEquals(3, retrievedData.keySet().size()); // 3 columns selected

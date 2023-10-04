@@ -98,7 +98,7 @@ public class ExportDao extends VObjectHelperDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	private HashMap<String, ArrayList<String>> exportFileRetrieveRules(int n, List<String> howToExport,
+	protected HashMap<String, ArrayList<String>> exportFileRetrieveRules(int n, List<String> howToExport,
 			List<String> tablesToExport, String bacASable) throws ArcException {
 		// if columns,orders table is specified, get the information from database metadata
 		String howToExportReworked;
@@ -120,10 +120,13 @@ public class ExportDao extends VObjectHelperDao {
 	}
 	
 	public ResultSet exportFileFilteredOrdered(Statement stmt, int n, List<String> tablesToExport, List<String> filterTable, List<String> orderTable, String bacASable) throws SQLException {
+		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "*", SQL.FROM, bacASable, SQL.DOT, tablesToExport.get(n),
-				SQL.WHERE, (StringUtils.isEmpty(filterTable.get(n)) ? SQL.TRUE : filterTable.get(n)), " ",
-				(StringUtils.isEmpty(orderTable.get(n)) ? "" : SQL.ORDER_BY + orderTable.get(n)), " ");
+		
+		query.build(SQL.SELECT, "*", SQL.FROM, ViewEnum.getFullName(bacASable, tablesToExport.get(n)));
+		query.build(SQL.WHERE, (StringUtils.isEmpty(filterTable.get(n)) ? SQL.TRUE : filterTable.get(n)), " ");
+		query.build((StringUtils.isEmpty(orderTable.get(n)) ? "" : SQL.ORDER_BY + orderTable.get(n)), " ");
+		
 		return stmt.executeQuery(query.getQuery().toString());
 	}
 
