@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.all.util.VObject;
@@ -78,8 +77,8 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 			// get the list nomenclatures selected record
 			Map<String, ArrayList<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
 			// if nomenclature selected, trigger call to dao to construct nomenclature view
-			if (!selectionListNomenclatures.isEmpty() && Boolean.TRUE.equals(UtilitaireDao.get(0)
-					.isTableExiste(null, "arc." + selectionListNomenclatures.get(NOM_TABLE).get(0)))) {
+			if (!selectionListNomenclatures.isEmpty() && dao
+					.execQueryIsSelectedNomenclatureTableExists(selectionListNomenclatures.get(NOM_TABLE).get(0))) {
 				dao.setSelectedRecords(selectionListNomenclatures);
 				dao.initializeViewNomenclature(viewNomenclature, NOM_TABLE,
 						selectionListNomenclatures.get(NOM_TABLE).get(0));
@@ -92,8 +91,8 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 	}
 
 	/**
-	 * Initializes {@code ModelNomenclature#viewSchemaNmcl}. Only gets the
-	 * schema linked to the selection in the nomenclature list.
+	 * Initializes {@code ModelNomenclature#viewSchemaNmcl}. Only gets the schema
+	 * linked to the selection in the nomenclature list.
 	 * 
 	 * @param viewSchemaNmcl
 	 * @param viewListNomenclatures
@@ -114,6 +113,5 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 			StaticLoggerDispatcher.error(LOGGER, "Error in InteractorNomenclature.initializeSchemaNmcl");
 		}
 	}
-
 
 }
