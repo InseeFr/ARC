@@ -23,15 +23,13 @@ import com.opencsv.CSVReader;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelTable;
-import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelVariable;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.famillenorme.dao.DDIInsertDAO;
-import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 import fr.insee.arc.web.gui.famillenorme.ddi.DDIModeler;
 import fr.insee.arc.web.gui.famillenorme.ddi.DDIParser;
+import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelTable;
+import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelVariable;
 
 @Service
 public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
@@ -51,13 +49,13 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 	public String deleteFamilleNorme(Model model) {
 		try {
-			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-			query.append(this.vObjectService.deleteQuery(views.getViewFamilleNorme()));
-			query.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(
-					views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0)));
-			query.asTransaction();
 
-			UtilitaireDao.get(0).executeRequest(null, query);
+			String idFamilleSelected = views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0);
+			// if family is selected
+			if (idFamilleSelected != null) {
+				dao.execQueryDeleteFamilleNorme(views.getViewFamilleNorme(), idFamilleSelected);
+			}
+
 		} catch (ArcException e) {
 			this.views.getViewFamilleNorme().setMessage("familyManagement.delete.error");
 		}
@@ -166,8 +164,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 					while ((recordOfTables = readerTables.readNext()) != null) {
 						String idFamille = recordOfTables[0];
 						String nomTableMetier = keepTableName(recordOfTables[1], idFamille);
-						modeler.getModelTables()
-								.add(new ModelTable(idFamille, nomTableMetier, recordOfTables[2]));
+						modeler.getModelTables().add(new ModelTable(idFamille, nomTableMetier, recordOfTables[2]));
 					}
 				} else if (ze.getName().equals("modelVariables.csv")) {
 
@@ -187,22 +184,22 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 		}
 
 	}
-	
+
 	/**
-	 * Deletes if present the prefix and suffix used for table names in ARC mapping table
+	 * Deletes if present the prefix and suffix used for table names in ARC mapping
+	 * table
+	 * 
 	 * @param nomTableMetier the table name to check for prefix and suffix
-	 * @param idFamille the norm family name to check in the table name prefix
+	 * @param idFamille      the norm family name to check in the table name prefix
 	 * @return the table name, with prefix and suffix removed if present
 	 */
 	protected String keepTableName(String nomTableMetier, String idFamille) {
-		
-		
+
 		String prefix = TraitementPhase.MAPPING.toString().toLowerCase() + "_" + idFamille.toLowerCase() + "_";
 		String suffix = "_" + TraitementEtat.OK.toString().toLowerCase();
-		
-		return ManipString.substringBeforeLast(ManipString.substringAfterFirst(nomTableMetier, prefix),suffix);
-	}
 
+		return ManipString.substringBeforeLast(ManipString.substringAfterFirst(nomTableMetier, prefix), suffix);
+	}
 
 	/**
 	 * Import a xml ddi file into the norm family

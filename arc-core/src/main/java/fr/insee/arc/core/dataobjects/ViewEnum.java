@@ -52,6 +52,12 @@ public enum ViewEnum {
 	, IHM_MOD_VARIABLE_METIER("ihm_mod_variable_metier", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE,
 			ColumnEnum.NOM_TABLE_METIER, ColumnEnum.NOM_VARIABLE_METIER, ColumnEnum.TYPE_VARIABLE_METIER,
 			ColumnEnum.DESCRIPTION_VARIABLE_METIER, ColumnEnum.TYPE_CONSOLIDATION) //
+	
+	// family model variables view in gui
+	, VIEW_VARIABLE_METIER("mod_variable_metier", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.NOM_TABLE_METIER, ColumnEnum.NOM_VARIABLE_METIER //
+			, ColumnEnum.TYPE_VARIABLE_METIER, ColumnEnum.TYPE_CONSOLIDATION, ColumnEnum.DESCRIPTION_VARIABLE_METIER) //
+	
+	
 	, IHM_NMCL("ihm_nmcl", SchemaEnum.ARC_METADATA, ColumnEnum.NOM_TABLE, ColumnEnum.DESCRIPTION) //
 	, IHM_NORMAGE_REGLE("ihm_normage_regle", SchemaEnum.ARC_METADATA, ColumnEnum.ID_REGLE_INT, ColumnEnum.ID_NORME,
 			ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION,
@@ -101,6 +107,7 @@ public enum ViewEnum {
 	, MOD_VARIABLE_METIER("mod_variable_metier", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_FAMILLE,
 			ColumnEnum.NOM_TABLE_METIER, ColumnEnum.NOM_VARIABLE_METIER, ColumnEnum.TYPE_VARIABLE_METIER,
 			ColumnEnum.DESCRIPTION_VARIABLE_METIER, ColumnEnum.TYPE_CONSOLIDATION) //
+
 
 	// rule model tables in sandbox
 	, NORME("norme", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE,

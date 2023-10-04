@@ -25,7 +25,11 @@ public class ServiceViewTableMetier extends InteractorFamilleNorme {
 	public String deleteTableMetier(Model model) {
 
 		try {
-			dao.execQueryDeleteTableMetier(views.getViewTableMetier(), views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0));
+			String idFamilleSelected = views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0);
+			// if family is selected
+			if (idFamilleSelected != null) {
+				dao.execQueryDeleteTableMetier(views.getViewTableMetier(), idFamilleSelected);
+			}
 		} catch (ArcException e) {
 			this.views.getViewTableMetier().setMessage("familyManagement.delete.error");
 		}
