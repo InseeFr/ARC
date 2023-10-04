@@ -29,6 +29,8 @@ public class ServiceViewTableMetier extends InteractorFamilleNorme {
 		} catch (ArcException e) {
 			this.views.getViewTableMetier().setMessage("familyManagement.delete.error");
 		}
+		// table metier must be rebuilt from scratch as some column might not exists anymore
+		this.vObjectService.destroy(views.getViewTableMetier());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
