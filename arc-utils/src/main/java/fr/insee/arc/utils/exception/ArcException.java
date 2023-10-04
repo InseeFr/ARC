@@ -14,6 +14,8 @@ public class ArcException extends Exception {
 	 */
 	private static final long serialVersionUID = -6127318245282541168L;
 	
+	private ArcExceptionMessage error;
+	
 	/**
 	 * build a custom business exception
 	 * @param error
@@ -22,6 +24,7 @@ public class ArcException extends Exception {
 	public ArcException(ArcExceptionMessage error, Object...parameters) {
 		super(error.formatException(parameters));
 		this.initCause(new Throwable(error.formatException(parameters)));
+		this.error = error;
 	}
 	
 	/**
@@ -45,5 +48,11 @@ public class ArcException extends Exception {
 		LoggerHelper.error(LOGGER, this.getMessage());
 		return this;
 	}
+
+	public ArcExceptionMessage getError() {
+		return error;
+	}
+	
+	
 
 }

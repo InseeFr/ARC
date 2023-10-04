@@ -89,7 +89,12 @@ public enum ArcExceptionMessage {
 	GENERIC_BEAN_KEY_VALUE_FAILED("GenericBean keyValue : the set hasn't exactly 2 elements and cannot be mapped to key>value format"),
 	GENERIC_BEAN_DUPLICATE_KEY("GenericBean keyValue : duplicate key %s"),
 	
-	SPRING_BEAN_PROPERTIES_NOTFOUND("Spring bean properties not found. Creating a blank singleton PropertiesHandler to be filled with right attributes.");
+	SPRING_BEAN_PROPERTIES_NOTFOUND("Spring bean properties not found. Creating a blank singleton PropertiesHandler to be filled with right attributes."),
+	
+	GUI_FAMILLENORME_VARIABLE_NULL("Une variable a un nom null"),
+	GUI_FAMILLENORME_VARIABLE_NO_TARGET_TABLE("Vous avez oublié de spécifier les tables cibles pour votre variable"), 
+	GUI_FAMILLENORME_VARIABLE_ALREADY_EXISTS("La variable existe déjà. Pour la modifier, passez par la ligne correspondante du tableau variable*table.\nAucune variable n'a été ajoutée.\n"),
+	GUI_EXPORT_TABLE_NOT_EXISTS("La table n'existe pas")
 	
 	;
 	
