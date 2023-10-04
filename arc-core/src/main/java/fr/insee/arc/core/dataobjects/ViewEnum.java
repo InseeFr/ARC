@@ -90,7 +90,8 @@ public enum ViewEnum {
 
 	// tables représentant le contenu des vobject (utilisées pour les tests)
 	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE) //
-
+	, VIEW_RAPPORT_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE,
+			ColumnEnum.PHASE_TRAITEMENT, ColumnEnum.ETAT_TRAITEMENT, ColumnEnum.RAPPORT, ColumnEnum.NB) //
 	// tables de pilotage
 	, PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.ID_SOURCE, ColumnEnum.ID_NORME,
 			ColumnEnum.VALIDITE, ColumnEnum.PERIODICITE, ColumnEnum.PHASE_TRAITEMENT, ColumnEnum.ETAT_TRAITEMENT,

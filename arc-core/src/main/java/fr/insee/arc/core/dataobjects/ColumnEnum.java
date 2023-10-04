@@ -132,6 +132,7 @@ public enum ColumnEnum {
 	, POS("pos", TypeEnum.BIGINT, "ordinal position") // export
 	, MAXP("maxp", TypeEnum.BIGINT, "highest position") // export
 	, I("i", TypeEnum.BIGINT, "row number index") // maintenanceparametre
+	, NB("nb", TypeEnum.BIGINT, "count") // pilotage
 	
 	, TEST1(PgColumnEnum.TEST1)
 	, TEST2(PgColumnEnum.TEST2)
