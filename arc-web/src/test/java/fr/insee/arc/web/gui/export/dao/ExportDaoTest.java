@@ -78,7 +78,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		pdao.setSelectedRecords(viewExportSelectedRecords);
 
 		// execute query
-		HashMap<String, ArrayList<String>> retrievedData = pdao.startExportRetrieve();
+		Map<String, ArrayList<String>> retrievedData = pdao.startExportRetrieve();
 
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum
