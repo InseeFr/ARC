@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -16,6 +16,7 @@ import java.util.zip.ZipOutputStream;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.web.gui.all.util.VObject;
 
@@ -52,10 +53,18 @@ public class ServiceViewExport extends InteractorExport {
 			// Requêter les exports à réaliser
 			VObject viewExport = views.getViewExport();
 			dao.setSelectedRecords(viewExport.mapContentSelected());
-			HashMap<String, ArrayList<String>> rules = dao.startExportRetrieve();
 
-			ArrayList<String> fileName = rules.get("file_name");
-			ArrayList<String> zip = rules.get("zip");
+			if (viewExport.mapContentSelected().isEmpty())
+			{
+				views.getViewExport().setMessage("general.noSelection");
+				return generateDisplay(model, RESULT_SUCCESS);
+			}
+			
+			Map<String, ArrayList<String>> rules = dao.startExportRetrieve();
+			
+			
+			ArrayList<String> fileName = rules.get(ColumnEnum.FILE_NAME.getColumnName());
+			ArrayList<String> zip = rules.get(ColumnEnum.ZIP.getColumnName());
 
 			// Initialiser le répertoire de sortie
 			String dirOut = initExportDir();
@@ -80,6 +89,7 @@ public class ServiceViewExport extends InteractorExport {
 			}
 		} catch (ArcException | SQLException e) {
 			views.getViewExport().setMessage("export.error.database");
+			views.getViewExport().setMessageArgs(e.getMessage());
 		} catch (IOException e) {
 			views.getViewExport().setMessage("export.error.filesystem");
 		}
@@ -87,7 +97,7 @@ public class ServiceViewExport extends InteractorExport {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	private void exportPlainText(String dirOut, HashMap<String, ArrayList<String>> h, int n)
+	private void exportPlainText(String dirOut, Map<String, ArrayList<String>> h, int n)
 			throws IOException, ArcException, SQLException {
 		ArrayList<String> fileName = h.get("file_name");
 
@@ -100,7 +110,7 @@ public class ServiceViewExport extends InteractorExport {
 		}
 	}
 
-	private void exportZip(String dirOut, HashMap<String, ArrayList<String>> h, int n)
+	private void exportZip(String dirOut, Map<String, ArrayList<String>> h, int n)
 			throws IOException, ArcException, SQLException {
 		ArrayList<String> fileName = h.get("file_name");
 
@@ -120,7 +130,7 @@ public class ServiceViewExport extends InteractorExport {
 		}
 	}
 
-	private void exportGz(String dirOut, HashMap<String, ArrayList<String>> h, int n)
+	private void exportGz(String dirOut, Map<String, ArrayList<String>> h, int n)
 			throws IOException, ArcException, SQLException {
 		ArrayList<String> fileName = h.get("file_name");
 

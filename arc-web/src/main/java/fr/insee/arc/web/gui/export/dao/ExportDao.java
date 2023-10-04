@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -18,12 +19,14 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
@@ -57,9 +60,10 @@ public class ExportDao extends VObjectHelperDao {
 	 * @return A map of all exports to make with their associated rules
 	 * @throws ArcException
 	 */
-	public HashMap<String, ArrayList<String>> startExportRetrieve() throws ArcException {
+	public Map<String, ArrayList<String>> startExportRetrieve() throws ArcException {
 		ViewEnum dataModelExport = ViewEnum.EXPORT;
 		String nameOfViewExport = dataObjectService.getView(dataModelExport);
+
 		// Récupérer les exports sélectionnés
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		StringBuilder columns = query.sqlListeOfColumnsFromModel(dataModelExport);
@@ -104,18 +108,16 @@ public class ExportDao extends VObjectHelperDao {
 		String howToExportReworked;
 		if (howToExport.get(n) == null) {
 			howToExportReworked = "(select column_name as varbdd, ordinal_position as pos from information_schema.columns where table_schema||'.'||table_name = '"
-					+ bacASable.toLowerCase() + "." + tablesToExport.get(n) + "') ww ";
+					+ ViewEnum.getFullName(bacASable.toLowerCase(),tablesToExport.get(n)) + "') ww ";
 		} else {
-			howToExportReworked = "arc." + howToExport.get(n);
+			howToExportReworked = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), howToExport.get(n));
 		}
 
 		// lire la table how to export pour voir comment on va s'y prendre
 		// L'objectif est de créer une hashmap de correspondance entre la variable et la position
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "lower(", ColumnEnum.VARBDD, ")", SQL.AS, ColumnEnum.VARBDD, SQL.COMMA,
-				ColumnEnum.POS, SQL.CAST_OPERATOR, "int-1", SQL.AS, ColumnEnum.POS, SQL.COMMA,
-				"max(", ColumnEnum.POS, SQL.CAST_OPERATOR, "int) over()", SQL.AS, ColumnEnum.MAXP, SQL.FROM,
-				howToExportReworked, SQL.ORDER_BY, ColumnEnum.POS, SQL.CAST_OPERATOR, "int");
+		query.build("SELECT lower(varbdd) as varbdd, pos::int-1 as pos, max(pos::int) over() as maxp FROM "+howToExportReworked+" order by pos::int ");
+		
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), query)).mapContent();
 	}
 	
@@ -141,7 +143,7 @@ public class ExportDao extends VObjectHelperDao {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public void exportFile(HashMap<String, ArrayList<String>> h, int n, BufferedWriter bw, FileOutputStream fw)
+	public void exportFile(Map<String, ArrayList<String>> h, int n, BufferedWriter bw, FileOutputStream fw)
 			throws ArcException, IOException, SQLException {
 		ArrayList<String> tablesToExport = h.get("table_to_export");
 		ArrayList<String> headers = h.get("headers");
@@ -156,6 +158,10 @@ public class ExportDao extends VObjectHelperDao {
 		ArrayList<String> headerLine = new ArrayList<>();
 
 		h = exportFileRetrieveRules(n, howToExport, tablesToExport, this.dataObjectService.getSandboxSchema());
+		
+		if (h.isEmpty()) {
+			throw new ArcException(ArcExceptionMessage.GUI_EXPORT_TABLE_NOT_EXISTS);
+		}
 
 		for (int i = 0; i < h.get("varbdd").size(); i++) {
 			pos.put(h.get("varbdd").get(i), Integer.parseInt(h.get("pos").get(i)));
@@ -172,74 +178,75 @@ public class ExportDao extends VObjectHelperDao {
 
 		int maxPos = Integer.parseInt(h.get("maxp").get(0));
 
-		Connection c = UtilitaireDao.get(0).getDriverConnexion();
-		c.setAutoCommit(false);
-
-		Statement stmt = c.createStatement();
-		stmt.setFetchSize(5000);
-
-		try (ResultSet res = exportFileFilteredOrdered(stmt, n, tablesToExport, filterTable, orderTable, this.dataObjectService.getSandboxSchema())) {
-			ResultSetMetaData rsmd = res.getMetaData();
-
-			ArrayList<String> output;
-			String[] tabH;
-			String[] tabV;
-			String colName;
-			while (res.next()) {
-				// reinitialiser l'arraylist de sortie
-				output = new ArrayList<String>();
-				for (int k = 0; k < maxPos; k++) {
-					output.add("");
-				}
-
-				boolean todo = false;
-				tabH = null;
-				tabV = null;
-				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-					colName = rsmd.getColumnLabel(i).toLowerCase();
-
-					todo = true;
-					// cas ou on est dans un tableau
-					if (todo && colName.equals(headersToScan.get(n))) {
-						todo = false;
-						tabH = (String[]) res.getArray(i).getArray();
+		try(Connection c = UtilitaireDao.get(0).getDriverConnexion();)
+		{
+			c.setAutoCommit(false);
+	
+			Statement stmt = c.createStatement();
+			stmt.setFetchSize(5000);
+	
+			try (ResultSet res = exportFileFilteredOrdered(stmt, n, tablesToExport, filterTable, orderTable, this.dataObjectService.getSandboxSchema())) {
+				ResultSetMetaData rsmd = res.getMetaData();
+	
+				ArrayList<String> output;
+				String[] tabH;
+				String[] tabV;
+				String colName;
+				while (res.next()) {
+					// reinitialiser l'arraylist de sortie
+					output = new ArrayList<String>();
+					for (int k = 0; k < maxPos; k++) {
+						output.add("");
 					}
-					if (todo && colName.equals(valuesToScan.get(n))) {
-						todo = false;
-						tabV = (String[]) res.getArray(i).getArray();
-					}
-					if (todo) {
-						todo = false;
-						if (pos.get(colName) != null) {
-							// if nulls value musn't be quoted as "null" and element is null then don't write
-							if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(res.getString(i)))) {
-								output.set(pos.get(colName), res.getString(i));
+	
+					boolean todo = false;
+					tabH = null;
+					tabV = null;
+					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+						colName = rsmd.getColumnLabel(i).toLowerCase();
+	
+						todo = true;
+						// cas ou on est dans un tableau
+						if (todo && colName.equals(headersToScan.get(n))) {
+							todo = false;
+							tabH = (String[]) res.getArray(i).getArray();
+						}
+						if (todo && colName.equals(valuesToScan.get(n))) {
+							todo = false;
+							tabV = (String[]) res.getArray(i).getArray();
+						}
+						if (todo) {
+							todo = false;
+							if (pos.get(colName) != null) {
+								// if nulls value musn't be quoted as "null" and element is null then don't write
+								if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(res.getString(i)))) {
+									output.set(pos.get(colName), res.getString(i));
+								}
 							}
 						}
 					}
-				}
-
-				// traitement des variables tableaux
-				if (tabH != null && tabV != null) {
-					for (int k = 0; k < tabH.length; k++) {
-						if (pos.get(tabH[k].toLowerCase()) != null) {
-							// if nulls value musn't be quoted as "null" and element is null then don't write
-							if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(tabV[k]))) {
-								output.set(pos.get(tabH[k].toLowerCase()), tabV[k]);
+	
+					// traitement des variables tableaux
+					if (tabH != null && tabV != null) {
+						for (int k = 0; k < tabH.length; k++) {
+							if (pos.get(tabH[k].toLowerCase()) != null) {
+								// if nulls value musn't be quoted as "null" and element is null then don't write
+								if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(tabV[k]))) {
+									output.set(pos.get(tabH[k].toLowerCase()), tabV[k]);
+								}
 							}
 						}
 					}
+	
+					for (String o : output) {
+						bw.write(o + ";");
+					}
+					bw.write("\n");
 				}
-
-				for (String o : output) {
-					bw.write(o + ";");
-				}
-				bw.write("\n");
 			}
+			bw.flush();
+			fw.flush();
 		}
-		c.close();
-		bw.flush();
-		fw.flush();
 
 	}
 	
