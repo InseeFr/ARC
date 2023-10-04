@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.utils.exception.ArcException;
 
 @Service
 public class ServiceViewChargement extends InteractorNorme {
@@ -68,7 +69,7 @@ public class ServiceViewChargement extends InteractorNorme {
 	 * @return
 	 */
 	public String importChargement(Model model, MultipartFile fileUploadLoad) {
-		uploadFileRule(views.getViewChargement(), views.getViewJeuxDeRegles(), fileUploadLoad);
+		dao.uploadFileRule(views.getViewChargement(), views.getViewJeuxDeRegles(), fileUploadLoad);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -76,10 +77,15 @@ public class ServiceViewChargement extends InteractorNorme {
 	 * Clean the loading rules. Update GUI and database
 	 * 
 	 * @return
+	 * @throws ArcException 
 	 */
 	public String viderChargement(Model model) {
 
-		emptyRuleTable(views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
+		try {
+			dao.emptyRuleTable(views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
+		} catch (ArcException e) {
+			e.logFullException();
+		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

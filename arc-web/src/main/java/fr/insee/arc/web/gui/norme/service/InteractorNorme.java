@@ -1,13 +1,8 @@
 package fr.insee.arc.web.gui.norme.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,15 +12,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.format.Format;
-import fr.insee.arc.utils.textUtils.IConstanteCaractere;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.model.GuiModules;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
@@ -347,135 +336,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		defaultInputFields.put("version", selection.get("version").get(0));
 		return defaultInputFields;
 	}
-	
-	
-	/**
-	 * Empty all the rules of a norm module
-	 * 
-	 * @param table
-	 * @return
-	 */
-	protected void emptyRuleTable(VObject viewRulesSet, String table) {
-		loggerDispatcher.info("Empty all the rules of a module", LOGGER);
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		HashMap<String, String> type = viewRulesSet.mapHeadersType();
-		ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
-		requete.append("DELETE FROM " + table);
-        requete.append(" WHERE id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-        requete.append(" AND periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-        requete.append(" AND validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-        requete.append(" AND validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-        requete.append(" AND version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
-        requete.append(" ;");
-
-		try {
-			UtilitaireDao.get(0).executeRequest(null, requete);
-		} catch (ArcException e) {
-			LoggerHelper.error(LOGGER, String.format("Error when emptying the rules %s", e.toString()));
-
-		}
-	}
-
-	/**
-	 * 
-	 * @param vObjectToUpdate the vObject to update with file
-	 * @param tableName       the
-	 */
-	protected void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, MultipartFile theFileToUpload) {
-
-		// Check if there is file
-		if (theFileToUpload == null || theFileToUpload.isEmpty()) {
-			// No file -> ko
-			vObjectToUpdate.setMessage("normManagement.upload.noSelection");
-		} else {
-			// A file -> can process it
-			LoggerHelper.debug(LOGGER, " filesUpload  : " + theFileToUpload);
-
-			// before inserting in the final table, the rules will be inserted in a table to
-			// test them
-			String nomTableImage = FormatSQL.temporaryTableName(vObjectToUpdate.getTable() + "_img" + 0);
-			
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));) {
-				// Get headers
-				List<String> listHeaders = getHeaderFromFile(bufferedReader);
-
-				/*
-				 * Création d'une table temporaire (qui ne peut pas être TEMPORARY)
-				 */
-				ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
-			    requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
-			    requete.append("\n CREATE TABLE " + nomTableImage + " AS SELECT "//
-				    + Format.untokenize(listHeaders, ", ") //
-				    + "\n\t FROM " //
-				    + vObjectToUpdate.getTable() //
-				    + "\n\t WHERE false");
 
 
-				UtilitaireDao.get(0).executeRequest(null, requete);
-
-				// Throwing away the first line
-				String uselessLine = bufferedReader.readLine();
-				LoggerHelper.debug(LOGGER, uselessLine + "is thrown away");
-				
-
-				// Importing the file in the database (COPY command)
-				UtilitaireDao.get(0).importingWithReader(null, nomTableImage, bufferedReader, false,
-						IConstanteCaractere.semicolon);
-
-			} catch (Exception ex) {
-				vObjectToUpdate.setMessage("normManagement.upload.error");
-				vObjectToUpdate.setMessageArgs(ex.getMessage());
-				LoggerHelper.error(LOGGER, ex, "uploadOutils()", "\n");
-				// After the exception, the methode cant go further, so the better thing to do
-				// is to quit it
-				return;
-			}
-			LoggerHelper.debug(LOGGER, "Insert file in the " + nomTableImage + " table");
-
-			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-
-			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
-
-			requete.append("\n UPDATE " + nomTableImage + " SET ");
-			requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));
-			requete.append("\n, periodicite=" + requete.quoteText(selection.get("periodicite").get(0)));
-			requete.append("\n, validite_inf=" + requete.quoteText(selection.get("validite_inf").get(0)) + "::date");
-			requete.append("\n, validite_sup=" + requete.quoteText(selection.get("validite_sup").get(0)) + "::date");
-			requete.append("\n, version=" + requete.quoteText(selection.get("version").get(0)));
-			requete.append("\n ; ");
-			
-			requete.append("\n DELETE FROM " + vObjectToUpdate.getTable());
-			requete.append("\n WHERE ");
-			requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));
-			requete.append("\n AND  periodicite=" + requete.quoteText(selection.get("periodicite").get(0)));
-			requete.append("\n AND  validite_inf=" + requete.quoteText(selection.get("validite_inf").get(0)) + "::date");
-			requete.append("\n AND  validite_sup=" + requete.quoteText(selection.get("validite_sup").get(0)) + "::date");
-			requete.append("\n AND  version=" + requete.quoteText(selection.get("version").get(0)));
-			requete.append("\n ; ");
-
-			requete.append("\n INSERT INTO " + vObjectToUpdate.getTable() + " ");
-			requete.append("\n SELECT * FROM " + nomTableImage + " ;");
-			requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
-
-			try {
-				UtilitaireDao.get(0).executeRequest(null, requete);
-			} catch (Exception ex) {
-				vObjectToUpdate.setMessage("normManagement.upload.error");
-				vObjectToUpdate.setMessageArgs(ex.getMessage());
-				LoggerHelper.error(LOGGER, ex, "uploadOutils()");
-			}
-		}
-
-	}
-	
-
-
-	private static List<String> getHeaderFromFile(BufferedReader bufferedReader) throws IOException {
-		String listeColonnesAggregees = bufferedReader.readLine();
-		List<String> listeColonnes = Arrays.asList(listeColonnesAggregees.split(IConstanteCaractere.semicolon));
-		LoggerHelper.debug(LOGGER, "Columns list : ", Format.untokenize(listeColonnes, ", "));
-		return listeColonnes;
-	}
 
 
 	/**

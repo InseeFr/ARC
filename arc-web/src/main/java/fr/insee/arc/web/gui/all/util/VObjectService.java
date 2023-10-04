@@ -57,8 +57,6 @@ import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
  * more generaly any table data) stored in a VObject instance. Provides general
  * helper methods, can also interact with the database (CRUD functionalities) or
  * extract the data in a file.
- * 
- * @author Soulier Manuel
  *
  */
 @Service
@@ -619,6 +617,7 @@ public class VObjectService {
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("vObject.insert.error");
+			currentData.setMessageArgs(ex.getCause());
 			return false;
 		}
 		return true;
@@ -635,6 +634,7 @@ public class VObjectService {
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("vObject.delete.error");
+			currentData.setMessageArgs(ex.getCause());
 		}
 	}
 
@@ -778,6 +778,7 @@ public class VObjectService {
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("vObject.update.error");
+			currentData.setMessageArgs(ex.getCause());
 		}
 
 	}

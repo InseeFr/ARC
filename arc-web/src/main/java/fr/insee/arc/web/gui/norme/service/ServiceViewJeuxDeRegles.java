@@ -1,9 +1,7 @@
 package fr.insee.arc.web.gui.norme.service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,8 +14,6 @@ import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.service.global.bo.ArcDateFormat;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.util.ConstanteBD;
@@ -88,35 +84,11 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 	/**
 	 * Action trigger by updating a rule set in the GUI. Update the GUI and the
 	 * database.
-	 * 
-	 * If the rule set is send to production, send a dummy file in prod which
-	 * trigger the initialisation batch.
-	 * 
+	 * If target environment is a production environment, trigger the initialisation process
 	 * @return success
 	 */
 	public String updateRuleSet(Model model) {
-		HashMap<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
-
-		// on les crée dans tous les environnements et tous les entrepots
-		// (ca evite les erreurs et car ca ne spécialise aucun environnement dans un
-		// role à priori)
-
-		if (!selection.isEmpty()) {
-			for (int i = 0; i < selection.get("etat").size(); i++) {
-				String etat = selection.get("etat").get(i);
-				if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
-					sendRuleSetToProduction(this.views.getViewJeuxDeRegles(),
-							dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)
-							
-							);
-				}
-			}
-
-			this.vObjectService.update(views.getViewJeuxDeRegles());
-
-		}
-
-		return generateDisplay(model, RESULT_SUCCESS);
+		return updateVobject(model, RESULT_SUCCESS, this.views.getViewJeuxDeRegles());
 	}
 
 	/**
@@ -178,29 +150,6 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 		}
 
 	}
-	
-	/**
-	 * Send a rule set to production.
-	 */
-	public void sendRuleSetToProduction(VObject viewRulesSet, String theTable) {
-		Date dNow = new Date();
-		loggerDispatcher.warn("Rule set send to production", LOGGER);
-
-		try {
-			
-			ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
-			requete.append("update " + theTable + " set last_init='"+ new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat()).format(dNow) + "', operation=case when operation='R' then 'O' else operation end;");
-			
-			UtilitaireDao.get(0).executeRequest(null, requete);
-			viewRulesSet.setMessage("normManagement.goToProduction");
-
-		} catch (ArcException e) {
-			viewRulesSet.setMessage("normManagement.goToProduction.error");
-			LoggerHelper.warn(LOGGER, "normManagement.goToProduction.error");
-
-		}
-	}
-	
 
 	/**
 	 * Return the SQL to get all the rules bond to a rule set. It suppose the a rule

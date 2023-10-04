@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.utils.exception.ArcException;
 
 @Service
 public class ServiceViewExpression extends InteractorNorme {
@@ -30,7 +31,7 @@ public class ServiceViewExpression extends InteractorNorme {
 	}
 
 	public String importExpression(Model model, MultipartFile fileUploadExpression) {
-		uploadFileRule(views.getViewExpression(), views.getViewJeuxDeRegles(), fileUploadExpression);
+		dao.uploadFileRule(views.getViewExpression(), views.getViewJeuxDeRegles(), fileUploadExpression);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -40,8 +41,11 @@ public class ServiceViewExpression extends InteractorNorme {
 	 * @return
 	 */
 	public String viderExpression(Model model) {
-
-		emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_EXPRESSION));
+		try {
+			dao.emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_EXPRESSION));
+		} catch (ArcException e) {
+			e.logFullException();
+		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

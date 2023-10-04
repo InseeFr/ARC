@@ -303,33 +303,18 @@ public class NormageEngine {
 	}
 
 
-
-	private Integer excludeFileonTimeOut(HashMap<String, ArrayList<String>> regle) {
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-			String type = regle.get("id_classe").get(j);
-			if (type.equals("exclusion")) {
-				return Integer.parseInt(regle.get("rubrique").get(j));
-			}
-		}
-		return null;
-	}
-
-	private String applyQueryPlanParametersOnJointure(String query, Integer statementTimeOut) {
-		return applyQueryPlanParametersOnJointure(new ArcPreparedStatementBuilder(query), statementTimeOut).getQuery()
+	private String applyQueryPlanParametersOnJointure(String query) {
+		return applyQueryPlanParametersOnJointure(new ArcPreparedStatementBuilder(query)).getQuery()
 				.toString();
 	}
 
-	private ArcPreparedStatementBuilder applyQueryPlanParametersOnJointure(ArcPreparedStatementBuilder query,
-			Integer statementTimeOut) {
+	private ArcPreparedStatementBuilder applyQueryPlanParametersOnJointure(ArcPreparedStatementBuilder query) {
 		ArcPreparedStatementBuilder r = new ArcPreparedStatementBuilder();
 		// seqscan on can be detrimental on some rare large file
 		r.append("set enable_nestloop=off;\n");
-		r.append((statementTimeOut == null) ? "" : "set statement_timeout=" + statementTimeOut.toString() + ";\n");
 		r.append("commit;");
 		r.append(query);
-		r.append((statementTimeOut == null) ? "" : "reset statement_timeout;");
 		r.append("set enable_nestloop=on;\n");
-
 		r.setQuery(new StringBuilder(r.getQuery().toString().replace(" insert into ", "commit; insert into ")));
 		return r;
 	}
@@ -366,8 +351,7 @@ public class NormageEngine {
 
 		// No partition found; normal execution
 		UtilitaireDao.get(0).executeImmediate(connection, applyQueryPlanParametersOnJointure(
-				replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, idSource),
-				null));
+				replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, idSource)));
 
 	}
 
@@ -403,8 +387,6 @@ public class NormageEngine {
 		// another table than t_rubrique
 		String partitionTableName = "";
 		String partitionIdentifier = " m_" + element + " ";
-
-		Integer statementTimeOut = excludeFileonTimeOut(regle);
 
 		if (blocCreate.contains(partitionIdentifier)) {
 			// get the tablename
@@ -444,7 +426,7 @@ public class NormageEngine {
 			bloc4.append("\n analyze " + partitionTableName + ";");
 			bloc4.append(blocInsert);
 
-			bloc4 = applyQueryPlanParametersOnJointure(bloc4, statementTimeOut);
+			bloc4 = applyQueryPlanParametersOnJointure(bloc4);
 
 			// iterate through chunks
 			int iterate = 1;
@@ -465,7 +447,7 @@ public class NormageEngine {
 		// no partitions needed
 		{
 			UtilitaireDao.get(0).executeImmediate(connection,
-					applyQueryPlanParametersOnJointure(blocInsert, statementTimeOut));
+					applyQueryPlanParametersOnJointure(blocInsert));
 		}
 	}
 

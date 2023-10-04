@@ -47,8 +47,7 @@ public class ControllerViewJeuxDeRegles extends ServiceViewJeuxDeRegles {
 	 * Action trigger by updating a rule set in the GUI. Update the GUI and the
 	 * database.
 	 * 
-	 * If the rule set is send to production, send a dummy file in prod which
-	 * trigger the initialisation batch.
+	 * If the rule set is send to production, program an initialization for the current day
 	 * 
 	 * @return success
 	 */

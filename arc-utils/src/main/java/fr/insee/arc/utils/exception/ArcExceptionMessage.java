@@ -78,7 +78,7 @@ public enum ArcExceptionMessage {
 
 	
 	SQL_DATE_PARSE_FAILED("L'expression %s n'a pas pu être converti au format date java %s"),
-	SQL_EXECUTE_FAILED("L'excution de la requête dans la base de données a échoué"),
+	SQL_EXECUTE_FAILED("L'exécution de la requête dans la base de données a échoué"),
 	
 	WS_RETRIEVE_DATA_FAMILY_FORBIDDEN("Vous ne pouvez pas accéder à cette famille de norme"),
 

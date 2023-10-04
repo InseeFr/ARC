@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.utils.exception.ArcException;
 
 @Service
 public class ServiceViewNormage extends InteractorNorme {
@@ -17,7 +18,7 @@ public class ServiceViewNormage extends InteractorNorme {
 	 */
 	public String importNormage(Model model, MultipartFile fileUploadStructurize) {
 
-		uploadFileRule(views.getViewNormage(), views.getViewJeuxDeRegles(), fileUploadStructurize);
+		dao.uploadFileRule(views.getViewNormage(), views.getViewJeuxDeRegles(), fileUploadStructurize);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -78,7 +79,11 @@ public class ServiceViewNormage extends InteractorNorme {
 	 */
 	public String viderNormage(Model model) {
 
-		emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
+		try {
+			dao.emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
+		} catch (ArcException e) {
+			e.logFullException();
+		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
