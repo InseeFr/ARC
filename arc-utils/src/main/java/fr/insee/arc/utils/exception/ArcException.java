@@ -40,7 +40,6 @@ public class ArcException extends Exception {
 	public ArcException logFullException()
 	{
 		LoggerHelper.error(LOGGER, this.getCause(), this.getMessage());
-		this.printStackTrace();
 		return this;
 	}
 	
