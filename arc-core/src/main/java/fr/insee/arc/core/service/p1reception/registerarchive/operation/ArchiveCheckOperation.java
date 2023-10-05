@@ -91,7 +91,6 @@ public class ArchiveCheckOperation {
 				}
 			}
 		}
-
 		return contentTemp;
 	}
 

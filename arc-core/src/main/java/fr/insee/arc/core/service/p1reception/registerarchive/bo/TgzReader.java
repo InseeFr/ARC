@@ -9,6 +9,8 @@ import java.util.zip.GZIPInputStream;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
 
 public class TgzReader implements IArchiveStream {
@@ -17,30 +19,47 @@ public class TgzReader implements IArchiveStream {
 		super();
 	}
 
+	private FileInputStream fileInputStream;
+	private BufferedInputStream bufferedInputStream;
+	private GZIPInputStream gZIPInputStream;
 	private TarInputStream tarInputStream;
 
 	@Override
 	public void startInputStream(File f) throws IOException {
-		tarInputStream = new TarInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(f), CompressedUtils.READ_BUFFER_SIZE)));
+
+		this.fileInputStream = new FileInputStream(f);
+		this.bufferedInputStream = new BufferedInputStream(fileInputStream, CompressedUtils.READ_BUFFER_SIZE);
+		this.gZIPInputStream = new GZIPInputStream(bufferedInputStream);
+		this.tarInputStream = new TarInputStream(gZIPInputStream);
+
 	}
 
 	@Override
 	public Entry getEntry() throws IOException {
 		TarEntry currentEntry = tarInputStream.getNextEntry();
-		
 		if (currentEntry == null) {
 			return null;
 		}
-
 		return new Entry(currentEntry.isDirectory(), currentEntry.getName());
 	}
 
 	@Override
 	public void close() {
 		try {
-			tarInputStream.close();
+			if (tarInputStream != null) {
+				tarInputStream.close();
+			}
+			if (gZIPInputStream != null) {
+				gZIPInputStream.close();
+			}
+			if (bufferedInputStream != null) {
+				bufferedInputStream.close();
+			}
+			if (fileInputStream != null) {
+				fileInputStream.close();
+			}
 		} catch (IOException e) {
-			
+			new ArcException(e, ArcExceptionMessage.FILE_CLOSE_FAILED).logFullException();
 		}
 	}
 

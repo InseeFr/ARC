@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.bo.Sandbox;
@@ -159,8 +160,7 @@ public class SynchronizeRulesAndMetadataOperation {
 
 		// Checks expression validity
 		ExpressionService expressionService = new ExpressionService();
-		ArrayList<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion,
-				anExecutionEnvironment + ".jeuderegle");
+		ArrayList<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion, ViewEnum.JEUDEREGLE.getFullName(anExecutionEnvironment));
 		for (JeuDeRegle ruleSet : allRuleSets) {
 			// Check
 			GenericBean expressions = expressionService.fetchExpressions(connexion, anExecutionEnvironment, ruleSet);
@@ -178,12 +178,10 @@ public class SynchronizeRulesAndMetadataOperation {
 			// Apply
 			expressions = expressionService.fetchOrderedExpressions(connexion, anExecutionEnvironment, ruleSet);
 			if (expressionService.isExpressionSyntaxPresentInControl(connexion, anExecutionEnvironment, ruleSet)) {
-				UtilitaireDao.get(0).executeRequest(connexion,
-						expressionService.applyExpressionsToControl(ruleSet, expressions, anExecutionEnvironment));
+				dao.execQueryApplyExpressionsToControl(expressionService, ruleSet, expressions);
 			}
 			if (expressionService.isExpressionSyntaxPresentInMapping(connexion, anExecutionEnvironment, ruleSet)) {
-				UtilitaireDao.get(0).executeRequest(connexion,
-						expressionService.applyExpressionsToMapping(ruleSet, expressions, anExecutionEnvironment));
+				dao.execQueryApplyExpressionsToMapping(expressionService, ruleSet, expressions);
 			}
 		}
 

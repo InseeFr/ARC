@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.p0initialisation.pilotage.dao;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -21,7 +22,7 @@ import fr.insee.arc.utils.utils.ManipString;
 public class SynchronizeDataByPilotageDao {
 
 	private SynchronizeDataByPilotageDao() {
-		throw new IllegalStateException("Utility class");
+		throw new IllegalStateException("static dao : most method could be used by functional interface to be sent on several connections");
 	}
 
 	/**
@@ -144,6 +145,30 @@ public class SynchronizeDataByPilotageDao {
 		query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getFullName(), ")");
 
 		UtilitaireDao.get(0).executeRequest(executorConnection, query);
-
 	}
+	
+
+	public static void dropDataTables(Connection executorConnection, List<String> dataTablesToDrop) {
+		UtilitaireDao.get(0).dropTable(executorConnection, dataTablesToDrop);
+	}
+	
+
+	/**
+	 * drop the unused temporary table on the target connection / environment
+	 * 
+	 * @param targetConnexion
+	 * @throws ArcException
+	 */
+	public static void dropUnusedTemporaryTablesOnConnection(Connection targetConnexion, String envExecution) throws ArcException {
+		GenericBean g = new GenericBean(
+				UtilitaireDao.get(0).executeRequest(targetConnexion, SynchronizeDataByPilotageDao.requeteListAllTemporaryTablesInEnv(envExecution)));
+		if (!g.mapContent().isEmpty()) {
+			ArrayList<String> envTables = g.mapContent().get("table_name");
+			for (String nomTable : envTables) {
+				UtilitaireDao.get(0).executeBlock(targetConnexion, FormatSQL.dropTable(nomTable));
+			}
+		}
+	}
+
+	
 }

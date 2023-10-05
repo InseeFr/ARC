@@ -11,8 +11,10 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
+import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.TableNaming;
+import fr.insee.arc.core.service.p5mapping.engine.ExpressionService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
@@ -320,11 +322,27 @@ public class SynchronizeRulesAndMetadataDao {
 	}
 
 
+	/**
+	 * load all data table in a GenericBean
+	 * @param coordinatorConnexion
+	 * @param table
+	 * @return
+	 * @throws ArcException
+	 */
 	public static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table) throws ArcException {
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
 				new ArcPreparedStatementBuilder("SELECT * FROM " + table)));
 	}
-	
-	
-	
+
+	public void execQueryApplyExpressionsToControl(ExpressionService expressionService, JeuDeRegle ruleSet, GenericBean expressions) throws ArcException {
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(),
+				expressionService.applyExpressionsToControl(ruleSet, expressions, sandbox.getSchema()));
+	}
+
+	public void execQueryApplyExpressionsToMapping(ExpressionService expressionService, JeuDeRegle ruleSet,
+			GenericBean expressions) throws ArcException {
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(),
+				expressionService.applyExpressionsToMapping(ruleSet, expressions, sandbox.getSchema()));
+	}
+
 }

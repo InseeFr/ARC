@@ -3,6 +3,7 @@ package fr.insee.arc.web.gui.famillenorme.service;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -14,7 +15,7 @@ public class ServiceViewTableMetier extends InteractorFamilleNorme {
 	}
 
 	public String addTableMetier(Model model) {
-		if (isNomTableMetierValide(views.getViewTableMetier().mapInputFields().get(NOM_TABLE_METIER).get(0))) {
+		if (isNomTableMetierValide(views.getViewTableMetier().mapInputFields().get(ColumnEnum.NOM_TABLE_METIER.getColumnName()).get(0))) {
 			this.vObjectService.insert(views.getViewTableMetier());
 		} else {
 			setMessageNomTableMetierInvalide();
@@ -25,7 +26,7 @@ public class ServiceViewTableMetier extends InteractorFamilleNorme {
 	public String deleteTableMetier(Model model) {
 
 		try {
-			String idFamilleSelected = views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0);
+			String idFamilleSelected = views.getViewFamilleNorme().mapContentSelected().get(ColumnEnum.ID_FAMILLE.getColumnName()).get(0);
 			// if family is selected
 			if (idFamilleSelected != null) {
 				dao.execQueryDeleteTableMetier(views.getViewTableMetier(), idFamilleSelected);
@@ -45,12 +46,12 @@ public class ServiceViewTableMetier extends InteractorFamilleNorme {
 	private void setMessageNomTableMetierInvalide() {
 		this.views.getViewTableMetier().setMessage("familyManagement.table.error.invalidname");
 		this.views.getViewTableMetier()
-				.setMessageArgs(views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0));
+				.setMessageArgs(views.getViewFamilleNorme().mapContentSelected().get(ColumnEnum.ID_FAMILLE.getColumnName()).get(0));
 	}
 
 	private final boolean isNomTableMetierValide(String nomTable) {
 		return isNomTableMetierValide(nomTable, TraitementPhase.MAPPING.toString().toLowerCase(),
-				views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0));
+				views.getViewFamilleNorme().mapContentSelected().get(ColumnEnum.ID_FAMILLE.getColumnName()).get(0));
 	}
 
 }

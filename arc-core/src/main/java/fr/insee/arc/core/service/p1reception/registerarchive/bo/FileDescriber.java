@@ -14,6 +14,7 @@ public class FileDescriber {
 	private TraitementEtat etat;
 	private String report;
 	private String virtualContainer;
+	private String containerNewName;
 
 	public FileDescriber(String containerName, String fileName, TraitementTypeFichier typeOfFile, TraitementEtat etat, String report,
 			String virtualContainer) {
@@ -85,6 +86,13 @@ public class FileDescriber {
 	{
 		return fileAttributes().toString();
 	}
-	
-	
+
+	public String getContainerNewName() {
+		return containerNewName;
+	}
+
+	public void setContainerNewName(String containerNewName) {
+		this.containerNewName = containerNewName;
+	}
+
 }

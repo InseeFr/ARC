@@ -96,7 +96,7 @@ public class PhaseOperations {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String selectIdSourceOfChildDataTable(Connection connection, String dataTable) throws ArcException
+	public static String execQuerySelectIdSourceOfChildDataTable(Connection connection, String dataTable) throws ArcException
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, dataTable, SQL.LIMIT, "1");

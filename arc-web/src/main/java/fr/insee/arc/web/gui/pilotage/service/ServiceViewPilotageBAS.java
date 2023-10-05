@@ -63,7 +63,11 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : */ *");
 
 		String writingRepo = this.views.getViewEntrepotBAS().getCustomValue(WRITING_REPO);
-		if (writingRepo != null && !writingRepo.equals("") && views.getViewPilotageBAS().getFileUpload() != null) {
+		String originalFileName=views.getViewPilotageBAS().getFileUpload().get(0).getOriginalFilename();
+		
+		boolean isAnyFileSelected = (originalFileName!=null) && (!originalFileName.isEmpty());
+		
+		if (writingRepo != null && !writingRepo.equals("") && isAnyFileSelected) {
 
 			String repertoireUpload = Paths
 					.get(this.repertoire + getBacASable().toUpperCase(), TraitementPhase.RECEPTION + "_" + writingRepo)
@@ -72,35 +76,34 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 			
 			try {
 				this.vObjectService.upload(views.getViewPilotageBAS(), repertoireUpload);
+				
+				if (!isEnvProd()) {
+					// Lancement de l'initialisation dans la foulée
+					ApiServiceFactory
+							.getService(TraitementPhase.INITIALISATION.toString(), getBacASable(),
+									this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
+							.invokeApi();
+					ApiServiceFactory
+							.getService(TraitementPhase.RECEPTION.toString(), getBacASable(),
+									this.repertoire, TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
+							.invokeApi();
+				}
+				
 			} catch (ArcException e) {
 				this.views.getViewPilotageBAS().setMessage("managementSandbox.upload.fail");
 			}
 		} else {
-			String msg = "";
-			if (views.getViewPilotageBAS().getFileUpload() == null) {
-				msg = "managementSandbox.upload.noSelection\n";
+			if (!isAnyFileSelected) {
 				this.views.getViewPilotageBAS().setMessage("managementSandbox.upload.noSelection");
 			}
 
 			if (writingRepo == null || writingRepo.equals("")) {
-				msg += "managementSandbox.upload.noFilestoreSelection\n";
+				this.views.getViewPilotageBAS().setMessage("managementSandbox.upload.noFilestoreSelection");
 			}
-
-			this.views.getViewPilotageBAS().setMessage(msg);
 		}
+		
 		this.views.getViewEntrepotBAS().setCustomValue(WRITING_REPO, null);
-		if (!isEnvProd()) {
-			// Lancement de l'initialisation dans la foulée
-			ApiServiceFactory
-					.getService(TraitementPhase.INITIALISATION.toString(), getBacASable(),
-							this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
-					.invokeApi();
-			ApiServiceFactory
-					.getService(TraitementPhase.RECEPTION.toString(), getBacASable(),
-							this.repertoire, TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
-					.invokeApi();
-		}
-
+		
 		return generateDisplay(model, RESULT_SUCCESS);
 
 	}

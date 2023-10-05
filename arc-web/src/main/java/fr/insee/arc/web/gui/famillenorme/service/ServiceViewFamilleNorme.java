@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVReader;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.exception.ArcException;
@@ -42,15 +43,15 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 	public String addFamilleNorme(Model model) {
 		// Clean up spaces
-		String nomFamilleNorme = views.getViewFamilleNorme().getInputFieldFor(ID_FAMILLE);
-		views.getViewFamilleNorme().setInputFieldFor(ID_FAMILLE, nomFamilleNorme.trim());
+		String nomFamilleNorme = views.getViewFamilleNorme().getInputFieldFor(ColumnEnum.ID_FAMILLE.getColumnName());
+		views.getViewFamilleNorme().setInputFieldFor(ColumnEnum.ID_FAMILLE.getColumnName(), nomFamilleNorme.trim());
 		return addLineVobject(model, RESULT_SUCCESS, views.getViewFamilleNorme());
 	}
 
 	public String deleteFamilleNorme(Model model) {
 		try {
 
-			String idFamilleSelected = views.getViewFamilleNorme().mapContentSelected().get(ID_FAMILLE).get(0);
+			String idFamilleSelected = views.getViewFamilleNorme().mapContentSelected().get(ColumnEnum.ID_FAMILLE.getColumnName()).get(0);
 			// if family is selected
 			if (idFamilleSelected != null) {
 				dao.execQueryDeleteFamilleNorme(views.getViewFamilleNorme(), idFamilleSelected);
@@ -77,18 +78,18 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 		if (!selection.isEmpty()) {
 
-			String selectedFamille = selection.get(ID_FAMILLE).get(0);
+			String selectedFamille = selection.get(ColumnEnum.ID_FAMILLE.getColumnName()).get(0);
 
 			ArcPreparedStatementBuilder requeteTableMetier = new ArcPreparedStatementBuilder();
 			requeteTableMetier.append("SELECT a.* ");
 			requeteTableMetier.append("FROM arc.ihm_mod_table_metier a ");
-			requeteTableMetier.append("WHERE " + ID_FAMILLE + "=");
+			requeteTableMetier.append("WHERE " + ColumnEnum.ID_FAMILLE.getColumnName() + "=");
 			requeteTableMetier.appendQuoteText(selectedFamille);
 
 			ArcPreparedStatementBuilder requeteVariableMetier = new ArcPreparedStatementBuilder();
 			requeteVariableMetier.append("SELECT a.* ");
 			requeteVariableMetier.append("FROM arc.ihm_mod_variable_metier a ");
-			requeteVariableMetier.append("WHERE " + ID_FAMILLE + "=");
+			requeteVariableMetier.append("WHERE " + ColumnEnum.ID_FAMILLE.getColumnName() + "=");
 			requeteVariableMetier.appendQuoteText(selectedFamille);
 
 			ArrayList<ArcPreparedStatementBuilder> queries = new ArrayList<>();

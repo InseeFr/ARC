@@ -252,15 +252,9 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 */
 	public static final String temporaryTableName(String aName) {
 		String newName = aName.split(REGEX_TMP)[0];
-		// on met la date du jour dans le nom de la table
-		String l = System.currentTimeMillis() + "";
-		// on prend que les 10 derniers chiffres (durrée de vie : 6 mois)
-		l = l.substring(l.length() - 10);
-		// on inverse la chaine de caractere pour avoir les millisecondes en
-		// premier en cas de troncature
-		l = new StringBuffer(l).reverse().toString();
-		return new StringBuilder(newName).append(TMP).append(l).append(dollar).append(randomNumber(4)).toString();
+		return new StringBuilder(newName).append(TMP).append(new TemporaryToken().getToken()).toString();
 	}
+
 
 	/**
 	 * Ajoute un suffixe de table temporaire au nom de table {@code prefix}
@@ -272,15 +266,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final String temporaryTableName(String aName, String suffix) {
 		String newName = aName.split(REGEX_TMP)[0];
 		return temporaryTableName(newName + underscore + suffix);
-	}
-
-	/**
-	 *
-	 * @return Un nombre aléatoire d'une certaine précision
-	 */
-	public static final String randomNumber(int precision) {
-		String rn = ((int) Math.floor((Math.random() * (Math.pow(10, precision))))) + "";
-		return ManipString.padLeft(rn, "0", precision);
 	}
 
 	/**

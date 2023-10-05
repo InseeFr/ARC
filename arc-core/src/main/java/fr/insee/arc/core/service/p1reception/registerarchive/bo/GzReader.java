@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
 
 public class GzReader implements IArchiveStream {
@@ -14,27 +16,28 @@ public class GzReader implements IArchiveStream {
 		super();
 	}
 
+	private FileInputStream fileInputStream;
+	private BufferedInputStream bufferedInputStream;
 	private GZIPInputStream inputStream;
-	boolean readTest=false;
-	
+
+	boolean readTest = false;
 	private String fileName;
 
 	@Override
 	public void startInputStream(File f) throws IOException {
-		this.inputStream = new GZIPInputStream(new BufferedInputStream(new FileInputStream(f), CompressedUtils.READ_BUFFER_SIZE));
-		fileName=f.getName();
+		this.fileInputStream = new FileInputStream(f);
+		this.bufferedInputStream = new BufferedInputStream(fileInputStream, CompressedUtils.READ_BUFFER_SIZE);
+		this.inputStream = new GZIPInputStream(bufferedInputStream);
+		fileName = f.getName();
 	}
 
 	@Override
 	public Entry getEntry() throws IOException {
-		
-		if (!readTest)
-		{
+
+		if (!readTest) {
 			this.inputStream.read();
-			readTest=true;
-		}
-		else
-		{
+			readTest = true;
+		} else {
 			return null;
 		}
 
@@ -44,9 +47,17 @@ public class GzReader implements IArchiveStream {
 	@Override
 	public void close() {
 		try {
-			inputStream.close();
+			if (inputStream != null) {
+				inputStream.close();
+			}
+			if (bufferedInputStream != null) {
+				bufferedInputStream.close();
+			}
+			if (fileInputStream != null) {
+				fileInputStream.close();
+			}
 		} catch (IOException e) {
-			
+			new ArcException(e, ArcExceptionMessage.FILE_CLOSE_FAILED).logFullException();
 		}
 	}
 

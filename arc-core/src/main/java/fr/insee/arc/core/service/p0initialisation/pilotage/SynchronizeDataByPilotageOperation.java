@@ -19,9 +19,7 @@ import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.service.p0initialisation.pilotage.bo.ListIdSourceInPilotage;
 import fr.insee.arc.core.service.p0initialisation.pilotage.dao.SynchronizeDataByPilotageDao;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
@@ -107,7 +105,7 @@ public class SynchronizeDataByPilotageOperation {
 	private int dropUnusedTemporaryTablesAllNods() throws ArcException {
 
 		ThrowingConsumer<Connection, ArcException> function = c -> {
-			dropUnusedTemporaryTablesOnConnection(c);
+			SynchronizeDataByPilotageDao.dropUnusedTemporaryTablesOnConnection(c,this.sandbox.getSchema());
 		};
 
 		return ServiceScalability.dispatchOnNods(this.sandbox.getConnection(), function, function);
@@ -204,10 +202,11 @@ public class SynchronizeDataByPilotageOperation {
 
 				// it could be more bulky but it would be less readable and useless; this is
 				// rarely triggered and access 10000 objects at max
+				// loop over children tables
 				for (String childDataTable : childDataTables) {
 
 					// retrieve the idSource of the childDataTable
-					String idSource = PhaseOperations.selectIdSourceOfChildDataTable(executorConnection,
+					String idSource = PhaseOperations.execQuerySelectIdSourceOfChildDataTable(executorConnection,
 							childDataTable);
 					String etape = PilotageOperations.execQuerySelectEtapeForIdSource(coordinatorConnexion, envExecution,
 							phase, etat, idSource);
@@ -220,31 +219,9 @@ public class SynchronizeDataByPilotageOperation {
 			}
 		}
 
-		dropDataTables(executorConnection, childDataTablesToBeDropped);
+		SynchronizeDataByPilotageDao.dropDataTables(executorConnection, childDataTablesToBeDropped);
 	}
 
-	private static void dropDataTables(Connection executorConnection, List<String> dataTablesToDrop) {
-		UtilitaireDao.get(0).dropTable(executorConnection, dataTablesToDrop);
-	}
-
-
-
-	/**
-	 * drop the unused temporary table on the target connection
-	 * 
-	 * @param targetConnexion
-	 * @throws ArcException
-	 */
-	private void dropUnusedTemporaryTablesOnConnection(Connection targetConnexion) throws ArcException {
-		GenericBean g = new GenericBean(
-				UtilitaireDao.get(0).executeRequest(targetConnexion, SynchronizeDataByPilotageDao.requeteListAllTemporaryTablesInEnv(this.sandbox.getSchema())));
-		if (!g.mapContent().isEmpty()) {
-			ArrayList<String> envTables = g.mapContent().get("table_name");
-			for (String nomTable : envTables) {
-				UtilitaireDao.get(0).executeBlock(targetConnexion, FormatSQL.dropTable(nomTable));
-			}
-		}
-	}
 
 
 	/**

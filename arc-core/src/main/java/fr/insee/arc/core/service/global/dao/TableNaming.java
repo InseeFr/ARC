@@ -24,15 +24,8 @@ public class TableNaming {
 	 * @param suffix        optionnal suffix added to the temporary name
 	 * @return
 	 */
-	public static String temporaryTableName(String aEnvExecution, String aCurrentPhase, ViewEnum table,
-			String... suffix) {
-
-		if (suffix != null && suffix.length > 0) {
-			String suffixJoin = String.join("$", suffix);
-			return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + table, suffixJoin);
-		} else {
-			return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + table);
-		}
+	public static String temporaryTableName(String aEnvExecution, String aCurrentPhase, ViewEnum table) {
+		return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + table);
 	}
 
 	public static String globalTableName(String aEnvExecution, String aPhase, TraitementEtat etat) {

@@ -46,8 +46,6 @@ public class PilotageDaoTest extends InitializeQueryTest {
 		
 		// execute query
 		pdao.initializePilotageBAS(viewPilotageBAS);
-
-		System.out.println(viewPilotageBAS.getHeadersDLabel());
 		
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum
@@ -64,8 +62,6 @@ public class PilotageDaoTest extends InitializeQueryTest {
 		
 		// execute query
 		pdao.initializeRapportBAS(viewRapportBAS);
-
-		System.out.println(viewRapportBAS.getHeadersDLabel());
 		
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum
@@ -86,8 +82,6 @@ public class PilotageDaoTest extends InitializeQueryTest {
 		
 		// execute query
 		pdao.initializeArchiveBAS(viewArchiveBAS, viewEntrepotBAS);
-
-		System.out.println(viewArchiveBAS.getHeadersDLabel());
 		
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum

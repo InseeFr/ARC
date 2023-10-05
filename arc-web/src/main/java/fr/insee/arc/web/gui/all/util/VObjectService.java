@@ -1301,8 +1301,6 @@ public class VObjectService {
 				nbUploaded++;
 			}
 		}
-		data.setMessage("managementSandbox.load.success");
-		data.setMessageArgs(nbUploaded);
 	}
 
 	public ArrayList<String> getHeaderSortDLabels(VObject currentData) {

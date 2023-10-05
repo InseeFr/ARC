@@ -103,8 +103,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		// Tables de pilotage et pilotage temporaire
 		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(aEnvExecution);
 		this.tablePilTemp = TableNaming.temporaryTableName(aEnvExecution, aCurrentPhase,
-				ViewEnum.PILOTAGE_FICHIER, "0");
-		
+				ViewEnum.PILOTAGE_FICHIER);
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** Fin constructeur ApiService **");
 	}
@@ -350,12 +349,14 @@ public abstract class ApiService implements IConstanteNumerique {
 				try {
 					this.executer();
 				} catch (ArcException ex) {
-					LoggerHelper.error(LOGGER_APISERVICE, "Erreur dans " + this.getCurrentPhase() + ". ", ex);
+					LoggerHelper.error(LOGGER_APISERVICE, "Erreur dans " + this.getCurrentPhase());
+					ex.logFullException();
 					try {
 						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(),
 								this.getTablePil(), ex, "aucuneTableADroper");
-					} catch (Exception ex2) {
+					} catch (ArcException ex2) {
 						LoggerHelper.error(LOGGER_APISERVICE, "Error in ApiService.invokeApi.repriseSurErreur");
+						ex2.logFullException();
 					}
 				}
 			}

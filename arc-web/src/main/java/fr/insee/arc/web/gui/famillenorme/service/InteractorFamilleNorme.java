@@ -26,21 +26,9 @@ import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamille,GererFamilleNormeDao> {
 
-	protected static final String MODEL_VARIABLE_NAME = "nom_variable_metier";
-
-	protected static final String NOM_TABLE_METIER = "nom_table_metier";
-
-	protected static final String ID_FAMILLE = "id_famille";
-
-	protected static final String ID_APPLICATION = "id_application";
-
 	protected static final String RESULT_SUCCESS = "jsp/gererFamilleNorme.jsp";
 
-	protected static final String IHM_MOD_VARIABLE_METIER = "ihm_mod_variable_metier";
-
 	private static final Logger LOGGER = LogManager.getLogger(InteractorFamilleNorme.class);
-	
-	protected static final int NUMBER_OF_COLUMN_TABLE_VARIABLE_METIER = 5;
 
 	@Autowired
 	protected ModelGererFamille views;
