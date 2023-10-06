@@ -168,16 +168,8 @@ public class ChargeurXmlComplexe implements IChargeur {
 		java.util.Date beginDate = new java.util.Date();
 
 		// Création de la table de stockage
-		XMLComplexeHandlerCharger handler = new XMLComplexeHandlerCharger();
-		handler.fileName = fileName;
-		handler.connexion = connexion;
-		handler.tempTableA = this.tableTempA;
-		handler.normeCourante = norme;
-		handler.validite = validite;
-		handler.tempTableAColumnsLongName = this.tempTableAColumnsLongName;
-		handler.tempTableAColumnsShortName = this.tempTableAColumnsShortName;
-		handler.format = this.format;
-
+		XMLComplexeHandlerCharger handler = new XMLComplexeHandlerCharger(connexion, fileName, norme, validite, this.tableTempA,
+				this.tempTableAColumnsLongName, this.tempTableAColumnsShortName, format);
 		// appel du parser et gestion d'erreur
 		try {
 			SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
@@ -189,7 +181,7 @@ public class ChargeurXmlComplexe implements IChargeur {
 			throw businessException;
 		}
 
-		this.jointure = handler.jointure;
+		this.jointure = handler.getJointure();
 
 		java.util.Date endDate = new java.util.Date();
 		StaticLoggerDispatcher.info(LOGGER, "** execution temps" + (endDate.getTime() - beginDate.getTime()) + " ms");

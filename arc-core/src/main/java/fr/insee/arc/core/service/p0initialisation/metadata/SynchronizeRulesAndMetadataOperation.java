@@ -160,7 +160,7 @@ public class SynchronizeRulesAndMetadataOperation {
 
 		// Checks expression validity
 		ExpressionService expressionService = new ExpressionService();
-		ArrayList<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion, ViewEnum.JEUDEREGLE.getFullName(anExecutionEnvironment));
+		List<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion, ViewEnum.JEUDEREGLE.getFullName(anExecutionEnvironment));
 		for (JeuDeRegle ruleSet : allRuleSets) {
 			// Check
 			GenericBean expressions = expressionService.fetchExpressions(connexion, anExecutionEnvironment, ruleSet);

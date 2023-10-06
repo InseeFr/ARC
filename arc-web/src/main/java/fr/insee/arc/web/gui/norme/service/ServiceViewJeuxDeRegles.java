@@ -124,7 +124,7 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 			requeteRegleExpression.append(recupRegle(this.views.getViewJeuxDeRegles(),
 					dataObjectService.getView(ViewEnum.IHM_EXPRESSION)));
 
-			ArrayList<String> fileNames = new ArrayList<>();
+			List<String> fileNames = new ArrayList<>();
 			fileNames.add("Rules_load");
 			fileNames.add("Rules_structurize");
 			fileNames.add("Rules_control");

@@ -231,7 +231,7 @@ public class MultiThreading<U, T extends IThread<U>> {
 	 */
 	private static List<ScalableConnection> prepareThreads(int executorNodTarget, int parallelDegree,
 			String anEnvExecution, String restrictedUsername) {
-		ArrayList<ScalableConnection> connexionList = new ArrayList<>();
+		List<ScalableConnection> connexionList = new ArrayList<>();
 		try {
 
 			// add thread connexions

@@ -39,8 +39,8 @@ public class NormageEngineRegleSupression {
 
 		// op 1 : identifier les blocs inutiles
 
-		ArrayList<String> listVarUtilisee = new ArrayList<>();
-		ArrayList<Integer> lineASupprimer = new ArrayList<>();
+		List<String> listVarUtilisee = new ArrayList<>();
+		List<Integer> lineASupprimer = new ArrayList<>();
 
 		for (int j = 0; j < rubriqueUtiliseeDansRegles.get("id_norme").size(); j++) {
 			listVarUtilisee.add(rubriqueUtiliseeDansRegles.get("var").get(j));
@@ -220,9 +220,9 @@ public class NormageEngineRegleSupression {
 	private static String appliquerRegleSuppressionCore(String returned, String rubrique) {
 		String[] lines = returned.split("\n");
 
-		ArrayList<String> grpAEnlever = new ArrayList<>();
-		ArrayList<Integer> ligneAEnlever = new ArrayList<>();
-		ArrayList<String> rubriqueAEnlever = new ArrayList<String>();
+		List<String> grpAEnlever = new ArrayList<>();
+		List<Integer> ligneAEnlever = new ArrayList<>();
+		List<String> rubriqueAEnlever = new ArrayList<String>();
 
 		// identifier les groupes a enlever de la requete
 		identifierGroupeAEnlever(lines, rubrique, grpAEnlever, ligneAEnlever);
@@ -234,8 +234,8 @@ public class NormageEngineRegleSupression {
 		return calculerRequeteSupression(lines, ligneAEnlever, rubriqueAEnlever);
 	}
 
-	private static String calculerRequeteSupression(String[] lines, ArrayList<Integer> ligneAEnlever,
-			ArrayList<String> rubriqueAEnlever) {
+	private static String calculerRequeteSupression(String[] lines, List<Integer> ligneAEnlever,
+			List<String> rubriqueAEnlever) {
 		StringBuilder f = new StringBuilder();
 
 		int max = lines.length - 1;
@@ -265,8 +265,8 @@ public class NormageEngineRegleSupression {
 		return f.toString();
 	}
 
-	private static void identifierRubriqueAEnlever(String[] lines, String rubrique, ArrayList<String> grpAEnlever,
-			ArrayList<Integer> ligneAEnlever, ArrayList<String> rubriqueAEnlever) {
+	private static void identifierRubriqueAEnlever(String[] lines, String rubrique, List<String> grpAEnlever,
+			List<Integer> ligneAEnlever, List<String> rubriqueAEnlever) {
 		int max = lines.length - 1;
 
 		int k = 1;
@@ -328,8 +328,8 @@ public class NormageEngineRegleSupression {
 	 * @param grpAEnlever
 	 * @param ligneAEnlever
 	 */
-	private static void identifierGroupeAEnlever(String[] lines, String rubrique, ArrayList<String> grpAEnlever,
-			ArrayList<Integer> ligneAEnlever) {
+	private static void identifierGroupeAEnlever(String[] lines, String rubrique, List<String> grpAEnlever,
+			List<Integer> ligneAEnlever) {
 		int max = lines.length - 1;
 
 		// on va iterer sur les lignes pour identifier les groupes à enlever

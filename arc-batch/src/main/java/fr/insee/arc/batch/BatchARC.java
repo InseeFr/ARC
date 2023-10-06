@@ -86,9 +86,9 @@ class BatchARC implements IReturnCode {
 	private boolean dejaEnCours;
 
 	// Array of phases
-	private ArrayList<TraitementPhase> phases = new ArrayList<>();
+	private List<TraitementPhase> phases = new ArrayList<>();
 	// Map of thread by phase
-	private HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> pool = new HashMap<>();
+	private Map<TraitementPhase, List<PhaseThreadFactory>> pool = new HashMap<>();
 	// delay between phase start
 	private int delay;
 	
@@ -457,8 +457,8 @@ class BatchARC implements IReturnCode {
 	 * @param pool
 	 * @return
 	 */
-	private void initializeBatchLoop(ArrayList<TraitementPhase> phases,
-			HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> pool) {
+	private void initializeBatchLoop(List<TraitementPhase> phases,
+			Map<TraitementPhase, List<PhaseThreadFactory>> pool) {
 		int stepNumber = (TraitementPhase.MAPPING.getOrdre() - TraitementPhase.CHARGEMENT.getOrdre()) + 2;
 		this.delay = poolingDelay / stepNumber;
 
@@ -535,7 +535,7 @@ class BatchARC implements IReturnCode {
 	// updtate the thread pool by phase by deleting the dead and finished thread
 	private void updateThreadPoolStatus() {
 		// delete dead thread i.e. keep only living thread in the pool
-					HashMap<TraitementPhase, ArrayList<PhaseThreadFactory>> poolToKeep = new HashMap<>();
+					Map<TraitementPhase, List<PhaseThreadFactory>> poolToKeep = new HashMap<>();
 					for (TraitementPhase phase : phases) {
 						poolToKeep.put(phase, new ArrayList<>());
 						if (!pool.get(phase).isEmpty()) {

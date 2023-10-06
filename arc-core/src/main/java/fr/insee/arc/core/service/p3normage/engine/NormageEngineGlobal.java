@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.p3normage.engine;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -16,8 +17,8 @@ public class NormageEngineGlobal {
 	 * @param mRubrique
 	 */
 
-	private static void getChildrenTree(ArrayList<String> r, String blocCreate, String mRubrique) {
-		ArrayList<String> s = getChildren(blocCreate, mRubrique);
+	private static void getChildrenTree(List<String> r, String blocCreate, String mRubrique) {
+		List<String> s = getChildren(blocCreate, mRubrique);
 
 		if (s.isEmpty()) {
 			return;
@@ -39,8 +40,8 @@ public class NormageEngineGlobal {
 	 * @param mRubrique
 	 * @return
 	 */
-	protected static ArrayList<String> getChildren(String blocCreate, String mRubrique) {
-		ArrayList<String> r = new ArrayList<>();
+	protected static List<String> getChildren(String blocCreate, String mRubrique) {
+		List<String> r = new ArrayList<>();
 
 		if (mRubrique == null) {
 			return r;
@@ -225,8 +226,8 @@ public class NormageEngineGlobal {
 	 */
 	protected static String pppc(String blocCreate, String rubriqueM, String rubriqueNmclM) {
 
-		ArrayList<String> rubriqueParents = getParentsTree(blocCreate, rubriqueM, true);
-		ArrayList<String> rubriqueNmclParents = getParentsTree(blocCreate, rubriqueNmclM, true);
+		List<String> rubriqueParents = getParentsTree(blocCreate, rubriqueM, true);
+		List<String> rubriqueNmclParents = getParentsTree(blocCreate, rubriqueNmclM, true);
 
 		for (int k = 0; k < rubriqueNmclParents.size(); k++) {
 			for (int l = 0; l < rubriqueParents.size(); l++) {
@@ -284,8 +285,8 @@ public class NormageEngineGlobal {
 	 * @param mRubrique
 	 * @return
 	 */
-	protected static ArrayList<String> getParentsTree(String blocCreate, String mRubrique, boolean... keep) {
-		ArrayList<String> r = new ArrayList<>();
+	protected static List<String> getParentsTree(String blocCreate, String mRubrique, boolean... keep) {
+		List<String> r = new ArrayList<>();
 		r.add(mRubrique);
 		String s;
 
@@ -309,8 +310,8 @@ public class NormageEngineGlobal {
 	 * @param mRubrique
 	 * @return
 	 */
-	protected static ArrayList<String> getChildrenTree(String blocCreate, String mRubrique) {
-		ArrayList<String> s = new ArrayList<>();
+	protected static List<String> getChildrenTree(String blocCreate, String mRubrique) {
+		List<String> s = new ArrayList<>();
 		getChildrenTree(s, blocCreate, mRubrique);
 		return s;
 	}

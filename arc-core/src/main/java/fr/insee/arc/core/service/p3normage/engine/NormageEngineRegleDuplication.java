@@ -1,10 +1,10 @@
 package fr.insee.arc.core.service.p3normage.engine;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,12 +119,12 @@ public class NormageEngineRegleDuplication {
 
 				// si on trouve une rubrique mère
 				if (rubriqueM != null) {
-					ArrayList<String> aTraiter = NormageEngineGlobal.getChildrenTree(blocCreate, rubriqueM);
+					List<String> aTraiter = NormageEngineGlobal.getChildrenTree(blocCreate, rubriqueM);
 					aTraiter.add(0, rubriqueM);
 
 					StringBuilder blocCreateNew = new StringBuilder();
 					StringBuilder blocInsertNew = new StringBuilder();
-					HashSet<String> colonnesAAjouter = new HashSet<>();
+					Set<String> colonnesAAjouter = new HashSet<>();
 
 					String[] lines = blocCreate.split("\n");
 					for (int i = 0; i < lines.length; i++) {

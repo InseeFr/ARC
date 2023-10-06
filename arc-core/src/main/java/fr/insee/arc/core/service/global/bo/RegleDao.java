@@ -22,11 +22,11 @@ public class RegleDao {
 
 	private static final Logger logger = LogManager.getLogger(RegleDao.class);
 
-	public static ArrayList<RegleControleEntity> getRegle(Connection connexion, String tableRegle, String tableIn)
+	public static List<RegleControleEntity> getRegle(Connection connexion, String tableRegle, String tableIn)
 			throws ArcException {
 		StaticLoggerDispatcher.debug(logger, "getRegle");
 
-		ArrayList<RegleControleEntity> listRegle = new ArrayList<>();
+		List<RegleControleEntity> listRegle = new ArrayList<>();
 
 		ArcPreparedStatementBuilder sb = new ArcPreparedStatementBuilder();
 		sb.append("SELECT id_regle, id_classe, ");

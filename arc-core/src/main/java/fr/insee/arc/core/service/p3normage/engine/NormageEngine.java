@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,7 +113,7 @@ public class NormageEngine {
 		List<String> listeRubriqueSource = new ArrayList<>();
 		UtilitaireDao.get(0).getColumns(connection, listeRubriqueSource, tableSource);
 
-		HashSet<String> alreadyAdded = new HashSet<>();
+		Set<String> alreadyAdded = new HashSet<>();
 
 		for (String variable : listeRubriqueSource) {
 			// pour toutes les variables du fichier commencant par i ou v et qui n'ont pas
@@ -175,7 +176,7 @@ public class NormageEngine {
 			Map<String, List<String>> regle = new HashMap<>();
 
 			for (String key : regleInitiale.keySet()) {
-				ArrayList<String> al = new ArrayList<>();
+				List<String> al = new ArrayList<>();
 				for (String val : regleInitiale.get(key)) {
 					al.add(val);
 				}

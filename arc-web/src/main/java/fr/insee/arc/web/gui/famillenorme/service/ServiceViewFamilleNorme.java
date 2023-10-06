@@ -93,11 +93,11 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 			requeteVariableMetier.append("WHERE " + ColumnEnum.ID_FAMILLE.getColumnName() + "=");
 			requeteVariableMetier.appendQuoteText(selectedFamille);
 
-			ArrayList<ArcPreparedStatementBuilder> queries = new ArrayList<>();
+			List<ArcPreparedStatementBuilder> queries = new ArrayList<>();
 			queries.add(requeteTableMetier);
 			queries.add(requeteVariableMetier);
 
-			ArrayList<String> fileNames = new ArrayList<>();
+			List<String> fileNames = new ArrayList<>();
 			fileNames.add("modelTables");
 			fileNames.add("modelVariables");
 

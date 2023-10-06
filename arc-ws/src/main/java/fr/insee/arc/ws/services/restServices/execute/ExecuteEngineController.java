@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
@@ -116,12 +117,12 @@ public class ExecuteEngineController {
 								"CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select *, '0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules from "+previousTemporaryTable(i)+";");
 						UtilitaireDao.get(0).executeImmediate(connection, requete);
 
-						ServiceJeuDeRegle sjdr = new ServiceJeuDeRegle(env + ".controle_regle");
+						ServiceJeuDeRegle sjdr = new ServiceJeuDeRegle();
 
 						// Récupération des règles de controles associées aux jeux de règle
 						JeuDeRegle jdr = new JeuDeRegle();
 
-						sjdr.fillRegleControle(connection, jdr, env + ".controle_regle", currentTemporaryTable(i));
+						sjdr.fillRegleControle(connection, jdr, ViewEnum.CONTROLE_REGLE.getFullName(env), currentTemporaryTable(i));
 						sjdr.executeJeuDeRegle(connection, jdr, currentTemporaryTable(i));
 						break;
 					case MAPPING:

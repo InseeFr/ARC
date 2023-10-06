@@ -16,7 +16,6 @@ import org.xml.sax.SAXParseException;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.global.dao.DateConversion;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -32,38 +31,63 @@ import fr.insee.arc.utils.utils.Pair;
 public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandler {
 	private static final Logger LOGGER = LogManager.getLogger(XMLHandlerCharger4.class);
 
-	public XMLComplexeHandlerCharger() {
+	public XMLComplexeHandlerCharger(Connection connexion, String fileName, Norme normeCourante, String validite,
+			String tempTableA, FastList<String> tempTableAColumnsLongName,
+			FastList<String> tempTableAColumnsShortName, ArrayList<Pair<String, String>> format) {
 		super();
+		this.connexion = connexion;
+		this.fileName = fileName;
+		this.normeCourante = normeCourante;
+		this.validite = validite;
+		this.tempTableA = tempTableA;
+		this.tempTableAColumnsLongName = tempTableAColumnsLongName;
+		this.tempTableAColumnsShortName = tempTableAColumnsShortName;
+		this.format=format;
 	}
 
+	
+	
+	
+	
+	// input
+	private Connection connexion;
+	private String fileName;
+	private Norme normeCourante;
+	private String validite;
+	private String tempTableA;
+	private FastList<String> tempTableAColumnsLongName;
+	private FastList<String> tempTableAColumnsShortName;
+
+	// output
+	private String jointure = "";
+
+	// map le nom des balises trouvé dans le fichier XML avec leur nombre
+	// d'occurence en cours du traitement
 	private Map<String, Integer> col = new HashMap<>();
+	// on met dans cette map les balises pour lesquels le parser a trouvé de la
+	// données
+	// l'integer ne sert à rien -> refactor avec un set
 	private Map<String, Integer> colData = new HashMap<>();
-	private HashMap<Integer, Integer> tree = new HashMap<>();
-	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
 
-	private HashMap<Integer, Integer> colDist = new HashMap<>();
-	private HashMap<Integer, String> keepLast = new HashMap<>();
+	private Map<Integer, Integer> tree = new HashMap<>();
+	private Map<Integer, Boolean> treeNode = new HashMap<>();
 
-	private int start = 0;
+	private Map<Integer, Integer> colDist = new HashMap<>();
+	private Map<Integer, String> keepLast = new HashMap<>();
+
 	private int idLigne = 0;
 
 	private int distance = 0;
 
-	public Connection connexion;
-
-	public String fileName;
-	public String jointure = "";
 
 	private String currentTag;
 
 	private String closedTag;
 	private String closedTag1;
-	private String closedTag2;
 
 	// this handler will keep the father reference to handle elements which have the
 	// same name but not the same parent
 	private String rootFather = "*";
-
 	private String father = rootFather;
 	private StringBuilder currentData = new StringBuilder();
 
@@ -73,42 +97,39 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	private boolean leafPossible = false;
 	private boolean leafStatus = false;
 
-	/* stacks of ancestors */
-	/* ancestors with raw xml name */
-	private Map<String, Integer> treeStackQName = new HashMap<>();
-	private Integer orderTreeStackQName = 0;
-
-	/* ancestors with database name */
 	private List<String> treeStack = new ArrayList<>();
 	private List<String> treeStackFather = new ArrayList<>();
 	private List<String> treeStackFatherLag = new ArrayList<>();
 
+	// contient la liste de toutes les balises trouvées dans le XML
 	private FastList<String> allCols = new FastList<>();
 	private List<Integer> lineCols = new ArrayList<>();
 	private List<Integer> lineCols11 = new ArrayList<>();
 	private List<Integer> lineIds = new ArrayList<>();
 	private List<String> lineValues = new ArrayList<>();
 
-	private StringBuilder requete = new StringBuilder();
-
 	// indique que la balise courante a des données
 	private boolean hasData = false;
 
-	public Norme normeCourante;
-	public String validite;
+	private ParallelInsert pi;
 
-	// column of the load table A
-	public String tempTableA;
-	public FastList<String> tempTableAColumnsLongName;
-	public FastList<String> tempTableAColumnsShortName;
+	private static final String ALTER = "ALTER";
+
+	private Map<String, StringBuilder> requetes = new HashMap<>();
+	private int requetesLength = 0;
+
+	// initialize the integration date with current
+	private final String integrationDate = DateConversion.queryDateConversion(new Date());
 
 	// format to rename column with format rules
 	public ArrayList<Pair<String, String>> format;
 
 	private static final String HEADER = "$h";
+	/* stacks of ancestors */
+	/* ancestors with raw xml name */
+	private Map<String, Integer> treeStackQName = new HashMap<>();
+	private Integer orderTreeStackQName = 0;
 
-	// initialize the integration date with current
-	private final String integrationDate = DateConversion.queryDateConversion(new Date());
 
 	/**
 	 * Actions à réaliser sur les données
@@ -131,22 +152,17 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 */
 	@Override
 	public void endDocument() throws SAXParseException {
-		insertQueryBuilder(this.requete, this.tempTableA, this.fileName, this.lineCols, this.lineIds, this.lineValues);
-		this.start = this.requete.length();
+		insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols, this.lineIds, this.lineValues);
 
-		renameColumns();
+		StringBuilder requete = new StringBuilder(computeFinalQuery());
+		renameColumns(requete);
+		multiLeafUpdate(requete);
 
-		multiLeafUpdate();
+		waitForParallelInsertAndReport();
 
-		try {
-			UtilitaireDao.get(0).executeImmediate(this.connexion, this.requete);
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "XMLComplexeHandlerCharger.startElement()", LOGGER, ex);
-			throw new SAXParseException("Fichier XML : erreur de requete insertion  : " + ex.getMessage(), "", "", 0,
-					0);
-		}
-		this.requete.setLength(0);
-		this.start = 0;
+		pi = new ParallelInsert(this.connexion, requete.toString());
+		pi.start();
+		waitForParallelInsertAndReport();
 
 		// construction de la requete de jointure
 		requeteJointureXML();
@@ -160,7 +176,8 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 */
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXParseException {
-		this.closedTag2 = this.closedTag1;
+		
+		String closedTag2 = this.closedTag1;
 		this.closedTag1 = this.closedTag;
 		this.closedTag = Format.toBdRaw(renameColumn(qName));
 
@@ -168,10 +185,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		// on doit arriver à la fin du stream de l'element et concaténer toutes
 		// les données trouvées jusqu'a ce qu'on en trouve plus
 		if (this.closedTag.equals(this.currentTag) && this.hasData) {
-
 			if (this.colData.get(this.currentTag) == null) {
 				this.colData.put(this.currentTag, 1);
-				this.requete.append("alter table " + this.tempTableA + " add v" + this.allCols.indexOf(this.currentTag)
+				addQuery(ALTER, "alter table " + this.tempTableA + " add v" + this.allCols.indexOf(this.currentTag)
 						+ " " + TypeEnum.TEXT.getTypeName() + ";");
 			}
 
@@ -189,7 +205,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		 * balise a été fermée 2 fois de suite
 		 */
 		boolean multipleLeaf = (this.closedTag1 != null && this.closedTag1.equals(this.closedTag))
-				|| (this.closedTag2 != null && this.closedTag2.equals(this.closedTag1));
+				|| (closedTag2 != null && closedTag2.equals(this.closedTag1));
 
 		if (multipleLeaf) {
 			String closedTagHeader1 = this.closedTag1 + HEADER;
@@ -198,8 +214,8 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			// créer et enregistrer la colonne si elle n'existe pas
 			if (o == null) {
 				this.allCols.add(closedTagHeader1);
-				this.requete.append("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(closedTagHeader1)
-						+ " " + TypeEnum.INTEGER.getTypeName() + ";");
+				addQuery(ALTER, "alter table " + this.tempTableA + " add i" + this.allCols.indexOf(closedTagHeader1)
+				+ " " + TypeEnum.INTEGER.getTypeName() + ";");
 			}
 
 			String fatherOfTheBlock = this.treeStackFatherLag.get(this.treeStackFatherLag.size() - 1);
@@ -238,9 +254,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		// mise à jour des listes
 		treeStackQName.remove(qName);
 		orderTreeStackQName--;
+		this.treeStackFatherLag = new ArrayList<>(this.treeStackFather);
 
 		this.treeStack.remove(this.treeStack.size() - 1);
-		this.treeStackFatherLag = new ArrayList<>(this.treeStackFather);
 		this.father = this.treeStackFather.get(this.treeStackFather.size() - 1);
 		this.treeStackFather.remove(this.treeStackFather.size() - 1);
 
@@ -250,13 +266,11 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			if (this.lineCols.indexOf(this.allCols.indexOf(this.closedTag)) < this.lineCols.size() - 1) {
 
 				// réalisation de l'insertion
-
-				insertQueryBuilder(this.requete, this.tempTableA, this.fileName,
-						this.lineCols.subList(0, this.lineCols.size() - 1),
+				insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols.subList(0, this.lineCols.size() - 1),
 						this.lineIds.subList(0, this.lineCols.size() - 1),
 						this.lineValues.subList(0, this.lineCols.size() - 1));
 
-				int i = 0;
+				int i;
 				if (multipleLeaf) {
 					String closedTagHeader1 = this.closedTag1 + HEADER;
 					i = this.lineCols.indexOf(this.allCols.indexOf(closedTagHeader1));
@@ -290,6 +304,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			this.lineCols11.add(this.lineCols11.get(this.lineCols11.size() - 1));
 
 		}
+
 	}
 
 	/**
@@ -297,6 +312,10 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 */
 	@Override
 	public void startDocument() {
+		// intialisation de la connexion
+		// creation de la table
+		this.pi = new ParallelInsert(this.connexion, null);
+
 		try {
 			this.colDist.put(-1, 0);
 		} catch (Exception ex) {
@@ -313,30 +332,26 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes)
 			throws SAXParseException {
-
 		this.treeStackQName.put(qName, orderTreeStackQName);
 		orderTreeStackQName++;
-
+		
 		this.currentTag = Format.toBdRaw(renameColumn(qName));
-
 		this.currentData.setLength(0);
 		this.hasData = false;
 
 		// on ajoute les colonnes si besoin
 		// on met à jour le numéro d'index
-		Object o = this.col.get(this.currentTag);
+		Integer o = this.col.get(this.currentTag);
 
 		// créer et enregistrer la colonne si elle n'existe pas
 		if (o == null) {
 			this.col.put(this.currentTag, 1);
 			this.allCols.add(this.currentTag);
-
-			this.requete.append("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag)
-					+ " " + TypeEnum.INTEGER.getTypeName() + ";");
-
+			addQuery(ALTER, "alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag) + " "
+					+ TypeEnum.INTEGER.getTypeName() + ";");
 		} else {
 			// ajouter 1 a son index si la colonne existe dejà
-			this.col.put(this.currentTag, (Integer) (o) + 1);
+			this.col.put(this.currentTag, o + 1);
 		}
 
 		this.distance++;
@@ -372,29 +387,32 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 		if (this.treeStackFatherLag.indexOf(this.father) >= 0 && this.leafStatus == false) {
 
-			insertQueryBuilder(this.requete, this.tempTableA, this.fileName, this.lineCols, this.lineIds,
-					this.lineValues);
+			insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols, this.lineIds, this.lineValues);
 
-			if (this.requete.length() > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
-				try {
-					UtilitaireDao.get(0).executeImmediate(this.connexion, this.requete);
-				} catch (ArcException ex) {
-					LoggerHelper.errorGenTextAsComment(getClass(), "startElement()", LOGGER, ex);
-					throw new SAXParseException("Fichier XML : erreur de requete insertion  : " + ex.getMessage(), "",
-							"", 0, 0);
-				}
-				this.requete.setLength(0);
-				this.start = 0;
+			if (this.requetesLength > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
+
+				String query = computeFinalQuery();
+
+				waitForParallelInsertAndReport();
+
+				pi = new ParallelInsert(this.connexion, query);
+				pi.start();
+
 			}
 
+			// On va alors dépiler ligneCols, lineIds, lineValues jusqu'au père
+			// de la rubrique
 			int fatherIndex = this.lineCols11.lastIndexOf(this.allCols.indexOf(this.father)) + 1;
+
 			Format.removeToIndexInt(this.lineCols11, fatherIndex);
 			Format.removeToIndexInt(this.lineCols, fatherIndex);
 			Format.removeToIndexInt(this.lineIds, fatherIndex);
 			Format.removeToIndex(this.lineValues, fatherIndex);
+
 		}
 
 		this.treeStackFather.add(this.father);
+
 		this.treeStack.add(this.currentTag);
 		this.father = this.currentTag;
 
@@ -407,9 +425,23 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	}
 
 	/**
+	 * Wait for the parallel insert to be done and report a sax exception if an
+	 * error occured
+	 * 
+	 * @throws SAXParseException
+	 */
+	private void waitForParallelInsertAndReport() throws SAXParseException {
+		try {
+			pi.waitAndReport();
+		} catch (ArcException e) {
+			throw new SAXParseException(e.getMessage(), "", "", idLigne, 0);
+		}
+	}
+
+	/**
 	 * Requete d'insertion des données parsées C'est assez diffcile : on souhaite
 	 * profiter au mieux de la commande insert multi value : INSERT into (cols)
-	 * values (data1) values (data2) ... ; faut bien reperer ou on met les nouvelles
+	 * values (data1), (data2) ... ; faut bien reperer ou on met les nouvelles
 	 * données et si c'est possible
 	 *
 	 *
@@ -421,28 +453,30 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 * @param lineValues
 	 * @throws SAXParseException
 	 */
-	private void insertQueryBuilder(StringBuilder aRequete, String tempTableI, String fileName, List<Integer> lineCols,
-			List<Integer> lineIds, List<String> lineValues) {
+	private void insertQueryBuilder(String tempTableI, String fileName, List<Integer> lineCols, List<Integer> lineIds,
+			List<String> lineValues) {
 
-		HashMap<Integer, String> keep = new HashMap<>();
+		Map<Integer, String> keep = new HashMap<>();
 
-		String s;
+		// enregistre la liste des colonnes/valeurs relatives à un noeud de l'arbre xml
+		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < lineCols.size(); i++) {
-			s = "{" + lineIds.get(i) + "}";
+			s.setLength(0);
+			s.append("{").append(lineIds.get(i)).append("}");
 			if (lineValues.get(i) != null) {
-				s = s + "[" + lineValues.get(i) + "]";
+				s.append("[").append(lineValues.get(i)).append("]");
 			}
 
 			if (keep.get(this.tree.get(lineCols.get(i))) == null) {
-				keep.put(this.tree.get(lineCols.get(i)), s);
+				keep.put(this.tree.get(lineCols.get(i)), s.toString());
 			} else {
-				s = s + keep.get(this.tree.get(lineCols.get(i)));
-				keep.put(this.tree.get(lineCols.get(i)), s);
+				s.append(keep.get(this.tree.get(lineCols.get(i))));
+				keep.put(this.tree.get(lineCols.get(i)), s.toString());
 			}
 
 		}
 
-		HashMap<Integer, Boolean> doNotinsert = new HashMap<>();
+		Map<Integer, Boolean> doNotinsert = new HashMap<>();
 		for (Map.Entry<Integer, String> entry : this.keepLast.entrySet()) {
 
 			if (entry.getValue().equals(keep.get(entry.getKey()))) {
@@ -456,57 +490,76 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		StringBuilder req2 = new StringBuilder();
 		this.idLigne++;
 
-		req.append("insert into " + tempTableI + "("
-				+ tempTableAColumnsShortName
-						.get(tempTableAColumnsLongName.indexOf(ColumnEnum.ID_SOURCE.getColumnName()))
-				+ "," + tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id")) + ","
-				+ tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("date_integration")) + ","
-				+ tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id_norme")) + ","
-				+ tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("periodicite")) + ","
-				+ tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("validite")));
+		req.append("insert into ").append(tempTableI).append("(")
+				.append(tempTableAColumnsShortName
+						.get(tempTableAColumnsLongName.indexOf(ColumnEnum.ID_SOURCE.getColumnName())))
+				.append(",").append(tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id"))).append(",")
+				.append(tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("date_integration")))
+				.append(",").append(tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("id_norme")))
+				.append(",").append(tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("periodicite")))
+				.append(",").append(tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("validite")));
 
-		req2.append("('" + fileName + "'," + this.idLigne + "," + integrationDate + ",'" + normeCourante.getIdNorme()
-				+ "','" + normeCourante.getPeriodicite() + "','" + validite + "'");
-
-		int z = 0;
+		req2.append("('").append(fileName).append("',").append(this.idLigne).append(",").append(integrationDate)
+				.append(",'").append(normeCourante.getIdNorme()).append("','").append(normeCourante.getPeriodicite())
+				.append("','").append(validite).append("'");
 
 		for (int i = 0; i < lineCols.size(); i++) {
 
 			// si le bloc est a reinséré (le pere n'est pas retrouvé dans doNotInsert
 			// ou si la colonne est un noeud, on procède à l'insertion
+
 			if (doNotinsert.get(this.tree.get(lineCols.get(i))) == null || this.treeNode.get(lineCols.get(i)) != null) {
 
-				req.append(",i" + this.allCols.indexOf(this.allCols.get(lineCols.get(i))));
-				req2.append("," + lineIds.get(i));
+				req.append(",i").append(this.allCols.indexOf(this.allCols.get(lineCols.get(i))));
+				req2.append(",").append(lineIds.get(i));
 
 				if (lineValues.get(i) != null) {
-					req.append(",v" + this.allCols.indexOf(this.allCols.get(lineCols.get(i))));
-					req2.append(",'" + lineValues.get(i) + "'");
+					req.append(",v").append(this.allCols.indexOf(this.allCols.get(lineCols.get(i))));
+					req2.append(",'").append(lineValues.get(i)).append("'");
 				}
 			}
-
 		}
 
 		req.append(")values");
 		req2.append(")");
 
-		// attention : on doit insérer au bon endroit
-		z = aRequete.indexOf(req.toString(), this.start);
+		String reqString = req.toString();
+		addQuery(reqString, req2);
+	}
 
-		if (z > -1) {
-			req2.append(",");
-			aRequete.insert(z + req.length(), req2);
+	private void addQuery(String key, String value) {
+		addQuery(key, new StringBuilder(value));
+	}
+
+	private void addQuery(String key, StringBuilder value) {
+		if (requetes.get(key) != null) {
+			requetes.get(key).append(key.equals(ALTER) ? "" : ",").append(value);
 		} else {
-			req2.append(";");
-			aRequete.append(req);
-			aRequete.append(req2);
+			requetes.put(key, value);
 		}
+		requetesLength = requetesLength + value.length();
+	}
+
+	private String computeFinalQuery() {
+
+		StringBuilder result = new StringBuilder();
+		result.append((requetes.get(ALTER) != null) ? requetes.get(ALTER) : "");
+
+		for (String s : requetes.keySet()) {
+			if (!s.equals(ALTER)) {
+				result.append(s).append(requetes.get(s)).append(";");
+			}
+		}
+
+		this.requetes = new HashMap<>();
+		this.requetesLength = 0;
+
+		return result.toString();
+
 	}
 
 	/**
-	 * Permet de générer la requête SQL de normage. C'est une méthode assez
-	 * compliqué car on doit décomposer le fichier en bloc pour ensuite faire les
-	 * jointure.
+	 * Permet de générer la requête SQL de normage
 	 */
 	private void requeteJointureXML() {
 
@@ -530,11 +583,13 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 		for (int i = 0; i < arr.length; i++) {
 
+			// pour chaque noeud
+
 			if (arr[i][2] == 1) {
 
 				String leaf = TreeFunctions.getLeafs(arr[i][1], arr, this.colData, this.allCols);
 
-				// Version sans fonctions d'aggregation
+				// créer les vues
 				String leafMax = TreeFunctions.getLeafsMax(arr[i][1], arr, this.colData, this.allCols);
 				reqCreate.append("CREATE TEMPORARY TABLE t_" + this.allCols.get(arr[i][1]) + " as (select i_"
 						+ this.allCols.get(arr[i][1]) + " as m_" + this.allCols.get(arr[i][1]) + " ");
@@ -589,13 +644,12 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		reqFrom.insert(0, "\n FROM ");
 		reqFrom.append("\n WHERE true ) ww ");
 
-		// on ne met pas la parenthèse fermante exprées
 		req.append(reqCreate);
 		req.append(reqInsert);
 		req.append(reqSelect);
 		req.append(reqFrom);
 
-		this.jointure = this.jointure + req.toString().replace("'", "''");
+		this.jointure = req.toString().replace("'", "''");
 
 	}
 
@@ -605,31 +659,31 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 * 
 	 * @param aRequete
 	 */
-	private void renameColumns() {
+	private void renameColumns(StringBuilder aRequete) {
 		for (int i = 0; i < this.tempTableAColumnsShortName.size(); i++) {
-			this.requete.append("\n ALTER TABLE " + this.tempTableA + " RENAME "
-					+ this.tempTableAColumnsShortName.get(i) + " TO " + this.tempTableAColumnsLongName.get(i) + ";");
+			aRequete.append("\n ALTER TABLE " + this.tempTableA + " RENAME " + this.tempTableAColumnsShortName.get(i)
+					+ " TO " + this.tempTableAColumnsLongName.get(i) + ";");
 		}
 
 		for (int i = 0; i < this.allCols.size(); i++) {
-			this.requete.append(
+			aRequete.append(
 					"\n ALTER TABLE " + this.tempTableA + " RENAME i" + i + " TO i_" + this.allCols.get(i) + ";");
 			if (colData.get(this.allCols.get(i)) != null) {
-				this.requete.append(
+				aRequete.append(
 						"\n ALTER TABLE " + this.tempTableA + " RENAME v" + i + " TO v_" + this.allCols.get(i) + ";");
 			}
 		}
 
 	}
 
-	private void multiLeafUpdate() {
+	private void multiLeafUpdate(StringBuilder aRequete) {
 		// gestion des rubriques multiple
 		for (int i = 0; i < this.allCols.size(); i++) {
 			if (this.allCols.get(i).endsWith(HEADER)) {
 				String headerCol = this.allCols.get(i);
 				String col = this.allCols.get(i).replace(HEADER, "");
 
-				this.requete.append("\n UPDATE " + this.tempTableA + " SET i_" + headerCol + "=i_" + col + " WHERE i_"
+				aRequete.append("\n UPDATE " + this.tempTableA + " SET i_" + headerCol + "=i_" + col + " WHERE i_"
 						+ headerCol + " IS NULL and i_" + col + " IS NOT NULL;");
 			}
 		}
@@ -661,4 +715,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		return qName;
 	}
 
+	public String getJointure() {
+		return jointure;
+	}
+
+	
 }

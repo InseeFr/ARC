@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +24,7 @@ public class JeuDeRegle {
     private Date validiteSup;
     private String version;
 
-    private ArrayList<RegleControleEntity> listRegleControle;
+    private List<RegleControleEntity> listRegleControle;
 
     private String etat;
 
@@ -106,11 +107,11 @@ public class JeuDeRegle {
         }
     }
 
-    public ArrayList<RegleControleEntity> getListRegleControle() {
+    public List<RegleControleEntity> getListRegleControle() {
         return this.listRegleControle;
     }
 
-    public void setListRegleControle(ArrayList<RegleControleEntity> listRegleControle) {
+    public void setListRegleControle(List<RegleControleEntity> listRegleControle) {
         this.listRegleControle = listRegleControle;
     }
 

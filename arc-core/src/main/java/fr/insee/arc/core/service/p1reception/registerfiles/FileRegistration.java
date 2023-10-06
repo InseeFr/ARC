@@ -108,7 +108,7 @@ public class FileRegistration {
 		dao.execQueryInsertCorruptedArchiveInPilotage(content);
 
 		List<String> listContainerDoublons = new ArrayList<>();
-		ArrayList<String> listVersionContainerDoublons = new ArrayList<>();
+		List<String> listVersionContainerDoublons = new ArrayList<>();
 
 		dao.execQueryVersionDuplicateArchives(listContainerDoublons, listVersionContainerDoublons);
 
@@ -118,7 +118,7 @@ public class FileRegistration {
 	}
 
 	private void markArchivesVersion(FilesDescriber content, List<String> listContainerDoublons,
-			ArrayList<String> listVersionContainerDoublons) {
+			List<String> listVersionContainerDoublons) {
 
 		// set the num
 

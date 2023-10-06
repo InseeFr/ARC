@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class RequeteMappingTest {
 		tables.add(new TableMapping("", "table1"));
 		mappingRequest.setEnsembleTableMapping(tables);
 
-		HashMap<TableMapping, ArrayList<TableMapping>> result = mappingRequest.ordonnerTraitementTable();
+		Map<TableMapping, List<TableMapping>> result = mappingRequest.ordonnerTraitementTable();
 
 		assertTrue(result.isEmpty());
 	}
@@ -65,7 +65,7 @@ public class RequeteMappingTest {
 		
 		mappingRequest.setEnsembleTableMapping(tables);
 
-		HashMap<TableMapping, ArrayList<TableMapping>> result = mappingRequest.ordonnerTraitementTable();
+		Map<TableMapping, List<TableMapping>> result = mappingRequest.ordonnerTraitementTable();
 
 		assertEquals(1, result.size());
 		assertEquals(1, result.get(parent).size());

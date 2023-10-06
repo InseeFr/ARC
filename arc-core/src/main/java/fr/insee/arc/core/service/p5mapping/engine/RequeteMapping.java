@@ -72,7 +72,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	private Set<VariableMapping> ensembleVariableMapping;
 	private SortedSet<Integer> ensembleGroupes;
 
-	private HashMap<TableMapping, HashSet<String>> ensembleRubriqueIdentifianteTable;
+	private Map<TableMapping, Set<String>> ensembleRubriqueIdentifianteTable;
 	/*
 	 * LA REQUÊTE TEXTUELLE
 	 */
@@ -165,7 +165,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 
 		for (int i = 0; i < resultTemp.size(); i++) {
 			// mise en minuscule des rubriques
-			ArrayList<String> temp = new ArrayList<>();
+			List<String> temp = new ArrayList<>();
 			temp.add(resultTemp.get(i).get(0).toLowerCase());
 
 			String exprCol = resultTemp.get(i).get(1);
@@ -250,7 +250,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 
 		for (TableMapping table : this.ensembleTableMapping) {
 
-			HashSet<String> s = new HashSet<>();
+			Set<String> s = new HashSet<>();
 
 			for (VariableMapping var : this.ensembleVariableMapping) {
 
@@ -346,7 +346,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 			construireListeIdentifiants(reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
 			construireTableIdentifiantsFichierCourant(requeteGlobale, reglesIdentifiantes, nomsVariablesGroupe,
 					linkedIds);
-			HashMap<TableMapping, ArrayList<TableMapping>> tablesFilles = ordonnerTraitementTable();
+			Map<TableMapping, List<TableMapping>> tablesFilles = ordonnerTraitementTable();
 
 			for (TableMapping table : this.ensembleTableMapping) {
 				this.nomTableTemporairePrepUnion = "prep_union";
@@ -421,8 +421,8 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 		return returned;
 	}
 
-	private int computeTableNumber(HashMap<TableMapping, Integer> order,
-			HashMap<TableMapping, ArrayList<TableMapping>> tableTree, TableMapping table) {
+	private int computeTableNumber(Map<TableMapping, Integer> order,
+			Map<TableMapping, List<TableMapping>> tableTree, TableMapping table) {
 
 		if (order.get(table) != null) {
 			return order.get(table);
@@ -464,7 +464,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	 * @param tableAncestor
 	 * @param tableChild
 	 */
-	private void addTableInTreeHierarchy(HashMap<TableMapping, ArrayList<TableMapping>> tableTree,
+	private void addTableInTreeHierarchy(Map<TableMapping, List<TableMapping>> tableTree,
 			TableMapping tableAncestor, TableMapping tableChild) {
 		// create the tree entry if it doesn't exist
 		if (tableTree.get(tableAncestor) == null) {
@@ -482,15 +482,15 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	 * en remontant l'arbre du modèle this recursive version works with multiple
 	 * fathers or sons links
 	 */
-	public HashMap<TableMapping, ArrayList<TableMapping>> ordonnerTraitementTable() {
+	public Map<TableMapping, List<TableMapping>> ordonnerTraitementTable() {
 		// Correctif modèle métier à une seule table
 		if (this.ensembleTableMapping.size() == 1) {
 			return new HashMap<>();
 		}
 
 		// initialisation
-		HashMap<TableMapping, Integer> order = new HashMap<>();
-		HashMap<TableMapping, ArrayList<TableMapping>> tableTree = new HashMap<>();
+		Map<TableMapping, Integer> order = new HashMap<>();
+		Map<TableMapping, List<TableMapping>> tableTree = new HashMap<>();
 
 		// compute the index of every table
 		for (TableMapping table : this.ensembleTableMapping) {
@@ -517,7 +517,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	 * @param order : the order index computed for table
 	 * @return
 	 */
-	private Set<TableMapping> buildTheOrderedTablesListForProcess(HashMap<TableMapping, Integer> order) {
+	private Set<TableMapping> buildTheOrderedTablesListForProcess(Map<TableMapping, Integer> order) {
 
 		// get the maximum index of ordered tables
 		int k = 0;
@@ -709,7 +709,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 			Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe,
 			Map<String, String> linkedIds) {
 		this.nomTableFichierCourant = "fichier";
-		HashSet<String> alreadyAdded = new HashSet<>();
+		Set<String> alreadyAdded = new HashSet<>();
 
 		returned.append("\n DROP TABLE IF EXISTS " + nomTableFichierCourant + " CASCADE;");
 		returned.append(
@@ -846,7 +846,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	}
 
 	private StringBuilder calculerRequeteArrayAggGroup(StringBuilder returned, TableMapping table,
-			HashMap<TableMapping, ArrayList<TableMapping>> tablesFilles) {
+			Map<TableMapping, List<TableMapping>> tablesFilles) {
 
 		StringBuilder select = new StringBuilder();
 		StringBuilder groupBy = new StringBuilder();

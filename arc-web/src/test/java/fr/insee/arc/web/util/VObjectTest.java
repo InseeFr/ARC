@@ -20,11 +20,11 @@ public class VObjectTest {
 	@Before
 	public void before() {
 		this.defaultTestVobject = new VObject();
-		ArrayList<String> headersDLabel = new ArrayList<>();
+		List<String> headersDLabel = new ArrayList<>();
 		headersDLabel.add("first_field");
 		headersDLabel.add("second_field");
 		this.defaultTestVobject.setHeadersDLabel(headersDLabel);
-		ArrayList<String> headersDType = new ArrayList<>();
+		List<String> headersDType = new ArrayList<>();
 		headersDType.add("text");
 		headersDType.add("date");
 		this.defaultTestVobject.setHeadersDType(headersDType);
@@ -117,7 +117,7 @@ public class VObjectTest {
 
 	@Test
 	public void listContentSelectedOk() {
-		ArrayList<Boolean> selectedLines = new ArrayList<>();
+		List<Boolean> selectedLines = new ArrayList<>();
 		selectedLines.add(null);
 		selectedLines.add(true);
 		this.defaultTestVobject.setSelectedLines(selectedLines);
@@ -127,7 +127,7 @@ public class VObjectTest {
 
 	@Test
 	public void listHeadersSelectedOk() {
-		ArrayList<Boolean> selectedColumns = new ArrayList<>();
+		List<Boolean> selectedColumns = new ArrayList<>();
 		selectedColumns.add(null);
 		selectedColumns.add(true);
 		this.defaultTestVobject.setSelectedColumns(selectedColumns);

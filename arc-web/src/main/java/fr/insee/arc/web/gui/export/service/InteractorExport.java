@@ -83,12 +83,12 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
         Map<String,List<String>> filter=filter2;
         List<List<String>> result=new ArrayList<>();
 
-        ArrayList<String> entete = new ArrayList<>();
+        List<String> entete = new ArrayList<>();
         entete.add("filename");
         entete.add("isdirectory");
         result.add(entete);
 
-        ArrayList<String> format = new ArrayList<>();
+        List<String> format = new ArrayList<>();
         format.add("text");
         format.add("text");
         result.add(format);
@@ -160,20 +160,12 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
 
             if (toInsert)
             {
-                ArrayList<String> fileAttribute = new ArrayList<String>();
+                List<String> fileAttribute = new ArrayList<>();
                 fileAttribute.add(f.getName());
                 fileAttribute.add(""+f.isDirectory());
                 result.add(fileAttribute);
-                nb++;
-                if (nb>50)
-                {
-                    break;
-                }
             }
         }
-
-
-
         return result;
 
     }

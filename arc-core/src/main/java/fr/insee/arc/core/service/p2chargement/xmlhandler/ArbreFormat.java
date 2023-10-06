@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,10 +36,10 @@ public class ArbreFormat {
     private Map<String, String> arbreHierachieDuFichier;
     
     //éléments terminaux
-    private ArrayList<String> feuilles = new ArrayList<>();
+    private List<String> feuilles = new ArrayList<>();
     
     //éléments intermédiaire
-    private ArrayList<String> branches = new ArrayList<>();
+    private List<String> branches = new ArrayList<>();
 
     public ArbreFormat(Norme aNorme) throws ArcException {
         super();
@@ -81,8 +82,8 @@ public class ArbreFormat {
     /*
      * Retourne la liste des pères d'un élément
      */
-    public ArrayList<String> getPeres (String fils){
-        ArrayList<String> listePere = new ArrayList<String>();
+    public List<String> getPeres (String fils){
+        List<String> listePere = new ArrayList<>();
         listePere.add(fils);
         String pere = this.arbreHierachieDuFichier.get(fils);
        
@@ -112,28 +113,28 @@ public class ArbreFormat {
     /**
      * @return the feuilles
      */
-    public ArrayList<String> getFeuilles() {
+    public List<String> getFeuilles() {
         return feuilles;
     }
 
     /**
      * @param feuilles the feuilles to set
      */
-    public void setFeuilles(ArrayList<String> feuilles) {
+    public void setFeuilles(List<String> feuilles) {
         this.feuilles = feuilles;
     }
     
     /**
      * @return the branches
      */
-    public ArrayList<String> getBranches() {
+    public List<String> getBranches() {
         return branches;
     }
 
     /**
      * @param feuilles the feuilles to set
      */
-    public void setBranches(ArrayList<String> branches) {
+    public void setBranches(List<String> branches) {
         this.branches = branches;
     }
     

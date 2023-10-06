@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +38,7 @@ public class NormageEngineRegleIndependance {
 		StaticLoggerDispatcher.info(LOGGER, "ajouterRegleIndependance()");
 
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
-		HashSet<String> rubriqueExclusion = new HashSet<String>();
+		Set<String> rubriqueExclusion = new HashSet<>();
 		Map<String, String> rubriquesAvecRegleDIndependance = new HashMap<>();
 
 		// pour toutes les règles de relation,
@@ -56,8 +57,8 @@ public class NormageEngineRegleIndependance {
 				String rubriqueNmclM = NormageEngineGlobal.getM(blocCreate, rubriqueNmcl);
 
 				if (rubriqueM != null && rubriqueNmclM != null) {
-					ArrayList<String> parentM = NormageEngineGlobal.getParentsTree(blocCreate, rubriqueM, true);
-					ArrayList<String> parentNmclM = NormageEngineGlobal.getParentsTree(blocCreate, rubriqueNmclM, true);
+					List<String> parentM = NormageEngineGlobal.getParentsTree(blocCreate, rubriqueM, true);
+					List<String> parentNmclM = NormageEngineGlobal.getParentsTree(blocCreate, rubriqueNmclM, true);
 
 					// on exclus tout les blocs présent dans les listes jusqu'a ce qu'on trouve
 					// l'élément en commun
@@ -97,7 +98,7 @@ public class NormageEngineRegleIndependance {
 		}
 
 		// ARC compute which rubriques are independant and set the independance rules
-		ArrayList<String> r = new ArrayList<>();
+		List<String> r = new ArrayList<>();
 		addIndependanceToChildren(r, blocCreate, NormageEngineGlobal.getM(blocCreate), regle,
 				rubriquesAvecRegleDIndependance, norme, periodicite, rubriqueExclusion);
 
@@ -134,7 +135,7 @@ public class NormageEngineRegleIndependance {
 				String[] rubriqueNmclRegle = regle.get("rubrique_nmcl").get(j).replace(" ", "").toLowerCase()
 						.split(",");
 
-				ArrayList<String> rubrique = new ArrayList<>();
+				List<String> rubrique = new ArrayList<>();
 				Map<String, String> rubriqueNmcl = new HashMap<>();
 
 				// ne garder que les rubriques qui existent dans la requete
@@ -269,7 +270,7 @@ public class NormageEngineRegleIndependance {
 	 * @return
 	 */
 	private static boolean calculerTableIndependance(StringBuilder blocRequete, boolean nullTableRequired,
-			ArrayList<String> rubrique, Map<String, String> rubriqueNmcl, Map<String, String> table,
+			List<String> rubrique, Map<String, String> rubriqueNmcl, Map<String, String> table,
 			Map<String, String> pere, Map<String, String> autreCol) {
 		boolean isThereAnyValue = false;
 
@@ -401,10 +402,10 @@ public class NormageEngineRegleIndependance {
 	 * @param periodicite
 	 * @param exclusion
 	 */
-	private static void addIndependanceToChildren(ArrayList<String> r, String blocCreate, String mRubrique,
+	private static void addIndependanceToChildren(List<String> r, String blocCreate, String mRubrique,
 			Map<String, List<String>> regle, Map<String, String> rubriquesAvecRegleDIndependance,
-			String norme, String periodicite, HashSet<String> exclusion) {
-		ArrayList<String> s = NormageEngineGlobal.getChildren(blocCreate, mRubrique);
+			String norme, String periodicite, Set<String> exclusion) {
+		List<String> s = NormageEngineGlobal.getChildren(blocCreate, mRubrique);
 
 		if (!s.isEmpty()) {
 			r.addAll(s);

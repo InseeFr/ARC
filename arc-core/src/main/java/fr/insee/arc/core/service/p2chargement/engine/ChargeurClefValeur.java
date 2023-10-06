@@ -172,7 +172,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws IOException 
      * @throws ArcException 
      */
-    private ArrayList<String> initialisationOutputStream(Map<String, String> arbreFormat, Map<String, List<String>> mapRubriquesFilles,
+    private List<String> initialisationOutputStream(Map<String, String> arbreFormat, Map<String, List<String>> mapRubriquesFilles,
             String ligne) throws ArcException {
         // ecriture de l'entete du fichier
 
@@ -190,7 +190,7 @@ public class ChargeurClefValeur implements IChargeur {
         if (!arbreFormat.containsKey(rubrique)) {
             throw new ArcException(ArcExceptionMessage.LOAD_KEYVALUE_VAR_NOT_EXISTS_IN_FORMAT_RULES, rubrique);
         }
-        ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
+        List<String> listePeresRubriqueCourante = new ArrayList<>();
         // On remonte dans l'arbre des pères jusqu'à la racine
         while (rubrique != null) {
             listePeresRubriqueCourante.add(rubrique);
@@ -227,7 +227,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws IOException 
      * @throws ArcException 
      */
-    private ArrayList<String> lectureLigne(Map<String, String> arbreFormat,
+    private List<String> lectureLigne(Map<String, String> arbreFormat,
             List<String> listePeresRubriquePrecedante, Map<String, List<String>> mapRubriquesFilles, String ligne) 
             		throws ArcException
             {
@@ -252,7 +252,7 @@ public class ChargeurClefValeur implements IChargeur {
         if (!arbreFormat.containsKey(pere)) {
             throw new ArcException(ArcExceptionMessage.LOAD_KEYVALUE_VAR_NOT_EXISTS_IN_FORMAT_RULES, rubrique);
         }
-        ArrayList<String> listePeresRubriqueCourante = new ArrayList<>();
+        List<String> listePeresRubriqueCourante = new ArrayList<>();
         while (pere != null) {
             listePeresRubriqueCourante.add(pere);
             pere = arbreFormat.get(pere);

@@ -113,7 +113,7 @@ public class VObject {
 		}
 		List<List<String>> c = new ArrayList<>();
 		for (int i = 0; i < getSavedContent().size(); i++) {
-			ArrayList<String> l = new ArrayList<>();
+			List<String> l = new ArrayList<>();
 			for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
 				l.add(getSavedContent().get(i).d.get(j));
 			}
@@ -238,7 +238,7 @@ public class VObject {
 		}
 		List<List<String>> r = new ArrayList<>();
 		for (int i = 0; i < getContent().size(); i++) {
-			ArrayList<String> line = new ArrayList<>();
+			List<String> line = new ArrayList<>();
 			boolean changed = false;
 			for (int j = 0; j < getContent().get(i).d.size(); j++) {
 				String oldContentValue = getSavedContent().get(i).d.get(j);
@@ -308,7 +308,7 @@ public class VObject {
 		if (getSavedContent() == null) {
 			return new ArrayList<>();
 		}
-		ArrayList<String> r = new ArrayList<>();
+		List<String> r = new ArrayList<>();
 		if (getSelectedColumns() == null || getSelectedColumns().isEmpty()) {
 			return r;
 		}
@@ -502,8 +502,8 @@ public class VObject {
 		return v0;
 	}
 
-	public ArrayList<String> getV(int j, TableObject content) {
-		ArrayList<String> h = new ArrayList<>();
+	public List<String> getV(int j, TableObject content) {
+		List<String> h = new ArrayList<>();
 		if (content == null) {
 			return h;
 		}

@@ -691,7 +691,7 @@ public class VObjectService {
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 		// Compares new and old values line by line
 		// Stocks the modified line number in toBeUpdated
-		ArrayList<Integer> toBeUpdated = new ArrayList<>();
+		List<Integer> toBeUpdated = new ArrayList<>();
 		for (int i = 0; i < currentData.getContent().size(); i++) {
 			LineObject line = currentData.getContent().get(i);
 			if (line != null) {

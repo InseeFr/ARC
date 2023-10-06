@@ -831,8 +831,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		// récupérer la liste des colonnes
 		// liste de toutes les colonnes
 		// liste des colonnes à mettre à jour
-		ArrayList<String> colSetList = new ArrayList<>();
-		ArrayList<String> setList = new ArrayList<>();
+		List<String> colSetList = new ArrayList<>();
+		List<String> setList = new ArrayList<>();
 		for (int i = 0; i < set.length; i++) {
 			// extraire la colonne à mettre à jour; la garder ssi elle existe
 			// dans le modèle de la table à mettre à
@@ -844,7 +844,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 		}
 		// liste des colonnes de la jointure (clé primaire de la table initiale)
-		ArrayList<String> colKeyList = new ArrayList<>();
+		List<String> colKeyList = new ArrayList<>();
 		for (int i = 0; i < keys.split(",").length; i++) {
 			colKeyList.add(keys.split(",")[i].trim().toUpperCase());
 		}

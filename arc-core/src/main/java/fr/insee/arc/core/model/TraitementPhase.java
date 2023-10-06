@@ -58,8 +58,8 @@ public enum TraitementPhase {
      * 
      * @return
      */
-    public ArrayList<TraitementPhase> nextPhases() {
-        ArrayList<TraitementPhase> listPhase = new ArrayList<>();
+    public List<TraitementPhase> nextPhases() {
+        List<TraitementPhase> listPhase = new ArrayList<>();
         for (TraitementPhase phase : TraitementPhase.values()) {
             if (phase.getOrdre() > ordre) {
                 listPhase.add(phase);

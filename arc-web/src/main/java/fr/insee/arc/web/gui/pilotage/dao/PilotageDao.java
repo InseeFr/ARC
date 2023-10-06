@@ -219,7 +219,7 @@ public class PilotageDao extends VObjectHelperDao {
 			querySelection.append(" AND nom_archive IN " + Format.sqlListe(selection) + " ");
 		}
 
-		ArrayList<String> listRepertoire = new ArrayList<>();
+		List<String> listRepertoire = new ArrayList<>();
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT DISTINCT entrepot FROM (");
@@ -265,7 +265,7 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public void downloadBdBAS(VObject viewFichierBAS, HttpServletResponse response,
-			ArrayList<String> tableDownload, String phase, String etatBdd, String date) throws ArcException {
+			List<String> tableDownload, String phase, String etatBdd, String date) throws ArcException {
 
 		// List of queries that will be executed to download
 		List<ArcPreparedStatementBuilder> tableauRequete = new ArrayList<>();
@@ -346,7 +346,7 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public void downloadEnvelopeBAS(VObject viewFichierBAS, HttpServletResponse response,
-			String chemin, ArrayList<String> listRepertoire) {
+			String chemin, List<String> listRepertoire) {
 		// récupération de la liste des noms d'enloppe
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();

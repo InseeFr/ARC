@@ -83,7 +83,7 @@ public class ServiceViewFileExport extends InteractorExport {
 			String envDir = getBacASable().replace(".", "_").toUpperCase();
 			String dirOut = repertoire + envDir;
 
-			ArrayList<String> r = new ArrayList<>(Arrays.asList("EXPORT"));
+			List<String> r = new ArrayList<>(Arrays.asList("EXPORT"));
 
 			this.vObjectService.downloadEnveloppe(views.getViewFileExport(), response, requete, dirOut, r);
 

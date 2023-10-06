@@ -65,7 +65,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.tabIdSource=theApi.getTabIdSource();
 		this.paramBatch=theApi.getParamBatch();
 
-		this.sjdr = new ServiceJeuDeRegle(ViewEnum.CONTROLE_REGLE.getFullName(envExecution));
+		this.sjdr = new ServiceJeuDeRegle();
 		this.jdr = new JeuDeRegle();
 
 		// Nom des tables temporaires

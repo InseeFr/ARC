@@ -43,9 +43,9 @@ public class NormageEngineRegleRelation {
 		int max = lines.length - 1;
 
 		// on parcourt maintenant les regles de relation
-		ArrayList<String> listRubrique = new ArrayList<String>();
-		ArrayList<String> listRubriqueNmcl = new ArrayList<String>();
-		ArrayList<String> listTableNmcl = new ArrayList<String>();
+		List<String> listRubrique = new ArrayList<>();
+		List<String> listRubriqueNmcl = new ArrayList<>();
+		List<String> listTableNmcl = new ArrayList<>();
 
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
 			String type = regle.get("id_classe").get(j);

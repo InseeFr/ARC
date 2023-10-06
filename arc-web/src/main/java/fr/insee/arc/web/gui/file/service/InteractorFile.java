@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
 import fr.insee.arc.web.gui.all.util.VObject;
@@ -254,7 +255,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 				requete.append("SELECT " + requete.quoteText(s) + " as nom_fichier ");
 			}
 
-			ArrayList<String> r = new ArrayList<>(Arrays.asList("/"));
+			List<String> r = new ArrayList<>(Arrays.asList("/"));
 
 			this.vObjectService.downloadEnveloppe(viewSource, response, requete, dirSource, r);
 		}
@@ -269,7 +270,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 				try {
 					Files.copy(fileSource.toPath(), fileTarget.toPath());
 				} catch (IOException e) {
-					loggerDispatcher.error("fileManagement.copy.error" + fileSource, e, LOGGER);
+					new ArcException(e, ArcExceptionMessage.FILE_COPY_FAILED).logFullException();
 					viewSource.setMessage("fileManagement.copy.error");
 					viewSource.setMessageArgs(fileSource);
 				}

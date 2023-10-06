@@ -106,7 +106,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 
 		// Sélection des table métiers en fonction de la phase sélectionner (5 pour
 		// mapping 1 sinon)
-		ArrayList<String> tableDownload = new ArrayList<>();
+		List<String> tableDownload = new ArrayList<>();
 		try {
 			
 			List<String> dataTables = PhaseOperations.selectPhaseDataTablesFoundInEnv(null, getBacASable());
@@ -139,7 +139,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		
 		initializeFichierBAS(views.getViewFichierBAS(), views.getViewPilotageBAS(), views.getViewRapportBAS());
 
-		ArrayList<String> listRepertoire = new ArrayList<>();
+		List<String> listRepertoire = new ArrayList<>();
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.OK);
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.KO);
 		String chemin = Paths.get(this.repertoire, getBacASable().toUpperCase()).toString();

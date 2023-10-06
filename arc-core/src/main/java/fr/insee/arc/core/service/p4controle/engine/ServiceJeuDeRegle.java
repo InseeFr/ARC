@@ -34,17 +34,10 @@ public class ServiceJeuDeRegle {
 	 * Liste des rubriques de la table de données DSN
 	 */
 	private List<String> listRubTable = new ArrayList<>();
-	private String tableControleRegle;
 
     public ServiceJeuDeRegle(){
     	this.servSql = new ServiceRequeteSqlRegle();
     }
-	
-    public ServiceJeuDeRegle(String tableControleRegle){
-    	this.servSql = new ServiceRequeteSqlRegle();
-    	this.tableControleRegle=tableControleRegle;
-    }
-
 
 	/**
 	 * pour remplir un jeu de règle avec les règles y afférant
@@ -59,7 +52,7 @@ public class ServiceJeuDeRegle {
 	 */	
 	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String tableRegle, String tableIn) throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER,"recherche de regle dans la table : " + tableRegle);
-		ArrayList<RegleControleEntity> listRegleC = RegleDao.getRegle(connexion, tableRegle, tableIn);
+		List<RegleControleEntity> listRegleC = RegleDao.getRegle(connexion, tableRegle, tableIn);
 		jdr.setListRegleControle(listRegleC);
 	}
 	
@@ -118,7 +111,7 @@ public class ServiceJeuDeRegle {
 		// exécuter les préactions
 				StaticLoggerDispatcher.info(LOGGER, "Debut Pré-actions");
 
-				ArrayList<String> p=new ArrayList<>();
+				List<String> p=new ArrayList<>();
 
 				// récupérer les préactions du jeu de regle
 				/**
@@ -199,7 +192,7 @@ public class ServiceJeuDeRegle {
 						// rules to set tree root and father label are ignored
 						&& !(reg.getRubriquePere().equalsIgnoreCase(XMLConstant.ROOT)))
 				{
-					blocRequete.append(executeRegleCardinalite(jdr, reg));
+					blocRequete.append(executeRegleCardinalite(reg));
 					blocRequete.append(System.lineSeparator());
 				}
 				else
@@ -275,7 +268,7 @@ public class ServiceJeuDeRegle {
 		StaticLoggerDispatcher.info(LOGGER,"Je lance executeRegleCondition()");
 		String requete = "";
 
-		ArrayList<String> listRubrique = ManipString.extractRubriques(reg.getCondition());
+		List<String> listRubrique = ManipString.extractRubriques(reg.getCondition());
 		listRubrique.replaceAll(String::toUpperCase);
 		
 		if (this.listRubTable.containsAll(listRubrique)) {
@@ -303,11 +296,11 @@ public class ServiceJeuDeRegle {
 	 * @param table
 	 * @throws ArcException
 	 */
-	private String executeRegleCardinalite(JeuDeRegle jdr, RegleControleEntity reg) {
+	private String executeRegleCardinalite(RegleControleEntity reg) {
 		StaticLoggerDispatcher.info(LOGGER,"Je lance executeRegleCardinalite()");
 		String requete = "";
 
-		ArrayList<String> listRubrique = ManipString.extractRubriques(reg.getCondition());
+		List<String> listRubrique = ManipString.extractRubriques(reg.getCondition());
 		listRubrique.replaceAll(String::toUpperCase);
 
 		requete = this.servSql.ctlCardinalite(reg, listRubrique, listRubTable);

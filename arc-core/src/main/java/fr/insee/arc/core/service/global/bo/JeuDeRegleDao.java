@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,6 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.utils.utils.LoggerHelper;
 public class JeuDeRegleDao {
 
     private static final Logger LOGGER = LogManager.getLogger(JeuDeRegleDao.class);
@@ -35,7 +33,7 @@ public class JeuDeRegleDao {
      * @return
      * @throws ArcException
      */
-    public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableJeuDeRegle) throws ArcException {
+    public static List<JeuDeRegle> recupJeuDeRegle(Connection connexion, String tableJeuDeRegle) throws ArcException {
         StaticLoggerDispatcher.info(LOGGER, "Recherche des jeux de règles à appliquer");
 
         StringBuilder requete = new StringBuilder();
@@ -56,7 +54,7 @@ public class JeuDeRegleDao {
      * @return
      * @throws ArcException
      */
-    public static ArrayList<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws ArcException {
+    public static List<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws ArcException {
         StaticLoggerDispatcher.info(LOGGER, "Recherche des jeux de règles à appliquer");
 
         StringBuilder requete = new StringBuilder();
@@ -72,15 +70,15 @@ public class JeuDeRegleDao {
 
 		Map<String,List<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
 
-		ArrayList<JeuDeRegle> listJdr = extractRuleSetObjects(g);
+		List<JeuDeRegle> listJdr = extractRuleSetObjects(g);
 
         StaticLoggerDispatcher.info(LOGGER, "J'ai trouvé " + listJdr.size() + " jeux de règle, utiles pour controler");
         return listJdr;
     }
 
-	private static ArrayList<JeuDeRegle> extractRuleSetObjects(Map<String, List<String>> g) throws ArcException {
+	private static List<JeuDeRegle> extractRuleSetObjects(Map<String, List<String>> g) throws ArcException {
 		SimpleDateFormat formatDate = new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat());
-        ArrayList<JeuDeRegle> listJdr = new ArrayList<>();
+        List<JeuDeRegle> listJdr = new ArrayList<>();
 		if (!g.isEmpty())
 		{
 			for (int i=0;i<g.get("id_norme").size();i++)

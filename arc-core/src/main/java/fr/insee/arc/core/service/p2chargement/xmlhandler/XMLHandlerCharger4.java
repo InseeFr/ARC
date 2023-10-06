@@ -62,11 +62,11 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	// l'integer ne sert à rien -> refactor avec un set
 	private Map<String, Integer> colData = new HashMap<>();
 
-	private HashMap<Integer, Integer> tree = new HashMap<>();
-	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
+	private Map<Integer, Integer> tree = new HashMap<>();
+	private Map<Integer, Boolean> treeNode = new HashMap<>();
 
-	private HashMap<Integer, Integer> colDist = new HashMap<>();
-	private HashMap<Integer, String> keepLast = new HashMap<>();
+	private Map<Integer, Integer> colDist = new HashMap<>();
+	private Map<Integer, String> keepLast = new HashMap<>();
 
 	private int idLigne = 0;
 	private int distance = 0;
@@ -182,6 +182,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 			// vérifier qu'une feuille n'existe pas déjà
 			if (this.lineCols.indexOf(this.allCols.indexOf(this.closedTag)) < this.lineCols.size() - 1) {
 
+				// réalisation de l'insertion
 				insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols.subList(0, this.lineCols.size() - 1),
 						this.lineIds.subList(0, this.lineCols.size() - 1),
 						this.lineValues.subList(0, this.lineCols.size() - 1));
@@ -228,7 +229,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 		try {
 			this.colDist.put(-1, 0);
-
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "instartDocumentdex()", LOGGER, ex);
 		}
@@ -257,7 +257,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 			this.allCols.add(this.currentTag);
 			addQuery(ALTER, "alter table " + this.tempTableA + " add i" + this.allCols.indexOf(this.currentTag) + " "
 					+ TypeEnum.INTEGER.getTypeName() + ";");
-
 		} else {
 			// ajouter 1 a son index si la colonne existe dejà
 			this.col.put(this.currentTag, o + 1);
@@ -354,7 +353,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private void insertQueryBuilder(String tempTableI, String fileName, List<Integer> lineCols, List<Integer> lineIds,
 			List<String> lineValues) {
 
-		HashMap<Integer, String> keep = new HashMap<>();
+		Map<Integer, String> keep = new HashMap<>();
 
 		// enregistre la liste des colonnes/valeurs relatives à un noeud de l'arbre xml
 		StringBuilder s = new StringBuilder();
@@ -374,12 +373,11 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 		}
 
-		HashMap<Integer, Boolean> doNotinsert = new HashMap<>();
+		Map<Integer, Boolean> doNotinsert = new HashMap<>();
 		for (Map.Entry<Integer, String> entry : this.keepLast.entrySet()) {
 
 			if (entry.getValue().equals(keep.get(entry.getKey()))) {
 				doNotinsert.put(entry.getKey(), true);
-
 			}
 		}
 
@@ -466,7 +464,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 		StringBuilder req = new StringBuilder();
 
 		int[][] arr = TreeFunctions.getTreeArrayByDistance(this.tree, this.colDist);
-
 		StringBuilder reqCreate = new StringBuilder(" \n");
 
 		StringBuilder reqInsert = new StringBuilder();
