@@ -64,7 +64,6 @@ public class ChargeurXmlComplexe implements IChargeur {
 			"text collate \"C\"", "text collate \"C\"", "text collate \"C\"", "text collate \"C\""));
 
 	private String rapport;
-	private boolean error = false;
 	public String jointure;
 
 	public ChargeurXmlComplexe(ThreadChargementService threadChargementService, String fileName) {
@@ -156,21 +155,11 @@ public class ChargeurXmlComplexe implements IChargeur {
 	}
 
 	@Override
-	public void finalisation() {
+	public void finalisation() throws ArcException {
 		StringBuilder requeteBilan = new StringBuilder();
-		if (error) {
-			requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName,
-					this.currentPhase, TraitementEtat.KO.toString(), rapport));
-		} else {
-			requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName,
+		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName,
 					this.currentPhase, TraitementEtat.OK.toString(), rapport, this.jointure));
-		}
-
-		try {
-			UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "chargerXml()", LOGGER, ex);
-		}
+		UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
 	}
 
 	@Override
@@ -194,7 +183,6 @@ public class ChargeurXmlComplexe implements IChargeur {
 			SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
 			saxParser.parse(f, handler);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			error = true;
 			ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED,
 					this.fileName).logMessageException();
 			rapport = businessException.getMessage().replace("'", "''");
