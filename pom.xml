@@ -78,7 +78,7 @@
 
 		<!-- math random used to compute temporary table name. Not a risk for internal use -->
 		<sonar.issue.ignore.multicriteria.e12.ruleKey>java:S2245</sonar.issue.ignore.multicriteria.e12.ruleKey>
-		<sonar.issue.ignore.multicriteria.e12.resourceKey>**/FormatSQL.java</sonar.issue.ignore.multicriteria.e12.resourceKey>
+		<sonar.issue.ignore.multicriteria.e12.resourceKey>**/TemporaryToken.java</sonar.issue.ignore.multicriteria.e12.resourceKey>
 
 		<!-- override log class. Not a risk for internal use-->
 		<sonar.issue.ignore.multicriteria.e13.ruleKey>java:S4792</sonar.issue.ignore.multicriteria.e13.ruleKey>
