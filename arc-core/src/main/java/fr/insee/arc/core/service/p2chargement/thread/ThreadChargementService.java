@@ -228,13 +228,15 @@ public class ThreadChargementService extends ApiChargementService implements Run
 				ArchiveChargerFactory archiveChargerFactory = new ArchiveChargerFactory(fileChargement, this.idSource);
 				IArchiveFileLoader archiveChargeur = archiveChargerFactory.getChargeur(container);
 
-				this.filesInputStreamLoad = archiveChargeur.loadArchive();
-				choixChargeur();
+				this.filesInputStreamLoad = archiveChargeur.prepareArchiveStreams();
+				IChargeur targetLoader = chooseLoader();
+				targetLoader.charger();
+				
 			} finally {
 				this.filesInputStreamLoad.closeAll();
 			}
 		} catch (IOException e) {
-			throw new ArcException(e, ArcExceptionMessage.FILE_CLOSE_FAILED, fileChargement);
+			throw new ArcException(e, ArcExceptionMessage.FILE_CLOSE_FAILED, fileChargement.getAbsolutePath());
 		}
 	}
 
@@ -246,7 +248,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * @param tmpInxNormage
 	 * @throws ArcException
 	 */
-	private void choixChargeur() throws ArcException {
+	private IChargeur chooseLoader() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "** choixChargeur : " + this.idSource + " **");
 		// Si on a pas 1 seule norme alors le fichier est en erreur
 		ChargementBrut chgrBrtl = new ChargementBrut();
@@ -275,10 +277,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 		ChargeurFactory chargeurFactory = new ChargeurFactory(this, this.idSource);
 
-		IChargeur chargeur = chargeurFactory.getChargeur(this.normeOk.getRegleChargement().getTypeChargement());
-
-		chargeur.charger();
-
+		return chargeurFactory.getChargeur(this.normeOk.getRegleChargement().getTypeChargement());
 	}
 
 	/**

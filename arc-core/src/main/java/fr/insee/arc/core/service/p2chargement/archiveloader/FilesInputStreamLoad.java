@@ -6,7 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipFile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,20 +25,43 @@ public class FilesInputStreamLoad {
     private static final Logger LOGGER = LogManager.getLogger(FilesInputStreamLoad.class);
 
     
-    private InputStream tmpInxChargement ;
-    private InputStream tmpInxNormage ;
-    private InputStream tmpInxCSV ;
+    // why a list of inputstream ?
+    // It is necessary to close the streams correctly
+    // as tar gz ou zip readers are composed by severals stream that must be individually close
+    // We can't use try resource with interface but it is the same deal with try-ressource : stream must be declared one by one
+    private List<InputStream> tmpInxChargement;
+
+    private List<InputStream> tmpInxNormage;
+
+    private List<InputStream> tmpInxCSV;
+    
     private File theFileToRead;
     
-    
+    // not really nice but ZipFIle need be close, not only the underlying InputStream...
+	private ZipFile zipFileChargement;
+	private ZipFile zipFileNormage;
+	private ZipFile zipFileCSV;
     
     
     public FilesInputStreamLoad(File theFileToRead) throws IOException {
 	super();
-	try {
-	    this.tmpInxChargement =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),CompressedUtils.READ_BUFFER_SIZE));
-	    this.tmpInxNormage =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),CompressedUtils.READ_BUFFER_SIZE));
-	    this.tmpInxCSV =  new GZIPInputStream(new BufferedInputStream(new FileInputStream(theFileToRead),CompressedUtils.READ_BUFFER_SIZE));
+	try {	
+	    tmpInxChargement = new ArrayList<>();
+	    tmpInxNormage = new ArrayList<>();
+	    tmpInxCSV = new ArrayList<>();
+	    
+		setTmpInxChargement(new FileInputStream(theFileToRead));
+		setTmpInxChargement(new BufferedInputStream(getTmpInxChargement(),CompressedUtils.READ_BUFFER_SIZE));
+		setTmpInxChargement(new GZIPInputStream(getTmpInxChargement()));
+		
+		setTmpInxNormage(new FileInputStream(theFileToRead));
+		setTmpInxNormage(new BufferedInputStream(getTmpInxNormage(),CompressedUtils.READ_BUFFER_SIZE));
+		setTmpInxNormage(new GZIPInputStream(getTmpInxNormage()));
+		
+		setTmpInxCSV(new FileInputStream(theFileToRead));
+		setTmpInxCSV(new BufferedInputStream(getTmpInxCSV(),CompressedUtils.READ_BUFFER_SIZE));
+		setTmpInxCSV(new GZIPInputStream(getTmpInxCSV()));
+		
 	} catch (FileNotFoundException e) {
 	    StaticLoggerDispatcher.error(LOGGER, "Can't instanciate FilesInputStreamLoad for file " + theFileToRead.getName());
 	    throw e;
@@ -45,22 +71,29 @@ public class FilesInputStreamLoad {
     
     public FilesInputStreamLoad() {
 	super();
+	    tmpInxChargement = new ArrayList<>();
+	    tmpInxNormage = new ArrayList<>();
+	    tmpInxCSV = new ArrayList<>();
     }
     
-    public void closeAll() throws IOException {
+    public FilesInputStreamLoad(ZipFile zipFileChargement, ZipFile zipFileNormage, ZipFile zipFileCSV) {
+		super();
+	    tmpInxChargement = new ArrayList<>();
+	    tmpInxNormage = new ArrayList<>();
+	    tmpInxCSV = new ArrayList<>();
+		this.zipFileChargement = zipFileChargement;
+		this.zipFileNormage = zipFileNormage;
+		this.zipFileCSV = zipFileCSV;
+	}
+
+	public void closeAll() throws IOException {
 	 try {
-		 if (this.tmpInxChargement!=null)
-		 {
-			 this.tmpInxChargement.close();
-		 }
-		 if (this.tmpInxNormage!=null)
-		 {
-			 this.tmpInxNormage.close();
-		 }
-		 if (this.tmpInxCSV!=null)
-		 {
-			 this.tmpInxCSV.close();
-		 }
+		 close(tmpInxChargement);
+		 close(tmpInxNormage);
+		 close(tmpInxCSV);
+		 close(zipFileChargement); 
+		 close(zipFileNormage); 
+		 close(zipFileCSV);  
 	} catch (IOException e) {
 	    StaticLoggerDispatcher.error(LOGGER, "Can't close all FilesInputStreamLoad for file " + theFileToRead.getName());
 	    throw e;
@@ -68,23 +101,22 @@ public class FilesInputStreamLoad {
     }
     
     public InputStream getTmpInxChargement() {
-        return tmpInxChargement;
+        return tmpInxChargement.get(tmpInxChargement.size()-1);
     }
     public void setTmpInxChargement(InputStream tmpInxChargement) {
-        this.tmpInxChargement = tmpInxChargement;
+        this.tmpInxChargement.add(tmpInxChargement);
     }
     public InputStream getTmpInxNormage() {
-        return tmpInxNormage;
+        return tmpInxNormage.get(tmpInxNormage.size()-1);
     }
     public void setTmpInxNormage(InputStream tmpInxNormage) {
-        this.tmpInxNormage = tmpInxNormage;
+        this.tmpInxNormage.add(tmpInxNormage);
     }
-
     public InputStream getTmpInxCSV() {
-        return tmpInxCSV;
+        return tmpInxCSV.get(tmpInxCSV.size()-1);
     }
     public void setTmpInxCSV(InputStream tmpInxCSV) {
-        this.tmpInxCSV = tmpInxCSV;
+        this.tmpInxCSV.add(tmpInxCSV);
     }
     public File getTheFileToRead() {
         return theFileToRead;
@@ -93,5 +125,30 @@ public class FilesInputStreamLoad {
         this.theFileToRead = theFileToRead;
     }
     
+    /**
+     * close inputStreams
+     */
+    private void close (List<InputStream> inputStreamEntries) throws IOException
+    {
+    	// order is important
+    	for (int i=inputStreamEntries.size()-1;i>-1;i--)
+    	{
+    		if (inputStreamEntries.get(i)!=null)
+    		{
+    			inputStreamEntries.get(i).close();
+    		}
+    	}
+    }
+
+    /**
+     * close ZipFIle
+     */
+    private void close(ZipFile zipfile) throws IOException
+    {
+    	if (zipfile!=null)
+    	{
+    		zipfile.close();
+    	}
+    }
     
 }

@@ -34,5 +34,5 @@ public interface IArchiveFileLoader {
      * @return all necessary inputstream
      * @throws ArcException
      */
-    public FilesInputStreamLoad loadArchive() throws ArcException ;
+    public FilesInputStreamLoad prepareArchiveStreams() throws ArcException ;
 }

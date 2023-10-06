@@ -3,9 +3,6 @@ package fr.insee.arc.utils.files;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,7 +107,7 @@ public class FileUtilsArc {
 		boolean deleteResult = fileInput.delete();
 
 		if (!deleteResult) {
-			throw new ArcException(ArcExceptionMessage.FILE_DELETE_FAILED, fileInput.getName());
+			throw new ArcException(ArcExceptionMessage.FILE_DELETE_FAILED, fileInput.getAbsolutePath());
 		}
 	}
 	

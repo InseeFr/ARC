@@ -32,9 +32,19 @@ public class GZArchiveLoader extends AbstractArchiveFileLoader {
 
 	// Loading
 	try {
-		this.filesInputStreamLoad.setTmpInxChargement(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),CompressedUtils.READ_BUFFER_SIZE)));
-		this.filesInputStreamLoad.setTmpInxCSV(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),CompressedUtils.READ_BUFFER_SIZE)));
-		this.filesInputStreamLoad.setTmpInxNormage(new GZIPInputStream(new BufferedInputStream(new FileInputStream(this.archiveChargement),CompressedUtils.READ_BUFFER_SIZE)));
+		
+		this.filesInputStreamLoad.setTmpInxChargement(new FileInputStream(this.archiveChargement));
+		this.filesInputStreamLoad.setTmpInxChargement(new BufferedInputStream(filesInputStreamLoad.getTmpInxChargement(),CompressedUtils.READ_BUFFER_SIZE));
+		this.filesInputStreamLoad.setTmpInxChargement(new GZIPInputStream(filesInputStreamLoad.getTmpInxChargement()));
+		
+		this.filesInputStreamLoad.setTmpInxNormage(new FileInputStream(this.archiveChargement));
+		this.filesInputStreamLoad.setTmpInxNormage(new BufferedInputStream(filesInputStreamLoad.getTmpInxNormage(),CompressedUtils.READ_BUFFER_SIZE));
+		this.filesInputStreamLoad.setTmpInxNormage(new GZIPInputStream(filesInputStreamLoad.getTmpInxNormage()));
+		
+		this.filesInputStreamLoad.setTmpInxCSV(new FileInputStream(this.archiveChargement));
+		this.filesInputStreamLoad.setTmpInxCSV(new BufferedInputStream(filesInputStreamLoad.getTmpInxCSV(),CompressedUtils.READ_BUFFER_SIZE));
+		this.filesInputStreamLoad.setTmpInxCSV(new GZIPInputStream(filesInputStreamLoad.getTmpInxCSV()));
+		
 	} catch (IOException ioReadException) {
 		throw new ArcException(ioReadException, ArcExceptionMessage.FILE_READ_FAILED, this.archiveChargement);
 	}
@@ -45,7 +55,7 @@ public class GZArchiveLoader extends AbstractArchiveFileLoader {
     }
 
     @Override
-    public FilesInputStreamLoad loadArchive() throws ArcException {
+    public FilesInputStreamLoad prepareArchiveStreams() throws ArcException {
 	StaticLoggerDispatcher.info(LOGGER, "begin loadArchive() ");
 
 	readFileWithoutExtracting();

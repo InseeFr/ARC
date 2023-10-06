@@ -28,8 +28,10 @@ public class ZipDecompressor implements IArchiveExtractor {
 		StaticLoggerDispatcher.info(LOGGER, "decompress()" + archiveFile.getName());
 		File dir = new File(archiveFile + ".dir");
 
-		try (ZipArchiveInputStream zipIn = new ZipArchiveInputStream(
-				new BufferedInputStream(new FileInputStream(archiveFile), CompressedUtils.READ_BUFFER_SIZE))) {
+		try (FileInputStream fileInputSteam = new FileInputStream(archiveFile);
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputSteam,
+						CompressedUtils.READ_BUFFER_SIZE);
+				ZipArchiveInputStream zipIn = new ZipArchiveInputStream(bufferedInputStream);) {
 			ZipArchiveEntry entry;
 
 			while ((entry = (ZipArchiveEntry) zipIn.getNextEntry()) != null) {
@@ -38,8 +40,8 @@ public class ZipDecompressor implements IArchiveExtractor {
 					File f = new File(entry.getName());
 					boolean created = f.mkdir();
 					if (!created) {
-						StaticLoggerDispatcher.error(
-								LOGGER, "Unable to create directory '%s', during extraction of archive contents.\n");
+						StaticLoggerDispatcher.error(LOGGER,
+								"Unable to create directory '%s', during extraction of archive contents.\n");
 					}
 				} else {
 					int count;
@@ -59,10 +61,10 @@ public class ZipDecompressor implements IArchiveExtractor {
 					// threads waiting
 					try {
 						FileUtilsArc.renameTo(
-								new File(dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName())
-										+ ".tmp"),
-								new File(
-										dir.getAbsolutePath() + File.separator + ManipString.redoEntryName(entry.getName()))
+								new File(dir.getAbsolutePath() + File.separator
+										+ ManipString.redoEntryName(entry.getName()) + ".tmp"),
+								new File(dir.getAbsolutePath() + File.separator
+										+ ManipString.redoEntryName(entry.getName()))
 						//
 						);
 					} catch (ArcException e) {

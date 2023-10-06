@@ -26,7 +26,7 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
     }
 
     @Override
-	public FilesInputStreamLoad loadArchive() throws ArcException {
+	public FilesInputStreamLoad prepareArchiveStreams() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "begin loadArchive() ");
 		readFileWithoutExtracting();
 		StaticLoggerDispatcher.info(LOGGER, "end loadArchive() ");
@@ -37,13 +37,12 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
     @Override
     public FilesInputStreamLoad readFileWithoutExtracting() throws ArcException {
 	StaticLoggerDispatcher.info(LOGGER, "begin readFileWithoutExtracting() ");
-	ZipFile zipFileChargement;
 	try {
-		zipFileChargement = new ZipFile(this.archiveChargement);
+		ZipFile zipFileChargement = new ZipFile(this.archiveChargement);
 		ZipFile zipFileNormage = new ZipFile(this.archiveChargement);
 		ZipFile zipFileCSV = new ZipFile(this.archiveChargement);
 
-		this.filesInputStreamLoad = new FilesInputStreamLoad();
+		this.filesInputStreamLoad = new FilesInputStreamLoad(zipFileChargement, zipFileNormage, zipFileCSV);
 
 		// seek the file inside archive to be loaded
 		// idSource format is datastorage_filename

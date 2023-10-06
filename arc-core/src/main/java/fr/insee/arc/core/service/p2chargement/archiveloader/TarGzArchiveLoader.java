@@ -28,7 +28,7 @@ public class TarGzArchiveLoader extends AbstractArchiveFileLoader {
     }
 
     @Override
-    public FilesInputStreamLoad loadArchive() throws ArcException {
+    public FilesInputStreamLoad prepareArchiveStreams() throws ArcException {
 	StaticLoggerDispatcher.info(LOGGER, "begin loadArchive() ");
 
 	// Mandatory for multithreading to decompress tar.gz archive
