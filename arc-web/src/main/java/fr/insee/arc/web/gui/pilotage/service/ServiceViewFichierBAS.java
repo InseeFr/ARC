@@ -93,9 +93,9 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 	}
 
 	public void downloadBdBAS(HttpServletResponse response) throws ArcException {
-		Map<String, ArrayList<String>> selectionLigne = views.getViewPilotageBAS().mapContentSelected();
-		ArrayList<String> selectionColonne = views.getViewPilotageBAS().listHeadersSelected();
-		ArrayList<Integer> selectionIndexColonne = views.getViewPilotageBAS().indexHeadersSelected();
+		Map<String, List<String>> selectionLigne = views.getViewPilotageBAS().mapContentSelected();
+		List<String> selectionColonne = views.getViewPilotageBAS().listHeadersSelected();
+		List<Integer> selectionIndexColonne = views.getViewPilotageBAS().indexHeadersSelected();
 
 		String phase = TraitementPhase.getPhase(selectionIndexColonne.get(0)).toString();
 		String etat = selectionColonne.get(0).split("_")[1].toUpperCase();

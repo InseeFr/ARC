@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +15,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 public class JeuDeRegleDao {
@@ -39,7 +42,7 @@ public class JeuDeRegleDao {
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
         requete.append("\n FROM " + tableJeuDeRegle + " a ");
 
-		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
+		Map<String,List<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
         return extractRuleSetObjects(g);
     }
     
@@ -67,7 +70,7 @@ public class JeuDeRegleDao {
         requete.append("\n    AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')<=a.validite_sup); ");
 
 
-		HashMap<String,ArrayList<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
+		Map<String,List<String>> g=new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder(requete))).mapContent();
 
 		ArrayList<JeuDeRegle> listJdr = extractRuleSetObjects(g);
 
@@ -75,7 +78,7 @@ public class JeuDeRegleDao {
         return listJdr;
     }
 
-	private static ArrayList<JeuDeRegle> extractRuleSetObjects(HashMap<String, ArrayList<String>> g) {
+	private static ArrayList<JeuDeRegle> extractRuleSetObjects(Map<String, List<String>> g) throws ArcException {
 		SimpleDateFormat formatDate = new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat());
         ArrayList<JeuDeRegle> listJdr = new ArrayList<>();
 		if (!g.isEmpty())
@@ -89,9 +92,17 @@ public class JeuDeRegleDao {
 	                jdr.setPeriodicite(g.get("periodicite").get(i));
 	                try {
 	                	jdr.setValiditeInf(formatDate.parse(g.get("validite_inf").get(i)));
+					} catch (ParseException ex) {
+						ArcException e = new ArcException(ArcExceptionMessage.DATE_PARSE_FAILED_VALIDITE_INF, g.get("validite_inf").get(i));
+						e.logFullException();
+						throw e;
+					}
+	                try {
 						jdr.setValiditeSup(formatDate.parse(g.get("validite_sup").get(i)));
 					} catch (ParseException ex) {
-					    LoggerHelper.errorGenTextAsComment(JeuDeRegleDao.class, "recupJeuDeRegle()", LOGGER, ex);
+						ArcException e = new ArcException(ArcExceptionMessage.DATE_PARSE_FAILED_VALIDITE_SUP, g.get("validite_sup").get(i));
+						e.logFullException();
+						throw e;
 					}
 	                jdr.setVersion(g.get("version").get(i));
 	                // Ajout à la liste de résultat

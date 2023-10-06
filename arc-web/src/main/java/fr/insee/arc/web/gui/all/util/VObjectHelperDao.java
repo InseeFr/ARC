@@ -1,7 +1,7 @@
 package fr.insee.arc.web.gui.all.util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class VObjectHelperDao implements IDao  {
 	}
 	
 
-	protected Map<String, ArrayList<String>> selectedRecords;
+	protected Map<String, List<String>> selectedRecords;
 
 	/**
 	 * build the default value taken from selection when adding a record according to what the user clicked on parent view
@@ -57,11 +57,11 @@ public class VObjectHelperDao implements IDao  {
 		return query;
 	}
 
-	public Map<String, ArrayList<String>> getSelectedRecords() {
+	public Map<String, List<String>> getSelectedRecords() {
 		return selectedRecords;
 	}
 
-	public void setSelectedRecords(Map<String, ArrayList<String>> selectedRecords) {
+	public void setSelectedRecords(Map<String, List<String>> selectedRecords) {
 		this.selectedRecords = selectedRecords;
 	}
 

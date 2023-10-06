@@ -495,7 +495,7 @@ end loop;
 end;
 $$;
 
-
+-- PATCH 03/07/2023
 -- 3. suppression et recopie des tables de filtrage de données
 do $$
 declare

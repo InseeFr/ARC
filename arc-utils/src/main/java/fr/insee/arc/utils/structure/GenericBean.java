@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -24,16 +25,16 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
  */
 public class GenericBean {
 
-	private ArrayList<String> headers;
-	private ArrayList<String> types;
-	public ArrayList<ArrayList<String>> content;
+	private List<String> headers;
+	private List<String> types;
+	public List<List<String>> content;
 
 	/**
 	 * @param headers
 	 * @param types
 	 * @param content
 	 */
-	public GenericBean(ArrayList<String> headers, ArrayList<String> types, ArrayList<ArrayList<String>> content) {
+	public GenericBean(List<String> headers, List<String> types, List<List<String>> content) {
 		this.headers = headers;
 		this.types = types;
 		this.content = content;
@@ -51,9 +52,9 @@ public class GenericBean {
 	}
 	
 	
-	protected static ArrayList<ArrayList<String>> reworkListAsContent(List<String> contentList) {
+	protected static List<List<String>> reworkListAsContent(List<String> contentList) {
 		
-		ArrayList<ArrayList<String>> contentReworked =new ArrayList<>();
+		List<List<String>> contentReworked =new ArrayList<>();
 		for (int i=0; i<contentList.size(); i++)
 		{
 			contentReworked.add(new ArrayList<>(Arrays.asList(contentList.get(i))));
@@ -64,7 +65,7 @@ public class GenericBean {
 	/**
 	 * @param requestResult
 	 */
-	public GenericBean(ArrayList<ArrayList<String>> requestResult) {
+	public GenericBean(List<List<String>> requestResult) {
 		// refactor de la méthode; faut pas utiliser la commande "remove" sinon on
 		// détruit le requestResult initial
 		this.headers = new ArrayList<>();
@@ -114,12 +115,12 @@ public class GenericBean {
 	 *
 	 * @return the HashMap
 	 */
-	public HashMap<String, ArrayList<String>> mapContent() {
+	public Map<String, List<String>> mapContent() {
 		if (this.content == null || this.content.isEmpty()) {
 			return new HashMap<>();
 		}
 
-		HashMap<String, ArrayList<String>> r = new HashMap<>();
+		Map<String, List<String>> r = new HashMap<>();
 		
 		// initialisation
 		int jMax = this.content.get(0).size();
@@ -143,8 +144,8 @@ public class GenericBean {
 	 * 
 	 * @return
 	 */
-	public HashMap<String, ArrayList<String>> mapContent(boolean initializeMapWithColumns) {
-		HashMap<String, ArrayList<String>> m = this.mapContent();
+	public Map<String, List<String>> mapContent(boolean initializeMapWithColumns) {
+		Map<String, List<String>> m = this.mapContent();
 
 		if (!initializeMapWithColumns) {
 			return m;
@@ -194,7 +195,7 @@ public class GenericBean {
 			throw new ArcException(ArcExceptionMessage.GENERIC_BEAN_KEY_VALUE_FAILED);
 		}
 
-		for (ArrayList<String> line : this.content) {
+		for (List<String> line : this.content) {
 			if (r.get(line.get(0)) != null) {
 				throw new ArcException(ArcExceptionMessage.GENERIC_BEAN_DUPLICATE_KEY, line.get(0));
 			}
@@ -214,27 +215,27 @@ public class GenericBean {
 	}
 	
 
-	public ArrayList<String> getHeaders() {
+	public List<String> getHeaders() {
 		return headers;
 	}
 
-	public void setHeaders(ArrayList<String> headers) {
+	public void setHeaders(List<String> headers) {
 		this.headers = headers;
 	}
 
-	public ArrayList<String> getTypes() {
+	public List<String> getTypes() {
 		return types;
 	}
 
-	public void setTypes(ArrayList<String> types) {
+	public void setTypes(List<String> types) {
 		this.types = types;
 	}
 
-	public ArrayList<ArrayList<String>> getContent() {
+	public List<List<String>> getContent() {
 		return content;
 	}
 
-	public void setContent(ArrayList<ArrayList<String>> content) {
+	public void setContent(List<List<String>> content) {
 		this.content = content;
 	}
 

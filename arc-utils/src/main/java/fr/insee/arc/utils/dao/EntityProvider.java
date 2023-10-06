@@ -26,9 +26,9 @@ public abstract class EntityProvider<T> implements Function<ResultSet, T> {
 		super();
 	}
 	
-	private static final class ArrayOfArrayProvider extends EntityProvider<ArrayList<ArrayList<String>>> {
+	private static final class ArrayOfArrayProvider extends EntityProvider<List<List<String>>> {
 		@Override
-		public ArrayList<ArrayList<String>> apply(ResultSet res) {
+		public List<List<String>> apply(ResultSet res) {
 			try {
 				return fromResultSetToArray(res);
 			} catch (ArcException ex) {
@@ -37,11 +37,11 @@ public abstract class EntityProvider<T> implements Function<ResultSet, T> {
 		}
 	}
 
-	public static final EntityProvider<ArrayList<ArrayList<String>>> getArrayOfArrayProvider() {
+	public static final EntityProvider<List<List<String>>> getArrayOfArrayProvider() {
 		return new ArrayOfArrayProvider();
 	}
 
-	public static ArrayList<ArrayList<String>> fromResultSetToArray(ResultSet res) throws ArcException {
+	public static List<List<String>> fromResultSetToArray(ResultSet res) throws ArcException {
 		return fromResultSetToList(() -> new ArrayList<>(), new ArrayList<>(), res);
 	}
 

@@ -175,7 +175,7 @@ public class VObjectService {
 	 * @param defaultInputFields
 	 */
 	public void initialize(VObject data, ArcPreparedStatementBuilder mainQuery, String table,
-			HashMap<String, String> defaultInputFields) {
+			Map<String, String> defaultInputFields) {
 		initialize(data, mainQuery, table, defaultInputFields, ((content) -> content));
 	}
 
@@ -188,8 +188,8 @@ public class VObjectService {
 	 * @param reworkContent      function to rewrite the fetched content
 	 */
 	private void initialize(VObject data, ArcPreparedStatementBuilder mainQuery, String table,
-			HashMap<String, String> defaultInputFields,
-			Function<ArrayList<ArrayList<String>>, ArrayList<ArrayList<String>>> reworkContent) {
+			Map<String, String> defaultInputFields,
+			Function<List<List<String>>, List<List<String>>> reworkContent) {
 		try {
 			LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
 
@@ -199,12 +199,12 @@ public class VObjectService {
 
 			// on sauvegarde le contenu des lignes selectionnées avant la nouvelle
 			// execution de la requete
-			HashMap<String, ArrayList<String>> selectedContent = data.mapContentSelected();
-			ArrayList<String> headersDLabel = new ArrayList<>();
-			ArrayList<String> headersDType = new ArrayList<>();
+			Map<String, List<String>> selectedContent = data.mapContentSelected();
+			List<String> headersDLabel = new ArrayList<>();
+			List<String> headersDType = new ArrayList<>();
 			// on sauvegarde les headers des colonnes selectionnées avant la
 			// nouvelle execution de la requete
-			ArrayList<String> selectedHeaders = data.listHeadersSelected();
+			List<String> selectedHeaders = data.listHeadersSelected();
 
 			// gestion du nombre de pages
 			Integer indexPage = pageManagement(mainQuery, data);
@@ -227,7 +227,7 @@ public class VObjectService {
 				requete.append(buildLimit(data, indexPage));
 			}
 
-			ArrayList<ArrayList<String>> aContent = new ArrayList<>();
+			List<List<String>> aContent = new ArrayList<>();
 			try {
 				aContent = reworkContent.apply(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete,
 						ModeRequeteImpl.arcModeRequeteIHM()));
@@ -260,7 +260,7 @@ public class VObjectService {
 			data.setDefaultInputFields(defaultInputFields);
 			data.setInputFields(eraseInputFields(headersDLabel, defaultInputFields));
 			// (Re-)determine selectedLines based on content
-			ArrayList<Boolean> selectedLines = new ArrayList<>();
+			List<Boolean> selectedLines = new ArrayList<>();
 			if (!selectedContent.isEmpty()) {
 				for (int i = 0; i < data.getContent().size(); i++) {
 					int k = 0;
@@ -284,7 +284,7 @@ public class VObjectService {
 			}
 			data.setSelectedLines(selectedLines);
 			// (Re-)determine selectedColums from selectedHeaders
-			ArrayList<Boolean> selectedColumns = new ArrayList<>();
+			List<Boolean> selectedColumns = new ArrayList<>();
 			for (int i = 0; i < data.getHeadersDLabel().size(); i++) {
 				if (selectedHeaders.contains(data.getHeadersDLabel().get(i))) {
 					selectedColumns.add(true);
@@ -323,7 +323,7 @@ public class VObjectService {
 	 */
 	public Integer pageManagement(ArcPreparedStatementBuilder mainQuery, VObject currentData) {
 
-		ArrayList<ArrayList<String>> aContent = new ArrayList<>();
+		List<List<String>> aContent = new ArrayList<>();
 		if (currentData.getIdPage() == null) {
 			currentData.setIdPage("1");
 		}
@@ -384,7 +384,7 @@ public class VObjectService {
 	 * @param data
 	 * @param headersDLabel
 	 */
-	public void applyColumnRendering(VObject data, ArrayList<String> headersDLabel) {
+	public void applyColumnRendering(VObject data, List<String> headersDLabel) {
 		data.setHeadersVLabel(buildHeadersVLabel(data, headersDLabel));
 		data.setHeadersVSize(buildHeadersVSize(data, headersDLabel));
 		data.setHeadersVType(buildHeadersVType(data, headersDLabel));
@@ -399,8 +399,8 @@ public class VObjectService {
 	 * ConstantVObject, on met le label déclaré. Sinon on garde le nom de colonne de
 	 * la base de données
 	 */
-	private ArrayList<String> buildHeadersVLabel(VObject data, ArrayList<String> headers) {
-		ArrayList<String> headersVLabel = new ArrayList<>();
+	private List<String> buildHeadersVLabel(VObject data, List<String> headers) {
+		List<String> headersVLabel = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject()//
 					.getColumnRender()//
@@ -417,8 +417,8 @@ public class VObjectService {
 	 * Génére la taille de colonnes. Si une déclaration est faite dans
 	 * ConstantVObject, on met la taille déclaré. Sinon on ne met rien.
 	 */
-	private ArrayList<String> buildHeadersVSize(VObject data, ArrayList<String> headers) {
-		ArrayList<String> headersVSize = new ArrayList<>();
+	private List<String> buildHeadersVSize(VObject data, List<String> headers) {
+		List<String> headersVSize = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
 				headersVSize.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).size);
@@ -433,8 +433,8 @@ public class VObjectService {
 	 * Génére le type de colonnes. Si une déclaration est faite dans
 	 * ConstantVObject, on met le type déclaré. Sinon on met text.
 	 */
-	private ArrayList<String> buildHeadersVType(VObject data, ArrayList<String> headers) {
-		ArrayList<String> headersVType = new ArrayList<>();
+	private List<String> buildHeadersVType(VObject data, List<String> headers) {
+		List<String> headersVType = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
 				headersVType.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).type);
@@ -450,8 +450,8 @@ public class VObjectService {
 	 * ConstantVObject, on met la visibilité déclarée. Sinon on met visible par
 	 * défaut.
 	 */
-	private ArrayList<Boolean> buildHeadersVisible(VObject data, ArrayList<String> headers) {
-		ArrayList<Boolean> headersVisible = new ArrayList<>();
+	private List<Boolean> buildHeadersVisible(VObject data, List<String> headers) {
+		List<Boolean> headersVisible = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
 				headersVisible.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).visible);
@@ -467,8 +467,8 @@ public class VObjectService {
 	 * dans ConstantVObject, on met la valeur déclarée. Sinon on met modifiable par
 	 * défaut.
 	 */
-	private ArrayList<Boolean> buildHeadersUpdatable(VObject data, ArrayList<String> headers) {
-		ArrayList<Boolean> headersUpdatable = new ArrayList<>();
+	private List<Boolean> buildHeadersUpdatable(VObject data, List<String> headers) {
+		List<Boolean> headersUpdatable = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
 				headersUpdatable.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).isUpdatable);
@@ -484,8 +484,8 @@ public class VObjectService {
 	 * dans ConstantVObject, on met la valeur déclarée. Sinon on met obligatoire par
 	 * défaut.
 	 */
-	private ArrayList<Boolean> buildHeadersRequired(VObject data, ArrayList<String> headers) {
-		ArrayList<Boolean> headersRequired = new ArrayList<>();
+	private List<Boolean> buildHeadersRequired(VObject data, List<String> headers) {
+		List<Boolean> headersRequired = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
 				headersRequired.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).isRequired);
@@ -496,9 +496,10 @@ public class VObjectService {
 		return headersRequired;
 	}
 
-	private ArrayList<LinkedHashMap<String, String>> buildHeadersVSelect(VObject data, ArrayList<String> headers) {
-		ArrayList<ArrayList<String>> arrayVSelect = new ArrayList<>();
-		ArrayList<LinkedHashMap<String, String>> headerVSelect = new ArrayList<>();
+	private List<Map<String, String>> buildHeadersVSelect(VObject data, List<String> headers) {
+		List<List<String>> arrayVSelect = new ArrayList<>();
+		List<Map<String, String>> headerVSelect = new ArrayList<>();
+		
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null
 					&& data.getConstantVObject().getColumnRender().get(headers.get(i)).query != null) {
@@ -537,9 +538,9 @@ public class VObjectService {
 	/**
 	 * Remise à zéro des champs d'entrée avec les valeurs par défault
 	 */
-	private ArrayList<String> eraseInputFields(ArrayList<String> headersDLabel,
-			HashMap<String, String> defaultInputFields) {
-		ArrayList<String> inputFields = new ArrayList<>();
+	private List<String> eraseInputFields(List<String> headersDLabel,
+			Map<String, String> defaultInputFields) {
+		List<String> inputFields = new ArrayList<>();
 		for (int i = 0; i < headersDLabel.size(); i++) {
 			if (defaultInputFields.get(headersDLabel.get(i)) != null) {
 				inputFields.add(defaultInputFields.get(headersDLabel.get(i)));
@@ -650,7 +651,7 @@ public class VObjectService {
 
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 
-		ArrayList<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
+		List<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
 				new ArrayList<>(), currentData.getTable());
 		ArcPreparedStatementBuilder reqDelete = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
@@ -705,7 +706,7 @@ public class VObjectService {
 		}
 
 		try {
-			ArrayList<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
+			List<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
 					new ArrayList<>(), currentData.getTable());
 
 			// SQL update query
@@ -801,7 +802,7 @@ public class VObjectService {
 		session.remove(data.getSessionName());
 	}
 
-	public ArcPreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel) {
+	public ArcPreparedStatementBuilder buildFilter(List<String> filterFields, List<String> headersDLabel) {
 		return buildFilter(filterFields, headersDLabel, DEFAULT_FILTER_PATTERN, DEFAULT_FILTER_FUNCTION);
 	}
 
@@ -813,7 +814,7 @@ public class VObjectService {
 	 * @return
 	 */
 
-	private ArcPreparedStatementBuilder buildFilter(ArrayList<String> filterFields, ArrayList<String> headersDLabel,
+	private ArcPreparedStatementBuilder buildFilter(List<String> filterFields, List<String> headersDLabel,
 			Integer filterPattern, String filterFunction) {
 
 		Pattern patternMath = Pattern.compile("[<>=]");
@@ -960,8 +961,8 @@ public class VObjectService {
 	 * @param headerSortDOrders ordres du tri des colonnes
 	 * @return
 	 */
-	public ArcPreparedStatementBuilder buildOrderBy(ArrayList<String> headerSortLabels,
-			ArrayList<Boolean> headerSortDOrders) {
+	public ArcPreparedStatementBuilder buildOrderBy(List<String> headerSortLabels,
+			List<Boolean> headerSortDOrders) {
 		if (headerSortLabels == null) {
 			return new ArcPreparedStatementBuilder("order by alias_de_table ");
 		}
@@ -1140,9 +1141,9 @@ public class VObjectService {
 		int k = 0;
 		int fetchSize = 5000;
 		GenericBean g;
-		ArrayList<String> listIdSource;
-		ArrayList<String> listIdSourceEtat;
-		ArrayList<String> listContainer;
+		List<String> listIdSource;
+		List<String> listIdSourceEtat;
+		List<String> listContainer;
 		String repertoire = repertoireIn + anEnvExcecution.toUpperCase().replace(".", "_") + File.separator;
 
 		String currentContainer;
@@ -1154,7 +1155,7 @@ public class VObjectService {
 			// Récupération de la liste d'id_source par paquet de fetchSize
 			try {
 				g = new GenericBean(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requeteLimit));
-				HashMap<String, ArrayList<String>> m = g.mapContent();
+				Map<String, List<String>> m = g.mapContent();
 				listIdSource = m.get(ColumnEnum.ID_SOURCE.getColumnName());
 				listContainer = m.get("container");
 				listIdSourceEtat = m.get("etat_traitement");
@@ -1169,8 +1170,8 @@ public class VObjectService {
 
 			LoggerHelper.traceAsComment(LOGGER, " listIdSource.size() =", listIdSource.size());
 
-			ArrayList<String> listIdSourceContainer = new ArrayList<>();
-			ArrayList<String> listIdSourceEtatContainer = new ArrayList<>();
+			List<String> listIdSourceContainer = new ArrayList<>();
+			List<String> listIdSourceEtatContainer = new ArrayList<>();
 
 			// Ajout des fichiers à l'archive
 			int i = 0;
@@ -1229,7 +1230,7 @@ public class VObjectService {
 	 *                       dans l'un de la liste)
 	 */
 	public void downloadEnveloppe(VObject currentData, HttpServletResponse response,
-			ArcPreparedStatementBuilder requete, String repertoire, ArrayList<String> listRepertoire) {
+			ArcPreparedStatementBuilder requete, String repertoire, List<String> listRepertoire) {
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 
 		if (currentData.getFilterFields() == null) {
@@ -1266,7 +1267,6 @@ public class VObjectService {
 	 * @throws ArcException
 	 */
 	public void upload(VObject data, String repertoireCible) throws ArcException {
-		int nbUploaded = 0;
 		if (data.getFileUpload() != null) {
 			for (MultipartFile uploadedFile : data.getFileUpload()) {
 				String fileName = uploadedFile.getOriginalFilename();
@@ -1298,16 +1298,15 @@ public class VObjectService {
 						}
 					}
 				}
-				nbUploaded++;
 			}
 		}
 	}
 
-	public ArrayList<String> getHeaderSortDLabels(VObject currentData) {
+	public List<String> getHeaderSortDLabels(VObject currentData) {
 		return currentData.getHeaderSortDLabels();
 	}
 
-	public void setHeaderSortDLabels(VObject currentData, ArrayList<String> headerSortLabels) {
+	public void setHeaderSortDLabels(VObject currentData, List<String> headerSortLabels) {
 		currentData.setHeaderSortDLabels(headerSortLabels);
 	}
 
@@ -1346,16 +1345,16 @@ public class VObjectService {
 		return (VObject) session.get(sessionName);
 	}
 
-	public final void setColumnRendering(VObject data, HashMap<String, ColumnRendering> columnRender) {
+	public final void setColumnRendering(VObject data, Map<String, ColumnRendering> columnRender) {
 		data.setConstantVObject(new ConstantVObject(columnRender));
 	}
 
-	public void initializeByList(VObject data, ArrayList<ArrayList<String>> liste,
-			HashMap<String, String> defaultInputFields) {
+	public void initializeByList(VObject data, List<List<String>> liste,
+			Map<String, String> defaultInputFields) {
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		ArrayList<String> header = liste.get(0);
-		ArrayList<String> type = liste.get(1);
+		List<String> header = liste.get(0);
+		List<String> type = liste.get(1);
 
 		// cas classique avec des données
 		for (int i = 2; i < liste.size(); i++) {
@@ -1391,7 +1390,7 @@ public class VObjectService {
 	}
 
 	// give values to be added to a result row
-	public static void addRowToVObjectList(ArrayList<ArrayList<String>> result, String... elements) {
+	public static void addRowToVObjectList(List<List<String>> result, String... elements) {
 		result.add(new ArrayList<>(Arrays.asList(Arrays.copyOf(elements, elements.length))));
 	}
 

@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -63,7 +63,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		query.append("select tablename from pg_tables where schemaname=")
 				.append(query.quoteText(testMetaDataSchema));
 
-		HashMap<String, ArrayList<String>> content;
+		Map<String, List<String>> content;
 
 		content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query))
 				.mapContent();
@@ -228,7 +228,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		initializeDatabaseForRetrieveTablesFromSchemaTest(u);
 		
 		// invocation de la fonction à tester
-		ArrayList<String> result;
+		List<String> result;
 		result = BddPatcher.retrieveRulesTablesFromSchema(c, testSandbox3);
 		
 		// test : on enleve tous les éléments à retenir et l'array list devra être au final vide

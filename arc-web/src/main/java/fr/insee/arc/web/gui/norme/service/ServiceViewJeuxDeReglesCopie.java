@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.norme.service;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -81,9 +81,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 		loggerDispatcher.info("Mon action pour copier un jeu de règles", LOGGER);
 		
 		// le jeu de regle à copier
-		Map<String, ArrayList<String>> selectionOut = views.getViewJeuxDeRegles().mapContentSelected();
+		Map<String, List<String>> selectionOut = views.getViewJeuxDeRegles().mapContentSelected();
 		// le nouveau jeu de regle
-		Map<String, ArrayList<String>> selectionIn = views.getViewJeuxDeReglesCopie().mapContentSelected();
+		Map<String, List<String>> selectionIn = views.getViewJeuxDeReglesCopie().mapContentSelected();
 		
 		if (!selectionOut.isEmpty() && !selectionIn.isEmpty()) {
 

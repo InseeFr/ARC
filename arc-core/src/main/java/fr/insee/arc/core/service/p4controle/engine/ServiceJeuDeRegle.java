@@ -74,7 +74,7 @@ public class ServiceJeuDeRegle {
      *            la table de travail dont les enregistrement seront "marqués"
      * @throws ArcException
      */
-	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table, String structure) throws ArcException {
+	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table) throws ArcException {
 		StaticLoggerDispatcher.debug(LOGGER, "executeJeuDeRegle");
 
 		java.util.Date date = new java.util.Date();
@@ -86,7 +86,7 @@ public class ServiceJeuDeRegle {
 		preAction(connexion, jdr, table);
 
 		// execute the control rules
-		control(connexion, jdr, table, structure);
+		control(connexion, jdr, table);
 
 		StaticLoggerDispatcher.info(LOGGER, "Temps de controle : " + (new java.util.Date().getTime() - date.getTime()));
 
@@ -160,7 +160,7 @@ public class ServiceJeuDeRegle {
 	 * @param structure
 	 * @throws ArcException
 	 */
-	private void control(Connection connexion, JeuDeRegle jdr, String table, String structure) throws ArcException {
+	private void control(Connection connexion, JeuDeRegle jdr, String table) throws ArcException {
 
 		StringBuilder blocRequete = new StringBuilder();
 		blocRequete.append(this.servSql.initTemporaryTable(table));
@@ -208,14 +208,6 @@ public class ServiceJeuDeRegle {
 							LOGGER, "la rubrique : " + reg.getRubriquePere() + " n'existe pas dans ce fichier");
 				}
 				break;
-			case "STRUCTURE":
-				{
-					if (tableControleRegle!=null && structure!=null)
-					{
-						blocRequete.append(this.servSql.ctlStructure(reg,structure,tableControleRegle));
-					}
-				}
-			break;
 			case "CONDITION":
 				blocRequete.append(executeRegleCondition(jdr, reg));
 				blocRequete.append(System.lineSeparator());

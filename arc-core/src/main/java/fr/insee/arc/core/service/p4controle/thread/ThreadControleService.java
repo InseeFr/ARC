@@ -48,8 +48,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private ServiceJeuDeRegle sjdr;
 
 	private JeuDeRegle jdr;
-
-	private String structure;
 	
     private ThreadOperations arcThreadGenericDao;
  
@@ -145,8 +143,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		// Récupération des Jeux de règles associés
 		this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution),
 				this.tableControleDataTemp);
-		this.structure = UtilitaireDao.get(0).getString(this.connexion.getExecutorConnection(),
-				new ArcPreparedStatementBuilder("SELECT jointure FROM " + this.tableControlePilTemp));
 	}
 
 	/**
@@ -161,8 +157,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private void execute() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **");
 
-		this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), jdr, this.tableControleDataTemp,
-				this.structure);
+		this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), jdr, this.tableControleDataTemp);
 
 	}
 

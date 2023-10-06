@@ -9,6 +9,8 @@ import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -118,15 +120,15 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws IOException 
      * @throws ArcException 
      */
-    private void clefValeurToXml(HashMap<String, String> arbreFormat, InputStream tmpInx2) throws ArcException {
+    private void clefValeurToXml(Map<String, String> arbreFormat, InputStream tmpInx2) throws ArcException {
         StaticLoggerDispatcher.info(LOGGER, "** Conversion du fichier clef valeur en XML **");
         java.util.Date beginDate = new java.util.Date();
         // contient la liste des pères pour l'élément précédent
-        ArrayList<String> listePeresRubriquePrecedante = new ArrayList<>();
+        List<String> listePeresRubriquePrecedante = new ArrayList<>();
 
         // contient la liste des rubriques vues au niveau pour chaque balise encore ouverte.
         // clef : rubrique/ valeur : fils ouvert
-        HashMap<String, ArrayList<String>> mapRubriquesFilles = new HashMap<>();
+        Map<String, List<String>> mapRubriquesFilles = new HashMap<>();
 
         // Lecture du fichier contenant les données et écriture d'un fichier xml
 		InputStreamReader inputStreamReader = new InputStreamReader(tmpInx2, StandardCharsets.ISO_8859_1);
@@ -170,7 +172,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws IOException 
      * @throws ArcException 
      */
-    private ArrayList<String> initialisationOutputStream(HashMap<String, String> arbreFormat, HashMap<String, ArrayList<String>> mapRubriquesFilles,
+    private ArrayList<String> initialisationOutputStream(Map<String, String> arbreFormat, Map<String, List<String>> mapRubriquesFilles,
             String ligne) throws ArcException {
         // ecriture de l'entete du fichier
 
@@ -225,8 +227,8 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws IOException 
      * @throws ArcException 
      */
-    private ArrayList<String> lectureLigne(HashMap<String, String> arbreFormat,
-            ArrayList<String> listePeresRubriquePrecedante, HashMap<String, ArrayList<String>> mapRubriquesFilles, String ligne) 
+    private ArrayList<String> lectureLigne(Map<String, String> arbreFormat,
+            List<String> listePeresRubriquePrecedante, Map<String, List<String>> mapRubriquesFilles, String ligne) 
             		throws ArcException
             {
         String rubrique;
@@ -324,7 +326,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @param bw
      * @throws IOException
      */
-    private void finaliserOutputStream(ArrayList<String> listePeresRubriqueCourante) throws ArcException {
+    private void finaliserOutputStream(List<String> listePeresRubriqueCourante) throws ArcException {
 
         String rubriqueCourante;
         for (int i = 1; i < listePeresRubriqueCourante.size(); i++) {

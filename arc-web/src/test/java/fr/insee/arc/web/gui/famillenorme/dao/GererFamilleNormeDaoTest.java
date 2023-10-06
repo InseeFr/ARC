@@ -71,7 +71,7 @@ public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 		// select the first record of viewNormFamily and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_FAMILLE), SQL.WHERE, "id_famille='DSN'");
-		Map<String, ArrayList<String>> viewNormFamilySelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewNormFamilySelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewNormFamilySelectedRecords);
 
 		// execute query
@@ -93,7 +93,7 @@ public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 		// select the first record of viewClient and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_CLIENT), SQL.WHERE, "id_application='ARTEMIS'");
-		Map<String, ArrayList<String>> viewClientSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewClientSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewClientSelectedRecords);
 		
 		
@@ -119,7 +119,7 @@ public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 		// select the first record of viewFamilleNorme and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_FAMILLE), SQL.WHERE, "id_famille='DSN'");
-		Map<String, ArrayList<String>> viewNormFamilySelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewNormFamilySelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewNormFamilySelectedRecords);
 		
 
@@ -148,7 +148,7 @@ public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 		// select the first record of viewFamilleNorme and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_FAMILLE), SQL.WHERE, "id_famille='DSN'");
-		Map<String, ArrayList<String>> viewNormFamilySelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewNormFamilySelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewNormFamilySelectedRecords);
 		
 		// select tables of dsn

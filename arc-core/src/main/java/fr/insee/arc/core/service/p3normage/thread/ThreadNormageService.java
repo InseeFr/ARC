@@ -1,7 +1,7 @@
 package fr.insee.arc.core.service.p3normage.thread;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -172,15 +172,15 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
 
         		// récupérer les caractéristiques du fichier
-			    HashMap<String, ArrayList<String>> pil = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getNormeAttributes(this.idSource, tableNormagePilTemp));
+			    Map<String, List<String>> pil = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getNormeAttributes(this.idSource, tableNormagePilTemp));
 
 			    // récupéreration des règles relative au fichier pour la phase courante
-			    HashMap<String,ArrayList<String>> regle = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getRegles(ViewEnum.NORMAGE_REGLE.getFullName(envExecution), this.tableNormagePilTemp));
+			    Map<String,List<String>> regle = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getRegles(ViewEnum.NORMAGE_REGLE.getFullName(envExecution), this.tableNormagePilTemp));
 			    
 			    
 		        // récupéreration des rubriques utilisées dans règles relative au fichier pour l'ensemble des phases
 		        
-			    HashMap<String,ArrayList<String>> rubriqueUtiliseeDansRegles=null;
+			    Map<String,List<String>> rubriqueUtiliseeDansRegles=null;
 			    
 			    if (paramBatch!=null)
 			    {
@@ -200,9 +200,6 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 		    
 			    NormageEngine n=new NormageEngine(this.connexion.getExecutorConnection() , pil, regle, rubriqueUtiliseeDansRegles, this.tableNormageDataTemp, this.tableNormageOKTemp, this.paramBatch);
 			    n.execute();
-			    
-			    this.structure=n.structure;
-
     }
     
     

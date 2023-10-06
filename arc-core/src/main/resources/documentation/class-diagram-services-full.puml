@@ -24,7 +24,7 @@ abstract class AbstractService [[java:fr.insee.arc.core.service.AbstractService]
 	#String idSource
 	+{static}String SEPARATEUR_JOINTURE_XML
 	#Boolean todo
-	#HashMap<String,ArrayList<String>> tabIdSource
+	#Map<String,List<String>> tabIdSource
 	#String tableNorme
 	#Integer cptBoucle
 	-String tableOutKo
@@ -71,7 +71,7 @@ abstract class AbstractPhaseService [[java:fr.insee.arc.core.service.AbstractPha
 	#String idSource
 	+{static}String SEPARATEUR_JOINTURE_XML
 	#Boolean todo
-	#HashMap<String,ArrayList<String>> tabIdSource
+	#Map<String,List<String>> tabIdSource
 	#String tableNorme
 	#Integer cptBoucle
 	#String tableOutKo
@@ -130,7 +130,7 @@ abstract class "AbstractThreadRunnerService<T extends AbstractThreadService>" as
 	-AbstractThreadService createThread(int currentIndice, Connection connectionThread)
 	+void waitForAbstractServiceThreads(int parallel, List<? extends AbstractThreadService> threadList, List<Connection> connexionList)
 	+{static}ArrayList<Connection> prepareThreads(int parallel, Connection connexion)
-	+HashMap<String,ArrayList<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase, String etat)
+	+Map<String,List<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase, String etat)
 	+Connection chooseConnection(Connection connextionThread, List<? extends AbstractThreadService> threadList, List<Connection> connexionList)
 }
 
@@ -151,7 +151,7 @@ class ApiChargementService [[java:fr.insee.arc.core.service.ApiChargementService
 	+int start
 	#String fileName
 	#List<Norme> listeNorme
-	-HashMap<String,ArrayList<String>> listIdsource
+	-Map<String,List<String>> listIdsource
 }
 
 interface IApiServiceWithoutOutputTablePreviousPhase [[java:fr.insee.arc.core.service.IApiServiceWithoutOutputTablePreviousPhase]] {

@@ -5,8 +5,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -94,7 +94,7 @@ public class InitializeQueryTest {
 	{
 		
 		// query the content in tableOut
-		HashMap<String, ArrayList<String>> content = new GenericBean(
+		Map<String, List<String>> content = new GenericBean(
 				    u.executeRequest(c, new GenericPreparedStatementBuilder("SELECT * FROM "+tableOut))).mapContent(true);
 
 		// test that there is exactly 2 columns in tableOut
@@ -110,7 +110,7 @@ public class InitializeQueryTest {
 	
     protected static void testTableExists(String tableOut, int expectedNumber) throws ArcException
 	{
-		HashMap<String, ArrayList<String>> content;
+		Map<String, List<String>> content;
 		
 		if (tableOut.contains("."))
 		{

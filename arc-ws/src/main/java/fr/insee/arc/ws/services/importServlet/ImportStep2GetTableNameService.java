@@ -1,6 +1,6 @@
 package fr.insee.arc.ws.services.importServlet;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,7 +70,7 @@ public class ImportStep2GetTableNameService {
 				tableName = "";
 			} else {
 				// récupération du type
-				ArrayList<ArrayList<String>> l = UtilitaireDao.get(0).executeRequest(null,
+				List<List<String>> l = UtilitaireDao.get(0).executeRequest(null,
 						new ArcPreparedStatementBuilder("select * from " + tableName + " where false "));
 
 				for (int j = 0; j < l.get(0).size(); j++) {

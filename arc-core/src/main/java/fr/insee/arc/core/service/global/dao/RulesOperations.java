@@ -1,8 +1,8 @@
 package fr.insee.arc.core.service.global.dao;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -145,7 +145,7 @@ public class RulesOperations {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static HashMap<String, ArrayList<String>> getBean(Connection c, String req) throws ArcException {
+	public static Map<String, List<String>> getBean(Connection c, String req) throws ArcException {
 		GenericBean gb = new GenericBean(
 				UtilitaireDao.get(0).executeRequest(c, new ArcPreparedStatementBuilder(req)));
 		return gb.mapContent(true);

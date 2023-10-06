@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +15,7 @@ import fr.insee.arc.web.gui.all.util.VObject;
 public class VObjectTest {
 	
 	private VObject defaultTestVobject;
-	private ArrayList<ArrayList<String>> defaultContent;
+	private List<List<String>> defaultContent;
 	
 	@Before
 	public void before() {
@@ -52,7 +53,7 @@ public class VObjectTest {
 
 	@Test
 	public void listContentBeforeUpdateOk() {
-		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
+		List<List<String>> newContent = new ArrayList<>();
 		newContent.add(new ArrayList<>());
 		newContent.get(0).add("first_field_new");
 		newContent.get(0).add("second_field_value1");
@@ -66,7 +67,7 @@ public class VObjectTest {
 
 	@Test
 	public void listContentUpdatedContentOk() {
-		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
+		List<List<String>> newContent = new ArrayList<>();
 		newContent.add(new ArrayList<>());
 		newContent.get(0).add(null);
 		newContent.get(0).add(null);
@@ -83,7 +84,7 @@ public class VObjectTest {
 	
 	@Test
 	public void listContentOnlyUpdatedContentOk() {
-		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
+		List<List<String>> newContent = new ArrayList<>();
 		newContent.add(new ArrayList<>());
 		newContent.get(0).add(null);
 		newContent.get(0).add(null);
@@ -102,7 +103,7 @@ public class VObjectTest {
 
 	@Test
 	public void listContentUpdatedOk() {
-		ArrayList<ArrayList<String>> newContent = new ArrayList<>();
+		List<List<String>> newContent = new ArrayList<>();
 		newContent.add(new ArrayList<>());
 		newContent.get(0).add(null);
 		newContent.get(0).add(null);

@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.norme.service;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class ServiceViewCalendrier extends InteractorNorme {
 	 */
 	public String deleteCalendrier(Model model) {
 		// get the selected calendar
-		Map<String, ArrayList<String>> selection = views.getViewCalendrier().mapContentSelected();
+		Map<String, List<String>> selection = views.getViewCalendrier().mapContentSelected();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			// Check actived calendar (code 1)

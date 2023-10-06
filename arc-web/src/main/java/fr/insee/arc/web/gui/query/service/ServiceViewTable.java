@@ -1,7 +1,7 @@
 package fr.insee.arc.web.gui.query.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -13,7 +13,7 @@ import fr.insee.arc.web.gui.query.dao.QueryDao;
 public class ServiceViewTable extends InteractorQuery {
 	
 	public String seeTable(Model model) {
-		HashMap<String, ArrayList<String>> mapContentSelected = views.getViewTable().mapContentSelected();
+		Map<String, List<String>> mapContentSelected = views.getViewTable().mapContentSelected();
 		if (!mapContentSelected.isEmpty()) {
 			this.myQuery = QueryDao.queryTableSelected(mySchema, mapContentSelected.get(ColumnEnum.TABLENAME.getColumnName()).get(0));
 			model.addAttribute("myQuery", myQuery);

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -88,7 +89,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	public void initializeDirIn() {
 		loggerDispatcher.debug("/* initializeDirIn */", LOGGER);
 		HashMap<String, String> defaultInputFields = new HashMap<>();
-		ArrayList<ArrayList<String>> listeFichier = getDirFiles(views.getDirIn(), views.getViewDirIn());
+		List<List<String>> listeFichier = getDirFiles(views.getDirIn(), views.getViewDirIn());
 		this.vObjectService.initializeByList(views.getViewDirIn(), listeFichier, defaultInputFields);
 	}
 
@@ -97,7 +98,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 		loggerDispatcher.debug("/* initializeDirOut */", LOGGER);
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 
-		ArrayList<ArrayList<String>> listeFichier = getDirFiles(views.getDirOut(), views.getViewDirOut());
+		List<List<String>> listeFichier = getDirFiles(views.getDirOut(), views.getViewDirOut());
 
 		this.vObjectService.initializeByList(views.getViewDirOut(), listeFichier, defaultInputFields);
 
@@ -112,7 +113,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	 * @param dirTarget
 	 */
 	protected void transfer(VObject viewSource, String dirSource, String dirTarget) {
-		Map<String, ArrayList<String>> m = viewSource.mapContentSelected();
+		Map<String, List<String>> m = viewSource.mapContentSelected();
 		if (!m.isEmpty()) {
 			for (String f : m.get(VC_FILENAME)) {
 				File fileSource = Paths.get(dirSource, f).toFile();
@@ -152,7 +153,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	protected boolean delete(VObject viewSource, String dirSource) {
 		// safeguard : only file or directory containing this magic word will be able to
 		// be deleted
-		Map<String, ArrayList<String>> m = viewSource.mapContentSelected();
+		Map<String, List<String>> m = viewSource.mapContentSelected();
 		if (!m.isEmpty()) {
 			for (String f : m.get(VC_FILENAME)) {
 				File fileSource = new File(dirSource + f);
@@ -215,8 +216,8 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	 */
 	protected void rename(VObject viewSource, String dirSource) {
 
-		Map<String, ArrayList<String>> m0 = viewSource.mapContentBeforeUpdate();
-		Map<String, ArrayList<String>> m1 = viewSource.mapContentAfterUpdate();
+		Map<String, List<String>> m0 = viewSource.mapContentBeforeUpdate();
+		Map<String, List<String>> m1 = viewSource.mapContentAfterUpdate();
 
 		for (int i = 0; i < m0.get(VC_FILENAME).size(); i++) {
 			File fileIn = new File(dirSource + m0.get(VC_FILENAME).get(i));
@@ -239,7 +240,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	 * @param dirSource
 	 */
 	protected void download(HttpServletResponse response, VObject viewSource, String dirSource) {
-		HashMap<String, ArrayList<String>> selection = viewSource.mapContentSelected();
+		Map<String, List<String>> selection = viewSource.mapContentSelected();
 		if (!selection.isEmpty()) {
 
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
@@ -260,7 +261,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	}
 
 	protected void copy(VObject viewSource, String dirSource, String dirTarget) {
-		Map<String, ArrayList<String>> m = viewSource.mapContentSelected();
+		Map<String, List<String>> m = viewSource.mapContentSelected();
 		if (!m.isEmpty()) {
 			for (String f : m.get(VC_FILENAME)) {
 				File fileSource = new File(dirSource + f);
@@ -297,7 +298,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	 * @param dirSource
 	 */
 	protected void createDirectory(VObject viewSource, String dirSource) {
-		HashMap<String, ArrayList<String>> m = viewSource.mapInputFields();
+		Map<String, List<String>> m = viewSource.mapInputFields();
 		if (!m.isEmpty()) {
 			if (m.get(VC_FILENAME).get(0) != null && !m.get(VC_FILENAME).get(0).trim().equals("")) {
 				Path directoryPath = Paths.get(dirSource + m.get(VC_FILENAME).get(0).trim());
@@ -319,9 +320,9 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	 * @param dirVobject
 	 * @return
 	 */
-	private ArrayList<ArrayList<String>> getDirFiles(String dirUri, VObject dirVobject) {
+	private List<List<String>> getDirFiles(String dirUri, VObject dirVobject) {
 		File dirFile = Paths.get(dirUri).toFile();
-		ArrayList<ArrayList<String>> listeFichier;
+		List<List<String>> listeFichier;
 		if (!dirFile.exists() || !dirFile.isDirectory()) {
 			listeFichier = errorFromDirectory();
 		} else {
@@ -330,20 +331,20 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 		return listeFichier;
 	}
 
-	private void initializeArrayForDirVObject(ArrayList<ArrayList<String>> result) {
+	private void initializeArrayForDirVObject(List<List<String>> result) {
 		VObjectService.addRowToVObjectList(result, VC_FILENAME, IS_DIRECTORY);
 		VObjectService.addRowToVObjectList(result, "text", "text");
 	}
 
-	private ArrayList<ArrayList<String>> errorFromDirectory() {
-		ArrayList<ArrayList<String>> result = new ArrayList<>();
+	private List<List<String>> errorFromDirectory() {
+		List<List<String>> result = new ArrayList<>();
 		initializeArrayForDirVObject(result);
 		VObjectService.addRowToVObjectList(result, "<Path not valid>", "false");
 		return result;
 	}
 
-	private ArrayList<ArrayList<String>> getFilesFromDirectory(File dir, HashMap<String, ArrayList<String>> filter) {
-		ArrayList<ArrayList<String>> result = new ArrayList<>();
+	private List<List<String>> getFilesFromDirectory(File dir, Map<String, List<String>> filter) {
+		List<List<String>> result = new ArrayList<>();
 
 		initializeArrayForDirVObject(result);
 

@@ -84,7 +84,7 @@ public class Norme {
 
         List<Norme> output = new ArrayList<Norme>() ;
         // Récupérer les régles de définition de normes
-        ArrayList<ArrayList<String>> normes = new ArrayList<ArrayList<String>>();
+        List<List<String>> normes = new ArrayList<>();
         try {
             normes = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion,
             		new ArcPreparedStatementBuilder( "select id_norme, periodicite, def_norme, def_validite from " + ViewEnum.NORME.getFullName(envExecution) + ";"))).content;

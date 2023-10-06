@@ -325,7 +325,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	protected String deleteLineVobject(Model model, String successUri, VObject theVObjectToUpdate) {
 		LoggerHelper.debug(LOGGER, String.join(" ** deleteLineVobject() called by %s **",
 				Thread.currentThread().getStackTrace()[2].getMethodName()));
-		Map<String, ArrayList<String>> selection = theVObjectToUpdate.mapContentSelected();
+		Map<String, List<String>> selection = theVObjectToUpdate.mapContentSelected();
 		if (!selection.isEmpty()) {
 			vObjectService.delete(theVObjectToUpdate);
 		} else {

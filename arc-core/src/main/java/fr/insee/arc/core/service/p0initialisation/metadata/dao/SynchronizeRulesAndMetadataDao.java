@@ -120,7 +120,7 @@ public class SynchronizeRulesAndMetadataDao {
 					+ requeteSelectDrop.quoteText(anExecutionEnvironment.toLowerCase()) + " ");
 			requeteSelectDrop.append(" AND tablename SIMILAR TO '%nmcl%|%ext%'");
 
-			ArrayList<String> requetesDeSuppressionTablesNmcl = new GenericBean(
+			List<String> requetesDeSuppressionTablesNmcl = new GenericBean(
 					UtilitaireDao.get(0).executeRequest(coordinatorConnexion, requeteSelectDrop)).mapContent()
 					.get("requete_drop");
 
@@ -131,7 +131,7 @@ public class SynchronizeRulesAndMetadataDao {
 			}
 
 			// 2.Préparation des requêtes de création des tables
-			ArrayList<String> requetesDeCreationTablesNmcl = new GenericBean(UtilitaireDao.get(0)
+			List<String> requetesDeCreationTablesNmcl = new GenericBean(UtilitaireDao.get(0)
 					.executeRequest(coordinatorConnexion, new ArcPreparedStatementBuilder(
 							"select tablename from pg_tables where (tablename like 'nmcl\\_%' OR tablename like 'ext\\_%') and schemaname='arc'")))
 					.mapContent().get("tablename");
@@ -174,8 +174,8 @@ public class SynchronizeRulesAndMetadataDao {
 				+ "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
 				+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
 
-		List<List<String>> relationalViewRef = Format
-				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef));
+		List<List<String>> relationalViewRef = UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef);
+				
 		HierarchicalView familleToTableToVariableToTypeRef = HierarchicalView.asRelationalToHierarchical(
 				"(Réf) Famille -> Table -> Variable -> Type",
 				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
@@ -205,8 +205,7 @@ public class SynchronizeRulesAndMetadataDao {
 				+ ManipString.substringAfterFirst(TableNaming.dbEnv(envExecution), ".").toLowerCase()
 				+ "mapping\\_'||lower(id_famille)||'\\_%';");
 
-		List<List<String>> relationalView = Format
-				.patch(UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete));
+		List<List<String>> relationalView = UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete);
 
 		HierarchicalView familleToTableToVariableToType = HierarchicalView.asRelationalToHierarchical(
 				"(Phy) Famille -> Table -> Variable -> Type",

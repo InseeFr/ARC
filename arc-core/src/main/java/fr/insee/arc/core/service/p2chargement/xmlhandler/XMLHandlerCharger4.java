@@ -29,18 +29,17 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private static final Logger LOGGER = LogManager.getLogger(XMLHandlerCharger4.class);
 
-
-	
 	public XMLHandlerCharger4(Connection connexion, String fileName, Norme normeCourante, String validite,
-		String tempTableA, FastList<String> tempTableAColumnsLongName, FastList<String> tempTableAColumnsShortName) {
-	super();
-	this.connexion = connexion;
-	this.fileName = fileName;
-	this.normeCourante = normeCourante;
-	this.validite = validite;
-	this.tempTableA = tempTableA;
-	this.tempTableAColumnsLongName = tempTableAColumnsLongName;
-	this.tempTableAColumnsShortName = tempTableAColumnsShortName;
+			String tempTableA, FastList<String> tempTableAColumnsLongName,
+			FastList<String> tempTableAColumnsShortName) {
+		super();
+		this.connexion = connexion;
+		this.fileName = fileName;
+		this.normeCourante = normeCourante;
+		this.validite = validite;
+		this.tempTableA = tempTableA;
+		this.tempTableAColumnsLongName = tempTableAColumnsLongName;
+		this.tempTableAColumnsShortName = tempTableAColumnsShortName;
 	}
 
 	// input
@@ -51,13 +50,18 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private String tempTableA;
 	private FastList<String> tempTableAColumnsLongName;
 	private FastList<String> tempTableAColumnsShortName;
-	
+
 	// output
 	private String jointure = "";
-	
-	
+
+	// map le nom des balises trouvé dans le fichier XML avec leur nombre
+	// d'occurence en cours du traitement
 	private HashMap<String, Integer> col = new HashMap<>();
+	// on met dans cette map les balises pour lesquels le parser a trouvé de la
+	// données
+	// l'integer ne sert à rien -> refactor avec un set
 	private HashMap<String, Integer> colData = new HashMap<>();
+
 	private HashMap<Integer, Integer> tree = new HashMap<>();
 	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
 
@@ -67,13 +71,11 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private int idLigne = 0;
 	private int distance = 0;
 
-
 	private String currentTag;
 	private String closedTag;
 
 	private String father = "*";
 	private StringBuilder currentData = new StringBuilder();
-
 
 	/*
 	 * pour les rubriques recursives (au cas ou...)
@@ -85,6 +87,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	private List<String> treeStackFather = new ArrayList<>();
 	private List<String> treeStackFatherLag = new ArrayList<>();
 
+	// contient la liste de toutes les balises trouvées dans le XML
 	private FastList<String> allCols = new FastList<>();
 	private List<Integer> lineCols = new ArrayList<>();
 	private List<Integer> lineCols11 = new ArrayList<>();
@@ -96,8 +99,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 	private ParallelInsert pi;
 
-
-
 	private static final String ALTER = "ALTER";
 
 	private HashMap<String, StringBuilder> requetes = new HashMap<>();
@@ -106,8 +107,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	// initialize the integration date with current
 	private final String integrationDate = DateConversion.queryDateConversion(new Date());
 
-	
-	
 	/**
 	 * Actions à réaliser sur les données
 	 */
@@ -459,9 +458,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	}
 
 	/**
-	 * Permet de générer la requête SQL de normage. C'est une méthode assez
-	 * compliqué car on doit décomposer le fichier en bloc pour ensuite faire les
-	 * jointure.
+	 * Permet de générer la requête SQL de normage
 	 */
 	private void requeteJointureXML() {
 
@@ -469,6 +466,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 		StringBuilder req = new StringBuilder();
 
 		int[][] arr = TreeFunctions.getTreeArrayByDistance(this.tree, this.colDist);
+
 		StringBuilder reqCreate = new StringBuilder(" \n");
 
 		StringBuilder reqInsert = new StringBuilder();
@@ -546,7 +544,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 		reqFrom.insert(0, "\n FROM ");
 		reqFrom.append("\n WHERE true ) ww ");
 
-		// on ne met pas la parenthèse fermante exprées
 		req.append(reqCreate);
 		req.append(reqInsert);
 		req.append(reqSelect);
@@ -582,5 +579,5 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	public String getJointure() {
 		return jointure;
 	}
-	
+
 }

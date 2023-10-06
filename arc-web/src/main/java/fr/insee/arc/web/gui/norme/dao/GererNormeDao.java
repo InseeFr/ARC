@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +20,6 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -310,11 +306,11 @@ public class GererNormeDao extends VObjectHelperDao {
 	public void execQueryCopieJeuxDeRegles(VObject viewJeuxDeRegles, VObject viewJeuxDeReglesCopie,
 			String selectedTableOfRegles) throws ArcException {
 		// le jeu de regle à copier
-		Map<String, ArrayList<String>> selectionOut = viewJeuxDeRegles.mapContentSelected();
+		Map<String, List<String>> selectionOut = viewJeuxDeRegles.mapContentSelected();
 		// le nouveau jeu de regle
-		Map<String, ArrayList<String>> selectionIn = viewJeuxDeReglesCopie.mapContentSelected();
+		Map<String, List<String>> selectionIn = viewJeuxDeReglesCopie.mapContentSelected();
 
-		HashMap<String, String> type = viewJeuxDeReglesCopie.mapHeadersType();
+		Map<String, String> type = viewJeuxDeReglesCopie.mapHeadersType();
 
 		// columns found in all rules tables
 		String inCommonColumns = new StringBuilder().append(ColumnEnum.ID_NORME.getColumnName())
@@ -395,8 +391,8 @@ public class GererNormeDao extends VObjectHelperDao {
 	 */
 	public void emptyRuleTable(VObject viewRulesSet, String table) throws ArcException {
 
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		HashMap<String, String> type = viewRulesSet.mapHeadersType();
+		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
+		Map<String, String> type = viewRulesSet.mapHeadersType();
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("DELETE FROM " + table);
 		requete.append(" WHERE id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
@@ -469,7 +465,7 @@ public class GererNormeDao extends VObjectHelperDao {
 			}
 			LoggerHelper.debug(LOGGER, "Insert file in the " + nomTableImage + " table");
 
-			Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
+			Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
 
 			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 

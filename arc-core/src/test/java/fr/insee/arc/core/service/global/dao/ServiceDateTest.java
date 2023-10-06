@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -27,7 +27,7 @@ public class ServiceDateTest extends InitializeQueryTest {
 		GenericPreparedStatementBuilder gb=new GenericPreparedStatementBuilder();
 		gb.append("SELECT "+DateConversion.queryDateConversion(testDate)+" as test_date");
 		
-		HashMap<String, ArrayList<String>> content= new GenericBean(UtilitaireDao.get(0).executeRequest(c, gb)).mapContent();
+		Map<String, List<String>> content= new GenericBean(UtilitaireDao.get(0).executeRequest(c, gb)).mapContent();
 
 		assertEquals("1975-12-16", content.get("test_date").get(0));
 		

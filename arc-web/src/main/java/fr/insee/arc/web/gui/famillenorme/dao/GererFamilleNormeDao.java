@@ -361,12 +361,12 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	private String queryUpdateRulesAndModelTablesOnVariableNameUpdate(VObject viewVariableMetier, String idFamilleSelected)
 			throws ArcException {
 		StringBuilder requete = new StringBuilder();
-		List<ArrayList<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();
+		List<List<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();
 
-		List<ArrayList<String>> lAfter = viewVariableMetier.listContentAfterUpdate();
+		List<List<String>> lAfter = viewVariableMetier.listContentAfterUpdate();
 		int nameIndex = viewVariableMetier.getHeadersDLabel().indexOf(ColumnEnum.NOM_VARIABLE_METIER.getColumnName());
 
-		for (ArrayList<String> modifiedLine : lAfter) {
+		for (List<String> modifiedLine : lAfter) {
 			int indexOfVar = nameIndex;
 			modifiedLine.set(indexOfVar, ArcStringUtils.cleanUpVariable(modifiedLine.get(indexOfVar)));
 		}
@@ -444,8 +444,8 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 				new StringBuilder("SELECT distinct replace(id,'.','_') FROM arc.ext_etat_jeuderegle where isenv"),
 				new ArrayList<>());
 
-		HashMap<String, ArrayList<String>> mBefore = viewVariableMetier.mapContentBeforeUpdate();
-		List<ArrayList<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();
+		Map<String, List<String>> mBefore = viewVariableMetier.mapContentBeforeUpdate();
+		List<List<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();
 
 		StringBuilder requete = new StringBuilder();
 		for (String envName : listeEnvironnement) {
@@ -469,7 +469,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		return requete.toString();
 	}
 
-	private void isAnyNullVariablesDeclared(HashMap<String, ArrayList<String>> mapContentAfterUpdate)
+	private void isAnyNullVariablesDeclared(Map<String, List<String>> mapContentAfterUpdate)
 			throws ArcException {
 		for (int i = 0; i < mapContentAfterUpdate.get(ColumnEnum.NOM_VARIABLE_METIER.getColumnName()).size(); i++) {
 			String nomVariable = mapContentAfterUpdate.get(ColumnEnum.NOM_VARIABLE_METIER.getColumnName()).get(i);
@@ -485,7 +485,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @param message
 	 */
 	private String addExistingVariableMetierWithoutSync(VObject viewVariableMetier,
-			List<ArrayList<String>> listContent) {
+			List<List<String>> listContent) {
 		StringBuilder requete = new StringBuilder();
 		/**
 		 * Pour chaque ligne à UPDATE
@@ -601,7 +601,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 				requete.append("\n");
 			}
 
-			HashMap<String, ArrayList<String>> content = someViewVariableMetier.mapOnlyUpdatedContent();
+			Map<String, List<String>> content = someViewVariableMetier.mapOnlyUpdatedContent();
 			StringBuilder requeteLocale = new StringBuilder(
 					"UPDATE " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " a ");
 			requeteLocale.append("\n  SET type_consolidation = ");
@@ -618,7 +618,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		return requete.toString();
 	}
 
-	private String computeMapcontent(HashMap<String, ArrayList<String>> content, String columnName, int index) {
+	private String computeMapcontent(Map<String, List<String>> content, String columnName, int index) {
 		if (content.get(columnName) == null || content.get(columnName).get(index) == null) {
 			return columnName;
 		} else {
@@ -636,7 +636,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 */
 	private String deleteVariableMetierWithoutSync(VObject viewVariableMetier) {
 		
-		Map<String, ArrayList<String>> map = viewVariableMetier.mapContentSelected();
+		Map<String, List<String>> map = viewVariableMetier.mapContentSelected();
 		
 		StringBuilder delete = new StringBuilder();
 		/**

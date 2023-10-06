@@ -3,6 +3,7 @@ package fr.insee.arc.web.gui.norme.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -102,7 +103,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		LoggerHelper.debug(LOGGER, "/* initializeCalendar */");
 
 		// get the norm selected records
-		Map<String, ArrayList<String>> viewNormSelectedRecords = viewNorme.mapContentSelected();
+		Map<String, List<String>> viewNormSelectedRecords = viewNorme.mapContentSelected();
 
 		// if a norm is selected, trigger the call to dao to construct calendar view
 		if (!viewNormSelectedRecords.isEmpty()) {
@@ -123,7 +124,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
 
 		// Get the selected calendar for requesting the rule set
-		Map<String, ArrayList<String>> viewCalendarSelectedRecords = viewCalendar.mapContentSelected();
+		Map<String, List<String>> viewCalendarSelectedRecords = viewCalendar.mapContentSelected();
 		
 		// if a calendar is selected, trigger the call to dao to construct rulesset view
 		if (!viewCalendarSelectedRecords.isEmpty()) {
@@ -143,7 +144,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
 
 		// Get the selected ruleset
-		Map<String, ArrayList<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
+		Map<String, List<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
 		
 		// if any ruleset selected, display and initialized the modules
 		if (!viewRulesSetSelectedRecords.isEmpty()) {
@@ -169,8 +170,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	public void initializeChargement(VObject viewChargement, VObject viewRulesSet, VObject viewModules) {
 		
 		
-		Map<String, ArrayList<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
-		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		Map<String, List<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
+		List<List<String>> moduleSelection =viewModules.listContentSelected();
 				
 		if (!viewRulesSetSelectedRecords.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.load)))
@@ -188,8 +189,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * get the load rule link to the selected rule set.
 	 */
 	public void initializeNormage(VObject viewNormage, VObject viewRulesSet, VObject viewModules, String theTableName) {
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
+		List<List<String>> moduleSelection =viewModules.listContentSelected();
 		
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.structurize)))
@@ -206,13 +207,13 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * get the load rule link to the selected rule set.
 	 */
 	public void initializeControle(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
+		List<List<String>> moduleSelection =viewModules.listContentSelected();
 				
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.control)))
 		{
-            HashMap<String, String> type = viewRulesSet.mapHeadersType();
+            Map<String, String> type = viewRulesSet.mapHeadersType();
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,blocking_threshold,error_row_processing,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
             whereRuleSetEquals(requete, selection, type);
@@ -228,13 +229,13 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * rule link to the selected rule set.
 	 */
 	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, VObject viewModules, String theTableName) {
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
+		List<List<String>> moduleSelection =viewModules.listContentSelected();
 		
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.mapmodel)))
 		{
-			HashMap<String, String> type = viewRulesSet.mapHeadersType();
+			Map<String, String> type = viewRulesSet.mapHeadersType();
 
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder(
                     "SELECT mapping.id_regle, mapping.id_norme, mapping.validite_inf, mapping.validite_sup, mapping.version, mapping.periodicite, mapping.variable_sortie, mapping.expr_regle_col, mapping.commentaire, variables.type_variable_metier type_sortie, variables.nom_table_metier nom_table_metier /*, variables.nom_table_metier nom_table_metier */ ");
@@ -262,13 +263,13 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 */
 	public void initializeExpression(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		ArrayList<ArrayList<String>> moduleSelection =viewModules.listContentSelected();
+		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
+		List<List<String>> moduleSelection =viewModules.listContentSelected();
 		
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.expression)))
 		{
-            HashMap<String, String> type = viewRulesSet.mapHeadersType();
+            Map<String, String> type = viewRulesSet.mapHeadersType();
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();;
             requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,expr_nom, expr_valeur, commentaire from arc.ihm_expression");
             whereRuleSetEquals(requete, selection, type);
@@ -301,8 +302,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 
 
 	/** Appends a where clause for rulesets. */
-	protected void whereRuleSetEquals(ArcPreparedStatementBuilder requete, Map<String, ArrayList<String>> selection,
-			HashMap<String, String> type) {
+	protected void whereRuleSetEquals(ArcPreparedStatementBuilder requete, Map<String, List<String>> selection,
+			Map<String, String> type) {
 		requete.append(" where id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
         requete.append(" and periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
         requete.append(" and validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
@@ -327,7 +328,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * @param selection
 	 * @return
 	 */
-	private HashMap<String, String> defaultRuleInputFields(Map<String, ArrayList<String>> selection) {
+	private HashMap<String, String> defaultRuleInputFields(Map<String, List<String>> selection) {
 		HashMap<String, String> defaultInputFields = new HashMap<>();
 		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
 		defaultInputFields.put("periodicite", selection.get("periodicite").get(0));

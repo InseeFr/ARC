@@ -21,7 +21,7 @@ public abstract class AbstractEntity {
 
     }
 
-    public AbstractEntity(Map<String, ArrayList<String>> mapInputFields) {
+    public AbstractEntity(Map<String, List<String>> mapInputFields) {
         this.map = new HashMap<>();
     }
 

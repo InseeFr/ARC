@@ -2,7 +2,7 @@ package fr.insee.arc.web.gui.file.service;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -15,7 +15,7 @@ public class ServiceViewDirIn extends InteractorFile {
 
 
 	public String seeDirIn(Model model) {
-		Map<String,ArrayList<String>> m= views.getViewDirIn().mapContentSelected();
+		Map<String,List<String>> m= views.getViewDirIn().mapContentSelected();
 		if (!m.isEmpty() && m.get(IS_DIRECTORY).get(0).equals("true"))  {
 			views.setDirIn(Paths.get(views.getDirIn(), m.get(VC_FILENAME).get(0)).toString() + File.separator);
 			model.addAttribute(DIR_IN, views.getDirIn());

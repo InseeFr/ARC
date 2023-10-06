@@ -1,7 +1,7 @@
 package fr.insee.arc.web.gui.nomenclature.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -83,7 +83,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
     public String downloadListNomenclatures(Model model, HttpServletResponse response) {
     	
-    	Map<String, ArrayList<String>> selection = views.getViewListNomenclatures().mapContentSelected();
+    	Map<String, List<String>> selection = views.getViewListNomenclatures().mapContentSelected();
     	
 		if (!selection.isEmpty()) {
 			

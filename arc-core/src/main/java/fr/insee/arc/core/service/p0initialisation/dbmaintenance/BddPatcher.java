@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
@@ -273,7 +275,7 @@ public class BddPatcher {
 	 * @return
 	 * @throws ArcException
 	 */
-	private static ArrayList<String> retrieveTablesFromSchema(Connection connexion, String envExecution, Function<String, ArcPreparedStatementBuilder> condition)
+	private static List<String> retrieveTablesFromSchema(Connection connexion, String envExecution, Function<String, ArcPreparedStatementBuilder> condition)
 			throws ArcException {
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
@@ -349,7 +351,7 @@ public class BddPatcher {
 	}
 
 	// return external tables used in rules
-	public static ArrayList<String> retrieveExternalTablesUsedInRules(Connection connexion, String envExecution)
+	public static List<String> retrieveExternalTablesUsedInRules(Connection connexion, String envExecution)
 			throws ArcException {
 		
 		// generate a sql expression with relevant the columns concatenation of rules table
@@ -371,7 +373,7 @@ public class BddPatcher {
 		query.build(SQL.AND, ColumnEnum.COLUMN_NAME, "!=", query.quoteText(ColumnEnum.VERSION));
 		query.build(SQL.GROUP_BY, ColumnEnum.TABLE_SCHEMA, "||'.'||", ColumnEnum.TABLE_NAME);
 
-		HashMap<String, ArrayList<String>> result = new GenericBean(
+		Map<String, List<String>> result = new GenericBean(
 				UtilitaireDao.get(0).executeRequest(connexion, query)).mapContent();
 
 		// search if a nomenclature table is quoted in the columns concatenation of rules tables
@@ -404,12 +406,12 @@ public class BddPatcher {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static ArrayList<String> retrieveRulesTablesFromSchema(Connection connexion, String envExecution)
+	public static List<String> retrieveRulesTablesFromSchema(Connection connexion, String envExecution)
 			throws ArcException {
 		return retrieveTablesFromSchema(connexion, envExecution, BddPatcher::conditionToRetrieveRulesTablesInSchema );
 	}
 	
-	public static ArrayList<String> retrieveModelTablesFromSchema(Connection connexion, String envExecution)
+	public static List<String> retrieveModelTablesFromSchema(Connection connexion, String envExecution)
 			throws ArcException {
 		return retrieveTablesFromSchema(connexion, envExecution, BddPatcher::conditionToRetrieveModelTablesInSchema );
 	}

@@ -157,12 +157,11 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 				.append(this.nomTableRegleMapping).append("\n WHERE ").append(this.jeuDeRegle.getSqlEquals())
 				.append(";");
 
-		List<List<String>> resultTemp = Format
-				.patch(UtilitaireDao.get(0).executeRequest(this.connexion, requete));
+		List<List<String>> resultTemp = UtilitaireDao.get(0).executeRequest(this.connexion, requete);
 		if (resultTemp.size() == 2) {
 			throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND);
 		}
-		ArrayList<ArrayList<String>> result = new ArrayList<>();
+		List<List<String>> result = new ArrayList<>();
 
 		for (int i = 0; i < resultTemp.size(); i++) {
 			// mise en minuscule des rubriques
@@ -289,7 +288,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 		requete.append(this.nomTableModVariableMetier);
 		requete.append("\n WHERE id_famille = " + requete.quoteText(this.idFamille) + ";");
 
-		List<List<String>> result = Format.patch(UtilitaireDao.get(0).executeRequest(this.connexion, requete));
+		List<List<String>> result = UtilitaireDao.get(0).executeRequest(this.connexion, requete);
 
 		for (int i = ARRAY_THIRD_COLUMN_INDEX; i < result.size(); i++) {
 			/*
@@ -342,7 +341,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 
 			Map<String, String> reglesIdentifiantes = new HashMap<>();
 			Map<String, String> nomsVariablesGroupe = new HashMap<>();
-			HashMap<String, String> linkedIds = new HashMap<>();
+			Map<String, String> linkedIds = new HashMap<>();
 
 			construireListeIdentifiants(reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
 			construireTableIdentifiantsFichierCourant(requeteGlobale, reglesIdentifiantes, nomsVariablesGroupe,
@@ -708,7 +707,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	 */
 	private StringBuilder construireTableIdentifiantsFichierCourant(StringBuilder returned,
 			Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe,
-			HashMap<String, String> linkedIds) {
+			Map<String, String> linkedIds) {
 		this.nomTableFichierCourant = "fichier";
 		HashSet<String> alreadyAdded = new HashSet<>();
 
@@ -778,7 +777,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	 * @param reglesIdentifiantes
 	 */
 	private void construireListeIdentifiants(Map<String, String> reglesIdentifiantes,
-			Map<String, String> nomsVariablesGroupe, HashMap<String, String> linkedIds) {
+			Map<String, String> nomsVariablesGroupe, Map<String, String> linkedIds) {
 
 		Set<RegleMappingClePrimaire> reglesClefs = new HashSet<>();
 		for (TableMapping table : this.ensembleTableMapping) {

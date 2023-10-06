@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.webservice.service;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -51,7 +51,7 @@ public class InteractorWebservice extends ArcWebGenericService<ModelWebservice, 
     	LoggerHelper.debug(LOGGER, "/* initializeWebserviceQuery */");
 
     	// get the webservice selected records
-        Map<String, ArrayList<String>> viewWsContextSelectedRecords = viewWsContext.mapContentSelected();
+        Map<String, List<String>> viewWsContextSelectedRecords = viewWsContext.mapContentSelected();
 
         // if a webservice is selected, trigger the call to dao to construct query view
         if (!viewWsContextSelectedRecords.isEmpty()) {

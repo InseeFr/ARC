@@ -329,10 +329,10 @@ public class GenericPreparedStatementBuilder {
 			// if chunkstop too high, limit it to the size of generic bean content
 			chunkStop = (chunkStop > gb.getContent().size()) ? gb.getContent().size() : chunkStop;
 
-			ArrayList<String> types = gb.getTypes();
+			List<String> types = gb.getTypes();
 		
 			for (int i = chunkStart; i < chunkStop; i++) {
-				ArrayList<String> line = gb.getContent().get(i);
+				List<String> line = gb.getContent().get(i);
 
 				if (firstLine) {
 					firstLine = false;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,48 +55,48 @@ public class VObject {
 	// nom des colonnes, type en base (D=Database), label dans la vue (V=VUE) ,
 	// taille sur la vue
 	/** Noms des colonnes en base. */
-	private ArrayList<String> headersDLabel;
+	private List<String> headersDLabel;
 	/** Types des colonnes en base. */
-	private ArrayList<String> headersDType;
+	private List<String> headersDType;
 	/** Noms des colonnes dans la vue. */
-	private ArrayList<String> headersVLabel;
+	private List<String> headersVLabel;
 	/** Tailles des colonnes dans la vue. */
-	private ArrayList<String> headersVSize;
+	private List<String> headersVSize;
 	/** Types des colonnes dans la vue. */
-	private ArrayList<String> headersVType;
-	private ArrayList<LinkedHashMap<String, String>> headersVSelect;
-	private ArrayList<Boolean> headersVisible;
-	private ArrayList<Boolean> headersUpdatable;
-	private ArrayList<Boolean> headersRequired;
+	private List<String> headersVType;
+	private List<Map<String, String>> headersVSelect;
+	private List<Boolean> headersVisible;
+	private List<Boolean> headersUpdatable;
+	private List<Boolean> headersRequired;
 	/** Tableau des lignes selectionnées */
-	private ArrayList<Boolean> selectedLines;
+	private List<Boolean> selectedLines;
 	/** Tableau des colonnes selectionnées */
-	private ArrayList<Boolean> selectedColumns;
+	private List<Boolean> selectedColumns;
 	// champs de saisie
-	private HashMap<String, String> defaultInputFields;
-	private ArrayList<String> inputFields;
+	private Map<String, String> defaultInputFields;
+	private List<String> inputFields;
 	// Pagination
 	private Integer nbPages;
 	private String idPage;
 
 	// Gestion du tri
 	/** Liste des colonnes utilisées pour trier la table */
-	private ArrayList<String> headerSortDLabels;
+	private List<String> headerSortDLabels;
 	/**
 	 * Liste des directions de tri (des colonnes nommées dans headerSortDLabels).
 	 * true = ascending, false = descending.
 	 */
-	private ArrayList<Boolean> headerSortDOrders;
+	private List<Boolean> headerSortDOrders;
 	/** La colonne cliquée par l'utilisateur pour le tri. */
 	private String headerSortDLabel;
 
-	private ArrayList<String> filterFields;
+	private List<String> filterFields;
 
 	private String message;
 
 	private Object[] messageArgs;
 
-	private HashMap<String, String> customValues;
+	private Map<String, String> customValues;
 
 	// pagination and order attribute
 	private boolean noOrder = VObjectService.DEFAULT_NO_ORDER;
@@ -106,11 +107,11 @@ public class VObject {
 	private int filterPattern = VObjectService.DEFAULT_FILTER_PATTERN;
 	private String filterFunction = VObjectService.DEFAULT_FILTER_FUNCTION;
 
-	public ArrayList<ArrayList<String>> listContent() {
+	public List<List<String>> listContent() {
 		if (getSavedContent() == null) {
 			return new ArrayList<>();
 		}
-		ArrayList<ArrayList<String>> c = new ArrayList<>();
+		List<List<String>> c = new ArrayList<>();
 		for (int i = 0; i < getSavedContent().size(); i++) {
 			ArrayList<String> l = new ArrayList<>();
 			for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
@@ -125,16 +126,16 @@ public class VObject {
 	 * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste
 	 * de toutes les valeurs
 	 */
-	public HashMap<String, ArrayList<String>> mapContent() {
+	public Map<String, List<String>> mapContent() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContent()).mapContent();
 	}
 
 	/** Returns the old values for the lines with new content. */
-	public ArrayList<ArrayList<String>> listContentBeforeUpdate() {
+	public List<List<String>> listContentBeforeUpdate() {
 		if (getSavedContent() == null) {
-			return new ArrayList<ArrayList<String>>();
+			return new ArrayList<>();
 		}
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		List<List<String>> r = new ArrayList<>();
 		// comparaison des lignes dans la table avant et aprés
 		// toBeUpdated contient l'identifiant des lignes à update
 		for (int i = 0; i < getContent().size(); i++) {
@@ -155,22 +156,22 @@ public class VObject {
 		return newContentValue == null || ManipString.compareStringWithNull(oldContentValue, newContentValue);
 	}
 
-	public HashMap<String, ArrayList<String>> mapContentBeforeUpdate() {
+	public Map<String, List<String>> mapContentBeforeUpdate() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentBeforeUpdate()).mapContent();
 	}
 
-	public HashMap<String, ArrayList<String>> mapContentBeforeUpdate(int i) {
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+	public Map<String, List<String>> mapContentBeforeUpdate(int i) {
+		List<List<String>> r = new ArrayList<>();
 		r.add(listContentBeforeUpdate().get(i));
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
 
 	/** Returns the lines with the new content. */
-	public ArrayList<ArrayList<String>> listContentAfterUpdate() {
+	public List<List<String>> listContentAfterUpdate() {
 		if (getSavedContent() == null) {
-			return new ArrayList<ArrayList<String>>();
+			return new ArrayList<>();
 		}
-		ArrayList<ArrayList<String>> r = new ArrayList<ArrayList<String>>();
+		List<List<String>> r = new ArrayList<>();
 		// comparaison des lignes dans la table avant et aprés
 		// toBeUpdated contient l'identifiant des lignes à update
 		for (int i = 0; i < getContent().size(); i++) {
@@ -187,22 +188,22 @@ public class VObject {
 		return r;
 	}
 
-	public HashMap<String, ArrayList<String>> mapContentAfterUpdate() {
+	public Map<String, List<String>> mapContentAfterUpdate() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentAfterUpdate()).mapContent();
 	}
 
-	public HashMap<String, ArrayList<String>> mapContentAfterUpdate(int i) {
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+	public Map<String, List<String>> mapContentAfterUpdate(int i) {
+		List<List<String>> r = new ArrayList<>();
 		r.add(listContentAfterUpdate().get(i));
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
 
 	/** Returns the content as it would be after the update. */
-	public ArrayList<ArrayList<String>> listUpdatedContent() {
+	public List<List<String>> listUpdatedContent() {
 		if (getSavedContent() == null) {
 			return new ArrayList<>();
 		}
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+		List<List<String>> r = new ArrayList<>();
 		for (int i = 0; i < getSavedContent().size(); i++) {
 			r.add(new ArrayList<>());
 			for (int j = 0; j < getSavedContent().get(i).d.size(); j++) {
@@ -223,7 +224,7 @@ public class VObject {
 		return r;
 	}
 
-	public HashMap<String, ArrayList<String>> mapUpdatedContent() {
+	public Map<String, List<String>> mapUpdatedContent() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listUpdatedContent()).mapContent();
 	}
 
@@ -231,11 +232,11 @@ public class VObject {
 	 * Returns the content as it would be after the update, only on the changed
 	 * lines.
 	 */
-	public ArrayList<ArrayList<String>> listOnlyUpdatedContent() {
+	public List<List<String>> listOnlyUpdatedContent() {
 		if (getSavedContent() == null) {
 			return new ArrayList<>();
 		}
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+		List<List<String>> r = new ArrayList<>();
 		for (int i = 0; i < getContent().size(); i++) {
 			ArrayList<String> line = new ArrayList<>();
 			boolean changed = false;
@@ -257,12 +258,12 @@ public class VObject {
 		return r;
 	}
 
-	public HashMap<String, ArrayList<String>> mapOnlyUpdatedContent() {
+	public Map<String, List<String>> mapOnlyUpdatedContent() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listOnlyUpdatedContent()).mapContent();
 	}
 
-	public ArrayList<ArrayList<String>> listContentSelected() {
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+	public List<List<String>> listContentSelected() {
+		List<List<String>> r = new ArrayList<>();
 		// si rien dans la liste, return null
 		if (getSelectedLines() == null || getSelectedLines().isEmpty()) {
 			return r;
@@ -279,18 +280,18 @@ public class VObject {
 	 * Retourne une hash map qui pour chaque entete de colonne (clé), donne la liste
 	 * de toutes les valeurs selectionnées
 	 */
-	public HashMap<String, ArrayList<String>> mapContentSelected() {
+	public Map<String, List<String>> mapContentSelected() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listContentSelected()).mapContent();
 	}
 
 	/** Return the index of headers selected */
-	public ArrayList<Integer> indexHeadersSelected() {
+	public List<Integer> indexHeadersSelected() {
 		if (getSavedContent() == null) {
 			return new ArrayList<>();
 		}
 
-		ArrayList<String> listHeadersSelected = listHeadersSelected();
-		ArrayList<Integer> indexHeadersSelected = new ArrayList<>();
+		List<String> listHeadersSelected = listHeadersSelected();
+		List<Integer> indexHeadersSelected = new ArrayList<>();
 		for (Integer i = 0; i < getHeadersDLabel().size(); i++) {
 			if (listHeadersSelected.contains(getHeadersDLabel().get(i))) {
 				indexHeadersSelected.add(i);
@@ -303,11 +304,11 @@ public class VObject {
 	/**
 	 * Retourne la liste des entetes base de donnée selectionnés
 	 */
-	public ArrayList<String> listHeadersSelected() {
+	public List<String> listHeadersSelected() {
 		if (getSavedContent() == null) {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
-		ArrayList<String> r = new ArrayList<String>();
+		ArrayList<String> r = new ArrayList<>();
 		if (getSelectedColumns() == null || getSelectedColumns().isEmpty()) {
 			return r;
 		}
@@ -319,25 +320,25 @@ public class VObject {
 		return r;
 	}
 
-	public HashMap<String, String> mapHeadersSelected() {
-		HashMap<String, String> r = new HashMap<>();
+	public Map<String, String> mapHeadersSelected() {
+		Map<String, String> r = new HashMap<>();
 		for (String s : listHeadersSelected()) {
 			r.put(s, s);
 		}
 		return r;
 	}
 
-	public HashMap<String, String> mapHeadersType() {
+	public Map<String, String> mapHeadersType() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), null).mapTypes();
 	}
 
-	public ArrayList<ArrayList<String>> listInputFields() {
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+	public List<List<String>> listInputFields() {
+		List<List<String>> r = new ArrayList<>();
 		r.add(getInputFields());
 		return r;
 	}
 
-	public HashMap<String, ArrayList<String>> mapInputFields() {
+	public Map<String, List<String>> mapInputFields() {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listInputFields()).mapContent();
 	}
 
@@ -371,27 +372,26 @@ public class VObject {
 		return mapInputFields().get(headerDLabel).get(0);
 	}
 
-	public ArrayList<ArrayList<String>> listLineContent(int i) {
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+	public List<List<String>> listLineContent(int i) {
+		List<List<String>> r = new ArrayList<>();
 		r.add(getContent().get(i).d);
 		return r;
 	}
 
-	public HashMap<String, ArrayList<String>> mapLineContent(int i) {
+	public Map<String, List<String>> mapLineContent(int i) {
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), listLineContent(i)).mapContent();
 	}
 
-	public HashMap<String, ArrayList<String>> mapFilterFields() {
+	public Map<String, List<String>> mapFilterFields() {
 		if (getFilterFields() == null) {
 			return new HashMap<>();
 		}
 
-		ArrayList<ArrayList<String>> r = new ArrayList<>();
+		List<List<String>> r = new ArrayList<>();
 		r.add(getFilterFields());
 		return new GenericBean(getHeadersDLabel(), getHeadersDType(), r).mapContent();
 	}
 
-	@SuppressWarnings("unchecked")
 	VObject copy() {
 		VObject v0 = new VObject();
 		v0.setTitle(this.getTitle());
@@ -410,86 +410,86 @@ public class VObject {
 			v0.setContent(null);
 		}
 		if (this.getHeadersDLabel() != null) {
-			v0.setHeadersDLabel((ArrayList<String>) this.getHeadersDLabel().clone());
+			v0.setHeadersDLabel(new ArrayList<>(this.getHeadersDLabel()));
 		} else {
 			v0.setHeadersDLabel(null);
 		}
 		if (this.getHeadersDType() != null) {
-			v0.setHeadersDType((ArrayList<String>) this.getHeadersDType().clone());
+			v0.setHeadersDType(new ArrayList<>(this.getHeadersDType()));
 		} else {
 			v0.setHeadersDType(null);
 		}
 		if (this.getHeadersVLabel() != null) {
-			v0.setHeadersVLabel((ArrayList<String>) this.getHeadersVLabel().clone());
+			v0.setHeadersVLabel(new ArrayList<>(this.getHeadersVLabel()));
 		} else {
 			v0.setHeadersVLabel(null);
 		}
 		if (this.getHeadersVSize() != null) {
-			v0.setHeadersVSize((ArrayList<String>) this.getHeadersVSize().clone());
+			v0.setHeadersVSize(new ArrayList<>(this.getHeadersVSize()));
 		} else {
 			v0.setHeadersVSize(null);
 		}
 		if (this.getHeadersVType() != null) {
-			v0.setHeadersVType((ArrayList<String>) this.getHeadersVType().clone());
+			v0.setHeadersVType(new ArrayList<>(this.getHeadersVType()));
 		} else {
 			v0.setHeadersVType(null);
 		}
 		if (this.getHeadersVSelect() != null) {
-			v0.setHeadersVSelect((ArrayList<LinkedHashMap<String, String>>) this.getHeadersVSelect().clone());
+			v0.setHeadersVSelect(new ArrayList<>(this.getHeadersVSelect()));
 		} else {
 			v0.setHeadersVSelect(null);
 		}
 		if (this.getHeadersVisible() != null) {
-			v0.setHeadersVisible((ArrayList<Boolean>) this.getHeadersVisible().clone());
+			v0.setHeadersVisible(new ArrayList<>(this.getHeadersVisible()));
 		} else {
 			v0.setHeadersVisible(null);
 		}
 		if (this.getHeadersUpdatable() != null) {
-			v0.setHeadersUpdatable((ArrayList<Boolean>) this.getHeadersUpdatable().clone());
+			v0.setHeadersUpdatable(new ArrayList<>(this.getHeadersUpdatable()));
 		} else {
 			v0.setHeadersUpdatable(null);
 		}
 		if (this.getHeadersRequired() != null) {
-			v0.setHeadersRequired((ArrayList<Boolean>) this.getHeadersRequired().clone());
+			v0.setHeadersRequired(new ArrayList<>(this.getHeadersRequired()));
 		} else {
 			v0.setHeadersRequired(null);
 		}
 		if (this.getHeaderSortDLabels() != null) {
-			v0.setHeaderSortDLabels((ArrayList<String>) this.getHeaderSortDLabels().clone());
+			v0.setHeaderSortDLabels(new ArrayList<>(this.getHeaderSortDLabels()));
 		} else {
 			v0.setHeaderSortDLabels(null);
 		}
 		if (this.getHeaderSortDOrders() != null) {
-			v0.setHeaderSortDOrders((ArrayList<Boolean>) this.getHeaderSortDOrders().clone());
+			v0.setHeaderSortDOrders( new ArrayList<>(this.getHeaderSortDOrders()));
 		} else {
 			v0.setHeaderSortDOrders(null);
 		}
 		v0.setHeaderSortDLabel(this.getHeaderSortDLabel());
 		if (this.getSelectedLines() != null) {
-			v0.setSelectedLines((ArrayList<Boolean>) this.getSelectedLines().clone());
+			v0.setSelectedLines(new ArrayList<>(this.getSelectedLines()));
 		} else {
 			v0.setSelectedLines(null);
 		}
 		if (this.getSelectedColumns() != null) {
-			v0.setSelectedColumns((ArrayList<Boolean>) this.getSelectedColumns().clone());
+			v0.setSelectedColumns(new ArrayList<>(this.getSelectedColumns()));
 		} else {
 			v0.setSelectedColumns(null);
 		}
 		v0.setHeaderSortDLabel(this.getHeaderSortDLabel());
 		if (this.getDefaultInputFields() != null) {
-			v0.setDefaultInputFields((HashMap<String, String>) this.getDefaultInputFields().clone());
+			v0.setDefaultInputFields(new HashMap<>(this.getDefaultInputFields()));
 		} else {
 			v0.setDefaultInputFields(null);
 		}
 		if (this.getInputFields() != null) {
-			v0.setInputFields((ArrayList<String>) this.getInputFields().clone());
+			v0.setInputFields(new ArrayList<>(this.getInputFields()));
 		} else {
 			v0.setInputFields(null);
 		}
 		v0.setNbPages(this.getNbPages());
 		v0.setIdPage(this.getIdPage());
 		if (this.getFilterFields() != null) {
-			v0.setFilterFields((ArrayList<String>) this.getFilterFields().clone());
+			v0.setFilterFields(new ArrayList<>(this.getFilterFields()));
 		} else {
 			v0.setFilterFields(null);
 		}
@@ -497,7 +497,7 @@ public class VObject {
 			v0.setConstantVObject(this.getConstantVObject());
 		}
 		if (this.getCustomValues() != null) {
-			v0.setCustomValues((HashMap<String, String>) this.getCustomValues().clone());
+			v0.setCustomValues(new HashMap<>(this.getCustomValues()));
 		}
 		return v0;
 	}
@@ -667,107 +667,107 @@ public class VObject {
 		this.isActive = isActive;
 	}
 
-	public ArrayList<String> getHeadersDLabel() {
+	public List<String> getHeadersDLabel() {
 		return headersDLabel;
 	}
 
-	public void setHeadersDLabel(ArrayList<String> headersDLabel) {
+	public void setHeadersDLabel(List<String> headersDLabel) {
 		this.headersDLabel = headersDLabel;
 	}
 
-	public ArrayList<String> getHeadersDType() {
+	public List<String> getHeadersDType() {
 		return headersDType;
 	}
 
-	public void setHeadersDType(ArrayList<String> headersDType) {
+	public void setHeadersDType(List<String> headersDType) {
 		this.headersDType = headersDType;
 	}
 
-	public ArrayList<String> getHeadersVLabel() {
+	public List<String> getHeadersVLabel() {
 		return headersVLabel;
 	}
 
-	public void setHeadersVLabel(ArrayList<String> headersVLabel) {
+	public void setHeadersVLabel(List<String> headersVLabel) {
 		this.headersVLabel = headersVLabel;
 	}
 
-	public ArrayList<String> getHeadersVSize() {
+	public List<String> getHeadersVSize() {
 		return headersVSize;
 	}
 
-	public void setHeadersVSize(ArrayList<String> headersVSize) {
+	public void setHeadersVSize(List<String> headersVSize) {
 		this.headersVSize = headersVSize;
 	}
 
-	public ArrayList<String> getHeadersVType() {
+	public List<String> getHeadersVType() {
 		return headersVType;
 	}
 
-	public void setHeadersVType(ArrayList<String> headersVType) {
+	public void setHeadersVType(List<String> headersVType) {
 		this.headersVType = headersVType;
 	}
 
-	public ArrayList<LinkedHashMap<String, String>> getHeadersVSelect() {
+	public List<Map<String, String>> getHeadersVSelect() {
 		return headersVSelect;
 	}
 
-	public void setHeadersVSelect(ArrayList<LinkedHashMap<String, String>> headersVSelect) {
+	public void setHeadersVSelect(List<Map<String, String>> headersVSelect) {
 		this.headersVSelect = headersVSelect;
 	}
 
-	public ArrayList<Boolean> getHeadersVisible() {
+	public List<Boolean> getHeadersVisible() {
 		return headersVisible;
 	}
 
-	public void setHeadersVisible(ArrayList<Boolean> headersVisible) {
+	public void setHeadersVisible(List<Boolean> headersVisible) {
 		this.headersVisible = headersVisible;
 	}
 
-	public ArrayList<Boolean> getHeadersUpdatable() {
+	public List<Boolean> getHeadersUpdatable() {
 		return headersUpdatable;
 	}
 
-	public void setHeadersUpdatable(ArrayList<Boolean> headersUpdatable) {
+	public void setHeadersUpdatable(List<Boolean> headersUpdatable) {
 		this.headersUpdatable = headersUpdatable;
 	}
 
-	public ArrayList<Boolean> getHeadersRequired() {
+	public List<Boolean> getHeadersRequired() {
 		return headersRequired;
 	}
 
-	public void setHeadersRequired(ArrayList<Boolean> headersRequired) {
+	public void setHeadersRequired(List<Boolean> headersRequired) {
 		this.headersRequired = headersRequired;
 	}
 
-	public ArrayList<Boolean> getSelectedLines() {
+	public List<Boolean> getSelectedLines() {
 		return selectedLines;
 	}
 
-	public void setSelectedLines(ArrayList<Boolean> selectedLines) {
+	public void setSelectedLines(List<Boolean> selectedLines) {
 		this.selectedLines = selectedLines;
 	}
 
-	public ArrayList<Boolean> getSelectedColumns() {
+	public List<Boolean> getSelectedColumns() {
 		return selectedColumns;
 	}
 
-	public void setSelectedColumns(ArrayList<Boolean> selectedColumns) {
+	public void setSelectedColumns(List<Boolean> selectedColumns) {
 		this.selectedColumns = selectedColumns;
 	}
 
-	public HashMap<String, String> getDefaultInputFields() {
+	public Map<String, String> getDefaultInputFields() {
 		return defaultInputFields;
 	}
 
-	public void setDefaultInputFields(HashMap<String, String> defaultInputFields) {
+	public void setDefaultInputFields(Map<String, String> defaultInputFields) {
 		this.defaultInputFields = defaultInputFields;
 	}
 
-	public ArrayList<String> getInputFields() {
+	public List<String> getInputFields() {
 		return inputFields;
 	}
 
-	public void setInputFields(ArrayList<String> inputFields) {
+	public void setInputFields(List<String> inputFields) {
 		this.inputFields = inputFields;
 	}
 
@@ -787,19 +787,19 @@ public class VObject {
 		this.idPage = idPage;
 	}
 
-	public ArrayList<String> getHeaderSortDLabels() {
+	public List<String> getHeaderSortDLabels() {
 		return headerSortDLabels;
 	}
 
-	public void setHeaderSortDLabels(ArrayList<String> headerSortDLabels) {
+	public void setHeaderSortDLabels(List<String> headerSortDLabels) {
 		this.headerSortDLabels = headerSortDLabels;
 	}
 
-	public ArrayList<Boolean> getHeaderSortDOrders() {
+	public List<Boolean> getHeaderSortDOrders() {
 		return headerSortDOrders;
 	}
 
-	public void setHeaderSortDOrders(ArrayList<Boolean> headerSortDOrders) {
+	public void setHeaderSortDOrders(List<Boolean> headerSortDOrders) {
 		this.headerSortDOrders = headerSortDOrders;
 	}
 
@@ -811,11 +811,11 @@ public class VObject {
 		this.headerSortDLabel = headerSortDLabel;
 	}
 
-	public ArrayList<String> getFilterFields() {
+	public List<String> getFilterFields() {
 		return filterFields;
 	}
 
-	public void setFilterFields(ArrayList<String> filterFields) {
+	public void setFilterFields(List<String> filterFields) {
 		this.filterFields = filterFields;
 	}
 
@@ -835,11 +835,11 @@ public class VObject {
 		this.messageArgs = messageArgs;
 	}
 
-	public HashMap<String, String> getCustomValues() {
+	public Map<String, String> getCustomValues() {
 		return customValues;
 	}
 
-	public void setCustomValues(HashMap<String, String> customValues) {
+	public void setCustomValues(Map<String, String> customValues) {
 		this.customValues = customValues;
 	}
 

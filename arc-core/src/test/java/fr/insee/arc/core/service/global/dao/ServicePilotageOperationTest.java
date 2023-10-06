@@ -2,7 +2,7 @@ package fr.insee.arc.core.service.global.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -24,7 +24,7 @@ public class ServicePilotageOperationTest extends InitializeQueryTest {
 		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f3', 'CHARGEMENT', '{OK}'");
 		
 		
-		ArrayList<String> listOfIdSource  = new GenericBean(u.executeRequest(c,
+		List<String> listOfIdSource  = new GenericBean(u.executeRequest(c,
 				PilotageOperations.querySelectIdSourceFromPilotage("public", TraitementPhase.MAPPING, TraitementEtat.OK)
 				)).mapContent().get("id_source");
 		

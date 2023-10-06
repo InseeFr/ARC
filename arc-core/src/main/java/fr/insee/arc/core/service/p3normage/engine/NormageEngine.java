@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
-import fr.insee.arc.core.service.p2chargement.xmlhandler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.Parameter;
 import fr.insee.arc.utils.dao.ParameterType;
@@ -41,7 +41,7 @@ public class NormageEngine {
 	 * idSource : nom du fichier jointure : requete de strucutration id_norme :
 	 * identifiant de norme validite : validite periodicite : periodicite
 	 */
-	private HashMap<String, ArrayList<String>> pilotageIdSource;
+	private Map<String, List<String>> pilotageIdSource;
 
 	/**
 	 * Les regles relatives au fichier (idSource)
@@ -50,25 +50,28 @@ public class NormageEngine {
 	 * version text, id_classe text, rubrique text, rubrique_nmcl text, id_regle
 	 * integer,
 	 */
-	private HashMap<String, ArrayList<String>> regleInitiale;
+	private Map<String, List<String>> regleInitiale;
 
 	/**
 	 * liste des rubriques présentes dans le fichier idSource et réutilisées dans
 	 * les phase en aval Ces rubriques "var" sont à conserver id_norme,
 	 * validite_inf, validite_sup, periodicite, var
 	 */
-	private HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles;
+	private Map<String, List<String>> rubriqueUtiliseeDansRegles;
 
 	private String tableSource;
 
 	private String tableDestination;
 
 	private String paramBatch;
+	
+	
+	// deprecated but requires patch in clients database
+	public static final String JOINXML_STRUCTURE_BLOCK = "\n -- structure\n";
 
-	public String structure;
 
-	public NormageEngine(Connection connection, HashMap<String, ArrayList<String>> pil,
-			HashMap<String, ArrayList<String>> regle, HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles,
+	public NormageEngine(Connection connection, Map<String, List<String>> pil,
+			Map<String, List<String>> regle, Map<String, List<String>> rubriqueUtiliseeDansRegles,
 			String tableSource, String tableDestination, String paramBatch) {
 		super();
 		this.connection = connection;
@@ -169,19 +172,7 @@ public class NormageEngine {
 		String periodicite = pilotageIdSource.get("periodicite").get(0);
 		String validiteText = pilotageIdSource.get("validite").get(0);
 
-		// split structure blocks
-		String[] ss = jointure.split(XMLComplexeHandlerCharger.JOINXML_STRUCTURE_BLOCK);
-
-		if (ss.length > 1) {
-			jointure = ss[0];
-			this.structure = ss[1];
-		}
-
-		// split query blocks
-		int subJoinNumber = 0;
-		for (String subJoin : jointure.split(XMLComplexeHandlerCharger.JOINXML_QUERY_BLOCK)) {
-
-			HashMap<String, ArrayList<String>> regle = new HashMap<>();
+			Map<String, List<String>> regle = new HashMap<>();
 
 			for (String key : regleInitiale.keySet()) {
 				ArrayList<String> al = new ArrayList<>();
@@ -191,7 +182,7 @@ public class NormageEngine {
 				regle.put(key, al);
 			}
 
-			subJoin = subJoin.toLowerCase();
+			String subJoin = jointure.split(JOINXML_STRUCTURE_BLOCK)[0].toLowerCase();
 
 			// ORDRE IMPORTANT
 			// on supprime les rubriques inutilisées quand le service est invoqué en batch
@@ -216,16 +207,13 @@ public class NormageEngine {
 			subJoin = NormageEngineRegleRelation.appliquerRegleRelation(regle, subJoin);
 
 			// retravaille de la requete pour éliminer UNION ALL
-			subJoin = optimisation96(subJoin, subJoinNumber);
+			subJoin = optimisation96(subJoin);
 
 			executerJointure(regle, norme, validite, periodicite, subJoin, validiteText, idSource);
 
-			subJoinNumber++;
-
-		}
 	}
 
-	private String optimisation96(String jointure, int subjoinNumber) {
+	private String optimisation96(String jointure) {
 		StaticLoggerDispatcher.info(LOGGER, "optimisation96()");
 
 		// on enleve l'id
@@ -288,17 +276,10 @@ public class NormageEngine {
 				+ "\n insert into {table_destination}"
 				+ ManipString.substringAfterFirst(r, "insert into {table_destination}");
 
-		if (subjoinNumber > 0) {
-			// on recrée les tables temporaires
-			r = r.replaceAll("create temporary table ([^ ]+) as ",
-					"drop table if exists $1; create temporary table $1 as ");
-		} else {
-
-			// on crée la table destination avec les bonnes colonnes pour la premiere sous
-			// jointure
+		// on crée la table destination avec les bonnes colonnes pour la premiere sous
+		// jointure
 			r = "drop table if exists {table_destination}; create temporary table {table_destination} as SELECT * FROM {table_source} where false; \n "
 					+ this.columnToBeAdded + "\n" + r;
-		}
 		return r;
 	}
 
@@ -332,7 +313,7 @@ public class NormageEngine {
 	 * @return
 	 * @throws ArcException
 	 */
-	private void executerJointure(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+	private void executerJointure(Map<String, List<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, String validiteText, String idSource) throws ArcException {
 
 		// only first partition rule is processed
@@ -372,7 +353,7 @@ public class NormageEngine {
 	 * @param chunkSize
 	 * @throws ArcException
 	 */
-	private void executerJointureWithPartition(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+	private void executerJointureWithPartition(Map<String, List<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, String validiteText, String idSource, String element, int minSize,
 			int chunkSize) throws ArcException {
 		/* get the query blocks */

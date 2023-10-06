@@ -98,7 +98,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 
 		dao.initializePilotageBAS(viewPilotageBAS);
 
-		ArrayList<String> columns = viewPilotageBAS.getHeadersDLabel();
+		List<String> columns = viewPilotageBAS.getHeadersDLabel();
 		Map<String, ColumnRendering> columnRendering = viewPilotageBAS.getConstantVObject().columnRender;
 
 		// for all columns, set rendering visibility to false

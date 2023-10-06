@@ -150,9 +150,9 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	public void initializeFichierBAS(VObject viewFichierBAS, VObject viewPilotageBAS, VObject viewRapportBAS) {
-		Map<String, ArrayList<String>> selectionLigne = viewPilotageBAS.mapContentSelected();
-		ArrayList<String> selectionColonne = viewPilotageBAS.listHeadersSelected();
-		Map<String, ArrayList<String>> selectionLigneRapport = viewRapportBAS.mapContentSelected();
+		Map<String, List<String>> selectionLigne = viewPilotageBAS.mapContentSelected();
+		List<String> selectionColonne = viewPilotageBAS.listHeadersSelected();
+		Map<String, List<String>> selectionLigneRapport = viewRapportBAS.mapContentSelected();
 
 		if (!selectionLigne.isEmpty() && !selectionColonne.isEmpty()) {
 
@@ -173,8 +173,8 @@ public class PilotageDao extends VObjectHelperDao {
 			this.vObjectService.initialize(viewFichierBAS, requete, null, defaultInputFields);
 
 		} else if (!selectionLigneRapport.isEmpty()) {
-			HashMap<String, String> type = viewRapportBAS.mapHeadersType();
-			HashMap<String, String> defaultInputFields = new HashMap<>();
+			Map<String, String> type = viewRapportBAS.mapHeadersType();
+			Map<String, String> defaultInputFields = new HashMap<>();
 
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 			requete.append(
@@ -239,7 +239,7 @@ public class PilotageDao extends VObjectHelperDao {
 	public void downloadFichierBAS(VObject viewFichierBAS, HttpServletResponse response,
 			String repertoire, String bacASable) {
 		// récupération de la liste des id_source
-		Map<String, ArrayList<String>> selection = viewFichierBAS.mapContentSelected();
+		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder query = vObjectService.queryView(viewFichierBAS);
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// sélectionner
@@ -255,7 +255,7 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public ArcPreparedStatementBuilder queryUpdateToDelete(VObject viewFichierBAS, String code) {
-		Map<String, ArrayList<String>> selection = viewFichierBAS.mapContentSelected();
+		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder querySelection = requestSelectToMark(viewFichierBAS, selection);
 		return requeteUpdateToMark(querySelection, code);
 	}
@@ -293,7 +293,7 @@ public class PilotageDao extends VObjectHelperDao {
 				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
 				// fichiers
 				if (!viewFichierBAS.mapContentSelected().isEmpty()) {
-					ArrayList<String> filesSelected = viewFichierBAS.mapContentSelected().get("id_source");
+					List<String> filesSelected = viewFichierBAS.mapContentSelected().get("id_source");
 					requete.append("AND id_source IN (");
 					for (int i = 0; i < filesSelected.size(); i++) {
 						if (i > 0) {
@@ -304,7 +304,7 @@ public class PilotageDao extends VObjectHelperDao {
 					requete.append(")");
 				}
 
-				ArrayList<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
+				List<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
 						.mapContent().get("id_source");
 
 				// for each files, generate the download query
@@ -348,7 +348,7 @@ public class PilotageDao extends VObjectHelperDao {
 	public void downloadEnvelopeBAS(VObject viewFichierBAS, HttpServletResponse response,
 			String chemin, ArrayList<String> listRepertoire) {
 		// récupération de la liste des noms d'enloppe
-		Map<String, ArrayList<String>> selection = viewFichierBAS.mapContentSelected();
+		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("select distinct alias_de_table.container as nom_fichier from (");
 		query.append(viewFichierBAS.getMainQuery());
@@ -366,7 +366,7 @@ public class PilotageDao extends VObjectHelperDao {
 	 * Prepare a request selecting the line to change when marking files for
 	 * deletion/replay.
 	 */
-	private ArcPreparedStatementBuilder requestSelectToMark(VObject viewFichierBAS, Map<String, ArrayList<String>> selection) {
+	private ArcPreparedStatementBuilder requestSelectToMark(VObject viewFichierBAS, Map<String, List<String>> selection) {
 		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
 		querySelection.append("select distinct container, id_source from (");
 		querySelection.append(viewFichierBAS.getMainQuery());
@@ -377,9 +377,9 @@ public class PilotageDao extends VObjectHelperDao {
 		// sélectionné
 		if (!selection.isEmpty()) {
 			// concaténation des informations
-			ArrayList<String> infoConcatenee = new ArrayList<>();
-			ArrayList<String> listContainer = selection.get("container");
-			ArrayList<String> listIdSource = selection.get("id_source");
+			List<String> infoConcatenee = new ArrayList<>();
+			List<String> listContainer = selection.get("container");
+			List<String> listIdSource = selection.get("id_source");
 
 			for (int i = 0; i < selection.get("id_source").size(); i++) {
 				infoConcatenee.add(listContainer.get(i) + "+" + listIdSource.get(i));

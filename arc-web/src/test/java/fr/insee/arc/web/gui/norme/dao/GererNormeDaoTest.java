@@ -74,7 +74,7 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 		// select the first record of viewNorm and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_NORME), SQL.WHERE, "id_norme='v2016-02'");
-		Map<String, ArrayList<String>> viewNormSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewNormSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewNormSelectedRecords);
 		
 		// execute query
@@ -101,7 +101,7 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 		// select the first record of viewCalendar and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_CALENDRIER), SQL.WHERE, "id_norme='v2008-11'");
-		Map<String, ArrayList<String>> viewCalendarSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewCalendarSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewCalendarSelectedRecords);
 		
 		// execute query
@@ -128,7 +128,7 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_JEUDEREGLE));
 		query.build(SQL.WHERE, "id_norme='v2008-11'", SQL.AND, "version='vConformite'");
-		Map<String, ArrayList<String>> viewRulesSetSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewRulesSetSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewRulesSetSelectedRecords);
 		
 		// execute query

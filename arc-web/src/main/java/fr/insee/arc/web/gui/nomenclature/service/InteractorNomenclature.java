@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.nomenclature.service;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -75,7 +75,7 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 		LoggerHelper.debug(LOGGER, "/* initializeViewNomenclature */");
 		try {
 			// get the list nomenclatures selected record
-			Map<String, ArrayList<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
+			Map<String, List<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
 			// if nomenclature selected, trigger call to dao to construct nomenclature view
 			if (!selectionListNomenclatures.isEmpty() && dao
 					.execQueryIsSelectedNomenclatureTableExists(selectionListNomenclatures.get(NOM_TABLE).get(0))) {
@@ -101,7 +101,7 @@ public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclatu
 		LoggerHelper.debug(LOGGER, "/* initializeSchemaNmcl */");
 		try {
 			// get the list nomenclatures selected record
-			Map<String, ArrayList<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
+			Map<String, List<String>> selectionListNomenclatures = viewListNomenclatures.mapContentSelected();
 			// if nomenclature selected, trigger call to dao to construct schema
 			if (!selectionListNomenclatures.isEmpty()) {
 				dao.setSelectedRecords(selectionListNomenclatures);

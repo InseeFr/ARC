@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -100,7 +101,7 @@ public class CompressedUtils {
 	 * @param listIdSourceContainer
 	 */
 	public static void generateEntryFromZip(String receptionDirectoryRoot, String currentContainer,
-			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
+			List<String> listIdSourceContainer, TarArchiveOutputStream taos) {
 		File fileIn = Paths.get(receptionDirectoryRoot, currentContainer).toFile();
 		if (fileIn.exists()) {
 			try {
@@ -138,7 +139,7 @@ public class CompressedUtils {
 	 * @param taos
 	 */
 	public static void generateEntryFromTarGz(String receptionDirectoryRoot, String currentContainer,
-			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
+			List<String> listIdSourceContainer, TarArchiveOutputStream taos) {
 		File fileIn = new File(receptionDirectoryRoot + File.separator + currentContainer);
 		LoggerHelper.traceAsComment(LOGGER, "#generateEntryFromTarGz()", receptionDirectoryRoot, "/", currentContainer);
 
@@ -178,7 +179,7 @@ public class CompressedUtils {
 	 * @param taos
 	 */
 	public static void generateEntryFromGz(String receptionDirectoryRoot, String currentContainer,
-			ArrayList<String> listIdSourceContainer, TarArchiveOutputStream taos) {
+			List<String> listIdSourceContainer, TarArchiveOutputStream taos) {
 		File fileIn = new File(receptionDirectoryRoot + "/" + currentContainer);
 		if (fileIn.exists()) {
 			try {

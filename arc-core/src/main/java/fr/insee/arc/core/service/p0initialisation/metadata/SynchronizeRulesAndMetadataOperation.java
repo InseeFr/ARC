@@ -3,6 +3,7 @@ package fr.insee.arc.core.service.p0initialisation.metadata;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +19,6 @@ import fr.insee.arc.core.service.p0initialisation.metadata.dao.SynchronizeRulesA
 import fr.insee.arc.core.service.p5mapping.engine.ExpressionService;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -132,7 +132,7 @@ public class SynchronizeRulesAndMetadataOperation {
 
 		// copy tables
 
-		ArrayList<String> tablesToCopyIntoExecutor = BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion,
+		List<String> tablesToCopyIntoExecutor = BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion,
 				envExecution);
 		tablesToCopyIntoExecutor
 				.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));

@@ -121,7 +121,7 @@ public class ServletArc extends HttpServlet {
 		query.append("AND id_application=" + query.quoteText(clientRealName) + " ");
 		query.append("AND " + query.quoteText(hostName) + " like host_allowed ");
 
-		HashMap<String, ArrayList<String>> result = new HashMap<>();
+		Map<String, List<String>> result = new HashMap<>();
 		try {
 			result = new GenericBean(UtilitaireDao.get(0).executeRequest(null, query)).mapContent();
 		} catch (ArcException e1) {

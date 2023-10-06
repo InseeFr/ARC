@@ -78,7 +78,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 		LoggerHelper.debug(LOGGER, "/* initializeClient */");
 		try {
 			// get the norm family selected records
-			Map<String, ArrayList<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
+			Map<String, List<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
 			// if norm family selected, trigger call to dao to construct client view
 			if (!selectionFamilleNorme.isEmpty()) {
 				dao.setSelectedRecords(selectionFamilleNorme);
@@ -102,7 +102,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 		LoggerHelper.debug(LOGGER, "/* initializeHostAllowed */");
 		try {
 			// get the client selected records
-			Map<String, ArrayList<String>> selectionClient = viewClient.mapContentSelected();
+			Map<String, List<String>> selectionClient = viewClient.mapContentSelected();
 			// if client selected, trigger call to dao to construct host allowed view
 			if (!selectionClient.isEmpty()) {
 				dao.setSelectedRecords(selectionClient);
@@ -126,7 +126,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 		LoggerHelper.debug(LOGGER, "/* initializeTableMetier */");
 		try {
 			// get the norm family selected records
-			Map<String, ArrayList<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
+			Map<String, List<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
 			// if norm family selected, trigger call to dao to construct business table view
 			if (!selectionFamilleNorme.isEmpty()) {
 				dao.setSelectedRecords(selectionFamilleNorme);
@@ -148,7 +148,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 	 */
 	private void initializeVariableMetier(VObject viewVariableMetier, VObject viewFamilleNorme) {
 		// get the norm family selected records
-		Map<String, ArrayList<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
+		Map<String, List<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
 		// if norm family selected, trigger call to dao to render column
 		if (!selectionFamilleNorme.isEmpty()) {
 			dao.setSelectedRecords(selectionFamilleNorme);

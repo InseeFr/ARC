@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +32,7 @@ public class NormageEngineRegleIndependance {
 	 * @param jointure
 	 * @throws ArcException
 	 */
-	protected static void ajouterRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme,
+	protected static void ajouterRegleIndependance(Map<String, List<String>> regle, String norme,
 			Date validite, String periodicite, String jointure) {
 		StaticLoggerDispatcher.info(LOGGER, "ajouterRegleIndependance()");
 
@@ -112,7 +114,7 @@ public class NormageEngineRegleIndependance {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected static String appliquerRegleIndependance(HashMap<String, ArrayList<String>> regle, String norme,
+	protected static String appliquerRegleIndependance(Map<String, List<String>> regle, String norme,
 			Date validite, String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleIndependance()");
@@ -400,7 +402,7 @@ public class NormageEngineRegleIndependance {
 	 * @param exclusion
 	 */
 	private static void addIndependanceToChildren(ArrayList<String> r, String blocCreate, String mRubrique,
-			HashMap<String, ArrayList<String>> regle, HashMap<String, String> rubriquesAvecRegleDIndependance,
+			Map<String, List<String>> regle, HashMap<String, String> rubriquesAvecRegleDIndependance,
 			String norme, String periodicite, HashSet<String> exclusion) {
 		ArrayList<String> s = NormageEngineGlobal.getChildren(blocCreate, mRubrique);
 

@@ -1,7 +1,8 @@
 package fr.insee.arc.core.service.p3normage.engine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +27,7 @@ public class NormageEngineRegleRelation {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected static String appliquerRegleRelation(HashMap<String, ArrayList<String>> regle, String jointure) {
+	protected static String appliquerRegleRelation(Map<String, List<String>> regle, String jointure) {
 
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleRelation()");
 

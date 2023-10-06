@@ -94,7 +94,10 @@ public enum ArcExceptionMessage {
 	GUI_FAMILLENORME_VARIABLE_NULL("Une variable a un nom null"),
 	GUI_FAMILLENORME_VARIABLE_NO_TARGET_TABLE("Vous avez oublié de spécifier les tables cibles pour votre variable"), 
 	GUI_FAMILLENORME_VARIABLE_ALREADY_EXISTS("La variable existe déjà. Pour la modifier, passez par la ligne correspondante du tableau variable*table.\nAucune variable n'a été ajoutée.\n"),
-	GUI_EXPORT_TABLE_NOT_EXISTS("La table n'existe pas")
+	GUI_EXPORT_TABLE_NOT_EXISTS("La table n'existe pas"),
+	
+	DATE_PARSE_FAILED_VALIDITE_INF("La validité inf %s n'a pu être parsée"),
+	DATE_PARSE_FAILED_VALIDITE_SUP("La validité sup %s n'a pu être parsée")
 	
 	;
 	

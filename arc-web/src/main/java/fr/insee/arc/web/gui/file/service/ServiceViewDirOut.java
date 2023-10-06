@@ -2,7 +2,7 @@ package fr.insee.arc.web.gui.file.service;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +14,7 @@ import org.springframework.ui.Model;
 public class ServiceViewDirOut extends InteractorFile {
 
 	public String seeDirOut(Model model) {
-		Map<String,ArrayList<String>> m=views.getViewDirOut().mapContentSelected();
+		Map<String,List<String>> m=views.getViewDirOut().mapContentSelected();
 
 		if (!m.isEmpty()) {
 			if(m.get(IS_DIRECTORY).get(0).equals("true")) {

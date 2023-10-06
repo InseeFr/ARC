@@ -74,11 +74,11 @@ public class ExportDaoTest extends InitializeQueryTest {
 		// select the first record of viewNorm and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.EXPORT), SQL.WHERE, "file_name='test1'");
-		Map<String, ArrayList<String>> viewExportSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewExportSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewExportSelectedRecords);
 
 		// execute query
-		Map<String, ArrayList<String>> retrievedData = pdao.startExportRetrieve();
+		Map<String, List<String>> retrievedData = pdao.startExportRetrieve();
 
 		// test the content of the view
 		List<String> viewColumns = ColumnEnum
@@ -101,7 +101,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		// test the content of the view
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, ColumnEnum.ETAT, SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.EXPORT), SQL.WHERE, "file_name='test1'");
-		Map<String, ArrayList<String>> viewExportUpdatedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewExportUpdatedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		assertEquals(TraitementEtat.ENCOURS.toString(), viewExportUpdatedRecords.get(ColumnEnum.ETAT.toString()).get(0));
 		
 	}
@@ -116,7 +116,7 @@ public class ExportDaoTest extends InitializeQueryTest {
 		tablesToExport.add("export");
 
 		// execute query
-		HashMap<String, ArrayList<String>> retrievedData = pdao.exportFileRetrieveRules(0, howToExport, tablesToExport, BddPatcherTest.testSandbox1);
+		Map<String, List<String>> retrievedData = pdao.exportFileRetrieveRules(0, howToExport, tablesToExport, BddPatcherTest.testSandbox1);
 
 		// test the content of the view
 		assertEquals(3, retrievedData.keySet().size()); // 3 columns selected

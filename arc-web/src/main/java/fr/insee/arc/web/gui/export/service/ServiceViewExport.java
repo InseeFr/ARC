@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -60,11 +60,11 @@ public class ServiceViewExport extends InteractorExport {
 				return generateDisplay(model, RESULT_SUCCESS);
 			}
 			
-			Map<String, ArrayList<String>> rules = dao.startExportRetrieve();
+			Map<String, List<String>> rules = dao.startExportRetrieve();
 			
 			
-			ArrayList<String> fileName = rules.get(ColumnEnum.FILE_NAME.getColumnName());
-			ArrayList<String> zip = rules.get(ColumnEnum.ZIP.getColumnName());
+			List<String> fileName = rules.get(ColumnEnum.FILE_NAME.getColumnName());
+			List<String> zip = rules.get(ColumnEnum.ZIP.getColumnName());
 
 			// Initialiser le répertoire de sortie
 			String dirOut = initExportDir();
@@ -97,9 +97,9 @@ public class ServiceViewExport extends InteractorExport {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	private void exportPlainText(String dirOut, Map<String, ArrayList<String>> h, int n)
+	private void exportPlainText(String dirOut, Map<String, List<String>> h, int n)
 			throws IOException, ArcException, SQLException {
-		ArrayList<String> fileName = h.get("file_name");
+		List<String> fileName = h.get("file_name");
 
 		File fOut = new File(dirOut + File.separator + fileName.get(n));
 
@@ -110,9 +110,9 @@ public class ServiceViewExport extends InteractorExport {
 		}
 	}
 
-	private void exportZip(String dirOut, Map<String, ArrayList<String>> h, int n)
+	private void exportZip(String dirOut, Map<String, List<String>> h, int n)
 			throws IOException, ArcException, SQLException {
-		ArrayList<String> fileName = h.get("file_name");
+		List<String> fileName = h.get("file_name");
 
 		File fOut = new File(dirOut + File.separator + fileName.get(n) + ".zip");
 
@@ -130,9 +130,9 @@ public class ServiceViewExport extends InteractorExport {
 		}
 	}
 
-	private void exportGz(String dirOut, Map<String, ArrayList<String>> h, int n)
+	private void exportGz(String dirOut, Map<String, List<String>> h, int n)
 			throws IOException, ArcException, SQLException {
-		ArrayList<String> fileName = h.get("file_name");
+		List<String> fileName = h.get("file_name");
 
 		File fOut = new File(dirOut + File.separator + fileName.get(n) + ".gz");
 

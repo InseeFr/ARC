@@ -1,10 +1,12 @@
 package fr.insee.arc.utils.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -75,7 +77,7 @@ public class FormatSQLTest extends InitializeQueryTest {
 		// check the current role used
 		GenericPreparedStatementBuilder testQuery = new GenericPreparedStatementBuilder(
 				"SELECT current_user as current_role");
-		HashMap<String, ArrayList<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, testQuery)).mapContent(true);
+		Map<String, List<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, testQuery)).mapContent(true);
 
 		assertEquals(myTestRole, content.get("current_role").get(0));
 	}
@@ -104,7 +106,7 @@ public class FormatSQLTest extends InitializeQueryTest {
 
 		// execute the query "hasRecord"
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder(FormatSQL.hasRecord(tableInTemporary));
-		HashMap<String, ArrayList<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent(true);
+		Map<String, List<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent(true);
 
 		// result must be true ('t' in postgres)
 		assertEquals("t", content.get("has_record").get(0));
@@ -121,7 +123,7 @@ public class FormatSQLTest extends InitializeQueryTest {
 
 		// execute the query "hasRecord"
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder(FormatSQL.hasRecord(tableInTemporary));
-		HashMap<String, ArrayList<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent(true);
+		Map<String, List<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent(true);
 
 		// result must be false ('f' in postgres)
 		assertEquals("f", content.get("has_record").get(0));

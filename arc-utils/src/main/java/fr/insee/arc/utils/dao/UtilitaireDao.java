@@ -232,7 +232,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws ArcException
 	 */
 	public String getString(Connection connexion, GenericPreparedStatementBuilder requete) throws ArcException {
-		ArrayList<ArrayList<String>> returned = executeRequest(connexion, requete,
+		List<List<String>> returned = executeRequest(connexion, requete,
 				new ModeRequete[] { ModeRequete.EXTRA_FLOAT_DIGIT });
 		return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? null
 				: returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
@@ -250,7 +250,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public int getInt(Connection connexion, GenericPreparedStatementBuilder sql, ModeRequete... modes) {
 		try {
-			ArrayList<ArrayList<String>> returned = executeRequest(connexion, sql, modes);
+			List<List<String>> returned = executeRequest(connexion, sql, modes);
 			return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? ZERO
 					: Integer.parseInt(returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0)));
 		} catch (Exception ex) {
@@ -282,9 +282,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public ArrayList<ArrayList<String>> executeRequestWithoutMetadata(Connection connexion,
+	public List<List<String>> executeRequestWithoutMetadata(Connection connexion,
 			GenericPreparedStatementBuilder requete, ModeRequete... modes) throws ArcException {
-		ArrayList<ArrayList<String>> returned = executeRequest(connexion, requete, modes);
+		List<List<String>> returned = executeRequest(connexion, requete, modes);
 		returned.remove(0);
 		returned.remove(0);
 		return returned;
@@ -366,13 +366,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 *
 	 */
-	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,
+	public List<List<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,
 			ModeRequete[] modes) throws ArcException {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
 
 	}
 
-	public ArrayList<ArrayList<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete)
+	public List<List<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete)
 			throws ArcException {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), new ModeRequete[] {});
 
@@ -387,7 +387,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public ArrayList<ArrayList<String>> executeStatement(Connection connexion, GenericPreparedStatementBuilder requete)
+	public List<List<String>> executeStatement(Connection connexion, GenericPreparedStatementBuilder requete)
 			throws ArcException {
 		return executeStatement(connexion, requete, EntityProvider.getArrayOfArrayProvider());
 
@@ -547,7 +547,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param l
 	 * @return
 	 */
-	public static boolean hasResults(ArrayList<ArrayList<String>> l) {
+	public static boolean hasResults(List<List<String>> l) {
 		return (l.size() > 2);
 	}
 
@@ -653,7 +653,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			List<String> listRepertoireIn) {
 		LoggerHelper.debugDebutMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
 		GenericBean g;
-		ArrayList<String> listFichier = new ArrayList<>();
+		List<String> listFichier = new ArrayList<>();
 		File fileIn = null;
 		boolean find;
 		String receptionDirectoryRoot = "";

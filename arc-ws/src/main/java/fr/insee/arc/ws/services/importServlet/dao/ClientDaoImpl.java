@@ -74,12 +74,12 @@ public class ClientDaoImpl implements ClientDao {
      * java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, String client, boolean reprise, String environnement, String idFamille,
+    public List<List<String>> getIdSrcTableMetier(long timestamp, String client, boolean reprise, String environnement, String idFamille,
             String validiteInf, String validiteSup, String periodicite) throws ArcException {
         //
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#getIdSrcTableMetier()");
         Connection connection = null;
-        ArrayList<ArrayList<String>> tablesMetierNames = new ArrayList<ArrayList<String>>();
+        List<List<String>> tablesMetierNames = new ArrayList<>();
 
         StringBuilder request = new StringBuilder("DROP TABLE IF EXISTS " + TableNaming.dbEnv(environnement) + client + "_" + timestamp
                 + "_"+ColumnEnum.ID_SOURCE.getColumnName()+"; ");
@@ -125,13 +125,13 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     @Override
-    public ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) throws ArcException {
+    public List<List<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) throws ArcException {
 
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl#getIdSrcTableMetier()");
 
         // Initialisation des variables
         Connection connection = null;
-        ArrayList<ArrayList<String>> tablesMetierNames = new ArrayList<ArrayList<String>>();
+        List<List<String>> tablesMetierNames = new ArrayList<>();
         final String env = TableNaming.dbEnv(requeteJSON.getString(JsonKeys.ENVIRONNEMENT.getKey()));
         final String client = requeteJSON.getString(JsonKeys.CLIENT.getKey());
         final String periodicite = requeteJSON.getString(JsonKeys.PERIODICITE.getKey());
@@ -247,12 +247,12 @@ public class ClientDaoImpl implements ClientDao {
      * @see fr.insee.arc_essnet.ws.dao.ClientDarcmage(long, java.lang.String, java.lang.String, java.util.ArrayList)
      */
     @Override
-    public ArrayList<String> createImages(long timestamp, String client, String environnement, ArrayList<ArrayList<String>> tablesMetierNames) throws ArcException {
+    public List<String> createImages(long timestamp, String client, String environnement, List<List<String>> tablesMetierNames) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl.createImage()");
 
-        ArrayList<String> mesTablesImagesCrees = new ArrayList<String>();
+        List<String> mesTablesImagesCrees = new ArrayList<>();
 
-        for (ArrayList<String> tableMetier : tablesMetierNames) {
+        for (List<String> tableMetier : tablesMetierNames) {
 
             addImage(timestamp, client, environnement, tableMetier, mesTablesImagesCrees);
 
@@ -262,7 +262,7 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     @Override
-    public void addImage(long timestamp, String client, String environnement, ArrayList<String> tableMetier, ArrayList<String> mesTablesImagesCrees) throws ArcException {
+    public void addImage(long timestamp, String client, String environnement, List<String> tableMetier, List<String> mesTablesImagesCrees) throws ArcException {
         Connection connection = null;
         StringBuilder request = new StringBuilder();
         String prefixeNomTableImage = new StringBuilder().append(TableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
@@ -298,7 +298,7 @@ public class ClientDaoImpl implements ClientDao {
     public void getResponse(long timestamp, String client, String tableMetierName, String environnement, SendResponse resp) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.getResponse()");
         Connection connection = null;
-        ArrayList<ArrayList<String>> result = new ArrayList<>();
+        List<List<String>> result = new ArrayList<>();
 
         int nbLines = 0;
         int blockSize = 10000;
@@ -361,7 +361,7 @@ public class ClientDaoImpl implements ClientDao {
     public void createNmcl(long timestamp, String client, String environnement) throws ArcException {
         LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createNmcl()");
         Connection connection = null;
-        ArrayList<ArrayList<String>> nmclNames = new ArrayList<>();
+        List<List<String>> nmclNames = new ArrayList<>();
         String schema = ManipString.substringBeforeFirst(TableNaming.dbEnv(environnement), ".");
 
         try {
@@ -378,7 +378,7 @@ public class ClientDaoImpl implements ClientDao {
             String prefixeNomTableImage = new StringBuilder().append(TableNaming.dbEnv(environnement)).append(client).append("_").append(timestamp)
                     .append("_").toString();
 
-            for (ArrayList<String> nmcl : nmclNames) {
+            for (List<String> nmcl : nmclNames) {
                 String nomTableImage = prefixeNomTableImage + nmcl.get(0);
 
                 UtilitaireDao.get(0).executeImmediate(connection,
@@ -495,7 +495,7 @@ public class ClientDaoImpl implements ClientDao {
      * @param resp
      *            Flux où écrire la réponse une fois mise en forme.
      */
-    private void mapJsonResponse(ArrayList<ArrayList<String>> result, SendResponse resp) {
+    private void mapJsonResponse(List<List<String>> result, SendResponse resp) {
         List<String> table = new ArrayList<>();
         StringBuilder row = new StringBuilder("\"");
         String cell;

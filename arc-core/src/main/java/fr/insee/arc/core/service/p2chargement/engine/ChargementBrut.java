@@ -143,11 +143,11 @@ public class ChargementBrut {
         query.append("\n ) vv ");
         query.append("\n where norme is not null ");
 
-        ArrayList<ArrayList<String>> result =UtilitaireDao.get(0).executeRequestWithoutMetadata(this.connexion, new ArcPreparedStatementBuilder(query));
+        List<List<String>> result =UtilitaireDao.get(0).executeRequestWithoutMetadata(this.connexion, new ArcPreparedStatementBuilder(query));
         if (result.size()>1)
         {
         	StringBuilder normsFound = new StringBuilder();
-        	for (ArrayList<String> resultLine : result) 
+        	for (List<String> resultLine : result) 
         	{
 	    		int index = Integer.parseInt(resultLine.get(0));
 	    		normsFound.append("{");

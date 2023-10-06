@@ -3,6 +3,7 @@ package fr.insee.arc.web.gui.norme.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -14,9 +15,7 @@ import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.web.gui.all.util.ConstanteBD;
+import fr.insee.arc.web.gui.all.model.Sandbox;
 import fr.insee.arc.web.gui.all.util.VObject;
 
 @Service
@@ -41,10 +40,10 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 	 * @return success
 	 */
 	public String addRuleSet(Model model) {
-		HashMap<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapInputFields();
+		Map<String, List<String>> selection = views.getViewJeuxDeRegles().mapInputFields();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
-			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
+			if (Sandbox.ARC_PROD.getValue().equals(etat)) {
 				this.views.getViewJeuxDeRegles().setMessage("normManagement.addRuleset.noProduction");
 			} else {
 				this.vObjectService.insert(views.getViewJeuxDeRegles());
@@ -63,13 +62,13 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 	public String deleteRuleSet(Model model) {
 		
 		// Get the selection
-		Map<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
+		Map<String, List<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
 			loggerDispatcher.info("State to delete : " + etat, LOGGER);
 			// Check production state. If yes cancel the delete and send a message to the
 			// user
-			if (ConstanteBD.ARC_PROD.getValue().equals(etat)) {
+			if (Sandbox.ARC_PROD.getValue().equals(etat)) {
 				this.views.getViewJeuxDeRegles().setMessage("normManagement.deleteRuleset.noProduction");
 			} else {
 				this.vObjectService.delete(views.getViewJeuxDeRegles());
@@ -106,7 +105,7 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 	 * @return
 	 */
 	public String downloadJeuxDeRegles(Model model, HttpServletResponse response) {
-		Map<String, ArrayList<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
+		Map<String, List<String>> selection = views.getViewJeuxDeRegles().mapContentSelected();
 		if (!selection.isEmpty()) {
 			ArcPreparedStatementBuilder requeteRegleChargement = new ArcPreparedStatementBuilder();
 			requeteRegleChargement.append(recupRegle(this.views.getViewJeuxDeRegles(),
@@ -161,8 +160,8 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 	 */
 	public ArcPreparedStatementBuilder recupRegle(VObject viewRulesSet, String table) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		Map<String, ArrayList<String>> selection = viewRulesSet.mapContentSelected();
-		HashMap<String, String> type = viewRulesSet.mapHeadersType();
+		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
+		Map<String, String> type = viewRulesSet.mapHeadersType();
         requete.append("select * from " + table + " ");
         whereRuleSetEquals(requete, selection, type);
 		return requete;

@@ -3,6 +3,8 @@ package fr.insee.arc.core.service.p0initialisation.pilotage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,11 +69,11 @@ public class CleanPilotageOperation {
 		cleanPilotageDao.execQueryMaterializeFilesToDelete(numberOfDaysToKeepFiles);
 		
 		// initialisation de la liste contenant les archives à déplacer
-		HashMap<String, ArrayList<String>> recordedArchives = new HashMap<>();
+		Map<String, List<String>> recordedArchives = new HashMap<>();
 		recordedArchives.put(ColumnEnum.ENTREPOT.getColumnName(), new ArrayList<>());
 		recordedArchives.put(ColumnEnum.NOM_ARCHIVE.getColumnName(), new ArrayList<>());
 
-		HashMap<String, ArrayList<String>> listOfDeletedArchives;
+		Map<String, List<String>> listOfDeletedArchives;
 
 		// on selectionne les fichiers éligibles et on limite le nombre de retour
 		// pour que l'update ne soit pas trop massif (perf)
@@ -96,7 +98,7 @@ public class CleanPilotageOperation {
 	}
 	
 	
-	private void keepTrackOfDeletedArchives(HashMap<String, ArrayList<String>> listOfDeletedArchives, HashMap<String, ArrayList<String>> recordedArchives)
+	private void keepTrackOfDeletedArchives(Map<String, List<String>> listOfDeletedArchives, Map<String, List<String>> recordedArchives)
 	{
 		if (listOfDeletedArchives.isEmpty()) {
 			return;
@@ -129,7 +131,7 @@ public class CleanPilotageOperation {
 	 * @param recordedArchives
 	 * @throws ArcException 
 	 */
-	private void moveDeletedArchivesToArchivageDirectory(HashMap<String, ArrayList<String>> recordedArchives) throws ArcException
+	private void moveDeletedArchivesToArchivageDirectory(Map<String, List<String>> recordedArchives) throws ArcException
 	{
 		if (recordedArchives.get(ColumnEnum.ENTREPOT.getColumnName()).isEmpty()) {
 			return;

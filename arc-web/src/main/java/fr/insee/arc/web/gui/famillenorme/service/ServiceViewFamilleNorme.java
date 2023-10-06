@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -74,7 +75,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 	public String downloadFamilleNorme(Model model, HttpServletResponse response) {
 
-		Map<String, ArrayList<String>> selection = views.getViewFamilleNorme().mapContentSelected();
+		Map<String, List<String>> selection = views.getViewFamilleNorme().mapContentSelected();
 
 		if (!selection.isEmpty()) {
 

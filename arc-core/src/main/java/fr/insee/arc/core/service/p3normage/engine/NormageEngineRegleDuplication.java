@@ -2,8 +2,9 @@ package fr.insee.arc.core.service.p3normage.engine;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,7 @@ public class NormageEngineRegleDuplication {
 	 * @param jointure
 	 * @throws ArcException
 	 */
-	protected static void ajouterRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+	protected static void ajouterRegleDuplication(Map<String, List<String>> regle, String norme, Date validite,
 			String periodicite, String jointure) {
 		StaticLoggerDispatcher.info(LOGGER, "ajouterRegleDuplication()");
 
@@ -94,7 +95,7 @@ public class NormageEngineRegleDuplication {
 
 	}
 	
-	protected static String appliquerRegleDuplication(HashMap<String, ArrayList<String>> regle, String norme, Date validite,
+	protected static String appliquerRegleDuplication(Map<String, List<String>> regle, String norme, Date validite,
 			String periodicite, String jointure, StringBuilder columnToBeAdded) {
 
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleDuplication()");

@@ -1,6 +1,7 @@
 package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -42,7 +43,7 @@ public interface ClientDao {
      *            Périodicité.
      * @return La liste des noms des tables métiers.
      */
-    ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, String client, boolean reprise, String environnement, String idFamille,
+    List<List<String>> getIdSrcTableMetier(long timestamp, String client, boolean reprise, String environnement, String idFamille,
             String validiteInf, String validiteSup, String periodicite) throws ArcException;
 
     /**
@@ -55,7 +56,7 @@ public interface ClientDao {
      * @return La liste des noms des tables métiers.
      * @throws ArcException 
      */
-    ArrayList<ArrayList<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) throws ArcException;
+    List<List<String>> getIdSrcTableMetier(long timestamp, JSONObject requeteJSON) throws ArcException;
 
     /**
      * Créer une image des tables métiers.
@@ -72,7 +73,7 @@ public interface ClientDao {
      * @return liste des noms de tables images crées
      * @throws ArcException 
      */
-    ArrayList<String> createImages(long timestamp, String client, String environnement, ArrayList<ArrayList<String>> tablesMetierNames) throws ArcException;
+    List<String> createImages(long timestamp, String client, String environnement, List<List<String>> tablesMetierNames) throws ArcException;
 
     /**
      * Créer une image des tables métiers.
@@ -89,7 +90,7 @@ public interface ClientDao {
      * @return liste des noms de tables images crées
      * @throws ArcException 
      */
-    void addImage(long timestamp, String client, String environnement, ArrayList<String> tableMetier, ArrayList<String> mesTablesImagesCrees) throws ArcException;
+    void addImage(long timestamp, String client, String environnement, List<String> tableMetier, List<String> mesTablesImagesCrees) throws ArcException;
 
     /**
      * Récupère les tables métiers.

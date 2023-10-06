@@ -60,7 +60,7 @@ public class ExportDao extends VObjectHelperDao {
 	 * @return A map of all exports to make with their associated rules
 	 * @throws ArcException
 	 */
-	public Map<String, ArrayList<String>> startExportRetrieve() throws ArcException {
+	public Map<String, List<String>> startExportRetrieve() throws ArcException {
 		ViewEnum dataModelExport = ViewEnum.EXPORT;
 		String nameOfViewExport = dataObjectService.getView(dataModelExport);
 
@@ -102,7 +102,7 @@ public class ExportDao extends VObjectHelperDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected HashMap<String, ArrayList<String>> exportFileRetrieveRules(int n, List<String> howToExport,
+	protected Map<String, List<String>> exportFileRetrieveRules(int n, List<String> howToExport,
 			List<String> tablesToExport, String bacASable) throws ArcException {
 		// if columns,orders table is specified, get the information from database metadata
 		String howToExportReworked;
@@ -143,19 +143,19 @@ public class ExportDao extends VObjectHelperDao {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public void exportFile(Map<String, ArrayList<String>> h, int n, BufferedWriter bw, FileOutputStream fw)
+	public void exportFile(Map<String, List<String>> h, int n, BufferedWriter bw, FileOutputStream fw)
 			throws ArcException, IOException, SQLException {
-		ArrayList<String> tablesToExport = h.get("table_to_export");
-		ArrayList<String> headers = h.get("headers");
-		ArrayList<String> nulls = h.get("nulls");
-		ArrayList<String> filterTable = h.get("filter_table");
-		ArrayList<String> orderTable = h.get("order_table");
-		ArrayList<String> howToExport = h.get("nomenclature_export");
-		ArrayList<String> headersToScan = h.get("columns_array_header");
-		ArrayList<String> valuesToScan = h.get("columns_array_value");
+		List<String> tablesToExport = h.get("table_to_export");
+		List<String> headers = h.get("headers");
+		List<String> nulls = h.get("nulls");
+		List<String> filterTable = h.get("filter_table");
+		List<String> orderTable = h.get("order_table");
+		List<String> howToExport = h.get("nomenclature_export");
+		List<String> headersToScan = h.get("columns_array_header");
+		List<String> valuesToScan = h.get("columns_array_value");
 
-		HashMap<String, Integer> pos = new HashMap<>();
-		ArrayList<String> headerLine = new ArrayList<>();
+		Map<String, Integer> pos = new HashMap<>();
+		List<String> headerLine = new ArrayList<>();
 
 		h = exportFileRetrieveRules(n, howToExport, tablesToExport, this.dataObjectService.getSandboxSchema());
 		

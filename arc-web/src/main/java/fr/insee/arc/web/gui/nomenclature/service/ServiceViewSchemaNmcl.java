@@ -1,7 +1,7 @@
 package fr.insee.arc.web.gui.nomenclature.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +32,7 @@ public class ServiceViewSchemaNmcl extends InteractorNomenclature {
 	}
 
 	public String updateSchemaNmcl(Model model) {
-		HashMap<String, ArrayList<String>> selection = views.getViewSchemaNmcl().mapContentAfterUpdate();
+		Map<String, List<String>> selection = views.getViewSchemaNmcl().mapContentAfterUpdate();
 		if (!selection.isEmpty()) {
 			boolean zeroErreur = true;
 

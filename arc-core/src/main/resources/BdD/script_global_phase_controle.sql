@@ -43,8 +43,25 @@ INSERT INTO arc.ext_type_controle values ('NUM','3') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_type_controle values ('REGEXP', '6') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_type_controle values ('ENUM_BRUTE', '7') ON CONFLICT DO NOTHING;
 INSERT INTO arc.ext_type_controle values ('ENUM_TABLE', '8') ON CONFLICT DO NOTHING;
-INSERT INTO arc.ext_type_controle values ('STRUCTURE', '9') ON CONFLICT DO NOTHING;
 
 DROP TRIGGER IF EXISTS doublon ON arc.ihm_controle_regle CASCADE;
 
 do $$ begin CREATE TRIGGER tg_insert_controle BEFORE INSERT ON arc.ihm_controle_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
+
+
+
+-- PATCH 06/10/2023 Remove deprecated rules
+DELETE FROM arc.ext_type_controle where id='STRUCTURE';
+
+do $$
+declare
+	table_regle_controle text;
+BEGIN
+for table_regle_controle in (select schemaname||'.'||tablename from pg_tables where (tablename='controle_regle' and schemaname like 'arc_bas%') or (tablename='ihm_controle_regle' and schemaname = 'arc') )
+loop
+execute 'DELETE FROM '||table_regle_controle||' WHERE id_classe= ''STRUCTURE'';';
+commit;
+end loop;
+end;
+$$;
+

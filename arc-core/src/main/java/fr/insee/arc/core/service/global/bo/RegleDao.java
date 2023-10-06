@@ -2,7 +2,8 @@ package fr.insee.arc.core.service.global.bo;
 
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +40,7 @@ public class RegleDao {
 		sb.append(" AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')<=a.validite_sup) ");
 		sb.append("; ");
 
-		HashMap<String, ArrayList<String>> g = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, sb))
+		Map<String, List<String>> g = new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, sb))
 				.mapContent();
 
 		if (!g.isEmpty()) {

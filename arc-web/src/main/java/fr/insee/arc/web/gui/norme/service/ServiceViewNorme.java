@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.norme.service;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +39,7 @@ public class ServiceViewNorme extends InteractorNorme {
 	public String deleteNorme(Model model) {
 
 		// Get the gui selection
-		Map<String, ArrayList<String>> selection = views.getViewNorme().mapContentSelected();
+		Map<String, List<String>> selection = views.getViewNorme().mapContentSelected();
 
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);

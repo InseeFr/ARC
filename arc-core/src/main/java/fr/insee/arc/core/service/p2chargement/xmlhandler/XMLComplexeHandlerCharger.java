@@ -14,8 +14,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.XMLConstant;
-import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.dao.DateConversion;
 import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -92,11 +90,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	private List<String> lineValues = new ArrayList<>();
 
 	private StringBuilder requete = new StringBuilder();
-	private StringBuilder structure = new StringBuilder();
 
 	// indique que la balise courante a des données
 	private boolean hasData = false;
-
 
 	public Norme normeCourante;
 	public String validite;
@@ -109,8 +105,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	// format to rename column with format rules
 	public ArrayList<Pair<String, String>> format;
 
-	public static final String JOINXML_QUERY_BLOCK = "\n -- query";
-	public static final String JOINXML_STRUCTURE_BLOCK = "\n -- structure\n";
 	private static final String HEADER = "$h";
 
 	// initialize the integration date with current
@@ -354,10 +348,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		if (this.tree.get(this.allCols.indexOf(this.currentTag)) == null) {
 			this.tree.put(this.allCols.indexOf(this.currentTag), this.allCols.indexOf(this.father));
 		}
-
-		// enregistrement de la structure
-		structure.append(("," + (this.father.equals(rootFather) ? XMLConstant.ROOT : "i_" + this.father)) + " "
-				+ (this.father.equals(rootFather) ? "1" : this.col.get(this.father)) + " " + "i_" + this.currentTag);
 
 		if (this.tree.get(this.allCols.indexOf(this.currentTag)).equals(this.allCols.indexOf(this.father))
 				// cas des bloc multiples
@@ -605,10 +595,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		req.append(reqSelect);
 		req.append(reqFrom);
 
-		// la compression fait perdre trop de temp
-		// Mais apres, c'est sur que la table de pilotage devient un peu trop "grosse"
-		req.append(JOINXML_STRUCTURE_BLOCK);
-		req.append(structure.substring(1));
 		this.jointure = this.jointure + req.toString().replace("'", "''");
 
 	}

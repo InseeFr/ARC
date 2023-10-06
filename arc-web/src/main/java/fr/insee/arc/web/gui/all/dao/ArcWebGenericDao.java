@@ -1,8 +1,7 @@
 package fr.insee.arc.web.gui.all.dao;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +33,7 @@ public class ArcWebGenericDao {
 		ArcPreparedStatementBuilder requete= new ArcPreparedStatementBuilder();
 		requete.append("SELECT replace(id,'.','_') as id, upper(substring(id from '\\.(.*)')) as val FROM arc.ext_etat_jeuderegle where isenv order by nullif(substring(id from '[0123456789]+'),'')::int");
 		
-		HashMap<String, ArrayList<String>> m;
+		Map<String, List<String>> m;
 		try {
 			m = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete)).mapContent();
 			

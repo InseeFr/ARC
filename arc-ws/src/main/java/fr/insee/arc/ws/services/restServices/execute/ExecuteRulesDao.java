@@ -3,7 +3,8 @@ package fr.insee.arc.ws.services.restServices.execute;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -40,7 +41,7 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 
 	// Récupération des parametres
 	gb=new GenericBean(UtilitaireDao.get(0).executeRequest(c, requete));
-	HashMap<String, ArrayList<String>> m=gb.mapContent();
+	Map<String, List<String>> m=gb.mapContent();
 
 	if (!m.isEmpty())
 	{

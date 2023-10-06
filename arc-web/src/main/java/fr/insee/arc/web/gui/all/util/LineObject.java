@@ -2,6 +2,7 @@ package fr.insee.arc.web.gui.all.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /** Ligne du tableau */
 public class LineObject implements Cloneable, Iterable<String> {
@@ -11,30 +12,29 @@ public class LineObject implements Cloneable, Iterable<String> {
         this.d = new ArrayList<>();
     }
 
-    public static LineObject as(ArrayList<String> someData) {
+    public static LineObject as(List<String> someData) {
         return new LineObject(someData);
     }
 
-    private LineObject(ArrayList<String> aData) {
+    private LineObject(List<String> aData) {
         super();
         this.d = aData;
     }
 
     /** Données de la ligne (par colonnes). */
-    public ArrayList<String> d;
+    public List<String> d;
 
-    public ArrayList<String> getD() {
+    public List<String> getD() {
         return this.d;
     }
 
-    public void setD(ArrayList<String> aData) {
+    public void setD(List<String> aData) {
         this.d = aData;
     }
 
     @Override
-	@SuppressWarnings("unchecked")
     public LineObject clone() {
-        return new LineObject((ArrayList<String>) this.d.clone());
+    	return new LineObject(new ArrayList<>(this.d));
     }
 
     @Override

@@ -2,14 +2,15 @@ package fr.insee.arc.web.gui.all.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /** Tableau du contenu de la requete (ligne, colonne) */
 public class TableObject implements Cloneable, Iterable<LineObject> {
 
 	/** Lignes du tableau.*/
-    public ArrayList<LineObject> t = new ArrayList<>();
+    public List<LineObject> t = new ArrayList<>();
 
-    public static TableObject as(ArrayList<ArrayList<String>> someContent) {
+    public static TableObject as(List<List<String>> someContent) {
         TableObject returned = new TableObject(new ArrayList<>());
         for (int i = 0; i < someContent.size(); i++) {
             returned.add(LineObject.as(someContent.get(i)));
@@ -25,15 +26,15 @@ public class TableObject implements Cloneable, Iterable<LineObject> {
         super();
     }
 
-    private TableObject(ArrayList<LineObject> someContent) {
+    private TableObject(List<LineObject> someContent) {
         this.t = someContent;
     }
 
-    public ArrayList<LineObject> getT() {
+    public List<LineObject> getT() {
         return this.t;
     }
 
-    public void setT(ArrayList<LineObject> t) {
+    public void setT(List<LineObject> t) {
         this.t = t;
     }
 
@@ -47,7 +48,7 @@ public class TableObject implements Cloneable, Iterable<LineObject> {
 
     @Override
 	public TableObject clone() {
-        ArrayList<LineObject> clonedContent = new ArrayList<>();
+        List<LineObject> clonedContent = new ArrayList<>();
         for (int i = 0; i < this.t.size(); i++) {
             clonedContent.add(this.t.get(i).clone());
         }

@@ -163,7 +163,7 @@ public class SynchronizeDataByPilotageDao {
 		GenericBean g = new GenericBean(
 				UtilitaireDao.get(0).executeRequest(targetConnexion, SynchronizeDataByPilotageDao.requeteListAllTemporaryTablesInEnv(envExecution)));
 		if (!g.mapContent().isEmpty()) {
-			ArrayList<String> envTables = g.mapContent().get("table_name");
+			List<String> envTables = g.mapContent().get("table_name");
 			for (String nomTable : envTables) {
 				UtilitaireDao.get(0).executeBlock(targetConnexion, FormatSQL.dropTable(nomTable));
 			}

@@ -81,7 +81,7 @@ public class GererNomenclatureDaoTest extends InitializeQueryTest {
 		// select the first record of viewNorm and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_NMCL), SQL.WHERE, "nom_table='nmcl_evenements_v001'");
-		Map<String, ArrayList<String>> viewNomenclatureSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		Map<String, List<String>> viewNomenclatureSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewNomenclatureSelectedRecords);
 
 		// execute query

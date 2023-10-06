@@ -2,8 +2,9 @@ package fr.insee.arc.core.service.global;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,7 +64,7 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	protected Boolean todo = false;
 
-	protected HashMap<String, ArrayList<String>> tabIdSource;
+	protected Map<String, List<String>> tabIdSource;
 
 	public ApiService() {
 		super();
@@ -264,7 +265,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param etat
 	 * @return
 	 */
-	public HashMap<String, ArrayList<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase,
+	public Map<String, List<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase,
 			String etat) {
 		LoggerHelper.info(LOGGER_APISERVICE, "pilotageListIdsource");
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
@@ -425,7 +426,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected HashMap<String, ArrayList<String>> recuperationIdSource() throws ArcException {
+	protected Map<String, List<String>> recuperationIdSource() throws ArcException {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("SELECT p." + ColumnEnum.ID_SOURCE.getColumnName() + " ");
@@ -433,7 +434,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		query.append("ORDER BY " + ColumnEnum.ID_SOURCE.getColumnName());
 		query.append(";");
 
-		HashMap<String, ArrayList<String>> pil = new GenericBean(
+		Map<String, List<String>> pil = new GenericBean(
 				UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), query)).mapContent();
 
 		return (pil);
@@ -444,7 +445,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		return envExecution;
 	}
 
-	public HashMap<String, ArrayList<String>> getTabIdSource() {
+	public Map<String, List<String>> getTabIdSource() {
 		return tabIdSource;
 	}
 

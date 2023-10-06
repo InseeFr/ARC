@@ -41,7 +41,7 @@ public class ImportStep1InitializeClientTablesService {
 
 	private String famille;
 
-	private ArrayList<ArrayList<String>> tablesMetierNames;
+	private List<List<String>> tablesMetierNames;
 	
 	private List<String> sources;
 

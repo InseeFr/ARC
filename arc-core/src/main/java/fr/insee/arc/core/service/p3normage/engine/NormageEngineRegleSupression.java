@@ -2,7 +2,8 @@ package fr.insee.arc.core.service.p3normage.engine;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,8 +30,8 @@ public class NormageEngineRegleSupression {
 	 * @throws ArcException
 	 */
 
-	protected static void ajouterRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme,
-			String periodicite, String jointure, HashMap<String, ArrayList<String>> rubriqueUtiliseeDansRegles)
+	protected static void ajouterRegleSuppression(Map<String, List<String>> regle, String norme,
+			String periodicite, String jointure, Map<String, List<String>> rubriqueUtiliseeDansRegles)
 			throws ArcException {
 		// on va jouer au "qui enleve-t-on" ??
 		// on va parcourir les regles de normage, controle, mapping et voir
@@ -38,8 +39,8 @@ public class NormageEngineRegleSupression {
 
 		// op 1 : identifier les blocs inutiles
 
-		ArrayList<String> listVarUtilisee = new ArrayList<String>();
-		ArrayList<Integer> lineASupprimer = new ArrayList<Integer>();
+		ArrayList<String> listVarUtilisee = new ArrayList<>();
+		ArrayList<Integer> lineASupprimer = new ArrayList<>();
 
 		for (int j = 0; j < rubriqueUtiliseeDansRegles.get("id_norme").size(); j++) {
 			listVarUtilisee.add(rubriqueUtiliseeDansRegles.get("var").get(j));
@@ -187,7 +188,7 @@ public class NormageEngineRegleSupression {
 	 * @return
 	 * @throws ArcException
 	 */
-	protected static String appliquerRegleSuppression(HashMap<String, ArrayList<String>> regle, String norme,
+	protected static String appliquerRegleSuppression(Map<String, List<String>> regle, String norme,
 			Date validite, String periodicite, String jointure) throws ArcException {
 
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleSuppression()");

@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,21 +67,21 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
     
     // visual des Files
     public void initializeFileExport() {
-        HashMap<String, String> defaultInputFields = new HashMap<String, String>();
+        Map<String, String> defaultInputFields = new HashMap<>();
 
         String dirOut = initExportDir();
 
-        ArrayList<ArrayList<String>> listeFichier = getFilesFromDirectory(dirOut, this.views.getViewFileExport().mapFilterFields());
+        List<List<String>> listeFichier = getFilesFromDirectory(dirOut, this.views.getViewFileExport().mapFilterFields());
 
         this.vObjectService.initializeByList(views.getViewFileExport(), listeFichier, defaultInputFields);
 
     }
 
     
-    private ArrayList<ArrayList<String>> getFilesFromDirectory(String dir, HashMap<String,ArrayList<String>> filter2)
+    private List<List<String>> getFilesFromDirectory(String dir, Map<String,List<String>> filter2)
     {
-        HashMap<String,ArrayList<String>> filter=filter2;
-        ArrayList<ArrayList<String>> result=new ArrayList<>();
+        Map<String,List<String>> filter=filter2;
+        List<List<String>> result=new ArrayList<>();
 
         ArrayList<String> entete = new ArrayList<>();
         entete.add("filename");

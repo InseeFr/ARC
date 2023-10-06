@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -134,7 +135,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 * @return
 	 */
 	private List<String> undoFilesSelection() {
-		HashMap<String, ArrayList<String>> m = new HashMap<>(views.getViewFichierBAS().mapContentSelected());
+		Map<String, List<String>> m = new HashMap<>(views.getViewFichierBAS().mapContentSelected());
 		if (!m.isEmpty() && m.get(ColumnEnum.ID_SOURCE.getColumnName()) != null) {
 			return m.get(ColumnEnum.ID_SOURCE.getColumnName());
 		}

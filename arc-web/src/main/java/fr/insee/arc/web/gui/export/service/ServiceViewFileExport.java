@@ -3,7 +3,8 @@ package fr.insee.arc.web.gui.export.service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,7 +29,7 @@ public class ServiceViewFileExport extends InteractorExport {
 
 	public String deleteFileExport(Model model) {
 		String dirOut = initExportDir();
-		HashMap<String, ArrayList<String>> selection = this.views.getViewFileExport().mapContentSelected();
+		Map<String, List<String>> selection = this.views.getViewFileExport().mapContentSelected();
 		if (!selection.isEmpty()) {
 			for (String s : selection.get("filename")) {
 				try {
@@ -45,8 +46,8 @@ public class ServiceViewFileExport extends InteractorExport {
 	public String updateFileExport(Model model) {
 		String dirOut = initExportDir();
 
-		HashMap<String, ArrayList<String>> m = this.views.getViewFileExport().mapContentBeforeUpdate();
-		HashMap<String, ArrayList<String>> n = this.views.getViewFileExport().mapContentAfterUpdate();
+		Map<String, List<String>> m = this.views.getViewFileExport().mapContentBeforeUpdate();
+		Map<String, List<String>> n = this.views.getViewFileExport().mapContentAfterUpdate();
 
 		if (!m.isEmpty()) {
 			for (int i = 0; i < m.get("filename").size(); i++) {
@@ -65,7 +66,7 @@ public class ServiceViewFileExport extends InteractorExport {
 	}
 
 	public String downloadFileExport(Model model, HttpServletResponse response) {
-		HashMap<String, ArrayList<String>> selection = this.views.getViewFileExport().mapContentSelected();
+		Map<String, List<String>> selection = this.views.getViewFileExport().mapContentSelected();
 		if (!selection.isEmpty()) {
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 			boolean first = true;

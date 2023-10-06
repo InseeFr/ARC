@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.p2chargement.xmlhandler;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 
 import fr.insee.arc.utils.textUtils.FastList;
@@ -10,19 +9,20 @@ import fr.insee.arc.utils.textUtils.FastList;
 public class TreeFunctions {
 
 
-    public TreeFunctions() {
+    private TreeFunctions() {
     	throw new IllegalStateException("Tree Utility class for XML Handlers");
 	}
 
 	/**
-     * renvoie un tableau ordonné selon la distance à la racine du pere pere -> fils -> noeud(1) ou feuille(2) -> distance à la racine du
+     * renvoie un tableau ordonné selon la distance à la racine du pere
+     * pere -> fils -> noeud(1) ou feuille(2) -> distance à la racine du
      * pere
      *
      * @param tree
      * @param colDist
      * @return
      */
-    public static int[][] getTreeArrayByDistance(HashMap<Integer, Integer> tree, HashMap<Integer, Integer> colDist) {
+    public static int[][] getTreeArrayByDistance(Map<Integer, Integer> tree, Map<Integer, Integer> colDist) {
         int[][] arr = new int[tree.size()][4];
 
         int i = 0;
@@ -50,7 +50,7 @@ public class TreeFunctions {
 
     }
 
-    public static String getLeafs(Integer arr2, int[][] arr, HashMap<String, Integer> colData, FastList<String> allCols) {
+    public static String getLeafs(Integer arr2, int[][] arr, Map<String, Integer> colData, FastList<String> allCols) {
         StringBuilder result = new StringBuilder();
 
         for (int j = 0; j < arr.length; j++) {
@@ -65,7 +65,7 @@ public class TreeFunctions {
 
     }
 
-    public static String getLeafsSpace(Integer arr2, int[][] arr, HashMap<String, Integer> colData, FastList<String> allCols) {
+    public static String getLeafsSpace(Integer arr2, int[][] arr, Map<String, Integer> colData, FastList<String> allCols) {
         StringBuilder result = new StringBuilder();
 
         for (int j = 0; j < arr.length; j++) {
@@ -80,7 +80,7 @@ public class TreeFunctions {
 
     }
 
-    public static String getLeafsMax(Integer arr2, int[][] arr, HashMap<String, Integer> colData, FastList<String> allCols) {
+    public static String getLeafsMax(Integer arr2, int[][] arr, Map<String, Integer> colData, FastList<String> allCols) {
         StringBuilder result = new StringBuilder();
 
         for (int j = 0; j < arr.length; j++) {

@@ -14,21 +14,6 @@ public class Format implements IConstanteCaractere {
 	private Format() {
 		throw new IllegalStateException("Utility class");
 	}
-
-    /**
-     * Transforme a list of list in list
-     * @param array
-     *            an ArrayList
-     * @return a List
-     */
-    public static <T> List<List<T>> patch(ArrayList<ArrayList<T>> array) {
-        List<List<T>> returned = new ArrayList<>();
-        for (int i = 0; i < array.size(); i++) {
-            returned.add(array.get(i));
-        }
-        return returned;
-    }
-
     
     /**
      * tokenize an expression and trim tokens

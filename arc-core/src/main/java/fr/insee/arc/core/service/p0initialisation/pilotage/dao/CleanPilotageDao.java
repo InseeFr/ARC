@@ -1,7 +1,7 @@
 package fr.insee.arc.core.service.p0initialisation.pilotage.dao;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -68,7 +68,7 @@ public class CleanPilotageDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	public HashMap<String, ArrayList<String>> execQueryDeleteDeprecatedFilesAndSelectArchives(int numberOfFilesToProceed) throws ArcException {
+	public Map<String, List<String>> execQueryDeleteDeprecatedFilesAndSelectArchives(int numberOfFilesToProceed) throws ArcException {
 		// requete sur laquelle on va itérer : on selectionne un certain nombre de
 		// fichier et on itere
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();

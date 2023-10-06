@@ -232,50 +232,6 @@ public class ServiceRequeteSqlRegle {
 	}
 
 
-	/**
-	 * Structure control
-	 * check if all the tags found in the file are in the ruleset 
-	 * and in the same order as in the ruleset
-	 * @param structure
-	 * @param jdr
-	 * @param tableControleRegle
-	 * @return
-	 */
-	public String ctlStructure(RegleControleEntity reg, String structure, String tableControleRegle) {
-	
-		StringBuilder requete=new StringBuilder();
-		requete.append("\n with"); 
-		requete.append("\n tmp_jointure as (");
-		requete.append("\n select split_part(b.e,' ',1) as pere, split_part(b.e,' ',2) as pere_id, split_part(b.e,' ',3) as fils, n  from unnest(('{'||'"+structure+"'||'}')::text[]) with ordinality b(e,n)");
-		requete.append("\n )");
-		requete.append("\n , tmp_num as (");
-		requete.append("\n select pere, pere_id, fils, row_number() over (partition by pere, pere_id order by n) as rk from (");
-		requete.append("\n select pere, pere_id, fils, coalesce(lag(fils) over (partition by pere, pere_id order by n),'*') as prev_fils, n from tmp_jointure");
-		requete.append("\n ) vv where fils!=prev_fils");
-		requete.append("\n )");
-		requete.append("\n , tmp_regle as (");
-		requete.append("\n select rubrique_pere as p, rubrique_fils as f, xsd_ordre from "+tableControleRegle+" a ");
-		requete.append("\n where xsd_ordre is not null");
-		requete.append("\n AND EXISTS (SELECT 1 FROM (SELECT id_norme, periodicite, validite FROM "+this.tableTempData+" LIMIT 1) b "); 
-		requete.append("\n WHERE a.id_norme=b.id_norme ");
-		requete.append("\n AND a.periodicite=b.periodicite "); 
-		requete.append("\n AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')>=a.validite_inf "); 
-		requete.append("\n AND to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"')<=a.validite_sup) ");
-		requete.append("\n )");
-		requete.append("\n , tmp_check as (");
-		requete.append("\n select pere, pere_id, fils from (");
-		requete.append("\n select a.pere, a.pere_id, a.fils, rk, dense_rank() over (partition by p, a.pere_id order by xsd_ordre) as r");
-		requete.append("\n from tmp_num a left join tmp_regle b");
-		requete.append("\n on a.pere=b.p and a.fils=b.f");
-		requete.append("\n ) vv");
-		requete.append("\n where rk!=r");
-		requete.append("\n )");
-		requete.append("\n , ctl as (select id from this.tableTempData WHERE EXISTS (SELECT from tmp_check))");
-		requete.append(insertBloc(reg.getBlockingThreshold(),reg.getErrorRowProcessing(),reg.getIdRegle()));
-		
-		return requete.toString();
-	}
-	
 	public String ctlCardinalite(RegleControleEntity reg, List<String> listRubriqueExpr, List<String> ListRubriqueTable) {
 		
 		// on retire le pere et le fils de la liste d'expr
