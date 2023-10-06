@@ -38,7 +38,7 @@ public class NormageEngineRegleIndependance {
 
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
 		HashSet<String> rubriqueExclusion = new HashSet<String>();
-		HashMap<String, String> rubriquesAvecRegleDIndependance = new HashMap<>();
+		Map<String, String> rubriquesAvecRegleDIndependance = new HashMap<>();
 
 		// pour toutes les règles de relation,
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -135,7 +135,7 @@ public class NormageEngineRegleIndependance {
 						.split(",");
 
 				ArrayList<String> rubrique = new ArrayList<>();
-				HashMap<String, String> rubriqueNmcl = new HashMap<>();
+				Map<String, String> rubriqueNmcl = new HashMap<>();
 
 				// ne garder que les rubriques qui existent dans la requete
 				// vérifier qu'elles ont le même pere
@@ -175,9 +175,9 @@ public class NormageEngineRegleIndependance {
 					// calcul du rang
 					String[] lines = blocCreate.split("\n");
 
-					HashMap<String, String> table = new HashMap<>();
-					HashMap<String, String> pere = new HashMap<>();
-					HashMap<String, String> autreCol = new HashMap<>();
+					Map<String, String> table = new HashMap<>();
+					Map<String, String> pere = new HashMap<>();
+					Map<String, String> autreCol = new HashMap<>();
 
 					StringBuilder blocCreateNew = new StringBuilder();
 					StringBuilder blocInsertNew = new StringBuilder();
@@ -269,8 +269,8 @@ public class NormageEngineRegleIndependance {
 	 * @return
 	 */
 	private static boolean calculerTableIndependance(StringBuilder blocRequete, boolean nullTableRequired,
-			ArrayList<String> rubrique, HashMap<String, String> rubriqueNmcl, HashMap<String, String> table,
-			HashMap<String, String> pere, HashMap<String, String> autreCol) {
+			ArrayList<String> rubrique, Map<String, String> rubriqueNmcl, Map<String, String> table,
+			Map<String, String> pere, Map<String, String> autreCol) {
 		boolean isThereAnyValue = false;
 
 		blocRequete.append(
@@ -402,7 +402,7 @@ public class NormageEngineRegleIndependance {
 	 * @param exclusion
 	 */
 	private static void addIndependanceToChildren(ArrayList<String> r, String blocCreate, String mRubrique,
-			Map<String, List<String>> regle, HashMap<String, String> rubriquesAvecRegleDIndependance,
+			Map<String, List<String>> regle, Map<String, String> rubriquesAvecRegleDIndependance,
 			String norme, String periodicite, HashSet<String> exclusion) {
 		ArrayList<String> s = NormageEngineGlobal.getChildren(blocCreate, mRubrique);
 

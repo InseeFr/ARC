@@ -142,9 +142,9 @@ class ApiChargementService [[java:fr.insee.arc.core.service.ApiChargementService
 	#String tableTempAll
 	#String tableChargementOK
 	-String tableChargementBrutal
-	~HashMap<String,Integer> col
+	~Map<String,Integer> col
 	-ArrayList<String> allCols
-	-HashMap<String,Integer> colData
+	-Map<String,Integer> colData
 	-StringBuilder requeteInsert
 	#StringBuilder requeteBilan
 	#int nbFileLoaded

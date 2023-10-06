@@ -2,11 +2,12 @@ package fr.insee.arc.web.gui.famillenorme.model;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.web.gui.all.util.ConstantVObject;
-import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.gui.all.util.VObject;
 
 public class ViewVariableMetier  extends VObject {
 
@@ -33,7 +34,7 @@ public class ViewVariableMetier  extends VObject {
      * @param returned
      * @return
      */
-    public static HashMap<String, ColumnRendering> getInitialRenderingViewVariableMetier(HashMap<String, ColumnRendering> returned) {
+    public static Map<String, ColumnRendering> getInitialRenderingViewVariableMetier(Map<String, ColumnRendering> returned) {
         returned.put("id_famille", new ColumnRendering(false, "Id.", "", "text", null, false));
         returned.put("nom_variable_metier", new ColumnRendering(true, "label.mapmodel.field", "30%", "text", null, true));
         returned.put("description_variable_metier", new ColumnRendering(true, "label.comment", "30%", "text", null, true));
@@ -46,8 +47,8 @@ public class ViewVariableMetier  extends VObject {
     /**
      * business columns
      */
-    public static final HashMap<String, ColumnRendering> getInitialRendering(List<String> aVariableListe) {
-        HashMap<String, ColumnRendering> returned = new HashMap<>();
+    public static final Map<String, ColumnRendering> getInitialRendering(List<String> aVariableListe) {
+        Map<String, ColumnRendering> returned = new HashMap<>();
         String size = "10%";
         String type = "text";
         for (int i = 0; i < aVariableListe.size(); i++) {

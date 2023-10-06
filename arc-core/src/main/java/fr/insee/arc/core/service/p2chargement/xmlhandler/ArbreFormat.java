@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -32,7 +32,7 @@ import fr.insee.arc.utils.utils.SecuredSaxParser;
 public class ArbreFormat {
 
     //L'arbre
-    private HashMap<String, String> arbreHierachieDuFichier;
+    private Map<String, String> arbreHierachieDuFichier;
     
     //éléments terminaux
     private ArrayList<String> feuilles = new ArrayList<>();
@@ -98,14 +98,14 @@ public class ArbreFormat {
     /**
      * @return the arbreFormat
      */
-    public HashMap<String, String> getArbreFormat() {
+    public Map<String, String> getArbreFormat() {
         return arbreHierachieDuFichier;
     }
 
     /**
      * @param arbreFormat the arbreFormat to set
      */
-    public void setArbreFormat(HashMap<String, String> arbreFormat) {
+    public void setArbreFormat(Map<String, String> arbreFormat) {
         this.arbreHierachieDuFichier = arbreFormat;
     }
 

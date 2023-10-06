@@ -37,7 +37,7 @@ public class ArcWebGenericDao {
 		try {
 			m = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete)).mapContent();
 			
-			LinkedHashMap<String, String> envMap=new LinkedHashMap<>();
+			Map<String, String> envMap=new LinkedHashMap<>();
 			
 			for (int i=0;i<m.get("id").size();i++)
 			{

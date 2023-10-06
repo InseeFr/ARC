@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.webservice.dao;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ public class WebserviceDao extends VObjectHelperDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "*", SQL.FROM, nameOfViewWsContext);
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewWsContext, query, nameOfViewWsContext, defaultInputFields);
 	}
@@ -44,7 +45,7 @@ public class WebserviceDao extends VObjectHelperDao {
 		query.build(SQL.SELECT, "*", SQL.FROM, nameOfViewWsQuery);
 		query.build(SQL.WHERE, sqlEqualWithFirstSelectedRecord(ColumnEnum.SERVICE_NAME), SQL.AND, sqlEqualWithFirstSelectedRecord(ColumnEnum.CALL_ID));
 		// default value
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.SERVICE_NAME, ColumnEnum.CALL_ID);
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.SERVICE_NAME, ColumnEnum.CALL_ID);
 		// initialize vobject
 		vObjectService.initialize(viewWsQuery, query, nameOfViewWsQuery, defaultInputFields);
 	}

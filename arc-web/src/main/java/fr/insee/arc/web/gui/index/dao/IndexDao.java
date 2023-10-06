@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.index.dao;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ public class IndexDao extends VObjectHelperDao {
 		query.build("upper(substring(id from '\\.(.*)'))", SQL.AS, ColumnEnum.VAL, SQL.COMMA, ColumnEnum.ENV_DESCRIPTION);
 		query.build(SQL.FROM, nameOfViewIndex, SQL.WHERE, ColumnEnum.ISENV);
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewIndex, query, nameOfViewIndex, defaultInputFields);
 	}

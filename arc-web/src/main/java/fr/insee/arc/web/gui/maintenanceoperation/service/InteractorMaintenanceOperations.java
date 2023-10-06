@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.maintenanceoperation.service;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -31,7 +32,7 @@ public class InteractorMaintenanceOperations extends ArcWebGenericService<Mainte
 	}
 
     public void initializeOperations() {
-        HashMap<String, String> defaultInputFields = new HashMap<>();
+        Map<String, String> defaultInputFields = new HashMap<>();
         this.vObjectService.initialize(views.getViewOperations(), new ArcPreparedStatementBuilder("SELECT true"),  "arc.operations", defaultInputFields);
     }
 

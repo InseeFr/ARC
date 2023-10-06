@@ -39,7 +39,7 @@ public class WebUtils {
 		Map<String, Object> details = new HashMap<>();
 		map.put(HEALTHCHECK_ATTRIBUTE_DETAILS, details);
 
-		HashMap<String, String> dbHealthCheck = new HashMap<>();
+		Map<String, String> dbHealthCheck = new HashMap<>();
 		details.put(HEALTHCHECK_ATTRIBUTE_DATABASEHEALTHCHECK, dbHealthCheck);
 		dbHealthCheck.put(HEALTHCHECK_ATTRIBUTE_STATUS, status);
 

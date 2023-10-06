@@ -44,7 +44,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		query.append(SQL.ORDER_BY);
 		query.append(ColumnEnum.ID_FAMILLE);
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewFamilleNorme, query, dataObjectService.getView(dataModelNormFamily),
 				defaultInputFields);
@@ -66,7 +66,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		query.append(SQL.WHERE);
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_FAMILLE));
 		// default value
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
 				ColumnEnum.ID_FAMILLE);
 		// initialize vobject
 		vObjectService.initialize(viewClient, query, dataObjectService.getView(dataModelClient), defaultInputFields);
@@ -90,7 +90,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		query.append(SQL.AND);
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_APPLICATION));
 		// default value
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
 				ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION);
 		// initialize vobject
 		vObjectService.initialize(viewHostAllowed, query, dataObjectService.getView(dataModelHostAllowed),
@@ -113,7 +113,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		query.append(SQL.WHERE);
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_FAMILLE));
 		// default value
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
 				ColumnEnum.ID_FAMILLE);
 		// initialize vobject
 		vObjectService.initialize(viewTableMetier, query, dataObjectService.getView(dataModelTableMetier),
@@ -178,7 +178,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 
 		query.append("\n ON left_side.nom_variable_metier = right_side.nom_variable_metier");
 
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(
 				ColumnEnum.ID_FAMILLE);
 		vObjectService.initialize(viewVariableMetier, query, dataObjectService.getView(dataModelVariableMetier),
 				defaultInputFields);

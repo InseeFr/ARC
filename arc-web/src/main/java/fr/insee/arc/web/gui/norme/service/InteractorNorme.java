@@ -291,7 +291,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		if (scope != null) {
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	        requete.append("select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
-			HashMap<String, String> defaultInputFields = new HashMap<>();
+			Map<String, String> defaultInputFields = new HashMap<>();
 			vObjectService.initialize(viewJeuxDeReglesCopie, requete, theTableName, defaultInputFields);
 		} else {
 			vObjectService.destroy(viewJeuxDeReglesCopie);
@@ -328,8 +328,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * @param selection
 	 * @return
 	 */
-	private HashMap<String, String> defaultRuleInputFields(Map<String, List<String>> selection) {
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+	private Map<String, String> defaultRuleInputFields(Map<String, List<String>> selection) {
+		Map<String, String> defaultInputFields = new HashMap<>();
 		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
 		defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
 		defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));

@@ -87,8 +87,8 @@ public class GenericBean {
 	 *
 	 * @return the resulting HashMap
 	 */
-	public HashMap<String, Integer> mapIndex() {
-		HashMap<String, Integer> r = new HashMap<String, Integer>();
+	public Map<String, Integer> mapIndex() {
+		Map<String, Integer> r = new HashMap<>();
 		for (int i = 0; i < headers.size(); i++) {
 			r.put(this.headers.get(i), i);
 		}
@@ -100,8 +100,8 @@ public class GenericBean {
 	 *
 	 * @return the HashMap
 	 */
-	public HashMap<String, String> mapTypes() {
-		HashMap<String, String> r = new HashMap<String, String>();
+	public Map<String, String> mapTypes() {
+		Map<String, String> r = new HashMap<>();
 
 		for (int i = 0; i < headers.size(); i++) {
 			r.put(this.headers.get(i), this.types.get(i));
@@ -161,12 +161,12 @@ public class GenericBean {
 		return m;
 	}
 	
-	public HashMap<String, Record> mapRecord() {
+	public Map<String, Record> mapRecord() {
 		if (this.content == null || this.content.isEmpty()) {
 			return new HashMap<>();
 		}
 
-		HashMap<String, Record> r = new HashMap<>();
+		Map<String, Record> r = new HashMap<>();
 
 		for (int i = 0; i < this.content.size(); i++) {
 
@@ -188,8 +188,8 @@ public class GenericBean {
 		return this.content.size();
 	}
 
-	public HashMap<String, String> keyValue() throws ArcException {
-		HashMap<String, String> r = new HashMap<>();
+	public Map<String, String> keyValue() throws ArcException {
+		Map<String, String> r = new HashMap<>();
 
 		if (!this.content.isEmpty() && this.content.get(0).size() != 2) {
 			throw new ArcException(ArcExceptionMessage.GENERIC_BEAN_KEY_VALUE_FAILED);

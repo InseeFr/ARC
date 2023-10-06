@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.maintenanceparametre.dao;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ public class MaintenanceParametreDao extends VObjectHelperDao {
 		query.build(SQL.SELECT, "row_number() over (order by description,key,val)", SQL.AS, ColumnEnum.I, SQL.COMMA, columns);
 		query.build(SQL.FROM, nameOfViewParameters);
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewParameters, query, nameOfViewParameters, defaultInputFields);
 	}

@@ -106,7 +106,7 @@ public class ServiceRequeteSqlRegle {
 	private String insertBloc(String blockingThreshold, String errorRowProcessing, String regleId)
 	{
 		// map from gui user action code to database control code
-		HashMap<String, String> mapRowProcessing=new HashMap<>();
+		Map<String, String> mapRowProcessing=new HashMap<>();
 		mapRowProcessing.put(ERROR_ROW_PROCESSING_KEEP,RECORD_WITH_ERROR_TO_KEEP);
 		mapRowProcessing.put(ERROR_ROW_PROCESSING_EXCLUDE,RECORD_WITH_ERROR_TO_EXCLUDE);
 

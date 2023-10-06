@@ -48,7 +48,7 @@ public class GererNormeDao extends VObjectHelperDao {
 
 		ViewEnum dataModelNorm = ViewEnum.IHM_NORME;
 
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(SQL.SELECT);
@@ -86,7 +86,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.PERIODICITE));
 
 		// build the default value when adding a record
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
 				ColumnEnum.PERIODICITE);
 
 		// check constraints on calendar after insert or update
@@ -126,7 +126,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_SUP));
 
 		// build the default value when adding a record
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
 				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP);
 
 		// check constraints on rulesets after insert or update
@@ -218,7 +218,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VERSION));
 
 		// build the default value when adding a record
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
 				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
 
 		vObjectService.initialize(viewChargement, query, dataObjectService.getView(dataModelChargement),
@@ -252,7 +252,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VERSION));
 
 		// build the default value when adding a record
-		HashMap<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
 				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
 
 		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelChargement),

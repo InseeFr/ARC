@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.query.dao;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ public class QueryDao extends VObjectHelperDao {
 	 * @param viewWsContext
 	 */
 	public void initializeQuery(VObject viewQuery, String myQuery) {
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 
 		if (myQuery!=null){
 			String m=myQuery.trim();
@@ -64,7 +65,7 @@ public class QueryDao extends VObjectHelperDao {
 		query.build(SQL.SELECT, ColumnEnum.TABLENAME, SQL.FROM, nameOfViewTable);
 		query.build(SQL.WHERE, ColumnEnum.SCHEMANAME, "='" + mySchema + "'");
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewTable, query, "arc.ihm_table", defaultInputFields);
 	}

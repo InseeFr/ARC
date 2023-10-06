@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -63,7 +64,7 @@ public abstract class EntityProvider<T> implements Function<ResultSet, T> {
 				 * int/bigint + sequence, il renvoit une serial/bigserial. sauf que l'on n'en
 				 * veut pas, alors on doit corriger ça à la main
 				 */
-				HashMap<String, String> correctionType = new HashMap<>();
+				Map<String, String> correctionType = new HashMap<>();
 				correctionType.put("serial", "int4");
 				correctionType.put("bigserial", "int8");
 				if (correctionType.containsKey(rsmd.getColumnTypeName(i))) {

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +42,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		query.append(SQL.FROM);
 		query.append(dataObjectService.getView(dataModelListNomenclatures));
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewListNomenclatures, query, dataObjectService.getView(dataModelListNomenclatures),
 				defaultInputFields);
@@ -62,7 +63,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		query.append(SQL.FROM);
 		query.append("arc." + tableSelected); // ?
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		defaultInputFields.put(nomTable, tableSelected);
 		// initialize vobject
 		vObjectService.initialize(viewNomenclature, query, "arc." + tableSelected, defaultInputFields);
@@ -87,7 +88,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 				query.quoteText(typeNomenclature(selectedRecords.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0))));
 
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		defaultInputFields.put(ColumnEnum.TYPE_NMCL.getColumnName(),
 				typeNomenclature(selectedRecords.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0)));
 

@@ -1,15 +1,16 @@
 package fr.insee.arc.web.gui.maintenanceparametre.model;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import fr.insee.arc.web.gui.all.util.ConstantVObject;
-import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
+import fr.insee.arc.web.gui.all.util.VObject;
 
 
 public class ViewParameters extends VObject {
 
-	private static final HashMap<String, ColumnRendering> columnMap= new HashMap<>();
+	private static final Map<String, ColumnRendering> columnMap= new HashMap<>();
 
 	static {
 		columnMap.put("i", new ColumnRendering(false, "i", "0%", "text", null, false));

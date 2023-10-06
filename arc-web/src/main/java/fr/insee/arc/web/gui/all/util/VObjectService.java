@@ -508,7 +508,7 @@ public class VObjectService {
 							data.getConstantVObject().getColumnRender().get(headers.get(i)).query);
 					arrayVSelect.remove(0);
 					arrayVSelect.remove(0);
-					LinkedHashMap<String, String> m = new LinkedHashMap<>();
+					Map<String, String> m = new LinkedHashMap<>();
 					for (int j = 0; j < arrayVSelect.size(); j++) {
 						m.put(arrayVSelect.get(j).get(0), arrayVSelect.get(j).get(1));
 					}
@@ -518,7 +518,7 @@ public class VObjectService {
 					LoggerHelper.errorGenTextAsComment(getClass(), "buildHeadersVSelect()", LOGGER, ex);
 				}
 			} else {
-				LinkedHashMap<String, String> m = new LinkedHashMap<>();
+				Map<String, String> m = new LinkedHashMap<>();
 				headerVSelect.add(m);
 			}
 		}

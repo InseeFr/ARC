@@ -13,7 +13,7 @@ public class ViewControle extends AbstractViewRule {
 	
 	@Override
 	protected Map<String, ColumnRendering> extraFields() {
-		HashMap<String, ColumnRendering> columnRenderings = new HashMap<>();
+		Map<String, ColumnRendering> columnRenderings = new HashMap<>();
         columnRenderings.put("id_classe", new ColumnRendering(true, "label.control.type", "13%", "select",
         		new ArcPreparedStatementBuilder("select id, id from arc.ext_type_controle order by ordre"), true));
         columnRenderings.put("rubrique_pere", new ColumnRendering(true, "label.element.main", "11%", "text", null, true));

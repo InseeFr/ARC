@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,7 @@ import fr.insee.arc.utils.utils.Sleep;
  */
 class BatchARC implements IReturnCode {
 	private static final Logger LOGGER = LogManager.getLogger(BatchARC.class);
-	private static HashMap<String, String> mapParam = new HashMap<>();
+	private static Map<String, String> mapParam = new HashMap<>();
 
 	/**
 	 * variable dateInitialisation si vide (ou si date du jour+1 depassé à 20h), je

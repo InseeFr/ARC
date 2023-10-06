@@ -13,7 +13,7 @@ public class ViewChargement extends AbstractViewRule {
     
     @Override
     protected Map<String, ColumnRendering> extraFields() {
-    	HashMap<String, ColumnRendering> columnRenderings = new HashMap<>();
+    	Map<String, ColumnRendering> columnRenderings = new HashMap<>();
         columnRenderings.put("type_fichier", new ColumnRendering(true, "label.file.type", "10%", "select",
         		new ArcPreparedStatementBuilder("select id, id from arc.ext_type_fichier_chargement order by ordre"), true));
         columnRenderings.put("delimiter", new ColumnRendering(true, "label.file.delimiter", "10%", "text", null, true));

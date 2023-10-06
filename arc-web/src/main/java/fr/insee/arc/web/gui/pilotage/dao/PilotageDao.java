@@ -50,7 +50,7 @@ public class PilotageDao extends VObjectHelperDao {
 		viewPilotageBAS.setNoCount(true);
 		viewPilotageBAS.setNoLimit(true);
 
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT date_entree ");
@@ -109,7 +109,7 @@ public class PilotageDao extends VObjectHelperDao {
 		requete.append("group by date_entree, phase_traitement, etat_traitement, rapport ");
 		requete.append("order by date_entree asc ");
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewRapportBAS, requete, null, defaultInputFields);
 	}
@@ -123,7 +123,7 @@ public class PilotageDao extends VObjectHelperDao {
 			requete.append("select * from " + dataObjectService.getView(dataModelArchiveBAS) + " where entrepot="
 					+ requete.quoteText(entrepotLecture) + " ");
 			// default value
-			HashMap<String, String> defaultInputFields = new HashMap<>();
+			Map<String, String> defaultInputFields = new HashMap<>();
 			// initialize vobject
 			vObjectService.initialize(viewArchiveBAS, requete, null, defaultInputFields);
 		} else {
@@ -143,7 +143,7 @@ public class PilotageDao extends VObjectHelperDao {
 			requete.append("select ''::text as id_entrepot");
 		}
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewEntrepotBAS, requete, null, defaultInputFields);
 
@@ -156,7 +156,7 @@ public class PilotageDao extends VObjectHelperDao {
 
 		if (!selectionLigne.isEmpty() && !selectionColonne.isEmpty()) {
 
-			HashMap<String, String> defaultInputFields = new HashMap<>();
+			Map<String, String> defaultInputFields = new HashMap<>();
 
 			String phase = ManipString.substringBeforeLast(selectionColonne.get(0), "_").toUpperCase();
 			String etat = ManipString.substringAfterLast(selectionColonne.get(0), "_").toUpperCase();

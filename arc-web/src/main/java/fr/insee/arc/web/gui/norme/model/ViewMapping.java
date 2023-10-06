@@ -12,7 +12,7 @@ public class ViewMapping extends AbstractViewRule {
 
 	@Override
 	protected Map<String, ColumnRendering> extraFields() {
-		HashMap<String, ColumnRendering> columnRenderings = new HashMap<>();
+		Map<String, ColumnRendering> columnRenderings = new HashMap<>();
         columnRenderings.put("variable_sortie", new ColumnRendering(true, "label.mapmodel.field", "10%", "text", null, false));
         columnRenderings.put("expr_regle_col", new ColumnRendering(true, "label.sql.expression", "50%", "text", null, true));
         columnRenderings.put("type_sortie", new ColumnRendering(true, "label.mapmodel.field.type", "10%", "text", null, false));

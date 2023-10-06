@@ -154,7 +154,7 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 			dao.setSelectedRecords(selectionFamilleNorme);
 			List<String> listeTableFamille = dao.getListeTableMetierFamille();
 			// render column
-			HashMap<String, ColumnRendering> rendering = ViewVariableMetier
+			Map<String, ColumnRendering> rendering = ViewVariableMetier
 					.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
 			rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
 			// initialize column rendering

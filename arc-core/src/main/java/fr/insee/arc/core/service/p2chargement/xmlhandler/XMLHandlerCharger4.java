@@ -56,11 +56,11 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 	// map le nom des balises trouvé dans le fichier XML avec leur nombre
 	// d'occurence en cours du traitement
-	private HashMap<String, Integer> col = new HashMap<>();
+	private Map<String, Integer> col = new HashMap<>();
 	// on met dans cette map les balises pour lesquels le parser a trouvé de la
 	// données
 	// l'integer ne sert à rien -> refactor avec un set
-	private HashMap<String, Integer> colData = new HashMap<>();
+	private Map<String, Integer> colData = new HashMap<>();
 
 	private HashMap<Integer, Integer> tree = new HashMap<>();
 	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
@@ -101,7 +101,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 
 	private static final String ALTER = "ALTER";
 
-	private HashMap<String, StringBuilder> requetes = new HashMap<>();
+	private Map<String, StringBuilder> requetes = new HashMap<>();
 	private int requetesLength = 0;
 
 	// initialize the integration date with current

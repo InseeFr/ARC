@@ -13,7 +13,7 @@ public class ViewNormage extends AbstractViewRule {
 
 	@Override
 	protected Map<String, ColumnRendering> extraFields() {
-		HashMap<String, ColumnRendering> columnRenderings = new HashMap<>();
+		Map<String, ColumnRendering> columnRenderings = new HashMap<>();
         columnRenderings.put("id_classe", new ColumnRendering(true, "label.structure.type", "23%", "select",
         		new ArcPreparedStatementBuilder("select id, id from arc.ext_type_normage order by ordre"), true));
         columnRenderings.put("rubrique", new ColumnRendering(true, "label.element.main", "24%", "text", null, true));

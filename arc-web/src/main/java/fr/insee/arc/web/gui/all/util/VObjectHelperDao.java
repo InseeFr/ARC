@@ -33,8 +33,8 @@ public class VObjectHelperDao implements IDao  {
 	 * @param selectedColumns
 	 * @return
 	 */
-	public HashMap<String, String> buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum... selectedColumns) {
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+	public Map<String, String> buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum... selectedColumns) {
+		Map<String, String> defaultInputFields = new HashMap<>();
 		for (ColumnEnum selectedColumn : selectedColumns) {
 			defaultInputFields.put(selectedColumn.getColumnName(),
 					selectedRecords.get(selectedColumn.getColumnName()).get(0));

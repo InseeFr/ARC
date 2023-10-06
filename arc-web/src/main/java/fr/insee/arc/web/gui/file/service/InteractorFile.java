@@ -88,7 +88,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	// visual des Files
 	public void initializeDirIn() {
 		loggerDispatcher.debug("/* initializeDirIn */", LOGGER);
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		List<List<String>> listeFichier = getDirFiles(views.getDirIn(), views.getViewDirIn());
 		this.vObjectService.initializeByList(views.getViewDirIn(), listeFichier, defaultInputFields);
 	}
@@ -96,7 +96,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 	// visual des Files
 	public void initializeDirOut() {
 		loggerDispatcher.debug("/* initializeDirOut */", LOGGER);
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 
 		List<List<String>> listeFichier = getDirFiles(views.getDirOut(), views.getViewDirOut());
 

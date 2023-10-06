@@ -36,8 +36,8 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 		super();
 	}
 
-	private HashMap<String, Integer> col = new HashMap<>();
-	private HashMap<String, Integer> colData = new HashMap<>();
+	private Map<String, Integer> col = new HashMap<>();
+	private Map<String, Integer> colData = new HashMap<>();
 	private HashMap<Integer, Integer> tree = new HashMap<>();
 	private HashMap<Integer, Boolean> treeNode = new HashMap<>();
 
@@ -75,7 +75,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 	/* stacks of ancestors */
 	/* ancestors with raw xml name */
-	private HashMap<String, Integer> treeStackQName = new HashMap<String, Integer>();
+	private Map<String, Integer> treeStackQName = new HashMap<>();
 	private Integer orderTreeStackQName = 0;
 
 	/* ancestors with database name */

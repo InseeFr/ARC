@@ -34,7 +34,7 @@ public void initializeViewUn(VObject viewUn) {
     ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
     query.append(SQL.SELECT);
     // reste de la requête
-    HashMap<String, String> defaultInputFields = new HashMap<>();
+    Map<String, String> defaultInputFields = new HashMap<>();
     vObjectService.initialize(viewUn, query,
         dataObjectService.getView(dataModelUn), defaultInputFields);
     }

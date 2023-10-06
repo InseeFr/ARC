@@ -35,7 +35,7 @@ public class GenericBeanTest {
 	@Test
 	public void mapIndexOk() {
 		genericBean = new GenericBean(headers, types, new ArrayList<>());
-		HashMap<String, Integer> mapIndex = genericBean.mapIndex();
+		Map<String, Integer> mapIndex = genericBean.mapIndex();
 		assertEquals(0, mapIndex.get("col1").intValue());
 		assertEquals(1, mapIndex.get("col2").intValue());
 	}
@@ -48,7 +48,7 @@ public class GenericBeanTest {
 		types.add("int");
 		//when
 		genericBean = new GenericBean(headers, types, new ArrayList<>());
-		HashMap<String, String> mapTypes = genericBean.mapTypes();
+		Map<String, String> mapTypes = genericBean.mapTypes();
 		//then
 		assertEquals("text", mapTypes.get("col1"));
 		assertEquals("int", mapTypes.get("col2"));

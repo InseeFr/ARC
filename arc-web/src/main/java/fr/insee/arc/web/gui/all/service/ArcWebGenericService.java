@@ -150,7 +150,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 
 		if (this.bacASable == null) {
 			// by default bacASable is the first element of the linkedhashmap
-			List<String> keys=new ArrayList<>(((LinkedHashMap<String,String>) this.envMap).keySet());
+			List<String> keys=new ArrayList<>(((Map<String,String>) this.envMap).keySet());
 			if (!keys.isEmpty())
 			{
 				this.bacASable = keys.get(0);

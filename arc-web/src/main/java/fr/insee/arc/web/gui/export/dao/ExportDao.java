@@ -48,7 +48,7 @@ public class ExportDao extends VObjectHelperDao {
 		StringBuilder columns = query.sqlListeOfColumnsFromModel(dataModelExport);
 		query.build(SQL.SELECT, columns, SQL.FROM, nameOfViewExport);
 		// default value
-		HashMap<String, String> defaultInputFields = new HashMap<>();
+		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
 		vObjectService.initialize(viewExport, query, nameOfViewExport, defaultInputFields);
 	}
