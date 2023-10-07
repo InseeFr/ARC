@@ -4,7 +4,6 @@ import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.ManipString;
 
 public class DatabaseConnexionConfiguration {
 
@@ -17,7 +16,7 @@ public class DatabaseConnexionConfiguration {
 	 */
 	public static StringBuilder configConnection(String anEnvExecution) {
 		StringBuilder requete = new StringBuilder();
-		requete.append(ModeRequeteImpl.arcModeRequeteEngine(ManipString.substringBeforeFirst(TableNaming.dbEnv(anEnvExecution), ".")));
+		requete.append(ModeRequeteImpl.arcModeRequeteEngine(anEnvExecution));
 		return requete;
 	}
 	

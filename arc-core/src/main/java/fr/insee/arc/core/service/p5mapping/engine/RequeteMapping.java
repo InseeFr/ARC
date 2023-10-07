@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
@@ -124,8 +125,8 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 		this.jeuDeRegle = aJeuDeRegle;
 		this.environnement = anEnvironnement;
 		this.nomTablePrecedente = aNomTablePrecedente;
-		this.nomTableModVariableMetier = TableNaming.dbEnv(this.environnement) + "mod_variable_metier";
-		this.nomTableRegleMapping = TableNaming.dbEnv(this.environnement) + "mapping_regle";
+		this.nomTableModVariableMetier = ViewEnum.MOD_VARIABLE_METIER.getFullName(this.environnement);
+		this.nomTableRegleMapping = ViewEnum.MAPPING_REGLE.getFullName(this.environnement);
 	}
 
 	public void construire() throws ArcException {

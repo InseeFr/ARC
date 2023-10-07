@@ -1,6 +1,8 @@
 package fr.insee.arc.web.gui.export.service;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 
@@ -80,8 +83,8 @@ public class ServiceViewFileExport extends InteractorExport {
 			}
 
 			String repertoire = properties.getBatchParametersDirectory();
-			String envDir = getBacASable().replace(".", "_").toUpperCase();
-			String dirOut = repertoire + envDir;
+			
+			String dirOut = FileSystemManagement.directoryEnvRoot(repertoire, getBacASable());
 
 			List<String> r = new ArrayList<>(Arrays.asList("EXPORT"));
 

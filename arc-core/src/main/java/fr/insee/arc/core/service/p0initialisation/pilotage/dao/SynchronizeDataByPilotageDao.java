@@ -115,9 +115,9 @@ public class SynchronizeDataByPilotageDao {
 			if (i > 2) {
 				requete.append(SQL.UNION_ALL);
 			}
-			requete.append(FormatSQL.tableExists(TableNaming.dbEnv(envExecution) + phase[i] + "$%$tmp$%"));
+			requete.append(FormatSQL.tableExists(ViewEnum.getFullName(envExecution, phase[i] + "$%$tmp$%")));
 			requete.append(SQL.UNION_ALL);
-			requete.append(FormatSQL.tableExists(TableNaming.dbEnv(envExecution) + phase[i] + "\\_%$tmp$%"));
+			requete.append(FormatSQL.tableExists(ViewEnum.getFullName(envExecution, phase[i] + "\\_%$tmp$%")));
 		}
 		return requete;
 	}

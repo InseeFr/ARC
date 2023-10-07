@@ -73,7 +73,7 @@ public class BddPatcher {
 			query = query.replace(NUMBER_OF_SANDBOXES_PLACEHOLDER, String.valueOf(nbSandboxes));
 		}
 		if (envExecution != null) {
-			query = query.replace(SANDBOX_ENVIRONMENT_PLACEHOLDER, envExecution.replace(".", "_"));
+			query = query.replace(SANDBOX_ENVIRONMENT_PLACEHOLDER, envExecution);
 		}
 		return query;
 	}
@@ -298,14 +298,7 @@ public class BddPatcher {
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.WHERE);
-		
-		// mapping tables
-		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(envExecution));
-		query.build(SQL.AND);
-		query.build(ColumnEnum.TABLE_NAME, SQL.LIKE, query.quoteText(TraitementPhase.MAPPING.toString().toLowerCase()+"\\_%ok"));
 
-		query.build(SQL.OR);
-		
 		// family tables			
 		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(SchemaEnum.ARC_METADATA.getSchemaName()));
 		query.build(SQL.AND);
@@ -319,6 +312,24 @@ public class BddPatcher {
 		return query;		
 	}
 
+	/**
+	 * Build the condition to retrieve tables that contains models
+	 * @param envExecution
+	 * @return
+	 */
+	private static ArcPreparedStatementBuilder conditionToRetrieveMappingTablesInSchema(String envExecution) {
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.WHERE);
+		
+		// mapping tables
+		query.build(ColumnEnum.TABLE_SCHEMA, "=", query.quoteText(envExecution));
+		query.build(SQL.AND);
+		query.build(ColumnEnum.TABLE_NAME, SQL.LIKE, query.quoteText(TraitementPhase.MAPPING.toString().toLowerCase()+"\\_%ok"));
+				
+		return query;		
+	}
+	
 	/**
 	 * Build the condition to retrieve tables that contains rules
 	 * @param envExecution
@@ -416,5 +427,9 @@ public class BddPatcher {
 		return retrieveTablesFromSchema(connexion, envExecution, BddPatcher::conditionToRetrieveModelTablesInSchema );
 	}
 	
+	public static List<String> retrieveMappingTablesFromSchema(Connection connexion, String envExecution)
+			throws ArcException {
+		return retrieveTablesFromSchema(connexion, envExecution, BddPatcher::conditionToRetrieveMappingTablesInSchema );
+	}
 
 }

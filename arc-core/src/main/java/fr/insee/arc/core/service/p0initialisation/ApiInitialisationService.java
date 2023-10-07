@@ -2,12 +2,14 @@ package fr.insee.arc.core.service.p0initialisation;
 
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p0initialisation.filesystem.RestoreFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFilesOperation;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
 /**
@@ -37,12 +39,12 @@ public class ApiInitialisationService extends ApiService {
 
 	@Override
 	public void executer() throws ArcException {
-
+		
 		// Supprime les lignes devenues inutiles récupérées par le webservice de la
 		// table pilotage_fichier
 		// Déplace les archives dans OLD
 		new CleanPilotageOperation(this.coordinatorSandbox).removeDeprecatedFiles();
-
+		
 		// Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
 		// l'environnement d'excécution courant
 		// mettre à jour les tables métier avec les paramêtres de la famille de norme

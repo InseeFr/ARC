@@ -21,6 +21,7 @@ import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
+import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -62,7 +63,7 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	protected String idSource;
 
-	protected Boolean todo = false;
+	protected boolean todo = false;
 
 	protected Map<String, List<String>> tabIdSource;
 
@@ -76,17 +77,16 @@ public abstract class ApiService implements IConstanteNumerique {
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");
 
+		this.envExecution = Patch.normalizeSchemaName(aEnvExecution);
+
 		try {
 			this.connexion = new ScalableConnection(
 					UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getDriverConnexion());
-			this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), aEnvExecution);
+			this.coordinatorSandbox = new Sandbox(this.connexion.getCoordinatorConnection(), this.envExecution);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "Error in initializing connexion");
 		}
 
-		this.envExecution = aEnvExecution;
-
-		
 		// current phase and compute the previous phase
 		this.currentPhase = aCurrentPhase;
 		this.previousPhase = TraitementPhase.valueOf(this.getCurrentPhase()).previousPhase().toString();
@@ -97,14 +97,13 @@ public abstract class ApiService implements IConstanteNumerique {
 		// indicate if api is triggered by batch or not
 		this.paramBatch = paramBatch;
 
-
 		// inputTables
-		this.tablePrevious = (TableNaming.dbEnv(aEnvExecution) + this.getPreviousPhase() + "_" + TraitementEtat.OK).toLowerCase();
+		this.tablePrevious = TableNaming.phaseDataTableName(this.envExecution, this.getPreviousPhase(),
+				TraitementEtat.OK);
 
 		// Tables de pilotage et pilotage temporaire
-		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(aEnvExecution);
-		this.tablePilTemp = TableNaming.temporaryTableName(aEnvExecution, aCurrentPhase,
-				ViewEnum.PILOTAGE_FICHIER);
+		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(this.envExecution);
+		this.tablePilTemp = TableNaming.temporaryTableName(this.envExecution, aCurrentPhase, ViewEnum.PILOTAGE_FICHIER);
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** Fin constructeur ApiService **");
 	}
@@ -265,8 +264,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param etat
 	 * @return
 	 */
-	public Map<String, List<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase,
-			String etat) {
+	public Map<String, List<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase, String etat) {
 		LoggerHelper.info(LOGGER_APISERVICE, "pilotageListIdsource");
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + tablePilotage + " ");

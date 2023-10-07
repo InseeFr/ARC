@@ -90,7 +90,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		this.tableChargementPilTemp = "chargement_pil_temp";
 
 		// table de sortie des données dans l'application (hors du module)
-		this.tableChargementOK = TableNaming.globalTableName(envExecution, this.currentPhase,
+		this.tableChargementOK = TableNaming.phaseDataTableName(envExecution, this.currentPhase,
 				TraitementEtat.OK);
 
 		// thread generic dao

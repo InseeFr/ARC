@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.exception.ArcException;
@@ -61,7 +62,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
 	public TableMapping(String anEnvironnement, String aNomTableCourt) {
 		this.nomTableCourt = aNomTableCourt;
-		this.nomTable = new StringBuilder(TableNaming.dbEnv(anEnvironnement)).append(aNomTableCourt).toString();
+		this.nomTable = ViewEnum.getFullName(anEnvironnement,aNomTableCourt);
 		this.ensembleVariableMapping = new TreeSet<>();
 		this.environnement = anEnvironnement;
 		this.ensembleRegleMappingClefPrimaire = new HashSet<>();

@@ -8,8 +8,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -33,9 +31,6 @@ import fr.insee.arc.web.gui.all.util.VObjectService;
 
 @Component
 public class PilotageDao extends VObjectHelperDao {
-
-	private static final Logger LOGGER = LogManager.getLogger(PilotageDao.class);
-
 	
 	public void initializePilotageBAS(VObject viewPilotageBAS) {
 

@@ -18,12 +18,12 @@ public class DataObjectService {
 	private String sandboxSchema;
 
 	/**
-	 * Return the SQL table name
+	 * Return the table name
 	 * 
 	 * @param e
 	 * @return
 	 */
-	public String getView(ViewEnum e) {
+	private String getViewRaw(ViewEnum e) {
 
 		if ((e.getTableLocation().equals(SchemaEnum.SANDBOX)
 				|| e.getTableLocation().equals(SchemaEnum.SANDBOX_GENERATED)) && this.sandboxSchema != null) {
@@ -33,9 +33,19 @@ public class DataObjectService {
 		return getFullTableNameInSchema(e.getTableLocation(), e.getTableName());
 
 	}
+	
+	/**
+	 * Return the table name (lowercase db convention)
+	 * 
+	 * @param e
+	 * @return
+	 */
+	public String getView(ViewEnum e) {
+		return getViewRaw(e).toLowerCase();
+	}
 
 	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename) {
-		return schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename;
+		return (schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename).toLowerCase();
 	}
 
 	public String getSandboxSchema() {

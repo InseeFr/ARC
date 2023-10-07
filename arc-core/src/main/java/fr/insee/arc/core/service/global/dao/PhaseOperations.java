@@ -5,6 +5,7 @@ import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.SQL;
@@ -135,7 +136,9 @@ public class PhaseOperations {
 				if (j > 0) {
 					requete.append(" UNION ALL ");
 				}
-				requete.append(FormatSQL.tableExists(TableNaming.dbEnv(env) + phase + "%\\_" + etat[j]));
+				requete.append(FormatSQL.tableExists(
+						ViewEnum.getFullName(env, phase + "%\\_" + etat[j])
+						));
 			}
 		}
 		return requete;

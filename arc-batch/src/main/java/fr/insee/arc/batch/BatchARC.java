@@ -24,6 +24,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
+import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.batch.IReturnCode;
@@ -147,7 +148,7 @@ class BatchARC implements IReturnCode {
 			envExecution = properties.getBatchExecutionEnvironment();
 		}
 
-		envExecution = envExecution.replace(".", "_");
+		envExecution = Patch.normalizeSchemaName(envExecution);
 
 		repertoire = properties.getBatchParametersDirectory();
 
@@ -192,8 +193,16 @@ class BatchARC implements IReturnCode {
 				maintenanceTablePilotageBatch();
 
 				// delete work directories and move back files that were pending but not finished
-				resetWorkDirectory();
+				message("Déplacements de fichiers");
 
+				// on vide les repertoires de chargement OK, KO, ENCOURS
+				effacerRepertoireChargement(repertoire, envExecution);
+
+				// des archives n'ont elles pas été traitées jusqu'au bout ?
+				deplacerFichiersNonTraites();
+
+				message("Fin des déplacements de fichiers");
+				
 				// initialize. Phase d'initialisation
 				initialize();
 
@@ -280,19 +289,20 @@ class BatchARC implements IReturnCode {
 		}
 		
 		// Effacer les fichiers des répertoires OK et KO
-		String envDirectory = envExecution.replace(".", "_").toUpperCase();
+		cleanDirectory(directory, envExecution, TraitementEtat.OK);
 
-		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.OK);
+		cleanDirectory(directory, envExecution, TraitementEtat.KO);
 
-		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.KO);
-
-		cleanDirectory(directory, envExecution, envDirectory, TraitementEtat.ENCOURS);
+		cleanDirectory(directory, envExecution, TraitementEtat.ENCOURS);
 
 	}
 
-	private static void cleanDirectory(String directory, String envExecution, String envDirectory, TraitementEtat etat)
+	/**
+	 * delete all files and directory inside the reception_ko, reception_encours and reception_ko
+	 */
+	private static void cleanDirectory(String directory, String envExecution, TraitementEtat etat)
 			throws ArcException {
-		File f = Paths.get(DirectoryPath.directoryReceptionEtat(directory, envDirectory, etat)).toFile();
+		File f = Paths.get(DirectoryPath.directoryReceptionEtat(directory, envExecution, etat)).toFile();
 		if (!f.exists()) {
 			return;
 		}
@@ -433,19 +443,6 @@ class BatchARC implements IReturnCode {
 		if (dejaEnCours) {
 			copyFileFromArchiveDirectoryToOK(envExecution, repertoire, aBouger);
 		}
-	}
-
-	private void resetWorkDirectory() throws ArcException, IOException {
-
-		message("Déplacements de fichiers");
-
-		// on vide les repertoires de chargement OK, KO, ENCOURS
-		effacerRepertoireChargement(repertoire, envExecution);
-
-		// des archives n'ont elles pas été traitées jusqu'au bout ?
-		deplacerFichiersNonTraites();
-
-		message("Fin des déplacements de fichiers");
 	}
 
 	/**

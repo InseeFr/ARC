@@ -144,6 +144,17 @@ public class SynchronizeRulesAndMetadataOperation {
 
 			CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, table, gb);
 		}
+		
+		// copy an empty image of  
+		tablesToCopyIntoExecutor = new ArrayList<>(BddPatcher.retrieveMappingTablesFromSchema(coordinatorConnexion, envExecution));
+
+		for (String table : new HashSet<String>(tablesToCopyIntoExecutor)) {
+			
+			GenericBean gb = SynchronizeRulesAndMetadataDao.execQuerySelectMetaDataOnlyFrom(coordinatorConnexion, table);
+
+			CopyObjectsToDatabase.execCopyFromGenericBeanIfTableNotExists(executorConnection, table, gb);
+		}
+		
 	}
 
 	/**

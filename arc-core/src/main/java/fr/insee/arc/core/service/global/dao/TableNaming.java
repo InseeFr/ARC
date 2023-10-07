@@ -25,25 +25,12 @@ public class TableNaming {
 	 * @return
 	 */
 	public static String temporaryTableName(String aEnvExecution, String aCurrentPhase, ViewEnum table) {
-		return FormatSQL.temporaryTableName(dbEnv(aEnvExecution) + aCurrentPhase + "_" + table);
+		return ViewEnum.getFullName(aEnvExecution, FormatSQL.temporaryTableName(aCurrentPhase + "_" + table));
 	}
 
-	public static String globalTableName(String aEnvExecution, String aPhase, TraitementEtat etat) {
+	public static String phaseDataTableName(String aEnvExecution, String aPhase, TraitementEtat etat) {
 		return ViewEnum.getFullName(aEnvExecution, aPhase + "_" + etat.toString());
 	}
-
-	/**
-	 * Permet la rétro compatibilité pour la migration vers 1 schéma par
-	 * envirionnement d'execution
-	 * 
-	 * @param anEnv
-	 * @return
-	 */
-	public static String dbEnv(String env) {
-		return env.replace(".", "_") + ".";
-	}
-
-
     
     public static ArcPreparedStatementBuilder queryTablesFromPgMetadata()
     {

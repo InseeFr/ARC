@@ -73,8 +73,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.tableControlePilTemp = FormatSQL.temporaryTableName("controle_pil_temp");
 
 		// tables finales
-		this.tableOutOk = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK);
-		this.tableOutKo = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO);
+		this.tableOutOk = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK);
+		this.tableOutKo = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO);
 		
 		// arc thread dao
 		arcThreadGenericDao=new ThreadOperations(connexion, tablePil, tablePilTemp, tableControlePilTemp, tablePrevious, paramBatch, idSource);

@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.global.dao;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 
@@ -29,7 +30,7 @@ public class FileSystemManagement {
 	private static final String DIRECTORY_OLD_QUALIFIIER = "OLD";
 
 	public static String directoryEnvRoot(String rootDirectory, String env) {
-		return rootDirectory + File.separator + env.replace(".", "_").toUpperCase();
+		return Paths.get(rootDirectory).toString() + File.separator + env.toUpperCase();
 	}
 
 	public static String directoryPhaseRoot(String rootDirectory, String env, TraitementPhase t) {

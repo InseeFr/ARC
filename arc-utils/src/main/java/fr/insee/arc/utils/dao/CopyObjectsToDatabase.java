@@ -24,9 +24,15 @@ public class CopyObjectsToDatabase {
 	 */
 	public static void execCopyFromGenericBean(Connection connection, String tableName, GenericBean gb)
 			throws ArcException {
-		execCopyFromGenericBean(connection, tableName, gb, CHUNK_SIZE);
+		execCopyFromGenericBean(connection, tableName, gb, CHUNK_SIZE, true);
 	}
 
+	public static void execCopyFromGenericBeanIfTableNotExists(Connection connection, String tableName, GenericBean gb)
+			throws ArcException {
+		execCopyFromGenericBean(connection, tableName, gb, CHUNK_SIZE, false);
+	}
+
+	
 	/**
 	 * execute copy from GenericBean to database by chunk of size @param chunkSize
 	 * 
@@ -36,11 +42,11 @@ public class CopyObjectsToDatabase {
 	 * @param chunkSize
 	 * @throws ArcException
 	 */
-	private static void execCopyFromGenericBean(Connection connection, String tableName, GenericBean gb, int chunkSize)
+	private static void execCopyFromGenericBean(Connection connection, String tableName, GenericBean gb, int chunkSize, boolean replaceTargetTable)
 			throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 
-		query.append(query.createWithGenericBean(tableName, gb));
+		query.append(query.createWithGenericBean(tableName, gb, replaceTargetTable));
 
 		int cursor = 0;
 		boolean stillToDo = true;

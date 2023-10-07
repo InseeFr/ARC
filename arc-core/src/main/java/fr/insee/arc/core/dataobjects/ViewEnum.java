@@ -142,6 +142,10 @@ public enum ViewEnum {
 	, TMP_FILES("tmp_files", SchemaEnum.TEMPORARY, ColumnEnum.FILE_NAME)
 
 	, PG_TABLES(PgViewEnum.PG_TABLES)
+	
+	
+	// webservice de récupération de données
+	, ID_SOURCE("id_source", SchemaEnum.SANDBOX_GENERATED)
 
 	;
 
@@ -194,11 +198,11 @@ public enum ViewEnum {
 	}
 
 	public String getFullName(String schema) {
-		return schema + SQL.DOT.getSqlCode() + this.tableName;
+		return (schema + SQL.DOT.getSqlCode() + this.tableName).toLowerCase();
 	}
 
 	public static String getFullName(String schema, String providedTableName) {
-		return providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName;
+		return (providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName).toLowerCase();
 	}
 	
 	public ColumnEnum col(ColumnEnum e) {

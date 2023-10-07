@@ -75,8 +75,8 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
         this.tableNormageOKTemp = FormatSQL.temporaryTableName("ok_Temp");
         this.tableNormageKOTemp = FormatSQL.temporaryTableName("ko_Temp");       
         
-        this.tableNormageOK = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK);
-        this.tableNormageKO = TableNaming.globalTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO);
+        this.tableNormageOK = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK);
+        this.tableNormageKO = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO);
 
         // tables héritées
         this.tablePil = theApi.getTablePil();

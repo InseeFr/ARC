@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p5mapping.engine.TableMapping;
 import fr.insee.arc.core.service.p5mapping.engine.VariableMapping;
@@ -77,7 +78,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
             if (start > end) {
                 returned.append(intermediaire.substring(end, start));
             }
-            returned.append(TableNaming.dbEnv(this.environnement) + intermediaire.substring(start + TWO, matcher.end() - ONE));
+            returned.append(this.environnement + "." + intermediaire.substring(start + TWO, matcher.end() - ONE));
             end = matcher.end();
         }
         returned.append(intermediaire.substring(end));
@@ -91,7 +92,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
     private String obtenirRequeteExecutable() {
         String returned = this.getExpression().replaceAll(tokenRegexDebutOuFin, empty);
         for (TableMapping table : this.ensembleTableMapping) {
-            returned = returned.replace(tokenTable(table.getNomTableCourt()), TableNaming.dbEnv(this.environnement) + table);
+            returned = returned.replace(tokenTable(table.getNomTableCourt()), ViewEnum.getFullName(environnement, table.toString()));
         }
         return returned;
     }

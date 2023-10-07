@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
@@ -98,7 +99,7 @@ public class ImportStep1InitializeClientTablesService {
             executeIf(ServletArc.METADATA, () -> this.clientDao.createTableFamille(this.timestamp, client, environnement));
             executeIf(ServletArc.METADATA, () -> this.clientDao.createTablePeriodicite(this.timestamp, client, environnement));
             // on renvoie l'id du client avec son timestamp
-            resp.send(TableNaming.dbEnv(environnement) + client + "_" + this.timestamp);
+            resp.send(ViewEnum.getFullName(environnement, client + "_" + this.timestamp));
             resp.endSending();
         } catch (ArcException e) {
 			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep1InitializeClientTablesService **");

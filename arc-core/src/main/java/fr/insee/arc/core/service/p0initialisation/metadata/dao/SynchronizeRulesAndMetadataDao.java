@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.p0initialisation.metadata.dao;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,16 +8,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p5mapping.engine.ExpressionService;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
@@ -29,14 +27,14 @@ import fr.insee.arc.utils.utils.ManipString;
 public class SynchronizeRulesAndMetadataDao {
 
 	private static final Logger LOGGER = LogManager.getLogger(SynchronizeRulesAndMetadataDao.class);
-	
+
 	public SynchronizeRulesAndMetadataDao(Sandbox sandbox) {
 		super();
 		this.sandbox = sandbox;
 	}
 
 	private Sandbox sandbox;
-	
+
 	/**
 	 * Copy the table containing user rules to the sandbox so they will be used by
 	 * the sandbox process
@@ -53,9 +51,6 @@ public class SynchronizeRulesAndMetadataDao {
 		String anExecutionEnvironment = sandbox.getSchema();
 
 		try {
-
-			anExecutionEnvironment = anExecutionEnvironment.replace(".", "_");
-
 			StringBuilder requete = new StringBuilder();
 			TraitementTableParametre[] r = TraitementTableParametre.values();
 			StringBuilder condition = new StringBuilder();
@@ -138,24 +133,23 @@ public class SynchronizeRulesAndMetadataDao {
 
 			if (requetesDeCreationTablesNmcl != null) {
 				for (String tableName : requetesDeCreationTablesNmcl) {
-					requete.append("\n CREATE TABLE " + TableNaming.dbEnv(anExecutionEnvironment) + tableName + " "
-							+ FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM arc." + tableName + ";");
+					requete.append("\n CREATE TABLE " + ViewEnum.getFullName(anExecutionEnvironment, tableName) + " "
+							+ FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM "
+							+ ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), tableName) + ";");
 				}
 			}
 
 			// 3.Execution du script Sql de suppression/création
 			UtilitaireDao.get(0).executeBlock(coordinatorConnexion, requete);
 
-		} catch (Exception e) {
+		} catch (ArcException e) {
 			LoggerHelper.trace(LOGGER,
 					"Problème lors de la copie des tables vers l'environnement : " + anExecutionEnvironment);
 			LoggerHelper.error(LOGGER, "Error in ApiInitialisation.copyRulesTablesToExecution");
 			throw e;
 		}
 	}
-	
-	
-	
+
 	/**
 	 * Créer ou detruire les colonnes ou les tables métiers en comparant ce qu'il y
 	 * a en base à ce qu'il y a de déclaré dans la table des familles de norme
@@ -163,19 +157,21 @@ public class SynchronizeRulesAndMetadataDao {
 	 * @param coordinatorOrExecutorConnexion
 	 * @throws ArcException
 	 */
-	public static void mettreAJourSchemaTableMetier(Connection coordinatorOrExecutorConnexion, String envExecution) throws ArcException {
+	public static void mettreAJourSchemaTableMetier(Connection coordinatorOrExecutorConnexion, String envExecution)
+			throws ArcException {
 		LoggerHelper.info(LOGGER, "mettreAJourSchemaTableMetier");
 		/*
 		 * Récupérer la table qui mappe : famille / table métier / variable métier et
 		 * type de la variable
 		 */
 		ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
-		requeteRef.append("SELECT lower(id_famille), lower('" + TableNaming.dbEnv(envExecution)
-				+ "'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
+		requeteRef.append("SELECT lower(id_famille), lower('" + envExecution
+				+ ".'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
 				+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
 
-		List<List<String>> relationalViewRef = UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef);
-				
+		List<List<String>> relationalViewRef = UtilitaireDao.get(0)
+				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef);
+
 		HierarchicalView familleToTableToVariableToTypeRef = HierarchicalView.asRelationalToHierarchical(
 				"(Réf) Famille -> Table -> Variable -> Type",
 				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
@@ -196,16 +192,13 @@ public class SynchronizeRulesAndMetadataDao {
 		requete.append(
 				" else replace(replace(lower(data_type),'double precision','float'),'integer','int') end type_variable_metier ");
 		requete.append("\n FROM information_schema.columns, " + ViewEnum.IHM_FAMILLE.getFullName());
-		requete.append("\n WHERE table_schema='"
-				+ ManipString.substringBeforeFirst(TableNaming.dbEnv(envExecution), ".").toLowerCase() + "' ");
-		requete.append("\n and table_name LIKE '"
-				+ ManipString.substringAfterFirst(TableNaming.dbEnv(envExecution), ".").toLowerCase()
-				+ "mapping\\_%' ");
-		requete.append("\n and table_name LIKE '"
-				+ ManipString.substringAfterFirst(TableNaming.dbEnv(envExecution), ".").toLowerCase()
-				+ "mapping\\_'||lower(id_famille)||'\\_%';");
+		requete.append("\n WHERE table_schema='" + envExecution + "' ");
+		requete.append("\n and table_name LIKE 'mapping\\_%' ");
+		requete.append("\n and table_name LIKE 'mapping\\_'||lower(id_famille)||'\\_%' ");
+		requete.append("\n ;");
 
-		List<List<String>> relationalView = UtilitaireDao.get(0).executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete);
+		List<List<String>> relationalView = UtilitaireDao.get(0)
+				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete);
 
 		HierarchicalView familleToTableToVariableToType = HierarchicalView.asRelationalToHierarchical(
 				"(Phy) Famille -> Table -> Variable -> Type",
@@ -317,23 +310,47 @@ public class SynchronizeRulesAndMetadataDao {
 				}
 			}
 		}
+
 		UtilitaireDao.get(0).executeBlock(coordinatorOrExecutorConnexion, requeteMAJSchema);
 	}
 
-
+	
 	/**
-	 * load all data table in a GenericBean
+	 * Query to return data from target table
+	 * if emptyTable is true, only metadata will be return without data
+	 * 
 	 * @param coordinatorConnexion
 	 * @param table
 	 * @return
 	 * @throws ArcException
 	 */
-	public static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table) throws ArcException {
+	private static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table, boolean emptyTable)
+			throws ArcException {
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
-				new ArcPreparedStatementBuilder("SELECT * FROM " + table)));
+				new ArcPreparedStatementBuilder("SELECT * FROM " + table + " " + (emptyTable ? "LIMIT 0" : ""))));
 	}
 
-	public void execQueryApplyExpressionsToControl(ExpressionService expressionService, JeuDeRegle ruleSet, GenericBean expressions) throws ArcException {
+	/**
+	 * Query to return data and metadata from target table
+	 * @param coordinatorConnexion
+	 * @param table
+	 * @return
+	 * @throws ArcException
+	 */
+	public static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table)
+			throws ArcException {
+		return execQuerySelectDataFrom(coordinatorConnexion, table, false);
+	}
+
+
+	public static GenericBean execQuerySelectMetaDataOnlyFrom(Connection coordinatorConnexion, String table)
+			throws ArcException {
+		return execQuerySelectDataFrom(coordinatorConnexion, table, true);
+	}
+	
+	
+	public void execQueryApplyExpressionsToControl(ExpressionService expressionService, JeuDeRegle ruleSet,
+			GenericBean expressions) throws ArcException {
 		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(),
 				expressionService.applyExpressionsToControl(ruleSet, expressions, sandbox.getSchema()));
 	}

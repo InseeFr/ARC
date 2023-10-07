@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -188,8 +189,7 @@ public class VObjectService {
 	 * @param reworkContent      function to rewrite the fetched content
 	 */
 	private void initialize(VObject data, ArcPreparedStatementBuilder mainQuery, String table,
-			Map<String, String> defaultInputFields,
-			Function<List<List<String>>, List<List<String>>> reworkContent) {
+			Map<String, String> defaultInputFields, Function<List<List<String>>, List<List<String>>> reworkContent) {
 		try {
 			LoggerHelper.debugAsComment(LOGGER, "initialize", data.getSessionName());
 
@@ -229,8 +229,8 @@ public class VObjectService {
 
 			List<List<String>> aContent = new ArrayList<>();
 			try {
-				aContent = reworkContent.apply(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete,
-						ModeRequeteImpl.arcModeRequeteIHM()));
+				aContent = reworkContent.apply(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
+						requete, ModeRequeteImpl.arcModeRequeteIHM()));
 			} catch (ArcException ex) {
 				data.setMessage(ex.getMessage());
 				LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
@@ -499,7 +499,7 @@ public class VObjectService {
 	private List<Map<String, String>> buildHeadersVSelect(VObject data, List<String> headers) {
 		List<List<String>> arrayVSelect = new ArrayList<>();
 		List<Map<String, String>> headerVSelect = new ArrayList<>();
-		
+
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null
 					&& data.getConstantVObject().getColumnRender().get(headers.get(i)).query != null) {
@@ -538,8 +538,7 @@ public class VObjectService {
 	/**
 	 * Remise à zéro des champs d'entrée avec les valeurs par défault
 	 */
-	private List<String> eraseInputFields(List<String> headersDLabel,
-			Map<String, String> defaultInputFields) {
+	private List<String> eraseInputFields(List<String> headersDLabel, Map<String, String> defaultInputFields) {
 		List<String> inputFields = new ArrayList<>();
 		for (int i = 0; i < headersDLabel.size(); i++) {
 			if (defaultInputFields.get(headersDLabel.get(i)) != null) {
@@ -565,8 +564,8 @@ public class VObjectService {
 			Arrays.asList(attributeValues).forEach((t) -> map.put(t.getFirst().toLowerCase(), t.getSecond()));
 
 			// Récupération des colonnes de la table cible
-			List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
-					new ArrayList<>(), currentData.getTable());
+			List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex)
+					.getColumns(this.connection, new ArrayList<>(), currentData.getTable());
 
 			Boolean allNull = true;
 			ArcPreparedStatementBuilder reqInsert = new ArcPreparedStatementBuilder();
@@ -651,8 +650,8 @@ public class VObjectService {
 
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 
-		List<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
-				new ArrayList<>(), currentData.getTable());
+		List<String> listeColonneNative = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex)
+				.getColumns(this.connection, new ArrayList<>(), currentData.getTable());
 		ArcPreparedStatementBuilder reqDelete = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < currentData.getSelectedLines().size(); i++) {
 			if (currentData.getSelectedLines().get(i) != null && currentData.getSelectedLines().get(i)) {
@@ -706,8 +705,8 @@ public class VObjectService {
 		}
 
 		try {
-			List<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex).getColumns(this.connection,
-					new ArrayList<>(), currentData.getTable());
+			List<String> nativeFieldsList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex)
+					.getColumns(this.connection, new ArrayList<>(), currentData.getTable());
 
 			// SQL update query
 			ArcPreparedStatementBuilder reqUpdate = new ArcPreparedStatementBuilder();
@@ -817,130 +816,156 @@ public class VObjectService {
 	private ArcPreparedStatementBuilder buildFilter(List<String> filterFields, List<String> headersDLabel,
 			Integer filterPattern, String filterFunction) {
 
-		Pattern patternMath = Pattern.compile("[<>=]");
-
 		ArcPreparedStatementBuilder s = new ArcPreparedStatementBuilder(" WHERE true ");
+
 		if (headersDLabel == null || filterFields == null) {
 			return s;
 		}
 
-		for (int i = 0; i < filterFields.size(); i++) {
-			if (filterFields.get(i) != null && !filterFields.get(i).equals("")) {
+		// symbole mathématiques que l'on peut avoir dans le filtre
+		Pattern patternMath = Pattern.compile("[<>=]");
+		String expressionAND = " AND";
+		String expressionOR = " OR";
 
-				if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH
-						|| filterPattern == FILTER_REGEXP_SIMILARTO)) {
-					s.append(" AND (");
-				}
-
-				/*
-				 * Si on a un symbole mathématique
-				 */
-				Matcher matcher = patternMath.matcher(filterFields.get(i));
-				if (matcher.find()) {
-					// On a au moins une fonction mathématique 2 cas, soit numérique, soit date. On
-					// sait que l'on a une date si
-					// le filtre contient §
-
-					if (filterFields.get(i).contains("§")) { // on a une date donc filtre du type format§condition
-						String filtre = filterFields.get(i);
-						String[] morceauReq = filtre.split("§");
-
-						// on découpe suivant les ET
-						String[] listeAND = morceauReq[1].split(FILTER_AND);
-
-						for (String conditionAND : listeAND) {
-							// on découpe suivant les OU
-							String[] listeOR = conditionAND.split(FILTER_OR);
-							for (String condtionOR : listeOR) {
-								s.append(" to_date(" + headersDLabel.get(i) + "::text, " + s.quoteText(morceauReq[0])
-										+ ")"); // cast database column to the searched date format
-								s.append(condtionOR.trim().substring(0, 1)); // operator
-								s.append(" to_date(" + s.quoteText(condtionOR.trim().substring(1)) + ","
-										+ s.quoteText(morceauReq[0]) + ") "); // cast condition expression to the
-																				// searched date format
-								s.append(" OR");
-							}
-							// on retire les dernier OR
-							s.setLength(s.length() - 3);
-							s.append(" AND");
-						}
-
-					} else { // on a des nombres
-						// on découpe suivant les ET
-						String[] listeAND = filterFields.get(i).split(FILTER_AND);
-
-						for (String conditionAND : listeAND) {
-							// on découpe suivant les OU
-							String[] listeOR = conditionAND.split(FILTER_OR);
-							for (String condtionOR : listeOR) {
-								if (condtionOR.contains("[")) { // cas ou on va chercher dans un vecteur
-
-									condtionOR = condtionOR.trim();
-
-									s.append(" (" + headersDLabel.get(i));
-
-									s.append(condtionOR.substring(0, 1) + "array_position(" + headersDLabel.get(i - 1)
-											+ "," + s.quoteText(condtionOR.substring(1, condtionOR.indexOf("]"))) + ")"
-											+ condtionOR.substring(condtionOR.indexOf("]"),
-													condtionOR.indexOf("]") + 1));
-
-									s.append(condtionOR.substring(condtionOR.indexOf("]") + 1));
-
-								} else {
-									s.append(" (" + headersDLabel.get(i) + ")" + condtionOR);
-
-								}
-								s.append(" OR");
-							}
-							// on retire les dernier OR
-							s.setLength(s.length() - 3);
-							s.append(" AND");
-						}
-					}
-
-					// on retire le dernier AND
-					s.setLength(s.length() - 4);
-
-				} else {
-
-					String toSearch = "";
-
-					if (filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH) {
-						s.append(" " + filterFunction + "(" + headersDLabel.get(i) + "::text) LIKE ");
-					}
-
-					if (filterPattern == FILTER_REGEXP_SIMILARTO) {
-						s.append(" ' '||" + filterFunction + "(" + headersDLabel.get(i) + "::text) SIMILAR TO ");
-					}
-
-					// Si on a déjà un % dans le filtre on n'en rajoute pas
-					if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_REGEXP_SIMILARTO)
-							&& !filterFields.get(i).contains("%")) {
-						toSearch += "%";
-					}
-
-					if (filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH) {
-						toSearch += filterFields.get(i).toUpperCase();
-					}
-
-					if (filterPattern == FILTER_REGEXP_SIMILARTO) {
-						String aChercher = patternMather(filterFields.get(i).toUpperCase().trim());
-						toSearch += "( " + aChercher.replace(" ", "| ") + ")%";
-					}
-
-					if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH)
-							&& !filterFields.get(i).contains("%")) {
-						toSearch += "%";
-					}
-
-					s.append(s.quoteText(toSearch));
-
-				}
-				s.append(") ");
+		for (int headerIndex = 0; headerIndex < filterFields.size(); headerIndex++) {
+			if (filterFields.get(headerIndex) == null || filterFields.get(headerIndex).isBlank()) {
+				continue;
 			}
+
+			if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH
+					|| filterPattern == FILTER_REGEXP_SIMILARTO)) {
+				s.append(" AND (");
+			}
+
+			/*
+			 * Si on a un symbole mathématique
+			 */
+			Matcher matcher = patternMath.matcher(filterFields.get(headerIndex));
+			boolean isFilterMathematicExpression = matcher.find();
+			boolean isFilterDate = filterFields.get(headerIndex).contains("§");
+
+			if (isFilterMathematicExpression && isFilterDate) {
+				buildFilterDate(headerIndex, s, filterFields, headersDLabel, expressionAND, expressionOR);
+			}
+
+			if (isFilterMathematicExpression && !isFilterDate) {
+				buildFilterNumeric(headerIndex, s, filterFields, headersDLabel, expressionAND, expressionOR);
+			}
+
+			if (!isFilterMathematicExpression) {
+				buildFilterString(headerIndex, s, filterFields, headersDLabel, filterPattern, filterFunction);
+			}
+
+			s.append(") ");
 		}
 		s.append(" ");
 		return s;
+	}
+
+	private void buildFilterString(int headerIndex, ArcPreparedStatementBuilder s, List<String> filterFields,
+			List<String> headersDLabel, Integer filterPattern, String filterFunction) {
+
+		String toSearch = "";
+
+		if (filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH) {
+			s.append(" " + filterFunction + "(" + headersDLabel.get(headerIndex) + "::text) LIKE ");
+		}
+
+		if (filterPattern == FILTER_REGEXP_SIMILARTO) {
+			s.append(" ' '||" + filterFunction + "(" + headersDLabel.get(headerIndex) + "::text) SIMILAR TO ");
+		}
+
+		// Si on a déjà un % dans le filtre on n'en rajoute pas
+		if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_REGEXP_SIMILARTO)
+				&& !filterFields.get(headerIndex).contains("%")) {
+			toSearch += "%";
+		}
+
+		if (filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH) {
+			toSearch += filterFields.get(headerIndex).toUpperCase();
+		}
+
+		if (filterPattern == FILTER_REGEXP_SIMILARTO) {
+			String aChercher = patternMather(filterFields.get(headerIndex).toUpperCase().trim());
+			toSearch += "( " + aChercher.replace(" ", "| ") + ")%";
+		}
+
+		if ((filterPattern == FILTER_LIKE_CONTAINS || filterPattern == FILTER_LIKE_ENDSWITH)
+				&& !filterFields.get(headerIndex).contains("%")) {
+			toSearch += "%";
+		}
+
+		s.append(s.quoteText(toSearch));
+	}
+
+	private void buildFilterNumeric(int headerIndex, ArcPreparedStatementBuilder s, List<String> filterFields,
+			List<String> headersDLabel, String expressionAND, String expressionOR) {
+		String[] listeAND = filterFields.get(headerIndex).split(FILTER_AND);
+
+		for (String conditionAND : listeAND) {
+			// on découpe suivant les OU
+			String[] listeOR = conditionAND.split(FILTER_OR);
+			for (String condtionOR : listeOR) {
+				if (condtionOR.contains("[")) { // cas ou on va chercher dans un vecteur
+
+					condtionOR = condtionOR.trim();
+
+					s.append(" (" + headersDLabel.get(headerIndex));
+
+					s.append(condtionOR.substring(0, 1) + "array_position(" + headersDLabel.get(headerIndex - 1) + ","
+							+ s.quoteText(condtionOR.substring(1, condtionOR.indexOf("]"))) + ")"
+							+ condtionOR.substring(condtionOR.indexOf("]"), condtionOR.indexOf("]") + 1));
+
+					s.append(condtionOR.substring(condtionOR.indexOf("]") + 1));
+
+				} else {
+					s.append(" (" + headersDLabel.get(headerIndex) + ")" + condtionOR);
+
+				}
+				s.append(expressionOR);
+			}
+			// on retire les dernier OR
+			s.setLength(s.length() - 3);
+			s.append(expressionAND);
+		}
+
+		// on retire le dernier AND
+		s.setLength(s.length() - expressionAND.length());
+
+	}
+
+	private void buildFilterDate(int headerIndex, ArcPreparedStatementBuilder s, List<String> filterFields,
+			List<String> headersDLabel, String expressionAND, String expressionOR) {
+		String filtre = filterFields.get(headerIndex);
+		String[] morceauReq = filtre.split("§");
+
+		// on découpe suivant les ET
+		String[] listeAND = morceauReq[1].split(FILTER_AND);
+
+		for (String conditionAND : listeAND) {
+			// on découpe suivant les OU
+			String[] listeOR = conditionAND.split(FILTER_OR);
+			for (String condtionOR : listeOR) {
+				s.append(" to_date(" + headersDLabel.get(headerIndex) + "::text, " + s.quoteText(morceauReq[0]) + ")"); // cast
+																														// database
+																														// column
+																														// to
+																														// the
+																														// searched
+																														// date
+																														// format
+				s.append(condtionOR.trim().substring(0, 1)); // operator
+				s.append(" to_date(" + s.quoteText(condtionOR.trim().substring(1)) + "," + s.quoteText(morceauReq[0])
+						+ ") "); // cast condition expression to the
+									// searched date format
+				s.append(expressionOR);
+			}
+			// on retire les dernier OR
+			s.setLength(s.length() - expressionOR.length());
+			s.append(expressionAND);
+		}
+		// on retire le dernier AND
+		s.setLength(s.length() - expressionAND.length());
 	}
 
 	private String patternMather(String aChercher) {
@@ -961,8 +986,7 @@ public class VObjectService {
 	 * @param headerSortDOrders ordres du tri des colonnes
 	 * @return
 	 */
-	public ArcPreparedStatementBuilder buildOrderBy(List<String> headerSortLabels,
-			List<Boolean> headerSortDOrders) {
+	public ArcPreparedStatementBuilder buildOrderBy(List<String> headerSortLabels, List<Boolean> headerSortDOrders) {
 		if (headerSortLabels == null) {
 			return new ArcPreparedStatementBuilder("order by alias_de_table ");
 		}
@@ -1058,7 +1082,8 @@ public class VObjectService {
 					ZipEntry entry = new ZipEntry(fileNames.get(i) + ".csv");
 					zos.putNextEntry(entry);
 					// Ecriture dans le fichier
-					UtilitaireDao.get(this.connectionIndex).outStreamRequeteSelect(this.connection, requetes.get(i), zos);
+					UtilitaireDao.get(this.connectionIndex).outStreamRequeteSelect(this.connection, requetes.get(i),
+							zos);
 					zos.closeEntry();
 				}
 			} finally {
@@ -1097,8 +1122,8 @@ public class VObjectService {
 		Date dNow = new Date();
 		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
 		response.reset();
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + CompressionExtension.TAR_GZ.getFileExtension());
+		response.setHeader("Content-Disposition", "attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow)
+				+ CompressionExtension.TAR_GZ.getFileExtension());
 
 		TarArchiveOutputStream taos = null;
 		try {
@@ -1144,7 +1169,8 @@ public class VObjectService {
 		List<String> listIdSource;
 		List<String> listIdSourceEtat;
 		List<String> listContainer;
-		String repertoire = repertoireIn + anEnvExcecution.toUpperCase().replace(".", "_") + File.separator;
+
+		String repertoire = FileSystemManagement.directoryEnvRoot(repertoireIn, anEnvExcecution) + File.separator;
 
 		String currentContainer;
 		while (true) {
@@ -1154,7 +1180,8 @@ public class VObjectService {
 			requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
 			// Récupération de la liste d'id_source par paquet de fetchSize
 			try {
-				g = new GenericBean(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requeteLimit));
+				g = new GenericBean(
+						UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requeteLimit));
 				Map<String, List<String>> m = g.mapContent();
 				listIdSource = m.get(ColumnEnum.ID_SOURCE.getColumnName());
 				listContainer = m.get("container");
@@ -1199,7 +1226,8 @@ public class VObjectService {
 						j++;
 					}
 					// archive .tar.gz
-					if (currentContainer.endsWith(CompressionExtension.TAR_GZ.getFileExtension()) || currentContainer.endsWith(CompressionExtension.TGZ.getFileExtension())) {
+					if (currentContainer.endsWith(CompressionExtension.TAR_GZ.getFileExtension())
+							|| currentContainer.endsWith(CompressionExtension.TGZ.getFileExtension())) {
 						CompressedUtils.generateEntryFromTarGz(receptionDirectoryRoot, currentContainer,
 								listIdSourceContainer, taos);
 						i = i + listIdSourceContainer.size();
@@ -1244,8 +1272,8 @@ public class VObjectService {
 				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar");
 
 		try (TarArchiveOutputStream taos = new TarArchiveOutputStream(response.getOutputStream());) {
-			UtilitaireDao.get(this.connectionIndex).getFilesDataStreamFromListOfInputDirectories(this.connection, requete, taos, repertoire,
-					listRepertoire);
+			UtilitaireDao.get(this.connectionIndex).getFilesDataStreamFromListOfInputDirectories(this.connection,
+					requete, taos, repertoire, listRepertoire);
 		} catch (IOException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
 		} finally {
@@ -1349,8 +1377,7 @@ public class VObjectService {
 		data.setConstantVObject(new ConstantVObject(columnRender));
 	}
 
-	public void initializeByList(VObject data, List<List<String>> liste,
-			Map<String, String> defaultInputFields) {
+	public void initializeByList(VObject data, List<List<String>> liste, Map<String, String> defaultInputFields) {
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		List<String> header = liste.get(0);

@@ -282,15 +282,30 @@ public class GenericPreparedStatementBuilder {
 	}
 
 	/**
-	 * Generate a query that create the strucutre of table according to GenericBean headers and types
+	 * Build the query to create the table structure
+	 * by default, the target table will be destroyed
 	 * @param tableName
 	 * @param gb
 	 * @return
 	 */
 	public GenericPreparedStatementBuilder createWithGenericBean(String tableName, GenericBean gb)
 	{
+		return createWithGenericBean(tableName, gb, true);
+	}
+	
+	/**
+	 * Generate a query that create the strucutre of table according to GenericBean headers and types
+	 * @param tableName
+	 * @param gb
+	 * @return
+	 */
+	public GenericPreparedStatementBuilder createWithGenericBean(String tableName, GenericBean gb, boolean replaceTargetTable)
+	{
 		// drop target table if exists
-		query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(tableName).append(SQL.END_QUERY);
+		if (replaceTargetTable)
+		{
+			query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(tableName).append(SQL.END_QUERY);
+		}
 		
 		query.append(SQL.CREATE);
 		
@@ -298,7 +313,7 @@ public class GenericPreparedStatementBuilder {
 			query.append(SQL.TEMPORARY);
 		}
 
-		query.append(SQL.TABLE).append(tableName).append("(");
+		query.append(SQL.TABLE).append(SQL.IF_NOT_EXISTS).append(tableName).append("(");
 
 		boolean first = true;
 		for (int i = 0; i < gb.getHeaders().size(); i++) {

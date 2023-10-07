@@ -252,7 +252,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 */
 	public static final String temporaryTableName(String aName) {
 		String newName = aName.split(REGEX_TMP)[0];
-		return new StringBuilder(newName).append(TMP).append(new TemporaryToken().getToken()).toString();
+		return new StringBuilder(newName.toLowerCase()).append(TMP).append(new TemporaryToken().getToken()).toString();
 	}
 
 

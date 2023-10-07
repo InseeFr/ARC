@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
@@ -19,6 +20,7 @@ import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.service.p0initialisation.pilotage.bo.ListIdSourceInPilotage;
 import fr.insee.arc.core.service.p0initialisation.pilotage.dao.SynchronizeDataByPilotageDao;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -55,7 +57,7 @@ public class SynchronizeDataByPilotageOperation {
 
 		// recrée la table de pilotage, ses index, son trigger
 		rebuildPilotage();
-
+	
 		// drop des tables temporaires de travail
 		dropUnusedTemporaryTablesAllNods();
 

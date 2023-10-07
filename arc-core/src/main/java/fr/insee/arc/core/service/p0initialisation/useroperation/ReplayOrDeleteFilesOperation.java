@@ -57,15 +57,14 @@ public class ReplayOrDeleteFilesOperation {
 		if (!containerList.isEmpty()) {
 			PropertiesHandler properties = PropertiesHandler.getInstance();
 			String repertoire = properties.getBatchParametersDirectory();
-			String envDir = envExecution.replace(".", "_").toUpperCase();
 
 			for (String s : containerList) {
 
 				String entrepot = ManipString.substringBeforeFirst(s, "_");
 				String archive = ManipString.substringAfterFirst(s, "_");
 
-				String dirIn = DirectoryPath.directoryReceptionEntrepotArchive(repertoire, envDir, entrepot);
-				String dirOut = DirectoryPath.directoryReceptionEntrepot(repertoire, envDir, entrepot);
+				String dirIn = DirectoryPath.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepot);
+				String dirOut = DirectoryPath.directoryReceptionEntrepot(repertoire, envExecution, entrepot);
 
 				FileUtilsArc.deplacerFichier(dirIn, dirOut, archive, archive);
 

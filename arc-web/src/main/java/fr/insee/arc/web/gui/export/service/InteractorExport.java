@@ -16,6 +16,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
@@ -57,9 +58,7 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
 	public String initExportDir()
 	{
     	String repertoire = properties.getBatchParametersDirectory();
-		String envDir =  getBacASable() .replace(".", "_").toUpperCase();
-		Path dirOut = Paths.get(repertoire, envDir, "EXPORT");
-
+		Path dirOut = Paths.get(repertoire, FileSystemManagement.directoryEnvRoot(repertoire, getBacASable()), "EXPORT");
 		FileUtilsArc.createDirIfNotexist(dirOut.toFile());
 
 		return dirOut.toString();
