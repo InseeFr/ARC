@@ -85,7 +85,7 @@ public class ExecuteEngineController {
 							FileIdCard fileIdCard = new FileIdCard(bodyPojo.fileName);
 							fileIdCard.setFileIdCard(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite);
 							
-							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, fileIdCard, inputStream, currentTemporaryTable(i));
+							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, env, fileIdCard, inputStream, currentTemporaryTable(i));
 							chargeur.executeEngine();
 							structure = chargeur.getJointure().replace("''", "'");
 						}
@@ -131,9 +131,12 @@ public class ExecuteEngineController {
 						break;
 					case MAPPING:
 						UtilitaireDao.get(0).executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"');");
+						
 						String tableTempControleOk = previousTemporaryTable(i);
+						
 						List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(connection, tableTempControleOk, env + ".mapping_regle");
 						ServiceMapping serviceMapping = new ServiceMapping();
+						
 						RegleMappingFactory regleMappingFactory = serviceMapping.construireRegleMappingFactory(connection, env, tableTempControleOk, "v_");
 						String idFamille = serviceMapping.fetchIdFamille(connection, listeJeuxDeRegles.get(0), env + ".norme");
 

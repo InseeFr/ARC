@@ -45,7 +45,7 @@ public class PilotageOperations {
 		query.append("\n SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
 
 		if (jointure.length > 0) {
-			query.append(", jointure= " + FormatSQL.textToSql(ManipString.nullIfEmptyTrim(jointure[0])));
+			query.append(", jointure= " + FormatSQL.quoteText(ManipString.nullIfEmptyTrim(jointure[0])));
 		}
 		query.append(";");
 		return query.toString();
@@ -126,8 +126,8 @@ public class PilotageOperations {
 	 */
 	public static StringBuilder queryUpdatePilotageError(String phase, String tablePil, Exception exception) {
 		StringBuilder requete = new StringBuilder();
-		requete.append("UPDATE " + tablePil + " SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport='"
-				+ exception.toString().replace("'", "''").replace("\r", "") + "' ");
+		requete.append("UPDATE " + tablePil + " SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport="
+				+ FormatSQL.quoteText(exception.toString()).replace("\r", "") + " ");
 		requete.append(
 				"\n WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
 		return requete;

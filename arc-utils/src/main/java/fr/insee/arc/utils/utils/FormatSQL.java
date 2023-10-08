@@ -216,8 +216,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 */
 	public static String executeIf(String queryToTest, String queryToExecute) {
 		StringBuilder query = new StringBuilder();
-		query.append("do $$ declare b boolean; begin execute ").append(quoteText(queryToTest)).append(" into b; ")
-				.append("if (b) then execute ").append(quoteText(queryToExecute)).append("; end if; end; $$;");
+		query.append("do $$ declare b boolean; begin execute ").append(escapeLiteralForPgFunction(queryToTest)).append(" into b; ")
+				.append("if (b) then execute ").append(escapeLiteralForPgFunction(queryToExecute)).append("; end if; end; $$;");
 		return query.toString();
 	}
 
@@ -269,17 +269,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	}
 
 	/**
-	 * converti une chaine de caractere pour etre mise en parametre d'un sql si
-	 * c'est vide, ca devient "null" quote devient quote quote
-	 *
-	 * @param val
-	 * @return
-	 */
-	public static String textToSql(String val) {
-		return val == null ? "NULL" : "'" + val.replace("'", "''") + "'";
-	}
-
-	/**
 	 * Ne garde que les séparateurs
 	 *
 	 * @param tokens
@@ -309,20 +298,38 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 		return requete;
 	}
 
+	
+
 	/**
-	 * escape quote return value through function
+	 * converti une chaine de caractere pour etre mise en parametre d'un sql si
+	 * c'est vide, ca devient "null" quote devient quote quote
+	 *
+	 * @param val
+	 * @return
+	 */
+	public static String quoteText(String val) {
+		return val == null ? "NULL" : new StringBuilder("'").append(quoteTextWithoutEnclosings(val)).append("'").toString();
+	}
+
+	
+	public static String quoteTextWithoutEnclosings(String val) {
+		return val.replace("'", "''");
+	}
+	
+	/**
+	 * escape quote through function
 	 * 
 	 * @param s
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String quoteText(String s) {
-		try {
-			return "'" + Utils.escapeLiteral(null, s, true) + "'";
-		} catch (SQLException e) {
-			LoggerHelper.errorAsComment(LOGGER, "This string cannot be escaped to postgres database format");
-			return null;
-		}
+	public static String escapeLiteralForPgFunction(String s) {
+			try {
+				return "'" + Utils.escapeLiteral(null, s, true) + "'";
+			} catch (SQLException e) {
+				LoggerHelper.errorAsComment(LOGGER, "The string "+ s + " cannot be escaped to postgres database format");
+				throw new IllegalArgumentException(s);
+			}
 	}
 
 	/**

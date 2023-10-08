@@ -157,7 +157,7 @@ public class GenericPreparedStatementBuilder {
 	 * @return
 	 */
 	public String quoteTextWithoutBinding(String p) {
-		return FormatSQL.textToSql(p);
+		return FormatSQL.quoteText(p);
 	}
 
 	public String quoteNumberWithoutBinding(String p) {

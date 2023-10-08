@@ -2,8 +2,6 @@ package fr.insee.arc.core.service.p2chargement.engine;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.util.Arrays;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -12,20 +10,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
-import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
-import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
+import fr.insee.arc.core.service.p2chargement.dao.ChargeurXMLDao;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.service.p2chargement.xmlhandler.XMLHandlerCharger4;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.textUtils.FastList;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.SecuredSaxParser;
 
 /**
@@ -37,25 +30,22 @@ import fr.insee.arc.utils.utils.SecuredSaxParser;
  */
 public class ChargeurXml implements IChargeur {
 	private static final Logger LOGGER = LogManager.getLogger(ChargeurXml.class);
+	
+	
+	private Sandbox sandbox;
 	private FileIdCard fileIdCard;
-	private Connection connexion;
 	private String tableChargementPilTemp;
 	private String currentPhase;
 	private InputStream f;
 
 	// temporary table where data will be loaded by the XML SAX engine
 	private String tableTempA;
-	private FastList<String> tempTableAColumnsLongName = new FastList<>(Arrays.asList(
-			ColumnEnum.ID_SOURCE.getColumnName(), "id", "date_integration", "id_norme", "periodicite", "validite"));
-	private FastList<String> tempTableAColumnsShortName = new FastList<>(
-			Arrays.asList("m0", "m1", "m2", "m3", "m4", "m5"));
-	private FastList<String> tempTableAColumnsType = new FastList<>(
-			Arrays.asList(ColumnEnum.ID_SOURCE.getColumnType().getTypeCollated(), "int", "text collate \"C\"",
-					"text collate \"C\"", "text collate \"C\"", "text collate \"C\""));
-
 	private String rapport = null;
 	private String jointure;
 
+	private ChargeurXMLDao dao;
+
+	
 	/**
 	 * constructor with thread object
 	 * 
@@ -63,12 +53,15 @@ public class ChargeurXml implements IChargeur {
 	 * @param fileName
 	 */
 	public ChargeurXml(ThreadChargementService threadChargementService) {
+		this.sandbox = new Sandbox(threadChargementService.getConnexion().getExecutorConnection(),
+				threadChargementService.getEnvExecution());
 		this.fileIdCard = threadChargementService.fileIdCard;
-		this.connexion = threadChargementService.getConnexion().getExecutorConnection();
 		this.tableTempA = threadChargementService.getTableTempA();
+
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
 		this.currentPhase = threadChargementService.getCurrentPhase();
 		this.f = threadChargementService.filesInputStreamLoad.getTmpInxChargement();
+		dao = new ChargeurXMLDao(sandbox, fileIdCard);
 	}
 
 	/**
@@ -83,64 +76,14 @@ public class ChargeurXml implements IChargeur {
 
 	@Override
 	public void initialisation() throws ArcException {
-		StaticLoggerDispatcher.info(LOGGER, "** requeteCreateA **");
 
-		java.util.Date beginDate = new java.util.Date();
-
-		StringBuilder requete = new StringBuilder();
-		requete.append(FormatSQL.dropTable(this.tableTempA));
-		requete.append("CREATE ");
-
-		if (!this.tableTempA.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append(" ");
-		}
-
-		// la tabble temporaire A : ids|id|d|data|nombre_colonnes
-		// data : contiendra les données chargé au format text séparée par des virgules
-		// nombre_colonnes : contiendra le nombre de colonne contenue dans data,
-		// nécessaire pour compléter la ligne avec des virgules
-
-		requete.append(" TABLE " + this.tableTempA + " (");
-		boolean noComma = true;
-		for (int i = 0; i < tempTableAColumnsLongName.size(); i++) {
-			if (noComma) {
-				noComma = false;
-			} else {
-				requete.append(",");
-			}
-			requete.append(tempTableAColumnsShortName.get(i) + " " + tempTableAColumnsType.get(i) + " ");
-		}
-		requete.append(") ");
-		requete.append(FormatSQL.WITH_NO_VACUUM);
-		requete.append(";");
-
-		try {
-			UtilitaireDao.get(0).executeBlock(this.connexion, requete);
-		} catch (ArcException e) {
-			LoggerHelper.errorAsComment(LOGGER,
-					"ChargeurXML.initialisation - creation failed on the temporary table A which is the temporary recipient for the xml file to be loaded");
-			throw e;
-		}
-		java.util.Date endDate = new java.util.Date();
-
-		StaticLoggerDispatcher.info(LOGGER,
-				"** requeteCreateA en " + (endDate.getTime() - beginDate.getTime()) + " ms **");
-
+		// create the data container where data will be inserted
+		dao.execQueryCreateTemporaryLoadDataTable(this.tableTempA);
 	}
 
 	@Override
-	public void finalisation() {
-		StringBuilder requeteBilan = new StringBuilder();
-		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileIdCard.getFileName(), this.currentPhase,
-				TraitementEtat.OK.toString(), rapport, this.jointure));
-
-		try {
-			UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "chargerXml()", LOGGER, ex);
-		}
+	public void finalisation() throws ArcException {
+		dao.execQueryBilan(tableChargementPilTemp, currentPhase, rapport, jointure);
 	}
 
 	@Override
@@ -149,8 +92,7 @@ public class ChargeurXml implements IChargeur {
 		java.util.Date beginDate = new java.util.Date();
 
 		// Création de la table de stockage
-		XMLHandlerCharger4 handler = new XMLHandlerCharger4(connexion, fileIdCard, this.tableTempA,
-				this.tempTableAColumnsLongName, this.tempTableAColumnsShortName);
+		XMLHandlerCharger4 handler = new XMLHandlerCharger4(sandbox.getConnection(), fileIdCard, this.tableTempA);
 
 		// appel du parser et gestion d'erreur
 		try {
@@ -159,7 +101,7 @@ public class ChargeurXml implements IChargeur {
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED,
 					fileIdCard.getFileName()).logMessageException();
-			rapport = businessException.getMessage().replace("'", "''");
+			rapport = FormatSQL.quoteTextWithoutEnclosings(businessException.getMessage());
 			throw businessException;
 		}
 

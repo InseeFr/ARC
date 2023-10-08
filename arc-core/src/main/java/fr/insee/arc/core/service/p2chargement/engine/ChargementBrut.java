@@ -19,6 +19,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 /**
  * Chargement brutalement d'un fichier pour déterminer la norme et la validité associées.
@@ -61,12 +62,12 @@ public class ChargementBrut {
     	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
           if (start)
           {
-    		requete.append("\nSELECT '"+idSource.replace("'", "''")+"'::text as "+ColumnEnum.ID_SOURCE.getColumnName()+","+ idLigne +"::int as id_ligne,'"+line.replace("'", "''")+"'::text as ligne");
+    		requete.append("\nSELECT "+FormatSQL.quoteText(idSource)+"::text as "+ColumnEnum.ID_SOURCE.getColumnName()+","+ idLigne +"::int as id_ligne,"+FormatSQL.quoteText(line)+"::text as ligne");
     		start=false;
           }
           else
           {
-      		requete.append("\nUNION ALL SELECT '"+idSource.replace("'", "''")+"',"+ idLigne +",'"+line.replace("'", "''")+"'"); 
+      		requete.append("\nUNION ALL SELECT "+FormatSQL.quoteText(idSource)+","+ idLigne +","+FormatSQL.quoteText(line)+""); 
           }
           
           idLigne++;

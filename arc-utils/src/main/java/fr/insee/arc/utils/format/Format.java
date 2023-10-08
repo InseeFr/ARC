@@ -48,17 +48,17 @@ public class Format implements IConstanteCaractere {
      * @param attribut
      * @return
      */
-    public static String toBdRaw(String attribut) {
+    public static String convertIntoDatabaseColumnValidName(String attribut) {
         return attribut.substring(attribut.lastIndexOf(':') + 1).replaceAll("[^A-Za-z0-9_]", "_");
     }
 
     public static String toBdId(String attribut) {
-        return "i_" + toBdRaw(attribut);
+        return "i_" + convertIntoDatabaseColumnValidName(attribut);
 
     }
 
     public static String toBdVal(String attribut) {
-        return "v_" + toBdRaw(attribut);
+        return "v_" + convertIntoDatabaseColumnValidName(attribut);
     }
     
     public static String[] toBdVal(String[] attributs) {
@@ -71,7 +71,7 @@ public class Format implements IConstanteCaractere {
     
 
     public static String toBdMain(String attribut) {
-        return "m_" + toBdRaw(attribut);
+        return "m_" + convertIntoDatabaseColumnValidName(attribut);
     }
     
     public static String toBdRemovePrefix(String attribut)

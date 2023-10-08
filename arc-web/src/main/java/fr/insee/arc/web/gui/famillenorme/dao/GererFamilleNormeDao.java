@@ -622,7 +622,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		if (content.get(columnName) == null || content.get(columnName).get(index) == null) {
 			return columnName;
 		} else {
-			return FormatSQL.textToSql(content.get(columnName).get(index));
+			return FormatSQL.quoteText(content.get(columnName).get(index));
 		}
 	}
 
