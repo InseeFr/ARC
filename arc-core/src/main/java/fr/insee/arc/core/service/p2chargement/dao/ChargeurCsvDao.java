@@ -14,8 +14,8 @@ import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
-import fr.insee.arc.core.service.p2chargement.bo.FileAttributesCSV;
-import fr.insee.arc.core.service.p2chargement.bo.FormatRulesCsv;
+import fr.insee.arc.core.service.p2chargement.bo.CSVFileAttributes;
+import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
 import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.core.service.p2chargement.engine.ParseFormatRulesOperation;
 import fr.insee.arc.utils.dao.SQL;
@@ -26,11 +26,11 @@ public class ChargeurCsvDao {
 
 	private Sandbox sandbox;
 	private FileIdCard fileIdCard;
-	private FileAttributesCSV fileAttributes;
-	private ParseFormatRulesOperation<FormatRulesCsv> parser;
+	private CSVFileAttributes fileAttributes;
+	private ParseFormatRulesOperation<CSVFormatRules> parser;
 
-	public ChargeurCsvDao(Sandbox sandbox, FileAttributesCSV fileAttributes, FileIdCard fileIdCard,
-			ParseFormatRulesOperation<FormatRulesCsv> parser) {
+	public ChargeurCsvDao(Sandbox sandbox, CSVFileAttributes fileAttributes, FileIdCard fileIdCard,
+			ParseFormatRulesOperation<CSVFormatRules> parser) {
 		this.sandbox = sandbox;
 		this.fileAttributes = fileAttributes;
 		this.fileIdCard = fileIdCard;
@@ -81,13 +81,13 @@ public class ChargeurCsvDao {
 		// tuple des headers
 		String columns = "(" + StringUtils.join(fileAttributes.getHeadersV(), SQL.COMMA.getSqlCode()) + ")";
 
-		boolean ignoreFirstLine = (parser.getValue(FormatRulesCsv.HEADERS) == null);
+		boolean ignoreFirstLine = (parser.getValue(CSVFormatRules.HEADERS) == null);
 
 		String separateur = fileIdCard.getIdCardChargement().getDelimiter();
 
-		String quote = parser.getValue(FormatRulesCsv.QUOTE);
+		String quote = parser.getValue(CSVFormatRules.QUOTE);
 
-		String encoding = parser.getValue(FormatRulesCsv.ENCODING);
+		String encoding = parser.getValue(CSVFormatRules.ENCODING);
 
 		UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
 				columns, streamContent, ignoreFirstLine, separateur, quote, encoding);
@@ -128,14 +128,14 @@ public class ChargeurCsvDao {
 	}
 
 	public void execQueryApplyIndexRules() throws ArcException {
-		if (parser.getValues(FormatRulesCsv.INDEX).isEmpty()) {
+		if (parser.getValues(CSVFormatRules.INDEX).isEmpty()) {
 			return;
 		}
 
 		StringBuilder query = new StringBuilder();
-		for (int i = 0; i < parser.getValues(FormatRulesCsv.INDEX).size(); i++) {
+		for (int i = 0; i < parser.getValues(CSVFormatRules.INDEX).size(); i++) {
 			query.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName()
-					+ "(" + parser.getValues(FormatRulesCsv.INDEX).get(i) + ");\n");
+					+ "(" + parser.getValues(CSVFormatRules.INDEX).get(i) + ");\n");
 		}
 		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), query);
 	}
@@ -146,7 +146,7 @@ public class ChargeurCsvDao {
 	 * @throws ArcException
 	 */
 	public void execQueryApplyJoinRules() throws ArcException {
-		if (parser.getValues(FormatRulesCsv.JOIN_TABLE).isEmpty()) {
+		if (parser.getValues(CSVFormatRules.JOIN_TABLE).isEmpty()) {
 			return;
 		}
 
@@ -157,7 +157,7 @@ public class ChargeurCsvDao {
 
 		// On renumérote les lignes après jointure pour etre cohérent
 		query.append("\n SELECT  (row_number() over ())::int as id$new$, l.* ");
-		for (int i = 0; i < parser.getValues(FormatRulesCsv.JOIN_TABLE).size(); i++) {
+		for (int i = 0; i < parser.getValues(CSVFormatRules.JOIN_TABLE).size(); i++) {
 			query.append("\n , v" + i + ".* ");
 		}
 		query.append("FROM  " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " l ");
@@ -182,7 +182,7 @@ public class ChargeurCsvDao {
 	 * 
 	 */
 	public void execQueryApplyColumnsExpressionRules() throws ArcException {
-		if (parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).isEmpty()) {
+		if (parser.getValues(CSVFormatRules.COLUMN_DEFINITION).isEmpty()) {
 			return;
 		}
 
@@ -207,7 +207,7 @@ public class ChargeurCsvDao {
 	 */
 	private void queryForJoinTables(StringBuilder query) throws ArcException {
 		// pour chaque table de jointure précisées dans les reqles
-		for (int i = 0; i < parser.getValues(FormatRulesCsv.JOIN_TABLE).size(); i++) {
+		for (int i = 0; i < parser.getValues(CSVFormatRules.JOIN_TABLE).size(); i++) {
 
 			applySchemaToJoinTableIfNeeded(i);
 
@@ -216,7 +216,7 @@ public class ChargeurCsvDao {
 			List<String> colsIn = execQuerySelectColumnsFromJoinTable(i);
 
 			// join type
-			query.append("\n " + parser.getValues(FormatRulesCsv.JOIN_TYPE).get(i) + " ");
+			query.append("\n " + parser.getValues(CSVFormatRules.JOIN_TYPE).get(i) + " ");
 
 			query.append("\n (SELECT ");
 			// build column name to be suitable to load process aka : i_col, v_col
@@ -231,9 +231,9 @@ public class ChargeurCsvDao {
 				query.append("null::int as i_" + colsIn.get(j) + ", " + colsIn.get(j) + " as v_" + colsIn.get(j) + " ");
 
 			}
-			query.append("\n FROM " + parser.getValues(FormatRulesCsv.JOIN_TABLE).get(i) + " ");
+			query.append("\n FROM " + parser.getValues(CSVFormatRules.JOIN_TABLE).get(i) + " ");
 			query.append("\n ) v" + i + " ");
-			query.append("\n ON " + parser.getValues(FormatRulesCsv.JOIN_CLAUSE).get(i) + " ");
+			query.append("\n ON " + parser.getValues(CSVFormatRules.JOIN_CLAUSE).get(i) + " ");
 
 		}
 	}
@@ -243,15 +243,15 @@ public class ChargeurCsvDao {
 	 * execution schema
 	 */
 	private void applySchemaToJoinTableIfNeeded(int jointTableIndex) {
-		parser.getValues(FormatRulesCsv.JOIN_TABLE).set(jointTableIndex, ViewEnum.getFullName(this.sandbox.getSchema(),
-				parser.getValues(FormatRulesCsv.JOIN_TABLE).get(jointTableIndex)));
+		parser.getValues(CSVFormatRules.JOIN_TABLE).set(jointTableIndex, ViewEnum.getFullName(this.sandbox.getSchema(),
+				parser.getValues(CSVFormatRules.JOIN_TABLE).get(jointTableIndex)));
 	}
 
 	private List<String> execQuerySelectColumnsFromJoinTable(int jointTableIndex) throws ArcException {
 		return UtilitaireDao.get(0)
 				.executeRequest(sandbox.getConnection(),
 						new ArcPreparedStatementBuilder(
-								"select " + parser.getValues(FormatRulesCsv.JOIN_SELECT).get(jointTableIndex) + " from " + parser.getValues(FormatRulesCsv.JOIN_TABLE).get(jointTableIndex) + " limit 0"))
+								"select " + parser.getValues(CSVFormatRules.JOIN_SELECT).get(jointTableIndex) + " from " + parser.getValues(CSVFormatRules.JOIN_TABLE).get(jointTableIndex) + " limit 0"))
 				.get(0);
 	}
 
@@ -262,7 +262,7 @@ public class ChargeurCsvDao {
 	 */
 	private void execQueryCreateContainerWithNewColumnsExpressionRules() throws ArcException {
 
-		if (parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).isEmpty()) {
+		if (parser.getValues(CSVFormatRules.COLUMN_DEFINITION).isEmpty()) {
 			return;
 		}
 
@@ -283,7 +283,7 @@ public class ChargeurCsvDao {
 
 		query.append("\n FROM " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " u ) v ) w ");
 		query.append("\n WHERE false ");
-		for (String s : parser.getValues(FormatRulesCsv.FILTER_WHERE)) {
+		for (String s : parser.getValues(CSVFormatRules.FILTER_WHERE)) {
 			query.append("\n AND (" + s + ")");
 		}
 		query.append(";");
@@ -292,19 +292,19 @@ public class ChargeurCsvDao {
 	}
 
 	private void queryColumnsExpression(StringBuilder req, boolean useRenameSuffix, int partitionNumber) {
-		for (int i = 0; i < parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).size(); i++) {
+		for (int i = 0; i < parser.getValues(CSVFormatRules.COLUMN_DEFINITION).size(); i++) {
 			// si on trouve dans l'expression le suffix alors on sait qu'on a voulu
 			// préalablement calculer la valeur
 
-			boolean hasRenameSuffix = parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i)
+			boolean hasRenameSuffix = parser.getValues(CSVFormatRules.COLUMN_EXPRESSION).get(i)
 					.contains(Delimiters.RENAME_SUFFIX);
 
 			if ((useRenameSuffix ? hasRenameSuffix : !hasRenameSuffix)) {
 				req.append("\n ,");
-				req.append(parser.getValues(FormatRulesCsv.COLUMN_EXPRESSION).get(i)
+				req.append(parser.getValues(CSVFormatRules.COLUMN_EXPRESSION).get(i)
 						.replace(Delimiters.PARTITION_NUMBER_PLACEHOLDER, partitionNumber + "000000000000::bigint"));
 				req.append(" as ");
-				req.append(parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + Delimiters.RENAME_SUFFIX + " ");
+				req.append(parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i) + Delimiters.RENAME_SUFFIX + " ");
 			}
 		}
 	}
@@ -314,7 +314,7 @@ public class ChargeurCsvDao {
 	 */
 	private int execQueryComputeNumberOfPartition() {
 
-		if (parser.getValues(FormatRulesCsv.PARTITION_EXPRESSION).isEmpty()) {
+		if (parser.getValues(CSVFormatRules.PARTITION_EXPRESSION).isEmpty()) {
 			// 1 single full partition if no partition defined in rules
 			return SINGLE_FULL_PARTITION;
 		}
@@ -342,7 +342,7 @@ public class ChargeurCsvDao {
 
 		StringBuilder query = new StringBuilder();
 		query.append("\n CREATE INDEX idx_partition_by_arc on " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName()
-				+ " ((abs(hashtext(" + parser.getValues(FormatRulesCsv.PARTITION_EXPRESSION).get(0) + "::text)) % "
+				+ " ((abs(hashtext(" + parser.getValues(CSVFormatRules.PARTITION_EXPRESSION).get(0) + "::text)) % "
 				+ nbPartition + "));");
 		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
 	}
@@ -390,14 +390,14 @@ public class ChargeurCsvDao {
 
 		// add partition key if more than one partition
 		if (numberOfPartition > SINGLE_FULL_PARTITION) {
-			req.append("\n WHERE abs(hashtext(" + parser.getValues(FormatRulesCsv.PARTITION_EXPRESSION).get(0)
+			req.append("\n WHERE abs(hashtext(" + parser.getValues(CSVFormatRules.PARTITION_EXPRESSION).get(0)
 					+ "::text)) % " + numberOfPartition + "=" + part + " ");
 		}
 		req.append("\n ) v ) w ");
 		req.append("\n WHERE true ");
 
 		// add filter where clause
-		for (String s : parser.getValues(FormatRulesCsv.FILTER_WHERE)) {
+		for (String s : parser.getValues(CSVFormatRules.FILTER_WHERE)) {
 			req.append("\n AND (" + s + ")");
 		}
 		req.append(";");
@@ -415,14 +415,14 @@ public class ChargeurCsvDao {
 		List<String> colsIn = execQuerySelectColumnsFromLoadTable();
 
 		StringBuilder query = new StringBuilder();
-		for (int i = 0; i < parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).size(); i++) {
+		for (int i = 0; i < parser.getValues(CSVFormatRules.COLUMN_DEFINITION).size(); i++) {
 
-			if (colsIn.contains(parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i))) {
+			if (colsIn.contains(parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i))) {
 				query.append("\n ALTER TABLE TTT DROP COLUMN "
-						+ parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i) + ";");
+						+ parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i) + ";");
 			}
-			query.append("\n ALTER TABLE TTT RENAME COLUMN " + parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i)
-					+ Delimiters.RENAME_SUFFIX + " TO " + parser.getValues(FormatRulesCsv.COLUMN_DEFINITION).get(i)
+			query.append("\n ALTER TABLE TTT RENAME COLUMN " + parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i)
+					+ Delimiters.RENAME_SUFFIX + " TO " + parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i)
 					+ ";");
 		}
 

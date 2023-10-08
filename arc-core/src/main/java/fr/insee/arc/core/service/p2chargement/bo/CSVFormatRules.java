@@ -1,6 +1,6 @@
 package fr.insee.arc.core.service.p2chargement.bo;
 
-public enum FormatRulesCsv implements IParseFormatRules {
+public enum CSVFormatRules implements IParseFormatRules {
 
 	// order is important
 	
@@ -47,7 +47,7 @@ public enum FormatRulesCsv implements IParseFormatRules {
 	;
 
 	
-	private FormatRulesCsv(String afterTag, String beforeTag, boolean stop) {
+	private CSVFormatRules(String afterTag, String beforeTag, boolean stop) {
 		this.afterTag = afterTag;
 		this.beforeTag = beforeTag;
 		this.stop = stop;

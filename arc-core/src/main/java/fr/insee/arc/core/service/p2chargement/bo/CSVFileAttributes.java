@@ -1,6 +1,6 @@
 package fr.insee.arc.core.service.p2chargement.bo;
 
-public class FileAttributesCSV {
+public class CSVFileAttributes {
 
 
 	private String[] headersV;

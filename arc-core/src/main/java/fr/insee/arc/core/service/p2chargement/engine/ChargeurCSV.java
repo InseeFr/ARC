@@ -14,8 +14,8 @@ import com.opencsv.CSVReader;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
-import fr.insee.arc.core.service.p2chargement.bo.FileAttributesCSV;
-import fr.insee.arc.core.service.p2chargement.bo.FormatRulesCsv;
+import fr.insee.arc.core.service.p2chargement.bo.CSVFileAttributes;
+import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
 import fr.insee.arc.core.service.p2chargement.dao.ChargeurCsvDao;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -44,9 +44,9 @@ public class ChargeurCSV implements IChargeur {
 
 	private Sandbox sandbox;
 	private FileIdCard fileIdCard;
-	private FileAttributesCSV fileAttributes;
+	private CSVFileAttributes fileAttributes;
 
-	private ParseFormatRulesOperation<FormatRulesCsv> parser;
+	private ParseFormatRulesOperation<CSVFormatRules> parser;
 
 	private ChargeurCsvDao dao;
 
@@ -55,8 +55,8 @@ public class ChargeurCSV implements IChargeur {
 		this.sandbox = new Sandbox(threadChargementService.getConnexion().getExecutorConnection(),
 				threadChargementService.getEnvExecution());
 		this.fileIdCard = threadChargementService.fileIdCard;
-		this.fileAttributes = new FileAttributesCSV();
-		this.parser = new ParseFormatRulesOperation<>(fileIdCard, FormatRulesCsv.class);
+		this.fileAttributes = new CSVFileAttributes();
+		this.parser = new ParseFormatRulesOperation<>(fileIdCard, CSVFormatRules.class);
 		this.dao = new ChargeurCsvDao(this.sandbox, this.fileAttributes, this.fileIdCard, this.parser);
 
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
@@ -97,8 +97,8 @@ public class ChargeurCSV implements IChargeur {
 						Delimiters.DEFAULT_CSV_DELIMITER));
 
 		// update quote
-		parser.setValue(FormatRulesCsv.QUOTE,
-				dao.execQueryEvaluateCharExpression(parser.getValue(FormatRulesCsv.QUOTE)));
+		parser.setValue(CSVFormatRules.QUOTE,
+				dao.execQueryEvaluateCharExpression(parser.getValue(CSVFormatRules.QUOTE)));
 
 		computeHeaders();
 
@@ -121,7 +121,7 @@ public class ChargeurCSV implements IChargeur {
 	 * @throws ArcException
 	 */
 	private void computeHeaders() throws ArcException {
-		String userDefinedHeaders = parser.getValue(FormatRulesCsv.HEADERS);
+		String userDefinedHeaders = parser.getValue(CSVFormatRules.HEADERS);
 		String csvDelimiter = fileIdCard.getIdCardChargement().getDelimiter();
 
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
