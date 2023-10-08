@@ -21,8 +21,6 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 	
 	@Test
 	public void numberOfNods_test() {
-		
-		u.getProperties().setConnectionProperties(null);
 		u.getProperties().setDatabaseUrl("{0=>\"db1\"},{1=>\"db2\"}");
 		u.getProperties().setDatabaseUsername("{0=>\"db1\"},{1=>\"db2\"}");
 		u.getProperties().setDatabasePassword("{0=>\"db1\"},{1=>\"db2\"}");
@@ -36,7 +34,6 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 	public void getDriverConnexion_OK() throws SQLException, ArcException {
 		
 		PropertiesHandler testProperties=new PropertiesHandler();
-		testProperties.setConnectionProperties(null);
 		testProperties.setDatabaseDriverClassName("org.postgresql.Driver");
 		testProperties.setDatabaseUrl(c.getMetaData().getURL());
 		testProperties.setDatabaseUsername(c.getMetaData().getUserName());
@@ -62,6 +59,7 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		u.getProperties().setDatabasePassword("NA");
 		
 		u.getDriverConnexion();
+		
 	}
 
 	

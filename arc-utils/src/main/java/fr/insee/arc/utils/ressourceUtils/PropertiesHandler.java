@@ -98,6 +98,8 @@ public class PropertiesHandler {
 
 	public void setDatabaseUrl(String databaseUrl) {
 		this.databaseUrl = databaseUrl;
+		// reset the connection getter
+		this.connectionProperties=null;
 	}
 
 	public String getDatabaseUsername() {
@@ -106,6 +108,8 @@ public class PropertiesHandler {
 
 	public void setDatabaseUsername(String databaseUsername) {
 		this.databaseUsername = databaseUsername;
+		// reset the connection getter
+		this.connectionProperties=null;
 	}
 
 	public String getDatabasePassword() {
@@ -114,6 +118,8 @@ public class PropertiesHandler {
 
 	public void setDatabasePassword(String databasePassword) {
 		this.databasePassword = databasePassword;
+		// reset the connection getter
+		this.connectionProperties=null;
 	}
 
 	public String getDatabaseDriverClassName() {
@@ -122,6 +128,8 @@ public class PropertiesHandler {
 
 	public void setDatabaseDriverClassName(String databaseDriverClassName) {
 		this.databaseDriverClassName = databaseDriverClassName;
+		// reset the connection getter
+		this.connectionProperties=null;
 	}
 
 	public String getDatabaseSchema() {

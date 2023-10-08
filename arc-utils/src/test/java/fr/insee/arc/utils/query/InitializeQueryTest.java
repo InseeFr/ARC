@@ -49,8 +49,6 @@ public class InitializeQueryTest {
 		PropertiesHandler testProperties=PropertiesHandler.getInstance();
 		
 		// reset connection properties
-		testProperties.setConnectionProperties(null);
-		
 		StringBuilder url=new StringBuilder();
 		StringBuilder username=new StringBuilder();
 		StringBuilder password=new StringBuilder();
