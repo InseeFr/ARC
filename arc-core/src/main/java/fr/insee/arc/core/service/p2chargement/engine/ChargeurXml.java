@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.dao.ChargeurXMLDao;
@@ -35,7 +36,7 @@ public class ChargeurXml implements IChargeur {
 	private Sandbox sandbox;
 	private FileIdCard fileIdCard;
 	private String tableChargementPilTemp;
-	private String currentPhase;
+	private TraitementPhase currentPhase;
 	private InputStream f;
 
 	// temporary table where data will be loaded by the XML SAX engine

@@ -14,23 +14,23 @@ import fr.insee.arc.core.service.global.ApiService;
 public class ApiServiceFactory {
 
 
-	private Map<String, IServiceFactory> map;
+	private Map<TraitementPhase, IServiceFactory> map;
 
 	private static ApiServiceFactory instance = null;
 
-	private ApiServiceFactory(Map<String, IServiceFactory> aMap) {
+	private ApiServiceFactory(Map<TraitementPhase, IServiceFactory> aMap) {
 		this.map = aMap;
-		this.map.put(TraitementPhase.INITIALISATION.toString(),
+		this.map.put(TraitementPhase.INITIALISATION,
 				ApiInitialisationServiceFactory.getInstance());
-		this.map.put(TraitementPhase.RECEPTION.toString(),
+		this.map.put(TraitementPhase.RECEPTION,
 				ApiReceptionServiceFactory.getInstance());
-		this.map.put(TraitementPhase.CHARGEMENT.toString(),
+		this.map.put(TraitementPhase.CHARGEMENT,
 				ApiChargementServiceFactory.getInstance());
-		this.map.put(TraitementPhase.NORMAGE.toString(),
+		this.map.put(TraitementPhase.NORMAGE,
 				ApiNormageServiceFactory.getInstance());
-		this.map.put(TraitementPhase.CONTROLE.toString(),
+		this.map.put(TraitementPhase.CONTROLE,
 				ApiControleServiceFactory.getInstance());
-		this.map.put(TraitementPhase.MAPPING.toString(),
+		this.map.put(TraitementPhase.MAPPING,
 				ApiMappingServiceFactory.getInstance());
 	}
 
@@ -52,7 +52,7 @@ public class ApiServiceFactory {
 	 * @param paramBatch
 	 * @return
 	 */
-	public static final ApiService getService(String phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
+	public static final ApiService getService(TraitementPhase phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
 		return getInstance().map.get(phaseService).get(phaseService, executionSchema, directory, capacityParameter, paramBatch);
 	}
 }

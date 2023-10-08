@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
 import fr.insee.arc.core.service.p4controle.thread.ThreadControleService;
@@ -37,7 +38,7 @@ public class ApiControleService extends ApiService {
 		super();
 	}
 
-	public ApiControleService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+	public ApiControleService(TraitementPhase aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
 			String paramBatch) {
 		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}

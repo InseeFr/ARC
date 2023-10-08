@@ -20,11 +20,11 @@ public class ApiServiceFactoryTest {
 		
 		for (TraitementPhase arcPhase:TraitementPhase.getListPhaseC())
 		{
-			p=ApiServiceFactory.getService(arcPhase.toString(), "arc_bas2", "./", capacity, null);
+			p=ApiServiceFactory.getService(arcPhase, "arc_bas2", "./", capacity, null);
 
 			assertEquals(null, p.getParamBatch());
 			assertEquals(capacity, p.getNbEnr().intValue());
-			assertEquals(p.getCurrentPhase(), arcPhase.toString());
+			assertEquals(p.getCurrentPhase().toString(), arcPhase.toString());
 		}
 
 	}

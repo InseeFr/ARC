@@ -1,5 +1,6 @@
 package fr.insee.arc.core.factory;
 
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p2chargement.ApiChargementService;
 
@@ -14,7 +15,7 @@ public class ApiChargementServiceFactory implements IServiceFactory {
 	 * @param aDirectoryRoot
 	 * @param aNbEnr
 	 */
-	public ApiService get(String phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
+	public ApiService get(TraitementPhase phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
 		return new ApiChargementService(phaseService, executionSchema, directory, capacityParameter, paramBatch);
 	}
 	

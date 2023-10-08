@@ -1,5 +1,6 @@
 package fr.insee.arc.core.factory;
 
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 
 public interface IServiceFactory {
@@ -14,6 +15,6 @@ public interface IServiceFactory {
 	 * @param paramBatch
 	 * @return
 	 */
-	public ApiService get(String phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch);
+	public ApiService get(TraitementPhase phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch);
 
 }

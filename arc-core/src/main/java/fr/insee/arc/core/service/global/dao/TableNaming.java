@@ -4,6 +4,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.utils.FormatSQL;
 
@@ -24,11 +25,11 @@ public class TableNaming {
 	 * @param suffix        optionnal suffix added to the temporary name
 	 * @return
 	 */
-	public static String temporaryTableName(String aEnvExecution, String aCurrentPhase, ViewEnum table) {
+	public static String temporaryTableName(String aEnvExecution, TraitementPhase aCurrentPhase, ViewEnum table) {
 		return ViewEnum.getFullName(aEnvExecution, FormatSQL.temporaryTableName(aCurrentPhase + "_" + table));
 	}
 
-	public static String phaseDataTableName(String aEnvExecution, String aPhase, TraitementEtat etat) {
+	public static String phaseDataTableName(String aEnvExecution, TraitementPhase aPhase, TraitementEtat etat) {
 		return ViewEnum.getFullName(aEnvExecution, aPhase + "_" + etat.toString());
 	}
     

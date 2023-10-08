@@ -2,14 +2,13 @@ package fr.insee.arc.core.service.p0initialisation;
 
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p0initialisation.filesystem.RestoreFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFilesOperation;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
 /**
@@ -32,7 +31,7 @@ public class ApiInitialisationService extends ApiService {
 		super();
 	}
 
-	public ApiInitialisationService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+	public ApiInitialisationService(TraitementPhase aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
 			String paramBatch) {
 		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}

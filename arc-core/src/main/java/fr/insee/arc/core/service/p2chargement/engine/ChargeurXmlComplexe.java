@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
@@ -38,7 +39,7 @@ public class ChargeurXmlComplexe implements IChargeur {
 
 	private Sandbox sandbox;
 	private String tableChargementPilTemp;
-	private String currentPhase;
+	private TraitementPhase currentPhase;
 	private FileIdCard fileIdCard;
 	private InputStream f;
 

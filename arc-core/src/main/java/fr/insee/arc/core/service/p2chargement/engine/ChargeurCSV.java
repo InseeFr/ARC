@@ -11,11 +11,12 @@ import org.apache.logging.log4j.Logger;
 
 import com.opencsv.CSVReader;
 
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
-import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFileAttributes;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
+import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.dao.ChargeurCsvDao;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -37,7 +38,7 @@ public class ChargeurCSV implements IChargeur {
 	private static final Logger LOGGER = LogManager.getLogger(ChargeurCSV.class);
 
 	private String tableChargementPilTemp;
-	private String currentPhase;
+	private TraitementPhase currentPhase;
 
 	private InputStream streamHeader;
 	private InputStream streamContent;

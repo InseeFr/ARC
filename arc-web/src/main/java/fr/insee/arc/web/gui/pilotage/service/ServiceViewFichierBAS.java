@@ -79,11 +79,11 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			// Lancement de l'initialisation dans la foulée
 			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
 			ApiServiceFactory
-					.getService(TraitementPhase.INITIALISATION.toString(), getBacASable(),
+					.getService(TraitementPhase.INITIALISATION, getBacASable(),
 							this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
 					.invokeApi();
 			ApiServiceFactory
-					.getService(TraitementPhase.RECEPTION.toString(), getBacASable(),
+					.getService(TraitementPhase.RECEPTION, getBacASable(),
 							this.repertoire, TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
 					.invokeApi();
 		}
@@ -172,7 +172,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		if (!isEnvProd()) {
 			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
 			ApiServiceFactory
-					.getService(TraitementPhase.INITIALISATION.toString(), getBacASable(),
+					.getService(TraitementPhase.INITIALISATION, getBacASable(),
 							this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
 					.invokeApi();
 		}

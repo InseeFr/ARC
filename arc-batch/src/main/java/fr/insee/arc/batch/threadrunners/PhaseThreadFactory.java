@@ -28,7 +28,7 @@ public class PhaseThreadFactory extends Thread {
 	public void execute() {
 
 		this.report = ApiServiceFactory.getService( //
-				getPhaseName().toString(), //
+				getPhaseName(), //
 				mapParam.get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT), //
 				mapParam.get(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION), //
 				Integer.parseInt(mapParam.get(capacityParameterName())), //

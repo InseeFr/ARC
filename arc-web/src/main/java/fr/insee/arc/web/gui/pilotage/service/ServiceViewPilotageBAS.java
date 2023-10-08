@@ -81,11 +81,11 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 				if (!isEnvProd()) {
 					// Lancement de l'initialisation dans la foulée
 					ApiServiceFactory
-							.getService(TraitementPhase.INITIALISATION.toString(), getBacASable(),
+							.getService(TraitementPhase.INITIALISATION, getBacASable(),
 									this.repertoire, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
 							.invokeApi();
 					ApiServiceFactory
-							.getService(TraitementPhase.RECEPTION.toString(), getBacASable(),
+							.getService(TraitementPhase.RECEPTION, getBacASable(),
 									this.repertoire, TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
 							.invokeApi();
 				}
@@ -182,7 +182,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		// Maximum number of files processed in each phase iteration
 		int maxFilesPerPhase = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
 		
-		ApiServiceFactory.getService(phaseAExecuter.toString(), getBacASable(), this.repertoire,
+		ApiServiceFactory.getService(phaseAExecuter, getBacASable(), this.repertoire,
 				maxFilesPerPhase, null
 		).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);

@@ -3,6 +3,7 @@ package fr.insee.arc.core.service.p1reception;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcDatabase;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p1reception.registerarchive.ArchiveRegistrationOperation;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
@@ -29,7 +30,7 @@ public class ApiReceptionService extends ApiService {
 		super();
 	}
 
-	public ApiReceptionService(String aCurrentPhase, String aEnvExecution,
+	public ApiReceptionService(TraitementPhase aCurrentPhase, String aEnvExecution,
 			String aDirectoryRoot, Integer aNbEnr, String paramBatch) {
 		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}

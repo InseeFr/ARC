@@ -67,8 +67,8 @@ public class PilotageOperations {
 	 * @param nbEnr
 	 * @return
 	 */
-	public static String queryCopieTablePilotage(String tablePil, String tablePilTemp, String phaseAncien,
-			String phaseNouveau, Integer nbEnr) {
+	public static String queryCopieTablePilotage(String tablePil, String tablePilTemp, TraitementPhase phaseAncien,
+			TraitementPhase phaseNouveau, Integer nbEnr) {
 		StringBuilder requete = new StringBuilder();
 
 		Date date = new Date();
@@ -124,7 +124,7 @@ public class PilotageOperations {
 	 * @param exception
 	 * @return
 	 */
-	public static StringBuilder queryUpdatePilotageError(String phase, String tablePil, Exception exception) {
+	public static StringBuilder queryUpdatePilotageError(TraitementPhase phase, String tablePil, Exception exception) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("UPDATE " + tablePil + " SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport="
 				+ FormatSQL.quoteText(exception.toString()).replace("\r", "") + " ");
@@ -201,7 +201,7 @@ public class PilotageOperations {
 	 * @param tableDrop
 	 * @throws ArcException
 	 */
-	public static void traitementSurErreur(Connection connexion, String phase, String tablePil, String idSource,
+	public static void traitementSurErreur(Connection connexion, TraitementPhase phase, String tablePil, String idSource,
 			ArcException exception) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de

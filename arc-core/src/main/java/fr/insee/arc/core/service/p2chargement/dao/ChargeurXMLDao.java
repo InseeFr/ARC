@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
@@ -84,7 +85,7 @@ public class ChargeurXMLDao {
 	 * @param jointure
 	 * @throws ArcException
 	 */
-	public void execQueryBilan(String tableChargementPilTemp, String currentPhase, String rapport, String jointure)
+	public void execQueryBilan(String tableChargementPilTemp, TraitementPhase currentPhase, String rapport, String jointure)
 			throws ArcException {
 		StringBuilder requeteBilan = new StringBuilder();
 		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getFileName(),

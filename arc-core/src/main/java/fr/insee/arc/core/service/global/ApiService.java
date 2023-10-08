@@ -49,8 +49,8 @@ public abstract class ApiService implements IConstanteNumerique {
 	protected String envExecution;
 	protected String tablePrevious;
 
-	protected String previousPhase;
-	protected String currentPhase;
+	protected TraitementPhase previousPhase;
+	protected TraitementPhase currentPhase;
 
 	protected String tablePil;
 	protected String tablePilTemp;
@@ -72,7 +72,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		springInit();
 	}
 
-	protected ApiService(String aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+	protected ApiService(TraitementPhase aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
 			String paramBatch) {
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");
@@ -89,7 +89,7 @@ public abstract class ApiService implements IConstanteNumerique {
 
 		// current phase and compute the previous phase
 		this.currentPhase = aCurrentPhase;
-		this.previousPhase = TraitementPhase.valueOf(this.getCurrentPhase()).previousPhase().toString();
+		this.previousPhase = this.getCurrentPhase().previousPhase();
 
 		// number of object to be proceed
 		this.nbEnr = aNbEnr;
@@ -150,11 +150,11 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param phaseAncien
 	 * @return
 	 */
-	private boolean checkTodo(String tablePil, String phaseAncien) {
+	private boolean checkTodo(String tablePil, TraitementPhase phaseAncien) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		boolean checkTodoResult = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
-		requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien) + " AND "
+		requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien.toString()) + " AND "
 				+ requete.quoteText(TraitementEtat.OK.toString()) + "=ANY(etat_traitement) ");
 		requete.append("and etape=1 ");
 		requete.append("limit 1 ");
@@ -180,7 +180,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param nbEnr
 	 * @throws ArcException
 	 */
-	private void register(Connection connexion, String phaseIn, String phase, String tablePil, String tablePilTemp,
+	private void register(Connection connexion, TraitementPhase phaseIn, TraitementPhase phase, String tablePil, String tablePilTemp,
 			Integer nbEnr) {
 		LoggerHelper.info(LOGGER_APISERVICE, "** register **");
 		try {
@@ -264,11 +264,11 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param etat
 	 * @return
 	 */
-	public Map<String, List<String>> pilotageListIdsource(String tablePilotage, String aCurrentPhase, String etat) {
+	public Map<String, List<String>> pilotageListIdsource(String tablePilotage, TraitementPhase aCurrentPhase, String etat) {
 		LoggerHelper.info(LOGGER_APISERVICE, "pilotageListIdsource");
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + tablePilotage + " ");
-		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase) + " ");
+		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase.toString()) + " ");
 		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
 		try {
 			return new GenericBean(
@@ -289,7 +289,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param etatNew
 	 * @return
 	 */
-	public static StringBuilder pilotageMarkIdsource(String tablePilotage, String idSource, String phaseNew,
+	public static StringBuilder pilotageMarkIdsource(String tablePilotage, String idSource, TraitementPhase phaseNew,
 			String etatNew, String rapport, String... jointure) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("UPDATE " + tablePilotage + " ");
@@ -336,8 +336,8 @@ public abstract class ApiService implements IConstanteNumerique {
 		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " *******");
 		try {
 
-			if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION.toString())
-					|| this.getCurrentPhase().equals(TraitementPhase.RECEPTION.toString())) {
+			if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION)
+					|| this.getCurrentPhase().equals(TraitementPhase.RECEPTION)) {
 				this.todo = true;
 			} else {
 				this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase());
@@ -352,7 +352,7 @@ public abstract class ApiService implements IConstanteNumerique {
 					ex.logFullException();
 					try {
 						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(),
-								this.getTablePil(), ex, "aucuneTableADroper");
+								this.getTablePil(), ex);
 					} catch (ArcException ex2) {
 						LoggerHelper.error(LOGGER_APISERVICE, "Error in ApiService.invokeApi.repriseSurErreur");
 						ex2.logFullException();
@@ -388,8 +388,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param tableDrop
 	 * @throws ArcException
 	 */
-	private void repriseSurErreur(Connection connexion, String phase, String tablePil, ArcException exception,
-			String... tableDrop) throws ArcException {
+	private void repriseSurErreur(Connection connexion, TraitementPhase phase, String tablePil, ArcException exception) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
 		// la transaction
@@ -403,11 +402,6 @@ public abstract class ApiService implements IConstanteNumerique {
 			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
 		}
 		StringBuilder requete = new StringBuilder();
-
-		for (int i = 0; i < tableDrop.length; i++) {
-			requete.append("DROP TABLE IF EXISTS " + tableDrop[i] + ";");
-		}
-
 		requete.append("WITH t0 AS ( ");
 		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
 		requete.append("\n RETURNING " + ColumnEnum.ID_SOURCE.getColumnName() + ") ");
@@ -451,11 +445,11 @@ public abstract class ApiService implements IConstanteNumerique {
 		return tablePil;
 	}
 
-	public String getPreviousPhase() {
+	public TraitementPhase getPreviousPhase() {
 		return previousPhase;
 	}
 
-	public String getCurrentPhase() {
+	public TraitementPhase getCurrentPhase() {
 		return currentPhase;
 	}
 

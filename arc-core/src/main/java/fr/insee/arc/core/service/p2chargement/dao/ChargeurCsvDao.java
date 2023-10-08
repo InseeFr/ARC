@@ -10,13 +10,13 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
-import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFileAttributes;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
-import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
+import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.engine.ParseFormatRulesOperation;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -436,7 +436,7 @@ public class ChargeurCsvDao {
 		return UtilitaireDao.get(0).getColumns(sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_ARC.getFullName());
 	}
 
-	public void execQueryBilan(String tableChargementPilTemp, String currentPhase) throws ArcException {
+	public void execQueryBilan(String tableChargementPilTemp, TraitementPhase currentPhase) throws ArcException {
 
 		StringBuilder requeteBilan = new StringBuilder();
 		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getFileName(),

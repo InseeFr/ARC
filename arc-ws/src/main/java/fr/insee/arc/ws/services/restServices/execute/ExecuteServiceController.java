@@ -78,7 +78,7 @@ public class ExecuteServiceController {
 
 			}
 			
-			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), env,
+			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase), env,
 							repertoire, Integer.MAX_VALUE, null).invokeApi();
 			
 			
@@ -155,7 +155,7 @@ public class ExecuteServiceController {
 
 			}
 			
-			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase).toString(), env,
+			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase), env,
 							repertoire, Integer.MAX_VALUE, null).invokeApi();
 			
 			
