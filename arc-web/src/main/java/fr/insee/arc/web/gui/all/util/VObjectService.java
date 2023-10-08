@@ -925,7 +925,7 @@ public class VObjectService {
 				s.append(expressionOR);
 			}
 			// on retire les dernier OR
-			s.setLength(s.length() - 3);
+			s.setLength(s.length() - expressionOR.length());
 			s.append(expressionAND);
 		}
 
