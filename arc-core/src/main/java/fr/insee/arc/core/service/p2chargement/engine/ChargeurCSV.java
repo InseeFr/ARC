@@ -13,9 +13,9 @@ import com.opencsv.CSVReader;
 
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
-import fr.insee.arc.core.service.p2chargement.bo.FileAttributes;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.p2chargement.bo.FileAttributesCSV;
 import fr.insee.arc.core.service.p2chargement.bo.FormatRulesCsv;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.core.service.p2chargement.dao.ChargeurCsvDao;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -43,24 +43,23 @@ public class ChargeurCSV implements IChargeur {
 	private InputStream streamContent;
 
 	private Sandbox sandbox;
-	private FileAttributes fileAttributes;
-	private Norme norme;
+	private FileIdCard fileIdCard;
+	private FileAttributesCSV fileAttributes;
+
 	private ParseFormatRulesOperation<FormatRulesCsv> parser;
 
 	private ChargeurCsvDao dao;
 
-	public ChargeurCSV(ThreadChargementService threadChargementService, String fileName) {
+	public ChargeurCSV(ThreadChargementService threadChargementService) {
 
 		this.sandbox = new Sandbox(threadChargementService.getConnexion().getExecutorConnection(),
 				threadChargementService.getEnvExecution());
-		this.fileAttributes = new FileAttributes(fileName, threadChargementService.validite);
-		this.norme = threadChargementService.normeOk;
-		this.parser = new ParseFormatRulesOperation<>(norme, FormatRulesCsv.class);
-
-		this.dao = new ChargeurCsvDao(this.sandbox, this.fileAttributes, this.norme, this.parser);
+		this.fileIdCard = threadChargementService.fileIdCard;
+		this.fileAttributes = new FileAttributesCSV();
+		this.parser = new ParseFormatRulesOperation<>(fileIdCard, FormatRulesCsv.class);
+		this.dao = new ChargeurCsvDao(this.sandbox, this.fileAttributes, this.fileIdCard, this.parser);
 
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
-
 		this.currentPhase = threadChargementService.getCurrentPhase();
 		this.streamContent = threadChargementService.filesInputStreamLoad.getTmpInxCSV();
 		this.streamHeader = threadChargementService.filesInputStreamLoad.getTmpInxChargement();
@@ -87,14 +86,14 @@ public class ChargeurCSV implements IChargeur {
 		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase begin **");
 
 		StaticLoggerDispatcher.debug(LOGGER,
-				String.format("contenu delimiter %s", norme.getRegleChargement().getDelimiter()));
+				String.format("contenu delimiter %s", fileIdCard.getRegleChargement().getDelimiter()));
 		StaticLoggerDispatcher.debug(LOGGER,
-				String.format("contenu format %s", norme.getRegleChargement().getFormat()));
+				String.format("contenu format %s", fileIdCard.getRegleChargement().getFormat()));
 
 		// update delimiter
-		norme.getRegleChargement()
+		fileIdCard.getRegleChargement()
 				.setDelimiter(ObjectUtils.firstNonNull(
-						dao.execQueryEvaluateCharExpression(norme.getRegleChargement().getDelimiter().trim()),
+						dao.execQueryEvaluateCharExpression(fileIdCard.getRegleChargement().getDelimiter().trim()),
 						Delimiters.DEFAULT_CSV_DELIMITER));
 
 		// update quote
@@ -123,7 +122,7 @@ public class ChargeurCSV implements IChargeur {
 	 */
 	private void computeHeaders() throws ArcException {
 		String userDefinedHeaders = parser.getValue(FormatRulesCsv.HEADERS);
-		String csvDelimiter = norme.getRegleChargement().getDelimiter();
+		String csvDelimiter = fileIdCard.getRegleChargement().getDelimiter();
 
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
 		// premier ligne
@@ -141,7 +140,7 @@ public class ChargeurCSV implements IChargeur {
 				}
 			} catch (IOException fileReadException) {
 				throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
-						fileAttributes.getFileName());
+						fileIdCard.getFileName());
 			}
 		} else {
 			String[] headers = Format.tokenizeAndTrim(userDefinedHeaders, Delimiters.HEADERS_DELIMITER);
@@ -150,7 +149,6 @@ public class ChargeurCSV implements IChargeur {
 	}
 
 	private void registerHeaders(String[] headers) {
-		this.fileAttributes.setHeaders(headers);
 		this.fileAttributes.setHeadersI(Format.toBdId(headers));
 		this.fileAttributes.setHeadersV(Format.toBdVal(headers));
 	}
@@ -172,7 +170,7 @@ public class ChargeurCSV implements IChargeur {
 			}
 		} catch (IOException fileReadException) {
 			throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
-					this.fileAttributes.getFileName());
+					this.fileIdCard.getFileName());
 		}
 	}
 

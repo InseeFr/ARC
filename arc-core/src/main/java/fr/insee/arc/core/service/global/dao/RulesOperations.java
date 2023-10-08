@@ -7,7 +7,7 @@ import java.util.Map;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
-import fr.insee.arc.core.service.global.bo.NormeFichier;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -34,10 +34,10 @@ public class RulesOperations {
 		return requete.toString();
 	}
 
-	public static String getRegles(String tableRegle, NormeFichier normeFichier) {
+	public static String getRegles(String tableRegle, FileIdCard fileIdCard) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n SELECT * FROM " + tableRegle + " a WHERE ");
-		requete.append(conditionRegle(normeFichier));
+		requete.append(conditionRegle(fileIdCard));
 		return requete.toString();
 	}
 
@@ -109,13 +109,13 @@ public class RulesOperations {
 		return requete.toString();
 	}
 
-	private static String conditionRegle(NormeFichier normeFichier) {
+	private static String conditionRegle(FileIdCard fileIdCard) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n ");
-		requete.append("a.id_norme='" + normeFichier.getIdNorme() + "' ");
-		requete.append("AND a.periodicite='" + normeFichier.getPeriodicite() + "' ");
-		requete.append("AND a.validite_inf<=to_date('" + normeFichier.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
-		requete.append("AND a.validite_sup>=to_date('" + normeFichier.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
+		requete.append("a.id_norme='" + fileIdCard.getIdNorme() + "' ");
+		requete.append("AND a.periodicite='" + fileIdCard.getPeriodicite() + "' ");
+		requete.append("AND a.validite_inf<=to_date('" + fileIdCard.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
+		requete.append("AND a.validite_sup>=to_date('" + fileIdCard.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
 		requete.append(";");
 		return requete.toString();
 	}

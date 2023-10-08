@@ -13,7 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -34,7 +35,7 @@ public class ChargementBrut {
        
     private static final Logger LOGGER = LogManager.getLogger(ChargementBrut.class);
     private Connection connexion;
-    private List<Norme> listeNorme;
+    private List<NormeRules> listeNorme;
 
     /** Retourne une requête (SELECT) contenant l'idsource et des lignes du fichier.
      * @param idSource du fichier chargé
@@ -84,13 +85,10 @@ public class ChargementBrut {
     /** Calcule la norme. Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
      * @throws IOException
      * @throws ArcException si aucune norme ou plus d'une norme trouvée */
-    public void calculeNormeAndValiditeFichiers(String idSource, InputStream file, Norme[] normeOk, String[] validiteOk)
+    public void calculeNormeAndValiditeFichiers(InputStream file, FileIdCard normeOk)
     		throws ArcException {
     	StaticLoggerDispatcher.info(LOGGER, "** calculeNormeFichiers **");
-    	
-	    normeOk[0] = new Norme();
-	    validiteOk[0]= null;
-	   
+
 	    int nbBoucle = 0;
 	
 	    try(InputStreamReader isr = new InputStreamReader(file);
@@ -102,19 +100,22 @@ public class ChargementBrut {
 			// nbBoucle<LIMIT_BOUCLE n'entre jamais en jeu.
 			// Gênant si la norme utilise une ligne qui n'est pas dans les xxx premières lignes, mais choix temporaire pour éviter
 			// de charger un fichier entier à la recherche de sa norme
-			while (normeOk[0].getIdNorme() == null && nbBoucle<LIMIT_BOUCLE) {
-	    		calculerNormeAndValidite(normeOk, validiteOk, requeteFichierBrutalement(idSource, br, nbBoucle));
+			while (normeOk.getIdNorme() == null && nbBoucle<LIMIT_BOUCLE) {
+	    		calculerNormeAndValidite(normeOk, requeteFichierBrutalement(normeOk.getFileName(), br, nbBoucle));
 
 	    		nbBoucle++;
 	    	}
 
 	    } catch (IOException e) {
-	    	throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
+	    	throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, normeOk.getFileName());
 	    }
 
-	    if (normeOk[0].getIdNorme()==null) {
-	        throw new ArcException(ArcExceptionMessage.LOAD_NORM_NOT_FOUND, idSource);
+	    if (normeOk.getIdNorme()==null) {
+	        throw new ArcException(ArcExceptionMessage.LOAD_NORM_NOT_FOUND, normeOk.getFileName());
 	    }
+	    
+	    
+	    
     }
 
     /** Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
@@ -122,7 +123,7 @@ public class ChargementBrut {
      * @throws ArcException
      * @throws ArcException 
      * @throws ArcException si aucune norme ou plus d'une norme trouvée*/
-    private void calculerNormeAndValidite(Norme[] normeOk, String[] validiteOk, String requeteFichier) throws ArcException {
+    private void calculerNormeAndValidite(FileIdCard normeOk, String requeteFichier) throws ArcException {
         StaticLoggerDispatcher.info(LOGGER, "** calculerNorme **");
 
         StringBuilder query=new StringBuilder();
@@ -162,8 +163,10 @@ public class ChargementBrut {
         	throw new ArcException(ArcExceptionMessage.LOAD_ZERO_NORM_FOUND);
         }
 
-        normeOk[0]=listeNorme.get(Integer.parseInt(result.get(0).get(0)));
-        validiteOk[0]=result.get(0).get(2);
+        NormeRules normFound = listeNorme.get(Integer.parseInt(result.get(0).get(0)));
+        
+        normeOk.setFileAttributes(normFound.getIdNorme(), result.get(0).get(2), normFound.getPeriodicite());
+
     }
     
     
@@ -186,7 +189,7 @@ public class ChargementBrut {
     /** Retourne les normes potentielles à vérifier pour le fichier.
      * @return the listeNorme
      */
-    public List<Norme> getListeNorme() {
+    public List<NormeRules> getListeNorme() {
         return listeNorme;
     }
 
@@ -194,7 +197,7 @@ public class ChargementBrut {
      * @param listeNorme
      *            the listeNorme to set
      */
-    public void setListeNorme(List<Norme> listeNorme) {
+    public void setListeNorme(List<NormeRules> listeNorme) {
         this.listeNorme = listeNorme;
     }
 

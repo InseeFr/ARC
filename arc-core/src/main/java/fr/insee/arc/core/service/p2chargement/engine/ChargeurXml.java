@@ -15,7 +15,8 @@ import org.xml.sax.SAXException;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.service.p2chargement.xmlhandler.XMLHandlerCharger4;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -36,12 +37,10 @@ import fr.insee.arc.utils.utils.SecuredSaxParser;
  */
 public class ChargeurXml implements IChargeur {
 	private static final Logger LOGGER = LogManager.getLogger(ChargeurXml.class);
-	private String fileName;
+	private FileIdCard fileIdCard;
 	private Connection connexion;
 	private String tableChargementPilTemp;
 	private String currentPhase;
-	private Norme norme;
-	private String validite;
 	private InputStream f;
 
 	// temporary table where data will be loaded by the XML SAX engine
@@ -63,15 +62,13 @@ public class ChargeurXml implements IChargeur {
 	 * @param threadChargementService
 	 * @param fileName
 	 */
-	public ChargeurXml(ThreadChargementService threadChargementService, String fileName) {
-		this.fileName = fileName;
+	public ChargeurXml(ThreadChargementService threadChargementService) {
+		this.fileIdCard = threadChargementService.fileIdCard;
 		this.connexion = threadChargementService.getConnexion().getExecutorConnection();
 		this.tableTempA = threadChargementService.getTableTempA();
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
 		this.currentPhase = threadChargementService.getCurrentPhase();
 		this.f = threadChargementService.filesInputStreamLoad.getTmpInxChargement();
-		this.norme = threadChargementService.normeOk;
-		this.validite = threadChargementService.validite;
 	}
 
 	/**
@@ -136,7 +133,7 @@ public class ChargeurXml implements IChargeur {
 	@Override
 	public void finalisation() {
 		StringBuilder requeteBilan = new StringBuilder();
-		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName, this.currentPhase,
+		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileIdCard.getFileName(), this.currentPhase,
 				TraitementEtat.OK.toString(), rapport, this.jointure));
 
 		try {
@@ -152,7 +149,7 @@ public class ChargeurXml implements IChargeur {
 		java.util.Date beginDate = new java.util.Date();
 
 		// Création de la table de stockage
-		XMLHandlerCharger4 handler = new XMLHandlerCharger4(connexion, fileName, norme, validite, this.tableTempA,
+		XMLHandlerCharger4 handler = new XMLHandlerCharger4(connexion, fileIdCard, this.tableTempA,
 				this.tempTableAColumnsLongName, this.tempTableAColumnsShortName);
 
 		// appel du parser et gestion d'erreur
@@ -161,7 +158,7 @@ public class ChargeurXml implements IChargeur {
 			saxParser.parse(f, handler);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED,
-					this.fileName).logMessageException();
+					fileIdCard.getFileName()).logMessageException();
 			rapport = businessException.getMessage().replace("'", "''");
 			throw businessException;
 		}

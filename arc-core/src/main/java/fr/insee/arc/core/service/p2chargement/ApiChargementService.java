@@ -13,7 +13,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
 import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -50,7 +50,7 @@ public class ApiChargementService extends ApiService {
 		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
 	}
 	
-	protected List<Norme> listeNorme;
+	protected List<NormeRules> listeNorme;
 	protected String directoryIn;
 
 	@Override
@@ -65,7 +65,7 @@ public class ApiChargementService extends ApiService {
 		this.directoryIn = new DirectoriesReception(this.coordinatorSandbox).getDirectoryReceptionOK() + File.separator;
 
 		// récupération des différentes normes dans la base
-		this.listeNorme = Norme.getNormesBase(this.connexion.getCoordinatorConnection(), this.envExecution);
+		this.listeNorme = NormeRules.getNormesBase(this.connexion.getCoordinatorConnection(), this.envExecution);
 
 		this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiChargementService.MAX_PARALLEL_WORKERS", 4);
@@ -82,7 +82,7 @@ public class ApiChargementService extends ApiService {
 
 	}
 
-	public List<Norme> getListeNorme() {
+	public List<NormeRules> getListeNorme() {
 		return listeNorme;
 	}
 

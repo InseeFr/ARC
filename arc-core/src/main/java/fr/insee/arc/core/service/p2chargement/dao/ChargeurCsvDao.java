@@ -13,9 +13,10 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.bo.Delimiters;
-import fr.insee.arc.core.service.p2chargement.bo.FileAttributes;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.p2chargement.bo.FileAttributesCSV;
 import fr.insee.arc.core.service.p2chargement.bo.FormatRulesCsv;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.core.service.p2chargement.engine.ParseFormatRulesOperation;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -24,15 +25,15 @@ import fr.insee.arc.utils.exception.ArcException;
 public class ChargeurCsvDao {
 
 	private Sandbox sandbox;
-	private FileAttributes fileAttributes;
-	private Norme norme;
+	private FileIdCard fileIdCard;
+	private FileAttributesCSV fileAttributes;
 	private ParseFormatRulesOperation<FormatRulesCsv> parser;
 
-	public ChargeurCsvDao(Sandbox sandbox, FileAttributes fileAttributes, Norme norme,
+	public ChargeurCsvDao(Sandbox sandbox, FileAttributesCSV fileAttributes, FileIdCard fileIdCard,
 			ParseFormatRulesOperation<FormatRulesCsv> parser) {
 		this.sandbox = sandbox;
 		this.fileAttributes = fileAttributes;
-		this.norme = norme;
+		this.fileIdCard = fileIdCard;
 		this.parser = parser;
 	}
 
@@ -82,7 +83,7 @@ public class ChargeurCsvDao {
 
 		boolean ignoreFirstLine = (parser.getValue(FormatRulesCsv.HEADERS) == null);
 
-		String separateur = norme.getRegleChargement().getDelimiter();
+		String separateur = fileIdCard.getRegleChargement().getDelimiter();
 
 		String quote = parser.getValue(FormatRulesCsv.QUOTE);
 
@@ -103,18 +104,18 @@ public class ChargeurCsvDao {
 		req.append("DROP TABLE IF EXISTS " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
 		req.append("CREATE TEMPORARY TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName());
 		req.append(" AS (SELECT ");
-		req.append("\n '" + fileAttributes.getFileName() + "'::text collate \"C\" as "
+		req.append("\n '" + fileIdCard.getFileName() + "'::text collate \"C\" as "
 				+ ColumnEnum.ID_SOURCE.getColumnName());
 		req.append("\n ,id::integer as id");
-		req.append("\n ," + fileAttributes.getIntegrationDate() + "::text collate \"C\" as date_integration ");
-		req.append("\n ,'" + norme.getIdNorme() + "'::text collate \"C\" as id_norme ");
-		req.append("\n ,'" + norme.getPeriodicite() + "'::text collate \"C\" as periodicite ");
-		req.append("\n ,'" + fileAttributes.getValidite() + "'::text collate \"C\" as validite ");
+		req.append("\n ," + fileIdCard.getIntegrationDate() + "::text collate \"C\" as date_integration ");
+		req.append("\n ,'" + fileIdCard.getIdNorme() + "'::text collate \"C\" as id_norme ");
+		req.append("\n ,'" + fileIdCard.getPeriodicite() + "'::text collate \"C\" as periodicite ");
+		req.append("\n ,'" + fileIdCard.getValidite() + "'::text collate \"C\" as validite ");
 		req.append("\n ,0::integer as nombre_colonne");
 
 		req.append("\n , ");
 
-		for (int i = 0; i < fileAttributes.getHeaders().length; i++) {
+		for (int i = 0; i < fileAttributes.getHeadersI().length; i++) {
 			req.append("id as " + fileAttributes.getHeadersI()[i] + ", " + fileAttributes.getHeadersV()[i] + ",");
 		}
 
@@ -438,7 +439,7 @@ public class ChargeurCsvDao {
 	public void execQueryBilan(String tableChargementPilTemp, String currentPhase) throws ArcException {
 
 		StringBuilder requeteBilan = new StringBuilder();
-		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileAttributes.getFileName(),
+		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getFileName(),
 				currentPhase, TraitementEtat.OK.toString(), null));
 
 		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);

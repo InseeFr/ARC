@@ -35,6 +35,7 @@ public enum ArcExceptionMessage {
 	LOAD_PARALLEL_INSERT_THREAD_FAILED("L'insertion en parallele des données a échoué"),
 	LOAD_KEYVALUE_VAR_NOT_EXISTS_IN_FORMAT_RULES("La rubrique fille %s n'existe pas les règles de formatage"),
 	LOAD_RULES_NOT_FOUND("La norme %s n'a pas de règles de chargement"),
+	LOAD_RULES_SEVERAL("La norme %s a plusieurs règles de chargement"),
 	LOAD_SEVERAL_NORM_FOUND("Plusieurs normes ou validité correspondent à l'expression : %s"),
 	LOAD_NORM_NOT_FOUND("Aucune norme trouvée pour le fichier %s"),
 	LOAD_ZERO_NORM_FOUND("Aucune norme trouvée"),

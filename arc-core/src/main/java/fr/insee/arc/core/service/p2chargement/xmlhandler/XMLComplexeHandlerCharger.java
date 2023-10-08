@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.p2chargement.xmlhandler;
 
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.service.global.dao.DateConversion;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -31,14 +29,12 @@ import fr.insee.arc.utils.utils.Pair;
 public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandler {
 	private static final Logger LOGGER = LogManager.getLogger(XMLHandlerCharger4.class);
 
-	public XMLComplexeHandlerCharger(Connection connexion, String fileName, Norme normeCourante, String validite,
+	public XMLComplexeHandlerCharger(Connection connexion, FileIdCard fileIdCard,
 			String tempTableA, FastList<String> tempTableAColumnsLongName,
 			FastList<String> tempTableAColumnsShortName, ArrayList<Pair<String, String>> format) {
 		super();
 		this.connexion = connexion;
-		this.fileName = fileName;
-		this.normeCourante = normeCourante;
-		this.validite = validite;
+		this.fileIdCard = fileIdCard;
 		this.tempTableA = tempTableA;
 		this.tempTableAColumnsLongName = tempTableAColumnsLongName;
 		this.tempTableAColumnsShortName = tempTableAColumnsShortName;
@@ -50,10 +46,8 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	
 	
 	// input
+	private FileIdCard fileIdCard;
 	private Connection connexion;
-	private String fileName;
-	private Norme normeCourante;
-	private String validite;
 	private String tempTableA;
 	private FastList<String> tempTableAColumnsLongName;
 	private FastList<String> tempTableAColumnsShortName;
@@ -118,9 +112,6 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	private Map<String, StringBuilder> requetes = new HashMap<>();
 	private int requetesLength = 0;
 
-	// initialize the integration date with current
-	private final String integrationDate = DateConversion.queryDateConversion(new Date());
-
 	// format to rename column with format rules
 	public ArrayList<Pair<String, String>> format;
 
@@ -152,7 +143,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 */
 	@Override
 	public void endDocument() throws SAXParseException {
-		insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols, this.lineIds, this.lineValues);
+		insertQueryBuilder(this.tempTableA, this.fileIdCard.getFileName(), this.lineCols, this.lineIds, this.lineValues);
 
 		StringBuilder requete = new StringBuilder(computeFinalQuery());
 		renameColumns(requete);
@@ -266,7 +257,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 			if (this.lineCols.indexOf(this.allCols.indexOf(this.closedTag)) < this.lineCols.size() - 1) {
 
 				// réalisation de l'insertion
-				insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols.subList(0, this.lineCols.size() - 1),
+				insertQueryBuilder(this.tempTableA, this.fileIdCard.getFileName(), this.lineCols.subList(0, this.lineCols.size() - 1),
 						this.lineIds.subList(0, this.lineCols.size() - 1),
 						this.lineValues.subList(0, this.lineCols.size() - 1));
 
@@ -387,7 +378,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 		if (this.treeStackFatherLag.indexOf(this.father) >= 0 && this.leafStatus == false) {
 
-			insertQueryBuilder(this.tempTableA, this.fileName, this.lineCols, this.lineIds, this.lineValues);
+			insertQueryBuilder(this.tempTableA, this.fileIdCard.getFileName(), this.lineCols, this.lineIds, this.lineValues);
 
 			if (this.requetesLength > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
 
@@ -499,9 +490,9 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 				.append(",").append(tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("periodicite")))
 				.append(",").append(tempTableAColumnsShortName.get(tempTableAColumnsLongName.indexOf("validite")));
 
-		req2.append("('").append(fileName).append("',").append(this.idLigne).append(",").append(integrationDate)
-				.append(",'").append(normeCourante.getIdNorme()).append("','").append(normeCourante.getPeriodicite())
-				.append("','").append(validite).append("'");
+		req2.append("('").append(fileName).append("',").append(this.idLigne).append(",").append(this.fileIdCard.getIntegrationDate())
+				.append(",'").append(this.fileIdCard.getIdNorme()).append("','").append(this.fileIdCard.getPeriodicite())
+				.append("','").append(this.fileIdCard.getValidite()).append("'");
 
 		for (int i = 0; i < lineCols.size(); i++) {
 
@@ -575,7 +566,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 		StringBuilder reqSelect = new StringBuilder();
 		reqSelect.append("\n SELECT row_number() over (), ww.* FROM (");
-		reqSelect.append("\n SELECT '{nom_fichier}'," + integrationDate + ",'{id_norme}','{validite}','{periodicite}'");
+		reqSelect.append("\n SELECT '{nom_fichier}'," + this.fileIdCard.getIntegrationDate() + ",'{id_norme}','{validite}','{periodicite}'");
 
 		StringBuilder reqFrom = new StringBuilder();
 

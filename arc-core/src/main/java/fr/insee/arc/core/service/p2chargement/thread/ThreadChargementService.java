@@ -2,6 +2,8 @@ package fr.insee.arc.core.service.p2chargement.thread;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +16,7 @@ import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
+import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
@@ -23,8 +26,9 @@ import fr.insee.arc.core.service.p2chargement.ApiChargementService;
 import fr.insee.arc.core.service.p2chargement.archiveloader.ArchiveChargerFactory;
 import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad;
 import fr.insee.arc.core.service.p2chargement.archiveloader.IArchiveFileLoader;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
-import fr.insee.arc.core.service.p2chargement.bo.RegleChargement;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCardChargement;
 import fr.insee.arc.core.service.p2chargement.engine.ChargementBrut;
 import fr.insee.arc.core.service.p2chargement.engine.IChargeur;
 import fr.insee.arc.core.service.p2chargement.factory.ChargeurFactory;
@@ -49,18 +53,15 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	private Thread t;
 
-
 	private String container;
 
 	private String tableChargementPilTemp;
 
 	private ThreadOperations arcThreadGenericDao;
 
-	public String validite;
-
 	public FilesInputStreamLoad filesInputStreamLoad;
 
-	public Norme normeOk;
+	public FileIdCard fileIdCard;
 
 	protected String tableChargementOK;
 
@@ -253,31 +254,27 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		// Si on a pas 1 seule norme alors le fichier est en erreur
 		ChargementBrut chgrBrtl = new ChargementBrut();
 		chgrBrtl.setConnexion(getConnexion().getExecutorConnection());
-		chgrBrtl.setListeNorme(listeNorme);
-
+		chgrBrtl.setListeNorme(listeNorme);		
 		// Stockage dans des tableaux pour passage par référence
-		Norme[] n = new Norme[1];
-		String[] v = new String[1];
-
+		
+		this.fileIdCard = new FileIdCard(this.idSource);
+		
 		try {
-			chgrBrtl.calculeNormeAndValiditeFichiers(this.idSource, this.filesInputStreamLoad.getTmpInxNormage(), n, v);
+			chgrBrtl.calculeNormeAndValiditeFichiers(this.filesInputStreamLoad.getTmpInxNormage(), this.fileIdCard);
 		} catch (Exception e) {
 			LoggerHelper.error(LOGGER, e);
 			throw e;
 		} finally {
-			majPilotage(this.idSource, n[0], v[0]);
+			majPilotage(this.idSource, this.fileIdCard);
 		}
-
-		this.normeOk = n[0];
-		this.validite = v[0];
 
 		// Quel type de fichier ?
 
-		normeOk = calculerTypeFichier(normeOk);
+		calculerTypeFichier();
 
-		ChargeurFactory chargeurFactory = new ChargeurFactory(this, this.idSource);
+		ChargeurFactory chargeurFactory = new ChargeurFactory(this);
 
-		return chargeurFactory.getChargeur(this.normeOk.getRegleChargement().getTypeChargement());
+		return chargeurFactory.getChargeur(this.fileIdCard.getRegleChargement().getTypeChargement());
 	}
 
 	/**
@@ -290,22 +287,24 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * @throws ArcException
 	 * @throws ArcException si aucune règle n'est trouvée
 	 */
-	private Norme calculerTypeFichier(Norme norme) throws ArcException {
-
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("SELECT type_fichier, delimiter, format ").append(" FROM " + ViewEnum.CHARGEMENT_REGLE.getFullName(this.getEnvExecution()))
-				.append(" WHERE id_norme =" + requete.quoteText(norme.getIdNorme()) + ";");
-
-		GenericBean g = new GenericBean(
-				UtilitaireDao.get(0).executeRequest(this.getConnexion().getExecutorConnection(), requete));
-		if (g.mapContent().isEmpty()) {
-			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, norme.getIdNorme());
+	private void calculerTypeFichier() throws ArcException {
+		Map<String, List<String>> regle = RulesOperations.getBean(this.getConnexion().getExecutorConnection(),
+				RulesOperations.getRegles(ViewEnum.CHARGEMENT_REGLE.getFullName(this.envExecution), this.fileIdCard));
+		
+		if (regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).isEmpty())
+		{
+			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, fileIdCard.getIdNorme());
 		}
-
-		norme.setRegleChargement(new RegleChargement(TypeChargement.getEnum(g.content.get(0).get(0)),
-				g.content.get(0).get(1), g.content.get(0).get(2)));
-
-		return norme;
+		
+		if (regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).size()>1)
+		{
+			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, fileIdCard.getIdNorme());
+		}
+		
+		fileIdCard.setRegleChargement(new FileIdCardChargement(
+				TypeChargement.getEnum(regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).get(0)),
+				regle.get(ColumnEnum.DELIMITER.getColumnName()).get(0)
+				, regle.get(ColumnEnum.FORMAT.getColumnName()).get(0)));
 	}
 
 	/**
@@ -338,7 +337,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * @throws ArcException
 	 */
 
-	private boolean majPilotage(String idSource, Norme normeOk, String validite) throws ArcException {
+	private boolean majPilotage(String idSource, FileIdCard fileIdCard) throws ArcException {
 		boolean erreur = false;
 		StaticLoggerDispatcher.info(LOGGER, "Mettre à jour la table de pilotage");
 		java.util.Date beginDate = new java.util.Date();
@@ -347,16 +346,16 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		bloc3.append("UPDATE " + this.tableChargementPilTemp + " a \n");
 		bloc3.append("SET\n");
 
-		if (normeOk.getIdNorme() == null) {
+		if (fileIdCard.getIdNorme() == null) {
 			bloc3.append(" id_norme='" + TraitementRapport.NORMAGE_NO_NORME + "' ");
 			bloc3.append(", validite= '" + TraitementRapport.NORMAGE_NO_DATE + "' ");
 			bloc3.append(", periodicite='" + TraitementRapport.NORMAGE_NO_NORME + "' ");
 			bloc3.append(", etat_traitement='{" + TraitementEtat.KO + "}' ");
 		} else {
 
-			bloc3.append(" id_norme='" + normeOk.getIdNorme() + "' \n");
-			bloc3.append(", validite='" + validite + "' \n");
-			bloc3.append(", periodicite='" + normeOk.getPeriodicite() + "' \n");
+			bloc3.append(" id_norme='" + fileIdCard.getIdNorme() + "' \n");
+			bloc3.append(", validite='" + fileIdCard.getValidite() + "' \n");
+			bloc3.append(", periodicite='" + fileIdCard.getPeriodicite() + "' \n");
 		}
 
 		bloc3.append("where " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "' AND phase_traitement='"
@@ -398,5 +397,15 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	public void setTableTempA(String tableTempA) {
 		this.tableTempA = tableTempA;
 	}
+
+	public FileIdCard getFileIdCard() {
+		return fileIdCard;
+	}
+
+	public void setFileIdCard(FileIdCard fileIdCard) {
+		this.fileIdCard = fileIdCard;
+	}
+	
+	
 
 }

@@ -14,7 +14,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.model.XMLConstant;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.SecuredSaxParser;
@@ -41,7 +42,7 @@ public class ArbreFormat {
     //éléments intermédiaire
     private List<String> branches = new ArrayList<>();
 
-    public ArbreFormat(Norme aNorme) throws ArcException {
+    public ArbreFormat(FileIdCard fileIdCard) throws ArcException {
         super();
         
         try {
@@ -50,7 +51,7 @@ public class ArbreFormat {
         SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
         FormatFichierHandler formatHandler = new FormatFichierHandler();
 
-        saxParser.parse(new InputSource(new StringReader(aNorme.getRegleChargement().getFormat())), formatHandler);
+        saxParser.parse(new InputSource(new StringReader(fileIdCard.getRegleChargement().getFormat())), formatHandler);
 
         this.arbreHierachieDuFichier = formatHandler.getArbre();
         calculerFeuilles();

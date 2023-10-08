@@ -21,17 +21,16 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  * @author S4LWO8
  *
  */
-public class Norme {
+public class NormeRules {
     
     private String idNorme;
     private String periodicite;
     private String defNorme; 
     private String defValidite;
-    private RegleChargement regleChargement;
     
-	private static final Logger LOGGER = LogManager.getLogger(Norme.class);
+	private static final Logger LOGGER = LogManager.getLogger(NormeRules.class);
     
-    public Norme(String idNorme, String periodicite, String defNorme, String defValidite) {
+    public NormeRules(String idNorme, String periodicite, String defNorme, String defValidite) {
         super();
         this.idNorme = idNorme;
         this.periodicite = periodicite;
@@ -39,7 +38,7 @@ public class Norme {
         this.defValidite = defValidite;
     }
     
-    public Norme() {
+    public NormeRules() {
     }
 
     public String getIdNorme() {
@@ -66,12 +65,7 @@ public class Norme {
     public void setDefValidite(String defValidite) {
         this.defValidite = defValidite;
     }
-    public RegleChargement getRegleChargement() {
-        return regleChargement;
-    }
-    public void setRegleChargement(RegleChargement regleChargement) {
-        this.regleChargement = regleChargement;
-    }
+
     
     /**
      * va chercher en base les normes et les renvoie sous forme d'un array
@@ -80,9 +74,9 @@ public class Norme {
      * @return
      * @throws ArcException
      */
-    public static List<Norme> getNormesBase(Connection connexion, String envExecution) {
+    public static List<NormeRules> getNormesBase(Connection connexion, String envExecution) {
 
-        List<Norme> output = new ArrayList<Norme>() ;
+        List<NormeRules> output = new ArrayList<NormeRules>() ;
         // Récupérer les régles de définition de normes
         List<List<String>> normes = new ArrayList<>();
         try {
@@ -94,7 +88,7 @@ public class Norme {
 
         //boucle sur les normes
         for (int i=0; i<normes.size(); i++) {
-            output.add(new Norme(normes.get(i).get(0), normes.get(i).get(1), normes.get(i).get(2), normes.get(i).get(3)));
+            output.add(new NormeRules(normes.get(i).get(0), normes.get(i).get(1), normes.get(i).get(2), normes.get(i).get(3)));
         }
         
         return output;

@@ -25,15 +25,15 @@ public class ChargeurFactory {
     private static final Logger LOGGER = LogManager.getLogger(ChargeurFactory.class);
 
 
-    public ChargeurFactory(ThreadChargementService threadChargementService, String fileName) {
+    public ChargeurFactory(ThreadChargementService threadChargementService) {
         this.map.put(TypeChargement.XML,
-                new ChargeurXml(threadChargementService,fileName));
+                new ChargeurXml(threadChargementService));
         this.map.put(TypeChargement.XML_COMPLEXE,
-                new ChargeurXmlComplexe(threadChargementService,fileName));
+                new ChargeurXmlComplexe(threadChargementService));
         this.map.put(TypeChargement.CLEF_VALEUR,
-                new ChargeurClefValeur(threadChargementService,fileName));
+                new ChargeurClefValeur(threadChargementService));
         this.map.put(TypeChargement.PLAT,
-                new ChargeurCSV(threadChargementService,fileName));
+                new ChargeurCSV(threadChargementService));
 
     }
     

@@ -17,7 +17,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.service.p2chargement.xmlhandler.ArbreFormat;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -35,8 +35,7 @@ import fr.insee.arc.utils.utils.ManipString;
 public class ChargeurClefValeur implements IChargeur {
     private static final Logger LOGGER = LogManager.getLogger(ChargeurClefValeur.class);
 
-    private Norme normeOk;
-    private String separateur = ",";
+    private FileIdCard fileIdCard;
     private String envExecution;
     private String idSource;
     private PipedOutputStream outputStream;
@@ -44,13 +43,12 @@ public class ChargeurClefValeur implements IChargeur {
     private InputStream tmpInxChargement;
     private ChargeurXml chargeurXml;
 
-    public ChargeurClefValeur(ThreadChargementService threadChargementService, String fileName) {
+    public ChargeurClefValeur(ThreadChargementService threadChargementService) {
         super();
 
         this.tmpInxChargement = threadChargementService.filesInputStreamLoad.getTmpInxChargement();
-        this.normeOk = threadChargementService.normeOk;
-        this.separateur = this.normeOk.getRegleChargement().getDelimiter();
-        this.chargeurXml = new ChargeurXml(threadChargementService, fileName);
+        this.fileIdCard = threadChargementService.fileIdCard;
+        this.chargeurXml = new ChargeurXml(threadChargementService);
         this.envExecution = threadChargementService.getEnvExecution();
     }
     
@@ -62,7 +60,7 @@ public class ChargeurClefValeur implements IChargeur {
 
             try {
                 // On lit le fichier format et on en retire une map (rubrique, père)
-                ArbreFormat arbreFormat = new ArbreFormat(getNormeOk());
+                ArbreFormat arbreFormat = new ArbreFormat(getFileIdCard());
                 
                 // Lire le fichier d'entrée et le convertir en fichier XML. Pour ne pas écrire dans la mémoire on transforme un
                 // stream en un autre stream
@@ -178,8 +176,8 @@ public class ChargeurClefValeur implements IChargeur {
 
         ecrireXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-        String rubrique = ManipString.substringBeforeFirst(ligne, separateur);
-        String donnee = ManipString.substringAfterFirst(ligne, separateur);
+        String rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
+        String donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
 
         // On retire les quotes de début et fin de manière violente
         donnee = donnee.substring(1, donnee.length() - 1);
@@ -236,8 +234,8 @@ public class ChargeurClefValeur implements IChargeur {
         String pere;
         String rubriqueCourante;
 
-        rubrique = ManipString.substringBeforeFirst(ligne, separateur);
-        donnee = ManipString.substringAfterFirst(ligne, separateur);
+        rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
+        donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
 
         // On retire les quotes de début et fin de manière violente
         donnee = donnee.substring(1, donnee.length() - 1);
@@ -345,15 +343,18 @@ public class ChargeurClefValeur implements IChargeur {
 		}
     }
 
-    public Norme getNormeOk() {
-        return normeOk;
-    }
+    
+    
+    
+    public FileIdCard getFileIdCard() {
+		return fileIdCard;
+	}
 
-    public void setNormeOk(Norme normeOk) {
-        this.normeOk = normeOk;
-    }
+	public void setFileIdCard(FileIdCard fileIdCard) {
+		this.fileIdCard = fileIdCard;
+	}
 
-    public String getEnvExecution() {
+	public String getEnvExecution() {
         return envExecution;
     }
 

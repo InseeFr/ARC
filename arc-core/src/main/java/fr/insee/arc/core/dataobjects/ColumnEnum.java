@@ -19,6 +19,7 @@ public enum ColumnEnum {
 	, CONDITION("condition", TypeEnum.TEXT, "") // ihm_controle_regle
 	, DATE_INACTIF("date_inactif", TypeEnum.DATE, "") // ihm_jeuderegle
 	, DATE_PRODUCTION("date_production", TypeEnum.DATE, "") // ihm_jeuderegle
+	, DATE_INTEGRATION("date_integration", TypeEnum.TEXT, "")
 	, DEF_NORME("def_norme", TypeEnum.TEXT, "") // ihm_norme
 	, DEF_VALIDITE("def_validite", TypeEnum.TEXT, "") // ihm_norme
 	, DELIMITER("delimiter", TypeEnum.TEXT, "") // ihm_chargement_regle
@@ -38,6 +39,7 @@ public enum ColumnEnum {
 	, FORMAT("format", TypeEnum.TEXT, "") // ihm_chargement_regle
 	, HOST_ALLOWED("host_allowed", TypeEnum.TEXT, "") // ihm_webservice_whitelist,ihm_webservice_log
 	, ID("id", TypeEnum.TEXT, "") // ext_webservice_type,ext_mod_periodicite,ext_webservice_queryview,ext_export_format,ext_etat,ext_type_normage,ext_type_fichier_chargement,ext_type_controle,ext_etat_jeuderegle
+	, ID_SAX("id", TypeEnum.INTEGER, "") // used by sax xml loaders
 	, IDEP("idep", TypeEnum.TEXT, "") // ihm_user
 	, ID_APPLICATION("id_application", TypeEnum.TEXT, "") // ihm_webservice_whitelist,ihm_webservice_log,ihm_client
 	, ID_CLASSE("id_classe", TypeEnum.TEXT, "") // ihm_normage_regle,ihm_controle_regle

@@ -27,6 +27,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.engine.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.p3normage.engine.NormageEngine;
 import fr.insee.arc.core.service.p4controle.engine.ServiceJeuDeRegle;
@@ -80,10 +81,13 @@ public class ExecuteEngineController {
 
 						try (InputStream inputStream = new ByteArrayInputStream(
 								bodyPojo.fileContent.getBytes(StandardCharsets.UTF_8));) {
-							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, bodyPojo.fileName, inputStream, currentTemporaryTable(i),
-									bodyPojo.norme, bodyPojo.periodicite, bodyPojo.validite, env);
+							
+							FileIdCard fileIdCard = new FileIdCard(bodyPojo.fileName);
+							fileIdCard.setFileAttributes(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite);
+							
+							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, fileIdCard, inputStream, currentTemporaryTable(i));
 							chargeur.executeEngine();
-							structure = chargeur.jointure.replace("''", "'");
+							structure = chargeur.getJointure().replace("''", "'");
 						}
 						break;
 					case NORMAGE:

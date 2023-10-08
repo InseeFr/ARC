@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -16,12 +14,9 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.global.bo.NormeFichier;
-import fr.insee.arc.core.service.global.dao.RulesOperations;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.service.p2chargement.xmlhandler.XMLComplexeHandlerCharger;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -30,7 +25,6 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.textUtils.FastList;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Pair;
 import fr.insee.arc.utils.utils.SecuredSaxParser;
 
@@ -43,13 +37,10 @@ import fr.insee.arc.utils.utils.SecuredSaxParser;
  */
 public class ChargeurXmlComplexe implements IChargeur {
 	private static final Logger LOGGER = LogManager.getLogger(ChargeurXmlComplexe.class);
-	private String fileName;
 	private Connection connexion;
 	private String tableChargementPilTemp;
-	private String envExecution;
 	private String currentPhase;
-	private Norme norme;
-	private String validite;
+	private FileIdCard fileIdCard;
 	private InputStream f;
 
 	private ArrayList<Pair<String, String>> format;
@@ -64,29 +55,22 @@ public class ChargeurXmlComplexe implements IChargeur {
 			"text collate \"C\"", "text collate \"C\"", "text collate \"C\"", "text collate \"C\""));
 
 	private String rapport;
-	public String jointure;
+	private String jointure;
 
-	public ChargeurXmlComplexe(ThreadChargementService threadChargementService, String fileName) {
-		this.fileName = fileName;
+	public ChargeurXmlComplexe(ThreadChargementService threadChargementService) {
 		this.connexion = threadChargementService.getConnexion().getExecutorConnection();
 		this.tableTempA = threadChargementService.getTableTempA();
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
 		this.currentPhase = threadChargementService.getCurrentPhase();
 		this.f = threadChargementService.filesInputStreamLoad.getTmpInxChargement();
-		this.norme = threadChargementService.normeOk;
-		this.validite = threadChargementService.validite;
-		this.envExecution = threadChargementService.getEnvExecution();
+		this.fileIdCard = threadChargementService.fileIdCard;
 	}
 
-	public ChargeurXmlComplexe(Connection connexion, String fileName, InputStream f, String tableOut, String norme,
-			String periodicite, String validite, String envExecution) {
-		this.fileName = fileName;
+	public ChargeurXmlComplexe(Connection connexion, FileIdCard fileIdCard, InputStream f, String tableOut) {
+		this.fileIdCard = fileIdCard;
 		this.connexion = connexion;
 		this.tableTempA = tableOut;
-		this.norme = new Norme(norme, periodicite, null, null);
-		this.validite = validite;
 		this.f = f;
-		this.envExecution = envExecution;
 	}
 
 	/**
@@ -105,13 +89,9 @@ public class ChargeurXmlComplexe implements IChargeur {
 
 		java.util.Date beginDate = new java.util.Date();
 
-		NormeFichier normeFichier = new NormeFichier(this.norme.getIdNorme(), validite, this.norme.getPeriodicite());
 		this.format = new ArrayList<>();
-
-		Map<String, List<String>> regle = RulesOperations.getBean(this.connexion,
-				RulesOperations.getRegles(ViewEnum.CHARGEMENT_REGLE.getFullName(this.envExecution), normeFichier));
-		if (regle.get("format").get(0) != null) {
-			for (String rule : regle.get("format").get(0).split("\n")) {
+		if (this.fileIdCard.getRegleChargement().getFormat() != null) {
+			for (String rule : this.fileIdCard.getRegleChargement().getFormat().split("\n")) {
 				this.format.add(new Pair<>(rule.split(",")[0].trim(), rule.split(",")[1].trim()));
 			}
 		}
@@ -157,7 +137,7 @@ public class ChargeurXmlComplexe implements IChargeur {
 	@Override
 	public void finalisation() throws ArcException {
 		StringBuilder requeteBilan = new StringBuilder();
-		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileName,
+		requeteBilan.append(ApiService.pilotageMarkIdsource(this.tableChargementPilTemp, fileIdCard.getFileName(),
 					this.currentPhase, TraitementEtat.OK.toString(), rapport, this.jointure));
 		UtilitaireDao.get(0).executeBlock(this.connexion, requeteBilan);
 	}
@@ -168,7 +148,7 @@ public class ChargeurXmlComplexe implements IChargeur {
 		java.util.Date beginDate = new java.util.Date();
 
 		// Création de la table de stockage
-		XMLComplexeHandlerCharger handler = new XMLComplexeHandlerCharger(connexion, fileName, norme, validite, this.tableTempA,
+		XMLComplexeHandlerCharger handler = new XMLComplexeHandlerCharger(connexion, fileIdCard, this.tableTempA,
 				this.tempTableAColumnsLongName, this.tempTableAColumnsShortName, format);
 		// appel du parser et gestion d'erreur
 		try {
@@ -176,7 +156,7 @@ public class ChargeurXmlComplexe implements IChargeur {
 			saxParser.parse(f, handler);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED,
-					this.fileName).logMessageException();
+					this.fileIdCard.getFileName()).logMessageException();
 			rapport = businessException.getMessage().replace("'", "''");
 			throw businessException;
 		}
@@ -210,4 +190,9 @@ public class ChargeurXmlComplexe implements IChargeur {
 		this.f = f;
 	}
 
+	public String getJointure() {
+		return jointure;
+	}
+
+	
 }

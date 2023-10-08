@@ -6,20 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.IParseFormatRules;
-import fr.insee.arc.core.service.p2chargement.bo.Norme;
 import fr.insee.arc.utils.utils.ManipString;
 
 public class ParseFormatRulesOperation<T extends IParseFormatRules> {
 	
-	public ParseFormatRulesOperation(Norme norme, Class<T> type) {
+	public ParseFormatRulesOperation(FileIdCard fileIdCard, Class<T> type) {
 		super();
-		this.norme = norme;
+		this.fileIdCard = fileIdCard;
 		this.parseResult = new HashMap<>();
 		this.type = type;
 	}
 
-	private Norme norme;
+	private FileIdCard fileIdCard;
 	private Class<T> type;
 
 	private Map<T, List<String>> parseResult;
@@ -38,7 +38,7 @@ public class ParseFormatRulesOperation<T extends IParseFormatRules> {
 
 
 	public void parseFormatRules() {
-		String formatRules = this.norme.getRegleChargement().getFormat();
+		String formatRules = this.fileIdCard.getRegleChargement().getFormat();
 		if (formatRules == null || formatRules.isBlank()) {
 			return;
 		}
