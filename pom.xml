@@ -290,6 +290,13 @@
 			<version>2.8.0</version>
 		</dependency>
 		
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${project.org.json}</version>
+		</dependency>
+		
 		<dependency>
 		    <groupId>io.zonky.test</groupId>
 		    <artifactId>embedded-postgres</artifactId>

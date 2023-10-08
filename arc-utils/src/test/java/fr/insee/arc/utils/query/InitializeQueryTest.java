@@ -48,42 +48,45 @@ public class InitializeQueryTest {
 	{
 		PropertiesHandler testProperties=PropertiesHandler.getInstance();
 		
-		boolean first=true;
+		// reset connection properties
+		testProperties.setConnectionProperties(null);
+		
 		StringBuilder url=new StringBuilder();
 		StringBuilder username=new StringBuilder();
 		StringBuilder password=new StringBuilder();
 		StringBuilder driver=new StringBuilder();
 
+		int index=0;
 		for (Connection singleConnection:connections)
 		{
-			if (first)
-			{
-				first=false;
-			}
-			else
-			{
-				url.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
-				username.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
-				password.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
-				driver.append(UtilitaireDao.CONNECTION_SEPARATOR_RAW);
-			}
-			url.append(singleConnection.getMetaData().getURL());
-			username.append(singleConnection.getMetaData().getUserName());
+			url.append(buildRuby(index,singleConnection.getMetaData().getURL()));
+			username.append(buildRuby(index,singleConnection.getMetaData().getUserName()));
 			// user password is not relevant in zonky
-			password.append("NA");
-			driver.append("org.postgresql.Driver");
+			password.append(buildRuby(index,"NA"));
+			driver.append(buildRuby(index,"org.postgresql.Driver"));
+			index ++;
 		}
+		
+		url.setLength(url.length()-1);
+		username.setLength(username.length()-1);
+		password.setLength(password.length()-1);
+		driver.setLength(driver.length()-1);
 		
 		testProperties.setDatabaseUrl(url.toString());
 		testProperties.setDatabaseUsername(username.toString());
 		testProperties.setDatabasePassword(password.toString());
 		testProperties.setDatabaseDriverClassName(driver.toString());
-
+		
 		testProperties.setBatchParametersDirectory(repertoire);
 		
 		u.setProperties(testProperties);		
 	}
 
+    
+    private static String buildRuby(int index, String inputString)
+    {
+    	return "{"+index+"=>\""+inputString+"\"},";
+    }
 	
 	/**
 	 * check the table columns and the number of lines in the table

@@ -35,6 +35,7 @@ import org.postgresql.core.BaseConnection;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
+import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -52,9 +53,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(UtilitaireDao.class);
 
-
-	public static final String CONNECTION_SEPARATOR_RAW = "|||";
-	private static final String CONNECTION_SEPARATOR = "\\|\\|\\|";
 
 	/**
 	 * execute request returns a table with headers, type and data provide the
@@ -90,20 +88,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 */
 	public int numberOfNods() {
-		return numberOfNods(properties.getDatabaseUsername());
+		return properties.getConnectionProperties().size();
 	}
-
-	/**
-	 * Compute the number of element split ||| . See regexp
-	 * {@value #CONNECTION_SEPARATOR}
-	 * 
-	 * @param databaseUserName
-	 * @return
-	 */
-	public static int numberOfNods(String databaseUserName) {
-		return databaseUserName.split(CONNECTION_SEPARATOR).length;
-	}
-
 	
 	/** return a valid connection index according to the given connection in properties
 	 * @param aPool
@@ -130,10 +116,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			
 			int validConnectionIndex=validConnectionIndex(this.pool);
 			
-			String driver = properties.getDatabaseDriverClassName().split(CONNECTION_SEPARATOR)[validConnectionIndex];
-			String uri = properties.getDatabaseUrl().split(CONNECTION_SEPARATOR)[validConnectionIndex];
-			String user = properties.getDatabaseUsername().split(CONNECTION_SEPARATOR)[validConnectionIndex];
-			String password = properties.getDatabasePassword().split(CONNECTION_SEPARATOR)[validConnectionIndex];
+			ConnectionAttribute currentConnectionAttributes = properties.getConnectionProperties().get(validConnectionIndex);
+			String driver = currentConnectionAttributes.getDatabaseDriverClassName();
+			String uri = currentConnectionAttributes.getDatabaseUrl();
+			String user = currentConnectionAttributes.getDatabaseUsername();
+			String password = currentConnectionAttributes.getDatabasePassword();
 
 			Class.forName(driver);
 			Connection c = null;

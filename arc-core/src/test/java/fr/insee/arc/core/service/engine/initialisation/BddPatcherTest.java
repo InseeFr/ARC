@@ -247,6 +247,15 @@ public class BddPatcherTest extends InitializeQueryTest {
 		assertEquals(4, result.size());
 
 		result = BddPatcher.retrieveModelTablesFromSchema(c, testSandbox3);
+		assertTrue(result.contains("arc.ihm_famille"));
+		assertTrue(result.contains("arc.ihm_mod_table_metier"));
+		assertTrue(result.contains("arc.ihm_mod_variable_metier"));
+		assertEquals(3, result.size());
+		
+		result = BddPatcher.retrieveMappingTablesFromSchema(c, testSandbox3);
+		assertTrue(result.contains(testSandbox3+".mapping_dsn_employeur_ok"));
+		assertEquals(1, result.size());
+
 
 		u.executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
 		

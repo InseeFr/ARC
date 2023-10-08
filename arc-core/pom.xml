@@ -77,14 +77,6 @@
 			<artifactId>opencsv</artifactId>
 			<version>3.9</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>${project.org.json}</version>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
 		<dependency>
 			<groupId>org.mockito</groupId>

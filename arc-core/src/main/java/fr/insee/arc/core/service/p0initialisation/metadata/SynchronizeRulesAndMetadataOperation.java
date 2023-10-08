@@ -90,8 +90,7 @@ public class SynchronizeRulesAndMetadataOperation {
 
 	/**
 	 * Instanciate the metadata required into all executors pod
-	 * 
-	 * @param envExecution
+	 * @return number of executor pod
 	 * @throws ArcException
 	 */
 	protected int copyMetadataToExecutorsAllNods() throws ArcException {

@@ -33,6 +33,7 @@ public class SynchronizeUserRulesAndMetadataTest  extends InitializeQueryTest  {
 		int result=synchronizationInstance.copyMetadataToExecutorsAllNods();
 		
 		// copy should be a success
+		// return that there is 1 executor nod
 		assertEquals(1, result);
 		
 		u.executeImmediate(c, "DROP SCHEMA IF EXISTS "+BddPatcherTest.testSandbox3+" CASCADE;");
