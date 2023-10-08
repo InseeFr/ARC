@@ -83,7 +83,7 @@ public class ExecuteEngineController {
 								bodyPojo.fileContent.getBytes(StandardCharsets.UTF_8));) {
 							
 							FileIdCard fileIdCard = new FileIdCard(bodyPojo.fileName);
-							fileIdCard.setFileAttributes(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite);
+							fileIdCard.setFileIdCard(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite);
 							
 							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, fileIdCard, inputStream, currentTemporaryTable(i));
 							chargeur.executeEngine();

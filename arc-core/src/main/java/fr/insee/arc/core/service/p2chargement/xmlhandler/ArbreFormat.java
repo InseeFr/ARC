@@ -51,7 +51,7 @@ public class ArbreFormat {
         SAXParser saxParser = SecuredSaxParser.buildSecuredSaxParser();
         FormatFichierHandler formatHandler = new FormatFichierHandler();
 
-        saxParser.parse(new InputSource(new StringReader(fileIdCard.getRegleChargement().getFormat())), formatHandler);
+        saxParser.parse(new InputSource(new StringReader(fileIdCard.getIdCardChargement().getFormat())), formatHandler);
 
         this.arbreHierachieDuFichier = formatHandler.getArbre();
         calculerFeuilles();

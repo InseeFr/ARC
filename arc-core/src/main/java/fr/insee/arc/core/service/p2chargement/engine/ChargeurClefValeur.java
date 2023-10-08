@@ -176,8 +176,8 @@ public class ChargeurClefValeur implements IChargeur {
 
         ecrireXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-        String rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
-        String donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
+        String rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
+        String donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
 
         // On retire les quotes de début et fin de manière violente
         donnee = donnee.substring(1, donnee.length() - 1);
@@ -234,8 +234,8 @@ public class ChargeurClefValeur implements IChargeur {
         String pere;
         String rubriqueCourante;
 
-        rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
-        donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getRegleChargement().getDelimiter());
+        rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
+        donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
 
         // On retire les quotes de début et fin de manière violente
         donnee = donnee.substring(1, donnee.length() - 1);

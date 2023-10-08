@@ -13,20 +13,19 @@ public class FileIdCard {
 	private String periodicite;
 	private final String integrationDate = DateConversion.queryDateConversion(new Date());
 	
-    private FileIdCardChargement regleChargement;
-    public FileIdCardChargement getRegleChargement() {
-        return regleChargement;
+    private IdCardChargement idCardChargement;
+    public IdCardChargement getIdCardChargement() {
+        return idCardChargement;
     }
-    public void setRegleChargement(FileIdCardChargement regleChargement) {
-        this.regleChargement = regleChargement;
+    public void setIdCardChargement(IdCardChargement regleChargement) {
+        this.idCardChargement = regleChargement;
     }
-	
 	
 	public FileIdCard(String idSource) {
 		this.fileName = idSource;
 	}
 
-	public void setFileAttributes(String idNorme, String validite, String periodicite) {
+	public void setFileIdCard(String idNorme, String validite, String periodicite) {
 		this.idNorme = idNorme;
 		this.validite = validite;
 		this.periodicite = periodicite;

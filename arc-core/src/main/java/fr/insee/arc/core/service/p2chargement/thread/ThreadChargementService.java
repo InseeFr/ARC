@@ -28,7 +28,7 @@ import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad
 import fr.insee.arc.core.service.p2chargement.archiveloader.IArchiveFileLoader;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
-import fr.insee.arc.core.service.p2chargement.bo.FileIdCardChargement;
+import fr.insee.arc.core.service.p2chargement.bo.IdCardChargement;
 import fr.insee.arc.core.service.p2chargement.engine.ChargementBrut;
 import fr.insee.arc.core.service.p2chargement.engine.IChargeur;
 import fr.insee.arc.core.service.p2chargement.factory.ChargeurFactory;
@@ -274,7 +274,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 		ChargeurFactory chargeurFactory = new ChargeurFactory(this);
 
-		return chargeurFactory.getChargeur(this.fileIdCard.getRegleChargement().getTypeChargement());
+		return chargeurFactory.getChargeur(this.fileIdCard.getIdCardChargement().getTypeChargement());
 	}
 
 	/**
@@ -301,7 +301,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, fileIdCard.getIdNorme());
 		}
 		
-		fileIdCard.setRegleChargement(new FileIdCardChargement(
+		fileIdCard.setIdCardChargement(new IdCardChargement(
 				TypeChargement.getEnum(regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).get(0)),
 				regle.get(ColumnEnum.DELIMITER.getColumnName()).get(0)
 				, regle.get(ColumnEnum.FORMAT.getColumnName()).get(0)));

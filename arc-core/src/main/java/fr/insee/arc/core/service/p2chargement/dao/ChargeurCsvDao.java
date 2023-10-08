@@ -83,7 +83,7 @@ public class ChargeurCsvDao {
 
 		boolean ignoreFirstLine = (parser.getValue(FormatRulesCsv.HEADERS) == null);
 
-		String separateur = fileIdCard.getRegleChargement().getDelimiter();
+		String separateur = fileIdCard.getIdCardChargement().getDelimiter();
 
 		String quote = parser.getValue(FormatRulesCsv.QUOTE);
 

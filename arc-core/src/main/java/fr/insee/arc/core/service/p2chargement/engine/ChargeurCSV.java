@@ -86,14 +86,14 @@ public class ChargeurCSV implements IChargeur {
 		StaticLoggerDispatcher.info(LOGGER, "** CSVtoBase begin **");
 
 		StaticLoggerDispatcher.debug(LOGGER,
-				String.format("contenu delimiter %s", fileIdCard.getRegleChargement().getDelimiter()));
+				String.format("contenu delimiter %s", fileIdCard.getIdCardChargement().getDelimiter()));
 		StaticLoggerDispatcher.debug(LOGGER,
-				String.format("contenu format %s", fileIdCard.getRegleChargement().getFormat()));
+				String.format("contenu format %s", fileIdCard.getIdCardChargement().getFormat()));
 
 		// update delimiter
-		fileIdCard.getRegleChargement()
+		fileIdCard.getIdCardChargement()
 				.setDelimiter(ObjectUtils.firstNonNull(
-						dao.execQueryEvaluateCharExpression(fileIdCard.getRegleChargement().getDelimiter().trim()),
+						dao.execQueryEvaluateCharExpression(fileIdCard.getIdCardChargement().getDelimiter().trim()),
 						Delimiters.DEFAULT_CSV_DELIMITER));
 
 		// update quote
@@ -122,7 +122,7 @@ public class ChargeurCSV implements IChargeur {
 	 */
 	private void computeHeaders() throws ArcException {
 		String userDefinedHeaders = parser.getValue(FormatRulesCsv.HEADERS);
-		String csvDelimiter = fileIdCard.getRegleChargement().getDelimiter();
+		String csvDelimiter = fileIdCard.getIdCardChargement().getDelimiter();
 
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
 		// premier ligne

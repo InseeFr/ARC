@@ -7,14 +7,14 @@ import fr.insee.arc.core.service.p2chargement.factory.TypeChargement;
  * @author S4LWO8
  *
  */
-public class FileIdCardChargement {
+public class IdCardChargement {
     
     private TypeChargement typeChargement;
     private String format;
     private String delimiter;
     
     
-    public FileIdCardChargement(TypeChargement typeChargement, String delimiter, String format) {
+    public IdCardChargement(TypeChargement typeChargement, String delimiter, String format) {
         super();
         this.typeChargement = typeChargement;
         this.format = format;

@@ -165,7 +165,7 @@ public class ChargementBrut {
 
         NormeRules normFound = listeNorme.get(Integer.parseInt(result.get(0).get(0)));
         
-        normeOk.setFileAttributes(normFound.getIdNorme(), result.get(0).get(2), normFound.getPeriodicite());
+        normeOk.setFileIdCard(normFound.getIdNorme(), result.get(0).get(2), normFound.getPeriodicite());
 
     }
     

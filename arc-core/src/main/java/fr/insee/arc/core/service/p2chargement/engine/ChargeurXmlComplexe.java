@@ -90,8 +90,8 @@ public class ChargeurXmlComplexe implements IChargeur {
 		java.util.Date beginDate = new java.util.Date();
 
 		this.format = new ArrayList<>();
-		if (this.fileIdCard.getRegleChargement().getFormat() != null) {
-			for (String rule : this.fileIdCard.getRegleChargement().getFormat().split("\n")) {
+		if (this.fileIdCard.getIdCardChargement().getFormat() != null) {
+			for (String rule : this.fileIdCard.getIdCardChargement().getFormat().split("\n")) {
 				this.format.add(new Pair<>(rule.split(",")[0].trim(), rule.split(",")[1].trim()));
 			}
 		}

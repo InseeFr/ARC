@@ -38,7 +38,7 @@ public class ParseFormatRulesOperation<T extends IParseFormatRules> {
 
 
 	public void parseFormatRules() {
-		String formatRules = this.fileIdCard.getRegleChargement().getFormat();
+		String formatRules = this.fileIdCard.getIdCardChargement().getFormat();
 		if (formatRules == null || formatRules.isBlank()) {
 			return;
 		}
