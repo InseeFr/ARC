@@ -3,8 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## version-93.1.8b
-- le webservice de récupération des données efface les tables clientes déjà existante
-- tentative d'implémentation d'un handshake pour règler les timeouts matériels
+- the webservice for data rerieval now delete the client pending data tables at the start of a new invoke
+- handshake implementation during the creation of client data table to avoid timeout
 
 ## version-93.1.7
 - functionnal tests
