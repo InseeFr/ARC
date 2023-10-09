@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.exception.ArcException;
@@ -265,7 +266,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 			} else {
 				returned.append(", ");
 			}
-			String nomVariable = variable.getNomVariable() + underscore + aNumeroGroupe;
+			String nomVariable = variable.getNomVariable() + Delimiters.SQL_TOKEN_DELIMITER + aNumeroGroupe;
 			String expression = reglesIdentifiantes.get(nomVariable);
 			if (expression != null) {
 				expression = variable.getNomVariable() + "::text as " + variable.getNomVariable();

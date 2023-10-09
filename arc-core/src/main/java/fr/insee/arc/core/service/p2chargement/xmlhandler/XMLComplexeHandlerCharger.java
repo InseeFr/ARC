@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.dao.HandlerXMLDao;
 import fr.insee.arc.utils.format.Format;
@@ -395,7 +396,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 
 		if (!m.isEmpty()) {
 			for (Integer key : m.keySet()) {
-				qName += "_" + m.get(key);
+				qName += Delimiters.SQL_TOKEN_DELIMITER + m.get(key);
 			}
 		}
 

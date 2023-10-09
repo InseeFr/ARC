@@ -14,6 +14,7 @@ public enum ViewEnum {
 	, EXT_ETAT_JEUDEREGLE("ext_etat_jeuderegle", SchemaEnum.ARC_METADATA, ColumnEnum.ID, ColumnEnum.VAL,
 			ColumnEnum.ISENV, ColumnEnum.MISE_A_JOUR_IMMEDIATE, ColumnEnum.ENV_DESCRIPTION) //
 	, EXT_EXPORT_FORMAT("ext_export_format", SchemaEnum.ARC_METADATA, ColumnEnum.ID, ColumnEnum.VAL) //
+	, EXT_MOD_FAMILLE("ext_mod_famille", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE) //
 	, EXT_MOD_PERIODICITE("ext_mod_periodicite", SchemaEnum.ARC_METADATA, ColumnEnum.ID, ColumnEnum.VAL) //
 	, EXT_MOD_TYPE_AUTORISE("ext_mod_type_autorise", SchemaEnum.ARC_METADATA, ColumnEnum.NOM_TYPE,
 			ColumnEnum.DESCRIPTION_TYPE) //
@@ -198,11 +199,16 @@ public enum ViewEnum {
 	}
 
 	public String getFullName(String schema) {
-		return (schema + SQL.DOT.getSqlCode() + this.tableName).toLowerCase();
+		return normalizeTableName(schema + SQL.DOT.getSqlCode() + this.tableName);
 	}
 
 	public static String getFullName(String schema, String providedTableName) {
-		return (providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName).toLowerCase();
+		return normalizeTableName(providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName);
+	}
+	
+	public static String normalizeTableName(String providedTableName)
+	{
+		return providedTableName.toLowerCase();
 	}
 	
 	public ColumnEnum col(ColumnEnum e) {

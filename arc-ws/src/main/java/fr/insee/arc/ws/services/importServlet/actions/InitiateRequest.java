@@ -56,11 +56,11 @@ public class InitiateRequest {
 		LoggerHelper.debugDebutMethodeAsComment(getClass(), "doRequest()", LOGGER);
 
 		if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.CLIENT.getService())) {
-			new ImportStep1InitializeClientTablesService(dsnRequest).buildParam().execute(resp);
+			new ImportStep1InitializeClientTablesService(dsnRequest).execute(resp);
 		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.TABLE_NAME.getService())) {
-			new ImportStep2GetTableNameService(dsnRequest).buildParam().execute(resp);
+			new ImportStep2GetTableNameService(dsnRequest).execute(resp);
 		} else if (dsnRequest.getString(JsonKeys.SERVICE.getKey()).equals(Services.TABLE_CONTENT.getService())) {
-			new ImportStep3GetTableDataService(dsnRequest).buildParam().execute(resp);
+			new ImportStep3GetTableDataService(dsnRequest).execute(resp);
 		}
 		else {
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"Le service n'est pas reconnu.\"}");

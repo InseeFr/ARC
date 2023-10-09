@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -810,7 +810,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	}
 
 	private static final String nomIdentifiantSuffixeGroupe(String nomVariable, int groupe) {
-		return new StringBuilder(nomVariable + underscore + groupe).toString();
+		return new StringBuilder(nomVariable + Delimiters.SQL_TOKEN_DELIMITER + groupe).toString();
 	}
 
 	/**

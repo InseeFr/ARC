@@ -8,104 +8,137 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.service.global.dao.TableNaming;
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
-import fr.insee.arc.ws.services.importServlet.dao.ClientDaoImpl;
 
 public class ImportStep1InitializeClientTablesService {
 
 	protected static final Logger LOGGER = LogManager.getLogger(ImportStep1InitializeClientTablesService.class);
 
-    static interface Executable {
-        void execute() throws ArcException;
-    }
-    
+	static interface Executable {
+		void execute() throws ArcException;
+	}
+
 	private ClientDao clientDao;
 	private JSONObject dsnRequest;
+	private ArcClientIdentifier arcClientIdentifier;
 
-	public ImportStep1InitializeClientTablesService(JSONObject dsnRequest) {
+	public ImportStep1InitializeClientTablesService(JSONObject dsnRequest) throws ArcException {
 		super();
-		clientDao = new ClientDaoImpl();
+
 		this.dsnRequest = dsnRequest;
+
+		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest);
+
+		this.sources = makeSource(dsnRequest);
+
+		this.clientDao = new ClientDao(this.arcClientIdentifier);
+
 	}
-	
-	private long timestamp;
 
-	private String environnement;
-
-	private String client;
-
-	private String famille;
-
-	private List<List<String>> tablesMetierNames;
-	
 	private List<String> sources;
 
-	private static final String SPECIALENVIRONMENT="arc";
-
-    public ImportStep1InitializeClientTablesService buildParam() throws ArcException
-    {
-    	timestamp = System.currentTimeMillis();
-    
-    	environnement = dsnRequest.getString(JsonKeys.ENVIRONNEMENT.getKey());
-    
-    	client = dsnRequest.getString(JsonKeys.CLIENT.getKey());
-    	
-    	famille = dsnRequest.getString(JsonKeys.FAMILLE.getKey());
-    	
-        sources = makeSource();
-    	
-    	if (!environnement.equalsIgnoreCase(SPECIALENVIRONMENT)) {
-    		this.tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.timestamp,
-    				dsnRequest);
-    	}
-    	
-    	return this;
-    }
-
 	private void executeIf(String source, Executable exe) throws ArcException {
-	    if (!sources.contains(source)) {
-            return;
-        }
-	    exe.execute();
+		if (!sources.contains(source)) {
+			return;
+		}
+		exe.execute();
 	}
-	
-    private List<String> makeSource() {
-        JSONArray source = dsnRequest.getJSONArray(JsonKeys.SOURCE.getKey());
-        List<String> returned = new ArrayList<>();
-        for (int i = 0; i < source.length(); i++) {
-            returned.add(source.getString(i));
-        }
-        return returned;
-    }
-    
-    public void execute(SendResponse resp) throws ArcException {
 
-        try {
+	private static List<String> makeSource(JSONObject dsnRequest) {
+		JSONArray source = dsnRequest.getJSONArray(JsonKeys.SOURCE.getKey());
+		List<String> returned = new ArrayList<>();
+		for (int i = 0; i < source.length(); i++) {
+			returned.add(source.getString(i));
+		}
+		return returned;
+	}
 
-            if (!environnement.equalsIgnoreCase(SPECIALENVIRONMENT)) {
-                this.clientDao.verificationClientFamille(this.timestamp, this.client, this.famille, this.environnement);
-                tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.timestamp, this.dsnRequest);
-                executeIf(ServletArc.MAPPING, () -> this.clientDao.createImages(this.timestamp, client, environnement, tablesMetierNames));
-                executeIf(ServletArc.METADATA, () -> this.clientDao.createTableMetier(this.timestamp, client, this.famille, environnement));
-                executeIf(ServletArc.METADATA, () -> this.clientDao.createVarMetier(this.timestamp, client, this.famille, environnement));
-            }
-            executeIf(ServletArc.NOMENCLATURE, () -> this.clientDao.createNmcl(this.timestamp, client, environnement));
-            executeIf(ServletArc.METADATA, () -> this.clientDao.createTableFamille(this.timestamp, client, environnement));
-            executeIf(ServletArc.METADATA, () -> this.clientDao.createTablePeriodicite(this.timestamp, client, environnement));
-            // on renvoie l'id du client avec son timestamp
-            resp.send(ViewEnum.getFullName(environnement, client + "_" + this.timestamp));
-            resp.endSending();
-        } catch (ArcException e) {
+	public void execute(SendResponse resp) throws ArcException {
+		try {
+
+			this.clientDao.dropPendingClientTables();
+			
+			startHandShake(resp);
+
+			if (!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
+				this.clientDao.verificationClientFamille();
+				List<String> tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.dsnRequest);
+				executeIf(ServletArc.MAPPING, () -> this.clientDao.createImages(tablesMetierNames));
+				executeIf(ServletArc.METADATA, () -> this.clientDao.createTableMetier());
+				executeIf(ServletArc.METADATA, () -> this.clientDao.createVarMetier());
+			}
+			executeIf(ServletArc.NOMENCLATURE, () -> this.clientDao.createNmcl());
+			executeIf(ServletArc.METADATA, () -> this.clientDao.createTableFamille());
+			executeIf(ServletArc.METADATA, () -> this.clientDao.createTablePeriodicite());
+
+			stopHandShake();
+			// on renvoie l'id du client avec son timestamp
+
+			resp.send(arcClientIdentifier.getEnvironnement()+ Delimiters.SQL_SCHEMA_DELIMITER + arcClientIdentifier.getClient()
+					+ Delimiters.SQL_TOKEN_DELIMITER + arcClientIdentifier.getTimestamp());
+
+			resp.endSending();
+		} catch (ArcException e) {
 			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep1InitializeClientTablesService **");
-            resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
-            resp.endSending();
-        }
-    }   
+			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
+			resp.endSending();
+		}
+	}
 
+	
+	Thread maintenance;
+
+	// set to 1 minute
+	private static final  int HANDSHAKE_TIMER_IN_MS = 60000;
+	
+	/**
+	 * Will send handshake to client every @HANDSHAKE_TIMER_IN_MS milliseconds
+	 * Ugly but we failed at fixing that in front of a F5 controller
+	 * @param resp
+	 */
+	private void startHandShake(SendResponse resp) {
+		maintenance = new Thread() {
+			@Override
+			public void run() {
+				do {
+					try {
+						Thread.sleep(HANDSHAKE_TIMER_IN_MS);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						break;
+					}
+					resp.send(Delimiters.HANDSHAKE_DELIMITER);
+				} while (true);
+			}
+		};
+
+		maintenance.start();
+	}
+
+	/**
+	 * Stop to send handshake
+	 * @param resp
+	 */
+	private void stopHandShake() {
+
+		maintenance.interrupt();
+		try {
+			maintenance.join();
+		} catch (InterruptedException e) {
+			new ArcException(ArcExceptionMessage.STREAM_WRITE_FAILED, e).logFullException();
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	
+	
 }

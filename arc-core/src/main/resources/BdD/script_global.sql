@@ -336,7 +336,7 @@ CONSTRAINT ihm_user_pkey PRIMARY KEY (idep)
 CREATE TABLE IF NOT EXISTS arc.ihm_entrepot 
 ( 
   id_entrepot text NOT NULL, 
-  id_loader text, 
+  id_loader text, -- deprecated
   CONSTRAINT ihm_entrepot_pkey PRIMARY KEY (id_entrepot) 
 ); 
 INSERT INTO arc.ihm_entrepot values ('DEFAULT','DEFAULT') ON CONFLICT DO NOTHING;

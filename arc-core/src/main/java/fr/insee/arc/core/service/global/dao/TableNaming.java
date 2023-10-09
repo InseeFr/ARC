@@ -1,11 +1,10 @@
 package fr.insee.arc.core.service.global.dao;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 public class TableNaming {
@@ -32,13 +31,48 @@ public class TableNaming {
 	public static String phaseDataTableName(String aEnvExecution, TraitementPhase aPhase, TraitementEtat etat) {
 		return ViewEnum.getFullName(aEnvExecution, aPhase + "_" + etat.toString());
 	}
-    
-    public static ArcPreparedStatementBuilder queryTablesFromPgMetadata()
-    {
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, ColumnEnum.TABLE_SCHEMA, "||'.'||", ColumnEnum.TABLE_NAME, SQL.AS, ColumnEnum.TABLE_NAME);
-		query.build(SQL.FROM, "information_schema.tables");
-		return query;
-    }
+
+	/**
+	 * Build a table name from a several informations
+	 * schema.token#1_token#2_..._token#n_suffix
+	 * @param schema
+	 * @param mainTable
+	 * @param tokens
+	 * @return
+	 */
+	public static String buildTableNameWithTokens(String schema, String mainSuffix, Object... tokens)
+	{
+		StringBuilder s = new StringBuilder();
+		
+		if (tokens==null || tokens.length==0)
+		{
+			return ViewEnum.getFullName(schema, mainSuffix);
+		}
+		
+		for (Object token:tokens)
+		{
+			// if any token is null, the table name will be invalid, return null
+			if (token==null)
+			{
+				return null;
+			}
+			s.append(token);
+			s.append(Delimiters.SQL_TOKEN_DELIMITER);
+		}
+		s.append(mainSuffix);
+		
+		return ViewEnum.getFullName(schema, s.toString());
+		
+	}
+	
+	public static String buildTableNameWithTokens(String schema, ViewEnum mainTableSuffix, Object... tokens)
+	{
+		return buildTableNameWithTokens(schema, mainTableSuffix.getTableName(), tokens);
+	}
+	
+	public static String buildTableNameWithTokens(String schema, ColumnEnum mainTableSuffix, Object... tokens)
+	{
+		return buildTableNameWithTokens(schema, mainTableSuffix.getColumnName(), tokens);
+	}
 	
 }

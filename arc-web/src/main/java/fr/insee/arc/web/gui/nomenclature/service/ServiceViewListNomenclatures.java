@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.SchemaEnum;
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.exception.ArcException;
@@ -156,7 +157,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
             return false;
         }
 
-        if (nomTable.split(underscore).length < 3) {
+        if (nomTable.split(Delimiters.SQL_TOKEN_DELIMITER).length < 3) {
             this.views.getViewListNomenclatures().setMessage("nmclManagement.validateName.error.format");
             return false;
         }

@@ -16,6 +16,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -104,7 +105,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	 * @return
 	 */
 	private static String typeNomenclature(String nomTable) {
-		String[] tokens = nomTable.split(fr.insee.arc.utils.textUtils.IConstanteCaractere.underscore);
+		String[] tokens = nomTable.split(Delimiters.SQL_TOKEN_DELIMITER);
 		StringBuilder typeNomenclature = new StringBuilder();
 		for (int i = 0; i < tokens.length - 1; i++) {
 			typeNomenclature

@@ -5,11 +5,6 @@ public enum JsonKeys {
 	CLIENT( "client" )
 	,SERVICE( "service" )
 
-	//Service "query"
-	,REQUESTS( "requests" )
-	,ID( "id" ) //Aussi utilisé dans les réponses quelque soit le service
-	,SQL( "sql" )
-
 	//Service "arcClient"
 	,REPRISE( "reprise" )
 	,ENVIRONNEMENT( "environnement" )
@@ -17,18 +12,11 @@ public enum JsonKeys {
 	,VALINF( "validiteInf" )
 	,VALSUP( "validiteSup" )
 	,PERIODICITE( "periodicite" )
-    ,LIBELLELIBRE( "libelleLibre" )
     ,NBFICHIERS("nbfichiers")
 
 	//Réponse
-	,RESPONSES( "responses" )
-	,NOMENCLATURES( "nomenclatures" )
-	,TABLEMETIER( "tableMetier" )
-	,VARMETIER( "varMetier" )
+	,ID( "id" ) //Aussi utilisé dans les réponses quelque soit le service
 	,TABLE( "table" )
-
-	,PHASE("phase")
-	,FILENAME("filename")
 	,FILEDATA("filedata")
 	,SOURCE("source")
 

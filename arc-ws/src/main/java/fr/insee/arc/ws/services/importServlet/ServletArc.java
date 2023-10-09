@@ -92,7 +92,6 @@ public class ServletArc extends HttpServlet {
 				"_");
 
 		ArcPreparedStatementBuilder query;
-
 		// check if security is enable
 		query = new ArcPreparedStatementBuilder();
 		query.append("SELECT count(*) ");
@@ -133,8 +132,7 @@ public class ServletArc extends HttpServlet {
 			sendForbidden(request, response);
 
 			LoggerHelper.error(LOGGER,
-					"The host " + request.getRemoteHost() + "/" + request.getRemoteAddr() + "/" + hostName
-							+ " has not been allowed to retrieved data of (" + familyName + "," + clientRealName
+					"The host " + hostName + " has not been allowed to retrieved data of (" + familyName + "," + clientRealName
 							+ "). Check the family norm interface to declare it.");
 			return false;
 		}

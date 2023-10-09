@@ -13,7 +13,11 @@ public class Patch {
 		    throw new IllegalStateException("Utility class");
 		  }
 
-	
+	/**
+	 * sandbox was defined as arc.bas2 instead of arc_bas2
+	 * @param envExecution
+	 * @return
+	 */
 	public static String normalizeSchemaName(String envExecution)
 	{
 		return envExecution.replace(".", "_").toLowerCase();

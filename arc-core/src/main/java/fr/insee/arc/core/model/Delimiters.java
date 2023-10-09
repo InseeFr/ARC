@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p2chargement.bo;
+package fr.insee.arc.core.model;
 
 public class Delimiters {
 
@@ -12,5 +12,9 @@ public class Delimiters {
 	public static final String RENAME_SUFFIX= "$new$";
 	public static final String PARTITION_NUMBER_PLACEHOLDER = "#pn#";
 	
+	public static final String SQL_TOKEN_DELIMITER = "_";
+	public static final String SQL_SCHEMA_DELIMITER = ".";
 	
+	public static final String HANDSHAKE_DELIMITER = ">";
+
 }
