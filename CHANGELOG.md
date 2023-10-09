@@ -2,16 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-merge 04/10/2023
+## version-93.1.8b
+- le webservice de récupération des données efface les tables clientes déjà existante
+- tentative d'implémentation d'un handshake pour règler les timeouts matériels
 
-## version-93.1.6b
+## version-93.1.7
 - functionnal tests
 - pg 14.8 bug fix
 - bug fix in gui file report
 - scalability connection management
-
-## version-93.1.3
-- passage en production
 
 ## version-93.1.3
 - passage en production
