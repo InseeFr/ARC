@@ -1,11 +1,11 @@
-package fr.insee.arc.core.service.p5mapping.engine.regles;
+package fr.insee.arc.core.service.p5mapping.engine.bo.rules;
 
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p5mapping.engine.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;

@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p5mapping.engine;
+package fr.insee.arc.core.service.p5mapping.engine.dao;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -18,7 +18,9 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.p5mapping.engine.bo.TableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -49,7 +51,7 @@ import fr.insee.arc.utils.utils.ManipString;
  * première invocation calcule la requête, les suivantes la restituent telle que
  * calculée la première fois.
  */
-public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique {
+public class MappingQueries implements IConstanteCaractere, IConstanteNumerique {
 	public static final String TOKEN_ID_SOURCE = "{:idSource}";
 	public static final String ALIAS_TABLE = "{:alias}";
 	public static final String FUNCTION_BEFORE = "{:functionBefore}";
@@ -66,9 +68,9 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	// on ignore leur contenu pour déterminer si on doit ajouter une ligne à une
 	// table ou pas
 
-	private static final String foreignKeyPrefix = "fk_";
+	private static final String FOREIGN_KEY_PREFIX = "fk_";
 	// identifiant lien direct
-	private static final String idKeyPrefix = "id_";
+	private static final String ID_KEY_PREFIX = "id_";
 
 	private Set<TableMapping> ensembleTableMapping;
 	private Set<VariableMapping> ensembleVariableMapping;
@@ -87,7 +89,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 	/*
 	 * LA FACTORY POUR LES REGLES DE MAPPING
 	 */
-	private RegleMappingFactory regleMappingFactory;
+	private MappingQueriesFactory regleMappingFactory;
 	/*
 	 * LES NOMS DES TABLES UTILES
 	 */
@@ -102,14 +104,14 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 
 	private static final String ID_TABLE = "id_table";
 
-	private RequeteMapping() {
+	private MappingQueries() {
 		this.isRequeteCalculee = false;
 		this.ensembleTableMapping = new HashSet<>();
 		this.ensembleVariableMapping = new HashSet<>();
 		this.ensembleGroupes = new TreeSet<>();
 	}
 
-	public RequeteMapping(Connection aConnexion, RegleMappingFactory aRegleMappingFactory, String anIdFamille,
+	public MappingQueries(Connection aConnexion, MappingQueriesFactory aRegleMappingFactory, String anIdFamille,
 			JeuDeRegle aJeuDeRegle, String anEnvironnement, String aNomTablePrecedente, int threadId) {
 		this();
 		this.regleMappingFactory = aRegleMappingFactory;
@@ -256,8 +258,8 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 
 			for (VariableMapping var : this.ensembleVariableMapping) {
 
-				if (table.getEnsembleVariableMapping().contains(var) && !var.toString().startsWith(idKeyPrefix)
-						&& !var.toString().startsWith(foreignKeyPrefix) || var.toString().equals(table.getPrimaryKey()))
+				if (table.getEnsembleVariableMapping().contains(var) && !var.toString().startsWith(ID_KEY_PREFIX)
+						&& !var.toString().startsWith(FOREIGN_KEY_PREFIX) || var.toString().equals(table.getPrimaryKey()))
 
 				{
 					s.addAll(var.getEnsembleIdentifiantsRubriques());

@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p5mapping.engine.regles;
+package fr.insee.arc.core.service.p5mapping.engine.bo.rules;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import fr.insee.arc.core.service.p5mapping.engine.RegleMappingFactory;
-import fr.insee.arc.core.service.p5mapping.engine.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.Pair;
@@ -48,9 +48,9 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
      */
     private Map<Integer, AbstractRegleMapping> mapRegleGroupe;
 
-    private RegleMappingFactory regleMappingFactory;
+    private MappingQueriesFactory regleMappingFactory;
 
-    public RegleMappingGroupe(RegleMappingFactory aRegleMappingFactory, String anExpression, VariableMapping aVariableMapping) {
+    public RegleMappingGroupe(MappingQueriesFactory aRegleMappingFactory, String anExpression, VariableMapping aVariableMapping) {
         super(anExpression, aVariableMapping);
         this.mapRegleGroupe = new HashMap<>();
         this.regleMappingFactory = aRegleMappingFactory;

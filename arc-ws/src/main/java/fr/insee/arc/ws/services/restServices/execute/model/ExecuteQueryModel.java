@@ -1,6 +1,6 @@
-package fr.insee.arc.ws.services.restServices.execute.pojo;
+package fr.insee.arc.ws.services.restServices.execute.model;
 
-public class ExecuteQueryPojo {
+public class ExecuteQueryModel {
 	
 	// numéro de requete de sortie
 	public String query_id;
@@ -14,12 +14,12 @@ public class ExecuteQueryPojo {
 	// rendu de la requete de sortie : LINE ou COLUMN
 	public String query_view;
 
-	public ExecuteQueryPojo() {
+	public ExecuteQueryModel() {
 		super();
 	}
 	
 	
-	public ExecuteQueryPojo(String query_id, String query_name, String expression, String query_view) {
+	public ExecuteQueryModel(String query_id, String query_name, String expression, String query_view) {
 		super();
 		this.query_id = query_id;
 		this.query_name = query_name;

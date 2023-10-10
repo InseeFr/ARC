@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p5mapping.engine.regles;
+package fr.insee.arc.core.service.p5mapping.engine.bo.rules;
 
 import java.sql.Connection;
 import java.util.Set;
@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.dao.TableNaming;
-import fr.insee.arc.core.service.p5mapping.engine.TableMapping;
-import fr.insee.arc.core.service.p5mapping.engine.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.TableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;

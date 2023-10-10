@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.factory.ApiServiceFactory;
+import fr.insee.arc.core.model.DataWarehouse;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.ResetEnvironmentService;
@@ -32,8 +33,8 @@ import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
-import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteQueryPojo;
+import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
+import fr.insee.arc.ws.services.restServices.execute.model.ExecuteQueryModel;
 import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 
 @RestController
@@ -48,7 +49,7 @@ public class ExecuteServiceController {
 	public ResponseEntity<ReturnView> executeServiceClient(
 			@PathVariable String serviceName,
 			@PathVariable int serviceId,
-			@RequestBody(required = true) ExecuteParameterPojo bodyPojo
+			@RequestBody(required = true) ExecuteParameterModel bodyPojo
 	)
 	{
 		Date firstContactDate=new Date();
@@ -67,7 +68,7 @@ public class ExecuteServiceController {
 						
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
-			String warehouse=bodyPojo.warehouse==null?"DEFAULT":bodyPojo.warehouse;
+			String warehouse=bodyPojo.warehouse==null?DataWarehouse.DEFAULT.getName():bodyPojo.warehouse;
 			
 			if (TraitementPhase.getPhase(bodyPojo.targetPhase).equals(TraitementPhase.RECEPTION))
 			{
@@ -97,14 +98,14 @@ public class ExecuteServiceController {
 	
 	@RequestMapping(value = "/reset/service", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ReturnView> resetServiceClient(
-			@RequestBody(required = true) ExecuteParameterPojo bodyPojo
+			@RequestBody(required = true) ExecuteParameterModel bodyPojo
 	)
 	{
 		Date firstContactDate=new Date();
 		ReturnView returnView=new ReturnView();
 		
 		bodyPojo.sandbox=bodyPojo.sandbox!=null?bodyPojo.sandbox.replace(".", "_"):bodyPojo.sandbox;
-		bodyPojo.queries=bodyPojo.queries==null?new ArrayList<ExecuteQueryPojo>():bodyPojo.queries;
+		bodyPojo.queries=bodyPojo.queries==null?new ArrayList<ExecuteQueryModel>():bodyPojo.queries;
 
 		try {
 		
@@ -128,14 +129,14 @@ public class ExecuteServiceController {
 	
 	@RequestMapping(value = "/execute/service", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ReturnView> executeServiceClient(
-			@RequestBody(required = true) ExecuteParameterPojo bodyPojo
+			@RequestBody(required = true) ExecuteParameterModel bodyPojo
 	)
 	{
 		Date firstContactDate=new Date();
 		ReturnView returnView=new ReturnView();
 	
 		bodyPojo.sandbox=bodyPojo.sandbox!=null?bodyPojo.sandbox.replace(".", "_"):bodyPojo.sandbox;
-		bodyPojo.queries=bodyPojo.queries==null?new ArrayList<ExecuteQueryPojo>():bodyPojo.queries;
+		bodyPojo.queries=bodyPojo.queries==null?new ArrayList<ExecuteQueryModel>():bodyPojo.queries;
 		
 		try {
 		
@@ -143,7 +144,7 @@ public class ExecuteServiceController {
 												
 			String env = bodyPojo.sandbox;
 			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
-			String warehouse=bodyPojo.warehouse==null?"DEFAULT":bodyPojo.warehouse;
+			String warehouse=bodyPojo.warehouse==null?DataWarehouse.DEFAULT.getName():bodyPojo.warehouse;
 
 			if (TraitementPhase.getPhase(bodyPojo.targetPhase).equals(TraitementPhase.RECEPTION))
 			{

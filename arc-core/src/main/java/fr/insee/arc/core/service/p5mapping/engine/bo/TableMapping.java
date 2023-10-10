@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p5mapping.engine;
+package fr.insee.arc.core.service.p5mapping.engine.bo;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -12,7 +12,8 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.global.dao.TableNaming;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueries;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -425,7 +426,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 					where2.append(",");
 
 				}
-				select.append(RequeteMapping.FUNCTION_BEFORE + variable.getNomVariable() + RequeteMapping.FUNCTION_AFTER
+				select.append(MappingQueries.FUNCTION_BEFORE + variable.getNomVariable() + MappingQueries.FUNCTION_AFTER
 						+ " as " + variable.getNomVariable());
 				allVar.append(variable.getNomVariable());
 				where.append(variable.getNomVariable());
@@ -439,7 +440,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
 				select.append(variable.getNomVariable());
 				allVar.append(variable.getNomVariable());
-				groupBy.append(RequeteMapping.ALIAS_TABLE + "." + variable.getNomVariable());
+				groupBy.append(MappingQueries.ALIAS_TABLE + "." + variable.getNomVariable());
 			}
 		}
 
@@ -475,7 +476,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 					where2.append(",");
 				}
 
-				select.append(RequeteMapping.FUNCTION_BEFORE + variable.getNomVariable() + RequeteMapping.FUNCTION_AFTER
+				select.append(MappingQueries.FUNCTION_BEFORE + variable.getNomVariable() + MappingQueries.FUNCTION_AFTER
 						+ " as " + variable.getNomVariable());
 				allVar.append(variable.getNomVariable());
 				where.append(variable.getNomVariable());
@@ -493,7 +494,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
 				select.append(variable.getNomVariable());
 				allVar.append(variable.getNomVariable());
-				groupBy.append(RequeteMapping.ALIAS_TABLE + "." + variable.getNomVariable());
+				groupBy.append(MappingQueries.ALIAS_TABLE + "." + variable.getNomVariable());
 				if (!variable.getNomVariable().equals(ColumnEnum.ID_SOURCE.getColumnName())) {
 					whereAllNonClefNull.append(variable.getNomVariable());
 				}

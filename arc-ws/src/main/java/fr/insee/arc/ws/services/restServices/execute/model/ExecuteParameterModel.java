@@ -1,4 +1,4 @@
-package fr.insee.arc.ws.services.restServices.execute.pojo;
+package fr.insee.arc.ws.services.restServices.execute.model;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import java.util.List;
  * @author MS
  *
  */
-public class ExecuteParameterPojo {
+public class ExecuteParameterModel {
 
 	// nom du fichier
 	public String fileName;
@@ -37,7 +37,7 @@ public class ExecuteParameterPojo {
 	public String periodicite;
 	
 	// liste des requete à exécuter
-	public List<ExecuteQueryPojo> queries;
+	public List<ExecuteQueryModel> queries;
 
 
 	
@@ -78,10 +78,10 @@ public class ExecuteParameterPojo {
 	public void setPeriodicite(String periodicite) {
 		this.periodicite = periodicite;
 	}
-	public List<ExecuteQueryPojo> getQueries() {
+	public List<ExecuteQueryModel> getQueries() {
 		return queries;
 	}
-	public void setQueries(List<ExecuteQueryPojo> queries) {
+	public void setQueries(List<ExecuteQueryModel> queries) {
 		this.queries = queries;
 	}
 	public String getFileContent() {

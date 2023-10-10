@@ -30,14 +30,15 @@ import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.engine.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.p3normage.engine.NormageEngine;
-import fr.insee.arc.core.service.p4controle.engine.ServiceJeuDeRegle;
-import fr.insee.arc.core.service.p4controle.engine.dao.ServiceRequeteSqlRegle;
-import fr.insee.arc.core.service.p5mapping.engine.RegleMappingFactory;
-import fr.insee.arc.core.service.p5mapping.engine.RequeteMapping;
+import fr.insee.arc.core.service.p4controle.engine.bo.ControleMarkCode;
+import fr.insee.arc.core.service.p4controle.engine.dao.ServiceJeuDeRegleDao;
 import fr.insee.arc.core.service.p5mapping.engine.ServiceMapping;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueries;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
+import fr.insee.arc.core.service.p5mapping.engine.dao.ThreadMappingQueries;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
+import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
 import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 
 @RestController
@@ -52,7 +53,7 @@ public class ExecuteEngineController {
 	public ResponseEntity<ReturnView> executeEngineClient(
 			@PathVariable String serviceName,
 			@PathVariable int serviceId,
-			@RequestBody(required = true) ExecuteParameterPojo bodyPojo
+			@RequestBody(required = true) ExecuteParameterModel bodyPojo
 	)
 	{
 		Date firstContactDate=new Date();
@@ -69,7 +70,7 @@ public class ExecuteEngineController {
 			StringBuilder requete;
 			
 			loggerDispatcher.info(identifiantLog + " launching phases", LOGGER);
-			String env = bodyPojo.sandbox;
+			String envExecution = bodyPojo.sandbox;
 
 
 			String structure = "";
@@ -85,7 +86,7 @@ public class ExecuteEngineController {
 							FileIdCard fileIdCard = new FileIdCard(bodyPojo.fileName);
 							fileIdCard.setFileIdCard(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite);
 							
-							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, env, fileIdCard, inputStream, currentTemporaryTable(i));
+							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, envExecution, fileIdCard, inputStream, currentTemporaryTable(i));
 							chargeur.executeEngine();
 							structure = chargeur.getJointure().replace("''", "'");
 						}
@@ -121,27 +122,27 @@ public class ExecuteEngineController {
 								"CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select *, '0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules from "+previousTemporaryTable(i)+";");
 						UtilitaireDao.get(0).executeImmediate(connection, requete);
 
-						ServiceJeuDeRegle sjdr = new ServiceJeuDeRegle();
+						ServiceJeuDeRegleDao sjdr = new ServiceJeuDeRegleDao();
 
 						// Récupération des règles de controles associées aux jeux de règle
 						JeuDeRegle jdr = new JeuDeRegle();
 
-						sjdr.fillRegleControle(connection, jdr, ViewEnum.CONTROLE_REGLE.getFullName(env), currentTemporaryTable(i));
+						sjdr.fillRegleControle(connection, jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution), currentTemporaryTable(i));
 						sjdr.executeJeuDeRegle(connection, jdr, currentTemporaryTable(i));
 						break;
 					case MAPPING:
-						UtilitaireDao.get(0).executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+"','"+ServiceRequeteSqlRegle.RECORD_WITH_ERROR_TO_KEEP+"');");
+						UtilitaireDao.get(0).executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ControleMarkCode.RECORD_WITH_NOERROR.getCode()+"','"+ControleMarkCode.RECORD_WITH_ERROR_TO_KEEP.getCode()+"');");
 						
 						String tableTempControleOk = previousTemporaryTable(i);
 						
-						List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(connection, tableTempControleOk, env + ".mapping_regle");
+						List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(connection, envExecution, tableTempControleOk);
 						ServiceMapping serviceMapping = new ServiceMapping();
 						
-						RegleMappingFactory regleMappingFactory = serviceMapping.construireRegleMappingFactory(connection, env, tableTempControleOk, "v_");
-						String idFamille = serviceMapping.fetchIdFamille(connection, listeJeuxDeRegles.get(0), env + ".norme");
+						MappingQueriesFactory regleMappingFactory = serviceMapping.construireRegleMappingFactory(connection, envExecution, tableTempControleOk, "v_");
+						String idFamille = ThreadMappingQueries.fetchIdFamille(connection, listeJeuxDeRegles.get(0), envExecution + ".norme");
 
-			            RequeteMapping requeteMapping = new RequeteMapping(connection, regleMappingFactory, idFamille, listeJeuxDeRegles.get(0),
-			                        env, tableTempControleOk, 0);
+			            MappingQueries requeteMapping = new MappingQueries(connection, regleMappingFactory, idFamille, listeJeuxDeRegles.get(0),
+			                        envExecution, tableTempControleOk, 0);
 			            requeteMapping.construire();
 			            UtilitaireDao.get(0).executeBlock(connection, requeteMapping.requeteCreationTablesTemporaires());
 
@@ -181,7 +182,7 @@ public class ExecuteEngineController {
 			@PathVariable String serviceName,
 			@PathVariable int serviceId,
 			@PathVariable int sandbox,
-			@RequestBody(required = true) ExecuteParameterPojo p
+			@RequestBody(required = true) ExecuteParameterModel p
 	)
 	{
 		p.sandbox="arc_"+sandbox;

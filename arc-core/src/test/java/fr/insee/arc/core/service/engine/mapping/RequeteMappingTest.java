@@ -12,20 +12,20 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.insee.arc.core.service.p5mapping.engine.RegleMappingFactory;
-import fr.insee.arc.core.service.p5mapping.engine.RequeteMapping;
-import fr.insee.arc.core.service.p5mapping.engine.TableMapping;
-import fr.insee.arc.core.service.p5mapping.engine.VariableMapping;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.p5mapping.engine.bo.TableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueries;
 
 public class RequeteMappingTest {
 	
-	private RequeteMapping mappingRequest;
+	private MappingQueries mappingRequest;
 	
 	@Before
 	public void setUp() {
-		RegleMappingFactory mappingRuleFactory = new RegleMappingFactory(null, "", null, null);
-		mappingRequest = new RequeteMapping(null, mappingRuleFactory, "", null, "", "", 0);
+		MappingQueriesFactory mappingRuleFactory = new MappingQueriesFactory(null, "", null, null);
+		mappingRequest = new MappingQueries(null, mappingRuleFactory, "", null, "", "", 0);
 	}
 
 	

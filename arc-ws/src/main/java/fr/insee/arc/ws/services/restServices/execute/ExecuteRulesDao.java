@@ -10,8 +10,8 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
-import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteParameterPojo;
-import fr.insee.arc.ws.services.restServices.execute.pojo.ExecuteQueryPojo;
+import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
+import fr.insee.arc.ws.services.restServices.execute.model.ExecuteQueryModel;
 import fr.insee.arc.ws.services.restServices.execute.view.DataSetView;
 import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 
@@ -25,7 +25,7 @@ public class ExecuteRulesDao {
  * @return
  * @throws ArcException 
  */
-public static void fillRules(Connection c, ExecuteParameterPojo p, String serviceName, int serviceId) throws ArcException
+public static void fillRules(Connection c, ExecuteParameterModel p, String serviceName, int serviceId) throws ArcException
 {
 	GenericBean gb;
 	
@@ -54,18 +54,18 @@ public static void fillRules(Connection c, ExecuteParameterPojo p, String servic
 	
 		p.fileName = p.fileName == null ? "f.xml" : p.fileName;
 	
-		p.queries=new ArrayList<ExecuteQueryPojo>();
+		p.queries=new ArrayList<ExecuteQueryModel>();
 		
 		for (int i=0;i<m.get("service_name").size();i++)
 		{
-			ExecuteQueryPojo e=new ExecuteQueryPojo(m.get("query_id").get(i), m.get("query_name").get(i), m.get("expression").get(i), m.get("query_view").get(i));
+			ExecuteQueryModel e=new ExecuteQueryModel(m.get("query_id").get(i), m.get("query_name").get(i), m.get("expression").get(i), m.get("query_view").get(i));
 			
 			p.queries.add(e);
 		}
 	}
 }
 
-public static void buildResponse(Connection c, ExecuteParameterPojo p, ReturnView r, Date firstContactDate) throws ArcException
+public static void buildResponse(Connection c, ExecuteParameterModel p, ReturnView r, Date firstContactDate) throws ArcException
 {
 	r.setReceptionTime(firstContactDate);
 	r.setReturnTime(new Date());

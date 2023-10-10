@@ -8,7 +8,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
 import fr.insee.arc.core.service.p4controle.ApiControleService;
-import fr.insee.arc.core.service.p5mapping.engine.RegleMappingFactory;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
 import fr.insee.arc.core.service.p5mapping.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.exception.ArcException;
@@ -43,7 +43,7 @@ public class ApiMappingService extends ApiService {
     
     private static final String PREFIX_IDENTIFIANT_RUBRIQUE = "i_";
 
-    protected RegleMappingFactory regleMappingFactory;
+    protected MappingQueriesFactory regleMappingFactory;
 
     /**
      * @param anParametersEnvironment

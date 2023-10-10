@@ -1,8 +1,8 @@
 package fr.insee.arc.core.service.p4controle.engine.bo;
 
-public class ControleRegleService {
+public class ControleXsdCode {
 
-	private ControleRegleService() {
+	private ControleXsdCode() {
 		throw new IllegalStateException("Utility class");
 	}
 

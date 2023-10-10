@@ -1,10 +1,11 @@
-package fr.insee.arc.core.service.p5mapping.engine;
+package fr.insee.arc.core.service.p5mapping.engine.bo;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import fr.insee.arc.core.service.p5mapping.engine.regles.AbstractRegleMapping;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingGroupe;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.AbstractRegleMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingGroupe;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
 import fr.insee.arc.utils.exception.ArcException;
 
 /**
@@ -23,7 +24,7 @@ public class VariableMapping implements Comparable<VariableMapping> {
 
     private Set<TableMapping> ensembleTableMapping;
 
-    private RegleMappingFactory regleMappingFactory;
+    private MappingQueriesFactory regleMappingFactory;
 
     /**
      *
@@ -32,7 +33,7 @@ public class VariableMapping implements Comparable<VariableMapping> {
         this.ensembleTableMapping = new HashSet<>();
     }
 
-    public VariableMapping(RegleMappingFactory aRegleMappingFactory, String aNomVariable, String aType) {
+    public VariableMapping(MappingQueriesFactory aRegleMappingFactory, String aNomVariable, String aType) {
         this();
         this.nomVariable = aNomVariable;
         this.regleMappingFactory = aRegleMappingFactory;

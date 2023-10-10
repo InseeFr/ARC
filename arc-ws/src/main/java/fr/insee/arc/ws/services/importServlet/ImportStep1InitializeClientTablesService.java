@@ -9,7 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import fr.insee.arc.core.dataobjects.SchemaEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;

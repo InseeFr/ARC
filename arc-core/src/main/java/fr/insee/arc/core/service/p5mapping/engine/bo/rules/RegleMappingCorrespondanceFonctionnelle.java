@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p5mapping.engine.regles;
+package fr.insee.arc.core.service.p5mapping.engine.bo.rules;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,9 +9,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import fr.insee.arc.core.service.p5mapping.engine.RegleMappingFactory;
-import fr.insee.arc.core.service.p5mapping.engine.VariableMapping;
-import fr.insee.arc.core.service.p5mapping.engine.regles.AbstractRegleMappingSimple.RubriqueMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.AbstractRegleMappingSimple.RubriqueMapping;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
@@ -28,7 +28,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
             + RubriqueMapping.regexRubriqueMappingAcceptante + ")";
     private static final Pattern patternMappingRegleGlobaleOuRubrique = Pattern.compile(regexMappingRegleGlobaleOuRubrique);
 
-    private RegleMappingFactory regleMappingFactory;
+    private MappingQueriesFactory regleMappingFactory;
 
     private List<AbstractRegleMapping> listeTokenRegle;
 
@@ -37,7 +37,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
 
     private boolean isCalcule;
 
-    public RegleMappingCorrespondanceFonctionnelle(RegleMappingFactory aRegleMappingFactory, String anExpression, VariableMapping aVariableMapping) {
+    public RegleMappingCorrespondanceFonctionnelle(MappingQueriesFactory aRegleMappingFactory, String anExpression, VariableMapping aVariableMapping) {
         super(anExpression, aVariableMapping);
         this.regleMappingFactory = aRegleMappingFactory;
         this.ensembleIdentifiantsRubriques = new HashSet<>();

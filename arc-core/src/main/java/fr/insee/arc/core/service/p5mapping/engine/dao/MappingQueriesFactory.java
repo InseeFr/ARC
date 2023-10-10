@@ -1,15 +1,17 @@
-package fr.insee.arc.core.service.p5mapping.engine;
+package fr.insee.arc.core.service.p5mapping.engine.dao;
 
 import java.sql.Connection;
 import java.util.Set;
 
-import fr.insee.arc.core.service.p5mapping.engine.regles.AbstractRegleMapping;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingCorrespondanceFonctionnelle;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingGlobale;
-import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingGroupe;
-import fr.insee.arc.core.service.p5mapping.engine.regles.AbstractRegleMappingSimple.CodeSQL;
-import fr.insee.arc.core.service.p5mapping.engine.regles.AbstractRegleMappingSimple.RubriqueMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.TableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.AbstractRegleMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingCorrespondanceFonctionnelle;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingGlobale;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingGroupe;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.AbstractRegleMappingSimple.CodeSQL;
+import fr.insee.arc.core.service.p5mapping.engine.bo.rules.AbstractRegleMappingSimple.RubriqueMapping;
 
 /**
  *
@@ -18,7 +20,7 @@ import fr.insee.arc.core.service.p5mapping.engine.regles.AbstractRegleMappingSim
  * Sortie : un objet héritant de {@link AbstractRegleMapping}.
  *
  */
-public class RegleMappingFactory {
+public class MappingQueriesFactory {
 
     /**
      * Ensemble des rubriques qui ont été rencontrées dans les tables de chargement pour les données issues d'un même entrepot.<br/>
@@ -35,7 +37,7 @@ public class RegleMappingFactory {
 
     private String idFamille;
 
-    public RegleMappingFactory(Connection aConnexion, String anEnvironnement, Set<String> anEnsembleIdentifiantRubriqueExistante,
+    public MappingQueriesFactory(Connection aConnexion, String anEnvironnement, Set<String> anEnsembleIdentifiantRubriqueExistante,
             Set<String> anEnsembleNomRubriqueExistante) {
         this.environnement = anEnvironnement;
         this.ensembleIdentifiantRubriqueExistante = anEnsembleIdentifiantRubriqueExistante;

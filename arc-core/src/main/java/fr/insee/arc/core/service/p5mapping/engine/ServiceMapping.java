@@ -8,6 +8,7 @@ import java.util.Set;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -24,7 +25,7 @@ public class ServiceMapping {
      *
      * @throws ArcException
      */
-    public RegleMappingFactory construireRegleMappingFactory(Connection connexion, String envExecution, String tableTempControleOk, String prefixIdentifiantRubrique) throws ArcException {
+    public MappingQueriesFactory construireRegleMappingFactory(Connection connexion, String envExecution, String tableTempControleOk, String prefixIdentifiantRubrique) throws ArcException {
         Set<String> ensembleIdentifiantRubriqueExistante = new HashSet<>();
         Set<String> ensembleNomRubriqueExistante = new HashSet<>();
         for (String nomColonne : calculerListeColonnes(connexion, tableTempControleOk)) {
@@ -34,7 +35,7 @@ public class ServiceMapping {
                 ensembleNomRubriqueExistante.add(nomColonne);
             }
         }
-        return new RegleMappingFactory(connexion, envExecution, ensembleIdentifiantRubriqueExistante, ensembleNomRubriqueExistante);
+        return new MappingQueriesFactory(connexion, envExecution, ensembleIdentifiantRubriqueExistante, ensembleNomRubriqueExistante);
     }
 
     
@@ -52,19 +53,5 @@ public class ServiceMapping {
     }
     
 
-    /**
-     *
-     * @param aJeuDeRegle
-     * @return Le bon id_famille
-     * @throws ArcException
-     */
-    public String fetchIdFamille(Connection connexion, JeuDeRegle aJeuDeRegle, String envExecution) throws ArcException {
-        ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-        requete
-        	.append("SELECT id_famille FROM " + ViewEnum.NORME.getFullName(envExecution))
-        	.append("\n WHERE id_norme = " + requete.quoteText(aJeuDeRegle.getIdNorme()))
-        	.append("\n AND periodicite = " + requete.quoteText(aJeuDeRegle.getPeriodicite()));
-        return UtilitaireDao.get(0).getString(connexion, requete);
-    }
     
 }

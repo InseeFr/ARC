@@ -1,11 +1,11 @@
-package fr.insee.arc.core.service.p5mapping.engine.regles;
+package fr.insee.arc.core.service.p5mapping.engine.bo.rules;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.service.p5mapping.engine.TableMapping;
-import fr.insee.arc.core.service.p5mapping.engine.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.TableMapping;
+import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.format.Format;

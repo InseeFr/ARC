@@ -47,6 +47,7 @@ public enum ArcExceptionMessage {
 	MAPPING_EXPRESSION_GROUP_MULTI_REFERENCE("L'expression %s comporte plusieurs références au numéro de groupe %s"),
 	MAPPING_EXPRESSION_GROUP_ILLEGAL_CALL("Cette méthode ne devrait pas être appelée par la classe RegleMappingGroupe"),
 	MAPPING_RULES_NOT_FOUND("Aucune règle de mapping n'a été trouvé dans le jeu de règle"),
+	MAPPING_RULES_NON_UNIQUE("Plusieurs règles de mapping ont été trouvé dans le jeu de règle pour le fichier"),
 	MAPPING_VARIABLE_NOT_FOUND_IN_MODEL("La variable %s n'est pas déclarée dans le modèle de la famille"),
 	
 	

@@ -18,12 +18,12 @@ public class XsdDate {
 			// not needed
 			// ,"YYYY-MM-DD+HH24:MI"
 			// "YYYY-MM-DD-HH24:MI"
-			entry(ControleRegleService.XSD_DATE_NAME.toLowerCase(), new String[] { "YYYY-MM-DD", "YYYY-MM-DD\"Z\""}) ,
+			entry(ControleXsdCode.XSD_DATE_NAME.toLowerCase(), new String[] { "YYYY-MM-DD", "YYYY-MM-DD\"Z\""}) ,
 			
-			entry(ControleRegleService.XSD_DATETIME_NAME.toLowerCase(),
+			entry(ControleXsdCode.XSD_DATETIME_NAME.toLowerCase(),
 					new String[] { "YYYY-MM-DD\"T\"HH24:MI:SS", "YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"" }) ,
 			
-			entry(ControleRegleService.XSD_TIME_NAME.toLowerCase(), new String[] { "HH24:MI:SS" })
+			entry(ControleXsdCode.XSD_TIME_NAME.toLowerCase(), new String[] { "HH24:MI:SS" })
 
 			
 			);
