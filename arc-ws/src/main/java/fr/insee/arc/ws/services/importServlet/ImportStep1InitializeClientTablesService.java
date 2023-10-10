@@ -81,8 +81,8 @@ public class ImportStep1InitializeClientTablesService {
 			executeIf(ServletArc.METADATA, () -> this.clientDao.createTablePeriodicite());
 
 			stopHandShake();
-			// on renvoie l'id du client avec son timestamp
 
+			// on renvoie l'id du client avec son timestamp
 			resp.send(arcClientIdentifier.getEnvironnement()+ Delimiters.SQL_SCHEMA_DELIMITER + arcClientIdentifier.getClient()
 					+ Delimiters.SQL_TOKEN_DELIMITER + arcClientIdentifier.getTimestamp());
 

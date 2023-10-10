@@ -18,38 +18,35 @@ public class ImportStep2GetTableNameService {
 
 	protected static final Logger LOGGER = LogManager.getLogger(ImportStep2GetTableNameService.class);
 
-	
 	private ClientDao clientDao;
 	private JSONObject dsnRequest;
 
 	private ArcClientIdentifier arcClientIdentifier;
-	
-	private boolean reprise;
 
+	private boolean reprise;
 
 	public ImportStep2GetTableNameService(JSONObject dsnRequest) {
 		super();
-		
+
 		this.dsnRequest = dsnRequest;
 
 		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest);
-		
+
 		reprise = this.dsnRequest.getBoolean(JsonKeys.REPRISE.getKey());
 
 		clientDao = new ClientDao(arcClientIdentifier);
-		
-	}
 
+	}
 
 	public void execute(SendResponse resp) throws ArcException {
 
 		try {
 			StringBuilder type = new StringBuilder();
-			
+
 			String tableName = this.clientDao.getAClientTable();
-			
+
 			if (tableName == null) {
-				tableName = this.clientDao.getIdTable();	
+				tableName = this.clientDao.getIdTable();
 
 				if (!reprise) {
 					this.clientDao.updatePilotage(tableName);
@@ -73,7 +70,7 @@ public class ImportStep2GetTableNameService {
 			}
 
 			// renvoie un nom de table du client si il en reste une
-			resp.send(tableName + " " + type);
+			resp.send(arcClientIdentifier.getHandshake() + tableName + " " + type);
 			resp.endSending();
 
 		} catch (ArcException e) {
