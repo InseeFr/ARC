@@ -1,7 +1,6 @@
-package fr.insee.arc.core.service.engine.mapping;
+package fr.insee.arc.core.service.p0initialisation.metadata;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,17 +8,16 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.insee.arc.core.service.p5mapping.engine.ExpressionService;
+public class ApplyExpressionRulesOperationTest {
 
-public class ExpressionServiceTest {
 
-	private ExpressionService expressionService;
+	private ApplyExpressionRulesOperation expressionService;
 	private ArrayList<String> headers;
 	private ArrayList<String> types;
 
 	@Before
 	public void setUp() {
-		expressionService = new ExpressionService();
+		expressionService = new ApplyExpressionRulesOperation();
 		headers = new ArrayList<>();
 		headers.add("expr_nom");
 		headers.add("expr_valeur");

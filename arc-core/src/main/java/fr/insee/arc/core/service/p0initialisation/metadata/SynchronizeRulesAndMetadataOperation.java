@@ -16,7 +16,6 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.metadata.dao.SynchronizeRulesAndMetadataDao;
-import fr.insee.arc.core.service.p5mapping.engine.ExpressionService;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
 import fr.insee.arc.utils.exception.ArcException;
@@ -169,7 +168,7 @@ public class SynchronizeRulesAndMetadataOperation {
 		String anExecutionEnvironment = sandbox.getSchema();
 
 		// Checks expression validity
-		ExpressionService expressionService = new ExpressionService();
+		ApplyExpressionRulesOperation expressionService = new ApplyExpressionRulesOperation();
 		List<JeuDeRegle> allRuleSets = JeuDeRegleDao.recupJeuDeRegle(connexion, ViewEnum.JEUDEREGLE.getFullName(anExecutionEnvironment));
 		for (JeuDeRegle ruleSet : allRuleSets) {
 			// Check
