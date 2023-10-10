@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.WebApplicationContext;
 
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -32,8 +33,6 @@ import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
 public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, PilotageDao> {
 
 	protected static final String ENV_DESCRIPTION = "envDescription";
-
-	protected static final String ENTRY_DATE = "date_entree";
 
 	private static final String ACTION_NAME = "EnvManagement";
 
@@ -134,7 +133,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 	public void initializeRapportBAS(VObject viewRapportBAS) {
 		LoggerHelper.debug(LOGGER, "* initializeRapportBAS *");
 		if (viewRapportBAS.getHeaderSortDLabels() == null) {
-			viewRapportBAS.setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ENTRY_DATE)));
+			viewRapportBAS.setHeaderSortDLabels(new ArrayList<>(Arrays.asList(ColumnEnum.DATE_ENTREE.toString())));
 			viewRapportBAS.setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
 		}
 		dao.initializeRapportBAS(viewRapportBAS);

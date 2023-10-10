@@ -260,64 +260,24 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public void downloadBdBAS(VObject viewFichierBAS, HttpServletResponse response,
-			List<String> tableDownload, String phase, String etatBdd, String date) throws ArcException {
-
+			List<String> tableDownload, TraitementPhase phase, TraitementEtat etat, String date) throws ArcException {
+		
 		// List of queries that will be executed to download
 		List<ArcPreparedStatementBuilder> tableauRequete = new ArrayList<>();
 		// Name of the file containing the data download
 		List<String> fileNames = new ArrayList<>();
+		
+		
 		ArcPreparedStatementBuilder requete;
 		
 		for (String t : tableDownload) {
-
-			// Check if the table to download got children
-			requete = new ArcPreparedStatementBuilder();
-			requete.append(FormatSQL.getAllInheritedTables(ManipString.substringBeforeFirst(t, "."),
-					ManipString.substringAfterFirst(t, ".")));
-			requete.append(" LIMIT 1");
-
-			if (Boolean.TRUE.equals(UtilitaireDao.get(0).hasResults(null, requete))) {
-
-				// Get the files to download
-				requete = new ArcPreparedStatementBuilder();
-				requete.append("SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
-				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
-				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + "::text[] ");
-				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
-
-				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
-				// fichiers
-				if (!viewFichierBAS.mapContentSelected().isEmpty()) {
-					List<String> filesSelected = viewFichierBAS.mapContentSelected().get("id_source");
-					requete.append("AND id_source IN (");
-					for (int i = 0; i < filesSelected.size(); i++) {
-						if (i > 0) {
-							requete.append(",");
-						}
-						requete.append("'" + filesSelected.get(i) + "'");
-					}
-					requete.append(")");
-				}
-
-				List<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
-						.mapContent().get("id_source");
-
-				// for each files, generate the download query
-				for (String idSource : idSources) {
-					tableauRequete.add(new ArcPreparedStatementBuilder(
-							"SELECT * FROM " + HashFileNameConversion.tableOfIdSource(t, idSource)));
-					fileNames.add(t + "_" + idSource);
-				}
-
-			}
-			// if no children
-			else {
-
+			if (phase.equals(TraitementPhase.MAPPING))
+			{
 				requete = new ArcPreparedStatementBuilder();
 				requete.append("WITH prep as ( ");
 				requete.append("SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
-				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase) + " ");
-				requete.append("\n AND etat_traitement=" + requete.quoteText(etatBdd) + "::text[] ");
+				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase.toString()) + " ");
+				requete.append("\n AND etat_traitement=" + requete.quoteText(etat.getSqlArrayExpression()) + "::text[] ");
 				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
 
 				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
@@ -331,12 +291,38 @@ public class PilotageDao extends VObjectHelperDao {
 				requete.append(" ) ");
 				requete.append("\n SELECT * from " + t
 						+ " a where exists (select 1 from prep b where a.id_source=b.id_source) ");
+
 				tableauRequete.add(requete);
 				fileNames.add(t);
+				
 			}
+			else
+			{
+				requete = new ArcPreparedStatementBuilder();
+				requete.append("SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
+				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase.toString()) + " ");
+				requete.append("\n AND etat_traitement=" + requete.quoteText(etat.getSqlArrayExpression()) + "::text[] ");
+				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
 
+				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
+				// fichiers
+				if (!viewFichierBAS.mapContentSelected().isEmpty()) {
+					requete.append("AND id_source IN (");
+					requete.append(requete.sqlListeOfValues(viewFichierBAS.mapContentSelected().get("id_source")));
+					requete.append(")");
+				}
+
+				List<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
+						.mapContent().get("id_source");
+
+				// for each files, generate the download query
+				for (String idSource : idSources) {
+					tableauRequete.add(new ArcPreparedStatementBuilder(
+							"SELECT * FROM " + HashFileNameConversion.tableOfIdSource(t, idSource)));
+					fileNames.add(t + "_" + idSource);
+				}
+			}
 		}
-
 		this.vObjectService.download(viewFichierBAS, response, fileNames, tableauRequete);
 	}
 	

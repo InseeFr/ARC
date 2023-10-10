@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
+import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.PhaseOperations;
@@ -93,16 +95,15 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 	}
 
 	public void downloadBdBAS(HttpServletResponse response) throws ArcException {
+		
 		Map<String, List<String>> selectionLigne = views.getViewPilotageBAS().mapContentSelected();
 		List<String> selectionColonne = views.getViewPilotageBAS().listHeadersSelected();
-		List<Integer> selectionIndexColonne = views.getViewPilotageBAS().indexHeadersSelected();
 
-		String phase = TraitementPhase.getPhase(selectionIndexColonne.get(0)).toString();
-		String etat = selectionColonne.get(0).split("_")[1].toUpperCase();
-		String date = selectionLigne.get(ENTRY_DATE).get(0);
-
-		String[] etatList = etat.split("\\$");
-		String etatBdd = "{" + etat.replace("$", ",") + "}";
+		TraitementPhase phase = TraitementPhase.valueOf(selectionColonne.get(0).split("_")[0].toUpperCase());
+		TraitementEtat etat = TraitementEtat.valueOf(selectionColonne.get(0).split("_")[1].toUpperCase());
+		
+		
+		String date = selectionLigne.get(ColumnEnum.DATE_ENTREE.toString()).get(0);
 
 		// Sélection des table métiers en fonction de la phase sélectionner (5 pour
 		// mapping 1 sinon)
@@ -114,10 +115,10 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			if (!dataTables.isEmpty()) {
 				for (String table : dataTables) {
 					// selection des tables qui contiennent la phase dans leur nom
-					for (int i = 0; i < etatList.length; i++) {
+					for (int i = 0; i < etat.getArrayExpression().length; i++) {
 						if (ManipString.substringAfterFirst(table.toUpperCase(), ".")
-								.startsWith(phase.toUpperCase() + "_")
-								&& table.toUpperCase().endsWith("_" + etatList[i].toUpperCase())
+								.startsWith(phase + Delimiters.SQL_TOKEN_DELIMITER)
+								&& table.toUpperCase().endsWith(Delimiters.SQL_TOKEN_DELIMITER + etat.getArrayExpression()[i])
 								&& !tableDownload.contains(table)) {
 							tableDownload.add(table);
 
@@ -129,7 +130,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			loggerDispatcher.error(e, LOGGER);
 		}
 		
-		dao.downloadBdBAS(this.views.getViewFichierBAS(), response, tableDownload, phase, etatBdd, date);
+		dao.downloadBdBAS(this.views.getViewFichierBAS(), response, tableDownload, phase, etat, date);
 
 	}
 
