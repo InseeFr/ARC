@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-93.1.9b
+## version-93.1.10b
 - tablebucket fix for webservice for data retrieval
 
 ## version-93.1.8b
