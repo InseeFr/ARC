@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
@@ -34,7 +35,7 @@ public class ImportStep3GetTableDataService {
 
 		try {
 			// binary transfer
-			ServiceDao.execQueryExportDataToResponse(resp.getWr(), arcClientIdentifier.getClient(), IS_EXPORT_CSV);
+			ServiceDao.execQueryExportDataToResponse(resp.getWr(), ViewEnum.normalizeTableName(arcClientIdentifier.getClient()), IS_EXPORT_CSV);
 			this.clientDao.dropTable(arcClientIdentifier.getClient());
 
 			resp.endSending();

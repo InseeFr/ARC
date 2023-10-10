@@ -240,7 +240,7 @@ public class ClientDao {
 				+ ColumnEnum.ID_SOURCE.getColumnName() + "=T2." + ColumnEnum.ID_SOURCE.getColumnName() + ") ");
 		query.append("AND T1.phase_traitement='" + TraitementPhase.MAPPING + "';");
 
-		UtilitaireDao.get(0).executeBlock(null, query.toString());
+		UtilitaireDao.get(0).executeBlock(connection, query.toString());
 	}
 
 	/**
@@ -368,17 +368,19 @@ public class ClientDao {
 	 */
 	public String getAClientTable(boolean isSourceListTable) throws ArcException {
 		
-		String normalizedTable = ViewEnum.normalizeTableName(client);
-		String schema = ManipString.substringBeforeFirst(normalizedTable, ".");
-		String clientDb = ManipString.substringAfterFirst(normalizedTable, ".").replace("_", "\\_") + "%";
+		String schema = ManipString.substringBeforeFirst(client, ".");
+		String tableToFind = ViewEnum.normalizeTableName(ManipString.substringAfterFirst(client, ".").replace("_", "\\_") + "%");
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT schemaname||'.'||tablename FROM pg_tables")
-				.append(" WHERE tablename like " + requete.quoteText(clientDb))
+				.append(" WHERE tablename like " + requete.quoteText(tableToFind))
 				.append(" AND schemaname=" + requete.quoteText(schema)).append(" AND tablename "
 						+ (isSourceListTable ? "" : "NOT") + " like " + requete.quoteText("%id\\_source%"));
 
-		return UtilitaireDao.get(0).getString(null, requete);
+		String selectedTableName = UtilitaireDao.get(0).getString(connection, requete);
+		
+		return this.client + selectedTableName.substring(this.client.length());
+		
 	}
 
 	public String getAClientTable() throws ArcException {
@@ -393,7 +395,7 @@ public class ClientDao {
 		if (StringUtils.isBlank(clientTable)) {
 			return;
 		}
-		UtilitaireDao.get(0).dropTable(null, clientTable);
+		UtilitaireDao.get(0).dropTable(connection, clientTable);
 	}
 
 	/**
@@ -410,10 +412,10 @@ public class ClientDao {
 		requete.append(" WHERE tablename like " + requete.quoteText(findClientTable));
 		requete.append(" AND schemaname = " + requete.quoteText(this.environnement));
 
-		List<String> tablesToDrop = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
+		List<String> tablesToDrop = new GenericBean(UtilitaireDao.get(0).executeRequest(connection, requete))
 				.getColumnValues(ColumnEnum.TABLE_NAME.getColumnName());
 
-		UtilitaireDao.get(0).executeImmediate(null, FormatSQL.dropTable(tablesToDrop.toArray(new String[0])));
+		UtilitaireDao.get(0).executeImmediate(connection, FormatSQL.dropTable(tablesToDrop.toArray(new String[0])));
 
 	}
 
