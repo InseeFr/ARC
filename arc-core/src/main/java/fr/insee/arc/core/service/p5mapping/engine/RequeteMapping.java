@@ -19,6 +19,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.p5mapping.engine.regles.RegleMappingClePrimaire;
+import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -336,7 +337,7 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 		if (!this.isRequeteCalculee) {
 			StringBuilder requeteGlobale = new StringBuilder("");
 
-			requeteGlobale.append("SET ENABLE_HASHAGG=ON; SET ENABLE_BITMAPSCAN=OFF; \n");
+			requeteGlobale.append(ModeRequete.NESTLOOP_OFF);
 
 			construireTablePrecedente(requeteGlobale);
 
@@ -364,6 +365,9 @@ public class RequeteMapping implements IConstanteCaractere, IConstanteNumerique 
 			}
 			requeteGlobale.append(FormatSQL.dropTable(this.nomTableFichierCourant));
 
+			requeteGlobale.append(ModeRequete.NESTLOOP_ON);
+
+			
 			this.requeteTextuelleInsertion = requeteGlobale.toString();
 			this.isRequeteCalculee = true;
 		}

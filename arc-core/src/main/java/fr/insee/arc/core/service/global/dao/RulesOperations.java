@@ -6,6 +6,8 @@ import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -150,4 +152,34 @@ public class RulesOperations {
 				UtilitaireDao.get(0).executeRequest(c, new ArcPreparedStatementBuilder(req)));
 		return gb.mapContent(true);
 	}
+	
+	/**
+	 * Méthodes pour marquer la table de pilotage temporaire avec le jeu de règle
+	 * appliqué
+	 *
+	 * @return
+	 */
+	public static String marqueJeuDeRegleApplique(TraitementPhase currentPhase, String envExecution, String pilTemp) {
+		return marqueJeuDeRegleApplique(currentPhase, envExecution, pilTemp, null);
+	}
+
+	public static String marqueJeuDeRegleApplique(TraitementPhase currentPhase, String envExecution, String pilTemp, String defaultEtatTraitement) {
+		StringBuilder requete = new StringBuilder();
+		requete.append("WITH ");
+		requete.append("prep AS (SELECT a." + ColumnEnum.ID_SOURCE.getColumnName()
+				+ ", a.id_norme, a.periodicite, b.validite_inf, b.validite_sup, b.version ");
+		requete.append("	FROM " + pilTemp + " a  ");
+		requete.append("	INNER JOIN " + ViewEnum.JEUDEREGLE.getFullName(envExecution)
+				+ " b ON a.id_norme=b.id_norme AND a.periodicite=b.periodicite AND b.validite_inf <=a.validite::date AND b.validite_sup>=a.validite::date ");
+		requete.append("	WHERE phase_traitement='" + currentPhase + "') ");
+		requete.append("UPDATE " + pilTemp + " AS a ");
+		requete.append("SET validite_inf=prep.validite_inf, validite_sup=prep.validite_sup, version=prep.version ");
+		if (defaultEtatTraitement != null) {
+			requete.append(", etat_traitement='{" + defaultEtatTraitement + "}'");
+		}
+		requete.append("FROM prep ");
+		requete.append("WHERE a.phase_traitement='" + currentPhase + "'; ");
+		return requete.toString();
+	}
+	
 }

@@ -51,6 +51,15 @@ public class PilotageOperations {
 		return query.toString();
 	}
 
+
+	public static String queryUpdatePilotageMapping(String tableMappingPilTemp, String idSource) {
+		StringBuilder query = new StringBuilder();
+        query.append("UPDATE " + tableMappingPilTemp + " SET etape=2, etat_traitement = '{" + TraitementEtat.OK + "}' WHERE etat_traitement='{"
+                        + TraitementEtat.ENCOURS + "}' AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ;");
+		return query.toString();
+	}
+
+	
 	/**
 	 * Selection d'un lot d'id_source pour appliquer le traitement Les id_sources
 	 * sont selectionnés parmi les id_source présent dans la phase précédentes avec
@@ -231,5 +240,4 @@ public class PilotageOperations {
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
 
-	
 }

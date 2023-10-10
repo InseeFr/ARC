@@ -191,35 +191,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		}
 	}
 
-	/**
-	 * Méthode pour marquer la table de pilotage temporaire avec le jeu de règle
-	 * appliqué
-	 *
-	 * @return
-	 */
-	protected String marqueJeuDeRegleApplique(String pilTemp) {
-		return marqueJeuDeRegleApplique(pilTemp, null);
-	}
-
-	protected String marqueJeuDeRegleApplique(String pilTemp, String defaultEtatTraitement) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("WITH ");
-		requete.append("prep AS (SELECT a." + ColumnEnum.ID_SOURCE.getColumnName()
-				+ ", a.id_norme, a.periodicite, b.validite_inf, b.validite_sup, b.version ");
-		requete.append("	FROM " + pilTemp + " a  ");
-		requete.append("	INNER JOIN " + ViewEnum.JEUDEREGLE.getFullName(this.envExecution)
-				+ " b ON a.id_norme=b.id_norme AND a.periodicite=b.periodicite AND b.validite_inf <=a.validite::date AND b.validite_sup>=a.validite::date ");
-		requete.append("	WHERE phase_traitement='" + this.getCurrentPhase() + "') ");
-		requete.append("UPDATE " + pilTemp + " AS a ");
-		requete.append("SET validite_inf=prep.validite_inf, validite_sup=prep.validite_sup, version=prep.version ");
-		if (defaultEtatTraitement != null) {
-			requete.append(", etat_traitement='{" + defaultEtatTraitement + "}'");
-		}
-		requete.append("FROM prep ");
-		requete.append("WHERE a.phase_traitement='" + this.getCurrentPhase() + "'; ");
-		return requete.toString();
-	}
-
 	public abstract void executer() throws ArcException;
 
 	/**

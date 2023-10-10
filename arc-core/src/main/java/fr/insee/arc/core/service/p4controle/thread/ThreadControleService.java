@@ -9,8 +9,10 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
+import fr.insee.arc.core.service.global.dao.GenericQueryDao;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
+import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
@@ -20,7 +22,6 @@ import fr.insee.arc.core.service.p4controle.ApiControleService;
 import fr.insee.arc.core.service.p4controle.engine.ServiceJeuDeRegle;
 import fr.insee.arc.core.service.p4controle.engine.dao.ServiceRequeteSqlRegle;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Sleep;
@@ -50,7 +51,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private JeuDeRegle jdr;
 	
     private ThreadOperations arcThreadGenericDao;
- 
+	private GenericQueryDao genericExecutorDao;
+    
 
 	@Override
 	public void configThread(ScalableConnection connexion, int currentIndice, ApiControleService theApi) {
@@ -78,6 +80,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		
 		// arc thread dao
 		arcThreadGenericDao=new ThreadOperations(connexion, tablePil, tablePilTemp, tableControlePilTemp, tablePrevious, paramBatch, idSource);
+    	genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
+
 	}
 
 	@Override
@@ -124,25 +128,23 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	 * @throws ArcException
 	 */
 	private void preparation() throws ArcException {
+
+		genericExecutorDao.initialize();
+		
 		StaticLoggerDispatcher.info(LOGGER, "** preparation **");
-
-    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
-
+		genericExecutorDao.addOperation(arcThreadGenericDao.preparationDefaultDao());
+		
 		// Marquage du jeux de règles appliqué
 		StaticLoggerDispatcher.info(LOGGER, "Marquage du jeux de règles appliqués ");
-		query.append(marqueJeuDeRegleApplique(this.tableControlePilTemp, TraitementEtat.OK.toString()));
+		genericExecutorDao.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.getCurrentPhase(), this.envExecution, this.tableControlePilTemp, TraitementEtat.OK.toString()));
 
 		// Fabrication de la table de controle temporaire
 		StaticLoggerDispatcher.info(LOGGER, "Fabrication de la table de controle temporaire ");
-		query.append(TableOperations.createTableTravailIdSource(this.getTablePrevious(), this.tableControleDataTemp, this.idSource,
-				"'" + ServiceRequeteSqlRegle.RECORD_WITH_NOERROR
-						+ "'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
+		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.getTablePrevious(), this.tableControleDataTemp, this.idSource,
+				"'" + ServiceRequeteSqlRegle.RECORD_WITH_NOERROR+ "'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules"));
 
-		UtilitaireDao.get(0).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
+		genericExecutorDao.executeAsTransaction();
 
-		// Récupération des Jeux de règles associés
-		this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution),
-				this.tableControleDataTemp);
 	}
 
 	/**
@@ -157,6 +159,10 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private void execute() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **");
 
+		// Récupération des Jeux de règles associés
+		this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution),
+				this.tableControleDataTemp);
+		
 		this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), jdr, this.tableControleDataTemp);
 
 	}

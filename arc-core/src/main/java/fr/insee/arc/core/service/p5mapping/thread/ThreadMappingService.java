@@ -1,6 +1,5 @@
 package fr.insee.arc.core.service.p5mapping.thread;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -8,12 +7,12 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
+import fr.insee.arc.core.service.global.dao.GenericQueryDao;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
+import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
@@ -22,8 +21,6 @@ import fr.insee.arc.core.service.p5mapping.ApiMappingService;
 import fr.insee.arc.core.service.p5mapping.engine.RequeteMapping;
 import fr.insee.arc.core.service.p5mapping.engine.ServiceMapping;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
-import fr.insee.arc.utils.dao.ModeRequete;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.Sleep;
 
@@ -42,6 +39,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
     private String tableMappingPilTemp;
 
 	private ThreadOperations arcThreadGenericDao;
+	
+	private GenericQueryDao genericExecutorDao;
 
     @Override
     public void configThread(ScalableConnection connexion, int currentIndice, ApiMappingService anApi) {
@@ -63,6 +62,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         
     	// thread generic dao
     	arcThreadGenericDao=new ThreadOperations(connexion, tablePil, tablePilTemp, tableMappingPilTemp, tablePrevious, paramBatch, idSource);
+    	genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
     	
     }
 
@@ -96,17 +96,11 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
      * @throws ArcException
      */
     private void preparerExecution() throws ArcException {
-
-    	ArcPreparedStatementBuilder query= arcThreadGenericDao.preparationDefaultDao();
-        
-        /*
-         * Marquer le jeu de règles
-         */
-    	query.append(this.marqueJeuDeRegleApplique(this.tableMappingPilTemp));
-        
-        query.append(TableOperations.createTableTravailIdSource(this.getTablePrevious(),this.tableTempControleOk, this.idSource));
-        UtilitaireDao.get(0).executeBlock(this.connexion.getExecutorConnection(), query.getQueryWithParameters());
-
+    	genericExecutorDao.initialize();
+    	genericExecutorDao.addOperation(this.arcThreadGenericDao.preparationDefaultDao());
+    	genericExecutorDao.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.getCurrentPhase(), this.envExecution, this.tableMappingPilTemp));
+    	genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.getTablePrevious(),this.tableTempControleOk, this.idSource));
+    	genericExecutorDao.executeAsTransaction();
     }
 
     
@@ -115,7 +109,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
         /*
          * Construire l'ensemble des jeux de règles
          */
-        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(), this.tableTempControleOk, ViewEnum.JEUDEREGLE.getFullName(this.getEnvExecution()));
+        List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(), this.getEnvExecution(), this.tableTempControleOk);
 
         /*
          * Construction de la factory pour les règles de mapping
@@ -140,31 +134,13 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
              */
             requeteMapping.construire();
 
-            /*
-             * Récupérer la liste des fichiers concernés
-             */
-            List<String> listeFichier = new ArrayList<>();
-            listeFichier.add(idSource);
-
-
-            StaticLoggerDispatcher.trace(LOGGER, "Mapping : " + listeFichier.get(0));                
-
+            
             ArcPreparedStatementBuilder query=new ArcPreparedStatementBuilder();
-
             // Créer les tables temporaires métier
             query.append(requeteMapping.requeteCreationTablesTemporaires());
-
             // calculer la requete du fichier
-            query.append(ModeRequete.NESTLOOP_OFF.toString());
-            query.append(requeteMapping.getRequete(listeFichier.get(0)));
-            query.append(ModeRequete.NESTLOOP_ON.toString());
-
-
-            /**
-             * Marquer les OK
-             */
-            query.append("UPDATE " + this.tableMappingPilTemp + " SET etape=2, etat_traitement = '{" + TraitementEtat.OK + "}' WHERE etat_traitement='{"
-                            + TraitementEtat.ENCOURS + "}' AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ;");
+            query.append(requeteMapping.getRequete(idSource));
+            
 
             /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
              * Opérations de fin d'opération
@@ -175,6 +151,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
              */
             query.append(requeteMapping.requeteTransfertVersTablesMetierDefinitives());
 
+        	query.append(PilotageOperations.queryUpdatePilotageMapping(this.tableMappingPilTemp, this.idSource));
+            
         	// promote the application user account to full right
             query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
             	

@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -54,12 +55,12 @@ public class JeuDeRegleDao {
      * @return
      * @throws ArcException
      */
-    public static List<JeuDeRegle> recupJeuDeRegle(Connection connexion, String nomTableATraiter, String tableJeuDeRegle) throws ArcException {
+    public static List<JeuDeRegle> recupJeuDeRegle(Connection connexion, String envExecution, String nomTableATraiter) throws ArcException {
         StaticLoggerDispatcher.info(LOGGER, "Recherche des jeux de règles à appliquer");
 
         StringBuilder requete = new StringBuilder();
         requete.append("SELECT a.id_norme, a.periodicite, a.validite_inf, a.validite_sup, a.version");
-        requete.append("\n FROM " + tableJeuDeRegle + " a ");
+        requete.append("\n FROM " + ViewEnum.JEUDEREGLE.getFullName(envExecution) + " a ");
         // optimization : a thread per file so reading the first line is enough
         requete.append("\n WHERE EXISTS (SELECT 1 FROM (SELECT * FROM " + nomTableATraiter + " LIMIT 1) b ");
         requete.append("\n  WHERE a.id_norme=b.id_norme ");
