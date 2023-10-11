@@ -1,10 +1,7 @@
 package fr.insee.arc.ws.services.importServlet;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,19 +13,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.utils.webutils.WebUtils;
 import fr.insee.arc.ws.services.importServlet.actions.InitiateRequest;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
@@ -42,8 +34,6 @@ public class ServletArc extends HttpServlet {
 	public static final String NOMENCLATURE = "nomenclature";
 	public static final String METADATA = "metadata";
 	public static final String MAPPING = "mapping";
-
-	public static final String CONF_DAO_FACTORY = "daofactory";
 
 	private static final List<String> DEFAULT_SOURCE = Arrays.asList(MAPPING, NOMENCLATURE, METADATA);
 
