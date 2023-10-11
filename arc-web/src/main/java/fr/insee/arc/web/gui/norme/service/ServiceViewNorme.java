@@ -43,7 +43,6 @@ public class ServiceViewNorme extends InteractorNorme {
 
 		if (!selection.isEmpty()) {
 			String etat = selection.get("etat").get(0);
-			loggerDispatcher.info("Norm state : " + etat, LOGGER);
 			// Check actived norm (code 1)
 			if ("1".equals(etat)) {
 				views.getViewNorme().setMessage("normManagement.delete.warning");
