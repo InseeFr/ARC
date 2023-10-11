@@ -4,16 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.operation.ChargeurXmlComplexe;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.ws.services.restServices.execute.model.ChargementInterface;
-import fr.insee.arc.ws.services.restServices.execute.model.PhaseInterface;
 import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
+import fr.insee.arc.ws.services.restServices.execute.model.PhaseInterface;
 
 /**
  * execte chargement operation
