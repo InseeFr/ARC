@@ -15,6 +15,7 @@ import fr.insee.arc.core.model.XMLConstant;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.RegleControleEntity;
 import fr.insee.arc.core.service.global.bo.RegleDao;
+import fr.insee.arc.core.service.p4controle.bo.ControleTypeCode;
 import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -158,26 +159,26 @@ public class ServiceJeuDeRegleOperation {
 
 			StaticLoggerDispatcher.info(LOGGER, "n° " + reg.getIdRegle() + " / classe : " + reg.getIdClasse()
 					+ " / commentaire : " + reg.getCommentaire());
-			switch (reg.getIdClasse()) {
-			case "NUM":
+			switch (ControleTypeCode.valueOf(reg.getIdClasse())) {
+			case NUM:
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
 					blocRequete.append(this.dao.ctlIsNumeric(reg));
 					blocRequete.append(System.lineSeparator());
 				}
 				break;
-			case "DATE":
+			case DATE:
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
 					blocRequete.append(this.dao.ctlIsDate(reg));
 					blocRequete.append(System.lineSeparator());
 				}
 				break;
-			case "ALPHANUM":
+			case ALPHANUM:
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
 					blocRequete.append(this.dao.ctlIsAlphanum(reg));
 					blocRequete.append(System.lineSeparator());
 				}
 				break;
-			case "CARDINALITE":
+			case CARDINALITE:
 				if (this.listRubTable.contains(reg.getRubriquePere())
 						// rules to set tree root and father label are ignored
 						&& !(reg.getRubriquePere().equalsIgnoreCase(XMLConstant.ROOT))) {
@@ -188,18 +189,18 @@ public class ServiceJeuDeRegleOperation {
 							"la rubrique : " + reg.getRubriquePere() + " n'existe pas dans ce fichier");
 				}
 				break;
-			case "CONDITION":
+			case CONDITION:
 				blocRequete.append(executeRegleCondition(jdr, reg));
 				blocRequete.append(System.lineSeparator());
 				break;
-			case "REGEXP":
+			case REGEXP:
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
 					blocRequete.append(this.dao.ctlMatchesRegexp(reg));
 					blocRequete.append(System.lineSeparator());
 				}
 				break;
-			case "ENUM_BRUTE":
-			case "ENUM_TABLE":
+			case ENUM_BRUTE:
+			case ENUM_TABLE:
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
 					blocRequete.append(this.dao.ctlIsValueIn(reg));
 					blocRequete.append(System.lineSeparator());
