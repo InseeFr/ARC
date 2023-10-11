@@ -8,7 +8,7 @@ import java.util.Map;
 import org.xml.sax.SAXParseException;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.XMLColumns;
 import fr.insee.arc.core.service.p2chargement.xmlhandler.ParallelInsert;
 import fr.insee.arc.core.service.p2chargement.xmlhandler.TreeFunctions;

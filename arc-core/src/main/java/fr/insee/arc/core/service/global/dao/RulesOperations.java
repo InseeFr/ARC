@@ -9,7 +9,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
-import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;

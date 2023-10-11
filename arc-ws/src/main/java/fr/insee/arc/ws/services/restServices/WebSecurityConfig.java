@@ -105,13 +105,11 @@ public class WebSecurityConfig  extends KeycloakWebSecurityConfigurerAdapter {
 			// Restricted
 			if (authorizedRoles.length == 0) {
 				http.authorizeRequests().antMatchers(HttpMethod.GET, "/generateSandbox").authenticated()
-				.antMatchers(HttpMethod.POST, "/liasse/**").authenticated()
-				.antMatchers(HttpMethod.POST, "/liasse2/**").authenticated()
+				.antMatchers(HttpMethod.POST, "/execute/service/**").authenticated()
 				.antMatchers(HttpMethod.POST, "/execute/engine/**").authenticated();
 			} else {
 				http.authorizeRequests().antMatchers(HttpMethod.GET, "/generateSandbox").hasAnyAuthority(authorizedRoles)
-				.antMatchers(HttpMethod.POST, "/liasse/**").hasAnyAuthority(authorizedRoles)
-				.antMatchers(HttpMethod.POST, "/liasse2/**").hasAnyAuthority(authorizedRoles)
+				.antMatchers(HttpMethod.POST, "/execute/service/**").hasAnyAuthority(authorizedRoles)
 				.antMatchers(HttpMethod.POST, "/execute/engine/**").hasAnyAuthority(authorizedRoles);
 			}
 			http.authorizeRequests().anyRequest().denyAll();

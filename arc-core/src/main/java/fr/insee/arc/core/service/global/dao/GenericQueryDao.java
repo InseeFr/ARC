@@ -16,31 +16,50 @@ public class GenericQueryDao {
 	private Connection connection;
 	private ArcPreparedStatementBuilder query;
 	
-	public void initialize()
+	public GenericQueryDao initialize()
 	{
 		query = new ArcPreparedStatementBuilder();
+		return this;
 	}
 	
-	public void addOperation(ArcPreparedStatementBuilder newQuery)
+	public GenericQueryDao addOperation(ArcPreparedStatementBuilder newQuery)
 	{
 		query.append(newQuery);
+		return this;
 	}
 	
-	public void addOperation(String newQuery)
+	public GenericQueryDao addOperation(String newQuery)
 	{
-		query.append(new ArcPreparedStatementBuilder(newQuery));
+		query.append(newQuery);
+		return this;
 	}
 	
-	public void addOperation(StringBuilder newQuery)
+	public GenericQueryDao addOperation(StringBuilder newQuery)
 	{
-		query.append(new ArcPreparedStatementBuilder(newQuery));
+		query.append(newQuery);
+		return this;
 	}
 	
+	public void executeWithParameters() throws ArcException {
+		UtilitaireDao.get(0).executeRequest(connection, query);
+	}	
 	
 	public void executeAsTransaction() throws ArcException
 	{
-        UtilitaireDao.get(0).executeBlock(this.connection, query.getQueryWithParameters());
-        initialize();
+        UtilitaireDao.get(0).executeImmediate(this.connection, query.asTransaction().getQueryWithParameters());
 	}
+
+	public void executeNoParameters() throws ArcException {
+		UtilitaireDao.get(0).executeImmediate(connection, query);
+	}
+
+	public ArcPreparedStatementBuilder getQuery() {
+		return query;
+	}
+
+	public void setQuery(ArcPreparedStatementBuilder query) {
+		this.query = query;
+	}
+	
 	
 }

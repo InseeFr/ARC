@@ -6,11 +6,11 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p2chargement.engine.ChargeurCSV;
-import fr.insee.arc.core.service.p2chargement.engine.ChargeurClefValeur;
-import fr.insee.arc.core.service.p2chargement.engine.ChargeurXml;
-import fr.insee.arc.core.service.p2chargement.engine.ChargeurXmlComplexe;
-import fr.insee.arc.core.service.p2chargement.engine.IChargeur;
+import fr.insee.arc.core.service.p2chargement.bo.IChargeur;
+import fr.insee.arc.core.service.p2chargement.operation.ChargeurCSV;
+import fr.insee.arc.core.service.p2chargement.operation.ChargeurClefValeur;
+import fr.insee.arc.core.service.p2chargement.operation.ChargeurXml;
+import fr.insee.arc.core.service.p2chargement.operation.ChargeurXmlComplexe;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 

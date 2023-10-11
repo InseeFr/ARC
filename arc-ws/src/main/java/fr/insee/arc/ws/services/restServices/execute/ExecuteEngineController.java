@@ -1,19 +1,7 @@
 package fr.insee.arc.ws.services.restServices.execute;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,31 +10,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
-import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
-import fr.insee.arc.core.service.p2chargement.engine.ChargeurXmlComplexe;
-import fr.insee.arc.core.service.p3normage.engine.NormageEngine;
-import fr.insee.arc.core.service.p4controle.engine.bo.ControleMarkCode;
-import fr.insee.arc.core.service.p4controle.engine.dao.ServiceJeuDeRegleDao;
-import fr.insee.arc.core.service.p5mapping.engine.ServiceMapping;
-import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueries;
-import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
-import fr.insee.arc.core.service.p5mapping.engine.dao.ThreadMappingQueries;
-import fr.insee.arc.core.util.LoggerDispatcher;
-import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
+import fr.insee.arc.ws.services.restServices.execute.model.ResponseAttributes;
+import fr.insee.arc.ws.services.restServices.execute.operation.ExecuteEngineOperation;
 import fr.insee.arc.ws.services.restServices.execute.view.ReturnView;
 
 @RestController
 public class ExecuteEngineController {
-	
-	@Autowired
-	private LoggerDispatcher loggerDispatcher;
-	
+
     private static final Logger LOGGER = LogManager.getLogger(ExecuteEngineController.class);
 	
 	@RequestMapping(value = "/execute/engine/{serviceName}/{serviceId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -56,123 +29,25 @@ public class ExecuteEngineController {
 			@RequestBody(required = true) ExecuteParameterModel bodyPojo
 	)
 	{
-		Date firstContactDate=new Date();
-		ReturnView returnView=new ReturnView();
+
+		 // date, timestamp, identifier
+		ResponseAttributes responseAttributes = new ResponseAttributes(serviceName, serviceId);
+		// the return view expected by client
+		ReturnView returnView = new ReturnView();
+		// service instance
+		ExecuteEngineOperation service = new ExecuteEngineOperation(returnView, responseAttributes, bodyPojo);
 		
-		String identifiantLog = "(" + serviceName + ", " + serviceId + ")";
+		StaticLoggerDispatcher.info(LOGGER, responseAttributes.getIdentifiantLog() + " launching phases");
 		
-		loggerDispatcher.info(identifiantLog + " received", LOGGER);
+		try {
+		
+			service.executeEngineClient();
 
-		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
-			
-			ExecuteRulesDao.fillRules(connection, bodyPojo, serviceName, serviceId);
-			
-			StringBuilder requete;
-			
-			loggerDispatcher.info(identifiantLog + " launching phases", LOGGER);
-			String envExecution = bodyPojo.sandbox;
-
-
-			String structure = "";
-				for (int i = 2; i <= TraitementPhase.getPhase(bodyPojo.targetPhase).getOrdre(); i++) {
-
-					switch (TraitementPhase.getPhase(i)) {
-					case CHARGEMENT:
-						// register file
-
-						try (InputStream inputStream = new ByteArrayInputStream(
-								bodyPojo.fileContent.getBytes(StandardCharsets.UTF_8));) {
-							
-							FileIdCard fileIdCard = new FileIdCard(bodyPojo.fileName);
-							fileIdCard.setFileIdCard(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite);
-							
-							ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(connection, envExecution, fileIdCard, inputStream, currentTemporaryTable(i));
-							chargeur.executeEngine();
-							structure = chargeur.getJointure().replace("''", "'");
-						}
-						break;
-					case NORMAGE:
-						Map<String, List<String>> pil = new HashMap<>();
-						pil.put(ColumnEnum.ID_SOURCE.getColumnName(), new ArrayList<>(Arrays.asList(bodyPojo.fileName)));
-						pil.put("id_norme", new ArrayList<>(Arrays.asList(bodyPojo.norme)));
-						pil.put("validite", new ArrayList<>(Arrays.asList(bodyPojo.validite)));
-						pil.put("periodicite", new ArrayList<>(Arrays.asList(bodyPojo.periodicite)));
-						pil.put("jointure", new ArrayList<>(Arrays.asList(structure)));
-
-						Map<String, List<String>> regle = new HashMap<>();
-						regle.put("id_regle", new ArrayList<>());
-						regle.put("id_norme", new ArrayList<>());
-						regle.put("periodicite", new ArrayList<>());
-						regle.put("validite_inf", new ArrayList<>());
-						regle.put("validite_sup", new ArrayList<>());
-						regle.put("id_classe", new ArrayList<>());
-						regle.put("rubrique", new ArrayList<>());
-						regle.put("rubrique_nmcl", new ArrayList<>());
-
-						Map<String, List<String>> rubriqueUtiliseeDansRegles = new HashMap<>();
-						rubriqueUtiliseeDansRegles.put("var", new ArrayList<>());
-
-						NormageEngine normage = new NormageEngine(connection, pil, regle, rubriqueUtiliseeDansRegles, previousTemporaryTable(i), currentTemporaryTable(i),
-								null);
-						normage.executeEngine();
-						break;
-					case CONTROLE:
-						requete = new StringBuilder();
-						requete.append(
-								"CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select *, '0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules from "+previousTemporaryTable(i)+";");
-						UtilitaireDao.get(0).executeImmediate(connection, requete);
-
-						ServiceJeuDeRegleDao sjdr = new ServiceJeuDeRegleDao();
-
-						// Récupération des règles de controles associées aux jeux de règle
-						JeuDeRegle jdr = new JeuDeRegle();
-
-						sjdr.fillRegleControle(connection, jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution), currentTemporaryTable(i));
-						sjdr.executeJeuDeRegle(connection, jdr, currentTemporaryTable(i));
-						break;
-					case MAPPING:
-						UtilitaireDao.get(0).executeImmediate(connection, "CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select * from "+previousTemporaryTable(i)+" WHERE controle IN ('"+ControleMarkCode.RECORD_WITH_NOERROR.getCode()+"','"+ControleMarkCode.RECORD_WITH_ERROR_TO_KEEP.getCode()+"');");
-						
-						String tableTempControleOk = previousTemporaryTable(i);
-						
-						List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(connection, envExecution, tableTempControleOk);
-						ServiceMapping serviceMapping = new ServiceMapping();
-						
-						MappingQueriesFactory regleMappingFactory = serviceMapping.construireRegleMappingFactory(connection, envExecution, tableTempControleOk, "v_");
-						String idFamille = ThreadMappingQueries.fetchIdFamille(connection, listeJeuxDeRegles.get(0), envExecution + ".norme");
-
-			            MappingQueries requeteMapping = new MappingQueries(connection, regleMappingFactory, idFamille, listeJeuxDeRegles.get(0),
-			                        envExecution, tableTempControleOk, 0);
-			            requeteMapping.construire();
-			            UtilitaireDao.get(0).executeBlock(connection, requeteMapping.requeteCreationTablesTemporaires());
-
-			            StringBuilder req = new StringBuilder();
-			            req.append(requeteMapping.getRequete(bodyPojo.fileName));
-			            UtilitaireDao.get(0).executeBlock(connection,"set enable_nestloop=off;"+req.toString()+"set enable_nestloop=on;");
-			            req.setLength(0);
-
-		                StringBuilder requeteMAJFinale = new StringBuilder();
-		                requeteMAJFinale.append(requeteMapping.requeteTransfertVersTablesMetierDefinitives());
-		                UtilitaireDao.get(0).executeBlock(connection, requeteMAJFinale);
-
-		                UtilitaireDao.get(0).dropTable(connection, requeteMapping.tableauNomsTablesTemporaires());
-						break;
-
-					default:
-						
-						break;
-
-					}
-
-				}
-				
-				ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, firstContactDate);
-
-		} catch (Exception e) {
-			loggerDispatcher.error(identifiantLog, e, LOGGER);
+		} catch (ArcException e) {
+			StaticLoggerDispatcher.error(LOGGER, responseAttributes.getIdentifiantLog(), e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(returnView);
 		}
-		loggerDispatcher.info(identifiantLog + " done", LOGGER);
+		StaticLoggerDispatcher.info(LOGGER, responseAttributes.getIdentifiantLog() + " done");
 		return ResponseEntity.status(HttpStatus.OK).body(returnView);
 
 	}
@@ -187,28 +62,6 @@ public class ExecuteEngineController {
 	{
 		p.sandbox="arc_"+sandbox;
 		return  executeEngineClient(serviceName,serviceId,p);
-	}
-
-	
-	// les tables temporaires des phases respectives valent a,b,c,d ...
-	// important de rester sur un octet pour les performances
-	private static int temporaryTableAsciiStart=97;
-
-	
-	private String generateTemporaryTableName(int i)
-	{
-		return String.valueOf(((char) (temporaryTableAsciiStart + i)));
-	}
-	
-	private String currentTemporaryTable(int i)
-	{
-		return generateTemporaryTableName(i);
-	}
-	
-	
-	private String previousTemporaryTable(int i)
-	{
-		return generateTemporaryTableName(i-1);
 	}
 
 }

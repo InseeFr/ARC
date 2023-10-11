@@ -13,6 +13,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
@@ -26,18 +27,15 @@ import fr.insee.arc.core.service.p2chargement.ApiChargementService;
 import fr.insee.arc.core.service.p2chargement.archiveloader.ArchiveChargerFactory;
 import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad;
 import fr.insee.arc.core.service.p2chargement.archiveloader.IArchiveFileLoader;
-import fr.insee.arc.core.service.p2chargement.bo.FileIdCard;
-import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
+import fr.insee.arc.core.service.p2chargement.bo.IChargeur;
 import fr.insee.arc.core.service.p2chargement.bo.IdCardChargement;
-import fr.insee.arc.core.service.p2chargement.engine.ChargementBrut;
-import fr.insee.arc.core.service.p2chargement.engine.IChargeur;
 import fr.insee.arc.core.service.p2chargement.factory.ChargeurFactory;
 import fr.insee.arc.core.service.p2chargement.factory.TypeChargement;
+import fr.insee.arc.core.service.p2chargement.operation.ChargementBrut;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Sleep;
@@ -59,9 +57,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	private ThreadOperations arcThreadGenericDao;
 
-	public FilesInputStreamLoad filesInputStreamLoad;
+	private FilesInputStreamLoad filesInputStreamLoad;
 
-	public FileIdCard fileIdCard;
+	private FileIdCard fileIdCard;
 
 	protected String tableChargementOK;
 
@@ -404,6 +402,14 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	public void setFileIdCard(FileIdCard fileIdCard) {
 		this.fileIdCard = fileIdCard;
+	}
+
+	public FilesInputStreamLoad getFilesInputStreamLoad() {
+		return filesInputStreamLoad;
+	}
+
+	public void setFilesInputStreamLoad(FilesInputStreamLoad filesInputStreamLoad) {
+		this.filesInputStreamLoad = filesInputStreamLoad;
 	}
 	
 	

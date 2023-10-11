@@ -19,10 +19,10 @@ import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
 import fr.insee.arc.core.service.p4controle.ApiControleService;
-import fr.insee.arc.core.service.p4controle.engine.bo.ControleMarkCode;
-import fr.insee.arc.core.service.p4controle.engine.dao.ControleRegleDao;
-import fr.insee.arc.core.service.p4controle.engine.dao.ServiceJeuDeRegleDao;
-import fr.insee.arc.core.service.p4controle.engine.dao.ThreadControleQueries;
+import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
+import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
+import fr.insee.arc.core.service.p4controle.dao.ThreadControleQueryBuilder;
+import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -48,7 +48,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private String tableOutOk;
 	private String tableOutKo;
 
-	private ServiceJeuDeRegleDao sjdr;
+	private ServiceJeuDeRegleOperation sjdr;
 
 	private JeuDeRegle jdr;
 	
@@ -69,7 +69,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.tabIdSource=theApi.getTabIdSource();
 		this.paramBatch=theApi.getParamBatch();
 
-		this.sjdr = new ServiceJeuDeRegleDao();
+		this.sjdr = new ServiceJeuDeRegleOperation();
 		this.jdr = new JeuDeRegle();
 
 		// Nom des tables temporaires
@@ -143,7 +143,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		// Fabrication de la table de controle temporaire
 		StaticLoggerDispatcher.info(LOGGER, "Fabrication de la table de controle temporaire ");
 		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.getTablePrevious(), this.tableControleDataTemp, this.idSource,
-				ThreadControleQueries.extraColumnsAddedByControle()));
+				ThreadControleQueryBuilder.extraColumnsAddedByControle()));
 
 		genericExecutorDao.executeAsTransaction();
 
@@ -202,13 +202,13 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		blocFin.append(marquagePilotage());
 
 		StaticLoggerDispatcher.info(LOGGER, "Insertion dans OK");
-		blocFin.append(ThreadControleQueries.querySelectRecordsOK(tableControleDataTemp, tableOutOkTemp, tableControlePilTemp));
+		blocFin.append(ThreadControleQueryBuilder.querySelectRecordsOK(tableControleDataTemp, tableOutOkTemp, tableControlePilTemp));
 
 		// insert in OK when
 		// etat traitement in KO
 		// OR records which have errors that must be excluded
 		StaticLoggerDispatcher.info(LOGGER, "Insertion dans KO");
-		blocFin.append(ThreadControleQueries.querySelectRecordsKO(tableControleDataTemp, tableOutKoTemp, tableControlePilTemp));
+		blocFin.append(ThreadControleQueryBuilder.querySelectRecordsKO(tableControleDataTemp, tableOutKoTemp, tableControlePilTemp));
 
 		return blocFin;
 	}
@@ -270,11 +270,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 
 	// Getter et Setter
-	public ServiceJeuDeRegleDao getSjdr() {
+	public ServiceJeuDeRegleOperation getSjdr() {
 		return this.sjdr;
 	}
 
-	public void setSjdr(ServiceJeuDeRegleDao sjdr) {
+	public void setSjdr(ServiceJeuDeRegleOperation sjdr) {
 		this.sjdr = sjdr;
 	}
 

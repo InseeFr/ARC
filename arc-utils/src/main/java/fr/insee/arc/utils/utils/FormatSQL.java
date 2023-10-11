@@ -315,6 +315,11 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static String quoteTextWithoutEnclosings(String val) {
 		return val.replace("'", "''");
 	}
+
+	public static String unquoteTextWithoutEnclosings(String val) {
+		return val.replace("''", "'");
+	}
+	
 	
 	/**
 	 * escape quote through function

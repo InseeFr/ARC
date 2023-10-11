@@ -55,6 +55,21 @@ public class TableOperations {
 	 */
 	public static String createTableTravailIdSource(String tableIn, String tableOut, String idSource,
 			String extraCols) throws ArcException {
+		
+		return createTableTravail(HashFileNameConversion.tableOfIdSource(tableIn, idSource), tableOut, extraCols);
+
+	}
+
+	/**
+	 * This query created a work table containing the copy of a data of an input table input provided output table
+	 * @param tableIn : the input table
+	 * @param tableOut : the output table
+	 * @param extraCols : sql syntax for extracols to be created
+	 * sql syntax : defaultvalue_col1 as my_col1, defaultvalue_col2 as my_col2,, ... 
+	 * @return
+	 * @throws ArcException
+	 */
+	public static String createTableTravail(String tableIn, String tableOut, String extraCols) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n CREATE ");
 		if (!tableOut.contains(".")) {
@@ -71,11 +86,12 @@ public class TableOperations {
 			requete.append(", " + extraCols);
 		}
 
-		requete.append("\n FROM " + HashFileNameConversion.tableOfIdSource(tableIn, idSource) + "; ");
+		requete.append("\n FROM " + tableIn + "; ");
 		
 		return requete.toString();
 	}
-
+	
+	
 	/**
 	 * This query created a work table containing the copy of a data of an input table for a given file identifier 
 	 * @param tableIn

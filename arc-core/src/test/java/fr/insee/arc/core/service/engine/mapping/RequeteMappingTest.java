@@ -12,11 +12,11 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.insee.arc.core.service.p5mapping.engine.bo.TableMapping;
-import fr.insee.arc.core.service.p5mapping.engine.bo.VariableMapping;
-import fr.insee.arc.core.service.p5mapping.engine.bo.rules.RegleMappingClePrimaire;
-import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
-import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueries;
+import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
+import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
+import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
+import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
+import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
 
 public class RequeteMappingTest {
 	

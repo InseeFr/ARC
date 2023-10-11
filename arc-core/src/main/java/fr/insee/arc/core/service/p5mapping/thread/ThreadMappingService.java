@@ -19,9 +19,9 @@ import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
 import fr.insee.arc.core.service.p5mapping.ApiMappingService;
-import fr.insee.arc.core.service.p5mapping.engine.ServiceMapping;
-import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueries;
-import fr.insee.arc.core.service.p5mapping.engine.dao.ThreadMappingQueries;
+import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
+import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
+import fr.insee.arc.core.service.p5mapping.operation.MappingOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -114,7 +114,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
 		JeuDeRegle jdr = getTheRulesSetOfTheFile();
 
-		ServiceMapping serviceMapping = new ServiceMapping();
+		MappingOperation serviceMapping = new MappingOperation();
 		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(),
 				this.getEnvExecution(), this.tableTempControleOk, getPrefixidentifiantrubrique());
 

@@ -8,7 +8,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
 import fr.insee.arc.core.service.p4controle.ApiControleService;
-import fr.insee.arc.core.service.p5mapping.engine.dao.MappingQueriesFactory;
+import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
 import fr.insee.arc.core.service.p5mapping.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.exception.ArcException;

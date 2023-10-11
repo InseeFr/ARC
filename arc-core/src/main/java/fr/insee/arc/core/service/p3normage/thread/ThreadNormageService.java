@@ -20,7 +20,7 @@ import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
 import fr.insee.arc.core.service.p3normage.ApiNormageService;
-import fr.insee.arc.core.service.p3normage.engine.NormageEngine;
+import fr.insee.arc.core.service.p3normage.operation.NormageOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -198,7 +198,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 				    rubriqueUtiliseeDansRegles = RulesOperations.getBean(this.connexion.getExecutorConnection(),RulesOperations.getRegles(tableTmpRubriqueDansregles, this.tableNormagePilTemp));
 			    }
 		    
-			    NormageEngine n=new NormageEngine(this.connexion.getExecutorConnection() , pil, regle, rubriqueUtiliseeDansRegles, this.tableNormageDataTemp, this.tableNormageOKTemp, this.paramBatch);
+			    NormageOperation n=new NormageOperation(this.connexion.getExecutorConnection() , pil, regle, rubriqueUtiliseeDansRegles, this.tableNormageDataTemp, this.tableNormageOKTemp, this.paramBatch);
 			    n.execute();
     }
     
