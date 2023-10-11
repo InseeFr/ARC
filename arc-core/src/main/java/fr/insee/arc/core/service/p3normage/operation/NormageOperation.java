@@ -343,7 +343,8 @@ public class NormageOperation {
 	 */
 	private void executerJointure(Map<String, List<String>> regle, String norme, Date validite, String periodicite,
 			String jointure, String validiteText, String idSource) throws ArcException {
-		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure sans partition");
+		
+		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure sans partition sur "+idSource);
 
 		// only first partition rule is processed
 		for (int j = 0; j < regle.get("id_regle").size(); j++) {
@@ -386,7 +387,7 @@ public class NormageOperation {
 			String periodicite, String jointure, String validiteText, String idSource, String element, int minSize,
 			int chunkSize) throws ArcException {
 		
-		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure et partition");
+		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure et partition "+idSource);
 		
 		/* get the query blocks */
 		String blocCreate = ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
