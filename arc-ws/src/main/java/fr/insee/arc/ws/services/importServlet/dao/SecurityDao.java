@@ -21,7 +21,6 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.ws.services.importServlet.ServletArc;
 
 public class SecurityDao {
 	
