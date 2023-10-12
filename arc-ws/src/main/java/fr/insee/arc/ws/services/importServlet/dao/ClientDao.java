@@ -378,8 +378,7 @@ public class ClientDao {
 						+ (isSourceListTable ? "" : "NOT") + " like " + requete.quoteText("%id\\_source%"));
 
 		String selectedTableName = UtilitaireDao.get(0).getString(connection, requete);
-		
-		return this.client + selectedTableName.substring(this.client.length());
+		return selectedTableName==null? null : this.client + selectedTableName.substring(this.client.length());
 		
 	}
 
