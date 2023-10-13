@@ -194,7 +194,7 @@ public class GererNormeDao extends VObjectHelperDao {
 	/**
 	 * Query to get load rules view
 	 * 
-	 * @param viewNormage
+	 * @param viewChargement
 	 */
 	public void initializeViewChargement(VObject viewChargement) {
 
@@ -232,14 +232,14 @@ public class GererNormeDao extends VObjectHelperDao {
 	 */
 	public void initializeNormage(VObject viewNormage) {
 
-		ViewEnum dataModelChargement = ViewEnum.IHM_NORMAGE_REGLE;
+		ViewEnum dataModelNormage = ViewEnum.IHM_NORMAGE_REGLE;
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
 		query.append(SQL.SELECT);
-		query.append(query.sqlListeOfColumnsFromModel(dataModelChargement));
+		query.append(query.sqlListeOfColumnsFromModel(dataModelNormage));
 		query.append(SQL.FROM);
-		query.append(dataObjectService.getView(dataModelChargement));
+		query.append(dataObjectService.getView(dataModelNormage));
 		query.append(SQL.WHERE);
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_NORME));
 		query.append(SQL.AND);
@@ -255,7 +255,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
 				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
 
-		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelChargement),
+		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelNormage),
 				defaultInputFields);
 	}
 

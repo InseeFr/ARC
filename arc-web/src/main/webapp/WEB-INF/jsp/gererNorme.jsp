@@ -1,4 +1,4 @@
-﻿﻿<%@ page
+﻿﻿﻿<%@ page
 	language="java"
 	contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"
@@ -92,9 +92,9 @@
 			<c:param name="ligneFilter" value ="true" />
 			<c:param name="checkbox" value ="true" />
 			<c:param name="checkboxVisible" value ="true" />
-			<c:param name="extraScopeAdd" value ="-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeAdd" value ="-viewJeuxDeReglesCopie;" />
 			<c:param name="extraScopeDelete" value ="-viewModules;-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
-			<c:param name="extraScopeUpdate" value ="-viewChargement;-viewNormage;-viewControle;-viewMapping;-viewExpression;-viewJeuxDeReglesCopie;" />
+			<c:param name="extraScopeUpdate" value ="viewModules;viewChargement;viewNormage;viewControle;viewMapping;viewExpression;-viewJeuxDeReglesCopie;" />
 			<c:param name="extraScopeSee" value ="viewModules;viewChargement;viewNormage;viewControle;viewMapping;viewExpression;-viewJeuxDeReglesCopie;" />
 			<c:param name="otherButton">
 				<button
@@ -136,49 +136,56 @@
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
 								<c:param name="multiSelection" value ="true" />
+								<c:param name="extraScopeAdd" value ="viewModules;" />
+								<c:param name="extraScopeDelete" value ="viewModules;" />
+								<c:param name="extraScopeUpdate" value ="viewModules;" />
+								<c:param name="extraScopeSee" value ="viewModules;" />
 								<c:param name="otherButton">
-
-									<input
-										class="btn btn-primary btn-sm"
-										id="viewChargement.truncate"
-										type="submit"
-										doAction="viderChargement"
-										scope="viewChargement;"
-										value="<spring:message code="gui.button.deleteRuleset"/>"
-									/>
-									<input
-										class="btn btn-primary btn-sm"
-										id="viewChargement.copie"
-										type="submit"
-										doAction="selectJeuxDeReglesChargementCopie"
-										scope="viewChargement;viewJeuxDeReglesCopie;"
-										value="<spring:message code="gui.button.replaceRuleset"/>"
-									/>
+									<c:if
+										test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
+									>
+										<input
+											class="btn btn-primary btn-sm"
+											id="viewChargement.truncate"
+											type="submit"
+											doAction="viderChargement"
+											scope="viewChargement;"
+											value="<spring:message code="gui.button.deleteRuleset"/>"
+										/>
+										<input
+											class="btn btn-primary btn-sm"
+											id="viewChargement.copie"
+											type="submit"
+											doAction="selectJeuxDeReglesChargementCopie"
+											scope="viewChargement;viewJeuxDeReglesCopie;"
+											value="<spring:message code="gui.button.replaceRuleset"/>"
+										/>
 									
-									<div class="input-group my-3">
-										<div class="custom-file">
-											<input
-												name="fileUploadLoad"
-												type="file"
-												class="custom-file-input"
-												id="inputGroupFileLoad"
-											/> <label
-												class="custom-file-label"
-												for="inputGroupFileLoad"
-												aria-describedby="Choose file to upload for load module"
-											><spring:message code="general.chooseFile"/></label>
+										<div class="input-group my-3">
+											<div class="custom-file">
+												<input
+													name="fileUploadLoad"
+													type="file"
+													class="custom-file-input"
+													id="inputGroupFileLoad"
+												/> <label
+													class="custom-file-label"
+													for="inputGroupFileLoad"
+													aria-describedby="Choose file to upload for load module"
+												><spring:message code="general.chooseFile"/></label>
+											</div>
+											<div class="input-group-append">
+												<button
+													class="btn btn-primary btn-sm"
+													id="viewChargement.import"
+													type="submit"
+													doAction="importChargement"
+													scope="viewChargement;"
+													multipart="true"
+												><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
+											</div>
 										</div>
-										<div class="input-group-append">
-											<button
-												class="btn btn-primary btn-sm"
-												id="viewChargement.import"
-												type="submit"
-												doAction="importChargement"
-												scope="viewChargement;"
-												multipart="true"
-											><span class="fa fa-upload">&nbsp;</span> <spring:message code="gui.button.importRuleset"/></button>
-										</div>
-									</div>
+									</c:if>
 								</c:param>
 							</c:import>
 
@@ -196,6 +203,10 @@
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
 								<c:param name="multiSelection" value ="true" />
+								<c:param name="extraScopeAdd" value ="viewModules;" />
+								<c:param name="extraScopeDelete" value ="viewModules;" />
+								<c:param name="extraScopeUpdate" value ="viewModules;" />
+								<c:param name="extraScopeSee" value ="viewModules;" />
 								<c:param name="otherButton">
 									<c:if
 										test='${viewJeuxDeRegles.mapContentSelected().get("etat").get(0).toLowerCase().contains(".bas")}'
@@ -258,6 +269,10 @@
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
 								<c:param name="multiSelection" value ="true" />
+								<c:param name="extraScopeAdd" value ="viewModules;" />
+								<c:param name="extraScopeDelete" value ="viewModules;" />
+								<c:param name="extraScopeUpdate" value ="viewModules;" />
+								<c:param name="extraScopeSee" value ="viewModules;" />
 								<c:param name="allowResize" value ="true" />
 								<c:param name="otherButton">
 									<c:if
@@ -318,6 +333,10 @@
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
 								<c:param name="multiSelection" value ="true" />
+								<c:param name="extraScopeAdd" value ="viewModules;" />
+								<c:param name="extraScopeDelete" value ="viewModules;" />
+								<c:param name="extraScopeUpdate" value ="viewModules;" />
+								<c:param name="extraScopeSee" value ="viewModules;" />
 								<c:param name="allowResize" value ="true" />
 								<c:param name="otherButton">
 									<c:if
@@ -391,6 +410,10 @@
 								<c:param name="ligneFilter" value ="true" />
 								<c:param name="checkbox" value ="true" />
 								<c:param name="checkboxVisible" value ="true" />
+								<c:param name="extraScopeAdd" value ="viewModules;" />
+								<c:param name="extraScopeDelete" value ="viewModules;" />
+								<c:param name="extraScopeUpdate" value ="viewModules;" />
+								<c:param name="extraScopeSee" value ="viewModules;" />
 								<c:param name="allowResize" value ="true" />
 								<c:param name="otherButton">
 									<c:if
