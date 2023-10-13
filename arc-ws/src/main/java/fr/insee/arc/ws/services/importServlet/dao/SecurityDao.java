@@ -21,6 +21,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 
 public class SecurityDao {
 	
@@ -36,15 +37,14 @@ public class SecurityDao {
 	 * @param dsnRequest
 	 * @return
 	 */
-	public static boolean securityAccessAndTracing(HttpServletRequest request, HttpServletResponse response,
-			JSONObject dsnRequest) {
+	public static boolean securityAccessAndTracing(HttpServletRequest request, HttpServletResponse response, JSONObject dsnRequest) {
 
 		// get the family name and client name
-		String familyName = dsnRequest.get("familleNorme").toString();
-		String clientDeclared = dsnRequest.get("client").toString();
+		String familyName = dsnRequest.get(JsonKeys.FAMILLE.getKey()).toString();
+		String clientDeclared = dsnRequest.get(JsonKeys.FAMILLE.getKey()).toString();
 		String clientRealName = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(clientDeclared, "."),
 				"_");
-
+		
 		ArcPreparedStatementBuilder query;
 		// check if security is enable
 		query = new ArcPreparedStatementBuilder();
@@ -121,8 +121,6 @@ public class SecurityDao {
 
 		return true;
 	}
-	
-
 
 
 	public static void sendForbidden(HttpServletRequest request, HttpServletResponse response) {
