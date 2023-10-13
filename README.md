@@ -201,7 +201,7 @@ fr.insee.arc.log.level=INFO
 # Path to log output file - leave blank to log to consoleAppender
 fr.insee.arc.log.directory= C://arc//log
 fr.insee.arc.log.level=TRACE
-``
+```
 
 #### Deploy or update the web and ws applications on tomcat
 
