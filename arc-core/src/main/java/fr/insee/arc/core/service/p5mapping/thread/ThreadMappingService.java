@@ -1,6 +1,5 @@
 package fr.insee.arc.core.service.p5mapping.thread;
 
-import java.sql.Connection;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
