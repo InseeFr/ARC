@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
-import fr.insee.arc.core.service.global.dao.GenericQueryDao;
 import fr.insee.arc.core.service.p3normage.bo.JoinParser;
 import fr.insee.arc.core.service.p3normage.dao.NormageDao;
 import fr.insee.arc.core.service.p3normage.querybuilder.DuplicationRulesRegleQueryBuilder;

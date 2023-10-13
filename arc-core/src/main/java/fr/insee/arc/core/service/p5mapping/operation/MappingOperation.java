@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

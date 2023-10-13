@@ -15,7 +15,6 @@ import org.xml.sax.SAXException;
 
 import fr.insee.arc.core.model.XMLConstant;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
-import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.SecuredSaxParser;

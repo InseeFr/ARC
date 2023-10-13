@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
 import fr.insee.arc.utils.dao.UtilitaireDao;
