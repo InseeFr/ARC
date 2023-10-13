@@ -57,9 +57,7 @@ public class ServiceViewChargement extends InteractorNorme {
 	 * @return
 	 */
 	public String sortChargement(Model model) {
-
-		this.vObjectService.sort(views.getViewChargement());
-		return generateDisplay(model, RESULT_SUCCESS);
+		return sortVobject(model, RESULT_SUCCESS, this.views.getViewChargement());
 	}
 
 	/**
@@ -69,6 +67,7 @@ public class ServiceViewChargement extends InteractorNorme {
 	 * @return
 	 */
 	public String importChargement(Model model, MultipartFile fileUploadLoad) {
+		
 		dao.uploadFileRule(views.getViewChargement(), views.getViewJeuxDeRegles(), fileUploadLoad);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

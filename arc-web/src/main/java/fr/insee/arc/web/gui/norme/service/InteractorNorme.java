@@ -54,8 +54,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		views.setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
 		views.setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
 		
-		putVObject(views.getViewNorme(),
-				t -> initializeViewNorme(t));
+		putVObject(views.getViewNorme(), t -> initializeViewNorme(t));
 		//
 		putVObject(views.getViewCalendrier(), t -> initializeViewCalendar(t, views.getViewNorme()));
 		//
@@ -65,8 +64,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		//
 		putVObject(views.getViewChargement(), t -> initializeChargement(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
-		putVObject(views.getViewNormage(), t -> initializeNormage(t, views.getViewJeuxDeRegles(), views.getViewModules(),
-				dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE) ));
+		putVObject(views.getViewNormage(), t -> initializeNormage(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
 		putVObject(views.getViewControle(), t -> initializeControle(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE) ));
@@ -77,7 +75,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		putVObject(views.getViewExpression(), t -> initializeExpression(t, views.getViewJeuxDeRegles(), views.getViewModules(),
 				dataObjectService.getView(ViewEnum.IHM_EXPRESSION) ));
 		//
-		putVObject(views.getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t, views.getViewJeuxDeRegles(), views.getViewModules(),
+		putVObject(views.getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t,
 				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) , getScope()));
 	}
 
@@ -185,10 +183,10 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	}
 
 	/**
-	 * Initialize the {@link VObject} of a load ruleset. Only
+	 * Initialize the {@link VObject} of a structurize ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeNormage(VObject viewNormage, VObject viewRulesSet, VObject viewModules, String theTableName) {
+	public void initializeNormage(VObject viewNormage, VObject viewRulesSet, VObject viewModules) {
 		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
 		List<List<String>> moduleSelection =viewModules.listContentSelected();
 		
@@ -225,8 +223,8 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	}
 	
 	/**
-	 * Initialize the {@link VObject} of the mapping rule. Only get the load
-	 * rule link to the selected rule set.
+	 * Initialize the {@link VObject} of the mapping rule. Only
+	 * get the load rule link to the selected rule set.
 	 */
 	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, VObject viewModules, String theTableName) {
 		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
@@ -285,8 +283,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * 
 	 * @param viewJeuxDeReglesCopie
 	 */
-	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, VObject viewRulesSet, VObject viewModules, 
-			String theTableName, String scope) {
+	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, String theTableName, String scope) {
 		LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
 		if (scope != null) {
             ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
