@@ -76,11 +76,6 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	// indique que la balise courante a des données
 	private boolean hasData = false;
 
-//	private ParallelInsert pi;
-//
-//	private Map<String, StringBuilder> requetes = new HashMap<>();
-//	private int requetesLength = 0;
-
 	/**
 	 * Actions à réaliser sur les données
 	 */
