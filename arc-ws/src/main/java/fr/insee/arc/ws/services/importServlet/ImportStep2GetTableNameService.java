@@ -53,7 +53,11 @@ public class ImportStep2GetTableNameService {
 				}
 
 				this.clientDao.dropTable(tableName);
-				tableName = "";
+				
+				resp.send(" ");
+				resp.endSending();
+				return;
+				
 			} else {
 				// récupération du type
 				List<List<String>> metadataOnlyTable = NameDao.execQuerySelectMetadata(tableName);
