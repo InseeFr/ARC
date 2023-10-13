@@ -19,6 +19,9 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 public class LogConfigurator {
 
 	private LoggerContext context;
+	
+	// the name of loggers must begin with this uri
+	private static final String ARC_LOGGER_NAME_PREFIX="fr.insee.arc";
 
 	public LogConfigurator(String logConfiguration) {
 		// Using here an XML configuration
@@ -83,7 +86,7 @@ public class LogConfigurator {
 		Map<String, LoggerConfig> loggerConfigs = context.getConfiguration().getLoggers();
 		for (LoggerConfig logger :loggerConfigs.values())
 		{
-			if (logger.getName().equals("fr.insee.arc")) {
+			if (logger.getName().startsWith(ARC_LOGGER_NAME_PREFIX)) {
 				logger.stop();
 				logger.setLevel(level);
 				logger.start();

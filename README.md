@@ -43,7 +43,7 @@ These functionnalities/services aim the statistician’s independence and abilit
 
 ## Running the application
 
-The ARC application is a java 8 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web/src/main/resources/fr/insee/config/arc.properties) file. Once this is done
+The ARC application is a java 11 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web/src/main/resources/fr/insee/config/arc.properties) file. Once this is done
 
 ### Running the web application with Docker
 
@@ -144,7 +144,7 @@ docker-compose up
 
 ### Running the app with tomcat
 
-The ARC web-user application component uses an apache/tomcat server with version 8.5 or higher.
+The ARC web-user application component uses an apache/tomcat server with version 8.5 or 9
 
 #### Set the tomcat and the database connection
 
@@ -156,9 +156,54 @@ For example in catalina.bat, the JAVA_OPTS parameters may be changed as followed
 set "JAVA_OPTS=%JAVA_OPTS% -Djava.protocol.handler.pkgs=org.apache.catalina.webresources -Dproperties.file=D:\apache-tomcat-8.5.38\webapps\"
 ```
 
-Change the file resources-prod.properties to configure the database connections, the root directory of the filesystem used by ARC and eventually the path to log4j2 configuration files See "Java configuration parameters" for more informations
+#### Examples of properties settings
 
-#### Deploy or update the application
+##### Set the root directory for the application
+```properties
+fr.insee.arc.batch.parametre.repertoire=C:\\Temp\\
+```
+
+##### Set arc connection to a single nod postgres database
+```properties
+## Database configuration
+fr.insee.database.arc.url=jdbc:postgresql://localhost:5432/arc_single_nod
+fr.insee.database.arc.username=user
+fr.insee.database.arc.password=password
+fr.insee.database.arc.driverClassName=org.postgresql.Driver
+```
+
+##### Set arc connection to multi nods postgres database
+```properties
+# Batch directory
+fr.insee.arc.batch.parametre.repertoire=${env.applicationDirectory}
+
+## Database configuration
+fr.insee.database.poolName=arc
+fr.insee.database.arc.url={0=>"jdbc:postgresql://localhost:5432/arc_coordinator_nod"},{1=>"jdbc:postgresql://localhost:5432/arc_executor_nod1"}
+fr.insee.database.arc.username={0=>"user_coordinator"},{1=>"user_executor_nod1"}
+fr.insee.database.arc.password={0=>"password_coordinator"},{1=>"password_executor_nod1"}
+fr.insee.database.arc.driverClassName={0=>"org.postgresql.Driver"},{1=>"org.postgresql.Driver"}
+```
+
+##### Set loggers
+
+- **Send the logs to console by letting the directory blank**
+
+```properties
+# Path to log output file - leave blank to log to consoleAppender
+fr.insee.arc.log.directory=
+fr.insee.arc.log.level=INFO
+```
+
+- **TRACE level will shows queries, logs will be sent to provided directory in rolling appenders files**
+
+```properties
+# Path to log output file - leave blank to log to consoleAppender
+fr.insee.arc.log.directory= C://arc//log
+fr.insee.arc.log.level=TRACE
+``
+
+#### Deploy or update the web and ws applications on tomcat
 
 1. Stop tomcat server
 2. Delete the content of the temporary tomcat directories namely "temp" and "work" directories
@@ -166,13 +211,17 @@ Change the file resources-prod.properties to configure the database connections,
 4. Copy the resources-prod.properties to the properties directory
 5. Start tomcat server
 
-### Test the deployment
-
-In a web browser go to localhost:8080/status.action. The status action returns :
-
-- 0 - No error detected
-- 201 - Database error connection
+### Test the deployments
+Use the healthchek
+http://localhost:8080/arc-web/healthcheck
+http://localhost:8080/arc-ws/healthcheck
 
 > Change the host ip adress and port number according to the tomcat server and tomcat ARC application context configuration.
+
+#### Use the web application
+The entry point of arc web gui is located at this URL.
+http://localhost:8080/arc-web/
+
+
 
 > For more information about the installation go check the [Install guide](user-guide/Install_guide.md)
