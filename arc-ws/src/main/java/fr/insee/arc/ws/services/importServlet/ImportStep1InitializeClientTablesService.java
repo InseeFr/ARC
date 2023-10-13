@@ -12,6 +12,7 @@ import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
@@ -65,6 +66,8 @@ public class ImportStep1InitializeClientTablesService {
 
 			this.clientDao.dropPendingClientTables();
 			
+			startHandShake(resp);
+
 			if (!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
 				this.clientDao.verificationClientFamille();
 				List<String> tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.dsnRequest);
@@ -76,12 +79,13 @@ public class ImportStep1InitializeClientTablesService {
 			executeIf(ServletArc.METADATA, () -> this.clientDao.createTableFamille());
 			executeIf(ServletArc.METADATA, () -> this.clientDao.createTablePeriodicite());
 
+			stopHandShake();
+
 			// on renvoie l'id du client avec son timestamp
 			resp.send(arcClientIdentifier.getEnvironnement()+ Delimiters.SQL_SCHEMA_DELIMITER + arcClientIdentifier.getClient()
 					+ Delimiters.SQL_TOKEN_DELIMITER + arcClientIdentifier.getTimestamp());
 
 			resp.endSending();
-			
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep1InitializeClientTablesService **");
 			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
@@ -89,5 +93,51 @@ public class ImportStep1InitializeClientTablesService {
 		}
 	}
 
+	
+	Thread maintenance;
+
+	// set to 1 minute
+	private static final  int HANDSHAKE_TIMER_IN_MS = 60000;
+	
+	/**
+	 * Will send handshake to client every @HANDSHAKE_TIMER_IN_MS milliseconds
+	 * Ugly but we failed at fixing that in front of a F5 controller
+	 * @param resp
+	 */
+	private void startHandShake(SendResponse resp) {
+		maintenance = new Thread() {
+			@Override
+			public void run() {
+				do {
+					try {
+						Thread.sleep(HANDSHAKE_TIMER_IN_MS);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						break;
+					}
+					resp.send(Delimiters.HANDSHAKE_DELIMITER);
+				} while (true);
+			}
+		};
+
+		maintenance.start();
+	}
+
+	/**
+	 * Stop to send handshake
+	 * @param resp
+	 */
+	private void stopHandShake() {
+
+		maintenance.interrupt();
+		try {
+			maintenance.join();
+		} catch (InterruptedException e) {
+			new ArcException(ArcExceptionMessage.STREAM_WRITE_FAILED, e).logFullException();
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	
 	
 }

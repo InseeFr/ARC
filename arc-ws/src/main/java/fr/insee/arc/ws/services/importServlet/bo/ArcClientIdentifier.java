@@ -15,7 +15,8 @@ public class ArcClientIdentifier {
 		
 		this.dsnRequest = dsnRequest;
 		
-		this.client = getKeyIfExists(JsonKeys.CLIENT);
+		this.client = getKeyIfExists(JsonKeys.CLIENT, t -> { return ManipString.substringAfterLast(t, Delimiters.HANDSHAKE_DELIMITER); });
+		this.handshake = getKeyIfExists(JsonKeys.CLIENT, t -> {return t.substring(0, t.length() - this.client.length());});
 		this.timestamp = System.currentTimeMillis();
 		this.environnement = getKeyIfExists(JsonKeys.ENVIRONNEMENT, Patch::normalizeSchemaName);
 		this.famille = getKeyIfExists(JsonKeys.FAMILLE);
@@ -32,6 +33,8 @@ public class ArcClientIdentifier {
 
 	private String famille;
 	
+	private String handshake;
+
 
 	private String getKeyIfExists(JsonKeys key, UnaryOperator<String> f )
 	{
@@ -59,5 +62,11 @@ public class ArcClientIdentifier {
 	public String getFamille() {
 		return famille;
 	}
+	
+	public String getHandshake() {
+		return handshake;
+	}
+
+	
 	
 }
