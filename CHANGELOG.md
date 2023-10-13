@@ -2,10 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-93.1.13b
+## version-93.1.14b
 - tablebucket fix for webservice for data retrieval
 - the webservice for data retrieval now delete the client pending data tables at the start of a new invoke
-- handshake implementation during the creation of client data table to avoid timeout
 
 ## version-93.1.7
 - functionnal tests
