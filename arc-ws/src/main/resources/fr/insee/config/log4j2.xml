@@ -15,7 +15,7 @@
             <AppenderRef ref="Console" />
         </Logger>
 	    
-	    <Logger name="fr.insee.arc.utils.dao.UtilitaireDao" level="${env:ARC_LOGLEVEL:-trace}" additivity="false">
+	    <Logger name="fr.insee.arc.utils.dao.UtilitaireDao" level="-trace" additivity="false">
             <AppenderRef ref="Console" />
     	</Logger>
 	    
