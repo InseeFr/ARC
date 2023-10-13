@@ -74,7 +74,7 @@ public class ImportStep2GetTableNameService {
 			}
 
 			// renvoie un nom de table du client si il en reste une
-			resp.send(arcClientIdentifier.getHandshake() + tableName + " " + type);
+			resp.send(tableName + " " + type);
 			resp.endSending();
 
 		} catch (ArcException e) {
