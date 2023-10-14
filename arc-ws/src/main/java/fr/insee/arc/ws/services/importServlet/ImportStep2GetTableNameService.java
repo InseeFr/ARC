@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
@@ -40,48 +39,41 @@ public class ImportStep2GetTableNameService {
 
 	public void execute(SendResponse resp) throws ArcException {
 
-		try {
-			StringBuilder type = new StringBuilder();
+		StringBuilder type = new StringBuilder();
 
-			String tableName = this.clientDao.getAClientTable();
+		String tableName = this.clientDao.getAClientTable();
 
-			if (tableName == null) {
-				tableName = this.clientDao.getIdTable();
+		if (tableName == null) {
+			tableName = this.clientDao.getIdTable();
 
-				if (!reprise) {
-					this.clientDao.updatePilotage(tableName);
-				}
-
-				this.clientDao.dropTable(tableName);
-				
-				resp.send(" ");
-				resp.endSending();
-				return;
-				
-			} else {
-				// récupération du type
-				List<List<String>> metadataOnlyTable = NameDao.execQuerySelectMetadata(tableName);
-
-				for (int j = 0; j < metadataOnlyTable.get(0).size(); j++) {
-					if (j > 0) {
-						type.append(",");
-					}
-
-					for (int i = 0; i < metadataOnlyTable.size(); i++) {
-						type.append(" " + metadataOnlyTable.get(i).get(j));
-					}
-				}
+			if (!reprise) {
+				this.clientDao.updatePilotage(tableName);
 			}
 
-			// renvoie un nom de table du client si il en reste une
-			resp.send(tableName + " " + type);
-			resp.endSending();
+			this.clientDao.dropTable(tableName);
 
-		} catch (ArcException e) {
-			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep2GetTableNameService **");
-			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
+			resp.send(" ");
 			resp.endSending();
+			return;
+
+		} else {
+			// récupération du type
+			List<List<String>> metadataOnlyTable = NameDao.execQuerySelectMetadata(tableName);
+
+			for (int j = 0; j < metadataOnlyTable.get(0).size(); j++) {
+				if (j > 0) {
+					type.append(",");
+				}
+
+				for (int i = 0; i < metadataOnlyTable.size(); i++) {
+					type.append(" " + metadataOnlyTable.get(i).get(j));
+				}
+			}
 		}
+
+		// renvoie un nom de table du client si il en reste une
+		resp.send(tableName + " " + type);
+		resp.endSending();
 	}
 
 }

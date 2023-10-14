@@ -63,8 +63,6 @@ public class InitiateRequest {
 			new ImportStep3GetTableDataService(dsnRequest).execute(resp);
 		}
 		else {
-			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"Le service n'est pas reconnu.\"}");
-			resp.endSending();
 			throw new ArcException(ArcExceptionMessage.JSON_PARSING_FAILED);
 		}
 	}

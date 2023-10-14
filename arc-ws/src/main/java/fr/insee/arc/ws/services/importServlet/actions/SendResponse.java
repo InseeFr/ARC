@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
 
@@ -77,11 +78,13 @@ public class SendResponse {
     private static final Logger LOGGER = LogManager.getLogger(SendResponse.class);
 
 	private ServletOutputStream wr;
+	private  HttpServletResponse response;
 
 	public SendResponse( HttpServletResponse response ){
+		this.response = response;
 		try {
-			response.setBufferSize(128 * 1024);
-			this.wr=response.getOutputStream();
+			this.response.setBufferSize(128 * 1024);
+			this.wr=this.response.getOutputStream();
 		}
 		catch (IOException e) {
 			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet SendResponse **");
@@ -101,6 +104,13 @@ public class SendResponse {
 			}
 	}
 
+	public void sendError(ArcException e){
+		try {
+			this.response.sendError(500, e.getMessage());
+		} catch (IOException e1) {
+			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet SendResponse **");
+		}
+	}
 
 
 	/**Fermeture du flux.

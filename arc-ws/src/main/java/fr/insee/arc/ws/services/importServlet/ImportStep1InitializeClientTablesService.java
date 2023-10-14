@@ -10,8 +10,8 @@ import org.json.JSONObject;
 
 import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.model.Delimiters;
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
@@ -28,6 +28,7 @@ public class ImportStep1InitializeClientTablesService {
 	private ClientDao clientDao;
 	private JSONObject dsnRequest;
 	private ArcClientIdentifier arcClientIdentifier;
+	private List<String> tablesMetierNames;
 
 	public ImportStep1InitializeClientTablesService(JSONObject dsnRequest) {
 		super();
@@ -61,32 +62,66 @@ public class ImportStep1InitializeClientTablesService {
 	}
 
 	public void execute(SendResponse resp) throws ArcException {
-		try {
+		this.clientDao.dropPendingClientTables();
 
-			this.clientDao.dropPendingClientTables();
-			
-			if (!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
-				this.clientDao.verificationClientFamille();
-				List<String> tablesMetierNames = this.clientDao.getIdSrcTableMetier(this.dsnRequest);
-				executeIf(ServletArc.MAPPING, () -> this.clientDao.createImages(tablesMetierNames));
-				executeIf(ServletArc.METADATA, () -> this.clientDao.createTableMetier());
-				executeIf(ServletArc.METADATA, () -> this.clientDao.createVarMetier());
-			}
-			executeIf(ServletArc.NOMENCLATURE, () -> this.clientDao.createNmcl());
-			executeIf(ServletArc.METADATA, () -> this.clientDao.createTableFamille());
-			executeIf(ServletArc.METADATA, () -> this.clientDao.createTablePeriodicite());
+		this.clientDao.createTableWsStatus();
 
-			// on renvoie l'id du client avec son timestamp
-			resp.send(arcClientIdentifier.getEnvironnement()+ Delimiters.SQL_SCHEMA_DELIMITER + arcClientIdentifier.getClient()
-					+ Delimiters.SQL_TOKEN_DELIMITER + arcClientIdentifier.getTimestamp());
-
-			resp.endSending();
-		} catch (ArcException e) {
-			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet ImportStep1InitializeClientTablesService **");
-			resp.send("\"type\":\"jsonwsp/response\",\"error\":\"" + e.getMessage() + "\"}");
-			resp.endSending();
+		if (!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
+			clientDao.verificationClientFamille();
+			tablesMetierNames = clientDao.getIdSrcTableMetier(dsnRequest);
 		}
+
+		startTableCreationInParallel();
+
+		// on renvoie l'id du client avec son timestamp
+		resp.send(arcClientIdentifier.getEnvironnement() + Delimiters.SQL_SCHEMA_DELIMITER
+				+ arcClientIdentifier.getClient() + Delimiters.SQL_TOKEN_DELIMITER
+				+ arcClientIdentifier.getTimestamp());
+
+		resp.endSending();
 	}
 
+	/**
+	 * Will send handshake to client every @HANDSHAKE_TIMER_IN_MS milliseconds Ugly
+	 * but we failed at fixing that in front of a F5 controller
+	 * 
+	 * @param resp
+	 */
+	private void startTableCreationInParallel() {
+		Thread maintenance = new Thread() {
+			@Override
+			public void run() {
+				try {
+					if (tablesMetierNames != null) {
+						executeIf(ServletArc.MAPPING, () -> clientDao.createImages(tablesMetierNames));
+						executeIf(ServletArc.METADATA, () -> clientDao.createTableMetier());
+						executeIf(ServletArc.METADATA, () -> clientDao.createVarMetier());
+					}
+					executeIf(ServletArc.NOMENCLATURE, () -> clientDao.createNmcl());
+					executeIf(ServletArc.METADATA, () -> clientDao.createTableFamille());
+					executeIf(ServletArc.METADATA, () -> clientDao.createTablePeriodicite());
+				} catch (ArcException e) {
+					try {
+						clientDao.createTableWsKO();
+					} catch (ArcException e1) {
+						new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED).logFullException();
+					}
+				} finally {
+					try {
+						clientDao.dropTableWsPending();
+					} catch (ArcException e) {
+						try {
+							clientDao.createTableWsKO();
+						} catch (ArcException e1) {
+							new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED).logFullException();
+						}
+					}
+				}
+
+			}
+		};
+
+		maintenance.start();
+	}
 
 }

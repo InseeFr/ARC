@@ -83,8 +83,8 @@ public class ServletArc extends HttpServlet {
 				try {
 					new InitiateRequest(dsnRequest).doRequest(resp);
 				} catch (ArcException e) {
-					resp.send("{\"type\":\"jsonwsp/JSONObject\",\"error\":\"" + e.getMessage() + "\"}");
-					resp.endSending();
+					resp.sendError(e);
+					e.logFullException();
 				}
 
 				LoggerHelper.info(LOGGER, "doPost() end");

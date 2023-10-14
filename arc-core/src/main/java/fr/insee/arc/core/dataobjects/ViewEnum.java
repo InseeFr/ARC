@@ -147,6 +147,9 @@ public enum ViewEnum {
 	
 	// webservice de récupération de données
 	, ID_SOURCE("id_source", SchemaEnum.SANDBOX_GENERATED)
+	, WS_INFO("ws_info", SchemaEnum.SANDBOX_GENERATED)
+	, WS_PENDING("ws_pending", SchemaEnum.SANDBOX_GENERATED)
+	, WS_KO("ws_ko", SchemaEnum.SANDBOX_GENERATED)
 
 	;
 

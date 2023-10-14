@@ -35,6 +35,7 @@ public class ClientDao {
 	private String famille;
 
 	private String tableOfIdSource;
+	private String tableWsPending;
 
 	Connection connection;
 
@@ -45,7 +46,9 @@ public class ClientDao {
 		this.famille = arcClientIdentifier.getFamille();
 
 		this.tableOfIdSource = TableNaming.buildTableNameWithTokens(environnement,
-				ColumnEnum.ID_SOURCE, client, timestamp);
+				ViewEnum.ID_SOURCE, client, timestamp);
+		this.tableWsPending = TableNaming.buildTableNameWithTokens(environnement,
+				ViewEnum.WS_PENDING, client, timestamp);
 
 	}
 
@@ -370,14 +373,31 @@ public class ClientDao {
 		
 		String schema = ManipString.substringBeforeFirst(client, ".");
 		String tableToFind = ViewEnum.normalizeTableName(ManipString.substringAfterFirst(client, ".").replace("_", "\\_") + "%");
+		String tableWsInfo = ViewEnum.normalizeTableName(this.client + Delimiters.SQL_TOKEN_DELIMITER + ViewEnum.WS_INFO.getTableName()); 
+		String tableWsKO = ViewEnum.normalizeTableName(this.client + Delimiters.SQL_TOKEN_DELIMITER + ViewEnum.WS_KO.getTableName()); 
+
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT schemaname||'.'||tablename FROM pg_tables")
 				.append(" WHERE tablename like " + requete.quoteText(tableToFind))
 				.append(" AND schemaname=" + requete.quoteText(schema)).append(" AND tablename "
-						+ (isSourceListTable ? "" : "NOT") + " like " + requete.quoteText("%id\\_source%"));
+						+ (isSourceListTable ? "" : "NOT") + " like " + requete.quoteText("%id\\_source%"))
+				// ws_info must be first if exists as this table wil be always created
+				// others might be pending in creation process
+				.append(" ORDER BY CASE schemaname||'.'||tablename ")
+				.append(" WHEN "+requete.quoteText(tableWsInfo)+" THEN 1 ")
+				.append(" WHEN "+requete.quoteText(tableWsKO)+" THEN 2 ") 
+				.append(" ELSE 3 END ")
+				.append(" LIMIT 1 ");
 
 		String selectedTableName = UtilitaireDao.get(0).getString(connection, requete);
+		
+		// if selectedTableName is ws_ko, there was a problem return exception
+		if (selectedTableName!=null && selectedTableName.equals(tableWsKO))
+		{
+			throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_FAMILY_CREATION_FAILED);
+		}
+		
 		return selectedTableName==null? null : this.client + selectedTableName.substring(this.client.length());
 		
 	}
@@ -390,7 +410,7 @@ public class ClientDao {
 		return getAClientTable(true);
 	}
 
-	public void dropTable(String clientTable) throws ArcException {
+	public void dropTable(String clientTable) {
 		if (StringUtils.isBlank(clientTable)) {
 			return;
 		}
@@ -416,6 +436,69 @@ public class ClientDao {
 
 		UtilitaireDao.get(0).executeImmediate(connection, FormatSQL.dropTable(tablesToDrop.toArray(new String[0])));
 
+	}
+
+	/**
+	 * create reporting table
+	 * @throws ArcException
+	 */
+	public void createTableWsStatus() throws ArcException {
+
+		String tableWsInfo = TableNaming.buildTableNameWithTokens(environnement,
+				ViewEnum.WS_INFO, client, timestamp);
+		
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("\n DROP TABLE IF EXISTS "+ tableWsInfo +";");
+		
+		requete.append("\n CREATE TABLE " + tableWsInfo + FormatSQL.WITH_NO_VACUUM + " AS");
+		requete.append("\n SELECT "+ requete.quoteText(client)+ " as client ");
+		requete.append(", "+requete.quoteText(Long.toString(timestamp)) +" as timestamp ");
+		requete.append(";");
+		
+		requete.append("\n DROP TABLE IF EXISTS "+ tableWsPending +";");
+		requete.append("\n CREATE TABLE " + tableWsPending + "();");
+		
+		UtilitaireDao.get(0).executeImmediate(connection, requete);
+	}
+
+	public void createTableWsKO() throws ArcException {
+		String tableWsKO = TableNaming.buildTableNameWithTokens(environnement,
+				ViewEnum.WS_KO, client, timestamp);
+
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("\n DROP TABLE IF EXISTS "+ tableWsKO +";");
+		requete.append("\n CREATE TABLE " + tableWsKO + "();");
+		
+		UtilitaireDao.get(0).executeImmediate(connection, requete);
+	}
+	
+	public void dropTableWsPending() throws ArcException {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("DROP TABLE IF EXISTS "+ tableWsPending +";");
+		UtilitaireDao.get(0).executeImmediate(connection, requete);
+	}
+
+	/**
+	 * web service data creation is not pending if tableWsPending doesn't exists anymore
+	 * @return
+	 * @throws ArcException
+	 */
+	public boolean isWebServiceNotPending() throws ArcException {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+
+		
+		String[] schemaAndClient = this.client.split("\\"+Delimiters.SQL_SCHEMA_DELIMITER);
+		String schema = schemaAndClient[0];
+		String[] clientTokens = schemaAndClient[1].split(Delimiters.SQL_TOKEN_DELIMITER);
+		String clientExtract = clientTokens[0];
+		String timestampExtract = clientTokens[1];
+		
+		String tableWsPendingExtract = TableNaming.buildTableNameWithTokens(schema, ViewEnum.WS_PENDING, clientExtract, timestampExtract);
+		
+		requete.append("SELECT 1 FROM pg_tables");
+		requete.append(" WHERE schemaname||'.'||tablename = "+requete.quoteText(tableWsPendingExtract)+" ");
+
+		return !UtilitaireDao.get(0).hasResults(connection, requete);
 	}
 
 }

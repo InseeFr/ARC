@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-93.1.16b
-- tablebucket fix for webservice for data retrieval
-- the webservice for data retrieval now delete the client pending data tables at the start of a new invoke
+## version-93.1.17b
+- the webservice for data retrieval deletes the client pending data tables at the start of a new invoke
+- the webservice for data retrieval acts creates data table asynchronously to avoid timeout problems
 
 ## version-93.1.7
 - functionnal tests

@@ -83,7 +83,8 @@ public enum ArcExceptionMessage {
 	SQL_EXECUTE_FAILED("L'exécution de la requête dans la base de données a échoué"),
 	
 	WS_RETRIEVE_DATA_FAMILY_FORBIDDEN("Vous ne pouvez pas accéder à cette famille de norme"),
-
+	WS_RETRIEVE_DATA_FAMILY_CREATION_FAILED("Les tables de la famille de norme n'ont pas pu être crées"),
+	
 	IHM_NMCL_COLUMN_IN_FILE_BUT_NOT_IN_SCHEMA("La colonne %s n'est pas déclarée dans le schéma"),
 	IHM_NMCL_COLUMN_IN_SCHEMA_BUT_NOT_IN_FILE("La colonne est déclarée dans le schéma mais absente du fichier"),
 	IHM_NMCL_IMPORT_FAILED("Le fichier n'a pu être lu. Il doit être au format csv non compressé, le nom des colonnes en première ligne, le type des colonne en 2ieme ligne."),
