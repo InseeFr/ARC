@@ -1,7 +1,5 @@
 package fr.insee.arc.ws.services.importServlet;
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
