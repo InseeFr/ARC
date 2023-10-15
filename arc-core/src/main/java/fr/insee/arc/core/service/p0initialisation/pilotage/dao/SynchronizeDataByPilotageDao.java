@@ -109,13 +109,11 @@ public class SynchronizeDataByPilotageDao {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		TraitementPhase[] phase = TraitementPhase.values();
 		// on commence après la phase "initialisation". i=2
-		for (int i = 2; i < phase.length; i++) {
-			if (i > 2) {
+		for (int i = 0; i < phase.length; i++) {
+			if (i > 0) {
 				requete.append(SQL.UNION_ALL);
 			}
-			requete.append(FormatSQL.tableExists(ViewEnum.getFullName(envExecution, phase[i] + "$%$tmp$%")));
-			requete.append(SQL.UNION_ALL);
-			requete.append(FormatSQL.tableExists(ViewEnum.getFullName(envExecution, phase[i] + "\\_%$tmp$%")));
+			requete.append(FormatSQL.tableExists(ViewEnum.getFullName(envExecution, phase[i] + "%" + FormatSQL.TMP+ "%")));
 		}
 		return requete;
 	}
