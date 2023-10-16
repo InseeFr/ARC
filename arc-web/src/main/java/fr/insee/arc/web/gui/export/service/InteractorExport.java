@@ -58,7 +58,7 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
 	public String initExportDir()
 	{
     	String repertoire = properties.getBatchParametersDirectory();
-		Path dirOut = Paths.get(repertoire, FileSystemManagement.directoryEnvRoot(repertoire, getBacASable()), "EXPORT");
+		Path dirOut = Paths.get(FileSystemManagement.directoryEnvRoot(repertoire, getBacASable()), "EXPORT");
 		FileUtilsArc.createDirIfNotexist(dirOut.toFile());
 
 		return dirOut.toString();
