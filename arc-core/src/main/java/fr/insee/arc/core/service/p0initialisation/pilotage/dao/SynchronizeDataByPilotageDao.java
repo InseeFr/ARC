@@ -118,30 +118,82 @@ public class SynchronizeDataByPilotageDao {
 		return requete;
 	}
 
+
 	/**
-	 * Delete data records from a target table according to a given list of source
+	 * materialize on executor nod a table containing the list of idSource provided
+	 * @param executorConnection
+	 * @param idSourceToDelete
+	 * @throws ArcException
+	 */
+	public static void execQueryMaterializeOnExecutorIdSource(Connection executorConnection,
+			List<String> idSourceToDelete) throws ArcException {
+		
+		GenericBean gb = new GenericBean(ColumnEnum.ID_SOURCE.getColumnName(), TypeEnum.TEXT.getTypeName(),
+				idSourceToDelete);
+		execQueryMaterializeOnExecutorIdSource(executorConnection, gb);
+		}
+	
+	
+
+	/**
+	 * materialize on executor nod a table containing the GenericBean of idSource provided
+	 * @param executorConnection
+	 * @param idSourceToDelete
+	 * @throws ArcException
+	 */
+	public static void execQueryMaterializeOnExecutorIdSource(Connection executorConnection,
+			GenericBean idSourceInPilotageToKeep) throws ArcException {
+
+		CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, ViewEnum.T1.getFullName(), idSourceInPilotageToKeep);
+		
+		// analyze table
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(FormatSQL.analyzeSecured(ViewEnum.T1.getFullName()));
+		UtilitaireDao.get(0).executeImmediate(executorConnection, query);
+
+	}
+	
+	/**
+	 * Delete the records from a target data table according to a given list of id_source
 	 * to delete
 	 * 
 	 * @param executorConnection
-	 * @param idSourceToDelete
 	 * @param targetDataTable
 	 * @throws ArcException
 	 */
-	public static void deleteDataRecords(Connection executorConnection, List<String> idSourceToDelete,
-			String targetDataTable) throws ArcException {
-
-		GenericBean gb = new GenericBean(ColumnEnum.ID_SOURCE.getColumnName(), TypeEnum.TEXT.getTypeName(),
-				idSourceToDelete);
-
-		CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, ViewEnum.T1.getFullName(), gb);
-
+	public static void deleteDataRecordsFoundInIdSource(Connection executorConnection, String targetDataTable) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.DELETE, targetDataTable);
-		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE, SQL.IN);
-		query.build("(", SQL.SELECT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.T1.getFullName(), ")");
-
-		UtilitaireDao.get(0).executeRequest(executorConnection, query);
+		query.build(SQL.DELETE, targetDataTable, SQL.AS, ViewEnum.ALIAS_A);
+		query.build(SQL.WHERE, SQL.EXISTS);
+		query.build("(");
+		query.build(SQL.SELECT, SQL.FROM, ViewEnum.T1.getFullName(), SQL.AS, ViewEnum.ALIAS_B);
+		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_A), "=", ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_B));
+		query.build(")");
+		query.build(SQL.END_QUERY);
+		UtilitaireDao.get(0).executeImmediate(executorConnection, query);
 	}
+
+
+
+	/**
+	 * Delete the records from a target data table that are not found in a given list of id_source
+	 * 
+	 * @param executorConnection
+	 * @param targetDataTable
+	 * @throws ArcException
+	 */
+	public static void keepDataRecordsFoundInIdSourceOnly(Connection executorConnection, String targetDataTable) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.DELETE, targetDataTable, SQL.AS, ViewEnum.ALIAS_A);
+		query.build(SQL.WHERE, SQL.NOT, SQL.EXISTS);
+		query.build("(");
+		query.build(SQL.SELECT, SQL.FROM, ViewEnum.T1.getFullName(), SQL.AS, ViewEnum.ALIAS_B);
+		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_A), "=", ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_B));
+		query.build(")");
+		query.build(SQL.END_QUERY);
+		UtilitaireDao.get(0).executeImmediate(executorConnection, query);
+	}
+
 	
 
 	public static void dropDataTables(Connection executorConnection, List<String> dataTablesToDrop) {
@@ -165,6 +217,7 @@ public class SynchronizeDataByPilotageDao {
 			}
 		}
 	}
+
 
 	
 }

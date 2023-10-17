@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.18b
+- initialization optimisation
+
 ## version-93.1.17b
 - the webservice for data retrieval deletes the client pending data tables at the start of a new invoke
 - the webservice for data retrieval acts creates data table asynchronously to avoid timeout problems

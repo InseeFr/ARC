@@ -304,23 +304,22 @@ public class SynchronizeDataByPilotageOperation {
 		if (envTablesWithRecords.isEmpty()) {
 			return;
 		}
+		
+		// materialize the table id_source table
+		if (providedIdSourceToDelete == null) {
+			SynchronizeDataByPilotageDao.execQueryMaterializeOnExecutorIdSource(executorConnection, listIdSourceInPilotage.getIdSourceInPilotage(phase, etat));
+		}
+		else
+		{
+			SynchronizeDataByPilotageDao.execQueryMaterializeOnExecutorIdSource(executorConnection, providedIdSourceToDelete);
+		}
 
+		// iterate over data tables
 		for (String dataTable : envTablesWithRecords) {
-
-			// retrieve the idSource that shouldn't be in data table according to pilotage
-			// table
-			List<String> idSourceInDataTableThatShouldntBe;
-
-			if (providedIdSourceToDelete != null) {
-				idSourceInDataTableThatShouldntBe = providedIdSourceToDelete;
+			if (providedIdSourceToDelete == null) {
+				SynchronizeDataByPilotageDao.keepDataRecordsFoundInIdSourceOnly(executorConnection, dataTable);
 			} else {
-				idSourceInDataTableThatShouldntBe = PhaseOperations.selectIdSourceOfDataTable(executorConnection,
-						dataTable);
-				idSourceInDataTableThatShouldntBe.removeAll(listIdSourceInPilotage.getIdSourceInPilotage(phase, etat));
-			}
-
-			if (!idSourceInDataTableThatShouldntBe.isEmpty()) {
-				SynchronizeDataByPilotageDao.deleteDataRecords(executorConnection, idSourceInDataTableThatShouldntBe, dataTable);
+				SynchronizeDataByPilotageDao.deleteDataRecordsFoundInIdSource(executorConnection, dataTable);
 			}
 		}
 
