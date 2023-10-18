@@ -18,6 +18,10 @@ public class ServiceIndex extends IndexAction {
 		getSession().put("console", "");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
+	
+	public String selectIndex(Model model) {
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
 
 	public ResponseEntity<Map<String, Object>> healthcheck() {
 		Map<String, Object> map = new HashMap<>();
