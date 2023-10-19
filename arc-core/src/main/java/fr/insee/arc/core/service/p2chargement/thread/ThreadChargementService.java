@@ -2,22 +2,18 @@ package fr.insee.arc.core.service.p2chargement.thread;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementRapport;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
-import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
@@ -28,10 +24,9 @@ import fr.insee.arc.core.service.p2chargement.archiveloader.ArchiveChargerFactor
 import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad;
 import fr.insee.arc.core.service.p2chargement.archiveloader.IArchiveFileLoader;
 import fr.insee.arc.core.service.p2chargement.bo.IChargeur;
-import fr.insee.arc.core.service.p2chargement.bo.IdCardChargement;
 import fr.insee.arc.core.service.p2chargement.factory.ChargeurFactory;
-import fr.insee.arc.core.service.p2chargement.factory.TypeChargement;
 import fr.insee.arc.core.service.p2chargement.operation.ChargementBrut;
+import fr.insee.arc.core.service.p2chargement.operation.ChargementRulesOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -268,41 +263,11 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 		// Quel type de fichier ?
 
-		calculerTypeFichier();
+		ChargementRulesOperation.fillChargementRules(this.getConnexion().getExecutorConnection(), envExecution, this.fileIdCard);
 
 		ChargeurFactory chargeurFactory = new ChargeurFactory(this);
 
 		return chargeurFactory.getChargeur(this.fileIdCard.getIdCardChargement().getTypeChargement());
-	}
-
-	/**
-	 * Méthode pour savoir quel est le type du fichier et l'envoyer vers le bon
-	 * chargeur. Définit la règle de chargement (si présente) dans l'objet norme
-	 * passé en paramètre.
-	 * 
-	 * @param norme
-	 * @return l'objet Norme avec la règle de chargement renseignée
-	 * @throws ArcException
-	 * @throws ArcException si aucune règle n'est trouvée
-	 */
-	private void calculerTypeFichier() throws ArcException {
-		Map<String, List<String>> regle = RulesOperations.getBean(this.getConnexion().getExecutorConnection(),
-				RulesOperations.getRegles(ViewEnum.CHARGEMENT_REGLE.getFullName(this.envExecution), this.fileIdCard));
-		
-		if (regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).isEmpty())
-		{
-			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, fileIdCard.getIdNorme());
-		}
-		
-		if (regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).size()>1)
-		{
-			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, fileIdCard.getIdNorme());
-		}
-		
-		fileIdCard.setIdCardChargement(new IdCardChargement(
-				TypeChargement.getEnum(regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).get(0)),
-				regle.get(ColumnEnum.DELIMITER.getColumnName()).get(0)
-				, regle.get(ColumnEnum.FORMAT.getColumnName()).get(0)));
 	}
 
 	/**

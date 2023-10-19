@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
@@ -36,6 +38,7 @@ public class ExecuteEngineOperation {
 		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
 			
 			ExecuteRulesDao.fillRules(connection, bodyPojo, responseAttributes.getServiceName(), responseAttributes.getServiceId());
+			
 			String envExecution = bodyPojo.sandbox;
 			
 			Sandbox serviceSandbox = new Sandbox(connection, envExecution);
@@ -67,22 +70,6 @@ public class ExecuteEngineOperation {
 						phaseInterface.setOutputTable(currentTemporaryTable(i));
 						ExecuteEngineControleOperation controleOperation = new ExecuteEngineControleOperation(serviceSandbox, bodyPojo, phaseInterface);
 						phaseInterface = controleOperation.execute();
-
-						
-						StringBuilder requete;
-						
-						requete = new StringBuilder();
-						requete.append(
-								"CREATE TEMPORARY TABLE "+currentTemporaryTable(i)+" as select *, '0'::text collate \"C\" as controle, null::text[] collate \"C\" as brokenrules from "+previousTemporaryTable(i)+";");
-						UtilitaireDao.get(0).executeImmediate(connection, requete);
-
-						ServiceJeuDeRegleOperation sjdr = new ServiceJeuDeRegleOperation();
-
-						// Récupération des règles de controles associées aux jeux de règle
-						JeuDeRegle jdr = new JeuDeRegle();
-
-						sjdr.fillRegleControle(connection, jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution), currentTemporaryTable(i));
-						sjdr.executeJeuDeRegle(connection, jdr, currentTemporaryTable(i));
 						break;
 					default:
 						break;
