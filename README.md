@@ -41,6 +41,10 @@ These functionnalities/services aim the statistician’s independence and abilit
 
 ![workflow](user-guide/img/workflow.png)
 
+### gsbpm diagram
+
+![gsbpm](user-guide/img/gsbpm.png)
+
 ## Running the application
 
 The ARC application is a java 11 application, working with a PostgreSQL > 9.6 database. To run the app you will need this PostgreSQL DB and configure the connection in the [arc.properties](arc-web/src/main/resources/fr/insee/config/arc.properties) file. Once this is done
