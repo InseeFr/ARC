@@ -131,8 +131,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				props.setProperty("user", user);
 				props.setProperty("password", password);
 				props.setProperty("tcpKeepAlive", "true");
+				props.setProperty("prepareThreshold" , "0");
+				props.setProperty("preparedStatementCacheQueries" , "0");
+				props.setProperty("preparedStatementCacheSizeMiB" , "0");
 
 				c = DriverManager.getConnection(uri, props);
+				
 			} catch (Exception e) {
 				throw new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 			}
@@ -365,66 +369,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	}
 
-	/**
-	 * Exécution de requêtes ramenant des enregistrements en mode Statement (donc
-	 * sans cache)
-	 * 
-	 * @param connexion
-	 * @param requete
-	 * @return
-	 * @throws ArcException
-	 */
-	public List<List<String>> executeStatement(Connection connexion, GenericPreparedStatementBuilder requete)
-			throws ArcException {
-		return executeStatement(connexion, requete, EntityProvider.getArrayOfArrayProvider());
-
-	}
-
-	/**
-	 * 
-	 * @param <T>
-	 * @param connexion
-	 * @param requete
-	 * @param entityProvider
-	 * @return
-	 * @throws ArcException
-	 */
-	public <T> T executeStatement(Connection connexion, GenericPreparedStatementBuilder requete,
-			EntityProvider<T> entityProvider) throws ArcException {
-
-		if (LOGGER.isEnabled(Level.TRACE)) {
-			LoggerHelper.trace(LOGGER, "/* executeRequest on */");
-			LoggerHelper.trace(LOGGER, "\n" + ModeRequete.configureQuery(requete.getQueryWithParameters()));
-			LoggerHelper.trace(LOGGER, requete.getParameters());
-		}
-
-		try {
-			ConnectionWrapper connexionWrapper = initConnection(connexion);
-			try {
-				connexionWrapper.getConnexion().setAutoCommit(false);
-				try (Statement stmt = connexionWrapper.getConnexion().createStatement();) {
-					try {
-						ResultSet res = stmt.executeQuery(requete.getQuery().toString());
-						return entityProvider.apply(res);
-					} catch (SQLException e) {
-						LoggerHelper.error(LOGGER, stmt.toString());
-						throw e;
-					} finally {
-						connexionWrapper.getConnexion().commit();
-					}
-				}
-			} catch (SQLException e) {
-				LoggerHelper.error(LOGGER, "executeStatement()", e);
-				connexionWrapper.getConnexion().rollback();
-				throw e;
-			} finally {
-				connexionWrapper.close();
-			}
-		} catch (SQLException sqlException) {
-			LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
-			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED).logFullException();
-		}
-	}
 
 	/**
 	 * Register in the targetPreparedStatement the bind variable of a request with
@@ -790,7 +734,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn)
 			throws ArcException {
 		liste.addAll(
-				new GenericBean(executeStatement(connexion, FormatSQL.listeColonneByHeaders(tableIn))).getHeaders());
+				new GenericBean(executeRequest(connexion, FormatSQL.listeColonneByHeaders(tableIn))).getHeaders());
 		return liste;
 	}
 
