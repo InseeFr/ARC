@@ -2,8 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.20b
+- deployment for version qualification
+
 ## version-93.1.19b
-- initialization optimisation
+- initialization optimization
 
 ## version-93.1.18b
 - the webservice for data retrieval deletes the client pending data tables at the start of a new invoke
