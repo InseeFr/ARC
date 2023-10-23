@@ -183,14 +183,27 @@ public class SynchronizeDataByPilotageDao {
 	 * @throws ArcException
 	 */
 	public static void keepDataRecordsFoundInIdSourceOnly(Connection executorConnection, String targetDataTable) throws ArcException {
+		
+		
+		// recreate full table instead of delete as large volume of data may be involved
+		// this operation occurs once a week
+		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.DELETE, targetDataTable, SQL.AS, ViewEnum.ALIAS_A);
-		query.build(SQL.WHERE, SQL.NOT, SQL.EXISTS);
+		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, ViewEnum.T2.getFullName(), SQL.END_QUERY);
+		
+		query.build(SQL.CREATE, SQL.TEMPORARY, SQL.TABLE, ViewEnum.T2.getFullName(), SQL.AS);
+		query.build(SQL.SELECT, "*", SQL.FROM, targetDataTable, SQL.AS, ViewEnum.ALIAS_A);
+		query.build(SQL.WHERE, SQL.EXISTS);
 		query.build("(");
 		query.build(SQL.SELECT, SQL.FROM, ViewEnum.T1.getFullName(), SQL.AS, ViewEnum.ALIAS_B);
 		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_A), "=", ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_B));
 		query.build(")");
 		query.build(SQL.END_QUERY);
+		
+		query.build(SQL.TRUNCATE, SQL.TABLE, targetDataTable, SQL.END_QUERY);
+		
+		query.build(SQL.INSERT_INTO, targetDataTable, SQL.SELECT, "*", SQL.FROM, ViewEnum.T2.getFullName(), SQL.END_QUERY);
+		
 		UtilitaireDao.get(0).executeImmediate(executorConnection, query);
 	}
 
