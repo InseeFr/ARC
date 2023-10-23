@@ -18,11 +18,6 @@ public class ControllerIndex extends ServiceIndex {
 		return index(model);
 	}
 
-	@PostMapping(value = {"/selectIndex"})
-	public String selectIndexAction(Model model) {
-		return selectIndex(model);
-	}
-
 	@RequestMapping("/healthcheck")
 	public ResponseEntity<Map<String, Object>> healthcheckAction() {
 		return healthcheck();

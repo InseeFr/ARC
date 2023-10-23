@@ -264,11 +264,6 @@ $(document).on('ready readyAgain',function() {
 		$("table").on('keyup', function(event) {ctrlKeyUp(event,$(this));});	
 	}
 
-
-
-	// sessionPersist();
-
-
 	if (configJS.indexOf("IHM:Onglet;")>-1) 
 	{
 		updateVisualTabs();
@@ -1226,12 +1221,6 @@ function selectByGrid(v,t)
 /**
  * Rafraichit la session persistante tous les 500s
  */
-function sessionPersist()
-{
-	setTimeout(function(){$('[id$=".select"]').first().trigger('click'); sessionPersist();},300000);
-
-}
-
 function triggerButton(action)
 {
 	$('[id="'+action+'"]').trigger('click');	

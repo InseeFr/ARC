@@ -12,14 +12,6 @@
 	<c:import url="tiles/defaulthead.jsp">
 		<c:param name="pageJs" value="/js/index.js" />
 	</c:import>
-	
-	<script>
-		$(document).ready(function() {
-			// Lancer un timer pour ne pas que la session expire
-			sessionPersist();
-		});
-	</script>
-
 </head>
 
 <body class="bg-body">
