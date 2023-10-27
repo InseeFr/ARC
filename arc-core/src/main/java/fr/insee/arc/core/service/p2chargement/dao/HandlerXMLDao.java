@@ -107,7 +107,7 @@ public class HandlerXMLDao {
 				.append(",") //
 				.append(XMLColumns.getShort(ColumnEnum.VALIDITE)); //
 
-		req2.append("('").append(fileIdCard.getFileName()).append("',").append(this.idLigne).append(",")
+		req2.append("('").append(fileIdCard.getIdSource()).append("',").append(this.idLigne).append(",")
 				.append(this.fileIdCard.getIntegrationDate()).append(",'").append(this.fileIdCard.getIdNorme())
 				.append("','").append(this.fileIdCard.getPeriodicite()).append("','")
 				.append(this.fileIdCard.getValidite()).append("'");

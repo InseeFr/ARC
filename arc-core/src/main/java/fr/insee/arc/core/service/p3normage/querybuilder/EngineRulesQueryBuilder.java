@@ -1,12 +1,14 @@
 package fr.insee.arc.core.service.p3normage.querybuilder;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p3normage.bo.JoinParser;
+import fr.insee.arc.core.service.p3normage.bo.RegleNormage;
+import fr.insee.arc.core.service.p3normage.bo.TypeNormage;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
@@ -27,10 +29,10 @@ public class EngineRulesQueryBuilder {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String appliquerRegleUnicite(Map<String, List<String>> regle, String jointure) {
+	public static String appliquerRegleUnicite(FileIdCard fileIdCard) {
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleUnicite()");
 
-		String returned = jointure;
+		String returned = fileIdCard.getJointure();
 		// extraction de la clause select
 
 		String selectBase = " select " + ManipString.substringAfterLast(returned, " select ");
@@ -38,12 +40,12 @@ public class EngineRulesQueryBuilder {
 		String[] lines = returned.split("\n");
 		int max = lines.length - 1;
 
+		List<RegleNormage> reglesNormageUnicite = fileIdCard.getIdCardNormage().getReglesNormage(TypeNormage.UNICITE);
+		
 		// on parcourt maintenant les regles d'unicité
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-			String type = regle.get("id_classe").get(j);
-			if (type.equals("unicité")) {
+		for (int j = 0; j < reglesNormageUnicite.size(); j++) {
 
-				String rubrique = regle.get("rubrique").get(j).toLowerCase();
+			String rubrique = reglesNormageUnicite.get(j).getRubrique().toLowerCase();
 
 				// vérifier l'existance des rubriques
 				if (returned.contains(" " + rubrique + " ")) {
@@ -85,7 +87,7 @@ public class EngineRulesQueryBuilder {
 						k++;
 					}
 				}
-			}
+
 		}
 
 		String viewAndInsert = "";

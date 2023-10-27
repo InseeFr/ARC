@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.p3normage.querybuilder;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +12,10 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p3normage.bo.JoinParser;
+import fr.insee.arc.core.service.p3normage.bo.RegleNormage;
+import fr.insee.arc.core.service.p3normage.bo.TypeNormage;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -34,25 +36,27 @@ public class IndependanceRulesQueryBuilder {
 	 * @param jointure
 	 * @throws ArcException
 	 */
-	public static void ajouterRegleIndependance(Map<String, List<String>> regle, String norme,
-			Date validite, String periodicite, String jointure) {
+	public static void ajouterRegleIndependance(FileIdCard fileIdCard) {
 		StaticLoggerDispatcher.info(LOGGER, "ajouterRegleIndependance()");
 
-		String blocCreate = ManipString.substringBeforeFirst(jointure, "insert into {table_destination}");
+		String blocCreate = ManipString.substringBeforeFirst(fileIdCard.getJointure(), "insert into {table_destination}");
 		Set<String> rubriqueExclusion = new HashSet<>();
 		Map<String, String> rubriquesAvecRegleDIndependance = new HashMap<>();
 
 		// pour toutes les règles de relation,
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
+		
+		List<RegleNormage> reglesNormage = fileIdCard.getIdCardNormage().getReglesNormage();
+		
+		for (int j = 0; j < reglesNormage.size(); j++) {
 
-			String type = regle.get("id_classe").get(j);
+			TypeNormage type = reglesNormage.get(j).getTypeNormage();
 
 			// cas 1 on met en indépendant les règles en relation
 			// en gros on parcours les regles de relation
 			// on va exclure les bloc en relation des blocs à calculer comme indépendants
-			if (type.equals("relation")) {
-				String rubrique = regle.get("rubrique").get(j).toLowerCase();
-				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
+			if (type.equals(TypeNormage.RELATION)) {
+				String rubrique = reglesNormage.get(j).getRubrique().toLowerCase();
+				String rubriqueNmcl = reglesNormage.get(j).getRubriqueNmcl().toLowerCase();
 
 				String rubriqueM = JoinParser.getM(blocCreate, rubrique);
 				String rubriqueNmclM = JoinParser.getM(blocCreate, rubriqueNmcl);
@@ -78,15 +82,15 @@ public class IndependanceRulesQueryBuilder {
 			// cas 3 : deux rubrique déclarées en cartesian
 			// les rubriques déclarées en cartésian ne peuvent intégrer un groupe de
 			// rubrique indépendante
-			if (type.equals("cartesian")) {
-				String rubrique = regle.get("rubrique").get(j).toLowerCase();
+			if (type.equals(TypeNormage.CARTESIAN)) {
+				String rubrique = reglesNormage.get(j).getRubrique().toLowerCase();
 				String rubriqueM = JoinParser.getM(blocCreate, rubrique);
 				rubriqueExclusion.add(rubriqueM);
 			}
 
-			if (type.equals("independance")) {
-				String rubrique = regle.get("rubrique").get(j).toLowerCase();
-				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
+			if (type.equals(TypeNormage.INDEPENDANCE)) {
+				String rubrique = reglesNormage.get(j).getRubrique().toLowerCase();
+				String rubriqueNmcl = reglesNormage.get(j).getRubriqueNmcl().toLowerCase();
 				rubriquesAvecRegleDIndependance.put(JoinParser.anyToM(rubrique), rubriqueNmcl);
 			}
 
@@ -100,8 +104,8 @@ public class IndependanceRulesQueryBuilder {
 
 		// ARC compute which rubriques are independant and set the independance rules
 		List<String> r = new ArrayList<>();
-		addIndependanceToChildren(r, blocCreate, JoinParser.getM(blocCreate), regle,
-				rubriquesAvecRegleDIndependance, norme, periodicite, rubriqueExclusion);
+		addIndependanceToChildren(r, fileIdCard, blocCreate, JoinParser.getM(blocCreate),
+				rubriquesAvecRegleDIndependance, rubriqueExclusion);
 
 	}
 
@@ -116,24 +120,23 @@ public class IndependanceRulesQueryBuilder {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String appliquerRegleIndependance(Map<String, List<String>> regle, String norme,
-			Date validite, String periodicite, String jointure) throws ArcException {
+	public static String appliquerRegleIndependance(FileIdCard fileIdCard) throws ArcException {
 
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleIndependance()");
 
-		String returned = jointure;
+		String returned = fileIdCard.getJointure();
 
 		String blocCreate = ManipString.substringBeforeFirst(returned, "\n insert into {table_destination}");
 		String blocInsert = " insert into {table_destination} "
 				+ ManipString.substringAfterFirst(returned, "insert into {table_destination} ");
 
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-			String type = regle.get("id_classe").get(j);
+		List<RegleNormage> reglesBlocIndependance = fileIdCard.getIdCardNormage().getReglesNormage(TypeNormage.BLOC_INDEPENDANCE);
+		
+		for (int j = 0; j < reglesBlocIndependance.size(); j++) {
 
-			if (type.equals("bloc_independance")) {
 
-				String[] rubriqueRegle = regle.get("rubrique").get(j).replace(" ", "").toLowerCase().split(",");
-				String[] rubriqueNmclRegle = regle.get("rubrique_nmcl").get(j).replace(" ", "").toLowerCase()
+				String[] rubriqueRegle = reglesBlocIndependance.get(j).getRubrique().replace(" ", "").toLowerCase().split(",");
+				String[] rubriqueNmclRegle = reglesBlocIndependance.get(j).getRubriqueNmcl().replace(" ", "").toLowerCase()
 						.split(",");
 
 				List<String> rubrique = new ArrayList<>();
@@ -245,7 +248,6 @@ public class IndependanceRulesQueryBuilder {
 					blocInsert = blocInsertNew.toString();
 
 				}
-			}
 
 		}
 
@@ -403,11 +405,11 @@ public class IndependanceRulesQueryBuilder {
 	 * @param periodicite
 	 * @param exclusion
 	 */
-	private static void addIndependanceToChildren(List<String> r, String blocCreate, String mRubrique,
-			Map<String, List<String>> regle, Map<String, String> rubriquesAvecRegleDIndependance,
-			String norme, String periodicite, Set<String> exclusion) {
+	private static void addIndependanceToChildren(List<String> r, FileIdCard fileIdCard, String blocCreate, String mRubrique, Map<String, String> rubriquesAvecRegleDIndependance,
+			Set<String> exclusion) {
+		
 		List<String> s = JoinParser.getChildren(blocCreate, mRubrique);
-
+		
 		if (!s.isEmpty()) {
 			r.addAll(s);
 
@@ -433,20 +435,11 @@ public class IndependanceRulesQueryBuilder {
 
 			// ne créer une regle que si y'a plus d'une rubrique retenue; sinon pas la peine
 			if (nbRubriqueRetenue > 1) {
-				regle.get("id_regle").add("G" + System.currentTimeMillis());
-				regle.get("id_norme").add(norme);
-				regle.get("periodicite").add(periodicite);
-				regle.get("validite_inf").add("1900-01-01");
-				regle.get("validite_sup").add("3000-01-01");
-				regle.get("id_classe").add("bloc_independance");
-				regle.get("rubrique").add(rubriqueContent.toString());
-				regle.get("rubrique_nmcl").add(rubriqueNmclContent.toString());
-
+				fileIdCard.getIdCardNormage().addRegleNormage(new RegleNormage(TypeNormage.BLOC_INDEPENDANCE, rubriqueContent.toString(), rubriqueNmclContent.toString()));
 			}
 
 			for (String rub : s) {
-				addIndependanceToChildren(r, blocCreate, rub, regle, rubriquesAvecRegleDIndependance, norme,
-						periodicite, exclusion);
+				addIndependanceToChildren(r, fileIdCard, blocCreate, rub, rubriquesAvecRegleDIndependance, exclusion);
 			}
 
 		}

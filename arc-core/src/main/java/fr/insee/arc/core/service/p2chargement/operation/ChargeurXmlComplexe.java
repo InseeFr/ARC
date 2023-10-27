@@ -132,7 +132,7 @@ public class ChargeurXmlComplexe implements IChargeur {
 			saxParser.parse(f, handler);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED,
-					this.fileIdCard.getFileName()).logMessageException();
+					this.fileIdCard.getIdSource()).logMessageException();
 			rapport = FormatSQL.quoteTextWithoutEnclosings(businessException.getMessage());
 			throw businessException;
 		}

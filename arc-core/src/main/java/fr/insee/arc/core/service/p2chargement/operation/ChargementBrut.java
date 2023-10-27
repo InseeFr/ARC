@@ -101,17 +101,17 @@ public class ChargementBrut {
 			// Gênant si la norme utilise une ligne qui n'est pas dans les xxx premières lignes, mais choix temporaire pour éviter
 			// de charger un fichier entier à la recherche de sa norme
 			while (normeOk.getIdNorme() == null && nbBoucle<LIMIT_BOUCLE) {
-	    		calculerNormeAndValidite(normeOk, requeteFichierBrutalement(normeOk.getFileName(), br, nbBoucle));
+	    		calculerNormeAndValidite(normeOk, requeteFichierBrutalement(normeOk.getIdSource(), br, nbBoucle));
 
 	    		nbBoucle++;
 	    	}
 
 	    } catch (IOException e) {
-	    	throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, normeOk.getFileName());
+	    	throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, normeOk.getIdSource());
 	    }
 
 	    if (normeOk.getIdNorme()==null) {
-	        throw new ArcException(ArcExceptionMessage.LOAD_NORM_NOT_FOUND, normeOk.getFileName());
+	        throw new ArcException(ArcExceptionMessage.LOAD_NORM_NOT_FOUND, normeOk.getIdSource());
 	    }
 	    
 	    
@@ -165,7 +165,7 @@ public class ChargementBrut {
 
         NormeRules normFound = listeNorme.get(Integer.parseInt(result.get(0).get(0)));
         
-        normeOk.setFileIdCard(normFound.getIdNorme(), result.get(0).get(2), normFound.getPeriodicite());
+        normeOk.setFileIdCard(normFound.getIdNorme(), result.get(0).get(2), normFound.getPeriodicite(), null);
 
     }
     

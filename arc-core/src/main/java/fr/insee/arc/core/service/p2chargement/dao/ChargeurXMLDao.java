@@ -88,7 +88,7 @@ public class ChargeurXMLDao {
 	public void execQueryBilan(String tableChargementPilTemp, TraitementPhase currentPhase, String rapport, String jointure)
 			throws ArcException {
 		StringBuilder requeteBilan = new StringBuilder();
-		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getFileName(),
+		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getIdSource(),
 				currentPhase, TraitementEtat.OK.toString(), rapport, jointure));
 		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);
 	}

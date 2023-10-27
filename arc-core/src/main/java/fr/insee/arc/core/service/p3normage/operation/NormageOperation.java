@@ -1,11 +1,6 @@
 package fr.insee.arc.core.service.p3normage.operation;
 
 import java.sql.Connection;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +13,10 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.service.global.bo.ArcDateFormat;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p3normage.bo.JoinParser;
+import fr.insee.arc.core.service.p3normage.bo.RegleNormage;
+import fr.insee.arc.core.service.p3normage.bo.TypeNormage;
 import fr.insee.arc.core.service.p3normage.dao.NormageDao;
 import fr.insee.arc.core.service.p3normage.querybuilder.DuplicationRulesRegleQueryBuilder;
 import fr.insee.arc.core.service.p3normage.querybuilder.EngineRulesQueryBuilder;
@@ -31,7 +28,6 @@ import fr.insee.arc.utils.dao.Parameter;
 import fr.insee.arc.utils.dao.ParameterType;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.ManipString;
 
 //@formatter:off
@@ -47,29 +43,9 @@ import fr.insee.arc.utils.utils.ManipString;
 public class NormageOperation {
 
 	private static final Logger LOGGER = LogManager.getLogger(NormageOperation.class);
-
-	private SimpleDateFormat formatter = new SimpleDateFormat(
-			ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat());
 	private StringBuilder columnToBeAdded = new StringBuilder();
 
 	private Connection connection;
-
-	/**
-	 * Caractéristique du fichier (idSource) issu du pilotage de ARC
-	 * 
-	 * idSource : nom du fichier jointure : requete de strucutration id_norme :
-	 * identifiant de norme validite : validite periodicite : periodicite
-	 */
-	private Map<String, List<String>> pilotageIdSource;
-
-	/**
-	 * Les regles relatives au fichier (idSource)
-	 * 
-	 * id_norme text, periodicite text, validite_inf date, validite_sup date,
-	 * version text, id_classe text, rubrique text, rubrique_nmcl text, id_regle
-	 * integer,
-	 */
-	private Map<String, List<String>> regleInitiale;
 
 	/**
 	 * liste des rubriques présentes dans le fichier idSource et réutilisées dans
@@ -86,16 +62,17 @@ public class NormageOperation {
 
 	private NormageDao dao;
 
+	private FileIdCard fileIdCard;
+
 	// deprecated but requires patch in clients database
 	public static final String JOINXML_STRUCTURE_BLOCK = "\n -- structure\n";
 
-	public NormageOperation(Connection connection, Map<String, List<String>> pil, Map<String, List<String>> regle,
+	public NormageOperation(Connection connection, FileIdCard fileIdCard,
 			Map<String, List<String>> rubriqueUtiliseeDansRegles, String tableSource, String tableDestination,
 			String paramBatch) {
 		super();
 		this.connection = connection;
-		this.pilotageIdSource = pil;
-		this.regleInitiale = regle;
+		this.fileIdCard = fileIdCard;
 		this.rubriqueUtiliseeDansRegles = rubriqueUtiliseeDansRegles;
 		this.tableSource = tableSource;
 		this.tableDestination = tableDestination;
@@ -109,12 +86,12 @@ public class NormageOperation {
 
 	public void execute() throws ArcException {
 
-		String jointure = pilotageIdSource.get("jointure").get(0);
+		String jointure = fileIdCard.getJointure();
 
 		if (jointure == null || jointure.equals("")) {
 			simpleExecutionWithNoJoinDefined();
 		} else {
-			complexExecutionWithJoinDefined(jointure);
+			complexExecutionWithJoinDefined();
 		}
 
 	}
@@ -185,31 +162,10 @@ public class NormageOperation {
 	 * @param jointure
 	 * @throws ArcException
 	 */
-	private void complexExecutionWithJoinDefined(String jointure) throws ArcException {
-		// variables locales
-		String idSource = pilotageIdSource.get(ColumnEnum.ID_SOURCE.getColumnName()).get(0);
-		String norme = pilotageIdSource.get("id_norme").get(0);
-		Date validite;
-		try {
-			validite = this.formatter.parse(pilotageIdSource.get(ColumnEnum.VALIDITE.getColumnName()).get(0));
-		} catch (ParseException e) {
-			throw new ArcException(e, ArcExceptionMessage.NORMAGE_VALIDITE_DATE_PARSE_FAILED,
-					pilotageIdSource.get("validite").get(0));
-		}
-		String periodicite = pilotageIdSource.get("periodicite").get(0);
-		String validiteText = pilotageIdSource.get("validite").get(0);
+	private void complexExecutionWithJoinDefined() throws ArcException {
 
-		Map<String, List<String>> regle = new HashMap<>();
-
-		for (String key : regleInitiale.keySet()) {
-			List<String> al = new ArrayList<>();
-			for (String val : regleInitiale.get(key)) {
-				al.add(val);
-			}
-			regle.put(key, al);
-		}
-
-		String subJoin = jointure.split(JOINXML_STRUCTURE_BLOCK)[0].toLowerCase();
+		// rework jointure to keep structure only
+		this.fileIdCard.setJointure(this.fileIdCard.getJointure().split(JOINXML_STRUCTURE_BLOCK)[0].toLowerCase());
 
 		// ORDRE IMPORTANT
 		// on supprime les rubriques inutilisées quand le service est invoqué en batch
@@ -217,36 +173,33 @@ public class NormageOperation {
 		// pour que les gens qui testent en bac à sable puissent utiliser toutes les
 		// rubriques
 		if (paramBatch != null) {
-			SuppressionRulesQueryBuilder.ajouterRegleSuppression(regle, norme, periodicite, subJoin,
-					rubriqueUtiliseeDansRegles);
+			SuppressionRulesQueryBuilder.ajouterRegleSuppression(fileIdCard, rubriqueUtiliseeDansRegles);
 
-			subJoin = SuppressionRulesQueryBuilder.appliquerRegleSuppression(regle, norme, validite, periodicite,
-					subJoin);
+			this.fileIdCard.setJointure(SuppressionRulesQueryBuilder.appliquerRegleSuppression(fileIdCard));
 		}
 
-		DuplicationRulesRegleQueryBuilder.ajouterRegleDuplication(regle, norme, validite, periodicite, subJoin);
+		DuplicationRulesRegleQueryBuilder.ajouterRegleDuplication(fileIdCard);
 
-		subJoin = DuplicationRulesRegleQueryBuilder.appliquerRegleDuplication(regle, norme, validite, periodicite,
-				subJoin, columnToBeAdded);
+		this.fileIdCard
+				.setJointure(DuplicationRulesRegleQueryBuilder.appliquerRegleDuplication(fileIdCard, columnToBeAdded));
 
-		IndependanceRulesQueryBuilder.ajouterRegleIndependance(regle, norme, validite, periodicite, subJoin);
+		IndependanceRulesQueryBuilder.ajouterRegleIndependance(fileIdCard);
 
-		subJoin = IndependanceRulesQueryBuilder.appliquerRegleIndependance(regle, norme, validite, periodicite,
-				subJoin);
+		this.fileIdCard.setJointure(IndependanceRulesQueryBuilder.appliquerRegleIndependance(fileIdCard));
 
-		subJoin = EngineRulesQueryBuilder.appliquerRegleUnicite(regle, subJoin);
+		this.fileIdCard.setJointure(EngineRulesQueryBuilder.appliquerRegleUnicite(fileIdCard));
 
-		subJoin = RelationRulesQueryBuilder.appliquerRegleRelation(regle, subJoin);
+		this.fileIdCard.setJointure(RelationRulesQueryBuilder.appliquerRegleRelation(fileIdCard));
 
-		subJoin = optimisation(subJoin);
+		this.fileIdCard.setJointure(optimisation(fileIdCard));
 
-		executerJointure(regle, norme, validite, periodicite, subJoin, validiteText, idSource);
+		executerJointure(fileIdCard);
 
 	}
 
-	private String optimisation(String jointure) {
+	private String optimisation(FileIdCard fileIdCard) {
 		// on enleve l'id
-		String r = jointure;
+		String r = fileIdCard.getJointure();
 		r = " \n " + r;
 
 		boolean blocInsert = false;
@@ -295,7 +248,7 @@ public class NormageOperation {
 		StringBuilder analyze = new StringBuilder();
 
 		Pattern p = Pattern.compile("create temporary table ([^ ]+) as ");
-		Matcher m = p.matcher(jointure);
+		Matcher m = p.matcher(fileIdCard.getJointure());
 		while (m.find()) {
 			analyze.append("\n analyze " + m.group(1) + ";");
 		}
@@ -340,28 +293,26 @@ public class NormageOperation {
 	 * @return
 	 * @throws ArcException
 	 */
-	private void executerJointure(Map<String, List<String>> regle, String norme, Date validite, String periodicite,
-			String jointure, String validiteText, String idSource) throws ArcException {
+	private void executerJointure(FileIdCard fileIdCard) throws ArcException {
+
+		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure sans partition sur " + fileIdCard.getIdSource());
+
+		List<RegleNormage> reglesPartition = fileIdCard.getIdCardNormage().getReglesNormage(TypeNormage.PARTITION);
+
 		
-		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure sans partition sur "+idSource);
-
+		
 		// only first partition rule is processed
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-			String type = regle.get("id_classe").get(j);
-			if (type.equals("partition")) {
+		for (int j = 0; j < reglesPartition.size(); j++) {
 
-				String element = regle.get("rubrique").get(j);
-				int minSize = Integer.parseInt(regle.get("rubrique_nmcl").get(j).split(",")[0]);
-				int chunkSize = Integer.parseInt(regle.get("rubrique_nmcl").get(j).split(",")[1]);
-				executerJointureWithPartition(regle, norme, validite, periodicite, jointure, validiteText, idSource,
-						element, minSize, chunkSize);
-				return;
-			}
+				String element = reglesPartition.get(j).getRubrique();
+				int minSize = Integer.parseInt(reglesPartition.get(j).getRubriqueNmcl().split(",")[0]);
+				int chunkSize = Integer.parseInt(reglesPartition.get(j).getRubriqueNmcl().split(",")[1]);
+				executerJointureWithPartition(fileIdCard, element, minSize, chunkSize);
 		}
 
 		// No partition found; normal execution
 		UtilitaireDao.get(0).executeImmediate(connection, applyQueryPlanParametersOnJointure(
-				replaceQueryParameters(jointure, norme, validite, periodicite, jointure, validiteText, idSource)));
+				replaceQueryParameters(fileIdCard.getJointure() ,fileIdCard)));
 
 	}
 
@@ -382,16 +333,15 @@ public class NormageOperation {
 	 * @param chunkSize
 	 * @throws ArcException
 	 */
-	private void executerJointureWithPartition(Map<String, List<String>> regle, String norme, Date validite,
-			String periodicite, String jointure, String validiteText, String idSource, String element, int minSize,
+	private void executerJointureWithPartition(FileIdCard fileIdCard, String element, int minSize,
 			int chunkSize) throws ArcException {
-		
-		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure et partition "+idSource);
-		
+
+		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure et partition " + fileIdCard.getIdSource());
+
 		/* get the query blocks */
-		String blocCreate = ManipString.substringBeforeFirst(jointure, "\n insert into {table_destination} ");
+		String blocCreate = ManipString.substringBeforeFirst(fileIdCard.getJointure(), "\n insert into {table_destination} ");
 		String blocInsert = "\n insert into {table_destination} "
-				+ ManipString.substringAfterFirst(jointure, "\n insert into {table_destination} ");
+				+ ManipString.substringAfterFirst(fileIdCard.getJointure(), "\n insert into {table_destination} ");
 
 		// rework create block to get the number of record in partition if the rubrique
 		// is found
@@ -412,8 +362,8 @@ public class NormageOperation {
 			blocCreate = blocCreate + "select 0";
 		}
 
-		blocCreate = replaceQueryParameters(blocCreate, norme, validite, periodicite, jointure, validiteText, idSource);
-		blocInsert = replaceQueryParameters(blocInsert, norme, validite, periodicite, jointure, validiteText, idSource);
+		blocCreate = replaceQueryParameters(blocCreate, fileIdCard);
+		blocInsert = replaceQueryParameters(blocInsert, fileIdCard);
 
 		int total = UtilitaireDao.get(0).getInt(connection, new ArcPreparedStatementBuilder(blocCreate));
 
@@ -424,7 +374,6 @@ public class NormageOperation {
 
 			// rename the table to split
 			dao.execQueryRenamePartitionTable(partitionTableName, partitionTableNameWithAllRecords);
-
 
 			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 			query.append("\n drop table if exists " + partitionTableName + ";");
@@ -460,11 +409,10 @@ public class NormageOperation {
 		}
 	}
 
-	private String replaceQueryParameters(String query, String norme, Date validite, String periodicite,
-			String jointure, String validiteText, String idSource) {
+	private String replaceQueryParameters(String query, FileIdCard fileIdCard) {
 		return query.replace("{table_source}", tableSource).replace("{table_destination}", tableDestination)
-				.replace("{id_norme}", norme).replace("{validite}", validiteText).replace("{periodicite}", periodicite)
-				.replace("{nom_fichier}", idSource);
+				.replace("{id_norme}", fileIdCard.getIdNorme()).replace("{validite}", fileIdCard.getValidite()).replace("{periodicite}", fileIdCard.getPeriodicite())
+				.replace("{nom_fichier}", fileIdCard.getIdSource());
 	}
 
 }

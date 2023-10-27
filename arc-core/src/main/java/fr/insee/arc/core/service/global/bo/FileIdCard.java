@@ -4,42 +4,86 @@ import java.util.Date;
 
 import fr.insee.arc.core.service.global.dao.DateConversion;
 import fr.insee.arc.core.service.p2chargement.bo.IdCardChargement;
+import fr.insee.arc.core.service.p3normage.bo.IdCardNormage;
+import fr.insee.arc.core.service.p4controle.bo.IdCardControle;
+import fr.insee.arc.core.service.p5mapping.bo.IdCardMapping;
 
 public class FileIdCard {
 
+	private final String integrationDate = DateConversion.queryDateConversion(new Date());
 
-	private String fileName;
+	private String idSource;
 	private String idNorme;
 	private String validite;
 	private String periodicite;
-	private final String integrationDate = DateConversion.queryDateConversion(new Date());
+	private String jointure;
 	
     private IdCardChargement idCardChargement;
+    
     public IdCardChargement getIdCardChargement() {
         return idCardChargement;
     }
+    
     public void setIdCardChargement(IdCardChargement regleChargement) {
         this.idCardChargement = regleChargement;
     }
-	
-	public FileIdCard(String idSource) {
-		this.fileName = idSource;
+    
+    private IdCardNormage idCardNormage;
+    
+	public IdCardNormage getIdCardNormage() {
+		return idCardNormage;
 	}
 
-	public void setFileIdCard(String idNorme, String validite, String periodicite) {
+	public void setIdCardNormage(IdCardNormage idCardNormage) {
+		this.idCardNormage = idCardNormage;
+	}
+    
+    private IdCardControle idCardControle;
+    
+	public IdCardControle getIdCardControle() {
+		return idCardControle;
+	}
+
+	public void setIdCardControle(IdCardControle idCardControle) {
+		this.idCardControle = idCardControle;
+	}
+	
+	private IdCardMapping idCardMapping;
+    
+	public IdCardMapping getIdCardMapping() {
+		return idCardMapping;
+	}
+
+	public void setIdCardMapping(IdCardMapping idCardMapping) {
+		this.idCardMapping = idCardMapping;
+	}
+	
+	public FileIdCard(String idSource) {
+		this.idSource = idSource;
+	}
+
+	/**
+	 * Set the pilotage values for a file
+	 * @param idNorme
+	 * @param validite
+	 * @param periodicite
+	 * @param jointure
+	 */
+	public void setFileIdCard(String idNorme, String validite, String periodicite, String jointure) {
 		this.idNorme = idNorme;
 		this.validite = validite;
 		this.periodicite = periodicite;
+		this.jointure = jointure;
 	}
 
 
-	public String getFileName() {
-		return fileName;
+	public String getIdSource() {
+		return idSource;
 	}
 
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+	public void setIdSource(String idSource) {
+		this.idSource = idSource;
 	}
 
 
@@ -78,6 +122,13 @@ public class FileIdCard {
 	}
 	
 	
-	
+
+	public String getJointure() {
+		return jointure;
+	}
+
+	public void setJointure(String jointure) {
+		this.jointure = jointure;
+	}
 	
 }

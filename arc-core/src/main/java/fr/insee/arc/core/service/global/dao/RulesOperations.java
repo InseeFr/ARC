@@ -105,8 +105,10 @@ public class RulesOperations {
 		requete.append("EXISTS ( SELECT * FROM " + tablePilotage + " b ");
 		requete.append("WHERE a.id_norme=b.id_norme ");
 		requete.append("AND a.periodicite=b.periodicite ");
-		requete.append("AND a.validite_inf<=to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
-		requete.append("AND a.validite_sup>=to_date(b.validite,'"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
+		requete.append("AND a.validite_inf<=to_date(b.validite,'"
+				+ ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat() + "') ");
+		requete.append("AND a.validite_sup>=to_date(b.validite,'"
+				+ ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat() + "') ");
 		requete.append(") ");
 		return requete.toString();
 	}
@@ -116,8 +118,10 @@ public class RulesOperations {
 		requete.append("\n ");
 		requete.append("a.id_norme='" + fileIdCard.getIdNorme() + "' ");
 		requete.append("AND a.periodicite='" + fileIdCard.getPeriodicite() + "' ");
-		requete.append("AND a.validite_inf<=to_date('" + fileIdCard.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
-		requete.append("AND a.validite_sup>=to_date('" + fileIdCard.getValidite() + "','"+ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()+"') ");
+		requete.append("AND a.validite_inf<=to_date('" + fileIdCard.getValidite() + "','"
+				+ ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat() + "') ");
+		requete.append("AND a.validite_sup>=to_date('" + fileIdCard.getValidite() + "','"
+				+ ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat() + "') ");
 		requete.append(";");
 		return requete.toString();
 	}
@@ -129,13 +133,13 @@ public class RulesOperations {
 	 * @param id_source
 	 * @param tableRegle
 	 * @return SQL pil.id_source, pil.jointure, pil.id_norme, pil.validite,
-	 *         pil.periodicite, pil.validite
+	 *         pil.periodicite
 	 */
 	public static String getNormeAttributes(String idSource, String tablePilotage) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n SELECT pil." + ColumnEnum.ID_SOURCE.getColumnName()
-				+ ", pil.jointure, pil.id_norme, pil.validite, pil.periodicite, pil.validite " + "FROM " + tablePilotage
-				+ " pil " + " WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "' ");
+				+ ", pil.jointure, pil.id_norme, pil.validite, pil.periodicite " + "FROM " + tablePilotage + " pil "
+				+ " WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "' ");
 		return requete.toString();
 	}
 
@@ -148,11 +152,10 @@ public class RulesOperations {
 	 * @throws ArcException
 	 */
 	public static Map<String, List<String>> getBean(Connection c, String req) throws ArcException {
-		GenericBean gb = new GenericBean(
-				UtilitaireDao.get(0).executeRequest(c, new ArcPreparedStatementBuilder(req)));
+		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(c, new ArcPreparedStatementBuilder(req)));
 		return gb.mapContent(true);
 	}
-	
+
 	/**
 	 * Méthodes pour marquer la table de pilotage temporaire avec le jeu de règle
 	 * appliqué
@@ -163,7 +166,8 @@ public class RulesOperations {
 		return marqueJeuDeRegleApplique(currentPhase, envExecution, pilTemp, null);
 	}
 
-	public static String marqueJeuDeRegleApplique(TraitementPhase currentPhase, String envExecution, String pilTemp, String defaultEtatTraitement) {
+	public static String marqueJeuDeRegleApplique(TraitementPhase currentPhase, String envExecution, String pilTemp,
+			String defaultEtatTraitement) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("WITH ");
 		requete.append("prep AS (SELECT a." + ColumnEnum.ID_SOURCE.getColumnName()
@@ -181,5 +185,31 @@ public class RulesOperations {
 		requete.append("WHERE a.phase_traitement='" + currentPhase + "'; ");
 		return requete.toString();
 	}
-	
+
+	/**
+	 * Set the id card for a file idSource
+	 * 
+	 * @param connection
+	 * @param idSource
+	 * @param pilotageTable
+	 * @return
+	 * @throws ArcException
+	 */
+	public static FileIdCard fileIdCardFromPilotage(Connection connection, String pilotageTable, String idSource)
+			throws ArcException {
+
+		FileIdCard fileIdCard = new FileIdCard(idSource);
+
+		Map<String, List<String>> fileIds = RulesOperations.getBean(connection,
+				RulesOperations.getNormeAttributes(idSource, pilotageTable));
+
+		fileIdCard.setFileIdCard(fileIds.get(ColumnEnum.ID_NORME.getColumnName()).get(0),
+				fileIds.get(ColumnEnum.VALIDITE.getColumnName()).get(0),
+				fileIds.get(ColumnEnum.PERIODICITE.getColumnName()).get(0),
+				fileIds.get(ColumnEnum.JOINTURE.getColumnName()).get(0));
+
+		return fileIdCard;
+
+	}
+
 }
