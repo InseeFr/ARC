@@ -19,7 +19,7 @@
 		<project.java.version>11</project.java.version>
 		<project.maven.compiler.version>3.11.0</project.maven.compiler.version>
 		
-		<project.org.json>20230227</project.org.json>
+		<project.org.json>20231013</project.org.json>
 
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
