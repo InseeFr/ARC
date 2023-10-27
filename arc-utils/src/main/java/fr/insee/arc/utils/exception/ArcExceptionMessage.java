@@ -39,6 +39,8 @@ public enum ArcExceptionMessage {
 	LOAD_SEVERAL_NORM_FOUND("Plusieurs normes ou validité correspondent à l'expression : %s"),
 	LOAD_NORM_NOT_FOUND("Aucune norme trouvée pour le fichier %s"),
 	LOAD_ZERO_NORM_FOUND("Aucune norme trouvée"),
+	LOAD_TYPE_NOT_FOUND("Le type de chargement %s n'existe pas"),
+
 	
 	MAPPING_PRIMARY_KEY_INVALID_FORMAT("La règle de clé primaire pour la variable %s n'est pas de la forme : \"{\"pk:mapping_<famille>_<variable>_ok\"}\""),
 	MAPPING_EXPRESSION_INVALID("L'expression \"%s\" est invalide"),
@@ -54,7 +56,7 @@ public enum ArcExceptionMessage {
 	NORMAGE_VALIDITE_DATE_PARSE_FAILED ("Le champ validite %s ne peut être converti en date"),
 	NORMAGE_INDEPENDANCE_BLOC_INVALID_IDENTIFIER("La rubrique %s n'identifie pas un bloc"),
 	NORMAGE_INDEPENDANCE_BLOC_INVALID_FATHER("La rubrique %s n'a pas le même pere que les autres rubriques du bloc"),
-	
+	NORMAGE_TYPE_NOT_FOUND("Le type de normage %s n'existe pas"),
 	
 	CONTROLE_XSD_ENUM_EMPTY("L'énumération XSD pour le type de règle de contrôle ENUM_BRUTE ne peut pas être vide"),
 	CONTROLE_XSD_RUBRIQUE_RELATION_ALREADY_DEFINED("La relation entre %s et %s est déjà décrite sous forme de séquence dans les règles XSD"),
@@ -101,7 +103,7 @@ public enum ArcExceptionMessage {
 	
 	DATE_PARSE_FAILED_VALIDITE_INF("La validité inf %s n'a pu être parsée"),
 	DATE_PARSE_FAILED_VALIDITE_SUP("La validité sup %s n'a pu être parsée")
-	
+
 	;
 	
 	private String message;
