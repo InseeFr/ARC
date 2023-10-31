@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.21
+- qualified : production version
+
 ## version-93.1.20b
 - deployment for version qualification
 
