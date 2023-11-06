@@ -40,7 +40,7 @@ jobs:
         with:
           push: true
           context: .
-          file: ./app.Dockerfile
+          file: ./app-web.Dockerfile
           tags: |
             ${{ github.event_name == 'release' && format('inseefr/arc:{0}', github.event.release.tag_name) || '' }}
             ${{ github.ref == 'refs/heads/master' && 'inseefr/arc:latest' || '' }}
