@@ -11,6 +11,7 @@ public class RegleControle {
 	private String condition;
 	
 	private String preAction; // aka prétraitement SQL
+	private int idRegle;
 	
 	private int xsdOrdre;
 	private String xsdLabelFils;
@@ -20,7 +21,7 @@ public class RegleControle {
 	private String traitementLignesErreur; // aka error_row_processing
 	
 	public RegleControle(ControleTypeCode typeControle, String rubriquePere, String rubriqueFils, String borneInf,
-			String borneSup, String condition, String preAction, int xsdOrdre, String xsdLabelFils, String xsdRole,
+			String borneSup, String condition, String preAction, int idRegle, int xsdOrdre, String xsdLabelFils, String xsdRole,
 			String seuilBloquant, String traitementLignesErreur) {
 		super();
 		this.typeControle = typeControle;
@@ -30,11 +31,16 @@ public class RegleControle {
 		this.borneSup = borneSup;
 		this.condition = condition;
 		this.preAction = preAction;
+		this.idRegle = idRegle;
 		this.xsdOrdre = xsdOrdre;
 		this.xsdLabelFils = xsdLabelFils;
 		this.xsdRole = xsdRole;
 		this.seuilBloquant = seuilBloquant;
 		this.traitementLignesErreur = traitementLignesErreur;
+	}
+
+	public RegleControle() {
+		super();
 	}
 
 	public ControleTypeCode getTypeControle() {
@@ -91,6 +97,14 @@ public class RegleControle {
 
 	public void setPreAction(String preAction) {
 		this.preAction = preAction;
+	}
+
+	public int getIdRegle() {
+		return idRegle;
+	}
+
+	public void setIdRegle(int idRegle) {
+		this.idRegle = idRegle;
 	}
 
 	public int getXsdOrdre() {

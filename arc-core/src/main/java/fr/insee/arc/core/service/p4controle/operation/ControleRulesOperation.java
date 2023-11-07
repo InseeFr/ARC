@@ -44,6 +44,7 @@ public class ControleRulesOperation {
 					regle.get(ColumnEnum.BORNE_SUP.getColumnName()).get(0),
 					regle.get(ColumnEnum.CONDITION.getColumnName()).get(0),
 					regle.get(ColumnEnum.PRE_ACTION.getColumnName()).get(0),
+					Integer.parseInt(regle.get(ColumnEnum.ID_REGLE.getColumnName()).get(0)),
 					Integer.parseInt(regle.get(ColumnEnum.XSD_ORDRE.getColumnName()).get(0)),
 					regle.get(ColumnEnum.XSD_LABEL_FILS.getColumnName()).get(0),
 					regle.get(ColumnEnum.XSD_ROLE.getColumnName()).get(0),

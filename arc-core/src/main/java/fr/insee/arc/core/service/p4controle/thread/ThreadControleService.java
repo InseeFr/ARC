@@ -5,9 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.GenericQueryDao;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
@@ -22,6 +21,7 @@ import fr.insee.arc.core.service.p4controle.ApiControleService;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
 import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
 import fr.insee.arc.core.service.p4controle.dao.ThreadControleQueryBuilder;
+import fr.insee.arc.core.service.p4controle.operation.ControleRulesOperation;
 import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
@@ -49,8 +49,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private String tableOutKo;
 
 	private ServiceJeuDeRegleOperation sjdr;
-
-	private JeuDeRegle jdr;
+	
+	private FileIdCard fileIdCard;
 	
     private ThreadOperations arcThreadGenericDao;
 	private GenericQueryDao genericExecutorDao;
@@ -70,7 +70,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.paramBatch=theApi.getParamBatch();
 
 		this.sjdr = new ServiceJeuDeRegleOperation();
-		this.jdr = new JeuDeRegle();
 
 		// Nom des tables temporaires
 		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
@@ -160,12 +159,14 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	 */
 	private void execute() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **");
-
-		// Récupération des Jeux de règles associés
-		this.sjdr.fillRegleControle(this.connexion.getExecutorConnection(), jdr, ViewEnum.CONTROLE_REGLE.getFullName(envExecution),
-				this.tableControleDataTemp);
 		
-		this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), jdr, this.tableControleDataTemp);
+		this.fileIdCard = RulesOperations.fileIdCardFromPilotage(this.connexion.getExecutorConnection(),
+				tableControleDataTemp, this.idSource);
+		
+		// Récupération des Jeux de règles associés
+		ControleRulesOperation.fillControleRules(this.connexion.getExecutorConnection(), tableControleDataTemp, fileIdCard);
+
+		this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), fileIdCard, this.tableControleDataTemp);
 
 	}
 
