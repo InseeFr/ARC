@@ -162,7 +162,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 		
 		
 		this.fileIdCard = RulesOperations.fileIdCardFromPilotage(this.connexion.getExecutorConnection(),
-				tableNormageDataTemp, this.idSource);
+				tableNormagePilTemp, this.idSource);
 
 		NormageRulesOperation.fillNormageRules(this.connexion.getExecutorConnection(), this.envExecution, fileIdCard);
 		
