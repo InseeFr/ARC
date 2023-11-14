@@ -49,9 +49,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private String tableOutKo;
 
 	private ServiceJeuDeRegleOperation sjdr;
-	
-	private FileIdCard fileIdCard;
-	
+		
     private ThreadOperations arcThreadGenericDao;
 	private GenericQueryDao genericExecutorDao;
     
@@ -160,8 +158,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private void execute() throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "** execute CONTROLE sur la table : " + this.tableControleDataTemp + " **");
 		
-		this.fileIdCard = RulesOperations.fileIdCardFromPilotage(this.connexion.getExecutorConnection(),
-				tableControleDataTemp, this.idSource);
+		FileIdCard fileIdCard = RulesOperations.fileIdCardFromPilotage(this.connexion.getExecutorConnection(),
+				tableControlePilTemp, this.idSource);
 		
 		// Récupération des Jeux de règles associés
 		ControleRulesOperation.fillControleRules(this.connexion.getExecutorConnection(), tableControleDataTemp, fileIdCard);
