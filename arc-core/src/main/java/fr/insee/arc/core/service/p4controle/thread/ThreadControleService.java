@@ -163,7 +163,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		
 		// Récupération des Jeux de règles associés
 		ControleRulesOperation.fillControleRules(this.connexion.getExecutorConnection(), this.envExecution, fileIdCard);
-
 		this.sjdr.executeJeuDeRegle(this.connexion.getExecutorConnection(), fileIdCard, this.tableControleDataTemp);
 
 	}
