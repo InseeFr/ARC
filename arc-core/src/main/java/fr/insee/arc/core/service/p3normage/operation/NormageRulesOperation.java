@@ -38,9 +38,9 @@ public class NormageRulesOperation {
 		List<RegleNormage> listRegles = new ArrayList<>();
 		for(int i = 0; i < regle.get(ColumnEnum.ID_CLASSE.getColumnName()).size(); i++) {
 			listRegles.add(new RegleNormage(
-					TypeNormage.getEnum(regle.get(ColumnEnum.ID_CLASSE.getColumnName()).get(0)),
-					regle.get(ColumnEnum.RUBRIQUE.getColumnName()).get(0),
-					regle.get(ColumnEnum.RUBRIQUE_NMCL.getColumnName()).get(0)
+					TypeNormage.getEnum(regle.get(ColumnEnum.ID_CLASSE.getColumnName()).get(i)),
+					regle.get(ColumnEnum.RUBRIQUE.getColumnName()).get(i),
+					regle.get(ColumnEnum.RUBRIQUE_NMCL.getColumnName()).get(i)
 					));
 		}
 	

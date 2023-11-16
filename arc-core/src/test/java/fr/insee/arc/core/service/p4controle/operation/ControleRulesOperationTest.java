@@ -77,9 +77,6 @@ public class ControleRulesOperationTest {
 		assertEquals("requete", regleControle.getCondition());
 		assertEquals("pretraitement", regleControle.getPreAction());
 		assertEquals(1, regleControle.getIdRegle());
-		assertEquals(1, regleControle.getXsdOrdre());
-		assertEquals("xsd1", regleControle.getXsdLabelFils());
-		assertEquals("xsd2", regleControle.getXsdRole());
 		assertEquals(">0u", regleControle.getSeuilBloquant());
 		assertEquals("e", regleControle.getTraitementLignesErreur());
 	}

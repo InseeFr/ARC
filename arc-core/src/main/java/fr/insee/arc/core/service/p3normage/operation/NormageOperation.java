@@ -295,24 +295,20 @@ public class NormageOperation {
 	 */
 	private void executerJointure(FileIdCard fileIdCard) throws ArcException {
 
-		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure sans partition sur " + fileIdCard.getIdSource());
+		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure sur " + fileIdCard.getIdSource());
 
 		List<RegleNormage> reglesPartition = fileIdCard.getIdCardNormage().getReglesNormage(TypeNormage.PARTITION);
 
-		
-		
-		// only first partition rule is processed
-		for (int j = 0; j < reglesPartition.size(); j++) {
-
-				String element = reglesPartition.get(j).getRubrique();
-				int minSize = Integer.parseInt(reglesPartition.get(j).getRubriqueNmcl().split(",")[0]);
-				int chunkSize = Integer.parseInt(reglesPartition.get(j).getRubriqueNmcl().split(",")[1]);
-				executerJointureWithPartition(fileIdCard, element, minSize, chunkSize);
+		if (!reglesPartition.isEmpty()) {
+			String element = reglesPartition.get(0).getRubrique();
+			int minSize = Integer.parseInt(reglesPartition.get(0).getRubriqueNmcl().split(",")[0]);
+			int chunkSize = Integer.parseInt(reglesPartition.get(0).getRubriqueNmcl().split(",")[1]);
+			executerJointureWithPartition(fileIdCard, element, minSize, chunkSize);
+		} else {
+			// No partition rules found; normal execution
+			UtilitaireDao.get(0).executeImmediate(connection,
+					applyQueryPlanParametersOnJointure(replaceQueryParameters(fileIdCard.getJointure(), fileIdCard)));
 		}
-
-		// No partition found; normal execution
-		UtilitaireDao.get(0).executeImmediate(connection, applyQueryPlanParametersOnJointure(
-				replaceQueryParameters(fileIdCard.getJointure() ,fileIdCard)));
 
 	}
 
@@ -333,13 +329,14 @@ public class NormageOperation {
 	 * @param chunkSize
 	 * @throws ArcException
 	 */
-	private void executerJointureWithPartition(FileIdCard fileIdCard, String element, int minSize,
-			int chunkSize) throws ArcException {
+	private void executerJointureWithPartition(FileIdCard fileIdCard, String element, int minSize, int chunkSize)
+			throws ArcException {
 
-		StaticLoggerDispatcher.info(LOGGER, "Normage avec jointure et partition " + fileIdCard.getIdSource());
+		StaticLoggerDispatcher.info(LOGGER, "Normage avec règle de partition " + fileIdCard.getIdSource());
 
 		/* get the query blocks */
-		String blocCreate = ManipString.substringBeforeFirst(fileIdCard.getJointure(), "\n insert into {table_destination} ");
+		String blocCreate = ManipString.substringBeforeFirst(fileIdCard.getJointure(),
+				"\n insert into {table_destination} ");
 		String blocInsert = "\n insert into {table_destination} "
 				+ ManipString.substringAfterFirst(fileIdCard.getJointure(), "\n insert into {table_destination} ");
 
@@ -411,7 +408,8 @@ public class NormageOperation {
 
 	private String replaceQueryParameters(String query, FileIdCard fileIdCard) {
 		return query.replace("{table_source}", tableSource).replace("{table_destination}", tableDestination)
-				.replace("{id_norme}", fileIdCard.getIdNorme()).replace("{validite}", fileIdCard.getValidite()).replace("{periodicite}", fileIdCard.getPeriodicite())
+				.replace("{id_norme}", fileIdCard.getIdNorme()).replace("{validite}", fileIdCard.getValidite())
+				.replace("{periodicite}", fileIdCard.getPeriodicite())
 				.replace("{nom_fichier}", fileIdCard.getIdSource());
 	}
 

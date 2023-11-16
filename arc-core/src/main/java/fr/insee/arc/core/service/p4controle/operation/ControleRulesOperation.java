@@ -37,23 +37,22 @@ public class ControleRulesOperation {
 		List<RegleControle> listRegles = new ArrayList<>();
 		for(int i = 0; i < regle.get(ColumnEnum.ID_CLASSE.getColumnName()).size(); i++) {
 			listRegles.add(new RegleControle(
-					ControleTypeCode.getEnum(regle.get(ColumnEnum.ID_CLASSE.getColumnName()).get(0)),
-					regle.get(ColumnEnum.RUBRIQUE_PERE.getColumnName()).get(0),
-					regle.get(ColumnEnum.RUBRIQUE_FILS.getColumnName()).get(0),
-					regle.get(ColumnEnum.BORNE_INF.getColumnName()).get(0),
-					regle.get(ColumnEnum.BORNE_SUP.getColumnName()).get(0),
-					regle.get(ColumnEnum.CONDITION.getColumnName()).get(0),
-					regle.get(ColumnEnum.PRE_ACTION.getColumnName()).get(0),
-					Integer.parseInt(regle.get(ColumnEnum.ID_REGLE.getColumnName()).get(0)),
-					Integer.parseInt(regle.get(ColumnEnum.XSD_ORDRE.getColumnName()).get(0)),
-					regle.get(ColumnEnum.XSD_LABEL_FILS.getColumnName()).get(0),
-					regle.get(ColumnEnum.XSD_ROLE.getColumnName()).get(0),
-					regle.get(ColumnEnum.BLOCKING_THRESHOLD.getColumnName()).get(0),
-					regle.get(ColumnEnum.ERROR_ROW_PROCESSING.getColumnName()).get(0)
+					ControleTypeCode.getEnum(regle.get(ColumnEnum.ID_CLASSE.getColumnName()).get(i)),
+					regle.get(ColumnEnum.RUBRIQUE_PERE.getColumnName()).get(i),
+					regle.get(ColumnEnum.RUBRIQUE_FILS.getColumnName()).get(i),
+					regle.get(ColumnEnum.BORNE_INF.getColumnName()).get(i),
+					regle.get(ColumnEnum.BORNE_SUP.getColumnName()).get(i),
+					regle.get(ColumnEnum.CONDITION.getColumnName()).get(i),
+					regle.get(ColumnEnum.PRE_ACTION.getColumnName()).get(i),
+					Integer.parseInt(regle.get(ColumnEnum.ID_REGLE.getColumnName()).get(i)),
+					regle.get(ColumnEnum.BLOCKING_THRESHOLD.getColumnName()).get(i),
+					regle.get(ColumnEnum.ERROR_ROW_PROCESSING.getColumnName()).get(i)
 					));
+			
+			
 		}
 		fileIdCard.setIdCardControle(
 				new IdCardControle(listRegles));
 	}
-	
+
 }

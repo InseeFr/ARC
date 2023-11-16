@@ -36,8 +36,8 @@ public class MappingRulesOperation {
 		List<RegleMapping> listRegles = new ArrayList<>();
 		for(int i = 0; i < regle.get(ColumnEnum.VARIABLE_SORTIE.getColumnName()).size(); i++) {
 			listRegles.add(new RegleMapping(
-					regle.get(ColumnEnum.VARIABLE_SORTIE.getColumnName()).get(0),
-					regle.get(ColumnEnum.EXPR_REGLE_COL.getColumnName()).get(0)
+					regle.get(ColumnEnum.VARIABLE_SORTIE.getColumnName()).get(i),
+					regle.get(ColumnEnum.EXPR_REGLE_COL.getColumnName()).get(i)
 					));
 		}
 		fileIdCard.setIdCardMapping(

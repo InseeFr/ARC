@@ -13,16 +13,11 @@ public class RegleControle {
 	private String preAction; // aka prétraitement SQL
 	private int idRegle;
 	
-	private int xsdOrdre;
-	private String xsdLabelFils;
-	private String xsdRole;
-	
 	private String seuilBloquant; // aka blocking_threshold
 	private String traitementLignesErreur; // aka error_row_processing
 	
 	public RegleControle(ControleTypeCode typeControle, String rubriquePere, String rubriqueFils, String borneInf,
-			String borneSup, String condition, String preAction, int idRegle, int xsdOrdre, String xsdLabelFils, String xsdRole,
-			String seuilBloquant, String traitementLignesErreur) {
+			String borneSup, String condition, String preAction, int idRegle, String seuilBloquant, String traitementLignesErreur) {
 		super();
 		this.typeControle = typeControle;
 		this.rubriquePere = rubriquePere;
@@ -32,9 +27,6 @@ public class RegleControle {
 		this.condition = condition;
 		this.preAction = preAction;
 		this.idRegle = idRegle;
-		this.xsdOrdre = xsdOrdre;
-		this.xsdLabelFils = xsdLabelFils;
-		this.xsdRole = xsdRole;
 		this.seuilBloquant = seuilBloquant;
 		this.traitementLignesErreur = traitementLignesErreur;
 	}
@@ -105,30 +97,6 @@ public class RegleControle {
 
 	public void setIdRegle(int idRegle) {
 		this.idRegle = idRegle;
-	}
-
-	public int getXsdOrdre() {
-		return xsdOrdre;
-	}
-
-	public void setXsdOrdre(int xsdOrdre) {
-		this.xsdOrdre = xsdOrdre;
-	}
-
-	public String getXsdLabelFils() {
-		return xsdLabelFils;
-	}
-
-	public void setXsdLabelFils(String xsdLabelFils) {
-		this.xsdLabelFils = xsdLabelFils;
-	}
-
-	public String getXsdRole() {
-		return xsdRole;
-	}
-
-	public void setXsdRole(String xsdRole) {
-		this.xsdRole = xsdRole;
 	}
 
 	public String getSeuilBloquant() {
