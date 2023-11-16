@@ -104,7 +104,7 @@ public class ParseFormatRulesOperation<T extends IParseFormatRules> {
 
 		if (criteria.getAfterTag() == null) {
 			if (inputString.contains(criteria.getBeforeTag())) {
-				return ManipString.substringBeforeFirst(inputString, criteria.getBeforeTag());
+				return ManipString.substringBeforeFirst(inputString, criteria.getBeforeTag()).trim();
 			} else {
 				return null;
 			}
@@ -115,7 +115,7 @@ public class ParseFormatRulesOperation<T extends IParseFormatRules> {
 				return ManipString.substringBeforeFirst(
 						ManipString.substringAfterFirst(inputString, criteria.getAfterTag()), criteria.getBeforeTag());
 			} else {
-				return ManipString.substringAfterFirst(inputString, criteria.getAfterTag());
+				return ManipString.substringAfterFirst(inputString, criteria.getAfterTag()).trim();
 			}
 		}
 
