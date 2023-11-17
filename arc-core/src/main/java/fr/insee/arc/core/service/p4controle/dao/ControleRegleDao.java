@@ -224,7 +224,7 @@ public class ControleRegleDao {
 	}
 
 	public String ctlCardinalite(RegleControle reg, List<String> listRubriqueExpr,
-			List<String> ListRubriqueTable) {
+			List<String> listRubriqueTable) {
 
 		// on retire le pere et le fils de la liste d'expr
 		// on pourrait tout traiter pareil (pere, fils et autres...) mais vraiment pas
@@ -242,7 +242,7 @@ public class ControleRegleDao {
 		// cas 1 : présente dans la table
 		// cas 2 : non present dans la table et identifiante
 		// cas 3 : non present dans la table et valeur
-		if (ListRubriqueTable.contains(reg.getRubriqueFils())) {
+		if (listRubriqueTable.contains(reg.getRubriqueFils())) {
 			requete.append("," + reg.getRubriqueFils() + " ");
 		} else {
 			if (reg.getRubriqueFils().toLowerCase().startsWith("i_")) {
@@ -254,7 +254,7 @@ public class ControleRegleDao {
 
 		// rubriques de l'expression
 		for (String s : listRubriqueExpr) {
-			if (ListRubriqueTable.contains(s)) {
+			if (listRubriqueTable.contains(s)) {
 				// on refait les identifiants pour que
 				// la valeur -1 corresponde au fait que la rubrique n'existe pas (null sur tout
 				// le groupe ou inexistante)
@@ -410,38 +410,37 @@ public class ControleRegleDao {
 	private String rewriteCondition(Map<String, RegleControle> mapRubrique, String condition0) {
 		StaticLoggerDispatcher.debug(logger, "Je rentre dans la méthode rewriteCondition");
 		// Passage en MAJUSCULE car la map contient des elements en majuscule
-		// bétonnage du code pour que le .uppercase ne lève pas de null pointerException
-		String cond;
 		if (condition0 == null) {
 			return condition0;
 		}
-		cond = condition0.toUpperCase();
-		String type = "";
-		String rubrique = "";
-		String format = "";
+		
+		// uppercase the condition because the map contains uppercase key
+		String condition = Pattern.compile("\\{[^\\{\\}]*}").matcher(condition0).replaceAll(occ -> occ.group().toUpperCase());
+		
 		for (Entry<String, RegleControle> entry : mapRubrique.entrySet()) {
 			StaticLoggerDispatcher.debug(logger, "A l'intérieur de la boucle FOR");
-			type = entry.getValue().getTypeControle().getNom().trim();
-			rubrique = entry.getKey().trim();
-			StaticLoggerDispatcher.debug(logger, "Mon type : " + type + ", ma rubrique : " + rubrique);
-			switch (type) {
-			case "NUM":
-				cond = cond.replace("{" + rubrique + "}", "cast(" + rubrique + " as numeric)");
-				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + cond);
+			
+			String rubrique = entry.getKey().trim();
+			StaticLoggerDispatcher.debug(logger, "Ma rubrique : " + rubrique);
+			
+			switch (entry.getValue().getTypeControle()) {
+			case NUM:
+				condition = condition.replace("{" + rubrique + "}", "cast(" + rubrique + " as numeric)");
+				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + condition);
 				break;
-			case "DATE":
-
-				format = entry.getValue().getCondition().trim();
+			case DATE:
+				String format = entry.getValue().getCondition().trim();
+				
 				StaticLoggerDispatcher.debug(logger, "format vaut : " + format);
-				cond = cond.replace("{" + rubrique + "}", "to_date(" + rubrique + ",'" + format + "')");
-				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + cond);
+				condition = condition.replace("{" + rubrique + "}", "to_date(" + rubrique + ",'" + format + "')");
+				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + condition);
 				break;
 			default:
-				cond = cond.replace("{" + rubrique + "}", rubrique);
+				condition = condition.replace("{" + rubrique + "}", rubrique);
 				break;
 			}
 		}
-		return cond;
+		return condition;
 	}
 
 	/**
@@ -456,28 +455,24 @@ public class ControleRegleDao {
 	 */
 	private String writeFiltre(Map<String, RegleControle> mapRubrique) {
 		String filtre = "";
-		String type = "";
-		String rubrique = "";
-		String format = "";
 
 		int i = 0;
 
 		for (Entry<String, RegleControle> entry : mapRubrique.entrySet()) {
-			type = entry.getValue().getTypeControle().getNom().trim();
-			rubrique = entry.getKey().trim();
-			format = entry.getValue().getCondition();
+			String rubrique = entry.getKey().trim();
+			String format = entry.getValue().getCondition();
 
 			if (i > 0) {
 				filtre = filtre + " AND ";
 			}
 
-			switch (type) {
-			case "NUM":
+			switch (entry.getValue().getTypeControle()) {
+			case NUM:
 				filtre = filtre
 						+ " (case when {1} IS NULL then true when {0} IS NULL then true else {0} ~ '^-?\\d*(\\.\\d+)?$' end) ";
 				filtre = getRequete(filtre, rubrique, "i_" + ManipString.substringAfterFirst(rubrique, "_"));
 				break;
-			case "DATE":
+			case DATE:
 				filtre = filtre
 						+ " (case when {1} IS NULL then true when {0} IS NULL then true else arc.isdate({0},'{2}') end )";
 				filtre = getRequete(filtre, rubrique, "i_" + ManipString.substringAfterFirst(rubrique, "_"), format);
