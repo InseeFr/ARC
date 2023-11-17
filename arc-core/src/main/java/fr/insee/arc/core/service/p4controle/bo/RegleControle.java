@@ -1,5 +1,7 @@
 package fr.insee.arc.core.service.p4controle.bo;
 
+import fr.insee.arc.utils.format.Format;
+
 public class RegleControle {
 	
 	private ControleTypeCode typeControle; // aka id_classe
@@ -44,7 +46,7 @@ public class RegleControle {
 	}
 
 	public String getRubriquePere() {
-		return rubriquePere==null?null:rubriquePere.toUpperCase();
+		return Format.toUpperCase(rubriquePere);
 	}
 
 	public void setRubriquePere(String rubriquePere) {
@@ -52,7 +54,7 @@ public class RegleControle {
 	}
 
 	public String getRubriqueFils() {
-		return rubriqueFils==null?null:rubriqueFils.toUpperCase();
+		return Format.toUpperCase(rubriqueFils);
 	}
 
 	public void setRubriqueFils(String rubriqueFils) {
