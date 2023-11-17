@@ -70,8 +70,9 @@ public class ControleRulesOperationTest {
 		// assertions
 		RegleControle regleControle = fileIdCard.getIdCardControle().getReglesControle().get(0);
 		assertEquals(ControleTypeCode.CARDINALITE, regleControle.getTypeControle());
-		assertEquals("col1", regleControle.getRubriquePere());
-		assertEquals("col2", regleControle.getRubriqueFils());
+		// rubriques are meant to be set in uppercase
+		assertEquals("COL1", regleControle.getRubriquePere());
+		assertEquals("COL2", regleControle.getRubriqueFils());
 		assertEquals("2", regleControle.getBorneInf());
 		assertEquals("3", regleControle.getBorneSup());
 		assertEquals("requete", regleControle.getCondition());
