@@ -44,7 +44,7 @@ public class RegleControle {
 	}
 
 	public String getRubriquePere() {
-		return rubriquePere;
+		return rubriquePere==null?null:rubriquePere.toUpperCase();
 	}
 
 	public void setRubriquePere(String rubriquePere) {
@@ -52,7 +52,7 @@ public class RegleControle {
 	}
 
 	public String getRubriqueFils() {
-		return rubriqueFils;
+		return rubriqueFils==null?null:rubriqueFils.toUpperCase();
 	}
 
 	public void setRubriqueFils(String rubriqueFils) {

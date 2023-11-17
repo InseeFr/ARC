@@ -101,10 +101,6 @@ public class ServiceJeuDeRegleOperation {
 		 */
 		for (RegleControle reg : fileIdCard.getIdCardControle().getReglesControle()) {
 			if (reg.getPreAction() != null && !StringUtils.isEmpty(reg.getPreAction())) {
-				/**
-				 * si la rubrique de la preaction n'est pas dans la table, il ne faut rien
-				 * calculer
-				 */
 				p.add(ManipString.extractAllRubrique(reg.getPreAction()) + " as " + reg.getRubriquePere());
 			}
 		}
