@@ -12,10 +12,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.XMLConstant;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.core.service.global.bo.RegleControleEntity;
-import fr.insee.arc.core.service.global.bo.RegleDao;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p4controle.bo.ControleTypeCode;
+import fr.insee.arc.core.service.p4controle.bo.RegleControle;
 import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -40,21 +39,6 @@ public class ServiceJeuDeRegleOperation {
 	}
 
 	/**
-	 * pour remplir un jeu de règle avec les règles y afférant
-	 *
-	 * @param jdr        , le jeu de règle à "complèter"
-	 * @param tableRegle , la table des règles de controle
-	 * @param tableIn    , la table à controler
-	 * @throws ArcException
-	 */
-	public void fillRegleControle(Connection connexion, JeuDeRegle jdr, String tableRegle, String tableIn)
-			throws ArcException {
-		StaticLoggerDispatcher.info(LOGGER, "recherche de regle dans la table : " + tableRegle);
-		List<RegleControleEntity> listRegleC = RegleDao.getRegle(connexion, tableRegle, tableIn);
-		jdr.setListRegleControle(listRegleC);
-	}
-
-	/**
 	 * Executer les règles liées à un jeu de règle sur une table donnée
 	 *
 	 * @param connexion
@@ -63,7 +47,7 @@ public class ServiceJeuDeRegleOperation {
 	 * @param table     la table de travail dont les enregistrement seront "marqués"
 	 * @throws ArcException
 	 */
-	public void executeJeuDeRegle(Connection connexion, JeuDeRegle jdr, String table) throws ArcException {
+	public void executeJeuDeRegle(Connection connexion, FileIdCard fileIdCard, String table) throws ArcException {
 		StaticLoggerDispatcher.debug(LOGGER, "executeJeuDeRegle");
 
 		java.util.Date date = new java.util.Date();
@@ -72,10 +56,10 @@ public class ServiceJeuDeRegleOperation {
 		registerRubriquesFromSourceTable(connexion, table);
 
 		// execute the correction rules (aka "preAction") before the control step
-		preAction(connexion, jdr, table);
+		preAction(connexion, fileIdCard, table);
 
 		// execute the control rules
-		executeQueryControl(connexion, jdr, table);
+		executeQueryControl(connexion, fileIdCard, table);
 
 		StaticLoggerDispatcher.info(LOGGER, "Temps de controle : " + (new java.util.Date().getTime() - date.getTime()));
 
@@ -103,7 +87,7 @@ public class ServiceJeuDeRegleOperation {
 	 * @param structure
 	 * @throws ArcException
 	 */
-	private void preAction(Connection connexion, JeuDeRegle jdr, String table) throws ArcException {
+	private void preAction(Connection connexion, FileIdCard fileIdCard, String table) throws ArcException {
 
 		// exécuter les préactions
 		StaticLoggerDispatcher.info(LOGGER, "Debut Pré-actions");
@@ -115,12 +99,8 @@ public class ServiceJeuDeRegleOperation {
 		 * Attention, on suppose que la preaction ne contient qu'une seule rubrique et
 		 * en plus celle de la règle
 		 */
-		for (RegleControleEntity reg : jdr.getListRegleControle()) {
+		for (RegleControle reg : fileIdCard.getIdCardControle().getReglesControle()) {
 			if (reg.getPreAction() != null && !StringUtils.isEmpty(reg.getPreAction())) {
-				/**
-				 * si la rubrique de la preaction n'est pas dans la table, il ne faut rien
-				 * calculer
-				 */
 				p.add(ManipString.extractAllRubrique(reg.getPreAction()) + " as " + reg.getRubriquePere());
 			}
 		}
@@ -145,21 +125,21 @@ public class ServiceJeuDeRegleOperation {
 	 * @param structure
 	 * @throws ArcException
 	 */
-	private void executeQueryControl(Connection connexion, JeuDeRegle jdr, String table) throws ArcException {
+	private void executeQueryControl(Connection connexion, FileIdCard fileIdCard, String table) throws ArcException {
 
 		StringBuilder blocRequete = new StringBuilder();
 		blocRequete.append(this.dao.initTemporaryTable(table));
 
 		int nbRegles = 0;
-		int nbTotalRegles = jdr.getListRegleControle().size();
+		int nbTotalRegles = fileIdCard.getIdCardControle().getReglesControle().size();
 
-		for (RegleControleEntity reg : jdr.getListRegleControle()) {
+		for (RegleControle reg : fileIdCard.getIdCardControle().getReglesControle()) {
 			nbRegles++;
-			reg.setTable(table);
+			//reg.setTable(table); //inutile?
 
-			StaticLoggerDispatcher.info(LOGGER, "n° " + reg.getIdRegle() + " / classe : " + reg.getIdClasse()
-					+ " / commentaire : " + reg.getCommentaire());
-			switch (ControleTypeCode.valueOf(reg.getIdClasse())) {
+			StaticLoggerDispatcher.info(LOGGER, "n° " + reg.getIdRegle() + " / classe : " + reg.getTypeControle()
+					/*+ " / commentaire : " + reg.getCommentaire()*/);
+			switch (reg.getTypeControle()) {
 			case NUM:
 				if (regleEstAAppliquer(this.listRubTable, reg)) {
 					blocRequete.append(this.dao.ctlIsNumeric(reg));
@@ -190,7 +170,7 @@ public class ServiceJeuDeRegleOperation {
 				}
 				break;
 			case CONDITION:
-				blocRequete.append(executeRegleCondition(jdr, reg));
+				blocRequete.append(executeRegleCondition(fileIdCard, reg));
 				blocRequete.append(System.lineSeparator());
 				break;
 			case REGEXP:
@@ -231,7 +211,7 @@ public class ServiceJeuDeRegleOperation {
 	}
 
 	/** Vérifie si la règle est à appliquer pour ces rubriques. */
-	private boolean regleEstAAppliquer(List<String> listRubriques, RegleControleEntity reg) {
+	private boolean regleEstAAppliquer(List<String> listRubriques, RegleControle reg) {
 		if (!listRubriques.contains(reg.getRubriquePere())) {
 			StaticLoggerDispatcher.info(LOGGER,
 					"la rubrique : " + reg.getRubriquePere() + " n'existe pas dans ce fichier");
@@ -250,7 +230,7 @@ public class ServiceJeuDeRegleOperation {
 	 * @param table
 	 * @throws ArcException
 	 */
-	private String executeRegleCondition(JeuDeRegle jdr, RegleControleEntity reg) {
+	private String executeRegleCondition(FileIdCard fileIdCard, RegleControle reg) {
 		StaticLoggerDispatcher.info(LOGGER, "Je lance executeRegleCondition()");
 		String requete = "";
 
@@ -258,10 +238,10 @@ public class ServiceJeuDeRegleOperation {
 		listRubrique.replaceAll(String::toUpperCase);
 
 		if (this.listRubTable.containsAll(listRubrique)) {
-			Map<String, RegleControleEntity> mapRubrique = new HashMap<>();
+			Map<String, RegleControle> mapRubrique = new HashMap<>();
 			for (String rub : listRubrique) {
 				StaticLoggerDispatcher.debug(LOGGER, "Je parcours la liste listRubrique sur l'élément : " + rub);
-				RegleControleEntity regle = findType(jdr, rub);
+				RegleControle regle = findType(fileIdCard, rub);
 				mapRubrique.put(rub, regle);
 			}
 			StaticLoggerDispatcher.debug(LOGGER, "MapRubrique contient : " + mapRubrique.toString());
@@ -282,7 +262,7 @@ public class ServiceJeuDeRegleOperation {
 	 * @param table
 	 * @throws ArcException
 	 */
-	private String executeRegleCardinalite(RegleControleEntity reg) {
+	private String executeRegleCardinalite(RegleControle reg) {
 		StaticLoggerDispatcher.info(LOGGER, "Je lance executeRegleCardinalite()");
 		String requete = "";
 
@@ -301,22 +281,22 @@ public class ServiceJeuDeRegleOperation {
 	 * @param rub
 	 * @return
 	 */
-	private RegleControleEntity findType(JeuDeRegle jdr, String rub) {
-		RegleControleEntity reg = new RegleControleEntity();
+	private RegleControle findType(FileIdCard fileIdCard, String rub) {
+		RegleControle reg = new RegleControle();
 		boolean isFind = false;
 		StaticLoggerDispatcher.debug(LOGGER, "La rubrique dont on cherche le type : " + rub);
 		String rubriquePere = "";
-		String idClasse = "";
-		for (RegleControleEntity regC : jdr.getListRegleControle()) {
+		ControleTypeCode idClasse;
+		for (RegleControle regC : fileIdCard.getIdCardControle().getReglesControle()) {
 			rubriquePere = regC.getRubriquePere();
-			idClasse = regC.getIdClasse();
+			idClasse = regC.getTypeControle();
 			StaticLoggerDispatcher.debug(LOGGER,
 					"La rubrique de la regle testée : " + rubriquePere + " et le type : " + idClasse);
 			if (rub.equals(rubriquePere)
-					&& (idClasse.equals("NUM") || idClasse.equals("DATE") || idClasse.equals("ALPHANUM"))) {
+					&& (idClasse.equals(ControleTypeCode.NUM) || idClasse.equals(ControleTypeCode.DATE) || idClasse.equals(ControleTypeCode.ALPHANUM))) {
 				StaticLoggerDispatcher.debug(LOGGER, "J'ai trouvé une règle de typage");
 				reg.setIdRegle(regC.getIdRegle());
-				reg.setIdClasse(regC.getIdClasse());
+				reg.setTypeControle(regC.getTypeControle());
 				reg.setRubriquePere(rub);
 				reg.setCondition(regC.getCondition());
 				isFind = true;
@@ -324,7 +304,7 @@ public class ServiceJeuDeRegleOperation {
 			}
 		}
 		if (!isFind) {// par défaut le type sera considéré comme numérique
-			reg.setIdClasse("ALPHANUM");
+			reg.setTypeControle(ControleTypeCode.ALPHANUM);
 			reg.setRubriquePere(rub);
 		}
 		return reg;

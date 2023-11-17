@@ -41,7 +41,7 @@ public class ExecuteEngineChargementOperation {
 				bodyPojo.fileContent.getBytes(StandardCharsets.UTF_8));) {
 			
 			FileIdCard fileIdCard = new FileIdCard(bodyPojo.fileName);
-			fileIdCard.setFileIdCard(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite);
+			fileIdCard.setFileIdCard(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite, null);
 			ChargementRulesOperation.fillChargementRules(sandbox.getConnection(), sandbox.getSchema(), fileIdCard);
 			
 			ChargeurXmlComplexe chargeur = new ChargeurXmlComplexe(sandbox.getConnection(), sandbox.getSchema(), fileIdCard, inputStream, phaseInterface.getOutputTable());

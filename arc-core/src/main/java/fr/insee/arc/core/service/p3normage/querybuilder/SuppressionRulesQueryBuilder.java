@@ -10,7 +10,10 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p3normage.bo.JoinParser;
+import fr.insee.arc.core.service.p3normage.bo.RegleNormage;
+import fr.insee.arc.core.service.p3normage.bo.TypeNormage;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
@@ -31,8 +34,7 @@ public class SuppressionRulesQueryBuilder {
 	 * @throws ArcException
 	 */
 
-	public static void ajouterRegleSuppression(Map<String, List<String>> regle, String norme,
-			String periodicite, String jointure, Map<String, List<String>> rubriqueUtiliseeDansRegles)
+	public static void ajouterRegleSuppression(FileIdCard fileIdCard, Map<String, List<String>> rubriqueUtiliseeDansRegles)
 			throws ArcException {
 		// on va jouer au "qui enleve-t-on" ??
 		// on va parcourir les regles de normage, controle, mapping et voir
@@ -47,7 +49,7 @@ public class SuppressionRulesQueryBuilder {
 			listVarUtilisee.add(rubriqueUtiliseeDansRegles.get("var").get(j));
 		}
 
-		String[] lines0 = jointure.split("\n");
+		String[] lines0 = fileIdCard.getJointure().split("\n");
 		int max0 = lines0.length - 1;
 		int k0 = max0;
 		while (k0 >= 1) {
@@ -106,19 +108,14 @@ public class SuppressionRulesQueryBuilder {
 						String rubriquePereBloc = JoinParser.getCoreVariableName(rubriquePere);
 
 						// ajouter le bloc aux regles de suppression si pas dans la table de regle
-						if (!regle.get("rubrique").contains(rubriquePere)
-								&& !regle.get("rubrique_nmcl").contains(rubriquePere)
-								&& !regle.get("rubrique").contains(rubriquePereBloc)
-								&& !regle.get("rubrique_nmcl").contains(rubriquePereBloc)) {
+						if (!fileIdCard.getIdCardNormage().isAnyRubrique(rubriquePere)
+								&& !fileIdCard.getIdCardNormage().isAnyRubriqueNmcl(rubriquePere)
+								&& !fileIdCard.getIdCardNormage().isAnyRubrique(rubriquePereBloc)
+								&& !fileIdCard.getIdCardNormage().isAnyRubriqueNmcl(rubriquePereBloc)
+								) {
 							lineASupprimer.add(k0);
-							regle.get("id_regle").add("B");
-							regle.get("id_norme").add(norme);
-							regle.get("periodicite").add(periodicite);
-							regle.get("validite_inf").add("1900-01-01");
-							regle.get("validite_sup").add("3000-01-01");
-							regle.get("id_classe").add("deletion");
-							regle.get("rubrique").add(rubriquePereBloc);
-							regle.get("rubrique_nmcl").add(null);
+							
+							fileIdCard.getIdCardNormage().addRegleNormage(new RegleNormage(TypeNormage.DELETION, rubriquePereBloc, null));
 
 						}
 					}
@@ -152,21 +149,18 @@ public class SuppressionRulesQueryBuilder {
 						String rubriqueV = "v_" + rubrique;
 
 						if (!listVarUtilisee.contains(rubriqueI) && !listVarUtilisee.contains(rubriqueV)
-								&& !regle.get("rubrique").contains(rubriqueI)
-								&& !regle.get("rubrique_nmcl").contains(rubriqueI)
-								&& !regle.get("rubrique").contains(rubriqueV)
-								&& !regle.get("rubrique_nmcl").contains(rubriqueV)
-								&& !regle.get("rubrique").contains(rubrique)
-								&& !regle.get("rubrique_nmcl").contains(rubrique)) {
-							regle.get("id_regle").add("R");
-							regle.get("id_norme").add(norme);
-							regle.get("periodicite").add(periodicite);
-							regle.get("validite_inf").add("1900-01-01");
-							regle.get("validite_sup").add("3000-01-01");
-							regle.get("id_classe").add("deletion");
-							regle.get("rubrique").add(rubrique);
-							regle.get("rubrique_nmcl").add(null);
+								
+								&& !fileIdCard.getIdCardNormage().isAnyRubrique(rubriqueI)
+								&& !fileIdCard.getIdCardNormage().isAnyRubrique(rubriqueV)
+								&& !fileIdCard.getIdCardNormage().isAnyRubrique(rubrique)
 
+								&& !fileIdCard.getIdCardNormage().isAnyRubriqueNmcl(rubriqueI)
+								&& !fileIdCard.getIdCardNormage().isAnyRubriqueNmcl(rubriqueV)
+								&& !fileIdCard.getIdCardNormage().isAnyRubriqueNmcl(rubrique)
+
+								) {
+							
+							fileIdCard.getIdCardNormage().addRegleNormage(new RegleNormage(TypeNormage.DELETION, rubrique, null));
 						}
 					}
 				}
@@ -189,23 +183,21 @@ public class SuppressionRulesQueryBuilder {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String appliquerRegleSuppression(Map<String, List<String>> regle, String norme,
-			Date validite, String periodicite, String jointure) throws ArcException {
+	public static String appliquerRegleSuppression(FileIdCard fileIdCard) throws ArcException {
 
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleSuppression()");
 
-		String returned = jointure;
+		String returned = fileIdCard.getJointure();
 
 		// ajout des regles
 		// parcourt des regles : faut parcourir les suppression d'abord
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
+		
+		List<RegleNormage> regleNormageDeletion = fileIdCard.getIdCardNormage().getReglesNormage(TypeNormage.DELETION);
+		for (int j = 0; j < regleNormageDeletion.size(); j++) {
 
-			String type = regle.get("id_classe").get(j);
-			String rubrique = regle.get("rubrique").get(j).toLowerCase();
+			String rubrique = regleNormageDeletion.get(j).getRubrique().toLowerCase();
 
-			if (type.equals("deletion")) {
-				returned = appliquerRegleSuppressionCore(returned, rubrique);
-			}
+			returned = appliquerRegleSuppressionCore(returned, rubrique);
 
 		}
 		return returned;
@@ -223,7 +215,7 @@ public class SuppressionRulesQueryBuilder {
 
 		List<String> grpAEnlever = new ArrayList<>();
 		List<Integer> ligneAEnlever = new ArrayList<>();
-		List<String> rubriqueAEnlever = new ArrayList<String>();
+		List<String> rubriqueAEnlever = new ArrayList<>();
 
 		// identifier les groupes a enlever de la requete
 		identifierGroupeAEnlever(lines, rubrique, grpAEnlever, ligneAEnlever);

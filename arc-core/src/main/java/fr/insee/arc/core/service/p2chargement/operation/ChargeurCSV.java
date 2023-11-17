@@ -142,7 +142,7 @@ public class ChargeurCSV implements IChargeur {
 				}
 			} catch (IOException fileReadException) {
 				throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
-						fileIdCard.getFileName());
+						fileIdCard.getIdSource());
 			}
 		} else {
 			String[] headers = Format.tokenizeAndTrim(userDefinedHeaders, Delimiters.HEADERS_DELIMITER);
@@ -172,7 +172,7 @@ public class ChargeurCSV implements IChargeur {
 			}
 		} catch (IOException fileReadException) {
 			throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
-					this.fileIdCard.getFileName());
+					this.fileIdCard.getIdSource());
 		}
 	}
 

@@ -12,9 +12,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.service.global.bo.RegleControleEntity;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
 import fr.insee.arc.core.service.p4controle.bo.ControleXsdCode;
+import fr.insee.arc.core.service.p4controle.bo.RegleControle;
 import fr.insee.arc.core.service.p4controle.bo.XsdDate;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -168,12 +168,12 @@ public class ControleRegleDao {
 	 * @param reg
 	 * @return
 	 */
-	public String ctlIsNumeric(RegleControleEntity reg) {
+	public String ctlIsNumeric(RegleControle reg) {
 		String cond = conditionLongueur(reg);
 		String requete = "WITH ctl AS (	SELECT id FROM " + this.tableTempData + " "
 				+ " WHERE ({2} ~ '^-?\\d*(\\.\\d+)?$') IS FALSE " + cond + ") "
-				+ insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle());
-		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere());
+				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
+		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere());
 		return requete;
 	}
 
@@ -185,7 +185,7 @@ public class ControleRegleDao {
 	 * 
 	 * @param reg la règle à appliquer
 	 */
-	public String ctlIsDate(RegleControleEntity reg) {
+	public String ctlIsDate(RegleControle reg) {
 		StringBuilder reqBuilder = new StringBuilder("WITH ctl AS (SELECT id FROM " + this.tableTempData + " ");
 		String requete = "";
 		if (reg.getCondition().equalsIgnoreCase(ControleXsdCode.XSD_DATE_NAME)
@@ -202,29 +202,29 @@ public class ControleRegleDao {
 			reqBuilder.append(") THEN false ");
 			reqBuilder.append("\n WHEN {2} is null THEN false ");
 			reqBuilder.append("\n ELSE true END) ");
-			reqBuilder.append(insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle()));
-			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere());
+			reqBuilder.append(insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle())));
+			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere());
 		} else {
 			reqBuilder.append("\n WHERE CASE WHEN arc.isdate({2},'{3}') THEN false");
 			reqBuilder.append("\n WHEN {2} is null THEN false ");
 			reqBuilder.append("\n ELSE true END) ");
-			reqBuilder.append(insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle()));
-			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(),
+			reqBuilder.append(insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle())));
+			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(),
 					reg.getCondition());
 		}
 		return requete;
 	}
 
-	public String ctlIsAlphanum(RegleControleEntity reg) {
+	public String ctlIsAlphanum(RegleControle reg) {
 		String cond = conditionLongueur(reg);
 		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData + " WHERE false " + cond + ")"
-				+ insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle());
-		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle());
+				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
+		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()));
 		return requete;
 	}
 
-	public String ctlCardinalite(RegleControleEntity reg, List<String> listRubriqueExpr,
-			List<String> ListRubriqueTable) {
+	public String ctlCardinalite(RegleControle reg, List<String> listRubriqueExpr,
+			List<String> listRubriqueTable) {
 
 		// on retire le pere et le fils de la liste d'expr
 		// on pourrait tout traiter pareil (pere, fils et autres...) mais vraiment pas
@@ -242,7 +242,7 @@ public class ControleRegleDao {
 		// cas 1 : présente dans la table
 		// cas 2 : non present dans la table et identifiante
 		// cas 3 : non present dans la table et valeur
-		if (ListRubriqueTable.contains(reg.getRubriqueFils())) {
+		if (listRubriqueTable.contains(reg.getRubriqueFils())) {
 			requete.append("," + reg.getRubriqueFils() + " ");
 		} else {
 			if (reg.getRubriqueFils().toLowerCase().startsWith("i_")) {
@@ -254,7 +254,7 @@ public class ControleRegleDao {
 
 		// rubriques de l'expression
 		for (String s : listRubriqueExpr) {
-			if (ListRubriqueTable.contains(s)) {
+			if (listRubriqueTable.contains(s)) {
 				// on refait les identifiants pour que
 				// la valeur -1 corresponde au fait que la rubrique n'existe pas (null sur tout
 				// le groupe ou inexistante)
@@ -306,9 +306,9 @@ public class ControleRegleDao {
 		requete.append("  SELECT a.id FROM " + this.tableTempData + " a ");
 		requete.append("  INNER JOIN trav ON row(a.{2})::text collate \"C\"=row(trav.{2})::text collate \"C\" ");
 		requete.append(" ) ");
-		requete.append(insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle()));
+		requete.append(insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle())));
 
-		return getRequete(requete.toString(), TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(),
+		return getRequete(requete.toString(), TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(),
 				reg.getRubriqueFils());
 	}
 
@@ -320,14 +320,14 @@ public class ControleRegleDao {
 	 * @param mapRubrique
 	 * @return
 	 */
-	public String ctlCondition(RegleControleEntity reg, Map<String, RegleControleEntity> mapRubrique) {
+	public String ctlCondition(RegleControle reg, Map<String, RegleControle> mapRubrique) {
 		String filtre = writeFiltre(mapRubrique);
 		String cond = rewriteCondition(mapRubrique, reg.getCondition());
 		String requete = "WITH ctl AS ( select id from (SELECT id, " + " CASE WHEN " + filtre + " THEN CASE WHEN "
 				+ cond + " THEN FALSE ELSE TRUE END ELSE FALSE END as condition_a_tester " + " FROM "
 				+ this.tableTempData + " " + ") ww where condition_a_tester ) "
-				+ insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle());
-		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle());
+				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
+		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()));
 		return requete;
 	}
 
@@ -338,10 +338,10 @@ public class ControleRegleDao {
 	 * 
 	 * @param reg la règle à appliquer
 	 */
-	public String ctlMatchesRegexp(RegleControleEntity reg) {
+	public String ctlMatchesRegexp(RegleControle reg) {
 		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData + " " + "WHERE ({2} ~ '{3}') IS FALSE ) "
-				+ insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle());
-		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
+				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
+		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
 
@@ -358,11 +358,11 @@ public class ControleRegleDao {
 	 * 
 	 * @param reg la règle à appliquer
 	 */
-	public String ctlIsValueIn(RegleControleEntity reg) {
+	public String ctlIsValueIn(RegleControle reg) {
 		String requete = "WITH " + "ctl AS ( SELECT id " + " FROM " + this.tableTempData + " "
 				+ "WHERE {2} not in ({3}) ) "
-				+ insertBloc(reg.getBlockingThreshold(), reg.getErrorRowProcessing(), reg.getIdRegle());
-		requete = getRequete(requete, TABLE_TEMP_MARK, reg.getIdRegle(), reg.getRubriquePere(), reg.getCondition());
+				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
+		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
 
@@ -373,7 +373,7 @@ public class ControleRegleDao {
 	 * @param reg
 	 * @return
 	 */
-	private String conditionCardinalite(RegleControleEntity reg) {
+	private String conditionCardinalite(RegleControle reg) {
 		String cond = "";
 		String rubrique = reg.getRubriquePere();
 		String rubriqueF = reg.getRubriqueFils();
@@ -407,41 +407,40 @@ public class ControleRegleDao {
 	 * @param condition0
 	 * @return le résultat est en MAJUSCULE
 	 */
-	private String rewriteCondition(Map<String, RegleControleEntity> mapRubrique, String condition0) {
+	private String rewriteCondition(Map<String, RegleControle> mapRubrique, String condition0) {
 		StaticLoggerDispatcher.debug(logger, "Je rentre dans la méthode rewriteCondition");
 		// Passage en MAJUSCULE car la map contient des elements en majuscule
-		// bétonnage du code pour que le .uppercase ne lève pas de null pointerException
-		String cond;
 		if (condition0 == null) {
 			return condition0;
 		}
-		cond = condition0.toUpperCase();
-		String type = "";
-		String rubrique = "";
-		String format = "";
-		for (Entry<String, RegleControleEntity> entry : mapRubrique.entrySet()) {
+		
+		// uppercase the condition because the map contains uppercase key
+		String condition = Pattern.compile("\\{[^\\{\\}]*}").matcher(condition0).replaceAll(occ -> occ.group().toUpperCase());
+		
+		for (Entry<String, RegleControle> entry : mapRubrique.entrySet()) {
 			StaticLoggerDispatcher.debug(logger, "A l'intérieur de la boucle FOR");
-			type = entry.getValue().getIdClasse().trim();
-			rubrique = entry.getKey().trim();
-			StaticLoggerDispatcher.debug(logger, "Mon type : " + type + ", ma rubrique : " + rubrique);
-			switch (type) {
-			case "NUM":
-				cond = cond.replace("{" + rubrique + "}", "cast(" + rubrique + " as numeric)");
-				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + cond);
+			
+			String rubrique = entry.getKey().trim();
+			StaticLoggerDispatcher.debug(logger, "Ma rubrique : " + rubrique);
+			
+			switch (entry.getValue().getTypeControle()) {
+			case NUM:
+				condition = condition.replace("{" + rubrique + "}", "cast(" + rubrique + " as numeric)");
+				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + condition);
 				break;
-			case "DATE":
-
-				format = entry.getValue().getCondition().trim();
+			case DATE:
+				String format = entry.getValue().getCondition().trim();
+				
 				StaticLoggerDispatcher.debug(logger, "format vaut : " + format);
-				cond = cond.replace("{" + rubrique + "}", "to_date(" + rubrique + ",'" + format + "')");
-				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + cond);
+				condition = condition.replace("{" + rubrique + "}", "to_date(" + rubrique + ",'" + format + "')");
+				StaticLoggerDispatcher.debug(logger, "la nouvelle condition : " + condition);
 				break;
 			default:
-				cond = cond.replace("{" + rubrique + "}", rubrique);
+				condition = condition.replace("{" + rubrique + "}", rubrique);
 				break;
 			}
 		}
-		return cond;
+		return condition;
 	}
 
 	/**
@@ -454,30 +453,26 @@ public class ControleRegleDao {
 	 * @param mapRubrique
 	 * @return
 	 */
-	private String writeFiltre(Map<String, RegleControleEntity> mapRubrique) {
+	private String writeFiltre(Map<String, RegleControle> mapRubrique) {
 		String filtre = "";
-		String type = "";
-		String rubrique = "";
-		String format = "";
 
 		int i = 0;
 
-		for (Entry<String, RegleControleEntity> entry : mapRubrique.entrySet()) {
-			type = entry.getValue().getIdClasse().trim();
-			rubrique = entry.getKey().trim();
-			format = entry.getValue().getCondition();
+		for (Entry<String, RegleControle> entry : mapRubrique.entrySet()) {
+			String rubrique = entry.getKey().trim();
+			String format = entry.getValue().getCondition();
 
 			if (i > 0) {
 				filtre = filtre + " AND ";
 			}
 
-			switch (type) {
-			case "NUM":
+			switch (entry.getValue().getTypeControle()) {
+			case NUM:
 				filtre = filtre
 						+ " (case when {1} IS NULL then true when {0} IS NULL then true else {0} ~ '^-?\\d*(\\.\\d+)?$' end) ";
 				filtre = getRequete(filtre, rubrique, "i_" + ManipString.substringAfterFirst(rubrique, "_"));
 				break;
-			case "DATE":
+			case DATE:
 				filtre = filtre
 						+ " (case when {1} IS NULL then true when {0} IS NULL then true else arc.isdate({0},'{2}') end )";
 				filtre = getRequete(filtre, rubrique, "i_" + ManipString.substringAfterFirst(rubrique, "_"), format);
@@ -554,7 +549,7 @@ public class ControleRegleDao {
 	 * @param borneSup
 	 * @return
 	 */
-	private String conditionLongueur(RegleControleEntity reg) {
+	private String conditionLongueur(RegleControle reg) {
 		String cond = "";
 		String rubrique = reg.getRubriquePere();
 		String borneInf = reg.getBorneInf();

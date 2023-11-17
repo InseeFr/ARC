@@ -2,9 +2,10 @@ package fr.insee.arc.ws.services.restServices.execute.operation;
 
 import java.io.IOException;
 
-import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.global.dao.RulesOperations;
+import fr.insee.arc.core.service.p4controle.operation.ControleRulesOperation;
 import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -40,10 +41,12 @@ public class ExecuteEngineControleOperation {
 		ServiceJeuDeRegleOperation sjdr = new ServiceJeuDeRegleOperation();
 
 		// Récupération des règles de controles associées aux jeux de règle
-		JeuDeRegle jdr = new JeuDeRegle();
+		FileIdCard fileIdCard = RulesOperations.fileIdCardFromPilotage(this.sandbox.getConnection(),
+				phaseInterface.getOutputTable(), this.bodyPojo.getFileName());
+		
+		ControleRulesOperation.fillControleRules(this.sandbox.getConnection(), phaseInterface.getOutputTable(), fileIdCard);
 
-		sjdr.fillRegleControle(this.sandbox.getConnection(), jdr, ViewEnum.CONTROLE_REGLE.getFullName(this.sandbox.getSchema()), phaseInterface.getOutputTable());
-		sjdr.executeJeuDeRegle(this.sandbox.getConnection(), jdr, phaseInterface.getOutputTable());
+		sjdr.executeJeuDeRegle(this.sandbox.getConnection(), fileIdCard, phaseInterface.getOutputTable());
 		
 		
 		PhaseInterface returnInterface = new PhaseInterface();

@@ -104,7 +104,7 @@ public class ChargeurCsvDao {
 		req.append("DROP TABLE IF EXISTS " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
 		req.append("CREATE TEMPORARY TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName());
 		req.append(" AS (SELECT ");
-		req.append("\n '" + fileIdCard.getFileName() + "'::text collate \"C\" as "
+		req.append("\n '" + fileIdCard.getIdSource() + "'::text collate \"C\" as "
 				+ ColumnEnum.ID_SOURCE.getColumnName());
 		req.append("\n ,id::integer as id");
 		req.append("\n ," + fileIdCard.getIntegrationDate() + "::text collate \"C\" as date_integration ");
@@ -439,7 +439,7 @@ public class ChargeurCsvDao {
 	public void execQueryBilan(String tableChargementPilTemp, TraitementPhase currentPhase) throws ArcException {
 
 		StringBuilder requeteBilan = new StringBuilder();
-		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getFileName(),
+		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getIdSource(),
 				currentPhase, TraitementEtat.OK.toString(), null));
 
 		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);

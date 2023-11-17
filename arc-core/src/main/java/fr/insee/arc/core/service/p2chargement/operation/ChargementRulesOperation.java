@@ -38,7 +38,7 @@ public class ChargementRulesOperation {
 		}
 
 		if (regle.get(ColumnEnum.TYPE_FICHIER.getColumnName()).size() > 1) {
-			throw new ArcException(ArcExceptionMessage.LOAD_RULES_NOT_FOUND, fileIdCard.getIdNorme());
+			throw new ArcException(ArcExceptionMessage.LOAD_RULES_SEVERAL, fileIdCard.getIdNorme());
 		}
 
 		fileIdCard.setIdCardChargement(

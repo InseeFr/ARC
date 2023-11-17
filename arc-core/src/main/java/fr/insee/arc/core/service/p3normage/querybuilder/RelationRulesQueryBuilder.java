@@ -2,12 +2,14 @@ package fr.insee.arc.core.service.p3normage.querybuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p3normage.bo.JoinParser;
+import fr.insee.arc.core.service.p3normage.bo.RegleNormage;
+import fr.insee.arc.core.service.p3normage.bo.TypeNormage;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
@@ -16,7 +18,6 @@ public class RelationRulesQueryBuilder {
 
 	private static final Logger LOGGER = LogManager.getLogger(RelationRulesQueryBuilder.class);
 
-	
 	/**
 	 * Modifie la requete pour appliquer les regles de relation
 	 * 
@@ -28,11 +29,12 @@ public class RelationRulesQueryBuilder {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String appliquerRegleRelation(Map<String, List<String>> regle, String jointure) {
+	public static String appliquerRegleRelation(FileIdCard fileIdCard) {
 
 		StaticLoggerDispatcher.info(LOGGER, "appliquerRegleRelation()");
 
-		String returned = jointure;
+		String returned = fileIdCard.getJointure();
+
 		// extraction de la clause select
 		String blocCreate = ManipString.substringBeforeFirst(returned, "\n insert into {table_destination}");
 
@@ -48,37 +50,36 @@ public class RelationRulesQueryBuilder {
 		List<String> listRubriqueNmcl = new ArrayList<>();
 		List<String> listTableNmcl = new ArrayList<>();
 
-		for (int j = 0; j < regle.get("id_regle").size(); j++) {
-			String type = regle.get("id_classe").get(j);
-			if (type.equals("relation")) {
+		List<RegleNormage> reglesNormageRelation = fileIdCard.getIdCardNormage().getReglesNormage(TypeNormage.RELATION);
 
-				String rubrique = regle.get("rubrique").get(j).toLowerCase();
-				String rubriqueNmcl = regle.get("rubrique_nmcl").get(j).toLowerCase();
+		for (int j = 0; j < reglesNormageRelation.size(); j++) {
 
-				// cérifier l'existance des rubriques
-				if (returned.contains(" " + rubriqueNmcl + " ") && returned.contains(" " + rubrique + " ")) {
-					listRubrique.add(rubrique);
-					listRubriqueNmcl.add(rubriqueNmcl);
+			String rubrique = reglesNormageRelation.get(j).getRubrique().toLowerCase();
+			String rubriqueNmcl = reglesNormageRelation.get(j).getRubriqueNmcl().toLowerCase();
 
-					// parcourir les ligne pour trouver la table correpondant à la rubriqueNcml
-					int k = 1;
-					while (k <= max) {
-						String line = lines[k];
+			// cérifier l'existance des rubriques
+			if (returned.contains(" " + rubriqueNmcl + " ") && returned.contains(" " + rubrique + " ")) {
+				listRubrique.add(rubrique);
+				listRubriqueNmcl.add(rubriqueNmcl);
 
-						if (line.startsWith(" ")) {
-							break;
-						}
+				// parcourir les ligne pour trouver la table correpondant à la rubriqueNcml
+				int k = 1;
+				while (k <= max) {
+					String line = lines[k];
 
-						if (!line.startsWith("insert ") && !line.contains("$ as (select ")
-								&& JoinParser.testRubriqueInCreate(line, rubriqueNmcl)) {
-							// extraction du nom de la table
-							listTableNmcl.add(JoinParser.getTable(line));
-
-							break;
-						}
-
-						k++;
+					if (line.startsWith(" ")) {
+						break;
 					}
+
+					if (!line.startsWith("insert ") && !line.contains("$ as (select ")
+							&& JoinParser.testRubriqueInCreate(line, rubriqueNmcl)) {
+						// extraction du nom de la table
+						listTableNmcl.add(JoinParser.getTable(line));
+
+						break;
+					}
+
+					k++;
 				}
 			}
 		}
@@ -126,10 +127,13 @@ public class RelationRulesQueryBuilder {
 					select = select.replace(" " + listTableNmcl.get(l) + " ", " " + listTableNmcl.get(l) + "_null ")
 							.replace("=" + listTableNmcl.get(l) + ".", "=" + listTableNmcl.get(l) + "_null.");
 					select = select + "\n AND NOT EXISTS (select 1 from (select distinct " + listRubriqueNmcl.get(l)
-							+ " as g_rub," + JoinParser.getFather(JoinParser.getLine(blocCreate, listRubriqueNmcl.get(l)))
-							+ " as g_pere from " + JoinParser.getTable(blocCreate, listRubriqueNmcl.get(l)) + ") xx where "
-							+ listRubrique.get(l) + "=g_rub and "
-							+ JoinParser.iToM(JoinParser.getFather(JoinParser.getLine(blocCreate, listRubriqueNmcl.get(l)))) + "=g_pere) ";
+							+ " as g_rub,"
+							+ JoinParser.getFather(JoinParser.getLine(blocCreate, listRubriqueNmcl.get(l)))
+							+ " as g_pere from " + JoinParser.getTable(blocCreate, listRubriqueNmcl.get(l))
+							+ ") xx where " + listRubrique.get(l) + "=g_rub and "
+							+ JoinParser
+									.iToM(JoinParser.getFather(JoinParser.getLine(blocCreate, listRubriqueNmcl.get(l))))
+							+ "=g_pere) ";
 
 				}
 			}
@@ -160,5 +164,4 @@ public class RelationRulesQueryBuilder {
 
 	}
 
-	
 }

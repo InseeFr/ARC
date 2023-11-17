@@ -26,9 +26,9 @@ public class ArcExceptionTest {
 
 	private final static String RUBRIQUE_NAME = "ma_rubrique";
 	private final static String EXPECTED_MESSAGE_BUSINESS_EXCEPTION = String
-			.format("%s La rubrique fille %s n'existe pas les règles de formatage", Level.ERROR.toString(), RUBRIQUE_NAME);
+			.format("%s La rubrique fille %s n'existe pas dans les règles de formatage", Level.ERROR.toString(), RUBRIQUE_NAME);
 	private final static String EXPECTED_STACK_BUSINESS_EXCEPTION = String
-			.format("java.lang.Throwable: La rubrique fille %s n'existe pas les règles de formatage", RUBRIQUE_NAME);
+			.format("java.lang.Throwable: La rubrique fille %s n'existe pas dans les règles de formatage", RUBRIQUE_NAME);
 	
 	
 	@Test
