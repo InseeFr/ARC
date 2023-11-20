@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## version-93.1.25b
+## version-93.1.25
 - fix performance issue in to_delete reception query
 - bind variable in gererFamille
 
