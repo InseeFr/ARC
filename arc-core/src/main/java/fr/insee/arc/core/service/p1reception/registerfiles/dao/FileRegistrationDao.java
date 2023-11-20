@@ -166,8 +166,9 @@ public class FileRegistrationDao {
 	 * @return
 	 */
 	private StringBuilder querySelectFilesMarkedToReplay() {
-		return new StringBuilder("select distinct " + ColumnEnum.ID_SOURCE.getColumnName() + " from " + this.tablePil
-				+ " a where to_delete='R' and exists (select 1 from " + this.tablePilTemp + " b where a."
+		return new StringBuilder("SELECT " + ColumnEnum.ID_SOURCE.getColumnName() + " FROM (SELECT DISTINCT "
+				+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + this.tablePil
+				+ " where to_delete='R') a WHERE exists (select 1 from " + this.tablePilTemp + " b where a."
 				+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName() + ")");
 	}
 
@@ -309,8 +310,7 @@ public class FileRegistrationDao {
 		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
 	}
 
-	
-	public void execQueryVersionDuplicateArchives (List<String> listContainerDoublons,
+	public void execQueryVersionDuplicateArchives(List<String> listContainerDoublons,
 			List<String> listVersionContainerDoublons) throws ArcException {
 		StringBuilder requete = new StringBuilder();
 
@@ -320,11 +320,11 @@ public class FileRegistrationDao {
 		requete.append(
 				"from (select distinct container from " + this.tablePilTemp + " where container is not null) a ");
 
-		GenericBean m = new GenericBean(UtilitaireDao.get(0)
-				.executeRequest(sandbox.getConnection(), new ArcPreparedStatementBuilder(requete)));
+		GenericBean m = new GenericBean(
+				UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), new ArcPreparedStatementBuilder(requete)));
 		listContainerDoublons.addAll(m.getColumnValues(ColumnEnum.CONTAINER.getColumnName()));
 		listVersionContainerDoublons.addAll(m.getColumnValues(ColumnEnum.V_CONTAINER.getColumnName()));
-		
+
 	}
 
 }
