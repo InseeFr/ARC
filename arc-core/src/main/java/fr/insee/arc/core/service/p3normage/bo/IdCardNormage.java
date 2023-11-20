@@ -42,7 +42,7 @@ public class IdCardNormage {
 	 */
 	public boolean isAnyRubrique(String rubriqueToTest)
 	{
-		return this.reglesNormage.stream().anyMatch(t -> t.getRubrique().contains(rubriqueToTest));
+		return this.reglesNormage.stream().anyMatch(t -> t.getRubrique()!=null && t.getRubrique().contains(rubriqueToTest));
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class IdCardNormage {
 	 */
 	public boolean isAnyRubriqueNmcl(String rubriqueToTest)
 	{
-		return this.reglesNormage.stream().anyMatch(t -> t.getRubriqueNmcl().contains(rubriqueToTest));
+		return this.reglesNormage.stream().anyMatch(t -> t.getRubriqueNmcl()!=null && t.getRubriqueNmcl().contains(rubriqueToTest));
 	}
 	
 }
