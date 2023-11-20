@@ -245,21 +245,22 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 
 	public void execQueryAddVariableMetier(VObject viewVariableMetier, String idFamilleSelected) throws ArcException {
 		
-		StringBuilder query = new StringBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(addNonExistingVariableMetierWithoutSync(viewVariableMetier));
 		query.append(
 				GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(idFamilleSelected));
-		UtilitaireDao.get(0).executeBlock(null, query);
+		UtilitaireDao.get(0).executeRequest(null, query);
 	}
 
-	private static String querySynchronizeRegleWithVariableMetier(String idFamille) {
+	private static ArcPreparedStatementBuilder querySynchronizeRegleWithVariableMetier(String idFamille) {
 		StringBuilder requeteListeSupprRegleMapping = requeteListeSupprRegleMapping(idFamille);
 		StringBuilder requeteListeAddRegleMapping = requeteListeAddRegleMapping(idFamille);
 
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(requeteListeAddRegleMapping.toString() + ";\n");
 		requete.append(requeteListeSupprRegleMapping.toString() + ";");
-		return requete.toString();
+		
+		return requete;
 	}
 
 	/**
@@ -531,8 +532,10 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @param message
 	 * @throws ArcException
 	 */
-	private String addNonExistingVariableMetierWithoutSync(VObject viewVariableMetier) throws ArcException {
-		StringBuilder requete = new StringBuilder();
+	private ArcPreparedStatementBuilder addNonExistingVariableMetierWithoutSync(VObject viewVariableMetier) throws ArcException {
+		
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		
 		boolean blank = true;
 		for (int i = NUMBER_OF_COLUMN_TABLE_VARIABLE_METIER; i < viewVariableMetier.getInputFields().size(); i++) {
 			if (StringUtils.isNotBlank(viewVariableMetier.getInputFields().get(i))) {
@@ -547,19 +550,22 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 
 				checkIsValide(viewVariableMetier.getInputFields());
 
+				ArcPreparedStatementBuilder values = new ArcPreparedStatementBuilder();
+				
 				requete.append("INSERT INTO " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " (");
-				StringBuilder values = new StringBuilder();
+
 				for (int j = 0; j < NUMBER_OF_COLUMN_TABLE_VARIABLE_METIER; j++) {
 					if (j > 0) {
 						requete.append(", ");
 						values.append(", ");
 					}
 					requete.append(viewVariableMetier.getHeadersDLabel().get(j));
-					values.append("'" + viewVariableMetier.getInputFields().get(j) + "'::"
-							+ viewVariableMetier.getHeadersDType().get(j));
+					values.append(values.quoteText(viewVariableMetier.getInputFields().get(j))+ "::"	+ viewVariableMetier.getHeadersDType().get(j));
 				}
-				requete.append(", nom_table_metier) VALUES ("
-						+ values.append(", '" + viewVariableMetier.getHeadersDLabel().get(i)) + "'::text);\n");
+				requete.append(", nom_table_metier) VALUES (");
+				values.append("," + values.quoteText(viewVariableMetier.getHeadersDLabel().get(i)) + "::text);\n");
+				
+				requete.append(values);
 
 			}
 		}
@@ -568,7 +574,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 			throw new ArcException(ArcExceptionMessage.GUI_FAMILLENORME_VARIABLE_NO_TARGET_TABLE);
 		}
 
-		return requete.toString();
+		return requete;
 	}
 
 	/**

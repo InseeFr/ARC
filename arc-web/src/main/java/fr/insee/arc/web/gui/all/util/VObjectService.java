@@ -946,18 +946,12 @@ public class VObjectService {
 			// on découpe suivant les OU
 			String[] listeOR = conditionAND.split(FILTER_OR);
 			for (String condtionOR : listeOR) {
-				s.append(" to_date(" + headersDLabel.get(headerIndex) + "::text, " + s.quoteText(morceauReq[0]) + ")"); // cast
-																														// database
-																														// column
-																														// to
-																														// the
-																														// searched
-																														// date
-																														// format
+				s.append(" to_date(" + headersDLabel.get(headerIndex) + "::text, " + s.quoteText(morceauReq[0]) + ")");
+				// cast database column to the searched date format
 				s.append(condtionOR.trim().substring(0, 1)); // operator
 				s.append(" to_date(" + s.quoteText(condtionOR.trim().substring(1)) + "," + s.quoteText(morceauReq[0])
-						+ ") "); // cast condition expression to the
-									// searched date format
+						+ ") ");
+				// cast condition expression to the searched date format
 				s.append(expressionOR);
 			}
 			// on retire les dernier OR
