@@ -52,11 +52,6 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-security-adapter</artifactId>
         </dependency>
-        <dependency>
-		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-tomcat8-adapter</artifactId>
-		</dependency>
-
 
 		<dependency>
 			<groupId>commons-fileupload</groupId>
