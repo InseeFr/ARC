@@ -20,6 +20,10 @@ public enum JsonKeys {
 	,FILEDATA("filedata")
 	,SOURCE("source")
 
+	// 
+	,FORMAT("format")
+	,ACCESS_TOKEN("acessToken")
+	
 	;
 	
 	private String key;

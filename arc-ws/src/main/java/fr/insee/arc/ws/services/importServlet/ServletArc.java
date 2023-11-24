@@ -24,6 +24,8 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.webutils.WebUtils;
 import fr.insee.arc.ws.services.importServlet.actions.InitiateRequest;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
+import fr.insee.arc.ws.services.importServlet.bo.ExportSource;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 import fr.insee.arc.ws.services.importServlet.dao.SecurityDao;
 
@@ -31,11 +33,7 @@ public class ServletArc extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String NOMENCLATURE = "nomenclature";
-	public static final String METADATA = "metadata";
-	public static final String MAPPING = "mapping";
-
-	private static final List<String> DEFAULT_SOURCE = Arrays.asList(MAPPING, NOMENCLATURE, METADATA);
+	private static final List<String> DEFAULT_SOURCE = Arrays.asList(ExportSource.MAPPING.getSource(), ExportSource.NOMENCLATURE.getSource(), ExportSource.METADATA.getSource());
 
 	private static final Logger LOGGER = LogManager.getLogger(ServletArc.class);
 
@@ -103,7 +101,11 @@ public class ServletArc extends HttpServlet {
 
 		// get parameters from request
 		JSONObject returned = new JSONObject(request.getParameter("requests"));
-
+		
+		if (returned.isNull(JsonKeys.FORMAT.getKey())) {
+			returned.put(JsonKeys.FORMAT.getKey(), ExportFormat.BINARY.getFormat());
+		}
+		
 		// if SOURCE key is not specified, add all the default sources to be retrieved
 		if (returned.isNull(JsonKeys.SOURCE.getKey())) {
 			return returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);

@@ -53,7 +53,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	private static final Logger LOGGER = LogManager.getLogger(UtilitaireDao.class);
 
-
 	/**
 	 * execute request returns a table with headers, type and data provide the
 	 * indexes of these elements
@@ -90,19 +89,21 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public int numberOfNods() {
 		return properties.getConnectionProperties().size();
 	}
-	
-	/** return a valid connection index according to the given connection in properties
+
+	/**
+	 * return a valid connection index according to the given connection in
+	 * properties
+	 * 
 	 * @param aPool
 	 * @return
 	 */
 	private int validConnectionIndex(Integer aPool) {
-		
+
 		int numberOfNodsDeclaredInProperties = numberOfNods();
-		
-		return (aPool<numberOfNodsDeclaredInProperties)?aPool:numberOfNodsDeclaredInProperties-1;
+
+		return (aPool < numberOfNodsDeclaredInProperties) ? aPool : numberOfNodsDeclaredInProperties - 1;
 	}
-	
-	
+
 	/**
 	 * Retourne une connexion vers la base de données
 	 *
@@ -113,10 +114,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public final Connection getDriverConnexion() throws ArcException {
 		// invocation du driver
 		try {
-			
-			int validConnectionIndex=validConnectionIndex(this.pool);
-			
-			ConnectionAttribute currentConnectionAttributes = properties.getConnectionProperties().get(validConnectionIndex);
+
+			int validConnectionIndex = validConnectionIndex(this.pool);
+
+			ConnectionAttribute currentConnectionAttributes = properties.getConnectionProperties()
+					.get(validConnectionIndex);
 			String driver = currentConnectionAttributes.getDatabaseDriverClassName();
 			String uri = currentConnectionAttributes.getDatabaseUrl();
 			String user = currentConnectionAttributes.getDatabaseUsername();
@@ -131,12 +133,12 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				props.setProperty("user", user);
 				props.setProperty("password", password);
 				props.setProperty("tcpKeepAlive", "true");
-				props.setProperty("prepareThreshold" , "0");
-				props.setProperty("preparedStatementCacheQueries" , "0");
-				props.setProperty("preparedStatementCacheSizeMiB" , "0");
+				props.setProperty("prepareThreshold", "0");
+				props.setProperty("preparedStatementCacheQueries", "0");
+				props.setProperty("preparedStatementCacheSizeMiB", "0");
 
 				c = DriverManager.getConnection(uri, props);
-				
+
 			} catch (Exception e) {
 				throw new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 			}
@@ -195,7 +197,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			ex.logFullException();
 		}
 	}
-	
+
 	/**
 	 * @param connexion  la connexion à la base
 	 * @param someTables le nom des tables
@@ -208,7 +210,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			ex.logFullException();
 		}
 	}
-	
 
 	/**
 	 * Exécute une requête qui renvoie exactement UN (unique) résultat de type
@@ -250,9 +251,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return ZERO;
 	}
 
-
 	/**
 	 * Check if a column exists in a table
+	 * 
 	 * @param aConnexion
 	 * @param aNomTable
 	 * @param aNomVariable
@@ -285,7 +286,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			throws ArcException {
 		executeImmediate(connexion, requete.toString(), modes);
 	}
-	
+
 	public void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes)
 			throws ArcException {
 		executeImmediate(connexion, requete.getQueryWithParameters(), modes);
@@ -368,7 +369,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), new ModeRequete[] {});
 
 	}
-
 
 	/**
 	 * Register in the targetPreparedStatement the bind variable of a request with
@@ -566,7 +566,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
-
 	/**
 	 * Les fichiers à copier sont potentiellement dans des dossiers différents
 	 * (****_OK ou *****_KO) <br/>
@@ -616,7 +615,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					taos.putArchiveEntry(entry);
 					// Ecriture dans le fichier
 					CompressedUtils.copyFromInputstreamToOutputStream(
-							new BufferedInputStream(new FileInputStream(fileIn), CompressedUtils.READ_BUFFER_SIZE), taos);
+							new BufferedInputStream(new FileInputStream(fileIn), CompressedUtils.READ_BUFFER_SIZE),
+							taos);
 					taos.closeArchiveEntry();
 				}
 			}
@@ -689,7 +689,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return returned;
 	}
 
-
 	/**
 	 * Postgres libère mal l'espace sur les tables quand on fait trop d'opération
 	 * sur les colonnes. Un vacuum full des tables du méta-modèle permet de résoudre
@@ -733,8 +732,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public Collection<String> getColumns(Connection connexion, Collection<String> liste, String tableIn)
 			throws ArcException {
-		liste.addAll(
-				new GenericBean(executeRequest(connexion, FormatSQL.listeColonneByHeaders(tableIn))).getHeaders());
+		liste.addAll(new GenericBean(executeRequest(connexion, FormatSQL.listeColonneByHeaders(tableIn))).getHeaders());
 		return liste;
 	}
 
@@ -757,8 +755,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *                   jour "12 as a"
 	 * @throws ArcException
 	 */
-	public void fastUpdate(Connection aConnexion, String tableName, String keys,
-			List<String> colList, String where, String... set) throws ArcException {
+	public void fastUpdate(Connection aConnexion, String tableName, String keys, List<String> colList, String where,
+			String... set) throws ArcException {
 		// récupérer la liste des colonnes
 		// liste de toutes les colonnes
 		// liste des colonnes à mettre à jour
@@ -864,30 +862,14 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws ArcException
 	 * @throws IOException
 	 */
-	public void exporting(Connection connexion, String table, OutputStream os, boolean csv, boolean... forceQuote)
-			throws ArcException {
+	public void exporting(Connection connexion, String table, OutputStream os, boolean csv) throws ArcException {
 		ConnectionWrapper conn = initConnection(connexion);
-
-		boolean forceQuoteBis;
-		if (forceQuote != null && forceQuote.length > 0) {
-			forceQuoteBis = forceQuote[0];
-		} else {
-			forceQuoteBis = true;
-		}
 
 		try {
 			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
 			if (csv) {
-				if (forceQuoteBis) {
-					copyManager.copyOut("COPY " + table
-							+ " TO STDOUT WITH (FORMAT csv, HEADER true , DELIMITER ';' , FORCE_QUOTE *, ENCODING 'UTF8') ",
-							os);
-				} else {
-					copyManager.copyOut(
-							"COPY " + table
-									+ " TO STDOUT WITH (FORMAT csv, HEADER true , DELIMITER ';' , ENCODING 'UTF8') ",
-							os);
-				}
+				copyManager.copyOut("COPY " + table
+						+ " TO STDOUT WITH (FORMAT csv, HEADER false , DELIMITER ';' , ENCODING 'UTF8') ", os);
 			} else {
 				copyManager.copyOut("COPY " + table + " TO STDOUT WITH (FORMAT BINARY)", os);
 			}

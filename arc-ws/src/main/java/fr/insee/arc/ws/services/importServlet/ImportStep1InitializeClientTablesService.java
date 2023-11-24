@@ -14,6 +14,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
+import fr.insee.arc.ws.services.importServlet.bo.ExportSource;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 
@@ -45,8 +46,8 @@ public class ImportStep1InitializeClientTablesService {
 
 	private List<String> sources;
 
-	private void executeIf(String source, Executable exe) throws ArcException {
-		if (!sources.contains(source)) {
+	private void executeIf(ExportSource source, Executable exe) throws ArcException {
+		if (!sources.contains(source.getSource())) {
 			return;
 		}
 		exe.execute();
@@ -93,13 +94,13 @@ public class ImportStep1InitializeClientTablesService {
 			public void run() {
 				try {
 					if (tablesMetierNames != null) {
-						executeIf(ServletArc.MAPPING, () -> clientDao.createImages(tablesMetierNames));
-						executeIf(ServletArc.METADATA, () -> clientDao.createTableMetier());
-						executeIf(ServletArc.METADATA, () -> clientDao.createVarMetier());
+						executeIf(ExportSource.MAPPING, () -> clientDao.createImages(tablesMetierNames));
+						executeIf(ExportSource.METADATA, () -> clientDao.createTableMetier());
+						executeIf(ExportSource.METADATA, () -> clientDao.createVarMetier());
 					}
-					executeIf(ServletArc.NOMENCLATURE, () -> clientDao.createNmcl());
-					executeIf(ServletArc.METADATA, () -> clientDao.createTableFamille());
-					executeIf(ServletArc.METADATA, () -> clientDao.createTablePeriodicite());
+					executeIf(ExportSource.NOMENCLATURE, () -> clientDao.createNmcl());
+					executeIf(ExportSource.METADATA, () -> clientDao.createTableFamille());
+					executeIf(ExportSource.METADATA, () -> clientDao.createTablePeriodicite());
 				} catch (ArcException e) {
 					try {
 						clientDao.createTableWsKO();

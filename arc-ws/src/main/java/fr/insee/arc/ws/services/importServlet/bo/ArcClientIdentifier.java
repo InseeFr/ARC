@@ -12,12 +12,11 @@ public class ArcClientIdentifier {
 	public ArcClientIdentifier(JSONObject dsnRequest) {
 		
 		this.dsnRequest = dsnRequest;
-		
 		this.client = getKeyIfExists(JsonKeys.CLIENT);
 		this.timestamp = System.currentTimeMillis();
 		this.environnement = getKeyIfExists(JsonKeys.ENVIRONNEMENT, Patch::normalizeSchemaName);
 		this.famille = getKeyIfExists(JsonKeys.FAMILLE);
-		
+		this.format = getKeyIfExists(JsonKeys.FORMAT);
 	}
 
 	private JSONObject dsnRequest;
@@ -30,6 +29,8 @@ public class ArcClientIdentifier {
 
 	private String famille;
 	
+	private String format;
+
 
 	private String getKeyIfExists(JsonKeys key, UnaryOperator<String> f )
 	{
@@ -57,6 +58,9 @@ public class ArcClientIdentifier {
 	public String getFamille() {
 		return famille;
 	}
-	
+
+	public String getFormat() {
+		return format;
+	}
 	
 }

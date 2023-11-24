@@ -12,73 +12,15 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
-
-
-/**Cette classe permet d'envoyer la réponse au client via un flux compressé.
- * La réponse aura une des formes suivantes :
- * 
- * Dans le cas d'un appel au service "arcClient" :
- * {
- *	"type":"jsonwsp/response",
- *	"responses":
- *		[
- *			{
- *				"id":"int",
- *				"table":
- *					[
- *						"nomColonne1;nomColonne2;...;nomColonnen;",
- *						"typeColonne1;typeColonne2;...;typeColonnen;",
- *						"a11;a12;...;a1n;",
- *						"...",
- *						"an1;an2;...;ann";
- *					]
- *			},
- *		],
- *	"nomenclatures" :
- *		[
- *			{
- *				"id":"int",
- *				"table":
- *					[
- *						"nomColonne1;nomColonne2;...;nomColonnen;",
- *						"typeColonne1;typeColonne2;...;typeColonnen;",
- *						"a11;a12;...;a1n;",
- *						"...",
- *						"an1;an2;...;ann;"
- *					]
- *			},
- *		],
- * 	"varMetier" :
- *		[
- *			{
- *				"id":"int",
- *				"table":
- *					[
- *						"nomColonne1;nomColonne2;...;nomColonnen;",
- *						"typeColonne1;typeColonne2;...;typeColonnen;",
- *						"a11;a12;...;a1n;",
- *						"...",
- *						"an1;an2;...;ann;"
- *					]
- *			},
- *		]
- * }
- *
- * - dans le cas d'une erreur :
- * {
- *	"type":"jsonwsp/response",
- *	"error":"string"
- * }
- *
- * @author N6YF91
- *
+/**
+ * Cette classe permet d'envoyer la réponse au client
  */
 public class SendResponse {
 
     private static final Logger LOGGER = LogManager.getLogger(SendResponse.class);
 
 	private ServletOutputStream wr;
-	private  HttpServletResponse response;
+	private HttpServletResponse response;
 
 	public SendResponse( HttpServletResponse response ){
 		this.response = response;
@@ -125,19 +67,8 @@ public class SendResponse {
 		}
 	}
 
-
-
 	public ServletOutputStream getWr() {
 		return wr;
 	}
-
-
-
-	public void setWr(ServletOutputStream wr) {
-		this.wr = wr;
-	}
-	
-	
-	
 	
 }
