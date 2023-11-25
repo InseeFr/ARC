@@ -22,10 +22,6 @@ public enum TypeNormage {
 		return nom;
 	}
 
-	public void setNom(String nom) {
-		this.nom = nom;
-	}
-
 	public static TypeNormage getEnum(String code) throws ArcException {
 
 		List<TypeNormage> filtered = Arrays.asList(TypeNormage.values()).stream().filter(t -> t.getNom().equals(code))

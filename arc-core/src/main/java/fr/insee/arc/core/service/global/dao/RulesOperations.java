@@ -24,18 +24,11 @@ public class RulesOperations {
 	 * Requete permettant de récupérer les règles pour un id_source donnée et une
 	 * table de regle
 	 * 
-	 * @param idSource      : identifiant du fichier
-	 * @param tableRegle    : table de regle
-	 * @param tablePilotage : table de pilotage
+	 * @param idSource : identifiant du fichier
+	 * @param tableRegle : table de regle
+	 * @param FileIdCard : carte d'identité du fichier i.e. sa norme, sa validité, sa periodicité
 	 * @return
 	 */
-	public static String getRegles(String tableRegle, String tablePilotage) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("\n SELECT * FROM " + tableRegle + " a WHERE ");
-		requete.append(conditionRegle(tablePilotage));
-		return requete.toString();
-	}
-
 	public static String getRegles(String tableRegle, FileIdCard fileIdCard) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n SELECT * FROM " + tableRegle + " a WHERE ");

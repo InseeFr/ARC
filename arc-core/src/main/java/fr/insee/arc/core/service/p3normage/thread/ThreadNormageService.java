@@ -200,14 +200,15 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
 			StringBuilder query = new StringBuilder();
 			query.append("\n DROP TABLE IF EXISTS " + tableTmpRubriqueDansregles + ";");
+			
 			query.append("\n CREATE TEMPORARY TABLE " + tableTmpRubriqueDansregles + " AS ");
 			query.append(RulesOperations.getAllRubriquesInRegles(this.tableNormagePilTemp,
 					ViewEnum.NORMAGE_REGLE.getFullName(envExecution), ViewEnum.CONTROLE_REGLE.getFullName(envExecution),
 					ViewEnum.MAPPING_REGLE.getFullName(envExecution)));
 			UtilitaireDao.get(0).executeImmediate(this.connexion.getExecutorConnection(), query);
-
+			
 			rubriqueUtiliseeDansRegles = RulesOperations.getBean(this.connexion.getExecutorConnection(),
-					RulesOperations.getRegles(tableTmpRubriqueDansregles, this.tableNormagePilTemp));
+					RulesOperations.getRegles(tableTmpRubriqueDansregles, this.fileIdCard));
 		}
 
 		NormageOperation n = new NormageOperation(this.connexion.getExecutorConnection(), fileIdCard,
