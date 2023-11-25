@@ -101,7 +101,10 @@ public class TestsFonctionnels extends InitializeQueryTest {
 	private void executeTestSiera(String sandbox, String repertoire) throws IOException, ArcException, SQLException {
 		BddPatcherTest.insertTestDataSiera();
 
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, repertoire, 10000000, null).invokeApi();
+		// to test batch mode
+		String batchMode="1";
+		
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, repertoire, 10000000, batchMode).invokeApi();
 
 		String repertoireDeDepot = DirectoryPath.directoryReceptionEntrepot(repertoire, sandbox,
 				DataWarehouse.DEFAULT.getName());
@@ -109,20 +112,20 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/siera_ano.xml"),
 				new File(repertoireDeDepot, "siera_ano.xml").toPath());
 
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, repertoire, 10000000, batchMode).invokeApi();
 
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, repertoire, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.NORMAGE, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.NORMAGE, sandbox, repertoire, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.NORMAGE, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.CONTROLE, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.CONTROLE, sandbox, repertoire, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.CONTROLE, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.MAPPING, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.MAPPING, sandbox, repertoire, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.MAPPING, TraitementEtat.OK));
 
 		// test on data
