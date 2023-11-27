@@ -10,7 +10,6 @@ public class ArcClientIdentifier {
 
 	
 	public ArcClientIdentifier(JSONObject dsnRequest) {
-		
 		this.dsnRequest = dsnRequest;
 		this.client = getKeyIfExists(JsonKeys.CLIENT);
 		this.timestamp = System.currentTimeMillis();
