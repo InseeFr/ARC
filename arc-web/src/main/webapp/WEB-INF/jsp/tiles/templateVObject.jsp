@@ -56,13 +56,11 @@
 	class='bg-body ${taille}'
 >
 
-<%-- <input type="hidden" name="${view.sessionName}.sessionName" value="${view.sessionName}" m="js"> --%>
 	<c:if test="${view.isInitialized && view.isScoped}">
 		<div class="row">
 			<div class="col-md">
 				<div class="card m-0 overflow-auto w-fitcontent">
 					<div class="card-header bg-primary p-0">
-<!-- 					onclick="var fullIdentifier='full';var fullCss= fullIdentifier + ' position-fixed min-vh-100 min-vw-100 top-0 left-0 zindex-1000';if ($('#${view.sessionName}').hasClass(fullIdentifier)){$('#${view.sessionName}').removeClass(fullCss);}else{$('#${view.sessionName}').addClass(fullCss);}" -->				
 						<h3 class="text-white m-1 float-left" id="${view.sessionName}_description"><spring:message code="${view.title}" text="${view.title}"/></h3>
 							<c:import url="tiles/template_help.jsp">
 								<c:param name="helpPage" value="/html/en/${view.sessionName}.html" />

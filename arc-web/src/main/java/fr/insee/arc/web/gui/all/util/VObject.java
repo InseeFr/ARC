@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.security.GuiInputSecurity;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -791,19 +792,19 @@ public class VObject {
 	}
 
 	public void setHeaderSortDLabels(List<String> headerSortDLabels) {
-		this.headerSortDLabels = headerSortDLabels;
+		this.headerSortDLabels = GuiInputSecurity.formatAsDatabaseIdentifier(headerSortDLabels);
 	}
 
+	public String getHeaderSortDLabel() {
+		return headerSortDLabel;
+	}
+	
 	public List<Boolean> getHeaderSortDOrders() {
 		return headerSortDOrders;
 	}
 
 	public void setHeaderSortDOrders(List<Boolean> headerSortDOrders) {
 		this.headerSortDOrders = headerSortDOrders;
-	}
-
-	public String getHeaderSortDLabel() {
-		return headerSortDLabel;
 	}
 
 	public void setHeaderSortDLabel(String headerSortDLabel) {
