@@ -57,25 +57,14 @@ public class RegleControle {
 		return Format.toUpperCase(rubriqueFils);
 	}
 
-	public void setRubriqueFils(String rubriqueFils) {
-		this.rubriqueFils = rubriqueFils;
-	}
-
 	public String getBorneInf() {
 		return borneInf;
-	}
-
-	public void setBorneInf(String borneInf) {
-		this.borneInf = borneInf;
 	}
 
 	public String getBorneSup() {
 		return borneSup;
 	}
 
-	public void setBorneSup(String borneSup) {
-		this.borneSup = borneSup;
-	}
 
 	public String getCondition() {
 		return condition;
@@ -87,10 +76,6 @@ public class RegleControle {
 
 	public String getPreAction() {
 		return preAction;
-	}
-
-	public void setPreAction(String preAction) {
-		this.preAction = preAction;
 	}
 
 	public int getIdRegle() {
@@ -105,16 +90,8 @@ public class RegleControle {
 		return seuilBloquant;
 	}
 
-	public void setSeuilBloquant(String seuilBloquant) {
-		this.seuilBloquant = seuilBloquant;
-	}
-
 	public String getTraitementLignesErreur() {
 		return traitementLignesErreur;
 	}
 
-	public void setTraitementLignesErreur(String traitementLignesErreur) {
-		this.traitementLignesErreur = traitementLignesErreur;
-	}
-	
 }
