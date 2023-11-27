@@ -37,7 +37,7 @@ public class ImportStep3GetTableDataService {
 
 		// binary transfer
 		ServiceDao.execQueryExportDataToResponse(resp.getWr(),
-				ViewEnum.normalizeTableName(arcClientIdentifier.getClient()), this.arcClientIdentifier.getFormat().equals(ExportFormat.CSV_GZIP.getFormat()));
+				ViewEnum.normalizeTableName(arcClientIdentifier.getClient()), ExportFormat.isCsv(this.arcClientIdentifier.getFormat()));
 
 		if (this.clientDao.isWebServiceNotPending()) {
 			this.clientDao.dropTable(arcClientIdentifier.getClient());
