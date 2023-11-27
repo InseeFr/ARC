@@ -8,8 +8,9 @@ public class ExportFormatTest {
 
 	@Test
 	public void isCsv() {
-		assertFalse(ExportFormat.isCsv(ExportFormat.BINARY.toString()));
-		assertTrue(ExportFormat.isCsv(ExportFormat.CSV_GZIP.toString()));
+		assertFalse(ExportFormat.isCsv("any"));
+		assertFalse(ExportFormat.isCsv("binary"));
+		assertTrue(ExportFormat.isCsv("csv_gzip"));
 	}
 
 }

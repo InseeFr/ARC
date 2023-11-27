@@ -16,7 +16,7 @@ public enum ExportFormat {
 	}
 
 	public static boolean isCsv(String clientFormat) {
-		return clientFormat.equals(CSV_GZIP.toString());
+		return clientFormat.equals(CSV_GZIP.getFormat());
 	}
 	
 }
