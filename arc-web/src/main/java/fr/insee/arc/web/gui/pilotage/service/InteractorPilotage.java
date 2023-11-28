@@ -98,7 +98,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		dao.initializePilotageBAS(viewPilotageBAS);
 
 		List<String> columns = viewPilotageBAS.getHeadersDLabel();
-		Map<String, ColumnRendering> columnRendering = viewPilotageBAS.getConstantVObject().columnRender;
+		Map<String, ColumnRendering> columnRendering = viewPilotageBAS.getConstantVObject().getColumnRender();
 
 		// for all columns, set rendering visibility to false
 		for (int i = 1; i < columns.size(); i++) {
@@ -112,7 +112,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		for (LineObject l : viewPilotageBAS.getContent()) {
 			for (int i = 1; i < columns.size(); i++) {
 				if (!l.getD().get(i).equals("0")) {
-					columnRendering.get(columns.get(i)).visible = true;
+					columnRendering.get(columns.get(i)).setVisible(true);
 				}
 			}
 		}

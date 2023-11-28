@@ -194,7 +194,7 @@ public class ExportDao extends VObjectHelperDao {
 				String colName;
 				while (res.next()) {
 					// reinitialiser l'arraylist de sortie
-					output = new ArrayList<String>();
+					output = new ArrayList<>();
 					for (int k = 0; k < maxPos; k++) {
 						output.add("");
 					}

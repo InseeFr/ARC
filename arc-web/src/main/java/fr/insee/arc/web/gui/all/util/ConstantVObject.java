@@ -7,16 +7,16 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 
 public final class ConstantVObject {
 
-    public Map<String, ColumnRendering> columnRender;
+    private Map<String, ColumnRendering> columnRender;
 
     public static class ColumnRendering {
-        public Boolean visible;
-        public String label;
-        public String size;
-        public String type;
-        public ArcPreparedStatementBuilder query;
-        public Boolean isUpdatable;
-        public Boolean isRequired;
+        private Boolean visible;
+        private String label;
+        private String size;
+        private String type;
+        private ArcPreparedStatementBuilder query;
+        private Boolean isUpdatable;
+        private Boolean isRequired;
 
         /**
          *
@@ -34,12 +34,12 @@ public final class ConstantVObject {
          *            est-ce que je peux modifier la colonne ?
          */
         public ColumnRendering(Boolean visible, String label, String size, String type, ArcPreparedStatementBuilder query, Boolean isUpdatable) {
-            this.visible = visible;
-            this.label = label;
-            this.size = size;
-            this.type = type;
-            this.query = query;
-            this.isUpdatable = isUpdatable;
+            this.setVisible(visible);
+            this.setLabel(label);
+            this.setSize(size);
+            this.setType(type);
+            this.setQuery(query);
+            this.setIsUpdatable(isUpdatable);
         }
         
         /**
@@ -61,8 +61,64 @@ public final class ConstantVObject {
         */
         public ColumnRendering(Boolean visible, String label, String size, String type, ArcPreparedStatementBuilder query, Boolean isUpdatable, Boolean isRequired) {
             this(visible, label, size, type, query, isUpdatable);
-            this.isRequired = isRequired;
+            this.setIsRequired(isRequired);
         }
+
+		public Boolean getVisible() {
+			return visible;
+		}
+
+		public void setVisible(Boolean visible) {
+			this.visible = visible;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public void setLabel(String label) {
+			this.label = label;
+		}
+
+		public String getSize() {
+			return size;
+		}
+
+		public void setSize(String size) {
+			this.size = size;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public void setType(String type) {
+			this.type = type;
+		}
+
+		public Boolean getIsUpdatable() {
+			return isUpdatable;
+		}
+
+		public void setIsUpdatable(Boolean isUpdatable) {
+			this.isUpdatable = isUpdatable;
+		}
+
+		public Boolean getIsRequired() {
+			return isRequired;
+		}
+
+		public void setIsRequired(Boolean isRequired) {
+			this.isRequired = isRequired;
+		}
+
+		public ArcPreparedStatementBuilder getQuery() {
+			return query;
+		}
+
+		public void setQuery(ArcPreparedStatementBuilder query) {
+			this.query = query;
+		}
         
         
     }

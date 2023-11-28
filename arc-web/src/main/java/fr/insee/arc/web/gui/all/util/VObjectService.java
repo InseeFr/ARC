@@ -405,7 +405,7 @@ public class VObjectService {
 			if (data.getConstantVObject()//
 					.getColumnRender()//
 					.get(headers.get(i)) != null) {
-				headersVLabel.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).label);
+				headersVLabel.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).getLabel());
 			} else {
 				headersVLabel.add(ManipString.translateAscii(headers.get(i)));
 			}
@@ -421,7 +421,7 @@ public class VObjectService {
 		List<String> headersVSize = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
-				headersVSize.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).size);
+				headersVSize.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).getSize());
 			} else {
 				headersVSize.add("auto");
 			}
@@ -437,7 +437,7 @@ public class VObjectService {
 		List<String> headersVType = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
-				headersVType.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).type);
+				headersVType.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).getType());
 			} else {
 				headersVType.add("text");
 			}
@@ -454,7 +454,7 @@ public class VObjectService {
 		List<Boolean> headersVisible = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
-				headersVisible.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).visible);
+				headersVisible.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).getVisible());
 			} else {
 				headersVisible.add(true);
 			}
@@ -471,7 +471,7 @@ public class VObjectService {
 		List<Boolean> headersUpdatable = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
-				headersUpdatable.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).isUpdatable);
+				headersUpdatable.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).getIsUpdatable());
 			} else {
 				headersUpdatable.add(true);
 			}
@@ -488,7 +488,7 @@ public class VObjectService {
 		List<Boolean> headersRequired = new ArrayList<>();
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null) {
-				headersRequired.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).isRequired);
+				headersRequired.add(data.getConstantVObject().getColumnRender().get(headers.get(i)).getIsRequired());
 			} else {
 				headersRequired.add(true);
 			}
@@ -502,10 +502,10 @@ public class VObjectService {
 
 		for (int i = 0; i < headers.size(); i++) {
 			if (data.getConstantVObject().getColumnRender().get(headers.get(i)) != null
-					&& data.getConstantVObject().getColumnRender().get(headers.get(i)).query != null) {
+					&& data.getConstantVObject().getColumnRender().get(headers.get(i)).getQuery() != null) {
 				try {
 					arrayVSelect = UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
-							data.getConstantVObject().getColumnRender().get(headers.get(i)).query);
+							data.getConstantVObject().getColumnRender().get(headers.get(i)).getQuery());
 					arrayVSelect.remove(0);
 					arrayVSelect.remove(0);
 					Map<String, String> m = new LinkedHashMap<>();
