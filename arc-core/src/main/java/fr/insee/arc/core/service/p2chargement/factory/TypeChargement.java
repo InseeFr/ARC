@@ -20,10 +20,6 @@ public enum TypeChargement {
 		return nom;
 	}
 
-	public void setNom(String nom) {
-		this.nom = nom;
-	}
-
 	public static TypeChargement getEnum(String code) throws ArcException {
 
 		List<TypeChargement> filtered = Arrays.asList(TypeChargement.values()).stream()
