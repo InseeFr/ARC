@@ -80,7 +80,8 @@ public class ClientDao {
 		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 		request.append("SELECT EXISTS (SELECT 1 FROM arc.ihm_client")
 				.append(" WHERE id_application=" + request.quoteText(client))
-				.append(" AND id_famille=" + request.quoteText(famille)).append(" LIMIT 1);");
+				.append(" AND id_famille=" + request.quoteText(famille))
+				.append(" LIMIT 1);");
 
 		String bool = UtilitaireDao.get(0).executeRequestWithoutMetadata(connection, request).get(0).get(0);
 

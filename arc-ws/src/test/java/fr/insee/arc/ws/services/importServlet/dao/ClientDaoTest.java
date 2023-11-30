@@ -23,16 +23,18 @@ public class ClientDaoTest extends InitializeQueryTest {
 	@Test
 	public void clientDaoTest() throws ArcException, SQLException {
 
-		InitializeQueryTest.buildPropertiesWithoutScalability("any");
+		InitializeQueryTest.buildPropertiesWithoutScalability(null);
+		
+		PropertiesHandler p = PropertiesHandler.getInstance();
 		
 		initializeTestData();
-
+		
 		testVerificationFamilleOK();
 		testVerificationFamilleKO();
 		
 		testSelectBusinessDataTables();
 
-		destroyTestData();
+//		destroyTestData();
 	}
 
 	private void testSelectBusinessDataTables() throws ArcException {
@@ -47,7 +49,6 @@ public class ClientDaoTest extends InitializeQueryTest {
 		assertEquals(2,clientTables.size());
 	}
 	
-	@Test
 	public void testVerificationFamilleOK() throws ArcException {
 		JSONObject json = new JSONObject(
 				"{\"client\":\"ARTEMIS\",\"environnement\":\"arc.bas1\",\"familleNorme\":\"DSN\",\"format\":\"csv_gzip\"}");
@@ -56,7 +57,6 @@ public class ClientDaoTest extends InitializeQueryTest {
 		assertTrue(clientDao.verificationClientFamille());
 	}
 	
-	@Test
 	public void testVerificationFamilleKO() throws ArcException {
 		JSONObject json = new JSONObject(
 				"{\"client\":\"ARTEMIS\",\"environnement\":\"arc.bas1\",\"familleNorme\":\"BATI\",\"format\":\"csv_gzip\"}");
@@ -80,7 +80,7 @@ public class ClientDaoTest extends InitializeQueryTest {
 		query.append("SELECT 'DSN' as id_famille,'DSNFLASH' as id_application");
 		query.append(SQL.END_QUERY);
 		
-		query.append("CREATE TABLE arc_bas1.ihm_mod_table_metier AS ");
+		query.append("CREATE TABLE arc_bas1.mod_table_metier AS ");
 		query.append("SELECT 'DSN' as id_famille,'mapping_dsn_test1_ok' as nom_table_metier UNION ALL ");
 		query.append("SELECT 'DSN' as id_famille,'mapping_dsn_test2_ok' as nom_table_metier UNION ALL ");
 		query.append("SELECT 'PASRAU' as id_famille,'mapping_pasrau_test_ok' as nom_table_metier");
