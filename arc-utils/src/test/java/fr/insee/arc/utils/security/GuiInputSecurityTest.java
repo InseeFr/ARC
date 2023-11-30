@@ -1,6 +1,7 @@
 package fr.insee.arc.utils.security;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -20,6 +21,9 @@ public class GuiInputSecurityTest {
 	@Test
 	public void testFormatAsDatabaseIdentifier() {
 		
+		String input = null;
+		assertNull(GuiInputSecurity.formatAsDatabaseIdentifier(input));
+		
 		assertEquals("var_table_metier",GuiInputSecurity.formatAsDatabaseIdentifier("var_table_metier"));
 		
 		// remove space and ; and other chars
@@ -33,6 +37,8 @@ public class GuiInputSecurityTest {
 		assertEquals("var_table_metier",GuiInputSecurity.formatAsDatabaseIdentifier("$var_table_metier_$"));
 		assertEquals("var_table_metier",GuiInputSecurity.formatAsDatabaseIdentifier("$_$var_table_metier$__;"));
 
+		List<String> guiInputsNull=null;
+		assertNull(GuiInputSecurity.formatAsDatabaseIdentifier(guiInputsNull));
 		
 		List<String> guiInputs = Arrays.asList("__var_table_metier$$", "drop database toto;");
 		List<String> guiInputsReformat = GuiInputSecurity.formatAsDatabaseIdentifier(guiInputs);
