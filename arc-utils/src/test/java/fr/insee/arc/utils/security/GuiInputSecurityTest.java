@@ -1,14 +1,22 @@
 package fr.insee.arc.utils.security;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
+import fr.insee.arc.utils.utils.PrivateConstructorTest;
+
 public class GuiInputSecurityTest {
 
+	@Test
+	public void testServiceHashFileNameIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+		PrivateConstructorTest.testConstructorIsPrivate(GuiInputSecurity.class);
+	}
+	
 	@Test
 	public void testFormatAsDatabaseIdentifier() {
 		
