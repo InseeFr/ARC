@@ -61,7 +61,7 @@ public class TableNaming {
 		}
 		s.append(mainSuffix);
 		
-		return ViewEnum.getFullName(schema, s.toString());
+		return ViewEnum.getFullNameNotNormalized(schema, s.toString());
 		
 	}
 	

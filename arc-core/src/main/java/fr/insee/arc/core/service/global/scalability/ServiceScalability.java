@@ -44,10 +44,8 @@ public class ServiceScalability {
 			actionOnCoordinator.accept(coordinatorConnexion);
 		}
 		
-
+		// dispatch when scaled
 		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
-		
-		// meta data copy is only necessary when scaled
 		if (numberOfExecutorNods==0)
 		{
 			return numberOfExecutorNods;

@@ -150,6 +150,7 @@ public enum ViewEnum {
 	, WS_INFO("ws_info", SchemaEnum.SANDBOX_GENERATED)
 	, WS_PENDING("ws_pending", SchemaEnum.SANDBOX_GENERATED)
 	, WS_KO("ws_ko", SchemaEnum.SANDBOX_GENERATED)
+	, WS_TRACKING("ws_tracking", SchemaEnum.SANDBOX_GENERATED)
 
 	;
 
@@ -205,8 +206,12 @@ public enum ViewEnum {
 		return normalizeTableName(schema + SQL.DOT.getSqlCode() + this.tableName);
 	}
 
+	public static String getFullNameNotNormalized(String schema, String providedTableName) {
+		return providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName;
+	}
+	
 	public static String getFullName(String schema, String providedTableName) {
-		return normalizeTableName(providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName);
+		return normalizeTableName(getFullNameNotNormalized(schema, providedTableName));
 	}
 	
 	public static String normalizeTableName(String providedTableName)

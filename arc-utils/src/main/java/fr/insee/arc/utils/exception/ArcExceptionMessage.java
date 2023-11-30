@@ -87,6 +87,7 @@ public enum ArcExceptionMessage {
 	
 	WS_RETRIEVE_DATA_FAMILY_FORBIDDEN("Vous ne pouvez pas accéder à cette famille de norme"),
 	WS_RETRIEVE_DATA_FAMILY_CREATION_FAILED("Les tables de la famille de norme n'ont pas pu être créées"),
+	WS_RETRIEVE_DATA_SCALABLE_TABLE_MUST_BE_EXPORT_IN_CSV("Scalable tables can only be retrieved in csv_gzip mode"),
 	
 	IHM_NMCL_COLUMN_IN_FILE_BUT_NOT_IN_SCHEMA("La colonne %s n'est pas déclarée dans le schéma"),
 	IHM_NMCL_COLUMN_IN_SCHEMA_BUT_NOT_IN_FILE("La colonne est déclarée dans le schéma mais absente du fichier"),

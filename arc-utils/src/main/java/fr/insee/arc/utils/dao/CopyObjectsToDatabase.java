@@ -18,35 +18,35 @@ public class CopyObjectsToDatabase {
 	/**
 	 * execute copy by chunk. It is mandatory for large GenericBean objects
 	 * @param connection
-	 * @param tableName
-	 * @param gb
+	 * @param targetTableName
+	 * @param genericBeanContainingData
 	 * @throws ArcException
 	 */
-	public static void execCopyFromGenericBean(Connection connection, String tableName, GenericBean gb)
+	public static void execCopyFromGenericBean(Connection connection, String targetTableName, GenericBean genericBeanContainingData)
 			throws ArcException {
-		execCopyFromGenericBean(connection, tableName, gb, CHUNK_SIZE, true);
+		execCopyFromGenericBean(connection, targetTableName, genericBeanContainingData, CHUNK_SIZE, true);
 	}
 
-	public static void execCopyFromGenericBeanIfTableNotExists(Connection connection, String tableName, GenericBean gb)
+	public static void execCopyFromGenericBeanWithoutDroppingTargetTable(Connection targetConnection, String targetTableName, GenericBean genericBeanContainingData)
 			throws ArcException {
-		execCopyFromGenericBean(connection, tableName, gb, CHUNK_SIZE, false);
+		execCopyFromGenericBean(targetConnection, targetTableName, genericBeanContainingData, CHUNK_SIZE, false);
 	}
 
 	
 	/**
 	 * execute copy from GenericBean to database by chunk of size @param chunkSize
 	 * 
-	 * @param connection
-	 * @param tableName
-	 * @param gb
+	 * @param targetConnection
+	 * @param targetTableName
+	 * @param genericBeanContainingData
 	 * @param chunkSize
 	 * @throws ArcException
 	 */
-	private static void execCopyFromGenericBean(Connection connection, String tableName, GenericBean gb, int chunkSize, boolean replaceTargetTable)
+	private static void execCopyFromGenericBean(Connection targetConnection, String targetTableName, GenericBean genericBeanContainingData, int chunkSize, boolean replaceTargetTable)
 			throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 
-		query.append(query.createWithGenericBean(tableName, gb, replaceTargetTable));
+		query.append(query.createWithGenericBean(targetTableName, genericBeanContainingData, replaceTargetTable));
 
 		int cursor = 0;
 		boolean stillToDo = true;
@@ -55,18 +55,18 @@ public class CopyObjectsToDatabase {
 			int startChunk = cursor;
 			int endChunk = cursor + chunkSize;
 			cursor = endChunk;
-			stillToDo=(cursor < gb.getContent().size());
+			stillToDo=(cursor < genericBeanContainingData.getContent().size());
 			
-			query.insertWithGenericBeanByChunk(tableName, gb, startChunk, endChunk);
+			query.insertWithGenericBeanByChunk(targetTableName, genericBeanContainingData, startChunk, endChunk);
 			
 			// analyze on the table at the end
 			if (!stillToDo)
 			{
 				query.append(SQL.COMMIT).append(SQL.END_QUERY);
-				query.append(FormatSQL.analyzeSecured(tableName));
+				query.append(FormatSQL.analyzeSecured(targetTableName));
 			}
 			
-			UtilitaireDao.get(0).executeImmediate(connection, query);
+			UtilitaireDao.get(0).executeImmediate(targetConnection, query);
 			query = new GenericPreparedStatementBuilder();
 			
 		} while (stillToDo);

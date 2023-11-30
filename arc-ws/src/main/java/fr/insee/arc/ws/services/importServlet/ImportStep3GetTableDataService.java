@@ -10,6 +10,7 @@ import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
+import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 import fr.insee.arc.ws.services.importServlet.dao.ServiceDao;
 
@@ -27,7 +28,7 @@ public class ImportStep3GetTableDataService {
 	public ImportStep3GetTableDataService(JSONObject dsnRequest) {
 		super();
 
-		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest);
+		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest, false);
 
 		clientDao = new ClientDao(arcClientIdentifier);
 
@@ -35,12 +36,14 @@ public class ImportStep3GetTableDataService {
 
 	public void execute(SendResponse resp) throws ArcException {
 
+		TableToRetrieve table = clientDao.getAClientTableByName(arcClientIdentifier.getClientInputParameter());
+		
 		// binary transfer
-		ServiceDao.execQueryExportDataToResponse(resp.getWr(),
-				ViewEnum.normalizeTableName(arcClientIdentifier.getClient()), ExportFormat.isCsv(this.arcClientIdentifier.getFormat()));
+		ServiceDao.execQueryExportDataToResponse(resp.getWr(), table, ExportFormat.isCsv(this.arcClientIdentifier.getFormat()));
 
 		if (this.clientDao.isWebServiceNotPending()) {
-			this.clientDao.dropTable(arcClientIdentifier.getClient());
+			this.clientDao.dropTable(table);
+			this.clientDao.deleteFromTrackTable(table.getTableName());
 		} else {
 			Sleep.sleep(WAIT_DELAY_ON_PENDING_TABLES_CREATION_IN_MS);
 		}

@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
@@ -36,7 +37,7 @@ public class ImportStep1InitializeClientTablesService {
 
 		this.dsnRequest = dsnRequest;
 
-		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest);
+		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest, true);
 
 		this.sources = makeSource(dsnRequest);
 
@@ -63,23 +64,66 @@ public class ImportStep1InitializeClientTablesService {
 	}
 
 	public void execute(SendResponse resp) throws ArcException {
-		this.clientDao.dropPendingClientTables();
+		
+		// drop tables from the client that had been requested from a former call
+		dropPendingClientTables();
 
-		this.clientDao.createTableWsStatus();
+		// create the table that will track the data table which has been built and retrieved
+		createTrackTable();
+		
+		// create the wsinfo and the wspending table
+		// wspending table will be delete when all 
+		createWsTables();
 
-		if (!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
-			clientDao.verificationClientFamille();
-			tablesMetierNames = clientDao.getIdSrcTableMetier(dsnRequest);
-		}
+		// create tables to retrieve family data table
+		createMetaFamilyTables();
 
+		// create data table in an asynchronous parallel thread
 		startTableCreationInParallel();
 
 		// on renvoie l'id du client avec son timestamp
 		resp.send(arcClientIdentifier.getEnvironnement() + Delimiters.SQL_SCHEMA_DELIMITER
-				+ arcClientIdentifier.getClient() + Delimiters.SQL_TOKEN_DELIMITER
+				+ arcClientIdentifier.getClientIdentifier() + Delimiters.SQL_TOKEN_DELIMITER
 				+ arcClientIdentifier.getTimestamp());
 
 		resp.endSending();
+	}
+
+	/**
+	 * 1. check if the client has the right to retrieve the family. If so :
+	 * 2. build the table of id_source to be retrieved in the family data table
+	 * 3. return the list of family data table to retrieve
+	 * @throws ArcException
+	 */
+	private void createMetaFamilyTables() throws ArcException {
+		if (!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
+			
+			if (!clientDao.verificationClientFamille()) {
+				throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_FAMILY_FORBIDDEN);
+			}
+			
+			clientDao.createTableOfIdSource(dsnRequest);
+			tablesMetierNames = clientDao.selectBusinessDataTables();
+		}
+	}
+
+	/**
+	 * create the table that tracks the client table which had been built
+	 * when the data of a table will be retrieved by the client, the table entry will be deleted from the track table 
+	 * @throws ArcException
+	 */
+	private void createTrackTable() throws ArcException {
+		clientDao.createTableTrackRetrievedTables();
+	}
+
+	/**
+	 * create the wsinfo and wspending tables
+	 * wspending will be deleted when all client tables will have been retrieved
+	 * wsinfo table will be looped transfered to the client until wspending table is dropped
+	 * @throws ArcException
+	 */
+	private void createWsTables() throws ArcException {
+		this.clientDao.createTableWsInfo();
 	}
 
 	/**
@@ -94,11 +138,12 @@ public class ImportStep1InitializeClientTablesService {
 			public void run() {
 				try {
 					if (tablesMetierNames != null) {
-						executeIf(ExportSource.MAPPING, () -> clientDao.createImages(tablesMetierNames));
+
+						executeIf(ExportSource.MAPPING, () -> createImages(tablesMetierNames));
 						executeIf(ExportSource.METADATA, () -> clientDao.createTableMetier());
-						executeIf(ExportSource.METADATA, () -> clientDao.createVarMetier());
+						executeIf(ExportSource.METADATA, () -> clientDao.createTableVarMetier());
 					}
-					executeIf(ExportSource.NOMENCLATURE, () -> clientDao.createNmcl());
+					executeIf(ExportSource.NOMENCLATURE, () -> clientDao.createTableNmcl());
 					executeIf(ExportSource.METADATA, () -> clientDao.createTableFamille());
 					executeIf(ExportSource.METADATA, () -> clientDao.createTablePeriodicite());
 				} catch (ArcException e) {
@@ -123,6 +168,48 @@ public class ImportStep1InitializeClientTablesService {
 		};
 
 		maintenance.start();
+	}
+
+	
+	/**
+	 * drop tables on coordinator and executors if the exists
+	 * @throws ArcException
+	 */
+	private void dropPendingClientTables() throws ArcException {
+		
+		this.clientDao.dropPendingClientTables(0);
+		
+		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
+		for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
+				.getIndex() + numberOfExecutorNods; executorConnectionId++) {
+			this.clientDao.dropPendingClientTables(executorConnectionId);
+		}
+	}
+
+	
+	
+	/**
+	 * create image tables on executor nods if connection is scaled, on coordinator
+	 * nod if not
+	 * 
+	 * @param tablesMetierNames
+	 * @throws ArcException
+	 */
+	private void createImages(List<String> tablesMetierNames) throws ArcException {
+		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
+		if (numberOfExecutorNods == 0) {
+			clientDao.createImages(tablesMetierNames, ArcDatabase.COORDINATOR.getIndex());
+		} else {
+			for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
+					.getIndex() + numberOfExecutorNods; executorConnectionId++) {
+				
+				// copy the table containing id_source to be retrieved on executor nods
+				clientDao.copyTableOfIdSourceToExecutorNod(executorConnectionId);
+				
+				// create the business table containing data of id_source found in table tableOfIdSource
+				clientDao.createImages(tablesMetierNames, executorConnectionId);
+			}
+		}
 	}
 
 }
