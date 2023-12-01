@@ -5,9 +5,9 @@
 
 [User guide ARC new version but unfinished yet](https://github.com/InseeFr/ARC/raw/master/user-guide/User_guide_v2.pdf)
 
-[Tutorial](https://hackmd.io/@EgVaFRsUQ-ywTiFcXIsWig/rJzPiJp3U#/)
+[Tutorial](https://hackmd.io/@4bIbwfJtQQmv5Ph8VVuYMw/H1a1NUPBp#/)
 
-[ARC functionnalities and architecture](https://hackmd.io/cg4xbdLoRFqHVky-lx5DiA?view)
+[ARC functionnalities and architecture](https://hackmd.io/@4bIbwfJtQQmv5Ph8VVuYMw/Skp3VIvHa)
 
 [Functionnal diagram](https://github.com/InseeFr/ARC/raw/master/user-guide/diagrammes_fonctionnels.pdf)
 
