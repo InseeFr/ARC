@@ -81,12 +81,11 @@ public class ImportStep2GetTableNameService {
 			if (!reprise) {
 				this.clientDao.updatePilotage(table.getTableName());
 			}
-
-			this.clientDao.dropTable(table.getTableName());
+			this.clientDao.dropTable(table);
 		}
 		
 		table = this.clientDao.getAClientTableByType(ExportTrackingType.TRACK);
-		this.clientDao.dropTable(table.getTableName());
+		this.clientDao.dropTable(table);
 		
 		resp.send(" ");
 		resp.endSending();

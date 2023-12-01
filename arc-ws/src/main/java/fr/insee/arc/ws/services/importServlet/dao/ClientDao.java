@@ -435,20 +435,18 @@ public class ClientDao {
 				: new TableToRetrieve(content.get("nod").get(0), content.get("table_to_retrieve").get(0));
 	}
 
-	public void dropTable(String clientTable) {
-		dropTable(ArcDatabase.COORDINATOR.getIndex(), clientTable);
-	}
 
-	public void dropTable(int connectionIndex, String clientTable) {
+	private void dropTable(int connectionIndex, String clientTable) {
 		UtilitaireDao.get(connectionIndex).dropTable(connection, clientTable);
 	}
 
 	public void dropTable(TableToRetrieve table) {
+
+		dropTable(ArcDatabase.COORDINATOR.getIndex(), table.getTableName());
 		
-		dropTable(table.getTableName());
+		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
 
 		if (table.getNod().equals(ArcDatabase.EXECUTOR)) {
-			int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
 			for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
 					.getIndex() + numberOfExecutorNods; executorConnectionId++) {
 				dropTable(executorConnectionId, table.getTableName());
