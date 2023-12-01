@@ -1,6 +1,13 @@
 # Change Log
 
+## TODO List
+- security in vobject input field
+- check that family name match family tables on rules import
+
 All notable changes to this project will be documented in this file.
+
+## version-93.1.29
+- csv_gzip format is available for the data retrieval webservice
 
 ## version-93.1.26
 - dependencies security fix

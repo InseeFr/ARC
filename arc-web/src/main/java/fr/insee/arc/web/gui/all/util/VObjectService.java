@@ -1313,7 +1313,7 @@ public class VObjectService {
 						Files.copy(locationTmp, location, StandardCopyOption.REPLACE_EXISTING);
 
 					} catch (IOException ex) {
-						throw new ArcException(ex, ArcExceptionMessage.FILE_COPY_FAILED, fileName);
+						throw new ArcException(ex, ArcExceptionMessage.FILE_COPY_FAILED, fileName, repertoireCible);
 					} finally {
 						if (temporaryFolder != null) {
 							FileUtilsArc.deleteDirectory(temporaryFolder);
