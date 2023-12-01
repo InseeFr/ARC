@@ -128,7 +128,6 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 			fileNames.add("Rules_structurize");
 			fileNames.add("Rules_control");
 			fileNames.add("Rules_mapping");
-			fileNames.add("Rules_filter");
 			fileNames.add("Rules_expression");
 			this.vObjectService.download(views.getViewJeuxDeRegles(), response, fileNames
 					, new ArrayList<>(
