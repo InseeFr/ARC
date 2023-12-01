@@ -215,9 +215,7 @@ public class ClientDao {
 				? requeteJSON.getString(JsonKeys.VALINF.getKey())
 				: null;
 		String validiteSup = requeteJSON.getString(JsonKeys.VALSUP.getKey());
-		int nbFichiers = requeteJSON.keySet().contains(JsonKeys.NBFICHIERS.getKey())
-				? requeteJSON.getInt(JsonKeys.NBFICHIERS.getKey())
-				: 0;
+
 		boolean reprise = requeteJSON.getBoolean(JsonKeys.REPRISE.getKey());
 
 		StringBuilder query = new StringBuilder();
@@ -228,8 +226,7 @@ public class ClientDao {
 
 		query.append("(");
 		query.append("SELECT " + ColumnEnum.ID_SOURCE.getColumnName()
-				+ (nbFichiers > 0 ? ", substr(date_entree,1,10)::date as date_entree " : " ") //
-				+ "FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(this.environnement) + " T1 ");
+				+ " FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(this.environnement) + " T1 ");
 		query.append(
 				"WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) AND T1.periodicite='" + periodicite + "' ");
 
@@ -250,13 +247,7 @@ public class ClientDao {
 			LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.getIdSrcTableMetier() : Reprise = true");
 		}
 
-		query.append("GROUP BY " + ColumnEnum.ID_SOURCE.getColumnName() + (nbFichiers > 0 ? ", date_entree " : " ")); // )
-
-		// on trie par ordre decroissant de date d'entree
-		if (nbFichiers > 0) {
-			query.append("ORDER BY date_entree DESC LIMIT ");
-			query.append(nbFichiers);
-		}
+		query.append("GROUP BY " + ColumnEnum.ID_SOURCE.getColumnName()); // )
 		query.append(") as foo; ");
 
 		UtilitaireDao.get(0).executeBlock(connection, query);
@@ -348,7 +339,7 @@ public class ClientDao {
 				+ requete.quoteText(client) + ");");
 		UtilitaireDao.get(0).executeRequest(connection, requete);
 
-		registerTableToBeRetrieved(ExportTrackingType.ID_SOURCE, ArcDatabase.COORDINATOR, nomTableImage);
+		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
 
 	}
 
@@ -361,7 +352,7 @@ public class ClientDao {
 	public void createTablePeriodicite() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTablePeriodicite()");
 
-		String nomTableImage = ViewEnum.getFullName(environnement,
+		String nomTableImage = ViewEnum.getFullNameNotNormalized(environnement,
 				client + "_" + timestamp + "_" + ViewEnum.EXT_MOD_PERIODICITE.getTableName());
 
 		UtilitaireDao.get(0).executeImmediate(connection, "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
@@ -559,5 +550,39 @@ public class ClientDao {
 	public void setConnection(Connection connection) {
 		this.connection = connection;
 	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public String getEnvironnement() {
+		return environnement;
+	}
+
+	public String getClient() {
+		return client;
+	}
+
+	public String getFamille() {
+		return famille;
+	}
+
+	public String getTableOfIdSource() {
+		return tableOfIdSource;
+	}
+
+	public String getTableWsPending() {
+		return tableWsPending;
+	}
+
+	public String getTableWsTracking() {
+		return tableWsTracking;
+	}
+
+	public Connection getConnection() {
+		return connection;
+	}
+	
+	
 
 }

@@ -12,7 +12,6 @@ public enum JsonKeys {
 	,VALINF( "validiteInf" )
 	,VALSUP( "validiteSup" )
 	,PERIODICITE( "periodicite" )
-    ,NBFICHIERS("nbfichiers")
 
 	//Réponse
 	,ID( "id" ) //Aussi utilisé dans les réponses quelque soit le service
