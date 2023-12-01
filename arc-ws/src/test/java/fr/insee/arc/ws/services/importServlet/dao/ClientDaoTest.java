@@ -15,7 +15,6 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 
 public class ClientDaoTest extends InitializeQueryTest {
@@ -25,16 +24,18 @@ public class ClientDaoTest extends InitializeQueryTest {
 
 		InitializeQueryTest.buildPropertiesWithoutScalability(null);
 		
-		PropertiesHandler p = PropertiesHandler.getInstance();
-		
 		initializeTestData();
 		
+		// test family check
 		testVerificationFamilleOK();
 		testVerificationFamilleKO();
 		
+		// test data tables retrieved according to query
 		testSelectBusinessDataTables();
+		
+//		testCreateTableOfIdSource();
 
-//		destroyTestData();
+		destroyTestData();
 	}
 
 	private void testSelectBusinessDataTables() throws ArcException {

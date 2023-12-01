@@ -107,6 +107,13 @@ public class ClientDao {
 				.getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName());
 	}
 
+	/**
+	 * register the table to be retrieved in tracking table
+	 * @param wsTrackingType
+	 * @param targetNod
+	 * @param nomTable
+	 * @throws ArcException
+	 */
 	private void registerTableToBeRetrieved(ExportTrackingType wsTrackingType, ArcDatabase targetNod, String nomTable)
 			throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
