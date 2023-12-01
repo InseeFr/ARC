@@ -10,6 +10,7 @@ import java.util.List;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -18,12 +19,13 @@ import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
+import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 
 public class ClientDaoTest extends InitializeQueryTest {
 
-	// request for DSN family, ARTEMIS client and reprise = true
+	// request for DSN family, ARTEMIS client and reprise = false
 	JSONObject jsonDsnStep1 = new JSONObject(
-			"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":true,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
+			"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
 	ArcClientIdentifier queryParametersDsnStep1 = new ArcClientIdentifier(jsonDsnStep1, true);
 	ClientDao clientDaoDsnStep1 = new ClientDao(queryParametersDsnStep1);
 
@@ -44,44 +46,104 @@ public class ClientDaoTest extends InitializeQueryTest {
 		testVerificationFamilleKO();
 		
 		// test data tables retrieved according to query
-		testSelectBusinessDataTables();
+		List<String> selectedDataTables = testSelectBusinessDataTables();
 		
+		// test id_source selection table
 		testCreateTableOfIdSourceRepriseFalse();
 		testCreateTableOfIdSourceRepriseTrue();
 
+		// test data table image creation
+		// table must had been registered in track table
+		List<String> dataTableImages = testCreateImages(selectedDataTables);
+		
+		// test return table from track table
+		// the dataTable in dataTableImages must be found the the track data table with type ExportTrackingType.DATA
+		testGetAClientTableByType(dataTableImages);
+		// the dataTable in dataTableImages must be found the the track data table by its name
+		testGetAClientTableByName(dataTableImages);
+		
 		destroyTestData();
 	}
 
-	private void testCreateTableOfIdSourceRepriseTrue() throws ArcException {
+	private void testGetAClientTableByType(List<String> dataTableImages) throws ArcException {
+		TableToRetrieve registeredTable = clientDaoDsnStep1.getAClientTableByType(ExportTrackingType.DATA);
+
+		// now that image had been created we should find it in tracking table
+		// check the name
+		assertEquals(dataTableImages.get(0),registeredTable.getTableName());
+		// data table are found on executor nod
+		assertEquals(ArcDatabase.EXECUTOR,registeredTable.getNod());
+	}
+
+	private void testGetAClientTableByName(List<String> dataTableImages) throws ArcException {
+		
+		TableToRetrieve registeredTable = clientDaoDsnStep1.getAClientTableByName(dataTableImages.get(0));
+		
+		// now that image had been created we should find it in tracking table
+		// check the name
+		assertEquals(dataTableImages.get(0),registeredTable.getTableName());
+		// the test is in non scalable nod so the data table must be on coordinator
+		assertEquals(ArcDatabase.EXECUTOR,registeredTable.getNod());
+	}
+	
+	private List<String> testCreateImages(List<String> selectedDataTables) throws ArcException {
+		List<String> dataTableImages = clientDaoDsnStep1.createImages(selectedDataTables, 0);
+		
+		// only 1 table in model and 1 table should had been created
+		assertEquals(1, dataTableImages.size());
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append("SELECT distinct id_source FROM "+dataTableImages.get(0)+";");
+		List<String> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("id_source");
+		
+		// only table with 1 id_source must had been retrieved
+		assertEquals(1, content.size());
+		
+		return dataTableImages;
+		
+	}
+
+	/**
+	 * test on retrieving idSource
+	 * request on DSN family, ARTEMIS client and reprise = false 
+	 * as reprise = false, only files not already retrieved by client must be selected
+	 * @throws ArcException
+	 */
+	private void testCreateTableOfIdSourceRepriseFalse() throws ArcException {
+		
 		clientDaoDsnStep1.createTableOfIdSource(jsonDsnStep1);
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("SELECT id_source FROM "+clientDaoDsnStep1.getTableOfIdSource()+";");
-		
 		List<String> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("id_source");
-		assertEquals(2, content.size());
+		
+		// only 1 file must be selected as reprise = false 
+		// file_not_to_retrieve_when_reprise_false has already been marked as retrieved by 'ARTEMIS' client
+		assertEquals(1, content.size());
 	}
 	
-	private void testCreateTableOfIdSourceRepriseFalse() throws ArcException {
+	/**
+	 * test to select id_source to be retrieved when reprise=true
+	 * @throws ArcException
+	 */
+	private void testCreateTableOfIdSourceRepriseTrue() throws ArcException {
 
-		// request on DSN family, ARTEMIS client and reprise = false
-		// as reprise = false, only files not already retrieved by client must be selected
-		JSONObject jsonDsnStep1RepriseFalse = new JSONObject(
-				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
-		ArcClientIdentifier queryParametersDsnStep1RepriseFalse = new ArcClientIdentifier(jsonDsnStep1RepriseFalse, true);
-		ClientDao clientDaoDsnStep1RepriseFalse = new ClientDao(queryParametersDsnStep1RepriseFalse);
+		JSONObject jsonDsnStep1RepriseTrue = new JSONObject(
+				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":true,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
+		ArcClientIdentifier queryParametersDsnStep1RepriseTrue = new ArcClientIdentifier(jsonDsnStep1RepriseTrue, true);
+		ClientDao clientDaoDsnStep1RepriseTrue = new ClientDao(queryParametersDsnStep1RepriseTrue);
 
 		// create tracking table
-		clientDaoDsnStep1RepriseFalse.createTableTrackRetrievedTables();
+		clientDaoDsnStep1RepriseTrue.createTableTrackRetrievedTables();
 		
-		clientDaoDsnStep1RepriseFalse.createTableOfIdSource(jsonDsnStep1RepriseFalse);
+		clientDaoDsnStep1RepriseTrue.createTableOfIdSource(jsonDsnStep1RepriseTrue);
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append("SELECT id_source FROM "+clientDaoDsnStep1RepriseFalse.getTableOfIdSource()+";");
+		query.append("SELECT id_source FROM "+clientDaoDsnStep1RepriseTrue.getTableOfIdSource()+";");
 		
 		List<String> content = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("id_source");
 		// only 1 file must be selected as reprise = false 
 		// file_not_to_retrieve_when_reprise_false has already been marked as retrieved by 'ARTEMIS' client
-		assertEquals(1, content.size());
+		assertEquals(2, content.size());
 	}
 
 	private void testCreateTableTrackRetrievedTables() throws ArcException {
@@ -99,13 +161,13 @@ public class ClientDaoTest extends InitializeQueryTest {
 
 	}
 
-	private void testSelectBusinessDataTables() throws ArcException {
+	private List<String> testSelectBusinessDataTables() throws ArcException {
 
 		List<String> clientTables = clientDaoDsnStep1.selectBusinessDataTables();
 
 		assertTrue(clientTables.contains("mapping_dsn_test1_ok"));
-		assertTrue(clientTables.contains("mapping_dsn_test2_ok"));
-		assertEquals(2,clientTables.size());
+		assertEquals(1,clientTables.size());
+		return clientTables;
 	}
 	
 	public void testVerificationFamilleOK() throws ArcException {
@@ -146,7 +208,6 @@ public class ClientDaoTest extends InitializeQueryTest {
 		
 		query.append("CREATE TABLE arc_bas1.mod_table_metier AS ");
 		query.append("SELECT 'DSN' as id_famille,'mapping_dsn_test1_ok' as nom_table_metier UNION ALL ");
-		query.append("SELECT 'DSN' as id_famille,'mapping_dsn_test2_ok' as nom_table_metier UNION ALL ");
 		query.append("SELECT 'PASRAU' as id_famille,'mapping_pasrau_test_ok' as nom_table_metier");
 		query.append(SQL.END_QUERY);
 		
@@ -164,6 +225,11 @@ public class ClientDaoTest extends InitializeQueryTest {
 		query.append("CREATE TABLE arc_bas1.norme AS ");
 		query.append("SELECT 'PHASE3V1' as id_norme, 'DSN' as id_famille UNION ALL ");
 		query.append("SELECT 'PASRAU' as id_norme, 'PASRAU' as id_famille");
+		query.append(SQL.END_QUERY);
+		
+		query.append("CREATE TABLE arc_bas1.mapping_dsn_test1_ok AS ");
+		query.append("SELECT 'file_to_retrieve.xml' as id_source, 'data_of_file_to_retrieve' as data UNION ALL ");
+		query.append("SELECT 'file_not_to_retrieve_when_reprise_false.xml' as id_source, 'data_of_file_not_to_retrieve_when_reprise_false' as data");
 		query.append(SQL.END_QUERY);
 
 		UtilitaireDao.get(0).executeImmediate(c, query);

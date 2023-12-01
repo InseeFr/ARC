@@ -2,6 +2,7 @@ package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -131,7 +132,7 @@ public class ClientDao {
 	 * @return liste des noms de tables images crées
 	 * @throws ArcException
 	 */
-	private void addImage(String tableMetier, int executorConnectionId) throws ArcException {
+	private String addImage(String tableMetier, int executorConnectionId) throws ArcException {
 		StringBuilder request = new StringBuilder();
 
 		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, tableMetier, client, timestamp);
@@ -147,6 +148,8 @@ public class ClientDao {
 		UtilitaireDao.get(executorConnectionId).executeBlock(connection, request);
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.EXECUTOR, nomTableImage);
+		
+		return nomTableImage;
 
 	}
 
@@ -264,12 +267,15 @@ public class ClientDao {
 	 * @return liste des noms de tables images crées
 	 * @throws ArcException
 	 */
-	public void createImages(List<String> tablesMetierNames, int executorConnectionId) throws ArcException {
+	public List<String> createImages(List<String> tablesMetierNames, int executorConnectionId) throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl.createImage()");
 
+		List<String> dataTableImages = new ArrayList<>(); 
+		
 		for (String tableMetier : tablesMetierNames) {
-			addImage(tableMetier, executorConnectionId);
+			dataTableImages.add(addImage(tableMetier, executorConnectionId));
 		}
+		return dataTableImages;
 	}
 
 	/*
