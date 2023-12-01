@@ -329,6 +329,28 @@ public class ClientDao {
 	/*
 	 * (non-Javadoc)
 	 *
+	 * @see fr.insee.arc_essnet.ws.dao.ClientDarcleMetier(java.lang.String,
+	 * fr.insee.arc_essnet.ws.actions.Senarc
+	 */
+	public void createTableMetier() throws ArcException {
+		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.sendTableMetier()");
+	
+		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.MOD_TABLE_METIER, client,
+				timestamp);
+	
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder(
+				"\n CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
+		requete.append("\n SELECT * FROM " + ViewEnum.MOD_TABLE_METIER.getFullName(environnement) + " ");
+		requete.append("\n WHERE id_famille = " + requete.quoteText(famille));
+		requete.append(";");
+		UtilitaireDao.get(0).executeRequest(connection, requete);
+	
+		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see fr.insee.arc_essnet.ws.dao.ClientDarcablesFamilles(long,
 	 * java.lang.String)
 	 */
@@ -366,28 +388,6 @@ public class ClientDao {
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
 
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see fr.insee.arc_essnet.ws.dao.ClientDarcleMetier(java.lang.String,
-	 * fr.insee.arc_essnet.ws.actions.Senarc
-	 */
-	public void createTableMetier() throws ArcException {
-		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.sendTableMetier()");
-
-		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.MOD_TABLE_METIER, client,
-				timestamp);
-
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder(
-				"\n CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
-		requete.append("\n SELECT * FROM " + ViewEnum.MOD_TABLE_METIER.getFullName(environnement) + " ");
-		requete.append("\n WHERE id_famille = " + requete.quoteText(famille));
-		requete.append(";");
-		UtilitaireDao.get(0).executeRequest(connection, requete);
-
-		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
 	}
 
 	/**

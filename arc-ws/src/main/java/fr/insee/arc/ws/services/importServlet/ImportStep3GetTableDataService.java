@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
