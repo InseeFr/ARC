@@ -440,13 +440,12 @@ public class ClientDao {
 	}
 
 	public void dropTable(int connectionIndex, String clientTable) {
-		if (StringUtils.isBlank(clientTable)) {
-			return;
-		}
 		UtilitaireDao.get(connectionIndex).dropTable(connection, clientTable);
 	}
 
 	public void dropTable(TableToRetrieve table) {
+		
+		dropTable(table.getTableName());
 
 		if (table.getNod().equals(ArcDatabase.EXECUTOR)) {
 			int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
@@ -454,8 +453,6 @@ public class ClientDao {
 					.getIndex() + numberOfExecutorNods; executorConnectionId++) {
 				dropTable(executorConnectionId, table.getTableName());
 			}
-		} else {
-			dropTable(0, table.getTableName());
 		}
 
 	}
@@ -551,10 +548,6 @@ public class ClientDao {
 		query.build(SQL.DELETE, this.tableWsTracking);
 		query.build(SQL.WHERE, "table_to_retrieve=", query.quoteText(tableName));
 		UtilitaireDao.get(0).executeImmediate(connection, query);
-	}
-
-	public void setConnection(Connection connection) {
-		this.connection = connection;
 	}
 
 	public long getTimestamp() {

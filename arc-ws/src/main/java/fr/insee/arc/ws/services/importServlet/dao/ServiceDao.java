@@ -13,14 +13,16 @@ import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 public class ServiceDao {
 	
 	public static void execQueryExportDataToResponse(OutputStream os, TableToRetrieve table, boolean csvExportFormat) throws ArcException {
-		
+
+		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
+
 		if (csvExportFormat)
 		{
 			try(GZIPOutputStream goz=new GZIPOutputStream(os);)
 			{
-				if (table.getNod().equals(ArcDatabase.EXECUTOR))
+
+				if (table.getNod().equals(ArcDatabase.EXECUTOR) && numberOfExecutorNods>0)
 				{
-					int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
 					for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
 							.getIndex() + numberOfExecutorNods; executorConnectionId++) {
 						UtilitaireDao.get(executorConnectionId).exporting(null, table.getTableName(), goz, csvExportFormat);
@@ -36,7 +38,8 @@ public class ServiceDao {
 		}
 		else
 		{
-			if (table.getNod().equals(ArcDatabase.EXECUTOR))
+			// binary transfer cannot be scaled
+			if (numberOfExecutorNods>0)
 			{
 				throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_SCALABLE_TABLE_MUST_BE_EXPORT_IN_CSV);
 			}
