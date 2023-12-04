@@ -32,19 +32,19 @@ public class InitializeQueryTest {
     	assertNotNull(c);
     }
     
-    protected static void buildPropertiesWithoutScalability(String repertoire) throws SQLException
+    public static void buildPropertiesWithoutScalability(String repertoire) throws SQLException
 	{
     	buildProperties(repertoire, new Connection[] {c});	
 	}
     
     
-    protected static void buildPropertiesWithScalability(String repertoire) throws SQLException
+    public static void buildPropertiesWithScalability(String repertoire) throws SQLException
 	{
 		e = new TestDatabase().testConnection;
     	buildProperties(repertoire, new Connection[] {c, e});	
 	}
     
-    protected static void buildProperties(String repertoire, Connection[] connections) throws SQLException
+    private static void buildProperties(String repertoire, Connection[] connections) throws SQLException
 	{
 		PropertiesHandler testProperties=PropertiesHandler.getInstance();
 		
