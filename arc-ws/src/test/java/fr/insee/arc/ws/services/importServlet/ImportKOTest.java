@@ -11,7 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
@@ -19,7 +18,7 @@ import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
 import fr.insee.arc.ws.services.importServlet.dao.InitializeTestDataNoScalability;
 
-public class ImportStep1KoTest extends ServletArc {
+public class ImportKOTest extends ServletArc {
 
 	private static final long serialVersionUID = 4409305598494746785L;
 

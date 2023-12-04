@@ -10,22 +10,18 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.dao.InitializeTestDataNoScalability;
 
-public class ImportStep1OkTest extends ServletArc {
+public class ImportOKTest extends ServletArc {
 
 	private static final long serialVersionUID = -7832574224892526397L;
 
-
 	@BeforeClass
     public static void setup() throws SQLException, ArcException {
-		
 		InitializeTestDataNoScalability.destroyTestData();
 		InitializeTestDataNoScalability.initializeTestData(true);
 	}

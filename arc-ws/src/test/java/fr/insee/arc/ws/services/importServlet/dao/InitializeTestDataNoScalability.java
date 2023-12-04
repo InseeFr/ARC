@@ -18,8 +18,6 @@ public class InitializeTestDataNoScalability {
 	 */
 	public static void initializeTestData(boolean ok) throws SQLException, ArcException {
 		
-		InitializeQueryTest.buildPropertiesWithoutScalability(null);
-		
 		ArcPreparedStatementBuilder query;
 		query = new ArcPreparedStatementBuilder();
 		query.append("CREATE SCHEMA arc;");
@@ -43,7 +41,7 @@ public class InitializeTestDataNoScalability {
 		query.append(SQL.END_QUERY);
 		
 		
-		if (!ok)
+		if (ok)
 		{
 			query.append("CREATE TABLE arc_bas1.mod_variable_metier AS SELECT 'DSN' as id_famille, 'mapping_dsn_test1_ok' as nom_table_metier, 'id_source' as nom_variable_metier");
 			query.append(SQL.END_QUERY);
@@ -94,8 +92,9 @@ public class InitializeTestDataNoScalability {
 	 */
 	public static void destroyTestData() throws SQLException, ArcException {
 
-		ArcPreparedStatementBuilder query;
+		InitializeQueryTest.buildPropertiesWithoutScalability(null);
 
+		ArcPreparedStatementBuilder query;
 		query = new ArcPreparedStatementBuilder();
 
 		query.append("DROP SCHEMA IF EXISTS arc CASCADE;");
