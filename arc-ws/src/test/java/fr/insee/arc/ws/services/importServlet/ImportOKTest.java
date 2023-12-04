@@ -1,5 +1,6 @@
 package fr.insee.arc.ws.services.importServlet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -41,6 +42,16 @@ public class ImportOKTest extends ServletArc {
 		return sentResponse.getWr().toString();
 	}
 	
+	private String executeImportStep2(JSONObject clientJsonInput) throws ArcException
+	{
+		JSONObject clientJsonInputValidated= validateRequest(clientJsonInput);
+		ImportStep2GetTableNameService imp = new ImportStep2GetTableNameService(clientJsonInputValidated);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		SendResponse sentResponse = new SendResponse(bos);
+		imp.execute(sentResponse);
+		return sentResponse.getWr().toString();
+	}
+	
 	
 	@Test(expected = ArcException.class)
 	public void testExecuteFamilyNotValid() throws ArcException {
@@ -53,10 +64,12 @@ public class ImportOKTest extends ServletArc {
 	@Test
 	public void testExecute() throws ArcException {
 
-		JSONObject clientJsonInput = new JSONObject(
+		// parameters sent by client for step 1
+		JSONObject clientJsonInputStep1 = new JSONObject(
 				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
 
-		executeImportStep1(clientJsonInput);
+		// response token will be used by client to invoke step2
+		String arcResponseStep1 = executeImportStep1(clientJsonInputStep1);
 
 		testCreateAndDropWsPending();
 		testCreateTableNmcl();
@@ -64,6 +77,24 @@ public class ImportOKTest extends ServletArc {
 		testCreateTableTableMetier();
 		testCreateTableTableFamille();
 		testCreateTableTablePeriodicite();
+		
+		// parameters sent by client for step 2
+		// it use response token provided as response of step1
+		JSONObject clientJsonInputStep2 =new JSONObject(
+				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"tableName\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\""+arcResponseStep1+"\",\"environnement\":\"arc_bas1\",\"type\":\"jsonwsp/request\"}");
+		
+		String arcResponseStep2 = executeImportStep2(clientJsonInputStep2);
+		
+		// ws info must be the first table to be retrieved
+		// token must return name of the table and the ddl of the table
+		assertEquals(arcResponseStep1+"_ws_info  client text, timestamp text", arcResponseStep2);
+		
+		
+//		JSONObject clientJsonInputStep1 = new JSONObject(
+//				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
+//		
+		
+		
 	}
 	
 	private void testCreateAndDropWsPending() throws ArcException {

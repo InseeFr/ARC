@@ -12,11 +12,11 @@ public class InitializeTestDataNoScalability {
 
 	/**
 	 * initialize the data sample for wsimport test
-	 * @param ok : true mean that data will be valid, false that a table will be lacking
+	 * @param dataSampleOk : true mean that data sample will be valid, false that a table will be lacking
 	 * @throws SQLException
 	 * @throws ArcException
 	 */
-	public static void initializeTestData(boolean ok) throws SQLException, ArcException {
+	public static void initializeTestData(boolean dataSampleOk) throws SQLException, ArcException {
 		
 		ArcPreparedStatementBuilder query;
 		query = new ArcPreparedStatementBuilder();
@@ -41,7 +41,7 @@ public class InitializeTestDataNoScalability {
 		query.append(SQL.END_QUERY);
 		
 		
-		if (ok)
+		if (dataSampleOk)
 		{
 			query.append("CREATE TABLE arc_bas1.mod_variable_metier AS SELECT 'DSN' as id_famille, 'mapping_dsn_test1_ok' as nom_table_metier, 'id_source' as nom_variable_metier");
 			query.append(SQL.END_QUERY);
