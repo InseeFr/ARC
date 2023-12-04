@@ -127,7 +127,6 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 	private static void initializeTestData() throws SQLException, ArcException {
 		
 		ArcPreparedStatementBuilder query;
-
 		query = new ArcPreparedStatementBuilder();
 
 		query.append("CREATE SCHEMA arc;");
@@ -136,7 +135,8 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 		
 		// family and client tables
 		query.append("CREATE TABLE arc.ihm_client AS ");
-		query.append("SELECT 'DSN' as id_famille,'ARTEMIS' as id_application UNION ALL ");
+		query.append("SELECT 'DSN' as id_famille,'ARTEMIS' as id_application");
+		query.append(SQL.UNION_ALL);
 		query.append("SELECT 'DSN' as id_famille,'DSNFLASH' as id_application");
 		query.append(SQL.END_QUERY);
 		
@@ -144,7 +144,8 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 		query.append(SQL.END_QUERY);
 
 		query.append("CREATE TABLE arc_bas1.mod_table_metier AS ");
-		query.append("SELECT 'DSN' as id_famille,'mapping_dsn_test1_ok' as nom_table_metier UNION ALL ");
+		query.append("SELECT 'DSN' as id_famille,'mapping_dsn_test1_ok' as nom_table_metier");
+		query.append(SQL.UNION_ALL);
 		query.append("SELECT 'PASRAU' as id_famille,'mapping_pasrau_test_ok' as nom_table_metier");
 		query.append(SQL.END_QUERY);
 		
@@ -156,7 +157,7 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 		query.append("SELECT 'file_to_retrieve.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
 		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
 		query.append(", null::text[] as client, null::timestamp[] as date_client");
-		query.append(" UNION ALL ");
+		query.append(SQL.UNION_ALL);
 		// file that mustn't be retrieved when reprise is false and family is DSN
 		query.append("SELECT 'file_not_to_retrieve_when_reprise_false.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
 		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
