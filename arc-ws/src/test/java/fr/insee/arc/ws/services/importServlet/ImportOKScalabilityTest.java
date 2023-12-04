@@ -24,10 +24,9 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.ws.services.importServlet.bo.ExecuteStep;
-import fr.insee.arc.ws.services.importServlet.dao.InitializeTestDataNoScalability;
 import fr.insee.arc.ws.services.importServlet.dao.InitializeTestDataScalability;
 
-public class ImportOKTestScalability {
+public class ImportOKScalabilityTest {
 
 	@BeforeClass
 	public static void setup() throws SQLException, ArcException {
