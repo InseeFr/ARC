@@ -16,8 +16,9 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
 
-public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
+public class ImportStep1InitializeClientTablesServiceTestKO extends ServletArc {
 	
 	/**
 	 * 
@@ -50,31 +51,21 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 	}
 	
 	
-	@Test(expected = ArcException.class)
-	public void testExecuteFamilyNotValid() throws ArcException {
-		JSONObject clientJsonInput = new JSONObject(
-				"{\"familleNorme\":\"RESIL\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
-		executeImportStep1(clientJsonInput);
-	}
-	
-	
 	@Test
 	public void testExecute() throws ArcException {
 
 		JSONObject clientJsonInput = new JSONObject(
 				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
 
-		executeImportStep1(clientJsonInput);
+		String arcResponse = executeImportStep1(clientJsonInput);
 
-		testCreateAndDropWsPending();
-		testCreateTableNmcl();
-		testCreateTableVarMetier();
-		testCreateTableTableMetier();
-		testCreateTableTableFamille();
-		testCreateTableTablePeriodicite();
+		testCreateAndDropWsPending(arcResponse);
+		
+		testCreateTableWsKo(arcResponse);
+		
 	}
 	
-	private void testCreateAndDropWsPending() throws ArcException {
+	private void testCreateAndDropWsPending(String arcResponse) throws ArcException {
 		
 		// check that the parallel thread that create tables drop the table ws_pending
 
@@ -82,7 +73,7 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 		int maxIteration = 50;
 		int i=0;
 		
-		while (i<maxIteration && UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, "arc_bas1.ARTEMIS_%_ws_pending"))
+		while (i<maxIteration && UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, arcResponse+"_ws_pending"))
 		{
 			i++;
 			UtilitaireDao.get(0).executeImmediate(InitializeQueryTest.c, "SELECT pg_sleep(1);");
@@ -92,32 +83,13 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 		assertTrue(i<maxIteration);
 	}
 	
-	private void testCreateTableNmcl() throws ArcException {
-		// table image created should be like arc_bas1.ARTEMIS_timestamp_<tablename_to_retrieve>
-		assertTrue(UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, "arc_bas1.ARTEMIS_%_nmcl_table1"));
-		assertTrue(UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, "arc_bas1.ARTEMIS_%_nmcl_table2"));
+	private void testCreateTableWsKo(String arcResponse) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		
+		query.append("SELECT 1 FROM "+arcResponse+"_ws_tracking where tracking_type="+query.quoteText(ExportTrackingType.KO.toString()));
+		
+		UtilitaireDao.get(0).hasResults(InitializeQueryTest.c, query);
 	}
-
-	private void testCreateTableVarMetier() throws ArcException {
-		// table image created should be like arc_bas1.ARTEMIS_timestamp_<tablename_to_retrieve>
-		assertTrue(UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, "arc_bas1.ARTEMIS_%_mod_variable_metier"));
-	}
-	
-	private void testCreateTableTableMetier() throws ArcException {
-		// table image created should be like arc_bas1.ARTEMIS_timestamp_<tablename_to_retrieve>
-		assertTrue(UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, "arc_bas1.ARTEMIS_%_mod_table_metier"));
-	}
-	
-	private void testCreateTableTableFamille() throws ArcException {
-		// table image created should be like arc_bas1.ARTEMIS_timestamp_<tablename_to_retrieve>
-		assertTrue(UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, "arc_bas1.ARTEMIS_%_ext_mod_famille"));
-	}
-	
-	private void testCreateTableTablePeriodicite() throws ArcException {
-		// table image created should be like arc_bas1.ARTEMIS_timestamp_<tablename_to_retrieve>
-		assertTrue(UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, "arc_bas1.ARTEMIS_%_ext_mod_periodicite"));
-	}
-	
 	
 	/**
 	 * initialize data for the tests
@@ -148,8 +120,7 @@ public class ImportStep1InitializeClientTablesServiceTest extends ServletArc {
 		query.append("SELECT 'PASRAU' as id_famille,'mapping_pasrau_test_ok' as nom_table_metier");
 		query.append(SQL.END_QUERY);
 		
-		query.append("CREATE TABLE arc_bas1.mod_variable_metier AS SELECT 'DSN' as id_famille, 'mapping_dsn_test1_ok' as nom_table_metier, 'id_source' as nom_variable_metier");
-		query.append(SQL.END_QUERY);
+		// table variable_metier doesn't exists, it will crash
 
 		// pilotage tables
 		query.append("CREATE TABLE arc_bas1.pilotage_fichier AS ");

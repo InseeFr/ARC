@@ -147,20 +147,12 @@ public class ImportStep1InitializeClientTablesService {
 					executeIf(ExportSource.METADATA, () -> clientDao.createTableFamille());
 					executeIf(ExportSource.METADATA, () -> clientDao.createTablePeriodicite());
 				} catch (ArcException e) {
-					try {
-						clientDao.createTableWsKO();
-					} catch (ArcException e1) {
-						new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED).logFullException();
-					}
+						clientDao.registerWsKO();
 				} finally {
 					try {
 						clientDao.dropTableWsPending();
 					} catch (ArcException e) {
-						try {
-							clientDao.createTableWsKO();
-						} catch (ArcException e1) {
-							new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED).logFullException();
-						}
+						clientDao.registerWsKO();
 					}
 				}
 

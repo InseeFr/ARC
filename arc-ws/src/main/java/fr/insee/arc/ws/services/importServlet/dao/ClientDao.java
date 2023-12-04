@@ -52,6 +52,8 @@ public class ClientDao {
 
 	// the tablename of the table that tracks tables left to retrieved
 	private String tableWsTracking;
+	
+	private String tableWsInfo;
 
 	private Connection connection;
 
@@ -67,7 +69,7 @@ public class ClientDao {
 				timestamp);
 		this.tableWsTracking = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.WS_TRACKING, client,
 				timestamp);
-
+		this.tableWsInfo = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.WS_INFO, client, timestamp);
 	}
 
 	/**
@@ -84,7 +86,6 @@ public class ClientDao {
 				.append(" LIMIT 1);");
 
 		String bool = UtilitaireDao.get(0).executeRequestWithoutMetadata(connection, request).get(0).get(0);
-
 		return bool.equals("t");
 
 	}
@@ -192,7 +193,7 @@ public class ClientDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, this.tableWsTracking, SQL.END_QUERY);
 		query.build(SQL.CREATE, SQL.TABLE, this.tableWsTracking,
-				" (tracking_type text, nod text, table_to_retrieve text) ", SQL.END_QUERY);
+				" (id serial, tracking_type text, nod text, table_to_retrieve text) ", SQL.END_QUERY);
 		UtilitaireDao.get(0).executeRequest(connection, query);
 
 		registerTableToBeRetrieved(ExportTrackingType.TRACK, ArcDatabase.COORDINATOR, this.tableWsTracking);
@@ -403,6 +404,7 @@ public class ClientDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "nod, table_to_retrieve", SQL.FROM, this.tableWsTracking);
 		query.build(SQL.WHERE, "tracking_type=", query.quoteText(type.toString()));
+		query.build(SQL.ORDER_BY, "id");
 		query.build(SQL.LIMIT, "1");
 
 		Map<String, List<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query))
@@ -425,6 +427,7 @@ public class ClientDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "nod, table_to_retrieve", SQL.FROM, this.tableWsTracking);
 		query.build(SQL.WHERE, "table_to_retrieve=", query.quoteText(tableName));
+		query.build(SQL.ORDER_BY, "id");
 		query.build(SQL.LIMIT, "1");
 
 		Map<String, List<String>> content = new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query))
@@ -482,8 +485,6 @@ public class ClientDao {
 	 */
 	public void createTableWsInfo() throws ArcException {
 
-		String tableWsInfo = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.WS_INFO, client, timestamp);
-
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("\n DROP TABLE IF EXISTS " + tableWsInfo + ";");
 
@@ -500,8 +501,12 @@ public class ClientDao {
 
 	}
 
-	public void createTableWsKO() throws ArcException {
-		registerTableToBeRetrieved(ExportTrackingType.KO, ArcDatabase.COORDINATOR, ViewEnum.WS_KO.toString());
+	public void registerWsKO() {
+		try {
+			registerTableToBeRetrieved(ExportTrackingType.KO, ArcDatabase.COORDINATOR, ViewEnum.WS_KO.toString());
+		} catch (ArcException e1) {
+			new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED).logFullException();
+		}
 	}
 
 	public void dropTableWsPending() throws ArcException {
