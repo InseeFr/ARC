@@ -97,7 +97,7 @@ public class ServletArc extends HttpServlet {
 	 * @param request
 	 * @return
 	 */
-	protected JSONObject validateRequest(JSONObject returned) {
+	protected static JSONObject validateRequest(JSONObject returned) {
 		
 		if (returned.isNull(JsonKeys.FORMAT.getKey())) {
 			returned.put(JsonKeys.FORMAT.getKey(), ExportFormat.BINARY.getFormat());
