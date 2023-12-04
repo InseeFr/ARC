@@ -1,8 +1,8 @@
 package fr.insee.arc.ws.services.importServlet.actions;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,36 +17,39 @@ import fr.insee.arc.utils.utils.LoggerHelper;
  */
 public class SendResponse {
 
-    private static final Logger LOGGER = LogManager.getLogger(SendResponse.class);
+	private static final Logger LOGGER = LogManager.getLogger(SendResponse.class);
 
-	private ServletOutputStream wr;
+	private OutputStream wr;
 	private HttpServletResponse response;
 
-	public SendResponse( HttpServletResponse response ){
+	public SendResponse(OutputStream os) {
+		this.wr = os;
+	}
+	
+	public SendResponse(HttpServletResponse response) {
 		this.response = response;
 		try {
 			this.response.setBufferSize(128 * 1024);
-			this.wr=this.response.getOutputStream();
-		}
-		catch (IOException e) {
+			this.wr = this.response.getOutputStream();
+		} catch (IOException e) {
 			StaticLoggerDispatcher.error(LOGGER, "** Error in servlet SendResponse **");
 		}
 	}
 
-
-
-	/**Ecrit la chaîne de caractères dans le flux de réponse compressé.
+	/**
+	 * Ecrit la chaîne de caractères dans le flux de réponse compressé.
+	 * 
 	 * @param string
 	 */
-	public void send( String string ){
-			try {
-				this.wr.write( string.getBytes() );//"UTF-8"
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(getClass(), "send()", LOGGER, ex);
-			}
+	public void send(String string) {
+		try {
+			this.wr.write(string.getBytes());// "UTF-8"
+		} catch (IOException ex) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "send()", LOGGER, ex);
+		}
 	}
 
-	public void sendError(ArcException e){
+	public void sendError(ArcException e) {
 		try {
 			this.response.sendError(500, e.getMessage());
 		} catch (IOException e1) {
@@ -54,11 +57,11 @@ public class SendResponse {
 		}
 	}
 
-
-	/**Fermeture du flux.
+	/**
+	 * Fermeture du flux.
 	 *
 	 */
-	public void endSending(){
+	public void endSending() {
 		try {
 			this.wr.flush();
 			this.wr.close();
@@ -67,8 +70,8 @@ public class SendResponse {
 		}
 	}
 
-	public ServletOutputStream getWr() {
+	public OutputStream getWr() {
 		return wr;
 	}
-	
+
 }

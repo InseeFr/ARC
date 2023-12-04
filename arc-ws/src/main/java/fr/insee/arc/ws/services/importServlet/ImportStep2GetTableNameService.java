@@ -7,9 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
+import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
+import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 import fr.insee.arc.ws.services.importServlet.dao.NameDao;
 
@@ -29,7 +32,7 @@ public class ImportStep2GetTableNameService {
 
 		this.dsnRequest = dsnRequest;
 
-		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest);
+		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest, false);
 
 		reprise = this.dsnRequest.getBoolean(JsonKeys.REPRISE.getKey());
 
@@ -39,26 +42,20 @@ public class ImportStep2GetTableNameService {
 
 	public void execute(SendResponse resp) throws ArcException {
 
-		StringBuilder type = new StringBuilder();
+		// check if a KO
+		if (this.clientDao.getAClientTableByType(ExportTrackingType.KO).getTableName() != null) {
+			throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_FAMILY_CREATION_FAILED);
+		}
+		
+		// try to get a data table
+		TableToRetrieve table = this.clientDao.getAClientTableByType(ExportTrackingType.DATA);
 
-		String tableName = this.clientDao.getAClientTable();
+		if (table.getTableName() != null) {
 
-		if (tableName == null) {
-			tableName = this.clientDao.getIdTable();
+			StringBuilder type = new StringBuilder();
 
-			if (!reprise) {
-				this.clientDao.updatePilotage(tableName);
-			}
-
-			this.clientDao.dropTable(tableName);
-
-			resp.send(" ");
-			resp.endSending();
-			return;
-
-		} else {
 			// récupération du type
-			List<List<String>> metadataOnlyTable = NameDao.execQuerySelectMetadata(tableName);
+			List<List<String>> metadataOnlyTable = NameDao.execQuerySelectMetadata(table);
 
 			for (int j = 0; j < metadataOnlyTable.get(0).size(); j++) {
 				if (j > 0) {
@@ -69,11 +66,30 @@ public class ImportStep2GetTableNameService {
 					type.append(" " + metadataOnlyTable.get(i).get(j));
 				}
 			}
+
+			// renvoie un nom de table du client si il en reste une
+			resp.send(table.getTableName() + " " + type);
+			resp.endSending();
+
+			return;
 		}
 
-		// renvoie un nom de table du client si il en reste une
-		resp.send(tableName + " " + type);
+		// if no data table found, get source table to register
+		table = this.clientDao.getAClientTableByType(ExportTrackingType.ID_SOURCE);
+
+		if (table.getTableName() != null) {
+			if (!reprise) {
+				this.clientDao.updatePilotage(table.getTableName());
+			}
+			this.clientDao.dropTable(table);
+		}
+		
+		table = this.clientDao.getAClientTableByType(ExportTrackingType.TRACK);
+		this.clientDao.dropTable(table);
+		
+		resp.send(" ");
 		resp.endSending();
+
 	}
 
 }

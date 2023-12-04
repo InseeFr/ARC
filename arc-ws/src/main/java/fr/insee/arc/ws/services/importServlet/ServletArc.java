@@ -71,7 +71,7 @@ public class ServletArc extends HttpServlet {
 
 		if (request.getParameter("requests") != null) {
 
-			dsnRequest = buildRequest(request);
+			dsnRequest = validateRequest(new JSONObject(request.getParameter("requests")));
 
 			if (SecurityDao.securityAccessAndTracing(request, response, dsnRequest)) {
 
@@ -97,10 +97,7 @@ public class ServletArc extends HttpServlet {
 	 * @param request
 	 * @return
 	 */
-	private JSONObject buildRequest(HttpServletRequest request) {
-
-		// get parameters from request
-		JSONObject returned = new JSONObject(request.getParameter("requests"));
+	protected static JSONObject validateRequest(JSONObject returned) {
 		
 		if (returned.isNull(JsonKeys.FORMAT.getKey())) {
 			returned.put(JsonKeys.FORMAT.getKey(), ExportFormat.BINARY.getFormat());

@@ -150,7 +150,7 @@ public class SynchronizeRulesAndMetadataOperation {
 			
 			GenericBean gb = SynchronizeRulesAndMetadataDao.execQuerySelectMetaDataOnlyFrom(coordinatorConnexion, table);
 
-			CopyObjectsToDatabase.execCopyFromGenericBeanIfTableNotExists(executorConnection, table, gb);
+			CopyObjectsToDatabase.execCopyFromGenericBeanWithoutDroppingTargetTable(executorConnection, table, gb);
 		}
 		
 	}

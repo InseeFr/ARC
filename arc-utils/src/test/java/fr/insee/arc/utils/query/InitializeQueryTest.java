@@ -25,6 +25,8 @@ public class InitializeQueryTest {
 
     public static Connection e;
 
+    public static Connection f;
+
 
     @Test
     public void testConnection()
@@ -32,19 +34,27 @@ public class InitializeQueryTest {
     	assertNotNull(c);
     }
     
-    protected static void buildPropertiesWithoutScalability(String repertoire) throws SQLException
+    public static void buildPropertiesWithoutScalability(String repertoire) throws SQLException
 	{
     	buildProperties(repertoire, new Connection[] {c});	
 	}
     
     
-    protected static void buildPropertiesWithScalability(String repertoire) throws SQLException
+    public static void buildPropertiesWithOneExecutor(String repertoire) throws SQLException
 	{
 		e = new TestDatabase().testConnection;
     	buildProperties(repertoire, new Connection[] {c, e});	
 	}
     
-    protected static void buildProperties(String repertoire, Connection[] connections) throws SQLException
+    public static void buildPropertiesWithTwoExecutors(String repertoire) throws SQLException
+	{
+		e = new TestDatabase().testConnection;
+		f = new TestDatabase().testConnection;
+    	buildProperties(repertoire, new Connection[] {c, e, f});	
+	}
+    
+    
+    private static void buildProperties(String repertoire, Connection[] connections) throws SQLException
 	{
 		PropertiesHandler testProperties=PropertiesHandler.getInstance();
 		
