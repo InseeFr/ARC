@@ -26,7 +26,7 @@ public class SynchronizeUserRulesAndMetadataTest  extends InitializeQueryTest  {
 	@Test
 	public void copyMetadataToExecutorsTestScalable() throws SQLException, ArcException {
 		
-		buildPropertiesWithScalability(null);
+		buildPropertiesWithOneExecutor(null);
 		
 		BddPatcherTest.initializeDatabaseForRetrieveTablesFromSchemaTest(u);
 		
