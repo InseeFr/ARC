@@ -163,11 +163,9 @@ public class ClientDao {
 	public void updatePilotage(String tableSource) throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.updatePilotage()");
 
-		String clientOfTableSource = extractClientFromToken();
-
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE " + ViewEnum.PILOTAGE_FICHIER.getFullName(environnement) + " T1 ");
-		query.append("SET client = array_append(client, '" + clientOfTableSource + "') ");
+		query.append("SET client = array_append(client, '" + this.client + "') ");
 		query.append(", date_client = array_append( date_client, localtimestamp ) ");
 		query.append("WHERE true ");
 		query.append("AND EXISTS (SELECT 1 FROM " + tableSource + " T2 where T1." + ColumnEnum.ID_SOURCE.getColumnName()
@@ -175,18 +173,6 @@ public class ClientDao {
 		query.append("AND T1.phase_traitement='" + TraitementPhase.MAPPING + "';");
 
 		UtilitaireDao.get(0).executeBlock(connection, query.toString());
-	}
-
-	/**
-	 * extract the client token name from the client
-	 * 
-	 * @param client2
-	 * @return
-	 */
-	private String extractClientFromToken() {
-		return ManipString.substringBeforeFirst(
-				ManipString.substringAfterFirst(this.client, Delimiters.SQL_SCHEMA_DELIMITER),
-				Delimiters.SQL_TOKEN_DELIMITER);
 	}
 
 	public void createTableTrackRetrievedTables() throws ArcException {
