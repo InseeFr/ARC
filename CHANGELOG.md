@@ -6,6 +6,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.30b
+- scalable data retrieval webservice
+
 ## version-93.1.29
 - csv_gzip format is available for the data retrieval webservice
 
