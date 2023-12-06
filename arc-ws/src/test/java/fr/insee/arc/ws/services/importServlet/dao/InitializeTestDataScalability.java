@@ -1,6 +1,8 @@
 package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
@@ -10,6 +12,7 @@ import fr.insee.arc.utils.query.InitializeQueryTest;
 
 public class InitializeTestDataScalability {
 
+	
 	/**
 	 * initialize the data sample for wsimport test
 	 * @param dataSampleOk : true mean that data sample will be valid, false that a table will be lacking
@@ -48,17 +51,32 @@ public class InitializeTestDataScalability {
 		}
 		
 		// pilotage tables
+		
 		query.append("CREATE TABLE arc_bas1.pilotage_fichier AS ");
-		query.append("SELECT 'file_to_retrieve.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
+		
+		// files on nod 1
+		query.append("SELECT 'file1_to_retrieve.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
 		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
 		query.append(", null::text[] as client, null::timestamp[] as date_client");
 		query.append(SQL.UNION_ALL);
 		// file that mustn't be retrieved when reprise is false and family is DSN
-		query.append("SELECT 'file_not_to_retrieve_when_reprise_false.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
+		query.append("SELECT 'file1_not_to_retrieve_when_reprise_false.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
 		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
-		query.append(", '{ARTEMIS}'::text[] as client, '{2023-11-30 10:29:47.000}'::timestamp[] as date_client");;
+		query.append(", '{ARTEMIS}'::text[] as client, '{2023-11-30 10:29:47.000}'::timestamp[] as date_client");
+		
+		query.append(SQL.UNION_ALL);
+		// files on nod 2
+		query.append("SELECT 'file2_to_retrieve.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
+		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
+		query.append(", null::text[] as client, null::timestamp[] as date_client");
+		query.append(SQL.UNION_ALL);
+		// file that mustn't be retrieved when reprise is false and family is DSN
+		query.append("SELECT 'file2_not_to_retrieve_when_reprise_false.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
+		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
+		query.append(", '{ARTEMIS}'::text[] as client, '{2023-11-30 10:29:47.000}'::timestamp[] as date_client");
 		query.append(SQL.END_QUERY);
 
+		
 		// norme table used to retrieve family of data
 		query.append("CREATE TABLE arc_bas1.norme AS ");
 		query.append("SELECT 'PHASE3V1' as id_norme, 'DSN' as id_famille UNION ALL ");
@@ -66,10 +84,12 @@ public class InitializeTestDataScalability {
 		query.append(SQL.END_QUERY);
 
 		// nomenclature tables
-		query.append("CREATE TABLE arc_bas1.nmcl_table1 AS SELECT 1 as data");
+		query.append("CREATE TABLE arc_bas1.nmcl_table1 AS SELECT 'data1' as data");
 		query.append(SQL.END_QUERY);
-		query.append("CREATE TABLE arc_bas1.nmcl_table2 AS SELECT 1 as data");
+		
+		query.append("CREATE TABLE arc_bas1.nmcl_table2 AS SELECT 'data2' as data");
 		query.append(SQL.END_QUERY);
+		
 		query.append("CREATE TABLE arc.ext_mod_periodicite AS SELECT 1 as id, 'A' as VAL");
 		query.append(SQL.END_QUERY);
 
