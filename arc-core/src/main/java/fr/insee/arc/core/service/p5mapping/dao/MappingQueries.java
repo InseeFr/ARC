@@ -10,14 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.Delimiters;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
+import fr.insee.arc.core.service.p5mapping.bo.RegleMapping;
 import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
@@ -83,7 +82,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	private String requeteTextuelleInsertion;
 	private boolean isRequeteCalculee;
 	private String idFamille;
-	private JeuDeRegle jeuDeRegle;
+	private FileIdCard fileIdCard;
 	private String environnement;
 	private Connection connexion;
 	/*
@@ -96,7 +95,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	private String nomTableModVariableMetier;
 	private String nomTablePrecedente;
 	private String nomTableSource;
-	private String nomTableRegleMapping;
 	private String nomTableTemporairePrepUnion;
 	private String nomTableTemporaireIdTable;
 	private String nomTableTemporaireFinale;
@@ -112,7 +110,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	}
 
 	public MappingQueries(Connection aConnexion, MappingQueriesFactory aRegleMappingFactory, String anIdFamille,
-			JeuDeRegle aJeuDeRegle, String anEnvironnement, String aNomTablePrecedente, int threadId) {
+			FileIdCard aFileIdCard, String anEnvironnement, String aNomTablePrecedente, int threadId) {
 		this();
 		this.regleMappingFactory = aRegleMappingFactory;
 		/**
@@ -125,11 +123,10 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		this.regleMappingFactory.setEnsembleTableMapping(this.ensembleTableMapping);
 		this.regleMappingFactory.setIdFamille(this.idFamille);
 		this.connexion = aConnexion;
-		this.jeuDeRegle = aJeuDeRegle;
+		this.fileIdCard = aFileIdCard;
 		this.environnement = anEnvironnement;
 		this.nomTablePrecedente = aNomTablePrecedente;
 		this.nomTableModVariableMetier = ViewEnum.MOD_VARIABLE_METIER.getFullName(this.environnement);
-		this.nomTableRegleMapping = ViewEnum.MAPPING_REGLE.getFullName(this.environnement);
 	}
 
 	public void construire() throws ArcException {
@@ -155,48 +152,18 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 * @param mapVariable
 	 * @throws ArcException
 	 */
-	private void attribuerExpressionRegleMapping(Map<String, VariableMapping> mapVariable) throws ArcException {
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("SELECT DISTINCT variable_sortie as variable_sortie, expr_regle_col as expr_regle_col FROM ")
-				.append(this.nomTableRegleMapping).append("\n WHERE ").append(this.jeuDeRegle.getSqlEquals())
-				.append(";");
+	private void attribuerExpressionRegleMapping(Map<String, VariableMapping> mapVariable) throws ArcException {		
+		List<RegleMapping> reglesMapping = this.fileIdCard.getIdCardMapping().getReglesMapping();
 
-		List<List<String>> resultTemp = UtilitaireDao.get(0).executeRequest(this.connexion, requete);
-		if (resultTemp.size() == 2) {
-			throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND);
-		}
-		List<List<String>> result = new ArrayList<>();
+		for (int i = 0; i < reglesMapping.size(); i++) {
 
-		for (int i = 0; i < resultTemp.size(); i++) {
-			// mise en minuscule des rubriques
-			List<String> temp = new ArrayList<>();
-			temp.add(resultTemp.get(i).get(0).toLowerCase());
-
-			String exprCol = resultTemp.get(i).get(1);
-			if (exprCol == null) {
-				exprCol = "";
-			}
-
-			Matcher m = Pattern.compile("\\{[^\\{\\} ]*\\}").matcher(exprCol);
-
-			StringBuffer sb = new StringBuffer();
-			while (m.find()) {
-				m.appendReplacement(sb, m.group().toLowerCase());
-			}
-			m.appendTail(sb);
-			temp.add(sb.toString());
-			result.add(temp);
-		}
-
-		for (int i = ARRAY_THIRD_COLUMN_INDEX; i < result.size(); i++) {
-
-			if (mapVariable.get(result.get(i).get(ARRAY_FIRST_COLUMN_INDEX)) == null) {
+			if (mapVariable.get(reglesMapping.get(i).getVariableSortie()) == null) {
 				throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND,
-						result.get(i).get(ARRAY_FIRST_COLUMN_INDEX));
+						reglesMapping.get(i).getVariableSortie());
 			}
 
-			mapVariable.get(result.get(i).get(ARRAY_FIRST_COLUMN_INDEX))
-					.setExpressionRegle(result.get(i).get(ARRAY_SECOND_COLUMN_INDEX));
+			mapVariable.get(reglesMapping.get(i).getVariableSortie())
+					.setExpressionRegle(reglesMapping.get(i).getExprRegleCol());
 		}
 	}
 
@@ -256,13 +223,13 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 
 			Set<String> s = new HashSet<>();
 
-			for (VariableMapping var : this.ensembleVariableMapping) {
+			for (VariableMapping variable : this.ensembleVariableMapping) {
 
-				if (table.getEnsembleVariableMapping().contains(var) && !var.toString().startsWith(ID_KEY_PREFIX)
-						&& !var.toString().startsWith(FOREIGN_KEY_PREFIX) || var.toString().equals(table.getPrimaryKey()))
+				if (table.getEnsembleVariableMapping().contains(variable) && !variable.toString().startsWith(ID_KEY_PREFIX)
+						&& !variable.toString().startsWith(FOREIGN_KEY_PREFIX) || variable.toString().equals(table.getPrimaryKey()))
 
 				{
-					s.addAll(var.getEnsembleIdentifiantsRubriques());
+					s.addAll(variable.getEnsembleIdentifiantsRubriques());
 				}
 
 			}

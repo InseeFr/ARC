@@ -12,6 +12,7 @@ import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.p5mapping.bo.IdCardMapping;
 import fr.insee.arc.core.service.p5mapping.bo.RegleMapping;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 public class MappingRulesOperation {
 	
@@ -32,6 +33,10 @@ public class MappingRulesOperation {
 			throws ArcException {
 		Map<String, List<String>> regle = RulesOperations.getBean(connection,
 				RulesOperations.getRegles(ViewEnum.MAPPING_REGLE.getFullName(envExecution), fileIdCard));
+		
+		if (regle.get(ColumnEnum.VARIABLE_SORTIE.getColumnName()).isEmpty()) {
+			throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND, fileIdCard.getIdNorme());
+		}
 
 		List<RegleMapping> listRegles = new ArrayList<>();
 		for(int i = 0; i < regle.get(ColumnEnum.VARIABLE_SORTIE.getColumnName()).size(); i++) {

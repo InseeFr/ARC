@@ -4,7 +4,7 @@ import java.sql.Connection;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -16,16 +16,16 @@ public class ThreadMappingQueries {
 
 	/**
 	 *
-	 * @param aJeuDeRegle
+	 * @param fileIdCard
 	 * @return Le bon id_famille
 	 * @throws ArcException
 	 */
-	public static String fetchIdFamille(Connection connexion, JeuDeRegle aJeuDeRegle, String envExecution)
+	public static String fetchIdFamille(Connection connexion, FileIdCard fileIdCard, String envExecution)
 			throws ArcException {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT id_famille FROM " + ViewEnum.NORME.getFullName(envExecution))
-				.append("\n WHERE id_norme = " + requete.quoteText(aJeuDeRegle.getIdNorme()))
-				.append("\n AND periodicite = " + requete.quoteText(aJeuDeRegle.getPeriodicite()));
+				.append("\n WHERE id_norme = " + requete.quoteText(fileIdCard.getIdNorme()))
+				.append("\n AND periodicite = " + requete.quoteText(fileIdCard.getPeriodicite()));
 		return UtilitaireDao.get(0).getString(connexion, requete);
 	}
 

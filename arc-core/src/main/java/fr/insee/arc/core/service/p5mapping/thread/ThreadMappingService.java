@@ -1,14 +1,11 @@
 package fr.insee.arc.core.service.p5mapping.thread;
 
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
+import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.GenericQueryDao;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
@@ -21,9 +18,9 @@ import fr.insee.arc.core.service.p5mapping.ApiMappingService;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
 import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
 import fr.insee.arc.core.service.p5mapping.operation.MappingOperation;
+import fr.insee.arc.core.service.p5mapping.operation.MappingRulesOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.Sleep;
 
 /**
@@ -39,6 +36,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 	private int indice;
 	private String tableTempControleOk;
 	private String tableMappingPilTemp;
+	
+	private FileIdCard fileIdCard;
 
 	private ThreadOperations arcThreadGenericDao;
 
@@ -110,8 +109,12 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 	}
 
 	private void execute() throws ArcException {
-
-		JeuDeRegle jdr = getTheRulesSetOfTheFile();
+		
+		this.fileIdCard = RulesOperations.fileIdCardFromPilotage(this.connexion.getExecutorConnection(),
+				tableMappingPilTemp, this.idSource);
+		
+		// Récupération des jeux de règles
+		MappingRulesOperation.fillMappingRules(this.connexion.getExecutorConnection(), envExecution, fileIdCard);
 
 		MappingOperation serviceMapping = new MappingOperation();
 		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(),
@@ -120,13 +123,13 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 		/*
 		 * Récupération de l'id_famille
 		 */
-		String idFamille = ThreadMappingQueries.fetchIdFamille(this.connexion.getExecutorConnection(), jdr,
+		String idFamille = ThreadMappingQueries.fetchIdFamille(this.connexion.getExecutorConnection(), fileIdCard,
 				this.getEnvExecution());
 		/*
 		 * Instancier une requête de mapping générique pour ce jeu de règles.
 		 */
 		MappingQueries requeteMapping = new MappingQueries(this.connexion.getExecutorConnection(),
-				this.regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk,
+				this.regleMappingFactory, idFamille, this.fileIdCard, this.getEnvExecution(), this.tableTempControleOk,
 				this.indice);
 		/*
 		 * Construire la requête de mapping (dérivation des règles)
@@ -156,25 +159,6 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
 		arcThreadGenericDao.marquageFinalDefaultDao(query);
 
-	}
-
-	private JeuDeRegle getTheRulesSetOfTheFile() throws ArcException {
-
-		/*
-		 * Construire l'ensemble des jeux de règles
-		 */
-		List<JeuDeRegle> listeJeuxDeRegles = JeuDeRegleDao.recupJeuDeRegle(this.connexion.getExecutorConnection(),
-				this.getEnvExecution(), this.tableTempControleOk);
-
-		if (listeJeuxDeRegles.isEmpty()) {
-			throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NOT_FOUND);
-		}
-
-		if (listeJeuxDeRegles.size() > 1) {
-			throw new ArcException(ArcExceptionMessage.MAPPING_RULES_NON_UNIQUE);
-		}
-
-		return listeJeuxDeRegles.get(0);
 	}
 
 	@Override
