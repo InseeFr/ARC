@@ -4,13 +4,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;

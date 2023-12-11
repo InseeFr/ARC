@@ -1,8 +1,6 @@
 package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;

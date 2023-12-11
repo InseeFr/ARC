@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.p0initialisation.pilotage.bo;
 
 import java.sql.Connection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
