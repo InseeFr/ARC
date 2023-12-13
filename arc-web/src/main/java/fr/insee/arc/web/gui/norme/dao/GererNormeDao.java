@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -255,8 +256,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
 				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
 
-		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelNormage),
-				defaultInputFields);
+		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelNormage), defaultInputFields);
 	}
 
 	/**
@@ -267,7 +267,8 @@ public class GererNormeDao extends VObjectHelperDao {
 	 * @param viewJeuxDeRegles
 	 * @throws ArcException
 	 */
-	public void execQueryPreGenererRegleMapping(VObject viewNorme, VObject viewJeuxDeRegles, VObject viewMapping) throws ArcException {
+	public void execQueryPreGenererRegleMapping(VObject viewNorme, VObject viewJeuxDeRegles, VObject viewMapping)
+			throws ArcException {
 		// List hard coded to be sure of the order in the select
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("INSERT INTO " + viewMapping.getTable()).append(
@@ -291,7 +292,7 @@ public class GererNormeDao extends VObjectHelperDao {
 				.append(ApiService.listeColonneTableMetierSelonFamilleNorme(
 						viewNorme.mapContentSelected().get(ColumnEnum.ID_FAMILLE.getColumnName()).get(0)))
 				.append(") liste_colonne");
-		
+
 		UtilitaireDao.get(0).executeRequest(null, requete);
 	}
 
@@ -427,29 +428,28 @@ public class GererNormeDao extends VObjectHelperDao {
 			// before inserting in the final table, the rules will be inserted in a table to
 			// test them
 			String nomTableImage = FormatSQL.temporaryTableName(vObjectToUpdate.getTable() + "_img" + 0);
-			
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));) {
+
+			try (BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));) {
 				// Get headers
 				List<String> listHeaders = getHeaderFromFile(bufferedReader);
 
 				/*
 				 * Création d'une table temporaire (qui ne peut pas être TEMPORARY)
 				 */
-				ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
-			    requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
-			    requete.append("\n CREATE TABLE " + nomTableImage + " AS SELECT "//
-				    + Format.untokenize(listHeaders, ", ") //
-				    + "\n\t FROM " //
-				    + vObjectToUpdate.getTable() //
-				    + "\n\t WHERE false");
-
+				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+				requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
+				requete.append("\n CREATE TABLE " + nomTableImage + " AS SELECT "//
+						+ Format.untokenize(listHeaders, ", ") //
+						+ "\n\t FROM " //
+						+ vObjectToUpdate.getTable() //
+						+ "\n\t WHERE false");
 
 				UtilitaireDao.get(0).executeRequest(null, requete);
 
 				// Throwing away the first line
 				String uselessLine = bufferedReader.readLine();
 				LoggerHelper.debug(LOGGER, uselessLine + "is thrown away");
-				
 
 				// Importing the file in the database (COPY command)
 				UtilitaireDao.get(0).importingWithReader(null, nomTableImage, bufferedReader, false,
@@ -467,7 +467,7 @@ public class GererNormeDao extends VObjectHelperDao {
 
 			Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
 
-			ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 			requete.append("\n UPDATE " + nomTableImage + " SET ");
 			requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));
@@ -476,7 +476,7 @@ public class GererNormeDao extends VObjectHelperDao {
 			requete.append("\n, validite_sup=" + requete.quoteText(selection.get("validite_sup").get(0)) + "::date");
 			requete.append("\n, version=" + requete.quoteText(selection.get("version").get(0)));
 			requete.append("\n ; ");
-			
+
 			requete.append("\n DELETE FROM " + vObjectToUpdate.getTable());
 			requete.append("\n WHERE ");
 			requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));
@@ -499,7 +499,149 @@ public class GererNormeDao extends VObjectHelperDao {
 			}
 		}
 	}
-	
+
+	/**
+	 * Upload mapping rules for a rule set of a norm module. The upload method for
+	 * mapping rules is different because it needs to ensure that mapping rules
+	 * remain consistent with the norm family
+	 * 
+	 * @param vObjectToUpdate the vObject to update with file
+	 * @param tableName       the
+	 */
+	public void uploadFileMapping(VObject viewMapping, VObject viewRulesSet, VObject viewNorme,
+			MultipartFile theFileToUpload) {
+
+		// Check if there is file
+		if (theFileToUpload == null || theFileToUpload.isEmpty()) {
+			// No file -> ko
+			viewMapping.setMessage("normManagement.upload.noSelection");
+		} else {
+			try {
+				// before : create temporary table from uploaded file
+				String nomTableImage = copyFileIntoTemporaryTable(viewMapping, theFileToUpload);
+				// first step : empty the table
+				emptyRuleTable(viewRulesSet, dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
+				// second step : pregenerate rules
+				execQueryPreGenererRegleMapping(viewNorme, viewRulesSet, viewMapping);
+				// third step : add rules from the files
+				copyTemporaryTableToRuleTable(viewMapping, viewRulesSet, nomTableImage);
+			} catch (Exception e) {
+				viewMapping.setMessage("normManagement.upload.error");
+				viewMapping.setMessageArgs(e.getMessage());
+				LoggerHelper.error(LOGGER, e, "uploadOutils()", "\n");
+				if (e instanceof ArcException) {
+					((ArcException) e).logFullException();
+				}
+			}
+		}
+	}
+
+	private String copyFileIntoTemporaryTable(VObject viewMapping, MultipartFile theFileToUpload)
+			throws IOException, ArcException {
+		// A file -> can process it
+		LoggerHelper.debug(LOGGER, " filesUpload  : " + theFileToUpload);
+
+		// the file will be read into a temporary table
+		String nomTableUpload = FormatSQL.temporaryTableName("fileUpload" + "_img" + 0);
+
+		BufferedReader bufferedReader = new BufferedReader(
+				new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));
+		// Get headers
+		List<String> listHeaders = getHeaderFromFile(bufferedReader);
+		// Get types
+		List<String> listTypes = getHeaderFromFile(bufferedReader);
+
+		// temporary table to read the file
+		ArcPreparedStatementBuilder requeteUpload = new ArcPreparedStatementBuilder();
+		requeteUpload.append("\n DROP TABLE IF EXISTS " + nomTableUpload + " cascade;");
+		requeteUpload.append("\n CREATE TABLE " + nomTableUpload + " (");
+		for (int i = 0; i < listHeaders.size(); i++) {
+			requeteUpload.append((i == 0 ? "" : ",") + "\n " + listHeaders.get(i) + " " + listTypes.get(i));
+		}
+		requeteUpload.append("\n );");
+
+		UtilitaireDao.get(0).executeRequest(null, requeteUpload);
+
+		// Importing the file in the database (COPY command)
+		UtilitaireDao.get(0).importingWithReader(null, nomTableUpload, bufferedReader, false,
+				IConstanteCaractere.semicolon);
+
+		// before inserting in the final table, the rules will be inserted in a table to
+		// test them
+		String nomTableImage = FormatSQL.temporaryTableName(viewMapping.getTable() + "_img" + 0);
+
+		List<String> listColumnsMapping = ColumnEnum
+				.listColumnEnumByName(ViewEnum.IHM_MAPPING_REGLE.getColumns().keySet());
+
+		/*
+		 * Création d'une table temporaire (qui ne peut pas être TEMPORARY)
+		 */
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
+		requete.append("\n CREATE TABLE " + nomTableImage + " AS SELECT "//
+				+ Format.untokenize(listColumnsMapping, ", ") //
+				+ "\n\t FROM " //
+				+ viewMapping.getTable() //
+				+ "\n\t WHERE false");
+
+		UtilitaireDao.get(0).executeRequest(null, requete);
+
+		// Only keep columns from mapping regle table
+		List<String> listHeadersToInsert = new ArrayList<>(listHeaders);
+		listHeadersToInsert.retainAll(listColumnsMapping);
+
+		// Insert into temporary table from upload table
+		ArcPreparedStatementBuilder requeteInsert = new ArcPreparedStatementBuilder();
+		requeteInsert
+				.append("\n INSERT INTO " + nomTableImage + " (" + Format.untokenize(listHeadersToInsert, ", ") + ")");
+		requeteInsert.append("\n SELECT "//
+				+ Format.untokenize(listHeadersToInsert, ", ") //
+				+ "\n\t FROM " //
+				+ nomTableUpload + ";");
+		requeteInsert.append("\n DROP TABLE IF EXISTS " + nomTableUpload + " cascade;");
+		UtilitaireDao.get(0).executeRequest(null, requeteInsert);
+
+		return nomTableImage;
+
+	}
+
+	private void copyTemporaryTableToRuleTable(VObject viewMapping, VObject viewRulesSet, String nomTableImage)
+			throws ArcException {
+		LoggerHelper.debug(LOGGER, "Insert file in the " + nomTableImage + " table");
+
+		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
+
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("\n UPDATE " + nomTableImage + " SET ");
+		requete.append("\n id_norme=" + requete.quoteText(selection.get("id_norme").get(0)));
+		requete.append("\n, periodicite=" + requete.quoteText(selection.get("periodicite").get(0)));
+		requete.append("\n, validite_inf=" + requete.quoteText(selection.get("validite_inf").get(0)) + "::date");
+		requete.append("\n, validite_sup=" + requete.quoteText(selection.get("validite_sup").get(0)) + "::date");
+		requete.append("\n, version=" + requete.quoteText(selection.get("version").get(0)));
+		requete.append("\n ; ");
+
+		requete.append("\n UPDATE " + viewMapping.getTable() + " m SET ");
+		boolean isOtherItem = false;
+		List<String> listColumnsMapping = ColumnEnum
+				.listColumnEnumByName(ViewEnum.IHM_MAPPING_REGLE.getColumns().keySet());
+		for (String col : listColumnsMapping) {
+			requete.append("\n" + (isOtherItem ? ", " : " ") + col + "=f." + col);
+			if (!isOtherItem)
+				isOtherItem = true;
+		}
+		requete.append("\n FROM " + nomTableImage + " AS f ");
+		requete.append("\n WHERE f.id_norme =m.id_norme");
+		requete.append("\n AND f.periodicite =m.periodicite");
+		requete.append("\n AND f.validite_inf =m.validite_inf");
+		requete.append("\n AND f.validite_sup =m.validite_sup");
+		requete.append("\n AND f.version =m.version");
+		requete.append("\n AND f.variable_sortie =m.variable_sortie");
+		requete.append(SQL.END_QUERY);
+
+		requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
+
+		UtilitaireDao.get(0).executeRequest(null, requete);
+	}
 
 	private static List<String> getHeaderFromFile(BufferedReader bufferedReader) throws IOException {
 		String listeColonnesAggregees = bufferedReader.readLine();
@@ -523,5 +665,5 @@ public class GererNormeDao extends VObjectHelperDao {
 	public void setDataObjectService(DataObjectService dataObjectService) {
 		this.dataObjectService = dataObjectService;
 	}
-	
+
 }

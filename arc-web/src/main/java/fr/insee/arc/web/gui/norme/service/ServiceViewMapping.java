@@ -54,7 +54,7 @@ public class ServiceViewMapping extends InteractorNorme {
 	 * @return
 	 */
 	public String importMapping(Model model, MultipartFile fileUploadMap) {
-		dao.uploadFileRule(views.getViewMapping(), views.getViewJeuxDeRegles(), fileUploadMap);
+		dao.uploadFileMapping(views.getViewMapping(), views.getViewJeuxDeRegles(), views.getViewNorme(), fileUploadMap);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
