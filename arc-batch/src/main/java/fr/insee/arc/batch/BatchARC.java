@@ -221,7 +221,7 @@ class BatchARC implements IReturnCode {
 
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
-			System.exit(STATUS_FAILURE_TECHNICAL_WARNING);
+			System.exit(STATUS_FAILURE_FUNCTIONAL_WARNING);
 		}
 
 		message("Fin du batch");
