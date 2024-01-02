@@ -6,6 +6,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.31b
+- upload mapping rules now corresponding to model declared variables
+
 ## version-93.1.30b
 - scalable data retrieval webservice
 
