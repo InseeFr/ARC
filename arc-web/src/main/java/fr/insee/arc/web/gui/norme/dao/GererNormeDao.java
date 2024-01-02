@@ -258,6 +258,129 @@ public class GererNormeDao extends VObjectHelperDao {
 
 		vObjectService.initialize(viewNormage, query, dataObjectService.getView(dataModelNormage), defaultInputFields);
 	}
+	
+	/**
+	 * Query to get control rules view
+	 * 
+	 * @param viewControle
+	 */
+	public void initializeControle(VObject viewControle) {
+
+		ViewEnum dataModelControle = ViewEnum.IHM_CONTROLE_REGLE;
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+        query.append(SQL.SELECT);
+		query.append(query.sqlListeOfColumnsFromModel(dataModelControle));
+		query.append(SQL.FROM);
+		query.append(dataObjectService.getView(dataModelControle));
+		query.append(SQL.WHERE);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_NORME));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.PERIODICITE));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_INF));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_SUP));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VERSION));
+
+		// build the default value when adding a record
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
+
+		vObjectService.initialize(viewControle, query, dataObjectService.getView(dataModelControle), defaultInputFields);
+	}
+	
+	/**
+	 * Query to get mapping rules view
+	 * 
+	 * @param viewMapping
+	 */
+	public void initializeMapping(VObject viewMapping) {
+
+		ViewEnum dataModelMapping = ViewEnum.IHM_MAPPING_REGLE;
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+        query.append("SELECT mapping.id_regle, mapping.id_norme, mapping.validite_inf, mapping.validite_sup, mapping.version, mapping.periodicite, mapping.variable_sortie, mapping.expr_regle_col, mapping.commentaire, variables.type_variable_metier type_sortie, variables.nom_table_metier nom_table_metier /*, variables.nom_table_metier nom_table_metier */ ");
+        query.append("\n  FROM arc.ihm_mapping_regle mapping INNER JOIN arc.ihm_jeuderegle jdr");
+        query.append("\n  ON mapping.id_norme     = jdr.id_norme     AND mapping.periodicite           = jdr.periodicite AND mapping.validite_inf = jdr.validite_inf AND mapping.validite_sup = jdr.validite_sup AND mapping.version = jdr.version");
+        query.append("\n  INNER JOIN arc.ihm_norme norme");
+        query.append("\n  ON norme.id_norme       = jdr.id_norme AND norme.periodicite   = jdr.periodicite");
+        query.append("\n  LEFT JOIN (SELECT id_famille, nom_variable_metier, type_variable_metier, string_agg(nom_table_metier,',') as nom_table_metier  FROM arc.ihm_mod_variable_metier group by id_famille, nom_variable_metier, type_variable_metier) variables");
+        query.append("\n  ON variables.id_famille = norme.id_famille AND variables.nom_variable_metier = mapping.variable_sortie");
+		query.append(SQL.WHERE + "mapping.");
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_NORME));
+		query.append(SQL.AND + "mapping.");
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.PERIODICITE));
+		query.append(SQL.AND + "mapping.");
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_INF));
+		query.append(SQL.AND + "mapping.");
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_SUP));
+		query.append(SQL.AND + "mapping.");
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VERSION));
+
+		// build the default value when adding a record
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
+
+		vObjectService.initialize(viewMapping, query, dataObjectService.getView(dataModelMapping), defaultInputFields);
+	}
+	
+	/**
+	 * Query to get expressions view
+	 * 
+	 * @param viewExpression
+	 */
+	public void initializeExpression(VObject viewExpression) {
+
+		ViewEnum dataModelExpression = ViewEnum.IHM_EXPRESSION;
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+        query.append(SQL.SELECT);
+		query.append(query.sqlListeOfColumnsFromModel(dataModelExpression));
+		query.append(SQL.FROM);
+		query.append(dataObjectService.getView(dataModelExpression));
+		query.append(SQL.WHERE);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_NORME));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.PERIODICITE));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_INF));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VALIDITE_SUP));
+		query.append(SQL.AND);
+		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.VERSION));
+
+		// build the default value when adding a record
+		Map<String, String> defaultInputFields = buildDefaultInputFieldsWithFirstSelectedRecord(ColumnEnum.ID_NORME,
+				ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION);
+
+		vObjectService.initialize(viewExpression, query, dataObjectService.getView(dataModelExpression), defaultInputFields);
+	}
+	
+	/**
+	 * Query to get ruleset view for copy
+	 * 
+	 * @param viewExpression
+	 */
+	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie) {
+
+		ViewEnum dataModelJeuxDeReglesCopie = ViewEnum.IHM_JEUDEREGLE;
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+        query.append(SQL.SELECT);
+		query.append("id_norme, periodicite, validite_inf, validite_sup, version, etat");
+		query.append(SQL.FROM);
+		query.append(dataObjectService.getView(dataModelJeuxDeReglesCopie));
+
+		// build the default value when adding a record
+		Map<String, String> defaultInputFields = new HashMap<>();
+
+		vObjectService.initialize(viewJeuxDeReglesCopie, query, dataObjectService.getView(dataModelJeuxDeReglesCopie), defaultInputFields);
+	}
 
 	/**
 	 * generate a blank rules set for mapping based on variables declared in data

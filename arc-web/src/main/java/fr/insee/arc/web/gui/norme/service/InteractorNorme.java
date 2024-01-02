@@ -2,7 +2,6 @@ package fr.insee.arc.web.gui.norme.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.model.GuiModules;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
@@ -66,17 +64,13 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		//
 		putVObject(views.getViewNormage(), t -> initializeNormage(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
-		putVObject(views.getViewControle(), t -> initializeControle(t, views.getViewJeuxDeRegles(), views.getViewModules(),
-				dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE) ));
+		putVObject(views.getViewControle(), t -> initializeControle(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
-		putVObject(views.getViewMapping(), t -> initializeMapping(t, views.getViewJeuxDeRegles(), views.getViewModules(),
-				dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE)  ));
+		putVObject(views.getViewMapping(), t -> initializeMapping(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
-		putVObject(views.getViewExpression(), t -> initializeExpression(t, views.getViewJeuxDeRegles(), views.getViewModules(),
-				dataObjectService.getView(ViewEnum.IHM_EXPRESSION) ));
+		putVObject(views.getViewExpression(), t -> initializeExpression(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
-		putVObject(views.getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t,
-				dataObjectService.getView(ViewEnum.IHM_JEUDEREGLE) , getScope()));
+		putVObject(views.getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t, getScope()));
 	}
 
 	@Override
@@ -204,21 +198,17 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * Initialize the {@link VObject} of a control ruleset. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeControle(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
+	public void initializeControle(VObject viewControle, VObject viewRulesSet, VObject viewModules) {
 		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
 		List<List<String>> moduleSelection =viewModules.listContentSelected();
 				
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.control)))
 		{
-            Map<String, String> type = viewRulesSet.mapHeadersType();
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,id_classe,rubrique_pere,rubrique_fils,borne_inf,borne_sup,condition,blocking_threshold,error_row_processing,pre_action,xsd_ordre,xsd_label_fils,xsd_role,commentaire from arc.ihm_controle_regle");
-            whereRuleSetEquals(requete, selection, type);
-            
-            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+			dao.setSelectedRecords(selection);
+			dao.initializeControle(viewControle);
 		} else {
-			vObjectService.destroy(moduleView);
+			vObjectService.destroy(viewControle);
 		}
 	}
 	
@@ -226,30 +216,15 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * Initialize the {@link VObject} of the mapping rule. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, VObject viewModules, String theTableName) {
+	public void initializeMapping(VObject viewMapping, VObject viewRulesSet, VObject viewModules) {
 		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
 		List<List<String>> moduleSelection =viewModules.listContentSelected();
 		
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.mapmodel)))
 		{
-			Map<String, String> type = viewRulesSet.mapHeadersType();
-
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder(
-                    "SELECT mapping.id_regle, mapping.id_norme, mapping.validite_inf, mapping.validite_sup, mapping.version, mapping.periodicite, mapping.variable_sortie, mapping.expr_regle_col, mapping.commentaire, variables.type_variable_metier type_sortie, variables.nom_table_metier nom_table_metier /*, variables.nom_table_metier nom_table_metier */ ");
-            requete.append("\n  FROM arc.ihm_mapping_regle mapping INNER JOIN arc.ihm_jeuderegle jdr");
-            requete.append("\n  ON mapping.id_norme     = jdr.id_norme     AND mapping.periodicite           = jdr.periodicite AND mapping.validite_inf = jdr.validite_inf AND mapping.validite_sup = jdr.validite_sup AND mapping.version = jdr.version");
-            requete.append("\n  INNER JOIN arc.ihm_norme norme");
-            requete.append("\n  ON norme.id_norme       = jdr.id_norme AND norme.periodicite   = jdr.periodicite");
-            requete.append("\n  LEFT JOIN (SELECT id_famille, nom_variable_metier, type_variable_metier, string_agg(nom_table_metier,',') as nom_table_metier  FROM arc.ihm_mod_variable_metier group by id_famille, nom_variable_metier, type_variable_metier) variables");
-            requete.append("\n  ON variables.id_famille = norme.id_famille AND variables.nom_variable_metier = mapping.variable_sortie");
-            requete.append("\n  WHERE mapping.id_norme" + requete.sqlEqual(selection.get("id_norme").get(0), type.get("id_norme")));
-            requete.append("\n  AND mapping.periodicite" + requete.sqlEqual(selection.get("periodicite").get(0), type.get("periodicite")));
-            requete.append("\n  AND mapping.validite_inf" + requete.sqlEqual(selection.get("validite_inf").get(0), type.get("validite_inf")));
-            requete.append("\n  AND mapping.validite_sup" + requete.sqlEqual(selection.get("validite_sup").get(0), type.get("validite_sup")));
-            requete.append("\n  AND mapping.version" + requete.sqlEqual(selection.get("version").get(0), type.get("version")));
-            
-            vObjectService.initialize(viewMapping,requete,theTableName, defaultRuleInputFields(selection));
+			dao.setSelectedRecords(selection);
+			dao.initializeMapping(viewMapping);
 		} else {
 			vObjectService.destroy(viewMapping);
 		}
@@ -259,21 +234,17 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * Initialize the {@link VObject} of the expression. Only
 	 * get the load rule link to the selected rule set.
 	 */
-	public void initializeExpression(VObject moduleView, VObject viewRulesSet, VObject viewModules, String theTableName) {
-		loggerDispatcher.info(String.format("Initialize view table %s", theTableName), LOGGER);
+	public void initializeExpression(VObject viewExpression, VObject viewRulesSet, VObject viewModules) {
 		Map<String, List<String>> selection = viewRulesSet.mapContentSelected();
 		List<List<String>> moduleSelection =viewModules.listContentSelected();
 		
 		if (!selection.isEmpty() && !moduleSelection.isEmpty()
 				&& moduleSelection.get(0).get(1).equals(moduleIdentifier(GuiModules.expression)))
 		{
-            Map<String, String> type = viewRulesSet.mapHeadersType();
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();;
-            requete.append("select id_norme,periodicite,validite_inf,validite_sup,version,id_regle,expr_nom, expr_valeur, commentaire from arc.ihm_expression");
-            whereRuleSetEquals(requete, selection, type);
-            vObjectService.initialize(moduleView, requete, theTableName, defaultRuleInputFields(selection));
+			dao.setSelectedRecords(selection);
+			dao.initializeExpression(viewExpression);
 		} else {
-			vObjectService.destroy(moduleView);
+			vObjectService.destroy(viewExpression);
 		}
 	}
 
@@ -283,20 +254,15 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * 
 	 * @param viewJeuxDeReglesCopie
 	 */
-	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, String theTableName, String scope) {
+	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, String scope) {
 		LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
 		if (scope != null) {
-            ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-	        requete.append("select id_norme, periodicite, validite_inf, validite_sup, version, etat from arc.ihm_jeuderegle ");
-			Map<String, String> defaultInputFields = new HashMap<>();
-			vObjectService.initialize(viewJeuxDeReglesCopie, requete, theTableName, defaultInputFields);
+			dao.initializeJeuxDeReglesCopie(viewJeuxDeReglesCopie);
 		} else {
 			vObjectService.destroy(viewJeuxDeReglesCopie);
 		}
 
 	}
-	
-
 
 	/** Appends a where clause for rulesets. */
 	protected void whereRuleSetEquals(ArcPreparedStatementBuilder requete, Map<String, List<String>> selection,
@@ -318,25 +284,6 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	{
 		return InteractorNorme.ACTION_NAME+"."+moduleName.toString();
 	}
-
-	
-	/** 
-	 * Default fields for arc rules set
-	 * @param selection
-	 * @return
-	 */
-	private Map<String, String> defaultRuleInputFields(Map<String, List<String>> selection) {
-		Map<String, String> defaultInputFields = new HashMap<>();
-		defaultInputFields.put("id_norme", selection.get("id_norme").get(0));
-		defaultInputFields.put("periodicite", selection.get("periodicite").get(0));
-		defaultInputFields.put("validite_inf", selection.get("validite_inf").get(0));
-		defaultInputFields.put("validite_sup", selection.get("validite_sup").get(0));
-		defaultInputFields.put("version", selection.get("version").get(0));
-		return defaultInputFields;
-	}
-
-
-
 
 	/**
 	 * @return the selectedJeuDeRegle
