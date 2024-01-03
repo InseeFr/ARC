@@ -41,9 +41,7 @@ public class GererNormeDao extends VObjectHelperDao {
 	/**
 	 * dao call to build norm vobject
 	 * 
-	 * @param viewObject
 	 * @param viewNorme
-	 * @param theTableName
 	 */
 	public void initializeViewNorme(VObject viewNorme) {
 
@@ -66,10 +64,7 @@ public class GererNormeDao extends VObjectHelperDao {
 	/**
 	 * dao call to build calendar vobject
 	 * 
-	 * @param viewObject
 	 * @param viewCalendar
-	 * @param theTableName
-	 * @param selection
 	 */
 	public void initializeViewCalendar(VObject viewCalendar) {
 
@@ -144,7 +139,8 @@ public class GererNormeDao extends VObjectHelperDao {
 	/**
 	 * dao call to build module menu vobject
 	 * 
-	 * @param viewRulesSet
+	 * @param viewModules
+	 * @param functionGetModuleName
 	 */
 	public void initializeViewModules(VObject viewModules, Function<GuiModules, String> functionGetModuleName) {
 
@@ -363,7 +359,7 @@ public class GererNormeDao extends VObjectHelperDao {
 	/**
 	 * Query to get ruleset view for copy
 	 * 
-	 * @param viewExpression
+	 * @param viewJeuxDeReglesCopie
 	 */
 	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie) {
 
@@ -386,8 +382,9 @@ public class GererNormeDao extends VObjectHelperDao {
 	 * generate a blank rules set for mapping based on variables declared in data
 	 * model
 	 * 
-	 * @param viewMapping
+	 * @param viewNorme
 	 * @param viewJeuxDeRegles
+	 * @param viewMapping
 	 * @throws ArcException
 	 */
 	public void execQueryPreGenererRegleMapping(VObject viewNorme, VObject viewJeuxDeRegles, VObject viewMapping)
@@ -509,8 +506,8 @@ public class GererNormeDao extends VObjectHelperDao {
 	/**
 	 * Empty all the rules of a norm module
 	 * 
+	 * @param viewRulesSet
 	 * @param table
-	 * @return
 	 * @throws ArcException
 	 */
 	public void emptyRuleTable(VObject viewRulesSet, String table) throws ArcException {
@@ -534,9 +531,12 @@ public class GererNormeDao extends VObjectHelperDao {
 	}
 
 	/**
+	 * Upload module rules for a rule set of a norm family. Upload for mapping rules
+	 * uses {@code uploadFileMapping} method.
 	 * 
 	 * @param vObjectToUpdate the vObject to update with file
-	 * @param tableName       the
+	 * @param viewRulesSet    the ruleset vObject, used to get the selected ruleset
+	 * @param theFileToUpload the file uploaded by the user
 	 */
 	public void uploadFileRule(VObject vObjectToUpdate, VObject viewRulesSet, MultipartFile theFileToUpload) {
 
@@ -624,12 +624,14 @@ public class GererNormeDao extends VObjectHelperDao {
 	}
 
 	/**
-	 * Upload mapping rules for a rule set of a norm module. The upload method for
+	 * Upload mapping rules for a rule set of a norm family. The upload method for
 	 * mapping rules is different because it needs to ensure that mapping rules
 	 * remain consistent with the norm family
 	 * 
-	 * @param vObjectToUpdate the vObject to update with file
-	 * @param tableName       the
+	 * @param viewMapping     the mapping vObject to update with file
+	 * @param viewRulesSet    the ruleset vObject, used to get the selected ruleset
+	 * @param viewNorme       the norme vObject, used to pregenerate mapping rules
+	 * @param theFileToUpload the file uploaded by the user
 	 */
 	public void uploadFileMapping(VObject viewMapping, VObject viewRulesSet, VObject viewNorme,
 			MultipartFile theFileToUpload) {
@@ -659,6 +661,18 @@ public class GererNormeDao extends VObjectHelperDao {
 		}
 	}
 
+	/**
+	 * Copies the mapping rules file given by the user into a temporary table.
+	 * Exceptions that might be thrown because of the file given by the user
+	 * are dealt here to avoid deleting and regenerating the rules in the
+	 * database for nothing
+	 * 
+	 * @param viewMapping     the mapping vObject to update with file
+	 * @param theFileToUpload the file uploaded by the user
+	 * @return the name of the temporary table
+	 * @throws IOException
+	 * @throws ArcException
+	 */
 	private String copyFileIntoTemporaryTable(VObject viewMapping, MultipartFile theFileToUpload)
 			throws IOException, ArcException {
 		// A file -> can process it
@@ -728,6 +742,15 @@ public class GererNormeDao extends VObjectHelperDao {
 
 	}
 
+	/**
+	 * Update the mapping rules with data from the temporary table, then drops
+	 * the temporary table
+	 * 
+	 * @param viewMapping   the mapping vObject to update with file
+	 * @param viewRulesSet  the ruleset vObject, used to get the selected ruleset
+	 * @param nomTableImage the name of the temporary table
+	 * @throws ArcException
+	 */
 	private void copyTemporaryTableToRuleTable(VObject viewMapping, VObject viewRulesSet, String nomTableImage)
 			throws ArcException {
 		LoggerHelper.debug(LOGGER, "Insert file in the " + nomTableImage + " table");

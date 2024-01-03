@@ -74,7 +74,7 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 
 		assertEquals(0, viewColumns.size());
 		
-		// in test data, must return two norms
+		// in test data, must return one norm
 		assertEquals(1, viewNorme.getContent().t.size());
 
 	}
