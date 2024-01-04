@@ -35,8 +35,7 @@
 				<version>${project.maven.compiler.version}</version>
 				<configuration>
 					<compilerArgument>-Xlint:unchecked</compilerArgument>
-					<source>${project.java.version}</source>
-					<target>${project.java.version}</target>
+					<release>${project.java.version}</release>
 				</configuration>
 			</plugin>
 			<plugin>
