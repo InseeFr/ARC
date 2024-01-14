@@ -34,8 +34,11 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${project.maven.compiler.version}</version>
 				<configuration>
-					<compilerArgument>-Xlint:unchecked</compilerArgument>
 					<release>${project.java.version}</release>
+					<compilerArgs>
+						<arg>-parameters</arg>
+ 						<arg>-Xlint:unchecked</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>

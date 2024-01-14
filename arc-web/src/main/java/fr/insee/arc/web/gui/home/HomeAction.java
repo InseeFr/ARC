@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.home;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -20,7 +20,7 @@ public class HomeAction extends ArcWebGenericService<NoModel, HomeDao> {
 	public static final String ACTION_NAME = "home";
 	private static final String RESULT_SUCCESS = "jsp/home.jsp";
 
-	@RequestMapping("/")
+	@RequestMapping("/home")
 	public String home(Model model, HttpServletRequest request) {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

@@ -29,7 +29,7 @@ import fr.insee.arc.web.gui.export.model.ModelExport;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao>  {
 
-	protected static final String RESULT_SUCCESS = "/jsp/gererExport.jsp";
+	protected static final String RESULT_SUCCESS = "jsp/gererExport.jsp";
 
 	private static final Logger LOGGER = LogManager.getLogger(InteractorExport.class);
 

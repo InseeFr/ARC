@@ -12,9 +12,9 @@
 		<version>0.0.2-SNAPSHOT</version>
 		
 		<project.log4j.version>2.17.1</project.log4j.version>
-		<project.spring.version>5.3.27</project.spring.version>
-		<project.springboot.version>2.6.7</project.springboot.version>
-		<project.jackson.version>2.13.2</project.jackson.version>
+		<project.spring.version>6.1.2</project.spring.version>
+		<project.springboot.version>3.1.6</project.springboot.version>
+		<project.jackson.version>2.16.1</project.jackson.version>
 		<project.postgres.version>42.5.1</project.postgres.version>
 		<project.java.version>17</project.java.version>
 		<project.maven.compiler.version>3.12.0</project.maven.compiler.version>
@@ -127,8 +127,11 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${project.maven.compiler.version}</version>
 				<configuration>
-					<compilerArgument>-Xlint:unchecked</compilerArgument>
 					<release>${project.java.version}</release>
+					<compilerArgs>
+						<arg>-parameters</arg>
+ 						<arg>-Xlint:unchecked</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 
@@ -310,14 +313,7 @@
 	        <dependency>
 	            <groupId>org.springframework.security</groupId>
 	            <artifactId>spring-security-bom</artifactId>
-	            <version>5.3.9.RELEASE</version>
-	            <type>pom</type>
-	            <scope>import</scope>
-	        </dependency>
-	        <dependency>
-	            <groupId>org.keycloak.bom</groupId>
-	            <artifactId>keycloak-adapter-bom</artifactId>
-	            <version>6.0.1</version>
+	            <version>6.2.1</version>
 	            <type>pom</type>
 	            <scope>import</scope>
 	        </dependency>

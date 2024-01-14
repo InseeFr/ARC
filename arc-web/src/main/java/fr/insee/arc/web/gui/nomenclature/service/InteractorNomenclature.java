@@ -22,7 +22,7 @@ import fr.insee.arc.web.gui.nomenclature.model.ModelNomenclature;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorNomenclature extends ArcWebGenericService<ModelNomenclature, GererNomenclatureDao> {
 
-	protected static final String RESULT_SUCCESS = "/jsp/gererNomenclature.jsp";
+	protected static final String RESULT_SUCCESS = "jsp/gererNomenclature.jsp";
 
 	private static final Logger LOGGER = LogManager.getLogger(InteractorNomenclature.class);
 

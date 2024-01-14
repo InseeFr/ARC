@@ -1,4 +1,4 @@
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="jakarta.tags.core" %>
 <script
 	type="text/javascript"
 	src="<c:url value='/js/jquery-2.1.3.min.js'/>"

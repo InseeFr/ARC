@@ -11,8 +11,8 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.multipart.support.MultipartFilter;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -34,7 +34,7 @@ import fr.insee.arc.web.gui.all.util.WebLoggerDispatcher;
 @ImportResource("classpath:applicationContext.xml")
 @ComponentScan(basePackages = {"fr.insee.arc.web", "fr.insee.arc.core", "fr.insee.arc.utils"})
 public class WebConfig implements WebMvcConfigurer {
-	
+
 	@Bean
 	public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(ConfigurableEnvironment env) throws IOException {
 		return PropertySourcesHelper.defaultWebappPropertySourcesConfigurer(env);
@@ -55,14 +55,12 @@ public class WebConfig implements WebMvcConfigurer {
 
 	    registry.addInterceptor(new ArcInterceptor());
 	}
-
-	@Bean(name=MultipartFilter.DEFAULT_MULTIPART_RESOLVER_BEAN_NAME)
-	public CommonsMultipartResolver multipartResolver() {
-	    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-	    multipartResolver.setMaxUploadSize(Long.MAX_VALUE);
-	    return multipartResolver;
+	
+	@Bean
+	MultipartResolver multipartResolver() {
+	    return new StandardServletMultipartResolver();
 	}
-
+	
 	@Bean
 	public LocaleResolver localeResolver() {
 		return new SessionLocaleResolver();
@@ -93,7 +91,10 @@ public class WebConfig implements WebMvcConfigurer {
 	public ViewResolver getViewResolver() {
 		return new InternalResourceViewResolver("/WEB-INF/", ""); 
 	}
+	
+//	@Bean(name = "mvcHandlerMappingIntrospector")
+//    public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
+//        return new HandlerMappingIntrospector();
+//    }
 
-	
-	
 }

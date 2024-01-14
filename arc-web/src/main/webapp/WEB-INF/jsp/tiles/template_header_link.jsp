@@ -1,5 +1,5 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %> 
 
 <li class="nav-item mt-1 mb-1 text-left">

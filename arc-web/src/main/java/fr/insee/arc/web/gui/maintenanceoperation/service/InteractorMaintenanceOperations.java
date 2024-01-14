@@ -19,7 +19,7 @@ import fr.insee.arc.web.gui.maintenanceoperation.model.MaintenanceOperationsMode
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorMaintenanceOperations extends ArcWebGenericService<MaintenanceOperationsModel,MaintenanceOperationDao>  {
 
-	protected static final String RESULT_SUCCESS = "/jsp/maintenanceOperations.jsp";
+	protected static final String RESULT_SUCCESS = "jsp/maintenanceOperations.jsp";
 
 	@Autowired
 	protected MaintenanceOperationsModel views;

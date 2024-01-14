@@ -1,5 +1,5 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 
 <c:set var="allowResize" value="${param.allowResize}" />
 <div class="d-flex">

@@ -21,7 +21,7 @@ import fr.insee.arc.web.gui.webservice.model.ModelWebservice;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorWebservice extends ArcWebGenericService<ModelWebservice, WebserviceDao> {
 
-	protected static final String RESULT_SUCCESS = "/jsp/gererWebservice.jsp";
+	protected static final String RESULT_SUCCESS = "jsp/gererWebservice.jsp";
 	private static final Logger LOGGER = LogManager.getLogger(InteractorWebservice.class);
 
 	@Autowired

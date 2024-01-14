@@ -5,7 +5,7 @@
 	trimDirectiveWhitespaces="true"
 %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib  prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 <%@taglib  prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${current_locale}"/>
 <!DOCTYPE html>

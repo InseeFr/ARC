@@ -25,7 +25,7 @@ import fr.insee.arc.web.gui.norme.model.ModelNorme;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNormeDao> {
 	
-	protected static final String RESULT_SUCCESS = "/jsp/gererNorme.jsp";
+	protected static final String RESULT_SUCCESS = "jsp/gererNorme.jsp";
 	
 	protected static final String SELECTED_RULESET_TABLE = "SELECTED_RULESET_TABLE";
 	protected static final String SELECTED_RULESET_NAME = "SELECTED_RULESET_NAME";
