@@ -17,7 +17,7 @@ public class ControllerIndex extends ServiceIndex {
 		return index(model);
 	}
 
-	@RequestMapping("/secure/healthcheck")
+	@RequestMapping("/healthcheck")
 	public ResponseEntity<Map<String, Object>> healthcheckAction() {
 		return healthcheck();
 	}
