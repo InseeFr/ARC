@@ -16,7 +16,7 @@ public class ControllerViewJeuxDeRegles extends ServiceViewJeuxDeRegles {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/selectJeuxDeRegles")
+	@RequestMapping("/secure/selectJeuxDeRegles")
 	public String selectRuleSetAction(Model model) {
 		return selectRuleSet(model);
 	}
@@ -27,7 +27,7 @@ public class ControllerViewJeuxDeRegles extends ServiceViewJeuxDeRegles {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/addJeuxDeRegles")
+	@RequestMapping("/secure/addJeuxDeRegles")
 	public String addRuleSetAction(Model model) {
 		return addRuleSet(model);
 	}
@@ -38,7 +38,7 @@ public class ControllerViewJeuxDeRegles extends ServiceViewJeuxDeRegles {
 	 * 
 	 * @return sucess
 	 */
-	@RequestMapping("/deleteJeuxDeRegles")
+	@RequestMapping("/secure/deleteJeuxDeRegles")
 	public String deleteRuleSetAction(Model model) {
 		return deleteRuleSet(model);
 	}
@@ -51,7 +51,7 @@ public class ControllerViewJeuxDeRegles extends ServiceViewJeuxDeRegles {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/updateJeuxDeRegles")
+	@RequestMapping("/secure/updateJeuxDeRegles")
 	public String updateRuleSetAction(Model model) {
 		return updateRuleSet(model);
 	}
@@ -61,7 +61,7 @@ public class ControllerViewJeuxDeRegles extends ServiceViewJeuxDeRegles {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/sortJeuxDeRegles")
+	@RequestMapping("/secure/sortJeuxDeRegles")
 	public String sortRuleSetAction(Model model) {
 		return sortRuleSet(model);
 	}
@@ -71,7 +71,7 @@ public class ControllerViewJeuxDeRegles extends ServiceViewJeuxDeRegles {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/downloadJeuxDeRegles")
+	@RequestMapping("/secure/downloadJeuxDeRegles")
 	public String downloadJeuxDeReglesAction(Model model, HttpServletResponse response) {
 		return downloadJeuxDeRegles(model, response);
 	}

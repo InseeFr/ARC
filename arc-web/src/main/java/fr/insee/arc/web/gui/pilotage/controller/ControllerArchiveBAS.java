@@ -15,7 +15,7 @@ public class ControllerArchiveBAS extends ServiceViewArchiveBAS {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/downloadEnveloppeFromArchiveBAS")
+	@RequestMapping("/secure/downloadEnveloppeFromArchiveBAS")
 	public void downloadEnveloppeFromArchiveBASAction(HttpServletResponse response) {
 		downloadEnveloppeFromArchiveBAS(response);
 	}

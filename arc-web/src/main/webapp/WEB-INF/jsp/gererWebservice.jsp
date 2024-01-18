@@ -15,15 +15,12 @@
 </c:if>
 
 <body class="bg-body">
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="webserviceManagement" />
+	</c:import>
 
 	<form id="selectWebserviceContext" action="selectWebserviceContext.action"
-	spellcheck="false" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-
-		<c:if test="${scope==null}">
-			<c:import url="tiles/header.jsp">
-				<c:param name="currentPage" value="webserviceManagement" />
-			</c:import>
-		</c:if>
+	spellcheck="false" method="post" accept-charset="UTF-8">
 
 		<div class="container-fluid">
 

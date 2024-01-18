@@ -29,7 +29,7 @@
 
 Vous êtes sur la page d'accueil non sécurisée de l'application
 </br>
-<a href="./index">Cliquer sur ce lien sécurisé et mettre la page en favori</a>			
+<a href="./secure/index">Cliquer sur ce lien sécurisé et mettre la page en favori</a>			
 		
 </body>
 </html>

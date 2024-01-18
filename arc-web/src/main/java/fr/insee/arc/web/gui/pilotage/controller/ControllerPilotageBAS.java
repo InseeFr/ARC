@@ -16,23 +16,22 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/enterPilotageBAS")
+	@RequestMapping("/secure/enterPilotageBAS")
 	public String enterPilotageBASAction(Model model) {
 		return enterPilotageBAS(model);
 	}
 
-	@PostMapping(value = {"/selectPilotageBAS"}
-	)
+	@PostMapping("/secure/selectPilotageBAS")
 	public String selectPilotageBASAction(Model model) {
 		return selectPilotageBAS(model);
 	}
 	
-	@PostMapping("/updateEnvDescription")
+	@PostMapping("/secure/updateEnvDescription")
 	public String updateEnvDescriptionAction(Model model) {
 		return updateEnvDescription(model);
 	}
 	
-	@RequestMapping("/sortPilotageBAS")
+	@RequestMapping("/secure/sortPilotageBAS")
 	public String sortPilotageBASAction(Model model) {		
 		return sortPilotageBAS(model);
 	}
@@ -40,7 +39,7 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
     
 	// Actions du bac à sable
 
-	@RequestMapping("/filesUploadBAS")
+	@RequestMapping("/secure/filesUploadBAS")
 	public String filesUploadBASAction(Model model) {
 		return filesUploadBAS(model);
 	}
@@ -51,7 +50,7 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	 * @param phaseAExecuter
 	 * @return
 	 */
-	@RequestMapping("/undoBatch")
+	@RequestMapping("/secure/undoBatch")
 	public String undoBatchAction(Model model, TraitementPhase phaseAExecuter) {
 		return undoBatch(model, phaseAExecuter);
 	}
@@ -62,7 +61,7 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping("/resetBAS")
+	@RequestMapping("/secure/resetBAS")
 	public String resetBASAction(Model model) {
 		return resetBAS(model);
 	}
@@ -74,7 +73,7 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	 * @param phaseAExecuter
 	 * @return
 	 */
-	@RequestMapping("/executerBatch")
+	@RequestMapping("/secure/executerBatch")
 	public String executerBatchAction(Model model, TraitementPhase phaseAExecuter) {
 		return executerBatch(model, phaseAExecuter);
 	}

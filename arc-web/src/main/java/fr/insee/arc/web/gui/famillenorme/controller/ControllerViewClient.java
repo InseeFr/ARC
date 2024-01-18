@@ -9,27 +9,27 @@ import fr.insee.arc.web.gui.famillenorme.service.ServiceViewClient;
 @Controller
 public class ControllerViewClient extends ServiceViewClient {
 
-	@RequestMapping("/selectClient")
+	@RequestMapping("/secure/selectClient")
 	public String selectClientAction(Model model) {
 		return selectClient(model);
 	}
 
-	@RequestMapping("/addClient")
+	@RequestMapping("/secure/addClient")
 	public String addClientAction(Model model) {
 		return addClient(model);
 	}
 
-	@RequestMapping("/deleteClient")
+	@RequestMapping("/secure/deleteClient")
 	public String deleteClientAction(Model model) {
 		return deleteClient(model);
 	}
 
-	@RequestMapping("/updateClient")
+	@RequestMapping("/secure/updateClient")
 	public String updateClientAction(Model model) {
 		return updateClient(model);
 	}
 
-	@RequestMapping("/sortClient")
+	@RequestMapping("/secure/sortClient")
 	public String sortClientAction(Model model) {
 		return sortClient(model);
 	}

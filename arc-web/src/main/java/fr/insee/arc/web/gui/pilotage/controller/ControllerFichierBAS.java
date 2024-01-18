@@ -12,17 +12,17 @@ import fr.insee.arc.web.gui.pilotage.service.ServiceViewFichierBAS;
 @Controller
 public class ControllerFichierBAS extends ServiceViewFichierBAS {
 
-	@RequestMapping("/selectFichierBAS")
+	@RequestMapping("/secure/selectFichierBAS")
 	public String selectFichierBASAction(Model model) {
 		return selectFichierBAS(model);
 	}
 
-	@RequestMapping("/sortFichierBAS")
+	@RequestMapping("/secure/sortFichierBAS")
 	public String sortFichierBASAction(Model model) {
 		return sortFichierBAS(model);
 	}
 
-	@RequestMapping("/downloadFichierBAS")
+	@RequestMapping("/secure/downloadFichierBAS")
 	public void downloadFichierBASAction(HttpServletResponse response) {
 		downloadFichierBAS(response);
 	}
@@ -32,7 +32,7 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/toRestoreBAS")
+	@RequestMapping("/secure/toRestoreBAS")
 	public String toRestoreBASAction(Model model) {		
 		return toRestoreBAS(model);
 	}
@@ -42,17 +42,17 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/toRestoreArchiveBAS")
+	@RequestMapping("/secure/toRestoreArchiveBAS")
 	public String toRestoreArchiveBASAction(Model model) {
 		return toRestoreArchiveBAS(model);
 	}
 
-	@RequestMapping("/downloadBdBAS")
+	@RequestMapping("/secure/downloadBdBAS")
 	public void downloadBdBASAction(HttpServletResponse response) throws ArcException {
 		downloadBdBAS(response);
 	}
 
-	@RequestMapping("/downloadEnveloppeBAS")
+	@RequestMapping("/secure/downloadEnveloppeBAS")
 	public String downloadEnveloppeBASAction(HttpServletResponse response) {
 		return downloadEnveloppeBAS(response);
 	}
@@ -62,7 +62,7 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/toDeleteBAS")
+	@RequestMapping("/secure/toDeleteBAS")
 	public String toDeleteBASAction(Model model) {
 		return toDeleteBAS(model);
 	}
@@ -73,7 +73,7 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/undoActionBAS")
+	@RequestMapping("/secure/undoActionBAS")
 	public String undoActionBASAction(Model model) {
 		return undoActionBAS(model);
 	}

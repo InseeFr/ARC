@@ -13,12 +13,13 @@
 </head>
 
 <body class="bg-body">
+
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="familyManagement" />
+	</c:import>
+
 	<form id="selectFamilleNorme" action="selectFamilleNorme.action"
 		spellcheck="false" method="post">
-
-		<c:import url="tiles/header.jsp">
-			<c:param name="currentPage" value="familyManagement" />
-		</c:import>
 
 		<div class="container-fluid">
 			<div class="row">

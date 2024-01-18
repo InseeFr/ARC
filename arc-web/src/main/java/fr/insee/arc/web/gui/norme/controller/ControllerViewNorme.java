@@ -13,7 +13,7 @@ public class ControllerViewNorme extends ServiceViewNorme {
 	 *
 	 * @return success
 	 */
-	@RequestMapping("/selectNorme")
+	@RequestMapping("/secure/selectNorme")
 	public String selectNormeAction(Model model) {
 		return selectNorme(model);
 	}
@@ -23,7 +23,7 @@ public class ControllerViewNorme extends ServiceViewNorme {
 	 *
 	 * @return success
 	 */
-	@RequestMapping("/addNorme")
+	@RequestMapping("/secure/addNorme")
 	public String addNormeAction(Model model) {
 		return addNorme(model);
 	}
@@ -33,7 +33,7 @@ public class ControllerViewNorme extends ServiceViewNorme {
 	 *
 	 * @return success
 	 */
-	@RequestMapping("/deleteNorme")
+	@RequestMapping("/secure/deleteNorme")
 	public String deleteNormeAction(Model model) {
 		return deleteNorme(model);
 	}
@@ -41,7 +41,7 @@ public class ControllerViewNorme extends ServiceViewNorme {
 	/**
 	 * Action trigger by updating a norm entry in the GUI. Update the GUI
 	 */
-	@RequestMapping("/updateNorme")
+	@RequestMapping("/secure/updateNorme")
 	public String updateNormeAction(Model model) {
 		return updateNorme(model);
 	}
@@ -49,7 +49,7 @@ public class ControllerViewNorme extends ServiceViewNorme {
 	/**
 	 * Action trigger by sorting a norm view in the GUI. Update the GUI
 	 */
-	@RequestMapping("/sortNorme")
+	@RequestMapping("/secure/sortNorme")
 	public String sortNormeAction(Model model) {
 		return sortNorme(model);
 	}

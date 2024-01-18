@@ -10,27 +10,27 @@ import fr.insee.arc.web.gui.famillenorme.service.ServiceViewVariableMetier;
 public class ControllerViewVariableMetier extends ServiceViewVariableMetier {
 
 
-	@RequestMapping("/selectVariableMetier")
+	@RequestMapping("/secure/selectVariableMetier")
 	public String selectVariableMetierAction(Model model) {
 		return selectVariableMetier(model);
 	}
 
-	@RequestMapping("/addVariableMetier")
+	@RequestMapping("/secure/addVariableMetier")
 	public String addVariableMetierAction(Model model) {
 		return addVariableMetier(model);
 	}
 
-	@RequestMapping("/sortVariableMetier")
+	@RequestMapping("/secure/sortVariableMetier")
 	public String sortVariableMetierAction(Model model) {
 		return sortVariableMetier(model);
 	}
 
-	@RequestMapping("/deleteVariableMetier")
+	@RequestMapping("/secure/deleteVariableMetier")
 	public String deleteVariableMetierAction(Model model) {
 		return deleteVariableMetier(model);
 	}
 
-	@RequestMapping("/updateVariableMetier")
+	@RequestMapping("/secure/updateVariableMetier")
 	public String updateVariableMetierAction(Model model) {
 		return updateVariableMetier(model);
 	}

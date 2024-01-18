@@ -20,7 +20,7 @@ public class HomeAction extends ArcWebGenericService<NoModel, HomeDao> {
 	public static final String ACTION_NAME = "home";
 	private static final String RESULT_SUCCESS = "jsp/home.jsp";
 
-	@RequestMapping("/home")
+	@RequestMapping("/secure/home")
 	public String home(Model model, HttpServletRequest request) {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

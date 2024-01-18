@@ -9,27 +9,27 @@ import fr.insee.arc.web.gui.famillenorme.service.ServiceViewHostAllowed;
 @Controller
 public class ControllerViewHostAllowed extends ServiceViewHostAllowed {
 
-	@RequestMapping("/selectHostAllowed")
+	@RequestMapping("/secure/selectHostAllowed")
 	public String selectHostAllowedAction(Model model) {
 		return selectHostAllowed(model);
 	}
 
-	@RequestMapping("/addHostAllowed")
+	@RequestMapping("/secure/addHostAllowed")
 	public String addHostAllowedAction(Model model) {
 		return addHostAllowed(model);
 	}
 
-	@RequestMapping("/deleteHostAllowed")
+	@RequestMapping("/secure/deleteHostAllowed")
 	public String deleteHostAllowedAction(Model model) {
 		return deleteHostAllowed(model);
 	}
 
-	@RequestMapping("/updateHostAllowed")
+	@RequestMapping("/secure/updateHostAllowed")
 	public String updateHostAllowedAction(Model model) {
 		return updateHostAllowed(model);
 	}
 
-	@RequestMapping("/sortHostAllowed")
+	@RequestMapping("/secure/sortHostAllowed")
 	public String sortHostAllowedAction(Model model) {
 		return sortHostAllowed(model);
 	}

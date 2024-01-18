@@ -14,7 +14,7 @@ public class ControllerViewModule extends ServiceViewModule {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/selectModules")
+	@RequestMapping("/secure/selectModules")
 	public String selectModulesAction(Model model) {
 		return selectModules(model);
 	}

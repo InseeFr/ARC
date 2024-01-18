@@ -12,42 +12,42 @@ import fr.insee.arc.web.gui.famillenorme.service.ServiceViewFamilleNorme;
 @Controller
 public class ControllerViewFamilleNorme extends ServiceViewFamilleNorme {
 	
-	@RequestMapping("/selectFamilleNorme")
+	@RequestMapping("/secure/selectFamilleNorme")
 	public String selectFamilleNormeAction(Model model) {
 		return selectFamilleNorme(model);
 	}
 
-	@RequestMapping("/addFamilleNorme")
+	@RequestMapping("/secure/addFamilleNorme")
 	public String addFamilleNormeAction(Model model) {
 		return addFamilleNorme(model);
 	}
 
-	@RequestMapping("/deleteFamilleNorme")
+	@RequestMapping("/secure/deleteFamilleNorme")
 	public String deleteFamilleNormeAction(Model model) {
 		return deleteFamilleNorme(model);
 	}
 
-	@RequestMapping("/updateFamilleNorme")
+	@RequestMapping("/secure/updateFamilleNorme")
 	public String updateFamilleNormeAction(Model model) {
 		return updateFamilleNorme(model);
 	}
 
-	@RequestMapping("/sortFamilleNorme")
+	@RequestMapping("/secure/sortFamilleNorme")
 	public String sortFamilleNormeAction(Model model) {
 		return sortFamilleNorme(model);
 	}
 
-	@RequestMapping("/downloadFamilleNorme")
+	@RequestMapping("/secure/downloadFamilleNorme")
 	public String downloadFamilleNormeAction(Model model, HttpServletResponse response) {
 		return downloadFamilleNorme(model, response);
 	}
 	
-	@RequestMapping("/importFamilleNorme")
+	@RequestMapping("/secure/importFamilleNorme")
 	public String uploadFamilleNormeAction(Model model, MultipartFile fileUpload) {
 		return uploadFamilleNorme(model, fileUpload);
 	}
 
-	@RequestMapping("/importDDI")
+	@RequestMapping("/secure/importDDI")
 	public String importDDIAction(Model model, MultipartFile fileUpload) {
 		return importDDI(model, fileUpload);
 	}

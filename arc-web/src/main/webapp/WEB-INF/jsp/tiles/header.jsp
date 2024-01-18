@@ -2,6 +2,7 @@
 <%@taglib prefix="c" uri="jakarta.tags.core"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>  
 
+<form spellcheck="false" id="menu" action="" method="post" accept-charset="UTF-8">
 
 <div class="menu-box-style" style="display: flex;flex-direction:row;flex-wrap:nowrap;justify-content: space-between;position: fixed;top: 0;width: 100%;z-index: 2000;">
 	
@@ -67,3 +68,5 @@
 </nav>
 
 <div class="float-left vh-menu-bar vw-menu-bar left-navbar collapse show"></div>
+
+</form>

@@ -9,12 +9,12 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
 	@Override
     protected Class<?>[] getRootConfigClasses() {
-        return null;
+        return new Class<?>[] { WebConfig.class };
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[] { WebConfig.class, SecurityConfiguration.class };
+        return new Class<?>[] { SecurityConfiguration.class };
     }
 
     @Override
@@ -25,8 +25,7 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 	
     @Override
     protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-        // Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
-        registration.setMultipartConfig(new MultipartConfigElement("/"));
+    	registration.setMultipartConfig(new MultipartConfigElement(""));
     }
 
 }

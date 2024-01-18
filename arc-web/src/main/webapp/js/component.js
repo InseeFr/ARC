@@ -70,16 +70,11 @@ function formatDecimal(s, n) {
 	
 }
 
-
 $(document).on('ready readyAgain',function() {
-
-
-	
 	try {
-		console.log("Chargement des modules js : "+configJS);
+		configJS;
 	}
 	catch(e) {
-		console.log("Aucun module js");
 		configJS="";
 	}
 
@@ -112,9 +107,7 @@ $(document).on('ready readyAgain',function() {
 		);
 
 		$('.bandeau').each(function(){
-			console.log($(this).siblings().filter("table.fixedHeader").css("width"));
 			$(this).css("width",$(this).siblings().filter("table.fixedHeader").css("width"));			
-
 		}
 		);
 		
@@ -160,13 +153,13 @@ $(document).on('ready readyAgain',function() {
 
 
 	if (configJS.indexOf("ICS:AjaxDataSelector;")>-1)
-	{
+	{		
 		// pour rendre la chose plus propre par rapport à html
 		// lorsqu'on clique un bouton d'action, ce n'est pas le bouton qui
 		// envoie
 		// l'action mais le formulaire
 		// A noter qu'en html5, le bouton peut désormais etre auteur de l'action
-		// mais on ne retrouve rien dans le dom... lol
+		// mais on ne retrouve rien dans le dom...
 		$("input[doAction]").off('click').on('click', function() {
 			$(this).parents().filter("form").attr("action",$(this).attr('doAction'));
 			$(this).parents().filter("form").attr("multipart",$(this).attr('multipart'));
@@ -441,7 +434,6 @@ function applyFormat()
 	
 	$("[f^='Heure:']").each(function(){
 		var toDisplay=formatDecimal($(this).text(),parseFloat($(this).attr("f").split(":")[1]));
-		console.log("toDisplay "+ toDisplay);
 		if (toDisplay!=null && toDisplay!="NULL.00") { toDisplay=toDisplay+" h"; } else { toDisplay="" }
 		$(this).text(toDisplay);
 		$(this).css("text-align","right");
@@ -478,7 +470,7 @@ function drawEllipsis(t)
 	setTimeout(function(){
 		if (t.scrollHeight-5 > t.clientHeight)
 		{
-			$(t).css("background-image", 'url("./img/ellipsis.png")');
+			$(t).css("background-image", 'url("./../img/ellipsis.png")');
 		}
 		else
 		{
@@ -814,7 +806,10 @@ function ajaxConfigurationCall()
 
 		if ($this.attr('ajax')=="false")
 		{
-			console.log("pas d'ajax");
+			// multipart is forbidden with ajax to false			
+			$("[class='custom-file-input']").attr('disabled',"");
+			setTimeout(function(){$("[class='custom-file-input']").removeAttr('disabled');},1000);
+
 			if ( $("meta[name='_csrf']").length ) {
 				$('<input>').attr({
 	    			type: 'hidden',
@@ -880,14 +875,8 @@ function ajaxConfigurationCall()
 			}
 			else
 			{
-				console.log("Appel ajax");
 				e.preventDefault();
 				var z0=new Date().getTime();
-
-
-				console.log($this.attr('action'));
-				console.log($this.attr('method'));
-				console.log($this.serialize2()+"&scope="+splitAndEval($this.attr('scope')));
 				
 				$.ajax({
 					url: $this.attr('action'),
@@ -909,12 +898,9 @@ function ajaxConfigurationCall()
 						var z1=new Date().getTime();
 
 						var scope=splitAndEvalArray(splitAndEval($this.attr('scope')));
-						console.log(scope);
 
 						for (var i=0;i<scope.length;i++)
 						{
-							console.log("actualisation de la div : "+scope[i]);
-
 							try{
 							if (scope[i].substr(0,1)=="-")
 							{
@@ -926,8 +912,6 @@ function ajaxConfigurationCall()
 									document.getElementById(scope[i]).innerHTML=$(xml).find("#"+scope[i]).get(0).innerHTML;
 							}
 							}catch(error) {
-								console.error(error);
-								console.log(scope[i]);
 							}
 
 						}
@@ -952,9 +936,6 @@ function ajaxConfigurationCall()
 
 function AfficherDimension(){
 	var $z=$('textarea').filter('[name="viewmapping.content.t[6].d[7]"]');
-	console.log("scrollHeight:"+$z.get(0).scrollHeight);
-	console.log("clientHeight:"+$z.get(0).clientHeight);
-	console.log("offsetHeight:"+$z.get(0).offsetHeight);
 	setTimeout(function(){AfficherDimension();},3000);}
 
 
@@ -1064,18 +1045,8 @@ function applyElementAttributes(scope, attributesSaved)
 			var elem=aTraiter.split(",");
 			for (var j=0;j<elem.length;j=j+2)
 			{
-			
 				var targetElementToSave=elem[j];
-				var targetAttributeToSave=elem[j+1];
-			
-				console.log(divMain);
-				console.log(targetElementToSave);
-				console.log(targetAttributeToSave);
-				console.log(attributesSaved);
-				console.log(k);
-				console.log(attributesSaved[k]);
-				
-				
+				var targetAttributeToSave=elem[j+1];		
 				$("#"+divMain+"").find("["+targetElementToSave+"]")[targetAttributeToSave](attributesSaved[k]);
 				k++;
 				}

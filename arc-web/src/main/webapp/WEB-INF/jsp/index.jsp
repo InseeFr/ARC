@@ -15,14 +15,12 @@
 </head>
 
 <body class="bg-body">
-	<form spellcheck="false" action="index" method="post"
-		enctype="multipart/form-data" accept-charset="UTF-8">
-		<c:import url="tiles/header.jsp">
-			<c:param name="currentPage" value="home" />
-		</c:import>
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="home" />
+	</c:import>
 
+	<form spellcheck="false" action="index" method="post" accept-charset="UTF-8">
 		<div class="container-fluid">
-
 			<div class="row justify-content-md-center">
 				<div class="col-md-8">
 					<div class="jumbotron jumbotron-fluid">

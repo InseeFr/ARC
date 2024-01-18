@@ -16,7 +16,7 @@ public class ControllerEntrepotBAS extends ServiceViewEntrepotBAS {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/visualiserEntrepotBAS")
+	@RequestMapping("/secure/visualiserEntrepotBAS")
 	public String visualiserEntrepotBASAction(Model model) {		
 		return visualiserEntrepotBAS(model);
 	}

@@ -20,19 +20,17 @@
 
 <body class="bg-body">
 
+<c:import url="tiles/header.jsp">
+	<c:param name="currentPage" value="normManagement" />
+</c:import>
+
 <form
 	spellcheck="false"
 	id="selectNorme"
 	action="selectNorme.action"
 	method="post"
-	enctype="multipart/form-data"
 	accept-charset="UTF-8"
 >
-
-	<c:import url="tiles/header.jsp">
-		<c:param name="currentPage" value="normManagement" />
-	</c:import>
-
 
 <div class="container-fluid">
 	<div class="row">
