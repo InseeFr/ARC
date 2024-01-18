@@ -15,14 +15,13 @@
 
 <body class="bg-body">
 
-	<c:import url="tiles/header.jsp">
-		<c:param name="currentPage" value="envManagement" />
-	</c:import>		
-
-
 	<form spellcheck="false" id="selectPilotageBAS" action="selectPilotageBAS.action"
 		method="post"
 		accept-charset="UTF-8">
+
+	<c:import url="tiles/header.jsp">
+		<c:param name="currentPage" value="envManagement" />
+	</c:import>		
 
 		<div class="container-fluid">
 			<c:import url="/WEB-INF/jsp/tiles/template_environment.jsp"></c:import>

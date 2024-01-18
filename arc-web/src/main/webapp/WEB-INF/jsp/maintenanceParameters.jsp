@@ -21,10 +21,6 @@
 </c:if>
 <body class="bg-body">
 
-<c:import url="tiles/header.jsp">
-	<c:param name="currentPage" value="parameters" />
-</c:import>	
-
 <form
 	spellcheck="false"
 	action="selectExport.action"
@@ -33,8 +29,11 @@
 	accept-charset="UTF-8"
 >
 
-	<div class="container-fluid">
+<c:import url="tiles/header.jsp">
+	<c:param name="currentPage" value="parameters" />
+</c:import>	
 
+	<div class="container-fluid">
 		<div class="row">
 				<div class="col-md-12">
 					<div class="row">

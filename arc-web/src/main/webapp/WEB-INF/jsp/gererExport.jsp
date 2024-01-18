@@ -22,10 +22,6 @@
 
 <body class="bg-body">
 
-<c:import url="tiles/header.jsp">
-	<c:param name="currentPage" value="export" />
-</c:import>
-
 <form
 	spellcheck="false"
 	action="selectExport.action"
@@ -33,6 +29,11 @@
 	method="post"
 	accept-charset="UTF-8"
 >
+
+<c:import url="tiles/header.jsp">
+	<c:param name="currentPage" value="export" />
+</c:import>
+
 	<div class="container-fluid">
 		<c:import url="/WEB-INF/jsp/tiles/template_environment.jsp"></c:import>
 		<div class="row">

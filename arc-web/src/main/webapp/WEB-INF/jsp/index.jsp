@@ -15,34 +15,33 @@
 </head>
 
 <body class="bg-body">
-	<c:import url="tiles/header.jsp">
-		<c:param name="currentPage" value="home" />
-	</c:import>
-
-	<form spellcheck="false" action="index" method="post" accept-charset="UTF-8">
-		<div class="container-fluid">
-			<div class="row justify-content-md-center">
-				<div class="col-md-8">
-					<div class="jumbotron jumbotron-fluid">
-						<div class="container">
-							<h1 class="display-4">
-								<spring:message code="home.welcome" />
-							</h1>
-							<p>${version}</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<hr />
-			<div class="row justify-content-md-center">
-				<div class="col-md-4">
-					<c:set var="view" value="${viewIndex}" scope="request"/>
-					<c:import url="tiles/templateVObject.jsp">
-						<c:param name="taille" value ="col-md" />
-					</c:import>
+<form spellcheck="false" action="index" method="post" accept-charset="UTF-8">
+<c:import url="tiles/header.jsp">
+	<c:param name="currentPage" value="home" />
+</c:import>
+<div class="container-fluid">
+	<div class="row justify-content-md-center">
+		<div class="col-md-8">
+			<div class="jumbotron jumbotron-fluid">
+				<div class="container">
+					<h1 class="display-4">
+						<spring:message code="home.welcome" />
+					</h1>
+					<p>${version}</p>
 				</div>
 			</div>
 		</div>
-	</form>
+	</div>
+	<hr />
+	<div class="row justify-content-md-center">
+		<div class="col-md-4">
+			<c:set var="view" value="${viewIndex}" scope="request"/>
+			<c:import url="tiles/templateVObject.jsp">
+				<c:param name="taille" value ="col-md" />
+			</c:import>
+		</div>
+	</div>
+</div>
+</form>
 </body>
 </html>

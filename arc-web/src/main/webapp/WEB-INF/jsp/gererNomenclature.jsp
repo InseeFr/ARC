@@ -19,11 +19,6 @@
 </c:if>
 
 <body class="bg-body">
-
-<c:import url="tiles/header.jsp">
-	<c:param name="currentPage" value="externalFile" />
-</c:import>
-
 <form
 	spellcheck="false"
 	action="selectListNomenclatures.action"
@@ -31,6 +26,10 @@
 	method="post"
 	accept-charset="UTF-8"
 >
+
+<c:import url="tiles/header.jsp">
+	<c:param name="currentPage" value="externalFile" />
+</c:import>
 
 	<div class="container-fluid">
 		<div class="row">

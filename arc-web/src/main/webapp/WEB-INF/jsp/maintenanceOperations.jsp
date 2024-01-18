@@ -21,10 +21,6 @@
 </c:if>
 <body class="bg-body">
 
-<c:import url="tiles/header.jsp">
-	<c:param name="currentPage" value="operations" />
-</c:import>
-
 <form
 	spellcheck="false"
 	action="selectExport.action"
@@ -33,27 +29,30 @@
 	accept-charset="UTF-8"
 >
 
-	<div class="container-fluid">
+<c:import url="tiles/header.jsp">
+	<c:param name="currentPage" value="operations" />
+</c:import>
 
-		<div class="row">
-				<div class="col-md-12">
-					<div class="row">
-						<div class="col-md">
-						<div id="viewOperations">
-							<button
-								id="viewOperations.generateErrorMessageInLogs"
-								class="btn btn-secondary btn-sm"
-								type="submit"
-								doAction="generateErrorMessageInLogsOperations"
-								scope="viewOperations;"
-								value="<spring:message code="gui.button.generateErrorMessageInLogs"/>"
-							><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.generateErrorMessageInLogs"/></button>
-							</div>
+<div class="container-fluid">
+	<div class="row">
+			<div class="col-md-12">
+				<div class="row">
+					<div class="col-md">
+					<div id="viewOperations">
+						<button
+							id="viewOperations.generateErrorMessageInLogs"
+							class="btn btn-secondary btn-sm"
+							type="submit"
+							doAction="generateErrorMessageInLogsOperations"
+							scope="viewOperations;"
+							value="<spring:message code="gui.button.generateErrorMessageInLogs"/>"
+						><span class="fa fa-eye-open">&nbsp;</span><spring:message code="gui.button.generateErrorMessageInLogs"/></button>
 						</div>
 					</div>
-			</div>			
+				</div>
 		</div>
-	</div>	
+	</div>
+</div>
 </form>
 	
 
