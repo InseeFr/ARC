@@ -5,17 +5,20 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class WebSecurityTest {
-
+	
 	@Test
-	public void isOverloaded1()
+	public void isKeycloakActiveFalse()
 	{
-		assertEquals(false, WebSecurity.isOverloaded("${i am a properties value that haven't been overloaded by environnement}"));
+		WebSecurity w = new WebSecurity();
+		assertEquals(false, w.isKeycloakActive());
 	}
-
+	
 	@Test
-	public void isOverloaded0()
+	public void isKeycloakActiveTrue()
 	{
-		assertEquals(true, WebSecurity.isOverloaded("i am a properties value that have been overloaded by environement or by other ways"));
+		WebSecurity w = new WebSecurity();
+		w.setKeycloak("realm", "url", "arc", "credentials");
+		assertEquals(true, w.isKeycloakActive());
 	}
 	
 }

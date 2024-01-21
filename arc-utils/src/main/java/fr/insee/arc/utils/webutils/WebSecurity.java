@@ -1,76 +1,140 @@
 package fr.insee.arc.utils.webutils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-// TODO
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
+
 public class WebSecurity {
-	private static final Logger LOGGER = LogManager.getLogger(WebSecurity.class);
+
+	@Value("${fr.insee.keycloak.realm}")
+	private String keycloakRealm;
+
+	@Value("${fr.insee.keycloak.server}")
+	private String keycloakServer;
+
+	@Value("${fr.insee.keycloak.resource}")
+	private String keycloakResource;
+
+	@Value("${fr.insee.keycloak.credentials.secret}")
+	private String keycloakCredential;
 
 	
-	private WebSecurity() {
-	    throw new IllegalStateException("Utility class");
-	  }
+	protected void setKeycloak(String keycloakRealm, String keycloakServer, String keycloakResource,
+			String keycloakCredential) {
+		this.keycloakRealm = keycloakRealm;
+		this.keycloakServer = keycloakServer;
+		this.keycloakResource = keycloakResource;
+		this.keycloakCredential = keycloakCredential;
+	}
+
+	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method) {
+
+		String realmUri = keycloakServer + "/realms/" + keycloakRealm;
+		String openIdConnect = "/protocol/openid-connect";
+
+		return ClientRegistration //
+				.withRegistrationId(keycloakRealm) //
+				.clientId(keycloakResource) //
+				.clientSecret(keycloakCredential) //
+				.redirectUri("{baseUrl}" + "/login/oauth2/code/" + "{registrationId}") //
+				.clientAuthenticationMethod(method) //
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) //
+				.issuerUri(realmUri) //
+				.scope("openid","profile","email","roles")
+				.authorizationUri(realmUri + openIdConnect + "/auth") //
+				.tokenUri(realmUri + openIdConnect + "/token") //
+				.userInfoUri(realmUri + openIdConnect + "/userinfo") //
+				.jwkSetUri(realmUri + openIdConnect + "/certs") //
+				.userNameAttributeName("preferred_username") //
+				.build();
+	}
 	
-	private static final String ENV_VAR_PREFIX="${";
-	private static final String ENV_VAR_SUFFIX="}";	
 	
-//	public static boolean isKeycloackOverloaded(AdapterConfig adapterConfig)
-//	{
-//        LoggerHelper.infoAsComment(LOGGER, "Keycloak classpath configuration overload");
-//		LoggerHelper.infoAsComment(LOGGER, "keycloak adapterConfig.getRealm() : "+adapterConfig.getRealm());
-//        LoggerHelper.infoAsComment(LOGGER, "keycloak adapterConfig.getAuthServerUrl() : "+adapterConfig.getAuthServerUrl());
-//		return isOverloaded(adapterConfig.getRealm()) 
-//				&& isOverloaded(adapterConfig.getAuthServerUrl()) 
-//				;
-//	}
-//	
-	/**
-	 * check if the value should be overloaded by an environment value 
-	 * @param myValue
-	 * @return
-	 */
-	public static boolean isOverloaded(String myValue)
+	protected boolean isKeycloakActive()
 	{
-		return !(myValue.startsWith(ENV_VAR_PREFIX) && myValue.endsWith(ENV_VAR_SUFFIX));
+		return keycloakRealm!=null;
 	}
 	
-	
+	protected GrantedAuthoritiesMapper userAuthoritiesMapper() {
+	    return (authorities) -> {
+	    	
+	    	System.out.println("§§§§§§§§§§§§");
+	      System.out.println("authorities check");
+	      System.out.println(authorities);
 
-	/**
-	 * Keycloak file configuration is active if the property to the file path is not empty
-	 * @return
-	 */
-	public static boolean isKeycloakFileConfigurationActive(String keycloakFile) {
-		return !keycloakFile.isEmpty();
+	      Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+
+	      authorities.forEach(
+	          authority -> {
+	            if (authority instanceof OidcUserAuthority) {
+	              OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
+	              OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
+	              
+	              System.out.println("§§§§§§§§§§§§");
+	              System.out.println(oidcUserAuthority);
+	              System.out.println(userInfo.getFullName());
+	              System.out.println(userInfo.getClaims());
+
+	              List<String> roles = userInfo.getClaimAsStringList("roles");
+	              if (roles==null)
+	              {
+	            	  roles = userInfo.getClaimAsStringList("groups");
+	              }
+	              
+	              List<SimpleGrantedAuthority> groupAuthorities =
+	            		  roles.stream()
+	                      .map(g -> new SimpleGrantedAuthority(g))
+	                      .toList();
+	              mappedAuthorities.addAll(groupAuthorities);
+	            }
+	          });
+
+	      return mappedAuthorities;
+	    };
+	  }
+
+	
+	public String getKeycloakRealm() {
+		return keycloakRealm;
 	}
-	
-	/**
-	 * Keycloak ressource configuration is active if
-	 * 1- the property to the classpath ressource is not empty
-	 * 2- the parameters in the classpath had been well overloaded by environment variables
-	 * @return
-	 */
-//	public static boolean isKeycloakResourceConfigurationActive(String keycloakResource) {
-//		// resource empty ? false
-//		if (keycloakResource.isEmpty()) {return false;}
-//		
-//		// ressource well built ? true else false
-//		try {
-//			return isKeycloackOverloaded(
-//			   					 KeycloakDeploymentBuilder.loadAdapterConfig(new ClassPathResource(keycloakResource).getInputStream()));
-//		} catch (IOException e) {
-//			return false;
-//		}
-//	}
-	
-	/**
-	 * Returns true if Keycloak authentification should be used.
-	 * Keycloak is active if one of the ressource or file configuration is active
-	 * @return
-	 */
-//	public static boolean isKeycloakActive(String keycloakFile, String keycloakResource) {
-//		return isKeycloakFileConfigurationActive(keycloakFile) || isKeycloakResourceConfigurationActive(keycloakResource);
-//	}
-	
+
+	public void setKeycloakRealm(String keycloakRealm) {
+		this.keycloakRealm = keycloakRealm;
+	}
+
+	public String getKeycloakServer() {
+		return keycloakServer;
+	}
+
+	public void setKeycloakServer(String keycloakServer) {
+		this.keycloakServer = keycloakServer;
+	}
+
+	public String getKeycloakResource() {
+		return keycloakResource;
+	}
+
+	public void setKeycloakResource(String keycloakResource) {
+		this.keycloakResource = keycloakResource;
+	}
+
+	public String getKeycloakCredential() {
+		return keycloakCredential;
+	}
+
+	public void setKeycloakCredential(String keycloakCredential) {
+		this.keycloakCredential = keycloakCredential;
+	}
+
+
 }

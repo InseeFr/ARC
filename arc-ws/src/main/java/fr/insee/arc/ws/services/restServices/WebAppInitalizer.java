@@ -6,7 +6,7 @@ public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletI
 
 	@Override
 	protected String getServletName() {
-		return "sirene";
+		return "arcws";
 	}
 	
     @Override
@@ -21,7 +21,7 @@ public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletI
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[] {WebConfig.class};
+        return new Class[] {WebConfig.class, WebSecurityConfig.class };
     }
 
 }
