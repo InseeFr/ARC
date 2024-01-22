@@ -3,17 +3,29 @@ package fr.insee.arc.utils.webutils;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
-public class WebUtils {
+public class WebAttributesName {
 
-	private WebUtils() {
+	private WebAttributesName() {
 		throw new IllegalStateException("Utility class");
 	}
 
 	private static PropertiesHandler properties = PropertiesHandler.getInstance();
 
+	public static final String KEYCLOAK_ATTRIBUTE_REALM = "${fr.insee.keycloak.realm}";
+	public static final String KEYCLOAK_ATTRIBUTE_SERVER = "${fr.insee.keycloak.server}";
+	public static final String KEYCLOAK_ATTRIBUTE_RESOURCE = "${fr.insee.keycloak.resource}";
+	public static final String KEYCLOAK_ATTRIBUTE_CREDENTIALS = "${fr.insee.keycloak.credentials.secret}";
+
+	public static boolean isKeycloakActive(String realmProperty)
+	{
+		return !realmProperty.equals(KEYCLOAK_ATTRIBUTE_REALM);
+	}
+	
 	// json healthcheck attribute
 	private static final String HEALTHCHECK_ATTRIBUTE_STATUS = "status";
 	private static final String HEALTHCHECK_ATTRIBUTE_DETAILS = "details";

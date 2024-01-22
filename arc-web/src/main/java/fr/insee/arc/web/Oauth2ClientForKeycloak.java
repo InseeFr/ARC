@@ -14,18 +14,20 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 
+import fr.insee.arc.utils.webutils.WebAttributesName;
+
 public class Oauth2ClientForKeycloak {
 	
-	@Value("${fr.insee.keycloak.realm}")
-	private String keycloakRealm;
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_REALM)
+	protected String keycloakRealm;
 
-	@Value("${fr.insee.keycloak.server}")
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_SERVER)
 	private String keycloakServer;
 
-	@Value("${fr.insee.keycloak.resource}")
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_RESOURCE)
 	private String keycloakResource;
 
-	@Value("${fr.insee.keycloak.credentials.secret}")
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_CREDENTIALS)
 	private String keycloakCredential;
 
 	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method) {
@@ -77,38 +79,4 @@ public class Oauth2ClientForKeycloak {
 	      return mappedAuthorities;
 	    };
 	  }
-
-	
-	public String getKeycloakRealm() {
-		return keycloakRealm;
-	}
-
-	public void setKeycloakRealm(String keycloakRealm) {
-		this.keycloakRealm = keycloakRealm;
-	}
-
-	public String getKeycloakServer() {
-		return keycloakServer;
-	}
-
-	public void setKeycloakServer(String keycloakServer) {
-		this.keycloakServer = keycloakServer;
-	}
-
-	public String getKeycloakResource() {
-		return keycloakResource;
-	}
-
-	public void setKeycloakResource(String keycloakResource) {
-		this.keycloakResource = keycloakResource;
-	}
-
-	public String getKeycloakCredential() {
-		return keycloakCredential;
-	}
-
-	public void setKeycloakCredential(String keycloakCredential) {
-		this.keycloakCredential = keycloakCredential;
-	}
-
 }

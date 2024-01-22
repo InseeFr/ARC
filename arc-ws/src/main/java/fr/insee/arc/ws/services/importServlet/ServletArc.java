@@ -21,7 +21,7 @@ import org.springframework.http.HttpStatus;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.webutils.WebUtils;
+import fr.insee.arc.utils.webutils.WebAttributesName;
 import fr.insee.arc.ws.services.importServlet.actions.InitiateRequest;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
@@ -48,7 +48,7 @@ public class ServletArc extends HttpServlet {
 			if (request.getRequestURI().endsWith("/healthcheck")) {
 
 				Map<String, Object> map = new HashMap<>();
-				boolean status = WebUtils.getHealthCheckStatus(map);
+				boolean status = WebAttributesName.getHealthCheckStatus(map);
 				if (!status) {
 					response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 				} else {
