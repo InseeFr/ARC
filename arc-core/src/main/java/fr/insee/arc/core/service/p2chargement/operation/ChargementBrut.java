@@ -31,8 +31,9 @@ public class ChargementBrut {
 	/** Combien de boucle au maximum */
 	private static final int LIMIT_BOUCLE = 1;
     /** Combien de ligne on charge pour chacune des boucles */
-    private static final int LIMIT_CHARGEMENT_BRUTAL = 50;
-       
+    private static final int LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE = 50;
+    private static final int LIMIT_CHARGEMENT_BRUTAL_NB_CHAR = 10000;
+      
     private static final Logger LOGGER = LogManager.getLogger(ChargementBrut.class);
     private Connection connexion;
     private List<NormeRules> listeNorme;
@@ -47,10 +48,11 @@ public class ChargementBrut {
 
     	
     	StringBuilder requete=new StringBuilder();
-    	int idLigne = nbBoucle * LIMIT_CHARGEMENT_BRUTAL;
+    	int idLigne = nbBoucle * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE;
     	String line;
 		try {
 			line = br.readLine();
+			line = line.substring(0, Math.min(line.length(), LIMIT_CHARGEMENT_BRUTAL_NB_CHAR));
 		} catch (IOException e) {
     		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 		}
@@ -58,7 +60,7 @@ public class ChargementBrut {
     		throw new ArcException(ArcExceptionMessage.FILE_IS_EMPTY, idSource);
     	}
     	boolean start=true;
-    	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
+    	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE) {
           if (start)
           {
     		requete.append("\nSELECT "+FormatSQL.quoteText(idSource)+"::text as "+ColumnEnum.ID_SOURCE.getColumnName()+","+ idLigne +"::int as id_ligne,"+FormatSQL.quoteText(line)+"::text as ligne");
@@ -70,7 +72,7 @@ public class ChargementBrut {
           }
           
           idLigne++;
-          if (idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL) {
+          if (idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE) {
               try {
 				line = br.readLine();
 			} catch (IOException e) {
