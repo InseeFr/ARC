@@ -10,7 +10,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = WebConfig.class)
+@ContextConfiguration(classes = WebConfiguration.class)
 public class WebConfigTest {
 	
 	@Test

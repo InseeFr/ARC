@@ -22,13 +22,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import fr.insee.arc.utils.webutils.WebSecurity;
 import jakarta.servlet.DispatcherType;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class WebSecurityConfig {
+public class WsSecurityConfiguration {
 
 	@Value("${fr.insee.keycloak.realm}")
 	private String keycloakRealm;

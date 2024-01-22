@@ -1,10 +1,12 @@
 package fr.insee.arc.ws.services.restServices.execute.operation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.RulesOperations;
+import fr.insee.arc.core.service.p3normage.bo.IdCardNormage;
 import fr.insee.arc.core.service.p4controle.operation.ControleRulesOperation;
 import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;
 import fr.insee.arc.utils.exception.ArcException;
@@ -39,12 +41,12 @@ public class ExecuteEngineControleOperation {
 		ExecuteEngineControleDao.execQueryCreateControleTable(this.sandbox.getConnection(), phaseInterface.getInputTable(), phaseInterface.getOutputTable());
 		
 		ServiceJeuDeRegleOperation sjdr = new ServiceJeuDeRegleOperation();
-
-		// Récupération des règles de controles associées aux jeux de règle
-		FileIdCard fileIdCard = RulesOperations.fileIdCardFromPilotage(this.sandbox.getConnection(),
-				phaseInterface.getOutputTable(), this.bodyPojo.getFileName());
 		
-		ControleRulesOperation.fillControleRules(this.sandbox.getConnection(), phaseInterface.getOutputTable(), fileIdCard);
+		FileIdCard fileIdCard = new FileIdCard(bodyPojo.fileName);
+		fileIdCard.setFileIdCard(bodyPojo.norme, bodyPojo.validite, bodyPojo.periodicite, phaseInterface.getStructure());
+		fileIdCard.setIdCardNormage(new IdCardNormage(new ArrayList<>()));
+		
+		ControleRulesOperation.fillControleRules(this.sandbox.getConnection(), sandbox.getSchema(), fileIdCard);
 
 		sjdr.executeJeuDeRegle(this.sandbox.getConnection(), fileIdCard, phaseInterface.getOutputTable());
 		

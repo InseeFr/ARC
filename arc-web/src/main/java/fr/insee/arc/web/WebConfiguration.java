@@ -33,7 +33,7 @@ import fr.insee.arc.web.gui.all.util.WebLoggerDispatcher;
 @Configuration
 @ImportResource("classpath:applicationContext.xml")
 @ComponentScan(basePackages = {"fr.insee.arc.web", "fr.insee.arc.core", "fr.insee.arc.utils"})
-public class WebConfig implements WebMvcConfigurer {
+public class WebConfiguration implements WebMvcConfigurer {
 
 	@Bean
 	public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(ConfigurableEnvironment env) throws IOException {

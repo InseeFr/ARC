@@ -1,24 +1,23 @@
 package fr.insee.arc.utils.webutils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class WebSecurityTest {
-	
+public class CheckKeycloakTest {
+
 	@Test
 	public void isKeycloakActiveFalse()
 	{
-		WebSecurity w = new WebSecurity();
+		CheckKeycloak w = new CheckKeycloak();
 		assertEquals(false, w.isKeycloakActive());
 	}
 	
 	@Test
 	public void isKeycloakActiveTrue()
 	{
-		WebSecurity w = new WebSecurity();
-		w.setKeycloak("realm", "url", "arc", "credentials");
+		CheckKeycloak w = new CheckKeycloak();
+		w.setKeycloak("realm");
 		assertEquals(true, w.isKeycloakActive());
 	}
-	
 }

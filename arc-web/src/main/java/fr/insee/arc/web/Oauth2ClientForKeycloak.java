@@ -1,4 +1,4 @@
-package fr.insee.arc.utils.webutils;
+package fr.insee.arc.web;
 
 import java.util.HashSet;
 import java.util.List;
@@ -14,8 +14,8 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 
-public class WebSecurity {
-
+public class Oauth2ClientForKeycloak {
+	
 	@Value("${fr.insee.keycloak.realm}")
 	private String keycloakRealm;
 
@@ -27,15 +27,6 @@ public class WebSecurity {
 
 	@Value("${fr.insee.keycloak.credentials.secret}")
 	private String keycloakCredential;
-
-	
-	protected void setKeycloak(String keycloakRealm, String keycloakServer, String keycloakResource,
-			String keycloakCredential) {
-		this.keycloakRealm = keycloakRealm;
-		this.keycloakServer = keycloakServer;
-		this.keycloakResource = keycloakResource;
-		this.keycloakCredential = keycloakCredential;
-	}
 
 	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method) {
 
@@ -59,19 +50,8 @@ public class WebSecurity {
 				.build();
 	}
 	
-	
-	protected boolean isKeycloakActive()
-	{
-		return keycloakRealm!=null;
-	}
-	
 	protected GrantedAuthoritiesMapper userAuthoritiesMapper() {
 	    return (authorities) -> {
-	    	
-	    	System.out.println("§§§§§§§§§§§§");
-	      System.out.println("authorities check");
-	      System.out.println(authorities);
-
 	      Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
 	      authorities.forEach(
@@ -79,11 +59,6 @@ public class WebSecurity {
 	            if (authority instanceof OidcUserAuthority) {
 	              OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
 	              OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
-	              
-	              System.out.println("§§§§§§§§§§§§");
-	              System.out.println(oidcUserAuthority);
-	              System.out.println(userInfo.getFullName());
-	              System.out.println(userInfo.getClaims());
 
 	              List<String> roles = userInfo.getClaimAsStringList("roles");
 	              if (roles==null)
@@ -135,6 +110,5 @@ public class WebSecurity {
 	public void setKeycloakCredential(String keycloakCredential) {
 		this.keycloakCredential = keycloakCredential;
 	}
-
 
 }

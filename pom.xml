@@ -17,9 +17,12 @@
 		<project.jackson.version>2.16.1</project.jackson.version>
 		<project.postgres.version>42.5.1</project.postgres.version>
 		<project.java.version>17</project.java.version>
+		<project.jakarta.version>6.1.0-M1</project.jakarta.version>
 		<project.maven.compiler.version>3.12.0</project.maven.compiler.version>
+		<project.org.json.version>20231013</project.org.json.version>
+		<project.commons.compress.version>1.25.0</project.commons.compress.version>
+		<project.commons.fileupload.version>1.5</project.commons.fileupload.version>
 		
-		<project.org.json>20231013</project.org.json>
 
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
@@ -220,32 +223,33 @@
 			<artifactId>spring-aop</artifactId>
 			<version>${project.spring.version}</version>
 		</dependency>
+		
+		<!-- compress/decompress archive libs -->
+		<!-- ant is used for tar.gz decompression -->		
 		<dependency>
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
 			<version>1.10.11</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>[1.19,)</version>
+			<version>${project.commons.compress.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.11.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+		<!-- postgres -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>${project.postgres.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.dbunit</groupId>
-			<artifactId>dbunit</artifactId>
-			<version>2.5.0</version>
-			<scope>test</scope>
-		</dependency>
-
+		<!-- logging -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
@@ -262,43 +266,46 @@
 			<version>${project.log4j.version}</version>
 		</dependency>
 
-
-		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<!-- serializers -->
+				<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${project.jackson.version}</version>
+		</dependency>
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.11.0</version>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>${project.jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${project.jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${project.org.json.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>2.27.0</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.9</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-configuration2 -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-configuration2</artifactId>
 			<version>2.8.0</version>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<!-- tests dependencies -->
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>${project.org.json}</version>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.27.0</version>
+			<scope>test</scope>
 		</dependency>
-		
 		<dependency>
 		    <groupId>io.zonky.test</groupId>
 		    <artifactId>embedded-postgres</artifactId>
