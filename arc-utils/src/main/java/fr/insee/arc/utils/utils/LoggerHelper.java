@@ -26,6 +26,8 @@ public class LoggerHelper {
 		throw new IllegalStateException("Logger utility class");
 	}
 
+	private static final String CUSTOM_LOGGER="OPERATION";
+	
 	/**
 	 * @see Logger#log(Priority, Object)
 	 * @param aLogger
@@ -354,5 +356,9 @@ public class LoggerHelper {
 	public static final void infoGenTextAsComment(Class<?> clazz, String method, Logger aLogger, Throwable t) {
 		logAsComment(aLogger, Level.INFO, t, "Lors de l'exécution de", clazz.getCanonicalName(),
 				IConstanteCaractere.sharp, method);
+	}
+
+	public static void custom(Logger aLogger, Object message) {
+		log(aLogger, Level.forName("CUSTOM_LOGGER", 200), message);
 	}
 }

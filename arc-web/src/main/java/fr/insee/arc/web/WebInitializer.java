@@ -9,12 +9,12 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
 	@Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class<?>[] { WebConfiguration.class };
+        return new Class[0];
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[] { WebSecurityConfiguration.class };
+        return new Class<?>[] { WebConfiguration.class, WebSecurityConfiguration.class };
     }
 
     @Override

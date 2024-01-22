@@ -26,7 +26,11 @@ public class ServiceIndex extends IndexAction {
 			return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(map, HttpStatus.OK);
-
+	}
+	
+	public ResponseEntity<Map<String, String>> version() {
+		Map<String, String> map = WebAttributesName.fullVersionInformation();
+		return new ResponseEntity<>(map, HttpStatus.OK);
 	}
 	
 }

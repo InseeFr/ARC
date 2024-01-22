@@ -10,6 +10,11 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 @Component
 public class StaticLoggerDispatcher {
 
+	
+	public static void custom(Logger logger, Object message) {
+		LoggerHelper.custom(logger, message);
+	}
+	
 
 	/** Transition class. Use a LoggerDispatcher as an @Autowired attribute instead. */
 	public static void error(Logger logger, Exception e) {

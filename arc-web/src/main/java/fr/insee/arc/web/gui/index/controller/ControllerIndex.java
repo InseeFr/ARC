@@ -22,4 +22,9 @@ public class ControllerIndex extends ServiceIndex {
 		return healthcheck();
 	}
 
+	@RequestMapping("/version")
+	public ResponseEntity<Map<String, String>> versionAction(){
+		return version();
+	}
+
 }
