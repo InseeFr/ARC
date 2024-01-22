@@ -51,7 +51,8 @@ public class ChargementBrut {
     	int idLigne = nbBoucle * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE;
     	String line;
 		try {
-			line = br.readLine().substring(0, LIMIT_CHARGEMENT_BRUTAL_NB_CHAR);
+			line = br.readLine();
+			line = line.substring(0, Math.min(line.length(), LIMIT_CHARGEMENT_BRUTAL_NB_CHAR));
 		} catch (IOException e) {
     		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 		}
