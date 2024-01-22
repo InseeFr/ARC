@@ -5,6 +5,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-93.1.34b
+- avoid overflow when large file data are set on a single line
+
 ## version-93.1.32b
 - batch failed with functional warning
 
