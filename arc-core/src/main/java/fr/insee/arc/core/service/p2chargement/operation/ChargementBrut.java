@@ -49,16 +49,7 @@ public class ChargementBrut {
     	
     	StringBuilder requete=new StringBuilder();
     	int idLigne = nbBoucle * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE;
-    	String line;
-		try {
-			line = br.readLine();
-			line = line.substring(0, Math.min(line.length(), LIMIT_CHARGEMENT_BRUTAL_NB_CHAR));
-		} catch (IOException e) {
-    		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
-		}
-    	if (line == null) {
-    		throw new ArcException(ArcExceptionMessage.FILE_IS_EMPTY, idSource);
-    	}
+    	String line = readLineBrutal(idSource, br);
     	boolean start=true;
     	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE) {
           if (start)
@@ -83,6 +74,33 @@ public class ChargementBrut {
     	return requete.toString();
 
     }
+
+    /**
+     * Retourne la ligne lue dans la limite du nombre de caractères
+     * @param idSource du fichier chargé
+     * @param br reader ouvert sur le fichier
+     * @return
+     * @throws ArcException
+     */
+	private String readLineBrutal(String idSource, BufferedReader br) throws ArcException {
+		char[] buffer = new char[LIMIT_CHARGEMENT_BRUTAL_NB_CHAR];
+    	int size = 0;
+    	int offset = 0;
+		try {
+			while (size != -1 && offset < LIMIT_CHARGEMENT_BRUTAL_NB_CHAR) {
+				size = br.read(buffer, offset, LIMIT_CHARGEMENT_BRUTAL_NB_CHAR - offset);
+				offset += size;
+			}
+		} catch (IOException e) {
+    		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
+		}
+    	if (size == 0) {
+    		throw new ArcException(ArcExceptionMessage.FILE_IS_EMPTY, idSource);
+    	}
+
+    	String line = new String(buffer, 0, size);
+		return line;
+	}
     
     /** Calcule la norme. Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
      * @throws IOException
