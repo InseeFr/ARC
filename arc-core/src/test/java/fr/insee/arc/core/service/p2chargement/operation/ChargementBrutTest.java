@@ -79,9 +79,7 @@ public class ChargementBrutTest extends ChargementBrut {
 		 {
 			 query = requeteFichierBrutalement("siera_ano", br);
 		 }
-		
-		 System.out.println(query);
-		 
+				 
 		 // extract id from query result
 		 // the test checks implicitly that maxNumberOfCharacterByLineToRead=5
 		 int id= Integer.valueOf(ManipString.substringBeforeLast(ManipString.substringAfterLast(query, "UNION ALL SELECT 'siera_ano',"),",'<n4ds'"));
