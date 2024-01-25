@@ -16,7 +16,7 @@ jobs:
       with:
         java-version: 17
         distribution: 'temurin'
-    - name: version
+    - name: Check version
       run: mvn version
     - name: Verify with Maven
       run: mvn verify
