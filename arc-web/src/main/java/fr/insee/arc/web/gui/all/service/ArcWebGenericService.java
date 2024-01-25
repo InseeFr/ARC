@@ -171,6 +171,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
     	initialize(arcModel);
     	refreshGenericModelAttributes(model);
     	extraModelAttributes(model);
+    	
     }
 
 	/**

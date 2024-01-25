@@ -14,7 +14,7 @@ public class ControllerViewCalendrier extends ServiceViewCalendrier {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/selectCalendrier")
+	@RequestMapping("/secure/selectCalendrier")
 	public String selectCalendrierAction(Model model) {
 		return selectCalendrier(model);
 	}
@@ -25,7 +25,7 @@ public class ControllerViewCalendrier extends ServiceViewCalendrier {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/addCalendrier")
+	@RequestMapping("/secure/addCalendrier")
 	public String addCalendrierAction(Model model) {
 		return addCalendrier(model);
 	}
@@ -36,7 +36,7 @@ public class ControllerViewCalendrier extends ServiceViewCalendrier {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/deleteCalendrier")
+	@RequestMapping("/secure/deleteCalendrier")
 	public String deleteCalendrierAction(Model model) {
 		return deleteCalendrier(model);
 	}
@@ -47,12 +47,12 @@ public class ControllerViewCalendrier extends ServiceViewCalendrier {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/updateCalendrier")
+	@RequestMapping("/secure/updateCalendrier")
 	public String updateCalendrierAction(Model model) {
 		return updateCalendrier(model);
 	}
 
-	@RequestMapping("/sortCalendrier")
+	@RequestMapping("/secure/sortCalendrier")
 	public String sortCalendrierAction(Model model) {
 		return sortCalendrier(model);
 	}

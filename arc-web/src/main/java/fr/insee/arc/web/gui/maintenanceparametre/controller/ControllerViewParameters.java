@@ -9,32 +9,32 @@ import fr.insee.arc.web.gui.maintenanceparametre.service.ServiceViewParameters;
 @Controller
 public class ControllerViewParameters extends ServiceViewParameters {
 	
-    @RequestMapping("/selectParameters")
+    @RequestMapping("/secure/selectParameters")
     public String selectParametersAction(Model model) {
     	return selectParameters(model);
     }
 
-    @RequestMapping("/addParameters")
+    @RequestMapping("/secure/addParameters")
     public String addParametersAction(Model model) {
     	return addParameters(model);
     }
 
-    @RequestMapping("/deleteParameters")
+    @RequestMapping("/secure/deleteParameters")
     public String deleteParametersAction(Model model) {
     	return deleteParameters(model);
     }
 
-    @RequestMapping("/updateParameters")
+    @RequestMapping("/secure/updateParameters")
     public String updateParametersAction(Model model) {
     	return updateParameters(model);
     }
 
-    @RequestMapping("/sortParameters")
+    @RequestMapping("/secure/sortParameters")
     public String sortParametersAction(Model model) {
     	return sortParameters(model);
     }
 
-    @RequestMapping("/startParameters")
+    @RequestMapping("/secure/startParameters")
     public String startParametersAction(Model model) {
     	return startParameters(model);
     }

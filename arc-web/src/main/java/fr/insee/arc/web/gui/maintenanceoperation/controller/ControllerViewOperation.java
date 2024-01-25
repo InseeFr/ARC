@@ -9,37 +9,37 @@ import fr.insee.arc.web.gui.maintenanceoperation.service.ServiceViewOperation;
 @Controller
 public class ControllerViewOperation extends ServiceViewOperation {
 
-    @RequestMapping("/generateErrorMessageInLogsOperations")
+    @RequestMapping("/secure/generateErrorMessageInLogsOperations")
     public String generateErrorMessageInLogsOperationsAction(Model model) {
     	return generateErrorMessageInLogsOperations(model);
     }
     
-    @RequestMapping("/selectOperations")
+    @RequestMapping("/secure/selectOperations")
     public String selectOperationsAction(Model model) {
 		return selectOperations(model);
     }
 
-    @RequestMapping("/addOperations")
+    @RequestMapping("/secure/addOperations")
     public String addOperationsAction(Model model) {
         return addOperations(model);
     }
 
-    @RequestMapping("/deleteOperations")
+    @RequestMapping("/secure/deleteOperations")
     public String deleteOperationsAction(Model model) {
         return deleteOperations(model);
     }
 
-    @RequestMapping("/updateOperations")
+    @RequestMapping("/secure/updateOperations")
     public String updateOperationsAction(Model model) {
         return updateOperations(model);
     }
 
-    @RequestMapping("/sortOperations")
+    @RequestMapping("/secure/sortOperations")
     public String sortOperationsAction(Model model) {
         return sortOperations(model);
     }
 
-    @RequestMapping("/startOperations")
+    @RequestMapping("/secure/startOperations")
     public String startOperationsAction(Model model) {
         return startOperations(model);
     }

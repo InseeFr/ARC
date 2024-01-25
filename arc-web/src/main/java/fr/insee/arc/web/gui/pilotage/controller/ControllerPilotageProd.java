@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.pilotage.controller;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +17,7 @@ public class ControllerPilotageProd extends ServiceViewPilotageProd {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping("/informationInitialisationPROD")
+	@RequestMapping("/secure/informationInitialisationPROD")
     public String informationInitialisationPRODAction(Model model, HttpServletRequest request) {
     	return informationInitialisationPROD(model, request);
     }
@@ -27,7 +27,7 @@ public class ControllerPilotageProd extends ServiceViewPilotageProd {
 	 * @param model
 	 * @return
 	 */
-    @RequestMapping("/retarderBatchInitialisationPROD")
+    @RequestMapping("/secure/retarderBatchInitialisationPROD")
     public String retarderBatchInitialisationPRODAction(Model model) {
     	return retarderBatchInitialisationPROD(model);
     }
@@ -37,7 +37,7 @@ public class ControllerPilotageProd extends ServiceViewPilotageProd {
      * @param model
      * @return
      */
-    @RequestMapping("/demanderBatchInitialisationPROD")
+    @RequestMapping("/secure/demanderBatchInitialisationPROD")
     public String demanderBatchInitialisationPRODAction(Model model) {
     	return demanderBatchInitialisationPROD(model);
     }
@@ -47,7 +47,7 @@ public class ControllerPilotageProd extends ServiceViewPilotageProd {
      * @param model
      * @return
      */
-    @RequestMapping("/toggleOnPROD")
+    @RequestMapping("/secure/toggleOnPROD")
     public String toggleOnPRODAction(Model model) {
     	return toggleOnPROD(model);
     }
@@ -58,7 +58,7 @@ public class ControllerPilotageProd extends ServiceViewPilotageProd {
      * @param model
      * @return
      */
-    @RequestMapping("/toggleOffPROD")
+    @RequestMapping("/secure/toggleOffPROD")
     public String toggleOffPRODAction(Model model) {
     	return toggleOffPROD(model);
     }
@@ -68,7 +68,7 @@ public class ControllerPilotageProd extends ServiceViewPilotageProd {
      * @param model
      * @return
      */
-    @RequestMapping("/applyRulesProd")
+    @RequestMapping("/secure/applyRulesProd")
     public String applyRulesProdAction(Model model) {
     	return applyRulesProd(model);
     }

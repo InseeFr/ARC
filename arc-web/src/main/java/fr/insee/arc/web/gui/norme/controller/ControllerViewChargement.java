@@ -16,7 +16,7 @@ public class ControllerViewChargement extends ServiceViewChargement {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/selectChargement")
+	@RequestMapping("/secure/selectChargement")
 	public String selectChargementAction(Model model) {
 		return selectChargement(model);
 	}
@@ -27,7 +27,7 @@ public class ControllerViewChargement extends ServiceViewChargement {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/addChargement")
+	@RequestMapping("/secure/addChargement")
 	public String addChargementAction(Model model) {
 		return addChargement(model);
 	}
@@ -38,7 +38,7 @@ public class ControllerViewChargement extends ServiceViewChargement {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/deleteChargement")
+	@RequestMapping("/secure/deleteChargement")
 	public String deleteChargementAction(Model model) {
 		return deleteChargement(model);
 	}
@@ -49,7 +49,7 @@ public class ControllerViewChargement extends ServiceViewChargement {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/updateChargement")
+	@RequestMapping("/secure/updateChargement")
 	public String updateChargementAction(Model model) {
 		return updateChargement(model);
 	}
@@ -60,7 +60,7 @@ public class ControllerViewChargement extends ServiceViewChargement {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/sortChargement")
+	@RequestMapping("/secure/sortChargement")
 	public String sortChargementAction(Model model) {
 		return sortChargement(model);
 	}
@@ -71,7 +71,7 @@ public class ControllerViewChargement extends ServiceViewChargement {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/importChargement")
+	@RequestMapping("/secure/importChargement")
 	public String importChargementAction(Model model, MultipartFile fileUploadLoad) {
 		return importChargement(model, fileUploadLoad);
 	}
@@ -81,7 +81,7 @@ public class ControllerViewChargement extends ServiceViewChargement {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/viderChargement")
+	@RequestMapping("/secure/viderChargement")
 	public String viderChargementAction(Model model) {
 		return viderChargement(model);
 	}

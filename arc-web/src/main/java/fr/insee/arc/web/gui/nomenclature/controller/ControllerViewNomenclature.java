@@ -10,12 +10,12 @@ import fr.insee.arc.web.gui.nomenclature.service.ServiceViewNomenclature;
 public class ControllerViewNomenclature extends ServiceViewNomenclature {
 
 
-    @RequestMapping("/selectNomenclature")
+    @RequestMapping("/secure/selectNomenclature")
     public String selectNomenclatureAction(Model model) {
         return selectNomenclature(model);
     }
 
-    @RequestMapping("/sortNomenclature")
+    @RequestMapping("/secure/sortNomenclature")
     public String sortNomenclatureAction(Model model) {
         return sortNomenclature(model);
     }

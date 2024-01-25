@@ -10,32 +10,32 @@ import fr.insee.arc.web.gui.norme.service.ServiceViewExpression;
 @Controller
 public class ControllerViewExpression extends ServiceViewExpression {
 
-	@RequestMapping("/selectExpression")
+	@RequestMapping("/secure/selectExpression")
 	public String selectExpressionAction(Model model) {
 		return selectExpression(model);
 	}
 
-	@RequestMapping("/addExpression")
+	@RequestMapping("/secure/addExpression")
 	public String addExpressionAction(Model model) {
 		return addExpression(model);
 	}
 
-	@RequestMapping("/updateExpression")
+	@RequestMapping("/secure/updateExpression")
 	public String updateExpressionAction(Model model) {
 		return updateExpression(model);
 	}
 
-	@RequestMapping("/sortExpression")
+	@RequestMapping("/secure/sortExpression")
 	public String sortExpressionAction(Model model) {
 		return sortExpression(model);
 	}
 
-	@RequestMapping("/deleteExpression")
+	@RequestMapping("/secure/deleteExpression")
 	public String deleteExpressionAction(Model model) {
 		return deleteExpression(model);
 	}
 
-	@RequestMapping("/importExpression")
+	@RequestMapping("/secure/importExpression")
 	public String importExpressionAction(Model model, MultipartFile fileUploadExpression) {
 		return importExpression(model, fileUploadExpression);
 	}
@@ -45,7 +45,7 @@ public class ControllerViewExpression extends ServiceViewExpression {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/viderExpression")
+	@RequestMapping("/secure/viderExpression")
 	public String viderExpressionAction(Model model) {
 		return viderExpression(model);
 	}

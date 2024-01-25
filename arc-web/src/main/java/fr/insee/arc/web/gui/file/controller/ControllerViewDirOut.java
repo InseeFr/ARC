@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.file.controller;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,44 +11,44 @@ import fr.insee.arc.web.gui.file.service.ServiceViewDirOut;
 @Controller
 public class ControllerViewDirOut extends ServiceViewDirOut {
 	
-	@RequestMapping({"/selectDirOut", "/seeDirOut"})
+	@RequestMapping({"/secure/selectDirOut", "/secure/seeDirOut"})
 	public String seeDirOutAction (Model model) {
 		return seeDirOut(model);
 	}
 
-	@RequestMapping("/sortDirOut")
+	@RequestMapping("/secure/sortDirOut")
 	public String sortDirOutAction (Model model) {
 		return sortDirOut(model);
 	}
 
-	@RequestMapping("/transferDirOut")
+	@RequestMapping("/secure/transferDirOut")
 	public String transferDirOutAction(Model model) {
 		return transferDirOut(model);
 	}
 
 
-	@RequestMapping("/copyDirOut")
+	@RequestMapping("/secure/copyDirOut")
 	public String copyDirOutAction(Model model) {
 		return copyDirOut(model);
 	}
 
-	@RequestMapping("/updateDirOut")
+	@RequestMapping("/secure/updateDirOut")
 	public String updateDirOutAction(Model model) {
 		return updateDirOut(model);
 	}
 
 
-	@RequestMapping("/addDirOut")
+	@RequestMapping("/secure/addDirOut")
 	public String addDirOutAction(Model model) {
 		return addDirOut(model);
 	}
 
-	@RequestMapping("/deleteDirOut")
+	@RequestMapping("/secure/deleteDirOut")
 	public String delDirOutAction(Model model) {
 		return delDirOut(model);
 	}
 	
-	@RequestMapping("/downloadDirOut")
+	@RequestMapping("/secure/downloadDirOut")
 	public String downloadDirOutAction(Model model, HttpServletResponse response) {
 		return downloadDirOut(model, response);
 	}

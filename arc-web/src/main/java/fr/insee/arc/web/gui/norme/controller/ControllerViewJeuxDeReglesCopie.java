@@ -48,7 +48,7 @@ public class ControllerViewJeuxDeReglesCopie extends ServiceViewJeuxDeReglesCopi
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping("/selectJeuxDeReglesMappingCopie")
+	@RequestMapping("/secure/selectJeuxDeReglesMappingCopie")
 	public String selectJeuxDeReglesMappingCopieAction(Model model) {
 		return selectJeuxDeReglesMappingCopie(model);
 	}
@@ -59,17 +59,17 @@ public class ControllerViewJeuxDeReglesCopie extends ServiceViewJeuxDeReglesCopi
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping("/selectJeuxDeReglesExpressionCopie")
+	@RequestMapping("/secure/selectJeuxDeReglesExpressionCopie")
 	public String selectJeuxDeReglesExpressionCopieAction(Model model) {
 		return selectJeuxDeReglesExpressionCopie(model);
 	}
 
-	@RequestMapping("/selectJeuxDeReglesCopie")
+	@RequestMapping("/secure/selectJeuxDeReglesCopie")
 	public String selectJeuxDeReglesCopieAction(Model model) {
 		return selectJeuxDeReglesCopie(model);
 	}
 
-	@RequestMapping("/copieJeuxDeRegles")
+	@RequestMapping("/secure/copieJeuxDeRegles")
 	public String copieJeuxDeReglesAction(Model model) {
 		return copieJeuxDeRegles(model);
 	}

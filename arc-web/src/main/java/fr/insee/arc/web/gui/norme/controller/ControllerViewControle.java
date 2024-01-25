@@ -18,7 +18,7 @@ public class ControllerViewControle extends ServiceViewControle {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/selectControle")
+	@RequestMapping("/secure/selectControle")
 	public String selectControleAction(Model model) {
 		return selectControle(model);
 	}
@@ -29,7 +29,7 @@ public class ControllerViewControle extends ServiceViewControle {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/addControle")
+	@RequestMapping("/secure/addControle")
 	public String addControleAction(Model model) {
 		return addControle(model);
 	}
@@ -40,7 +40,7 @@ public class ControllerViewControle extends ServiceViewControle {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/deleteControle")
+	@RequestMapping("/secure/deleteControle")
 	public String deleteControleAction(Model model) {
 		return deleteControle(model);
 	}
@@ -52,7 +52,7 @@ public class ControllerViewControle extends ServiceViewControle {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/updateControle")
+	@RequestMapping("/secure/updateControle")
 	public String updateControleAction(Model model) {
 		return updateControle(model);
 	}
@@ -62,7 +62,7 @@ public class ControllerViewControle extends ServiceViewControle {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/sortControle")
+	@RequestMapping("/secure/sortControle")
 	public String sortControleAction(Model model) {
 		return sortControle(model);
 	}
@@ -73,7 +73,7 @@ public class ControllerViewControle extends ServiceViewControle {
 	 * @return
 	 * @throws IOException
 	 */
-	@RequestMapping("/importControle")
+	@RequestMapping("/secure/importControle")
 	public String importControleAction(Model model, MultipartFile fileUploadControle) {
 		return importControle(model, fileUploadControle);
 	}
@@ -83,7 +83,7 @@ public class ControllerViewControle extends ServiceViewControle {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/viderControle")
+	@RequestMapping("/secure/viderControle")
 	public String viderControleAction(Model model) {
 		return viderControle(model);
 	}

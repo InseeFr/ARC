@@ -19,7 +19,7 @@ import fr.insee.arc.web.gui.maintenanceparametre.model.ModelMaintenanceParametre
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorMaintenanceParameters extends ArcWebGenericService<ModelMaintenanceParametre, MaintenanceParametreDao>  {
 
-	protected static final String RESULT_SUCCESS = "/jsp/maintenanceParameters.jsp";
+	protected static final String RESULT_SUCCESS = "jsp/maintenanceParameters.jsp";
 	
 	private static final Logger LOGGER = LogManager.getLogger(InteractorMaintenanceParameters.class);
 

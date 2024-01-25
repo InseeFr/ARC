@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +61,9 @@ public class SecurityDao {
 		// check the host
 		String hostName;
 		try {
+//			byte[] ipAddress = { 192, 0, 2, 1 };
+//			InetAddress address = InetAddress.getByAddress(ipAddress);
+//			String hostName = address.getHostByAddress(ipAddress);
 			hostName = InetAddress.getByName(request.getRemoteHost()).getHostName();
 		} catch (UnknownHostException e2) {
 			LoggerHelper.warn(LOGGER, "No dns name found for host " + request.getRemoteHost());

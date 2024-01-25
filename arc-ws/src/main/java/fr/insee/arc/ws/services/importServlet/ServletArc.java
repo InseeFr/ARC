@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +21,7 @@ import org.springframework.http.HttpStatus;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.webutils.WebUtils;
+import fr.insee.arc.utils.webutils.WebAttributesName;
 import fr.insee.arc.ws.services.importServlet.actions.InitiateRequest;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
@@ -48,7 +48,7 @@ public class ServletArc extends HttpServlet {
 			if (request.getRequestURI().endsWith("/healthcheck")) {
 
 				Map<String, Object> map = new HashMap<>();
-				boolean status = WebUtils.getHealthCheckStatus(map);
+				boolean status = WebAttributesName.getHealthCheckStatus(map);
 				if (!status) {
 					response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 				} else {

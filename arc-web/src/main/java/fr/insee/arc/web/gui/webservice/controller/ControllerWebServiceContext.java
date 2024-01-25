@@ -10,28 +10,28 @@ import fr.insee.arc.web.gui.webservice.service.ServiceWebServiceContext;
 public class ControllerWebServiceContext extends ServiceWebServiceContext {
 
 
-    @RequestMapping("/selectWebserviceContext")
+    @RequestMapping("/secure/selectWebserviceContext")
     public String selectWebserviceContextAction(Model model) {
         return selectWebserviceContext(model);
     }
 
-    @RequestMapping("/addWebserviceContext")
+    @RequestMapping("/secure/addWebserviceContext")
     public String addWebserviceContextAction(Model model) {
         return addWebserviceContext(model);
     }
 
-    @RequestMapping("/updateWebserviceContext")
+    @RequestMapping("/secure/updateWebserviceContext")
     public String updateWebserviceContextAction(Model model) {
     	return updateWebserviceContext(model);
     }
 
-    @RequestMapping("/sortWebserviceContext")
+    @RequestMapping("/secure/sortWebserviceContext")
     public String sortWebserviceContextAction(Model model) {
         this.vObjectService.sort(views.getViewWebserviceContext());
         return generateDisplay(model, RESULT_SUCCESS);
     }
 
-    @RequestMapping("/deleteWebserviceContext")
+    @RequestMapping("/secure/deleteWebserviceContext")
     public String deleteWebserviceContextAction(Model model) {
         return deleteWebserviceContext(model);
     }

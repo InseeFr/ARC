@@ -2,11 +2,11 @@ package fr.insee.arc.ws.services.restServices;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletInitializer {
+public class WsAppInitalizer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
 	@Override
 	protected String getServletName() {
-		return "sirene";
+		return "arcws";
 	}
 	
     @Override
@@ -21,7 +21,7 @@ public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletI
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[] {WebConfig.class};
+        return new Class[] {WsConfiguration.class, WsSecurityConfiguration.class };
     }
 
 }

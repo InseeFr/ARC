@@ -20,7 +20,7 @@ import fr.insee.arc.web.gui.query.model.ModelQuery;
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorQuery extends ArcWebGenericService<ModelQuery, QueryDao> implements  IConstanteCaractere {
 
-	protected static final String RESULT_SUCCESS = "/jsp/gererQuery.jsp";
+	protected static final String RESULT_SUCCESS = "jsp/gererQuery.jsp";
 
 	private static final String DEFAULT_SCHEMA = "arc";
 	private static final Logger LOGGER = LogManager.getLogger(InteractorQuery.class);

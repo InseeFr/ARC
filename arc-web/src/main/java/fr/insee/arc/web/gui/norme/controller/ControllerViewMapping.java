@@ -18,7 +18,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/selectMapping")
+	@RequestMapping("/secure/selectMapping")
 	public String selectMappingAction(Model model) {
 		return selectMapping(model);
 	}
@@ -30,7 +30,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/addMapping")
+	@RequestMapping("/secure/addMapping")
 	public String addMappingAction(Model model) {
 		return addMapping(model);
 	}
@@ -41,7 +41,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/deleteMapping")
+	@RequestMapping("/secure/deleteMapping")
 	public String deleteMappingAction(Model model) {
 		return deleteMapping(model);
 	}
@@ -52,7 +52,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/updateMapping")
+	@RequestMapping("/secure/updateMapping")
 	public String updateMappingAction(Model model) {
 		return updateMapping(model);
 	}
@@ -62,7 +62,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/sortMapping")
+	@RequestMapping("/secure/sortMapping")
 	public String sortMappingAction(Model model) {
 		return sortMapping(model);
 	}
@@ -72,7 +72,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/viderMapping")
+	@RequestMapping("/secure/viderMapping")
 	public String viderMappingAction(Model model) {
 		return viderMapping(model);
 	}
@@ -82,7 +82,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/importMapping")
+	@RequestMapping("/secure/importMapping")
 	public String importMappingAction(Model model, MultipartFile fileUploadMap) {
 		return importMapping(model, fileUploadMap);
 	}
@@ -93,7 +93,7 @@ public class ControllerViewMapping extends ServiceViewMapping {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/preGenererRegleMapping")
+	@RequestMapping("/secure/preGenererRegleMapping")
 	public String preGenererRegleMappingAction(Model model) {
 		return preGenererRegleMapping(model);
 	}

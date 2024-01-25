@@ -10,27 +10,27 @@ import fr.insee.arc.web.gui.webservice.service.ServiceWebServiceQuery;
 public class ControllerWebServiceQuery extends ServiceWebServiceQuery  {
 
 
-    @RequestMapping("/selectWebserviceQuery")
+    @RequestMapping("/secure/selectWebserviceQuery")
     public String selectWebserviceQueryAction(Model model) {
         return selectWebserviceQuery(model);
     }
 
-    @RequestMapping("/addWebserviceQuery")
+    @RequestMapping("/secure/addWebserviceQuery")
     public String addWebserviceQueryAction(Model model) {
         return addWebserviceQuery(model);
     }
 
-    @RequestMapping("/updateWebserviceQuery")
+    @RequestMapping("/secure/updateWebserviceQuery")
     public String updateWebserviceQueryAction(Model model) {
     	return updateWebserviceQuery(model);
     }
 
-    @RequestMapping("/sortWebserviceQuery")
+    @RequestMapping("/secure/sortWebserviceQuery")
     public String sortWebserviceQueryAction(Model model) {
         return sortWebserviceQuery(model);
     }
 
-    @RequestMapping("/deleteWebserviceQuery")
+    @RequestMapping("/secure/deleteWebserviceQuery")
     public String deleteWebserviceQueryAction(Model model) {
         return deleteWebserviceQuery(model);
     }

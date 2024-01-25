@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.text.AbstractDocument.LeafElement;
-
 /**
  * Transform a relation into a hierarchy (tree or forest), enable its manipulation through hierarchical methods. <br/>
  *
@@ -135,7 +133,7 @@ public class HierarchicalView implements ITree<String, String> {
     /**
      * Load columns of a {@code aRelationalView} into a hierarchichal view, constrained by {@code aColumnList}.
      *
-     * The nth {@link LeafElement} of a {@code aColumnList} is taken as the name of the nth column of {@code aRelationalView}.
+     * The nth of a {@code aColumnList} is taken as the name of the nth column of {@code aRelationalView}.
      *
      * @param aRootName
      * @param aColumnList

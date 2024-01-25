@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-import fr.insee.arc.utils.webutils.WebUtils;
+import fr.insee.arc.utils.webutils.WebAttributesName;
 
 @Service
 public class ServiceIndex extends IndexAction {
@@ -21,12 +21,16 @@ public class ServiceIndex extends IndexAction {
 
 	public ResponseEntity<Map<String, Object>> healthcheck() {
 		Map<String, Object> map = new HashMap<>();
-		boolean status = WebUtils.getHealthCheckStatus(map);
+		boolean status = WebAttributesName.getHealthCheckStatus(map);
 		if (!status) {
 			return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(map, HttpStatus.OK);
-
+	}
+	
+	public ResponseEntity<Map<String, String>> version() {
+		Map<String, String> map = WebAttributesName.fullVersionInformation();
+		return new ResponseEntity<>(map, HttpStatus.OK);
 	}
 	
 }

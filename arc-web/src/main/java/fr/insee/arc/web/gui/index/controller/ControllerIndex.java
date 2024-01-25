@@ -12,7 +12,7 @@ import fr.insee.arc.web.gui.index.service.ServiceIndex;
 @Controller
 public class ControllerIndex extends ServiceIndex {
 	
-	@RequestMapping({ "/index" })
+	@RequestMapping("/secure/index")
 	public String indexAction(Model model) {
 		return index(model);
 	}
@@ -20,6 +20,11 @@ public class ControllerIndex extends ServiceIndex {
 	@RequestMapping("/healthcheck")
 	public ResponseEntity<Map<String, Object>> healthcheckAction() {
 		return healthcheck();
+	}
+
+	@RequestMapping("/version")
+	public ResponseEntity<Map<String, String>> versionAction(){
+		return version();
 	}
 
 }

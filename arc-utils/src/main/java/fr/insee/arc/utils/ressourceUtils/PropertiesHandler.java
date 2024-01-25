@@ -320,8 +320,6 @@ public class PropertiesHandler {
 		map.put("version", getVersion());
 		map.put("buildDate", getVersionDate());
 		map.put("gitCommitId", getGitCommitId());
-		map.put("databaseUrl", getDatabaseUrl());
-		map.put("databaseUserName", getDatabaseUsername());
 		return map;
 	}
 

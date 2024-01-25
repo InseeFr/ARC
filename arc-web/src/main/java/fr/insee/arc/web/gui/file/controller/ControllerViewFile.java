@@ -9,7 +9,7 @@ import fr.insee.arc.web.gui.file.service.ServiceViewFile;
 @Controller
 public class ControllerViewFile extends ServiceViewFile {
 
-	@RequestMapping("/selectFile")
+	@RequestMapping("/secure/selectFile")
 	public String selectFileAction(Model model) {
 		return selectFile(model);
 	}

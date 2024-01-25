@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.export.controller;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,27 +11,27 @@ import fr.insee.arc.web.gui.export.service.ServiceViewFileExport;
 @Controller
 public class ControllerViewFileExport extends ServiceViewFileExport {
 
-    @RequestMapping({"/selectFileExport", "/seeFileExport"})
+    @RequestMapping({"/secure/selectFileExport", "/secure/seeFileExport"})
     public String selectFileExportAction(Model model) {
         return selectFileExport(model);
     }
 
-    @RequestMapping("/sortFileExport")
+    @RequestMapping("/secure/sortFileExport")
     public String sortFileExportAction(Model model) {
         return sortFileExport(model);
     }
 
-    @RequestMapping("/deleteFileExport")
+    @RequestMapping("/secure/deleteFileExport")
     public String deleteFileExportAction(Model model) {
     	return deleteFileExport(model);
     }
     
-    @RequestMapping("/updateFileExport")
+    @RequestMapping("/secure/updateFileExport")
     public String updateFileExportAction(Model model) {
     	return updateFileExport(model);
     }
     
-    @RequestMapping("/downloadFileExport")
+    @RequestMapping("/secure/downloadFileExport")
     public String downloadFileExportAction(Model model, HttpServletResponse response) {
     	return downloadFileExport(model, response);
     }	

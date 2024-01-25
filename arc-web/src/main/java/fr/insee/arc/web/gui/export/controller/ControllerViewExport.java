@@ -9,32 +9,32 @@ import fr.insee.arc.web.gui.export.service.ServiceViewExport;
 @Controller
 public class ControllerViewExport extends ServiceViewExport {
 
-    @RequestMapping("/selectExport")
+    @RequestMapping("/secure/selectExport")
     public String selectExportAction(Model model) {
 		return selectExport(model);
     }
 
-    @RequestMapping("/addExport")
+    @RequestMapping("/secure/addExport")
     public String addExportAction(Model model) {
         return addExport(model);
     }
 
-    @RequestMapping("/deleteExport")
+    @RequestMapping("/secure/deleteExport")
     public String deleteExportAction(Model model) {
          return deleteExport(model);
     }
 
-    @RequestMapping("/updateExport")
+    @RequestMapping("/secure/updateExport")
     public String updateExportAction(Model model) {
         return updateExport(model);
     }
 
-    @RequestMapping("/sortExport")
+    @RequestMapping("/secure/sortExport")
     public String sortExportAction(Model model) {
     	return sortExport(model);
     }
 
-    @RequestMapping("/startExport")
+    @RequestMapping("/secure/startExport")
     public String startExportAction(Model model) {
     	return startExport(model);
 	}

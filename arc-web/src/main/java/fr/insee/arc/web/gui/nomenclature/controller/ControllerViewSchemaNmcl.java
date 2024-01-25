@@ -9,27 +9,27 @@ import fr.insee.arc.web.gui.nomenclature.service.ServiceViewSchemaNmcl;
 @Controller
 public class ControllerViewSchemaNmcl extends ServiceViewSchemaNmcl {
 	 
-    @RequestMapping("/selectSchemaNmcl")
+    @RequestMapping("/secure/selectSchemaNmcl")
     public String selectSchemaNmclAction(Model model) {
         return selectSchemaNmcl(model);
     }
 
-    @RequestMapping("/addSchemaNmcl")
+    @RequestMapping("/secure/addSchemaNmcl")
     public String addSchemaNmclAction(Model model) {
 		return addSchemaNmcl(model);
     }
 
-    @RequestMapping("/updateSchemaNmcl")
+    @RequestMapping("/secure/updateSchemaNmcl")
     public String updateSchemaNmclAction(Model model) {
         return updateSchemaNmcl(model);
     }
 
-    @RequestMapping("/sortSchemaNmcl")
+    @RequestMapping("/secure/sortSchemaNmcl")
     public String sortSchemaNmclAction(Model model) {
         return sortSchemaNmcl(model);
     }
 
-    @RequestMapping("/deleteSchemaNmcl")
+    @RequestMapping("/secure/deleteSchemaNmcl")
     public String deleteSchemaNmclAction(Model model) {
         return deleteSchemaNmcl(model);
     }

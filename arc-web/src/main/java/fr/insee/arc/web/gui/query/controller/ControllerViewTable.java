@@ -10,12 +10,12 @@ import fr.insee.arc.web.gui.query.service.ServiceViewTable;
 public class ControllerViewTable extends ServiceViewTable {
 	
 
-	@RequestMapping({"/selectTable", "/seeTable"})
+	@RequestMapping({"/secure/selectTable", "/secure/seeTable"})
 	public String seeTableAction(Model model) {
 		return seeTable(model);
 	}
 
-	@RequestMapping("/sortTable")
+	@RequestMapping("/secure/sortTable")
 	public String sortTableAction(Model model) {
 		return sortTable(model);
 	}

@@ -11,11 +11,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import fr.insee.arc.web.WebConfig;
+import fr.insee.arc.web.WebConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = WebConfig.class)
+@ContextConfiguration(classes = WebConfiguration.class)
 public class IndexActionTest {
 
 	@Autowired

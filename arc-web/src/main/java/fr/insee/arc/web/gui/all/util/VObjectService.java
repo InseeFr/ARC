@@ -22,7 +22,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;

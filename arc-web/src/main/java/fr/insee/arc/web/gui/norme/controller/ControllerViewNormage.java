@@ -16,7 +16,7 @@ public class ControllerViewNormage extends ServiceViewNormage {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/importNormage")
+	@RequestMapping("/secure/importNormage")
 	public String importNormageAction(Model model, MultipartFile fileUploadStructurize) {
 		return importNormage(model, fileUploadStructurize);
 	}
@@ -27,7 +27,7 @@ public class ControllerViewNormage extends ServiceViewNormage {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/selectNormage")
+	@RequestMapping("/secure/selectNormage")
 	public String selectNormageAction(Model model) {
 		return selectNormage(model);
 	}
@@ -38,7 +38,7 @@ public class ControllerViewNormage extends ServiceViewNormage {
 	 * 
 	 * @return success
 	 */
-	@RequestMapping("/addNormage")
+	@RequestMapping("/secure/addNormage")
 	public String addNormageAction(Model model) {
 		return addNormage(model);
 	}
@@ -49,7 +49,7 @@ public class ControllerViewNormage extends ServiceViewNormage {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/deleteNormage")
+	@RequestMapping("/secure/deleteNormage")
 	public String deleteNormageAction(Model model) {
 		return deleteNormage(model);
 	}
@@ -60,7 +60,7 @@ public class ControllerViewNormage extends ServiceViewNormage {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/updateNormage")
+	@RequestMapping("/secure/updateNormage")
 	public String updateNormageAction(Model model) {
 		return updateNormage(model);
 	}
@@ -71,7 +71,7 @@ public class ControllerViewNormage extends ServiceViewNormage {
 	 * @return
 	 */
 
-	@RequestMapping("/sortNormage")
+	@RequestMapping("/secure/sortNormage")
 	public String sortNormageAction(Model model) {
 		return sortNormage(model);
 	}
@@ -81,7 +81,7 @@ public class ControllerViewNormage extends ServiceViewNormage {
 	 * 
 	 * @return
 	 */
-	@RequestMapping("/viderNormage")
+	@RequestMapping("/secure/viderNormage")
 	public String viderNormageAction(Model model) {
 		return viderNormage(model);
 	}
