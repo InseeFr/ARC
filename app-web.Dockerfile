@@ -24,8 +24,8 @@ COPY . /usr/src/app/
 # Run a conditional script for the maven build
 RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
  
-# Get a tomcat 8.5
-FROM tomcat:8.5
+# Get a tomcat
+FROM tomcat:10
 
 # Clean it
 RUN rm -rf $CATALINA_HOME/webapps/*
