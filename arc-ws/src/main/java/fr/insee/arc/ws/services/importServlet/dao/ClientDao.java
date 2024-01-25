@@ -510,7 +510,8 @@ public class ClientDao {
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
-		requete.append("SELECT 1 FROM pg_tables WHERE schemaname||'.'||tablename = " + requete.quoteText(tableWsPending)
+		requete.append("SELECT 1 FROM pg_tables WHERE schemaname||'.'||tablename = " + requete.quoteText(
+				ViewEnum.normalizeTableName(tableWsPending))
 				+ " ");
 
 		return !UtilitaireDao.get(0).hasResults(connection, requete);
