@@ -1,6 +1,5 @@
 package fr.insee.arc.core.service.p2chargement.operation;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,6 +17,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.BoundedBufferedReader;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 /**
@@ -27,12 +27,8 @@ import fr.insee.arc.utils.utils.FormatSQL;
  */
 public class ChargementBrut {
 
-    
-	/** Combien de boucle au maximum */
-	private static final int LIMIT_BOUCLE = 1;
-    /** Combien de ligne on charge pour chacune des boucles */
-    private static final int LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE = 50;
-    private static final int LIMIT_CHARGEMENT_BRUTAL_NB_CHAR = 10000;
+    protected int maxNumberOfLinesToRead = 50;
+    protected int maxNumberOfCharacterByLineToRead = 10000;
       
     private static final Logger LOGGER = LogManager.getLogger(ChargementBrut.class);
     private Connection connexion;
@@ -43,24 +39,23 @@ public class ChargementBrut {
      * @param br reader ouvert sur le fichier
      * @param nbBoucle étape dans la lecture
      * */
-    private String requeteFichierBrutalement(String idSource, BufferedReader br, int nbBoucle) throws ArcException {
+    protected String requeteFichierBrutalement(String idSource, BoundedBufferedReader br) throws ArcException {
         StaticLoggerDispatcher.info(LOGGER, "** chargerFichierBrutalement **");
-
     	
     	StringBuilder requete=new StringBuilder();
-    	int idLigne = nbBoucle * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE;
+    	int idLigne = 0;
     	String line;
 		try {
-			line = br.readLine();
-			line = line.substring(0, Math.min(line.length(), LIMIT_CHARGEMENT_BRUTAL_NB_CHAR));
+			line = br.readLine(maxNumberOfCharacterByLineToRead);
 		} catch (IOException e) {
     		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 		}
     	if (line == null) {
     		throw new ArcException(ArcExceptionMessage.FILE_IS_EMPTY, idSource);
     	}
+    	
     	boolean start=true;
-    	while (line != null && idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE) {
+    	while (line != null && idLigne < maxNumberOfLinesToRead) {
           if (start)
           {
     		requete.append("\nSELECT "+FormatSQL.quoteText(idSource)+"::text as "+ColumnEnum.ID_SOURCE.getColumnName()+","+ idLigne +"::int as id_ligne,"+FormatSQL.quoteText(line)+"::text as ligne");
@@ -72,9 +67,9 @@ public class ChargementBrut {
           }
           
           idLigne++;
-          if (idLigne < (nbBoucle + 1) * LIMIT_CHARGEMENT_BRUTAL_NB_LIGNE) {
+          if (idLigne < maxNumberOfLinesToRead) {
               try {
-				line = br.readLine();
+				line = br.readLine(maxNumberOfCharacterByLineToRead);
 			} catch (IOException e) {
 	    		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 			}
@@ -91,22 +86,14 @@ public class ChargementBrut {
     		throws ArcException {
     	StaticLoggerDispatcher.info(LOGGER, "** calculeNormeFichiers **");
 
-	    int nbBoucle = 0;
-	
 	    try(InputStreamReader isr = new InputStreamReader(file);
-	    		BufferedReader br = new BufferedReader(isr);) {
+	    		BoundedBufferedReader br = new BoundedBufferedReader(isr);) {
 
-			// On boucle tant que l'on a pas une norme ou une exception
 			// - soit la norme est trouvée et on sort
 			// - soit aucune/trop de normes est/sont trouvé(s) et on sort de calculerNormeAndValidite avec une exception
-			// nbBoucle<LIMIT_BOUCLE n'entre jamais en jeu.
 			// Gênant si la norme utilise une ligne qui n'est pas dans les xxx premières lignes, mais choix temporaire pour éviter
 			// de charger un fichier entier à la recherche de sa norme
-			while (normeOk.getIdNorme() == null && nbBoucle<LIMIT_BOUCLE) {
-	    		calculerNormeAndValidite(normeOk, requeteFichierBrutalement(normeOk.getIdSource(), br, nbBoucle));
-
-	    		nbBoucle++;
-	    	}
+    		calculerNormeAndValidite(normeOk, requeteFichierBrutalement(normeOk.getIdSource(), br));
 
 	    } catch (IOException e) {
 	    	throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, normeOk.getIdSource());
