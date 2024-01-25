@@ -5,6 +5,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-94.1.1
+- tomcat 10, java 17, spring 6
+
+## version-93.1.36
+- fix : ws import wait for large data tables
+- last version in tomcat 9, java 11
+
 ## version-93.1.34b
 - avoid overflow when large file data are set on a single line
 
