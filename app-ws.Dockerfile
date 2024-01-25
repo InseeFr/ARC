@@ -1,4 +1,4 @@
-FROM maven:3.8.6-jdk-11 AS build
+FROM maven:3-eclipse-temurin-17 AS build
 
 # Proxies
 ARG HTTP_PROXY

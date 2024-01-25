@@ -1,4 +1,4 @@
-FROM maven:3.8.6-jdk-11 AS build
+FROM maven:3-eclipse-temurin-17 AS build
 
 # Proxies
 ARG HTTP_PROXY
@@ -17,7 +17,6 @@ ARG DISABLE_DEBUG_GUI
 
 # Log properties
 ARG LOG_SETTINGS=fr/insee/config/log4j2.xml
-
 
 COPY . /usr/src/app/
 
