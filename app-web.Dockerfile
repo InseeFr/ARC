@@ -25,7 +25,7 @@ COPY . /usr/src/app/
 RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
  
 # Get a tomcat
-FROM tomcat:10-jre17
+FROM tomcat:10-jdk17
 
 # Clean it
 RUN rm -rf $CATALINA_HOME/webapps/*
