@@ -14,9 +14,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
@@ -97,6 +99,9 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 
 	/** Is the current environment a production environment?*/
 	private boolean isEnvProd;
+	
+	/** Are the Kubernetes options enabled?*/
+	private boolean isKube;
 
 	protected boolean isRefreshMonitoring = false;
 
@@ -164,10 +169,11 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
 		this.dataObjectService.setSandboxSchema(this.bacASable);
 		
+		this.isKube = Boolean.parseBoolean(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.enableKube","false"));
+		
 		dao.initialize(vObjectService, dataObjectService);
 		
 		this.scope = scope;
-		
     	initialize(arcModel);
     	refreshGenericModelAttributes(model);
     	extraModelAttributes(model);
@@ -185,6 +191,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
     	model.addAttribute("version", getVersion());
     	model.addAttribute("isEnvProd", isEnvProd());
     	model.addAttribute("application", getApplication());
+    	model.addAttribute("isKube", isKube());
 	}
 	
 	/** Adds (if overridden) more attributes to the model.*/
@@ -414,6 +421,14 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 
 	public void setDataBaseOk(boolean isDataBaseOK) {
 		this.isDataBaseOK = isDataBaseOK;
+	}
+	
+	public boolean isKube() {
+		return isKube;
+	}
+
+	public void setKube(boolean isKube) {
+		this.isKube = isKube;
 	}
 
 	protected Session getSession() {

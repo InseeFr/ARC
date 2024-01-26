@@ -94,6 +94,20 @@ delete from arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
 INSERT INTO arc.parameter VALUES ('MappingService.MAX_PARALLEL_WORKERS','4');
 UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.mapmodel' where key='MappingService.MAX_PARALLEL_WORKERS';
 
+-- kubernetes parameters
+INSERT INTO arc.parameter VALUES ('ArcAction.enableKube','false');
+UPDATE arc.parameter set description='parameter.ihm.enableKube' where key='ArcAction.enableKube';
+
+INSERT INTO arc.parameter VALUES ('ArcAction.nbExecutorPods','10');
+UPDATE arc.parameter set description='parameter.ihm.nbExecutorPods' where key='ArcAction.nbExecutorPods';
+
+INSERT INTO arc.parameter VALUES ('BatchArc.enableKube','false');
+UPDATE arc.parameter set description='parameter.batch.enableKube' where key='BatchArc.enableKube';
+
+INSERT INTO arc.parameter VALUES ('BatchArc.nbExecutorPods','10');
+UPDATE arc.parameter set description='parameter.batch.nbExecutorPods' where key='BatchArc.nbExecutorPods';
+
+
 -- patch 23/06/2023
 -- remove deprecated parameters
 DELETE FROM arc.parameter WHERE key='LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE';

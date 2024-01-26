@@ -18,8 +18,8 @@
 
 <form
 spellcheck="false"
-action="selectExport.action"
-id="selectExport"
+action="selectOperations.action"
+id="selectOperations"
 method="post"
 accept-charset="UTF-8"
 >
@@ -47,6 +47,34 @@ value="<spring:message code="gui.button.generateErrorMessageInLogs"/>"
 </div>
 </div>
 </div>
+
+<c:if test="${isKube}">
+<hr />
+<div class="row">
+<div class="col-md-12">
+<h2>
+Kubernetes
+</h2>
+<div class="row">
+<div class="col-md">
+<div id="viewKube">
+<input type="submit" class="btn btn-primary btn-sm"
+id="viewOperations.createPods"
+value="<spring:message code="gui.button.createPods"/>"
+scope="viewOperations;" doAction="createPods"
+onclick="return confirm('<spring:message code="gui.button.createPods.confirm" javaScriptEscape="true"/>');" />
+<input type="submit" class="btn btn-primary btn-sm"
+id="viewOperations.deletePods"
+value="<spring:message code="gui.button.deletePods"/>"
+scope="viewOperations;" doAction="deletePods"
+onclick="return confirm('<spring:message code="gui.button.deletePods.confirm" javaScriptEscape="true"/>');" />
+</div>
+</div>
+</div>
+</div>
+</div>
+</c:if>
+
 </div>
 </form>
 

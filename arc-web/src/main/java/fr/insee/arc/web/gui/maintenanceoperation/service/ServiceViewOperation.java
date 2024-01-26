@@ -17,7 +17,6 @@ public class ServiceViewOperation extends InteractorMaintenanceOperations {
     }
     
     public String selectOperations(Model model) {
-
 		return generateDisplay(model, RESULT_SUCCESS);
     }
 
