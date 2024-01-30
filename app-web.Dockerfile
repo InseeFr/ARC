@@ -34,11 +34,3 @@ ENV ARC_LOGLEVEL=$LOG_LEVEL
 
 # Copy the war file
 COPY --from=build usr/src/app/arc-web/target/*.war $CATALINA_HOME/webapps/ROOT.war
-
-# Kubernetes
-FROM bitnami/kubectl:latest as kubectl
-
-COPY --from=kubectl /opt/bitnami/kubectl/bin/kubectl /
-
-
-
