@@ -38,8 +38,7 @@ COPY --from=build usr/src/app/arc-web/target/*.war $CATALINA_HOME/webapps/ROOT.w
 # Kubernetes
 FROM bitnami/kubectl:latest as kubectl
 
-FROM ubuntu:latest
+COPY --from=kubectl /opt/bitnami/kubectl/bin/kubectl /
 
-COPY --from=kubectl /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/
 
 
