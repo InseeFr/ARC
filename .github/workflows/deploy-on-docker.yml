@@ -2,8 +2,8 @@ name: Deploy on DockerHub
 
 on:
   push:
-  	branches:
-    - master
+    branches:
+      - master
   pull_request:
   release:
     types: [published]
