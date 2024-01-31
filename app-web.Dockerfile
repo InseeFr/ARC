@@ -23,9 +23,6 @@ COPY . /usr/src/app/
 # Run a conditional script for the maven build
 RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
 
-# Kubernetes
-FROM bitnami/kubectl:latest as kubectl
-
 # Get a tomcat
 FROM tomcat:10-jdk17
 
@@ -38,4 +35,3 @@ ENV ARC_LOGLEVEL=$LOG_LEVEL
 
 # Copy the war file
 COPY --from=build usr/src/app/arc-web/target/*.war $CATALINA_HOME/webapps/ROOT.war
-COPY --from=kubectl /opt/bitnami/kubectl/bin/kubectl ./
