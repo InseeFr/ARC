@@ -57,29 +57,48 @@ Kubernetes
 </h2>
 <div class="row">
 <div class="col-md">
+
 <div id="viewKubernetes">
 
+<div class="col-md-2">
+Number of database :
+<input class="border" type="text" m="" name="numberOfExecutorDatabase" value="${numberOfExecutorDatabase}"/>
+</div>
+
+<input type="submit" class="btn btn-primary btn-sm" id="viewKubernetes.createDatabases" 
+value="<spring:message code="gui.button.createDatabases"/>"
+scope="viewKubernetes;" doAction="createDatabases" />
+
+<input type="submit" class="btn btn-primary btn-sm"
+id="viewKubernetes.deleteDatabases"
+value="<spring:message code="gui.button.deleteDatabases"/>"
+scope="viewKubernetes;" doAction="deleteDatabases"
+/>
+
+<div class="row">
+<div class="col-md-6">
+</br>
 <p>Url</p>
 <textarea cols="60" rows="1" class="border" type="text" m="" name="url">${url}</textarea>
 <p>Http Type</p>
 <textarea cols="10" rows="1" class="border" type="text" m="" name="httpType">${httpType}</textarea>
+<p>Authentication token</p>
+<textarea cols="10" rows="1" class="border" type="text" m="" name="token">${token}</textarea>
 <p>Content</p>
-<textarea cols="60" rows="20" class="border" type="text" m="" name="json">${json}</textarea>
+<textarea cols="60" rows="11" class="border" type="text" m="" name="json">${json}</textarea>
 </br>
 
-<input type="submit" class="btn btn-primary btn-sm" id="viewKubernetes.createPods" 
-value="<spring:message code="gui.button.createPods"/>"
-scope="viewKubernetes;" doAction="createPods" />
+<input type="submit" class="btn btn-primary btn-sm" id="viewKubernetes.executeHttps" 
+value="<spring:message code="gui.button.executeService"/>"
+scope="viewKubernetes;" doAction="executeService" />
 
-<input type="submit" class="btn btn-primary btn-sm"
-id="viewKubernetes.deletePods"
-value="<spring:message code="gui.button.deletePods"/>"
-scope="viewKubernetes;" doAction="deletePods"
-/>
+</div>
 
-</br>
+<div class="col-md-6">
 <p>output</p>
-<textarea cols="60" rows="20" class="border" type="text" m="" name="httpOutput">${httpOutput}</textarea>
+<textarea cols="60" rows="22" class="border" type="text" m="" name="httpOutput">${httpOutput}</textarea>
+</div>
+</div>
 
 </div>
 </div>
