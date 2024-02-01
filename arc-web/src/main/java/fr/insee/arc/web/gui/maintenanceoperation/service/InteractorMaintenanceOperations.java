@@ -27,10 +27,10 @@ public class InteractorMaintenanceOperations extends ArcWebGenericService<Mainte
 	@Override
 	protected void putAllVObjects(MaintenanceOperationsModel arcModel) {
 		views.setViewOperations(this.vObjectService.preInitialize(arcModel.getViewOperations()));
-		views.setViewKube(this.vObjectService.preInitialize(arcModel.getViewKube()));
+		views.setViewKubernetes(this.vObjectService.preInitialize(arcModel.getViewKubernetes()));
 		
 		putVObject(views.getViewOperations(), t -> initializeOperations());
-		putVObject(views.getViewKube(), t -> initializeKube());
+		putVObject(views.getViewKubernetes(), t -> initializeKube());
 	}
 
     public void initializeOperations() {
@@ -40,7 +40,7 @@ public class InteractorMaintenanceOperations extends ArcWebGenericService<Mainte
     
     public void initializeKube() {
     	Map<String, String> defaultInputFields = new HashMap<>();
-    	this.vObjectService.initialize(views.getViewKube(), new ArcPreparedStatementBuilder("SELECT true"),  "arc.kube", defaultInputFields);
+    	this.vObjectService.initialize(views.getViewKubernetes(), new ArcPreparedStatementBuilder("SELECT true"),  "arc.kube", defaultInputFields);
     }
 
 	@Override

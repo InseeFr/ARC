@@ -57,17 +57,29 @@ Kubernetes
 </h2>
 <div class="row">
 <div class="col-md">
-<div id="viewKube">
+<div id="viewKubernetes">
+
+<p>Url</p>
+<input type="text" m="" name="url" value="${url}" />
+<p>Http Type</p>
+<input type="text" m="" name="httpType" value="${httpType}" />
+<p>Content</p>
+<input type="text" m="" name="json" value="${json}" />
+</br>
 <input type="submit" class="btn btn-primary btn-sm"
-id="viewOperations.createPods"
+id="viewKubernetes.createPods"
 value="<spring:message code="gui.button.createPods"/>"
-scope="viewOperations;" doAction="createPods"
+scope="viewKubernetes;" doAction="createPods"
 onclick="return confirm('<spring:message code="gui.button.createPods.confirm" javaScriptEscape="true"/>');" />
 <input type="submit" class="btn btn-primary btn-sm"
-id="viewOperations.deletePods"
+id="viewKubernetes.deletePods"
 value="<spring:message code="gui.button.deletePods"/>"
-scope="viewOperations;" doAction="deletePods"
+scope="viewKubernetes;" doAction="deletePods"
 onclick="return confirm('<spring:message code="gui.button.deletePods.confirm" javaScriptEscape="true"/>');" />
+</br>
+<p>output</p>
+<input type="text" m="" name="httpOutput" value="${httpOutput}" />
+
 </div>
 </div>
 </div>

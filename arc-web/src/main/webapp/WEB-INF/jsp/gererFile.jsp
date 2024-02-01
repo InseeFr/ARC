@@ -22,7 +22,7 @@ accept-charset="UTF-8"
 <div class="container-fluid">
 <div class="row">
 <div class="col-md-5 border-right">
- <c:set var="view" value="${viewDirIn}"  scope="request"/>
+<c:set var="view" value="${viewDirIn}"  scope="request"/>
 <c:import url="tiles/templateVObject.jsp">
 <c:param name="taille" value ="col-md4" />
 <c:param name="ligneAdd" value="true" />

@@ -8,7 +8,7 @@ import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
 import fr.insee.arc.web.gui.all.util.VObject;
 
 
-public class ViewKube extends VObject {
+public class ViewKubernetes extends VObject {
 
 	private static final Map<String, ColumnRendering> columnMap= new HashMap<>();
 
@@ -20,10 +20,10 @@ public class ViewKube extends VObject {
 
 	}
 	
-	public ViewKube() {
+	public ViewKubernetes() {
         super();
-        this.setTitle("view.kube");
-        this.setSessionName("viewKube");
+        this.setTitle("view.viewKubernetes");
+        this.setSessionName("viewKubernetes");
     	this.setDefaultPaginationSize(20);
         this.setConstantVObject(new ConstantVObject(columnMap));
     }

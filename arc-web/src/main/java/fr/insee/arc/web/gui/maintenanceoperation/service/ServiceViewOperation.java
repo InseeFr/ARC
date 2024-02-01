@@ -19,30 +19,5 @@ public class ServiceViewOperation extends InteractorMaintenanceOperations {
     public String selectOperations(Model model) {
 		return generateDisplay(model, RESULT_SUCCESS);
     }
-
-    public String addOperations(Model model) {
-        this.vObjectService.insert(views.getViewOperations());
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-
-    public String deleteOperations(Model model) {
-         this.vObjectService.delete(views.getViewOperations());
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-
-    public String updateOperations(Model model) {
-        this.vObjectService.update(views.getViewOperations());
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-
-    public String sortOperations(Model model) {
-        this.vObjectService.sort(views.getViewOperations());
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-
-    public String startOperations(Model model) {
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
-
     
 }

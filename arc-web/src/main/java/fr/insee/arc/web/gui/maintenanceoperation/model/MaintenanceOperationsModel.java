@@ -8,13 +8,21 @@ import fr.insee.arc.web.gui.all.util.VObject;
 @Component
 public class MaintenanceOperationsModel implements ArcModel {
 
+	
+	private String url;
+	private String httpType;
+	private String json;
+	private String httpOutput;
+	
+	
+	
     private VObject viewOperations;
-    private VObject viewKube;
+    private VObject viewKubernetes;
 
 
     public MaintenanceOperationsModel() {
 		this.viewOperations = new ViewOperations();
-		this.viewKube = new ViewKube();
+		this.viewKubernetes = new ViewKubernetes();
 	}
 
 	public VObject getViewOperations() {
@@ -25,12 +33,47 @@ public class MaintenanceOperationsModel implements ArcModel {
 		this.viewOperations = viewOperations;
 	}
 
-	public VObject getViewKube() {
-		return viewKube;
+	public VObject getViewKubernetes() {
+		return viewKubernetes;
 	}
 
-	public void setViewKube(VObject viewKube) {
-		this.viewKube = viewKube;
+	public void setViewKubernetes(VObject viewKubernetes) {
+		this.viewKubernetes = viewKubernetes;
 	}
 
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getHttpType() {
+		return httpType;
+	}
+
+	public void setHttpType(String httpType) {
+		this.httpType = httpType;
+	}
+
+	public String getJson() {
+		return json;
+	}
+
+	public void setJson(String json) {
+		this.json = json;
+	}
+
+	public String getHttpOutput() {
+		return httpOutput;
+	}
+
+	public void setHttpOutput(String httpOutput) {
+		this.httpOutput = httpOutput;
+	}
+
+	
+	
+	
 }
