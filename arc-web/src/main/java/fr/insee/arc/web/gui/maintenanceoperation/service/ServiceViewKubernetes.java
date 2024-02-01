@@ -1,98 +1,44 @@
 package fr.insee.arc.web.gui.maintenanceoperation.service;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import fr.insee.arc.core.service.kubernetes.ApiKubernetesService;
+import fr.insee.arc.core.service.kubernetes.bo.KubernetesServiceResult;
 
 @Service
 public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
 
-    public String createPods(Model model) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-    	
-    	System.out.println(views.getHttpType());
-    	System.out.println(views.getUrl());
-    	
-    	// récupération du token
-    	String tokenBearer = "Bearer "+new String(Files.readAllBytes(Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")), StandardCharsets.UTF_8);
-    	
-    	X509TrustManager x=  new X509TrustManager() {     
-	        public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-	            return new X509Certificate[0];
-	        } 
-	        public void checkClientTrusted( 
-	            java.security.cert.X509Certificate[] certs, String authType) {
-	        	// selfsigned cetificate
-	            } 
-	        public void checkServerTrusted( 
-	            java.security.cert.X509Certificate[] certs, String authType) {
-	        	// selfsigned cetificate
-	        }
-	    } ;
-    	
-    	
-    	TrustManager[] trustAllCerts = new TrustManager[] { x };
+	public String createDatabases(Model model) throws IOException {
+		// récupération du token
+		// kubectl exec arc-web-99ff74866-95lvz -t cat /var/run/secrets/kubernetes.io/serviceaccount/token
+		String token = "Bearer "
+				+ new String(Files.readAllBytes(Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")),
+						StandardCharsets.UTF_8);
 
-    		// Install the all-trusting trust manager
-	    SSLContext sc = SSLContext.getInstance("TLSv1.2"); 
-	    sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
-	    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		KubernetesServiceResult result = ApiKubernetesService.execute(views.getUrl(),
+				views.getHttpType(), token, views.getJson());
 
-    	URL url = new URL(views.getUrl());
-    	HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-    	con.setRequestMethod(views.getHttpType());
-    	con.setRequestProperty("Authorization", tokenBearer);
-    	con.setRequestProperty("Accept", "application/json");
+		views.setHttpOutput(result.getResponse());
+		model.addAttribute("httpOutput", views.getHttpOutput());
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
 
-    	if (views.getJson()!=null || !views.getJson().isBlank()) {
-        	con.setRequestProperty("Content-Type", "application/json");
-	    	OutputStream os = con.getOutputStream();
-	    	OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");    
-	    	osw.write(views.getJson());
-	    	osw.flush();
-	    	osw.close();
-	    	os.close();
-    	}
-    	
-    	int responseCode = con.getResponseCode();
-    	System.out.println("GET Response Code :: " + responseCode);
-    	
-    	BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String inputLine;
-		StringBuilder response = new StringBuilder();
+	public String executeService(Model model) {
+		KubernetesServiceResult result = ApiKubernetesService.execute(views.getUrl(),
+				views.getHttpType(), views.getToken(), views.getJson());
+		views.setHttpOutput(result.getResponse());
+		model.addAttribute("httpOutput", views.getHttpOutput());
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
 
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
+	public String deleteDatabases(Model model) {
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
 
-		// print result
-		System.out.println(response.toString());
-    	views.setHttpOutput(response.toString());
-    	
-    	return generateDisplay(model, RESULT_SUCCESS);
-    }
-
-    public String deletePods(Model model) {
-        return generateDisplay(model, RESULT_SUCCESS);
-    }
 }

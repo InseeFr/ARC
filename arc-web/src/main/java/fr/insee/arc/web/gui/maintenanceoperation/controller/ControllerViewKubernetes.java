@@ -13,15 +13,19 @@ import fr.insee.arc.web.gui.maintenanceoperation.service.ServiceViewKubernetes;
 @Controller
 public class ControllerViewKubernetes extends ServiceViewKubernetes {
     
-    @RequestMapping("/secure/createPods")
-    public String createPodsAction(Model model) throws NoSuchAlgorithmException, IOException, KeyManagementException {
-		return createPods(model);
+    @RequestMapping("/secure/executeService")
+    public String executeServiceAction(Model model) {
+		return executeService(model);
     }
 
-    @RequestMapping("/secure/deletePods")
-    public String deletePodsAction(Model model) {
-		return deletePods(model);
+    @RequestMapping("/secure/createDatabases")
+    public String createDatabasesAction(Model model) throws IOException {
+		return createDatabases(model);
     }
-
     
+    @RequestMapping("/secure/deleteDatabases")
+    public String deleteDatabasesAction(Model model) {
+		return deleteDatabases(model);
+    }
+
 }

@@ -12,6 +12,8 @@ public class MaintenanceOperationsModel implements ArcModel {
 	private String httpType;
 	private String json;
 	private String httpOutput;
+	private String token;
+	private int numberOfExecutorDatabase;
 	
     private VObject viewOperations;
     private VObject viewKubernetes;
@@ -68,6 +70,22 @@ public class MaintenanceOperationsModel implements ArcModel {
 
 	public void setHttpOutput(String httpOutput) {
 		this.httpOutput = httpOutput;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public int getNumberOfExecutorDatabase() {
+		return numberOfExecutorDatabase;
+	}
+
+	public void setNumberOfExecutorDatabase(int numberOfExecutorDatabase) {
+		this.numberOfExecutorDatabase = numberOfExecutorDatabase;
 	}
 
 	
