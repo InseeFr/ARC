@@ -7,14 +7,11 @@ import fr.insee.arc.web.gui.all.util.VObject;
 
 @Component
 public class MaintenanceOperationsModel implements ArcModel {
-
 	
 	private String url;
 	private String httpType;
 	private String json;
 	private String httpOutput;
-	
-	
 	
     private VObject viewOperations;
     private VObject viewKubernetes;

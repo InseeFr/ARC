@@ -60,25 +60,26 @@ Kubernetes
 <div id="viewKubernetes">
 
 <p>Url</p>
-<input type="text" m="" name="url" value="${url}" />
+<textarea cols="60" rows="1" class="border" type="text" m="" name="url">${url}</textarea>
 <p>Http Type</p>
-<input type="text" m="" name="httpType" value="${httpType}" />
+<textarea cols="10" rows="1" class="border" type="text" m="" name="httpType">${httpType}</textarea>
 <p>Content</p>
-<input type="text" m="" name="json" value="${json}" />
+<textarea cols="60" rows="20" class="border" type="text" m="" name="json">${json}</textarea>
 </br>
-<input type="submit" class="btn btn-primary btn-sm"
-id="viewKubernetes.createPods"
+
+<input type="submit" class="btn btn-primary btn-sm" id="viewKubernetes.createPods" 
 value="<spring:message code="gui.button.createPods"/>"
-scope="viewKubernetes;" doAction="createPods"
-onclick="return confirm('<spring:message code="gui.button.createPods.confirm" javaScriptEscape="true"/>');" />
+scope="viewKubernetes;" doAction="createPods" />
+
 <input type="submit" class="btn btn-primary btn-sm"
 id="viewKubernetes.deletePods"
 value="<spring:message code="gui.button.deletePods"/>"
 scope="viewKubernetes;" doAction="deletePods"
-onclick="return confirm('<spring:message code="gui.button.deletePods.confirm" javaScriptEscape="true"/>');" />
+/>
+
 </br>
 <p>output</p>
-<input type="text" m="" name="httpOutput" value="${httpOutput}" />
+<textarea cols="60" rows="20" class="border" type="text" m="" name="httpOutput">${httpOutput}</textarea>
 
 </div>
 </div>

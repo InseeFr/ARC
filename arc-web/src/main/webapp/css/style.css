@@ -739,6 +739,10 @@ input.onglet_haut_actif {
 	-moz-border-radius-topleft: 3px 3px;
 }
 
+.border {
+	border: 1px solid #aaaaaa;
+}
+
 div.onglet_haut {
 	background-color: #f4ffff;
 	border: 1px solid #aaaaaa;
