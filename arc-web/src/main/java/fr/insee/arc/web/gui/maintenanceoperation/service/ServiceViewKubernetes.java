@@ -1,8 +1,10 @@
 package fr.insee.arc.web.gui.maintenanceoperation.service;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
@@ -60,9 +62,9 @@ public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
     	con.setRequestMethod(views.getHttpType());
     	con.setRequestProperty("Authorization", tokenBearer);
     	con.setRequestProperty("Accept", "application/json");
-    	con.setRequestProperty("Content-Type", "application/json");
 
     	if (views.getJson()!=null || !views.getJson().isBlank()) {
+        	con.setRequestProperty("Content-Type", "application/json");
 	    	OutputStream os = con.getOutputStream();
 	    	OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");    
 	    	osw.write(views.getJson());
@@ -71,17 +73,21 @@ public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
 	    	os.close();
     	}
     	
-    	String result;
-    	BufferedInputStream bis = new BufferedInputStream(con.getInputStream());
-    	ByteArrayOutputStream buf = new ByteArrayOutputStream();
-    	int result2 = bis.read();
-    	while(result2 != -1) {
-    	    buf.write((byte) result2);
-    	    result2 = bis.read();
-    	}
-    	result = buf.toString();
-    	System.out.println(result);
-    	views.setHttpOutput(result);
+    	int responseCode = con.getResponseCode();
+    	System.out.println("GET Response Code :: " + responseCode);
+    	
+    	BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuilder response = new StringBuilder();
+
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+
+		// print result
+		System.out.println(response.toString());
+    	views.setHttpOutput(response.toString());
     	
     	return generateDisplay(model, RESULT_SUCCESS);
     }
