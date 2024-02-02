@@ -304,7 +304,8 @@ CONSTRAINT pk_ihm_mod_variable_metier PRIMARY KEY (id_famille, nom_table_metier,
 ALTER TABLE arc.ihm_mod_variable_metier DROP CONSTRAINT IF EXISTS fk_ihm_mod_variable_table_metier;
 
 do $$ begin ALTER TABLE arc.ihm_mod_variable_metier ADD CONSTRAINT fk2_ihm_mod_variable_table_metier FOREIGN KEY (id_famille,nom_table_metier) REFERENCES arc.ihm_mod_table_metier(id_famille,nom_table_metier) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
-        
+do $$ begin CREATE TRIGGER tg_check_variable_famille AFTER insert or update or delete ON arc.ihm_mod_variable_metier EXECUTE PROCEDURE arc.fn_check_variable_famille(); EXCEPTION WHEN OTHERS then end; $$;
+
 CREATE TABLE IF NOT EXISTS arc.ihm_nmcl 
 ( 
 nom_table text NOT NULL, 

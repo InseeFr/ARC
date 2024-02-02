@@ -80,4 +80,27 @@ RETURN NEW;
   END; 
 $BODY$ 
 LANGUAGE plpgsql VOLATILE 
-COST 100; 
+COST 100;
+
+CREATE OR REPLACE FUNCTION arc.fn_check_variable_famille() 
+RETURNS trigger AS 
+$BODY$ 
+DECLARE 
+n integer; 
+begin
+select max(c) into n from (
+select 
+case when max(row(type_variable_metier, description_variable_metier, type_consolidation)::text) =
+min(row(type_variable_metier, description_variable_metier, type_consolidation)::text) then 0 else 1
+end as c
+from arc.ihm_mod_variable_metier
+group by id_famille, nom_variable_metier
+) u ;
+if n>0 then  
+RAISE EXCEPTION 'Variable incohérente'; 
+end if;
+RETURN NEW;
+END;  
+$BODY$ 
+LANGUAGE plpgsql volatile;
+
