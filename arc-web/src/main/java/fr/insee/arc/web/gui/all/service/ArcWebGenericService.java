@@ -168,7 +168,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		this.dataObjectService.setSandboxSchema(this.bacASable);
 		
 		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
-		this.isKube = Boolean.parseBoolean(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "kubernetes.gui.s3.in.enable","false"));
+		this.isKube = Boolean.parseBoolean(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "kubernetes.gui.scalability.enable","false"));
 		
 		dao.initialize(vObjectService, dataObjectService);
 		
