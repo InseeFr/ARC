@@ -46,9 +46,9 @@ public class ApiChargementService extends ApiService {
 		super();
 	}
 
-	public ApiChargementService(TraitementPhase aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+	public ApiChargementService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
 			String paramBatch) {
-		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
+		super(aCurrentPhase, aEnvExecution, aNbEnr, paramBatch);
 	}
 	
 	protected List<NormeRules> listeNorme;

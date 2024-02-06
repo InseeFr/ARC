@@ -30,7 +30,6 @@ public class PhaseThreadFactory extends Thread {
 		this.report = ApiServiceFactory.getService( //
 				getPhaseName(), //
 				mapParam.get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT), //
-				mapParam.get(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION), //
 				Integer.parseInt(mapParam.get(capacityParameterName())), //
 				Boolean.parseBoolean(PhaseParameterKeys.KEY_FOR_KEEP_IN_DATABASE) ? null
 						: mapParam.get(PhaseParameterKeys.KEY_FOR_BATCH_CHUNK_ID)) //

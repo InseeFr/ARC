@@ -38,9 +38,9 @@ public class ApiControleService extends ApiService {
 		super();
 	}
 
-	public ApiControleService(TraitementPhase aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+	public ApiControleService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
 			String paramBatch) {
-		super(aCurrentPhase, aEnvExecution, aDirectoryRoot, aNbEnr, paramBatch);
+		super(aCurrentPhase, aEnvExecution, aNbEnr, paramBatch);
 	}
 
 	/**

@@ -72,7 +72,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		springInit();
 	}
 
-	protected ApiService(TraitementPhase aCurrentPhase, String aEnvExecution, String aDirectoryRoot, Integer aNbEnr,
+	protected ApiService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
 			String paramBatch) {
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");

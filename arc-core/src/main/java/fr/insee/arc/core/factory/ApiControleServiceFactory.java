@@ -15,8 +15,8 @@ public class ApiControleServiceFactory implements IServiceFactory {
 	 * @param aDirectoryRoot
 	 * @param aNbEnr
 	 */
-	public ApiService get(TraitementPhase phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
-		return new ApiControleService(phaseService, executionSchema, directory, capacityParameter, paramBatch);
+	public ApiService get(TraitementPhase phaseService, String executionSchema, Integer capacityParameter, String paramBatch) {
+		return new ApiControleService(phaseService, executionSchema, capacityParameter, paramBatch);
 	}
 
 	public static IServiceFactory getInstance() {

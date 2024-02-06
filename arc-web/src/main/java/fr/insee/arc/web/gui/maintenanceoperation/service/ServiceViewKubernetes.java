@@ -12,8 +12,8 @@ import java.util.Iterator;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-import fr.insee.arc.core.service.kubernetes.ApiKubernetesService;
-import fr.insee.arc.core.service.kubernetes.bo.KubernetesServiceResult;
+import fr.insee.arc.utils.kubernetes.KubernetesService;
+import fr.insee.arc.utils.kubernetes.bo.KubernetesServiceResult;
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.Result;
@@ -31,11 +31,10 @@ public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
 	public String createDatabases(Model model) throws IOException {
 		// récupération du token
 		// kubectl exec <pod_name> -t cat /var/run/secrets/kubernetes.io/serviceaccount/token
-		String token = "Bearer "
-				+ new String(Files.readAllBytes(Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")),
+		String token = new String(Files.readAllBytes(Paths.get("/var/run/secrets/kubernetes.io/serviceaccount/token")),
 						StandardCharsets.UTF_8);
 
-		KubernetesServiceResult result = ApiKubernetesService.execute(views.getUrl(),
+		KubernetesServiceResult result = KubernetesService.execute(views.getUrl(),
 				views.getHttpType(), token, views.getJson());
 
 		views.setHttpOutput(result.getResponse());
@@ -73,7 +72,7 @@ public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
 	
 
 	public String executeService(Model model) {
-		KubernetesServiceResult result = ApiKubernetesService.execute(views.getUrl(),
+		KubernetesServiceResult result = KubernetesService.execute(views.getUrl(),
 				views.getHttpType(), views.getToken(), views.getJson());
 		views.setHttpOutput(result.getResponse());
 		model.addAttribute("httpOutput", views.getHttpOutput());

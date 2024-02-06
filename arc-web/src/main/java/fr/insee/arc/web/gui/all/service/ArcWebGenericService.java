@@ -49,7 +49,6 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	protected static final String POOLNAME = "arc"; 
 	
 	@Autowired
-	@Qualifier("properties")
 	protected PropertiesHandler properties;
 
 	@Autowired
@@ -166,10 +165,10 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 			loggerDispatcher.info(String.format("env selected %s", bacASable), LOGGER);
 			this.bacASable = bacASable;
 		}
-		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
 		this.dataObjectService.setSandboxSchema(this.bacASable);
 		
-		this.isKube = Boolean.parseBoolean(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.enableKube","false"));
+		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
+		this.isKube = Boolean.parseBoolean(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "kubernetes.gui.s3.in.enable","false"));
 		
 		dao.initialize(vObjectService, dataObjectService);
 		

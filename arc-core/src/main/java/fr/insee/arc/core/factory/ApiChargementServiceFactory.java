@@ -15,8 +15,8 @@ public class ApiChargementServiceFactory implements IServiceFactory {
 	 * @param aDirectoryRoot
 	 * @param aNbEnr
 	 */
-	public ApiService get(TraitementPhase phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
-		return new ApiChargementService(phaseService, executionSchema, directory, capacityParameter, paramBatch);
+	public ApiService get(TraitementPhase phaseService, String executionSchema, Integer capacityParameter, String paramBatch) {
+		return new ApiChargementService(phaseService, executionSchema, capacityParameter, paramBatch);
 	}
 	
 	public static IServiceFactory getInstance() {

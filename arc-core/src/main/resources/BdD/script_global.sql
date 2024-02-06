@@ -95,24 +95,31 @@ INSERT INTO arc.parameter VALUES ('MappingService.MAX_PARALLEL_WORKERS','4');
 UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.mapmodel' where key='MappingService.MAX_PARALLEL_WORKERS';
 
 -- kubernetes parameters
-INSERT INTO arc.parameter VALUES ('ArcAction.enableKube','false');
-UPDATE arc.parameter set description='parameter.ihm.enableKube' where key='ArcAction.enableKube';
 
-INSERT INTO arc.parameter VALUES ('ArcAction.nbExecutorPods','10');
-UPDATE arc.parameter set description='parameter.ihm.nbExecutorPods' where key='ArcAction.nbExecutorPods';
+-- horizontal scalability parameters
+INSERT INTO arc.parameter VALUES ('kubernetes.gui.scalability.enable','false', 'Enable kubernetes horizontal scalability in gui mode');
+INSERT INTO arc.parameter VALUES ('kubernetes.batch.scalability.enable','false', 'Enable kubernetes horizontal scalability in batch mode');
+INSERT INTO arc.parameter VALUES ('kubernetes.batch.scalability.numberOfExecutorDatabase','4', 'Number of executor database nod for horizontal scaling');
 
-INSERT INTO arc.parameter VALUES ('BatchArc.enableKube','false');
-UPDATE arc.parameter set description='parameter.batch.enableKube' where key='BatchArc.enableKube';
+-- data input s3 bucket parameters
+INSERT INTO arc.parameter VALUES ('kubernetes.gui.s3.in.enable','false', 'Enable the use of an s3 input bucket in gui');
+INSERT INTO arc.parameter VALUES ('kubernetes.gui.s3.in.name','s3-name', 'Name of the s3 input bucket used by gui');
+INSERT INTO arc.parameter VALUES ('kubernetes.gui.s3.in.access','s3-access', 'Access identifier for s3 access in gui');
+INSERT INTO arc.parameter VALUES ('kubernetes.gui.s3.in.secret','s3-secret', 'Secret for s3 access in gui');
 
-INSERT INTO arc.parameter VALUES ('BatchArc.nbExecutorPods','10');
-UPDATE arc.parameter set description='parameter.batch.nbExecutorPods' where key='BatchArc.nbExecutorPods';
-
+INSERT INTO arc.parameter VALUES ('kubernetes.batch.s3.in.enable','false', 'Enable the use of an s3 input bucket in batch');
+INSERT INTO arc.parameter VALUES ('kubernetes.batch.s3.in.name','s3-name', 'Name of the s3 input bucket used by batch');
+INSERT INTO arc.parameter VALUES ('kubernetes.batch.s3.in.access','s3-access', 'Access identifier for s3 access in batch');
+INSERT INTO arc.parameter VALUES ('kubernetes.batch.s3.in.secret','s3-secret', 'Secret for s3 access in batch');
 
 -- patch 23/06/2023
 -- remove deprecated parameters
 DELETE FROM arc.parameter WHERE key='LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE';
 DELETE FROM arc.parameter WHERE key='LanceurARC.PARALLEL_LOCK_CHECK_INTERVAL';
 DELETE FROM arc.parameter WHERE key='LanceurARC.env';
+
+commit;
+vacuum arc.parameter;
 
 -- table de pilotage du batch de production
 CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text);

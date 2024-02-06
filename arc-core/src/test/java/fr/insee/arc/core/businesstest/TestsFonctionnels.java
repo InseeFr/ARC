@@ -63,7 +63,7 @@ public class TestsFonctionnels extends InitializeQueryTest {
 	private void executeTestSirene(String sandbox, String repertoire) throws IOException, ArcException, SQLException {
 		BddPatcherTest.insertTestDataSirene();
 
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, 10000000, null).invokeApi();
 
 		String repertoireDeDepot = DirectoryPath.directoryReceptionEntrepot(repertoire, sandbox,
 				DataWarehouse.DEFAULT.getName());
@@ -73,17 +73,17 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/Cas_test_V2016.02.zip"),
 				new File(repertoireDeDepot, "Cas_test_V2016.02.zip").toPath());
 
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, 10000000, null).invokeApi();
 
 		assertEquals(114, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, 10000000, null).invokeApi();
 		assertEquals(114, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.NORMAGE, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.NORMAGE, sandbox, 10000000, null).invokeApi();
 		assertEquals(114, nbFileInPhase(sandbox, TraitementPhase.NORMAGE, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.CONTROLE, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.CONTROLE, sandbox, 10000000, null).invokeApi();
 		assertEquals(47, nbFileInPhase(sandbox, TraitementPhase.CONTROLE, TraitementEtat.OK));
 
 	}
@@ -104,7 +104,7 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		// to test batch mode
 		String batchMode="1";
 		
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, repertoire, 10000000, batchMode).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, 10000000, batchMode).invokeApi();
 
 		String repertoireDeDepot = DirectoryPath.directoryReceptionEntrepot(repertoire, sandbox,
 				DataWarehouse.DEFAULT.getName());
@@ -112,20 +112,20 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/siera_ano.xml"),
 				new File(repertoireDeDepot, "siera_ano.xml").toPath());
 
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, repertoire, 10000000, batchMode).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, 10000000, batchMode).invokeApi();
 
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, repertoire, 10000000, batchMode).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.NORMAGE, sandbox, repertoire, 10000000, batchMode).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.NORMAGE, sandbox, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.NORMAGE, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.CONTROLE, sandbox, repertoire, 10000000, batchMode).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.CONTROLE, sandbox, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.CONTROLE, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.MAPPING, sandbox, repertoire, 10000000, batchMode).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.MAPPING, sandbox, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.MAPPING, TraitementEtat.OK));
 
 		// test on data
@@ -167,7 +167,7 @@ public class TestsFonctionnels extends InitializeQueryTest {
 	private void executeTestAnimal(String sandbox, String repertoire) throws IOException, ArcException, SQLException {
 		BddPatcherTest.insertTestDataAnimal();
 
-		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.INITIALISATION, sandbox, 10000000, null).invokeApi();
 
 		String repertoireDeDepot = DirectoryPath.directoryReceptionEntrepot(repertoire, sandbox,
 				DataWarehouse.DEFAULT.getName());
@@ -175,18 +175,18 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/animals.tar.gz"),
 				new File(repertoireDeDepot, "animals.tar.gz").toPath());
 
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, 10000000, null).invokeApi();
 
 		assertEquals(2, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.OK));
 
-		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.CHARGEMENT, sandbox, 10000000, null).invokeApi();
 		assertEquals(2, nbFileInPhase(sandbox, TraitementPhase.CHARGEMENT, TraitementEtat.OK));
 
 		// doublon detection test
 		Files.copy(this.getClass().getClassLoader().getResourceAsStream("testFiles/animals-001.csv"),
 				new File(repertoireDeDepot, "animals-001.csv").toPath());
 
-		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, repertoire, 10000000, null).invokeApi();
+		ApiServiceFactory.getService(TraitementPhase.RECEPTION, sandbox, 10000000, null).invokeApi();
 
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.RECEPTION, TraitementEtat.KO));
 

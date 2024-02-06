@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.kubernetes.bo;
+package fr.insee.arc.utils.kubernetes.bo;
 
 public class KubernetesServiceResult {
 

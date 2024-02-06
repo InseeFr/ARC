@@ -52,7 +52,7 @@ public class ApiServiceFactory {
 	 * @param paramBatch
 	 * @return
 	 */
-	public static final ApiService getService(TraitementPhase phaseService, String executionSchema, String directory, Integer capacityParameter, String paramBatch) {
-		return getInstance().map.get(phaseService).get(phaseService, executionSchema, directory, capacityParameter, paramBatch);
+	public static final ApiService getService(TraitementPhase phaseService, String executionSchema, Integer capacityParameter, String paramBatch) {
+		return getInstance().map.get(phaseService).get(phaseService, executionSchema, capacityParameter, paramBatch);
 	}
 }

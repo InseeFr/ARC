@@ -14,9 +14,6 @@ public class ViewKubernetes extends VObject {
 
 	static {
 		columnMap.put("i", new ColumnRendering(false, "i", "0%", "text", null, false));
-		columnMap.put("key", new ColumnRendering(true, "label.key", "15%", "text", null, true));
-		columnMap.put("val", new ColumnRendering(true, "label.val", "15%", "text", null, true));
-		columnMap.put("description", new ColumnRendering(true, "label.description", "70%", "text", null, false));
 	}
 	
 	public ViewKubernetes() {

@@ -65,7 +65,7 @@ public class ExecuteServiceOperation {
 
 			}
 
-			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase), env, repertoire,
+			ApiServiceFactory.getService(TraitementPhase.getPhase(bodyPojo.targetPhase), env,
 					Integer.MAX_VALUE, null).invokeApi();
 
 			ExecuteRulesDao.buildResponse(connection, bodyPojo, returnView, responseAttributes.getFirstContactDate());

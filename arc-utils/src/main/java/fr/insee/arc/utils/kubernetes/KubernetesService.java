@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.kubernetes;
+package fr.insee.arc.utils.kubernetes;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,9 +19,9 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import fr.insee.arc.core.service.kubernetes.bo.KubernetesServiceResult;
+import fr.insee.arc.utils.kubernetes.bo.KubernetesServiceResult;
 
-public class ApiKubernetesService {
+public class KubernetesService {
 
 
     public static KubernetesServiceResult execute(String urlProvided, String httpType, String token, String json)
