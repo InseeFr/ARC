@@ -28,10 +28,6 @@ public class PropertiesHandler {
 	 */
 	private List<ConnectionAttribute> connectionProperties;
 
-	/* Authentication directory */
-	private String ldapDirectoryUri;
-	private String ldapDirectoryIdent;
-	private String ldapDirectoryPassword;
 	/* Log */
 	private String logDirectory;
 	private String logLevel;
@@ -54,6 +50,22 @@ public class PropertiesHandler {
 	private String disableDebugGui;
 
 	private String gitCommitId;
+	
+	/* Kubernetes */
+	private String kubernetesApiUri;
+	private String kubernetesApiToken;
+	private int kubernetesExecutorNumber;
+	private String kubernetesExecutorLabel;
+	
+	private String s3InputApiUri;
+	private String s3InputBucket;
+	private String s3InputAccess;
+	private String s3InputSecret;
+	
+	private String s3OutputApiUri;
+	private String s3OutputBucket;
+	private String s3OutputAccess;
+	private String s3OutputSecret;
 
 	private static PropertiesHandler instanceOfPropertiesHandler;
 
@@ -138,41 +150,6 @@ public class PropertiesHandler {
 
 	public void setDatabaseSchema(String databaseSchema) {
 		this.databaseSchema = databaseSchema;
-	}
-
-	public boolean isLdapActive() {
-		return !ldapDirectoryUri.isEmpty();
-	}
-
-	public String getLdapApplicatioName() {
-		if (ldapDirectoryIdent.isEmpty()) {
-			return "";
-		}
-		return ldapDirectoryIdent.substring("appli_".length());
-	}
-
-	public String getLdapDirectoryUri() {
-		return ldapDirectoryUri;
-	}
-
-	public void setLdapDirectoryUri(String ldapDirectoryUri) {
-		this.ldapDirectoryUri = ldapDirectoryUri;
-	}
-
-	public String getLdapDirectoryIdent() {
-		return ldapDirectoryIdent;
-	}
-
-	public void setLdapDirectoryIdent(String ldapDirectoryIdent) {
-		this.ldapDirectoryIdent = ldapDirectoryIdent;
-	}
-
-	public String getLdapDirectoryPassword() {
-		return ldapDirectoryPassword;
-	}
-
-	public void setLdapDirectoryPassword(String ldapDirectoryPassword) {
-		this.ldapDirectoryPassword = ldapDirectoryPassword;
 	}
 
 	public String getLogDirectory() {
@@ -313,6 +290,108 @@ public class PropertiesHandler {
 
 	public void setGitCommitId(String gitCommitId) {
 		this.gitCommitId = gitCommitId;
+	}
+
+	
+	public String getKubernetesApiUri() {
+		return kubernetesApiUri;
+	}
+
+	public void setKubernetesApiUri(String kubernetesApiUri) {
+		this.kubernetesApiUri = kubernetesApiUri;
+	}
+
+	public String getKubernetesApiToken() {
+		return kubernetesApiToken;
+	}
+
+	public void setKubernetesApiToken(String kubernetesApiToken) {
+		this.kubernetesApiToken = kubernetesApiToken;
+	}
+
+	public int getKubernetesExecutorNumber() {
+		return kubernetesExecutorNumber;
+	}
+
+	public void setKubernetesExecutorNumber(int kubernetesExecutorNumber) {
+		this.kubernetesExecutorNumber = kubernetesExecutorNumber;
+	}
+
+	public String getKubernetesExecutorLabel() {
+		return kubernetesExecutorLabel;
+	}
+
+	public void setKubernetesExecutorLabel(String kubernetesExecutorLabel) {
+		this.kubernetesExecutorLabel = kubernetesExecutorLabel;
+	}
+	
+	public boolean isKubernetesOn()
+	{
+		return this.kubernetesApiToken!=null && kubernetesExecutorNumber>0;
+	}
+
+	public String getS3InputApiUri() {
+		return s3InputApiUri;
+	}
+
+	public void setS3InputApiUri(String s3InputApiUri) {
+		this.s3InputApiUri = s3InputApiUri;
+	}
+
+	public String getS3InputBucket() {
+		return s3InputBucket;
+	}
+
+	public void setS3InputBucket(String s3InputBucket) {
+		this.s3InputBucket = s3InputBucket;
+	}
+
+	public String getS3InputAccess() {
+		return s3InputAccess;
+	}
+
+	public void setS3InputAccess(String s3InputAccess) {
+		this.s3InputAccess = s3InputAccess;
+	}
+
+	public String getS3InputSecret() {
+		return s3InputSecret;
+	}
+
+	public void setS3InputSecret(String s3InputSecret) {
+		this.s3InputSecret = s3InputSecret;
+	}
+
+	public String getS3OutputApiUri() {
+		return s3OutputApiUri;
+	}
+
+	public void setS3OutputApiUri(String s3OutputApiUri) {
+		this.s3OutputApiUri = s3OutputApiUri;
+	}
+
+	public String getS3OutputBucket() {
+		return s3OutputBucket;
+	}
+
+	public void setS3OutputBucket(String s3OutputBucket) {
+		this.s3OutputBucket = s3OutputBucket;
+	}
+
+	public String getS3OutputAccess() {
+		return s3OutputAccess;
+	}
+
+	public void setS3OutputAccess(String s3OutputAccess) {
+		this.s3OutputAccess = s3OutputAccess;
+	}
+
+	public String getS3OutputSecret() {
+		return s3OutputSecret;
+	}
+
+	public void setS3OutputSecret(String s3OutputSecret) {
+		this.s3OutputSecret = s3OutputSecret;
 	}
 
 	public Map<String, String> fullVersionInformation() {

@@ -22,9 +22,6 @@
 		<property name="databaseRestrictedUsername" value="#{systemEnvironment['DATABASE_RESTRICTED_USER'] ?: '${fr.insee.database.arc.restrictedUsername:}' }"></property>
 		<property name="databasePassword" value="#{systemEnvironment['DATABASE_PASSWORD'] ?: '${fr.insee.database.arc.password}' }"></property>
 		<property name="databaseDriverClassName" value="${fr.insee.database.arc.driverClassName}"></property>
-		<property name="ldapDirectoryUri" value="${fr.insee.annuaire.arc.uri}"></property>
-		<property name="ldapDirectoryIdent" value="${fr.insee.annuaire.arc.ident}"></property>
-		<property name="ldapDirectoryPassword" value="${fr.insee.annuaire.arc.password}"></property>
 		<property name="logLevel" value="${fr.insee.arc.log.level:ERROR}"></property>
 		<property name="logDirectory" value="${fr.insee.arc.log.directory:}"></property>
 		<property name="logFileName" value="arc-ws"></property>
@@ -35,6 +32,20 @@
 		<property name="gitCommitId" value="${git.commit.id:}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
 		<property name="authorizedRoles" value="${fr.insee.arc.roles.admin:}"></property>
+		
+		<property name="kubernetesApiUri" value="#{systemEnvironment['KUBERNETES_API_URI'] ?: '${fr.insee.arc.kubernetes.api.uri}' }"></property>
+		<property name="kubernetesApiToken" value="#{systemEnvironment['KUBERNETES_API_TOKEN'] ?: '${fr.insee.arc.kubernetes.api.token}' }"></property>
+		<property name="kubernetesExecutorNumber" value="#{systemEnvironment['KUBERNETES_EXECUTOR_NUMBER'] ?: '${fr.insee.arc.kubernetes.executor.number}' }"></property>
+		<property name="kubernetesExecutorLabel" value="#{systemEnvironment['KUBERNETES_EXECUTOR_LABEL'] ?: '${fr.insee.arc.kubernetes.executor.label}' }"></property>
+		<property name="s3InputApiUri" value="#{systemEnvironment['S3_INPUT_API_URI'] ?: '${fr.insee.arc.s3.input.api.uri}' }"></property>
+		<property name="s3InputBucket" value="#{systemEnvironment['S3_INPUT_BUCKET'] ?: '${fr.insee.arc.s3.input.bucket}' }"></property>
+		<property name="s3InputAccess" value="#{systemEnvironment['S3_INPUT_ACCESS'] ?: '${fr.insee.arc.s3.input.access}' }"></property>
+		<property name="s3InputSecret" value="#{systemEnvironment['S3_INPUT_SECRET'] ?: '${fr.insee.arc.s3.input.secret}' }"></property>		
+		<property name="s3OutputApiUri" value="#{systemEnvironment['S3_OUTPUT_API_URI'] ?: '${fr.insee.arc.s3.output.api.uri}' }"></property>
+		<property name="s3OutputBucket" value="#{systemEnvironment['S3_OUTPUT_BUCKET'] ?: '${fr.insee.arc.s3.output.bucket}' }"></property>
+		<property name="s3OutputAccess" value="#{systemEnvironment['S3_OUTPUT_ACCESS'] ?: '${fr.insee.arc.s3.output.access}' }"></property>
+		<property name="s3OutputSecret" value="#{systemEnvironment['S3_OUTPUT_SECRET'] ?: '${fr.insee.arc.s3.output.secret}' }"></property>	
+
 	</bean>
 	
 	<bean id="activeLoggerDispatcher" class="fr.insee.arc.core.util.DefaultLoggerDispatcher"></bean>
