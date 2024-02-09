@@ -7,7 +7,7 @@ import fr.insee.arc.core.service.kubernetes.api.BuildRestQuery;
 import fr.insee.arc.core.service.kubernetes.configuration.BuildJsonConfiguration;
 import fr.insee.arc.core.service.kubernetes.security.BuildAccessToken;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.kubernetes.KubernetesApiService;
+import fr.insee.arc.utils.kubernetes.KubernetesApi;
 import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
 
 public class ApiManageExecutorDatabase {
@@ -21,7 +21,7 @@ public class ApiManageExecutorDatabase {
 		List<KubernetesApiResult> results = new ArrayList<>();
 		
 		// create stateful set of executor databases
-		results.add(KubernetesApiService.execute(
+		results.add(KubernetesApi.execute(
 				BuildRestQuery.stateful().getUri(), //
 				BuildRestQuery.stateful().getHttpMethod(), //
 				BuildAccessToken.retrieve().getToken(), //
@@ -31,7 +31,7 @@ public class ApiManageExecutorDatabase {
 		
 		for (String serviceJsonConfiguration : BuildJsonConfiguration.services())
 		{
-			results.add(KubernetesApiService.execute(
+			results.add(KubernetesApi.execute(
 					BuildRestQuery.service().getUri(), //
 					BuildRestQuery.service().getHttpMethod(), //
 					BuildAccessToken.retrieve().getToken(), //
