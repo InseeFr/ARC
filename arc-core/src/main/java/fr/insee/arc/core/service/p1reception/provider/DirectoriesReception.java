@@ -26,13 +26,6 @@ public class DirectoriesReception {
 	 * create global sandbox directories if not exist and register their paths in class
 	 */
 	public void createSandboxDirectories() {
-		
-		System.out.println("§§§§§§§§§§§§§");
-		System.out.println(this.directoryRoot);
-		System.out.println(this.directoryReceptionEnCours);
-		System.out.println(this.directoryReceptionOK);
-		System.out.println(this.directoryReceptionKO);
-
 		// Create target directories if they don't exist
 		FileUtilsArc.createDirIfNotexist(this.directoryRoot);
 		FileUtilsArc.createDirIfNotexist(this.directoryReceptionEnCours);
