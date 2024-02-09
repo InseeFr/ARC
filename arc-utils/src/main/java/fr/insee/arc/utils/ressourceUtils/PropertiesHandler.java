@@ -433,6 +433,9 @@ public class PropertiesHandler {
 				connectionProperties
 				.add(new ConnectionAttribute(this.databaseUrl, this.databaseUsername, this.databasePassword, this.databaseDriverClassName));
 				
+				System.out.println("§§§§§§§");
+				System.out.println(this.databaseUrl+ " " + this.databaseUsername);
+				
 				for (int i=0; i<this.getKubernetesExecutorNumber(); i++)
 				{
 					connectionProperties
@@ -442,6 +445,9 @@ public class PropertiesHandler {
 							, this.databasePassword //
 							, this.databaseDriverClassName //
 							));
+					
+					System.out.println("§§§§§§§");
+					System.out.println(KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i) + " " + KubernetesServiceLayer.USER_NAME + " " + this.databasePassword + " " + this.databaseDriverClassName );
 				}
 			}
 			else
