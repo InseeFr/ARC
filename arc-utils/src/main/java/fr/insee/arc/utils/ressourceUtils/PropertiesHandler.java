@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.checkerframework.common.returnsreceiver.qual.This;
 import org.springframework.stereotype.Service;
 
 import fr.insee.arc.utils.exception.ArcException;
@@ -40,7 +41,6 @@ public class PropertiesHandler {
 	private String version;
 	private String versionDate;
 	private String application;
-	private String tn;
 	/* Directories */
 	private String registrationDirectory;
 	private String loadingDirectory;
@@ -53,9 +53,12 @@ public class PropertiesHandler {
 	
 	/* Kubernetes */
 	private String kubernetesApiUri;
+	private String kubernetesApiNamespace;
 	private String kubernetesApiToken;
 	private int kubernetesExecutorNumber;
 	private String kubernetesExecutorLabel;
+	
+	private Boolean kubernetesActive;
 	
 	private String s3InputApiUri;
 	private String s3InputBucket;
@@ -225,14 +228,6 @@ public class PropertiesHandler {
 		this.application = application;
 	}
 
-	public String getTn() {
-		return tn;
-	}
-
-	public void setTn(String tn) {
-		this.tn = tn;
-	}
-
 	public String getRegistrationDirectory() {
 		return registrationDirectory;
 	}
@@ -304,6 +299,14 @@ public class PropertiesHandler {
 	public String getKubernetesApiToken() {
 		return kubernetesApiToken;
 	}
+	
+	public String getKubernetesApiNamespace() {
+		return kubernetesApiNamespace;
+	}
+
+	public void setKubernetesApiNamespace(String kubernetesApiNamespace) {
+		this.kubernetesApiNamespace = kubernetesApiNamespace;
+	}
 
 	public void setKubernetesApiToken(String kubernetesApiToken) {
 		this.kubernetesApiToken = kubernetesApiToken;
@@ -325,9 +328,12 @@ public class PropertiesHandler {
 		this.kubernetesExecutorLabel = kubernetesExecutorLabel;
 	}
 	
-	public boolean isKubernetesOn()
-	{
-		return this.kubernetesApiToken!=null && kubernetesExecutorNumber>0;
+	public boolean isKubernetesActive() {
+		if (this.kubernetesActive==null)
+		{
+			this.kubernetesActive =  this.kubernetesApiToken!=null && kubernetesExecutorNumber>0;
+		}
+		return kubernetesActive;
 	}
 
 	public String getS3InputApiUri() {

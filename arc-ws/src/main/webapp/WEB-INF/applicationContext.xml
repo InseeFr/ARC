@@ -34,6 +34,7 @@
 		<property name="authorizedRoles" value="${fr.insee.arc.roles.admin:}"></property>
 		
 		<property name="kubernetesApiUri" value="#{systemEnvironment['KUBERNETES_API_URI'] ?: '${fr.insee.arc.kubernetes.api.uri}' }"></property>
+		<property name="kubernetesApiNamespace" value="#{systemEnvironment['KUBERNETES_API_NAMESPACE'] ?: '${fr.insee.arc.kubernetes.api.namespace}' }"></property>
 		<property name="kubernetesApiToken" value="#{systemEnvironment['KUBERNETES_API_TOKEN'] ?: '${fr.insee.arc.kubernetes.api.token}' }"></property>
 		<property name="kubernetesExecutorNumber" value="#{systemEnvironment['KUBERNETES_EXECUTOR_NUMBER'] ?: '${fr.insee.arc.kubernetes.executor.number}' }"></property>
 		<property name="kubernetesExecutorLabel" value="#{systemEnvironment['KUBERNETES_EXECUTOR_LABEL'] ?: '${fr.insee.arc.kubernetes.executor.label}' }"></property>
