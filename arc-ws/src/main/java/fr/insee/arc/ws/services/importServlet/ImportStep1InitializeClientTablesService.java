@@ -147,11 +147,13 @@ public class ImportStep1InitializeClientTablesService {
 					executeIf(ExportSource.METADATA, () -> clientDao.createTableFamille());
 					executeIf(ExportSource.METADATA, () -> clientDao.createTablePeriodicite());
 				} catch (ArcException e) {
+						e.logFullException();
 						clientDao.registerWsKO();
 				} finally {
 					try {
 						clientDao.dropTableWsPending();
 					} catch (ArcException e) {
+						e.logFullException();
 						clientDao.registerWsKO();
 					}
 				}
