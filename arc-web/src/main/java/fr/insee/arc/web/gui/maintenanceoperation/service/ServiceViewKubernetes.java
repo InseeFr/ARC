@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 
 import fr.insee.arc.core.service.kubernetes.ApiManageExecutorDatabase;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.kubernetes.bo.KubernetesServiceResult;
+import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
 
 @Service
 public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
@@ -17,9 +17,9 @@ public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
 		StringBuilder result = new StringBuilder();
 
 		try {
-			List<KubernetesServiceResult> results = ApiManageExecutorDatabase.create();
+			List<KubernetesApiResult> results = ApiManageExecutorDatabase.create();
 			
-			for (KubernetesServiceResult r : results)
+			for (KubernetesApiResult r : results)
 			{
 				result.append(r.toString());
 			}

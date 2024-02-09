@@ -14,7 +14,5 @@ public class Delimiters {
 	
 	public static final String SQL_TOKEN_DELIMITER = "_";
 	public static final String SQL_SCHEMA_DELIMITER = ".";
-	
-	public static final String KUBERNETES_TOKEN_DELIMITER="-";
 
 }

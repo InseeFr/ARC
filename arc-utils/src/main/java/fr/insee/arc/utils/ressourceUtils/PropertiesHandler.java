@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
 import fr.insee.arc.utils.utils.ManipString;
 
 @Service("properties")
@@ -427,20 +428,40 @@ public class PropertiesHandler {
 		if (this.connectionProperties == null) {
 			connectionProperties = new ArrayList<>();
 
-			String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
-			String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
-			String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
-			String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
-
-			for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
+			if (this.isKubernetesActive())
+			{
 				connectionProperties
-						.add(new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
-								databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]));
+				.add(new ConnectionAttribute(this.databaseUrl, this.databaseUsername, this.databasePassword, this.databaseDriverClassName));
+				
+				for (int i=0; i<this.getKubernetesExecutorNumber(); i++)
+				{
+					connectionProperties
+					.add(new ConnectionAttribute(
+							KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i) //
+							, KubernetesServiceLayer.USER_NAME //
+							, this.databasePassword //
+							, this.databaseDriverClassName //
+							));
+				}
+			}
+			else
+			{
+				String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
+				String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
+				String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
+				String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
+	
+				for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
+					connectionProperties
+							.add(new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
+									databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]));
+				}
 			}
 		}
 
 		return this.connectionProperties;
 	}
+
 
 	public void setConnectionProperties(List<ConnectionAttribute> connectionProperties) {
 		this.connectionProperties = connectionProperties;

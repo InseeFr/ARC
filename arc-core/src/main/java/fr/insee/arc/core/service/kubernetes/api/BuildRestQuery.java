@@ -3,7 +3,7 @@ package fr.insee.arc.core.service.kubernetes.api;
 import org.springframework.http.HttpMethod;
 
 import fr.insee.arc.core.service.kubernetes.bo.RestQuery;
-import fr.insee.arc.utils.kubernetes.KubernetesService;
+import fr.insee.arc.utils.kubernetes.KubernetesApiService;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class BuildRestQuery {

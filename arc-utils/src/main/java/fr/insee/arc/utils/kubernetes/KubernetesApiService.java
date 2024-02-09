@@ -20,15 +20,15 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpMethod;
 
-import fr.insee.arc.utils.kubernetes.bo.KubernetesServiceResult;
+import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
 
-public class KubernetesService {
+public class KubernetesApiService {
 
-	private KubernetesService() {
+	private KubernetesApiService() {
 		throw new IllegalStateException("Utility class");
 	}
 
-	public static KubernetesServiceResult execute(String urlProvided, HttpMethod httpMethod, String token,
+	public static KubernetesApiResult execute(String urlProvided, HttpMethod httpMethod, String token,
 			String json) {
 		int responseCode = -1;
 		StringBuilder response = new StringBuilder();
@@ -96,7 +96,7 @@ public class KubernetesService {
 			response.append(ExceptionUtils.getStackTrace(e));
 		}
 
-		return new KubernetesServiceResult(responseCode, response.toString());
+		return new KubernetesApiResult(responseCode, response.toString());
 	}
 
 }

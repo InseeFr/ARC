@@ -1,8 +1,8 @@
 package fr.insee.arc.utils.kubernetes.bo;
 
-public class KubernetesServiceResult {
+public class KubernetesApiResult {
 
-	public KubernetesServiceResult(int responseCode, String response) {
+	public KubernetesApiResult(int responseCode, String response) {
 		super();
 		this.responseCode = responseCode;
 		this.response = response;

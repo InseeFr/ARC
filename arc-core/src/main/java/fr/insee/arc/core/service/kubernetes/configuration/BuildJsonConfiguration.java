@@ -12,6 +12,7 @@ import fr.insee.arc.core.service.kubernetes.bo.JsonFileParameter;
 import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class BuildJsonConfiguration {
@@ -66,7 +67,8 @@ public class BuildJsonConfiguration {
 	{
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		return readConfiguration("kubernetes/executorDatabaseServiceTemplate.json"
-				, JsonFileParameter.EXECUTOR_LABEL, String.join(Delimiters.KUBERNETES_TOKEN_DELIMITER, properties.getKubernetesExecutorLabel(), String.valueOf(executorReplicaIndex)) //
+				, JsonFileParameter.EXECUTOR_LABEL, 
+				KubernetesServiceLayer.getName(properties.getKubernetesExecutorLabel(), executorReplicaIndex)
 				)
 				;
 	}
