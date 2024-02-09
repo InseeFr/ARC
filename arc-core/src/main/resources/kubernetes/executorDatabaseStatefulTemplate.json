@@ -5,7 +5,7 @@
     "name": "{pg-arc-executor-label}"
   },
   "spec": {
-    "replicas": {pg-arc-executor-number},
+    "replicas": 1,
     "selector": {
       "matchLabels": {
         "app": "{pg-arc-executor-label}"

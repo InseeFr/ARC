@@ -23,17 +23,26 @@ public class BuildJsonConfiguration {
 	
 	private static PropertiesHandler properties = PropertiesHandler.getInstance();
 
+	public static List<String> statefuls() throws ArcException
+	{
+		List<String> statefulLayers = new ArrayList<>();
+		
+		for (int i=0; i< properties.getKubernetesExecutorNumber(); i++)
+		{
+			statefulLayers.add(stateful(i));
+		}
+		return statefulLayers;
+	}
 
 	/**
 	 * Create the json configuration to create <ExecutorNumber> replica of stateful databases
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String stateful() throws ArcException
+	public static String stateful(int executorReplicaIndex) throws ArcException
 	{
 		return readConfiguration("kubernetes/executorDatabaseStatefulTemplate.json"
-				, JsonFileParameter.EXECUTOR_LABEL, properties.getKubernetesExecutorLabel() //
-				, JsonFileParameter.EXECUTOR_NUMBER, String.valueOf(properties.getKubernetesExecutorNumber()) //
+				, JsonFileParameter.EXECUTOR_LABEL, KubernetesServiceLayer.getName(properties.getKubernetesExecutorLabel(), executorReplicaIndex) //
 				, JsonFileParameter.EXECUTOR_PASSWORD, properties.getDatabasePassword() //
 				)
 				;

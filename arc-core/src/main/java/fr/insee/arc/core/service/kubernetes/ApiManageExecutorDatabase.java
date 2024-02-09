@@ -20,12 +20,17 @@ public class ApiManageExecutorDatabase {
 	{
 		List<KubernetesApiResult> results = new ArrayList<>();
 		
-		// create stateful set of executor databases
-		results.add(KubernetesApi.execute(
-				BuildRestQuery.stateful().getUri(), //
-				BuildRestQuery.stateful().getHttpMethod(), //
-				BuildAccessToken.retrieve().getToken(), //
-				BuildJsonConfiguration.stateful()));
+		// create statefuls
+		
+		for (String statefulJsonConfiguration : BuildJsonConfiguration.statefuls())
+		{
+			results.add(KubernetesApi.execute(
+					BuildRestQuery.stateful().getUri(), //
+					BuildRestQuery.stateful().getHttpMethod(), //
+					BuildAccessToken.retrieve().getToken(), //
+					statefulJsonConfiguration));
+		}
+		
 		
 		// create services
 		
