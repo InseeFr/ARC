@@ -1431,4 +1431,10 @@ public class VObjectService {
 		this.session = session;
 	}
 
+	public void setConnectionIndex(Integer connectionIndex) {
+		this.connectionIndex = connectionIndex;
+	}
+	
+	
+
 }

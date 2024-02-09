@@ -17,15 +17,22 @@
 <div class="container-fluid">
 
 <div class="row">
-<div class="col-4 border-right">
- <textarea cols="30" rows="1" type="text" m="" name="mySchema">${mySchema}</textarea>
+<div class="col-md-1">
+<p>Connection index</p>
+ <textarea class="border" rows="1" type="text" m="" name="myDbConnection">${myDbConnection}</textarea>
 </div>
-<div class="col-8" id="viewQuerySql">
-   <textarea m="" name="myQuery" cols="500" aria-label="Query">${myQuery}</textarea>
-   <input id="viewQuery.selectFromTextBox" type="submit" doAction="selectQueryFromTextBox" scope="viewQuery;" value="Execute query"></input>
+<div class="col-md-3">
+<p>Schema</p>
+ <textarea class="border" rows="1" type="text" m="" name="mySchema">${mySchema}</textarea>
+</div>
+<div class="col-md-8" id="viewQuerySql">
+<p>Query</p>
+<textarea class="border" m="" cols="150" name="myQuery" aria-label="Query">${myQuery}</textarea>
+<br>
+<input id="viewQuery.selectFromTextBox" type="submit" doAction="selectQueryFromTextBox" scope="viewQuery;" value="Execute query"></input>
 </div>
 </div>
- <div class="row  align-items-start">
+ <div class="row align-items-start">
  
  <div class="col-md-4 border-right">
  <c:set var="view" value="${viewTable}"  scope="request"/>

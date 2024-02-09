@@ -21,7 +21,7 @@ public class QueryDao extends VObjectHelperDao {
 	 * 
 	 * @param viewWsContext
 	 */
-	public void initializeQuery(VObject viewQuery, String myQuery) {
+	public void initializeQuery(VObject viewQuery, Integer myDbConnection, String myQuery) {
 		Map<String, String> defaultInputFields = new HashMap<>();
 
 		if (myQuery!=null){
@@ -33,14 +33,15 @@ public class QueryDao extends VObjectHelperDao {
 
 			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(m);
 			
-			if (Boolean.TRUE.equals(UtilitaireDao.get(0).testResultRequest(null, query)))
+			if (Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(null, query)))
 			{
+				this.vObjectService.setConnectionIndex(myDbConnection);
 				this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
 			}
 			else
 			{
 				try {
-					UtilitaireDao.get(0).executeImmediate(null, myQuery);
+					UtilitaireDao.get(myDbConnection).executeImmediate(null, myQuery);
 					this.vObjectService.destroy(viewQuery);
 					viewQuery.setMessage("query.complete");
 				} catch (Exception e) {
@@ -57,7 +58,7 @@ public class QueryDao extends VObjectHelperDao {
 	 * 
 	 * @param viewWsContext
 	 */
-	public void initializeTable(VObject viewTable, String mySchema) {
+	public void initializeTable(VObject viewTable, Integer myDbConnection, String mySchema) {
         ViewEnum dataModelTable = ViewEnum.PG_TABLES;
 		String nameOfViewTable = dataObjectService.getView(dataModelTable);
 		// view query
@@ -67,6 +68,7 @@ public class QueryDao extends VObjectHelperDao {
 		// default value
 		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
+		vObjectService.setConnectionIndex(myDbConnection);
 		vObjectService.initialize(viewTable, query, "arc.ihm_table", defaultInputFields);
 	}
 	
