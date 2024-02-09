@@ -16,6 +16,7 @@ import io.minio.errors.InternalException;
 import io.minio.errors.InvalidResponseException;
 import io.minio.errors.ServerException;
 import io.minio.errors.XmlParserException;
+import okhttp3.OkHttpClient;
 
 public class S3Template {
 
@@ -34,6 +35,8 @@ public class S3Template {
 
 	private MinioClient minioClient;
 
+	private OkHttpClient httpClient;
+	
 	
 	public MinioClient getMinioClient() {
 		if (this.minioClient == null) {
@@ -48,9 +51,8 @@ public class S3Template {
 	}
 
 	private void buildMinioClient() throws KeyManagementException, NoSuchAlgorithmException {
-		
-		
-		this.minioClient = MinioClient.builder().endpoint(s3ApiUri).credentials(accessKey, secretKey).build();
+		httpClient = new OkHttpClient().newBuilder().build();
+		this.minioClient = MinioClient.builder().endpoint(s3ApiUri).credentials(accessKey, secretKey).httpClient(httpClient).build();
 		this.minioClient.ignoreCertCheck();
 	}
 
@@ -73,5 +75,10 @@ public class S3Template {
 		}
 	}
 
+	public void closeMinioClient()
+	{
+		httpClient.dispatcher().executorService().shutdown();
+		this.minioClient=null;
+	}
 	
 }
