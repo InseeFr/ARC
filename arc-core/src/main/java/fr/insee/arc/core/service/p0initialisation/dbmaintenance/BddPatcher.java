@@ -402,8 +402,8 @@ public class BddPatcher {
 			query.build(")");
 		}
 		
-		return new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, query)).mapContent()
-				.get(ColumnEnum.TABLE_NAME.getColumnName());
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, query))
+				.getColumnValues(ColumnEnum.TABLE_NAME.getColumnName());
 		
 	}
 	
