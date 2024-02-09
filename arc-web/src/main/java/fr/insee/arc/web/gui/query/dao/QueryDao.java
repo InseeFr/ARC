@@ -36,10 +36,11 @@ public class QueryDao extends VObjectHelperDao {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(m);
 
-		this.vObjectService.setConnectionIndex(myDbConnection);
-
 		if (Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(null, query))) {
+			this.vObjectService.setConnectionIndex(myDbConnection);
 			this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
+			this.vObjectService.resetConnectionIndex();
+
 		} else {
 
 			query = new ArcPreparedStatementBuilder();
@@ -74,6 +75,7 @@ public class QueryDao extends VObjectHelperDao {
 		// initialize vobject
 		vObjectService.setConnectionIndex(myDbConnection);
 		vObjectService.initialize(viewTable, query, "arc.ihm_table", defaultInputFields);
+		this.vObjectService.resetConnectionIndex();
 	}
 
 	public static String queryTableSelected(String mySchema, String tableName) {

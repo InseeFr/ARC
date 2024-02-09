@@ -1435,6 +1435,8 @@ public class VObjectService {
 		this.connectionIndex = connectionIndex;
 	}
 	
-	
+	public void resetConnectionIndex() {
+		this.connectionIndex = ArcDatabase.COORDINATOR.getIndex();
+	}
 
 }
