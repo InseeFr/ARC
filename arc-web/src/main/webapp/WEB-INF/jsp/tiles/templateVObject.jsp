@@ -381,7 +381,7 @@
 						class="btn btn-secondary btn-sm "
 						type="submit"
 						doAction="select${viewType}"
-						scope="${view.sessionName};"
+						scope="${view.sessionName};${param.extraScopeSelect}"
 						value="<spring:message code="gui.button.refresh"/>"
 						${btnSelect.equals('true') ? '' : "style='display:none'"}
 					><span class="fa fa-refresh">&nbsp;</span><spring:message code="gui.button.refresh"/></button>

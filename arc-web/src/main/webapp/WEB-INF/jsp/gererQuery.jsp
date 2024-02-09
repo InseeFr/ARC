@@ -16,26 +16,25 @@
 
 <div class="container-fluid">
 
-<div class="row">
+<div id="viewHeaders" class="row">
 <div class="col-md-1">
 <p>Connection index</p>
- <textarea class="border" rows="1" type="text" m="" name="myDbConnection">${myDbConnection}</textarea>
+ <textarea class="border" cols="4" rows="1" type="text" m="" name="myDbConnection">${myDbConnection}</textarea>
 </div>
 <div class="col-md-3">
 <p>Schema</p>
- <textarea class="border" rows="1" type="text" m="" name="mySchema">${mySchema}</textarea>
+ <textarea class="border" cols="10" rows="1" type="text" m="" name="mySchema">${mySchema}</textarea>
 </div>
 <div class="col-md-8" id="viewQuerySql">
 <p>Query</p>
 <textarea class="border" m="" cols="150" name="myQuery" aria-label="Query">${myQuery}</textarea>
 <br>
-<input id="viewQuery.selectFromTextBox" type="submit" doAction="selectQueryFromTextBox" scope="viewQuery;" value="Execute query"></input>
+<input id="viewQuery.selectFromTextBox" type="submit" doAction="selectQueryFromTextBox" scope="viewQuery;viewHeaders;" value="Execute query"></input>
 </div>
 </div>
- <div class="row align-items-start">
- 
- <div class="col-md-4 border-right">
- <c:set var="view" value="${viewTable}"  scope="request"/>
+<div class="row align-items-start">
+<div class="col-md-4 border-right">
+<c:set var="view" value="${viewTable}"  scope="request"/>
 <c:import url="tiles/templateVObject.jsp">
 <c:param name="taille" value ="col-md4" />
 <c:param name="ligneAdd" value="false" />
@@ -45,6 +44,8 @@
 <c:param name="checkbox" value="true" />
 <c:param name="checkboxVisible" value="true" />
 <c:param name="allowResize" value="true" />
+<c:param name="extraScopeSelect" value="viewQuery;viewHeaders;" />
+<c:param name="extraScopeSee" value="viewQuery;viewHeaders;" />
 </c:import>
 </div>
 <div class="col-md-8">

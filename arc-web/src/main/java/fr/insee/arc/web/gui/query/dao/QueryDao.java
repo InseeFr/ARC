@@ -15,7 +15,7 @@ import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 
 @Component
 public class QueryDao extends VObjectHelperDao {
-	
+
 	/**
 	 * dao call to build query vobject
 	 * 
@@ -24,42 +24,46 @@ public class QueryDao extends VObjectHelperDao {
 	public void initializeQuery(VObject viewQuery, Integer myDbConnection, String myQuery) {
 		Map<String, String> defaultInputFields = new HashMap<>();
 
-		if (myQuery!=null){
-			String m=myQuery.trim();
-			if (m.endsWith(";"))
-			{
-				m=m.substring(0, m.length()-1);
-			}
-
-			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(m);
-			
-			if (Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(null, query)))
-			{
-				this.vObjectService.setConnectionIndex(myDbConnection);
-				this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
-			}
-			else
-			{
-				try {
-					UtilitaireDao.get(myDbConnection).executeImmediate(null, myQuery);
-					this.vObjectService.destroy(viewQuery);
-					viewQuery.setMessage("query.complete");
-				} catch (Exception e) {
-					this.vObjectService.destroy(viewQuery);
-					viewQuery.setMessage(e.getMessage());
-				}
-
-			}
+		if (myQuery == null || myQuery.isEmpty()) {
+			this.vObjectService.destroy(viewQuery);
+			return;
 		}
+
+		String m = myQuery.trim();
+		if (m.endsWith(";")) {
+			m = m.substring(0, m.length() - 1);
+		}
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(m);
+
+		this.vObjectService.setConnectionIndex(myDbConnection);
+
+		if (Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(null, query))) {
+			this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
+		} else {
+
+			query = new ArcPreparedStatementBuilder();
+
+			try {
+				UtilitaireDao.get(myDbConnection).executeImmediate(null, myQuery);
+				query.build(SQL.SELECT, query.quoteText("query succeed"), SQL.AS, "query_result");
+			} catch (Exception e) {
+				query.build(SQL.SELECT, query.quoteText(e.getMessage()), SQL.AS, "query_result");
+			}
+
+			this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
+
+		}
+
 	}
-	
+
 	/**
 	 * dao call to build tables vobject
 	 * 
 	 * @param viewWsContext
 	 */
 	public void initializeTable(VObject viewTable, Integer myDbConnection, String mySchema) {
-        ViewEnum dataModelTable = ViewEnum.PG_TABLES;
+		ViewEnum dataModelTable = ViewEnum.PG_TABLES;
 		String nameOfViewTable = dataObjectService.getView(dataModelTable);
 		// view query
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
@@ -71,7 +75,7 @@ public class QueryDao extends VObjectHelperDao {
 		vObjectService.setConnectionIndex(myDbConnection);
 		vObjectService.initialize(viewTable, query, "arc.ihm_table", defaultInputFields);
 	}
-	
+
 	public static String queryTableSelected(String mySchema, String tableName) {
 		return "select * from " + mySchema + "." + tableName + " limit 10 ";
 	}

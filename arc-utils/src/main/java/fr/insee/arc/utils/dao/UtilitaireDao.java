@@ -335,7 +335,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		GenericPreparedStatementBuilder requeteLimit = new GenericPreparedStatementBuilder();
 		requeteLimit.append("SELECT * from (").append(requete).append(") dummy LIMIT 1");
 		try {
-			return hasResults(connexion, requeteLimit);
+			executeImmediate(connexion, requeteLimit);
+			return true;
 		} catch (Exception e) {
 			return false;
 		}
