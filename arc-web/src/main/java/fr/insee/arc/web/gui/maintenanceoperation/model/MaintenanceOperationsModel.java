@@ -40,30 +40,6 @@ public class MaintenanceOperationsModel implements ArcModel {
 		this.viewKubernetes = viewKubernetes;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getHttpType() {
-		return httpType;
-	}
-
-	public void setHttpType(String httpType) {
-		this.httpType = httpType;
-	}
-
-	public String getJson() {
-		return json;
-	}
-
-	public void setJson(String json) {
-		this.json = json;
-	}
-
 	public String getHttpOutput() {
 		return httpOutput;
 	}
@@ -71,24 +47,6 @@ public class MaintenanceOperationsModel implements ArcModel {
 	public void setHttpOutput(String httpOutput) {
 		this.httpOutput = httpOutput;
 	}
-
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
-	}
-
-	public int getNumberOfExecutorDatabase() {
-		return numberOfExecutorDatabase;
-	}
-
-	public void setNumberOfExecutorDatabase(int numberOfExecutorDatabase) {
-		this.numberOfExecutorDatabase = numberOfExecutorDatabase;
-	}
-
-	
 	
 	
 }

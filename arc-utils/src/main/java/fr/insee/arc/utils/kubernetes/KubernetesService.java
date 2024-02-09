@@ -18,85 +18,85 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.http.HttpMethod;
 
 import fr.insee.arc.utils.kubernetes.bo.KubernetesServiceResult;
 
 public class KubernetesService {
 
+	private KubernetesService() {
+		throw new IllegalStateException("Utility class");
+	}
 
-    public static KubernetesServiceResult execute(String urlProvided, String httpType, String token, String json)
-    {
-    	int responseCode = -1;
-    	StringBuilder response = new StringBuilder();
-    	
-    	try {
-       	String tokenBearer = "Bearer "+ token;
-    	
-    	X509TrustManager x=  new X509TrustManager() {     
-	        public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-	            return new X509Certificate[0];
-	        } 
-	        public void checkClientTrusted( 
-	            java.security.cert.X509Certificate[] certs, String authType) {
-	        	// selfsigned cetificate
-	            } 
-	        public void checkServerTrusted( 
-	            java.security.cert.X509Certificate[] certs, String authType) {
-	        	// selfsigned cetificate
-	        }
-	    } ;
-    	
-    	
-    	TrustManager[] trustAllCerts = new TrustManager[] { x };
+	public static KubernetesServiceResult execute(String urlProvided, HttpMethod httpMethod, String token,
+			String json) {
+		int responseCode = -1;
+		StringBuilder response = new StringBuilder();
 
-    		// Install the all-trusting trust manager
-	    SSLContext sc = SSLContext.getInstance("TLSv1.3"); 
-	    sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
-	    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		try {
+			String tokenBearer = "Bearer " + token;
 
-    	URL url = new URL(urlProvided);
-    	HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-    	con.setRequestMethod(httpType);
-    	
-    	
-    	
-    	con.setRequestProperty("Authorization", tokenBearer);
-    	con.setRequestProperty("Accept", "application/json");
+			X509TrustManager x = new X509TrustManager() {
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return new X509Certificate[0];
+				}
 
-    	if (json!=null && !json.isBlank()) {
-        	con.setRequestProperty("Content-Type", "application/json");
-        	con.setDoOutput(true);
-	    	OutputStream os = con.getOutputStream();
-	    	OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);    
-	    	osw.write(json);
-	    	osw.flush();
-	    	osw.close();
-	    	os.close();
-    	}
-    	
-    	responseCode = con.getResponseCode();
+				public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					// selfsigned cetificate
+				}
 
-    	response.append("Response code : "+ responseCode);
-    	response.append("\n");
-    	
-    	InputStream is = con.getInputStream();
-    	if (is!=null)
-    	{
-	    	BufferedReader in = new BufferedReader(new InputStreamReader(is));
-			String inputLine;
-	
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
+				public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					// selfsigned cetificate
+				}
+			};
+
+			TrustManager[] trustAllCerts = new TrustManager[] { x };
+
+			// Install the all-trusting trust manager
+			SSLContext sc = SSLContext.getInstance("TLSv1.3");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+			URL url = new URL(urlProvided);
+			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+			con.setRequestMethod(httpMethod.toString());
+
+			con.setRequestProperty("Authorization", tokenBearer);
+			con.setRequestProperty("Accept", "application/json");
+
+			if (json != null && !json.isBlank()) {
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setDoOutput(true);
+				OutputStream os = con.getOutputStream();
+				OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+				osw.write(json);
+				osw.flush();
+				osw.close();
+				os.close();
 			}
-			in.close();
-    	}
-		
+
+			responseCode = con.getResponseCode();
+
+			response.append("Response code : " + responseCode);
+			response.append("\n");
+
+			InputStream is = con.getInputStream();
+			if (is != null) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(is));
+				String inputLine;
+
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+				in.close();
+			}
+
 		} catch (IOException | NoSuchAlgorithmException | KeyManagementException e) {
-			
+
 			response.append(ExceptionUtils.getStackTrace(e));
 		}
 
 		return new KubernetesServiceResult(responseCode, response.toString());
-    }
-	
+	}
+
 }

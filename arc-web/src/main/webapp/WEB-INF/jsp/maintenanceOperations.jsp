@@ -60,11 +60,6 @@ Kubernetes
 
 <div id="viewKubernetes">
 
-<div class="col-md-2">
-Number of database :
-<input class="border" type="text" m="" name="numberOfExecutorDatabase" value="${numberOfExecutorDatabase}"/>
-</div>
-
 <input type="submit" class="btn btn-primary btn-sm" id="viewKubernetes.createDatabases" 
 value="<spring:message code="gui.button.createDatabases"/>"
 scope="viewKubernetes;" doAction="createDatabases" />
@@ -76,24 +71,6 @@ scope="viewKubernetes;" doAction="deleteDatabases"
 />
 
 <div class="row">
-<div class="col-md-6">
-</br>
-<p>Url</p>
-<textarea cols="60" rows="1" class="border" type="text" m="" name="url">${url}</textarea>
-<p>Http Type</p>
-<textarea cols="10" rows="1" class="border" type="text" m="" name="httpType">${httpType}</textarea>
-<p>Authentication token</p>
-<textarea cols="10" rows="1" class="border" type="text" m="" name="token">${token}</textarea>
-<p>Content</p>
-<textarea cols="60" rows="11" class="border" type="text" m="" name="json">${json}</textarea>
-</br>
-
-<input type="submit" class="btn btn-primary btn-sm" id="viewKubernetes.executeHttps" 
-value="<spring:message code="gui.button.executeService"/>"
-scope="viewKubernetes;" doAction="executeService" />
-
-</div>
-
 <div class="col-md-6">
 <p>output</p>
 <textarea cols="60" rows="22" class="border" type="text" m="" name="httpOutput">${httpOutput}</textarea>

@@ -1,0 +1,21 @@
+{
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": {
+    "name": "{pg-arc-executor-label}",
+    "labels": {
+      "app": "{pg-arc-executor-label}"
+    }
+  },
+  "spec": {
+    "type": "ClusterIP",
+    "ports": [
+      {
+        "port": 5432
+      }
+    ],
+    "selector": {
+      "app": "{pg-arc-executor-label}"
+    }
+  }
+}

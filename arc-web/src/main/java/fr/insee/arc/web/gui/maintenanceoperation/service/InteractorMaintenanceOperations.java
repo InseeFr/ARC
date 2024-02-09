@@ -27,13 +27,7 @@ public class InteractorMaintenanceOperations extends ArcWebGenericService<Mainte
 	
 	@Override
 	protected void putAllVObjects(MaintenanceOperationsModel arcModel) {
-		
-		views.setNumberOfExecutorDatabase(arcModel.getNumberOfExecutorDatabase());	
 
-		views.setUrl(arcModel.getUrl());
-		views.setHttpType(arcModel.getHttpType());
-		views.setToken(arcModel.getToken());
-		views.setJson(arcModel.getJson());
 		views.setHttpOutput(null);
 		
 		views.setViewOperations(this.vObjectService.preInitialize(arcModel.getViewOperations()));
@@ -45,11 +39,6 @@ public class InteractorMaintenanceOperations extends ArcWebGenericService<Mainte
 	
 	@Override
 	public void extraModelAttributes(Model model) {
-		model.addAttribute("numberOfExecutorDatabase", views.getNumberOfExecutorDatabase());
-		model.addAttribute("url", views.getUrl());
-		model.addAttribute("httpType", views.getHttpType());
-		model.addAttribute("token", views.getToken());
-		model.addAttribute("json", views.getJson());
 		model.addAttribute("httpOutput", views.getHttpOutput());
 	}
 

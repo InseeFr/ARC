@@ -104,7 +104,9 @@ public enum ArcExceptionMessage {
 	GUI_EXPORT_TABLE_NOT_EXISTS("La table n'existe pas"),
 	
 	DATE_PARSE_FAILED_VALIDITE_INF("La validité inf %s n'a pas pu être parsée"),
-	DATE_PARSE_FAILED_VALIDITE_SUP("La validité sup %s n'a pas pu être parsée")
+	DATE_PARSE_FAILED_VALIDITE_SUP("La validité sup %s n'a pas pu être parsée"),
+	
+	ACCESS_TOKEN_NOT_EXIST("Aucun token d'accès fourni")
 
 	;
 	

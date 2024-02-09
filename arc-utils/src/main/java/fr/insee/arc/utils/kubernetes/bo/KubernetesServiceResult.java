@@ -22,7 +22,11 @@ public class KubernetesServiceResult {
 		this.response = response;
 	}
 
-	
+	@Override
+	public String toString()
+	{
+		return this.responseCode+"\n";
+	}
 	
 	
 	
