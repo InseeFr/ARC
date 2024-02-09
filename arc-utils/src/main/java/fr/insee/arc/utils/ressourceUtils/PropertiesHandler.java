@@ -54,7 +54,8 @@ public class PropertiesHandler {
 	/* Kubernetes */
 	private String kubernetesApiUri;
 	private String kubernetesApiNamespace;
-	private String kubernetesApiToken;
+	private String kubernetesApiTokenValue;
+	private String kubernetesApiTokenPath;
 	private int kubernetesExecutorNumber;
 	private String kubernetesExecutorLabel;
 	
@@ -295,11 +296,23 @@ public class PropertiesHandler {
 	public void setKubernetesApiUri(String kubernetesApiUri) {
 		this.kubernetesApiUri = kubernetesApiUri;
 	}
-
-	public String getKubernetesApiToken() {
-		return kubernetesApiToken;
-	}
 	
+	public String getKubernetesApiTokenValue() {
+		return kubernetesApiTokenValue;
+	}
+
+	public void setKubernetesApiTokenValue(String kubernetesApiTokenValue) {
+		this.kubernetesApiTokenValue = kubernetesApiTokenValue;
+	}
+
+	public String getKubernetesApiTokenPath() {
+		return kubernetesApiTokenPath;
+	}
+
+	public void setKubernetesApiTokenPath(String kubernetesApiTokenPath) {
+		this.kubernetesApiTokenPath = kubernetesApiTokenPath;
+	}
+
 	public String getKubernetesApiNamespace() {
 		return kubernetesApiNamespace;
 	}
@@ -307,11 +320,7 @@ public class PropertiesHandler {
 	public void setKubernetesApiNamespace(String kubernetesApiNamespace) {
 		this.kubernetesApiNamespace = kubernetesApiNamespace;
 	}
-
-	public void setKubernetesApiToken(String kubernetesApiToken) {
-		this.kubernetesApiToken = kubernetesApiToken;
-	}
-
+	
 	public int getKubernetesExecutorNumber() {
 		return kubernetesExecutorNumber;
 	}
@@ -331,7 +340,7 @@ public class PropertiesHandler {
 	public boolean isKubernetesActive() {
 		if (this.kubernetesActive==null)
 		{
-			this.kubernetesActive =  this.kubernetesApiToken!=null && kubernetesExecutorNumber>0;
+			this.kubernetesActive =  this.kubernetesApiUri!=null &&this.kubernetesApiNamespace!=null && kubernetesExecutorNumber>0;
 		}
 		return kubernetesActive;
 	}
