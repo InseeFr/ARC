@@ -41,9 +41,13 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery, QueryDao> 
 		views.setViewQuery(vObjectService.preInitialize(model.getViewQuery()));
 		views.setViewTable(vObjectService.preInitialize(model.getViewTable()));
 
-		if (this.myDbConnection==null)
+		if (model.getMyDbConnection()==null)
 		{
 			this.myDbConnection=ArcDatabase.COORDINATOR.getIndex();
+		}
+		else
+		{
+			this.myDbConnection=model.getMyDbConnection();
 		}
 		
 		if (model.getMySchema() != null && !model.getMySchema().trim().isEmpty()) {
@@ -62,7 +66,6 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery, QueryDao> 
 		model.addAttribute("myQuery", myQuery);
 		model.addAttribute("mySchema", mySchema);
 		model.addAttribute("myDbConnection", myDbConnection);
-
 	}
 
 	@Override

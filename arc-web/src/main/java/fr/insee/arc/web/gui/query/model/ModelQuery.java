@@ -11,7 +11,7 @@ public class ModelQuery implements ArcModel {
 	private VObject viewQuery;
 	private VObject viewTable;
 
-	private String myDbConnection;
+	private Integer myDbConnection;
 	private String myQuery;
 	private String mySchema;
 	
@@ -33,11 +33,11 @@ public class ModelQuery implements ArcModel {
 		this.viewTable = viewTable;
 	}
 	
-	public String getMyDbConnection() {
+	public Integer getMyDbConnection() {
 		return myDbConnection;
 	}
 
-	public void setMyDbConnection(String myDbConnection) {
+	public void setMyDbConnection(Integer myDbConnection) {
 		this.myDbConnection = myDbConnection;
 	}
 

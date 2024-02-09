@@ -18,10 +18,12 @@ public class ServiceViewTable extends InteractorQuery {
 			this.myQuery = QueryDao.queryTableSelected(mySchema, mapContentSelected.get(ColumnEnum.TABLENAME.getColumnName()).get(0));
 			model.addAttribute("myQuery", myQuery);
 		}
+		model.addAttribute("myDbConnection", myDbConnection);
 		return basicAction(model, RESULT_SUCCESS);
 	}
 
 	public String sortTable(Model model) {
+		model.addAttribute("myDbConnection", myDbConnection);
 		return sortVobject(model, RESULT_SUCCESS, views.getViewTable());
 	}
 
