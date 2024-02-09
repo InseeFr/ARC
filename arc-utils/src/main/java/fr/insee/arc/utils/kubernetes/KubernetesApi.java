@@ -22,9 +22,9 @@ import org.springframework.http.HttpMethod;
 
 import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
 
-public class KubernetesApiService {
+public class KubernetesApi {
 
-	private KubernetesApiService() {
+	private KubernetesApi() {
 		throw new IllegalStateException("Utility class");
 	}
 
