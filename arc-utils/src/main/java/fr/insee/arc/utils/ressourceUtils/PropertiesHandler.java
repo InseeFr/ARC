@@ -58,6 +58,9 @@ public class PropertiesHandler {
 	private String kubernetesApiTokenPath;
 	private int kubernetesExecutorNumber;
 	private String kubernetesExecutorLabel;
+	private String kubernetesExecutorUser;
+	private String kubernetesExecutorDatabase;
+	private String kubernetesExecutorPort;
 	
 	private Boolean kubernetesActive;
 	
@@ -337,6 +340,30 @@ public class PropertiesHandler {
 		this.kubernetesExecutorLabel = kubernetesExecutorLabel;
 	}
 	
+	public String getKubernetesExecutorUser() {
+		return kubernetesExecutorUser;
+	}
+
+	public void setKubernetesExecutorUser(String kubernetesExecutorUser) {
+		this.kubernetesExecutorUser = kubernetesExecutorUser;
+	}
+
+	public String getKubernetesExecutorDatabase() {
+		return kubernetesExecutorDatabase;
+	}
+
+	public void setKubernetesExecutorDatabase(String kubernetesExecutorDatabase) {
+		this.kubernetesExecutorDatabase = kubernetesExecutorDatabase;
+	}
+
+	public String getKubernetesExecutorPort() {
+		return kubernetesExecutorPort;
+	}
+
+	public void setKubernetesExecutorPort(String kubernetesExecutorPort) {
+		this.kubernetesExecutorPort = kubernetesExecutorPort;
+	}
+
 	public boolean isKubernetesActive() {
 		if (this.kubernetesActive==null)
 		{
@@ -437,8 +464,8 @@ public class PropertiesHandler {
 				{
 					connectionProperties
 					.add(new ConnectionAttribute(
-							KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i) //
-							, KubernetesServiceLayer.USER_NAME //
+							KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i, this.kubernetesExecutorDatabase, this.kubernetesExecutorPort) //
+							, this.kubernetesExecutorUser
 							, this.databasePassword //
 							, this.databaseDriverClassName //
 							));					
@@ -458,10 +485,8 @@ public class PropertiesHandler {
 				}
 			}
 		}
-
 		return this.connectionProperties;
 	}
-
 
 	public void setConnectionProperties(List<ConnectionAttribute> connectionProperties) {
 		this.connectionProperties = connectionProperties;

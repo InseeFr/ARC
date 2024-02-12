@@ -27,7 +27,7 @@
               },
               {
                 "name": "POSTGRESQL_PORT_NUMBER",
-                "value": "5432"
+                "value": "{port}"
               },
               {
                 "name": "POSTGRESQL_VOLUME_DIR",
@@ -39,7 +39,7 @@
               },
               {
                 "name": "POSTGRES_USER",
-                "value": "postgres"
+                "value": "{user}"
               },
               {
                 "name": "POSTGRES_POSTGRES_PASSWORD",
@@ -51,7 +51,7 @@
               },
               {
                 "name": "POSTGRES_DB",
-                "value": "defaultdb"
+                "value": "{database}"
               },
               {
                 "name": "POSTGRESQL_ENABLE_LDAP",
@@ -97,7 +97,7 @@
                 "command": [
                   "/bin/sh",
                   "-c",
-                  "exec pg_isready -U \"postgres\" -d \"dbname=defaultdb\" -h 127.0.0.1 -p 5432"
+                  "exec pg_isready -U \"{user}\" -d \"dbname={database}\" -h 127.0.0.1 -p {port}"
                 ]
               },
               "failureThreshold": 6,
@@ -109,7 +109,7 @@
             "name": "postgresql",
             "ports": [
               {
-                "containerPort": 5432,
+                "containerPort": {port},
                 "name": "tcp-postgresql",
                 "protocol": "TCP"
               }
@@ -120,7 +120,7 @@
                   "/bin/sh",
                   "-c",
                   "-e",
-                  "exec pg_isready -U \"postgres\" -d \"dbname=defaultdb\" -h 127.0.0.1 -p 5432\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\n"
+                  "exec pg_isready -U \"{user}\" -d \"dbname={database}\" -h 127.0.0.1 -p {port}\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\n"
                 ]
               },
               "failureThreshold": 6,
