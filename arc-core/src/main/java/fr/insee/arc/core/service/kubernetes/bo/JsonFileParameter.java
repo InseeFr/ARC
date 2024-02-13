@@ -16,5 +16,8 @@ public class JsonFileParameter {
 	public static final String EXECUTOR_LABEL = "{pg-arc-executor-label}";
 	public static final String EXECUTOR_NUMBER = "{pg-arc-executor-number}";
 	public static final String EXECUTOR_PASSWORD = "{password}";
+	public static final String EXECUTOR_DATABASE = "{database}";
+	public static final String EXECUTOR_USER = "{user}";
+	public static final String EXECUTOR_PORT = "{port}";
 
 }

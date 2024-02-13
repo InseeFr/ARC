@@ -11,7 +11,7 @@
     "type": "ClusterIP",
     "ports": [
       {
-        "port": 5432
+        "port": {port}
       }
     ],
     "selector": {
