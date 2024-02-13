@@ -6,15 +6,20 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.DownloadObjectArgs;
+import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.Result;
 import io.minio.StatObjectArgs;
 import io.minio.StatObjectResponse;
 import io.minio.UploadObjectArgs;
@@ -24,6 +29,7 @@ import io.minio.errors.InternalException;
 import io.minio.errors.InvalidResponseException;
 import io.minio.errors.ServerException;
 import io.minio.errors.XmlParserException;
+import io.minio.messages.Item;
 import okhttp3.OkHttpClient;
 
 public class S3Template {
@@ -45,6 +51,11 @@ public class S3Template {
 
 	private OkHttpClient httpClient;
 
+	/**
+	 * Récupère le minioClient en le recréant si nécessaire.
+	 * 
+	 * @return minioClient
+	 */
 	public MinioClient getMinioClient() {
 		if (this.minioClient == null) {
 			try {
@@ -74,7 +85,10 @@ public class S3Template {
 		try {
 			getMinioClient()
 					.putObject(PutObjectArgs.builder().bucket(bucket).object(path + (path.endsWith("/") ? "" : "/"))
-							.stream(new ByteArrayInputStream(new byte[] {}), 0, -1).build());
+							.stream(new ByteArrayInputStream(new byte[] {}), 0, -1).build()); // répertoire
+			getMinioClient().putObject(
+					PutObjectArgs.builder().bucket(bucket).object(path + (path.endsWith("/") ? "" : "/") + ".exists")
+							.stream(new ByteArrayInputStream(new byte[] { 0x01 }), 1, -1).build()); // fichier .exists
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
@@ -157,8 +171,27 @@ public class S3Template {
 		}
 	}
 
+	public void delete(List<String> paths) throws ArcException {
+		for (String path : paths) {
+			delete(path);
+		}
+	}
+
 	/**
-	 * Déplace un objet d'un bucket vers un nouvel emplacement dans le même bucket
+	 * Supprime un répertoire d'un bucket avec son contenu
+	 * 
+	 * @param path le chemin du répertoire à supprimer (emplacement et nom)
+	 * @throws ArcException
+	 */
+	public void deleteDirectory(String path) throws ArcException {
+		path += (path.endsWith("/") ? "" : "/");
+		delete(path);
+		delete(listObjectsInDirectory(path));
+	}
+
+	/**
+	 * Déplace un objet d'un bucket vers un nouvel emplacement dans le même bucket.
+	 * Cette méthode peut être aussi utilisée pour renommer un objet.
 	 * 
 	 * @param pathFrom le chemin de l'objet à déplacer (emplacement et nom)
 	 * @param pathTo   le nouveau chemin de l'objet (emplacement et nom)
@@ -191,6 +224,14 @@ public class S3Template {
 		return statObject.size();
 	}
 
+	public long size(List<String> paths) throws ArcException {
+		long sizeTotal = 0;
+		for (String path : paths) {
+			sizeTotal += size(path);
+		}
+		return sizeTotal;
+	}
+
 	/**
 	 * Vérifie qu'un objet existe dans le bucket au chemin donné
 	 * 
@@ -204,7 +245,8 @@ public class S3Template {
 		StatObjectResponse statObject;
 		boolean found;
 		try {
-			statObject = getMinioClient().statObject(StatObjectArgs.builder().bucket(bucket).object(path).build());
+			statObject = getMinioClient().statObject(StatObjectArgs.builder().bucket(bucket)
+					.object(path + (path.endsWith("/") ? ".exists" : "")).build());
 			found = true;
 		} catch (ErrorResponseException e) {
 			if (e.response().code() != 404) {
@@ -212,11 +254,29 @@ public class S3Template {
 			}
 			found = false;
 		} catch (InvalidKeyException | InsufficientDataException | InternalException | InvalidResponseException
-				| NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException | IOException e) {
-			
+				| NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException
+				| IOException e) {
+
 			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, path);
 		}
 		return found;
+	}
+
+	public List<String> listObjectsInDirectory(String path) throws ArcException {
+		List<String> listNames = new ArrayList<>();
+		Iterator<Result<Item>> listObject = getMinioClient()
+				.listObjects(ListObjectsArgs.builder().bucket(bucket).prefix(path).build()).iterator();
+		while (listObject.hasNext()) {
+			try {
+				listNames.add(listObject.next().get().objectName());
+			} catch (InvalidKeyException | ErrorResponseException | IllegalArgumentException | InsufficientDataException
+					| InternalException | InvalidResponseException | NoSuchAlgorithmException | ServerException
+					| XmlParserException | IOException e) {
+
+				throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, path);
+			}
+		}
+		return listNames;
 	}
 
 	public void closeMinioClient() {
