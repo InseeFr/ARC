@@ -10,17 +10,17 @@ import fr.insee.arc.web.gui.query.service.ServiceViewQuery;
 public class ControllerViewQuery extends ServiceViewQuery {
 
 
-	@RequestMapping("/secure/selectQuery")
+	@RequestMapping("/debug/selectQuery")
 	public String selectQueryAction(Model model) {
 		return selectQuery(model);
 	}
 
-	@RequestMapping("/secure/selectQueryFromTextBox")
+	@RequestMapping("/debug/selectQueryFromTextBox")
 	public String selectQueryFromTextBoxAction(Model model) {
 		return selectQuery(model);
 	}
 	
-	@RequestMapping("/secure/sortQuery")
+	@RequestMapping("/debug/sortQuery")
 	public String sortQueryAction(Model model) {
 		return sortQuery(model);
 	}

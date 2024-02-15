@@ -2,6 +2,7 @@ package fr.insee.arc.web;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -37,9 +38,16 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 	}
 
 	@Bean
-	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
+
+		// disable debugging screens when proprty is set
+		if (!properties.getDisableDebugGui().isEmpty()) {
+			http.authorizeRequests().requestMatchers("/debug/**").denyAll();
+		}
+		
+		// oath2 keycloak
 		if (WebAttributesName.isKeycloakActive(keycloakRealm)) {
-			http.authorizeRequests().requestMatchers("/secure/**")
+			http.authorizeRequests().requestMatchers("/secure/**", "/debug/**")
 					.hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()) //
 					.and().oauth2Login().userInfoEndpoint().userAuthoritiesMapper(userAuthoritiesMapper());
 

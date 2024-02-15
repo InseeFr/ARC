@@ -11,44 +11,44 @@ import fr.insee.arc.web.gui.file.service.ServiceViewDirIn;
 @Controller
 public class ControllerViewDirIn extends ServiceViewDirIn {
 
-	@RequestMapping({"/secure/selectDirIn", "/secure/seeDirIn"})
+	@RequestMapping({"/debug/selectDirIn", "/debug/seeDirIn"})
 	public String seeDirInAction (Model model) {
 		return seeDirIn(model);
 	}
 
-	@RequestMapping("/secure/sortDirIn")
+	@RequestMapping("/debug/sortDirIn")
 	public String sortDirInAction (Model model) {
 		return sortDirIn(model);
 	}
 
-	@RequestMapping("/secure/transferDirIn")
+	@RequestMapping("/debug/transferDirIn")
 	public String transferDirInAction(Model model) {
 		return transferDirIn(model);
 	}
 
 
-	@RequestMapping("/secure/copyDirIn")
+	@RequestMapping("/debug/copyDirIn")
 	public String copyDirInAction(Model model) {
 		return copyDirIn(model);
 	}
 
-	@RequestMapping("/secure/updateDirIn")
+	@RequestMapping("/debug/updateDirIn")
 	public String updateDirInAction(Model model) {
 		return updateDirIn(model);
 	}
 
 
-	@RequestMapping("/secure/addDirIn")
+	@RequestMapping("/debug/addDirIn")
 	public String addDirInAction(Model model) {
 		return addDirIn(model);
 	}
 
-	@RequestMapping("/secure/deleteDirIn")
+	@RequestMapping("/debug/deleteDirIn")
 	public String delDirInAction(Model model) {
 		return delDirIn(model);
 	}
 	
-	@RequestMapping("/secure/downloadDirIn")
+	@RequestMapping("/debug/downloadDirIn")
 	public String downloadDirInAction(Model model, HttpServletResponse response) {
 		return downloadDirIn(model, response);
 	}

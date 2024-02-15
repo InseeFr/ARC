@@ -208,10 +208,13 @@ ON UPDATE NO ACTION ON DELETE NO ACTION
 CREATE TABLE IF NOT EXISTS arc.ihm_webservice_whitelist
 (
 host_allowed text, id_famille text, id_application text, is_secured text
-, PRIMARY KEY (host_allowed)
+, PRIMARY KEY (id_application)
 , FOREIGN KEY (id_famille,id_application) REFERENCES arc.ihm_client(id_famille,id_application)
 ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webservice_whitelist_pkey; alter table arc.ihm_webservice_whitelist ADD PRIMARY KEY (id_application); EXCEPTION WHEN OTHERS then end; $$;
+
 
 -- data retrieval webservice logs 
 CREATE TABLE IF NOT EXISTS arc.ihm_webservice_log

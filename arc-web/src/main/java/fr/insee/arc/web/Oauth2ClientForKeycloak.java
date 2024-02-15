@@ -64,13 +64,13 @@ public class Oauth2ClientForKeycloak {
 	            if (authority instanceof OidcUserAuthority) {
 	              OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
 	              OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
-
+	              
 	              List<String> roles = userInfo.getClaimAsStringList("roles");
 	              if (roles==null)
 	              {
 	            	  roles = userInfo.getClaimAsStringList("groups");
 	              }
-	              
+
 	              List<SimpleGrantedAuthority> groupAuthorities =
 	            		  roles.stream()
 	                      .map(g -> new SimpleGrantedAuthority(g))
