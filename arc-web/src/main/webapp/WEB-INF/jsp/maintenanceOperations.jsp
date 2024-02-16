@@ -8,7 +8,7 @@
 <c:if test="${scope==null}">
 <head>
 <link rel="icon" href="data:,"/>
-<title><spring:message code="header.export"/></title>
+<title><spring:message code="header.maintenance"/></title>
 <c:import url="tiles/defaulthead.jsp">
 <c:param name="pageJs" value="/js/maintenanceOperations.js" />
 </c:import>

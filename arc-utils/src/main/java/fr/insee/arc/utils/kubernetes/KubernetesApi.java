@@ -96,7 +96,7 @@ public class KubernetesApi {
 			response.append(ExceptionUtils.getStackTrace(e));
 		}
 
-		return new KubernetesApiResult(responseCode, response.toString());
+		return new KubernetesApiResult(httpMethod.toString()+" on "+urlProvided, responseCode, response.toString());
 	}
 
 }

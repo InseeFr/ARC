@@ -1,14 +1,21 @@
 package fr.insee.arc.utils.kubernetes.bo;
 
+import org.springframework.http.HttpStatus;
+
 public class KubernetesApiResult {
 
-	public KubernetesApiResult(int responseCode, String response) {
+	public KubernetesApiResult(String sourceInformation, int responseCode, String response) {
 		super();
+		this.sourceInformation = sourceInformation;
 		this.responseCode = responseCode;
 		this.response = response;
 	}
+	
+	
 	private int responseCode;
 	private String response;
+	private String sourceInformation;
+	
 	public int getResponseCode() {
 		return responseCode;
 	}
@@ -25,9 +32,8 @@ public class KubernetesApiResult {
 	@Override
 	public String toString()
 	{
-		return this.responseCode+"\n";
+		return this.sourceInformation+"\n"+HttpStatus.valueOf(this.responseCode).name()+"\n\n";
 	}
-	
 	
 	
 }

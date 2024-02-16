@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.service.kubernetes.ApiManageExecutorDatabase;
+import fr.insee.arc.utils.consumer.ThrowingSupplier;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
 
@@ -13,11 +14,19 @@ import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
 public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
 
 	public String createDatabases(Model model) {
+		return renderExecuteOnKubernetes(model, ApiManageExecutorDatabase::create);
+	}
+
+	public String deleteDatabases(Model model) {
+		return renderExecuteOnKubernetes(model, ApiManageExecutorDatabase::delete);
+	}
+
+	private String renderExecuteOnKubernetes(Model model, ThrowingSupplier<List<KubernetesApiResult>> manageExecutorDatabaseFunction) {
 		
 		StringBuilder result = new StringBuilder();
 
 		try {
-			List<KubernetesApiResult> results = ApiManageExecutorDatabase.create();
+			List<KubernetesApiResult> results = manageExecutorDatabaseFunction.get();
 			
 			for (KubernetesApiResult r : results)
 			{
@@ -33,8 +42,5 @@ public class ServiceViewKubernetes extends InteractorMaintenanceOperations {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	public String deleteDatabases(Model model) {
-		return generateDisplay(model, RESULT_SUCCESS);
-	}
-
+	
 }
