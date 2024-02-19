@@ -5,6 +5,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-94.1.3
+- webservice servlet access fix
+- kubernetess support
+- disablegui property now working
+
 ## version-94.1.1
 - tomcat 10, java 17, spring 6
 

@@ -7,7 +7,7 @@ ARG HTTPS_PROXY
 # path of settings.xml 
 ARG MAVEN_SETTINGS
 
-# Properties
+# DB properties
 ARG LOG_SETTINGS
 ARG LOG_LEVEL
 ARG DATABASE_URL
@@ -34,18 +34,12 @@ ARG S3_OUTPUT_BUCKET
 ARG S3_OUTPUT_ACCESS
 ARG S3_OUTPUT_SECRET
 
+# Log properties
 COPY . /usr/src/app/
 
 # Run a conditional script for the maven build
 RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
- 
-# Get a tomcat
-FROM tomcat:10-jdk17
 
-# Clean it
-RUN rm -rf $CATALINA_HOME/webapps/*
-
+#
 ENV ARC_LOGLEVEL=$LOG_LEVEL
-
-# Copy the war file
-COPY --from=build usr/src/app/arc-ws/target/*.war $CATALINA_HOME/webapps/ROOT.war
+CMD ["java","-jar","usr/src/app/arc-batch/target/ArcMain.jar"]
