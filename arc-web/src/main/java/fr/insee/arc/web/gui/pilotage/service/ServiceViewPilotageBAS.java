@@ -3,11 +3,14 @@ package fr.insee.arc.web.gui.pilotage.service;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -182,8 +185,19 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		// Maximum number of files processed in each phase iteration
 		int maxFilesPerPhase = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
 		
+		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.batchMode", "[]"));
+		Set<String> found=new HashSet<>();
+		
+		j.forEach(item -> {
+            if (item.toString().equals(getBacASable()))
+            {
+            	found.add(item.toString());
+            }
+        });
+		String batchMode = found.isEmpty() ? null : "1";
+		
 		ApiServiceFactory.getService(phaseAExecuter, getBacASable(),
-				maxFilesPerPhase, null
+				maxFilesPerPhase, batchMode
 		).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

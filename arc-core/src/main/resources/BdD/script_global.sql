@@ -77,6 +77,8 @@ UPDATE arc.parameter set description='parameter.ihm.sandbox.maxNumberOfFilesRegi
 INSERT INTO arc.parameter VALUES ('ArcAction.productionEnvironments','["arc_prod"]');
 UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListWithProductionGUI' where key='ArcAction.productionEnvironments';
 
+INSERT INTO arc.parameter VALUES ('ArcAction.batchMode','[]');
+UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListWithBatchMode' where key='ArcAction.batchMode';
 
 -- parallelism parameters
 INSERT INTO arc.parameter VALUES ('ApiChargementService.MAX_PARALLEL_WORKERS','2');
