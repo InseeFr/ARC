@@ -48,6 +48,7 @@
 			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectNorme" /><c:param name="linkId" value="normManagement" /></c:import>
 			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectListNomenclatures" /><c:param name="linkId" value="externalFile" /></c:import>
 			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectWebserviceContext" /><c:param name="linkId" value="webserviceManagement" /></c:import>
+    		<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectEntrepot" /><c:param name="linkId" value="entrepot" /></c:import>
 
 			<li><h5 class="mt-4">Bacs à sable</h5></li>
 			<li class="nobullet mt-1 mb-1 text-left">
