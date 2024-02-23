@@ -1,4 +1,4 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
+﻿﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib prefix="c" uri="jakarta.tags.core"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -32,7 +32,6 @@ accept-charset="UTF-8">
 <c:param name="btnSelect" value ="true" />
 <c:param name="btnSee" value ="true" />
 <c:param name="btnSort" value ="true" />
-<c:param name="ligneFilter" value ="true" />
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="false" />
 <c:param name="extraScopeSee" value ="viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;" />
