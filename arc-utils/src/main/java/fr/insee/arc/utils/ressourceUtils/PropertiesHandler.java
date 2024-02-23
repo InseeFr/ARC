@@ -61,6 +61,7 @@ public class PropertiesHandler {
 	private String kubernetesExecutorUser;
 	private String kubernetesExecutorDatabase;
 	private String kubernetesExecutorPort;
+	private String kubernetesExecutorVolatile;
 	
 	private Boolean kubernetesActive;
 	
@@ -364,10 +365,18 @@ public class PropertiesHandler {
 		this.kubernetesExecutorPort = kubernetesExecutorPort;
 	}
 
+	public String getKubernetesExecutorVolatile() {
+		return kubernetesExecutorVolatile;
+	}
+
+	public void setKubernetesExecutorVolatile(String kubernetesExecutorVolatile) {
+		this.kubernetesExecutorVolatile = kubernetesExecutorVolatile;
+	}
+
 	public boolean isKubernetesActive() {
 		if (this.kubernetesActive==null)
 		{
-			this.kubernetesActive =  this.kubernetesApiUri!=null &&this.kubernetesApiNamespace!=null && kubernetesExecutorNumber>0;
+			this.kubernetesActive =  kubernetesExecutorNumber>0;
 		}
 		return kubernetesActive;
 	}
