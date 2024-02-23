@@ -42,6 +42,7 @@ import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
@@ -215,8 +216,8 @@ public class VObjectService {
 			requete.append(mainQuery);
 			requete.append(") alias_de_table ");
 
-			requete.append(buildFilter(data.getFilterFields(), data.getHeadersDLabel(), data.getFilterPattern(),
-					data.getFilterFunction()));
+			requete.append(buildFilter(data.getFilterFields(), data.getHeadersDLabel(), data.getHeadersDType(),
+					data.getFilterPattern(), data.getFilterFunction()));
 
 			if (!data.isNoOrder()) {
 				requete.append(buildOrderBy(data.getHeaderSortDLabels(), data.getHeaderSortDOrders()));
@@ -338,7 +339,8 @@ public class VObjectService {
 					requete.append("select ceil(count(1)::float/" + currentData.getPaginationSize() + ") from (");
 					requete.append(mainQuery);
 					requete.append(") alias_de_table ");
-					requete.append(buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel()));
+					requete.append(buildFilter(currentData.getFilterFields(), currentData.getHeadersDLabel(),
+							currentData.getHeadersDType()));
 
 					aContent = UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete,
 							ModeRequeteImpl.arcModeRequeteIHM());
@@ -792,7 +794,7 @@ public class VObjectService {
 		requete.append("select alias_de_table.* from (");
 		requete.append(v0.getMainQuery());
 		requete.append(") alias_de_table ");
-		requete.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel()));
+		requete.append(buildFilter(currentData.getFilterFields(), v0.getHeadersDLabel(), v0.getHeadersDType()));
 		return requete;
 	}
 
@@ -801,8 +803,9 @@ public class VObjectService {
 		session.remove(data.getSessionName());
 	}
 
-	public ArcPreparedStatementBuilder buildFilter(List<String> filterFields, List<String> headersDLabel) {
-		return buildFilter(filterFields, headersDLabel, DEFAULT_FILTER_PATTERN, DEFAULT_FILTER_FUNCTION);
+	public ArcPreparedStatementBuilder buildFilter(List<String> filterFields, List<String> headersDLabel,
+			List<String> headersDType) {
+		return buildFilter(filterFields, headersDLabel, headersDType, DEFAULT_FILTER_PATTERN, DEFAULT_FILTER_FUNCTION);
 	}
 
 	/**
@@ -814,7 +817,7 @@ public class VObjectService {
 	 */
 
 	private ArcPreparedStatementBuilder buildFilter(List<String> filterFields, List<String> headersDLabel,
-			Integer filterPattern, String filterFunction) {
+			List<String> headersDType, Integer filterPattern, String filterFunction) {
 
 		ArcPreparedStatementBuilder s = new ArcPreparedStatementBuilder(" WHERE true ");
 
@@ -843,16 +846,17 @@ public class VObjectService {
 			Matcher matcher = patternMath.matcher(filterFields.get(headerIndex));
 			boolean isFilterMathematicExpression = matcher.find();
 			boolean isFilterDate = filterFields.get(headerIndex).contains("§");
+			TypeEnum fieldType = TypeEnum.realNameOf(headersDType.get(headerIndex));
 
-			if (isFilterMathematicExpression && isFilterDate) {
+			if (fieldType.isDate() && isFilterMathematicExpression && isFilterDate) {
 				buildFilterDate(headerIndex, s, filterFields, headersDLabel, expressionAND, expressionOR);
 			}
 
-			if (isFilterMathematicExpression && !isFilterDate) {
+			if (fieldType.isNumeric() && isFilterMathematicExpression && !isFilterDate) {
 				buildFilterNumeric(headerIndex, s, filterFields, headersDLabel, expressionAND, expressionOR);
 			}
 
-			if (!isFilterMathematicExpression) {
+			else {
 				buildFilterString(headerIndex, s, filterFields, headersDLabel, filterPattern, filterFunction);
 			}
 

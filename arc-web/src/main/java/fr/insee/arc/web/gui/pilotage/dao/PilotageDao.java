@@ -64,7 +64,7 @@ public class PilotageDao extends VObjectHelperDao {
 		requete.append(
 				"\n SELECT DISTINCT date_entree FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " a ");
 		requete.append(
-				this.vObjectService.buildFilter(viewPilotageBAS.getFilterFields(), viewPilotageBAS.getHeadersDLabel()));
+				this.vObjectService.buildFilter(viewPilotageBAS.getFilterFields(), viewPilotageBAS.getHeadersDLabel(), viewPilotageBAS.getHeadersDType()));
 		requete.append("\n AND phase_traitement='" + TraitementPhase.RECEPTION + "' ");
 		requete.append(this.vObjectService.buildOrderBy(viewPilotageBAS.getHeaderSortDLabels(),
 				viewPilotageBAS.getHeaderSortDOrders()));
@@ -208,7 +208,7 @@ public class PilotageDao extends VObjectHelperDao {
 		querySelection.append(viewArchiveBAS.getMainQuery());
 		querySelection.append(") alias_de_table ");
 		querySelection.append(this.vObjectService.buildFilter(viewArchiveBAS.getFilterFields(),
-				viewArchiveBAS.getHeadersDLabel()));
+				viewArchiveBAS.getHeadersDLabel(), viewArchiveBAS.getHeadersDType()));
 
 		if (selection!=null) {
 			querySelection.append(" AND nom_archive IN " + Format.sqlListe(selection) + " ");
@@ -334,7 +334,7 @@ public class PilotageDao extends VObjectHelperDao {
 		query.append("select distinct alias_de_table.container as nom_fichier from (");
 		query.append(viewFichierBAS.getMainQuery());
 		query.append(") alias_de_table ");
-		query.append(vObjectService.buildFilter(viewFichierBAS.getFilterFields(), viewFichierBAS.getHeadersDLabel()));
+		query.append(vObjectService.buildFilter(viewFichierBAS.getFilterFields(), viewFichierBAS.getHeadersDLabel(), viewFichierBAS.getHeadersDType()));
 		if (!selection.isEmpty()) {
 			query.append(" AND container IN (" + query.sqlListeOfValues(selection.get("container")) + ") ");
 		}
@@ -353,7 +353,7 @@ public class PilotageDao extends VObjectHelperDao {
 		querySelection.append(viewFichierBAS.getMainQuery());
 		querySelection.append(") alias_de_table ");
 		querySelection.append(this.vObjectService.buildFilter(viewFichierBAS.getFilterFields(),
-				viewFichierBAS.getHeadersDLabel()));
+				viewFichierBAS.getHeadersDLabel(), viewFichierBAS.getHeadersDType()));
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// sélectionné
 		if (!selection.isEmpty()) {
