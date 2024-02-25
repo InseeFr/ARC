@@ -17,9 +17,11 @@ import fr.insee.arc.core.service.p1reception.registerarchive.bo.ZipReader;
 import fr.insee.arc.core.service.p1reception.registerarchive.dao.MoveFilesToRegisterDao;
 import fr.insee.arc.core.service.p1reception.registerarchive.operation.ArchiveCheckOperation;
 import fr.insee.arc.core.service.p1reception.registerarchive.operation.ReworkArchiveOperation;
+import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.files.CompressionExtension;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.ManipString;
@@ -54,9 +56,9 @@ public class ArchiveRegistrationOperation {
 	
 
 	// current size of files registered
-	private int fileSize = 0;
+	private int fileSize;
 	// current number of files registered
-	private int fileNb = 0;
+	private int fileNb;
 
 	/**
 	 * Initialize the application directories if needed List the the files received
@@ -92,20 +94,72 @@ public class ArchiveRegistrationOperation {
 
 		StaticLoggerDispatcher.info(LOGGER, "Taille limite de fichiers à charger : " + fileSizeLimit);
 
-		for (String entrepot : entrepotIdList) {
+		createSandboxEntrepotDirectoriesIfNotExists(entrepotIdList);
 
+		moveEntriesFromS3ToPodFileSystem(entrepotIdList);
+
+		selectEntriesToBeProceed(entrepotIdList);
+	}
+
+
+	/**
+	 * Create directories for declared entrepot
+	 * @param entrepotIdList
+	 * @throws ArcException
+	 */
+	private void createSandboxEntrepotDirectoriesIfNotExists(List<String> entrepotIdList) throws ArcException {
+		for (String entrepot : entrepotIdList) {
+			// create and register datawarehouse sandbox directories (entrepot) if not exists
+			directories.buildSandboxEntrepotDirectories(entrepot).createSandboxEntrepotDirectories();
+		}
+	}
+	
+	/**
+	 * Move entries from s3 to fileSystem
+	 * @param entrepotIdList
+	 * @throws ArcException
+	 */
+	private void moveEntriesFromS3ToPodFileSystem(List<String> entrepotIdList) throws ArcException {
+		resetFileSizeAndNumber();
+		for (String entrepot : entrepotIdList) {
+			
+			directories.buildSandboxEntrepotDirectories(entrepot);
+			
 			if (isFileRegisteringFinished()) {
 				break;
 			}
-
-			// create and register datawarehouse sandbox directories (entrepot)
-			directories.createSandboxEntrepotDirectories(entrepot);
-
-			selectFilesInEntrepot(entrepot);
-		}
-
+		
+			// copy s3 to pod filesystem
+			copyS3ToPodFileSystem();
+		}		
 	}
 
+	/**
+	 * Move entries from s3 to fileSystem
+	 * @param entrepotIdList
+	 * @throws ArcException
+	 */
+	private void selectEntriesToBeProceed(List<String> entrepotIdList) throws ArcException {
+		resetFileSizeAndNumber();
+		for (String entrepot : entrepotIdList) {
+
+			directories.buildSandboxEntrepotDirectories(entrepot);
+			
+			if (isFileRegisteringFinished()) {
+				break;
+			}
+			
+			// select file
+			selectFilesInEntrepot();
+		}		
+	}
+
+	private void resetFileSizeAndNumber()
+	{
+		this.fileNb=0;
+		this.fileSize=0;
+	}
+	
 	/**
 	 * Check condition to end the file registering Condition is checked when the
 	 * size of the files selected or the number of files selected exceed the given
@@ -117,9 +171,39 @@ public class ArchiveRegistrationOperation {
 		return (fileSize > fileSizeLimit || fileNb > maxNumberOfFiles);
 	}
 
-	private void selectFilesInEntrepot(String entrepot) throws ArcException {
+	/**
+	 * copy files in s3 to pod
+	 * an upper approximation of file size will be used to stop selecting as we cannot count number of file nor compress in tgz on s3
+	 * @param entrepot
+	 * @throws ArcException
+	 */
+	private void copyS3ToPodFileSystem() throws ArcException {
+		
+		for (String s3objects : ArcS3.INPUT_BUCKET.listObjectsInDirectory(directories.getS3EntrepotIn()))
+		{
+			
+			if (isFileRegisteringFinished()) {
+				break;
+			}
+			
+			if (CompressedUtils.isNotArchive(s3objects))
+			{
+				fileSize += ArcS3.INPUT_BUCKET.size(s3objects)/1024/1024/10;
+			}
+			else
+			{
+				fileSize += ArcS3.INPUT_BUCKET.size(s3objects)/1024/1024;
+			}
 
-		File fDirIn = new File(directories.getDiretoryEntrepotIn());
+			ArcS3.INPUT_BUCKET.downloadToDirectory(s3objects, directories.getDirectoryEntrepotIn());
+			
+		}
+	}
+
+	
+	private void selectFilesInEntrepot() throws ArcException {
+		
+		File fDirIn = new File(directories.getDirectoryEntrepotIn());
 		// vérifier le type (répertoire)
 		if (fDirIn.isDirectory()) {
 
@@ -139,7 +223,7 @@ public class ArchiveRegistrationOperation {
 					break;
 				}
 
-				ReworkArchiveOperation reworkInstance = new ReworkArchiveOperation(directories, entrepot, f);
+				ReworkArchiveOperation reworkInstance = new ReworkArchiveOperation(directories, directories.getEntrepot(), f);
 
 				reworkInstance.qualifyAndRename();
 
@@ -155,7 +239,7 @@ public class ArchiveRegistrationOperation {
 
 				// enregistrer le fichier
 				
-				moveFilesToRegisterDao.registerArchive(entrepot, reworkInstance.getReworkedArchiveName());
+				moveFilesToRegisterDao.registerArchive(directories.getEntrepot(), reworkInstance.getReworkedArchiveName());
 
 			}
 		}
@@ -191,6 +275,8 @@ public class ArchiveRegistrationOperation {
 	public int getFileNb() {
 		return fileNb;
 	}
+	
+	
 	
 	
 }

@@ -115,7 +115,7 @@ public class ArcS3Test {
 		assertTrue(areSameList(listFFFExpected, listFFFActual));
 		
 		File testDownloadFile = new File(repertoire, "testDownloadFile.txt");
-		ArcS3.INPUT_BUCKET.download("test/foo/testFile.txt", testDownloadFile); // télécharger un fichier
+		ArcS3.INPUT_BUCKET.download("test/foo/testFile.txt", "testDownloadFile.txt"); // télécharger un fichier
 		assertEquals(11, testDownloadFile.length());
 
 		ArcS3.INPUT_BUCKET.delete("test/testFile.txt"); // supprimer un fichier

@@ -215,6 +215,16 @@ class BatchARC implements IReturnCode {
 				// Delete entry files if no interruption or no problems
 				effacerRepertoireChargement(repertoire, envExecution);
 
+				// if executors are set and if output s3 is defined
+				// export mapping to output s3 and DELETE file system
+				if (properties.getKubernetesExecutorVolatile().equals(PropertiesHandler.YES)
+					&& properties.getKubernetesExecutorNumber()>0
+					&& !properties.getS3OutputApiUri().isEmpty()
+					)
+				{
+					// that or use the maintenance process ?
+				}
+
 				message("Traitement Fin");
 				System.exit(STATUS_SUCCESS);
 			}

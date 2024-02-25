@@ -15,6 +15,10 @@ import fr.insee.arc.utils.utils.ManipString;
 @Service("properties")
 public class PropertiesHandler {
 
+	/* long word on purpose to avoid big mistake */
+	/* setting fr.insee.arc.kubernetes.executor.volatile to YES will erase all filesystem everytime the batch ends */
+	public static final String YES = "YES";
+
 	/* Database */
 	private String databasePoolName;
 	private String databaseRestrictedUsername;

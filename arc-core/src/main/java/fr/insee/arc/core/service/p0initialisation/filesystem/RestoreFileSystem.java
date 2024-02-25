@@ -63,9 +63,10 @@ public class RestoreFileSystem {
 	
 	private void rebuildFileSystemInEntrepot(String entrepot) throws ArcException
 	{
-		directories.createSandboxEntrepotDirectories(entrepot);
+		directories.buildSandboxEntrepotDirectories(entrepot).createSandboxEntrepotDirectories();
+		
 		String dirEntrepotArchive = directories.getDirectoryEntrepotArchive();
-		String dirEntrepot = directories.getDiretoryEntrepotIn();
+		String dirEntrepot = directories.getDirectoryEntrepotIn();
 
 		// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table
 		// archive

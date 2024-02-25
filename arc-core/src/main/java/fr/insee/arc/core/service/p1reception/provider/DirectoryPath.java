@@ -28,6 +28,10 @@ public class DirectoryPath {
 		return FileSystemManagement.directoryPhaseEntrepot(rootDirectory, env, TraitementPhase.RECEPTION, entrepot);
 	}
 
+	public static String s3ReceptionEntrepot(String env, String entrepot) {
+		return FileSystemManagement.directoryPhaseEntrepot("", env, TraitementPhase.RECEPTION, entrepot);
+	}
+	
 	public static String directoryReceptionEntrepotArchive(String rootDirectory, String env, String entrepot) {
 		return FileSystemManagement.directoryPhaseEntrepotArchive(rootDirectory, env, TraitementPhase.RECEPTION,
 				entrepot);

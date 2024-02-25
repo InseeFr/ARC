@@ -12,6 +12,7 @@ import java.util.List;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.utils.ManipString;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.DownloadObjectArgs;
@@ -52,7 +53,7 @@ public class S3Template {
 	private MinioClient minioClient;
 
 	private OkHttpClient httpClient;
-
+	
 	/**
 	 * Récupère le minioClient en le recréant si nécessaire.
 	 * 
@@ -84,7 +85,10 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public void createDirectory(String path) throws ArcException {
-		path += (path.endsWith("/") ? "" : "/"); // ajouté au path si manquant
+		
+		if (s3ApiUri.isEmpty()) return;
+		
+		path = asDirectory(path); // ajouté au path si manquant
 		int indexSecondLastSubstr = path.lastIndexOf("/", path.length() - 2); // index de l'avant dernier "/"
 		if (indexSecondLastSubstr > 0) {
 			createDirectory(path.substring(0, indexSecondLastSubstr + 1)); // crée les répertoires parents
@@ -101,6 +105,44 @@ public class S3Template {
 			throw new ArcException(ArcExceptionMessage.FILE_WRITE_FAILED, path);
 		}
 	}
+	
+	/**
+	 * normalize path given
+	 * :\ is replace by s3 separator /
+	 * double s3 path separator // is replaced by single s3 path separator /
+	 * @param path
+	 * @return
+	 */
+	private static String normalizePath(String path)
+	{
+		String reworkedPath = path.replace("\\", "/").replace("//", "/");
+		reworkedPath = reworkedPath.substring(0,1).equals("/") ? reworkedPath.substring(1) : reworkedPath;
+		return reworkedPath;
+	}
+	
+	/**
+	 * directory are being added an s3 path separator / at the end
+	 * @param path
+	 * @return
+	 */
+	private static String asDirectory(String path)
+	{
+		String normalizedPath = normalizePath(path);
+		return normalizedPath + (normalizedPath.endsWith("/") ? "" : "/");
+	}
+	
+	/**
+	 * path for files
+	 * if the path provided is a directory with s3 path separator, it adds the directory indicator file .exists
+	 * @param path
+	 * @return
+	 */
+	private static String asFile(String path)
+	{
+		String normalizedPath = normalizePath(path);
+		return normalizedPath + (normalizedPath.endsWith("/") ? EXISTS_FILE : "");
+	}
+	
 
 	/**
 	 * Copie un objet d'un bucket dans un autre emplacement de ce bucket
@@ -110,9 +152,12 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public void copy(String pathFrom, String pathTo) throws ArcException {
+		
+		if (s3ApiUri.isEmpty()) return;
+		
 		try {
-			getMinioClient().copyObject(CopyObjectArgs.builder().bucket(bucket).object(pathTo)
-					.source(CopySource.builder().bucket(bucket).object(pathFrom).build()).build());
+			getMinioClient().copyObject(CopyObjectArgs.builder().bucket(bucket).object(normalizePath(pathTo))
+					.source(CopySource.builder().bucket(bucket).object(normalizePath(pathFrom)).build()).build());
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
@@ -124,20 +169,35 @@ public class S3Template {
 	/**
 	 * Télécharge un objet d'un bucket vers un emplacement hors S3
 	 * 
-	 * @param pathFrom le chemin de l'objet à copier
-	 * @param fileTo   le fichier téléchargé
+	 * @param sourceS3Path le chemin de l'objet à copier
+	 * @param targetFilePath   le fichier téléchargé
 	 * @throws ArcException
 	 */
-	public void download(String pathFrom, File fileTo) throws ArcException {
+	public void download(String sourceS3Path, String targetFilePath) throws ArcException {
+		
+		if (s3ApiUri.isEmpty()) return;
+		
+		File targetFile = new File(targetFilePath);
+		
 		try {
 			getMinioClient().downloadObject(
-					DownloadObjectArgs.builder().bucket(bucket).object(pathFrom).filename(fileTo.getPath()).build());
+					DownloadObjectArgs.builder().bucket(bucket).object(normalizePath(sourceS3Path)).filename(targetFile.getPath()).build());
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
 
-			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, pathFrom, fileTo.getName());
+			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, sourceS3Path, targetFile.getName());
 		}
+	}
+	
+	public void downloadToDirectory(String sourceS3Path, String targetDirectoryPath) throws ArcException {
+		
+		if (s3ApiUri.isEmpty()) return;
+		
+		String targetFilePath = targetDirectoryPath + File.separator + ManipString.substringAfterLast(sourceS3Path, "/");
+		
+		download(sourceS3Path, targetFilePath);
+
 	}
 
 	/**
@@ -150,7 +210,7 @@ public class S3Template {
 	public void upload(File fileFrom, String pathTo) throws ArcException {
 		try {
 			getMinioClient().uploadObject(
-					UploadObjectArgs.builder().bucket(bucket).object(pathTo).filename(fileFrom.getPath()).build());
+					UploadObjectArgs.builder().bucket(bucket).object(normalizePath(pathTo)).filename(fileFrom.getPath()).build());
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
@@ -166,8 +226,11 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public void delete(String path) throws ArcException {
+		
+		if (s3ApiUri.isEmpty()) return;
+		
 		try {
-			getMinioClient().removeObject(RemoveObjectArgs.builder().bucket(bucket).object(path).build());
+			getMinioClient().removeObject(RemoveObjectArgs.builder().bucket(bucket).object(normalizePath(path)).build());
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
@@ -195,8 +258,7 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public void deleteDirectory(String path) throws ArcException {
-		path += (path.endsWith("/") ? "" : "/");
-		delete(path);
+		delete(asDirectory(path));
 		delete(listObjectsInDirectory(path, true, true, false));
 	}
 
@@ -260,12 +322,12 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public boolean isExists(String path) throws ArcException {
-		@SuppressWarnings("unused")
-		StatObjectResponse statObject;
 		boolean found;
 		try {
-			statObject = getMinioClient().statObject(StatObjectArgs.builder().bucket(bucket)
-					.object(path + (path.endsWith("/") ? EXISTS_FILE : "")).build());
+			@SuppressWarnings("unused")
+
+			StatObjectResponse statObject = getMinioClient().statObject(StatObjectArgs.builder().bucket(bucket)
+					.object(asFile(path)).build());
 			found = true;
 		} catch (ErrorResponseException e) {
 			if (e.response().code() != 404) {
@@ -304,9 +366,12 @@ public class S3Template {
 	 */
 	public List<String> listObjectsInDirectory(String path, Boolean isRecursive, Boolean includeExists,
 			Boolean includeSubdirs) throws ArcException {
+		
+		if (s3ApiUri.isEmpty()) return new ArrayList<String>();
+		
 		List<String> listNames = new ArrayList<>();
 		Iterator<Result<Item>> listObject = getMinioClient()
-				.listObjects(ListObjectsArgs.builder().bucket(bucket).prefix(path).recursive(isRecursive).build())
+				.listObjects(ListObjectsArgs.builder().bucket(bucket).prefix(asDirectory(path)).recursive(isRecursive).build())
 				.iterator();
 		while (listObject.hasNext()) {
 			try {

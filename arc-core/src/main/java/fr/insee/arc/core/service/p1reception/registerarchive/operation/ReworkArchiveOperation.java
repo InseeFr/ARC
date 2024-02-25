@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
+import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
@@ -98,7 +99,7 @@ public class ReworkArchiveOperation {
 				throw new ArcException(exception, ArcExceptionMessage.FILE_COPY_FAILED, inputFile, fileOutArchive);
 			}
 			// déplacer le fichier dans encours
-			FileUtilsArc.deplacerFichier(directories.getDiretoryEntrepotIn(), directories.getDirectoryReceptionEnCours(),
+			FileUtilsArc.deplacerFichier(directories.getDirectoryEntrepotIn(), directories.getDirectoryReceptionEnCours(),
 					inputFile.getName(), entrepot + "_" + reworkedArchiveName);
 		} else {
 			// on génére le tar.gz dans archive
@@ -113,6 +114,8 @@ public class ReworkArchiveOperation {
 			// on efface le fichier source
 			FileUtilsArc.delete(inputFile);
 		}
+		// delete on s3 if success
+		ArcS3.INPUT_BUCKET.delete(directories.getS3EntrepotIn()+"/"+inputFile.getName());
 		
 		this.reworkedArchiveFile = new File(directories.getDirectoryReceptionEnCours() + File.separator + entrepot + "_" + reworkedArchiveName);
 		this.reworkedArchiveSize = (int) (fileOutArchive.length() / 1024 / 1024);
