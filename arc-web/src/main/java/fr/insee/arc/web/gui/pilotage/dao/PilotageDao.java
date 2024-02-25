@@ -42,6 +42,12 @@ public class PilotageDao extends VObjectHelperDao {
 			viewPilotageBAS.setHeaderSortDOrders(new ArrayList<>(Arrays.asList(false)));
 		}
 
+		// filtering is only allowed on first column
+		if (viewPilotageBAS.getFilterFields()!=null && viewPilotageBAS.getFilterFields().size()>1)
+		{
+			viewPilotageBAS.setFilterFields(viewPilotageBAS.getFilterFields().subList(0, 1));
+		}
+
 		viewPilotageBAS.setNoCount(true);
 		viewPilotageBAS.setNoLimit(true);
 

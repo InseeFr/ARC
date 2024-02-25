@@ -32,6 +32,7 @@ accept-charset="UTF-8">
 <c:param name="btnSelect" value ="true" />
 <c:param name="btnSee" value ="true" />
 <c:param name="btnSort" value ="true" />
+<c:param name="ligneFilter" value ="true" />
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="false" />
 <c:param name="extraScopeSee" value ="viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;" />
