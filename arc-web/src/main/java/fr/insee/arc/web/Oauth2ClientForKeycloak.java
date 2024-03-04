@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,12 +66,11 @@ public class Oauth2ClientForKeycloak {
 					OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
 					OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
 
-					StaticLoggerDispatcher.custom(LOGGER, userInfo.getClaims());
-
-					List<String> roles = userInfo.getClaimAsStringList("roles");
-					if (roles == null) {
-						roles = userInfo.getClaimAsStringList("groups");
-					}
+					@SuppressWarnings("unchecked")
+					List<String> roles = (List<String>) ObjectUtils.firstNonNull(
+							userInfo.getClaimAsStringList("roles"),
+							userInfo.getClaimAsStringList("groups"),
+							userInfo.getClaimAsMap("realm_access").get("roles"));
 
 					List<SimpleGrantedAuthority> groupAuthorities = roles.stream()
 							.map(g -> new SimpleGrantedAuthority(g)).toList();
