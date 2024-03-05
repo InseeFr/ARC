@@ -12,15 +12,15 @@
 		<version>0.0.2-SNAPSHOT</version>
 		
 		<project.log4j.version>2.17.1</project.log4j.version>
-		<project.spring.version>6.1.3</project.spring.version>
+		<project.spring.version>6.1.4</project.spring.version>
 		<project.springboot.version>3.2.2</project.springboot.version>
 		<project.jackson.version>2.16.1</project.jackson.version>
-		<project.postgres.version>42.5.1</project.postgres.version>
+		<project.postgres.version>42.5.5</project.postgres.version>
 		<project.java.version>17</project.java.version>
 		<project.jakarta.version>6.1.0-M1</project.jakarta.version>
 		<project.maven.compiler.version>3.12.0</project.maven.compiler.version>
 		<project.org.json.version>20231013</project.org.json.version>
-		<project.commons.compress.version>1.25.0</project.commons.compress.version>
+		<project.commons.compress.version>1.26.0</project.commons.compress.version>
 		<project.commons.fileupload.version>1.5</project.commons.fileupload.version>
 		
 
