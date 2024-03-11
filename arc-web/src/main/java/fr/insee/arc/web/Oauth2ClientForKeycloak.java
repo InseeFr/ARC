@@ -65,12 +65,12 @@ public class Oauth2ClientForKeycloak {
 				if (authority instanceof OidcUserAuthority) {
 					OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
 					OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
-
+					
 					@SuppressWarnings("unchecked")
 					List<String> roles = (List<String>) ObjectUtils.firstNonNull(
 							userInfo.getClaimAsStringList("roles"),
 							userInfo.getClaimAsStringList("groups"),
-							userInfo.getClaimAsMap("realm_access").get("roles"));
+							userInfo.getClaimAsMap("realm_access")==null ? null : userInfo.getClaimAsMap("realm_access").get("roles"));
 
 					List<SimpleGrantedAuthority> groupAuthorities = roles.stream()
 							.map(g -> new SimpleGrantedAuthority(g)).toList();
