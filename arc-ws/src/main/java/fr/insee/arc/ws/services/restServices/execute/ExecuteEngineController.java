@@ -51,17 +51,5 @@ public class ExecuteEngineController {
 		return ResponseEntity.status(HttpStatus.OK).body(returnView);
 
 	}
-	
-	@RequestMapping(value = "/execute/engine/{serviceName}/{serviceId}/{sandbox}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ReturnView> executeEngineClient(
-			@PathVariable String serviceName,
-			@PathVariable int serviceId,
-			@PathVariable int sandbox,
-			@RequestBody(required = true) ExecuteParameterModel p
-	)
-	{
-		p.sandbox="arc_"+sandbox;
-		return  executeEngineClient(serviceName,serviceId,p);
-	}
 
 }
