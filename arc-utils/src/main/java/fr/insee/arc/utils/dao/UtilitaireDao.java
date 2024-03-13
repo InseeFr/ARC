@@ -541,10 +541,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 							}
 							while (res.next()) {
 								for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-									if (res.getString(i) != null) {
-										str.append(res.getString(i).replace("\n", " ").replace("\r", ""));
-									} else {
-									}
+									String element = res.getString(i);
+									if (element != null) {
+										element = element.contains(";") ? "\"" + element + "\"" : element;
+										str.append(element.replace("\n", " ").replace("\r", ""));
+									} 
 									if (i < rsmd.getColumnCount()) {
 										str.append(";");
 									}
@@ -639,6 +640,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		executeImmediate(connexion, bloc.toString());
 	}
 
+	
+	public void executeBlock(Connection connexion, GenericPreparedStatementBuilder... listeRequete) throws ArcException {
+		GenericPreparedStatementBuilder bloc = new GenericPreparedStatementBuilder("BEGIN;\n");
+		for (int i = 0; i < listeRequete.length; i++) {
+			bloc.append(listeRequete[i]).append(semicolon);
+		}
+		bloc.append("END;\n");
+		executeRequest(connexion, bloc);
+	}
+	
 	/**
 	 *
 	 * @param connexion
@@ -901,7 +912,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			conn.getConnexion().setAutoCommit(false);
 			CopyManager copyManager = new CopyManager((BaseConnection) conn.getConnexion());
 			String delimiter = "";
-			String quote = Character.toString((char) 2);
+			String quote = "\"";
 
 			if (aDelim != null && aDelim.length > 0) {
 				delimiter = ", DELIMITER '" + aDelim[0] + "', QUOTE '" + quote + "' ";
