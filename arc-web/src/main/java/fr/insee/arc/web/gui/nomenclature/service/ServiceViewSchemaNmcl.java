@@ -32,24 +32,28 @@ public class ServiceViewSchemaNmcl extends InteractorNomenclature {
 	}
 
 	public String updateSchemaNmcl(Model model) {
+		boolean zeroErreur = true;
 		Map<String, List<String>> selection = views.getViewSchemaNmcl().mapContentAfterUpdate();
 		if (!selection.isEmpty()) {
-			boolean zeroErreur = true;
-
-			loggerDispatcher.debug("nombre de valeurs : " + selection.get(NOM_COLONNE).size(), LOGGER);
-			for (int i = 0; i < selection.get(NOM_COLONNE).size(); i++) {
-				String nomColonne = selection.get(NOM_COLONNE).get(i);
-				String typeColonne = selection.get(TYPE_COLONNE).get(i);
+        	List<String> nomsColonne = selection.get(NOM_COLONNE);
+        	List<String> typesColonne = selection.get(TYPE_COLONNE);
+        	
+			loggerDispatcher.debug("nombre de valeurs : " + nomsColonne.size(), LOGGER);
+			for (int i = 0; i < nomsColonne.size(); i++) {
+				String nomColonne = nomsColonne.get(i);
+				String typeColonne = typesColonne == null ? null : typesColonne.get(i);
 				
 				loggerDispatcher.debug("test colonne : " + nomColonne + " - " + typeColonne, LOGGER);
-				if (!isColonneValide(nomColonne) || !isTypeValide(typeColonne)) {
+				if (!isColonneValide(nomColonne) || (typeColonne != null && !isTypeValide(typeColonne))) {
 					zeroErreur = false;
 					break;
 				}
 			}
-			if (zeroErreur) {
-				this.vObjectService.update(views.getViewSchemaNmcl());
-			}
+		} else {
+			this.views.getViewListNomenclatures().setMessage("nmclManagement.update.noSchema");
+		}
+		if (zeroErreur) {
+			this.vObjectService.update(views.getViewSchemaNmcl());
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

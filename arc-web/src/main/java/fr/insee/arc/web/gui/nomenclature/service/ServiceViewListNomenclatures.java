@@ -44,10 +44,11 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 
     public String updateListNomenclatures(Model model) {
         // vérification que tous les noms de tables updatés soient conformes
-        boolean zeroErreur = true;
-        if (this.views.getViewListNomenclatures().mapContentAfterUpdate().size() > 0) {
-			for (String nomTable : this.views.getViewListNomenclatures().mapContentAfterUpdate().get(NOM_TABLE)) {
-                if (!validationNomTable(nomTable)) {
+    	boolean zeroErreur = true;
+    	Map<String, List<String>> selection = views.getViewListNomenclatures().mapContentAfterUpdate();
+        if (!selection.isEmpty()) {
+        	for (String nomTable : selection.get(NOM_TABLE)) {
+                if (nomTable != null && !validationNomTable(nomTable)) {
                     this.views.getViewListNomenclatures().setMessage("nmclManagement.update.invalidName");
                     this.views.getViewListNomenclatures().setMessageArgs(nomTable);
                     zeroErreur = false;
