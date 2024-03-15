@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file.
 - removed webservice entrypoint /execute/engine/{serviceName}/{serviceId}/{bas} as it looks unused
 
 ## version-94.1.3
-- webservice servlet access fix
+- webservice data retrieval servlet access fix
 - kubernetess support
 - disablegui property now working
 
