@@ -3,6 +3,7 @@
 ## TODO List
 - download functionality from pilotage will now be put in a download directory in the sandbox filesystem instrad of being downlod to user gui
 - export to parquet for volatile database will be added to pipeline
+- checkmarx security update
 
 All notable changes to this project will be documented in this file.
 
