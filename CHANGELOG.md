@@ -8,6 +8,9 @@ All notable changes to this project will be documented in this file.
 ## version-94.1.8
 - ihm bug fix
 
+## version-94.1.7
+- removed entrypoint /execute/engine/{serviceName}/{serviceId}/{bas} as it looks unused
+
 ## version-94.1.3
 - webservice servlet access fix
 - kubernetess support
