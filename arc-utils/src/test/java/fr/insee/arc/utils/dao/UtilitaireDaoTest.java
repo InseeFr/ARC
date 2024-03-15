@@ -2,9 +2,11 @@ package fr.insee.arc.utils.dao;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,5 +64,23 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		
 	}
 
+	@Test
+	public void outStreamRequeteSelect() throws ArcException {
+		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS test CASCADE;");
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE SCHEMA test;");
+		
+		// create a test table with 26 lines
+		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE test.table_test as select i as id, chr(i+64) as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
+		
+		// test method
+		GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder("SELECT * FROM test.table_test");
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		u.outStreamRequeteSelect(c, requete, bos);
+		
+		// assert
+		byte[] outputArray = bos.toByteArray();
+		assertEquals(28, StringUtils.countMatches(new String(outputArray), "\n"));
+		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS test CASCADE;");
+	}
 	
 }
