@@ -6,7 +6,8 @@
 All notable changes to this project will be documented in this file.
 
 ## version-94.1.8
-- ihm bug fix
+- gui bug fix : import rules and update comment in nomenclature screen
+- tomcat fix as a library was missing in new version of tomcat 10.8
 
 ## version-94.1.7
 - removed entrypoint /execute/engine/{serviceName}/{serviceId}/{bas} as it looks unused
