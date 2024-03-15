@@ -498,73 +498,51 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public void outStreamRequeteSelect(Connection connexion, GenericPreparedStatementBuilder requete, OutputStream out)
 			throws ArcException {
-		StringBuilder str = new StringBuilder();
-		String lineSeparator = "\n";
-		int k = 0;
-		int fetchSize = 5000;
-		boolean endLoop = false;
+
 		try (ConnectionWrapper connexionWrapper = initConnection(connexion)) {
-			while (!endLoop) {
-				try {
-					GenericPreparedStatementBuilder requeteLimit = new GenericPreparedStatementBuilder();
-					requeteLimit.append(requete);
-					requeteLimit.append(" offset " + (k * fetchSize) + " limit " + fetchSize + " ");
+			try (PreparedStatement stmt = connexionWrapper.getConnexion()
+					.prepareStatement(requete.getQuery().toString())) {
 
-					try (PreparedStatement stmt = connexionWrapper.getConnexion()
-							.prepareStatement(requeteLimit.getQuery().toString())) {
+				// bind parameters
+				for (int i = 0; i < requete.getParameters().size(); i++) {
+					registerBindVariable(stmt, requete, i);
+				}
 
-						// bind parameters
-						for (int i = 0; i < requete.getParameters().size(); i++) {
-							registerBindVariable(stmt, requete, i);
-						}
+				StringBuilder str = new StringBuilder();
+				String lineSeparator = System.lineSeparator();
 
-						// build file output
-						try (ResultSet res = stmt.executeQuery()) {
-							ResultSetMetaData rsmd = res.getMetaData();
-							if (k == 0) {
-								// Noms des colonnes
-								for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-									str.append(rsmd.getColumnLabel(i));
-									if (i < rsmd.getColumnCount()) {
-										str.append(";");
-									}
-								}
-								str.append(lineSeparator);
-								// Types des colonnes
-								for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-									str.append(rsmd.getColumnTypeName(i));
-									if (i < rsmd.getColumnCount()) {
-										str.append(";");
-									}
-								}
-								str.append(lineSeparator);
-							}
-							while (res.next()) {
-								for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-									String element = res.getString(i);
-									if (element != null) {
-										element = element.contains(";") ? "\"" + element + "\"" : element;
-										str.append(element.replace("\n", " ").replace("\r", ""));
-									} 
-									if (i < rsmd.getColumnCount()) {
-										str.append(";");
-									}
-								}
-								str.append(lineSeparator);
-							}
-							out.write(str.toString().getBytes());
-							endLoop = (str.length() == 0);
-							k++;
-							str.setLength(0);
+				// write metadata in output
+				try (ResultSet res = stmt.executeQuery()) {
+					ResultSetMetaData rsmd = res.getMetaData();
+
+					// Noms des colonnes
+					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+						str.append(rsmd.getColumnLabel(i));
+						if (i < rsmd.getColumnCount()) {
+							str.append(";");
 						}
 					}
-				} catch (Exception e) {
-					LoggerHelper.trace(LOGGER, e.getMessage());
-					throw e;
+					str.append(lineSeparator);
+					// Types des colonnes
+					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+						str.append(rsmd.getColumnTypeName(i));
+						if (i < rsmd.getColumnCount()) {
+							str.append(";");
+						}
+					}
+					str.append(lineSeparator);
+
+					out.write(str.toString().getBytes());
+
+				} catch (SQLException | IOException e) {
+					throw new ArcException(ArcExceptionMessage.GUI_EXPORT_TABLE_FAILED);
 				}
+			} catch (SQLException e1) {
+				throw new ArcException(ArcExceptionMessage.GUI_EXPORT_TABLE_FAILED);
 			}
-		} catch (Exception ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "outStreamRequeteSelect()", LOGGER, ex);
+
+			exporting(connexion, "(" + requete + ")", out, true);
+
 		}
 	}
 
@@ -640,8 +618,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		executeImmediate(connexion, bloc.toString());
 	}
 
-	
-	public void executeBlock(Connection connexion, GenericPreparedStatementBuilder... listeRequete) throws ArcException {
+	public void executeBlock(Connection connexion, GenericPreparedStatementBuilder... listeRequete)
+			throws ArcException {
 		GenericPreparedStatementBuilder bloc = new GenericPreparedStatementBuilder("BEGIN;\n");
 		for (int i = 0; i < listeRequete.length; i++) {
 			bloc.append(listeRequete[i]).append(semicolon);
@@ -649,7 +627,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		bloc.append("END;\n");
 		executeRequest(connexion, bloc);
 	}
-	
+
 	/**
 	 *
 	 * @param connexion
