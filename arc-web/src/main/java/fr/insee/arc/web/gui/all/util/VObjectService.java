@@ -560,6 +560,12 @@ public class VObjectService {
 	 * @param attributeValues
 	 */
 	public boolean insert(VObject currentData, AttributeValue... attributeValues) {
+		
+		if (currentData.getInputFields()==null || currentData.getInputFields().size()==0)
+		{
+			return false;
+		}
+		
 		try {
 			LoggerHelper.traceAsComment(LOGGER, "insert()", currentData.getSessionName());
 			Map<String, String> map = new HashMap<>();
@@ -688,7 +694,14 @@ public class VObjectService {
 	}
 
 	public void update(VObject currentData) {
+		
 		LoggerHelper.traceAsComment(LOGGER, "update()", currentData.getSessionName());
+		
+		if (currentData.getContent()==null || currentData.getContent().size()==0)
+		{
+			return;
+		}
+		
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 		// Compares new and old values line by line
 		// Stocks the modified line number in toBeUpdated
