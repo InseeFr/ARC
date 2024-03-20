@@ -1,4 +1,4 @@
-package fr.insee.arc.core.model;
+package fr.insee.arc.utils.database;
 
 public class Delimiters {
 

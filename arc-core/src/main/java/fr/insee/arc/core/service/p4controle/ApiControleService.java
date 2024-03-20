@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.p4controle;
 
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
@@ -10,6 +9,7 @@ import fr.insee.arc.core.service.global.thread.MultiThreading;
 import fr.insee.arc.core.service.p4controle.thread.ThreadControleService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 

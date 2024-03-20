@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.p5mapping;
 
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
@@ -11,6 +10,7 @@ import fr.insee.arc.core.service.p4controle.ApiControleService;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
 import fr.insee.arc.core.service.p5mapping.thread.ThreadMappingService;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 

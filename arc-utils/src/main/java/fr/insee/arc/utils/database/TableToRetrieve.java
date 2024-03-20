@@ -1,15 +1,19 @@
-package fr.insee.arc.ws.services.importServlet.bo;
-
-import fr.insee.arc.core.dataobjects.ArcDatabase;
+package fr.insee.arc.utils.database;
 
 public class TableToRetrieve {
-	
+
 	private ArcDatabase nod;
 	
 	private String tableName;
 
 	public TableToRetrieve() {
 		super();
+	}
+
+	public TableToRetrieve(ArcDatabase nod, String tableName) {
+		super();
+		this.nod = nod;
+		this.tableName = tableName;
 	}
 	
 	public TableToRetrieve(String nod, String tableName) {

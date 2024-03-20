@@ -4,8 +4,8 @@ import java.util.function.UnaryOperator;
 
 import org.json.JSONObject;
 
-import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.global.util.Patch;
+import fr.insee.arc.utils.database.Delimiters;
 
 public class ArcClientIdentifier {
 

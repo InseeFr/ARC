@@ -28,4 +28,19 @@ public class ConnectionAttributeTest {
     	
 	}
 
+	@Test
+	public void testHostPortDatabaseFromUri() {
+		ConnectionAttribute c;
+		
+		c = new ConnectionAttribute("jdbc:postgresql://localhost:5555/arc_test", null, null, null);
+		assertEquals(c.getHost(),"localhost");
+		assertEquals(c.getPort(),"5555");
+		assertEquals(c.getDatabase(),"arc_test");
+
+		c = new ConnectionAttribute("jdbc:postgresql://localhost/arc_test", null, null, null);
+		assertEquals(c.getHost(),"localhost");
+		assertEquals(c.getPort(),"5432");
+		assertEquals(c.getDatabase(),"arc_test");
+	}
+	
 }

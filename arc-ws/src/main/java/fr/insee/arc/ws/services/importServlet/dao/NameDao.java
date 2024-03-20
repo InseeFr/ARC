@@ -4,8 +4,8 @@ import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 
 public class NameDao {
 

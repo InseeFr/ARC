@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fr.insee.arc.batch.dao.BatchArcDao;
 import fr.insee.arc.batch.threadrunners.PhaseParameterKeys;
 import fr.insee.arc.batch.threadrunners.PhaseThreadFactory;
-import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
@@ -28,6 +27,7 @@ import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.batch.IReturnCode;
+import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
@@ -216,13 +216,15 @@ class BatchARC implements IReturnCode {
 				effacerRepertoireChargement(repertoire, envExecution);
 
 				// if executors are set and if output s3 is defined
-				// export mapping to output s3 and DELETE file system
-				if (properties.getKubernetesExecutorVolatile().equals(PropertiesHandler.YES)
+				// export mapping to output s3
+				if (!properties.getKubernetesExecutorVolatile().isEmpty()
 					&& properties.getKubernetesExecutorNumber()>0
 					&& !properties.getS3OutputApiUri().isEmpty()
 					)
 				{
-					// that or use the maintenance process ?
+
+					
+					
 				}
 
 				message("Traitement Fin");

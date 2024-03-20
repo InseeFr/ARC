@@ -4,12 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
-import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 import fr.insee.arc.ws.services.importServlet.dao.ServiceDao;
 

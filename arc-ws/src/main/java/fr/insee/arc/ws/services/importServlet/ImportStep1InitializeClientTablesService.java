@@ -8,9 +8,9 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.dataobjects.SchemaEnum;
-import fr.insee.arc.core.model.Delimiters;
+import fr.insee.arc.utils.database.ArcDatabase;
+import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;

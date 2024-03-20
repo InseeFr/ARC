@@ -1,4 +1,4 @@
-package fr.insee.arc.core.dataobjects;
+package fr.insee.arc.utils.database;
 
 import fr.insee.arc.utils.dao.UtilitaireDao;
 

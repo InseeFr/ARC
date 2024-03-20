@@ -15,6 +15,15 @@
 	</properties>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>prod/*.properties</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -24,21 +33,47 @@
 					<release>${project.java.version}</release>
 					<compilerArgs>
 						<arg>-parameters</arg>
- 						<arg>-Xlint:unchecked</arg>
+						<arg>-Xlint:unchecked</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
-			   <groupId>org.apache.maven.plugins</groupId>
-			   <artifactId>maven-jar-plugin</artifactId>
-			   <version>3.3.0</version>
-			   <executions>
-			      <execution>
-			         <goals>
-			            <goal>test-jar</goal>
-			         </goals>
-			      </execution>
-			   </executions>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>download-files</id>
+						<phase>test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<mkdir dir="${basedir}/src/main/resources/duckdb/v${project.duckdb.version}/windows_amd64/"/>
+								<gunzip dest="${basedir}/src/main/resources/duckdb/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension">
+									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension.gz" />
+								</gunzip>
+								<mkdir dir="${basedir}/src/main/resources/duckdb/v${project.duckdb.version}/linux_amd64/"/>
+								<gunzip dest="${basedir}/src/main/resources/duckdb/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension">
+									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension.gz" />
+								</gunzip>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -53,6 +88,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.duckdb</groupId>
+			<artifactId>duckdb_jdbc</artifactId>
+			<version>${project.duckdb.version}</version>
 		</dependency>
 	</dependencies>
 

@@ -10,9 +10,9 @@ import java.util.TreeSet;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.Delimiters;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
+import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;

@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.database.ArcDatabase;
+import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 
 public class ServiceDao {
 	

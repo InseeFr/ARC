@@ -6,13 +6,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
+import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
-import fr.insee.arc.ws.services.importServlet.bo.TableToRetrieve;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 import fr.insee.arc.ws.services.importServlet.dao.NameDao;
 

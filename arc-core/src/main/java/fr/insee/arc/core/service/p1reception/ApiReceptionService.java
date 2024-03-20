@@ -2,13 +2,13 @@ package fr.insee.arc.core.service.p1reception;
 
 import org.springframework.stereotype.Component;
 
-import fr.insee.arc.core.dataobjects.ArcDatabase;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p1reception.registerarchive.ArchiveRegistrationOperation;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
 import fr.insee.arc.core.service.p1reception.registerfiles.FileRegistration;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 
 /**

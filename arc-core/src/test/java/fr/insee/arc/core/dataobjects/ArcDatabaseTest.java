@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 
 public class ArcDatabaseTest extends InitializeQueryTest {
