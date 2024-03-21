@@ -23,9 +23,9 @@ public class InitializeQueryTest {
     
     public static Connection c = new TestDatabase().testConnection;
 
-    public static Connection e;
+    public static Connection e1;
 
-    public static Connection f;
+    public static Connection e2;
 
 
     @Test
@@ -42,15 +42,15 @@ public class InitializeQueryTest {
     
     public static void buildPropertiesWithOneExecutor(String repertoire) throws SQLException
 	{
-		e = new TestDatabase().testConnection;
-    	buildProperties(repertoire, new Connection[] {c, e});	
+		e1 = new TestDatabase().testConnection;
+    	buildProperties(repertoire, new Connection[] {c, e1});	
 	}
     
     public static void buildPropertiesWithTwoExecutors(String repertoire) throws SQLException
 	{
-		e = new TestDatabase().testConnection;
-		f = new TestDatabase().testConnection;
-    	buildProperties(repertoire, new Connection[] {c, e, f});	
+		e1 = new TestDatabase().testConnection;
+		e2 = new TestDatabase().testConnection;
+    	buildProperties(repertoire, new Connection[] {c, e1, e2});	
 	}
     
     
