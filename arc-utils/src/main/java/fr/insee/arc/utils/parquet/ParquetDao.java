@@ -1,13 +1,14 @@
 package fr.insee.arc.utils.parquet;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.util.ResourceUtils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
@@ -27,6 +28,7 @@ public class ParquetDao {
 
 	public static void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
+		
 		loadDuckdb();
 
 		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:")) {
@@ -37,7 +39,7 @@ public class ParquetDao {
 				exportTableToParquet(connection, table, outputDirectory);
 			}
 
-		} catch (SQLException | FileNotFoundException e) {
+		} catch (SQLException | IOException e) {
 			e.printStackTrace();
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
@@ -86,13 +88,15 @@ public class ParquetDao {
 	}
 
 	private static void attachPostgresDatabasesToDuckdb(Connection connection, ParquetEncryptionKey encryptionKey)
-			throws SQLException, FileNotFoundException {
+			throws SQLException, IOException {
 
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		int numberOfPods = properties.getConnectionProperties().size();
 
 		File f = ResourceUtils.getFile("classpath:duckdb");
-		String path = f.getAbsolutePath();
+		File target = new File("./duckdb");
+		FileUtils.copyDirectory(f, target);
+		String path=target.getAbsolutePath();
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SET custom_extension_repository = " + query.quoteText(path) + ";\n");
