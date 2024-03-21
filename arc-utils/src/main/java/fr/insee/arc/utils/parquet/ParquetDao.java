@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ResourceUtils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
@@ -93,9 +94,10 @@ public class ParquetDao {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		int numberOfPods = properties.getConnectionProperties().size();
 
-		File f = ResourceUtils.getFile("classpath:duckdb");
+		File folder = new ClassPathResource("duckdb").getFile();
+		
 		File target = new File("./duckdb");
-		FileUtils.copyDirectory(f, target);
+		FileUtils.copyDirectory(folder, target);
 		String path=target.getAbsolutePath();
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
