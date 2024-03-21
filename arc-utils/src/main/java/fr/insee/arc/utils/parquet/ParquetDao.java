@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ResourceUtils;
 
@@ -41,7 +42,8 @@ public class ParquetDao {
 			}
 
 		} catch (SQLException | IOException e) {
-			e.printStackTrace();
+			System.out.println("§§§§§");
+			System.out.println(ExceptionUtils.getStackTrace(e));
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
 
@@ -99,6 +101,9 @@ public class ParquetDao {
 		File target = new File("./duckdb");
 		FileUtils.copyDirectory(folder, target);
 		String path=target.getAbsolutePath();
+		
+		System.out.println("§§§§§");
+		System.out.println(path);
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SET custom_extension_repository = " + query.quoteText(path) + ";\n");
@@ -110,6 +115,9 @@ public class ParquetDao {
 
 			String connexionChain = "dbname=" + c.getDatabase() + " user=" + c.getDatabaseUsername() + " port="
 					+ c.getPort() + " password=" + c.getDatabasePassword() + " host=" + c.getHost();
+			
+			System.out.println("§§§§§§§§§§§");
+			System.out.println(connexionChain);
 
 			query.append("ATTACH " + query.quoteText(connexionChain) + " AS " + attachmentName(connectionIndex)
 					+ " (TYPE postgres, READ_ONLY);\n");
