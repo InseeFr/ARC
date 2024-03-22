@@ -1,13 +1,17 @@
 package fr.insee.arc.utils.parquet;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -20,6 +24,8 @@ import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressedUtils;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -28,12 +34,21 @@ public class ParquetDao {
 
 	private static final String ATTACHMENT_NAME_PREFIX = "pg";
 
+	// classpath file containing extension files
+	private static final String DUCKDB_EXTENSION_PROVIDED_FILE = "duckdb/extensions.zip";
+
+	// directory where extension will be unzip and used by duckdb
+	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = "./duckdb/";
+
 	public static void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
-		
+
 		loadDuckdb();
 
 		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:")) {
+			
+			unzipDuckdbPostgresExtensions();
+
 			attachPostgresDatabasesToDuckdb(connection, encryptionKey);
 
 			// exporter la liste des tables en parquet
@@ -42,8 +57,6 @@ public class ParquetDao {
 			}
 
 		} catch (SQLException | IOException e) {
-			System.out.println("§§§§§");
-			System.out.println(ExceptionUtils.getStackTrace(e));
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
 
@@ -96,18 +109,9 @@ public class ParquetDao {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		int numberOfPods = properties.getConnectionProperties().size();
 
-		File folder = new ClassPathResource("duckdb").getFile();
-		
-		File target = new File("./duckdb");
-		FileUtils.copyDirectory(folder, target);
-		String path=target.getAbsolutePath();
-		
-		System.out.println("§§§§§");
-		System.out.println(path);
-
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("SET custom_extension_repository = " + query.quoteText(path) + ";\n");
-		query.append("SET extension_directory  = " + query.quoteText(path) + ";\n");
+		query.append("SET custom_extension_repository = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
+		query.append("SET extension_directory  = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
 		query.append("INSTALL postgres;\n");
 
 		for (int connectionIndex = 0; connectionIndex < numberOfPods; connectionIndex++) {
@@ -115,9 +119,6 @@ public class ParquetDao {
 
 			String connexionChain = "dbname=" + c.getDatabase() + " user=" + c.getDatabaseUsername() + " port="
 					+ c.getPort() + " password=" + c.getDatabasePassword() + " host=" + c.getHost();
-			
-			System.out.println("§§§§§§§§§§§");
-			System.out.println(connexionChain);
 
 			query.append("ATTACH " + query.quoteText(connexionChain) + " AS " + attachmentName(connectionIndex)
 					+ " (TYPE postgres, READ_ONLY);\n");
@@ -130,6 +131,35 @@ public class ParquetDao {
 
 		executeQuery(connection, query);
 
+	}
+
+	private static void unzipDuckdbPostgresExtensions() throws IOException {
+		try (InputStream is = ParquetDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
+			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
+				ZipArchiveEntry zae = zis.getNextEntry();
+				while (zae != null) {
+					
+					// if already uncompressed, try next entry
+					if (new File(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + zae).exists()) {
+						zae = zis.getNextEntry();
+						continue;
+					}
+
+					if (zae.isDirectory()) {
+						FileUtilsArc.createDirIfNotexist(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + zae);
+					} else {
+						try (FileOutputStream fos = new FileOutputStream(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + zae)) {
+							byte[] buffer = new byte[CompressedUtils.READ_BUFFER_SIZE];
+							int len;
+							while ((len = zis.read(buffer)) > 0) {
+								fos.write(buffer, 0, len);
+							}
+						}
+					}
+					zae = zis.getNextEntry();
+				}
+			}
+		}
 	}
 
 	private static void executeQuery(Connection connection, GenericPreparedStatementBuilder query) throws SQLException {
