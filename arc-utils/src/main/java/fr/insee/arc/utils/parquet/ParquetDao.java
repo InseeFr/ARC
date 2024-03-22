@@ -12,11 +12,8 @@ import java.util.List;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
@@ -142,10 +139,11 @@ public class ParquetDao {
 
 	private void unzipDuckdbPostgresExtensions() throws IOException {
 		System.out.println("§§§§");
-		System.out.println(ParquetDao.class.getClassLoader());
-		System.out.println(ParquetDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
 		
-		try (InputStream is = ParquetDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		System.out.println(classloader.getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
+		
+		try (InputStream is = classloader.getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
 				while (zae != null) {
