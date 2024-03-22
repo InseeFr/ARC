@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.database.TableToRetrieve;
@@ -46,7 +47,7 @@ public class ParquetDao {
 
 		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:")) {
 			
-			unzipDuckdbPostgresExtensions();
+			unzipExtensions();
 
 			attachPostgresDatabasesToDuckdb(connection, encryptionKey);
 
@@ -137,13 +138,12 @@ public class ParquetDao {
 
 	}
 
-	private void unzipDuckdbPostgresExtensions() throws IOException {
+	private void unzipExtensions() throws IOException {
 		System.out.println("§§§§");
 		
-		ClassLoader classloader = ClassLoader.getSystemClassLoader();
-		System.out.println(classloader.getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
+		System.out.println(UtilitaireDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
 		
-		try (InputStream is = classloader.getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
+		try (InputStream is = UtilitaireDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
 				while (zae != null) {
