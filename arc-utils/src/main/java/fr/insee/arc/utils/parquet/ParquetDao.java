@@ -57,6 +57,8 @@ public class ParquetDao {
 			}
 
 		} catch (SQLException | IOException e) {
+			System.out.println("§§§§§");
+			System.out.println(ExceptionUtils.getStackTrace(e));
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
 
@@ -119,6 +121,9 @@ public class ParquetDao {
 
 			String connexionChain = "dbname=" + c.getDatabase() + " user=" + c.getDatabaseUsername() + " port="
 					+ c.getPort() + " password=" + c.getDatabasePassword() + " host=" + c.getHost();
+
+			System.out.println("§§§§§§§§§§§");
+			System.out.println(connexionChain);
 
 			query.append("ATTACH " + query.quoteText(connexionChain) + " AS " + attachmentName(connectionIndex)
 					+ " (TYPE postgres, READ_ONLY);\n");
