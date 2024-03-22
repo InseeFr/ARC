@@ -142,6 +142,7 @@ public class ParquetDao {
 
 	private static void unzipDuckdbPostgresExtensions() throws IOException {
 		System.out.println("§§§§");
+		System.out.println(ParquetDao.class.getClassLoader());
 		System.out.println(ParquetDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
 		
 		try (InputStream is = ParquetDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
