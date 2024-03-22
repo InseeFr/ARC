@@ -73,7 +73,7 @@
 									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension.gz" />
 								</gunzip>
 								<mkdir dir="${project.build.directory}/src/main/resources/duckdb"/>
-								<zip basedir="${project.build.directory}/src/main/resources/duckdbtmp" destfile="${basedir}/src/main/resources/duckdb/extensions.zip">
+								<zip basedir="${project.build.directory}/src/main/resources/duckdbtmp" destfile="${project.build.directory}/src/main/resources/duckdb/extensions.zip">
 								</zip>
 								<delete dir="${project.build.directory}/src/main/resources/duckdbtmp"></delete>
 							</target>
