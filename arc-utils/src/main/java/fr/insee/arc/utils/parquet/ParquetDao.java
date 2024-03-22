@@ -15,6 +15,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
@@ -30,6 +31,7 @@ import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
 
+@Component
 public class ParquetDao {
 
 	private static final String ATTACHMENT_NAME_PREFIX = "pg";
