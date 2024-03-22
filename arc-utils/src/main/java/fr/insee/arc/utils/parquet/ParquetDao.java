@@ -42,7 +42,7 @@ public class ParquetDao {
 	// directory where extension will be unzip and used by duckdb
 	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = "./duckdb/";
 
-	public static void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
+	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
 
 		loadDuckdb();
@@ -66,7 +66,7 @@ public class ParquetDao {
 
 	}
 
-	private static void exportTableToParquet(Connection connection, TableToRetrieve table, String outputDirectory)
+	private void exportTableToParquet(Connection connection, TableToRetrieve table, String outputDirectory)
 			throws SQLException {
 
 		PropertiesHandler properties = PropertiesHandler.getInstance();
@@ -100,14 +100,14 @@ public class ParquetDao {
 
 	}
 
-	private static void executeCopy(Connection connection, GenericPreparedStatementBuilder selectQuery, String output)
+	private void executeCopy(Connection connection, GenericPreparedStatementBuilder selectQuery, String output)
 			throws SQLException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("COPY (").append(selectQuery).append(") TO " + query.quoteText(output) + "; ");
 		executeQuery(connection, query);
 	}
 
-	private static void attachPostgresDatabasesToDuckdb(Connection connection, ParquetEncryptionKey encryptionKey)
+	private void attachPostgresDatabasesToDuckdb(Connection connection, ParquetEncryptionKey encryptionKey)
 			throws SQLException, IOException {
 
 		PropertiesHandler properties = PropertiesHandler.getInstance();
@@ -140,7 +140,7 @@ public class ParquetDao {
 
 	}
 
-	private static void unzipDuckdbPostgresExtensions() throws IOException {
+	private void unzipDuckdbPostgresExtensions() throws IOException {
 		System.out.println("§§§§");
 		System.out.println(ParquetDao.class.getClassLoader());
 		System.out.println(ParquetDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
@@ -173,7 +173,7 @@ public class ParquetDao {
 		}
 	}
 
-	private static void executeQuery(Connection connection, GenericPreparedStatementBuilder query) throws SQLException {
+	private void executeQuery(Connection connection, GenericPreparedStatementBuilder query) throws SQLException {
 		try (PreparedStatement stmt = connection.prepareStatement(query.getQueryWithParameters())) {
 			stmt.execute();
 		}
@@ -184,7 +184,7 @@ public class ParquetDao {
 	 * 
 	 * @throws ArcException
 	 */
-	private static void loadDuckdb() throws ArcException {
+	private void loadDuckdb() throws ArcException {
 		try {
 			Class.forName("org.duckdb.DuckDBDriver");
 		} catch (ClassNotFoundException e) {
@@ -200,7 +200,7 @@ public class ParquetDao {
 	 * @param connectionIndex
 	 * @return
 	 */
-	protected static String attachedTableName(int connectionIndex, String tablename) {
+	protected String attachedTableName(int connectionIndex, String tablename) {
 		return attachmentName(connectionIndex) + Delimiters.SQL_SCHEMA_DELIMITER + tablename;
 	}
 
@@ -212,7 +212,7 @@ public class ParquetDao {
 	 * @param connectionIndex
 	 * @return
 	 */
-	protected static String attachmentName(int connectionIndex) {
+	protected String attachmentName(int connectionIndex) {
 		return ATTACHMENT_NAME_PREFIX + Delimiters.SQL_TOKEN_DELIMITER + connectionIndex;
 	}
 

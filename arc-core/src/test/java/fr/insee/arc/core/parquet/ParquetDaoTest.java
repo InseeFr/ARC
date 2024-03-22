@@ -52,7 +52,7 @@ public class ParquetDaoTest extends ParquetDao {
 		// create a test table on executor 1
 		createTestTable(InitializeQueryTest.e2, testTable);
 
-		ParquetDao.exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable),
+		new ParquetDao().exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable),
 				new TableToRetrieve(ArcDatabase.EXECUTOR, testTable)), repertoire, null);
 
 	}
