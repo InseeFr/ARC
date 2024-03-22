@@ -16,7 +16,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.database.TableToRetrieve;
@@ -36,7 +35,7 @@ public class ParquetDao {
 	private static final String DUCKDB_EXTENSION_PROVIDED_FILE = "duckdb/extensions.zip";
 
 	// directory where extension will be unzip and used by duckdb
-	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = "./duckdb/";
+	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = "./duckdb";
 
 	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
@@ -148,15 +147,15 @@ public class ParquetDao {
 				while (zae != null) {
 					
 					// if already uncompressed, try next entry
-					if (new File(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + zae).exists()) {
+					if (new File(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae).exists()) {
 						zae = zis.getNextEntry();
 						continue;
 					}
 
 					if (zae.isDirectory()) {
-						FileUtilsArc.createDirIfNotexist(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + zae);
+						FileUtilsArc.createDirIfNotexist(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae);
 					} else {
-						try (FileOutputStream fos = new FileOutputStream(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + zae)) {
+						try (FileOutputStream fos = new FileOutputStream(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae)) {
 							byte[] buffer = new byte[CompressedUtils.READ_BUFFER_SIZE];
 							int len;
 							while ((len = zis.read(buffer)) > 0) {

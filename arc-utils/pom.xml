@@ -62,20 +62,20 @@
 						</goals>
 						<configuration>
 							<target>
-								<delete dir="${basedir}/src/main/resources/duckdb"></delete>
-								<delete dir="${basedir}/src/main/resources/duckdbtmp"></delete>
-								<mkdir dir="${basedir}/src/main/resources/duckdbtmp/v${project.duckdb.version}/windows_amd64/"/>
-								<gunzip dest="${basedir}/src/main/resources/duckdbtmp/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension">
+								<delete dir="${project.build.directory}/src/main/resources/duckdb"></delete>
+								<delete dir="${project.build.directory}/src/main/resources/duckdbtmp"></delete>
+								<mkdir dir="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/windows_amd64/"/>
+								<gunzip dest="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension">
 									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension.gz" />
 								</gunzip>
-								<mkdir dir="${basedir}/src/main/resources/duckdbtmp/v${project.duckdb.version}/linux_amd64/"/>
-								<gunzip dest="${basedir}/src/main/resources/duckdbtmp/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension">
+								<mkdir dir="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/linux_amd64/"/>
+								<gunzip dest="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension">
 									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension.gz" />
 								</gunzip>
-								<mkdir dir="${basedir}/src/main/resources/duckdb"/>
-								<zip basedir="${basedir}/src/main/resources/duckdbtmp" destfile="${basedir}/src/main/resources/duckdb/extensions.zip">
+								<mkdir dir="${project.build.directory}/src/main/resources/duckdb"/>
+								<zip basedir="${project.build.directory}/src/main/resources/duckdbtmp" destfile="${basedir}/src/main/resources/duckdb/extensions.zip">
 								</zip>
-								<delete dir="${basedir}/src/main/resources/duckdbtmp"></delete>
+								<delete dir="${project.build.directory}/src/main/resources/duckdbtmp"></delete>
 							</target>
 						</configuration>
 					</execution>
