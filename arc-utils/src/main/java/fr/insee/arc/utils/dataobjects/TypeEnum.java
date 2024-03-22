@@ -61,7 +61,7 @@ public enum TypeEnum {
 	            return type;
 	        }
 	    }    
-	    throw new IllegalArgumentException(realName);
+		return TEXT;
 	}
 
 	public boolean isString() {
