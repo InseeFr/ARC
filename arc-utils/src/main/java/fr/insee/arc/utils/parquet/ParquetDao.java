@@ -138,7 +138,8 @@ public class ParquetDao {
 
 	private void unzipExtensions() throws IOException {
 		System.out.println("§§§§§§§§§§");
-		System.out.println(ParquetDao.class.getClassLoader());
+		System.out.println(ParquetDao.class.getClassLoader().getName());
+		System.out.println(ParquetDao.class.getClassLoader().getDefinedPackages()[0]);
 		System.out.println(ParquetDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
 		
 		try (InputStream is = ParquetDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
