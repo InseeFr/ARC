@@ -139,7 +139,7 @@ public class ParquetDao {
 		System.out.println("§§§§§§§§§§");
 		System.out.println(ParquetDao.class.getClassLoader().getName());
 		System.out.println(ParquetDao.class.getClassLoader().getDefinedPackages()[0]);
-		System.out.println(ParquetDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
+		System.out.println(ParquetDao.class.getClassLoader().getResource(""));
 		
 		try (InputStream is = ParquetDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
