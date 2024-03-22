@@ -13,7 +13,6 @@ import java.util.List;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
@@ -29,7 +28,6 @@ import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
 
-@Component
 public class ParquetDao {
 
 	private static final String ATTACHMENT_NAME_PREFIX = "pg";
@@ -139,11 +137,11 @@ public class ParquetDao {
 	}
 
 	private void unzipExtensions() throws IOException {
-		System.out.println("§§§§");
+		System.out.println("§§§§§§§§§§");
+		System.out.println(ParquetDao.class.getClassLoader());
+		System.out.println(ParquetDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
 		
-		System.out.println(UtilitaireDao.class.getClassLoader().getResource(DUCKDB_EXTENSION_PROVIDED_FILE));
-		
-		try (InputStream is = UtilitaireDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
+		try (InputStream is = ParquetDao.class.getClassLoader().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
 				while (zae != null) {
