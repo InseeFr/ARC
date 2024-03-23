@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class ParquetDaoTest extends ParquetDao {
 
 		// create a test table on executor 1
 		String testTable2 = "public.test_table2";
-		createTestTable(InitializeQueryTest.e2, testTable2);
+		createTestTable(InitializeQueryTest.e1, testTable2);
 		// create a test table on executor 1
 		createTestTable(InitializeQueryTest.e2, testTable2);
 
@@ -61,14 +62,12 @@ public class ParquetDaoTest extends ParquetDao {
 		new ParquetDao().exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable1),
 				new TableToRetrieve(ArcDatabase.EXECUTOR, testTable2)), repertoire, null);
 
-		System.out.println("§§§§");
-		System.out.println(Arrays.asList(root.listFiles()));
 		
-		
-		// two file sould had been exported
-		assertEquals(2,root.listFiles().length);
+		List<String> f = Arrays.asList(root.listFiles()).stream().map(t->t.getName()).toList();
+		assertEquals(2, f.size());
+		assertTrue(f.contains("test_table1.parquet"));
+		assertTrue(f.contains("test_table2.parquet"));
 
-		
 	}
 
 	/**

@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
@@ -36,6 +35,9 @@ public class ParquetDao {
 
 	// directory where extension will be unzip and used by duckdb
 	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = "./duckdb";
+	
+	// parquet file format as "file.parquet"
+	private static final String PARQUET_FILE_EXTENSION = ".parquet";
 
 	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
@@ -68,7 +70,7 @@ public class ParquetDao {
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 
-		String output = outputDirectory + File.separator + FormatSQL.extractTableNameToken(table.getTableName());
+		String output = outputDirectory + File.separator + FormatSQL.extractTableNameToken(table.getTableName()) + PARQUET_FILE_EXTENSION;
 
 		if (table.getNod().equals(ArcDatabase.COORDINATOR)) {
 			query.append(
@@ -131,7 +133,7 @@ public class ParquetDao {
 
 	}
 
-	private void unzipExtensions() throws IOException {	
+	private void unzipExtensions() throws IOException {
 		try (InputStream is = getClass().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
