@@ -56,26 +56,26 @@
 				<executions>
 					<execution>
 						<id>download-files</id>
-						<phase>process-resources</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
 							<target>
-								<delete dir="${project.build.directory}/src/main/resources/duckdb"></delete>
-								<delete dir="${project.build.directory}/src/main/resources/duckdbtmp"></delete>
-								<mkdir dir="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/windows_amd64/"/>
-								<gunzip dest="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension">
+								<delete dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdb"></delete>
+								<delete dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp"></delete>
+								<mkdir dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/windows_amd64/"/>
+								<gunzip dest="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension">
 									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/windows_amd64/postgres_scanner.duckdb_extension.gz" />
 								</gunzip>
-								<mkdir dir="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/linux_amd64/"/>
-								<gunzip dest="${project.build.directory}/src/main/resources/duckdbtmp/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension">
+								<mkdir dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/linux_amd64/"/>
+								<gunzip dest="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension">
 									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension.gz" />
 								</gunzip>
-								<mkdir dir="${project.build.directory}/src/main/resources/duckdb"/>
-								<zip basedir="${project.build.directory}/src/main/resources/duckdbtmp" destfile="${project.build.directory}/src/main/resources/duckdb/extensions.zip">
+								<mkdir dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdb"/>
+								<zip basedir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp" destfile="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdb/extensions.zip">
 								</zip>
-								<delete dir="${project.build.directory}/src/main/resources/duckdbtmp"></delete>
+								<delete dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp"></delete>
 							</target>
 						</configuration>
 					</execution>
