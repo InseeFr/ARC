@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
@@ -57,6 +58,8 @@ public class ParquetDao {
 
 		} catch (SQLException | IOException e) {
 
+			System.out.println("§§§§§§§§§§§§§");
+			System.out.println(ExceptionUtils.getStackTrace(e));
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
 
@@ -134,10 +137,6 @@ public class ParquetDao {
 	}
 
 	private void unzipExtensions() throws IOException {
-		
-		System.out.println("§§§§§§§§§§§§§§");
-		System.out.println(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY);
-		
 		try (InputStream is = getClass().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
