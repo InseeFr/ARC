@@ -72,6 +72,14 @@
 								<gunzip dest="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension">
 									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/linux_amd64/postgres_scanner.duckdb_extension.gz" />
 								</gunzip>
+								<mkdir dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/linux_amd64_gcc4/"/>
+								<gunzip dest="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/linux_amd64_gcc4/postgres_scanner.duckdb_extension">
+									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/linux_amd64_gcc4/postgres_scanner.duckdb_extension.gz" />
+								</gunzip>
+								<mkdir dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/linux_arm64/"/>
+								<gunzip dest="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp/v${project.duckdb.version}/linux_arm64/postgres_scanner.duckdb_extension">
+									<url url="http://extensions.duckdb.org/v${project.duckdb.version}/linux_arm64/postgres_scanner.duckdb_extension.gz" />
+								</gunzip>
 								<mkdir dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdb"/>
 								<zip basedir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp" destfile="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdb/extensions.zip">
 								</zip>
