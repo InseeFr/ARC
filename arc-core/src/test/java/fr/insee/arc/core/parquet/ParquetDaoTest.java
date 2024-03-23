@@ -44,27 +44,30 @@ public class ParquetDaoTest extends ParquetDao {
 
 		InitializeQueryTest.buildPropertiesWithTwoExecutors(repertoire);
 
-		String testTable = "public.test_table";
+		String testTable1 = "public.test_table1";
 		// create a test table on coordinator
-		createTestTable(InitializeQueryTest.c, testTable);
+		createTestTable(InitializeQueryTest.c, testTable1);
+
 		// create a test table on executor 1
-		createTestTable(InitializeQueryTest.e1, testTable);
+		String testTable2 = "public.test_table2";
+		createTestTable(InitializeQueryTest.e2, testTable2);
 		// create a test table on executor 1
-		createTestTable(InitializeQueryTest.e2, testTable);
+		createTestTable(InitializeQueryTest.e2, testTable2);
 
 		
 		// directory is empty
 		assertEquals(0,root.listFiles().length);
 		
-		new ParquetDao().exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable),
-				new TableToRetrieve(ArcDatabase.EXECUTOR, testTable)), repertoire, null);
+		new ParquetDao().exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable1),
+				new TableToRetrieve(ArcDatabase.EXECUTOR, testTable2)), repertoire, null);
 
-		// two file sould had been exported
-		assertEquals(2,root.listFiles().length);
-		
 		System.out.println("§§§§");
 		System.out.println(Arrays.asList(root.listFiles()));
 		
+		
+		// two file sould had been exported
+		assertEquals(2,root.listFiles().length);
+
 		
 	}
 
