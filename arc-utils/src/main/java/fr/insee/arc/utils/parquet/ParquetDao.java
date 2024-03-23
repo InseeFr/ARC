@@ -34,7 +34,7 @@ public class ParquetDao {
 	private static final String DUCKDB_EXTENSION_PROVIDED_FILE = "duckdb/extensions.zip";
 
 	// directory where extension will be unzip and used by duckdb
-	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = "./duckdb";
+	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = System.getProperty("java.io.tmpdir") + "./duckdb";
 	
 	// parquet file format as "file.parquet"
 	private static final String PARQUET_FILE_EXTENSION = ".parquet";
