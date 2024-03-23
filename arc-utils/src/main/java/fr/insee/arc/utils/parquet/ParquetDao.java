@@ -134,6 +134,10 @@ public class ParquetDao {
 	}
 
 	private void unzipExtensions() throws IOException {
+		
+		System.out.println("§§§§§§§§§§§§§§");
+		System.out.println(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY);
+		
 		try (InputStream is = getClass().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
