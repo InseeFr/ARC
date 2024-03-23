@@ -54,8 +54,7 @@ public class ParquetDao {
 			}
 
 		} catch (SQLException | IOException e) {
-			System.out.println("§§§§§");
-			System.out.println(ExceptionUtils.getStackTrace(e));
+
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
 
@@ -119,9 +118,6 @@ public class ParquetDao {
 			String connexionChain = "dbname=" + c.getDatabase() + " user=" + c.getDatabaseUsername() + " port="
 					+ c.getPort() + " password=" + c.getDatabasePassword() + " host=" + c.getHost();
 
-			System.out.println("§§§§§§§§§§§");
-			System.out.println(connexionChain);
-
 			query.append("ATTACH " + query.quoteText(connexionChain) + " AS " + attachmentName(connectionIndex)
 					+ " (TYPE postgres, READ_ONLY);\n");
 
@@ -135,10 +131,7 @@ public class ParquetDao {
 
 	}
 
-	private void unzipExtensions() throws IOException {
-		System.out.println("§§§§§§§§§§");
-		System.out.println(getClass().getResource(""));
-		
+	private void unzipExtensions() throws IOException {	
 		try (InputStream is = getClass().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();

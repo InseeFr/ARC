@@ -37,7 +37,7 @@ public class ParquetDaoTest extends ParquetDao {
 		assertEquals("pg_0.arc_bas1.ma_table", attachedTableName(0, "arc_bas1.ma_table"));
 	}
 
-	@Test(expected = Test.None.class)
+	@Test
 	public void exportParquetTestOnExecutor() throws SQLException, IOException, ArcException {
 		File root = testFolder.newFolder("root");
 		String repertoire = root.getAbsolutePath();
@@ -52,9 +52,20 @@ public class ParquetDaoTest extends ParquetDao {
 		// create a test table on executor 1
 		createTestTable(InitializeQueryTest.e2, testTable);
 
+		
+		// directory is empty
+		assertEquals(0,root.listFiles().length);
+		
 		new ParquetDao().exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable),
 				new TableToRetrieve(ArcDatabase.EXECUTOR, testTable)), repertoire, null);
 
+		// two file sould had been exported
+		assertEquals(2,root.listFiles().length);
+		
+		System.out.println("§§§§");
+		System.out.println(Arrays.asList(root.listFiles()));
+		
+		
 	}
 
 	/**
