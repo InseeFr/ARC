@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -35,7 +36,7 @@ public class ParquetDao {
 	private static final String DUCKDB_EXTENSION_PROVIDED_FILE = "duckdb/extensions.zip";
 
 	// directory where extension will be unzip and used by duckdb
-	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = System.getProperty("java.io.tmpdir") + "./duckdb";
+	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = Paths.get(System.getProperty("java.io.tmpdir"), "duckdb").toString();
 	
 	// parquet file format as "file.parquet"
 	private static final String PARQUET_FILE_EXTENSION = ".parquet";
@@ -57,10 +58,7 @@ public class ParquetDao {
 			}
 
 		} catch (SQLException | IOException e) {
-
-			System.out.println("§§§§§§§§§§§§§");
-			System.out.println(ExceptionUtils.getStackTrace(e));
-			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
+			throw new ArcException(ArcExceptionMessage.PARQUET_EXPORT_FAILED);
 		}
 
 	}

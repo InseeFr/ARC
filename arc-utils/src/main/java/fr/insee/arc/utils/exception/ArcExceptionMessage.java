@@ -107,8 +107,9 @@ public enum ArcExceptionMessage {
 	DATE_PARSE_FAILED_VALIDITE_INF("La validité inf %s n'a pas pu être parsée"),
 	DATE_PARSE_FAILED_VALIDITE_SUP("La validité sup %s n'a pas pu être parsée"),
 	
-	ACCESS_TOKEN_NOT_EXIST("Aucun token d'accès fourni")
+	ACCESS_TOKEN_NOT_EXIST("Aucun token d'accès fourni"),
 
+	PARQUET_EXPORT_FAILED("L'export en parquet a échoué")
 	;
 	
 	private String message;
