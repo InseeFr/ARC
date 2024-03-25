@@ -1,4 +1,4 @@
-package fr.insee.arc.core.parquet;
+package fr.insee.arc.utils.parquet;
 
 import static org.junit.Assert.*;
 
@@ -13,13 +13,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.parquet.ParquetDao;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 
 public class ParquetDaoTest extends ParquetDao {
@@ -80,7 +79,7 @@ public class ParquetDaoTest extends ParquetDao {
 	private void createTestTable(Connection connection, String testTableName) throws ArcException {
 
 		// test query on
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.build(SQL.CREATE, SQL.TABLE, testTableName, SQL.AS, SQL.SELECT);
 		query.append("'string'::text as column_string");
 		query.append(",12::int as column_int4");
