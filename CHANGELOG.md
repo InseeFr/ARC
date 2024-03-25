@@ -7,6 +7,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-94.1.9
+- bug fix with filter gui
+
 ## version-94.1.8
 - gui bug fix : import rules and update comment in nomenclature screen
 - tomcat fix as a library was missing in new version of tomcat 10.8
