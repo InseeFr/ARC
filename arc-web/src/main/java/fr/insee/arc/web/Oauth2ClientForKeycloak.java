@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,12 +15,9 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 
-import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.webutils.WebAttributesName;
 
 public class Oauth2ClientForKeycloak {
-
-	private static final Logger LOGGER = LogManager.getLogger(Oauth2ClientForKeycloak.class);
 
 	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_REALM)
 	protected String keycloakRealm;
@@ -36,6 +31,18 @@ public class Oauth2ClientForKeycloak {
 	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_CREDENTIALS)
 	private String keycloakCredential;
 
+
+	private static final String SCOPE_OPENID = "openid";
+	private static final String SCOPE_PROFILE = "profile";
+	private static final String SCOPE_EMAIL = "email";
+	private static final String SCOPE_ROLES = "roles";
+	private static final String[] SCOPES = new String[] {SCOPE_OPENID, SCOPE_PROFILE, SCOPE_EMAIL, SCOPE_ROLES};
+	
+	private static final String CLAIM_ROLES = "roles";
+	private static final String CLAIM_GROUPS = "groups";
+	private static final String CLAIM_REALM_ACCESS = "realm_access";
+
+	
 	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method) {
 
 		String realmUri = keycloakServer + "/realms/" + keycloakRealm;
@@ -49,7 +56,7 @@ public class Oauth2ClientForKeycloak {
 				.clientAuthenticationMethod(method) //
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) //
 				.issuerUri(realmUri) //
-				.scope("openid", "profile", "email", "roles").authorizationUri(realmUri + openIdConnect + "/auth") //
+				.scope(SCOPES).authorizationUri(realmUri + openIdConnect + "/auth") //
 				.tokenUri(realmUri + openIdConnect + "/token") //
 				.userInfoUri(realmUri + openIdConnect + "/userinfo") //
 				.jwkSetUri(realmUri + openIdConnect + "/certs") //
@@ -62,18 +69,18 @@ public class Oauth2ClientForKeycloak {
 			Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
 
 			authorities.forEach(authority -> {
-				if (authority instanceof OidcUserAuthority) {
-					OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority;
+				if (authority instanceof OidcUserAuthority oidcUserAuthority) {
+					
 					OidcUserInfo userInfo = oidcUserAuthority.getUserInfo();
 					
 					@SuppressWarnings("unchecked")
 					List<String> roles = (List<String>) ObjectUtils.firstNonNull(
-							userInfo.getClaimAsStringList("roles"),
-							userInfo.getClaimAsStringList("groups"),
-							userInfo.getClaimAsMap("realm_access")==null ? null : userInfo.getClaimAsMap("realm_access").get("roles"));
+							userInfo.getClaimAsStringList(CLAIM_ROLES),
+							userInfo.getClaimAsStringList(CLAIM_GROUPS),
+							userInfo.getClaimAsMap(CLAIM_REALM_ACCESS)==null ? null : userInfo.getClaimAsMap(CLAIM_REALM_ACCESS).get(CLAIM_ROLES));
 
 					List<SimpleGrantedAuthority> groupAuthorities = roles.stream()
-							.map(g -> new SimpleGrantedAuthority(g)).toList();
+							.map(SimpleGrantedAuthority::new).toList();
 					mappedAuthorities.addAll(groupAuthorities);
 				}
 			});

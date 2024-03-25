@@ -561,7 +561,7 @@ public class VObjectService {
 	 */
 	public boolean insert(VObject currentData, AttributeValue... attributeValues) {
 		
-		if (currentData.getInputFields()==null || currentData.getInputFields().size()==0)
+		if (currentData.getInputFields()==null || currentData.getInputFields().isEmpty())
 		{
 			return false;
 		}
