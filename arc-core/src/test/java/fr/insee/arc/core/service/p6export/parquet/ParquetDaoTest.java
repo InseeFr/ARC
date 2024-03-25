@@ -1,10 +1,11 @@
-package fr.insee.arc.utils.parquet;
+package fr.insee.arc.core.service.p6export.parquet;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 public class ParquetDaoTest extends ParquetDao {
+	
 
 	@Test
 	public void attachmentNameTest() {
@@ -17,4 +18,6 @@ public class ParquetDaoTest extends ParquetDao {
 		assertEquals("pg_0.arc_bas1.ma_table", attachedTableName(0, "arc_bas1.ma_table"));
 	}
 
+
 }
+

@@ -1,4 +1,4 @@
-package fr.insee.arc.utils.parquet;
+package fr.insee.arc.core.service.p6export.parquet;
 
 public class ParquetEncryptionKey {
 

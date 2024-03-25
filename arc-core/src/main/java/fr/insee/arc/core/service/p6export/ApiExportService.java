@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
+import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.parquet.ParquetDao;
-import fr.insee.arc.utils.parquet.ParquetEncryptionKey;
 
 @Component
 public class ApiExportService  extends ApiService {

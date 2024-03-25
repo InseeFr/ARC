@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -85,6 +86,5 @@ public class ApiExportServiceTest extends ApiExportService {
 
 		UtilitaireDao.get(0).executeImmediate(connection, query);
 	}
-
 
 }

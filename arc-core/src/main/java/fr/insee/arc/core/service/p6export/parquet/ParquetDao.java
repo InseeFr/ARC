@@ -1,4 +1,4 @@
-package fr.insee.arc.utils.parquet;
+package fr.insee.arc.core.service.p6export.parquet;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,6 +23,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
 import fr.insee.arc.utils.files.FileUtilsArc;
+import fr.insee.arc.utils.parquet.ParquetExtension;
 import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -35,67 +36,124 @@ public class ParquetDao {
 	private static final String DUCKDB_EXTENSION_PROVIDED_FILE = "duckdb/extensions.zip";
 
 	// directory where extension will be unzip and used by duckdb
-	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = Paths.get(System.getProperty("java.io.tmpdir"), "duckdb").toString();
-	
+	private static final String DUCKDB_EXTENSION_INSTALLATION_DIRECTORY = Paths
+			.get(System.getProperty("java.io.tmpdir"), "duckdb").toString();
+
 	// parquet file format as "file.parquet"
 	private static final String PARQUET_FILE_EXTENSION = ".parquet";
 
+	/**
+	 * Export to parquet
+	 * 
+	 * @param tables
+	 * @param outputDirectory
+	 * @param encryptionKey
+	 * @throws ArcException
+	 */
 	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
 
+		// load duckdb extension
 		loadDuckdb();
 
 		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:")) {
-			
+
+			// unzip extensions
 			unzipExtensions();
 
+			// attach postgres database
 			attachPostgresDatabasesToDuckdb(connection, encryptionKey);
 
-			// exporter la liste des tables en parquet
+			// export tables one by one to parquet
 			for (TableToRetrieve table : tables) {
+				// export table to parquet
 				exportTableToParquet(connection, table, outputDirectory);
 			}
 
 		} catch (SQLException | IOException e) {
+			e.printStackTrace();
 			throw new ArcException(ArcExceptionMessage.PARQUET_EXPORT_FAILED);
 		}
 
 	}
 
+	/**
+	 * 
+	 * @param connection
+	 * @param table
+	 * @param outputDirectory
+	 * @throws SQLException
+	 */
 	private void exportTableToParquet(Connection connection, TableToRetrieve table, String outputDirectory)
 			throws SQLException {
 
+		String outputFileName = exportTablePath(table, outputDirectory);
+		
+		exportCoordinatorTableToParquet(connection, table, outputFileName);
+
+		exportExecutorTableToParquet(connection, table, outputFileName);
+
+	}
+	
+	
+	/**
+	 * export table to parquet if table is located on executor nods
+	 * @param connection
+	 * @param table
+	 * @param outputFileName
+	 * @throws SQLException
+	 */
+	private void exportExecutorTableToParquet(Connection connection, TableToRetrieve table, String outputFileName) throws SQLException {
+		
+		if (!table.getNod().equals(ArcDatabase.EXECUTOR)) {
+			return;
+		}
+		
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		int numberOfPods = properties.getConnectionProperties().size();
-
+		
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		boolean first = true;
+		for (int connectionIndex = ArcDatabase.EXECUTOR
+				.getIndex(); connectionIndex < numberOfPods; connectionIndex++) {
+			if (first) {
+				first = false;
+			} else {
+				query.append(SQL.UNION_ALL);
+			}
+			query.append("SELECT * FROM " + attachedTableName(connectionIndex, table.getTableName()));
+		}
 
-		String output = outputDirectory + File.separator + FormatSQL.extractTableNameToken(table.getTableName()) + PARQUET_FILE_EXTENSION;
+		executeCopy(connection, query, outputFileName);
+		
+	}
 
-		if (table.getNod().equals(ArcDatabase.COORDINATOR)) {
-			query.append(
-					"SELECT * FROM " + attachedTableName(ArcDatabase.COORDINATOR.getIndex(), table.getTableName()));
-			executeCopy(connection, query, output);
+	/**
+	 * export table to parquet if table is located on executor nods
+	 * @param connection
+	 * @param table
+	 * @param outputFileName
+	 * @throws SQLException
+	 */
+	private void exportCoordinatorTableToParquet(Connection connection, TableToRetrieve table, String outputFileName)
+			throws SQLException {
+
+		if (!table.getNod().equals(ArcDatabase.COORDINATOR)) {
 			return;
 		}
 
-		if (table.getNod().equals(ArcDatabase.EXECUTOR)) {
-			boolean first = true;
-			for (int connectionIndex = ArcDatabase.EXECUTOR
-					.getIndex(); connectionIndex < numberOfPods; connectionIndex++) {
-				if (first) {
-					first = false;
-				} else {
-					query.append(SQL.UNION_ALL);
-				}
-				query.append("SELECT * FROM " + attachedTableName(connectionIndex, table.getTableName()));
-			}
-
-			executeCopy(connection, query, output);
-		}
-
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		query.append("SELECT * FROM " + attachedTableName(ArcDatabase.COORDINATOR.getIndex(), table.getTableName()));
+		executeCopy(connection, query, outputFileName);
 	}
 
+	/**
+	 * execute COPY command on duckdb driver
+	 * @param connection
+	 * @param selectQuery
+	 * @param output
+	 * @throws SQLException
+	 */
 	private void executeCopy(Connection connection, GenericPreparedStatementBuilder selectQuery, String output)
 			throws SQLException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
@@ -103,14 +161,23 @@ public class ParquetDao {
 		executeQuery(connection, query);
 	}
 
+	
+	/**
+	 * Attach the postgres databases (coordinator and executors) to duckdb engine
+	 * @param connection
+	 * @param encryptionKey
+	 * @throws SQLException
+	 * @throws IOException
+	 */
 	private void attachPostgresDatabasesToDuckdb(Connection connection, ParquetEncryptionKey encryptionKey)
-			throws SQLException, IOException {
+			throws SQLException {
 
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		int numberOfPods = properties.getConnectionProperties().size();
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("SET custom_extension_repository = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
+		query.append("SET custom_extension_repository = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY)
+				+ ";\n");
 		query.append("SET extension_directory  = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
 		query.append("INSTALL postgres;\n");
 
@@ -133,12 +200,17 @@ public class ParquetDao {
 
 	}
 
+	/**
+	 * unzip the duckdb postgres extension
+	 * @throws IOException
+	 */
 	private void unzipExtensions() throws IOException {
-		try (InputStream is = getClass().getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
+		
+		try (InputStream is = ParquetExtension.class.getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
 				while (zae != null) {
-					
+
 					// if already uncompressed, try next entry
 					if (new File(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae).exists()) {
 						zae = zis.getNextEntry();
@@ -146,9 +218,11 @@ public class ParquetDao {
 					}
 
 					if (zae.isDirectory()) {
-						FileUtilsArc.createDirIfNotexist(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae);
+						FileUtilsArc
+								.createDirIfNotexist(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae);
 					} else {
-						try (FileOutputStream fos = new FileOutputStream(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae)) {
+						try (FileOutputStream fos = new FileOutputStream(
+								DUCKDB_EXTENSION_INSTALLATION_DIRECTORY + File.separator + zae)) {
 							byte[] buffer = new byte[CompressedUtils.READ_BUFFER_SIZE];
 							int len;
 							while ((len = zis.read(buffer)) > 0) {
@@ -181,6 +255,20 @@ public class ParquetDao {
 		}
 	}
 
+	
+	/**
+	 * return the generated file path used when exporting a table
+	 * @param table
+	 * @param outputDirectory
+	 * @return
+	 */
+	protected String exportTablePath(TableToRetrieve table, String outputDirectory)
+	{
+		return outputDirectory + File.separator + FormatSQL.extractTableNameToken(table.getTableName())
+		+ PARQUET_FILE_EXTENSION;
+	}
+	
+	
 	/**
 	 * return the name of an table attached to a given postgre database duckdb use
 	 * database.schema.tablename format
