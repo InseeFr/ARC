@@ -65,9 +65,26 @@ value="<spring:message code="gui.button.exportStart"/>"></input>
 </div>
 </div>
 </div>
+
 <div class="row">
-<div class="col-md-12 border-right" style="margin-top: 2.25rem;"
->
+<div class="col-md-12 border-right ml-0-50 mt-2-25">
+<div class="card m-0 overflow-auto w-fitcontent">
+<div class="card-header bg-primary p-0">
+<h3 class="text-white m-1 float-left" id="viewExport_description"><spring:message code="gui.title.parquetExport"/></h3>
+</div>
+</div>
+<input 
+class="btn btn-primary btn-sm"
+id="startParquetExport.start"
+type="submit"
+doAction="startParquetExport"
+scope="viewExport;viewFileExport;"
+value="<spring:message code="gui.button.startParquetExport"/>"></input>
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-12 border-right mt-2-25">
 <div class="row">
 <div class="col-md">
 <!-- norm list -->

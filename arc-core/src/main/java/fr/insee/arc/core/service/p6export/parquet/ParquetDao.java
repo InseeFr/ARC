@@ -64,6 +64,9 @@ public class ParquetDao {
 			// attach postgres database
 			attachPostgresDatabasesToDuckdb(connection, encryptionKey);
 
+			// create output directory
+			FileUtilsArc.createDirIfNotexist(outputDirectory);
+			
 			// export tables one by one to parquet
 			for (TableToRetrieve table : tables) {
 				// export table to parquet
@@ -88,6 +91,8 @@ public class ParquetDao {
 
 		String outputFileName = exportTablePath(table, outputDirectory);
 		
+		assignTableOnCoordinatorWhenNoScalability(table);
+		
 		exportCoordinatorTableToParquet(connection, table, outputFileName);
 
 		exportExecutorTableToParquet(connection, table, outputFileName);
@@ -95,6 +100,21 @@ public class ParquetDao {
 	}
 	
 	
+	/**
+	 * if no executors nods declared, table declared on executor can are found on coordinator nod
+	 * @param table
+	 */
+	private void assignTableOnCoordinatorWhenNoScalability(TableToRetrieve table) {
+		PropertiesHandler properties = PropertiesHandler.getInstance();
+		int numberOfPods = properties.getConnectionProperties().size();
+		
+		// if no executor nod
+		if (numberOfPods<=ArcDatabase.EXECUTOR.getIndex())
+		{
+			table.setNod(ArcDatabase.COORDINATOR);
+		}
+	}
+
 	/**
 	 * export table to parquet if table is located on executor nods
 	 * @param connection
@@ -109,12 +129,11 @@ public class ParquetDao {
 		}
 		
 		PropertiesHandler properties = PropertiesHandler.getInstance();
-		int numberOfPods = properties.getConnectionProperties().size();
 		
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		boolean first = true;
 		for (int connectionIndex = ArcDatabase.EXECUTOR
-				.getIndex(); connectionIndex < numberOfPods; connectionIndex++) {
+				.getIndex(); connectionIndex < properties.numberOfNods(); connectionIndex++) {
 			if (first) {
 				first = false;
 			} else {
@@ -204,7 +223,6 @@ public class ParquetDao {
 	 * @throws IOException
 	 */
 	private void unzipExtensions() throws IOException {
-		
 		try (InputStream is = ParquetExtension.class.getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();

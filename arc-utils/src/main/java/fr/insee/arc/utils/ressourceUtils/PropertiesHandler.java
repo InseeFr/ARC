@@ -500,6 +500,10 @@ public class PropertiesHandler {
 	public void setConnectionProperties(List<ConnectionAttribute> connectionProperties) {
 		this.connectionProperties = connectionProperties;
 	}
+
+	public int numberOfNods() {
+		return this.getConnectionProperties().size();
+	}
 	
 	
 

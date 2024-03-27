@@ -18,7 +18,7 @@ public class ApiServiceFactoryTest {
 		
 		int capacity=5001;
 		
-		for (TraitementPhase arcPhase:TraitementPhase.getListPhaseC())
+		for (TraitementPhase arcPhase:TraitementPhase.getListPhaseExecutableInBas())
 		{
 			p=ApiServiceFactory.getService(arcPhase, "arc_bas2", capacity, null);
 

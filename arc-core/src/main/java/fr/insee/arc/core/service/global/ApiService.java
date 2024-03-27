@@ -306,9 +306,7 @@ public abstract class ApiService implements IConstanteNumerique {
 
 		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " *******");
 		try {
-
-			if (this.getCurrentPhase().equals(TraitementPhase.INITIALISATION)
-					|| this.getCurrentPhase().equals(TraitementPhase.RECEPTION)) {
+			if (TraitementPhase.getListPhaseAlwaysTodo().contains(this.getCurrentPhase())) {
 				this.todo = true;
 			} else {
 				this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase());

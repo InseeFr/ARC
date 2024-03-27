@@ -36,7 +36,7 @@
 	</div>
 </div>
 
-<div class="mt-4-5"></div>
+<div class="mt-3-00"></div>
 
 <nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse show pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
 		<ul class="navbar-nav flex-column ml-1 mr-0 mb-4">

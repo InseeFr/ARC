@@ -79,6 +79,7 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		
 		// assert
 		byte[] outputArray = bos.toByteArray();
+		// export must contain 1 line for columns name + 1 line for columns type + 26 lines of data
 		assertEquals(28, StringUtils.countMatches(new String(outputArray), "\n"));
 		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS test CASCADE;");
 	}

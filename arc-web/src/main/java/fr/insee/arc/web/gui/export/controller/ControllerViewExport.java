@@ -39,5 +39,9 @@ public class ControllerViewExport extends ServiceViewExport {
     	return startExport(model);
 	}
     
-	
+    @RequestMapping("/secure/startParquetExport")
+    public String startParquetExportAction(Model model) {
+    	return startParquetExport(model);
+	}
+
 }

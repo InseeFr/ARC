@@ -1,11 +1,12 @@
 package fr.insee.arc.core.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public enum TraitementPhase {
     DUMMY(-1, 1), INITIALISATION(0, 1000000), RECEPTION(1, 1000000), CHARGEMENT(2, 1000000), NORMAGE(3, 1000000)
-    , CONTROLE(4, 1000000), MAPPING(5, 1000000);
+    , CONTROLE(4, 1000000), MAPPING(5, 1000000), EXPORT(6,1);
     private TraitementPhase(int anOrdre, int aNbLigneATraiter) {
         this.ordre = anOrdre;
         this.nbLigneATraiter = aNbLigneATraiter;
@@ -80,18 +81,26 @@ public enum TraitementPhase {
         return phase;
     }
     
-	public static List<TraitementPhase> listPhasesAfterPhase(TraitementPhase phase) {
+	public static List<TraitementPhase> listPhasesBetween(TraitementPhase phase, TraitementPhase phaseEnd) {
 		List<TraitementPhase> listePhaseC = new ArrayList<>();
 		for (TraitementPhase t : values()) {
-			if (t.getOrdre()>=phase.getOrdre()) {
+			if (t.getOrdre()>=phase.getOrdre() && t.getOrdre()<=phaseEnd.getOrdre()) {
 				listePhaseC.add(t);
 			}
 		}
 		return listePhaseC;
 	}
 	
-	public static List<TraitementPhase> getListPhaseC() {
-		return listPhasesAfterPhase(TraitementPhase.INITIALISATION);
+	public static List<TraitementPhase> getListPhaseExecutableInBas() {
+		return listPhasesBetween(TraitementPhase.INITIALISATION, TraitementPhase.MAPPING);
+	}
+
+	public static List<TraitementPhase> getListPhaseReportedInBas() {
+		return listPhasesBetween(TraitementPhase.RECEPTION, TraitementPhase.MAPPING);
+	}
+	
+	public static List<TraitementPhase> getListPhaseAlwaysTodo() {
+		return Arrays.asList(TraitementPhase.INITIALISATION, TraitementPhase.RECEPTION, TraitementPhase.EXPORT);
 	}
 	
 	public String tableRegleOfPhaseInSandbox() {

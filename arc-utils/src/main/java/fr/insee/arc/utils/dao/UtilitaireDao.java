@@ -87,7 +87,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 */
 	public int numberOfNods() {
-		return properties.getConnectionProperties().size();
+		return properties.numberOfNods();
 	}
 
 	/**

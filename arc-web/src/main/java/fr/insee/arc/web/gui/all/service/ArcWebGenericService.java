@@ -96,6 +96,8 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 
 	/** Is the current environment a production environment?*/
 	private boolean isEnvProd;
+	/** Is the current environment must be executed as a batch ? */
+	private String isEnvBatch;
 	
 	/** Are the Kubernetes options enabled?*/
 	private boolean isKube;
@@ -166,6 +168,8 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		this.dataObjectService.setSandboxSchema(this.bacASable);
 		
 		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
+		this.isEnvBatch = Sandbox.isEnvSetForBatch(this.bacASable);
+
 		this.isKube = PropertiesHandler.getInstance().isKubernetesActive();
 		
 		dao.initialize(vObjectService, dataObjectService);
@@ -411,7 +415,11 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	public boolean isEnvProd() {
 		return isEnvProd;
 	}
-	
+
+	public String isEnvBatch() {
+		return isEnvBatch;
+	}
+
 	public boolean isDataBaseOk() {
 		return isDataBaseOK;
 	}

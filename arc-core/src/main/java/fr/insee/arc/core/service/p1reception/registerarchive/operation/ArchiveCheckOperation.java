@@ -10,9 +10,13 @@ import fr.insee.arc.core.service.p1reception.registerarchive.bo.Entry;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FileDescriber;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.IArchiveStream;
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.CompressionExtension;
 
 /**
  * Class to check archive
+ * 
  * @author FY2QEQ
  *
  */
@@ -21,10 +25,9 @@ public class ArchiveCheckOperation {
 	private int erreur;
 	private TraitementEtat etat;
 	private String rapport;
-	
+
 	IArchiveStream archiveStream;
 	Entry currentEntry;
-	
 
 	public ArchiveCheckOperation(IArchiveStream archiveStream) {
 		super();
@@ -33,8 +36,9 @@ public class ArchiveCheckOperation {
 
 	/**
 	 * Check every file in the tgz archive and returns the archive content.
+	 * @throws ArcException 
 	 */
-	public FilesDescriber checkArchive(File f, String entrepot) {
+	public FilesDescriber checkArchive(File f, String entrepot) throws ArcException {
 		// Inscription des fichiers au contenu de l'archive
 
 		FilesDescriber contentTemp = new FilesDescriber();
@@ -42,28 +46,30 @@ public class ArchiveCheckOperation {
 		setStatus(0, null, null);
 
 		// Check if the archive is fully readable
-		try 
-		{
+		try {
 			archiveStream.startInputStream(f);
 			// default case if archive is empty of real files
 			setStatus(1, TraitementEtat.KO, TraitementRapport.INITIALISATION_CORRUPTED_ARCHIVE.toString());
 
-			this.currentEntry = archiveStream.getEntry(); 
-			
+			this.currentEntry = archiveStream.getEntry();
+
 			// Check every entry
 			while (currentEntry != null) {
 
 				if (currentEntry.isDirectory()) {
-					currentEntry = archiveStream.getEntry(); 
+					currentEntry = archiveStream.getEntry();
 				} else {
 					setStatus(0, TraitementEtat.OK, null);
 
 					String name = currentEntry.getName();
-					
+
+					// prefix entry name with entrepot
+					String entryNamePrefixedWithEntrepot = addEntrepotPrefixToEntryName(entrepot, f.getName(), name);
+
 					validateEntry();
 
-					contentTemp.add(new FileDescriber(f.getName(), entrepot + name,
-							TraitementTypeFichier.DA, etat, rapport, null));
+					contentTemp.add(new FileDescriber(f.getName(), entryNamePrefixedWithEntrepot , TraitementTypeFichier.DA, etat,
+							rapport, null));
 
 					rapport = null;
 				}
@@ -71,16 +77,14 @@ public class ArchiveCheckOperation {
 		} catch (IOException e1) {
 			erreur = 1;
 			rapport = TraitementRapport.INITIALISATION_CORRUPTED_ARCHIVE.toString();
-		}
-		finally
-		{
+		} finally {
 			archiveStream.close();
 		}
 
 		// Inscription de l'archive
-		contentTemp.add(new FileDescriber(f.getName(), null,
-				erreur == 1 ? TraitementTypeFichier.AC : TraitementTypeFichier.A,
-				erreur > 0 ? TraitementEtat.KO : TraitementEtat.OK, rapport, null));
+		contentTemp.add(
+				new FileDescriber(f.getName(), null, erreur == 1 ? TraitementTypeFichier.AC : TraitementTypeFichier.A,
+						erreur > 0 ? TraitementEtat.KO : TraitementEtat.OK, rapport, null));
 
 		// If there is any error, all files are marked KO with a special report
 		if (erreur > 0) {
@@ -92,6 +96,37 @@ public class ArchiveCheckOperation {
 			}
 		}
 		return contentTemp;
+	}
+
+	/**
+	 * Add entrepot to entry name if required GZ entry get the name of original
+	 * archive name so entrepot musn't be added to these ones as it is already in
+	 * the archive name
+	 * For other archive type, entries name are not dependent from
+	 * archive name so entrepot must be prefixed to them
+	 * 
+	 * @param entrepot
+	 * @param name
+	 * @param name2
+	 * @return
+	 * @throws ArcException 
+	 */
+	protected static String addEntrepotPrefixToEntryName(String entrepot, String archiveName, String entryName) throws ArcException {
+		
+		if (archiveName.endsWith(CompressionExtension.TAR_GZ.getFileExtension())
+				|| archiveName.endsWith(CompressionExtension.TGZ.getFileExtension())) {
+			return entrepot + entryName;
+		}
+		
+		if (archiveName.endsWith(CompressionExtension.ZIP.getFileExtension())) {
+			return entrepot + entryName;
+		}
+		
+		if (archiveName.endsWith(CompressionExtension.GZ.getFileExtension())) {
+			return entryName;
+		}
+		
+		throw new ArcException(ArcExceptionMessage.INVALID_FILE_FORMAT);
 	}
 
 	private void setStatus(int erreur, TraitementEtat etat, String rapport) {

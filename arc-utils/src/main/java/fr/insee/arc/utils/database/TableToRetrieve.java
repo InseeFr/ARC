@@ -29,5 +29,9 @@ public class TableToRetrieve {
 	public String getTableName() {
 		return tableName;
 	}
+
+	public void setNod(ArcDatabase nod) {
+		this.nod = nod;
+	}
 	
 }

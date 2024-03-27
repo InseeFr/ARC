@@ -569,7 +569,7 @@ public class VObjectService {
 		try {
 			LoggerHelper.traceAsComment(LOGGER, "insert()", currentData.getSessionName());
 			Map<String, String> map = new HashMap<>();
-			Arrays.asList(attributeValues).forEach((t) -> map.put(t.getFirst().toLowerCase(), t.getSecond()));
+			Arrays.asList(attributeValues).forEach(t -> map.put(t.getFirst().toLowerCase(), t.getSecond()));
 
 			// Récupération des colonnes de la table cible
 			List<String> nativeFieldList = (ArrayList<String>) UtilitaireDao.get(this.connectionIndex)

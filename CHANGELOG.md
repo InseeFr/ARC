@@ -7,6 +7,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-94.1.10
+- bug fix for gz archive entry name
+- parquet export
+
 ## version-94.1.9
 - bug fix with filter gui
 

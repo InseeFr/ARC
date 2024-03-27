@@ -56,5 +56,17 @@ public class Sandbox {
 		return !found.isEmpty();
 	}
 	
+	public static String isEnvSetForBatch(String env) {
+		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.batchMode", "[]"));
+		Set<String> found=new HashSet<>();
+		
+		j.forEach(item -> {
+            if (item.toString().equals(env))
+            {
+            	found.add(item.toString());
+            }
+        });
+		return (found.isEmpty() ? null : "1");
+	}
 
 }

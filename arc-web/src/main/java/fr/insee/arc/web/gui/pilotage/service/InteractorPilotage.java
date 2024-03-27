@@ -53,7 +53,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 	protected ModelPilotage views;
 
 	public InteractorPilotage() {
-		this.setListePhase(TraitementPhase.getListPhaseC());
+		this.setListePhase(TraitementPhase.getListPhaseExecutableInBas());
 	}
 
 	@ModelAttribute

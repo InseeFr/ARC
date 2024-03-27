@@ -475,13 +475,14 @@ class BatchARC implements IReturnCode {
 
 		// initialiser le tableau de phase
 		int startingPhase = TraitementPhase.CHARGEMENT.getOrdre();
+		int endPhase = TraitementPhase.MAPPING.getOrdre();
 
 		for (TraitementPhase phase : TraitementPhase.values()) {
-			if (phase.getOrdre() >= startingPhase) {
+			if (phase.getOrdre() >= startingPhase && phase.getOrdre() <= endPhase) {
 				phases.add(phase.getOrdre() - startingPhase, phase);
 			}
 		}
-
+		
 		// initialiser le pool de thread
 		for (TraitementPhase phase : phases) {
 			pool.put(phase, new ArrayList<>());

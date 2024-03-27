@@ -169,6 +169,12 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		loggerDispatcher.debug("executerBatch", LOGGER);
 		loggerDispatcher.debug(String.format("Service %s", phaseAExecuter), LOGGER);
 
+		if (!this.getListePhase().contains(phaseAExecuter))
+		{
+			this.views.getViewPilotageBAS().setMessage("validation.error");
+			return generateDisplay(model, RESULT_SUCCESS);
+		}
+		
 		// by default, running an ARC step by GUI will synchronize the sandbox rules first
 		// no need to do that if selected phase is INITIALISATION as INITIALISATION will synchronize the sandbox
 		if (!phaseAExecuter.equals(TraitementPhase.INITIALISATION)) {
@@ -185,20 +191,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		// Maximum number of files processed in each phase iteration
 		int maxFilesPerPhase = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
 		
-		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.batchMode", "[]"));
-		Set<String> found=new HashSet<>();
-		
-		j.forEach(item -> {
-            if (item.toString().equals(getBacASable()))
-            {
-            	found.add(item.toString());
-            }
-        });
-		String batchMode = found.isEmpty() ? null : "1";
-		
-		ApiServiceFactory.getService(phaseAExecuter, getBacASable(),
-				maxFilesPerPhase, batchMode
-		).invokeApi();
+		ApiServiceFactory.getService(phaseAExecuter, getBacASable(), maxFilesPerPhase, isEnvBatch()).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

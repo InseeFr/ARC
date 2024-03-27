@@ -27,7 +27,7 @@ accept-charset="UTF-8"
 <div class="container-fluid">
 <div class="row">
 <!-- left column -->
-<div class="col-md-5 border-right" style="margin-top: 2.25rem;">
+<div class="col-md-5 border-right mt-2-25">
 <div class="row">
 <div class="col-sm-12 col-xl-7 border-right">
 <div class="col-md">
@@ -113,8 +113,7 @@ onclick="submitForm()"
 </div>
 </div>
 </div>
-<div class="col-md-7 border-right" style="margin-top: 2.25rem;"
->
+<div class="col-md-7 border-right mt-2-25">
 <div class="row">
 <div class="col-md">
 <!-- norm list -->

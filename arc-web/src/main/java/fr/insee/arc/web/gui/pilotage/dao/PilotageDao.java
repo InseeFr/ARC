@@ -55,7 +55,7 @@ public class PilotageDao extends VObjectHelperDao {
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT date_entree ");
-		for (TraitementPhase phase : TraitementPhase.listPhasesAfterPhase(TraitementPhase.RECEPTION)) {
+		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
 			for (TraitementEtat etat : new ArrayList<>(Arrays.asList(TraitementEtat.valuesByOrdreAffichage()))) {
 				String columnName = phase.toString().toLowerCase() + "_" + etat.toString().toLowerCase();
 				requete.append("\n, max(CASE WHEN phase_traitement='" + phase + "' and etat_traitement='"

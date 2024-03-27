@@ -10,18 +10,18 @@ import org.junit.Test;
 public class TraitementPhaseTest {
 	
 	@Test
-	public void getListPhaseCShouldNotBeNull() {
-		assertNotNull(TraitementPhase.getListPhaseC());
+	public void getListPhaseExecutableInBasShouldNotBeNull() {
+		assertNotNull(TraitementPhase.getListPhaseExecutableInBas());
 	}
 
 	@Test
-	public void getListPhaseCShoulNotBeEmpty() {
-		assertTrue(!TraitementPhase.getListPhaseC().isEmpty());
+	public void getListPhaseExecutableInBasShoulNotBeEmpty() {
+		assertTrue(!TraitementPhase.getListPhaseExecutableInBas().isEmpty());
 	}
 
 	@Test
-	public void getListPhaseCShouldNotContainsUnordoredElements() {
-		for (TraitementPhase phase : TraitementPhase.getListPhaseC()) {
+	public void getListPhaseExecutableInBasShouldNotContainsUnordoredElements() {
+		for (TraitementPhase phase : TraitementPhase.getListPhaseExecutableInBas()) {
 			assertTrue(phase.toString(), phase.getOrdre() >= 0);
 		}
 	}

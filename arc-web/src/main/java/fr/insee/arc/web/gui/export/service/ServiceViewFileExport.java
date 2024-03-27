@@ -33,8 +33,19 @@ public class ServiceViewFileExport extends InteractorExport {
 		Map<String, List<String>> selection = this.views.getViewFileExport().mapContentSelected();
 		if (!selection.isEmpty()) {
 			for (String s : selection.get("filename")) {
+				
+				File fileToProceed= new File(dirOut + File.separator + s);
+				
 				try {
-					FileUtilsArc.delete(new File(dirOut + File.separator + s));
+					if (fileToProceed.isDirectory())
+					{
+						FileUtilsArc.deleteDirectory(fileToProceed);
+					}
+					else
+					{
+						FileUtilsArc.delete(new File(dirOut + File.separator + s));
+	
+					}
 				} catch (ArcException e) {
 					this.views.getViewFileExport().setMessage("export.file.delete.error");
 					this.views.getViewFileExport().setMessageArgs(s);

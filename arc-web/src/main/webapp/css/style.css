@@ -62,12 +62,20 @@ textarea
     padding-left: 0.3rem;
 }	
 
-.mt-4-5
+.mt-3-00
 {
 	margin-top: 3rem!important;
 }
 
+.mt-2-25
+{
+	margin-top: 2.25rem;
+}
 
+.ml-0-50
+{
+	margin-left: 0.5rem;
+}
 
 .form-control{
 	width: auto;

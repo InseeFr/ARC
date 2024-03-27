@@ -32,6 +32,8 @@ public class ApiServiceFactory {
 				ApiControleServiceFactory.getInstance());
 		this.map.put(TraitementPhase.MAPPING,
 				ApiMappingServiceFactory.getInstance());
+		this.map.put(TraitementPhase.EXPORT,
+				ApiExportServiceFactory.getInstance());
 	}
 
 	private static final ApiServiceFactory getInstance() {

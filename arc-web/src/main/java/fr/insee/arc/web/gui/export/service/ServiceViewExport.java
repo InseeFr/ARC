@@ -17,6 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.factory.ApiServiceFactory;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.web.gui.all.util.VObject;
 
@@ -44,6 +48,15 @@ public class ServiceViewExport extends InteractorExport {
 
 	public String sortExport(Model model) {
 		this.vObjectService.sort(views.getViewExport());
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+	
+	public String startParquetExport(Model model) {
+		
+		int maxFilesPerPhase = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
+		
+		ApiServiceFactory.getService(TraitementPhase.EXPORT, getBacASable(), maxFilesPerPhase, isEnvBatch()).invokeApi();
+		
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
