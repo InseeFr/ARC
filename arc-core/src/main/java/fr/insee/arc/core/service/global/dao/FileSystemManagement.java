@@ -21,6 +21,10 @@ public class FileSystemManagement {
 	/**
 	 * Directory management
 	 */
+	private static final String DIRECTORY_DOWNLOAD_QUALIFIIER = "DOWNLOAD";
+	
+	private static final String DIRECTORY_EXPORT_QUALIFIIER = "EXPORT";
+
 	private static final String DIRECTORY_TOKEN = "_";
 
 	private static final String DIRECTORY_ARCHIVE_QUALIFIIER = "ARCHIVE";
@@ -46,6 +50,10 @@ public class FileSystemManagement {
 		return directoryPath.toString();
 	}
 	
+	public static String directoryEnvDownload(String rootDirectory, String env) {
+		return directoryEnvRoot(rootDirectory, env) + File.separator + DIRECTORY_DOWNLOAD_QUALIFIIER;
+	}
+
 	public static String directoryPhaseEntrepot(String rootDirectory, String env, TraitementPhase t, String entrepot) {
 		return directoryPhaseRoot(rootDirectory, env, t) + DIRECTORY_TOKEN + entrepot;
 	}

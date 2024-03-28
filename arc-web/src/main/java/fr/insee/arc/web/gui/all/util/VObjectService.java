@@ -1,6 +1,7 @@
 package fr.insee.arc.web.gui.all.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -1071,17 +1072,46 @@ public class VObjectService {
 	 * @param fileNames , liste des noms de fichiers obtenus
 	 * @param requetes  , liste des requetes SQL
 	 */
+	public File download(VObject currentData, String dirOut, List<String> fileNames,
+			List<ArcPreparedStatementBuilder> requetes) {
+		File fOut = new File(dirOut + File.separator
+				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
+		try {
+			// Rattachement du zip à la réponse de Struts2
+			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(fOut));
+			try {
+				for (int i = 0; i < requetes.size(); i++) {
+					// Le nom des fichiers à l'interieur du zip seront simple :
+					// fichier1.csv, fichier2.csv etc.
+					// Ajout d'un nouveau fichier
+					ZipEntry entry = new ZipEntry(fileNames.get(i) + ".csv");
+					zos.putNextEntry(entry);
+					// Ecriture dans le fichier
+					UtilitaireDao.get(this.connectionIndex).outStreamRequeteSelect(this.connection, requetes.get(i),
+							zos);
+					zos.closeEntry();
+				}
+			} finally {
+				zos.close();
+			}
+		} catch (IOException | ArcException ex) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
+		}
+		return fOut;
+	}
+
+	/**
+	 * Téléchargement dans un zip de N fichiers csv, les données étant extraites de
+	 * la base de données
+	 *
+	 * @param fileNames , liste des noms de fichiers obtenus
+	 * @param requetes  , liste des requetes SQL
+	 */
 	public void download(VObject currentData, HttpServletResponse response, List<String> fileNames,
 			List<ArcPreparedStatementBuilder> requetes) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
 		response.reset();
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".csv.zip");
+		response.setHeader("Content-Disposition", "attachment; filename="
+				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
 		try {
 			// Rattachement du zip à la réponse de Struts2
 			ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
@@ -1124,39 +1154,21 @@ public class VObjectService {
 	 *
 	 * @param listIdSource
 	 */
-	public void downloadXML(VObject currentData, HttpServletResponse response, ArcPreparedStatementBuilder requete,
-			String repertoire, String anEnvExcecution, String phase) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-		response.reset();
-		response.setHeader("Content-Disposition", "attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow)
-				+ CompressionExtension.TAR_GZ.getFileExtension());
+	public File downloadXML(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete, String dirIn,
+			String anEnvExcecution, String phase) {
+		File fOut = new File(dirOut + File.separator
+				+ getFileNameDownload(currentData, CompressionExtension.TAR_GZ.getFileExtension()));
 
-		TarArchiveOutputStream taos = null;
-		try {
-			taos = new TarArchiveOutputStream(new GZIPOutputStream(response.getOutputStream()));
-			zipOutStreamRequeteSelect(this.connection, requete, taos, repertoire, anEnvExcecution, phase, "ARCHIVE");
+		try (FileOutputStream fos =new FileOutputStream(fOut))
+		{
+			try (TarArchiveOutputStream taos = new TarArchiveOutputStream(fos))
+			{
+				zipOutStreamRequeteSelect(this.connection, requete, taos, dirIn, anEnvExcecution, phase, "ARCHIVE");
+			}
 		} catch (IOException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
-		} finally {
-			try {
-				if (taos != null) {
-					try {
-						taos.close();
-					} catch (IOException ioe) {
-						// Silent catch
-					}
-				}
-				response.getOutputStream().flush();
-				response.getOutputStream().close();
-			} catch (IOException ex) {
-				LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
-			}
 		}
+		return fOut;
 	}
 
 	/**
@@ -1268,19 +1280,42 @@ public class VObjectService {
 	 * @param listRepertoire noms du dernier dossier (chaque fichier pouvant être
 	 *                       dans l'un de la liste)
 	 */
+	public File downloadEnveloppe(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete,
+			String repertoire, List<String> listRepertoire) {
+		File fOut = new File(dirOut + File.separator + getFileNameDownload(currentData, ".tar"));
+
+		TarArchiveOutputStream taos = null;
+		try {
+			taos = new TarArchiveOutputStream(new FileOutputStream(fOut));
+			UtilitaireDao.get(this.connectionIndex).getFilesDataStreamFromListOfInputDirectories(this.connection,
+					requete, taos, repertoire, listRepertoire);
+		} catch (IOException ex) {
+			LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
+		} finally {
+			if (taos != null) {
+				try {
+					taos.close();
+				} catch (IOException ioe) {
+					// Silent catch
+				}
+			}
+		}
+		return fOut;
+	}
+
+	/**
+	 * Télécharger en tar gzip une liste de fichier
+	 *
+	 * @param requete        la selection de fichier avec la clé pertinente qui doit
+	 *                       d'appeler nom_fichier
+	 * @param repertoire     chemin jusqu'à l'avant dernier dossier
+	 * @param listRepertoire noms du dernier dossier (chaque fichier pouvant être
+	 *                       dans l'un de la liste)
+	 */
 	public void downloadEnveloppe(VObject currentData, HttpServletResponse response,
 			ArcPreparedStatementBuilder requete, String repertoire, List<String> listRepertoire) {
-		VObject v0 = fetchVObjectData(currentData.getSessionName());
-
-		if (currentData.getFilterFields() == null) {
-			currentData.setFilterFields(v0.getFilterFields());
-		}
-
-		Date dNow = new Date();
-		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
 		response.reset();
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + v0.getSessionName() + "_" + ft.format(dNow) + ".tar");
+		response.setHeader("Content-Disposition", "attachment; filename=" + getFileNameDownload(currentData, ".tar"));
 
 		try (TarArchiveOutputStream taos = new TarArchiveOutputStream(response.getOutputStream());) {
 			UtilitaireDao.get(this.connectionIndex).getFilesDataStreamFromListOfInputDirectories(this.connection,
@@ -1295,6 +1330,23 @@ public class VObjectService {
 				LoggerHelper.errorGenTextAsComment(getClass(), "downloadEnveloppe()", LOGGER, ex);
 			}
 		}
+	}
+
+	/**
+	 * Génère le nom du fichier ou dossier téléchargé
+	 * 
+	 * @param currentData
+	 * @param extension
+	 * @return
+	 */
+	private String getFileNameDownload(VObject currentData, String extension) {
+		VObject v0 = fetchVObjectData(currentData.getSessionName());
+		if (currentData.getFilterFields() == null) {
+			currentData.setFilterFields(v0.getFilterFields());
+		}
+		Date dNow = new Date();
+		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
+		return v0.getSessionName() + "_" + ft.format(dNow) + extension;
 	}
 
 	/**
@@ -1451,7 +1503,7 @@ public class VObjectService {
 	public void setConnectionIndex(Integer connectionIndex) {
 		this.connectionIndex = connectionIndex;
 	}
-	
+
 	public void resetConnectionIndex() {
 		this.connectionIndex = ArcDatabase.COORDINATOR.getIndex();
 	}

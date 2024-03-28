@@ -1,5 +1,8 @@
 package fr.insee.arc.web.gui.pilotage.dao;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,11 +20,13 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
+import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
+import fr.insee.arc.utils.minio.S3Template;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
@@ -237,8 +242,8 @@ public class PilotageDao extends VObjectHelperDao {
 		
 	}
 	
-	public void downloadFichierBAS(VObject viewFichierBAS, HttpServletResponse response,
-			String repertoire, String bacASable) {
+	public File downloadFichierBAS(VObject viewFichierBAS, String dirOut,
+			String dirIn, String bacASable) {
 		// récupération de la liste des id_source
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder query = vObjectService.queryView(viewFichierBAS);
@@ -246,13 +251,14 @@ public class PilotageDao extends VObjectHelperDao {
 		// sélectionner
 		//
 		if (!selection.isEmpty()) {
-			query.build(SQL.AND, ColumnEnum.ID_SOURCE, SQL.IN, "(", query.sqlListeOfValues(selection.get("id_source")), ") ");
+			query.build(SQL.AND, ColumnEnum.ID_SOURCE, SQL.IN, "(", query.sqlListeOfValues(selection.get(ColumnEnum.ID_SOURCE.getColumnName())), ") ");
 		}
 
 		// optimisation pour avoir des bloc successifs sur la même archive
 		query.build(SQL.ORDER_BY, ColumnEnum.CONTAINER);
 
-		vObjectService.downloadXML(viewFichierBAS, response, query, repertoire, bacASable, TraitementPhase.RECEPTION.toString());
+		return vObjectService.downloadXML(viewFichierBAS, dirOut, query, dirIn, bacASable, TraitementPhase.RECEPTION.toString());
+		
 	}
 	
 	public ArcPreparedStatementBuilder queryUpdateToDelete(VObject viewFichierBAS, String code) {
@@ -265,7 +271,7 @@ public class PilotageDao extends VObjectHelperDao {
 		UtilitaireDao.get(0).executeRequest(null, updateToDelete);
 	}
 	
-	public void downloadBdBAS(VObject viewFichierBAS, HttpServletResponse response,
+	public File downloadBdBAS(VObject viewFichierBAS, String dirOut,
 			List<String> tableDownload, TraitementPhase phase, TraitementEtat etat, String date) throws ArcException {
 		
 		// List of queries that will be executed to download
@@ -329,10 +335,10 @@ public class PilotageDao extends VObjectHelperDao {
 				}
 			}
 		}
-		this.vObjectService.download(viewFichierBAS, response, fileNames, tableauRequete);
+		return this.vObjectService.download(viewFichierBAS, dirOut, fileNames, tableauRequete);
 	}
 	
-	public void downloadEnvelopeBAS(VObject viewFichierBAS, HttpServletResponse response,
+	public File downloadEnvelopeBAS(VObject viewFichierBAS, String dirOut,
 			String chemin, List<String> listRepertoire) {
 		// récupération de la liste des noms d'enloppe
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
@@ -344,11 +350,31 @@ public class PilotageDao extends VObjectHelperDao {
 		if (!selection.isEmpty()) {
 			query.append(" AND container IN (" + query.sqlListeOfValues(selection.get("container")) + ") ");
 		}
-		vObjectService.downloadEnveloppe(viewFichierBAS, response, query, chemin, listRepertoire);
+		return vObjectService.downloadEnveloppe(viewFichierBAS, dirOut, query, chemin, listRepertoire);
 	}
 	
 	
 	
+	public void copyDownloadedFileToS3(File fOut, String bacASable) throws ArcException, IOException {
+		
+		S3Template s3 = ArcS3.INPUT_BUCKET;
+		
+		if (s3.isS3Off()) return;
+	
+		// s3 operations
+		String s3PathOut = bacASable.toUpperCase() + File.separator + "DOWNLOAD/";
+		s3.createDirectory(s3PathOut);
+		s3.upload(fOut, s3PathOut);
+		
+		// delete file on filesystem
+		Files.delete(fOut.toPath());
+		
+		// TODO :
+		// delete file
+		// return file in download[Fichier/Bd/Enveloppe]BAS
+		
+	}
+
 	/**
 	 * Prepare a request selecting the line to change when marking files for
 	 * deletion/replay.

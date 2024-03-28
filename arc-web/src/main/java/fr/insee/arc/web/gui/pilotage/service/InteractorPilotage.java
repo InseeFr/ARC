@@ -1,5 +1,7 @@
 package fr.insee.arc.web.gui.pilotage.service;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +20,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
@@ -161,6 +165,15 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 	public void initializeFichierBAS(VObject viewFichierBAS, VObject viewPilotageBAS, VObject viewRapportBAS) {
 		LoggerHelper.debug(LOGGER, "initializeFichierBAS");
 		dao.initializeFichierBAS(viewFichierBAS, viewPilotageBAS, viewRapportBAS);
+	}
+	
+	public String initDownloadDir()
+	{
+    	String repertoire = properties.getBatchParametersDirectory();
+		Path dirOut = Paths.get(FileSystemManagement.directoryEnvDownload(repertoire, getBacASable()));
+		FileUtilsArc.createDirIfNotexist(dirOut.toFile());
+
+		return dirOut.toString();
 	}
 
 	@Override

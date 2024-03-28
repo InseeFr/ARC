@@ -113,6 +113,8 @@ public class ResetEnvironmentOperation {
 				Paths.get(DirectoryPath.directoryReceptionEtatKO(repertoire, envExecution)).toFile());
 		FileUtilsArc.deleteAndRecreateDirectory(
 				Paths.get(FileSystemManagement.directoryPhaseRoot(repertoire, envExecution, TraitementPhase.EXPORT)).toFile());
+		FileUtilsArc.deleteAndRecreateDirectory(
+				Paths.get(FileSystemManagement.directoryEnvDownload(repertoire, envExecution)).toFile());
 	}
 
 }
