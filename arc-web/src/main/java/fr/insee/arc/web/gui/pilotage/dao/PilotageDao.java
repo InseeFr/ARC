@@ -369,10 +369,6 @@ public class PilotageDao extends VObjectHelperDao {
 		// delete file on filesystem
 		Files.delete(fOut.toPath());
 		
-		// TODO :
-		// delete file
-		// return file in download[Fichier/Bd/Enveloppe]BAS
-		
 	}
 
 	/**
