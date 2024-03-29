@@ -98,6 +98,10 @@ public enum TraitementPhase {
 	public static List<TraitementPhase> getListPhaseReportedInBas() {
 		return listPhasesBetween(TraitementPhase.RECEPTION, TraitementPhase.MAPPING);
 	}
+
+	public static List<TraitementPhase> getListPhaseBatchToLoopOver() {
+		return listPhasesBetween(TraitementPhase.CHARGEMENT, TraitementPhase.MAPPING);
+	}
 	
 	public static List<TraitementPhase> getListPhaseAlwaysTodo() {
 		return Arrays.asList(TraitementPhase.INITIALISATION, TraitementPhase.RECEPTION, TraitementPhase.EXPORT);

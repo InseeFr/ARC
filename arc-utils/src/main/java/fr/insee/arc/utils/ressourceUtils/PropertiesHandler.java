@@ -463,17 +463,36 @@ public class PropertiesHandler {
 	 * Unserialize the connection data found in properties
 	 * 
 	 * @return
+	 * @throws ArcException 
 	 */
 	public List<ConnectionAttribute> getConnectionProperties() {
 		
 		if (this.connectionProperties == null) {
 			connectionProperties = new ArrayList<>();
+			
+			String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
+			String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
+			String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
+			String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
 
+			for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
+				connectionProperties
+						.add(new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
+								databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]));
+			}
+
+			// if executors are declared on pool, set kubernetesExecutorNumber to 0
+			// cannot have at the same time executors declared on pool and executors declared by kubernetes
+			if (connectionProperties.size()>1 && this.getKubernetesExecutorNumber()>0)
+			{
+				this.setKubernetesExecutorNumber(0);
+			}
+			
+			
+			// if kubernetes active, add the number of executors nods to connection pool
+			// this can happen if and only if one coordinator had been declared in pool
 			if (this.isKubernetesActive())
 			{
-				connectionProperties
-				.add(new ConnectionAttribute(this.databaseUrl, this.databaseUsername, this.databasePassword, this.databaseDriverClassName));
-				
 				for (int i=0; i<this.getKubernetesExecutorNumber(); i++)
 				{
 					connectionProperties
@@ -483,19 +502,6 @@ public class PropertiesHandler {
 							, this.databasePassword //
 							, this.databaseDriverClassName //
 							));					
-				}
-			}
-			else
-			{
-				String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
-				String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
-				String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
-				String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
-	
-				for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
-					connectionProperties
-							.add(new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
-									databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]));
 				}
 			}
 		}
