@@ -14,16 +14,42 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class BatchArcDao {
 
-	public static List<String> execQuerySelectArchiveEnCours(String envExecution) throws ArcException {
+	/**
+	 * select archive not fully proceed by former batch (etape=1)
+	 * 
+	 * @param volatileOn
+	 * @param envExecution
+	 * @return
+	 * @throws ArcException
+	 */
+	public static List<String> execQuerySelectArchiveEnCours(String envExecution)
+			throws ArcException {
+			return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
+					new ArcPreparedStatementBuilder("select distinct container from "
+							+ ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution) + " where etape=1")))
+					.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
+	}
+
+	/**
+	 * select archives not exported (date_client = null)
+	 * used for volatile mode
+	 * @param envExecution
+	 * @return
+	 * @throws ArcException
+	 */
+	public static List<String> execQuerySelectArchiveNotExported(String envExecution)
+			throws ArcException {
 		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
 				new ArcPreparedStatementBuilder("select distinct container from "
-						+ ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution) + " where etape=1")))
+						+ ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution) + " where date_client is null")))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
 
 	/**
-	 * Reset the status of interrupted archives in the pilotage table
-	 * Archives entry marked as "encours" are deleted and set back to "finished" in the former phase
+	 * Reset the status of interrupted archives in the pilotage table Archives entry
+	 * marked as "encours" are deleted and set back to "finished" in the former
+	 * phase
+	 * 
 	 * @param envExecution
 	 * @throws ArcException
 	 */
@@ -45,8 +71,9 @@ public class BatchArcDao {
 	}
 
 	/**
-	 * Create the pilotage batch table if it doesn't exist
-	 * It may happen only if the application is started firstly and exclusively in batch mode without any built database
+	 * Create the pilotage batch table if it doesn't exist It may happen only if the
+	 * application is started firstly and exclusively in batch mode without any
+	 * built database
 	 * 
 	 * @throws ArcException
 	 */
@@ -59,58 +86,56 @@ public class BatchArcDao {
 		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, requete);
 	}
 
-	
 	/**
 	 * Query the initialization timestamp
+	 * 
 	 * @return
 	 * @throws ArcException
 	 */
 	public static String execQueryLastInitialisationTimestamp() throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("select last_init from " + ViewEnum.PILOTAGE_BATCH.getFullName());
-		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(null,query);
+		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(null, query);
 	}
-	
-	
+
 	/**
 	 * Update the initialization timestamp
+	 * 
 	 * @param intervalForInitializationInDay
 	 * @param hourToTriggerInitializationInProduction
 	 * @throws ArcException
 	 */
-	public static void execUpdateLastInitialisationTimestamp(Integer intervalForInitializationInDay, Integer hourToTriggerInitializationInProduction) throws ArcException {
-		
+	public static void execUpdateLastInitialisationTimestamp(Integer intervalForInitializationInDay,
+			Integer hourToTriggerInitializationInProduction) throws ArcException {
+
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.UPDATE, ViewEnum.PILOTAGE_BATCH.getFullName());
-		query.build(SQL.SET, "last_init=to_char(current_date+interval '" + intervalForInitializationInDay + " days','yyyy-mm-dd')||':"+ hourToTriggerInitializationInProduction+ "'");
+		query.build(SQL.SET, "last_init=to_char(current_date+interval '" + intervalForInitializationInDay
+				+ " days','yyyy-mm-dd')||':" + hourToTriggerInitializationInProduction + "'");
 		query.build(",", "operation=case when operation='R' then 'O' else operation end ");
 		query.build(SQL.END_QUERY);
 
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,query);
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query);
 	}
 
-	
-	public static Integer execQueryAnythingLeftTodo(String envExecution)
-	{
+	public static Integer execQueryAnythingLeftTodo(String envExecution) {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		
+
 		query.build(SQL.SELECT, "count(*)", SQL.FROM);
 		query.build("(");
 		query.build(SQL.SELECT, SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
 		query.build(SQL.WHERE, ColumnEnum.ETAPE, "=", "1");
 		query.build(SQL.LIMIT, "1");
 		query.build(")", ViewEnum.ALIAS_A);
-		
+
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getInt(null, query);
 	}
-	
-	public static Boolean execQueryIsProductionOn() throws ArcException
-	{
+
+	public static Boolean execQueryIsProductionOn() throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName());
 		query.build(SQL.WHERE, ColumnEnum.OPERATION, "=", query.quoteText("O"));
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(null, query);
-	}		
-			
-	
+	}
+
 }
