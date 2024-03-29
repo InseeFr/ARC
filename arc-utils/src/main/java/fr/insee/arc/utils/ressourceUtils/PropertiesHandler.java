@@ -450,6 +450,11 @@ public class PropertiesHandler {
 		map.put("version", getVersion());
 		map.put("buildDate", getVersionDate());
 		map.put("gitCommitId", getGitCommitId());
+		map.put("number_of_nods", String.valueOf(getConnectionProperties().size()));
+		map.put("volatile", String.valueOf(!getKubernetesExecutorVolatile().isEmpty()));
+		map.put("number_of_volatile_executors", String.valueOf(getKubernetesExecutorNumber()));
+		map.put("S3_Input", String.valueOf(!getS3InputApiUri().isEmpty()));
+		map.put("S3_Output", String.valueOf(!getS3OutputApiUri().isEmpty()));
 		return map;
 	}
 

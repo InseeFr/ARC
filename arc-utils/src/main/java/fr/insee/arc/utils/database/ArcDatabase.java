@@ -27,5 +27,21 @@ public enum ArcDatabase {
 		return numberOfExecutorNodsWhenMultiNods>0?numberOfExecutorNodsWhenMultiNods:0;
 	}
 
+	/**
+	 * number of total nods (coordinator + executor)
+	 * @return
+	 */
+	public static int numberOfNods()
+	{
+		return UtilitaireDao.get(0).numberOfNods();
+	}
 	
+	/**
+	 * return true if database are scaled with executor nods
+	 * @return
+	 */
+	public static boolean isScaled()
+	{
+		return numberOfNods() > ArcDatabase.EXECUTOR.getIndex();
+	}
 }

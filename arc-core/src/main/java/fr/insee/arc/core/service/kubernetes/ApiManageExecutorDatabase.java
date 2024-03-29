@@ -28,7 +28,6 @@ public class ApiManageExecutorDatabase {
 		
 		for (String statefulJsonConfiguration : BuildJsonConfiguration.statefuls())
 		{
-			
 			RestQuery restQuery = BuildRestQuery.createStateful();
 			results.add(KubernetesApi.execute(
 					restQuery.getUri(), //

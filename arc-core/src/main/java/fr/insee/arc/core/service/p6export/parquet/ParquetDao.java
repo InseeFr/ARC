@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class ParquetDao {
 		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:")) {
 
 			// unzip extensions
-			unzipExtensions();
+			unzipExtensions(connection);
 
 			// attach postgres database
 			attachPostgresDatabasesToDuckdb(connection, encryptionKey);
@@ -74,6 +75,7 @@ public class ParquetDao {
 			}
 
 		} catch (SQLException | IOException e) {
+			e.printStackTrace();
 			throw new ArcException(ArcExceptionMessage.PARQUET_EXPORT_FAILED);
 		}
 
@@ -90,29 +92,11 @@ public class ParquetDao {
 			throws SQLException {
 
 		String outputFileName = exportTablePath(table, outputDirectory);
-		
-		assignTableOnCoordinatorWhenNoScalability(table);
-		
+				
 		exportCoordinatorTableToParquet(connection, table, outputFileName);
 
 		exportExecutorTableToParquet(connection, table, outputFileName);
 
-	}
-	
-	
-	/**
-	 * if no executors nods declared, table declared on executor can are found on coordinator nod
-	 * @param table
-	 */
-	private void assignTableOnCoordinatorWhenNoScalability(TableToRetrieve table) {
-		PropertiesHandler properties = PropertiesHandler.getInstance();
-		int numberOfPods = properties.getConnectionProperties().size();
-		
-		// if no executor nod
-		if (numberOfPods<=ArcDatabase.EXECUTOR.getIndex())
-		{
-			table.setNod(ArcDatabase.COORDINATOR);
-		}
 	}
 
 	/**
@@ -220,9 +204,20 @@ public class ParquetDao {
 
 	/**
 	 * unzip the duckdb postgres extension
+	 * @param connection 
 	 * @throws IOException
+	 * @throws SQLException 
 	 */
-	private void unzipExtensions() throws IOException {
+	private void unzipExtensions(Connection connection) throws IOException, SQLException {
+
+		// check if temporary folder /temp/duckdb/version/ already exists
+		// if yes, do nothing : extensions have already been extracted
+		if (Paths.get(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY, readDuckDbVersion(connection)).toFile().exists())
+		{
+			return;
+		}
+		
+		// unzip the extension file
 		try (InputStream is = ParquetExtension.class.getResourceAsStream(DUCKDB_EXTENSION_PROVIDED_FILE)) {
 			try (ZipArchiveInputStream zis = new ZipArchiveInputStream(is)) {
 				ZipArchiveEntry zae = zis.getNextEntry();
@@ -251,6 +246,20 @@ public class ParquetDao {
 				}
 			}
 		}
+	}
+
+	private String readDuckDbVersion(Connection connection) throws SQLException {
+		String version;
+		try (PreparedStatement stmt = connection.prepareStatement("SELECT version()")) {
+			stmt.execute();
+			
+			try (ResultSet rs= stmt.getResultSet())
+			{
+				rs.next();
+				version = rs.getString(1);
+			}
+		}
+		return version;
 	}
 
 	private void executeQuery(Connection connection, GenericPreparedStatementBuilder query) throws SQLException {
