@@ -43,6 +43,8 @@
 		<property name="kubernetesExecutorDatabase" value="#{systemEnvironment['KUBERNETES_EXECUTOR_DATABASE'] ?: '${fr.insee.arc.kubernetes.executor.database}' }"></property>
 		<property name="kubernetesExecutorPort" value="#{systemEnvironment['KUBERNETES_EXECUTOR_PORT'] ?: '${fr.insee.arc.kubernetes.executor.port}' }"></property>
 		<property name="kubernetesExecutorVolatile" value="#{systemEnvironment['KUBERNETES_EXECUTOR_VOLATILE'] ?: '${fr.insee.arc.kubernetes.executor.volatile}' }"></property>
+		
+		<property name="processExport" value="#{systemEnvironment['PROCESS_EXPORT'] ?: '${fr.insee.arc.process.export}' }"></property>
 				
 		<property name="s3InputApiUri" value="#{systemEnvironment['S3_INPUT_API_URI'] ?: '${fr.insee.arc.s3.input.api.uri}' }"></property>
 		<property name="s3InputBucket" value="#{systemEnvironment['S3_INPUT_BUCKET'] ?: '${fr.insee.arc.s3.input.bucket}' }"></property>

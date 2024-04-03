@@ -65,6 +65,9 @@ public class PropertiesHandler {
 	
 	private Boolean kubernetesActive;
 	
+	/* export data end of batch ? */
+	private String processExport;
+
 	private String s3InputApiUri;
 	private String s3InputBucket;
 	private String s3InputAccess;
@@ -379,6 +382,14 @@ public class PropertiesHandler {
 			this.kubernetesActive =  kubernetesExecutorNumber>0;
 		}
 		return kubernetesActive;
+	}
+	
+	public String getProcessExport() {
+		return processExport;
+	}
+
+	public void setProcessExport(String processExport) {
+		this.processExport = processExport;
 	}
 
 	public String getS3InputApiUri() {
