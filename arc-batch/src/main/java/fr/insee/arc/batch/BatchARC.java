@@ -102,7 +102,10 @@ class BatchARC implements IReturnCode {
 	// is production on ?
 	private boolean productionOn;
 
-	// are executors nod volatile ?
+	// data from executors must be automatically exported ?
+	private boolean exportOn;
+
+	// will delete executor nods
 	private boolean volatileOn;
 
 	private boolean exit = false;
@@ -122,15 +125,15 @@ class BatchARC implements IReturnCode {
 		try {
 
 			// set batch parameters
-			executeIfProductionActive(this::batchParametersPrepare);
+			executeIfProductionActive(this::batchParametersGet);
 
 			// prepare batch
 			executeIfProductionActive(this::batchEnvironmentPrepare);
 
-			// execute Initialization phase or Executor synchronization (volatile mode)
+			// execute Initialization phase or Executor synchronization
 			executeIfProductionActive(this::phaseInitializationExecute);
 
-			// execute Initialization phase or Executor synchronization (volatile mode)
+			// execute Reception phase
 			executeIfProductionActive(this::phaseReceptionExecute);
 
 			// execute the loop
@@ -156,12 +159,27 @@ class BatchARC implements IReturnCode {
 		method.run();
 	}
 
+	/**
+	 * if kubernetes executor are defined and volatile is on
+	 * 
+	 * @param method
+	 * @throws ArcException
+	 */
 	private void executeIfVolatile(ThrowingRunnable method) throws ArcException {
 		if (!this.volatileOn) {
 			return;
 		}
-		
-		message("Volatile mode is on. Executors will be created and deleted if possible && tables will be exported to parquet");
+
+		message("Volatile mode is on");
+		method.run();
+	}
+
+	private void executeIfParquetActive(ThrowingRunnable method) throws ArcException {
+		if (!this.exportOn) {
+			return;
+		}
+
+		message("Parquet export is on");
 		method.run();
 	}
 
@@ -172,44 +190,46 @@ class BatchARC implements IReturnCode {
 		message("Database is scaled");
 		method.run();
 	}
-	
-	private void batchParametersPrepare() throws ArcException {
-	
+
+	private void batchParametersGet() {
+
+		message("Récupération des paramètres du batch");
+
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
-	
+
 		boolean keepInDatabase = Boolean
 				.parseBoolean(bdParameters.getString(null, "LanceurARC.keepInDatabase", "false"));
-	
+
 		// pour le batch en cours, l'ensemble des enveloppes traitées ne peut pas
 		// excéder une certaine taille
 		int tailleMaxReceptionEnMb = bdParameters.getInt(null, "LanceurARC.tailleMaxReceptionEnMb", 10);
-	
+
 		// Maximum number of files to load
 		int maxFilesToLoad = bdParameters.getInt(null, "LanceurARC.maxFilesToLoad", 101);
-	
+
 		// Maximum number of files processed in each phase iteration
 		int maxFilesPerPhase = bdParameters.getInt(null, "LanceurARC.maxFilesPerPhase", 1000000);
-	
+
 		// fréquence à laquelle les phases sont démarrées
 		this.poolingDelay = bdParameters.getInt(null, "LanceurARC.poolingDelay", 1000);
-	
+
 		// heure d'initalisation en production
 		hourToTriggerInitializationInProduction = bdParameters.getInt(null,
 				"ApiService.HEURE_INITIALISATION_PRODUCTION", 22);
-	
+
 		// interval entre chaque initialisation en nb de jours
 		intervalForInitializationInDay = bdParameters.getInt(null, "LanceurARC.INTERVAL_JOUR_INITIALISATION", 7);
-	
+
 		// nombre d'iteration de la boucle batch entre chaque routine de maintenance de
 		// la base de données
 		numberOfIterationBewteenDatabaseMaintenanceRoutine = bdParameters.getInt(null,
 				"LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL", 500);
-	
+
 		// nombre d'iteration de la boucle batch entre chaque routine de vérification du
 		// reste à faire
 		numberOfIterationBewteenCheckTodo = bdParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
 				10);
-	
+
 		// either we take env and envExecution from database or properties
 		// default is from properties
 		if (Boolean.parseBoolean(bdParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
@@ -217,11 +237,11 @@ class BatchARC implements IReturnCode {
 		} else {
 			envExecution = properties.getBatchExecutionEnvironment();
 		}
-	
+
 		envExecution = Patch.normalizeSchemaName(envExecution);
-	
+
 		repertoire = properties.getBatchParametersDirectory();
-	
+
 		mapParam.put(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION, repertoire);
 		mapParam.put(PhaseParameterKeys.KEY_FOR_BATCH_CHUNK_ID, new SimpleDateFormat("yyyyMMddHH").format(new Date()));
 		mapParam.put(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
@@ -229,14 +249,23 @@ class BatchARC implements IReturnCode {
 		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_FILES_TO_LOAD, String.valueOf(maxFilesToLoad));
 		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_FILES_PER_PHASE, String.valueOf(maxFilesPerPhase));
 		mapParam.put(PhaseParameterKeys.KEY_FOR_KEEP_IN_DATABASE, String.valueOf(keepInDatabase));
-	
+
 		message(mapParam.toString());
-	
-		this.volatileOn = !properties.getKubernetesExecutorVolatile().isEmpty();
-	
+
+		this.exportOn = !properties.getProcessExport().isEmpty();
+
+		message("Export to parquet : "+exportOn);
+
+		// volatile mode is on if kubernetes have executor defined and volatile mode is
+		// set
+		this.volatileOn = !properties.getKubernetesExecutorVolatile().isEmpty() //
+				&& (properties.getKubernetesExecutorNumber() > 0);
+
+		message("Volaile database : "+volatileOn);
+		
 		message("Main");
 		message("Batch ARC " + properties.fullVersionInformation().toString());
-	
+
 	}
 
 	/**
@@ -248,14 +277,13 @@ class BatchARC implements IReturnCode {
 	 */
 	private void batchEnvironmentPrepare() throws ArcException {
 
-		message("Traitement Début");
+		message("Préparation de l'environnement");
+
+		// recover process if last batch didn't finish well
+		resetPendingFilesFromPilotage();
 
 		// database maintenance on pilotage table so that index won't bloat
 		maintenanceTablePilotageBatch();
-
-		// delete work directories and move back files that were pending but not
-		// finished
-		message("Déplacements de fichiers");
 
 		// on vide les repertoires de chargement OK, KO, ENCOURS
 		effacerRepertoireChargement(repertoire, envExecution);
@@ -268,25 +296,33 @@ class BatchARC implements IReturnCode {
 
 	}
 
+	/**
+	 * Reset the pending file status from pilotage Pending files can occurs when the
+	 * former batch run didn't finish or crahs
+	 * 
+	 * @throws ArcException
+	 */
+	private void resetPendingFilesFromPilotage() throws ArcException {
+
+		BatchArcDao.execQueryResetPendingFilesInPilotageTable(envExecution);
+
+		// if volatile mode on, put back all the not fully proceeded files in reception
+		// phase
+		executeIfVolatile(() -> BatchArcDao.execQueryResetPendingFilesInPilotageTableVolatile(envExecution));
+	}
+
 	private void executorsDatabaseCreate() throws ArcException {
-		if (properties.getKubernetesExecutorNumber() == 0)
-		{
-			return;
-		}
 		message(ApiManageExecutorDatabase.delete().toString());
 		message(ApiManageExecutorDatabase.create().toString());
 	}
 
 	/**
-	 * Delete the volatile executor database
+	 * Delete the volatile executor database Can only happen if executors are
+	 * declared on kubernetes
 	 * 
 	 * @throws ArcException
 	 */
 	private void executorsDatabaseDelete() throws ArcException {
-		if (properties.getKubernetesExecutorNumber() == 0)
-		{
-			return;
-		}
 		message(ApiManageExecutorDatabase.delete().toString());
 	}
 
@@ -300,7 +336,7 @@ class BatchARC implements IReturnCode {
 		// Delete entry files if no interruption or no problems
 		effacerRepertoireChargement(repertoire, envExecution);
 
-		executeIfVolatile(this::exportToParquet);
+		executeIfParquetActive(this::exportToParquet);
 
 		executeIfVolatile(this::executorsDatabaseDelete);
 
@@ -326,9 +362,6 @@ class BatchARC implements IReturnCode {
 	 */
 	private void maintenanceTablePilotageBatch() throws ArcException {
 
-		// reset the pending files status in pilotage
-		BatchArcDao.execQueryResetPendingFilesInPilotageTable(envExecution);
-
 		// create the pilotage batch table if it doesn't exists
 		BatchArcDao.execQueryCreatePilotageBatch();
 
@@ -348,6 +381,8 @@ class BatchARC implements IReturnCode {
 	 * @throws IOException
 	 */
 	private void effacerRepertoireChargement(String directory, String envExecution) throws ArcException {
+
+		message("Déplacements de fichiers");
 
 		// Effacer les fichiers des répertoires OK et KO
 		cleanDirectory(directory, envExecution, TraitementEtat.OK);
@@ -415,17 +450,17 @@ class BatchARC implements IReturnCode {
 	 * @param recevoir
 	 * @throws ArcException
 	 */
-	private void phaseReceptionExecute() throws ArcException {
+	private void phaseReceptionExecute() {
 		if (dejaEnCours) {
-			message("Reprise des fichiers en cours de traitement");
-			BatchArcDao.execQueryResetPendingFilesInPilotageTable(envExecution);
-		} else {
-			message("Reception de nouveaux fichiers");
-			PhaseThreadFactory recevoir = new PhaseThreadFactory(mapParam, TraitementPhase.RECEPTION);
-			recevoir.execute();
-			message("Reception : " + recevoir.getReport().getNbObject() + " objets enregistrés en "
-					+ recevoir.getReport().getDuree() + " ms");
+			message("Reprise du traitement des fichiers du batch précédent. Pas de phase reception");
+			return;
 		}
+
+		message("Reception de nouveaux fichiers");
+		PhaseThreadFactory recevoir = new PhaseThreadFactory(mapParam, TraitementPhase.RECEPTION);
+		recevoir.execute();
+		message("Reception : " + recevoir.getReport().getNbObject() + " objets enregistrés en "
+				+ recevoir.getReport().getDuree() + " ms");
 
 	}
 
@@ -450,25 +485,26 @@ class BatchARC implements IReturnCode {
 			return;
 		}
 
-		// if no initialization phase had been run, metadata on executor nods must be synchronized
+		// if no initialization phase had been run, metadata on executor nods must be
+		// synchronized
 		executeIfExecutors(this::synchronizeExecutorsMetadata);
 
 	}
-	
+
 	/**
 	 * Synchronize executors metadata with coordinator
+	 * 
 	 * @throws ArcException
 	 */
 	private void synchronizeExecutorsMetadata() throws ArcException {
-		
+
 		message("Synchronization vers les executeurs en cours");
-		
+
 		new SynchronizeRulesAndMetadataOperation(new Sandbox(null, this.envExecution))
-		.synchroniserSchemaExecutionAllNods();
-		
+				.synchroniserSchemaExecutionAllNods();
+
 		message("Synchronization terminé");
 	}
-	
 
 	/**
 	 * Copy the files from the archive directory to ok directory
@@ -510,7 +546,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private void deplacerFichiersNonTraites() throws ArcException {
 
-		List<String> aBouger = volatileOn ? //
+		List<String> aBouger = exportOn ? //
 				BatchArcDao.execQuerySelectArchiveNotExported(envExecution) //
 				: BatchArcDao.execQuerySelectArchiveEnCours(envExecution);
 
@@ -533,8 +569,7 @@ class BatchARC implements IReturnCode {
 	 * @param pool
 	 * @return
 	 */
-	private void initializeBatchLoop(List<TraitementPhase> phases,
-			Map<TraitementPhase, List<PhaseThreadFactory>> pool) {
+	private void initializeBatchLoop() {
 		int stepNumber = (TraitementPhase.MAPPING.getOrdre() - TraitementPhase.CHARGEMENT.getOrdre()) + 2;
 		this.delay = poolingDelay / stepNumber;
 
@@ -557,7 +592,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private void executeLoopOverPhases() throws ArcException {
 
-		initializeBatchLoop(phases, pool);
+		initializeBatchLoop();
 
 		// boucle de chargement
 		message("Début de la boucle d'itération");
@@ -579,6 +614,8 @@ class BatchARC implements IReturnCode {
 			waitAndClear();
 
 		} while (!exit);
+
+		message("Fin de la boucle d'itération");
 
 	}
 
@@ -622,24 +659,30 @@ class BatchARC implements IReturnCode {
 	}
 
 	private void startMaintenanceThread() {
-		if (iteration % numberOfIterationBewteenDatabaseMaintenanceRoutine == 0) {
-			if (!maintenance.isAlive()) {
-				message(iteration + ": database maintenance started");
-				maintenance = new Thread() {
-					@Override
-					public void run() {
-						try {
-							DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_NONE);
-							DatabaseMaintenance.maintenancePilotage(null, envExecution, FormatSQL.VACUUM_OPTION_NONE);
-						} catch (ArcException e) {
-							e.logMessageException();
-						}
-	
-					}
-				};
-				maintenance.start();
-			}
+		if ((iteration % numberOfIterationBewteenDatabaseMaintenanceRoutine) != 0) {
+			return;
 		}
+
+		message(iteration + ": boucle Chargement->Mapping en cours");
+		
+		if (maintenance.isAlive()) {
+			return;
+		}
+
+		message(iteration + ": database maintenance started");
+		
+		maintenance = new Thread() {
+			@Override
+			public void run() {
+				try {
+					DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_NONE);
+					DatabaseMaintenance.maintenancePilotage(null, envExecution, FormatSQL.VACUUM_OPTION_NONE);
+				} catch (ArcException e) {
+					e.logMessageException();
+				}
+			}
+		};
+		maintenance.start();
 	}
 
 	/**

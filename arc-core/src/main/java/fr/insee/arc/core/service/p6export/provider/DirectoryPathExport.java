@@ -9,6 +9,8 @@ public class DirectoryPathExport {
 		throw new IllegalStateException("Utility class");
 	}
 
+	private static final String S3_EXPORT_ROOT = "ARC";
+
 	/**
 	 * Methods to provide directories paths
 	 * 
@@ -16,13 +18,14 @@ public class DirectoryPathExport {
 	 * @param env
 	 * @return
 	 */
-	public static String directoryExport (String rootDirectory, String env, String dateExport) {
-		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, dateExport);
+	public static String directoryExport(String rootDirectory, String env, String dateExport) {
+		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT,
+				dateExport);
 	}
 
 	public static String s3Export(String env, String dateExport) {
-		return FileSystemManagement.directoryPhaseRootSubdirectories("", env, TraitementPhase.EXPORT, dateExport);
+		return FileSystemManagement.directoryPhaseRootSubdirectories(S3_EXPORT_ROOT, env, TraitementPhase.EXPORT,
+				dateExport);
 	}
 
-	
 }

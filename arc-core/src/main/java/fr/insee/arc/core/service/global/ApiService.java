@@ -15,6 +15,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
@@ -62,7 +63,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	private int reportNumberOfObject = 0;
 
 	protected String idSource;
-
+	
 	protected boolean todo = false;
 
 	protected Map<String, List<String>> tabIdSource;
@@ -104,7 +105,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		// Tables de pilotage et pilotage temporaire
 		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(this.envExecution);
 		this.tablePilTemp = TableNaming.temporaryTableName(this.envExecution, aCurrentPhase, ViewEnum.PILOTAGE_FICHIER);
-
+		
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** Fin constructeur ApiService **");
 	}
 
@@ -151,21 +152,30 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @return
 	 */
 	private boolean checkTodo(String tablePil, TraitementPhase phaseAncien) {
+		
+		if (this.getCurrentPhase().getConditionExecution().equals(ConditionExecution.AUCUN_PREREQUIS))
+		{
+			return true;
+		}
+		
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		boolean checkTodoResult = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
 		requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien.toString()) + " AND "
 				+ requete.quoteText(TraitementEtat.OK.toString()) + "=ANY(etat_traitement) ");
-		requete.append("and etape=1 ");
-		requete.append("limit 1 ");
+		requete.append(" AND ");
+		requete.append(this.getCurrentPhase().getConditionExecution().getSqlFilter());
+		requete.append(" LIMIT 1 ");
+				
 		try {
 			checkTodoResult = UtilitaireDao.get(0).hasResults(this.connexion.getCoordinatorConnection(), requete);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "checkTodo()", ex);
 		}
+		
 		return checkTodoResult;
 	}
-
+	
 	/**
 	 * Marque dans la table de pilotage les id_source qui vont être traités dans la
 	 * phase Si des id_source sont déjà en traitement, la méthode en selectionnera
@@ -306,11 +316,7 @@ public abstract class ApiService implements IConstanteNumerique {
 
 		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " *******");
 		try {
-			if (TraitementPhase.getListPhaseAlwaysTodo().contains(this.getCurrentPhase())) {
-				this.todo = true;
-			} else {
-				this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase());
-			}
+			this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase());
 			LoggerHelper.info(LOGGER_APISERVICE, "A faire - " + this.getCurrentPhase() + " : " + this.todo);
 
 			if (this.initialiser()) {

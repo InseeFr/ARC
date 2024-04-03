@@ -15,7 +15,7 @@ public enum SQL {
 
 	BEGIN("BEGIN;"), END("END;"),
 
-	AND("AND"), OR("OR"), UNION_ALL("UNION ALL"), IN("IN"), NOT("NOT"),
+	AND("AND"), OR("OR"), UNION("UNION"), UNION_ALL("UNION ALL"), IN("IN"), NOT("NOT"),
 	
 	LIMIT("LIMIT"), OFFSET("OFFSET"),
 

@@ -63,8 +63,6 @@ public class PropertiesHandler {
 	private String kubernetesExecutorPort;
 	private String kubernetesExecutorVolatile;
 	
-	private Boolean kubernetesActive;
-	
 	/* export data end of batch ? */
 	private String processExport;
 
@@ -375,14 +373,6 @@ public class PropertiesHandler {
 	public void setKubernetesExecutorVolatile(String kubernetesExecutorVolatile) {
 		this.kubernetesExecutorVolatile = kubernetesExecutorVolatile;
 	}
-
-	public boolean isKubernetesActive() {
-		if (this.kubernetesActive==null)
-		{
-			this.kubernetesActive =  kubernetesExecutorNumber>0;
-		}
-		return kubernetesActive;
-	}
 	
 	public String getProcessExport() {
 		return processExport;
@@ -502,7 +492,7 @@ public class PropertiesHandler {
 			
 			// if kubernetes active, add the number of executors nods to connection pool
 			// this can happen if and only if one coordinator had been declared in pool
-			if (this.isKubernetesActive())
+			if (this.kubernetesExecutorNumber > 0)
 			{
 				for (int i=0; i<this.getKubernetesExecutorNumber(); i++)
 				{

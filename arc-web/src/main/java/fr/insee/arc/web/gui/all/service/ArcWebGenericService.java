@@ -170,7 +170,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
 		this.isEnvBatch = Sandbox.isEnvSetForBatch(this.bacASable);
 
-		this.isKube = PropertiesHandler.getInstance().isKubernetesActive();
+		this.isKube = PropertiesHandler.getInstance().getKubernetesExecutorNumber() > 0;
 		
 		dao.initialize(vObjectService, dataObjectService);
 		

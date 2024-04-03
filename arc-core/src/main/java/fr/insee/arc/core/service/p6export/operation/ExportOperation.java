@@ -11,9 +11,11 @@ import fr.insee.arc.utils.exception.ArcException;
 public class ExportOperation {
 
 	private ExportDao exportDao;
+	private String paramBatch;
 	
-	public ExportOperation(Sandbox coordinatorSandbox) {
+	public ExportOperation(Sandbox coordinatorSandbox, String paramBatch) {
 		this.exportDao = new ExportDao(coordinatorSandbox);
+		this.paramBatch = paramBatch;
 	}
 
 	public void exportParquet() throws ArcException {
@@ -28,7 +30,14 @@ public class ExportOperation {
 		
 		// export to parquet
 		exportDao.exportTablesToParquet(dateExport, tablesToExport);
-
+		
+		// copy exported directory to s3
+		exportDao.copyToS3Out();
+		
+		// mark exported data in pilotage table in batch mode
+		if (paramBatch!=null)
+			exportDao.markExportedData();
+		
 	}
 
 }

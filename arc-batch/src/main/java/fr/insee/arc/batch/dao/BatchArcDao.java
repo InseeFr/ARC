@@ -6,6 +6,8 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
@@ -15,33 +17,53 @@ import fr.insee.arc.utils.structure.GenericBean;
 public class BatchArcDao {
 
 	/**
-	 * select archive not fully proceed by former batch (etape=1)
+	 * Query to check what archives had not been fully proceeded depending on the phase execution condition
+	 * 
+	 * @param envExecution
+	 * @param condition
+	 * @return
+	 */
+	private static ArcPreparedStatementBuilder queryPipelineNotFinished(String envExecution,
+			ConditionExecution condition) {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, SQL.DISTINCT, ColumnEnum.CONTAINER);
+		query.build(SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
+		query.build(SQL.WHERE, condition.getSqlFilter());
+		return query;
+	}
+
+	/**
+	 * Select the archives not fully proceeded by former batch (etape=1)
 	 * 
 	 * @param volatileOn
 	 * @param envExecution
 	 * @return
 	 * @throws ArcException
 	 */
-	public static List<String> execQuerySelectArchiveEnCours(String envExecution)
-			throws ArcException {
-			return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
-					new ArcPreparedStatementBuilder("select distinct container from "
-							+ ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution) + " where etape=1")))
-					.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
+	public static List<String> execQuerySelectArchiveEnCours(String envExecution) throws ArcException {
+
+		ArcPreparedStatementBuilder query = queryPipelineNotFinished(envExecution,
+				ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE);
+
+		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query))
+				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
 
 	/**
-	 * select archives not exported (date_client = null)
-	 * used for volatile mode
+	 * Select the archives not exported (date_client = null) used for volatile mode
+	 * 
 	 * @param envExecution
 	 * @return
 	 * @throws ArcException
 	 */
-	public static List<String> execQuerySelectArchiveNotExported(String envExecution)
-			throws ArcException {
-		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null,
-				new ArcPreparedStatementBuilder("select distinct container from "
-						+ ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution) + " where date_client is null")))
+	public static List<String> execQuerySelectArchiveNotExported(String envExecution) throws ArcException {
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE));
+		query.build(SQL.UNION);
+		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PIPELINE_TERMINE_DONNEES_NON_EXPORTEES));
+		
+		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
 
@@ -69,6 +91,39 @@ public class BatchArcDao {
 		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeBlock(null, query);
 
 	}
+	
+
+	/**
+	 * reset to reception phase all files witch hasn't been proceed fully
+	 * @param envExecution
+	 * @throws ArcException 
+	 */
+	public static void execQueryResetPendingFilesInPilotageTableVolatile(String envExecution) throws ArcException {
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append("WITH tmp_pending_files AS ( ");
+		query.append("\n SELECT id_source FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
+		query.append("\n WHERE "+ConditionExecution.PIPELINE_TERMINE_DONNEES_NON_EXPORTEES.getSqlFilter());
+		query.append("\n UNION ALL ");
+		query.append("\n SELECT id_source FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
+		query.append("\n WHERE "+ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE.getSqlFilter());
+		query.append("\n )");
+		query.append("\n , tmp_delete_pendings_not_in_reception AS ( ");
+		query.append("\n DELETE FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution)+ " a USING tmp_pending_files b ");
+		query.append("\n WHERE a.id_source = b.id_source ");
+		query.append("\n AND a.phase_traitement != "+query.quoteText(TraitementPhase.RECEPTION.toString())); 
+		query.append("\n ) ");
+		query.append("\n UPDATE " + ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution)+ " a ");
+		query.append("\n SET etape=1 ");
+		query.append("\n FROM tmp_pending_files b ");
+		query.append("\n WHERE a.id_source=b.id_source ");
+		query.append("\n AND a.phase_traitement = "+query.quoteText(TraitementPhase.RECEPTION.toString()));
+		query.append("\n AND a.etat_traitement = "+query.quoteText(TraitementEtat.OK.getSqlArrayExpression())+"::text[]");
+
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query);
+					
+	}
+
 
 	/**
 	 * Create the pilotage batch table if it doesn't exist It may happen only if the
@@ -124,7 +179,7 @@ public class BatchArcDao {
 		query.build(SQL.SELECT, "count(*)", SQL.FROM);
 		query.build("(");
 		query.build(SQL.SELECT, SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
-		query.build(SQL.WHERE, ColumnEnum.ETAPE, "=", "1");
+		query.build(SQL.WHERE, ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE.getSqlFilter());
 		query.build(SQL.LIMIT, "1");
 		query.build(")", ViewEnum.ALIAS_A);
 
