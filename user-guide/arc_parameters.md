@@ -8,9 +8,9 @@
 
 [3- Process configuration](#3--Process-configuration)
 
-[4- Kubernetes-configuration](#4--Kubernetes-configuration)
+[4- Kubernetes configuration](#4--Kubernetes-configuration)
 
-[5- S3-configuration](#5--S3-configuration)
+[5- S3 configuration](#5--S3-configuration)
 
 
 ## 1- Database configuration
