@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.util.Arrays;
 import org.springframework.stereotype.Service;
 
 import fr.insee.arc.utils.exception.ArcException;
@@ -468,45 +469,57 @@ public class PropertiesHandler {
 	 */
 	public List<ConnectionAttribute> getConnectionProperties() {
 		
-		if (this.connectionProperties == null) {
-			connectionProperties = new ArrayList<>();
-			
-			String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
-			String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
-			String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
-			String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
+		if (this.connectionProperties != null) {
+			return this.connectionProperties;
+		}
+		
+		connectionProperties = new ArrayList<>();
+		
+		String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
+		String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
+		String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
+		String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
+		
+		// driver may only be declared once for all databases
+		if (databaseDriverClassNames.length==1 && databaseUrls.length>1)
+		{
+			String driverClassName = databaseDriverClassNames[0];
+			databaseDriverClassNames = new String[databaseUrls.length];
+			Arrays.fill(databaseDriverClassNames, driverClassName);
+		}
 
-			for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
+		for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
+			connectionProperties
+					.add(new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
+							databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]));
+		}
+
+		// if executors are declared on pool, set kubernetesExecutorNumber to 0
+		// cannot have at the same time executors declared on pool and executors declared by kubernetes
+		if (connectionProperties.size()>1 && this.getKubernetesExecutorNumber()>0)
+		{
+			this.setKubernetesExecutorNumber(0);
+		}
+		
+		
+		// if kubernetes active, add the number of executors nods to connection pool
+		// this can happen if and only if one coordinator had been declared in pool
+		if (this.kubernetesExecutorNumber > 0)
+		{
+			for (int i=0; i<this.getKubernetesExecutorNumber(); i++)
+			{
 				connectionProperties
-						.add(new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
-								databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]));
-			}
-
-			// if executors are declared on pool, set kubernetesExecutorNumber to 0
-			// cannot have at the same time executors declared on pool and executors declared by kubernetes
-			if (connectionProperties.size()>1 && this.getKubernetesExecutorNumber()>0)
-			{
-				this.setKubernetesExecutorNumber(0);
-			}
-			
-			
-			// if kubernetes active, add the number of executors nods to connection pool
-			// this can happen if and only if one coordinator had been declared in pool
-			if (this.kubernetesExecutorNumber > 0)
-			{
-				for (int i=0; i<this.getKubernetesExecutorNumber(); i++)
-				{
-					connectionProperties
-					.add(new ConnectionAttribute(
-							KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i, this.kubernetesExecutorDatabase, this.kubernetesExecutorPort) //
-							, this.kubernetesExecutorUser
-							, this.databasePassword //
-							, this.databaseDriverClassName //
-							));					
-				}
+				.add(new ConnectionAttribute(
+						KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i, this.kubernetesExecutorDatabase, this.kubernetesExecutorPort) //
+						, this.kubernetesExecutorUser
+						, this.databasePassword //
+						, this.databaseDriverClassName //
+						));					
 			}
 		}
+		
 		return this.connectionProperties;
+
 	}
 
 	public void setConnectionProperties(List<ConnectionAttribute> connectionProperties) {
