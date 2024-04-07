@@ -11,7 +11,7 @@
 
 [Functionnal diagram](https://github.com/InseeFr/ARC/raw/master/user-guide/diagrammes_fonctionnels.pdf)
 
-[Arc parameters : properties and environment variables](https://github.com/InseeFr/ARC/raw/master/user-guide/arc_parameters.md)
+[Arc parameters : properties and environment variables](user-guide/arc_parameters.md)
 
 ## Workbench for acquisition and normalization of data sets
 [![Build Status](https://github.com/InseeFr/ARC/actions/workflows/build.yml/badge.svg)](https://github.com/InseeFr/ARC/actions/workflows/build.yml)
@@ -164,7 +164,7 @@ set "JAVA_OPTS=%JAVA_OPTS% -Djava.protocol.handler.pkgs=org.apache.catalina.webr
 
 #### Examples of properties settings
 
-Check [Arc parameters : properties and environment variables](https://github.com/InseeFr/ARC/raw/master/user-guide/arc_parameters.md) for full documentation on ARC properties and environment variables.
+Check [Arc parameters : properties and environment variables](user-guide/arc_parameters.md) for full documentation on ARC properties and environment variables.
 
 ##### Set the root directory for the application
 ```properties

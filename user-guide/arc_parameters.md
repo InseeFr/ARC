@@ -2,10 +2,14 @@
 
 ## Index
 
-* [1- Database configuration](#1--Database-configuration)
+[1- Database configuration](#1--Database-configuration)
+
 [2- Loggers configuration](#2--Loggers-configuration)
+
 [3- Process configuration](#3--Process-configuration)
+
 [4- Kubernetes-configuration](#4--Kubernetes-configuration)
+
 [5- S3-configuration](#5--S3-configuration)
 
 
