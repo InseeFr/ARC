@@ -309,7 +309,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					st.execute(ModeRequete.configureQuery(requete, modes));
 					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
 				} catch (SQLException e) {
-					st.cancel();
+					try {
+						st.cancel();
+					}
+					catch (SQLException cancelException) {
+						LoggerHelper.error(LOGGER, requete);
+						throw e;
+					}
 					LoggerHelper.error(LOGGER, requete);
 					throw e;
 				}
