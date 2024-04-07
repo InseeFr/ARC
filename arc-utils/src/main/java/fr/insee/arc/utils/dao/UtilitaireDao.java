@@ -315,7 +315,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				}
 			}
 		} catch (SQLException e) {
-			throw new ArcException(e, ArcExceptionMessage.SQL_EXECUTE_FAILED).logFullException();
+			throw new ArcException(e, ArcExceptionMessage.SQL_EXECUTE_FAILED, e.getMessage()).logFullException();
 		} finally {
 			if (connexionWrapper.isLocal()) {
 				connexionWrapper.close();
@@ -468,7 +468,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 		} catch (SQLException sqlException) {
 			LoggerHelper.error(LOGGER, "Lors de l'exécution de", requete.getQuery());
-			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED).logFullException();
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED, sqlException.getMessage()).logFullException();
 		}
 	}
 
@@ -864,7 +864,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				copyManager.copyOut("COPY " + table + " TO STDOUT WITH (FORMAT BINARY)", os);
 			}
 		} catch (SQLException sqlException) {
-			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED).logFullException();
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED, sqlException.getMessage()).logFullException();
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.STREAM_WRITE_FAILED);
 		} finally {
@@ -989,7 +989,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			}
 
 		} catch (SQLException sqlException) {
-			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED).logFullException();
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED, sqlException.getMessage()).logFullException();
 		}
 	}
 

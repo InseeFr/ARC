@@ -75,8 +75,7 @@ public class ParquetDao {
 			}
 
 		} catch (SQLException | IOException e) {
-			e.printStackTrace();
-			throw new ArcException(ArcExceptionMessage.PARQUET_EXPORT_FAILED);
+			throw new ArcException(ArcExceptionMessage.SQL_EXECUTE_FAILED, e.getMessage());
 		}
 
 	}

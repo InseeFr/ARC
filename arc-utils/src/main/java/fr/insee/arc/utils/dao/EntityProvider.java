@@ -83,7 +83,7 @@ public abstract class EntityProvider<T> implements Function<ResultSet, T> {
 			}
 			return result;
 		} catch (SQLException sqlException) {
-			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED).logFullException();
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED, sqlException.getMessage()).logFullException();
 		}
 	}
 

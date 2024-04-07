@@ -77,7 +77,7 @@ public class ExecuteEngineOperation {
 				throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED);
 			}
 			catch (SQLException e) {
-				throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
+				throw new ArcException(ArcExceptionMessage.SQL_EXECUTE_FAILED, e.getMessage());
 			}
 		
 	}
