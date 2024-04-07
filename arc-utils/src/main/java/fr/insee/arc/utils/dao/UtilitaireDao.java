@@ -397,7 +397,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			targetPreparedStatement.setBytes(bindVariableIndex + 1,
 					(byte[]) requete.getParameters().get(bindVariableIndex).getValue());
 		}
-		;
 	}
 
 	/**
