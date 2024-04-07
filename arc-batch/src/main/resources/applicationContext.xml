@@ -39,7 +39,8 @@
 		<property name="versionDate" value="${git.commit.time:}"></property>
 		<property name="gitCommitId" value="${git.commit.id:}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
-		<property name="batchExecutionEnvironment" value="${fr.insee.arc.batch.parametre.envExecution:arc_prod}"></property>
+		
+		<property name="batchExecutionEnvironment" value="#{systemEnvironment['ENV_EXECUTION'] ?: '${fr.insee.arc.batch.parametre.envExecution}' }"></property>
 		
 		<property name="kubernetesApiUri" value="#{systemEnvironment['KUBERNETES_API_URI'] ?: '${fr.insee.arc.kubernetes.api.uri}' }"></property>
 		<property name="kubernetesApiNamespace" value="#{systemEnvironment['KUBERNETES_API_NAMESPACE'] ?: '${fr.insee.arc.kubernetes.api.namespace}' }"></property>
