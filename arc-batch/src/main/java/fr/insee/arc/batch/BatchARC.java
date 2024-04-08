@@ -279,6 +279,9 @@ class BatchARC implements IReturnCode {
 
 		message("Préparation de l'environnement");
 
+		// create volatile database
+		executeIfVolatile(this::executorsDatabaseCreate);
+		
 		// recover process if last batch didn't finish well
 		resetPendingFilesFromPilotage();
 
@@ -290,9 +293,6 @@ class BatchARC implements IReturnCode {
 
 		// des archives n'ont elles pas été traitées jusqu'au bout ?
 		deplacerFichiersNonTraites();
-
-		// create volatile database
-		executeIfVolatile(this::executorsDatabaseCreate);
 
 	}
 
