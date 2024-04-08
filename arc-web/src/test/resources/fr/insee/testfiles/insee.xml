@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Insee>
+<Etablissement>
+<Nom_Etablissement>DR Centre Val de Loire</Nom_Etablissement>
+<Adresse_Etablissement>Orléans</Adresse_Etablissement>
+	<Individu>
+		<Nom>Dupont</Nom>
+	<Prénom>Jean</Prénom>
+	<Date_de_naissance>01/01/1980</Date_de_naissance>
+	<Service>SNDI</Service>
+	</Individu>
+</Etablissement>
+</Insee>

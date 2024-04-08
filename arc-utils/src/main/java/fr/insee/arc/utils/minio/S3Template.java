@@ -54,6 +54,16 @@ public class S3Template {
 
 	private OkHttpClient httpClient;
 	
+	
+	/**
+	 * test if s3 in turned off
+	 * @return
+	 */
+	public boolean isS3Off()
+	{
+		return s3ApiUri.isEmpty();
+	}
+	
 	/**
 	 * Récupère le minioClient en le recréant si nécessaire.
 	 * 
@@ -86,7 +96,7 @@ public class S3Template {
 	 */
 	public void createDirectory(String path) throws ArcException {
 		
-		if (s3ApiUri.isEmpty()) return;
+		if (isS3Off()) return;
 		
 		path = asDirectory(path); // ajouté au path si manquant
 		int indexSecondLastSubstr = path.lastIndexOf("/", path.length() - 2); // index de l'avant dernier "/"
@@ -153,7 +163,7 @@ public class S3Template {
 	 */
 	public void copy(String pathFrom, String pathTo) throws ArcException {
 		
-		if (s3ApiUri.isEmpty()) return;
+		if (isS3Off()) return;
 		
 		try {
 			getMinioClient().copyObject(CopyObjectArgs.builder().bucket(bucket).object(normalizePath(pathTo))
@@ -175,7 +185,7 @@ public class S3Template {
 	 */
 	public void download(String sourceS3Path, String targetFilePath) throws ArcException {
 		
-		if (s3ApiUri.isEmpty()) return;
+		if (isS3Off()) return;
 		
 		File targetFile = new File(targetFilePath);
 		
@@ -192,7 +202,7 @@ public class S3Template {
 	
 	public void downloadToDirectory(String sourceS3Path, String targetDirectoryPath) throws ArcException {
 		
-		if (s3ApiUri.isEmpty()) return;
+		if (isS3Off()) return;
 		
 		String targetFilePath = targetDirectoryPath + File.separator + ManipString.substringAfterLast(sourceS3Path, "/");
 		
@@ -208,6 +218,9 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public void upload(File fileFrom, String pathTo) throws ArcException {
+		
+		if (isS3Off()) return;
+		
 		try {
 			getMinioClient().uploadObject(
 					UploadObjectArgs.builder().bucket(bucket).object(normalizePath(pathTo)).filename(fileFrom.getPath()).build());
@@ -227,7 +240,7 @@ public class S3Template {
 	 */
 	public void delete(String path) throws ArcException {
 		
-		if (s3ApiUri.isEmpty()) return;
+		if (isS3Off()) return;
 		
 		try {
 			getMinioClient().removeObject(RemoveObjectArgs.builder().bucket(bucket).object(normalizePath(path)).build());
@@ -367,7 +380,7 @@ public class S3Template {
 	public List<String> listObjectsInDirectory(String path, Boolean isRecursive, Boolean includeExists,
 			Boolean includeSubdirs) throws ArcException {
 		
-		if (s3ApiUri.isEmpty()) return new ArrayList<String>();
+		if (isS3Off()) return new ArrayList<String>();
 		
 		List<String> listNames = new ArrayList<>();
 		Iterator<Result<Item>> listObject = getMinioClient()

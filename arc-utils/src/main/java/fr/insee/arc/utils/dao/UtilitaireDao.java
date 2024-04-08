@@ -573,7 +573,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		boolean find;
 		String receptionDirectoryRoot = "";
 		try {
-			g = new GenericBean(this.executeRequest(null, requete));
+			g = new GenericBean(this.executeRequest(connexion, requete));
 			listFichier = g.mapContent().get("nom_fichier");
 			LoggerHelper.traceAsComment(LOGGER, "listeFichier =", listFichier);
 			if (listFichier == null) {

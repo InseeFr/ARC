@@ -1,11 +1,11 @@
 package fr.insee.arc.web.gui.pilotage.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,10 +39,12 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 
 	}
 
-	public void downloadFichierBAS(HttpServletResponse response) {
+	public String downloadFichierBAS(Model model) {
 		loggerDispatcher.trace("*** Téléchargement des fichiers ***", LOGGER);
-		dao.downloadFichierBAS(this.views.getViewFichierBAS(), response, this.repertoire, getBacASable());
+		File fOut = dao.downloadFichierBAS(this.views.getViewFichierBAS(), initDownloadDir(), this.repertoire, getBacASable());
+		copyDownloadedFileToS3(fOut);
 		loggerDispatcher.trace("*** Fin du téléchargement des fichiers XML ***", LOGGER);
+		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
 	/**
@@ -92,7 +94,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	public void downloadBdBAS(HttpServletResponse response) throws ArcException {
+	public String downloadBdBAS(Model model) throws ArcException {
 		
 		Map<String, List<String>> selectionLigne = views.getViewPilotageBAS().mapContentSelected();
 		List<String> selectionColonne = views.getViewPilotageBAS().listHeadersSelected();
@@ -128,11 +130,13 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			loggerDispatcher.error(e, LOGGER);
 		}
 		
-		dao.downloadBdBAS(this.views.getViewFichierBAS(), response, tableDownload, phase, etat, date);
+		File fOut = dao.downloadBdBAS(this.views.getViewFichierBAS(), initDownloadDir(), tableDownload, phase, etat, date);
+		copyDownloadedFileToS3(fOut);
+		return generateDisplay(model, RESULT_SUCCESS);
 
 	}
 
-	public String downloadEnveloppeBAS(HttpServletResponse response) {
+	public String downloadEnveloppeBAS(Model model) {
 
 		loggerDispatcher.trace("*** Téléchargement des enveloppes ***", LOGGER);
 		
@@ -142,10 +146,19 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.OK);
 		listRepertoire.add(TraitementPhase.RECEPTION + "_" + TraitementEtat.KO);
 		String chemin = Paths.get(this.repertoire, getBacASable().toUpperCase()).toString();
-		dao.downloadEnvelopeBAS(this.views.getViewFichierBAS(), response, chemin, listRepertoire);
+		File fOut = dao.downloadEnvelopeBAS(this.views.getViewFichierBAS(), initDownloadDir(), chemin, listRepertoire);
+		copyDownloadedFileToS3(fOut);
 		loggerDispatcher.trace("*** Fin du téléchargement des enveloppes ***", LOGGER);
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
 
-		return "none";
+	private void copyDownloadedFileToS3(File fOut) {
+		try {
+			dao.copyDownloadedFileToS3(fOut, getBacASable());
+			this.views.getViewFichierBAS().setMessage("managementSandbox.download.ok");
+		} catch (ArcException | IOException e) {
+			this.views.getViewFichierBAS().setMessage("managementSandbox.download.ko.s3");
+		}
 	}
 
 	/**

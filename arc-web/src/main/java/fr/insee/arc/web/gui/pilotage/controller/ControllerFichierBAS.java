@@ -1,7 +1,5 @@
 package fr.insee.arc.web.gui.pilotage.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +21,8 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 	}
 
 	@RequestMapping("/secure/downloadFichierBAS")
-	public void downloadFichierBASAction(HttpServletResponse response) {
-		downloadFichierBAS(response);
+	public String downloadFichierBASAction(Model model) {
+		return downloadFichierBAS(model);
 	}
 
 	/**
@@ -48,13 +46,13 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 	}
 
 	@RequestMapping("/secure/downloadBdBAS")
-	public void downloadBdBASAction(HttpServletResponse response) throws ArcException {
-		downloadBdBAS(response);
+	public String downloadBdBASAction(Model model) throws ArcException {
+		return downloadBdBAS(model);
 	}
 
 	@RequestMapping("/secure/downloadEnveloppeBAS")
-	public String downloadEnveloppeBASAction(HttpServletResponse response) {
-		return downloadEnveloppeBAS(response);
+	public String downloadEnveloppeBASAction(Model model) {
+		return downloadEnveloppeBAS(model);
 	}
 
 	/**
