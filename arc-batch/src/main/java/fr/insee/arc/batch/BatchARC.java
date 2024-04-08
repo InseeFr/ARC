@@ -314,6 +314,8 @@ class BatchARC implements IReturnCode {
 	private void executorsDatabaseCreate() throws ArcException {
 		message(ApiManageExecutorDatabase.delete().toString());
 		message(ApiManageExecutorDatabase.create().toString());
+		
+		Sleep.sleep(20000);
 	}
 
 	/**
