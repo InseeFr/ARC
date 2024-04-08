@@ -43,5 +43,5 @@ RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
 #
 ENV ARC_LOGLEVEL=$LOG_LEVEL
 
-## start ArcMain.jar
-# CMD ["java","-jar","usr/src/app/arc-batch/target/ArcMain.jar"]
+## execute batch
+ENTRYPOINT ["java","-jar","usr/src/app/arc-batch/target/ArcMain.jar"]
