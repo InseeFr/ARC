@@ -21,7 +21,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.JSONObject;
 import org.springframework.http.HttpMethod;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
+import fr.insee.arc.utils.validator.JsonValidator;
 
 public class KubernetesApi {
 
@@ -71,9 +74,11 @@ public class KubernetesApi {
 				OutputStream os = con.getOutputStream();
 				OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
 				
-				JSONObject j=new JSONObject(json);
-				
-				osw.write(j.toString());
+				if (new JsonValidator(json).validate())
+				{
+					osw.write(json);
+				}
+
 				osw.flush();
 				osw.close();
 				os.close();
