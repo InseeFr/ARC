@@ -27,6 +27,7 @@ public class LoggerHelper {
 	}
 
 	private static final String CUSTOM_LOGGER="OPERATION";
+	private static final String ACTION_LOGGER="ACTION";
 	
 	/**
 	 * @see Logger#log(Priority, Object)
@@ -359,6 +360,10 @@ public class LoggerHelper {
 	}
 
 	public static void custom(Logger aLogger, Object message) {
-		log(aLogger, Level.forName("CUSTOM_LOGGER", 200), message);
+		log(aLogger, Level.forName(CUSTOM_LOGGER, 200), message);
+	}
+	
+	public static void action(Logger aLogger, Object message) {
+		log(aLogger, Level.forName(ACTION_LOGGER, 200), message);
 	}
 }

@@ -19,11 +19,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;
@@ -54,6 +51,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A service to easily manipulate and display in the app any database object (or
@@ -561,6 +559,7 @@ public class VObjectService {
 	 * @param attributeValues
 	 */
 	public boolean insert(VObject currentData, AttributeValue... attributeValues) {
+		LoggerHelper.action(LOGGER, getUsername() + " : INSERT in " + currentData.getSessionName());
 		
 		if (currentData.getInputFields()==null || currentData.getInputFields().isEmpty())
 		{
@@ -636,7 +635,9 @@ public class VObjectService {
 	 * delete the selected item in database
 	 */
 	public void delete(VObject currentData, String... tables) {
-		LoggerHelper.traceAsComment(LOGGER, "delete()", currentData.getSessionName());
+		
+		LoggerHelper.action(LOGGER, getUsername() + " : DELETE in " + currentData.getSessionName());
+
 		try {
 			UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
 					deleteQuery(currentData, tables).asTransaction());
@@ -695,8 +696,8 @@ public class VObjectService {
 	}
 
 	public void update(VObject currentData) {
-		
-		LoggerHelper.traceAsComment(LOGGER, "update()", currentData.getSessionName());
+
+		LoggerHelper.action(LOGGER, getUsername() + " : UPDATE in " + currentData.getSessionName());
 		
 		if (currentData.getContent()==null || currentData.getContent().size()==0)
 		{
@@ -1032,7 +1033,7 @@ public class VObjectService {
 	 * Trier suivant une colonne
 	 */
 	public void sort(VObject currentData) {
-		LoggerHelper.debugAsComment(LOGGER, "sort()");
+		LoggerHelper.action(LOGGER, getUsername() + " : SORT in " + currentData.getSessionName());
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 		if (v0.getHeadersDLabel().indexOf(currentData.getHeaderSortDLabel()) != -1) {
 			this.setHeaderSortDLabels(currentData, v0.getHeaderSortDLabels());
@@ -1109,6 +1110,7 @@ public class VObjectService {
 	 */
 	public void download(VObject currentData, HttpServletResponse response, List<String> fileNames,
 			List<ArcPreparedStatementBuilder> requetes) {
+		LoggerHelper.action(LOGGER, getUsername() + " : DOWNLOAD in " + currentData.getSessionName());
 		response.reset();
 		response.setHeader("Content-Disposition", "attachment; filename="
 				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
@@ -1156,6 +1158,7 @@ public class VObjectService {
 	 */
 	public File downloadXML(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete, String dirIn,
 			String anEnvExcecution, String phase) {
+		LoggerHelper.action(LOGGER, getUsername() + " : DOWNLOAD XML in " + currentData.getSessionName());
 		File fOut = new File(dirOut + File.separator
 				+ getFileNameDownload(currentData, CompressionExtension.TAR_GZ.getFileExtension()));
 
@@ -1282,6 +1285,7 @@ public class VObjectService {
 	 */
 	public File downloadEnveloppe(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete,
 			String repertoire, List<String> listRepertoire) {
+		LoggerHelper.action(LOGGER, getUsername() + " : DOWNLOAD ENVELOPPE in " + currentData.getSessionName());
 		File fOut = new File(dirOut + File.separator + getFileNameDownload(currentData, ".tar"));
 
 		TarArchiveOutputStream taos = null;
@@ -1358,6 +1362,7 @@ public class VObjectService {
 	 * @throws ArcException
 	 */
 	public void upload(VObject data, String repertoireCible) throws ArcException {
+		LoggerHelper.action(LOGGER, getUsername() + " : UPLOAD in " + data.getSessionName());
 		if (data.getFileUpload() != null) {
 			for (MultipartFile uploadedFile : data.getFileUpload()) {
 				String fileName = uploadedFile.getOriginalFilename();
@@ -1482,6 +1487,11 @@ public class VObjectService {
 	// give values to be added to a result row
 	public static void addRowToVObjectList(List<List<String>> result, String... elements) {
 		result.add(new ArrayList<>(Arrays.asList(Arrays.copyOf(elements, elements.length))));
+	}
+
+	public static String getUsername() {
+		// placeholder before real getUsername method
+	    return null;
 	}
 
 	public Connection getConnection() {
