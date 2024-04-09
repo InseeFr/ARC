@@ -18,6 +18,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.json.JSONObject;
 import org.springframework.http.HttpMethod;
 
 import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
@@ -69,7 +70,10 @@ public class KubernetesApi {
 				con.setDoOutput(true);
 				OutputStream os = con.getOutputStream();
 				OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
-				osw.write(json);
+				
+				JSONObject j=new JSONObject(json);
+				
+				osw.write(j.toString());
 				osw.flush();
 				osw.close();
 				os.close();
