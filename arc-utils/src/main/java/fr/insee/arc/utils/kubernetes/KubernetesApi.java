@@ -73,12 +73,7 @@ public class KubernetesApi {
 				con.setDoOutput(true);
 				OutputStream os = con.getOutputStream();
 				OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
-				
-				if (new JsonValidator(json).validate())
-				{
-					osw.write(json);
-				}
-
+				osw.write(json);
 				osw.flush();
 				osw.close();
 				os.close();

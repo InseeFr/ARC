@@ -14,6 +14,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
+import fr.insee.arc.utils.validator.JsonValidator;
 
 public class BuildJsonConfiguration {
 	
@@ -67,6 +68,8 @@ public class BuildJsonConfiguration {
 			kubernetesConfiguration = IOUtils.toString(
 					ApiInitialisationService.class.getClassLoader().getResourceAsStream("kubernetes/executorDatabaseStatefulTemplate.jsonnet"),
 					StandardCharsets.UTF_8);
+			kubernetesConfiguration = new JsonValidator(kubernetesConfiguration).validate();
+			
 		} catch (IOException e) {
 			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, "executorDatabaseStatefulTemplate.jsonnet").logFullException();
 		}		
@@ -86,6 +89,8 @@ public class BuildJsonConfiguration {
 			kubernetesConfiguration = IOUtils.toString(
 					ApiInitialisationService.class.getClassLoader().getResourceAsStream("kubernetes/executorDatabaseServiceTemplate.jsonnet"),
 					StandardCharsets.UTF_8);
+			kubernetesConfiguration = new JsonValidator(kubernetesConfiguration).validate();
+
 		} catch (IOException e) {
 			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, "executorDatabaseServiceTemplate.jsonnet");
 		}		
