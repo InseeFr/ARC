@@ -24,6 +24,14 @@ public class StatusController {
 		return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+    /**
+     * Controller to check if security is up for uri with execute/**
+     * @return
+     */
+    @GetMapping(value = "execute/healthcheck", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> healthCheckExecute() {
+		return healthCheck();
+    }
 
 	@GetMapping(value = "/version", produces = "application/json")
 	public Map<String, String> version(){
