@@ -32,7 +32,7 @@ import fr.insee.arc.utils.webutils.WebAttributesName;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WsSecurityConfiguration {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(WsSecurityConfiguration.class);
 
 	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_REALM)
@@ -59,17 +59,20 @@ public class WsSecurityConfiguration {
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		return (web) -> web.ignoring().requestMatchers(new AntPathRequestMatcher("/webservice/**"));
 	}
-	
+
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		
 		if (WebAttributesName.isKeycloakActive(keycloakRealm)) {
-			http.authorizeRequests() //
-					.requestMatchers(new AntPathRequestMatcher("/execute/**"))
-					.hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()) //
-					.and().oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtResourceServer -> {
-						jwtResourceServer.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak());
-					}));
+
+			http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtResourceServer -> jwtResourceServer
+					.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak())))
+					.authorizeHttpRequests(t -> t.requestMatchers(new AntPathRequestMatcher("/execute/**"))
+							.hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
 		}
+
+		http.authorizeHttpRequests(t -> t.anyRequest().permitAll());
+
 		return http.build();
 	}
 

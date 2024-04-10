@@ -16,6 +16,7 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tools.tar.TarEntry;
@@ -31,7 +32,6 @@ public class CompressedUtils {
 	private static final Logger LOGGER = LogManager.getLogger(CompressedUtils.class);
 	
 	public static final int READ_BUFFER_SIZE = 131072;
-	private static final int BYTES_BUFFER_SIZE = 1024;
 
 	private CompressedUtils() {
 		throw new IllegalStateException("Utility class");
@@ -223,11 +223,7 @@ public class CompressedUtils {
 	 */
 	public static void copyFromInputstreamToOutputStream(InputStream input, OutputStream output) throws IOException {
 		try {
-			byte[] buffer = new byte[BYTES_BUFFER_SIZE];
-			int n = 0;
-			while (-1 != (n = input.read(buffer))) {
-				output.write(buffer, 0, n);
-			}
+			IOUtils.copy(input, output);
 		} finally {
 			try {
 				input.close();

@@ -243,7 +243,7 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public File downloadFichierBAS(VObject viewFichierBAS, String dirOut,
-			String dirIn, String bacASable) {
+			String dirIn, String bacASable) throws ArcException {
 		// récupération de la liste des id_source
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder query = vObjectService.queryView(viewFichierBAS);
@@ -355,16 +355,20 @@ public class PilotageDao extends VObjectHelperDao {
 	
 	
 	
-	public void copyDownloadedFileToS3(File fOut, String bacASable) throws ArcException, IOException {
-		
-		S3Template s3 = ArcS3.INPUT_BUCKET;
-		
-		if (s3.isS3Off()) return;
+	/**
+	 * copy the downloaded file to s3 bucket /bas/download/
+	 * @param fOut
+	 * @param bacASable
+	 * @param s3
+	 * @throws ArcException
+	 * @throws IOException
+	 */
+	public void copyDownloadedFileToS3(File fOut, String bacASable, S3Template s3) throws ArcException, IOException {
 	
 		// s3 operations
 		String s3PathOut = bacASable.toUpperCase() + File.separator + "DOWNLOAD/";
 		s3.createDirectory(s3PathOut);
-		s3.upload(fOut, s3PathOut);
+		s3.upload(fOut, s3PathOut + fOut.getName());
 		
 		// delete file on filesystem
 		Files.delete(fOut.toPath());

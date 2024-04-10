@@ -1153,9 +1153,10 @@ public class VObjectService {
 	 * @param etatKo
 	 *
 	 * @param listIdSource
+	 * @throws ArcException 
 	 */
 	public File downloadXML(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete, String dirIn,
-			String anEnvExcecution, String phase) {
+			String anEnvExcecution, String phase) throws ArcException {
 		File fOut = new File(dirOut + File.separator
 				+ getFileNameDownload(currentData, CompressionExtension.TAR_GZ.getFileExtension()));
 
@@ -1166,7 +1167,9 @@ public class VObjectService {
 				zipOutStreamRequeteSelect(this.connection, requete, taos, dirIn, anEnvExcecution, phase, "ARCHIVE");
 			}
 		} catch (IOException ex) {
-			LoggerHelper.errorGenTextAsComment(getClass(), "downloadXML()", LOGGER, ex);
+			ArcException e = new ArcException(ArcExceptionMessage.FILE_WRITE_FAILED, fOut);
+			e.logFullException();
+			throw e;
 		}
 		return fOut;
 	}
