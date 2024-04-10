@@ -314,7 +314,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	public ServiceReporting invokeApi() {
 		double start = System.currentTimeMillis();
 
-		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " *******");
+		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " dans " + this.getCoordinatorSandbox().getSchema().toUpperCase() + " *******");
 		try {
 			this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase());
 			LoggerHelper.info(LOGGER_APISERVICE, "A faire - " + this.getCurrentPhase() + " : " + this.todo);

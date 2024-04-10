@@ -113,7 +113,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * link to the selected norm and calendar.
 	 */
 	public void initializeViewRulesSet(VObject viewRulesSet, VObject viewCalendar) {
-		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
+		LoggerHelper.debug(LOGGER, "/* initializeRulesSet */");
 
 		// Get the selected calendar for requesting the rule set
 		Map<String, List<String>> viewCalendarSelectedRecords = viewCalendar.mapContentSelected();
@@ -133,7 +133,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * link to the selected norm and calendar.
 	 */
 	public void initializeViewModules(VObject viewModules, VObject viewRulesSet) {
-		loggerDispatcher.info("/* initializeViewRulesSet *", LOGGER);
+		LoggerHelper.debug(LOGGER, "/* initializeModules */");
 
 		// Get the selected ruleset
 		Map<String, List<String>> viewRulesSetSelectedRecords = viewRulesSet.mapContentSelected();
@@ -255,7 +255,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 	 * @param viewJeuxDeReglesCopie
 	 */
 	public void initializeJeuxDeReglesCopie(VObject viewJeuxDeReglesCopie, String scope) {
-		LoggerHelper.info(LOGGER, "initializeJeuxDeReglesCopie");
+		LoggerHelper.debug(LOGGER, "/* initializeJeuxDeReglesCopie */");
 		if (scope != null) {
 			dao.initializeJeuxDeReglesCopie(viewJeuxDeReglesCopie);
 		} else {
