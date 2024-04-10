@@ -7,6 +7,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIDatabase;
 import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDIRepresentedVariable;
 import fr.insee.arc.web.gui.famillenorme.ddi.ddiobjects.DDITable;
@@ -65,7 +66,7 @@ public class DDIHandler extends DefaultHandler {
     public void startElement(String uri, String localName,
                              String qName, Attributes attributes) throws SAXException
     {
-        switch (qName) {
+        switch (ManipString.substringAfterLast(qName, ":")) {
             case "DataRelationship":
                 bDatabase = true;
                 constructedDDIDatabase = new DDIDatabase();
@@ -89,7 +90,7 @@ public class DDIHandler extends DefaultHandler {
                 bRepresentedVariable = true;
                 constructedDDIRepresentedVariable = new DDIRepresentedVariable();
                 break;
-            case "r:Description":
+            case "Description":
             	bDescription = true;
             	break;
             default :
@@ -107,8 +108,8 @@ public class DDIHandler extends DefaultHandler {
     public void endElement(String uri, String localName,
                            String qName) throws SAXException
     {
-        switch (qName) {
-            case "r:ID": // Identifiants
+        switch (ManipString.substringAfterLast(qName, ":")) {
+            case "ID": // Identifiants
                 if (bDatabase && constructedDDIDatabase.getId() == null && !bTable && !bVariableOfTable) { // ID d'une database
                     this.constructedDDIDatabase.setId(content);
                 } else if (bDatabase && bTable && !bVariableOfTable) { // ID d'une table + ajout de l'ID de sa database
@@ -125,7 +126,7 @@ public class DDIHandler extends DefaultHandler {
                     this.constructedDDIRepresentedVariable.setId(content);
                 }
                 break;
-            case "r:Content": // Labels et descriptions
+            case "Content": // Labels et descriptions
                 if (!bDescription) { // Labels
                     if (bDatabase && constructedDDIDatabase.getLabel() == null && !bTable) { // label d'une database
                         this.constructedDDIDatabase.setLabel(content);
@@ -144,7 +145,7 @@ public class DDIHandler extends DefaultHandler {
                     }
                 }
                 break;
-            case "r:String": // Noms des objets
+            case "String": // Noms des objets
                 if (bDatabase && constructedDDIDatabase.getDbName() == null && !bTable) { // nom d'une database
                     this.constructedDDIDatabase.setDbName(content);
                 } else if (bDatabase && bTable) { // nom d'une table
@@ -155,16 +156,16 @@ public class DDIHandler extends DefaultHandler {
                     this.constructedDDIRepresentedVariable.setRepresentedVariableName(content);
                 }
                 break;
-            case "r:TextRepresentation": // represented variable de type text
+            case "TextRepresentation": // represented variable de type text
                 this.constructedDDIRepresentedVariable.setType("Text");
                 break;
-            case "r:NumericTypeCode": // le contenu de r:NumericTypeCode détermine si le nombre est entier ou flottant
+            case "NumericTypeCode": // le contenu de r:NumericTypeCode détermine si le nombre est entier ou flottant
                 this.constructedDDIRepresentedVariable.setType(content);
                 break;
-            case "r:CodeRepresentation": // represented variable de type code
+            case "CodeRepresentation": // represented variable de type code
                 this.constructedDDIRepresentedVariable.setType("Code");
                 break;
-            case "r:DateTimeRepresentation": // represented variable de type datetime
+            case "DateTimeRepresentation": // represented variable de type datetime
                 this.constructedDDIRepresentedVariable.setType("DateTime");
                 break;
             case "DataRelationship": // fin de construction d'une database
@@ -190,7 +191,7 @@ public class DDIHandler extends DefaultHandler {
                 bRepresentedVariable = false;
                 this.listDDIRepresentedVariables.add(constructedDDIRepresentedVariable);
                 break;
-            case "r:Description": // fin de description
+            case "Description": // fin de description
                 bDescription = false;
                 break;
             default :
