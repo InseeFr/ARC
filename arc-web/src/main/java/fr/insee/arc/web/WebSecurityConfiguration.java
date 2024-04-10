@@ -41,16 +41,17 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 
 		// disable debugging screens when proprty is set
 		if (!properties.getDisableDebugGui().isEmpty()) {
-			http.authorizeRequests().requestMatchers("/debug/**").denyAll();
+			http.authorizeHttpRequests(t -> t.requestMatchers("/debug/**").denyAll());
 		}
 		
 		// oath2 keycloak
 		if (WebAttributesName.isKeycloakActive(keycloakRealm)) {
-			http.authorizeRequests().requestMatchers("/secure/**", "/debug/**")
-					.hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()) //
-					.and().oauth2Login().userInfoEndpoint().userAuthoritiesMapper(userAuthoritiesMapper());
-
+			http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
+			.authorizeHttpRequests(t -> t.requestMatchers("/secure/**", "/debug/**").hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
 		}
+		
+		http.authorizeHttpRequests(t -> t.anyRequest().permitAll());
+		
 		return http.build();
 	}
 
