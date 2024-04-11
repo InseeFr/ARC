@@ -21,7 +21,7 @@ public class ViewHostAllowed  extends VObject {
             {
                 put("id_webservice_whitelist", new ColumnRendering(false, "Id.", "", "text", null, false));
                 put("id_famille", new ColumnRendering(false, "label.normFamily", "", "text", null, true));
-                put("id_application", new ColumnRendering(false, "label.client.software", "", "text", null, false));
+                put("id_application", new ColumnRendering(false, "label.client.software", "", "text", null, true));
                 put("host_allowed", new ColumnRendering(true, "label.webservice.host.allowed", "80%", "text", null, true));
                 put("is_secured", new ColumnRendering(true, "label.webservice.host.secured", "20%", "text", null, true));
             }
