@@ -10,6 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,7 +48,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	private static final Logger LOGGER = LogManager.getLogger(ArcWebGenericService.class);
 	
 	protected static final String POOLNAME = "arc"; 
-	
+
 	@Autowired
 	protected PropertiesHandler properties;
 
@@ -131,7 +134,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
-			@RequestParam(required = false) String scope) {
+			@RequestParam(required = false) String scope, Authentication auth) {
 		LoggerHelper.trace(LOGGER, getActionName());
 
 		// no action required for unsecured page
@@ -178,8 +181,31 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
     	initialize(arcModel);
     	refreshGenericModelAttributes(model);
     	extraModelAttributes(model);
+
+    	// retrieve userName and remote ip adress to log
+    	trackUserInformations(auth);
     	
     }
+
+	/**
+	 * register user informations (name and ip adress)
+	 * @param auth
+	 */
+	private void trackUserInformations(Authentication token) {
+		
+		if (token == null)
+		{
+	    	vObjectService.setUserName("anonymous");
+	    	return;
+		}
+		
+		OAuth2AuthenticationToken oauth2 = (OAuth2AuthenticationToken) token;
+		String userName = oauth2.getPrincipal().getAttribute("preferred_username");
+        WebAuthenticationDetails webDetails = (WebAuthenticationDetails) token.getDetails();
+        userName+="@"+webDetails.getRemoteAddress();
+    	
+        vObjectService.setUserName(userName);
+	}
 
 	/**
 	 * Fills the model with some attributes expected on (almost) all pages

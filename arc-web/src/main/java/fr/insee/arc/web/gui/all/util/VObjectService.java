@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
@@ -94,6 +95,8 @@ public class VObjectService {
 	private Integer connectionIndex = ArcDatabase.COORDINATOR.getIndex();
 
 	private Connection connection = null;
+
+	private String userName;
 
 	/**
 	 * Try to set some informations based on the data saved in session.
@@ -552,6 +555,16 @@ public class VObjectService {
 	}
 
 	/**
+	 * log action for security purposes
+	 * @param currentData
+	 */
+	public void logVObjectAction(VObject currentData)
+	{
+		LoggerHelper.action(LOGGER, getUserName() + " : "+Thread.currentThread().getStackTrace()[2].getMethodName()+" in " + currentData.getSessionName());
+	}
+	
+	
+	/**
 	 * On peut avoir envie d'insérer une valeur calculable de façon déterministe
 	 * mais non renseignée dans les valeurs insérées. {@link AttributeValue} définit
 	 * des paires de {@link String} à cet effet.
@@ -559,8 +572,9 @@ public class VObjectService {
 	 * @param attributeValues
 	 */
 	public boolean insert(VObject currentData, AttributeValue... attributeValues) {
-		LoggerHelper.action(LOGGER, getUsername() + " : INSERT in " + currentData.getSessionName());
 		
+		logVObjectAction(currentData);
+				
 		if (currentData.getInputFields()==null || currentData.getInputFields().isEmpty())
 		{
 			return false;
@@ -636,7 +650,7 @@ public class VObjectService {
 	 */
 	public void delete(VObject currentData, String... tables) {
 		
-		LoggerHelper.action(LOGGER, getUsername() + " : DELETE in " + currentData.getSessionName());
+		logVObjectAction(currentData);
 
 		try {
 			UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
@@ -697,7 +711,7 @@ public class VObjectService {
 
 	public void update(VObject currentData) {
 
-		LoggerHelper.action(LOGGER, getUsername() + " : UPDATE in " + currentData.getSessionName());
+		logVObjectAction(currentData);
 		
 		if (currentData.getContent()==null || currentData.getContent().size()==0)
 		{
@@ -1033,7 +1047,8 @@ public class VObjectService {
 	 * Trier suivant une colonne
 	 */
 	public void sort(VObject currentData) {
-		LoggerHelper.action(LOGGER, getUsername() + " : SORT in " + currentData.getSessionName());
+		logVObjectAction(currentData);
+
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 		if (v0.getHeadersDLabel().indexOf(currentData.getHeaderSortDLabel()) != -1) {
 			this.setHeaderSortDLabels(currentData, v0.getHeaderSortDLabels());
@@ -1110,7 +1125,9 @@ public class VObjectService {
 	 */
 	public void download(VObject currentData, HttpServletResponse response, List<String> fileNames,
 			List<ArcPreparedStatementBuilder> requetes) {
-		LoggerHelper.action(LOGGER, getUsername() + " : DOWNLOAD in " + currentData.getSessionName());
+		
+		logVObjectAction(currentData);
+
 		response.reset();
 		response.setHeader("Content-Disposition", "attachment; filename="
 				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
@@ -1159,7 +1176,9 @@ public class VObjectService {
 	 */
 	public File downloadXML(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete, String dirIn,
 			String anEnvExcecution, String phase) throws ArcException {
-		LoggerHelper.action(LOGGER, getUsername() + " : DOWNLOAD XML in " + currentData.getSessionName());
+
+		logVObjectAction(currentData);
+		
 		File fOut = new File(dirOut + File.separator
 				+ getFileNameDownload(currentData, CompressionExtension.TAR_GZ.getFileExtension()));
 
@@ -1288,7 +1307,9 @@ public class VObjectService {
 	 */
 	public File downloadEnveloppe(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete,
 			String repertoire, List<String> listRepertoire) {
-		LoggerHelper.action(LOGGER, getUsername() + " : DOWNLOAD ENVELOPPE in " + currentData.getSessionName());
+
+		logVObjectAction(currentData);
+		
 		File fOut = new File(dirOut + File.separator + getFileNameDownload(currentData, ".tar"));
 
 		TarArchiveOutputStream taos = null;
@@ -1365,7 +1386,9 @@ public class VObjectService {
 	 * @throws ArcException
 	 */
 	public void upload(VObject data, String repertoireCible) throws ArcException {
-		LoggerHelper.action(LOGGER, getUsername() + " : UPLOAD in " + data.getSessionName());
+
+		logVObjectAction(data);
+		
 		if (data.getFileUpload() != null) {
 			for (MultipartFile uploadedFile : data.getFileUpload()) {
 				String fileName = uploadedFile.getOriginalFilename();
@@ -1492,11 +1515,6 @@ public class VObjectService {
 		result.add(new ArrayList<>(Arrays.asList(Arrays.copyOf(elements, elements.length))));
 	}
 
-	public static String getUsername() {
-		// placeholder before real getUsername method
-	    return null;
-	}
-
 	public Connection getConnection() {
 		return connection;
 	}
@@ -1519,6 +1537,18 @@ public class VObjectService {
 
 	public void resetConnectionIndex() {
 		this.connectionIndex = ArcDatabase.COORDINATOR.getIndex();
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public void access(VObject data) {
+		logVObjectAction(data);
 	}
 
 }

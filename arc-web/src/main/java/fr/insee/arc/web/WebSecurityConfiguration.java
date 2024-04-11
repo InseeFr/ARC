@@ -39,7 +39,7 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 	@Bean
 	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
 
-		// disable debugging screens when proprty is set
+		// disable debugging screens when property is set
 		if (!properties.getDisableDebugGui().isEmpty()) {
 			http.authorizeHttpRequests(t -> t.requestMatchers("/debug/**").denyAll());
 		}
