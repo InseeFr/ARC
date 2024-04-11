@@ -1,3 +1,9 @@
+package fr.insee.arc.core.service.kubernetes.configuration;
+
+public class ExecutorDatabaseStatefulTemplate {
+	
+	protected static String configuration =
+"""
 {
   "apiVersion": "apps/v1",
   "kind": "StatefulSet",
@@ -97,7 +103,7 @@
                 "command": [
                   "/bin/sh",
                   "-c",
-                  "exec pg_isready -U \"{user}\" -d \"dbname={database}\" -h 127.0.0.1 -p {port}"
+                  "exec pg_isready -U \\"{user}\\" -d \\"dbname={database}\\" -h 127.0.0.1 -p {port}"
                 ]
               },
               "failureThreshold": 6,
@@ -120,7 +126,7 @@
                   "/bin/sh",
                   "-c",
                   "-e",
-                  "exec pg_isready -U \"{user}\" -d \"dbname={database}\" -h 127.0.0.1 -p {port}\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\n"
+                  "exec pg_isready -U \\"{user}\\" -d \\"dbname={database}\\" -h 127.0.0.1 -p {port}\\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\\n"
                 ]
               },
               "failureThreshold": 6,
@@ -173,4 +179,7 @@
       }
     }
   }
+}
+
+""";
 }

@@ -1,3 +1,9 @@
+package fr.insee.arc.core.service.kubernetes.configuration;
+
+public class ExecutorDatabaseServiceTemplate {
+
+	protected static String configuration =
+"""
 {
   "apiVersion": "v1",
   "kind": "Service",
@@ -18,4 +24,7 @@
       "app": "{pg-arc-executor-label}"
     }
   }
+}
+""";
+	
 }

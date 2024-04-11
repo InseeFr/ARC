@@ -1,20 +1,13 @@
 package fr.insee.arc.core.service.kubernetes.configuration;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-
 import fr.insee.arc.core.service.kubernetes.bo.JsonFileParameter;
-import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.utils.consumer.ThrowingFunction;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.validator.JsonValidator;
 
 public class BuildJsonConfiguration {
 	
@@ -61,19 +54,9 @@ public class BuildJsonConfiguration {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String replicaStatefulConfiguration(int executorReplicaIndex) throws ArcException
+	private static String replicaStatefulConfiguration(int executorReplicaIndex)
 	{
-		String kubernetesConfiguration;
-		try {
-			kubernetesConfiguration = IOUtils.toString(
-					ApiInitialisationService.class.getClassLoader().getResourceAsStream("kubernetes/executorDatabaseStatefulTemplate.jsonnet"),
-					StandardCharsets.UTF_8);
-			kubernetesConfiguration = new JsonValidator(kubernetesConfiguration).validate();
-			
-		} catch (IOException e) {
-			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, "executorDatabaseStatefulTemplate.jsonnet").logFullException();
-		}		
-		return applyKubernetesParameters(kubernetesConfiguration, kubernetesParameters(executorReplicaIndex));
+		return applyKubernetesParameters(ExecutorDatabaseStatefulTemplate.configuration, kubernetesParameters(executorReplicaIndex));
 	}
 	
 	/**
@@ -84,17 +67,7 @@ public class BuildJsonConfiguration {
 	 */
 	private static String replicaServiceConfiguration(int executorReplicaIndex) throws ArcException
 	{
-		String kubernetesConfiguration;
-		try {
-			kubernetesConfiguration = IOUtils.toString(
-					ApiInitialisationService.class.getClassLoader().getResourceAsStream("kubernetes/executorDatabaseServiceTemplate.jsonnet"),
-					StandardCharsets.UTF_8);
-			kubernetesConfiguration = new JsonValidator(kubernetesConfiguration).validate();
-
-		} catch (IOException e) {
-			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, "executorDatabaseServiceTemplate.jsonnet");
-		}		
-		return applyKubernetesParameters(kubernetesConfiguration, kubernetesParameters(executorReplicaIndex));
+		return applyKubernetesParameters(ExecutorDatabaseServiceTemplate.configuration, kubernetesParameters(executorReplicaIndex));
 	}
 	
 	private static String[] kubernetesParameters(int executorReplicaIndex)

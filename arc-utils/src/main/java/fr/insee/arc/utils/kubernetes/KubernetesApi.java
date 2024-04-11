@@ -18,13 +18,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.json.JSONObject;
 import org.springframework.http.HttpMethod;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import fr.insee.arc.utils.kubernetes.bo.KubernetesApiResult;
-import fr.insee.arc.utils.validator.JsonValidator;
 
 public class KubernetesApi {
 
