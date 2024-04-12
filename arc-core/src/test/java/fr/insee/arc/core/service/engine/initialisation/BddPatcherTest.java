@@ -24,7 +24,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class BddPatcherTest extends InitializeQueryTest {
 
-	private static String newVersion = "v2";
+	private static String newVersionBuildDate = "2024-04-11T13:25:42+0200";
 	private static String userWithRestrictedRights = "";
 	
 	public static String testMetaDataSchema= "arc";
@@ -105,7 +105,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		UtilitaireDao.get(0).executeRequest(c, query);
 		
 		BddPatcher patcher=new BddPatcher();
-		patcher.getProperties().setGitCommitId(newVersion);
+		patcher.getProperties().setVersionDate(newVersionBuildDate);
 		patcher.getProperties().setDatabaseRestrictedUsername(userWithRestrictedRights);
 
 		// metadata schema creation
