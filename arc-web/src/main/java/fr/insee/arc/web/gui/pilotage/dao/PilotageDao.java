@@ -429,29 +429,29 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public String execQueryTime() throws ArcException {
-		return UtilitaireDao.get(0).getString(null, new ArcPreparedStatementBuilder("SELECT last_init from arc.pilotage_batch"));
+		return UtilitaireDao.get(0).getString(null, new ArcPreparedStatementBuilder("SELECT last_init FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)));
 	}
 
 	public String execQueryState() throws ArcException {
-		return UtilitaireDao.get(0).getString(null, new ArcPreparedStatementBuilder("SELECT case when operation='O' then 'active' else 'inactive' end from arc.pilotage_batch;"));
+		return UtilitaireDao.get(0).getString(null, new ArcPreparedStatementBuilder("SELECT case when operation='O' then 'active' else 'inactive' end FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)));
 	}
 	
 	public void execQueryDelayBatchTime() throws ArcException {
 		UtilitaireDao.get(0).executeRequest(null, 
-				new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date + interval '7 days','yyyy-mm-dd')||':22';"));
+				new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set last_init=to_char(current_date + interval '7 days','yyyy-mm-dd')||':22';"));
 	}
 	
 	public void execQueryForwardBatchTime() throws ArcException {
 		UtilitaireDao.get(0).executeRequest(null,
-				new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set last_init=to_char(current_date-interval '1 days','yyyy-mm-dd')||':22';"));
+				new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set last_init=to_char(current_date-interval '1 days','yyyy-mm-dd')||':22';"));
 	}
 	
 	public void execQueryToggleOn() throws ArcException {
-		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='O'; "));
+		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='O'; "));
 	}
 	
 	public void execQueryToggleOff() throws ArcException {
-		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE arc.pilotage_batch set operation='N'; "));
+		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='N'; "));
 	}
 	
 	

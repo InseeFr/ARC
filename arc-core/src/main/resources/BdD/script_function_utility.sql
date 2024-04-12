@@ -29,24 +29,6 @@ end loop;
 end;
 $$;
 
--- grant / revoke
-REVOKE ALL ON SCHEMA public FROM public;
-REVOKE ALL ON SCHEMA arc FROM public; 
-
--- restricted role for service execution
-do $$ begin
-if ('{{userRestricted}}'!='') then 
-	execute 'CREATE ROLE {{userRestricted}} with NOINHERIT;';
-end if;
-exception when others then end; $$;
-
-do $$ begin
-if ('{{userRestricted}}'!='') then 
-	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public to {{userRestricted}};';
-end if; 
-exception when others then end;
-$$;
-
 -- fonctions technique sur les tableaux
 do $$ begin create type public.cle_valeur as (i bigint, v text collate "C"); exception when others then end; $$;
 
@@ -294,3 +276,20 @@ $BODY$
   LANGUAGE sql IMMUTABLE STRICT
   COST 100;
 
+  -- grant / revoke
+REVOKE ALL ON SCHEMA public FROM public;
+REVOKE ALL ON SCHEMA arc FROM public; 
+
+-- restricted role for service execution
+do $$ begin
+if ('{{userRestricted}}'!='') then 
+	execute 'CREATE ROLE {{userRestricted}} with NOINHERIT;';
+end if;
+exception when others then end; $$;
+
+do $$ begin
+if ('{{userRestricted}}'!='') then 
+	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public to {{userRestricted}}; GRANT USAGE ON SCHEMA arc TO {{userRestricted}}; GRANT EXECUTE ON FUNCTION arc.isdate to {{userRestricted}}; GRANT USAGE, SELECT, UPDATE ON SEQUENCE arc.number_generator to {{userRestricted}};';
+end if; 
+exception when others then end;
+$$;

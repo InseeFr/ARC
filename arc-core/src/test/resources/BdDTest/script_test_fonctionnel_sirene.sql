@@ -39313,12 +39313,3 @@ INSERT INTO arc.parameter VALUES ('git.commit.id.arc_bas1', 'ea5420f4d121208d069
 INSERT INTO arc.parameter VALUES ('git.commit.id.arc_bas2', 'ea5420f4d121208d069908eb0d651ab4ace22fcf', 'parameter.database.version.sandbox');
 INSERT INTO arc.parameter VALUES ('git.commit.id.arc_bas3', 'ea5420f4d121208d069908eb0d651ab4ace22fcf', 'parameter.database.version.sandbox');
 
-
---
--- TOC entry 7367 (class 0 OID 16975816)
--- Dependencies: 785
--- Data for Name: pilotage_batch; Type: TABLE DATA; Schema: arc; Owner: -
---
-
-INSERT INTO arc.pilotage_batch VALUES ('1900-01-01:00', 'O');
-

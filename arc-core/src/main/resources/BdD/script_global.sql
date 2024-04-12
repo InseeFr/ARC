@@ -108,8 +108,7 @@ VACUUM arc.parameter;
 COMMIT;
 
 -- table de pilotage du batch de production
-CREATE TABLE IF NOT EXISTS arc.pilotage_batch (last_init text, operation text);
-insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select from arc.pilotage_batch);
+DROP TABLE IF EXISTS arc.pilotage_batch;
   
 -- table de modalités IHM       
 CREATE TABLE IF NOT EXISTS arc.ext_etat 

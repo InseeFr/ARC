@@ -139,20 +139,15 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 		// calculer la requete du fichier
 		query.append(requeteMapping.getRequete(idSource));
 
+		// promote the application user account to full right
+		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
+		
 		/*
 		 * Transfert des tables métier temporaires vers les tables définitives
 		 */
 		query.append(requeteMapping.requeteTransfertVersTablesMetierDefinitives());
 
 		query.append(PilotageOperations.queryUpdatePilotageMapping(this.tableMappingPilTemp, this.idSource));
-
-		// promote the application user account to full right
-		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
-
-		/*
-		 * Transfert de la table mapping_ko temporaire vers la table mapping_ko
-		 * définitive
-		 */
 
 		arcThreadGenericDao.marquageFinalDefaultDao(query);
 

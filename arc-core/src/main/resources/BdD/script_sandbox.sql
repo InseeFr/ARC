@@ -13,6 +13,9 @@ end if;
 exception when others then end;
 $$;
 
+-- create pilotage table
+CREATE TABLE IF NOT EXISTS {{envExecution}}.pilotage_batch (last_init text, operation text);
+insert into {{envExecution}}.pilotage_batch select '1900-01-01:00','O' where not exists (select from {{envExecution}}.pilotage_batch);
 
 -- create export rules table
 CREATE TABLE IF NOT EXISTS {{envExecution}}.export

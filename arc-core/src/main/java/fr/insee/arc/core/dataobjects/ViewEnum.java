@@ -81,7 +81,6 @@ public enum ViewEnum {
 
 	// tables de paramètre
 	, PARAMETER("parameter", SchemaEnum.ARC_METADATA, ColumnEnum.KEY, ColumnEnum.VAL, ColumnEnum.DESCRIPTION) //
-	, PILOTAGE_BATCH("pilotage_batch", SchemaEnum.ARC_METADATA, ColumnEnum.LAST_INIT, ColumnEnum.OPERATION) //
 
 	// table d'export
 	, EXPORT("export", SchemaEnum.SANDBOX, ColumnEnum.FILE_NAME, ColumnEnum.ZIP, ColumnEnum.TABLE_TO_EXPORT,
@@ -102,6 +101,7 @@ public enum ViewEnum {
 			ColumnEnum.TO_DELETE, ColumnEnum.CLIENT, ColumnEnum.DATE_CLIENT, ColumnEnum.JOINTURE,
 			ColumnEnum.GENERATION_COMPOSITE) //
 	, PILOTAGE_ARCHIVE("pilotage_archive", SchemaEnum.SANDBOX, ColumnEnum.ENTREPOT , ColumnEnum.NOM_ARCHIVE)
+	, PILOTAGE_BATCH("pilotage_batch", SchemaEnum.SANDBOX, ColumnEnum.LAST_INIT, ColumnEnum.OPERATION) //
 
 	// family model table in sandbox
 	, MOD_TABLE_METIER("mod_table_metier", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ID_FAMILLE,

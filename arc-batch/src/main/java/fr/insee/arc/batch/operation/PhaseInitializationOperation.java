@@ -18,9 +18,9 @@ public class PhaseInitializationOperation {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static boolean isInitializationMustTrigger() throws ArcException
+	public static boolean isInitializationMustTrigger(String envExecution) throws ArcException
 	{
-		String lastInitialize = BatchArcDao.execQueryLastInitialisationTimestamp();
+		String lastInitialize = BatchArcDao.execQueryLastInitialisationTimestamp(envExecution);
 
 		Date dNow = new Date();
 		Date dLastInitialize;

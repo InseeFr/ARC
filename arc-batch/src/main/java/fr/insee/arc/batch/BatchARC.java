@@ -25,6 +25,7 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
 import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.service.kubernetes.ApiManageExecutorDatabase;
+import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.BDParameters;
@@ -123,6 +124,9 @@ class BatchARC implements IReturnCode {
 	void execute() {
 
 		try {
+			
+			// patch database
+			batchPatchDatabase();
 
 			// set batch parameters
 			executeIfProductionActive(this::batchParametersGet);
@@ -191,6 +195,34 @@ class BatchARC implements IReturnCode {
 		method.run();
 	}
 
+	/**
+	 * Patch or create the ARC database with tiniotialization script
+	 */
+	private void batchPatchDatabase() {
+		
+		message("Main");
+		message("Batch ARC " + properties.fullVersionInformation().toString());
+		
+		new BddPatcher().bddScript(null);
+		
+		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
+
+		// either we take env and envExecution from database or properties
+		// default is from properties
+		if (Boolean.parseBoolean(bdParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
+			envExecution = bdParameters.getString(null, "LanceurARC.envExecution", "arc_prod");
+		} else {
+			envExecution = properties.getBatchExecutionEnvironment();
+		}
+
+		envExecution = Patch.normalizeSchemaName(envExecution);
+		
+		new BddPatcher().bddScript(null, envExecution);
+	}
+	
+	/**
+	 * Get batch parameters
+	 */
 	private void batchParametersGet() {
 
 		message("Récupération des paramètres du batch");
@@ -230,16 +262,6 @@ class BatchARC implements IReturnCode {
 		numberOfIterationBewteenCheckTodo = bdParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
 				10);
 
-		// either we take env and envExecution from database or properties
-		// default is from properties
-		if (Boolean.parseBoolean(bdParameters.getString(null, "LanceurARC.envFromDatabase", "false"))) {
-			envExecution = bdParameters.getString(null, "LanceurARC.envExecution", "arc_prod");
-		} else {
-			envExecution = properties.getBatchExecutionEnvironment();
-		}
-
-		envExecution = Patch.normalizeSchemaName(envExecution);
-
 		repertoire = properties.getBatchParametersDirectory();
 
 		mapParam.put(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION, repertoire);
@@ -261,10 +283,7 @@ class BatchARC implements IReturnCode {
 		this.volatileOn = !properties.getKubernetesExecutorVolatile().isEmpty() //
 				&& (properties.getKubernetesExecutorNumber() > 0);
 
-		message("Volaile database : "+volatileOn);
-		
-		message("Main");
-		message("Batch ARC " + properties.fullVersionInformation().toString());
+		message("Volatile database : "+volatileOn);
 
 	}
 
@@ -363,9 +382,6 @@ class BatchARC implements IReturnCode {
 	 * @throws ArcException
 	 */
 	private void maintenanceTablePilotageBatch() throws ArcException {
-
-		// create the pilotage batch table if it doesn't exists
-		BatchArcDao.execQueryCreatePilotageBatch();
 
 		// postgres catalog maintenance
 		DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_FULL);
@@ -472,7 +488,7 @@ class BatchARC implements IReturnCode {
 		// date programmée d'initialisation (last_init)
 		// on ne la lance que s'il n'y a rien en cours (pas essentiel mais plus
 		// sécurisé)
-		if ((!dejaEnCours && PhaseInitializationOperation.isInitializationMustTrigger())) {
+		if ((!dejaEnCours && PhaseInitializationOperation.isInitializationMustTrigger(this.envExecution))) {
 			message("Initialisation en cours");
 
 			PhaseThreadFactory initialiser = new PhaseThreadFactory(mapParam, TraitementPhase.INITIALISATION);
@@ -481,7 +497,7 @@ class BatchARC implements IReturnCode {
 
 			message("Initialisation terminée : " + initialiser.getReport().getDuree() + " ms");
 
-			BatchArcDao.execUpdateLastInitialisationTimestamp(intervalForInitializationInDay,
+			BatchArcDao.execUpdateLastInitialisationTimestamp(envExecution, intervalForInitializationInDay,
 					hourToTriggerInitializationInProduction);
 
 			return;
@@ -708,7 +724,7 @@ class BatchARC implements IReturnCode {
 	 * @throws ArcException
 	 */
 	private boolean isProductionOn() throws ArcException {
-		this.productionOn = BatchArcDao.execQueryIsProductionOn();
+		this.productionOn = BatchArcDao.execQueryIsProductionOn(this.envExecution);
 		return productionOn;
 	}
 

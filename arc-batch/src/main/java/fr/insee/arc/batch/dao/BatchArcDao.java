@@ -124,32 +124,15 @@ public class BatchArcDao {
 					
 	}
 
-
-	/**
-	 * Create the pilotage batch table if it doesn't exist It may happen only if the
-	 * application is started firstly and exclusively in batch mode without any
-	 * built database
-	 * 
-	 * @throws ArcException
-	 */
-	public static void execQueryCreatePilotageBatch() throws ArcException {
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("\n CREATE TABLE IF NOT EXISTS " + ViewEnum.PILOTAGE_BATCH.getFullName()
-				+ " (last_init text, operation text); ");
-		requete.append(
-				"\n insert into arc.pilotage_batch select '1900-01-01:00','O' where not exists (select 1 from arc.pilotage_batch); ");
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, requete);
-	}
-
 	/**
 	 * Query the initialization timestamp
 	 * 
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String execQueryLastInitialisationTimestamp() throws ArcException {
+	public static String execQueryLastInitialisationTimestamp(String envExecution) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append("select last_init from " + ViewEnum.PILOTAGE_BATCH.getFullName());
+		query.append("select last_init from " + ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(null, query);
 	}
 
@@ -160,11 +143,11 @@ public class BatchArcDao {
 	 * @param hourToTriggerInitializationInProduction
 	 * @throws ArcException
 	 */
-	public static void execUpdateLastInitialisationTimestamp(Integer intervalForInitializationInDay,
+	public static void execUpdateLastInitialisationTimestamp(String envExecution, Integer intervalForInitializationInDay,
 			Integer hourToTriggerInitializationInProduction) throws ArcException {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.UPDATE, ViewEnum.PILOTAGE_BATCH.getFullName());
+		query.build(SQL.UPDATE, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
 		query.build(SQL.SET, "last_init=to_char(current_date+interval '" + intervalForInitializationInDay
 				+ " days','yyyy-mm-dd')||':" + hourToTriggerInitializationInProduction + "'");
 		query.build(",", "operation=case when operation='R' then 'O' else operation end ");
@@ -186,9 +169,9 @@ public class BatchArcDao {
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getInt(null, query);
 	}
 
-	public static Boolean execQueryIsProductionOn() throws ArcException {
+	public static Boolean execQueryIsProductionOn(String envExecution) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName());
+		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
 		query.build(SQL.WHERE, ColumnEnum.OPERATION, "=", query.quoteText("O"));
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(null, query);
 	}
