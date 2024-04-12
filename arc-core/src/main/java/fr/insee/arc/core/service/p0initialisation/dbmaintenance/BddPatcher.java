@@ -23,6 +23,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.format.GitDateFormat;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 
@@ -212,10 +213,10 @@ public class BddPatcher {
 	 */
 	public void bddScript(Connection connexion, String... envExecutions) {
 
-		String applicationNewGitVersion = properties.getGitCommitId();
+		String applicationNewGitVersionDate = properties.getVersionDate();
 		String userNameWithRestrictedRights = properties.getDatabaseRestrictedUsername();
 
-		bddScript(applicationNewGitVersion, userNameWithRestrictedRights, connexion, envExecutions);
+		bddScript(applicationNewGitVersionDate, userNameWithRestrictedRights, connexion, envExecutions);
 
 	}
 
@@ -228,18 +229,18 @@ public class BddPatcher {
 	 * @param connexion
 	 * @param envExecutions
 	 */
-	private static void bddScript(String applicationNewGitVersion, String userNameWithRestrictedRights,
+	private static void bddScript(String applicationNewGitVersionDate, String userNameWithRestrictedRights,
 			Connection connexion, String... envExecutions) {
 		// retrieve the old version from the parameter table
 		// if param not found, parameter table is created and parameter added
-		String databaseOldGitVersion = checkBddScriptVersion(connexion, envExecutions);
-
-		// if database registered git number is not the same as the application git
-		// number
-
-		if (!databaseOldGitVersion.equals(applicationNewGitVersion)) {
-
-			setBddScriptVersionWithoutDescription(connexion, applicationNewGitVersion, envExecutions);
+		String databaseOldGitVersionDate = checkBddScriptVersion(connexion, envExecutions);
+		
+		// if new git version date is strictly older than the old git version date
+		// proceed to database patch
+		if (GitDateFormat.parse(applicationNewGitVersionDate).compareTo(GitDateFormat.parse(databaseOldGitVersionDate)) > 0)
+		{
+			
+			setBddScriptVersionWithoutDescription(connexion, applicationNewGitVersionDate, envExecutions);
 
 			// global script. Mainly to build the arc schema
 			try {
@@ -251,11 +252,11 @@ public class BddPatcher {
 				}
 
 			} catch (Exception e) {
-				setBddScriptVersion(connexion, databaseOldGitVersion);
+				setBddScriptVersion(connexion, databaseOldGitVersionDate);
 			}
 
 			// set version number when the update scripts are over
-			setBddScriptVersion(connexion, applicationNewGitVersion, envExecutions);
+			setBddScriptVersion(connexion, applicationNewGitVersionDate, envExecutions);
 
 		}
 	}
