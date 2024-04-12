@@ -70,8 +70,7 @@ public static void buildResponse(Connection c, ExecuteParameterModel p, ReturnVi
 {
 	r.setReceptionTime(firstContactDate);
 	r.setReturnTime(new Date());
-	
-	r.setDataSetView(new ArrayList<DataSetView>());
+	r.setDataSetView(new ArrayList<>());
 	
 	// searchpath to the current sandbow to be able to query rules of the sandbox simply and without any risk of confusion with user rules
 	String bas=Patch.normalizeSchemaName(p.sandbox);

@@ -6,18 +6,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.DataWarehouse;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.p0initialisation.ResetEnvironmentService;
-import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
-import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
-import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -76,56 +70,6 @@ public class ExecuteServiceOperation {
 			throw new ArcException(ArcExceptionMessage.SQL_EXECUTE_FAILED, e.getMessage());
 		}
 
-	}
-
-	/**
-	 * reset the sandbox to a target phase
-	 * 
-	 * @param env         : sandbox identifier
-	 * @param targetPhase
-	 * @throws ArcException
-	 */
-	public void resetServiceClient(String env, String targetPhase) throws ArcException {
-
-		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
-
-			String repertoire = PropertiesHandler.getInstance().getBatchParametersDirectory();
-
-			ResetEnvironmentService.backToTargetPhase(TraitementPhase.getPhase(targetPhase), env, repertoire,
-					new ArrayList<>());
-
-		} catch (SQLException e) {
-			throw new ArcException(ArcExceptionMessage.SQL_EXECUTE_FAILED, e.getMessage());
-		}
-	}
-
-	/**
-	 * Build a sandbox from scratch it build the file system and build database
-	 * 
-	 * @param env : sandbox identifier
-	 */
-	public void buildSandbox(String env) {
-
-		BddPatcher patcher = new BddPatcher();
-		patcher.bddScript(null);
-		patcher.bddScript(null, env);
-		new BuildFileSystem(null, new String[] { env }).execute();
-
-	}
-
-	/**
-	 * Synchronize the rules of sandbox with the one provided by user in arc
-	 * metadata schema
-	 * 
-	 * @param env : sandbox identifier
-	 * @throws ArcException
-	 */
-	public void synchronizeSandbox(String env) throws ArcException {
-		try (Connection connection = UtilitaireDao.get(0).getDriverConnexion()) {
-			new SynchronizeRulesAndMetadataOperation(new Sandbox(connection, env)).synchroniserSchemaExecutionAllNods();
-		} catch (SQLException e) {
-			throw new ArcException(ArcExceptionMessage.SQL_EXECUTE_FAILED, e.getMessage());
-		}
 	}
 
 }
