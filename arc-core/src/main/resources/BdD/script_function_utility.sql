@@ -182,33 +182,7 @@ $BODY$
 LANGUAGE sql IMMUTABLE STRICT
 COST 100;
 
-CREATE OR REPLACE FUNCTION public.explain(
-    sql1 text,
-    sql2 text)
-  RETURNS text AS
-$BODY$
-declare a text:='';
-DECLARE cur refcursor;
-DECLARE c record;
-
-begin
-
-execute sql1;
-
-open cur for execute sql2;
-loop
-   FETCH cur INTO c;
-   EXIT WHEN NOT FOUND;
-   a:=a||c::text||chr(13);
-end loop;
-close cur;
-
-return a;
-
-end;
-$BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+drop function if exists public.explain;
 
 CREATE OR REPLACE FUNCTION public.sum_evoluee(double precision[])
   RETURNS double precision AS
