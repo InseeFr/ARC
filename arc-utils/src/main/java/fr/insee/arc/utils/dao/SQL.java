@@ -29,6 +29,8 @@ public enum SQL {
 	
 	GROUP_BY("GROUP BY"),
 	
+	ALTER("ALTER"), RENAME_TO("RENAME TO"),
+	
 	TRUE("TRUE"), FALSE("FALSE"),
 	
 	EXISTS("EXISTS"), 

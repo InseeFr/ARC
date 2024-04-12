@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.p3normage.bo.IdCardNormage;
 import fr.insee.arc.core.service.p4controle.operation.ControleRulesOperation;
 import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;

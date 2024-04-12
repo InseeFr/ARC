@@ -35,7 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
@@ -1047,6 +1046,7 @@ public class VObjectService {
 	 * Trier suivant une colonne
 	 */
 	public void sort(VObject currentData) {
+		
 		logVObjectAction(currentData);
 
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
@@ -1090,6 +1090,9 @@ public class VObjectService {
 	 */
 	public File download(VObject currentData, String dirOut, List<String> fileNames,
 			List<ArcPreparedStatementBuilder> requetes) {
+		
+		logVObjectAction(currentData);
+				
 		File fOut = new File(dirOut + File.separator
 				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
 		try {
@@ -1342,6 +1345,9 @@ public class VObjectService {
 	 */
 	public void downloadEnveloppe(VObject currentData, HttpServletResponse response,
 			ArcPreparedStatementBuilder requete, String repertoire, List<String> listRepertoire) {
+		
+		logVObjectAction(currentData);
+		
 		response.reset();
 		response.setHeader("Content-Disposition", "attachment; filename=" + getFileNameDownload(currentData, ".tar"));
 

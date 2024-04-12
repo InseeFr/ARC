@@ -21,6 +21,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
@@ -113,6 +114,21 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		}
 		return typeNomenclature.toString();
 	}
+	
+	/**
+	 * renames the nomenclature table when it is updated in vObject
+	 * 
+	 * @param nameBefore
+	 * @param nameAfter
+	 * @throws ArcException 
+	 */
+	public void updateNomenclatureDansBase(String nameBefore, String nameAfter) throws ArcException {
+		String fullNameBefore = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), nameBefore);
+		ArcPreparedStatementBuilder queryRename = new ArcPreparedStatementBuilder();
+		queryRename.build(SQL.ALTER, SQL.TABLE, SQL.IF_EXISTS, fullNameBefore);
+		queryRename.build(SQL.RENAME_TO, nameAfter);
+		UtilitaireDao.get(0).executeImmediate(null, queryRename);
+	}
 
 	public void importNomenclatureDansBase(VObject viewListNomenclatures, MultipartFile fileUpload)
 			throws ArcException {
@@ -152,24 +168,29 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		List<String> colonnesDansFichier = convertListToLowerTrim(colonnesFichier);
 		List<String> typesDansFichier = convertListToLowerTrim(typesFichier);
 
-		// Verification des noms de colonnes et des types
-		String selectNomColonne = "SELECT nom_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature
-				+ "' ORDER BY nom_colonne";
-		List<String> colonnesDansTableIhmSchemaNmcl = new ArrayList<String>();
-		UtilitaireDao.get(0).getList(null, selectNomColonne, colonnesDansTableIhmSchemaNmcl);
-		areListsEquals(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl, "field");
+		// Verification des noms de colonnes
+		ArcPreparedStatementBuilder queryColonnes = new ArcPreparedStatementBuilder();
+		queryColonnes.build(SQL.SELECT, ColumnEnum.NOM_COLONNE, SQL.FROM, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
+		queryColonnes.build(SQL.WHERE, ColumnEnum.TYPE_NMCL, "=", queryColonnes.quoteText(typeNomenclature));
+		queryColonnes.build(SQL.ORDER_BY, ColumnEnum.NOM_COLONNE);
+		
+		List<String> colonnesDansTableIhmSchemaNmcl = new GenericBean(UtilitaireDao.get(0).executeRequest(null, queryColonnes))
+				.getColumnValues(ColumnEnum.NOM_COLONNE.getColumnName());
+		areListsEquals(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl);
 
 		// Verification des types
-		String selectTypeColonne = "SELECT type_colonne FROM arc.ihm_schema_nmcl WHERE type_nmcl = '" + typeNomenclature
-				+ "' ORDER BY nom_colonne";
-		List<String> typesDansTableIhmSchemaNmcl = new ArrayList<String>();
-		UtilitaireDao.get(0).getList(null, selectTypeColonne, typesDansTableIhmSchemaNmcl);
-		areListsEquals(typesDansFichier, typesDansTableIhmSchemaNmcl, "type");
+		ArcPreparedStatementBuilder queryTypes = new ArcPreparedStatementBuilder();
+		queryTypes.build(SQL.SELECT, ColumnEnum.TYPE_COLONNE, SQL.FROM, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
+		queryTypes.build(SQL.WHERE, ColumnEnum.TYPE_NMCL, "=", queryTypes.quoteText(typeNomenclature));
+		queryTypes.build(SQL.ORDER_BY, ColumnEnum.NOM_COLONNE);
+
+		List<String> typesDansTableIhmSchemaNmcl = new GenericBean(UtilitaireDao.get(0).executeRequest(null, queryTypes))
+				.getColumnValues(ColumnEnum.TYPE_COLONNE.getColumnName());
+		areListsEquals(typesDansFichier, typesDansTableIhmSchemaNmcl);
 
 	}
 
-	private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl, String elementDescription)
-			throws ArcException {
+	private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl) throws ArcException {
 		for (String e : listeFichier) {
 			if (!listIhmSchemaNmcl.contains(e)) {
 				throw new ArcException(ArcExceptionMessage.IHM_NMCL_COLUMN_IN_FILE_BUT_NOT_IN_SCHEMA, e);
@@ -196,9 +217,9 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 			throws ArcException {
 		String newNomenclatureName = viewListNomenclatures.mapContentSelected()
 				.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
-		StringBuilder createTableRequest = new StringBuilder();
-		createTableRequest.append("\n DROP TABLE IF EXISTS arc.temp_" + newNomenclatureName + ";");
-		createTableRequest.append("\n CREATE TABLE arc.temp_" + newNomenclatureName + " (");
+		ArcPreparedStatementBuilder createTableRequest = new ArcPreparedStatementBuilder();
+		createTableRequest.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, "arc.temp_", newNomenclatureName, ";");
+		createTableRequest.build(SQL.CREATE, SQL.TABLE, "arc.temp_", newNomenclatureName, " (");
 		for (int i = 0; i < colonnes.length; i++) {
 			if (i > 0) {
 				createTableRequest.append(", ");
@@ -213,18 +234,18 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	private void creationTableDefinitif(VObject viewListNomenclatures) throws ArcException {
 		String newNomenclatureName = viewListNomenclatures.mapContentSelected()
 				.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
-		StringBuilder creationTableDef = new StringBuilder();
+		ArcPreparedStatementBuilder creationTableDef = new ArcPreparedStatementBuilder();
 
 		String temporaryNewNomenclatureName = "temp_" + newNomenclatureName;
 
-		creationTableDef.append("\n DROP TABLE IF EXISTS "
-				+ ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), newNomenclatureName) + ";");
-		creationTableDef.append("\n CREATE TABLE "
-				+ ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), newNomenclatureName));
-		creationTableDef.append("\n AS SELECT * FROM "
-				+ ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), temporaryNewNomenclatureName) + ";");
-		creationTableDef.append("\n DROP TABLE "
-				+ ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), temporaryNewNomenclatureName) + ";");
+		creationTableDef.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS,
+				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), newNomenclatureName), ";");
+		creationTableDef.build(SQL.CREATE, SQL.TABLE,
+				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), newNomenclatureName));
+		creationTableDef.build(SQL.AS, SQL.SELECT, "*", SQL.FROM,
+				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), temporaryNewNomenclatureName), ";");
+		creationTableDef.build(SQL.DROP, SQL.TABLE,
+				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), temporaryNewNomenclatureName), ";");
 		UtilitaireDao.get(0).executeBlock(null, creationTableDef);
 	}
 
@@ -252,69 +273,66 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 
 	public void execQueryDeleteListNomenclature(VObject viewListNomenclatures) throws ArcException {
 		// Suppression de la table nom table
-		String nomTable = viewListNomenclatures.mapContentSelected().get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
+		String nomTable = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(),
+				viewListNomenclatures.mapContentSelected().get(ColumnEnum.NOM_TABLE.getColumnName()).get(0));
 		
-        UtilitaireDao.get(0).executeImmediate(null, FormatSQL.dropTable(nomTable));
-        
-                    
-        StringBuilder requete = new StringBuilder();
-        requete.append("\n SELECT nom_table FROM arc.ihm_nmcl ");
-        requete.append("\n WHERE nom_table like '" + typeNomenclature(nomTable) + "%'");
-        requete.append("\n AND nom_table <> '" + nomTable + "'");
-        
-        List<String> listeTables = UtilitaireDao.get(0).getList(null, requete.toString(), new ArrayList<>());
-        
-        if (listeTables.isEmpty()) {
-            requete = new StringBuilder();
-            requete.append("\n DELETE FROM arc.ihm_schema_nmcl");
-            requete.append("\n WHERE type_nmcl = '" + typeNomenclature(nomTable) + "'");
-            UtilitaireDao.get(0).executeImmediate(null, requete.toString());
-        }
-        
+		UtilitaireDao.get(0).executeImmediate(null, FormatSQL.dropTable(nomTable));
+
+        			
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.build(SQL.SELECT, ColumnEnum.NOM_TABLE.getColumnName(), SQL.FROM, ViewEnum.IHM_NMCL.getFullName());
+		requete.build(SQL.WHERE, ColumnEnum.NOM_TABLE.getColumnName(), SQL.LIKE, requete.quoteText(typeNomenclature(nomTable)+"%"));
+		requete.build(SQL.AND, ColumnEnum.NOM_TABLE.getColumnName(), "<>", requete.quoteText(nomTable));
+
+		List<String> listeTables = UtilitaireDao.get(0).getList(null, requete.toString(), new ArrayList<>());
+
+		if (listeTables.isEmpty()) {
+			requete = new ArcPreparedStatementBuilder();
+			requete.build(SQL.DELETE, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
+			requete.build(SQL.WHERE, ColumnEnum.TYPE_NMCL.getColumnName(), "=", requete.quoteText(typeNomenclature(nomTable)));
+			UtilitaireDao.get(0).executeImmediate(null, requete.toString());
+		}
+
 	}
 
 	public boolean execQueryIsSelectedNomenclatureTableExists(String selectedTable) {
-		return UtilitaireDao.get(0)
-		.isTableExiste(null, ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), selectedTable));
+		return UtilitaireDao.get(0).isTableExiste(null,
+				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), selectedTable));
 	}
 
-	
+	/**
+	 * 
+	 * Vérifie si un nom de colonnes est valide. <br/>
+	 * Si ce n'est pas le cas une exception est jetée.
+	 * 
+	 * @param nomColonne
+	 * @throws ArcException
+	 */
+	public boolean isColonneValide(String nomColonne) {
+		try {
+			UtilitaireDao.get(0).executeImmediate(null, "SELECT null as " + nomColonne);
+		} catch (ArcException e) {
+			return false;
+		}
+		return true;
+	}
 
-	 
-
-    /**
-     * 
-     * Vérifie si un nom de colonnes est valide. <br/>
-     * Si ce n'est pas le cas une exception est jetée.
-     * 
-     * @param nomColonne
-     * @throws ArcException
-     */
-    public boolean isColonneValide(String nomColonne) {
-        try {
-            UtilitaireDao.get(0).executeImmediate(null, "SELECT null as " + nomColonne);
-        } catch (ArcException e) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 
-     * Vérifie si un nom de colonnes est valide. <br/>
-     * Si ce n'est pas le cas une exception est jetée.
-     * 
-     * @param nomColonne
-     * @throws ArcException
-     */
-    public boolean isTypeValide(String typeColonne) {
-        try {
-            UtilitaireDao.get(0).executeImmediate(null, "SELECT null::" + typeColonne);
-        } catch (ArcException e) {
-            return false;
-        }
-        return true;
-    }
+	/**
+	 * 
+	 * Vérifie si un nom de colonnes est valide. <br/>
+	 * Si ce n'est pas le cas une exception est jetée.
+	 * 
+	 * @param nomColonne
+	 * @throws ArcException
+	 */
+	public boolean isTypeValide(String typeColonne) {
+		try {
+			UtilitaireDao.get(0).executeImmediate(null, "SELECT null::" + typeColonne);
+		} catch (ArcException e) {
+			return false;
+		}
+		return true;
+	}
 
 
 	

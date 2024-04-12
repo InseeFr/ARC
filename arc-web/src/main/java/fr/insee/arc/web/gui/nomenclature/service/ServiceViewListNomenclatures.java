@@ -59,7 +59,16 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
             this.views.getViewListNomenclatures().setMessage("nmclManagement.update.noNomenclature");
         }
         if (zeroErreur) {
-            this.vObjectService.update(this.views.getViewListNomenclatures());
+            Map<String, List<String>> selectionBefore = views.getViewListNomenclatures().mapContentBeforeUpdate();
+            try {
+                for (int i = 0; i < selection.get(NOM_TABLE).size(); i++) {
+                    dao.updateNomenclatureDansBase(selectionBefore.get(NOM_TABLE).get(i),
+                            selection.get(NOM_TABLE).get(i));
+                }
+                this.vObjectService.update(this.views.getViewListNomenclatures());
+            } catch (ArcException e) {
+                this.views.getViewListNomenclatures().setMessage("nmclManagement.update.error");
+            }
         }
 
         return generateDisplay(model, RESULT_SUCCESS);
