@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -73,7 +74,11 @@ public static void buildResponse(Connection c, ExecuteParameterModel p, ReturnVi
 	r.setDataSetView(new ArrayList<DataSetView>());
 	
 	// searchpath to the current sandbow to be able to query rules of the sandbox simply and without any risk of confusion with user rules
-	UtilitaireDao.get(0).executeImmediate(c,"SET search_path=public, "+p.sandbox.replace(".", "_")+", arc; ");
+	String bas=Patch.normalizeSchemaName(p.sandbox);
+	String postgresSearchPath ="public, "+bas+", arc"; 
+	ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+	query.append("select set_config('search_path', "+query.quoteText(postgresSearchPath)+", false)");
+	UtilitaireDao.get(0).executeRequest(c, query);
 	
 	if (p.queries!=null)
 	{
