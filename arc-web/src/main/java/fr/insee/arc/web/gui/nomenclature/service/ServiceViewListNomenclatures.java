@@ -61,7 +61,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
         if (zeroErreur) {
             Map<String, List<String>> selectionBefore = views.getViewListNomenclatures().mapContentBeforeUpdate();
             try {
-                for (int i = 0; i < selection.size(); i++) {
+                for (int i = 0; i < selection.get(NOM_TABLE).size(); i++) {
                     dao.updateNomenclatureDansBase(selectionBefore.get(NOM_TABLE).get(i),
                             selection.get(NOM_TABLE).get(i));
                 }

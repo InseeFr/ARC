@@ -123,8 +123,9 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	 * @throws ArcException 
 	 */
 	public void updateNomenclatureDansBase(String nameBefore, String nameAfter) throws ArcException {
+		String fullNameBefore = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), nameBefore);
 		ArcPreparedStatementBuilder queryRename = new ArcPreparedStatementBuilder();
-		queryRename.build(SQL.ALTER, SQL.TABLE, SQL.IF_EXISTS, "arc." + nameBefore);
+		queryRename.build(SQL.ALTER, SQL.TABLE, SQL.IF_EXISTS, fullNameBefore);
 		queryRename.build(SQL.RENAME_TO, nameAfter);
 		UtilitaireDao.get(0).executeImmediate(null, queryRename);
 	}
@@ -272,7 +273,8 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 
 	public void execQueryDeleteListNomenclature(VObject viewListNomenclatures) throws ArcException {
 		// Suppression de la table nom table
-		String nomTable = viewListNomenclatures.mapContentSelected().get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
+		String nomTable = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(),
+				viewListNomenclatures.mapContentSelected().get(ColumnEnum.NOM_TABLE.getColumnName()).get(0));
 		
 		UtilitaireDao.get(0).executeImmediate(null, FormatSQL.dropTable(nomTable));
 
@@ -286,7 +288,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 
 		if (listeTables.isEmpty()) {
 			requete = new ArcPreparedStatementBuilder();
-			requete.build(SQL.DELETE, SQL.FROM, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
+			requete.build(SQL.DELETE, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
 			requete.build(SQL.WHERE, ColumnEnum.TYPE_NMCL.getColumnName(), "=", requete.quoteText(typeNomenclature(nomTable)));
 			UtilitaireDao.get(0).executeImmediate(null, requete.toString());
 		}
