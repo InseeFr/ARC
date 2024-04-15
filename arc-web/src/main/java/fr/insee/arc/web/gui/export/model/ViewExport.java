@@ -27,7 +27,7 @@ public class ViewExport extends VObject {
             {
                 put("file_name", new ColumnRendering(true, "Nom du fichier à créer", "11%", "text", null, true));
                 put("zip", new ColumnRendering(true, "Format d'export", "4%", "select", new ArcPreparedStatementBuilder("select id, val from arc.ext_export_format order by id"), true));
-                put("headers", new ColumnRendering(true, "Créer la ligne d'entete ?", "10%", "text", null, true));
+                put("headers", new ColumnRendering(true, "Créer la ligne d'entête ?", "10%", "text", null, true));
                 put("nulls", new ColumnRendering(true, "Mettre null pour les valeurs à null ?", "10%", "text", null, true));
                 put("table_to_export", new ColumnRendering(true, "Table à exporter", "11%", "text", null, true));
                 put("nomenclature_export", new ColumnRendering(true, "Nomenclature de définition de l'export", "11%", "text", null, true));
