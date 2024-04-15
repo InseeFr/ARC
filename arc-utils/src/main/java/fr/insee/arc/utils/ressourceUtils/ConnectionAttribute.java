@@ -9,12 +9,16 @@ import fr.insee.arc.utils.utils.ManipString;
 
 public class ConnectionAttribute {
 
+	private static final String HOST_SEPARATOR = "://";
+	private static final String PORT_SEPARATOR = ":";
+	private static final String SERVICE_SEPARATOR = "/";
 	private static final String PG_DEFAULT_PORT = "5432";
 
 	private String databaseUrl;
 	private String databaseUsername;
 	private String databasePassword;
 	private String databaseDriverClassName;
+	private String prefix;
 	private String host;
 	private String port;
 	private String database;
@@ -28,14 +32,19 @@ public class ConnectionAttribute {
 		this.databaseDriverClassName = databaseDriverClassName;
 
 		// deduce from postgres uri the host, the port and the database
-		String longHost = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(this.databaseUrl, "//"),
-				"/");
-		this.host = ManipString.substringBeforeFirst(longHost, ":");
-		this.port = longHost.contains(":") ? ManipString.substringAfterFirst(longHost, ":") : PG_DEFAULT_PORT;
-		this.database = ManipString.substringAfterLast(this.databaseUrl, "/");
-
+		this.prefix= ManipString.substringBeforeFirst(this.databaseUrl, HOST_SEPARATOR);
+		String longHost = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(this.databaseUrl, HOST_SEPARATOR),
+				SERVICE_SEPARATOR);
+		this.host = ManipString.substringBeforeFirst(longHost, PORT_SEPARATOR);
+		this.port = longHost.contains(PORT_SEPARATOR) ? ManipString.substringAfterFirst(longHost, PORT_SEPARATOR) : PG_DEFAULT_PORT;
+		this.database = ManipString.substringAfterLast(this.databaseUrl, SERVICE_SEPARATOR);
 	}
-
+	
+	
+	public void updateDatabaseUrl() {
+		this.databaseUrl = this.prefix + HOST_SEPARATOR + this.host + PORT_SEPARATOR + this.port + SERVICE_SEPARATOR + this.database;
+	}
+	
 	/**
 	 * Ruby map from ci/cd : {0=>"zzz"},{1=>"xxxx"},{2=>"pass\"ji\""} No ruby parser
 	 * in java :( Change string to json {0:"zzz",1:"xxxx",2:"pass\"ji\""} to be
@@ -115,12 +124,25 @@ public class ConnectionAttribute {
 		this.databaseDriverClassName = databaseDriverClassName;
 	}
 
+	
+	public String getPrefix() {
+		return prefix;
+	}
+
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+
 	public String getHost() {
 		return host;
 	}
 
+	// if a new host is set, database uri is updated with new value
 	public void setHost(String host) {
 		this.host = host;
+		updateDatabaseUrl();
 	}
 
 	public String getPort() {

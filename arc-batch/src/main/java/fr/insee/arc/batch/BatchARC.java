@@ -2,6 +2,8 @@ package fr.insee.arc.batch;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -125,6 +127,8 @@ class BatchARC implements IReturnCode {
 
 		try {
 			
+			batchAvoidDnsSpam();
+			
 			// patch database
 			batchPatchDatabase();
 
@@ -154,6 +158,23 @@ class BatchARC implements IReturnCode {
 		message("Fin du batch");
 
 	}
+
+	/**
+	 * Remap given database uri to use ip adress instead of dns name during batch loop
+	 */
+	private void batchAvoidDnsSpam() {
+		properties.setRemapHostAddress(t -> {
+			try {
+				return InetAddress.getByName(t).getHostAddress();
+			} catch (UnknownHostException e) {
+				throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
+			}
+		}
+		);
+	}
+	
+	
+	
 
 	private void executeIfProductionActive(ThrowingRunnable method) throws ArcException {
 		if (!isProductionOn()) {

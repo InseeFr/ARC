@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.bouncycastle.util.Arrays;
 import org.springframework.stereotype.Service;
 
+import fr.insee.arc.utils.consumer.ThrowingFunction;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
@@ -25,7 +28,7 @@ public class PropertiesHandler {
 	private String databaseDriverClassName;
 	private String databaseSchema;
 
-	/**
+	/*
 	 * List of connection attributes
 	 */
 	private List<ConnectionAttribute> connectionProperties;
@@ -79,6 +82,10 @@ public class PropertiesHandler {
 
 	private static PropertiesHandler instanceOfPropertiesHandler;
 
+	// remap database host address ; can be useful to prevent dns spam for example
+	private ThrowingFunction<String, String> remapHostAddress = t -> {return t;};
+
+	
 	public void initializeLog() {
 		LogConfigurator logConf = new LogConfigurator(logConfiguration);
 
@@ -452,6 +459,7 @@ public class PropertiesHandler {
 		map.put("version", getVersion());
 		map.put("buildDate", getVersionDate());
 		map.put("gitCommitId", getGitCommitId());
+		map.put("databaseUri", String.valueOf(getConnectionProperties().stream().map(ConnectionAttribute::getDatabaseUrl).toList()));
 		map.put("number_of_nods", String.valueOf(getConnectionProperties().size()));
 		map.put("volatile", String.valueOf(!getKubernetesExecutorVolatile().isEmpty()));
 		map.put("number_of_volatile_executors", String.valueOf(getKubernetesExecutorNumber()));
@@ -488,10 +496,21 @@ public class PropertiesHandler {
 			Arrays.fill(databaseDriverClassNames, driverClassName);
 		}
 
+		// fill the connectionProperties
 		for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
+			
+			ConnectionAttribute connectionAttribute = new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
+					databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]);
+			
+			try {
+				connectionAttribute.setHost(remapHostAddress.apply(connectionAttribute.getHost()));
+			} catch (ArcException e) {
+				this.connectionProperties = null;
+				return this.connectionProperties;
+			}
+			
 			connectionProperties
-					.add(new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
-							databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]));
+					.add(connectionAttribute);
 		}
 
 		// if executors are declared on pool, set kubernetesExecutorNumber to 0
@@ -529,7 +548,10 @@ public class PropertiesHandler {
 	public int numberOfNods() {
 		return this.getConnectionProperties().size();
 	}
-	
-	
+
+	public void setRemapHostAddress(ThrowingFunction<String, String> remapHostAddress) {
+		this.remapHostAddress = remapHostAddress;
+	}
+
 
 }

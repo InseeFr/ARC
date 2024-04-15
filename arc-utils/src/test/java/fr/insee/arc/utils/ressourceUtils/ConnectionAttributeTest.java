@@ -1,6 +1,7 @@
 package fr.insee.arc.utils.ressourceUtils;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,14 +34,20 @@ public class ConnectionAttributeTest {
 		ConnectionAttribute c;
 		
 		c = new ConnectionAttribute("jdbc:postgresql://localhost:5555/arc_test", null, null, null);
-		assertEquals(c.getHost(),"localhost");
-		assertEquals(c.getPort(),"5555");
-		assertEquals(c.getDatabase(),"arc_test");
+		assertEquals("jdbc:postgresql", c.getPrefix());
+		assertEquals("localhost", c.getHost());
+		assertEquals("5555", c.getPort());
+		assertEquals("arc_test", c.getDatabase());
+		assertEquals("jdbc:postgresql://localhost:5555/arc_test",c.getDatabaseUrl());
 
 		c = new ConnectionAttribute("jdbc:postgresql://localhost/arc_test", null, null, null);
-		assertEquals(c.getHost(),"localhost");
-		assertEquals(c.getPort(),"5432");
-		assertEquals(c.getDatabase(),"arc_test");
+		assertEquals("jdbc:postgresql", c.getPrefix());
+		assertEquals("localhost", c.getHost());
+		assertEquals("5432", c.getPort());
+		assertEquals("arc_test", c.getDatabase());
+		
+		c.setHost("127.0.0.1");
+		assertEquals("jdbc:postgresql://127.0.0.1:5432/arc_test",c.getDatabaseUrl());
 	}
 	
 }
