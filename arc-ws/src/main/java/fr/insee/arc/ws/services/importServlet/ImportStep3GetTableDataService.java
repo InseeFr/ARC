@@ -9,6 +9,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
+import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifierUnsafe;
 import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 import fr.insee.arc.ws.services.importServlet.dao.ServiceDao;
@@ -27,7 +28,7 @@ public class ImportStep3GetTableDataService {
 	public ImportStep3GetTableDataService(JSONObject dsnRequest) {
 		super();
 
-		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest, false);
+		this.arcClientIdentifier = new ArcClientIdentifier(new ArcClientIdentifierUnsafe(dsnRequest, false));
 
 		clientDao = new ClientDao(arcClientIdentifier);
 

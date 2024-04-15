@@ -33,7 +33,8 @@ public class ServletArc extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final List<String> DEFAULT_SOURCE = Arrays.asList(ExportSource.MAPPING.getSource(), ExportSource.NOMENCLATURE.getSource(), ExportSource.METADATA.getSource());
+	private static final List<String> DEFAULT_SOURCE = Arrays.asList(ExportSource.MAPPING.getSource(),
+			ExportSource.NOMENCLATURE.getSource(), ExportSource.METADATA.getSource());
 
 	private static final Logger LOGGER = LogManager.getLogger(ServletArc.class);
 
@@ -62,33 +63,33 @@ public class ServletArc extends HttpServlet {
 		}
 	}
 
-
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) {
 
 		LoggerHelper.info(LOGGER, "doPost() begin");
 		JSONObject dsnRequest = null;
 
-		if (request.getParameter("requests") != null) {
+		if (request.getParameter("requests") == null) {
+			return;
+		}
 
-			dsnRequest = validateRequest(new JSONObject(request.getParameter("requests")));
+		dsnRequest = validateRequest(new JSONObject(request.getParameter("requests")));
 
-			if (SecurityDao.securityAccessAndTracing(request, response, dsnRequest)) {
+		if (SecurityDao.securityAccessAndTracing(request, response, dsnRequest)) {
 
-				LoggerHelper.info(LOGGER, "ServletArc.doPost(): Requête reçue : " + dsnRequest);
+			LoggerHelper.info(LOGGER, "ServletArc.doPost(): Requête reçue : " + dsnRequest);
 
-				SendResponse resp = new SendResponse(response);
-				try {
-					new InitiateRequest(dsnRequest).doRequest(resp);
-				} catch (ArcException e) {
-					resp.sendError(e);
-					e.logFullException();
-				}
-
-				LoggerHelper.info(LOGGER, "doPost() end");
+			SendResponse resp = new SendResponse(response);
+			try {
+				new InitiateRequest(dsnRequest).doRequest(resp);
+			} catch (ArcException e) {
+				resp.sendError(e);
+				e.logFullException();
 			}
 
+			LoggerHelper.info(LOGGER, "doPost() end");
 		}
+
 	}
 
 	/**
@@ -98,11 +99,11 @@ public class ServletArc extends HttpServlet {
 	 * @return
 	 */
 	protected static JSONObject validateRequest(JSONObject returned) {
-		
+
 		if (returned.isNull(JsonKeys.FORMAT.getKey())) {
 			returned.put(JsonKeys.FORMAT.getKey(), ExportFormat.BINARY.getFormat());
 		}
-		
+
 		// if SOURCE key is not specified, add all the default sources to be retrieved
 		if (returned.isNull(JsonKeys.SOURCE.getKey())) {
 			return returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);

@@ -15,6 +15,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
+import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifierUnsafe;
 import fr.insee.arc.ws.services.importServlet.bo.ExportSource;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
@@ -37,7 +38,7 @@ public class ImportStep1InitializeClientTablesService {
 
 		this.dsnRequest = dsnRequest;
 
-		this.arcClientIdentifier = new ArcClientIdentifier(dsnRequest, true);
+		this.arcClientIdentifier = new ArcClientIdentifier(new ArcClientIdentifierUnsafe(dsnRequest, true));
 
 		this.sources = makeSource(dsnRequest);
 
