@@ -7,6 +7,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## version-94.1.12b
+- some checkmarx fix
+- ip caching to avoid dsn spam in batch mode
+- deprecated spring security fix
+
+## version-94.1.11b
+- ARC batch exports data to parquet (when fr.insee.arc.process.export property is not empty). Default is off
+- ARC batch pops, uses and removes executor database (when fr.insee.arc.kubernetes.executor.volatile is not empty). Default is off
+
 ## version-94.1.10
 - bug fix for gz archive entry name
 - parquet export
