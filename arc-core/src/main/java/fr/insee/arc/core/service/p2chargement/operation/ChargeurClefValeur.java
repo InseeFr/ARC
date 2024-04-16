@@ -17,6 +17,8 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.opencsv.CSVReader;
+
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.IChargeur;
 import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
@@ -135,19 +137,20 @@ public class ChargeurClefValeur implements IChargeur {
         try
         (
         		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        		CSVReader readerCSV = new CSVReader(bufferedReader, fileIdCard.getIdCardChargement().getDelimiter().charAt(0));
         )
         {
 	        // On lit le fichier ligne par ligne
-	        String ligne = bufferedReader.readLine();
+	        String[] ligne = readerCSV.readNext();
 	
 	        // initialisation du fichier
 	        listePeresRubriquePrecedante = initialisationOutputStream(arbreFormat, mapRubriquesFilles, ligne);
 	
-	        ligne = bufferedReader.readLine();
+	        ligne = readerCSV.readNext();
 	        while (ligne != null) {
 	
 	            listePeresRubriquePrecedante = lectureLigne(arbreFormat, listePeresRubriquePrecedante, mapRubriquesFilles, ligne);
-	            ligne = bufferedReader.readLine();
+	            ligne = readerCSV.readNext();
 	
 	        }
 	
@@ -172,13 +175,13 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws ArcException 
      */
     private List<String> initialisationOutputStream(Map<String, String> arbreFormat, Map<String, List<String>> mapRubriquesFilles,
-            String ligne) throws ArcException {
+            String[] ligne) throws ArcException {
         // ecriture de l'entete du fichier
 
         ecrireXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-        String rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
-        String donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
+        String rubrique = ligne[0];
+        String donnee = ligne[1];
 
         // On retire les quotes de début et fin de manière violente
         donnee = donnee.substring(1, donnee.length() - 1);
@@ -227,7 +230,7 @@ public class ChargeurClefValeur implements IChargeur {
      * @throws ArcException 
      */
     private List<String> lectureLigne(Map<String, String> arbreFormat,
-            List<String> listePeresRubriquePrecedante, Map<String, List<String>> mapRubriquesFilles, String ligne) 
+            List<String> listePeresRubriquePrecedante, Map<String, List<String>> mapRubriquesFilles, String[] ligne) 
             		throws ArcException
             {
         String rubrique;
@@ -235,8 +238,8 @@ public class ChargeurClefValeur implements IChargeur {
         String pere;
         String rubriqueCourante;
 
-        rubrique = ManipString.substringBeforeFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
-        donnee = ManipString.substringAfterFirst(ligne, fileIdCard.getIdCardChargement().getDelimiter());
+        rubrique = ligne[0];
+        donnee = ligne[1];
 
         // On retire les quotes de début et fin de manière violente
         donnee = donnee.substring(1, donnee.length() - 1);
