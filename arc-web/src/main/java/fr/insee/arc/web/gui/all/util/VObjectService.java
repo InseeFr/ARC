@@ -1097,8 +1097,8 @@ public class VObjectService {
 				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
 		try {
 			// Rattachement du zip à la réponse de Struts2
-			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(fOut));
-			try {
+			try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(fOut));)
+			{
 				for (int i = 0; i < requetes.size(); i++) {
 					// Le nom des fichiers à l'interieur du zip seront simple :
 					// fichier1.csv, fichier2.csv etc.
@@ -1110,8 +1110,6 @@ public class VObjectService {
 							zos);
 					zos.closeEntry();
 				}
-			} finally {
-				zos.close();
 			}
 		} catch (IOException | ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
@@ -1136,8 +1134,8 @@ public class VObjectService {
 				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
 		try {
 			// Rattachement du zip à la réponse de Struts2
-			ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
-			try {
+			try (ZipOutputStream zos = new ZipOutputStream(response.getOutputStream()))
+			{
 				for (int i = 0; i < requetes.size(); i++) {
 					// Le nom des fichiers à l'interieur du zip seront simple :
 					// fichier1.csv, fichier2.csv etc.
@@ -1149,8 +1147,6 @@ public class VObjectService {
 							zos);
 					zos.closeEntry();
 				}
-			} finally {
-				zos.close();
 			}
 		} catch (IOException | ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
