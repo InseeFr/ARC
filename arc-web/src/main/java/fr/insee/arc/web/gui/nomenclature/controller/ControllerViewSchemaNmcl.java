@@ -13,25 +13,10 @@ public class ControllerViewSchemaNmcl extends ServiceViewSchemaNmcl {
     public String selectSchemaNmclAction(Model model) {
         return selectSchemaNmcl(model);
     }
-
-    @RequestMapping("/secure/addSchemaNmcl")
-    public String addSchemaNmclAction(Model model) {
-		return addSchemaNmcl(model);
-    }
-
-    @RequestMapping("/secure/updateSchemaNmcl")
-    public String updateSchemaNmclAction(Model model) {
-        return updateSchemaNmcl(model);
-    }
-
+    
     @RequestMapping("/secure/sortSchemaNmcl")
     public String sortSchemaNmclAction(Model model) {
         return sortSchemaNmcl(model);
-    }
-
-    @RequestMapping("/secure/deleteSchemaNmcl")
-    public String deleteSchemaNmclAction(Model model) {
-        return deleteSchemaNmcl(model);
     }
 
 }

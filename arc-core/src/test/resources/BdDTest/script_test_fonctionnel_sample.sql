@@ -434,21 +434,6 @@ INSERT INTO arc.ihm_nmcl VALUES ('nmcl_evenements_v002', 'Code évènement (V201
 INSERT INTO arc.ihm_nmcl VALUES ('nmcl_cog_v004', 'COG année 2023');
 
 --
--- TOC entry 7346 (class 0 OID 17190)
--- Dependencies: 299
--- Data for Name: ihm_schema_nmcl; Type: TABLE DATA; Schema: arc; Owner: -
---
-
-INSERT INTO arc.ihm_schema_nmcl VALUES ('nmcl_supportdec', 'code', 'text');
-INSERT INTO arc.ihm_schema_nmcl VALUES ('nmcl_supportdec', 'libellé', 'text');
-INSERT INTO arc.ihm_schema_nmcl VALUES ('nmcl_rubriqueentete', 'rubrique', 'text');
-INSERT INTO arc.ihm_schema_nmcl VALUES ('nmcl_evenements', 'code', 'text');
-INSERT INTO arc.ihm_schema_nmcl VALUES ('nmcl_evenements', 'libellé', 'text');
-INSERT INTO arc.ihm_schema_nmcl VALUES ('nmcl_cog', 'code', 'text');
-INSERT INTO arc.ihm_schema_nmcl VALUES ('nmcl_cog', 'libelle', 'text');
-
-
---
 -- TOC entry 7361 (class 0 OID 12416756)
 -- Dependencies: 429
 -- Data for Name: ihm_ws_context; Type: TABLE DATA; Schema: arc; Owner: -

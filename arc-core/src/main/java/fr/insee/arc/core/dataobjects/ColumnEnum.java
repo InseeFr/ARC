@@ -55,7 +55,7 @@ public enum ColumnEnum {
 	, KEY("key", TypeEnum.TEXT, "") // parameter
 	, LAST_INIT("last_init", TypeEnum.TEXT, "") // pilotage_batch
 	, MISE_A_JOUR_IMMEDIATE("mise_a_jour_immediate", TypeEnum.BOOLEAN, "") // ext_etat_jeuderegle
-	, NOM_COLONNE("nom_colonne", TypeEnum.TEXT, "") // ihm_schema_nmcl
+	, NOM_COLONNE("nom_colonne", TypeEnum.TEXT, "") // view schema nmcl
 	, NOM_TABLE("nom_table", TypeEnum.TEXT, "") // ihm_nmcl
 	, NOM_TABLE_METIER("nom_table_metier", TypeEnum.TEXT, "") // ihm_mod_table_metier,ihm_mod_variable_metier
 	, NOM_TYPE("nom_type", TypeEnum.NAME, "") // ext_mod_type_autorise
@@ -77,10 +77,10 @@ public enum ColumnEnum {
 	, SERVICE_TYPE("service_type", TypeEnum.INTEGER, "") // ihm_ws_context
 	, TARGET_PHASE("target_phase", TypeEnum.TEXT, "") // ihm_ws_context
 	, TODO("todo", TypeEnum.TEXT, "") // ihm_controle_regle,ihm_normage_regle
-	, TYPE_COLONNE("type_colonne", TypeEnum.TEXT, "") // ihm_schema_nmcl
+	, TYPE_COLONNE("type_colonne", TypeEnum.TEXT, "") // view schema nmcl
 	, TYPE_CONSOLIDATION("type_consolidation", TypeEnum.TEXT, "") // ihm_mod_variable_metier
 	, TYPE_FICHIER("type_fichier", TypeEnum.TEXT, "") // ihm_chargement_regle
-	, TYPE_NMCL("type_nmcl", TypeEnum.TEXT, "") // ihm_schema_nmcl
+	, TYPE_NMCL("type_nmcl", TypeEnum.TEXT, "") // view schema nmcl
 	, TYPE_VARIABLE_METIER("type_variable_metier", TypeEnum.NAME, "") // ihm_mod_variable_metier
 	, VAL("val", TypeEnum.TEXT, "") // ext_export_format,ext_etat_jeuderegle,ext_webservice_queryview,ext_webservice_type,ext_etat,parameter,ext_mod_periodicite
 	, VALIDITE("validite", TypeEnum.TEXT, "") // ihm_ws_context

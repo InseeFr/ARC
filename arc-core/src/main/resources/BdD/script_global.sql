@@ -309,12 +309,7 @@ CONSTRAINT ihm_nmcl_pkey PRIMARY KEY (nom_table)
 ); 
        
         
-CREATE TABLE IF NOT EXISTS arc.ihm_schema_nmcl 
-( 
-type_nmcl text, 
-nom_colonne text, 
-type_colonne text 
-); 
+DROP TABLE IF EXISTS arc.ihm_schema_nmcl;
 
 DROP TABLE IF EXISTS arc.ihm_seuil;
 

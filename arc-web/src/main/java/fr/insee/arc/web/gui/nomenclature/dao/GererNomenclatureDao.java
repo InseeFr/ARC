@@ -3,9 +3,7 @@ package fr.insee.arc.web.gui.nomenclature.dao;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -21,7 +19,6 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
@@ -77,26 +74,26 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	 * @param viewSchemaNmcl
 	 */
 	public void initializeViewSchemaNmcl(VObject viewSchemaNmcl) {
-		ViewEnum dataModelSchemaNmcl = ViewEnum.IHM_SCHEMA_NMCL;
+		String nmclTableName = selectedRecords.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
 		// view query
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append(SQL.SELECT);
-		query.append(query.sqlListeOfColumnsFromModel(dataModelSchemaNmcl));
-		query.append(SQL.FROM);
-		query.append(dataObjectService.getView(dataModelSchemaNmcl));
-		query.append(SQL.WHERE);
-		query.append(ColumnEnum.TYPE_NMCL).append("=");
-		query.append(
-				query.quoteText(typeNomenclature(selectedRecords.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0))));
+		query.build(SQL.SELECT);
+		query.build(query.quoteText(typeNomenclature(nmclTableName)), SQL.AS, ColumnEnum.TYPE_NMCL);
+		query.build(SQL.COMMA, "column_name", SQL.AS, ColumnEnum.NOM_COLONNE);
+		query.build(SQL.COMMA, "data_type", SQL.AS, ColumnEnum.TYPE_COLONNE);
+		query.build(SQL.FROM);
+		query.build("information_schema.columns");
+		query.build(SQL.WHERE);
+		query.build(ColumnEnum.TABLE_SCHEMA, "='arc'");
+		query.build(SQL.AND);
+		query.build(ColumnEnum.TABLE_NAME, "=", query.quoteText(nmclTableName));
 
 		// default value
 		Map<String, String> defaultInputFields = new HashMap<>();
-		defaultInputFields.put(ColumnEnum.TYPE_NMCL.getColumnName(),
-				typeNomenclature(selectedRecords.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0)));
+		defaultInputFields.put(ColumnEnum.TYPE_NMCL.getColumnName(), typeNomenclature(nmclTableName));
 
 		// initialize vobject
-		vObjectService.initialize(viewSchemaNmcl, query, dataObjectService.getView(dataModelSchemaNmcl),
-				defaultInputFields);
+		vObjectService.initialize(viewSchemaNmcl, query, "arc." + nmclTableName, defaultInputFields);
 	}
 
 	/**
@@ -135,12 +132,10 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 
 		try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))) {
 
-			// Verification des colonnes
+			// Colonnes et types pour le schéma de la table temporaire
 			String[] colonnes = rd.readLine().split(";");
 			String[] types = rd.readLine().split(";");
-			verificationColonnes(viewListNomenclatures, colonnes, types);
 
-			// Verification du nombre de colonnes
 			// Création de la table temporaire
 			creationTableDeNomenclatureTemporaire(viewListNomenclatures, colonnes, types);
 
@@ -153,64 +148,6 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 			throw new ArcException(e, ArcExceptionMessage.IHM_NMCL_IMPORT_FAILED);
 		}
 
-	}
-
-	/**
-	 * @param colonnesFichier
-	 * @throws ArcException
-	 */
-	private void verificationColonnes(VObject viewListNomenclatures, String[] colonnesFichier, String[] typesFichier)
-			throws ArcException {
-		String newNomenclatureName = viewListNomenclatures.mapContentSelected()
-				.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
-		String typeNomenclature = typeNomenclature(newNomenclatureName);
-
-		List<String> colonnesDansFichier = convertListToLowerTrim(colonnesFichier);
-		List<String> typesDansFichier = convertListToLowerTrim(typesFichier);
-
-		// Verification des noms de colonnes
-		ArcPreparedStatementBuilder queryColonnes = new ArcPreparedStatementBuilder();
-		queryColonnes.build(SQL.SELECT, ColumnEnum.NOM_COLONNE, SQL.FROM, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
-		queryColonnes.build(SQL.WHERE, ColumnEnum.TYPE_NMCL, "=", queryColonnes.quoteText(typeNomenclature));
-		queryColonnes.build(SQL.ORDER_BY, ColumnEnum.NOM_COLONNE);
-		
-		List<String> colonnesDansTableIhmSchemaNmcl = new GenericBean(UtilitaireDao.get(0).executeRequest(null, queryColonnes))
-				.getColumnValues(ColumnEnum.NOM_COLONNE.getColumnName());
-		areListsEquals(colonnesDansFichier, colonnesDansTableIhmSchemaNmcl);
-
-		// Verification des types
-		ArcPreparedStatementBuilder queryTypes = new ArcPreparedStatementBuilder();
-		queryTypes.build(SQL.SELECT, ColumnEnum.TYPE_COLONNE, SQL.FROM, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
-		queryTypes.build(SQL.WHERE, ColumnEnum.TYPE_NMCL, "=", queryTypes.quoteText(typeNomenclature));
-		queryTypes.build(SQL.ORDER_BY, ColumnEnum.NOM_COLONNE);
-
-		List<String> typesDansTableIhmSchemaNmcl = new GenericBean(UtilitaireDao.get(0).executeRequest(null, queryTypes))
-				.getColumnValues(ColumnEnum.TYPE_COLONNE.getColumnName());
-		areListsEquals(typesDansFichier, typesDansTableIhmSchemaNmcl);
-
-	}
-
-	private void areListsEquals(List<String> listeFichier, List<String> listIhmSchemaNmcl) throws ArcException {
-		for (String e : listeFichier) {
-			if (!listIhmSchemaNmcl.contains(e)) {
-				throw new ArcException(ArcExceptionMessage.IHM_NMCL_COLUMN_IN_FILE_BUT_NOT_IN_SCHEMA, e);
-			}
-		}
-
-		// Et réciproquement si toutes les colonnes sont présentes dans le fichier
-		for (String e : listIhmSchemaNmcl) {
-			if (!listeFichier.contains(e)) {
-				throw new ArcException(ArcExceptionMessage.IHM_NMCL_COLUMN_IN_SCHEMA_BUT_NOT_IN_FILE, e);
-			}
-		}
-	}
-
-	private List<String> convertListToLowerTrim(String[] tab) {
-		List<String> list = new ArrayList<>();
-		for (int i = 0; i < tab.length; i++) {
-			list.add(tab[i].toLowerCase().trim());
-		}
-		return list;
 	}
 
 	private void creationTableDeNomenclatureTemporaire(VObject viewListNomenclatures, String[] colonnes, String[] types)
@@ -283,15 +220,6 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		requete.build(SQL.SELECT, ColumnEnum.NOM_TABLE.getColumnName(), SQL.FROM, ViewEnum.IHM_NMCL.getFullName());
 		requete.build(SQL.WHERE, ColumnEnum.NOM_TABLE.getColumnName(), SQL.LIKE, requete.quoteText(typeNomenclature(nomTable)+"%"));
 		requete.build(SQL.AND, ColumnEnum.NOM_TABLE.getColumnName(), "<>", requete.quoteText(nomTable));
-
-		List<String> listeTables = UtilitaireDao.get(0).getList(null, requete.toString(), new ArrayList<>());
-
-		if (listeTables.isEmpty()) {
-			requete = new ArcPreparedStatementBuilder();
-			requete.build(SQL.DELETE, ViewEnum.IHM_SCHEMA_NMCL.getFullName());
-			requete.build(SQL.WHERE, ColumnEnum.TYPE_NMCL.getColumnName(), "=", requete.quoteText(typeNomenclature(nomTable)));
-			UtilitaireDao.get(0).executeImmediate(null, requete.toString());
-		}
 
 	}
 
