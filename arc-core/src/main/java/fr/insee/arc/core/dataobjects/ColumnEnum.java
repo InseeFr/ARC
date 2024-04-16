@@ -146,12 +146,12 @@ public enum ColumnEnum {
 	, TABLENAME(PgColumnEnum.TABLENAME)
 	, SCHEMANAME(PgColumnEnum.SCHEMANAME)
 
-	, M0("m0", TypeEnum.TEXT, "short column in xml parser")
-	, M1("m1", TypeEnum.INTEGER, "short column in xml parser")
-	, M2("m2", TypeEnum.TEXT, "short column in xml parser")
-	, M3("m3", TypeEnum.TEXT, "short column in xml parser")
-	, M4("m4", TypeEnum.TEXT, "short column in xml parser")
-	, M5("m5", TypeEnum.TEXT, "short column in xml parser")
+	, M0("m0", TypeEnum.TEXT, "short column m0 in xml parser")
+	, M1("m1", TypeEnum.INTEGER, "short column m1 in xml parser")
+	, M2("m2", TypeEnum.TEXT, "short column m2 in xml parser")
+	, M3("m3", TypeEnum.TEXT, "short column m3 in xml parser")
+	, M4("m4", TypeEnum.TEXT, "short column m4 in xml parser")
+	, M5("m5", TypeEnum.TEXT, "short column m5 in xml parser")
 
 	;
 
