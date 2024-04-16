@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -20,7 +18,6 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
-import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
@@ -33,6 +30,7 @@ import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 import fr.insee.arc.web.gui.all.util.VObjectService;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class PilotageDao extends VObjectHelperDao {
@@ -413,7 +411,7 @@ public class PilotageDao extends VObjectHelperDao {
 		updateToDelete.append(querySelection);
 		updateToDelete.append("         ) ");
 		updateToDelete.append("UPDATE " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " a ");
-		updateToDelete.append("SET to_delete=" + value + " ");
+		updateToDelete.append("SET to_delete=" + updateToDelete.quoteText(value) + " ");
 		updateToDelete.append(
 				"WHERE EXISTS (SELECT 1 FROM prep WHERE a.container=prep.container AND a.id_source=prep.id_source); ");
 		return updateToDelete;
