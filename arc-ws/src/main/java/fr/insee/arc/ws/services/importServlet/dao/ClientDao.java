@@ -55,7 +55,12 @@ public class ClientDao {
 
 	private Connection connection;
 
+	private ArcClientIdentifier arcClientIdentifier;
+	
 	public ClientDao(ArcClientIdentifier arcClientIdentifier) {
+		
+		this.arcClientIdentifier = arcClientIdentifier;
+		
 		this.timestamp = arcClientIdentifier.getTimestamp();
 		this.environnement = arcClientIdentifier.getEnvironnement();
 		this.client = arcClientIdentifier.getClientIdentifier();
@@ -195,15 +200,11 @@ public class ClientDao {
 	 * @param requeteJSON
 	 * @throws ArcException
 	 */
-	public void createTableOfIdSource(JSONObject requeteJSON) throws ArcException {
+	public void createTableOfIdSource() throws ArcException {
 
-		String periodicite = requeteJSON.getString(JsonKeys.PERIODICITE.getKey());
-		String validiteInf = requeteJSON.keySet().contains(JsonKeys.VALINF.getKey())
-				? requeteJSON.getString(JsonKeys.VALINF.getKey())
-				: null;
-		String validiteSup = requeteJSON.getString(JsonKeys.VALSUP.getKey());
-
-		boolean reprise = requeteJSON.getBoolean(JsonKeys.REPRISE.getKey());
+		String validiteInf = arcClientIdentifier.getValidityInf();
+		String validiteSup = arcClientIdentifier.getValiditySup();
+		boolean reprise = arcClientIdentifier.getReprise();
 
 		StringBuilder query = new StringBuilder();
 		query.append("DROP TABLE IF EXISTS " + tableOfIdSource + "; ");
@@ -215,7 +216,7 @@ public class ClientDao {
 		query.append("SELECT " + ColumnEnum.ID_SOURCE.getColumnName()
 				+ " FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(this.environnement) + " T1 ");
 		query.append(
-				"WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) AND T1.periodicite='" + periodicite + "' ");
+				"WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) ");
 
 		if (validiteInf != null) {
 			query.append("AND validite>='" + validiteInf + "' ");

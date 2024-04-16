@@ -109,7 +109,9 @@ public enum ArcExceptionMessage {
 	
 	ACCESS_TOKEN_NOT_EXIST("Aucun token d'accès fourni"),
 
-	PARQUET_EXPORT_FAILED("L'export en parquet a échoué")
+	PARQUET_EXPORT_FAILED("L'export en parquet a échoué"),
+	
+	HOST_NOT_RESOLVED("Hôte non résolu")
 	;
 	
 	private String message;

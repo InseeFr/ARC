@@ -25,10 +25,10 @@ public class ImportStep3GetTableDataService {
 
 	private ArcClientIdentifier arcClientIdentifier;
 
-	public ImportStep3GetTableDataService(JSONObject dsnRequest) {
+	public ImportStep3GetTableDataService(ArcClientIdentifier arcClientIdentifier) {
 		super();
 
-		this.arcClientIdentifier = new ArcClientIdentifier(new ArcClientIdentifierUnsafe(dsnRequest, false));
+		this.arcClientIdentifier = arcClientIdentifier;
 
 		clientDao = new ClientDao(arcClientIdentifier);
 

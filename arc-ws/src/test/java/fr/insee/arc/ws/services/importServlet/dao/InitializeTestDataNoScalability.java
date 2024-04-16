@@ -23,6 +23,7 @@ public class InitializeTestDataNoScalability {
 		query.append("CREATE SCHEMA arc;");
 		query.append("CREATE SCHEMA arc_bas1;");
 
+		query.append("CREATE TABLE arc.ext_etat_jeuderegle as select 'arc_bas1' as id;");
 		
 		// family and client tables
 		query.append("CREATE TABLE arc.ihm_client AS ");

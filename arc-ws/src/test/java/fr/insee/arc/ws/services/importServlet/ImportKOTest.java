@@ -15,6 +15,8 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
+import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifierUnsafe;
 import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
 import fr.insee.arc.ws.services.importServlet.dao.InitializeTestDataNoScalability;
 
@@ -37,7 +39,7 @@ public class ImportKOTest extends ServletArc {
 
 	private String executeImportStep1(JSONObject clientJsonInput) throws ArcException
 	{
-		JSONObject clientJsonInputValidated= validateRequest(clientJsonInput);
+		ArcClientIdentifier clientJsonInputValidated= new ArcClientIdentifier(new ArcClientIdentifierUnsafe(clientJsonInput), null);
 		ImportStep1InitializeClientTablesService imp = new ImportStep1InitializeClientTablesService(clientJsonInputValidated);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		SendResponse sentResponse = new SendResponse(bos);

@@ -2,39 +2,32 @@ package fr.insee.arc.ws.services.importServlet;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
+
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.security.Sanitize;
+import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.webutils.WebAttributesName;
+import fr.insee.arc.ws.services.importServlet.actions.InitiateRequest;
+import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
+import fr.insee.arc.ws.services.importServlet.bo.RemoteHost;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.http.HttpStatus;
-
-import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.webutils.WebAttributesName;
-import fr.insee.arc.ws.services.importServlet.actions.InitiateRequest;
-import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
-import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
-import fr.insee.arc.ws.services.importServlet.bo.ExportSource;
-import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
-import fr.insee.arc.ws.services.importServlet.dao.SecurityDao;
-
 public class ServletArc extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final List<String> DEFAULT_SOURCE = Arrays.asList(ExportSource.MAPPING.getSource(),
-			ExportSource.NOMENCLATURE.getSource(), ExportSource.METADATA.getSource());
 
 	private static final Logger LOGGER = LogManager.getLogger(ServletArc.class);
 
@@ -67,59 +60,39 @@ public class ServletArc extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) {
 
 		LoggerHelper.info(LOGGER, "doPost() begin");
-		JSONObject dsnRequest = null;
 
-		if (request.getParameter("requests") == null) {
-			return;
+		SendResponse resp = new SendResponse(response);
+		
+		try {
+
+		// refactor with json body...
+		String jsonInput = Sanitize.htmlParameter(request.getParameter("requests"));
+		
+		new InitiateRequest(parseParameterToJson(jsonInput), new RemoteHost(request)).doRequest(resp);
+		
+		} catch (ArcException e) {
+			resp.sendError(e);
+			e.logFullException();
 		}
 
-		dsnRequest = validateRequest(new JSONObject(request.getParameter("requests")));
-
-		if (SecurityDao.securityAccessAndTracing(request, response, dsnRequest)) {
-
-			LoggerHelper.info(LOGGER, "ServletArc.doPost(): Requête reçue : " + dsnRequest);
-
-			SendResponse resp = new SendResponse(response);
-			try {
-				new InitiateRequest(dsnRequest).doRequest(resp);
-			} catch (ArcException e) {
-				resp.sendError(e);
-				e.logFullException();
-			}
-
-			LoggerHelper.info(LOGGER, "doPost() end");
-		}
+		LoggerHelper.info(LOGGER, "doPost() end");
 
 	}
-
-	/**
-	 * read JSON parameters provide by the http request return the JSON object
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected static JSONObject validateRequest(JSONObject returned) {
-
-		if (returned.isNull(JsonKeys.FORMAT.getKey())) {
-			returned.put(JsonKeys.FORMAT.getKey(), ExportFormat.BINARY.getFormat());
+	
+	
+	private JSONObject parseParameterToJson(String jsonInput) throws ArcException
+	{
+		if (jsonInput == null) {
+			throw new ArcException(ArcExceptionMessage.JSON_PARSING_FAILED);
 		}
-
-		// if SOURCE key is not specified, add all the default sources to be retrieved
-		if (returned.isNull(JsonKeys.SOURCE.getKey())) {
-			return returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);
+		
+		try {
+			return new JSONObject(jsonInput);
+		} catch (JSONException e)
+		{
+			throw new ArcException(ArcExceptionMessage.JSON_PARSING_FAILED);
 		}
-
-		// if any correct source provided, exit
-		JSONArray sourcesProvidedByClient = returned.getJSONArray(JsonKeys.SOURCE.getKey());
-		for (int i = 0; i < sourcesProvidedByClient.length(); i++) {
-			if (DEFAULT_SOURCE.contains(sourcesProvidedByClient.getString(i))) {
-				return returned;
-			}
-		}
-
-		// if no sources provided, add all the default sources to be retrieved
-		return returned.put(JsonKeys.SOURCE.getKey(), DEFAULT_SOURCE);
-
 	}
+
 
 }

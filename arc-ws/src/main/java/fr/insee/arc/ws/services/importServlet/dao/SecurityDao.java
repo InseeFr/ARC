@@ -1,32 +1,46 @@
 package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.ws.services.importServlet.bo.RemoteHost;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class SecurityDao {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(SecurityDao.class);
 
+	private SecurityDao() {
+		throw new IllegalStateException("SecurityDao class");
+	}
 
+	public static String validateEnvironnement(String unsafe) throws ArcException
+	{
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append("SELECT "+query.quoteText(unsafe)+" as bas_name FROM arc.ext_etat_jeuderegle where lower(replace(id,'.','_')) = "+query.quoteText(unsafe.toLowerCase()));
+		return UtilitaireDao.get(0).getString(null, query);
+	}
+	
+	public static String validateClientIdentifier(String unsafe) throws ArcException
+	{
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append("SELECT "+query.quoteText(unsafe)+" as bas_name FROM arc.ihm_client where lower(id_application) = "+query.quoteText(unsafe.toLowerCase()));
+		return UtilitaireDao.get(0).getString(null, query);
+	}
+	
 	/**
 	 * Manage the security accesses and traces for the data retrieval webservice
 	 * returns true if security acess is ok
@@ -35,15 +49,12 @@ public class SecurityDao {
 	 * @param response
 	 * @param dsnRequest
 	 * @return
+	 * @throws ArcException
 	 */
-	public static boolean securityAccessAndTracing(HttpServletRequest request, HttpServletResponse response,
-			JSONObject dsnRequest) {
+	public static void securityAccessAndTracing(String familyName, String clientRealName, RemoteHost remoteHost)
+			throws ArcException {
 
 		// get the family name and client name
-		String familyName = dsnRequest.get("familleNorme").toString();
-		String clientDeclared = dsnRequest.get("client").toString();
-		String clientRealName = ManipString.substringBeforeFirst(ManipString.substringAfterFirst(clientDeclared, "."),
-				"_");
 
 		ArcPreparedStatementBuilder query;
 		// check if security is enable
@@ -55,20 +66,11 @@ public class SecurityDao {
 
 		if (UtilitaireDao.get(0).getInt(null, query) == 0) {
 			LoggerHelper.warn(LOGGER, "Security is not enabled for (" + familyName + "," + clientRealName + ")");
-			return true;
+			return;
 		}
 
 		// check the host
-		String hostName;
-		try {
-//			byte[] ipAddress = { 192, 0, 2, 1 };
-//			InetAddress address = InetAddress.getByAddress(ipAddress);
-//			String hostName = address.getHostByAddress(ipAddress);
-			hostName = InetAddress.getByName(request.getRemoteHost()).getHostName();
-		} catch (UnknownHostException e2) {
-			LoggerHelper.warn(LOGGER, "No dns name found for host " + request.getRemoteHost());
-			hostName = request.getRemoteHost();
-		}
+		String hostName = remoteHost.getName();
 
 		query = new ArcPreparedStatementBuilder();
 		query.append("SELECT is_secured ");
@@ -82,30 +84,26 @@ public class SecurityDao {
 			result = new GenericBean(UtilitaireDao.get(0).executeRequest(null, query)).mapContent();
 		} catch (ArcException e1) {
 			LoggerHelper.error(LOGGER, "Error in querying host allowed");
+			throw new ArcException(ArcExceptionMessage.HOST_NOT_RESOLVED);
 		}
 
 		if (result.isEmpty() || result.get("is_secured").isEmpty()) {
+			LoggerHelper.error(LOGGER, "The host " + hostName + " has not been allowed to retrieved data of ("
+					+ familyName + "," + clientRealName + "). Check the family norm interface to declare it.");
 
-			sendForbidden(request, response);
-
-			LoggerHelper.error(LOGGER,
-					"The host " + hostName + " has not been allowed to retrieved data of (" + familyName + "," + clientRealName
-							+ "). Check the family norm interface to declare it.");
-			return false;
+			throw new ArcException(ArcExceptionMessage.HOST_NOT_RESOLVED);
 		}
 
 		// check security and log query if security required
 		boolean hostDeclaredAsSecured = !StringUtils.isBlank(result.get("is_secured").get(0));
-		boolean requestSecured = request.isSecure();
+		boolean requestSecured = remoteHost.isSecure();
 
-		if (hostDeclaredAsSecured) {
-			// if query is not secured and the host had been declared as secured, return
-			// forbidden
-			if (!requestSecured) {
-				LoggerHelper.error(LOGGER, hostName + " connexion is not secured. Abort.");
-				sendForbidden(request, response);
-				return false;
-			}
+		// if the request is not secured and the host had been declared as secured,
+		// return
+		// forbidden
+		if (hostDeclaredAsSecured && !requestSecured) {
+			LoggerHelper.error(LOGGER, hostName + " connexion is not secured. Abort.");
+			throw new ArcException(ArcExceptionMessage.HOST_NOT_RESOLVED);
 		}
 
 		// log the access
@@ -120,13 +118,10 @@ public class SecurityDao {
 			UtilitaireDao.get(0).executeRequest(null, query);
 		} catch (ArcException e) {
 			LoggerHelper.error(LOGGER, "Error in querying to register the connection entry");
+			throw new ArcException(ArcExceptionMessage.HOST_NOT_RESOLVED);
 		}
 
-		return true;
 	}
-	
-
-
 
 	public static void sendForbidden(HttpServletRequest request, HttpServletResponse response) {
 		try {
@@ -135,5 +130,5 @@ public class SecurityDao {
 			LoggerHelper.error(LOGGER, "Error in sending forbidden to host " + request.getRemoteHost());
 		}
 	}
-	
+
 }

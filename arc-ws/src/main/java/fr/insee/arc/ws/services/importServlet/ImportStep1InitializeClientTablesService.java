@@ -1,12 +1,9 @@
 package fr.insee.arc.ws.services.importServlet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.utils.database.ArcDatabase;
@@ -15,9 +12,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
-import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifierUnsafe;
 import fr.insee.arc.ws.services.importServlet.bo.ExportSource;
-import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 
 public class ImportStep1InitializeClientTablesService {
@@ -29,39 +24,23 @@ public class ImportStep1InitializeClientTablesService {
 	}
 
 	private ClientDao clientDao;
-	private JSONObject dsnRequest;
 	private ArcClientIdentifier arcClientIdentifier;
 	private List<String> tablesMetierNames;
 
-	public ImportStep1InitializeClientTablesService(JSONObject dsnRequest) {
+	public ImportStep1InitializeClientTablesService(ArcClientIdentifier arcClientIdentifier) {
 		super();
 
-		this.dsnRequest = dsnRequest;
-
-		this.arcClientIdentifier = new ArcClientIdentifier(new ArcClientIdentifierUnsafe(dsnRequest, true));
-
-		this.sources = makeSource(dsnRequest);
+		this.arcClientIdentifier = arcClientIdentifier;
 
 		this.clientDao = new ClientDao(this.arcClientIdentifier);
 
 	}
 
-	private List<String> sources;
-
 	private void executeIf(ExportSource source, Executable exe) throws ArcException {
-		if (!sources.contains(source.getSource())) {
+		if (!arcClientIdentifier.getSource().contains(source)) {
 			return;
 		}
 		exe.execute();
-	}
-
-	private static List<String> makeSource(JSONObject dsnRequest) {
-		JSONArray source = dsnRequest.getJSONArray(JsonKeys.SOURCE.getKey());
-		List<String> returned = new ArrayList<>();
-		for (int i = 0; i < source.length(); i++) {
-			returned.add(source.getString(i));
-		}
-		return returned;
 	}
 
 	public void execute(SendResponse resp) throws ArcException {
@@ -103,7 +82,7 @@ public class ImportStep1InitializeClientTablesService {
 				throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_FAMILY_FORBIDDEN);
 			}
 			
-			clientDao.createTableOfIdSource(dsnRequest);
+			clientDao.createTableOfIdSource();
 			tablesMetierNames = clientDao.selectBusinessDataTables();
 		}
 	}

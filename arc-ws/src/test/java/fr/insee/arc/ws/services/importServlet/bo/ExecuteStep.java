@@ -19,7 +19,7 @@ public class ExecuteStep extends ServletArc {
 
 	public static String executeImportStep1(JSONObject clientJsonInput) throws ArcException, UnsupportedEncodingException
 	{
-		JSONObject clientJsonInputValidated= validateRequest(clientJsonInput);
+		ArcClientIdentifier clientJsonInputValidated= new ArcClientIdentifier(new ArcClientIdentifierUnsafe(clientJsonInput), null);
 		ImportStep1InitializeClientTablesService imp = new ImportStep1InitializeClientTablesService(clientJsonInputValidated);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		SendResponse sentResponse = new SendResponse(bos);
@@ -29,7 +29,7 @@ public class ExecuteStep extends ServletArc {
 	
 	public static String executeImportStep2(JSONObject clientJsonInput) throws ArcException, UnsupportedEncodingException
 	{
-		JSONObject clientJsonInputValidated= validateRequest(clientJsonInput);
+		ArcClientIdentifier clientJsonInputValidated= new ArcClientIdentifier(new ArcClientIdentifierUnsafe(clientJsonInput), null);
 		ImportStep2GetTableNameService imp = new ImportStep2GetTableNameService(clientJsonInputValidated);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		SendResponse sentResponse = new SendResponse(bos);
@@ -39,7 +39,7 @@ public class ExecuteStep extends ServletArc {
 	
 	public static ByteArrayOutputStream executeImportStep3(JSONObject clientJsonInput) throws ArcException, UnsupportedEncodingException
 	{
-		JSONObject clientJsonInputValidated= validateRequest(clientJsonInput);
+		ArcClientIdentifier clientJsonInputValidated= new ArcClientIdentifier(new ArcClientIdentifierUnsafe(clientJsonInput), null);
 		ImportStep3GetTableDataService imp = new ImportStep3GetTableDataService(clientJsonInputValidated);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		SendResponse sentResponse = new SendResponse(bos);
