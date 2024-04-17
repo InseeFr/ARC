@@ -106,6 +106,9 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	private boolean isKube;
 
 	protected boolean isRefreshMonitoring = false;
+	
+	/** user idep **/
+	private String userName;
 
 	/**
 	 * Completes the received request parameters with the information 
@@ -187,6 +190,21 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
     	
     }
 
+	
+
+	/**
+	 * used to log a non standard VObjectServiceAction
+	 * @param data
+	 */
+	public void trackThisAction() {
+		LoggerHelper.action(LOGGER, this.userName + " : "+Thread.currentThread().getStackTrace()[2].getMethodName());
+	}
+	
+	public void trackThisAction(String extraInfo) {
+		LoggerHelper.action(LOGGER, this.userName + " : "+Thread.currentThread().getStackTrace()[2].getMethodName()+ " on " + extraInfo );
+	}
+	
+	
 	/**
 	 * register user informations (name and ip adress)
 	 * @param auth
@@ -200,9 +218,9 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		}
 		
 		OAuth2AuthenticationToken oauth2 = (OAuth2AuthenticationToken) token;
-		String userName = oauth2.getPrincipal().getAttribute("preferred_username");
+		this.userName = oauth2.getPrincipal().getAttribute("preferred_username");
         WebAuthenticationDetails webDetails = (WebAuthenticationDetails) token.getDetails();
-        userName+="@"+webDetails.getRemoteAddress();
+        this.userName+="@"+webDetails.getRemoteAddress();
     	
         vObjectService.setUserName(userName);
 	}
@@ -389,6 +407,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	public final String getScope() {
 		return this.scope;
 	}
+
 
 	/**
 	 * @param scope

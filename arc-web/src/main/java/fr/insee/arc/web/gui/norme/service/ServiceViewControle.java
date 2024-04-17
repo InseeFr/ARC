@@ -69,6 +69,7 @@ public class ServiceViewControle extends InteractorNorme {
 	 * @throws IOException
 	 */
 	public String importControle(Model model, MultipartFile fileUploadControle) {
+		trackThisAction();
 		dao.uploadFileRule(views.getViewControle(), views.getViewJeuxDeRegles(), fileUploadControle);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -79,6 +80,7 @@ public class ServiceViewControle extends InteractorNorme {
 	 * @return
 	 */
 	public String viderControle(Model model) {
+		trackThisAction();
 		try {
 			dao.emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CONTROLE_REGLE));
 		} catch (ArcException e) {

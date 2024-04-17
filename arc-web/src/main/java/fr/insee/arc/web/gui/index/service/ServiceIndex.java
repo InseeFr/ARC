@@ -16,7 +16,7 @@ public class ServiceIndex extends IndexAction {
 	
 	public String index(Model model) {
 		getSession().put("console", "");
-		vObjectService.access(views.getViewIndex());
+		trackThisAction();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

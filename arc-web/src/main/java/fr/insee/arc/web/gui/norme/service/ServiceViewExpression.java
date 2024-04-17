@@ -31,6 +31,7 @@ public class ServiceViewExpression extends InteractorNorme {
 	}
 
 	public String importExpression(Model model, MultipartFile fileUploadExpression) {
+		trackThisAction();
 		dao.uploadFileRule(views.getViewExpression(), views.getViewJeuxDeRegles(), fileUploadExpression);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -41,6 +42,7 @@ public class ServiceViewExpression extends InteractorNorme {
 	 * @return
 	 */
 	public String viderExpression(Model model) {
+		trackThisAction();
 		try {
 			dao.emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_EXPRESSION));
 		} catch (ArcException e) {

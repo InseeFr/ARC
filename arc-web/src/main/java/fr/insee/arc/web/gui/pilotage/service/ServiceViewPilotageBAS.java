@@ -61,8 +61,9 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 
 	// Actions du bac à sable
 	public String filesUploadBAS(Model model) {
-		LoggerHelper.debug(LOGGER, "* /* filesUploadBAS : */ *");
 
+		trackThisAction();
+		
 		String writingRepo = this.views.getViewEntrepotBAS().getCustomValue(WRITING_REPO);
 		String originalFileName=views.getViewPilotageBAS().getFileUpload().get(0).getOriginalFilename();
 		
@@ -117,7 +118,9 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 * @return
 	 */
 	public String undoBatch(Model model, TraitementPhase phaseAExecuter) {
-		loggerDispatcher.debug("undoBatch", LOGGER);
+		
+		trackThisAction(phaseAExecuter.toString());
+		
 		loggerDispatcher.debug(String.format("undo service %s", phaseAExecuter), LOGGER);
 
 		try {
@@ -149,6 +152,8 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 * @return
 	 */
 	public String resetBAS(Model model) {
+
+		trackThisAction();
 
 		ResetEnvironmentService.resetBAS(getBacASable(), this.repertoire);
 

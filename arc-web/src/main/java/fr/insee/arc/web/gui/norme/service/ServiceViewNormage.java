@@ -17,7 +17,7 @@ public class ServiceViewNormage extends InteractorNorme {
 	 * @return
 	 */
 	public String importNormage(Model model, MultipartFile fileUploadStructurize) {
-
+		trackThisAction();
 		dao.uploadFileRule(views.getViewNormage(), views.getViewJeuxDeRegles(), fileUploadStructurize);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -78,7 +78,7 @@ public class ServiceViewNormage extends InteractorNorme {
 	 * @return
 	 */
 	public String viderNormage(Model model) {
-
+		trackThisAction();
 		try {
 			dao.emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_NORMAGE_REGLE));
 		} catch (ArcException e) {

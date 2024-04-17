@@ -54,6 +54,7 @@ public class ServiceViewMapping extends InteractorNorme {
 	 * @return
 	 */
 	public String importMapping(Model model, MultipartFile fileUploadMap) {
+		trackThisAction();
 		dao.uploadFileMapping(views.getViewMapping(), views.getViewJeuxDeRegles(), views.getViewNorme(), fileUploadMap);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -64,7 +65,7 @@ public class ServiceViewMapping extends InteractorNorme {
 	 * @return
 	 */
 	public String viderMapping(Model model) {
-
+		trackThisAction();
 		try {
 			dao.emptyRuleTable(this.views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_MAPPING_REGLE));
 		} catch (ArcException e) {

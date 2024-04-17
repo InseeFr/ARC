@@ -116,6 +116,9 @@ public class ServiceViewPilotageProd extends InteractorPilotage {
      * @return
      */
     public String applyRulesProd(Model model) {
+    	
+		trackThisAction();
+		
     	try {
     		new SynchronizeRulesAndMetadataOperation(new Sandbox(null, getBacASable())).copyMetadataAllNods();
     	}

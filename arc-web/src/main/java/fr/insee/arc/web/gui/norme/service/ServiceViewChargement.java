@@ -67,7 +67,7 @@ public class ServiceViewChargement extends InteractorNorme {
 	 * @return
 	 */
 	public String importChargement(Model model, MultipartFile fileUploadLoad) {
-		
+		trackThisAction();
 		dao.uploadFileRule(views.getViewChargement(), views.getViewJeuxDeRegles(), fileUploadLoad);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -79,7 +79,7 @@ public class ServiceViewChargement extends InteractorNorme {
 	 * @throws ArcException 
 	 */
 	public String viderChargement(Model model) {
-
+		trackThisAction();
 		try {
 			dao.emptyRuleTable(views.getViewJeuxDeRegles(), dataObjectService.getView(ViewEnum.IHM_CHARGEMENT_REGLE));
 		} catch (ArcException e) {

@@ -557,11 +557,10 @@ public class VObjectService {
 	 * log action for security purposes
 	 * @param currentData
 	 */
-	public void logVObjectAction(VObject currentData)
+	private void trackVObjectServiceAction(VObject currentData)
 	{
 		LoggerHelper.action(LOGGER, getUserName() + " : "+Thread.currentThread().getStackTrace()[2].getMethodName()+" in " + currentData.getSessionName());
 	}
-	
 	
 	/**
 	 * On peut avoir envie d'insérer une valeur calculable de façon déterministe
@@ -572,7 +571,7 @@ public class VObjectService {
 	 */
 	public boolean insert(VObject currentData, AttributeValue... attributeValues) {
 		
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 				
 		if (currentData.getInputFields()==null || currentData.getInputFields().isEmpty())
 		{
@@ -649,7 +648,7 @@ public class VObjectService {
 	 */
 	public void delete(VObject currentData, String... tables) {
 		
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 
 		try {
 			UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
@@ -710,7 +709,7 @@ public class VObjectService {
 
 	public void update(VObject currentData) {
 
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 		
 		if (currentData.getContent()==null || currentData.getContent().size()==0)
 		{
@@ -1047,7 +1046,7 @@ public class VObjectService {
 	 */
 	public void sort(VObject currentData) {
 		
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 
 		VObject v0 = fetchVObjectData(currentData.getSessionName());
 		if (v0.getHeadersDLabel().indexOf(currentData.getHeaderSortDLabel()) != -1) {
@@ -1091,7 +1090,7 @@ public class VObjectService {
 	public File download(VObject currentData, String dirOut, List<String> fileNames,
 			List<ArcPreparedStatementBuilder> requetes) {
 		
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 				
 		File fOut = new File(dirOut + File.separator
 				+ getFileNameDownload(currentData, ".csv" + CompressionExtension.ZIP.getFileExtension()));
@@ -1127,7 +1126,7 @@ public class VObjectService {
 	public void download(VObject currentData, HttpServletResponse response, List<String> fileNames,
 			List<ArcPreparedStatementBuilder> requetes) {
 		
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 
 		response.reset();
 		response.setHeader("Content-Disposition", "attachment; filename="
@@ -1176,7 +1175,7 @@ public class VObjectService {
 	public File downloadXML(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete, String dirIn,
 			String anEnvExcecution, String phase) throws ArcException {
 
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 		
 		File fOut = new File(dirOut + File.separator
 				+ getFileNameDownload(currentData, CompressionExtension.TAR_GZ.getFileExtension()));
@@ -1307,7 +1306,7 @@ public class VObjectService {
 	public File downloadEnveloppe(VObject currentData, String dirOut, ArcPreparedStatementBuilder requete,
 			String repertoire, List<String> listRepertoire) {
 
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 		
 		File fOut = new File(dirOut + File.separator + getFileNameDownload(currentData, ".tar"));
 
@@ -1342,7 +1341,7 @@ public class VObjectService {
 	public void downloadEnveloppe(VObject currentData, HttpServletResponse response,
 			ArcPreparedStatementBuilder requete, String repertoire, List<String> listRepertoire) {
 		
-		logVObjectAction(currentData);
+		trackVObjectServiceAction(currentData);
 		
 		response.reset();
 		response.setHeader("Content-Disposition", "attachment; filename=" + getFileNameDownload(currentData, ".tar"));
@@ -1389,7 +1388,7 @@ public class VObjectService {
 	 */
 	public void upload(VObject data, String repertoireCible) throws ArcException {
 
-		logVObjectAction(data);
+		trackVObjectServiceAction(data);
 		
 		if (data.getFileUpload() != null) {
 			for (MultipartFile uploadedFile : data.getFileUpload()) {
@@ -1549,8 +1548,5 @@ public class VObjectService {
 		this.userName = userName;
 	}
 
-	public void access(VObject data) {
-		logVObjectAction(data);
-	}
 
 }

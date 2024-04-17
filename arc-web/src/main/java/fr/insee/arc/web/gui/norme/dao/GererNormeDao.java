@@ -16,6 +16,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.opencsv.CSVReader;
+
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
@@ -25,6 +27,7 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
+import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -531,7 +534,7 @@ public class GererNormeDao extends VObjectHelperDao {
 	}
 
 	/**
-	 * Upload module rules for a rule set of a norm family. Upload for mapping rules
+	 * Upload module rules for a rule set of a norm family. Upload for rules
 	 * uses {@code uploadFileMapping} method.
 	 * 
 	 * @param vObjectToUpdate the vObject to update with file
@@ -553,9 +556,11 @@ public class GererNormeDao extends VObjectHelperDao {
 			String nomTableImage = FormatSQL.temporaryTableName(vObjectToUpdate.getTable() + "_img" + 0);
 
 			try (BufferedReader bufferedReader = new BufferedReader(
-					new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));) {
-				// Get headers
-				List<String> listHeaders = getHeaderFromFile(bufferedReader);
+					new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));
+				CSVReader readerCSV = new CSVReader(bufferedReader, IConstanteCaractere.semicolon.charAt(0));	
+					) {
+				// Get headers and type
+				GenericBean fileSchema= getHeaderFromFile(readerCSV);
 
 				/*
 				 * Création d'une table temporaire (qui ne peut pas être TEMPORARY)
@@ -563,16 +568,12 @@ public class GererNormeDao extends VObjectHelperDao {
 				ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 				requete.append("\n DROP TABLE IF EXISTS " + nomTableImage + " cascade;");
 				requete.append("\n CREATE TABLE " + nomTableImage + " AS SELECT "//
-						+ Format.untokenize(listHeaders, ", ") //
+						+ Format.untokenize(fileSchema.getHeaders(), ", ") //
 						+ "\n\t FROM " //
 						+ vObjectToUpdate.getTable() //
 						+ "\n\t WHERE false");
 
 				UtilitaireDao.get(0).executeRequest(null, requete);
-
-				// Throwing away the first line
-				String uselessLine = bufferedReader.readLine();
-				LoggerHelper.debug(LOGGER, uselessLine + "is thrown away");
 
 				// Importing the file in the database (COPY command)
 				UtilitaireDao.get(0).importingWithReader(null, nomTableImage, bufferedReader, false,
@@ -680,20 +681,23 @@ public class GererNormeDao extends VObjectHelperDao {
 
 		// the file will be read into a temporary table
 		String nomTableUpload = FormatSQL.temporaryTableName("fileUpload" + "_img" + 0);
+		
+		// schema provided by the file
+		GenericBean fileSchema;
 
-		BufferedReader bufferedReader = new BufferedReader(
+		try (BufferedReader bufferedReader = new BufferedReader(
 				new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));
-		// Get headers
-		List<String> listHeaders = getHeaderFromFile(bufferedReader);
-		// Get types
-		List<String> listTypes = getHeaderFromFile(bufferedReader);
-
+			 CSVReader readerCSV = new CSVReader(bufferedReader, IConstanteCaractere.semicolon.charAt(0));
+				)
+		{
+		fileSchema = getHeaderFromFile(readerCSV);
+		
 		// temporary table to read the file
 		ArcPreparedStatementBuilder requeteUpload = new ArcPreparedStatementBuilder();
 		requeteUpload.append("\n DROP TABLE IF EXISTS " + nomTableUpload + " cascade;");
 		requeteUpload.append("\n CREATE TABLE " + nomTableUpload + " (");
-		for (int i = 0; i < listHeaders.size(); i++) {
-			requeteUpload.append((i == 0 ? "" : ",") + "\n " + listHeaders.get(i) + " " + listTypes.get(i));
+		for (int i = 0; i < fileSchema.getHeaders().size(); i++) {
+			requeteUpload.append((i == 0 ? "" : ",") + "\n " + fileSchema.getHeaders().get(i) + " " + fileSchema.getTypes().get(i));
 		}
 		requeteUpload.append("\n );");
 
@@ -702,7 +706,8 @@ public class GererNormeDao extends VObjectHelperDao {
 		// Importing the file in the database (COPY command)
 		UtilitaireDao.get(0).importingWithReader(null, nomTableUpload, bufferedReader, false,
 				IConstanteCaractere.semicolon);
-
+		}
+		
 		// before inserting in the final table, the rules will be inserted in a table to
 		// test them
 		String nomTableImage = FormatSQL.temporaryTableName(viewMapping.getTable() + "_img" + 0);
@@ -724,7 +729,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		UtilitaireDao.get(0).executeRequest(null, requete);
 
 		// Only keep columns from mapping regle table
-		List<String> listHeadersToInsert = new ArrayList<>(listHeaders);
+		List<String> listHeadersToInsert = new ArrayList<>(fileSchema.getHeaders());
 		listHeadersToInsert.retainAll(listColumnsMapping);
 
 		// Insert into temporary table from upload table
@@ -789,11 +794,8 @@ public class GererNormeDao extends VObjectHelperDao {
 		UtilitaireDao.get(0).executeRequest(null, requete);
 	}
 
-	private static List<String> getHeaderFromFile(BufferedReader bufferedReader) throws IOException {
-		String listeColonnesAggregees = bufferedReader.readLine();
-		List<String> listeColonnes = Arrays.asList(listeColonnesAggregees.split(IConstanteCaractere.semicolon));
-		LoggerHelper.debug(LOGGER, "Columns list : ", Format.untokenize(listeColonnes, ", "));
-		return listeColonnes;
+	private static GenericBean getHeaderFromFile(CSVReader csvReader) throws IOException {	
+		return new GenericBean(Arrays.asList(csvReader.readNext()), Arrays.asList(csvReader.readNext()), null);
 	}
 
 	public VObjectService getvObjectService() {
