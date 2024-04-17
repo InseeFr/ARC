@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.web.util.HtmlUtils;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
@@ -43,7 +44,7 @@ public class SendResponse {
 	 */
 	public void send(String string) {
 		try {
-			this.wr.write(string.getBytes());// "UTF-8"
+			this.wr.write(HtmlUtils.htmlEscape(string).getBytes());// "UTF-8"
 		} catch (IOException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "send()", LOGGER, ex);
 		}

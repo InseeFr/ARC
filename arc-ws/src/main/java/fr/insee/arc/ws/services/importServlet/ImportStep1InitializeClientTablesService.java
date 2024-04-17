@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.utils.database.ArcDatabase;
-import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
@@ -62,9 +61,7 @@ public class ImportStep1InitializeClientTablesService {
 		startTableCreationInParallel();
 
 		// on renvoie l'id du client avec son timestamp
-		resp.send(arcClientIdentifier.getEnvironnement() + Delimiters.SQL_SCHEMA_DELIMITER
-				+ arcClientIdentifier.getClientIdentifier() + Delimiters.SQL_TOKEN_DELIMITER
-				+ arcClientIdentifier.getTimestamp());
+		resp.send(arcClientIdentifier.getSessionId());
 
 		resp.endSending();
 	}
