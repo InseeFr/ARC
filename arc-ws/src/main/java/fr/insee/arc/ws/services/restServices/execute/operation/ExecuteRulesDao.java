@@ -79,14 +79,18 @@ public static void buildResponse(Connection c, ExecuteParameterModel p, ReturnVi
 	query.append("select set_config('search_path', "+query.quoteText(postgresSearchPath)+", false)");
 	UtilitaireDao.get(0).executeRequest(c, query);
 	
+	
+	
 	if (p.queries!=null)
 	{
 		for (int i=0;i<p.queries.size();i++)
 		{
+		query = new ArcPreparedStatementBuilder();
+		query.append("CALL public.safe_select("+query.quoteText(p.queries.get(i).expression)+"); SELECT * from safe_select");
 		DataSetView ds=new DataSetView(
 				Integer.parseInt(p.queries.get(i).query_id)
 				,p.queries.get(i).query_name
-				,new GenericBean(UtilitaireDao.get(0).executeRequest(c, new ArcPreparedStatementBuilder(p.queries.get(i).expression))).mapRecord()
+				,new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapRecord()
 				);
 			r.getDataSetView().add(ds);
 		}

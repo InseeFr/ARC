@@ -276,7 +276,33 @@ $BODY$
   LANGUAGE sql IMMUTABLE STRICT
   COST 100;
 
-  -- grant / revoke
+-- functions to check sql injection
+CREATE OR REPLACE PROCEDURE public.safe_select(query text)
+AS
+$BODY$
+begin
+perform check_no_injection(query);
+EXECUTE FORMAT('DROP TABLE IF EXISTS safe_select; CREATE TEMPORARY TABLE safe_select AS %s',query);
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public.check_no_injection(query text) RETURNS boolean
+as
+$BODY$
+declare query_analyze text:=regexp_replace(query,'''[^'']+''','','g');
+begin
+if (strpos(query_analyze,';')>0 or strpos(query_analyze,'--')>0 or strpos(query_analyze,'/*')>0 or strpos(query_analyze,'*/')>0)
+then
+RAISE EXCEPTION 'SQL with multiple statements or comments are forbidden to prevent injection'; 
+end if;
+return true;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
+  
+-- grant / revoke
 REVOKE ALL ON SCHEMA public FROM public;
 REVOKE ALL ON SCHEMA arc FROM public; 
 
