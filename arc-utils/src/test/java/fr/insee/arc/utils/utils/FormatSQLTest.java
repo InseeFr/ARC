@@ -70,11 +70,11 @@ public class FormatSQLTest extends InitializeQueryTest {
 		GenericPreparedStatementBuilder testQuery = new GenericPreparedStatementBuilder(
 				"SELECT current_user as current_role");
 		
-		// save the default role
-		String defaultRoleInDatabase = UtilitaireDao.get(0).getString(c, testQuery);
-		
+		// the default role
+		String defaultRoleInDatabase = "postgres";
 		// create a role with test role
 		String myTestRole = "arc";
+		
 		UtilitaireDao.get(0).executeImmediate(c, "CREATE ROLE " + myTestRole + " with NOINHERIT;");
 		// change role test
 		UtilitaireDao.get(0).executeImmediate(c, FormatSQL.changeRole(myTestRole));
@@ -82,8 +82,8 @@ public class FormatSQLTest extends InitializeQueryTest {
 		// check the current role used
 		
 		String currentRoleInDatabase = UtilitaireDao.get(0).getString(c, testQuery);
-
 		assertEquals(myTestRole, currentRoleInDatabase);
+		
 		UtilitaireDao.get(0).executeImmediate(c, FormatSQL.changeRole(defaultRoleInDatabase));
 		
 	}
