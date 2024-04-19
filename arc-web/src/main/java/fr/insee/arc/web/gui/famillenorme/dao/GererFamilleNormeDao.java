@@ -216,7 +216,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	
 		isAnyNullVariablesDeclared(viewVariableMetier.mapUpdatedContent());
 		
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 	
 		// update name
 		requete.append(queryUpdateRulesAndModelTablesOnVariableNameUpdate(viewVariableMetier, idFamilleSelected));
@@ -236,7 +236,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 
 	public void execQueryDeleteVariableMetier(VObject viewVariableMetier, String idFamilleSelected) throws ArcException {
 	
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(deleteVariableMetierWithoutSync(viewVariableMetier));
 		requete.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(idFamilleSelected));
 		UtilitaireDao.get(0).executeBlock(null, requete);
@@ -253,8 +253,8 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	}
 
 	private static ArcPreparedStatementBuilder querySynchronizeRegleWithVariableMetier(String idFamille) {
-		StringBuilder requeteListeSupprRegleMapping = requeteListeSupprRegleMapping(idFamille);
-		StringBuilder requeteListeAddRegleMapping = requeteListeAddRegleMapping(idFamille);
+		ArcPreparedStatementBuilder requeteListeSupprRegleMapping = requeteListeSupprRegleMapping(idFamille);
+		ArcPreparedStatementBuilder requeteListeAddRegleMapping = requeteListeAddRegleMapping(idFamille);
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(requeteListeAddRegleMapping.toString() + ";\n");
@@ -266,8 +266,8 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	/**
 	 * Sélection des règles à détruire
 	 */
-	private static StringBuilder requeteListeSupprRegleMapping(String idFamille) {
-		StringBuilder requeteListeSupprRegleMapping = new StringBuilder(
+	private static ArcPreparedStatementBuilder requeteListeSupprRegleMapping(String idFamille) {
+		ArcPreparedStatementBuilder requeteListeSupprRegleMapping = new ArcPreparedStatementBuilder(
 				"DELETE FROM " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + " regle\n");
 		requeteListeSupprRegleMapping.append("  WHERE NOT EXISTS (");
 		requeteListeSupprRegleMapping.append("    SELECT 1 FROM " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName()
@@ -277,21 +277,21 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		requeteListeSupprRegleMapping.append("    INNER JOIN arc.ihm_norme norme\n");
 		requeteListeSupprRegleMapping.append("    ON norme.id_famille=fam.id_famille\n");
 		requeteListeSupprRegleMapping.append("    AND regle.id_norme=norme.id_norme\n");
-		requeteListeSupprRegleMapping.append("    WHERE fam.id_famille = '" + idFamille + "'");
+		requeteListeSupprRegleMapping.append("    WHERE fam.id_famille = " + requeteListeSupprRegleMapping.quoteText(idFamille));
 		requeteListeSupprRegleMapping.append("  )");
 		requeteListeSupprRegleMapping.append("    AND EXISTS (SELECT 1 FROM " + ViewEnum.IHM_NORME.getFullName()
 				+ " norme INNER JOIN " + ViewEnum.IHM_FAMILLE.getFullName() + " fam");
 		requeteListeSupprRegleMapping.append("      ON norme.id_famille=fam.id_famille");
 		requeteListeSupprRegleMapping.append("      AND regle.id_norme=norme.id_norme");
-		requeteListeSupprRegleMapping.append("      WHERE fam.id_famille = '" + idFamille + "')");
+		requeteListeSupprRegleMapping.append("      WHERE fam.id_famille = " + requeteListeSupprRegleMapping.quoteText(idFamille) + ")");
 		return requeteListeSupprRegleMapping;
 	}
 
 	/**
 	 * Sélection des règles à créer
 	 */
-	private static StringBuilder requeteListeAddRegleMapping(String idFamille) {
-		StringBuilder requeteListeAddRegleMapping = new StringBuilder(
+	private static ArcPreparedStatementBuilder requeteListeAddRegleMapping(String idFamille) {
+		ArcPreparedStatementBuilder requeteListeAddRegleMapping = new ArcPreparedStatementBuilder(
 				"INSERT INTO " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + "(");
 		requeteListeAddRegleMapping.append("id_regle");
 		requeteListeAddRegleMapping.append(", id_norme");
@@ -326,7 +326,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 				.append("\n    ON calendrier.id_norme=jdr.id_norme AND calendrier.periodicite=jdr.periodicite");
 		requeteListeAddRegleMapping.append(
 				"\n      AND calendrier.validite_inf=jdr.validite_inf AND calendrier.validite_sup=jdr.validite_sup");
-		requeteListeAddRegleMapping.append("\n  WHERE fam.id_famille = '" + idFamille + "'");
+		requeteListeAddRegleMapping.append("\n  WHERE fam.id_famille = " + requeteListeAddRegleMapping.quoteText(idFamille));
 		requeteListeAddRegleMapping.append("\n    AND lower(jdr.etat) <> 'inactif'");
 		requeteListeAddRegleMapping.append("\n    AND lower(calendrier.etat) = '1'");
 		requeteListeAddRegleMapping.append("\n    AND NOT EXISTS (");
@@ -359,12 +359,12 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	private String queryUpdateRulesAndModelTablesOnVariableNameUpdate(VObject viewVariableMetier, String idFamilleSelected)
+	private ArcPreparedStatementBuilder queryUpdateRulesAndModelTablesOnVariableNameUpdate(VObject viewVariableMetier, String idFamilleSelected)
 			throws ArcException {
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		List<List<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();
-
 		List<List<String>> lAfter = viewVariableMetier.listContentAfterUpdate();
+
 		int nameIndex = viewVariableMetier.getHeadersDLabel().indexOf(ColumnEnum.NOM_VARIABLE_METIER.getColumnName());
 
 		for (List<String> modifiedLine : lAfter) {
@@ -389,7 +389,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 
 		requete.append("\n");
 
-		return requete.toString();
+		return requete;
 	}
 
 	/**
@@ -399,16 +399,16 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @param nameAfter
 	 * @return
 	 */
-	private String queryUpdateRulesTableUsingModifiedVariable(String idFamilleSelected, String nameBefore,
+	private ArcPreparedStatementBuilder queryUpdateRulesTableUsingModifiedVariable(String idFamilleSelected, String nameBefore,
 			String nameAfter) {
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 		requete.append("\n");
-		requete.append("update arc.ihm_mapping_regle a set variable_sortie='" + nameAfter + "' ");
-		requete.append("where variable_sortie='" + nameBefore + "' ");
-		requete.append("and exists (select from arc.ihm_norme b where a.id_norme=b.id_norme and b.id_famille='"
-				+ idFamilleSelected + "'); ");
-		return requete.toString();
+		requete.append("update " + ViewEnum.IHM_MAPPING_REGLE.getFullName() + " a set variable_sortie=" + requete.quoteText(nameAfter));
+		requete.append("where variable_sortie=" + requete.quoteText(nameBefore));
+		requete.append("and exists (select from arc.ihm_norme b where a.id_norme=b.id_norme and b.id_famille="
+				+ requete.quoteText(idFamilleSelected) + "); ");
+		return requete;
 
 	}
 
@@ -419,14 +419,14 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @param nameAfter
 	 * @return
 	 */
-	private String queryUpdateMetadataVariablesTable(String idFamilleSelected, String nameBefore, String nameAfter) {
-		StringBuilder requete = new StringBuilder();
+	private ArcPreparedStatementBuilder queryUpdateMetadataVariablesTable(String idFamilleSelected, String nameBefore, String nameAfter) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 		requete.append("\n");
-		requete.append("update arc.ihm_mod_variable_metier set nom_variable_metier='" + nameAfter + "' ");
-		requete.append("where nom_variable_metier='" + nameBefore + "' ");
-		requete.append("and id_famille='" + idFamilleSelected + "'; ");
-		return requete.toString();
+		requete.append("update " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " set nom_variable_metier=" + requete.quoteText(nameAfter));
+		requete.append("where nom_variable_metier=" + requete.quoteText(nameBefore));
+		requete.append("and id_famille=" + requete.quoteText(idFamilleSelected) + "; ");
+		return requete;
 	}
 
 	/**
@@ -438,17 +438,17 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	private String queryAlterColumnNameInModelTables(VObject viewVariableMetier, int tableIndexInView,
+	private ArcPreparedStatementBuilder queryAlterColumnNameInModelTables(VObject viewVariableMetier, int tableIndexInView,
 			String nameBefore, String nameAfter) throws ArcException {
 
 		List<String> listeEnvironnement = UtilitaireDao.get(0).getList(null,
-				new StringBuilder("SELECT distinct replace(id,'.','_') FROM arc.ext_etat_jeuderegle where isenv"),
+				new ArcPreparedStatementBuilder("SELECT distinct replace(id,'.','_') FROM arc.ext_etat_jeuderegle where isenv").toString(),
 				new ArrayList<>());
 
 		Map<String, List<String>> mBefore = viewVariableMetier.mapContentBeforeUpdate();
 		List<List<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();
 
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		for (String envName : listeEnvironnement) {
 			for (int k = NUMBER_OF_COLUMN_TABLE_VARIABLE_METIER; k < mBefore.size(); k++) {
 				String nomVeridique = envName + "." + viewVariableMetier.getHeadersDLabel().get(k);
@@ -467,7 +467,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 			}
 		}
 
-		return requete.toString();
+		return requete;
 	}
 
 	private void isAnyNullVariablesDeclared(Map<String, List<String>> mapContentAfterUpdate)
@@ -485,9 +485,9 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 *
 	 * @param message
 	 */
-	private String addExistingVariableMetierWithoutSync(VObject viewVariableMetier,
+	private ArcPreparedStatementBuilder addExistingVariableMetierWithoutSync(VObject viewVariableMetier,
 			List<List<String>> listContent) {
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		/**
 		 * Pour chaque ligne à UPDATE
 		 */
@@ -506,23 +506,28 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 					 * ... on l'ajoute
 					 */
 					requete.append("INSERT INTO " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " (");
-					StringBuilder values = new StringBuilder();
+					ArcPreparedStatementBuilder values = new ArcPreparedStatementBuilder();
 					for (int k = 0; k < NUMBER_OF_COLUMN_TABLE_VARIABLE_METIER; k++) {
 						if (k > 0) {
 							requete.append(", ");
 							values.append(", ");
 						}
 						requete.append(viewVariableMetier.getHeadersDLabel().get(k));
-						values.append(//
-								((listContent.get(i).get(k) == null) ? "null" : ("'" + listContent.get(i).get(k) + "'"))//
-										+ "::" + viewVariableMetier.getHeadersDType().get(k));
+						
+						values.append(values.quoteText(listContent.get(i).get(k)));
+						values.append("::" + viewVariableMetier.getHeadersDType().get(k));
 					}
-					requete.append(", nom_table_metier) VALUES ("
-							+ values.append(", '" + viewVariableMetier.getHeadersDLabel().get(j)) + "'::text);\n");
+					
+					requete.append(", nom_table_metier) VALUES (");
+					values.append(",") //
+					.append(values.quoteText(viewVariableMetier.getHeadersDLabel().get(j))) //
+					.append("::text);\n");
+					
+					requete.append(values);
 				}
 			}
 		}
-		return requete.toString();
+		return requete;
 	}
 
 	/**
@@ -600,28 +605,27 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @param someViewVariableMetier
 	 * @return
 	 */
-	private String mettreAJourInformationsVariables(VObject someViewVariableMetier) {
-		StringBuilder requete = new StringBuilder();
+	private ArcPreparedStatementBuilder mettreAJourInformationsVariables(VObject someViewVariableMetier) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < someViewVariableMetier.listOnlyUpdatedContent().size(); i++) {
 			if (i > 0) {
 				requete.append("\n");
 			}
 
 			Map<String, List<String>> content = someViewVariableMetier.mapOnlyUpdatedContent();
-			StringBuilder requeteLocale = new StringBuilder(
+			ArcPreparedStatementBuilder requeteLocale = new ArcPreparedStatementBuilder(
 					"UPDATE " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " a ");
 			requeteLocale.append("\n  SET type_consolidation = ");
 			requeteLocale.append(computeMapcontent(content, "type_consolidation", i));
 			requeteLocale.append(",\n    description_variable_metier = ");
 			requeteLocale.append(computeMapcontent(content, "description_variable_metier", i));
-			requeteLocale.append("\n  WHERE id_famille = '"
-					+ someViewVariableMetier.mapOnlyUpdatedContent().get(ColumnEnum.ID_FAMILLE.getColumnName()).get(i)
-					+ "'");
+			requeteLocale.append("\n  WHERE id_famille = "
+					+ requeteLocale.quoteText(someViewVariableMetier.mapOnlyUpdatedContent().get(ColumnEnum.ID_FAMILLE.getColumnName()).get(i)));
 			requeteLocale.append("\n    AND nom_variable_metier = '" + someViewVariableMetier.mapOnlyUpdatedContent()
 					.get(ColumnEnum.NOM_VARIABLE_METIER.getColumnName()).get(i) + "'");
 			requete.append(requeteLocale).append(";");
 		}
-		return requete.toString();
+		return requete;
 	}
 
 	private String computeMapcontent(Map<String, List<String>> content, String columnName, int index) {
@@ -640,11 +644,11 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	 * @param message
 	 * @param listContentBeforeUpdate Peut être à null
 	 */
-	private String deleteVariableMetierWithoutSync(VObject viewVariableMetier) {
+	private ArcPreparedStatementBuilder deleteVariableMetierWithoutSync(VObject viewVariableMetier) {
 		
 		Map<String, List<String>> map = viewVariableMetier.mapContentSelected();
 		
-		StringBuilder delete = new StringBuilder();
+		ArcPreparedStatementBuilder delete = new ArcPreparedStatementBuilder();
 		/**
 		 * Pour chaque variable :<br/>
 		 * 1. Lister les tables<br/>
@@ -665,11 +669,12 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 			for (int i = NUMBER_OF_COLUMN_TABLE_VARIABLE_METIER; i < map.size(); i++) {
 				listeTable.append("[" + viewVariableMetier.getHeadersDLabel().get(i) + "]");
 			}
-			delete.append("DELETE FROM " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName() + " WHERE id_famille='"
-					+ map.get(ColumnEnum.ID_FAMILLE.getColumnName()).get(j) + "' AND nom_variable_metier='" + nomVariable + "'::text AND '"
-					+ listeTable + "' like '%['||nom_table_metier||']%';\n");
+			delete.append("DELETE FROM " + ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName()
+					+ " WHERE id_famille=" + delete.quoteText(map.get(ColumnEnum.ID_FAMILLE.getColumnName()).get(j))
+					+ " AND nom_variable_metier=" + delete.quoteText(nomVariable) + "::text"
+					+ " AND " + delete.quoteText(listeTable.toString()) + " like '%['||nom_table_metier||']%';\n");
 		}
-		return delete.toString();
+		return delete;
 	}
 
 	
