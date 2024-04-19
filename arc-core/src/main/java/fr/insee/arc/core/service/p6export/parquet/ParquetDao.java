@@ -174,7 +174,10 @@ public class ParquetDao {
 			throws SQLException {
 
 		PropertiesHandler properties = PropertiesHandler.getInstance();
-		int numberOfPods = properties.connectionProperties().size();
+		
+		ConnectionAttribute[] postgresConnections = properties.connectionProperties().toArray(new ConnectionAttribute[0]);
+		
+		int numberOfPods = postgresConnections.length;
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SET custom_extension_repository = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY)
@@ -182,8 +185,10 @@ public class ParquetDao {
 		query.append("SET extension_directory  = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
 		query.append("INSTALL postgres;\n");
 
+		
+		
 		for (int connectionIndex = 0; connectionIndex < numberOfPods; connectionIndex++) {
-			ConnectionAttribute c = properties.connectionProperties().get(connectionIndex);
+			ConnectionAttribute c = postgresConnections[connectionIndex];
 
 			String connexionChain = "dbname=" + c.getDatabase() + " user=" + c.getDatabaseUsername() + " port="
 					+ c.getPort() + " password=" + c.getDatabasePassword() + " host=" + c.getHost();
