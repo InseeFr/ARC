@@ -459,8 +459,8 @@ public class PropertiesHandler {
 		map.put("version", getVersion());
 		map.put("buildDate", getVersionDate());
 		map.put("gitCommitId", getGitCommitId());
-		map.put("databaseUri", String.valueOf(getConnectionProperties().stream().map(ConnectionAttribute::getDatabaseUrl).toList()));
-		map.put("number_of_nods", String.valueOf(getConnectionProperties().size()));
+		map.put("databaseUri", String.valueOf(connectionProperties().stream().map(ConnectionAttribute::getDatabaseUrl).toList()));
+		map.put("number_of_nods", String.valueOf(connectionProperties().size()));
 		map.put("volatile", String.valueOf(!getKubernetesExecutorVolatile().isEmpty()));
 		map.put("number_of_volatile_executors", String.valueOf(getKubernetesExecutorNumber()));
 		map.put("S3_Input", String.valueOf(!getS3InputApiUri().isEmpty()));
@@ -475,7 +475,7 @@ public class PropertiesHandler {
 	 * @return
 	 * @throws ArcException 
 	 */
-	public List<ConnectionAttribute> cons() {
+	public List<ConnectionAttribute> connectionProperties() {
 		
 		if (this.connectionProperties != null) {
 			return this.connectionProperties;
@@ -540,17 +540,13 @@ public class PropertiesHandler {
 		return this.connectionProperties;
 
 	}
-	
-	public List<ConnectionAttribute> getConnectionProperties() {
-		return cons();
-	}
 
 	public void setConnectionProperties(List<ConnectionAttribute> connectionProperties) {
 		this.connectionProperties = connectionProperties;
 	}
 
 	public int numberOfNods() {
-		return this.getConnectionProperties().size();
+		return this.connectionProperties().size();
 	}
 
 	public void setRemapHostAddress(ThrowingFunction<String, String> remapHostAddress) {

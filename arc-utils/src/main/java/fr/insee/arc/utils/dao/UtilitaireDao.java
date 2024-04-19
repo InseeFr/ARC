@@ -117,7 +117,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 			int validConnectionIndex = validConnectionIndex(this.pool);
 
-			ConnectionAttribute currentConnectionAttributes = properties.getConnectionProperties()
+			ConnectionAttribute currentConnectionAttributes = properties.connectionProperties()
 					.get(validConnectionIndex);
 			String driver = currentConnectionAttributes.getDatabaseDriverClassName();
 			String uri = currentConnectionAttributes.getDatabaseUrl();
