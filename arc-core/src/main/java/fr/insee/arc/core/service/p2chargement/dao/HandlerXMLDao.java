@@ -272,8 +272,8 @@ public class HandlerXMLDao {
 	}
 
 	/**
-	 * Permet de générer la requête SQL de normage TODO : serializer un objet en
-	 * JSON
+	 * Permet de générer la requête SQL de normage
+	 * A sérializer en json
 	 */
 	public String requeteJointureXML(Map<Integer, Integer> colDist) {
 

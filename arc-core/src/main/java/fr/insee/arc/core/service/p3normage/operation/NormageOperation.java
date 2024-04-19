@@ -265,10 +265,6 @@ public class NormageOperation {
 		return r;
 	}
 
-	private String applyQueryPlanParametersOnJointure(String query) {
-		return applyQueryPlanParametersOnJointure(new ArcPreparedStatementBuilder(query)).getQuery().toString();
-	}
-
 	private ArcPreparedStatementBuilder applyQueryPlanParametersOnJointure(ArcPreparedStatementBuilder query) {
 		ArcPreparedStatementBuilder r = new ArcPreparedStatementBuilder();
 		// seqscan on can be detrimental on some rare large file
@@ -306,7 +302,7 @@ public class NormageOperation {
 			executerJointureWithPartition(fileIdCard, element, minSize, chunkSize);
 		} else {
 			// No partition rules found; normal execution
-			UtilitaireDao.get(0).executeImmediate(connection,
+			UtilitaireDao.get(0).executeRequest(connection,
 					applyQueryPlanParametersOnJointure(replaceQueryParameters(fileIdCard.getJointure(), fileIdCard)));
 		}
 
@@ -334,11 +330,13 @@ public class NormageOperation {
 
 		StaticLoggerDispatcher.info(LOGGER, "Normage avec règle de partition " + fileIdCard.getIdSource());
 
+		
+		String delimiterForBlocInsert = "\n insert into {table_destination} ";
+		
 		/* get the query blocks */
-		String blocCreate = ManipString.substringBeforeFirst(fileIdCard.getJointure(),
-				"\n insert into {table_destination} ");
-		String blocInsert = "\n insert into {table_destination} "
-				+ ManipString.substringAfterFirst(fileIdCard.getJointure(), "\n insert into {table_destination} ");
+		String blocCreate = ManipString.substringBeforeFirst(fileIdCard.getJointure(), delimiterForBlocInsert);
+		String blocInsert = delimiterForBlocInsert
+				+ ManipString.substringAfterFirst(fileIdCard.getJointure(), delimiterForBlocInsert);
 
 		// rework create block to get the number of record in partition if the rubrique
 		// is found
@@ -359,10 +357,10 @@ public class NormageOperation {
 			blocCreate = blocCreate + "select 0";
 		}
 
-		blocCreate = replaceQueryParameters(blocCreate, fileIdCard);
-		blocInsert = replaceQueryParameters(blocInsert, fileIdCard);
+		ArcPreparedStatementBuilder queryCreate = replaceQueryParameters(blocCreate, fileIdCard);
+		ArcPreparedStatementBuilder queryInsert = replaceQueryParameters(blocInsert, fileIdCard);
 
-		int total = UtilitaireDao.get(0).getInt(connection, new ArcPreparedStatementBuilder(blocCreate));
+		int total = UtilitaireDao.get(0).getInt(connection, queryCreate);
 
 		// partition if and only if enough records
 		if (total >= minSize) {
@@ -380,7 +378,7 @@ public class NormageOperation {
 			query.append("\n AND " + partitionIdentifier + "<" + query.quoteInt(null));
 			query.append("\n ;");
 			query.append("\n analyze " + partitionTableName + ";");
-			query.append(blocInsert);
+			query.append(queryInsert);
 
 			query = applyQueryPlanParametersOnJointure(query);
 
@@ -402,15 +400,28 @@ public class NormageOperation {
 		} else
 		// no partitions needed
 		{
-			UtilitaireDao.get(0).executeImmediate(connection, applyQueryPlanParametersOnJointure(blocInsert));
+			UtilitaireDao.get(0).executeRequest(connection, applyQueryPlanParametersOnJointure(queryInsert));
 		}
 	}
 
-	private String replaceQueryParameters(String query, FileIdCard fileIdCard) {
-		return query.replace("{table_source}", tableSource).replace("{table_destination}", tableDestination)
-				.replace("{id_norme}", fileIdCard.getIdNorme()).replace("{validite}", fileIdCard.getValidite())
-				.replace("{periodicite}", fileIdCard.getPeriodicite())
-				.replace("{nom_fichier}", fileIdCard.getIdSource());
+	private ArcPreparedStatementBuilder replaceQueryParameters(String query, FileIdCard fileIdCard) {
+		
+		query = query.replace("{table_source}", tableSource) //
+				.replace("{table_destination}", tableDestination) //
+				.replace("'{nom_fichier}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				.replace("'{id_norme}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				.replace("'{validite}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				.replace("'{periodicite}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				;
+		
+		ArcPreparedStatementBuilder pstmtQuery = new ArcPreparedStatementBuilder(query);
+		pstmtQuery.addText(fileIdCard.getIdSource());	
+		pstmtQuery.addText(fileIdCard.getIdNorme());	
+		pstmtQuery.addText(fileIdCard.getValidite());	
+		pstmtQuery.addText(fileIdCard.getPeriodicite());	
+
+		
+		return pstmtQuery;
 	}
 
 }

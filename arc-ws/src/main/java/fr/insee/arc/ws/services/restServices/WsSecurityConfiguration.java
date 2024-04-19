@@ -70,6 +70,10 @@ public class WsSecurityConfiguration {
 					.authorizeHttpRequests(t -> t.requestMatchers(new AntPathRequestMatcher("/execute/**"))
 							.hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
 		}
+		else
+		{
+			http.csrf(t-> t.requireCsrfProtectionMatcher(new AntPathRequestMatcher("/execute/**")).disable());
+		}
 
 		http.authorizeHttpRequests(t -> t.anyRequest().permitAll());
 

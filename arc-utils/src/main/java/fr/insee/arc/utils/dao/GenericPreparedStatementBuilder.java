@@ -17,7 +17,7 @@ public class GenericPreparedStatementBuilder {
 
 	private List<Parameter<?>> parameters = new ArrayList<>();
 
-	private static final String BIND_VARIABLE_PLACEHOLDER = "  ?  ";
+	public static final String BIND_VARIABLE_PLACEHOLDER = "  ?  ";
 
 	public GenericPreparedStatementBuilder() {
 		super();
@@ -124,10 +124,19 @@ public class GenericPreparedStatementBuilder {
 	 * @return
 	 */
 	public String quoteText(String s) {
-		parameters.add(new Parameter<>(s, ParameterType.STRING));
+		addText(s);
 		return BIND_VARIABLE_PLACEHOLDER;
 	}
 
+	/**
+	 * add a text parameter to current parameter list
+	 * @param s
+	 */
+	public void addText(String s) {
+		parameters.add(new Parameter<>(s, ParameterType.STRING));
+	}
+
+	
 	/**
 	 * Register and return the SQL bind variable placeholder
 	 * 
@@ -135,8 +144,16 @@ public class GenericPreparedStatementBuilder {
 	 * @return
 	 */
 	public String quoteInt(Integer s) {
-		parameters.add(new Parameter<>(s, ParameterType.INT));
+		addInt(s);
 		return BIND_VARIABLE_PLACEHOLDER;
+	}
+
+	/**
+	 * add an Integer parameter to current parameter list
+	 * @param s
+	 */
+	public void addInt(Integer s) {
+		parameters.add(new Parameter<>(s, ParameterType.INT));
 	}
 
 	/**
@@ -146,8 +163,16 @@ public class GenericPreparedStatementBuilder {
 	 * @return
 	 */
 	public String quoteBytes(byte[] s) {
-		parameters.add(new Parameter<>(s, ParameterType.BYTES));
+		addBytes(s);
 		return BIND_VARIABLE_PLACEHOLDER;
+	}
+	
+	/**
+	 * add an bytes[] parameter to current parameter list
+	 * @param s
+	 */
+	public void addBytes(byte[] s) {
+		parameters.add(new Parameter<>(s, ParameterType.BYTES));
 	}
 	
 	/**
