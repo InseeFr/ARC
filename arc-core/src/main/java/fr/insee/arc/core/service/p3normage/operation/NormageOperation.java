@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +25,7 @@ import fr.insee.arc.core.service.p3normage.querybuilder.IndependanceRulesQueryBu
 import fr.insee.arc.core.service.p3normage.querybuilder.RelationRulesQueryBuilder;
 import fr.insee.arc.core.service.p3normage.querybuilder.SuppressionRulesQueryBuilder;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.Parameter;
 import fr.insee.arc.utils.dao.ParameterType;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -357,14 +359,13 @@ public class NormageOperation {
 			blocCreate = blocCreate + "select 0";
 		}
 
-		ArcPreparedStatementBuilder queryCreate = replaceQueryParameters(blocCreate, fileIdCard);
-		ArcPreparedStatementBuilder queryInsert = replaceQueryParameters(blocInsert, fileIdCard);
+		int total = UtilitaireDao.get(0).getInt(connection, new ArcPreparedStatementBuilder(replaceQueryIdentifier(blocCreate)));
 
-		int total = UtilitaireDao.get(0).getInt(connection, queryCreate);
+		ArcPreparedStatementBuilder queryInsert = replaceQueryParameters(blocInsert, fileIdCard);
 
 		// partition if and only if enough records
 		if (total >= minSize) {
-
+			
 			String partitionTableNameWithAllRecords = "all_" + partitionTableName;
 
 			// rename the table to split
@@ -385,6 +386,7 @@ public class NormageOperation {
 			// iterate through chunks
 			int iterate = 1;
 			do {
+
 				Parameter<Integer> lowerbound = new Parameter<>(iterate, ParameterType.INT);
 				Parameter<Integer> upperbound = new Parameter<>((iterate + chunkSize), ParameterType.INT);
 
@@ -404,22 +406,35 @@ public class NormageOperation {
 		}
 	}
 
+	
+	private String replaceQueryIdentifier(String query)
+	{
+		return query.replace("{table_source}", tableSource) //
+				.replace("{table_destination}", tableDestination);
+	}
+	
 	private ArcPreparedStatementBuilder replaceQueryParameters(String query, FileIdCard fileIdCard) {
 		
-		query = query.replace("{table_source}", tableSource) //
-				.replace("{table_destination}", tableDestination) //
-				.replace("'{nom_fichier}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
-				.replace("'{id_norme}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
-				.replace("'{validite}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
-				.replace("'{periodicite}'", ArcPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
-				;
+		query = replaceQueryIdentifier(query);
 		
-		ArcPreparedStatementBuilder pstmtQuery = new ArcPreparedStatementBuilder(query);
-		pstmtQuery.addText(fileIdCard.getIdSource());	
-		pstmtQuery.addText(fileIdCard.getIdNorme());	
-		pstmtQuery.addText(fileIdCard.getValidite());	
-		pstmtQuery.addText(fileIdCard.getPeriodicite());	
+		int numberOfBlockOfParameters = StringUtils.countMatches(query, "'{nom_fichier}'");
 
+		query = query
+				.replace("'{nom_fichier}'", GenericPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				.replace("'{id_norme}'", GenericPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				.replace("'{validite}'", GenericPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				.replace("'{periodicite}'", GenericPreparedStatementBuilder.BIND_VARIABLE_PLACEHOLDER)
+				;
+
+		ArcPreparedStatementBuilder pstmtQuery = new ArcPreparedStatementBuilder(query);
+		
+		for (int i= 0; i<numberOfBlockOfParameters; i++ )
+		{
+			pstmtQuery.addText(fileIdCard.getIdSource());	
+			pstmtQuery.addText(fileIdCard.getIdNorme());	
+			pstmtQuery.addText(fileIdCard.getValidite());	
+			pstmtQuery.addText(fileIdCard.getPeriodicite());	
+		}
 		
 		return pstmtQuery;
 	}
