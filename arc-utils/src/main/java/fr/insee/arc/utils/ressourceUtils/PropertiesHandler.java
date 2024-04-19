@@ -475,7 +475,7 @@ public class PropertiesHandler {
 	 * @return
 	 * @throws ArcException 
 	 */
-	public List<ConnectionAttribute> getConnectionProperties() {
+	public List<ConnectionAttribute> cons() {
 		
 		if (this.connectionProperties != null) {
 			return this.connectionProperties;
@@ -539,6 +539,10 @@ public class PropertiesHandler {
 		
 		return this.connectionProperties;
 
+	}
+	
+	public List<ConnectionAttribute> getConnectionProperties() {
+		return cons();
 	}
 
 	public void setConnectionProperties(List<ConnectionAttribute> connectionProperties) {

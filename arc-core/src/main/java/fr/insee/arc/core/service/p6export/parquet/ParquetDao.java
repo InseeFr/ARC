@@ -183,7 +183,7 @@ public class ParquetDao {
 		query.append("INSTALL postgres;\n");
 
 		for (int connectionIndex = 0; connectionIndex < numberOfPods; connectionIndex++) {
-			ConnectionAttribute c = properties.getConnectionProperties().get(connectionIndex);
+			ConnectionAttribute c = properties.cons().get(connectionIndex);
 
 			String connexionChain = "dbname=" + c.getDatabase() + " user=" + c.getDatabaseUsername() + " port="
 					+ c.getPort() + " password=" + c.getDatabasePassword() + " host=" + c.getHost();
