@@ -27,9 +27,8 @@ accept-charset="UTF-8"
 <div class="container-fluid">
 <div class="row">
 <!-- left column -->
-<div class="col-md-5 border-right mt-2-25">
+<div class="col-md-3 border-right mt-2-25">
 <div class="row">
-<div class="col-sm-12 col-xl-7 border-right">
 <div class="col-md">
 <!-- norm list -->
 <c:set var="view" value="${viewListNomenclatures}"  scope="request"/>
@@ -85,34 +84,23 @@ onclick="submitForm()"
 </c:import>
 </div>
 </div>
+</div>
 
-<div class="col-sm-12 col-xl-5 border-right">
+<div class="col-md-2 border-left mt-2-25">
 <div class="row">
-<div class="col-xl">
+<div class="col-md">
 <!-- norm list -->
 <c:set var="view" value="${viewSchemaNmcl}"  scope="request"/>
 <c:import url="tiles/templateVObject.jsp">
-<c:param name="btnSelect" value ="true" />
 <c:param name="btnSee" value ="true" />
 <c:param name="btnSort" value ="true" />
-<c:param name="btnAdd" value ="true" />
-<c:param name="btnUpdate" value ="true" />
-<c:param name="btnDelete" value ="true" />
-<c:param name="ligneAdd" value ="true" />
 <c:param name="ligneFilter" value ="true" />
-<c:param name="checkbox" value ="true" />
-<c:param name="checkboxVisible" value ="true" />
-<c:param name="extraScopeAdd" value ="viewSchemaNmcl;" />
-<c:param name="extraScopeDelete" value ="viewSchemaNmcl;" />
-<c:param name="extraScopeUpdate" value ="viewSchemaNmcl;" />
 <c:param name="extraScopeSee" value ="viewSchemaNmcl;" />
-
 </c:import>
 </div>
 </div>
 </div>
-</div>
-</div>
+
 <div class="col-md-7 border-right mt-2-25">
 <div class="row">
 <div class="col-md">
@@ -131,9 +119,9 @@ onclick="submitForm()"
 <c:param name="checkbox" value ="false" />
 <c:param name="checkboxVisible" value ="false" />
 <c:param name="extraScopeSee" value ="viewNomenclature;" />
-
 </c:import>
 </div>
+
 </div>
 </div>
 

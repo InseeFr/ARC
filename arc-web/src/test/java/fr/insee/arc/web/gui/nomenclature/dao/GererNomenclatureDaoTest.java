@@ -2,6 +2,7 @@ package fr.insee.arc.web.gui.nomenclature.dao;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,15 +47,14 @@ public class GererNomenclatureDaoTest extends InitializeQueryTest {
 
 	@Test
 	public void initializeViewListNomenclatures() {
-		
+
 		VObject viewListNomenclatures = new ViewListNomenclatures();
 
 		// execute query
 		pdao.initializeViewListNomenclatures(viewListNomenclatures);
 
 		// test the content of the view
-		List<String> viewColumns = ColumnEnum
-				.listColumnEnumByName(ViewEnum.IHM_NMCL.getColumns().keySet());
+		List<String> viewColumns = ColumnEnum.listColumnEnumByName(ViewEnum.IHM_NMCL.getColumns().keySet());
 		viewColumns.removeAll(viewListNomenclatures.getHeadersDLabel());
 
 		assertEquals(0, viewColumns.size());
@@ -62,7 +62,7 @@ public class GererNomenclatureDaoTest extends InitializeQueryTest {
 
 	@Test
 	public void initializeViewNomenclature() {
-		
+
 		VObject viewNomenclature = new ViewNomenclature();
 
 		// execute query
@@ -71,28 +71,30 @@ public class GererNomenclatureDaoTest extends InitializeQueryTest {
 		// test the content of the view
 		assertEquals(2, viewNomenclature.getHeadersDLabel().size()); // key-value : 2 columns
 	}
-	
+
 	@Test
 	public void initializeViewSchemaNmcl() throws ArcException {
-		
+
 		VObject viewSchemaNmcl = new ViewSchemaNmcl();
-		
+
 		// select the first record of viewNorm and set it as the selected record
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_NMCL), SQL.WHERE, "nom_table='nmcl_evenements_v001'");
-		Map<String, List<String>> viewNomenclatureSelectedRecords = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
+		query.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_NMCL), SQL.WHERE,
+				"nom_table='nmcl_evenements_v001'");
+		Map<String, List<String>> viewNomenclatureSelectedRecords = new GenericBean(
+				UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
 		pdao.setSelectedRecords(viewNomenclatureSelectedRecords);
 
 		// execute query
 		pdao.initializeViewSchemaNmcl(viewSchemaNmcl);
 
 		// test the content of the view
-		List<String> viewColumns = ColumnEnum
-				.listColumnEnumByName(ViewEnum.IHM_SCHEMA_NMCL.getColumns().keySet());
+		List<String> viewColumns = new ArrayList<String>(List.of(ColumnEnum.TYPE_NMCL.getColumnName(),
+				ColumnEnum.NOM_COLONNE.getColumnName(), ColumnEnum.TYPE_COLONNE.getColumnName()));
 		viewColumns.removeAll(viewSchemaNmcl.getHeadersDLabel());
 
 		assertEquals(0, viewColumns.size());
-		
+
 		// in test data, must return a schema of two columns
 		assertEquals(2, viewSchemaNmcl.getContent().t.size());
 	}
