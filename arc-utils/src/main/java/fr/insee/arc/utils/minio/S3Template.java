@@ -380,7 +380,7 @@ public class S3Template {
 	public List<String> listObjectsInDirectory(String path, Boolean isRecursive, Boolean includeExists,
 			Boolean includeSubdirs) throws ArcException {
 		
-		if (isS3Off()) return new ArrayList<String>();
+		if (isS3Off()) return new ArrayList<>();
 		
 		List<String> listNames = new ArrayList<>();
 		Iterator<Result<Item>> listObject = getMinioClient()
