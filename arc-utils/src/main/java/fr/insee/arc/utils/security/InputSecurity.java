@@ -3,9 +3,9 @@ package fr.insee.arc.utils.security;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GuiInputSecurity {
+public class InputSecurity {
 
-	private GuiInputSecurity() {
+	private InputSecurity() {
 		throw new IllegalStateException("Utility class");
 	}
 
@@ -23,6 +23,7 @@ public class GuiInputSecurity {
 		
 		return guiInput.replaceAll("[^\\w$]", "") // remove all but world and $ symbol. worlds are 0-9a-zA-Z and _
 				.replaceFirst("^[_$]*", "") // remove begin trailings $ and _
+				.replaceFirst("[_$]*$", "") // remove end trailings $ and _
 				.replaceFirst("[_$]*$", "") // remove end trailings $ and _
 		;
 	}

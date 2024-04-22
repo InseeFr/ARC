@@ -60,6 +60,11 @@ public class GenericPreparedStatementBuilder {
 		return this;
 	}
 
+	public GenericPreparedStatementBuilder appendText(String s) {
+		query.append(this.quoteText(s));
+		return this;
+	}
+	
 	/**
 	 * Add transaction command to the prepared statement builder
 	 * 

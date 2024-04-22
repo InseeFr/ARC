@@ -11,37 +11,40 @@ import org.junit.Test;
 
 import fr.insee.arc.utils.utils.PrivateConstructorTest;
 
-public class GuiInputSecurityTest {
+public class InputSecurityTest {
 
 	@Test
 	public void testServiceHashFileNameIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-		PrivateConstructorTest.testConstructorIsPrivate(GuiInputSecurity.class);
+		PrivateConstructorTest.testConstructorIsPrivate(InputSecurity.class);
 	}
 	
 	@Test
 	public void testFormatAsDatabaseIdentifier() {
 		
 		String input = null;
-		assertNull(GuiInputSecurity.formatAsDatabaseIdentifier(input));
+		assertNull(InputSecurity.formatAsDatabaseIdentifier(input));
 		
-		assertEquals("var_table_metier",GuiInputSecurity.formatAsDatabaseIdentifier("var_table_metier"));
-		
+		assertEquals("var_table_metier",InputSecurity.formatAsDatabaseIdentifier("var_table_metier"));
+		assertEquals("vartable_metier",InputSecurity.formatAsDatabaseIdentifier("var-table_metier"));
+
+		assertEquals("vartable_metier",InputSecurity.formatAsDatabaseIdentifier("\n -var-table_metier"));
+
 		// remove space and ; and other chars
-		assertEquals("var_tablemetier",GuiInputSecurity.formatAsDatabaseIdentifier("var_table metier"));
-		assertEquals("dropdatabasetoto",GuiInputSecurity.formatAsDatabaseIdentifier("drop database toto;"));
-		assertEquals("var_table_metier$10",GuiInputSecurity.formatAsDatabaseIdentifier("var_table_metier$10"));
-		assertEquals("var_tableMETIER",GuiInputSecurity.formatAsDatabaseIdentifier("var_table METIER"));
+		assertEquals("var_tablemetier",InputSecurity.formatAsDatabaseIdentifier("var_table metier"));
+		assertEquals("dropdatabasetoto",InputSecurity.formatAsDatabaseIdentifier("drop database toto;"));
+		assertEquals("var_table_metier$10",InputSecurity.formatAsDatabaseIdentifier("var_table_metier$10"));
+		assertEquals("var_tableMETIER",InputSecurity.formatAsDatabaseIdentifier("var_table METIER"));
 
 		// remove trailing $ and _
-		assertEquals("var_table_metier",GuiInputSecurity.formatAsDatabaseIdentifier("__var_table_metier$$"));
-		assertEquals("var_table_metier",GuiInputSecurity.formatAsDatabaseIdentifier("$var_table_metier_$"));
-		assertEquals("var_table_metier",GuiInputSecurity.formatAsDatabaseIdentifier("$_$var_table_metier$__;"));
+		assertEquals("var_table_metier",InputSecurity.formatAsDatabaseIdentifier("__var_table_metier$$"));
+		assertEquals("var_table_metier",InputSecurity.formatAsDatabaseIdentifier("$var_table_metier_$"));
+		assertEquals("var_table_metier",InputSecurity.formatAsDatabaseIdentifier("$_$var_table_metier$__;"));
 
 		List<String> guiInputsNull=null;
-		assertNull(GuiInputSecurity.formatAsDatabaseIdentifier(guiInputsNull));
+		assertNull(InputSecurity.formatAsDatabaseIdentifier(guiInputsNull));
 		
 		List<String> guiInputs = Arrays.asList("__var_table_metier$$", "drop database toto;");
-		List<String> guiInputsReformat = GuiInputSecurity.formatAsDatabaseIdentifier(guiInputs);
+		List<String> guiInputsReformat = InputSecurity.formatAsDatabaseIdentifier(guiInputs);
 		assertEquals("var_table_metier", guiInputsReformat.get(0));
 		assertEquals("dropdatabasetoto", guiInputsReformat.get(1));
 				

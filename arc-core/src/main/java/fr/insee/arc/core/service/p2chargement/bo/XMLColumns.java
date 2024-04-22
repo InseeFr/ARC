@@ -26,10 +26,10 @@ public class XMLColumns {
 	public static final FastList<ColumnEnum> tempTableAColumnsShortName = new FastList<>(
 			Arrays.asList(ColumnEnum.M0, ColumnEnum.M1, ColumnEnum.M2, ColumnEnum.M3, ColumnEnum.M4, ColumnEnum.M5));
 
-	public static ColumnEnum getShort(ColumnEnum c)
+	public static String getShort(ColumnEnum c)
 	{
 		return tempTableAColumnsShortName
-				.get(tempTableAColumnsLongName.indexOf(c));
+				.get(tempTableAColumnsLongName.indexOf(c)).toString();
 	}
 	
 }

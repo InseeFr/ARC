@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.xml.sax.SAXParseException;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.XMLColumns;
@@ -52,7 +53,7 @@ public class HandlerXMLDao {
 	private int idLigne = 0;
 	private Connection connexion;
 	private ParallelInsert pi;
-	private Map<String, StringBuilder> requetes = new HashMap<>();
+	private Map<String, ArcPreparedStatementBuilder> requetes = new HashMap<>();
 	private int requetesLength = 0;
 
 	Map<Integer, Boolean> doNotinsert;
@@ -90,8 +91,8 @@ public class HandlerXMLDao {
 	 * @param lineValues
 	 */
 	private void buildInsertQuery(List<Integer> lineCols, List<Integer> lineIds, List<String> lineValues) {
-		StringBuilder req = new StringBuilder();
-		StringBuilder req2 = new StringBuilder();
+		ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
+		ArcPreparedStatementBuilder req2 = new ArcPreparedStatementBuilder();
 		this.idLigne++;
 
 		req.append(SQL.INSERT_INTO).append(tempTableA).append("(") //
@@ -107,10 +108,10 @@ public class HandlerXMLDao {
 				.append(",") //
 				.append(XMLColumns.getShort(ColumnEnum.VALIDITE)); //
 
-		req2.append("('").append(fileIdCard.getIdSource()).append("',").append(this.idLigne).append(",")
-				.append(this.fileIdCard.getIntegrationDate()).append(",'").append(this.fileIdCard.getIdNorme())
-				.append("','").append(this.fileIdCard.getPeriodicite()).append("','")
-				.append(this.fileIdCard.getValidite()).append("'");
+		req2.append("(").appendText(fileIdCard.getIdSource()).append(",").append(this.idLigne).append(",")
+				.append(this.fileIdCard.getIntegrationDate()).append(",").appendText(this.fileIdCard.getIdNorme())
+				.append(",").appendText(this.fileIdCard.getPeriodicite()).append(",")
+				.appendText(this.fileIdCard.getValidite());
 
 		for (int i = 0; i < lineCols.size(); i++) {
 
@@ -124,7 +125,7 @@ public class HandlerXMLDao {
 
 				if (lineValues.get(i) != null) {
 					req.append(",v").append(lineCols.get(i));
-					req2.append(",'").append(lineValues.get(i)).append("'");
+					req2.append(",").appendText(lineValues.get(i)).append("");
 				}
 			}
 		}
@@ -170,11 +171,7 @@ public class HandlerXMLDao {
 		this.keepLast = keep;
 	}
 
-	private void addQuery(String key, String value) {
-		addQuery(key, new StringBuilder(value));
-	}
-
-	private void addQuery(String key, StringBuilder value) {
+	private void addQuery(String key, ArcPreparedStatementBuilder value) {
 		if (requetes.get(key) != null) {
 			requetes.get(key).append(key.equals(ALTER) ? "" : ",").append(value);
 		} else {
@@ -197,11 +194,15 @@ public class HandlerXMLDao {
 		}
 	}
 
-	private String computeFinalQuery() {
+	private ArcPreparedStatementBuilder computeFinalQuery() {
 
-		StringBuilder result = new StringBuilder();
-		result.append((requetes.get(ALTER) != null) ? requetes.get(ALTER) : "");
-
+		ArcPreparedStatementBuilder result = new ArcPreparedStatementBuilder();
+		
+		if (requetes.get(ALTER) != null)
+		{
+			result.append(requetes.get(ALTER));
+		}
+		
 		for (String s : requetes.keySet()) {
 			if (!s.equals(ALTER)) {
 				result.append(s).append(requetes.get(s)).append(";");
@@ -211,7 +212,7 @@ public class HandlerXMLDao {
 		this.requetes = new HashMap<>();
 		this.requetesLength = 0;
 
-		return result.toString();
+		return result;
 
 	}
 
@@ -219,7 +220,7 @@ public class HandlerXMLDao {
 
 		if (this.requetesLength > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
 
-			String query = computeFinalQuery();
+			ArcPreparedStatementBuilder query = computeFinalQuery();
 
 			waitForParallelInsertAndReport();
 
@@ -236,7 +237,7 @@ public class HandlerXMLDao {
 	 * 
 	 * @param aRequete
 	 */
-	private void renameColumns(StringBuilder aRequete) {
+	private void renameColumns(ArcPreparedStatementBuilder aRequete) {
 		for (int i = 0; i < XMLColumns.tempTableAColumnsShortName.size(); i++) {
 			aRequete.append(
 					"\n ALTER TABLE " + this.tempTableA + " RENAME " + XMLColumns.tempTableAColumnsShortName.get(i)
@@ -262,13 +263,13 @@ public class HandlerXMLDao {
 
 	public void addValueColumn(String currentTag) {
 
-		addQuery(ALTER, "alter table " + this.tempTableA + " add v" + this.allCols.indexOf(currentTag) + " "
-				+ TypeEnum.TEXT.getTypeName() + ";");
+		addQuery(ALTER, new ArcPreparedStatementBuilder("alter table " + this.tempTableA + " add v" + this.allCols.indexOf(currentTag) + " "
+				+ TypeEnum.TEXT.getTypeName() + ";"));
 	}
 
 	public void addIdColumn(String currentTag) {
-		addQuery(ALTER, "alter table " + this.tempTableA + " add i" + this.allCols.indexOf(currentTag) + " "
-				+ TypeEnum.INTEGER.getTypeName() + ";");
+		addQuery(ALTER, new ArcPreparedStatementBuilder("alter table " + this.tempTableA + " add i" + this.allCols.indexOf(currentTag) + " "
+				+ TypeEnum.INTEGER.getTypeName() + ";"));
 	}
 
 	/**
@@ -370,7 +371,7 @@ public class HandlerXMLDao {
 
 	public void execQueryInsertFinal(boolean multileaf) throws SAXParseException {
 	
-		StringBuilder requete = new StringBuilder(computeFinalQuery());
+		ArcPreparedStatementBuilder requete = computeFinalQuery();
 		renameColumns(requete);
 		
 		if (multileaf) {
@@ -379,7 +380,7 @@ public class HandlerXMLDao {
 	
 		waitForParallelInsertAndReport();
 	
-		pi = new ParallelInsert(this.connexion, requete.toString());
+		pi = new ParallelInsert(this.connexion, requete);
 		pi.start();
 		waitForParallelInsertAndReport();
 	}
@@ -389,7 +390,7 @@ public class HandlerXMLDao {
 	 * synchronize header identifier if they are null
 	 * @param aRequete
 	 */
-	private void multiLeafUpdate(StringBuilder aRequete) {
+	private void multiLeafUpdate(ArcPreparedStatementBuilder aRequete) {
 		// gestion des rubriques multiple
 		for (int i = 0; i < this.allCols.size(); i++) {
 			if (this.allCols.get(i).endsWith(HEADER)) {

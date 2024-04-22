@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.p2chargement.xmlhandler;
 
 import java.sql.Connection;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -9,10 +10,10 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
 public class ParallelInsert extends Thread {
 
 	private Connection connexion;
-	private String query;
+	private ArcPreparedStatementBuilder query;
 	private ArcException threadException;
 
-	public ParallelInsert(Connection connexion, String query) {
+	public ParallelInsert(Connection connexion, ArcPreparedStatementBuilder query) {
 		super();
 		this.connexion = connexion;
 		this.query = query;
@@ -21,7 +22,7 @@ public class ParallelInsert extends Thread {
 	@Override
 	public void run() {
 		try {
-			UtilitaireDao.get(0).executeImmediate(this.connexion, query);
+			UtilitaireDao.get(0).executeRequest(this.connexion, query);
 		} catch (ArcException e) {
 			this.threadException = e;
 		}
@@ -51,7 +52,7 @@ public class ParallelInsert extends Thread {
 		this.connexion = connexion;
 	}
 
-	public void setQuery(String query) {
+	public void setQuery(ArcPreparedStatementBuilder query) {
 		this.query = query;
 	}
 
