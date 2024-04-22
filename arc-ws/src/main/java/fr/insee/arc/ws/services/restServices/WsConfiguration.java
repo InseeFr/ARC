@@ -1,6 +1,7 @@
 package fr.insee.arc.ws.services.restServices;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -8,10 +9,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import fr.insee.arc.utils.ressourceUtils.PropertySourcesHelper;
+import fr.insee.arc.utils.webutils.CustomExceptionHandlerResolver;
 
 @Configuration
 @EnableWebMvc
@@ -24,5 +27,10 @@ public class WsConfiguration implements WebMvcConfigurer {
 		return PropertySourcesHelper.defaultWebappPropertySourcesConfigurer(env);
 	}
 
+	@Override
+    public void configureHandlerExceptionResolvers(
+             List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(0, new CustomExceptionHandlerResolver());
+    }
 	
 }

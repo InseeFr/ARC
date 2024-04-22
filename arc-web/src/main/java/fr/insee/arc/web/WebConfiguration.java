@@ -1,6 +1,7 @@
 package fr.insee.arc.web;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
@@ -13,6 +14,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -26,6 +28,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.ressourceUtils.PropertySourcesHelper;
+import fr.insee.arc.utils.webutils.CustomExceptionHandlerResolver;
 import fr.insee.arc.web.gui.all.interceptor.ArcInterceptor;
 import fr.insee.arc.web.gui.all.util.WebLoggerDispatcher;
 
@@ -92,10 +95,11 @@ public class WebConfiguration implements WebMvcConfigurer {
 		return new InternalResourceViewResolver("/WEB-INF/", ""); 
 	}
 	
-//	@Bean(name = "mvcHandlerMappingIntrospector")
-//    public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
-//        return new HandlerMappingIntrospector();
-//    }
+	@Override
+    public void configureHandlerExceptionResolvers(
+             List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(0, new CustomExceptionHandlerResolver());
+    }
 
 	
 }
