@@ -14,7 +14,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import fr.insee.arc.utils.ressourceUtils.PropertySourcesHelper;
-import fr.insee.arc.utils.webutils.CustomExceptionHandlerResolver;
 
 @Configuration
 @EnableWebMvc
@@ -30,7 +29,7 @@ public class WsConfiguration implements WebMvcConfigurer {
 	@Override
     public void configureHandlerExceptionResolvers(
              List<HandlerExceptionResolver> resolvers) {
-        resolvers.add(0, new CustomExceptionHandlerResolver());
+        resolvers.add(0, new WsExceptionHandlerResolver());
     }
 	
 }

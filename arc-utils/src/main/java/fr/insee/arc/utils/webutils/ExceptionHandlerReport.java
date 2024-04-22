@@ -1,15 +1,11 @@
 package fr.insee.arc.utils.webutils;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 @Component
-public class CustomExceptionHandlerResolver implements HandlerExceptionResolver {
+public class ExceptionHandlerReport {
 	
 	class ErrorReport {
 
@@ -30,10 +26,8 @@ public class CustomExceptionHandlerResolver implements HandlerExceptionResolver 
 		}
 	}
 	
-
-	@Override
-	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler,
-			Exception ex) {
+	public ModelAndView reportException(Exception ex)
+	{
 		ModelAndView model = new ModelAndView();
 		model.setView(new MappingJackson2JsonView());
 		
@@ -41,4 +35,5 @@ public class CustomExceptionHandlerResolver implements HandlerExceptionResolver 
 		model.addObject("Error", e);
 		return model;
 	}
+
 }
