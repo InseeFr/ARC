@@ -163,6 +163,12 @@
 			<artifactId>duckdb_jdbc</artifactId>
 			<version>${project.duckdb.version}</version>
 		</dependency>
+		<dependency>
+		    <groupId>jakarta.servlet</groupId>
+		    <artifactId>jakarta.servlet-api</artifactId>
+		    <version>${project.jakarta.version}</version>
+		    <scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 
