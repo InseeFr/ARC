@@ -104,6 +104,18 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static String changeRole(String roleName) {
 		return "SET role='" + roleName + "';COMMIT;";
 	}
+	
+	/**
+	 * Query to set database parameters with prepared statement
+	 * @param databaseParameter
+	 * @param value
+	 * @return
+	 */
+	public static GenericPreparedStatementBuilder setConfig(String databaseParameter, String value)
+	{
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		return new GenericPreparedStatementBuilder("SELECT set_config("+query.quoteText(databaseParameter)+", "+query.quoteText(value)+", false);");
+	}
 
 	/**
 	 * timeOut
@@ -121,20 +133,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 */
 	public static String tryQuery(String query) {
 		return "do $$ begin " + query + " exception when others then end; $$; ";
-	}
-
-	/**
-	 * Met entre cote ou renvoie null (comme pour un champ de base de donnée)
-	 *
-	 * @param t
-	 * @return
-	 */
-	public static String cast(String t) {
-		if (t == null) {
-			return "null";
-		} else {
-			return "'" + t + "'";
-		}
 	}
 
 	/**
