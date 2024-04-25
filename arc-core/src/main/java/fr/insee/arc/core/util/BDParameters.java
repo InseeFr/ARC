@@ -12,6 +12,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 
 public class BDParameters {
 
@@ -20,6 +21,7 @@ public class BDParameters {
 	private static final String PARAMETER_TABLE=new DataObjectService().getView(ViewEnum.PARAMETER);
 	private static final String PARAMETER_SQL_QUERY = "SELECT val FROM "+PARAMETER_TABLE+" ";
 
+	@SqlInjectionChecked
 	private static ArcPreparedStatementBuilder parameterQuery(String key) {
 		ArcPreparedStatementBuilder requete=new ArcPreparedStatementBuilder();
 		requete.append(PARAMETER_SQL_QUERY+ " WHERE key="+requete.quoteText(key));

@@ -21,6 +21,8 @@ import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.util.LoggerDispatcher;
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -133,11 +135,12 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	/** Runs the generic initialization (status, scope, VObject,...) 
 	 * on all requests in ArcAction or ArcAction subclasses. 
 	 * Adds some generic information to the model.
-	 * VObject themselves are added to the model later by {@link ArcWebGenericService#generateDisplay()}.*/
+	 * VObject themselves are added to the model later by {@link ArcWebGenericService#generateDisplay()}.
+	 * @throws ArcException */
 	@ModelAttribute
     public void initializeModel(@ModelAttribute T arcModel, Model model,
     		@RequestParam(required = false) String bacASable,
-			@RequestParam(required = false) String scope, Authentication auth) {
+			@RequestParam(required = false) String scope, Authentication auth) throws ArcException {
 		LoggerHelper.trace(LOGGER, getActionName());
 
 		// no action required for unsecured page
@@ -156,21 +159,33 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		
 		// get declared sandboxes
 		this.envMap= arcWebGenericDao.getSandboxList();
+		List<String> keys=new ArrayList<>(this.envMap.keySet());
 
 		if (this.bacASable == null) {
 			// by default bacASable is the first element of the linkedhashmap
-			List<String> keys=new ArrayList<>(((Map<String,String>) this.envMap).keySet());
 			if (!keys.isEmpty())
 			{
 				this.bacASable = keys.get(0);
 			}
 		}
+		
+		System.out.println("§§§§§§§§§§§");
+		System.out.println(this.envMap);
+		System.out.println(this.bacASable);
+		System.out.println(bacASable);
 
 		// updating current sandbox from request
 		if (bacASable != null && !bacASable.equals(this.bacASable)) {
 			loggerDispatcher.info(String.format("env selected %s", bacASable), LOGGER);
 			this.bacASable = bacASable;
 		}
+		
+		// security : this.bacASable value must be in environment list retrieved from database
+		if (!keys.contains(this.bacASable))
+		{
+			this.bacASable="arc_bas1";	
+		}
+		
 		this.dataObjectService.setSandboxSchema(this.bacASable);
 		
 		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);

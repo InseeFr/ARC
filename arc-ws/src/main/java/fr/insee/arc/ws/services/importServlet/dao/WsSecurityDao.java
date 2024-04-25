@@ -13,35 +13,19 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.security.SecurityDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.ws.services.importServlet.bo.RemoteHost;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class SecurityDao {
+public class WsSecurityDao {
 
-	private static final Logger LOGGER = LogManager.getLogger(SecurityDao.class);
+	private static final Logger LOGGER = LogManager.getLogger(WsSecurityDao.class);
 
-	private SecurityDao() {
-		throw new IllegalStateException("SecurityDao class");
-	}
-
-	public static String validateEnvironnement(String unsafe) throws ArcException
-	{
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append("SELECT "+query.quoteText(unsafe)+" as bas_name FROM arc.ext_etat_jeuderegle where isenv and lower(replace(id,'.','_')) = "+query.quoteText(unsafe.toLowerCase()));
-		String result = UtilitaireDao.get(0).getString(null, query);
-		
-		return validateOfThrow(result, unsafe);
-	}
-	
-	private static String validateOfThrow(String result, String unsafe) throws ArcException {
-		if (result==null)
-		{
-			throw new ArcException(ArcExceptionMessage.WS_INVALID_PARAMETER, unsafe);
-		}
-		return result;
+	private WsSecurityDao() {
+		throw new IllegalStateException("Webservice SecurityDao class");
 	}
 
 	public static String validateClientIdentifier(String unsafe) throws ArcException
@@ -49,7 +33,7 @@ public class SecurityDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("SELECT "+query.quoteText(unsafe)+" as client FROM arc.ihm_client where lower(id_application) = "+query.quoteText(unsafe.toLowerCase()));
 		String result = UtilitaireDao.get(0).getString(null, query);
-		return validateOfThrow(result, unsafe);
+		return SecurityDao.validateOrThrow(result, unsafe);
 	}
 	
 	/**

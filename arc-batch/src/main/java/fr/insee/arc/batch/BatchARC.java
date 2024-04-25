@@ -38,6 +38,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
+import fr.insee.arc.utils.security.SecurityDao;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
@@ -218,8 +219,9 @@ class BatchARC implements IReturnCode {
 
 	/**
 	 * Patch or create the ARC database with tiniotialization script
+	 * @throws ArcException 
 	 */
-	private void batchPatchDatabase() {
+	private void batchPatchDatabase() throws ArcException {
 		
 		message("Main");
 		message("Batch ARC " + properties.fullVersionInformation().toString());
@@ -237,6 +239,9 @@ class BatchARC implements IReturnCode {
 		}
 
 		envExecution = Patch.normalizeSchemaName(envExecution);
+		
+		// security check if envExecution is valid
+		envExecution=SecurityDao.validateEnvironnement(envExecution);
 		
 		new BddPatcher().bddScript(null, envExecution);
 	}

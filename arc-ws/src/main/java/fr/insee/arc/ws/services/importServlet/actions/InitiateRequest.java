@@ -21,7 +21,7 @@ import fr.insee.arc.ws.services.importServlet.bo.ExportSource;
 import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
 import fr.insee.arc.ws.services.importServlet.bo.RemoteHost;
 import fr.insee.arc.ws.services.importServlet.bo.ServletService;
-import fr.insee.arc.ws.services.importServlet.dao.SecurityDao;
+import fr.insee.arc.ws.services.importServlet.dao.WsSecurityDao;
 
 /**
  * Cette classe permet d'initier le requêtage auprès de la base de données.

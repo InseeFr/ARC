@@ -7,7 +7,8 @@ import java.util.List;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.ws.services.importServlet.dao.SecurityDao;
+import fr.insee.arc.utils.security.SecurityDao;
+import fr.insee.arc.ws.services.importServlet.dao.WsSecurityDao;
 
 public class ArcClientIdentifier {
 
@@ -51,7 +52,7 @@ public class ArcClientIdentifier {
 		this.clientInputParameter = rawParameters.getClientInputParameterUnsafe();
 
 		this.environnement = SecurityDao.validateEnvironnement(rawParameters.getEnvironnementUnsafe());
-		this.clientIdentifier = SecurityDao.validateClientIdentifier(rawParameters.getClientIdentifierUnsafe());
+		this.clientIdentifier = WsSecurityDao.validateClientIdentifier(rawParameters.getClientIdentifierUnsafe());
 		this.timestamp = rawParameters.getTimestampUnsafe();
 		this.famille = rawParameters.getFamilleUnsafe();
 		
@@ -61,7 +62,7 @@ public class ArcClientIdentifier {
 		
 		if (remoteHost!=null)
 		{
-			SecurityDao.securityAccessAndTracing(this.famille, this.clientIdentifier, remoteHost);
+			WsSecurityDao.securityAccessAndTracing(this.famille, this.clientIdentifier, remoteHost);
 		}
 		
 		this.sessionId = this.environnement + Delimiters.SQL_SCHEMA_DELIMITER + this.clientIdentifier + Delimiters.SQL_TOKEN_DELIMITER

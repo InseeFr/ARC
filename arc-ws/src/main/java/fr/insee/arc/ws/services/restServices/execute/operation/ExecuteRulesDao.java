@@ -10,6 +10,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SecurityDao;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
 import fr.insee.arc.ws.services.restServices.execute.model.ExecuteQueryModel;
@@ -64,6 +65,11 @@ public static void fillRules(Connection c, ExecuteParameterModel p, String servi
 			p.queries.add(e);
 		}
 	}
+
+	// security : validate sandbox
+	p.sandbox= SecurityDao.validateEnvironnement(p.sandbox);
+
+	
 }
 
 public static void buildResponse(Connection c, ExecuteParameterModel p, ReturnView r, Date firstContactDate) throws ArcException
