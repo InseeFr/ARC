@@ -8,7 +8,7 @@ public class ModeRequeteTest {
 
 @Test
 public void untokenize1() {
-	assertEquals("set enable_nestloop=off;set enable_hashagg=on;\n",ModeRequete.untokenize(ModeRequete.NESTLOOP_OFF,ModeRequete.HASHAGG_ON));
+	assertEquals("set enable_nestloop=off;set enable_hashagg=on;\n",ModeRequete.untokenize(ModeRequete.NESTLOOP_OFF,ModeRequete.HASHAGG_ON).getQueryWithParameters());
 }
 
 @Test
