@@ -1,0 +1,10 @@
+id_norme;periodicite;validite_inf;validite_sup;version;id_classe;rubrique;rubrique_nmcl;id_regle;todo;commentaire
+text;text;date;date;text;text;text;text;int4;text;text
+PHASE3V1;M;2015-01-01;2050-12-31;v002;relation;V_S21_G00_40_019;V_S21_G00_85_001;1;;relation lieu de travail maison mere
+PHASE3V1;M;2015-01-01;2050-12-31;v002;relation;V_S21_G00_40_046;siretutil.V_S21_G00_85_001;2;;relation lieu de travail siret utilisateur
+PHASE3V1;M;2015-01-01;2050-12-31;v002;relation;V_S21_G00_40_009;V_S21_G00_52_006;3;;numéro de contrat / prime
+PHASE3V1;M;2015-01-01;2050-12-31;v002;relation;V_S21_G00_40_009;V_S21_G00_51_010;4;;numero de contrat / rémunération
+PHASE3V1;M;2015-01-01;2050-12-31;v002;relation;V_S21_G00_40_009;V_S21_G00_34_002;5;;numéro de contrat / pénibilité
+PHASE3V1;M;2015-01-01;2050-12-31;v002;unicité;siretutil.V_S21_G00_85_001;;6;;
+PHASE3V1;M;2015-01-01;2050-12-31;v002;unicité;V_S21_G00_85_001;;7;;
+PHASE3V1;M;2015-01-01;2050-12-31;v002;partition;s21_g00_30;"500,100";9;;si > 500 individus, decoupage en paquet de 100 individus
