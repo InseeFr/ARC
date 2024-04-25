@@ -1,5 +1,7 @@
 package fr.insee.arc.utils.dao;
 
+import fr.insee.arc.utils.utils.FormatSQL;
+
 public class ModeRequeteImpl {
 	
 	public static final String PARALLEL_WORK_MEM = "24MB";
@@ -27,27 +29,27 @@ public class ModeRequeteImpl {
      * @param defaultSchema
      * @return requete
      */
-    public static String arcModeRequeteEngine(String defaultSchema)
+    public static GenericPreparedStatementBuilder arcModeRequeteEngine(String defaultSchema)
     {
-    	StringBuilder query=new StringBuilder();
+    	GenericPreparedStatementBuilder query=new GenericPreparedStatementBuilder();
     	query
-    	.append(ModeRequete.NESTLOOP_ON)
-    	.append(ModeRequete.MERGE_JOIN_OFF)
-    	.append(ModeRequete.HASH_JOIN_ON)
-    	.append(ModeRequete.MATERIAL_OFF)
-    	.append(ModeRequete.SEQSCAN_OFF)
-    	.append(ModeRequete.HASHAGG_ON)
+    	.append(ModeRequete.NESTLOOP_ON.expr())
+    	.append(ModeRequete.MERGE_JOIN_OFF.expr())
+    	.append(ModeRequete.HASH_JOIN_ON.expr())
+    	.append(ModeRequete.MATERIAL_OFF.expr())
+    	.append(ModeRequete.SEQSCAN_OFF.expr())
+    	.append(ModeRequete.HASHAGG_ON.expr())
     	.append("set work_mem='" + PARALLEL_WORK_MEM + "';")
     	.append("set maintenance_work_mem='" + PARALLEL_WORK_MEM+"';")
     	.append("set temp_buffers='" + PARALLEL_WORK_MEM + "';")
     	.append("set statement_timeout="+ (3600000 * TIME_OUT_SQL_EN_HEURE) + ";")
     	.append("set from_collapse_limit="+COLLAPSE_JOIN_LIMIT+";")
     	.append("set join_collapse_limit="+COLLAPSE_JOIN_LIMIT+";")
-    	.append("set search_path=" + defaultSchema.toLowerCase() + ", public;")
+    	.append(FormatSQL.setConfig("search_path", defaultSchema.toLowerCase() + ",public"))
     	.append(ModeRequete.EXTRA_FLOAT_DIGIT.expr())
     	.append("COMMIT;")
     	;
-    	return query.toString();
+    	return query;
     }
 
 }

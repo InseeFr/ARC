@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 public class DateConversion {
@@ -17,8 +18,8 @@ public class DateConversion {
 	 * @param dateToCompute
 	 * @return
 	 */
-	public static String queryDateConversion(Date dateToCompute) 
-	{
+	public static GenericPreparedStatementBuilder queryDateConversion(Date dateToCompute) 
+	{		
 		return FormatSQL.toDate(
 				FormatSQL.quoteText(new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).format(dateToCompute)),
 				FormatSQL.quoteText(ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()));

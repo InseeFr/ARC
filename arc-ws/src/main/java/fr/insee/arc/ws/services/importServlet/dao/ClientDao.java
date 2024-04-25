@@ -23,6 +23,7 @@ import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -118,6 +119,7 @@ public class ClientDao {
 	 * @param nomTable
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	private void registerTableToBeRetrieved(ExportTrackingType wsTrackingType, ArcDatabase targetNod, String nomTable)
 			throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
@@ -135,19 +137,19 @@ public class ClientDao {
 	 * @return liste des noms de tables images crées
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	private String addImage(String tableMetier, int executorConnectionId) throws ArcException {
-		StringBuilder request = new StringBuilder();
+		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 
 		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, tableMetier, client, timestamp);
 
 		request.append("DROP TABLE IF EXISTS " + nomTableImage + "; ");
-
 		request.append("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS ");
 		request.append("SELECT * ");
 		request.append("FROM " + ViewEnum.getFullName(environnement, tableMetier) + " T1 WHERE true ");
 		request.append("AND exists (SELECT 1 FROM " + tableOfIdSource + " T2 where T2."
 				+ ColumnEnum.ID_SOURCE.getColumnName() + "=T1." + ColumnEnum.ID_SOURCE.getColumnName() + "); ");
-
+		
 		UtilitaireDao.get(executorConnectionId).executeBlock(connection, request);
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.EXECUTOR, nomTableImage);
@@ -163,19 +165,19 @@ public class ClientDao {
 	 * @param tableSource
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	public void updatePilotage(String tableSource) throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, timestamp, ": ClientDaoImpl.updatePilotage()");
 
-		StringBuilder query = new StringBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("UPDATE " + ViewEnum.PILOTAGE_FICHIER.getFullName(environnement) + " T1 ");
-		query.append("SET client = array_append(client, '" + this.client + "') ");
+		query.append("SET client = array_append(client, ").appendText(this.client).append(") ");
 		query.append(", date_client = array_append( date_client, localtimestamp ) ");
 		query.append("WHERE true ");
 		query.append("AND EXISTS (SELECT 1 FROM " + tableSource + " T2 where T1." + ColumnEnum.ID_SOURCE.getColumnName()
 				+ "=T2." + ColumnEnum.ID_SOURCE.getColumnName() + ") ");
 		query.append("AND T1.phase_traitement='" + TraitementPhase.MAPPING + "';");
-
-		UtilitaireDao.get(0).executeBlock(connection, query.toString());
+		UtilitaireDao.get(0).executeRequest(connection, query);
 	}
 
 	public void createTableTrackRetrievedTables() throws ArcException {
@@ -206,7 +208,7 @@ public class ClientDao {
 		String validiteSup = arcClientIdentifier.getValiditySup();
 		boolean reprise = arcClientIdentifier.getReprise();
 
-		StringBuilder query = new StringBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("DROP TABLE IF EXISTS " + tableOfIdSource + "; ");
 
 		query.append("CREATE TABLE " + tableOfIdSource + " ");
@@ -219,12 +221,13 @@ public class ClientDao {
 				"WHERE '" + TraitementEtat.OK + "'=ANY(T1.etat_traitement) ");
 
 		if (validiteInf != null) {
-			query.append("AND validite>='" + validiteInf + "' ");
+			query.append("AND validite>=").appendText(validiteInf).append(" ");
 		}
 
-		query.append("AND validite<='" + validiteSup + "' AND T1.phase_traitement='" + TraitementPhase.MAPPING + "' ");
-		query.append("AND EXISTS (SELECT 1 FROM " + ViewEnum.NORME.getFullName(environnement)
-				+ " T2 WHERE T2.id_famille='" + famille + "' AND T1.id_norme=T2.id_norme) ");
+		query.append("AND validite<=").appendText(validiteSup).append(" ");
+		query.append("AND T1.phase_traitement='" + TraitementPhase.MAPPING + "' ");
+		query.append("AND EXISTS (SELECT 1 FROM " + ViewEnum.NORME.getFullName(this.environnement)
+				+ " T2 WHERE T2.id_famille='" + this.famille + "' AND T1.id_norme=T2.id_norme) ");
 
 		// if reprise is true, we want to retrieve all files, even the one which had
 		// been already retrieved
@@ -263,11 +266,10 @@ public class ClientDao {
 		return dataTableImages;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * fr.insee.arc_essnet.ws.dao.ClientDarcl(fr.insee.arc_essnet.ws.actions.Senarc
+
+	/**
+	 * Create image of nomenclature tables
+	 * @throws ArcException
 	 */
 	public void createTableNmcl() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createNmcl()");
@@ -288,11 +290,9 @@ public class ClientDao {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see fr.insee.arc_essnet.ws.dao.ClientDarcMetier(java.lang.String,
-	 * fr.insee.arc_essnet.ws.actions.Senarc
+	/**
+	 * Create image of model tables
+	 * @throws ArcException
 	 */
 	public void createTableVarMetier() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createVarMetier()");

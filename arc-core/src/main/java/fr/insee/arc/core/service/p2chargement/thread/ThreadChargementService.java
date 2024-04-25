@@ -31,6 +31,7 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Sleep;
@@ -137,7 +138,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	private void preparation() throws ArcException {
 
 		ArcPreparedStatementBuilder query = arcThreadGenericDao.preparationDefaultDao();
-		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());
+		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query);
 
 	}
 
@@ -299,36 +300,33 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	 * @return
 	 * @throws ArcException
 	 */
-
+	@SqlInjectionChecked
 	private boolean majPilotage(String idSource, FileIdCard fileIdCard) throws ArcException {
 		boolean erreur = false;
 		StaticLoggerDispatcher.info(LOGGER, "Mettre à jour la table de pilotage");
-		java.util.Date beginDate = new java.util.Date();
-		StringBuilder bloc3 = new StringBuilder();
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
-		bloc3.append("UPDATE " + this.tableChargementPilTemp + " a \n");
-		bloc3.append("SET\n");
+		query.append("UPDATE " + this.tableChargementPilTemp + " a \n");
+		query.append("SET ");
 
 		if (fileIdCard.getIdNorme() == null) {
-			bloc3.append(" id_norme='" + TraitementRapport.NORMAGE_NO_NORME + "' ");
-			bloc3.append(", validite= '" + TraitementRapport.NORMAGE_NO_DATE + "' ");
-			bloc3.append(", periodicite='" + TraitementRapport.NORMAGE_NO_NORME + "' ");
-			bloc3.append(", etat_traitement='{" + TraitementEtat.KO + "}' ");
+			query.append("id_norme='" + TraitementRapport.NORMAGE_NO_NORME + "' ");
+			query.append(", validite= '" + TraitementRapport.NORMAGE_NO_DATE + "' ");
+			query.append(", periodicite='" + TraitementRapport.NORMAGE_NO_NORME + "' ");
+			query.append(", etat_traitement='{" + TraitementEtat.KO + "}' ");
 		} else {
 
-			bloc3.append(" id_norme='" + fileIdCard.getIdNorme() + "' \n");
-			bloc3.append(", validite='" + fileIdCard.getValidite() + "' \n");
-			bloc3.append(", periodicite='" + fileIdCard.getPeriodicite() + "' \n");
+			query.append("id_norme=").appendText(fileIdCard.getIdNorme());
+			query.append(", validite=").appendText(fileIdCard.getValidite());
+			query.append(", periodicite=").appendText(fileIdCard.getPeriodicite());
 		}
 
-		bloc3.append("where " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "' AND phase_traitement='"
-				+ this.currentPhase + "'; \n");
-		UtilitaireDao.get(0).executeBlock(this.getConnexion().getExecutorConnection(), bloc3);
-		java.util.Date endDate = new java.util.Date();
+		query.append(" WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "=").appendText(idSource);
+		query.append(" AND phase_traitement='"+ this.currentPhase + "';\n");
+		UtilitaireDao.get(0).executeRequest(this.getConnexion().getExecutorConnection(), query);
 
-		StaticLoggerDispatcher.info(
-				LOGGER,
-				"Mettre à jour la table de pilotage temps : " + (endDate.getTime() - beginDate.getTime()) + " ms");
+		StaticLoggerDispatcher.info(LOGGER,	"Fin mettre à jour la table de pilotage");
 		return erreur;
 	}
 

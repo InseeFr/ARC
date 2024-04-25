@@ -52,7 +52,7 @@ public class FileRegistrationDao {
 
 	public void execQueryRegisterFiles(FilesDescriber archiveContent) throws ArcException {
 
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		String dirIn = directories.getDirectoryReceptionEnCours();
 
 		for (FileDescriber f : archiveContent.getFilesAttribute()) {
@@ -110,7 +110,7 @@ public class FileRegistrationDao {
 	 * @param requete
 	 * @param f
 	 */
-	private void queryInsertFileDescriberInPilotage(StringBuilder requete, FileDescriber f) {
+	private void queryInsertFileDescriberInPilotage(ArcPreparedStatementBuilder requete, FileDescriber f) {
 		String originalContainer = f.getContainerName();
 		String newContainer = f.getContainerNewName();
 		String virtualContainer = f.getVirtualContainer();
@@ -131,18 +131,19 @@ public class FileRegistrationDao {
 			requete.append("\n,");
 		}
 		requete.append(" (");
-		requete.append(FormatSQL.cast(originalContainer));
-		requete.append("," + FormatSQL.cast(newContainer));
-		requete.append("," + FormatSQL.cast(virtualContainer));
-		requete.append("," + FormatSQL.cast(fileName));
-		requete.append("," + FormatSQL.cast(
-				new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat()).format(d)));
-		requete.append("," + FormatSQL.cast(TraitementPhase.RECEPTION.toString()));
-		requete.append("," + FormatSQL.cast("{" + etat + "}"));
-		requete.append("," + "to_timestamp(" + FormatSQL
-				.cast(new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(d))
-				+ ",'" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat() + "')");
-		requete.append("," + FormatSQL.cast(rapport));
+		requete.appendText(originalContainer);
+		requete.append(",").appendText(newContainer);
+		requete.append(",").appendText(virtualContainer);
+		requete.append(",").appendText(fileName);
+		requete.append(",").appendText(
+				new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat()).format(d));
+		requete.append(",").appendText(TraitementPhase.RECEPTION.toString());
+		requete.append(",").appendText("{" + etat + "}");
+		requete.append(",to_timestamp(")
+			.appendText(new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(d))
+			.append(",").appendText(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat())
+		.append(")");
+		requete.append(",").appendText(rapport);
 		requete.append(",1");
 		requete.append("," + etape);
 		requete.append(") ");
@@ -153,7 +154,7 @@ public class FileRegistrationDao {
 	 * 
 	 * @param requete
 	 */
-	private void queryUpdateArchiveWithoutFileName(StringBuilder requete) {
+	private void queryUpdateArchiveWithoutFileName(ArcPreparedStatementBuilder requete) {
 		// pb des archives sans nom de fichier
 		requete.append("UPDATE " + this.tablePilTemp + " set " + ColumnEnum.ID_SOURCE.getColumnName() + "='' where "
 				+ ColumnEnum.ID_SOURCE.getColumnName() + " is null; ");
@@ -228,16 +229,16 @@ public class FileRegistrationDao {
 	 * @throws ArcException
 	 */
 	public void execQueryTemporaryInsertRegisteredFiles(FilesDescriber registeredFile) throws ArcException {
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		// insertion des fichiers enregitrés dans la table tablePilTemp
 		for (FileDescriber f : registeredFile.getFilesAttribute()) {
 			if (f.getFileName() != null) {
 				requete.append("insert into " + this.tablePilTemp + " (container, "
-						+ ColumnEnum.ID_SOURCE.getColumnName() + ") values (" + FormatSQL.cast(f.getContainerName())
-						+ "," + FormatSQL.cast(f.getFileName()) + "); \n");
+						+ ColumnEnum.ID_SOURCE.getColumnName() + ") values (" + requete.quoteText(f.getContainerName())
+						+ "," + requete.quoteText(f.getFileName()) + "); \n");
 			}
 		}
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 	}
 
 	/**
@@ -296,15 +297,15 @@ public class FileRegistrationDao {
 
 	public void execQueryInsertCorruptedArchiveInPilotage(FilesDescriber content) throws ArcException {
 
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		// insertion des fichiers d'archive corrompue dans la table
 		// tablePilTemp
 		// on doit aussi leur donner un numéro
 		for (FileDescriber z : content.getFilesAttribute()) {
 			if (z.getTypeOfFile().equals(TraitementTypeFichier.AC)) {
 				requete.append("insert into " + this.tablePilTemp + " (container, "
-						+ ColumnEnum.ID_SOURCE.getColumnName() + ") values (" + FormatSQL.cast(z.getContainerName())
-						+ "," + FormatSQL.cast(z.getFileName()) + "); \n");
+						+ ColumnEnum.ID_SOURCE.getColumnName() + ") values (" + requete.quoteText(z.getContainerName())
+						+ "," + requete.quoteText(z.getFileName()) + "); \n");
 			}
 		}
 		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);

@@ -9,10 +9,6 @@ public enum ModeRequete {
     MATERIAL_OFF("set enable_material=off;"), //    
     MERGE_JOIN_ON("set enable_mergejoin=on;"), //
     MERGE_JOIN_OFF("set enable_mergejoin=off;"), //
-    RESET_WORK_MEM("reset work_mem;"), //
-    WORK_MEM_32("set work_mem = \"{}MB\";", 32), //
-    RESET_TEMP_BUFFER("reset temp_buffers;"), //
-    TEMP_BUFFER_32("set temp_buffers = \"{}MB\";", 32),
     SEQSCAN_ON("set enable_seqscan=on;"), //
     SEQSCAN_OFF("set enable_seqscan=off;"), //
     HASHAGG_ON("set enable_hashagg=on;"), //
@@ -24,10 +20,6 @@ public enum ModeRequete {
 
     private ModeRequete(String anExpression) {
         this.expression = anExpression;
-    }
-
-    private ModeRequete(String anExpression, int value) {
-        this.expression = anExpression.replace("{}", String.valueOf(value));
     }
 
     @Override
@@ -45,12 +37,12 @@ public enum ModeRequete {
      * @param modes
      * @return
      */
-	public static String untokenize(ModeRequete... modes) {
-		StringBuilder returned = new StringBuilder();
+	public static GenericPreparedStatementBuilder untokenize(ModeRequete... modes) {
+		GenericPreparedStatementBuilder returned = new GenericPreparedStatementBuilder();
 		for (int i = 0; i < modes.length; i++) {
 			returned.append(modes[i].expr());
 		}
-		return returned.append("\n").toString();
+		return returned.append("\n");
 	}
 
 
@@ -62,11 +54,9 @@ public enum ModeRequete {
      * @param modes
      * @return
      */
-    public static String configureQuery(String requete, ModeRequete... modes)
+    public static GenericPreparedStatementBuilder configureQuery(GenericPreparedStatementBuilder requete, ModeRequete... modes)
     {
-    	
-    	StringBuilder query=new StringBuilder();
-    	
+    	GenericPreparedStatementBuilder query=new GenericPreparedStatementBuilder();
 		// user defined configuration modes
 		query.append(ModeRequete.untokenize(modes));
 
@@ -76,7 +66,7 @@ public enum ModeRequete {
 			query.append(requete);
 		}
 		
-		return query.toString();
+		return query;
 		
     }
     

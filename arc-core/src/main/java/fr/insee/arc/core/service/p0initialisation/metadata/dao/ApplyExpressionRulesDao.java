@@ -7,6 +7,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class ApplyExpressionRulesDao {
@@ -86,6 +87,7 @@ public class ApplyExpressionRulesDao {
 	 * @param field : the rule where replacement will be made
 	 * @return
 	 */
+	@SqlInjectionChecked(requiredAsSafe = {"table", "field"})
 	public ArcPreparedStatementBuilder applyExpressionsTo(JeuDeRegle ruleSet, GenericBean expressions, String table, String field) {
 		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < expressions.size(); i++) {

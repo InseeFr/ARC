@@ -10,6 +10,7 @@ import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class ThreadOperations {
@@ -72,7 +73,7 @@ public class ThreadOperations {
 		// if scalable thread
 		if (connexion.isScaled()) {		
 			// create the pilotage table of the file on the coordinator nod
-			UtilitaireDao.get(0).executeBlock(connexion.getCoordinatorConnection(), query.getQueryWithParameters());
+			UtilitaireDao.get(0).executeRequest(connexion.getCoordinatorConnection(), query);
 		
 			query = new ArcPreparedStatementBuilder();
 
@@ -110,7 +111,7 @@ public class ThreadOperations {
 			query.append("DROP TABLE IF EXISTS "+HashFileNameConversion.tableOfIdSource(this.tablePrevious,idSource)+";");
 		}
 		
-		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query.getQueryWithParameters());
+		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query);
 
 		query = new ArcPreparedStatementBuilder();
 		if (connexion.isScaled()) {
@@ -121,7 +122,7 @@ public class ThreadOperations {
 
 			query.append(marquageFinal(tablePilotageGlobale, tablePilotageThread, idSource));
 
-			UtilitaireDao.get(0).executeBlock(connexion.getCoordinatorConnection(), query.getQueryWithParameters());
+			UtilitaireDao.get(0).executeBlock(connexion.getCoordinatorConnection(), query);
 		}
 	}
 
@@ -143,8 +144,8 @@ public class ThreadOperations {
 	 * @param idSource
 	 * @return
 	 */
-	public static String createTablePilotageIdSource(String tableIn, String tableOut, String idSource) {
-		StringBuilder requete = new StringBuilder();
+	public static ArcPreparedStatementBuilder createTablePilotageIdSource(String tableIn, String tableOut, String idSource) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("\n CREATE ");
 		if (!tableOut.contains(".")) {
 			requete.append("TEMPORARY ");
@@ -154,10 +155,10 @@ public class ThreadOperations {
 		requete.append(
 				"TABLE " + tableOut + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ");
 		requete.append("\n SELECT * FROM " + tableIn + " ");
-		requete.append("\n WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + " ='" + idSource + "' ");
+		requete.append("\n WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + " = ").appendText(idSource);
 		requete.append("\n AND etape = 1 ");
 		requete.append("\n ; ");
-		return requete.toString();
+		return requete;
 	}
 	
 
@@ -170,8 +171,9 @@ public class ThreadOperations {
 	 * @param idSource
 	 * @return
 	 */
-	private static String marquageFinal(String tablePil, String tablePilTemp, String idSource) {
-		StringBuilder requete = new StringBuilder();
+	@SqlInjectionChecked
+	private static ArcPreparedStatementBuilder marquageFinal(String tablePil, String tablePilTemp, String idSource) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		
 		requete.append("\n set enable_hashjoin=off; ");
 		requete.append("\n UPDATE " + tablePil + " a ");
@@ -193,13 +195,13 @@ public class ThreadOperations {
 
 		// Si on dispose d'un id source on met à jour seulement celui ci
 		requete.append("\n FROM " + tablePilTemp + " as b ");
-		requete.append("\n WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
+		requete.append("\n WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 		requete.append("\n AND a.etape = 1 ; ");
 
 		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));
 
 		requete.append("\n set enable_hashjoin = on; ");
-		return requete.toString();
+		return requete;
 
 	}
 

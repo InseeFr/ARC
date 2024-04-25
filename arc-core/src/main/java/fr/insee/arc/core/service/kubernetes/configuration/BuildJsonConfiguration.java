@@ -65,7 +65,7 @@ public class BuildJsonConfiguration {
 	 * @return
 	 * @throws ArcException
 	 */
-	private static String replicaServiceConfiguration(int executorReplicaIndex) throws ArcException
+	private static String replicaServiceConfiguration(int executorReplicaIndex)
 	{
 		return applyKubernetesParameters(ExecutorDatabaseServiceTemplate.configuration, kubernetesParameters(executorReplicaIndex));
 	}

@@ -11,6 +11,10 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 public class PhaseInitializationOperation {
 
+	private PhaseInitializationOperation() {
+		throw new IllegalStateException("Utility class");
+	}
+	
 	/**
 	 * The initialization phase can trigger when the current date is more than
 	 * the initialization date stored in database

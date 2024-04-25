@@ -30,15 +30,26 @@ public class SecurityDao {
 	public static String validateEnvironnement(String unsafe) throws ArcException
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append("SELECT "+query.quoteText(unsafe)+" as bas_name FROM arc.ext_etat_jeuderegle where lower(replace(id,'.','_')) = "+query.quoteText(unsafe.toLowerCase()));
-		return UtilitaireDao.get(0).getString(null, query);
+		query.append("SELECT "+query.quoteText(unsafe)+" as bas_name FROM arc.ext_etat_jeuderegle where isenv and lower(replace(id,'.','_')) = "+query.quoteText(unsafe.toLowerCase()));
+		String result = UtilitaireDao.get(0).getString(null, query);
+		
+		return validateOfThrow(result, unsafe);
 	}
 	
+	private static String validateOfThrow(String result, String unsafe) throws ArcException {
+		if (result==null)
+		{
+			throw new ArcException(ArcExceptionMessage.WS_INVALID_PARAMETER, unsafe);
+		}
+		return result;
+	}
+
 	public static String validateClientIdentifier(String unsafe) throws ArcException
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.append("SELECT "+query.quoteText(unsafe)+" as bas_name FROM arc.ihm_client where lower(id_application) = "+query.quoteText(unsafe.toLowerCase()));
-		return UtilitaireDao.get(0).getString(null, query);
+		query.append("SELECT "+query.quoteText(unsafe)+" as client FROM arc.ihm_client where lower(id_application) = "+query.quoteText(unsafe.toLowerCase()));
+		String result = UtilitaireDao.get(0).getString(null, query);
+		return validateOfThrow(result, unsafe);
 	}
 	
 	/**

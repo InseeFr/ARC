@@ -17,6 +17,7 @@ import fr.insee.arc.core.service.p3normage.thread.ThreadNormageService;
 import fr.insee.arc.core.service.p4controle.thread.ThreadControleService;
 import fr.insee.arc.core.service.p5mapping.thread.ThreadMappingService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
@@ -283,7 +284,8 @@ public class MultiThreading<U, T extends IThread<U>> {
 			Connection connection) throws ArcException {
 		UtilitaireDao.get(poolId).executeImmediate(connection,
 				DatabaseConnexionConfiguration.configConnection(anEnvExecution)
-						+ (restrictedUsername.equals("") ? "" : FormatSQL.changeRole(restrictedUsername)));
+				.append((restrictedUsername.equals("") ? new GenericPreparedStatementBuilder() : FormatSQL.changeRole(restrictedUsername)))
+				);
 	}
 
 }

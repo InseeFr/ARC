@@ -3,6 +3,7 @@ package fr.insee.arc.core.service.p2chargement.dao;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
@@ -12,6 +13,7 @@ import fr.insee.arc.core.service.p2chargement.bo.XMLColumns;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ChargeurXMLDao {
@@ -32,12 +34,11 @@ public class ChargeurXMLDao {
 	 * @param tableTempA
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	public void execQueryCreateTemporaryLoadDataTable(String tableTempA) throws ArcException {
 		StaticLoggerDispatcher.info(LOGGER, "** Création de la table temporaire de chargement tableTempA **");
 
-		java.util.Date beginDate = new java.util.Date();
-
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(FormatSQL.dropTable(tableTempA));
 		requete.append("CREATE ");
 
@@ -67,12 +68,10 @@ public class ChargeurXMLDao {
 		requete.append(FormatSQL.WITH_NO_VACUUM);
 		requete.append(";");
 
-		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requete);
-
-		java.util.Date endDate = new java.util.Date();
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), requete);
 
 		StaticLoggerDispatcher.info(LOGGER,
-				"** requeteCreateA en " + (endDate.getTime() - beginDate.getTime()) + " ms **");
+				"** fin création de la table temporaire de chargement tableTempA **");
 	}
 
 	/**
@@ -85,11 +84,12 @@ public class ChargeurXMLDao {
 	 * @param jointure
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	public void execQueryBilan(String tableChargementPilTemp, TraitementPhase currentPhase, String rapport, String jointure)
 			throws ArcException {
-		StringBuilder requeteBilan = new StringBuilder();
+		ArcPreparedStatementBuilder requeteBilan = new ArcPreparedStatementBuilder();
 		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getIdSource(),
-				currentPhase, TraitementEtat.OK.toString(), rapport, jointure));
+				currentPhase, TraitementEtat.OK, rapport, jointure));
 		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);
 	}
 

@@ -28,6 +28,7 @@ import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -209,16 +210,14 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * temporaire de la phase vers la table de pilotage globale) Efface les objets
 	 * temporaires (tables, type, ...)
 	 */
+	@SqlInjectionChecked
 	public void finaliser() {
 		LoggerHelper.info(LOGGER_APISERVICE, "finaliser");
 
 		try {
 			if (Boolean.TRUE.equals(this.todo)) {
-
-				StringBuilder requete = new StringBuilder();
-				requete.append(FormatSQL.dropTable(this.tablePilTemp));
 				try {
-					UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), requete);
+					UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), FormatSQL.dropTable(this.tablePilTemp));
 				} catch (Exception ex) {
 					LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "finaliser()", ex);
 				}
@@ -270,23 +269,25 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param etatNew
 	 * @return
 	 */
-	public static StringBuilder pilotageMarkIdsource(String tablePilotage, String idSource, TraitementPhase phaseNew,
-			String etatNew, String rapport, String... jointure) {
-		StringBuilder requete = new StringBuilder();
+	@SqlInjectionChecked
+	public static ArcPreparedStatementBuilder pilotageMarkIdsource(String tablePilotage, String idSource, TraitementPhase phaseNew,
+			TraitementEtat etatNew, String rapport, String... jointure) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("UPDATE " + tablePilotage + " ");
 		requete.append("SET phase_traitement= '" + phaseNew + "' ");
 		requete.append(", etat_traitement= '{" + etatNew + "}' ");
 		if (rapport == null) {
 			requete.append(", rapport= null ");
 		} else {
-			requete.append(", rapport= '" + rapport + "' ");
+			requete.append(", rapport=").appendText(rapport);
 		}
 
 		if (jointure.length > 0) {
-			requete.append(", jointure= '" + jointure[0] + "'");
+			requete.append(", jointure=").appendText(jointure[0]);
 		}
 
-		requete.append("WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + idSource + "';\n");
+		requete.append("WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "=").appendText(idSource)
+		.append(";\n");
 		return requete;
 	}
 
@@ -363,6 +364,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param tableDrop
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	private void repriseSurErreur(Connection connexion, TraitementPhase phase, String tablePil, ArcException exception) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
@@ -376,7 +378,8 @@ public abstract class ApiService implements IConstanteNumerique {
 		} catch (SQLException rollbackException) {
 			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
 		}
-		StringBuilder requete = new StringBuilder();
+		
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("WITH t0 AS ( ");
 		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
 		requete.append("\n RETURNING " + ColumnEnum.ID_SOURCE.getColumnName() + ") ");

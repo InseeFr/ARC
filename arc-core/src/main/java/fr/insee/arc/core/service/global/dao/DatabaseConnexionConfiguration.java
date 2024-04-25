@@ -1,5 +1,6 @@
 package fr.insee.arc.core.service.global.dao;
 
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -14,10 +15,8 @@ public class DatabaseConnexionConfiguration {
 	/**
 	 * Permet de configurer la connexion Mettre un timeout par exemple
 	 */
-	public static StringBuilder configConnection(String anEnvExecution) {
-		StringBuilder requete = new StringBuilder();
-		requete.append(ModeRequeteImpl.arcModeRequeteEngine(anEnvExecution));
-		return requete;
+	public static GenericPreparedStatementBuilder configConnection(String anEnvExecution) {
+		return ModeRequeteImpl.arcModeRequeteEngine(anEnvExecution);
 	}
 	
 
@@ -27,12 +26,12 @@ public class DatabaseConnexionConfiguration {
 	 * 
 	 * @throws ArcException
 	 */
-	public static String switchToFullRightRole() {
+	public static GenericPreparedStatementBuilder switchToFullRightRole() {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		if (!properties.getDatabaseRestrictedUsername().equals("")) {
 			return FormatSQL.changeRole(properties.getDatabaseUsername());
 		}
-		return "";
+		return new GenericPreparedStatementBuilder();
 	}
 
 	

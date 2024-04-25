@@ -19,6 +19,7 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -36,8 +37,9 @@ public class PilotageOperations {
 	 * 
 	 * @throws ArcException
 	 */
-	public static String queryUpdateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) {
-		StringBuilder query = new StringBuilder();
+	@SqlInjectionChecked
+	public static ArcPreparedStatementBuilder queryUpdateNbEnr(String tablePilTemp, String tableTravailTemp, String... jointure) {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
 		// mise à jour du nombre d'enregistrement et du type composite
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** updateNbEnr **");
@@ -45,18 +47,19 @@ public class PilotageOperations {
 		query.append("\n SET nb_enr=(select count(*) from " + tableTravailTemp + ") ");
 
 		if (jointure.length > 0) {
-			query.append(", jointure= " + FormatSQL.quoteText(ManipString.nullIfEmptyTrim(jointure[0])));
+			query.append(", jointure= ").appendText(ManipString.nullIfEmptyTrim(jointure[0]));
 		}
 		query.append(";");
-		return query.toString();
+		return query;
 	}
 
 
-	public static String queryUpdatePilotageMapping(String tableMappingPilTemp, String idSource) {
-		StringBuilder query = new StringBuilder();
+	@SqlInjectionChecked
+	public static ArcPreparedStatementBuilder queryUpdatePilotageMapping(String tableMappingPilTemp, String idSource) {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
         query.append("UPDATE " + tableMappingPilTemp + " SET etape=2, etat_traitement = '{" + TraitementEtat.OK + "}' WHERE etat_traitement='{"
-                        + TraitementEtat.ENCOURS + "}' AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ;");
-		return query.toString();
+                        + TraitementEtat.ENCOURS + "}' AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource).append(";");
+		return query;
 	}
 
 	
@@ -76,9 +79,11 @@ public class PilotageOperations {
 	 * @param nbEnr
 	 * @return
 	 */
-	public static String queryCopieTablePilotage(String tablePil, String tablePilTemp, TraitementPhase phaseAncien,
+	@SqlInjectionChecked
+	public static ArcPreparedStatementBuilder queryCopieTablePilotage(String tablePil, String tablePilTemp, TraitementPhase phaseAncien,
 			TraitementPhase phaseNouveau, Integer nbEnr) {
-		StringBuilder requete = new StringBuilder();
+		
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 		Date date = new Date();
 
@@ -122,7 +127,7 @@ public class PilotageOperations {
 
 		requete.append("\n SELECT * from insert; ");
 		requete.append("\n ANALYZE " + tablePilTemp + ";");
-		return requete.toString();
+		return requete;
 	}
 
 	/**
@@ -133,12 +138,13 @@ public class PilotageOperations {
 	 * @param exception
 	 * @return
 	 */
-	public static StringBuilder queryUpdatePilotageError(TraitementPhase phase, String tablePil, Exception exception) {
-		StringBuilder requete = new StringBuilder();
-		requete.append("UPDATE " + tablePil + " SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}', rapport="
-				+ FormatSQL.quoteText(exception.toString()).replace("\r", "") + " ");
-		requete.append(
-				"\n WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
+	@SqlInjectionChecked
+	public static ArcPreparedStatementBuilder queryUpdatePilotageError(TraitementPhase phase, String tablePil, Exception exception) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("UPDATE " + tablePil + " ");
+		requete.append("SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}'");
+		requete.append(", rapport=").appendText(exception.toString().replace("\r", ""));
+		requete.append(" WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
 		return requete;
 	}
 
@@ -180,15 +186,16 @@ public class PilotageOperations {
 	 * @param idSource
 	 * @return
 	 */
-	public static StringBuilder queryResetPreviousPhaseMark(String tablePil, String idSource, String tableSource) {
-		StringBuilder requete = new StringBuilder();
+	@SqlInjectionChecked
+	public static ArcPreparedStatementBuilder queryResetPreviousPhaseMark(String tablePil, String idSource, String tableSource) {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 		// mettre à etape = 0 la phase marquée à 3
 		requete.append("\n UPDATE " + tablePil + " a ");
 		requete.append("\n SET etape=0 ");
 		requete.append("\n WHERE a.etape=3 ");
 		if (idSource != null) {
-			requete.append("\n AND a."+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
+			requete.append("\n AND a."+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 		}
 
 		if (tableSource != null) {
@@ -224,19 +231,31 @@ public class PilotageOperations {
 		} catch (SQLException rollbackException) {
 			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
 		}
-
 		// promote the application user account to full right
 		UtilitaireDao.get(0).executeImmediate(connexion, DatabaseConnexionConfiguration.switchToFullRightRole());
 
-		StringBuilder requete = new StringBuilder();
+		traitementSurErreurPilotage(connexion, phase, tablePil, idSource, exception);
 
+	}
+
+	/**
+	 * For the given file idSourc, mark the error in pilotage table and reset etape 3 to 0 
+	 * @param connexion
+	 * @param phase
+	 * @param tablePil
+	 * @param idSource
+	 * @param exception
+	 * @throws ArcException
+	 */
+	@SqlInjectionChecked
+	private static void traitementSurErreurPilotage(Connection connexion, TraitementPhase phase, String tablePil,
+			String idSource, ArcException exception) throws ArcException 
+	{
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
-
-		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = '" + idSource + "' ");
+		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 		requete.append("\n ;");
-
 		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));
-
 		UtilitaireDao.get(0).executeBlock(connexion, requete);
 	}
 

@@ -11,6 +11,7 @@ import org.postgresql.core.Utils;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 
@@ -47,12 +48,12 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @param tableName
 	 * @return
 	 */
-	public static String dropTable(String... someTables) {
+	public static GenericPreparedStatementBuilder dropTable(String... someTables) {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		for (String tableName : someTables) {
 			query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, tableName, SQL.END_QUERY, SQL.BR);
 		}
-		return query.toString();
+		return query;
 	}
 
 	/**
@@ -61,6 +62,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @param table
 	 * @return
 	 */
+	@SqlInjectionChecked
 	public static GenericPreparedStatementBuilder tableExists(String table) {
 		String tableSchema = extractSchemaNameToken(table);
 		String tableName = extractTableNameToken(table);
@@ -101,8 +103,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String changeRole(String roleName) {
-		return "SET role='" + roleName + "';COMMIT;";
+	public static GenericPreparedStatementBuilder changeRole(String roleName) {
+		return setConfig("role", roleName).append(SQL.COMMIT).append(SQL.END_QUERY);
 	}
 	
 	/**
@@ -111,10 +113,12 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @param value
 	 * @return
 	 */
+	@SqlInjectionChecked
 	public static GenericPreparedStatementBuilder setConfig(String databaseParameter, String value)
 	{
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		return new GenericPreparedStatementBuilder("SELECT set_config("+query.quoteText(databaseParameter)+", "+query.quoteText(value)+", false);");
+		query.append("SELECT set_config("+query.quoteText(databaseParameter)+", "+query.quoteText(value)+", false);");
+		return query;
 	}
 
 	/**
@@ -165,8 +169,9 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @param where
 	 * @return
 	 */
-	public static String createTableAsSelectWhere(String tableIn, String tableOut, String where) {
-		StringBuilder requete = new StringBuilder();
+	@SqlInjectionChecked
+	public static GenericPreparedStatementBuilder createTableAsSelectWhere(String tableIn, String tableOut, String where) {
+		GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
 		requete.append(FormatSQL.dropTable(tableOut));
 
 		requete.append("\n CREATE ");
@@ -178,7 +183,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 		requete.append("TABLE ").append(tableOut).append(" ").append(FormatSQL.WITH_NO_VACUUM)
 				.append(" AS SELECT * FROM ").append(tableIn).append(" a WHERE ").append(where);
 		requete.append("; ");
-		return requete.toString();
+		return requete;
 	}
 
 	/**
@@ -189,10 +194,10 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @param triggersAndIndexes
 	 * @return
 	 */
-	public static StringBuilder rebuildTableAsSelectWhere(String table, String where) {
+	public static GenericPreparedStatementBuilder rebuildTableAsSelectWhere(String table, String where) {
 		String tableRebuild = temporaryTableName(table, "RB");
 
-		StringBuilder requete = new StringBuilder();
+		GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
 		requete.append("set enable_nestloop=off; ");
 
 		requete.append(createTableAsSelectWhere(table, tableRebuild, where));
@@ -314,11 +319,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 		return val.replace("'", "''");
 	}
 
-	public static String unquoteTextWithoutEnclosings(String val) {
-		return val.replace("''", "'");
-	}
-	
-	
 	/**
 	 * escape quote through function
 	 * 
@@ -342,8 +342,12 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @param formatIn
 	 * @return
 	 */
-	public static String toDate(String dateTextIn, String formatIn) {
-		return "to_date(" + dateTextIn + "::text," + formatIn + ")";
+	public static GenericPreparedStatementBuilder toDate(String dateTextIn, String formatIn) {
+		return new GenericPreparedStatementBuilder().append("to_date(").appendText(dateTextIn).append("::text,").appendText(formatIn).append(")");
+	}
+
+	public static GenericPreparedStatementBuilder truncate(String fullName) {
+		return new GenericPreparedStatementBuilder("truncate " + fullName + ";");
 	}
 
 }

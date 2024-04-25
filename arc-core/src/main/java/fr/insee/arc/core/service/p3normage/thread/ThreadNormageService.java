@@ -24,6 +24,7 @@ import fr.insee.arc.core.service.p3normage.ApiNormageService;
 import fr.insee.arc.core.service.p3normage.operation.NormageOperation;
 import fr.insee.arc.core.service.p3normage.operation.NormageRulesOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -154,11 +155,12 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 		query.append("\n UPDATE " + this.tableNormagePilTemp);
 		query.append("\n SET etat_traitement = '{" + TraitementEtat.OK + "}'");
 		query.append("\n , phase_traitement = '" + this.currentPhase + "'");
-		query.append("\n WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "='" + this.idSource + "';");
+		query.append("\n WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "=").appendText(this.idSource);
+		query.append(SQL.END_QUERY);
 
 		query.append(TableOperations.creationTableResultat(this.tableNormageDataTemp, this.tableNormageKOTemp));
 
-		UtilitaireDao.get(0).executeBlock(this.getConnexion().getExecutorConnection(), query.getQueryWithParameters());
+		UtilitaireDao.get(0).executeBlock(this.getConnexion().getExecutorConnection(), query);
 		
 		
 		this.fileIdCard = RulesOperations.fileIdCardFromPilotage(this.connexion.getExecutorConnection(),

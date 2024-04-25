@@ -81,7 +81,7 @@ public class XMLHandlerCharger4 extends org.xml.sax.helpers.DefaultHandler {
 	 */
 	@Override
 	public void characters(char[] caracteres, int debut, int longueur) {
-		String donnees = FormatSQL.quoteTextWithoutEnclosings(new String(caracteres, debut, longueur));
+		String donnees = new String(caracteres, debut, longueur);
 
 		// on concatène les données lues dans currentData
 		// currentData est effacée quand on trouve un nouvel élement

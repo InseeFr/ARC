@@ -13,9 +13,9 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.ManipString;
 
 public class SynchronizeDataByPilotageDao {
 
@@ -30,10 +30,11 @@ public class SynchronizeDataByPilotageDao {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	public static void resetEtapePilotageDao(Connection connection, String envExecution) throws ArcException {
 		String tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
 
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
 		requete.append("DELETE FROM " + tablePil + " WHERE etat_traitement='{ENCOURS}';");
 
@@ -73,30 +74,8 @@ public class SynchronizeDataByPilotageDao {
 	public static void rebuildPilotageDao(Connection connexion, String envExecution) throws ArcException {
 
 		String tablePilotage = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
-
-		StringBuilder query = FormatSQL.rebuildTableAsSelectWhere(tablePilotage, "true");
-
-		query.append("create index idx1_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage
-				+ " (" + ColumnEnum.ID_SOURCE.getColumnName() + ");");
-
-		query.append("create index idx2_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage
-				+ " (phase_traitement, etape);");
-
-		query.append("create index idx4_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage
-				+ " (rapport) where rapport is not null;");
-
-		query.append("create index idx5_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage
-				+ " (o_container,v_container);");
-
-		query.append("create index idx6_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage
-				+ " (to_delete);");
-
-		query.append("create index idx7_" + ManipString.substringAfterFirst(tablePilotage, ".") + " on " + tablePilotage
-				+ " (date_entree, phase_traitement, etat_traitement);");
-
-		query.append("analyze " + tablePilotage + ";");
-
-		UtilitaireDao.get(0).executeBlock(connexion, "analyze " + tablePilotage + ";");
+		
+		UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder("analyze " + tablePilotage + ";"));
 	}
 
 	/**
@@ -105,6 +84,7 @@ public class SynchronizeDataByPilotageDao {
 	 * @param env
 	 * @return
 	 */
+	@SqlInjectionChecked
 	public static ArcPreparedStatementBuilder requeteListAllTemporaryTablesInEnv(String envExecution) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		TraitementPhase[] phase = TraitementPhase.values();

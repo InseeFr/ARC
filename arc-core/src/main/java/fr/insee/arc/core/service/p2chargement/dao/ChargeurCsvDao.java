@@ -100,20 +100,18 @@ public class ChargeurCsvDao {
 	 * @throws ArcException
 	 */
 	public void execQueryCreateContainerWithArcMetadata() throws ArcException {
-		StringBuilder req = new StringBuilder();
+		ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
 		req.append("DROP TABLE IF EXISTS " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
 		req.append("CREATE TEMPORARY TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName());
 		req.append(" AS (SELECT ");
-		req.append("\n '" + fileIdCard.getIdSource() + "'::text collate \"C\" as "
-				+ ColumnEnum.ID_SOURCE.getColumnName());
-		req.append("\n ,id::integer as id");
-		req.append("\n ," + fileIdCard.getIntegrationDate() + "::text collate \"C\" as date_integration ");
-		req.append("\n ,'" + fileIdCard.getIdNorme() + "'::text collate \"C\" as id_norme ");
-		req.append("\n ,'" + fileIdCard.getPeriodicite() + "'::text collate \"C\" as periodicite ");
-		req.append("\n ,'" + fileIdCard.getValidite() + "'::text collate \"C\" as validite ");
-		req.append("\n ,0::integer as nombre_colonne");
-
-		req.append("\n , ");
+		req.appendText(fileIdCard.getIdSource()).append("::text collate \"C\" as "+ ColumnEnum.ID_SOURCE.getColumnName());
+		req.append(",").append("id::integer");
+		req.append(",").append(fileIdCard.getIntegrationDate()).append("::text collate \"C\" as date_integration ");
+		req.append(",").appendText(fileIdCard.getIdNorme()).append("::text collate \"C\" as id_norme ");
+		req.append(",").appendText(fileIdCard.getPeriodicite()).append("::text collate \"C\" as periodicite ");
+		req.append(",").appendText(fileIdCard.getValidite()).append("::text collate \"C\" as validite ");
+		req.append(",0::integer as nombre_colonne");
+		req.append(",");
 
 		for (int i = 0; i < fileAttributes.getHeadersI().length; i++) {
 			req.append("id as " + fileAttributes.getHeadersI()[i] + ", " + fileAttributes.getHeadersV()[i] + ",");
@@ -121,10 +119,10 @@ public class ChargeurCsvDao {
 
 		req.setLength(req.length() - 1);
 
-		req.append("\n FROM " + ViewEnum.TMP_CHARGEMENT_BRUT.getFullName() + ");");
+		req.append(SQL.FROM).append(ViewEnum.TMP_CHARGEMENT_BRUT.getFullName()).append(");");
 		req.append("DROP TABLE IF EXISTS " + ViewEnum.TMP_CHARGEMENT_BRUT.getFullName() + ";");
 
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), req);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), req);
 	}
 
 	public void execQueryApplyIndexRules() throws ArcException {
@@ -438,9 +436,9 @@ public class ChargeurCsvDao {
 
 	public void execQueryBilan(String tableChargementPilTemp, TraitementPhase currentPhase) throws ArcException {
 
-		StringBuilder requeteBilan = new StringBuilder();
+		ArcPreparedStatementBuilder requeteBilan = new ArcPreparedStatementBuilder();
 		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getIdSource(),
-				currentPhase, TraitementEtat.OK.toString(), null));
+				currentPhase, TraitementEtat.OK, null));
 
 		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);
 	}

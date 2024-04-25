@@ -955,19 +955,18 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 * @return la requête de destruction puis création des tables de mapping
 	 *         temporaires
 	 */
-	public String requeteCreationTablesTemporaires() {
-		StringBuilder returned = new StringBuilder();
+	public ArcPreparedStatementBuilder requeteCreationTablesTemporaires() {
+		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder();
 		boolean isFirstTable = true;
 		for (TableMapping table : this.ensembleTableMapping) {
-			String requeteTable = table.requeteCreation();
 			if (isFirstTable) {
 				isFirstTable = false;
 			} else {
 				returned.append("\n");
 			}
-			returned.append(requeteTable);
+			returned.append(table.requeteCreation());
 		}
-		return returned.toString();
+		return returned;
 	}
 
 	public String requeteTransfertVersTablesMetierDefinitives() {

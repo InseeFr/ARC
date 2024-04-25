@@ -49,7 +49,7 @@ public class ExecuteEngineChargementOperation {
 			
 			PhaseInterface returnInterface = new PhaseInterface();
 			returnInterface.setInputTable(phaseInterface.getOutputTable());
-			returnInterface.setStructure(FormatSQL.unquoteTextWithoutEnclosings(chargeur.getJointure()));
+			returnInterface.setStructure(chargeur.getJointure());
 			return returnInterface;
 			
 		}

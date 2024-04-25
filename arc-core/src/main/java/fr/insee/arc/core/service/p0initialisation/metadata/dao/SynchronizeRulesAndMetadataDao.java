@@ -17,6 +17,7 @@ import fr.insee.arc.core.service.p0initialisation.metadata.ApplyExpressionRulesO
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.structure.tree.HierarchicalView;
@@ -44,6 +45,7 @@ public class SynchronizeRulesAndMetadataDao {
 	 * @param anExecutionEnvironment
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked(requiredAsSafe = "anExecutionEnvironment")
 	public void copyRulesTablesToExecution() throws ArcException {
 		LoggerHelper.info(LOGGER, "copyTablesToExecution");
 
@@ -51,9 +53,11 @@ public class SynchronizeRulesAndMetadataDao {
 		String anExecutionEnvironment = sandbox.getSchema();
 
 		try {
-			StringBuilder requete = new StringBuilder();
+			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+			ArcPreparedStatementBuilder condition = new ArcPreparedStatementBuilder();
+
+			
 			TraitementTableParametre[] r = TraitementTableParametre.values();
-			StringBuilder condition = new StringBuilder();
 			String modaliteEtat = anExecutionEnvironment.replace("_", ".");
 			for (int i = 0; i < r.length; i++) {
 				// on créé une table image de la table venant de l'ihm
@@ -157,55 +161,71 @@ public class SynchronizeRulesAndMetadataDao {
 	 * @param coordinatorOrExecutorConnexion
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	public static void mettreAJourSchemaTableMetier(Connection coordinatorOrExecutorConnexion, String envExecution)
 			throws ArcException {
 		LoggerHelper.info(LOGGER, "mettreAJourSchemaTableMetier");
+
+		
+		HierarchicalView familleToTableToVariableToTypeRef = retrieveDeclaredVariableMetier(coordinatorOrExecutorConnexion, envExecution);
+		HierarchicalView familleToTableToVariableToType = retrieveEffectiveVariableMetier(coordinatorOrExecutorConnexion, envExecution);
+		
+		ArcPreparedStatementBuilder requeteMAJSchema = new ArcPreparedStatementBuilder();
+
+		addAndUpdateColumnsOfModelTable(requeteMAJSchema, familleToTableToVariableToTypeRef, familleToTableToVariableToType);
+		deleteColumnsOfModelTable(requeteMAJSchema, familleToTableToVariableToTypeRef, familleToTableToVariableToType);
+
+		UtilitaireDao.get(0).executeBlock(coordinatorOrExecutorConnexion, requeteMAJSchema);
+	}
+	
+	/**
+	 * delete the columns of business model table that shouldn't exists according to what user have declared in ihm_mod_variable_metier
+	 * @param requeteMAJSchema
+	 * @param familleToTableToVariableToTypeRef
+	 * @param familleToTableToVariableToType
+	 */
+	private static void deleteColumnsOfModelTable(ArcPreparedStatementBuilder requeteMAJSchema,
+			HierarchicalView familleToTableToVariableToTypeRef, HierarchicalView familleToTableToVariableToType) {
 		/*
-		 * Récupérer la table qui mappe : famille / table métier / variable métier et
-		 * type de la variable
+		 * SUPPRESSION DES COLONNES QUI NE SONT PAS CENSEES EXISTER
 		 */
-		ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
-		requeteRef.append("SELECT lower(id_famille), lower('" + envExecution
-				+ ".'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
-				+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
+		for (HierarchicalView famille : familleToTableToVariableToType.children()) {
+			/**
+			 * Pour chaque table physique
+			 */
+			for (HierarchicalView table : familleToTableToVariableToType.get(famille).children()) {
+				/**
+				 * Est-ce que la table devrait exister ?
+				 */
+				if (!familleToTableToVariableToTypeRef.hasPath(famille, table)) {
+					requeteMAJSchema.append("DROP TABLE IF EXISTS " + table.getLocalRoot() + ";\n");
+				} else {
+					/**
+					 * Pour chaque variable de cette table
+					 */
+					for (HierarchicalView variable : table.children()) {
+						/**
+						 * Est-ce que la variable devrait exister ?
+						 */
+						if (!familleToTableToVariableToTypeRef.hasPath(famille, table, variable)) {
+							requeteMAJSchema.append("ALTER TABLE " + table.getLocalRoot() + " DROP COLUMN "
+									+ variable.getLocalRoot() + ";\n");
+						}
+					}
+				}
+			}
+		}
+	}
 
-		List<List<String>> relationalViewRef = UtilitaireDao.get(0)
-				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef);
-
-		HierarchicalView familleToTableToVariableToTypeRef = HierarchicalView.asRelationalToHierarchical(
-				"(Réf) Famille -> Table -> Variable -> Type",
-				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
-				relationalViewRef);
-		/*
-		 * Récupérer dans le méta-modèle de la base les tables métiers correspondant à
-		 * la famille chargée
-		 */
-		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append(
-				"SELECT lower(id_famille), lower(table_schema||'.'||table_name) nom_table_metier, lower(column_name) nom_variable_metier");
-
-		// les types dans postgres sont horribles :(
-		// udt_name : float8 = float, int8=bigint, int4=int
-		// data_type : double precision = float, integer=int
-		requete.append(
-				", case when lower(data_type)='array' then replace(replace(replace(ltrim(udt_name,'_'),'int4','int'),'int8','bigint'),'float8','float')||'[]' ");
-		requete.append(
-				" else replace(replace(lower(data_type),'double precision','float'),'integer','int') end type_variable_metier ");
-		requete.append("\n FROM information_schema.columns, " + ViewEnum.IHM_FAMILLE.getFullName());
-		requete.append("\n WHERE table_schema='" + envExecution + "' ");
-		requete.append("\n and table_name LIKE 'mapping\\_%' ");
-		requete.append("\n and table_name LIKE 'mapping\\_'||lower(id_famille)||'\\_%' ");
-		requete.append("\n ;");
-
-		List<List<String>> relationalView = UtilitaireDao.get(0)
-				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete);
-
-		HierarchicalView familleToTableToVariableToType = HierarchicalView.asRelationalToHierarchical(
-				"(Phy) Famille -> Table -> Variable -> Type",
-				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
-				relationalView);
-		StringBuilder requeteMAJSchema = new StringBuilder();
-
+	/**
+	 * add or update the columns of business model table according to what user have declared in ihm_mod_variable_metier
+	 * @param requeteMAJSchema
+	 * @param familleToTableToVariableToTypeRef
+	 * @param familleToTableToVariableToType
+	 */
+	@SqlInjectionChecked
+	private static void addAndUpdateColumnsOfModelTable(ArcPreparedStatementBuilder requeteMAJSchema,
+			HierarchicalView familleToTableToVariableToTypeRef, HierarchicalView familleToTableToVariableToType) {
 		/*
 		 * AJOUT/MODIFICATION DES COLONNES DE REFERENCE
 		 */
@@ -281,40 +301,76 @@ public class SynchronizeRulesAndMetadataDao {
 
 			}
 		}
-		/*
-		 * SUPPRESSION DES COLONNES QUI NE SONT PAS CENSEES EXISTER
-		 */
-		for (HierarchicalView famille : familleToTableToVariableToType.children()) {
-			/**
-			 * Pour chaque table physique
-			 */
-			for (HierarchicalView table : familleToTableToVariableToType.get(famille).children()) {
-				/**
-				 * Est-ce que la table devrait exister ?
-				 */
-				if (!familleToTableToVariableToTypeRef.hasPath(famille, table)) {
-					requeteMAJSchema.append("DROP TABLE IF EXISTS " + table.getLocalRoot() + ";\n");
-				} else {
-					/**
-					 * Pour chaque variable de cette table
-					 */
-					for (HierarchicalView variable : table.children()) {
-						/**
-						 * Est-ce que la variable devrait exister ?
-						 */
-						if (!familleToTableToVariableToTypeRef.hasPath(famille, table, variable)) {
-							requeteMAJSchema.append("ALTER TABLE " + table.getLocalRoot() + " DROP COLUMN "
-									+ variable.getLocalRoot() + ";\n");
-						}
-					}
-				}
-			}
-		}
-
-		UtilitaireDao.get(0).executeBlock(coordinatorOrExecutorConnexion, requeteMAJSchema);
 	}
 
-	
+	/**
+	 * Retrieve the real columns, names of business model table found in database
+	 * @param coordinatorOrExecutorConnexion
+	 * @param envExecution
+	 * @return
+	 * @throws ArcException
+	 */
+	@SqlInjectionChecked
+	private static HierarchicalView retrieveEffectiveVariableMetier(Connection coordinatorOrExecutorConnexion,
+			String envExecution) throws ArcException {
+		/*
+		 * Récupérer dans le méta-modèle de la base les tables métiers correspondant à
+		 * la famille chargée
+		 */
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append(
+				"SELECT lower(id_famille), lower(table_schema||'.'||table_name) nom_table_metier, lower(column_name) nom_variable_metier");
+
+		// les types dans postgres sont horribles :(
+		// udt_name : float8 = float, int8=bigint, int4=int
+		// data_type : double precision = float, integer=int
+		requete.append(
+				", case when lower(data_type)='array' then replace(replace(replace(ltrim(udt_name,'_'),'int4','int'),'int8','bigint'),'float8','float')||'[]' ");
+		requete.append(
+				" else replace(replace(lower(data_type),'double precision','float'),'integer','int') end type_variable_metier ");
+		requete.append("\n FROM information_schema.columns, " + ViewEnum.IHM_FAMILLE.getFullName());
+		requete.append("\n WHERE table_schema=").appendText(envExecution);
+		requete.append("\n and table_name LIKE 'mapping\\_%' ");
+		requete.append("\n and table_name LIKE 'mapping\\_'||lower(id_famille)||'\\_%' ");
+		requete.append("\n ;");
+
+		List<List<String>> relationalView = UtilitaireDao.get(0)
+				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete);
+
+		
+		return HierarchicalView.asRelationalToHierarchical(
+				"(Phy) Famille -> Table -> Variable -> Type",
+				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
+				relationalView);
+	}
+
+	/**
+	 * Retrieve the business model table schema (famille, nom_de_table, variable, ...) declared by user
+	 * @param coordinatorOrExecutorConnexion
+	 * @param envExecution
+	 * @return
+	 * @throws ArcException
+	 */
+	@SqlInjectionChecked
+	private static HierarchicalView retrieveDeclaredVariableMetier(Connection coordinatorOrExecutorConnexion, String envExecution) throws ArcException {
+		/*
+		 * Récupérer la table qui mappe : famille / table métier / variable métier et
+		 * type de la variable
+		 */
+		ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
+		requeteRef.append("SELECT lower(id_famille), lower(").appendText(envExecution)
+		.append("||'.'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
+				+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
+
+		List<List<String>> relationalViewRef = UtilitaireDao.get(0)
+				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef);
+
+		return HierarchicalView.asRelationalToHierarchical(
+				"(Réf) Famille -> Table -> Variable -> Type",
+				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
+				relationalViewRef);
+	}
+
 	/**
 	 * Query to return data from target table
 	 * if emptyTable is true, only metadata will be return without data
@@ -324,6 +380,7 @@ public class SynchronizeRulesAndMetadataDao {
 	 * @return
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked(requiredAsSafe = "table")
 	private static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table, boolean emptyTable)
 			throws ArcException {
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion,

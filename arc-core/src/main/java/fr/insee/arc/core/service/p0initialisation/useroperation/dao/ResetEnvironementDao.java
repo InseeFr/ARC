@@ -10,6 +10,7 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 public class ResetEnvironementDao {
 
@@ -22,9 +23,10 @@ public class ResetEnvironementDao {
 
 	public void executeQueryResetPilotage() throws ArcException {
 		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(),
-				"truncate " + ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()) + ";");
+				FormatSQL.truncate(ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema())));
+
 		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(),
-				"truncate " + ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema()) + ";");
+				FormatSQL.truncate(ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema())));
 	}
 
 	/**
@@ -33,8 +35,8 @@ public class ResetEnvironementDao {
 	 * @throws ArcException
 	 */
 	public void executeQueryResetAllPreviousPhaseMark() throws ArcException {
-		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), new ArcPreparedStatementBuilder(PilotageOperations
-				.queryResetPreviousPhaseMark(ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), null, null)));
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), PilotageOperations
+				.queryResetPreviousPhaseMark(ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), null, null));
 	}
 
 	/**

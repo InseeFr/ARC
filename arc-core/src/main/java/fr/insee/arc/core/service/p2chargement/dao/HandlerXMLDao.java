@@ -365,7 +365,7 @@ public class HandlerXMLDao {
 		req.append(reqSelect);
 		req.append(reqFrom);
 
-		return FormatSQL.quoteTextWithoutEnclosings(req.toString());
+		return req.toString();
 
 	}
 

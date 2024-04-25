@@ -8,6 +8,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
@@ -227,10 +228,10 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 		return this.nomTableTemporaire;
 	}
 
-	public String requeteCreation() {
-		StringBuilder returned = new StringBuilder(FormatSQL.dropTable(this.getNomTableTemporaire()));
-		returned.append("CREATE " + (this.getNomTableTemporaire().contains(".") ? "UNLOGGED" : "TEMPORARY") + " TABLE "
-				+ this.getNomTableTemporaire() + " (");
+	public ArcPreparedStatementBuilder requeteCreation() {
+		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder();
+		returned.append(FormatSQL.dropTable(this.getNomTableTemporaire()));
+		returned.append("CREATE TEMPORARY TABLE "+ this.getNomTableTemporaire() + " (");
 		boolean isFirst = true;
 		for (VariableMapping variable : this.getEnsembleVariableMapping()) {
 			if (isFirst) {
@@ -241,7 +242,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 			returned.append(variable.getNomVariable() + " " + variable.getType());
 		}
 		returned.append(") " + FormatSQL.WITH_NO_VACUUM + ";");
-		return returned.toString();
+		return returned;
 	}
 
 	/**

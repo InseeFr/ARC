@@ -101,7 +101,7 @@ public class XMLComplexeHandlerCharger extends org.xml.sax.helpers.DefaultHandle
 	 */
 	@Override
 	public void characters(char[] caracteres, int debut, int longueur) {
-		String donnees = new String(caracteres, debut, longueur).replace("'", "''");
+		String donnees = new String(caracteres, debut, longueur);
 
 		// on concatène les données lues dans currentData
 		// currentData est effacée quand on trouve un nouvel élement

@@ -22,8 +22,6 @@ public class FileSystemManagement {
 	 * Directory management
 	 */
 	private static final String DIRECTORY_DOWNLOAD_QUALIFIIER = "DOWNLOAD";
-	
-	private static final String DIRECTORY_EXPORT_QUALIFIIER = "EXPORT";
 
 	private static final String DIRECTORY_TOKEN = "_";
 

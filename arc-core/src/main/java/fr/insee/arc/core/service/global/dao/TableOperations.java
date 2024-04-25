@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.FormatSQL;
 
@@ -23,7 +24,7 @@ public class TableOperations {
 	 * @param tableToBeCreated
 	 * @return
 	 */
-	public static String creationTableResultat(String tableIn, String tableToBeCreated, Boolean... image) {
+	public static GenericPreparedStatementBuilder creationTableResultat(String tableIn, String tableToBeCreated, Boolean... image) {
 		
 		String where= (image.length == 0 || Boolean.FALSE.equals(image[0]))?"false":"true";
 
@@ -40,7 +41,7 @@ public class TableOperations {
 	 */
 	public static String createTableInherit(String tableIn, String tableIdSource) {
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** createTableOK ** : " + tableIdSource);
-		return FormatSQL.executeIf(FormatSQL.hasRecord(tableIn), creationTableResultat(tableIn, tableIdSource, true));
+		return FormatSQL.executeIf(FormatSQL.hasRecord(tableIn), creationTableResultat(tableIn, tableIdSource, true).toString());
 	}
 
 

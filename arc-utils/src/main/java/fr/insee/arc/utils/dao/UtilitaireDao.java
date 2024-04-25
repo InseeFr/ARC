@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -287,18 +286,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		executeImmediate(connexion, requete.toString(), modes);
 	}
 
-	public void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes)
+	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes)
 			throws ArcException {
-		executeImmediate(connexion, requete.getQueryWithParameters(), modes);
+		executeImmediate(connexion, new GenericPreparedStatementBuilder(requete), modes);
 	}
 
-	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes) throws ArcException {
-
-		long start = new Date().getTime();
+	public void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes) throws ArcException {
 
 		if (LOGGER.isEnabled(Level.TRACE)) {
-			LoggerHelper.trace(LOGGER, "/* executeImmediate on */");
-			LoggerHelper.trace(LOGGER, "\n" + requete.trim());
+			LoggerHelper.traceAsComment(LOGGER, "START executeImmediate");
+			LoggerHelper.trace(LOGGER, "\n" + requete.getQueryWithParameters());
 		}
 
 		ConnectionWrapper connexionWrapper = initConnection(connexion);
@@ -306,8 +303,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			connexionWrapper.getConnexion().setAutoCommit(true);
 			try (Statement st = connexionWrapper.getConnexion().createStatement();) {
 				try {
-					st.execute(ModeRequete.configureQuery(requete, modes));
-					LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
+					st.execute(ModeRequete.configureQuery(requete, modes).getQueryWithParameters().toString());
+					LoggerHelper.traceAsComment(LOGGER, "END executeImmediate");
 				} catch (SQLException e) {
 					try {
 						st.cancel();
@@ -419,11 +416,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	public <T> T executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,
 			EntityProvider<T> entityProvider, ModeRequete[] modes) throws ArcException {
 
-		long start = new Date().getTime();
 		if (LOGGER.isEnabled(Level.TRACE)) {
-			LoggerHelper.trace(LOGGER, "/* executeRequest on */");
-			LoggerHelper.trace(LOGGER, "\n" + ModeRequete.configureQuery(requete.getQueryWithParameters()));
-			LoggerHelper.trace(LOGGER, requete.getParameters());
+			LoggerHelper.trace(LOGGER, "/* Start executeRequest */");
+			LoggerHelper.trace(LOGGER, "\n" + ModeRequete.configureQuery(requete).getQueryWithParameters());
 		}
 
 		try {
@@ -431,14 +426,14 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			try {
 				connexionWrapper.getConnexion().setAutoCommit(false);
 				try (PreparedStatement stmt = connexionWrapper.getConnexion()
-						.prepareStatement(ModeRequete.configureQuery(requete.getQuery().toString(), modes));) {
+						.prepareStatement(ModeRequete.configureQuery(requete, modes).getQuery().toString());) {
 					for (int i = 0; i < requete.getParameters().size(); i++) {
 						registerBindVariable(stmt, requete, i);
 					}
 					try {
 						// the first result found will be output
 						boolean isresult = stmt.execute();
-						LoggerHelper.traceAsComment(LOGGER, "DUREE : ", (new Date().getTime() - start) + "ms");
+						LoggerHelper.traceAsComment(LOGGER, "End executeRequest");
 
 						if (!isresult) {
 							do {
@@ -614,14 +609,14 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	/**
 	 * exécute un bloque transactionnel
 	 */
-	public void executeBlock(Connection connexion, String... listeRequete) throws ArcException {
-		StringBuilder bloc = new StringBuilder("BEGIN;\n");
-		for (int i = 0; i < listeRequete.length; i++) {
-			bloc.append(listeRequete[i]).append(semicolon);
-		}
-		bloc.append("END;\n");
-		executeImmediate(connexion, bloc.toString());
-	}
+//	public void executeBlock(Connection connexion, String... listeRequete) throws ArcException {
+//		StringBuilder bloc = new StringBuilder("BEGIN;\n");
+//		for (int i = 0; i < listeRequete.length; i++) {
+//			bloc.append(listeRequete[i]).append(semicolon);
+//		}
+//		bloc.append("END;\n");
+//		executeImmediate(connexion, bloc.toString());
+//	}
 
 	public void executeBlock(Connection connexion, GenericPreparedStatementBuilder... listeRequete)
 			throws ArcException {
@@ -639,9 +634,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param requete
 	 * @throws ArcException
 	 */
-	public void executeBlock(Connection connexion, StringBuilder requete) throws ArcException {
-		executeBlock(connexion, requete.toString());
-	}
+//	public void executeBlock(Connection connexion, StringBuilder requete) throws ArcException {
+//		executeBlock(connexion, requete.toString());
+//	}
 
 	/**
 	 *
@@ -649,11 +644,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param requete
 	 * @throws ArcException
 	 */
-	public void executeBlock(Connection connexion, String requete) throws ArcException {
-		if (!requete.trim().isEmpty()) {
-			executeImmediate(connexion, "BEGIN;" + requete + "COMMIT;");
-		}
-	}
+//	public void executeBlock(Connection connexion, String requete) throws ArcException {
+//		if (!requete.trim().isEmpty()) {
+//			executeImmediate(connexion, "BEGIN;" + requete + "COMMIT;");
+//		}
+//	}
 
 	public List<String> getList(Connection connexion, StringBuilder requete, List<String> returned) {
 		return getList(connexion, requete.toString(), returned);

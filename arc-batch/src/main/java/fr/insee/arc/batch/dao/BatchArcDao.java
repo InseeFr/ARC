@@ -12,6 +12,7 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class BatchArcDao {
@@ -75,9 +76,10 @@ public class BatchArcDao {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
+	@SqlInjectionChecked
 	public static void execQueryResetPendingFilesInPilotageTable(String envExecution) throws ArcException {
 		// delete files that are en cours
-		StringBuilder query = new StringBuilder();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("\n DELETE FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
 		query.append("\n WHERE etape=1 AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
 		query.append(";");
@@ -87,7 +89,6 @@ public class BatchArcDao {
 		query.append("\n set etape=1 ");
 		query.append("\n WHERE etape=3");
 		query.append(";");
-
 		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeBlock(null, query);
 
 	}

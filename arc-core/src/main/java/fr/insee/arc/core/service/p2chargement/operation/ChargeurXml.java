@@ -103,7 +103,7 @@ public class ChargeurXml implements IChargeur {
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			ArcException businessException = new ArcException(e, ArcExceptionMessage.XML_SAX_PARSING_FAILED,
 					fileIdCard.getIdSource()).logMessageException();
-			rapport = FormatSQL.quoteTextWithoutEnclosings(businessException.getMessage());
+			rapport = businessException.getMessage();
 			throw businessException;
 		}
 

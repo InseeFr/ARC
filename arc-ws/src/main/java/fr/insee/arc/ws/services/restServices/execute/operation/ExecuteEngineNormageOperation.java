@@ -50,7 +50,7 @@ public class ExecuteEngineNormageOperation {
 		
 		PhaseInterface returnInterface = new PhaseInterface();
 		returnInterface.setInputTable(phaseInterface.getOutputTable());
-		returnInterface.setStructure(FormatSQL.unquoteTextWithoutEnclosings(phaseInterface.getStructure()));
+		returnInterface.setStructure(phaseInterface.getStructure());
 		return returnInterface;
 		
 	}

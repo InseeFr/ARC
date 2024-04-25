@@ -2,15 +2,17 @@ package fr.insee.arc.core.service.global.bo;
 
 import java.util.Date;
 
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.dao.DateConversion;
 import fr.insee.arc.core.service.p2chargement.bo.IdCardChargement;
 import fr.insee.arc.core.service.p3normage.bo.IdCardNormage;
 import fr.insee.arc.core.service.p4controle.bo.IdCardControle;
 import fr.insee.arc.core.service.p5mapping.bo.IdCardMapping;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 
 public class FileIdCard {
 
-	private final String integrationDate = DateConversion.queryDateConversion(new Date());
+	private final GenericPreparedStatementBuilder integrationDate = DateConversion.queryDateConversion(new Date());
 
 	private String idSource;
 	private String idNorme;
@@ -97,7 +99,7 @@ public class FileIdCard {
 	}
 
 
-	public String getIntegrationDate() {
+	public GenericPreparedStatementBuilder getIntegrationDate() {
 		return integrationDate;
 	}
 

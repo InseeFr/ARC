@@ -2,6 +2,11 @@ package fr.insee.arc.core.service.kubernetes.configuration;
 
 public class ExecutorDatabaseServiceTemplate {
 
+	private ExecutorDatabaseServiceTemplate() {
+		throw new IllegalStateException("Service Template for kubernetes database executors");
+	}
+
+	
 	protected static String configuration =
 """
 {

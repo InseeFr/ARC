@@ -60,6 +60,12 @@ public class GenericPreparedStatementBuilder {
 		return this;
 	}
 
+	
+	/**
+	 * append a bind variable "  ?  " to query and register parameter as String/text type
+	 * @param s
+	 * @return
+	 */
 	public GenericPreparedStatementBuilder appendText(String s) {
 		query.append(this.quoteText(s));
 		return this;
@@ -413,8 +419,8 @@ public class GenericPreparedStatementBuilder {
 			} else {
 				query.append(",");
 			}
-			// cannot use bind variables here : potentially too many bounded values
-			query.append(quoteTextWithoutBinding(cell));
+
+			this.appendText(cell);
 			if (!types.get(j).equals(TypeEnum.TEXT.getTypeName()))
 			{
 				query.append(SQL.CAST_OPERATOR);
