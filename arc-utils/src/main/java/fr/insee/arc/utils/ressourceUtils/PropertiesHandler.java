@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import org.bouncycastle.util.Arrays;
 import org.springframework.stereotype.Service;
@@ -478,6 +476,18 @@ public class PropertiesHandler {
 	public List<ConnectionAttribute> connectionProperties() {
 		
 		if (this.connectionProperties != null) {
+			
+			System.out.println("§§§§§ 2");
+
+			for (int i=0;i<this.connectionProperties.size();i++)
+			{
+				System.out.println(connectionProperties.get(i).getDatabase());
+				System.out.println(connectionProperties.get(i).getDatabaseDriverClassName());
+				System.out.println(connectionProperties.get(i).getDatabasePassword());
+				System.out.println(connectionProperties.get(i).getDatabaseUrl());
+				System.out.println(connectionProperties.get(i).getDatabaseUsername());
+			}
+			
 			return this.connectionProperties;
 		}
 		
@@ -537,7 +547,7 @@ public class PropertiesHandler {
 			}
 		}
 		
-		System.out.println("§§§§§");
+		System.out.println("§§§§§ 1");
 
 		for (int i=0;i<this.connectionProperties.size();i++)
 		{
