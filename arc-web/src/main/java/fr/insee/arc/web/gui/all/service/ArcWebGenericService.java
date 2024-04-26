@@ -168,11 +168,6 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 				this.bacASable = keys.get(0);
 			}
 		}
-		
-		System.out.println("§§§§§§§§§§§");
-		System.out.println(this.envMap);
-		System.out.println(this.bacASable);
-		System.out.println(bacASable);
 
 		// updating current sandbox from request
 		if (bacASable != null && !bacASable.equals(this.bacASable)) {

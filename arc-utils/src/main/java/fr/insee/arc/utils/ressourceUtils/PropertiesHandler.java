@@ -476,18 +476,6 @@ public class PropertiesHandler {
 	public List<ConnectionAttribute> connectionProperties() {
 		
 		if (this.connectionProperties != null) {
-			
-			System.out.println("§§§§§ 2");
-
-			for (int i=0;i<this.connectionProperties.size();i++)
-			{
-				System.out.println(connectionProperties.get(i).getDatabase());
-				System.out.println(connectionProperties.get(i).getDatabaseDriverClassName());
-				System.out.println(connectionProperties.get(i).getDatabasePassword());
-				System.out.println(connectionProperties.get(i).getDatabaseUrl());
-				System.out.println(connectionProperties.get(i).getDatabaseUsername());
-			}
-			
 			return this.connectionProperties;
 		}
 		
@@ -546,19 +534,6 @@ public class PropertiesHandler {
 						));					
 			}
 		}
-		
-		System.out.println("§§§§§ 1");
-
-		for (int i=0;i<this.connectionProperties.size();i++)
-		{
-			System.out.println(connectionProperties.get(i).getDatabase());
-			System.out.println(connectionProperties.get(i).getDatabaseDriverClassName());
-			System.out.println(connectionProperties.get(i).getDatabasePassword());
-			System.out.println(connectionProperties.get(i).getDatabaseUrl());
-			System.out.println(connectionProperties.get(i).getDatabaseUsername());
-		}
-		
-		
 		return this.connectionProperties;
 
 	}
