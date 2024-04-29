@@ -35,17 +35,14 @@ public class InputSecurityTest {
 		assertEquals("var_table_metier$10",InputSecurity.formatAsDatabaseIdentifier("var_table_metier$10"));
 		assertEquals("var_tableMETIER",InputSecurity.formatAsDatabaseIdentifier("var_table METIER"));
 
-		// remove trailing $ and _
-		assertEquals("var_table_metier",InputSecurity.formatAsDatabaseIdentifier("__var_table_metier$$"));
-		assertEquals("var_table_metier",InputSecurity.formatAsDatabaseIdentifier("$var_table_metier_$"));
-		assertEquals("var_table_metier",InputSecurity.formatAsDatabaseIdentifier("$_$var_table_metier$__;"));
+		assertEquals("var_tablemetier",InputSecurity.formatAsDatabaseIdentifier("000var_table metier"));
 
 		List<String> guiInputsNull=null;
 		assertNull(InputSecurity.formatAsDatabaseIdentifier(guiInputsNull));
 		
 		List<String> guiInputs = Arrays.asList("__var_table_metier$$", "drop database toto;");
 		List<String> guiInputsReformat = InputSecurity.formatAsDatabaseIdentifier(guiInputs);
-		assertEquals("var_table_metier", guiInputsReformat.get(0));
+		assertEquals("var_table_metier$$", guiInputsReformat.get(0));
 		assertEquals("dropdatabasetoto", guiInputsReformat.get(1));
 				
 	}

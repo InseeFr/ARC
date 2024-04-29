@@ -3,11 +3,15 @@ package fr.insee.arc.web.gui.nomenclature.dao;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.opencsv.CSVReader;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -111,13 +115,13 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		}
 		return typeNomenclature.toString();
 	}
-	
+
 	/**
 	 * renames the nomenclature table when it is updated in vObject
 	 * 
 	 * @param nameBefore
 	 * @param nameAfter
-	 * @throws ArcException 
+	 * @throws ArcException
 	 */
 	public void updateNomenclatureDansBase(String nameBefore, String nameAfter) throws ArcException {
 		String fullNameBefore = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), nameBefore);
@@ -130,66 +134,65 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	public void importNomenclatureDansBase(VObject viewListNomenclatures, MultipartFile fileUpload)
 			throws ArcException {
 
-		try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()))) {
+		try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()));
+				CSVReader readerCSV = new CSVReader(rd, Delimiters.DEFAULT_CSV_DELIMITER.charAt(0));) {
 
 			// Colonnes et types pour le schéma de la table temporaire
-			String[] colonnes = rd.readLine().split(";");
-			String[] types = rd.readLine().split(";");
+	        String[] colonnes = readerCSV.readNext();
+	        String[] types = readerCSV.readNext();
+			String nomenclatureTableName = viewListNomenclatures.mapContentSelected()
+					.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
 
-			// Création de la table temporaire
-			creationTableDeNomenclatureTemporaire(viewListNomenclatures, colonnes, types);
-
-			// Remplissage de la table
-			remplissageTableTemporaire(viewListNomenclatures, rd);
-
-			// Création de la table définitive
-			creationTableDefinitif(viewListNomenclatures);
+	        createNomenclatureTable(nomenclatureTableName, colonnes, types, rd);
+			
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.IHM_NMCL_IMPORT_FAILED);
 		}
 
 	}
 
-	private void creationTableDeNomenclatureTemporaire(VObject viewListNomenclatures, String[] colonnes, String[] types)
-			throws ArcException {
-		String newNomenclatureName = viewListNomenclatures.mapContentSelected()
-				.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
-		ArcPreparedStatementBuilder createTableRequest = new ArcPreparedStatementBuilder();
-		createTableRequest.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, "arc.temp_", newNomenclatureName, ";");
-		createTableRequest.build(SQL.CREATE, SQL.TABLE, "arc.temp_", newNomenclatureName, " (");
-		for (int i = 0; i < colonnes.length; i++) {
-			if (i > 0) {
-				createTableRequest.append(", ");
-			}
-			createTableRequest.append(colonnes[i] + " " + types[i]);
+	/**
+	 * Create a nomenclature table
+	 * @param nomenclatureTableName
+	 * @param colonnes
+	 * @param types
+	 * @param rd
+	 * @throws ArcException
+	 */
+	private void createNomenclatureTable(String nomenclatureTableName, String[] colonnes, String[] types, BufferedReader rd) throws ArcException {
+		try (Connection c= UtilitaireDao.get(0).getDriverConnexion();)
+		{
+			
+			// Création de la table de nomenclature
+			creationTableDeNomenclature(c, nomenclatureTableName, colonnes, types);
+
+			// Remplissage de la table
+			remplissageTable(c, nomenclatureTableName, rd);
+
+			
+		} catch (SQLException e) {
+			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 		}
-		createTableRequest.append(");");
-
-		UtilitaireDao.get(0).executeImmediate(null, createTableRequest);
+		
 	}
 
-	private void creationTableDefinitif(VObject viewListNomenclatures) throws ArcException {
-		String newNomenclatureName = viewListNomenclatures.mapContentSelected()
-				.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
-		ArcPreparedStatementBuilder creationTableDef = new ArcPreparedStatementBuilder();
-
-		String temporaryNewNomenclatureName = "temp_" + newNomenclatureName;
-
-		creationTableDef.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS,
-				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), newNomenclatureName), ";");
-		creationTableDef.build(SQL.CREATE, SQL.TABLE,
-				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), newNomenclatureName));
-		creationTableDef.build(SQL.AS, SQL.SELECT, "*", SQL.FROM,
-				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), temporaryNewNomenclatureName), ";");
-		creationTableDef.build(SQL.DROP, SQL.TABLE,
-				ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), temporaryNewNomenclatureName), ";");
-		UtilitaireDao.get(0).executeBlock(null, creationTableDef);
+	private void creationTableDeNomenclature(Connection connection, String nomenclatureTableName, String[] colonnes, String[] types) throws ArcException {
+		
+		ArcPreparedStatementBuilder createTableRequest = new ArcPreparedStatementBuilder();
+		createTableRequest.append("CALL safe_create_table(")
+		.appendText(ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), nomenclatureTableName))
+		.append(",")
+		.appendText(FormatSQL.javaArrayToSqlArray(colonnes))
+		.append("::text[],")
+		.appendText(FormatSQL.javaArrayToSqlArray(types))
+		.append("::text[]")
+		.append(");");
+		
+		UtilitaireDao.get(0).executeRequest(connection, createTableRequest);
 	}
 
-	private void remplissageTableTemporaire(VObject viewListNomenclatures, BufferedReader rd) throws ArcException {
-		String newNomenclatureName = viewListNomenclatures.mapContentSelected()
-				.get(ColumnEnum.NOM_TABLE.getColumnName()).get(0);
-		UtilitaireDao.get(0).importingWithReader(null, "arc.temp_" + newNomenclatureName, rd, false, ";");
+	private void remplissageTable(Connection connection, String nomenclatureTableName, BufferedReader rd) throws ArcException {
+		UtilitaireDao.get(0).importingWithReader(connection, ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), nomenclatureTableName), rd, false, ";");
 	}
 
 	public VObjectService getvObjectService() {
@@ -212,13 +215,13 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		// Suppression de la table nom table
 		String nomTable = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(),
 				viewListNomenclatures.mapContentSelected().get(ColumnEnum.NOM_TABLE.getColumnName()).get(0));
-		
+
 		UtilitaireDao.get(0).executeImmediate(null, FormatSQL.dropTable(nomTable));
 
-        			
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.build(SQL.SELECT, ColumnEnum.NOM_TABLE.getColumnName(), SQL.FROM, ViewEnum.IHM_NMCL.getFullName());
-		requete.build(SQL.WHERE, ColumnEnum.NOM_TABLE.getColumnName(), SQL.LIKE, requete.quoteText(typeNomenclature(nomTable)+"%"));
+		requete.build(SQL.WHERE, ColumnEnum.NOM_TABLE.getColumnName(), SQL.LIKE,
+				requete.quoteText(typeNomenclature(nomTable) + "%"));
 		requete.build(SQL.AND, ColumnEnum.NOM_TABLE.getColumnName(), "<>", requete.quoteText(nomTable));
 
 	}
@@ -262,6 +265,4 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		return true;
 	}
 
-
-	
 }

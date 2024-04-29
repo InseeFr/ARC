@@ -1,6 +1,7 @@
 package fr.insee.arc.utils.utils;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
@@ -348,6 +349,16 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 
 	public static GenericPreparedStatementBuilder truncate(String fullName) {
 		return new GenericPreparedStatementBuilder("truncate " + fullName + ";");
+	}
+
+	/**
+	 * convert a java array to a sql array
+	 * @param colonnes
+	 * @return
+	 */
+	public static String javaArrayToSqlArray(String[] colonnes) {
+		return Arrays.asList(colonnes).toString().replaceFirst("^\\[", "{").replaceFirst("\\]$", "}");
+		
 	}
 
 }

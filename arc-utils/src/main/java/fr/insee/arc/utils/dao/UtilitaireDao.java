@@ -139,15 +139,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				c = DriverManager.getConnection(uri, props);
 
 			} catch (Exception e) {
-				
-				
-				System.out.println("§§§§§§§§§§§§§§§ 1");
-
-				System.out.println(uri);
-				System.out.println(user);
-				System.out.println(password);
-				System.out.println(driver);
-				
 				throw new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
 			}
 			return c;

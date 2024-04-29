@@ -21,10 +21,7 @@ public class InputSecurity {
 			return null;
 		}
 		
-		return guiInput.replaceAll("[^\\w$]", "") // remove all but world and $ symbol. worlds are 0-9a-zA-Z and _
-				.replaceFirst("^[_$]*", "") // remove begin trailings $ and _
-				.replaceFirst("[_$]*$", "") // remove end trailings $ and _
-				.replaceFirst("[_$]*$", "") // remove end trailings $ and _
+		return guiInput.replaceFirst("^[^a-zA-Z]+", "").replaceAll("[^[a-z][A-Z][0-9]_$]", "") // remove all but world and $ symbol. worlds are 0-9a-zA-Z and _
 		;
 	}
 	

@@ -199,5 +199,10 @@ public class FormatSQLTest extends InitializeQueryTest {
 		assertEquals("zzz", FormatSQL.extractTableNameToken("zzz"));	
 	 }
 	
+	@Test
+	public void javaArrayToSqlArrayTest()
+	{
+		assertEquals("{a, b}", FormatSQL.javaArrayToSqlArray(new String[] {"a","b"}));
+	}
 	
 }

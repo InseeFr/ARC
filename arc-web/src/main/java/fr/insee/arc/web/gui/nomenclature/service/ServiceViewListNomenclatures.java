@@ -167,11 +167,6 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
             return false;
         }
 
-        if (nomTable.split(Delimiters.SQL_TOKEN_DELIMITER).length < 3) {
-            this.views.getViewListNomenclatures().setMessage("nmclManagement.validateName.error.format");
-            return false;
-        }
-
         // primary key sur la table arc.ihm_nmcl donc pas besoin de tester que le nom existe déjà
 
         return true;

@@ -276,7 +276,7 @@ $BODY$
   LANGUAGE sql IMMUTABLE STRICT
   COST 100;
 
--- functions to check sql injection
+-- procedure to create a table as select safely
 CREATE OR REPLACE PROCEDURE public.safe_select(query text)
 AS
 $BODY$
@@ -287,6 +287,64 @@ END;
 $BODY$
 LANGUAGE plpgsql;
 
+
+-- procedure to safely create a table given its column name and types
+CREATE OR REPLACE PROCEDURE public.safe_create_table(tablename text, cols text[], types text[])
+AS
+$BODY$
+DECLARE query text;
+declare schemaname text;
+begin
+if (array_length(cols,1)!=array_length(types,1)) then
+	RAISE EXCEPTION 'not the same number of column attributes and type atributes'; 
+end if;
+
+if (strpos(tablename,'.')>0) then
+	schemaname:=split_part(tablename,'.',1);
+	tablename:=split_part(tablename,'.',2);
+end if;
+
+raise notice '%',schemaname;
+
+
+if (length(schemaname)>0) then
+	query:= 'DROP TABLE IF EXISTS '||public.formatAsDatabaseIdentifier(schemaname)||'.'||public.formatAsDatabaseIdentifier(tablename)||';';
+	query:=query||'CREATE TABLE '||public.formatAsDatabaseIdentifier(schemaname)||'.'||public.formatAsDatabaseIdentifier(tablename)||' (';
+else
+	query:= 'DROP TABLE IF EXISTS '||public.formatAsDatabaseIdentifier(tablename)||';'; 
+	query:=query||'CREATE TEMPORARY TABLE '||public.formatAsDatabaseIdentifier(tablename)||' (';
+end if;
+
+FOR i in 1..array_length(cols,1) loop
+if (i>1) then 
+query:=query||',';
+end if;
+query:=query||public.formatAsDatabaseIdentifier(cols[i])||' '||public.formatAsDatabaseIdentifier(types[i]);
+
+end loop;
+
+query:=query||');';
+
+raise notice '%',query;
+
+EXECUTE query;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
+
+-- strong white list function for identifier (tablename, column name, types)
+CREATE OR REPLACE FUNCTION public.formatAsDatabaseIdentifier(unsafeIdentifier text) RETURNS text
+as
+$BODY$
+BEGIN
+return regexp_replace(regexp_replace(lower(unsafeIdentifier), '^[^a-z]+','', 'g'),'[^\w]+','','g');
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
+-- white liste to check if sql injection in query
+-- comments are forbidden in arc queries
 CREATE OR REPLACE FUNCTION public.check_no_injection(query text) RETURNS boolean
 as
 $BODY$
