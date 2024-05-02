@@ -19,5 +19,6 @@ public class JsonFileParameter {
 	public static final String EXECUTOR_DATABASE = "{database}";
 	public static final String EXECUTOR_USER = "{user}";
 	public static final String EXECUTOR_PORT = "{port}";
+	public static final String IMAGE = "{image}";
 
 }

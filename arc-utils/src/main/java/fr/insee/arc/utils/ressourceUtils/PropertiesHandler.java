@@ -58,6 +58,8 @@ public class PropertiesHandler {
 	private String kubernetesApiNamespace;
 	private String kubernetesApiTokenValue;
 	private String kubernetesApiTokenPath;
+
+	private String kubernetesExecutorImage;
 	private int kubernetesExecutorNumber;
 	private String kubernetesExecutorLabel;
 	private String kubernetesExecutorUser;
@@ -331,7 +333,15 @@ public class PropertiesHandler {
 	public void setKubernetesApiNamespace(String kubernetesApiNamespace) {
 		this.kubernetesApiNamespace = kubernetesApiNamespace;
 	}
-	
+
+	public String getKubernetesExecutorImage() {
+		return kubernetesExecutorImage;
+	}
+
+	public void setKubernetesExecutorImage(String kubernetesExecutorImage) {
+		this.kubernetesExecutorImage = kubernetesExecutorImage;
+	}
+
 	public int getKubernetesExecutorNumber() {
 		return kubernetesExecutorNumber;
 	}
