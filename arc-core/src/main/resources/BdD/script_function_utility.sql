@@ -172,7 +172,6 @@ $BODY$
 DECLARE
 	res numeric := 0;
 BEGIN
-	--RAISE NOTICE 'Mon input : %', $1;
 	SELECT sum(t) INTO res FROM (SELECT unnest($1) AS t) foo;
 RETURN res;
 END;
@@ -287,7 +286,6 @@ END;
 $BODY$
 LANGUAGE plpgsql;
 
-
 -- procedure to safely create a table given its column name and types
 CREATE OR REPLACE PROCEDURE public.safe_create_table(tablename text, cols text[], types text[])
 AS
@@ -304,9 +302,6 @@ if (strpos(tablename,'.')>0) then
 	tablename:=split_part(tablename,'.',2);
 end if;
 
-raise notice '%',schemaname;
-
-
 if (length(schemaname)>0) then
 	query:= 'DROP TABLE IF EXISTS '||public.formatAsDatabaseIdentifier(schemaname)||'.'||public.formatAsDatabaseIdentifier(tablename)||';';
 	query:=query||'CREATE TABLE '||public.formatAsDatabaseIdentifier(schemaname)||'.'||public.formatAsDatabaseIdentifier(tablename)||' (';
@@ -320,12 +315,8 @@ if (i>1) then
 query:=query||',';
 end if;
 query:=query||public.formatAsDatabaseIdentifier(cols[i])||' '||public.formatAsDatabaseIdentifier(types[i]);
-
 end loop;
-
 query:=query||');';
-
-raise notice '%',query;
 
 EXECUTE query;
 END; 
