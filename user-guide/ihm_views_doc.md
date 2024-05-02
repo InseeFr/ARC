@@ -1,16 +1,18 @@
-Ce document détaille l'utilisation des différents tableaux (appelés *view*) de l'application IHM d'ARC. Les tableaux sont regroupés par écran.
+# Aide des vues de l'appication Web d'ARC
 
-# Accueil
+Ce document détaille l'utilisation des différents tableaux (appelés *view* ou vues) de l'application Web d'ARC. Les tableaux sont regroupés par écran.
 
-## `viewIndex`
+## Accueil
+
+### `viewIndex`
 
 ***"Utilisateurs des bacs à sable"*** : ce tableau est un aperçu de l'utilisation de tous les bacs à sable.
 
 L'encart en haut à droite de l'écran de pilotage permet de renseigner à quoi sert l'environnement. En pratique, on y renseignera soit son nom, soit la famille de norme que l'on teste, etc. Cela ne change rien au traitement et permet simplement de s'y retrouver. Le tableau de la page d'accueil reflète tous ces champs commentaire.
 
-# Gérer les familles
+## Gérer les familles
 
-## `viewFamilleNorme`
+### `viewFamilleNorme`
 
 ***"Liste des familles de normes"*** : ce tableau liste les familles de norme renseignées dans ARC.
 
@@ -20,17 +22,21 @@ Une famille de norme définit les tables, les liens entre tables et les variable
 
 Pour ajouter une nouvelle famille de norme, il faut soit la créer à la main, soit importer une famille précédemment téléchargée, soit charger un modèle DDI issu de Collectica. Par sécurité, une famille de norme ne peut pas être supprimée si elle a au moins une application cliente.
 
-## `viewClient`
+---
+
+### `viewClient`
 
 ***"Applications clientes"*** : ce tableau liste les applications clientes de la famille de norme sélectionnée.
 
-## `viewTableMetier`
+---
+
+### `viewTableMetier`
 
 ***"Tables métier"*** : ce tableau liste les tables qui composent la famille de norme sélectionnée.
 
 Ajouter une nouvelle table dans ce tableau met à jour le tableau des variables métier avec une nouvelle colonne correspondant à la table ajoutée.
 
-### Convention de nommage
+#### Convention de nommage
 
 Le nom des tables créées dans la famille de norme doivent suivre les règles suivantes :
 
@@ -45,7 +51,9 @@ Exemple : je souhaite créer une famille de norme INSEE avec une table établiss
 - ~~mapping_insee_établissement_ok~~
 - ~~mapping_insee etablissement_ok~~
 
-## `viewVariableMetier`
+---
+
+### `viewVariableMetier`
 
 ***"Variables métier"*** : ce tableau liste les variables qui composent la famille de norme sélectionnée.
 
@@ -62,7 +70,7 @@ Il y a une colonne par table dans la famille de norme. Pour indiquer qu'une vari
 | nom_etablissement |     | x             |       |
 | prenom_agent      |     |               | x     |
 
-### Variables techniques nécessaires à ARC
+#### Variables techniques nécessaires à ARC
 
 Pour qu'ARC puisse fonctionner, chacune des tables doit comporter a minima les 2 variables suivantes :
 
@@ -71,9 +79,9 @@ Pour qu'ARC puisse fonctionner, chacune des tables doit comporter a minima les 2
 
 Si le modèle est hiérarchique, ces 2 variables servent de clé de jointure entre la table père et table fille. Il faudra donc que la clé primaire de la table mère soit dans la table fille (par exemple, dans l'exemple précédent, id_etablissement est dans la table agent).
 
-# Gérer les normes
+## Gérer les normes
 
-## `viewNorme`
+### `viewNorme`
 
 ***"Liste des normes"*** : ce tableau liste les normes renseignées dans ARC.
 
@@ -86,22 +94,22 @@ Une norme dans ARC est définie par sa **famille de norme**, son **nom** et sa *
 
 Pour qu'une norme soit créée, il est nécessaire que l'ensemble de ces informations soient remplies, sinon ARC n'accepte pas la norme.
 
-### Famille de norme
+#### Famille de norme
 
 Dans la zone de saisie, la colonne Famille de norme propose un menu déroulant permettant de choisir parmi les familles de normes créées celle sur laquelle on souhaite faire une norme. Il suffit de sélectionner celle qui nous intéresse.
 
-### Norme
+#### Norme
 
 Il s'agit ici de donner un nom à la norme.
 Une norme est associée à une instance du fichier. Si le fichier évolue, il sera nécessaire de créer une nouvelle norme. Aussi, on nommera la norme avec un nom explicite, comme [nom de la famille]\_[millésime] mais, en pratique, ARC accepte n'importe quel nom.
 
 Attention, il est important de tout de même mettre quelque chose de distinctif, comme le nom de la famille, dans le nom de la norme. Le doublet norme et périodicité sert de clé primaire à cette table, et donc on ne peut pas donner le même nom et périodicité à plusieurs normes, même si elles sont rattachées à des familles différentes.
 
-### Périodicité
+#### Périodicité
 
 La zone de saisie propose ici un menu déroulant avec 2 choix : **MENSUEL** et **ANNUEL**. En pratique, cela ne modifie pas le comportement d'ARC, le paramètre est purement informatif. Il est toutefois préférable de renseigner si le fichier est reçu mensuellement ou annuellement.
 
-### Calcul de la norme
+#### Calcul de la norme
 
 Ici, il s'agit de donner à ARC les éléments lui permettant d'affecter la norme au fichier reçu. Cela passe par une requête SQL. ARC met en place une table temporaire à la réception d'un fichier qui se nomme **alias_table** et qui permet de créer la variable id_source, variable contenant le nom du fichier chargé. **alias_table** comporte 3 colonnes :
 
@@ -130,7 +138,7 @@ Le cas le plus simple et le plus courant est une condition sur le nom du fichier
 
 L'attribution de la norme s'effectue au début de la phase de chargement, c'est à ce moment-là que toutes les requêtes de calcul de la norme sont mobilisées.
 
-### Calcul de la validité
+#### Calcul de la validité
 
 ARC utilise un système de calendrier pour savoir si la norme est actuelle ou non. Cela permet à ARC d'utiliser ou non cette norme. Cela offre donc une historicisation des normes, le but étant de rejouer des fichiers passés.
 
@@ -138,13 +146,15 @@ Comme pour le calcul de la norme, on définira une requête SQL qui permet de r�
 
 Si le système de calendrier n'est pas utilisé, une date fixe suffit (`select 2023-01-01` par exemple).
 
-### État
+#### État
 
 L'état permet de dire à ARC s'il peut utiliser la norme ou non. C'est utile lorsque l'on veut faire des tests. On peut vouloir désactiver une norme pour en créer une seconde sans supprimer la première.
 
 La zone de saisie propose un menu déroulant avec donc 2 choix : **ACTIF** ou **INACTIF**.
 
-## `viewCalendrier`
+---
+
+### `viewCalendrier`
 
 ***"Calendrier des normes"*** : ce tableau liste les périodes de validité créées pour la norme sélectionnée.
 
@@ -156,7 +166,9 @@ Attention, pour un même fichier, si plusieurs normes existent, il est nécessai
 
 Noter que les dates renseignées sont au format DATE de PostgreSQL, à savoir AAAA-MM-JJ.
 
-## `viewJeuxDeRegles`
+---
+
+### `viewJeuxDeRegles`
 
 ***"Jeux de règle"*** : ce tableau liste les différentes versions du jeu de règle créées pour la norme et la période de validité sélectionnées.
 
@@ -164,7 +176,9 @@ Un jeu de règle est associé à une norme et une période de validité. Cet ens
 
 Une fois le jeu de règle défini, il est nécessaire d'indiquer sur quel bac à sable le charger pour qu'il puisse être appliqué. Il ne peut y avoir qu'une version du jeu de règle activée par bac à sable. Comme les normes et les périodes de validité, les versions peuvent être désactivées en sélectionnant l'état **INACTIF** à la place d'un bac à sable.
 
-## `viewChargement`
+---
+
+### `viewChargement`
 
 ***"Règles de chargement"*** : ce tableau liste les règles de chargement pour le jeu de règle sélectionné.
 
@@ -183,7 +197,7 @@ Pour définir une règle de chargement, différents champs sont disponibles :
 - **Règles de formatage** : on saisira ici l'ensemble des règles permettant la lecture des données. Cet élément sera détaillé ci-dessous.
 - **Commentaire** : on pourra saisir ici des éléments permettant de comprendre les règles de formatage par exemple.
 
-### Règles de formatage
+#### Règles de formatage
 
 Pour que ARC puisse lire et mettre en forme les données en entrée de processus, on lui indiquera un ensemble d'éléments qui lui est nécessaire. En fonction du fichier, on pourra :
 
@@ -215,11 +229,11 @@ v_choice_fiscal=row_number() over (partition by v_cle_entete,v_id_insee order by
 <where>v_choice_fiscal$new$=1
 ```
 
-### Description du processus de chargement
+#### Description du processus de chargement
 
 À l'étape de chargement, ARC structure l'information contenue dans les fichiers de façon hiérarchique, c'est à dire que pour chaque variable, il va définir d'une part sa position hiérarchique, et d'autre part sa valeur.
 
-#### Exemple
+##### Exemple
 
 Prenons un extrait d'un fichier exemple.
   
@@ -251,20 +265,22 @@ Que constate-t-on?
 - Les noeuds enfants récupèrent la valeur d'indice des objets parents afin de pouvoir les rattacher.
 - Lorsque qu'ARC récupère les noms de balise pour créer les variables, il les transforme en minuscule et remplace les accents par des \_. Cela a une importance lorsque l'on sera à l'étape du mapping.
 
-### Spécificités du chargement des fichiers délimités
+#### Spécificités du chargement des fichiers délimités
 
 - Il faut bien définir le délimiteur dans la colonne dédiée.
 - En cas de souci au chargement, définir l'encoding du fichier via les balises `<encoding> </encoding>`.
 - Si le fichier ne contient pas de nom de colonne sur la première ligne, les définir via la balise `<headers> </headers>`.
 
-### Spécificités du chargement des fichiers positionnels
+#### Spécificités du chargement des fichiers positionnels
 
 - La lecture du fichier se fait ligne à ligne. Le délimiteur pour ces fichiers est `E'\1'`, ce qui permet de récupérer la ligne dans une variable.
 - Dans la partie Règles de formatage, définir un header pour la variable constituée via les balises `<headers> </headers>`.
 - Définir aussi les quotes via `E'\2'` afin d'éviter la perte des apostrophes présentes dans le fichier.
 - Pour les fichiers positionnels complexes ou hiérarchiques, définir une variable qui permet de récupérer l'information 'hiérarchique' de la ligne
 
-## `viewNormage`
+---
+
+### `viewNormage`
 
 ***"Règles de structuration XML"*** : ce tableau liste les règles de normage XML pour le jeu de règle sélectionné.
 
@@ -278,7 +294,9 @@ En fonction du fichier XML traité, il peut y avoir des relations entre noeuds f
 - **Partition** : partitionner selon les valeurs d'une colonne pour limiter la taille des requêtes
 - **Indépendance** : spécifier l'indépendance de deux colonnes (ou blocs)
 
-## `viewControle`
+---
+
+### `viewControle`
 
 ***"Règles de contrôle"*** : ce tableau liste les règles de contrôle pour le jeu de règle sélectionné.
 
@@ -319,9 +337,9 @@ Une règle de contrôle peut soit **exclure** ou **conserver** les lignes qu'ell
 
 Cette requête SQL est jouée avant le contrôle, ce qui peut servir dans de nombreux scénarios, notamment de reformatage : changement de format de date, ajout de 0 devant un numéro de département, modification d'une énumération, etc.
 
-### Exemples d'utilisation des règles de contrôle
+#### Exemples d'utilisation des règles de contrôle
 
-#### Contrôle des formats de date
+##### Contrôle des formats de date
 
 Un problème très fréquent dans la gestion de différents fichiers de données est la conciliation de différents formats de date. Il est possible dans ARC de reformater des dates en un format commun en utilisant la règle de prétraitement d'une règle de contrôle :
 
@@ -344,7 +362,7 @@ end
 
 On utilise la fonction **arc.isdate** qui est une fonction de ARC permettant de reconnaître le format de date à modifier, pour ensuite réarranger les dates vers le format souhaité.
 
-#### Règles de filtrage
+##### Règles de filtrage
 
 Avant la version 93 de ARC, il existait une phase distincte de filtrage, qui permettait d'exclure des lignes ou des tables suivant un certain critère sur les données. Pour simplifier le pipeline, cette phase a été supprimée, mais il reste possible d'écrire des règles équivalentes à un filtrage en phase de contrôle :
 
@@ -354,7 +372,9 @@ Avant la version 93 de ARC, il existait une phase distincte de filtrage, qui per
 - Condition SQL : une condition SQL (donc uniquement ce qui viendrait après une clause WHERE) portant sur les lignes à **garder** dans vos données. Par exemple, pour un simple filtre sur la valeur d'une colonne : `{v_nom_etablissement}='DR Bretagne'`.
 - Laissez les autres champs vides.
 
-## `viewMapping`
+---
+
+### `viewMapping`
 
 ***"Règles de mapping"*** : ce tableau liste les règles de mapping pour le jeu de règle sélectionné.
 
@@ -362,7 +382,7 @@ La phase de mapping fait le lien entre les données en sortie du contrôle et le
 
 À la création de la norme, l'onglet mapping est vide. Pour initialiser le mapping, il est nécessaire de cliquer sur le bouton "Pré-générer les règles". Une fois cela fait, l'ensemble des variables définies dans la famille de norme rattachée à la norme apparaît. Il ne reste plus qu'à saisir dans la colonne "Expression SQL" les requêtes SQL qui permettront de récupérer l'information.
 
-### Mapping des fichiers XML
+#### Mapping des fichiers XML
 
 Pour les fichiers XML, ARC récupère le nom des balises pour nommer leur contenu dans une variable v_[nom de la balise]. Attention, les balises XML peuvent être associées à un namespace. Dans ce cas, ARC ne retient pas le namespace et il faudra donc ne pas le saisir.
 
@@ -383,11 +403,11 @@ On peut vouloir créer de nouvelles variables à partir des variables en entrée
 Dans ce cas, on pourra écrire l'expression SQL suivant pour "mapper" la variable sexe :
 `CASE {v_civilite} WHEN 'M' THEN '1' WHEN 'MME' THEN '2' END`
 
-### Spécificité du mapping des fichiers délimités
+#### Spécificité du mapping des fichiers délimités
 
 Pour les fichiers délimités, il faut gérer les formats de variable, notamment pour les dates, car les variables des fichiers CSV sont souvent non formatées.
 
-### Spécificité du mapping des fichiers positionnels
+#### Spécificité du mapping des fichiers positionnels
 
 Pour les fichiers positionnels, l'ensemble des variables est contenu dans une chaine de caractère. Il faut donc utiliser des fonctions SQL pour extraire les données.
 
@@ -397,7 +417,7 @@ Quelques fonctions utiles:
 - **nullif** : permet de mettre à null une valeur en fonction de la valeur d'une chaine
 - **to_date** : permet de formater une valeur en date
 
-#### Pour les fichiers positionnels complexes ou hiérarchiques
+##### Pour les fichiers positionnels complexes ou hiérarchiques
 
 En complément de l'information hiérarchique, il faut utiliser la fonction interne d'ARC **ArcProcessingTable** qui permet de pointer la table ARC utile, ceci afin d'éviter la création de lignes vides.
 
@@ -412,7 +432,9 @@ case
 end
 ```
 
-## `viewExpression`
+---
+
+### `viewExpression`
 
 ***"Expressions"*** : ce tableau liste les expressions définies pour le jeu de règle sélectionné.
 
@@ -420,81 +442,109 @@ Les expressions permettent de réutiliser dans le mapping des chaînes de caract
 
 Cette fonctionnalité n'est pas utilisée dans les différentes applications qui utilisent ARC.
 
-## `viewJeuxDeReglesCopie`
+---
+
+### `viewJeuxDeReglesCopie`
 
 ***"Jeu de règle à copier"*** : ce tableau liste tous les jeux de règles existants, avec leur norme, périodicité, validités, version et bac à sable.
 
 En cochant un jeu de règle puis en cliquant sur "Copier", ce jeu de règle vient remplacer le jeu de règle sélectionné au-dessus, uniquement pour la phase sélectionnée.
 
-# Gérer les nomenclatures
+## Gérer les nomenclatures
 
-## `viewListNomenclatures`
+### `viewListNomenclatures`
 
 ***"Liste des tables externes"*** : ce tableau liste les nomenclatures renseignées dans ARC.
 
-## `viewSchemaNmcl`
+---
+
+### `viewSchemaNmcl`
 
 ***"Schéma de la table externe"*** : ce tableau détaille les colonnes et leur types pour la nomenclature sélectionée.
 
-## `viewNomenclature`
+---
+
+### `viewNomenclature`
 
 ***"Contenu de la table externe"*** : ce tableau détaille les éléments de la nomenclature sélectionnée.
 
-# Gérer les webservices
+## Gérer les webservices
 
-## `viewWebserviceContext`
+### `viewWebserviceContext`
 
 ***"Définition des webservices"*** : ce tableau liste les webservices renseignés dans ARC.
 
-## `viewWebserviceQuery`
+---
+
+### `viewWebserviceQuery`
 
 ***"Requête des webservices"*** : ce tableau détaille les requêtes du webservice sélectionné et l'expression SQL permettant d'y répondre.
 
-# Piloter l'environnement
+## Gérer les entrepôts
 
-## `viewPilotageBAS`
+### `viewEntrepot`
+
+***"Liste des entrepôts"*** : ce tableau liste les entrepôts renseignés dans ARC.
+
+Dans le système de fichiers sur lequel il pointe, ARC crée un dossier par bac à sable utilisé. Dans chacun de ces dossiers, un ensemble de dossiers préfixés "RECEPTION_" est généré. Ce sont ces dossiers-là que ARC utilise pour la phase de réception.
+
+C'est ici que le choix d'entrepôt entre en jeu. Lorsque la phase de réception est lancée, ARC lit dans les dossiers RECEPTION_[ENTREPÔT] pour les fichiers à réceptionner. Les fichiers chargés sont alors préfixés du nom de leur entrepôt pour la suite du traitement. L'entrepôt par défaut s'appelle DEFAULT.
+
+À la réception, les fichiers sont copiés dans [ENTREPÔT]_ARCHIVE pour archivage, et déplacés dans ENCOURS le temps du traitement, puis OK ou KO selon l'état final.
+
+## Piloter l'environnement
+
+### `viewPilotageBAS`
 
 ***"État des fichiers dans le traitement"*** : ce tableau détaille le nombre de fichiers par phase de traitement pour chaque réception de fichiers dans ARC.
 
 Les cases correspondant au nombre de fichiers par phase sont cliquables et permettent d'ouvrir le détail des fichiers dans cette phase pour ce chargement.
 
-## `viewRapportBAS`
+---
+
+### `viewRapportBAS`
 
 ***"Rapport de traitement"*** : ce tableau détaille tous les rapports d'erreur des fichiers du bac à sable.
 
 Les rapports d'erreur sont sous forme d'exceptions Java, et concernent aussi bien les fichiers en échec après une phase (état KO) que les lignes en erreur d'une règle de contrôle.
 
-## `viewFichierBAS`
+---
+
+### `viewFichierBAS`
 
 ***"Détail des fichiers traités"*** : ce tableau détaille, pour un paquet de fichiers sélectionné, la liste de tous les fichiers ayant passé par la phase et l'état donné.
 
 Il est possible d'exécuter un module de traitement (ou son retour arrière) sur une sélection de fichiers uniquement, en les sélectionnant depuis ce tableau.
 
-## `viewArchiveBAS`
+---
+
+### `viewArchiveBAS`
 
 ***"Contenu du répertoire d'archive"*** : ce tableau montre les archives contenues dans le dépôt donné.
 
-# Exporter des données
+## Exporter des données
 
-## `viewExport`
+### `viewExport`
 
 ***"Définition des exports"*** : ce tableau liste les exports définis pour les tables du bac à sable sélectionné.
 
-## `viewFileExport`
+---
+
+### `viewFileExport`
 
 ***"Fichiers exportés"*** : ce tableau liste les exports effectués et prêts à être téléchargés pour le bac à sable sélectionné.
 
-# Paramétrer l'application
+## Paramétrer l'application
 
-## `viewParameters`
+### `viewParameters`
 
 ***"Paramétrage du fonctionnement de l'application"*** : ce tableau liste les différents paramètres de l'application.
 
-### Exemples de modifications de paramètres
+#### Exemples de modifications de paramètres
 
 Dans ce qui suit, pour toute modification de paramètre, n'oubliez pas de cliquer sur "Mettre à jour" en bas du tableau pour que le changement soit pris en compte.
 
-#### Ajouter des bacs à sable
+##### Ajouter des bacs à sable
 
 Le paramètre **ApiInitialisationService.nbSandboxes** détermine le nombre de bacs à sable disponibles. Il est possible d'en rajouter en modifiant ce nombre. Pour que ce changement prenne effet, la manipulation est la suivante :
 - Modifiez le paramètre **ApiInitialisationService.nbSandboxes** avec le nombre de votre choix
@@ -504,7 +554,7 @@ Le paramètre **ApiInitialisationService.nbSandboxes** détermine le nombre de b
 
 Les paramètres **git.commit&period;id** sont les identifiants de version des bases de données de ARC. Supprimer l'identifiant de la base de données globale force ARC à le retrouver et à au passage regénérer cette base de données, donc avec les nouveaux bacs à sable. La regénération est déclenchée en allant sur la page d'accueil.
 
-#### Convertir un environnement de test en prod (et inversement)
+##### Convertir un environnement de test en prod (et inversement)
 
 Le paramètre **ArcAction.productionEnvironments** détermine quels environnements sont à afficher avec une interface de production. Pour convertir le bac à sable X de test en prod, ajoutez "arc_basX" (entre guillemets) à la liste.
 
