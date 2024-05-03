@@ -10,6 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -103,16 +105,32 @@ public class WsSecurityDao {
 
 		// log the access
 		query = new ArcPreparedStatementBuilder();
-		query.append(
-				"DELETE FROM arc.ihm_webservice_log  where event_timestamp < current_timestamp - INTERVAL '1 YEAR';");
-		query.append("INSERT INTO arc.ihm_webservice_log (id_famille, id_application, host_allowed, event_timestamp) ");
-		query.append("SELECT " + query.quoteText(familyName) + ", " + query.quoteText(clientRealName) + ", "
-				+ query.quoteText(hostName) + ", current_timestamp;");
-
+		
+		// delete old logs
+		query.build(SQL.DELETE, ViewEnum.SECURITY_WEBSERVICE_LOG.getFullName(), SQL.WHERE, "event_timestamp < current_timestamp - INTERVAL '3 MONTHS'", SQL.END_QUERY);
+		// insert the new access
+		query.build(SQL.INSERT_INTO,ViewEnum.SECURITY_WEBSERVICE_LOG.getFullName());
+		query.build("(id_famille, id_application, host_allowed, event_timestamp)");
+		query.append(SQL.SELECT)
+			.build(query.quoteText(familyName))
+			.build(",", query.quoteText(clientRealName))
+			.build(",", query.quoteText(hostName))
+			.build(",", "current_timestamp");
+		// avoid spam; just writer real new access
+		query.build(SQL.WHERE, "(")
+			.build(query.quoteText(familyName))
+			.build(",", query.quoteText(clientRealName))
+			.build(",", query.quoteText(hostName))
+			.build(") NOT IN ")
+			.build("(SELECT id_famille, id_application, host_allowed FROM ", ViewEnum.SECURITY_WEBSERVICE_LOG.getFullName())
+			.build(SQL.ORDER_BY, "id_webservice_logging desc")
+			.build(SQL.LIMIT, "1", ")")
+			.build(SQL.END_QUERY);
+		
 		try {
 			UtilitaireDao.get(0).executeRequest(null, query);
 		} catch (ArcException e) {
-			LoggerHelper.error(LOGGER, "Error in querying to register the connection entry");
+			LoggerHelper.error(LOGGER, "Error in logging webservice access");
 			throw new ArcException(ArcExceptionMessage.HOST_NOT_RESOLVED);
 		}
 
