@@ -28,6 +28,8 @@ Pour ajouter une nouvelle famille de norme, il faut soit la créer à la main, s
 
 ***"Applications clientes"*** : ce tableau liste les applications clientes de la famille de norme sélectionnée.
 
+Le client doit être défini dans ARC pour que l'application cliente aie le droit de récupérer les données. Un même client ne peut récupérer qu'une seule fois une sortie d'ARC.
+
 ---
 
 ### `viewTableMetier`
@@ -456,17 +458,23 @@ En cochant un jeu de règle puis en cliquant sur "Copier", ce jeu de règle vien
 
 ***"Liste des tables externes"*** : ce tableau liste les nomenclatures renseignées dans ARC.
 
+Le nom de la table doit être obligatoirement précédé de `nmcl_`. Pour importer une nomenclature, il faut au préalable ajouter et sélectionner son nom dans ce tableau. Le nom du fichier importé n'est pas utilisé.
+
 ---
 
 ### `viewSchemaNmcl`
 
 ***"Schéma de la table externe"*** : ce tableau détaille les colonnes et leur types pour la nomenclature sélectionée.
 
+Le schéma est imputé de la table de nomenclature consultée, il ne peut pas être modifié dans ARC.
+
 ---
 
 ### `viewNomenclature`
 
 ***"Contenu de la table externe"*** : ce tableau détaille les éléments de la nomenclature sélectionnée.
+
+Le contenu des nomenclatures est seulement consulté, il ne peut pas être modifié dans ARC.
 
 ## Gérer les webservices
 
