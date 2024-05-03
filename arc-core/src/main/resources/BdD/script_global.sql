@@ -218,7 +218,7 @@ do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webserv
 
 
 -- data retrieval webservice logs 
-CREATE TABLE IF NOT EXISTS arc.ihm_webservice_log
+CREATE TABLE IF NOT EXISTS arc.security_webservice_log
 (
 id_webservice_logging bigserial, id_famille text, id_application text, host_allowed text, event_timestamp timestamp
 , PRIMARY KEY (id_webservice_logging)
@@ -226,6 +226,17 @@ id_webservice_logging bigserial, id_famille text, id_application text, host_allo
 ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- patch : drop old logging table if no longer used
+do $$
+declare b boolean;
+BEGIN
+select true into b from arc.security_webservice_log limit 1;
+if (b is not null) then 
+drop table if exists arc.ihm_webservice_log;
+end if;
+end;
+$$
+;
 
 -- tables de gestion des règles        
 CREATE TABLE IF NOT EXISTS arc.ihm_norme 
@@ -264,15 +275,18 @@ CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle
   validite_inf date NOT NULL, 
   validite_sup date NOT NULL, 
   version text NOT NULL, 
-  etat text, 
+  sandbox text, 
   date_production date, 
   date_inactif date, 
   CONSTRAINT ihm_jeuderegle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version), 
   CONSTRAINT ihm_jeuderegle_calendrier_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup) 
       REFERENCES arc.ihm_calendrier (id_norme, periodicite, validite_inf, validite_sup) MATCH SIMPLE 
       ON UPDATE CASCADE ON DELETE CASCADE 
-);             
-        
+);
+
+-- patch etat column become sandbox
+do $$ begin ALTER TABLE arc.ihm_jeuderegle rename etat to sandbox; EXCEPTION WHEN OTHERS then end; $$;
+
 CREATE TABLE IF NOT EXISTS arc.ihm_mod_table_metier 
 ( 
 id_famille text NOT NULL, 

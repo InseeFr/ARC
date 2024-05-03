@@ -301,11 +301,9 @@ public class GererNormeDao extends VObjectHelperDao {
 		ViewEnum dataModelMapping = ViewEnum.IHM_MAPPING_REGLE;
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-        query.append("SELECT mapping.id_regle, mapping.id_norme, mapping.validite_inf, mapping.validite_sup, mapping.version, mapping.periodicite, mapping.variable_sortie, mapping.expr_regle_col, mapping.commentaire, variables.type_variable_metier type_sortie, variables.nom_table_metier nom_table_metier /*, variables.nom_table_metier nom_table_metier */ ");
-        query.append("\n  FROM arc.ihm_mapping_regle mapping INNER JOIN arc.ihm_jeuderegle jdr");
-        query.append("\n  ON mapping.id_norme     = jdr.id_norme     AND mapping.periodicite           = jdr.periodicite AND mapping.validite_inf = jdr.validite_inf AND mapping.validite_sup = jdr.validite_sup AND mapping.version = jdr.version");
-        query.append("\n  INNER JOIN arc.ihm_norme norme");
-        query.append("\n  ON norme.id_norme       = jdr.id_norme AND norme.periodicite   = jdr.periodicite");
+        query.append("SELECT mapping.id_regle, mapping.id_norme, mapping.validite_inf, mapping.validite_sup, mapping.version, mapping.periodicite, mapping.variable_sortie, mapping.expr_regle_col, mapping.commentaire, variables.type_variable_metier type_sortie, variables.nom_table_metier nom_table_metier ");
+        query.append("\n  FROM arc.ihm_mapping_regle mapping INNER JOIN arc.ihm_norme norme");
+        query.append("\n  ON norme.id_norme = mapping.id_norme AND norme.periodicite = mapping.periodicite");
         query.append("\n  LEFT JOIN (SELECT id_famille, nom_variable_metier, type_variable_metier, string_agg(nom_table_metier,',') as nom_table_metier  FROM arc.ihm_mod_variable_metier group by id_famille, nom_variable_metier, type_variable_metier) variables");
         query.append("\n  ON variables.id_famille = norme.id_famille AND variables.nom_variable_metier = mapping.variable_sortie");
 		query.append(SQL.WHERE + "mapping.");
@@ -371,7 +369,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
         query.append(SQL.SELECT);
-		query.append("id_norme, periodicite, validite_inf, validite_sup, version, etat");
+		query.append("id_norme, periodicite, validite_inf, validite_sup, version, sandbox");
 		query.append(SQL.FROM);
 		query.append(dataObjectService.getView(dataModelJeuxDeReglesCopie));
 

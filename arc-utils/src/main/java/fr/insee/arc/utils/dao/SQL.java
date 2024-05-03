@@ -5,6 +5,8 @@ public enum SQL {
 
 	AS("AS"),
 	
+	VACUUM("VACUUM"),
+	
 	COMMIT("COMMIT"),
 
 	INSERT_INTO("INSERT INTO"), DELETE ("DELETE FROM"),

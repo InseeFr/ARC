@@ -327,7 +327,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		requeteListeAddRegleMapping.append(
 				"\n      AND calendrier.validite_inf=jdr.validite_inf AND calendrier.validite_sup=jdr.validite_sup");
 		requeteListeAddRegleMapping.append("\n  WHERE fam.id_famille = " + requeteListeAddRegleMapping.quoteText(idFamille));
-		requeteListeAddRegleMapping.append("\n    AND lower(jdr.etat) <> 'inactif'");
+		requeteListeAddRegleMapping.append("\n    AND lower(jdr.sandbox) <> 'inactif'");
 		requeteListeAddRegleMapping.append("\n    AND lower(calendrier.etat) = '1'");
 		requeteListeAddRegleMapping.append("\n    AND NOT EXISTS (");
 		requeteListeAddRegleMapping

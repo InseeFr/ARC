@@ -30,26 +30,27 @@ public enum ColumnEnum {
 	, ENVIRONMENT("environment", TypeEnum.TEXT, "") // ihm_ws_context
 	, ENV_DESCRIPTION("env_description", TypeEnum.TEXT, "") // ext_etat_jeuderegle
 	, ERROR_ROW_PROCESSING("error_row_processing", TypeEnum.TEXT, "") // ihm_controle_regle
-	, ETAT("etat", TypeEnum.TEXT, "") // ihm_jeuderegle,ihm_norme,ihm_calendrier, export
-	, EVENT_TIMESTAMP("event_timestamp", TypeEnum.TIMESTAMP, "") // ihm_webservice_log
+	, ETAT("etat", TypeEnum.TEXT, "") // ihm_norme,ihm_calendrier, export
+	, SANDBOX("sandbox", TypeEnum.TEXT, "") // ihm_jeuderegle
+	, EVENT_TIMESTAMP("event_timestamp", TypeEnum.TIMESTAMP, "") // security_webservice_log
 	, EXPRESSION("expression", TypeEnum.TEXT, "") // ihm_ws_query
 	, EXPR_NOM("expr_nom", TypeEnum.TEXT, "") // ihm_expression
 	, EXPR_REGLE_COL("expr_regle_col", TypeEnum.TEXT, "") // ihm_mapping_regle
 	, EXPR_VALEUR("expr_valeur", TypeEnum.TEXT, "") // ihm_expression
 	, FORMAT("format", TypeEnum.TEXT, "") // ihm_chargement_regle
-	, HOST_ALLOWED("host_allowed", TypeEnum.TEXT, "") // ihm_webservice_whitelist,ihm_webservice_log
+	, HOST_ALLOWED("host_allowed", TypeEnum.TEXT, "") // ihm_webservice_whitelist,security_webservice_log
 	, ID("id", TypeEnum.TEXT, "") // ext_webservice_type,ext_mod_periodicite,ext_webservice_queryview,ext_export_format,ext_etat,ext_type_normage,ext_type_fichier_chargement,ext_type_controle,ext_etat_jeuderegle
 	, ID_SAX("id", TypeEnum.INTEGER, "") // used by sax xml loaders
 	, IDEP("idep", TypeEnum.TEXT, "") // ihm_user
-	, ID_APPLICATION("id_application", TypeEnum.TEXT, "") // ihm_webservice_whitelist,ihm_webservice_log,ihm_client
+	, ID_APPLICATION("id_application", TypeEnum.TEXT, "") // ihm_webservice_whitelist,security_webservice_log,ihm_client
 	, ID_CLASSE("id_classe", TypeEnum.TEXT, "") // ihm_normage_regle,ihm_controle_regle
 	, ID_ENTREPOT("id_entrepot", TypeEnum.TEXT, "") // ihm_entrepot
-	, ID_FAMILLE("id_famille", TypeEnum.TEXT, "") // ihm_norme,ihm_webservice_log,ihm_mod_variable_metier,ihm_famille,ihm_mod_table_metier,ihm_webservice_whitelist,ihm_client
+	, ID_FAMILLE("id_famille", TypeEnum.TEXT, "") // ihm_norme,security_webservice_log,ihm_mod_variable_metier,ihm_famille,ihm_mod_table_metier,ihm_webservice_whitelist,ihm_client
 	, ID_LOADER("id_loader", TypeEnum.TEXT, "") // ihm_entrepot
 	, ID_NORME("id_norme", TypeEnum.TEXT, "") // ihm_calendrier,ihm_expression,ihm_controle_regle,ihm_jeuderegle,ihm_norme,ihm_chargement_regle,ihm_normage_regle,ihm_mapping_regle
 	, ID_REGLE("id_regle", TypeEnum.BIGINT, "") // ihm_chargement_regle,ihm_expression,ihm_mapping_regle, ihm_controle_regle,ihm_normage_regle
 	, ID_REGLE_INT("id_regle", TypeEnum.INTEGER, "") // ihm_controle_regle,ihm_normage_regle
-	, ID_WEBSERVICE_LOGGING("id_webservice_logging", TypeEnum.BIGINT, "") // ihm_webservice_log
+	, ID_WEBSERVICE_LOGGING("id_webservice_logging", TypeEnum.BIGINT, "") // security_webservice_log
 	, ISENV("isenv", TypeEnum.BOOLEAN, "") // ext_etat_jeuderegle
 	, IS_SECURED("is_secured", TypeEnum.TEXT, "") // ihm_webservice_whitelist
 	, KEY("key", TypeEnum.TEXT, "") // parameter

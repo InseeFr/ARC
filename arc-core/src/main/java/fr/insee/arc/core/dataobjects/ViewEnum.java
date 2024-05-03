@@ -43,7 +43,7 @@ public enum ViewEnum {
 			ColumnEnum.EXPR_NOM, ColumnEnum.EXPR_VALEUR, ColumnEnum.COMMENTAIRE) //
 	, IHM_FAMILLE("ihm_famille", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE) //
 	, IHM_JEUDEREGLE("ihm_jeuderegle", SchemaEnum.ARC_METADATA, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE,
-			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ETAT,
+			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.SANDBOX,
 			ColumnEnum.DATE_PRODUCTION, ColumnEnum.DATE_INACTIF) //
 	, IHM_MAPPING_REGLE("ihm_mapping_regle", SchemaEnum.ARC_METADATA, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME,
 			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE,
@@ -67,7 +67,7 @@ public enum ViewEnum {
 	, IHM_NORME("ihm_norme", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME,
 			ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT) //
 	, IHM_USER("ihm_user", SchemaEnum.ARC_METADATA, ColumnEnum.IDEP, ColumnEnum.PROFIL) //
-	, IHM_WEBSERVICE_LOG("ihm_webservice_log", SchemaEnum.ARC_METADATA, ColumnEnum.ID_WEBSERVICE_LOGGING,
+	, SECURITY_WEBSERVICE_LOG("security_webservice_log", SchemaEnum.ARC_METADATA, ColumnEnum.ID_WEBSERVICE_LOGGING,
 			ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION, ColumnEnum.HOST_ALLOWED, ColumnEnum.EVENT_TIMESTAMP) //
 	, IHM_WEBSERVICE_WHITELIST("ihm_webservice_whitelist", SchemaEnum.ARC_METADATA, ColumnEnum.HOST_ALLOWED,
 			ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION, ColumnEnum.IS_SECURED) //
