@@ -63,7 +63,7 @@
 					<div class="card-header bg-primary p-0">
 						<h3 class="text-white m-1 float-left" id="${view.sessionName}_description"><spring:message code="${view.title}" text="${view.title}"/></h3>
 							<c:import url="tiles/template_help.jsp">
-								<c:param name="helpPage" value="/html/en/${view.sessionName}.html" />
+								<c:param name="helpPage" value="https://github.com/InseeFr/ARC/blob/master/user-guide/ihm_views_doc.md#${view.sessionName}" />
 							</c:import>
 					</div>
 					<div class="card-body p-0 ${view.sessionName}">

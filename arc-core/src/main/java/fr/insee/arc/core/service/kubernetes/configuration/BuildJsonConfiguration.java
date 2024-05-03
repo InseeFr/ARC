@@ -76,7 +76,9 @@ public class BuildJsonConfiguration {
 				, JsonFileParameter.EXECUTOR_USER, properties.getKubernetesExecutorUser() //
 				, JsonFileParameter.EXECUTOR_PASSWORD, properties.getDatabasePassword() //
 				, JsonFileParameter.EXECUTOR_DATABASE, properties.getKubernetesExecutorDatabase() //
-				, JsonFileParameter.EXECUTOR_PORT, properties.getKubernetesExecutorPort()};
+				, JsonFileParameter.EXECUTOR_PORT, properties.getKubernetesExecutorPort()
+				, JsonFileParameter.IMAGE, properties.getKubernetesExecutorImage()
+		};
 	}
 
 	

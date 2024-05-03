@@ -100,7 +100,7 @@ public class ExecutorDatabaseStatefulTemplate {
                 "value": "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
               }
             ],
-            "image": "docker.io/bitnami/postgresql:11",
+            "image": "{image}",
             "imagePullPolicy": "IfNotPresent",
             "livenessProbe": {
               "exec": {
