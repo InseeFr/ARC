@@ -43,7 +43,7 @@ public enum ViewEnum {
 			ColumnEnum.EXPR_NOM, ColumnEnum.EXPR_VALEUR, ColumnEnum.COMMENTAIRE) //
 	, IHM_FAMILLE("ihm_famille", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE) //
 	, IHM_JEUDEREGLE("ihm_jeuderegle", SchemaEnum.ARC_METADATA, ColumnEnum.ID_NORME, ColumnEnum.PERIODICITE,
-			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.SANDBOX,
+			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.ETAT,
 			ColumnEnum.DATE_PRODUCTION, ColumnEnum.DATE_INACTIF) //
 	, IHM_MAPPING_REGLE("ihm_mapping_regle", SchemaEnum.ARC_METADATA, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME,
 			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE,

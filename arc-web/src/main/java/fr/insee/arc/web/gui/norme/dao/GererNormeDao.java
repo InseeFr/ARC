@@ -369,7 +369,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
         query.append(SQL.SELECT);
-		query.append("id_norme, periodicite, validite_inf, validite_sup, version, sandbox");
+		query.append("id_norme, periodicite, validite_inf, validite_sup, version, etat");
 		query.append(SQL.FROM);
 		query.append(dataObjectService.getView(dataModelJeuxDeReglesCopie));
 

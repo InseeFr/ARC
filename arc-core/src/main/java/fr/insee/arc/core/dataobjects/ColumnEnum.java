@@ -30,8 +30,7 @@ public enum ColumnEnum {
 	, ENVIRONMENT("environment", TypeEnum.TEXT, "") // ihm_ws_context
 	, ENV_DESCRIPTION("env_description", TypeEnum.TEXT, "") // ext_etat_jeuderegle
 	, ERROR_ROW_PROCESSING("error_row_processing", TypeEnum.TEXT, "") // ihm_controle_regle
-	, ETAT("etat", TypeEnum.TEXT, "") // ihm_norme,ihm_calendrier, export
-	, SANDBOX("sandbox", TypeEnum.TEXT, "") // ihm_jeuderegle
+	, ETAT("etat", TypeEnum.TEXT, "") // ihm_jeuderegle,ihm_norme,ihm_calendrier, export
 	, EVENT_TIMESTAMP("event_timestamp", TypeEnum.TIMESTAMP, "") // security_webservice_log
 	, EXPRESSION("expression", TypeEnum.TEXT, "") // ihm_ws_query
 	, EXPR_NOM("expr_nom", TypeEnum.TEXT, "") // ihm_expression

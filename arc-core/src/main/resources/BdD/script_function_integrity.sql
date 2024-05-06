@@ -46,7 +46,7 @@ SELECT count(1) into n
 FROM 	( 
 SELECT id_norme, periodicite, validite_inf, validite_sup, etat, count(etat) 
 FROM arc.ihm_jeuderegle  b 
-WHERE b.sandbox != 'inactif' 
+WHERE b.etat != 'inactif' 
 GROUP BY id_norme, periodicite, validite_inf, validite_sup, etat 
 HAVING count(etat)>1 
 ) AS foo; 

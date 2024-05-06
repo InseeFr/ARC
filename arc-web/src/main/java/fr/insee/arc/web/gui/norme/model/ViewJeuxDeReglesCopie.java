@@ -27,7 +27,7 @@ public class ViewJeuxDeReglesCopie extends VObject {
                 put("validite_inf", new ColumnRendering(true, "label.validity.min", "18%", "text", null, false));
                 put("validite_sup", new ColumnRendering(true, "label.validity.max", "18%", "text", null, false));
                 put("version", new ColumnRendering(true, "label.version", "9%", "text", null, false));
-                put("sandbox", new ColumnRendering(true, "label.state", "20%", "select", new ArcPreparedStatementBuilder("select id, val from arc.ext_etat_jeuderegle order by id"), false));
+                put("etat", new ColumnRendering(true, "label.state", "20%", "select", new ArcPreparedStatementBuilder("select id, val from arc.ext_etat_jeuderegle order by id"), false));
 
             }
 

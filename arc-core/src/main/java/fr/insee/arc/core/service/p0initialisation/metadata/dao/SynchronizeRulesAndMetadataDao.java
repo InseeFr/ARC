@@ -77,7 +77,7 @@ public class SynchronizeRulesAndMetadataDao {
 					condition.append(" and exists (select 1 from " + ViewEnum.IHM_NORME.getFullName()
 							+ " b where a.id_norme=b.id_norme and b.etat='1')");
 				} else if (parameterTable == TraitementTableParametre.JEUDEREGLE) {
-					condition.append(" WHERE sandbox=lower(" + condition.quoteText(modaliteEtat) + ")");
+					condition.append(" WHERE etat=lower(" + condition.quoteText(modaliteEtat) + ")");
 					condition.append(" and exists (select 1 from " + ViewEnum.IHM_NORME.getFullName()
 							+ " b where a.id_norme=b.id_norme and b.etat='1')");
 					condition.append(" and exists (select 1 from " + ViewEnum.IHM_CALENDRIER.getFullName()
@@ -88,7 +88,7 @@ public class SynchronizeRulesAndMetadataDao {
 					condition.append(" and exists (select 1 from " + ViewEnum.IHM_CALENDRIER.getFullName()
 							+ " b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup and b.etat='1')");
 					condition.append(" and exists (select 1 from " + ViewEnum.IHM_JEUDEREGLE.getFullName()
-							+ " b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup AND a.version=b.version and b.sandbox=lower("
+							+ " b where a.id_norme=b.id_norme and a.periodicite=b.periodicite and a.validite_inf=b.validite_inf and a.validite_sup=b.validite_sup AND a.version=b.version and b.etat=lower("
 							+ condition.quoteText(modaliteEtat) + "))");
 				}
 				requete.append(FormatSQL.dropTable(tableImage));

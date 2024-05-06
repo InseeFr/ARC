@@ -251,9 +251,14 @@ CREATE TABLE IF NOT EXISTS arc.ihm_norme
   CONSTRAINT ihm_norme_pkey PRIMARY KEY (id_norme, periodicite), 
   CONSTRAINT ihm_norme_id_famille_fkey FOREIGN KEY (id_famille) 
       REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE 
-      ON UPDATE CASCADE ON DELETE CASCADE 
+      ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade,
+  CONSTRAINT ihm_norme_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade
 ); 
-        
+do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+
+
 CREATE TABLE IF NOT EXISTS arc.ihm_calendrier 
 ( 
   id_norme text NOT NULL, 
@@ -265,9 +270,11 @@ CREATE TABLE IF NOT EXISTS arc.ihm_calendrier
   CONSTRAINT ihm_calendrier_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup), 
   CONSTRAINT ihm_calendrier_norme_fkey FOREIGN KEY (id_norme, periodicite) 
       REFERENCES arc.ihm_norme (id_norme, periodicite) MATCH SIMPLE 
-      ON UPDATE CASCADE ON DELETE CASCADE 
+      ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT ihm_calendrier_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade
 ); 
-        
+do $$ begin alter table arc.ihm_calendrier add CONSTRAINT ihm_calendrier_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+
 CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle 
 ( 
   id_norme text NOT NULL, 
@@ -275,7 +282,7 @@ CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle
   validite_inf date NOT NULL, 
   validite_sup date NOT NULL, 
   version text NOT NULL, 
-  sandbox text, 
+  etat text, 
   date_production date, 
   date_inactif date, 
   CONSTRAINT ihm_jeuderegle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version), 
@@ -284,8 +291,8 @@ CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle
       ON UPDATE CASCADE ON DELETE CASCADE 
 );
 
--- patch etat column become sandbox
-do $$ begin ALTER TABLE arc.ihm_jeuderegle rename etat to sandbox; EXCEPTION WHEN OTHERS then end; $$;
+-- temporary patch
+do $$ begin ALTER TABLE arc.ihm_jeuderegle rename sandbox to etat; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_mod_table_metier 
 ( 
