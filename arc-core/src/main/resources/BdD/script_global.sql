@@ -209,12 +209,12 @@ ON UPDATE NO ACTION ON DELETE NO ACTION
 CREATE TABLE IF NOT EXISTS arc.ihm_webservice_whitelist
 (
 host_allowed text, id_famille text, id_application text, is_secured text
-, PRIMARY KEY (id_application)
+, PRIMARY KEY (id_famille,id_application)
 , FOREIGN KEY (id_famille,id_application) REFERENCES arc.ihm_client(id_famille,id_application)
 ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webservice_whitelist_pkey; alter table arc.ihm_webservice_whitelist ADD PRIMARY KEY (id_application); EXCEPTION WHEN OTHERS then end; $$;
+do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webservice_whitelist_pkey; alter table arc.ihm_webservice_whitelist ADD PRIMARY KEY (id_famille, id_application); EXCEPTION WHEN OTHERS then end; $$;
 
 
 -- data retrieval webservice logs 
@@ -254,7 +254,10 @@ CREATE TABLE IF NOT EXISTS arc.ihm_norme
       ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade,
   CONSTRAINT ihm_norme_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade
-); 
+);
+alter table arc.ihm_norme alter column etat set not null;
+alter table arc.ihm_norme alter column id_famille set not null;
+
 do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
@@ -272,7 +275,9 @@ CREATE TABLE IF NOT EXISTS arc.ihm_calendrier
       REFERENCES arc.ihm_norme (id_norme, periodicite) MATCH SIMPLE 
       ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT ihm_calendrier_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade
-); 
+);
+alter table arc.ihm_calendrier alter column etat set not null;
+
 do $$ begin alter table arc.ihm_calendrier add CONSTRAINT ihm_calendrier_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle 
@@ -288,11 +293,12 @@ CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle
   CONSTRAINT ihm_jeuderegle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version), 
   CONSTRAINT ihm_jeuderegle_calendrier_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup) 
       REFERENCES arc.ihm_calendrier (id_norme, periodicite, validite_inf, validite_sup) MATCH SIMPLE 
-      ON UPDATE CASCADE ON DELETE CASCADE 
+      ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT ihm_jeuderegle_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat_jeuderegle(id) ON DELETE CASCADE ON UPDATE cascade
 );
-
--- temporary patch
 do $$ begin ALTER TABLE arc.ihm_jeuderegle rename sandbox to etat; EXCEPTION WHEN OTHERS then end; $$;
+alter table arc.ihm_jeuderegle alter column etat set not null;
+do $$ begin alter table arc.ihm_jeuderegle add CONSTRAINT ihm_jeuderegle_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat_jeuderegle(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_mod_table_metier 
 ( 
