@@ -251,9 +251,7 @@ CREATE TABLE IF NOT EXISTS arc.ihm_norme
   CONSTRAINT ihm_norme_pkey PRIMARY KEY (id_norme, periodicite), 
   CONSTRAINT ihm_norme_id_famille_fkey FOREIGN KEY (id_famille) 
       REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE 
-      ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade,
-  CONSTRAINT ihm_norme_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade
+      ON UPDATE CASCADE ON DELETE CASCADE
 );
 alter table arc.ihm_norme alter column etat set not null;
 alter table arc.ihm_norme alter column id_famille set not null;
@@ -273,8 +271,7 @@ CREATE TABLE IF NOT EXISTS arc.ihm_calendrier
   CONSTRAINT ihm_calendrier_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup), 
   CONSTRAINT ihm_calendrier_norme_fkey FOREIGN KEY (id_norme, periodicite) 
       REFERENCES arc.ihm_norme (id_norme, periodicite) MATCH SIMPLE 
-      ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT ihm_calendrier_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade
+      ON UPDATE CASCADE ON DELETE CASCADE
 );
 alter table arc.ihm_calendrier alter column etat set not null;
 
@@ -293,8 +290,7 @@ CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle
   CONSTRAINT ihm_jeuderegle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version), 
   CONSTRAINT ihm_jeuderegle_calendrier_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup) 
       REFERENCES arc.ihm_calendrier (id_norme, periodicite, validite_inf, validite_sup) MATCH SIMPLE 
-      ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT ihm_jeuderegle_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat_jeuderegle(id) ON DELETE CASCADE ON UPDATE cascade
+      ON UPDATE CASCADE ON DELETE CASCADE
 );
 do $$ begin ALTER TABLE arc.ihm_jeuderegle rename sandbox to etat; EXCEPTION WHEN OTHERS then end; $$;
 alter table arc.ihm_jeuderegle alter column etat set not null;
@@ -360,8 +356,8 @@ INSERT INTO arc.ihm_entrepot values ('DEFAULT','DEFAULT') ON CONFLICT DO NOTHING
 -- table de gestion des webservices
 CREATE TABLE IF NOT EXISTS arc.ihm_ws_context 
 ( 
-  service_name text NOT NULL, 
-  service_type integer, 
+service_name text NOT NULL, 
+service_type integer, 
 call_id integer NOT NULL, 
 environment text, 
 target_phase text, 
@@ -371,6 +367,18 @@ periodicite text,
 CONSTRAINT ws_engine_context_pkey PRIMARY KEY (service_name, call_id) 
 ); 
 
+do $$ begin alter table arc.ihm_ws_context add CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+
+CREATE TABLE IF NOT EXISTS arc.ext_webservice_queryview 
+( 
+id text NOT NULL, 
+val text, 
+CONSTRAINT ext_webservice_queryview_pkey PRIMARY KEY (id) 
+);
+
+INSERT INTO arc.ext_webservice_queryview VALUES ('1','COLUMN'), ('2','LINE') ON CONFLICT DO NOTHING; 
+
+alter table arc.ext_webservice_queryview alter column id type int using id::integer;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_ws_query 
 ( 
@@ -386,6 +394,7 @@ REFERENCES arc.ihm_ws_context (service_name, call_id) MATCH SIMPLE
 ON UPDATE CASCADE ON DELETE CASCADE 
 ); 
 
+do $$ begin alter table arc.ihm_ws_query  add CONSTRAINT ihm_ws_query_query_view_fkey FOREIGN KEY (query_view) REFERENCES arc.ext_webservice_queryview(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ext_webservice_type 
 ( 
@@ -396,15 +405,6 @@ CONSTRAINT ext_webservice_type_pkey PRIMARY KEY (id)
 
 INSERT INTO arc.ext_webservice_type VALUES ('1','ENGINE'), ('2','SERVICE') ON CONFLICT DO NOTHING; 
 
-CREATE TABLE IF NOT EXISTS arc.ext_webservice_queryview 
-( 
-id text NOT NULL, 
-val text, 
-CONSTRAINT ext_webservice_queryview_pkey PRIMARY KEY (id) 
-);
-
-INSERT INTO arc.ext_webservice_queryview VALUES ('1','COLUMN'), ('2','LINE') ON CONFLICT DO NOTHING; 
-        
 
 -- table de modalités format d'export
 CREATE TABLE IF NOT EXISTS arc.ext_export_format 

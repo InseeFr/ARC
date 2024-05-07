@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS arc.ext_type_normage;
 CREATE TABLE IF NOT EXISTS arc.ext_type_normage 
 ( 
   id text NOT NULL, 
@@ -27,14 +26,12 @@ commentaire text,
 CONSTRAINT ihm_normage_regle_pkey PRIMARY KEY (id_norme, periodicite, validite_inf, validite_sup, version, id_regle), 
 CONSTRAINT ihm_normage_regle_jeuderegle_fkey FOREIGN KEY (id_norme, periodicite, validite_inf, validite_sup, version) 
       REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup, version) MATCH SIMPLE 
-     ON UPDATE CASCADE ON DELETE CASCADE,
-CONSTRAINT ihm_normage_regle_id_classe_fkey FOREIGN KEY (id_classe) 
-      REFERENCES arc.ext_type_normage (id) MATCH SIMPLE 
-     ON UPDATE CASCADE ON DELETE CASCADE     
+     ON UPDATE CASCADE ON DELETE CASCADE   
 );
 
-do $$ begin alter table arc.ihm_normage_regle ADD CONSTRAINT ihm_normage_regle_id_classe_fkey FOREIGN KEY (id_classe) REFERENCES arc.ext_type_normage (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
+alter table arc.ihm_normage_regle alter column id_classe set NOT NULL;
 
+do $$ begin alter table arc.ihm_normage_regle ADD CONSTRAINT ihm_normage_regle_id_classe_fkey FOREIGN KEY (id_classe) REFERENCES arc.ext_type_normage (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
 do $$ begin CREATE TRIGGER tg_insert_normage BEFORE INSERT ON arc.ihm_normage_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
 
 -- PATCH 06/10/2023 Remove deprecated rules

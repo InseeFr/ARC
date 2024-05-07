@@ -24,12 +24,12 @@ public class ViewControle extends AbstractViewRule {
         columnRenderings.put("pre_action", new ColumnRendering(true, "label.sql.pretreatment", "21%", "text", null, true));
         columnRenderings.put("commentaire", new ColumnRendering(true, "label.comment", "21%", "text", null, true));
         columnRenderings.put("todo", new ColumnRendering(false, "label.todo", "0%", "text", null, true));
-        columnRenderings.put("xsd_ordre", new ColumnRendering(true, "label.xsd.order", "5%", "text", null, true));
-        columnRenderings.put("xsd_label_fils", new ColumnRendering(true, "label.xsd.child", "15%", "text", null, true));
-        columnRenderings.put("xsd_role", new ColumnRendering(true, "label.xsd.role", "6%", "text", null, true));
+        columnRenderings.put("xsd_ordre", new ColumnRendering(false, "label.xsd.order", "5%", "text", null, true));
+        columnRenderings.put("xsd_label_fils", new ColumnRendering(false, "label.xsd.child", "15%", "text", null, true));
+        columnRenderings.put("xsd_role", new ColumnRendering(false, "label.xsd.role", "6%", "text", null, true));
         columnRenderings.put("blocking_threshold", new ColumnRendering(true, "label.threshold.blocking", "6%", "text", null, true));
         columnRenderings.put("error_row_processing", new ColumnRendering(true, "label.errorRowProcessing", "11%", "select",
-        		new ArcPreparedStatementBuilder("select 'k' as id, 'conserver' union all select 'e' as id, 'exclure' "), true));
+        		new ArcPreparedStatementBuilder("select id, label FROM arc.ext_error_row_processing order by ordre"), true));
 
 		return columnRenderings;
 	}

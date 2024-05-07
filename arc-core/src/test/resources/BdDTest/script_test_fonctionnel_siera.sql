@@ -241,8 +241,9 @@ INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-1
 INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-12-31', 'v002', 'relation', 'V_S21_G00_40_009', 'V_S21_G00_34_002', 5, NULL, 'numéro de contrat / pénibilité');
 INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-12-31', 'v002', 'unicité', 'siretutil.V_S21_G00_85_001', NULL, 6, NULL, NULL);
 INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-12-31', 'v002', 'unicité', 'V_S21_G00_85_001', NULL, 7, NULL, NULL);
-INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-12-31', 'v002', 'partition', 's21_g00_30', '500,100', 9, NULL, 'si > 500 individus, decoupage en paquet de 100 individus');
-
+INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-12-31', 'v002', 'partition', 's21_g00_30', '500,100', 8, NULL, 'si > 500 individus, decoupage en paquet de 100 individus');
+INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-12-31', 'v002', 'independance', 'm_s21_g00_51', 'v_s21_g00_51_010', 9, NULL, NULL);
+INSERT INTO arc.ihm_normage_regle VALUES ('PHASE3V1', 'M', '2015-01-01', '2050-12-31', 'v002', 'independance', 'm_s21_g00_52', 'v_s21_g00_52_006', 10, NULL, NULL);
 
 --
 -- TOC entry 3568 (class 0 OID 43163509)

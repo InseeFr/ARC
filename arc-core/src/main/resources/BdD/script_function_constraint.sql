@@ -11,7 +11,6 @@ END;
 $BODY$
 LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION public.check_identifier(unsafe text) RETURNS boolean
 as
 $BODY$
@@ -25,18 +24,52 @@ END;
 $BODY$
 LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION public.check_identifier_with_schema(unsafe text) RETURNS boolean
+as
+$BODY$
+declare token text[];
+begin
+token:=regexp_split_to_array(unsafe,'\.');
+	
+if (array_length(token,1)>2) then 
+	RAISE EXCEPTION '% format is not correct. Too many dot.', unsafe;
+end if;
+
+perform public.check_identifier(t) from unnest(token) as t;
+
+return true;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION public.check_identifier_token(unsafe text) RETURNS boolean
 as
 $BODY$
 begin
 if (regexp_replace(lower(unsafe), '[^a-z0-9]+','', 'g') != lower(unsafe))
 then
-RAISE EXCEPTION '% format is not correct. Allowed chars (between parenthesis are the chars allowed at the start of expression) : (A-Z a-z) 0-9', unsafe; 
+RAISE EXCEPTION '% format is not correct. Allowed chars (between parenthesis are the chars allowed at the start of expression) : (A-Z a-z 0-9)', unsafe; 
 end if;
 return true;
 END; 
 $BODY$
 LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public.check_integer(unsafe text) RETURNS boolean
+as
+$BODY$
+begin
+if (regexp_replace(regexp_replace(lower(unsafe), '^[^123456789]+','', 'g'),'[^0-9]+','','g') != lower(unsafe))
+then
+RAISE EXCEPTION '% format is not correct. Allowed chars (between parenthesis are the chars allowed at the start of expression) : (1-9) 0-9', unsafe; 
+end if;
+return true;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION public.check_type(unsafe text) RETURNS boolean
 as
@@ -80,25 +113,25 @@ $BODY$
 LANGUAGE plpgsql;
 
 /* For a given column and a given function */
-/* - Remove the contraints on all ihm tables containing the column */
-/* - Create the contraints on all ihm tables containing the column */
+/* - Remove the contraints on all tables from schema containing the column */
+/* - Create the contraints on all tables from schema containing the column */
 /* The constraint checks if the function applied to the column returns true */
 /* If the give constraint_function is null, it remove constraint */
-CREATE OR REPLACE function public.check_function(col text, constraint_function text) returns boolean
+CREATE OR REPLACE function public.check_function(schemaname text, col text, constraint_function text) returns boolean
 as
 $BODY$
 declare query text;
 begin
 for query in (
 select 
-'do $$ begin alter table arc.'||table_name||' drop constraint '||table_name||'_'||column_name||'_c; exception when others then end;  $$; '
+'do $$ begin alter table '||schemaname||'.'||table_name||' drop constraint '||table_name||'_'||column_name||'_c; exception when others then end;  $$; '
 ||
 case
 when constraint_function is null
 then '' 
-else 'alter table arc.'||table_name||' add constraint '||table_name||'_'||column_name||'_c check ('||constraint_function||'('||column_name||'));'
+else 'alter table '||schemaname||'.'||table_name||' add constraint '||table_name||'_'||column_name||'_c check ('||constraint_function||'('||column_name||'));'
 end
-from information_schema.columns where column_name = col and table_schema='arc'
+from information_schema.columns where column_name = col and table_schema= schemaname
 ) loop
 	execute query;
 end loop;
@@ -107,6 +140,14 @@ END;
 $BODY$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE function public.check_function(col text, constraint_function text) returns boolean
+as
+$BODY$
+begin
+return public.check_function('arc', col, constraint_function);
+END; 
+$BODY$
+LANGUAGE plpgsql;
 
 -- white liste to check if sql injection in query
 -- comments are forbidden in arc queries
@@ -208,11 +249,54 @@ LANGUAGE plpgsql;
 
 
 /* ADD CONSTRAINTS */
-select public.check_function('id_famille', 'public.check_identifier_token');
+-- norme
 select public.check_function('id_norme', 'public.check_word');
 select public.check_function('version', 'public.check_word');
 select public.check_function('def_norme', 'public.check_sql');
 select public.check_function('def_validite', 'public.check_sql');
+
+-- famille & model
+select public.check_function('id_famille', 'public.check_identifier_token');
 select public.check_function('nom_table_metier', 'public.check_identifier');
 select public.check_function('nom_variable_metier', 'public.check_identifier');
 select public.check_function('type_variable_metier', 'public.check_type');
+
+-- nmcl
+select public.check_function('nom_table', 'public.check_identifier');
+
+-- controle rules
+select public.check_function('rubrique_pere', 'public.check_identifier');
+select public.check_function('rubrique_fils', 'public.check_identifier');
+select public.check_function('borne_sup', 'public.check_integer');
+select public.check_function('borne_inf', 'public.check_integer');
+select public.check_function('condition', 'public.check_sql');
+select public.check_function('preaction', 'public.check_sql');
+
+-- normage rules
+select public.check_function('rubrique', 'public.check_identifier_with_schema');
+
+do $$ begin alter table arc.ihm_normage_regle add constraint ihm_normage_regle_rubrique_nmcl_c 
+check (
+case when id_classe= 'partition' 
+	then public.check_integer(split_part(rubrique_nmcl,',',1)) and public.check_integer(split_part(rubrique_nmcl,',',2))
+	else public.check_identifier_with_schema(rubrique_nmcl)
+end
+); exception when others then end;  $$; 
+
+-- mapping rules
+select public.check_function('variable_sortie', 'public.check_identifier'); 
+select public.check_function('expr_regle_col', 'public.check_sql'); 
+
+-- expression rules
+select public.check_function('expr_nom', 'public.check_identifier'); 
+select public.check_function('expr_valeur', 'public.check_sql'); 
+
+-- webservice declaration rules
+select public.check_function('norme', 'public.check_word');
+select public.check_function('service_name', 'public.check_identifier_token');
+select public.check_function('target_phase', 'public.check_integer');
+
+select public.check_function('query_name', 'public.check_word');
+select public.check_function('expression', 'public.check_sql');
+
+
