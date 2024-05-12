@@ -43,6 +43,9 @@ public class ParquetDao {
 	// parquet file format as "file.parquet"
 	private static final String PARQUET_FILE_EXTENSION = ".parquet";
 
+	ParquetEncryptionKey encryptionKey;
+	
+	
 	/**
 	 * Export to parquet
 	 * 
@@ -54,6 +57,8 @@ public class ParquetDao {
 	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
 
+		this.encryptionKey=encryptionKey;
+		
 		// load duckdb extension
 		loadDuckdb();
 
@@ -63,7 +68,7 @@ public class ParquetDao {
 			unzipExtensions(connection);
 
 			// attach postgres database
-			attachPostgresDatabasesToDuckdb(connection, encryptionKey);
+			attachPostgresDatabasesToDuckdb(connection);
 
 			// create output directory
 			FileUtilsArc.createDirIfNotexist(outputDirectory);
@@ -158,7 +163,13 @@ public class ParquetDao {
 	private void executeCopy(Connection connection, GenericPreparedStatementBuilder selectQuery, String output)
 			throws SQLException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("COPY (").append(selectQuery).append(") TO " + query.quoteText(output) + "; ");
+		query.append("COPY (").append(selectQuery).append(") TO " + query.quoteText(output));
+		
+		if (encryptionKey != null) {
+			query.append("(ENCRYPTION_CONFIG {footer_key: "+query.quoteText(encryptionKey.getType().getAlias())+"})");
+		}
+		
+		query.append(";");
 		executeQuery(connection, query);
 	}
 
@@ -170,7 +181,7 @@ public class ParquetDao {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void attachPostgresDatabasesToDuckdb(Connection connection, ParquetEncryptionKey encryptionKey)
+	private void attachPostgresDatabasesToDuckdb(Connection connection)
 			throws SQLException {
 
 		PropertiesHandler properties = PropertiesHandler.getInstance();
