@@ -34,6 +34,7 @@ ARG S3_OUTPUT_API_URI
 ARG S3_OUTPUT_BUCKET
 ARG S3_OUTPUT_ACCESS
 ARG S3_OUTPUT_SECRET
+ARG S3_OUTPUT_PARQUET_KEY
 
 # Log properties
 COPY . /usr/src/app/
@@ -45,4 +46,4 @@ RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
 ENV ARC_LOGLEVEL=$LOG_LEVEL
 
 ## execute batch
-ENTRYPOINT ["java","-jar","usr/src/app/arc-batch/target/ArcMain.jar"]
+## ENTRYPOINT ["java","-jar","usr/src/app/arc-batch/target/ArcMain.jar"]

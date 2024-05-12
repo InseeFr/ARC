@@ -13,6 +13,8 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
+import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey;
+import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey.EncryptionType;
 import fr.insee.arc.core.service.p6export.provider.DirectoryPathExport;
 import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.dao.SQL;
@@ -123,8 +125,10 @@ public class ExportDao {
 					.directoryExport(properties.getBatchParametersDirectory(), this.coordinatorSandbox.getSchema(), dateExport);
 		 this.s3Out = DirectoryPathExport
 					.s3Export(this.coordinatorSandbox.getSchema(), dateExport);
-
-		new ParquetDao().exportToParquet(tablesToExport, directoryOut, null);
+		 
+		 ParquetEncryptionKey p = properties.getS3OutputParquetKey().isEmpty()?null:new ParquetEncryptionKey(EncryptionType.KEY256, dateExport);
+		 
+		 new ParquetDao().exportToParquet(tablesToExport, directoryOut, p);
 	}
 
 	/**

@@ -56,6 +56,7 @@
 		<property name="s3OutputBucket" value="#{systemEnvironment['S3_OUTPUT_BUCKET'] ?: '${fr.insee.arc.s3.output.bucket}' }"></property>
 		<property name="s3OutputAccess" value="#{systemEnvironment['S3_OUTPUT_ACCESS'] ?: '${fr.insee.arc.s3.output.access}' }"></property>
 		<property name="s3OutputSecret" value="#{systemEnvironment['S3_OUTPUT_SECRET'] ?: '${fr.insee.arc.s3.output.secret}' }"></property>	
+		<property name="s3OutputParquetKey" value="#{systemEnvironment['S3_OUTPUT_PARQUET_KEY'] ?: '${fr.insee.arc.s3.output.parquet.key}' }"></property>	
 
 	</bean>
 	

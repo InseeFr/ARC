@@ -79,6 +79,7 @@ public class PropertiesHandler {
 	private String s3OutputBucket;
 	private String s3OutputAccess;
 	private String s3OutputSecret;
+	private String s3OutputParquetKey;
 
 	private static PropertiesHandler instanceOfPropertiesHandler;
 
@@ -460,6 +461,14 @@ public class PropertiesHandler {
 
 	public void setS3OutputSecret(String s3OutputSecret) {
 		this.s3OutputSecret = s3OutputSecret;
+	}
+
+	public String getS3OutputParquetKey() {
+		return s3OutputParquetKey;
+	}
+
+	public void setS3OutputParquetKey(String s3OutputParquetKey) {
+		this.s3OutputParquetKey = s3OutputParquetKey;
 	}
 
 	public Map<String, String> fullVersionInformation() {

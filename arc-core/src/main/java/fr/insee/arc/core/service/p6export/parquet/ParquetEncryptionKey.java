@@ -3,9 +3,6 @@ package fr.insee.arc.core.service.p6export.parquet;
 public class ParquetEncryptionKey {
 
 	public enum EncryptionType {
-
-		KEY128("key128"),
-		KEY192("key192"),
 		KEY256("key256");
 		
 		private EncryptionType(String alias)
