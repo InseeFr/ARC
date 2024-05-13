@@ -97,10 +97,10 @@ public class SynchronizeRulesAndMetadataOperation {
 		Connection coordinatorConnexion = sandbox.getConnection();
 		String envExecution = sandbox.getSchema();
 
-		ThrowingConsumer<Connection, ArcException> onCoordinator = c -> {
+		ThrowingConsumer<Connection> onCoordinator = c -> {
 		};
 
-		ThrowingConsumer<Connection, ArcException> onExecutor = executorConnection -> {
+		ThrowingConsumer<Connection> onExecutor = executorConnection -> {
 			copyMetaDataToExecutors(coordinatorConnexion, executorConnection, envExecution);
 		};
 
@@ -202,7 +202,7 @@ public class SynchronizeRulesAndMetadataOperation {
 		Connection coordinatorConnexion = sandbox.getConnection();
 		String envExecution = sandbox.getSchema();
 
-		ThrowingConsumer<Connection, ArcException> function = executorConnection -> {
+		ThrowingConsumer<Connection> function = executorConnection -> {
 			SynchronizeRulesAndMetadataDao.mettreAJourSchemaTableMetier(executorConnection, envExecution);
 		};
 

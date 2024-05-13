@@ -29,7 +29,7 @@ public class DatabaseMaintenance {
 	 */
 	public static void maintenancePgCatalogAllNods(Connection coordinatorConnection, String type) throws ArcException {
 
-		ThrowingConsumer<Connection, ArcException> function = executorConnection -> UtilitaireDao.get(0).maintenancePgCatalog(executorConnection, type);
+		ThrowingConsumer<Connection> function = executorConnection -> UtilitaireDao.get(0).maintenancePgCatalog(executorConnection, type);
 
 		ServiceScalability.dispatchOnNods(coordinatorConnection, function, function);
 

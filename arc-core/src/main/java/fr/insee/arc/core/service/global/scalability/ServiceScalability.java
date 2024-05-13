@@ -25,7 +25,7 @@ public class ServiceScalability {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static int dispatchOnNods(Connection coordinatorConnexion, ThrowingConsumer<Connection, ArcException> actionOnCoordinator, ThrowingConsumer<Connection, ArcException> actionOnExecutor) throws ArcException
+	public static int dispatchOnNods(Connection coordinatorConnexion, ThrowingConsumer<Connection> actionOnCoordinator, ThrowingConsumer<Connection> actionOnExecutor) throws ArcException
 	{
 		if (coordinatorConnexion==null)
 		{

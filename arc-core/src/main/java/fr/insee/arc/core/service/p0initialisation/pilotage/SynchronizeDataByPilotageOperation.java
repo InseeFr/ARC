@@ -104,7 +104,7 @@ public class SynchronizeDataByPilotageOperation {
 	 */
 	private int dropUnusedTemporaryTablesAllNods() throws ArcException {
 
-		ThrowingConsumer<Connection, ArcException> function = c -> {
+		ThrowingConsumer<Connection> function = c -> {
 			SynchronizeDataByPilotageDao.dropUnusedTemporaryTablesOnConnection(c,this.sandbox.getSchema());
 		};
 
@@ -122,7 +122,7 @@ public class SynchronizeDataByPilotageOperation {
 		Connection coordinatorConnexion = sandbox.getConnection();
 		String envExecution = sandbox.getSchema();
 		
-		ThrowingConsumer<Connection, ArcException> function = executorConnection -> dropUnusedDataTables(
+		ThrowingConsumer<Connection> function = executorConnection -> dropUnusedDataTables(
 				coordinatorConnexion, executorConnection, envExecution, optionalProvidedIdSourceToDrop);
 
 		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
@@ -248,7 +248,7 @@ public class SynchronizeDataByPilotageOperation {
 					.addSource(coordinatorConnexion, envExecution, TraitementPhase.MAPPING, TraitementEtat.KO);
 		}
 
-		ThrowingConsumer<Connection, ArcException> function = executorConnection -> deleteUnusedDataRecordsAllTables(
+		ThrowingConsumer<Connection> function = executorConnection -> deleteUnusedDataRecordsAllTables(
 				executorConnection, envExecution, listIdSourceInPilotage, optionalProvidedIdSourceToDelete);
 
 		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
