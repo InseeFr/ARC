@@ -154,12 +154,24 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION public.check_sql(query text) RETURNS boolean
 as
 $BODY$
-declare query_analyze text:=regexp_replace(query,'''[^'']+''','','g');
+declare query_analyze text:=query;
 begin
-if (strpos(query_analyze,';')>0 or strpos(query_analyze,'--')>0 or strpos(query_analyze,'/*')>0 or strpos(query_analyze,'*/')>0)
-then
-RAISE EXCEPTION '% \n This SQL contains multiple statements or unclosed comments. Forbidden.', query; 
+	
+query_analyze := replace(query_analyze, '/*', chr(1));
+query_analyze := replace(query_analyze, '*/', chr(2));
+query_analyze := regexp_replace(query_analyze, '\x01[^\x01\x02]*\x02','', 'g');
+query_analyze := regexp_replace(query_analyze,'''[^'']*''','','g');
+
+if (strpos(query_analyze,'''')>0 or  strpos(query_analyze,chr(1))>0 or strpos(query_analyze,chr(2))>0)
+then 
+RAISE EXCEPTION '% \n A quote or a comment bloc of this SQL expression is not correctly enclosed.', query; 
 end if;
+
+if (strpos(query_analyze,';')>0 or strpos(query_analyze,'--')>0)
+then
+RAISE EXCEPTION '% \n This SQL contains multiple statements or not allowed comment line. Forbidden.', query; 
+end if;
+
 return true;
 END; 
 $BODY$
@@ -264,6 +276,9 @@ select public.check_function('type_variable_metier', 'public.check_type');
 -- nmcl
 select public.check_function('nom_table', 'public.check_identifier');
 
+-- chargement rules
+select public.check_function('format', 'public.check_sql');
+
 -- controle rules
 select public.check_function('rubrique_pere', 'public.check_identifier');
 select public.check_function('rubrique_fils', 'public.check_identifier');
@@ -289,7 +304,7 @@ select public.check_function('expr_regle_col', 'public.check_sql');
 
 -- expression rules
 select public.check_function('expr_nom', 'public.check_identifier'); 
-select public.check_function('expr_valeur', 'public.check_sql'); 
+select public.check_function('expr_valeur', 'public.check_sql');
 
 -- webservice declaration rules
 select public.check_function('norme', 'public.check_word');

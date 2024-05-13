@@ -123,11 +123,6 @@ public class BddPatcher {
 				bddParameterDescription(envExecution));
 	}
 
-	private static void setBddScriptVersionWithoutDescription(Connection connexion, String commitId,
-			String... envExecution) {
-		new BDParameters(ArcDatabase.COORDINATOR).setString(connexion, gitCommitIdParameterKey(envExecution), commitId);
-	}
-
 	/**
 	 * parameter description
 	 * 
@@ -211,8 +206,9 @@ public class BddPatcher {
 	 * version de la base de données correpond au numéro de commit de git
 	 * 
 	 * @param connexion
+	 * @throws ArcException 
 	 */
-	public void bddScript(Connection connexion, String... envExecutions) {
+	public void bddScript(Connection connexion, String... envExecutions) throws ArcException {
 
 		String applicationNewGitVersionDate = properties.getVersionDate();
 		String userNameWithRestrictedRights = properties.getDatabaseRestrictedUsername();
@@ -229,37 +225,39 @@ public class BddPatcher {
 	 * @param userNameWithRestrictedRights
 	 * @param connexion
 	 * @param envExecutions
+	 * @throws ArcException 
 	 */
 	private static void bddScript(String applicationNewGitVersionDate, String userNameWithRestrictedRights,
-			Connection connexion, String... envExecutions) {
+			Connection connexion, String... envExecutions) throws ArcException {
 		// retrieve the old version from the parameter table
 		// if param not found, parameter table is created and parameter added
 		String databaseOldGitVersionDate = checkBddScriptVersion(connexion, envExecutions);
 		
 		// if new git version date is strictly older than the old git version date
 		// proceed to database patch
-		if (GitDateFormat.parse(applicationNewGitVersionDate).compareTo(GitDateFormat.parse(databaseOldGitVersionDate)) > 0)
+		// otherwise do nothing
+		if (GitDateFormat.parse(applicationNewGitVersionDate).compareTo(GitDateFormat.parse(databaseOldGitVersionDate)) <= 0)
 		{
+			return;
+		}
 			
-			setBddScriptVersionWithoutDescription(connexion, applicationNewGitVersionDate, envExecutions);
+		// set the new git version before run bdd patching script in order to prevent concurrent patching 
+		setBddScriptVersion(connexion, applicationNewGitVersionDate, envExecutions);
+		
+		// global script. Mainly to build the arc schema
+		try {
 
-			// global script. Mainly to build the arc schema
-			try {
-
-				if (envExecutions == null || envExecutions.length == 0) {
-					bddScriptGlobalExecutor(connexion, userNameWithRestrictedRights);
-				} else {
-					bddScriptEnvironmentExecutor(connexion, userNameWithRestrictedRights, envExecutions);
-				}
-
-			} catch (Exception e) {
-				setBddScriptVersion(connexion, databaseOldGitVersionDate);
+			if (envExecutions == null || envExecutions.length == 0) {
+				bddScriptGlobalExecutor(connexion, userNameWithRestrictedRights);
+			} else {
+				bddScriptEnvironmentExecutor(connexion, userNameWithRestrictedRights, envExecutions);
 			}
 
-			// set version number when the update scripts are over
-			setBddScriptVersion(connexion, applicationNewGitVersionDate, envExecutions);
-
+		} catch (ArcException e) {
+			setBddScriptVersion(connexion, databaseOldGitVersionDate);
+			throw e;
 		}
+
 	}
 
 	public PropertiesHandler getProperties() {
