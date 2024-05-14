@@ -66,7 +66,6 @@ public enum ViewEnum {
 			ColumnEnum.COMMENTAIRE) //
 	, IHM_NORME("ihm_norme", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME,
 			ColumnEnum.PERIODICITE, ColumnEnum.DEF_NORME, ColumnEnum.DEF_VALIDITE, ColumnEnum.ETAT) //
-	, IHM_USER("ihm_user", SchemaEnum.ARC_METADATA, ColumnEnum.IDEP, ColumnEnum.PROFIL) //
 	, SECURITY_WEBSERVICE_LOG("security_webservice_log", SchemaEnum.ARC_METADATA, ColumnEnum.ID_WEBSERVICE_LOGGING,
 			ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION, ColumnEnum.HOST_ALLOWED, ColumnEnum.EVENT_TIMESTAMP) //
 	, IHM_WEBSERVICE_WHITELIST("ihm_webservice_whitelist", SchemaEnum.ARC_METADATA, ColumnEnum.HOST_ALLOWED,

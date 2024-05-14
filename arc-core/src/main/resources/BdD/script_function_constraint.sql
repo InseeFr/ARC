@@ -124,14 +124,14 @@ declare query text;
 begin
 for query in (
 select 
-'do $$ begin alter table '||schemaname||'.'||table_name||' drop constraint '||table_name||'_'||column_name||'_c; exception when others then end;  $$; '
+'do $$ begin alter table '||table_schema||'.'||table_name||' drop constraint '||table_name||'_'||column_name||'_c; exception when others then end;  $$; '
 ||
 case
 when constraint_function is null
 then '' 
-else 'alter table '||schemaname||'.'||table_name||' add constraint '||table_name||'_'||column_name||'_c check ('||constraint_function||'('||column_name||'));'
+else 'alter table '||table_schema||'.'||table_name||' add constraint '||table_name||'_'||column_name||'_c check ('||constraint_function||'('||column_name||'));'
 end
-from information_schema.columns where column_name = col and table_schema= schemaname
+from information_schema.columns where column_name = col and table_schema||'.'||table_name like schemaname||'%'
 ) loop
 	execute query;
 end loop;
@@ -144,7 +144,7 @@ CREATE OR REPLACE function public.check_function(col text, constraint_function t
 as
 $BODY$
 begin
-return public.check_function('arc', col, constraint_function);
+return public.check_function('arc.ihm', col, constraint_function);
 END; 
 $BODY$
 LANGUAGE plpgsql;
@@ -314,4 +314,9 @@ select public.check_function('target_phase', 'public.check_integer');
 select public.check_function('query_name', 'public.check_word');
 select public.check_function('expression', 'public.check_sql');
 
+-- ihm_nmcl
+select public.check_function('nom_table', 'public.check_identifier');
 
+-- ihm_entrepot
+select public.check_function('id_entrepot', 'public.check_identifier_token');
+select public.check_function('id_loader', 'public.check_identifier_token');

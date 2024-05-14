@@ -1,16 +1,23 @@
 # Change Log
 
 ## TODO List
-- download functionality from pilotage will now be put in a download directory in the sandbox filesystem instrad of being downlod to user gui
-- export to parquet for volatile database will be added to pipeline
-- checkmarx security update
-
 All notable changes to this project will be documented in this file.
 
+## version-94.1.14b
+- add gui constraints for all rules
+- new gui generic error message
+- docker add : parquet encryption key for minio s3 export
+- docker add : keycloak
+
+## version-94.1.13b
+- rest webservice securisation for injection
+- gui database securisation for injection
+
 ## version-94.1.12b
-- some checkmarx fix
-- ip caching to avoid dsn spam in batch mode
-- deprecated spring security fix
+- checkmarx fix
+- databases ip caching to avoid dsn spam in batch mode
+- deprecated spring security fix (rest webservice and web)
+- action are now logged with idep
 
 ## version-94.1.11b
 - ARC batch exports data to parquet (when fr.insee.arc.process.export property is not empty). Default is off

@@ -40,7 +40,6 @@ public enum ColumnEnum {
 	, HOST_ALLOWED("host_allowed", TypeEnum.TEXT, "") // ihm_webservice_whitelist,security_webservice_log
 	, ID("id", TypeEnum.TEXT, "") // ext_webservice_type,ext_mod_periodicite,ext_webservice_queryview,ext_export_format,ext_etat,ext_type_normage,ext_type_fichier_chargement,ext_type_controle,ext_etat_jeuderegle
 	, ID_SAX("id", TypeEnum.INTEGER, "") // used by sax xml loaders
-	, IDEP("idep", TypeEnum.TEXT, "") // ihm_user
 	, ID_APPLICATION("id_application", TypeEnum.TEXT, "") // ihm_webservice_whitelist,security_webservice_log,ihm_client
 	, ID_CLASSE("id_classe", TypeEnum.TEXT, "") // ihm_normage_regle,ihm_controle_regle
 	, ID_ENTREPOT("id_entrepot", TypeEnum.TEXT, "") // ihm_entrepot
@@ -65,7 +64,6 @@ public enum ColumnEnum {
 	, ORDRE("ordre", TypeEnum.INTEGER, "") // ext_type_fichier_chargement,ext_type_controle,ext_type_normage
 	, PERIODICITE("periodicite", TypeEnum.TEXT, "") // ihm_controle_regle,ihm_jeuderegle,ihm_calendrier,ihm_mapping_regle,ihm_normage_regle,ihm_expression,ihm_ws_context,ihm_norme,ihm_chargement_regle
 	, PRE_ACTION("pre_action", TypeEnum.TEXT, "") // ihm_controle_regle
-	, PROFIL("profil", TypeEnum.TEXT, "") // ihm_user
 	, QUERY_ID("query_id", TypeEnum.INTEGER, "") // ihm_ws_query
 	, QUERY_NAME("query_name", TypeEnum.TEXT, "") // ihm_ws_query
 	, QUERY_VIEW("query_view", TypeEnum.INTEGER, "") // ihm_ws_query

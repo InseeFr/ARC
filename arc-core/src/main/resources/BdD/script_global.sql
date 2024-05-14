@@ -336,13 +336,8 @@ DROP TABLE IF EXISTS arc.ihm_schema_nmcl;
 
 DROP TABLE IF EXISTS arc.ihm_seuil;
 
--- table des users
-CREATE TABLE IF NOT EXISTS arc.ihm_user 
-( 
-idep text NOT NULL, 
-profil text, 
-CONSTRAINT ihm_user_pkey PRIMARY KEY (idep) 
-); 
+-- table des users deprecated
+DROP TABLE IF EXISTS arc.ihm_user;
 
 -- table des entrepots de données        
 CREATE TABLE IF NOT EXISTS arc.ihm_entrepot 

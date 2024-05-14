@@ -33,8 +33,8 @@ public class ViewExport extends VObject {
                 put("nomenclature_export", new ColumnRendering(true, "Nomenclature de définition de l'export", "11%", "text", null, true));
                 put("filter_table", new ColumnRendering(true, "Filtre", "11%", "text", null, true));
                 put("order_table", new ColumnRendering(true, "Tri", "11%", "text", null, true));
-                put("columns_array_header", new ColumnRendering(true, "Colonne(s) tableau contenant des entetes", "11%", "text", null, true));
-                put("columns_array_value", new ColumnRendering(true, "Colonne(s) tableau contenant des valeurs", "11%", "text", null, true));
+                put("columns_array_header", new ColumnRendering(true, "Colonne tableau contenant des entetes", "11%", "text", null, true));
+                put("columns_array_value", new ColumnRendering(true, "Colonne tableau contenant des valeurs", "11%", "text", null, true));
                 put("etat", new ColumnRendering(true, "Etat du dernier export", "10%", "text", null, false));
 
                 
