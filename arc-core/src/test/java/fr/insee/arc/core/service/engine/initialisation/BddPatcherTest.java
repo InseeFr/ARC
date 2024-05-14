@@ -97,13 +97,19 @@ public class BddPatcherTest extends InitializeQueryTest {
 	private static void createDatabase(String restrictedUser) throws ArcException {
 		GenericPreparedStatementBuilder query;
 
+		query = new GenericPreparedStatementBuilder();
+		query.append("select distinct schemaname from pg_tables where schemaname like 'arc%';");
+		List<String> schemasToDelete = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("schemaname");
+		
 		// clean database
 		query = new GenericPreparedStatementBuilder();
-		query.append("DROP SCHEMA IF EXISTS " + testMetaDataSchema + " CASCADE;");
-		query.append("DROP SCHEMA IF EXISTS " + testSandbox1 + " CASCADE;");
+		for (String schemaToDelete:schemasToDelete)
+		{
+			query.append("DROP SCHEMA IF EXISTS " + schemaToDelete + " CASCADE;");
+		}
 		query.append("DROP SCHEMA IF EXISTS public CASCADE;");
 		UtilitaireDao.get(0).executeRequest(c, query);
-		
+
 		BddPatcher patcher=new BddPatcher();
 		patcher.getProperties().setVersionDate(newVersionBuildDate);
 		patcher.getProperties().setDatabaseRestrictedUsername(userWithRestrictedRights);
