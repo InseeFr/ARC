@@ -34,8 +34,9 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 	 * Entering sandbox monitoring from main menu build the database and filesystem
 	 * 
 	 * @return
+	 * @throws ArcException 
 	 */
-	public String enterPilotageBAS(Model model) {
+	public String enterPilotageBAS(Model model) throws ArcException {
 		new BddPatcher().bddScript(null, getBacASable());
 		return generateDisplay(model, RESULT_SUCCESS);
 	}

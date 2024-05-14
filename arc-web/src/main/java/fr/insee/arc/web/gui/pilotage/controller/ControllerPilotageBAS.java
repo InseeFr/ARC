@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.web.gui.pilotage.service.ServiceViewPilotageBAS;
 
 @Controller
@@ -15,9 +16,10 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	 * Entering sandbox monitoring from main menu build the database and filesystem
 	 * 
 	 * @return
+	 * @throws ArcException 
 	 */
 	@RequestMapping("/secure/enterPilotageBAS")
-	public String enterPilotageBASAction(Model model) {
+	public String enterPilotageBASAction(Model model) throws ArcException {
 		return enterPilotageBAS(model);
 	}
 
