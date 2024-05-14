@@ -125,7 +125,7 @@ public class SynchronizeRulesAndMetadataOperation {
 				properties.getDatabaseRestrictedUsername(), null, null);
 
 		// add tables for phases if required
-		BddPatcher.bddScriptEnvironmentExecutor(executorConnection, properties.getDatabaseRestrictedUsername(),
+		BddPatcher.bddScriptEnvironment(executorConnection, properties.getDatabaseRestrictedUsername(),
 				new String[] { envExecution });
 
 		// copy tables

@@ -144,7 +144,7 @@ public class BddPatcher {
 	 * @param properties
 	 * @throws ArcException
 	 */
-	private static void bddScriptGlobalExecutor(Connection connexion, String userNameWithRestrictedRights)
+	private static void bddScriptGlobal(Connection connexion, String userNameWithRestrictedRights)
 			throws ArcException {
 
 		Integer nbSandboxes = new BDParameters(ArcDatabase.COORDINATOR).getInt(connexion,
@@ -172,7 +172,7 @@ public class BddPatcher {
 	 * @param envExecutions
 	 * @throws ArcException
 	 */
-	public static void bddScriptEnvironmentExecutor(Connection connexion, String userNameWithRestrictedRights,
+	public static void bddScriptEnvironment(Connection connexion, String userNameWithRestrictedRights,
 			String[] envExecutions) throws ArcException {
 		for (String envExecution : envExecutions) {
 			executeBddScript(connexion, "BdD/script_sandbox.sql", userNameWithRestrictedRights, null, envExecution);
@@ -183,6 +183,22 @@ public class BddPatcher {
 			bddScriptSandboxPhases(connexion, userNameWithRestrictedRights, envExecution);
 		}
 	}
+	
+	/**
+	 * Execute the sql script for environements
+	 * 
+	 * @param connexion
+	 * @param properties
+	 * @param envExecutions
+	 * @throws ArcException
+	 */
+	public static void bddScriptEnvironmentExportRules(Connection connexion, String userNameWithRestrictedRights,
+			String[] envExecutions) throws ArcException {
+		for (String envExecution : envExecutions) {
+			executeBddScript(connexion, "BdD/script_sandbox_export.sql", userNameWithRestrictedRights, null, envExecution);
+		}
+	}
+	
 
 	/**
 	 * create in the sandbox the tables need for each phases
@@ -248,9 +264,10 @@ public class BddPatcher {
 		try {
 
 			if (envExecutions == null || envExecutions.length == 0) {
-				bddScriptGlobalExecutor(connexion, userNameWithRestrictedRights);
+				bddScriptGlobal(connexion, userNameWithRestrictedRights);
 			} else {
-				bddScriptEnvironmentExecutor(connexion, userNameWithRestrictedRights, envExecutions);
+				bddScriptEnvironment(connexion, userNameWithRestrictedRights, envExecutions);
+				bddScriptEnvironmentExportRules(connexion, userNameWithRestrictedRights, envExecutions);
 			}
 
 		} catch (ArcException e) {
