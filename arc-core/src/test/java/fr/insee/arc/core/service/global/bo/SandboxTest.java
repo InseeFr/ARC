@@ -22,7 +22,6 @@ public class SandboxTest extends InitializeQueryTest {
 
 	@Test
 	public void isEnvSetForProductionTest() throws IOException, SQLException, ArcException {
-		BddPatcherTest.createDatabase();
 
 		File root = testFolder.newFolder("root");
 		String repertoire = root.getAbsolutePath();
