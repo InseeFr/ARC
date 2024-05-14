@@ -3,15 +3,12 @@
 ## TODO List
 All notable changes to this project will be documented in this file.
 
-## version-94.1.14b
-- add gui constraints for all rules
+## version-94.1.15b
+- rest webservice securisation for injection
+- gui database securisation for injection (add gui constraints for all rules)
 - new gui generic error message
 - docker add : parquet encryption key for minio s3 export
 - docker add : keycloak
-
-## version-94.1.13b
-- rest webservice securisation for injection
-- gui database securisation for injection
 
 ## version-94.1.12b
 - checkmarx fix
