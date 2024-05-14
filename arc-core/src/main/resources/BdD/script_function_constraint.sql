@@ -61,15 +61,14 @@ CREATE OR REPLACE FUNCTION public.check_integer(unsafe text) RETURNS boolean
 as
 $BODY$
 begin
-if (regexp_replace(regexp_replace(lower(unsafe), '^[^123456789]+','', 'g'),'[^0-9]+','','g') != lower(unsafe))
+if (regexp_replace(lower(unsafe),'[^0-9]+','','g') != lower(unsafe))
 then
-RAISE EXCEPTION '% format is not correct. Allowed chars (between parenthesis are the chars allowed at the start of expression) : (1-9) 0-9', unsafe; 
+RAISE EXCEPTION '% format is not correct. Allowed chars (between parenthesis are the chars allowed at the start of expression) : 0-9', unsafe; 
 end if;
 return true;
 END; 
 $BODY$
 LANGUAGE plpgsql;
-
 
 CREATE OR REPLACE FUNCTION public.check_type(unsafe text) RETURNS boolean
 as
