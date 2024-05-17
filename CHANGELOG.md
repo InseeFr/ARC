@@ -3,7 +3,7 @@
 ## TODO List
 All notable changes to this project will be documented in this file.
 
-## version-94.1.16b
+## version-94.1.17b
 - rest webservice securisation for injection
 - gui database securisation for injection (add gui constraints for all rules)
 - new gui generic error message

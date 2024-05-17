@@ -11,6 +11,19 @@ END;
 $BODY$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION public.check_directory_token(unsafe text) RETURNS boolean
+as
+$BODY$
+begin
+if (regexp_replace(regexp_replace(lower(unsafe), '^[^a-z]+','', 'g'),'[^a-z0-9\-]+','','g') != lower(unsafe))
+then
+RAISE EXCEPTION '% format is not correct. Allowed chars (between parenthesis are the chars allowed at the start of expression) : (A-Z a-z) 0-9 -', unsafe; 
+end if;
+return true;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION public.check_identifier(unsafe text) RETURNS boolean
 as
 $BODY$
@@ -317,5 +330,6 @@ select public.check_function('expression', 'public.check_sql');
 select public.check_function('nom_table', 'public.check_identifier');
 
 -- ihm_entrepot
-select public.check_function('id_entrepot', 'public.check_identifier_token');
-select public.check_function('id_loader', 'public.check_identifier_token');
+select public.check_function('id_entrepot', 'public.check_directory_token');
+select public.check_function('id_loader', 'public.check_directory_token');
+
