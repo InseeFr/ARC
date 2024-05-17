@@ -185,6 +185,7 @@ ___
 | s3OutputAccess | S3_OUTPUT_ACCESS  | fr.insee.arc.s3.output.access  |
 | s3OutputSecret | S3_OUTPUT_SECRET  | fr.insee.arc.s3.output.secret  |
 | s3OutputParquetKey | S3_OUTPUT_PARQUET_KEY  | fr.insee.arc.s3.output.parquet.key  |
+| | KEYCLOAK_AUTHORIZED_ROLES | fr.insee.arc.roles.admin |
 | | KEYCLOAK_REALM  | fr.insee.keycloak.realm  |
 | | KEYCLOAK_SERVER  | fr.insee.keycloak.server  |
 | | KEYCLOAK_RESOURCE  | fr.insee.keycloak.resource  |
