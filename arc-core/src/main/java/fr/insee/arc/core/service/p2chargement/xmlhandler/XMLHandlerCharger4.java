@@ -15,7 +15,6 @@ import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.dao.HandlerXMLDao;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.FastList;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
 /**

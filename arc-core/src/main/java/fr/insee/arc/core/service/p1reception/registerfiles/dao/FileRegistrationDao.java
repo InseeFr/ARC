@@ -237,6 +237,11 @@ public class FileRegistrationDao {
 						+ ColumnEnum.ID_SOURCE.getColumnName() + ") values (" + requete.quoteText(f.getContainerName())
 						+ "," + requete.quoteText(f.getFileName()) + "); \n");
 			}
+			if (requete.getParameters().size()>FormatSQL.MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT)
+			{
+				UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
+				requete = new ArcPreparedStatementBuilder();
+			}
 		}
 		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 	}
