@@ -239,6 +239,8 @@ public class FileRegistrationDao {
 			}
 			if (requete.getParameters().size()>FormatSQL.MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT)
 			{
+				requete.append(SQL.COMMIT);
+				requete.append(SQL.END_QUERY);
 				UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 				requete = new ArcPreparedStatementBuilder();
 			}
