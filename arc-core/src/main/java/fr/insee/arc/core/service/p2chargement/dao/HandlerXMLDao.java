@@ -218,7 +218,12 @@ public class HandlerXMLDao {
 
 	public void execQueryInsert() throws SAXParseException {
 
-		if (this.requetesLength > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
+		int numberOfParameters = 0;
+		for (Map.Entry<String,ArcPreparedStatementBuilder> entry : requetes.entrySet()) {
+			numberOfParameters+=entry.getValue().getParameters().size();
+		}
+		
+		if (numberOfParameters > FormatSQL.MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT) {
 
 			ArcPreparedStatementBuilder query = computeFinalQuery();
 

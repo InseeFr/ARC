@@ -33,7 +33,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final boolean DROP_FIRST_TRUE = true;
 
 	public static final int TAILLE_MAXIMAL_BLOC_SQL = 700000;
-	public static final int MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT = 20000;
+	public static final int MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT = 30000;
 
 	public static final int TIMEOUT_MAINTENANCE = 600000;
 
