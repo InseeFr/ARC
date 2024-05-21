@@ -230,12 +230,22 @@ public class FileRegistrationDao {
 	 */
 	public void execQueryTemporaryInsertRegisteredFiles(FilesDescriber registeredFile) throws ArcException {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		
+		boolean first = true;
 		// insertion des fichiers enregitrés dans la table tablePilTemp
 		for (FileDescriber f : registeredFile.getFilesAttribute()) {
 			if (f.getFileName() != null) {
-				requete.append("insert into " + this.tablePilTemp + " (container, "
-						+ ColumnEnum.ID_SOURCE.getColumnName() + ") values (" + requete.quoteText(f.getContainerName())
-						+ "," + requete.quoteText(f.getFileName()) + "); \n");
+				if (first)
+				{
+					requete.append("insert into " + this.tablePilTemp + " (container, "
+							+ ColumnEnum.ID_SOURCE.getColumnName() + ") values (" + requete.quoteText(f.getContainerName())
+							+ "," + requete.quoteText(f.getFileName()) + ")");
+					first = false;
+				}
+				else
+				{
+					requete.append(",(" + requete.quoteText(f.getContainerName())+ "," + requete.quoteText(f.getFileName()) + ")");
+				}
 			}
 			if (requete.getParameters().size()>FormatSQL.MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT)
 			{
@@ -243,6 +253,7 @@ public class FileRegistrationDao {
 				requete.append(SQL.END_QUERY);
 				UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 				requete = new ArcPreparedStatementBuilder();
+				first = true;
 			}
 		}
 		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
