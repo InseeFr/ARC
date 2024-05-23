@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.webutils.WebAttributesName;
 
 public class Oauth2ClientForKeycloak {
@@ -43,15 +44,15 @@ public class Oauth2ClientForKeycloak {
 	private static final String CLAIM_REALM_ACCESS = "realm_access";
 
 	
-	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method) {
+	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method, PropertiesHandler properties) {
 
-		String realmUri = keycloakServer + "/realms/" + keycloakRealm;
+		String realmUri = properties.getKeycloakServer() + "/realms/" + properties.getKeycloakRealm();
 		String openIdConnect = "/protocol/openid-connect";
 
 		return ClientRegistration //
-				.withRegistrationId(keycloakRealm) //
-				.clientId(keycloakResource) //
-				.clientSecret(keycloakCredential) //
+				.withRegistrationId(properties.getKeycloakRealm()) //
+				.clientId(properties.getKeycloakResource()) //
+				.clientSecret(properties.getKeycloakCredential()) //
 				.redirectUri("{baseUrl}" + "/login/oauth2/code/" + "{registrationId}") //
 				.clientAuthenticationMethod(method) //
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) //
