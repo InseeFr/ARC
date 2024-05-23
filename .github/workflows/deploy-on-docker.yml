@@ -9,20 +9,7 @@ on:
     types: [published]
 
 jobs:
-  version:
-    steps:
-        - uses: actions/checkout@v2
-        - name: Set output
-          id: vars
-          run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-        - name: Check output
-          env:
-            RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-          run: |
-            echo $RELEASE_VERSION
-            echo ${{ steps.vars.outputs.tag }}
   build:
-  	needs: version
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -60,7 +47,7 @@ jobs:
           context: .
           file: ./app-web.Dockerfile
           tags: |
-            ${{ github.ref_type == 'tag' && format('inseefr/arc:{0}', RELEASE_VERSION) || '' }}
+            ${{ github.ref_type == 'tag' && format('inseefr/arc:{0}', GITHUB_REF_NAME) || '' }}
             ${{ github.ref == 'refs/heads/master' && 'inseefr/arc:latest' || '' }}
       - name: Push arc-ws to Docker Hub
         uses: docker/build-push-action@v2
@@ -69,7 +56,7 @@ jobs:
           context: .
           file: ./app-ws.Dockerfile
           tags: |
-            ${{ github.event_name == 'tag' && format('inseefr/arc-ws:{0}', RELEASE_VERSION) || '' }}
+            ${{ github.event_name == 'tag' && format('inseefr/arc-ws:{0}', GITHUB_REF_NAME) || '' }}
             ${{ github.ref == 'refs/heads/master' && 'inseefr/arc-ws:latest' || '' }}
       - name: Push arc-batch to Docker Hub
         uses: docker/build-push-action@v2
@@ -78,5 +65,5 @@ jobs:
           context: .
           file: ./app-batch.Dockerfile
           tags: |
-            ${{ github.event_name == 'tag' && format('inseefr/arc-batch:{0}', RELEASE_VERSION) || '' }}
+            ${{ github.event_name == 'tag' && format('inseefr/arc-batch:{0}', GITHUB_REF_NAME) || '' }}
             ${{ github.ref == 'refs/heads/master' && 'inseefr/arc-batch:latest' || '' }}
