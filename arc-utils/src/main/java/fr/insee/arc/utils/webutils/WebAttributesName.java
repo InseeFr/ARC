@@ -54,6 +54,10 @@ public class WebAttributesName {
 		dbHealthCheck.put(HEALTHCHECK_ATTRIBUTE_STATUS, status);
 
 		map.put(HEALTHCHECK_ATTRIBUTE_VERSION, properties.getVersion());
+		
+		map.put(KEYCLOAK_ATTRIBUTE_REALM, properties.getKeycloakRealm());
+		map.put(KEYCLOAK_ATTRIBUTE_SERVER, properties.getKeycloakServer());
+		map.put(KEYCLOAK_ATTRIBUTE_RESOURCE, properties.getKeycloakResource());
 
 		return map.getOrDefault(HEALTHCHECK_ATTRIBUTE_STATUS, "").equals(HEALTHCHECK_RESULT_UP);
 	}

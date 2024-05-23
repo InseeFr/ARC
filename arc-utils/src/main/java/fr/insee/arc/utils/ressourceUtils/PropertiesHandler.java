@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import fr.insee.arc.utils.consumer.ThrowingFunction;
@@ -13,6 +14,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.utils.webutils.WebAttributesName;
 
 @Service("properties")
 public class PropertiesHandler {
@@ -81,6 +83,18 @@ public class PropertiesHandler {
 	private String s3OutputSecret;
 	private String s3OutputParquetKey;
 
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_REALM)
+	protected String keycloakRealm;
+
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_SERVER)
+	private String keycloakServer;
+	
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_RESOURCE)
+	private String keycloakResource;
+
+	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_CREDENTIALS)
+	private String keycloakCredential;
+	
 	private static PropertiesHandler instanceOfPropertiesHandler;
 
 	// remap database host address ; can be useful to prevent dns spam for example
@@ -482,6 +496,9 @@ public class PropertiesHandler {
 		map.put("number_of_volatile_executors", String.valueOf(getKubernetesExecutorNumber()));
 		map.put("S3_Input", String.valueOf(!getS3InputApiUri().isEmpty()));
 		map.put("S3_Output", String.valueOf(!getS3OutputApiUri().isEmpty()));
+		map.put("keycloak server", keycloakServer);
+		map.put("keycloak realm", keycloakRealm);
+		map.put("keycloak ressource", keycloakResource);
 		return map;
 	}
 
@@ -569,5 +586,36 @@ public class PropertiesHandler {
 		this.remapHostAddress = remapHostAddress;
 	}
 
+	public String getKeycloakRealm() {
+		return keycloakRealm;
+	}
+
+	public void setKeycloakRealm(String keycloakRealm) {
+		this.keycloakRealm = keycloakRealm;
+	}
+
+	public String getKeycloakServer() {
+		return keycloakServer;
+	}
+
+	public void setKeycloakServer(String keycloakServer) {
+		this.keycloakServer = keycloakServer;
+	}
+
+	public String getKeycloakResource() {
+		return keycloakResource;
+	}
+
+	public void setKeycloakResource(String keycloakResource) {
+		this.keycloakResource = keycloakResource;
+	}
+
+	public String getKeycloakCredential() {
+		return keycloakCredential;
+	}
+
+	public void setKeycloakCredential(String keycloakCredential) {
+		this.keycloakCredential = keycloakCredential;
+	}
 
 }

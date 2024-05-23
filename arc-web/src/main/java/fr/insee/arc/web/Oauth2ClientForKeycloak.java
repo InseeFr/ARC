@@ -88,4 +88,7 @@ public class Oauth2ClientForKeycloak {
 			return mappedAuthorities;
 		};
 	}
+	
+	
+	
 }
