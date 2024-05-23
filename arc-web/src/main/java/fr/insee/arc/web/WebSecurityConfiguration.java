@@ -25,12 +25,12 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 
 	// register Keycloak oauth2 client for authentification flow
 	@Bean
-	public ClientRegistrationRepository clientRegistrationRepository() {
-		if (WebAttributesName.isKeycloakActive(keycloakRealm)) {
+	public ClientRegistrationRepository clientRegistrationRepository(PropertiesHandler properties) {
+		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			StaticLoggerDispatcher.custom(LOGGER, "Keycloak is set for arc-web");
 
 			return new InMemoryClientRegistrationRepository(
-					keycloakClientRegistration(ClientAuthenticationMethod.CLIENT_SECRET_BASIC));
+					keycloakClientRegistration(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, properties));
 		}
 		StaticLoggerDispatcher.custom(LOGGER, "Keycloak is NOT set for arc-web");
 		return null;
@@ -45,7 +45,7 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 		}
 		
 		// oath2 keycloak
-		if (WebAttributesName.isKeycloakActive(keycloakRealm)) {
+		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
 			.authorizeHttpRequests(t -> t.requestMatchers("/secure/**", "/debug/**").hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
 		}

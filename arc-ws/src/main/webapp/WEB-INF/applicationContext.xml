@@ -31,8 +31,13 @@
 		<property name="versionDate" value="${git.commit.time:}"></property>
 		<property name="gitCommitId" value="${git.commit.id:}"></property>
 		<property name="application" value="${fr.insee.application:ARC}"></property>
-		<property name="authorizedRoles" value="${fr.insee.arc.roles.admin:}"></property>
-		
+
+		<property name="authorizedRoles" value="#{systemEnvironment['KEYCLOAK_AUTHORIZED_ROLES'] ?: '${fr.insee.arc.roles.admin:}' }"></property>
+		<property name="keycloakRealm" value="#{systemEnvironment['KEYCLOAK_REALM'] ?: '${fr.insee.keycloak.realm}' }"></property>
+		<property name="keycloakServer" value="#{systemEnvironment['KEYCLOAK_SERVER'] ?: '${fr.insee.keycloak.server}' }"></property>
+		<property name="keycloakResource" value="#{systemEnvironment['KEYCLOAK_RESOURCE'] ?: '${fr.insee.keycloak.resource}' }"></property>
+		<property name="keycloakCredential" value="#{systemEnvironment['KEYCLOAK_CREDENTIALS'] ?: '${fr.insee.keycloak.credentials.secret}' }"></property>
+
 		<property name="kubernetesApiUri" value="#{systemEnvironment['KUBERNETES_API_URI'] ?: '${fr.insee.arc.kubernetes.api.uri}' }"></property>
 		<property name="kubernetesApiNamespace" value="#{systemEnvironment['KUBERNETES_API_NAMESPACE'] ?: '${fr.insee.arc.kubernetes.api.namespace}' }"></property>
 		<property name="kubernetesApiTokenPath" value="#{systemEnvironment['KUBERNETES_API_TOKEN_PATH'] ?: '${fr.insee.arc.kubernetes.api.token.path}' }"></property>

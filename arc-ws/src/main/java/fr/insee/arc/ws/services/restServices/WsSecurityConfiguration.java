@@ -35,12 +35,6 @@ public class WsSecurityConfiguration {
 
 	private static final Logger LOGGER = LogManager.getLogger(WsSecurityConfiguration.class);
 
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_REALM)
-	private String keycloakRealm;
-
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_SERVER)
-	private String keycloakServer;
-
 	public JwtAuthenticationConverter jwtAuthenticationConverterForKeycloak() {
 		Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter = jwt -> {
 			Map<String, Object> resourceAccess = jwt.getClaim("realm_access");
@@ -61,10 +55,8 @@ public class WsSecurityConfiguration {
 	}
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		
-		if (WebAttributesName.isKeycloakActive(keycloakRealm)) {
-
+	SecurityFilterChain securityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
+		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtResourceServer -> jwtResourceServer
 					.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak())))
 					.authorizeHttpRequests(t -> t.requestMatchers(new AntPathRequestMatcher("/execute/**"))
@@ -81,10 +73,10 @@ public class WsSecurityConfiguration {
 	}
 
 	@Bean
-	public JwtDecoder jwtDecoder() {
-		if (WebAttributesName.isKeycloakActive(keycloakRealm)) {
+	public JwtDecoder jwtDecoder(PropertiesHandler properties) {
+		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			StaticLoggerDispatcher.custom(LOGGER, "Keycloak is set for arc-ws");
-			return JwtDecoders.fromIssuerLocation(keycloakServer + "/realms/" + keycloakRealm);
+			return JwtDecoders.fromIssuerLocation(properties.getKeycloakServer() + "/realms/" + properties.getKeycloakRealm());
 		}
 		StaticLoggerDispatcher.custom(LOGGER, "Keycloak is NOT set for arc-ws");
 		return null;

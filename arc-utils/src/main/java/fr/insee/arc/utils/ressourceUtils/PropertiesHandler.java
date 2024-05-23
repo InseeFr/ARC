@@ -83,16 +83,9 @@ public class PropertiesHandler {
 	private String s3OutputSecret;
 	private String s3OutputParquetKey;
 
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_REALM)
 	protected String keycloakRealm;
-
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_SERVER)
 	private String keycloakServer;
-	
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_RESOURCE)
 	private String keycloakResource;
-
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_CREDENTIALS)
 	private String keycloakCredential;
 	
 	private static PropertiesHandler instanceOfPropertiesHandler;

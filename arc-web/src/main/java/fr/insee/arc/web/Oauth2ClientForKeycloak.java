@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -15,22 +14,9 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 
-import fr.insee.arc.utils.webutils.WebAttributesName;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class Oauth2ClientForKeycloak {
-
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_REALM)
-	protected String keycloakRealm;
-
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_SERVER)
-	private String keycloakServer;
-	
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_RESOURCE)
-	private String keycloakResource;
-
-	@Value(WebAttributesName.KEYCLOAK_ATTRIBUTE_CREDENTIALS)
-	private String keycloakCredential;
-
 
 	private static final String SCOPE_OPENID = "openid";
 	private static final String SCOPE_PROFILE = "profile";
@@ -43,15 +29,15 @@ public class Oauth2ClientForKeycloak {
 	private static final String CLAIM_REALM_ACCESS = "realm_access";
 
 	
-	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method) {
+	protected ClientRegistration keycloakClientRegistration(ClientAuthenticationMethod method, PropertiesHandler properties) {
 
-		String realmUri = keycloakServer + "/realms/" + keycloakRealm;
+		String realmUri = properties.getKeycloakServer() + "/realms/" + properties.getKeycloakRealm();
 		String openIdConnect = "/protocol/openid-connect";
 
 		return ClientRegistration //
-				.withRegistrationId(keycloakRealm) //
-				.clientId(keycloakResource) //
-				.clientSecret(keycloakCredential) //
+				.withRegistrationId(properties.getKeycloakRealm()) //
+				.clientId(properties.getKeycloakResource()) //
+				.clientSecret(properties.getKeycloakCredential()) //
 				.redirectUri("{baseUrl}" + "/login/oauth2/code/" + "{registrationId}") //
 				.clientAuthenticationMethod(method) //
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) //
