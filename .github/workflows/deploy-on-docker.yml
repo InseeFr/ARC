@@ -22,6 +22,7 @@ jobs:
             echo $RELEASE_VERSION
             echo ${{ steps.vars.outputs.tag }}
   build:
+  	needs: version
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
