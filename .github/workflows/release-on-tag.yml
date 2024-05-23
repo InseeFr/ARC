@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: show event
+      run: |
+        echo "Tag name : $${{ github.event.release.tag_name }}"
+        echo "ref name : $${{ github.event.ref_name }}"
+        echo "Event name : ${{github.event_name}}"
+        echo "Ref type : ${{github.ref_type}}"
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
