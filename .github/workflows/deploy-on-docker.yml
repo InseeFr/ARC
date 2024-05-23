@@ -24,13 +24,18 @@ jobs:
       run: mvn verify
   push_to_registry:
     needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.event_name == 'release'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: show event
+		run: |
+         echo "Tag name ${{github.ref_name}}"
+         echo "Event name : ${{github.event_name}}"
+         echo "Ref type : ${{github.ref_type}}"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
