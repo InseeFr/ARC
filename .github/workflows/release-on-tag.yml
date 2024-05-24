@@ -3,21 +3,13 @@ name: release-on-tag
 on:
   push:
    tags:
-     - version*-
+     - version-*
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: show event
-      run: |
-        echo "Tag name : $${{ github.event.release.tag_name }}"
-        echo "ref name : $${{github.ref_name:1}}"
-        echo "Event name : ${{github.event_name}}"
-        echo "Ref type : ${{github.ref_type}}"
-        echo "VERSION=${VERSION:1}" >> $GITHUB_ENV
-        
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
