@@ -303,7 +303,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			connexionWrapper.getConnexion().setAutoCommit(true);
 			try (Statement st = connexionWrapper.getConnexion().createStatement();) {
 				try {
-					st.execute(ModeRequete.configureQuery(requete, modes).getQueryWithParameters().toString());
+					st.execute(ModeRequete.configureQuery(requete, modes).getQueryWithParameters());
 					LoggerHelper.traceAsComment(LOGGER, "END executeImmediate");
 				} catch (SQLException e) {
 					try {
