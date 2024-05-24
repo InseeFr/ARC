@@ -129,8 +129,10 @@ public class ParquetDao {
 			}
 			query.append("SELECT * FROM " + attachedTableName(connectionIndex, table.getTableName()));
 		}
-
-		executeCopy(connection, query, outputFileName);
+		
+		if (checkNotEmpty(connection, query)) {
+			executeCopy(connection, query, outputFileName);
+		}
 		
 	}
 
@@ -150,7 +152,36 @@ public class ParquetDao {
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SELECT * FROM " + attachedTableName(ArcDatabase.COORDINATOR.getIndex(), table.getTableName()));
-		executeCopy(connection, query, outputFileName);
+		
+		if (checkNotEmpty(connection, query)) {
+			executeCopy(connection, query, outputFileName);
+		}
+	}
+
+	/**
+	 * check if the table selected by the query is not empty
+	 * @param connection
+	 * @param selectQuery
+	 * @return true if the table contains at least 1 line, false if not
+	 * @throws SQLException
+	 */
+	protected boolean checkNotEmpty(Connection connection, GenericPreparedStatementBuilder selectQuery)
+			throws SQLException {
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		query.append("SELECT count(*) FROM (").append(selectQuery).append(" LIMIT 1) a;\n");
+		
+		int countLine;
+		try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
+			stmt.execute();
+			
+			try (ResultSet rs = stmt.getResultSet())
+			{
+				rs.next();
+				countLine = rs.getInt(1);
+			}
+		}
+		
+		return (countLine == 1);
 	}
 
 	/**
