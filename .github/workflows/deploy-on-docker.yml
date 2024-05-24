@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - master
-  pull_request:
-  release:
-    types: [published]
 
 jobs:
   build:
@@ -30,7 +27,7 @@ jobs:
         echo "Ref type : ${{github.ref_type}}"
   push_to_registry:
     needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push' || github.event_name == 'release'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
@@ -52,24 +49,18 @@ jobs:
           push: true
           context: .
           file: ./app-web.Dockerfile
-          tags: |
-            ${{ github.ref_type == 'tag' && format('inseefr/arc:{0}', github.ref_name) || '' }}
-            ${{ github.ref == 'refs/heads/master' && 'inseefr/arc:latest' || '' }}
+          tags: 'inseefr/arc:latest'
       - name: Push arc-ws to Docker Hub
         uses: docker/build-push-action@v2
         with:
           push: true          
           context: .
           file: ./app-ws.Dockerfile
-          tags: |
-            ${{ github.event_name == 'tag' && format('inseefr/arc-ws:{0}', github.ref_name) || '' }}
-            ${{ github.ref == 'refs/heads/master' && 'inseefr/arc-ws:latest' || '' }}
+          tags: 'inseefr/arc-ws:latest'
       - name: Push arc-batch to Docker Hub
         uses: docker/build-push-action@v2
         with:
           push: true          
           context: .
           file: ./app-batch.Dockerfile
-          tags: |
-            ${{ github.event_name == 'tag' && format('inseefr/arc-batch:{0}', github.ref_name) || '' }}
-            ${{ github.ref == 'refs/heads/master' && 'inseefr/arc-batch:latest' || '' }}
+          tags: 'inseefr/arc-ws:latest'
