@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.p6export.parquet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -69,6 +70,12 @@ public class ParquetDaoTest extends ParquetDao {
 		assertTrue(f.contains("test_table1.parquet"));
 		assertTrue(f.contains("test_table2.parquet"));
 
+	}
+	
+	@Test
+	public void checkNotEmptyTest() throws SQLException {
+		assertTrue(checkNotEmpty(InitializeQueryTest.c, new GenericPreparedStatementBuilder("SELECT * FROM (VALUES (1),(2),(3)) t (col)")));
+		assertFalse(checkNotEmpty(InitializeQueryTest.c, new GenericPreparedStatementBuilder("SELECT 1 WHERE 1=0")));
 	}
 
 	/**
