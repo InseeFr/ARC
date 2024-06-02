@@ -20,7 +20,7 @@ jobs:
       env:
         BRANCH: ${{ github.ref_name }}
       id: split
-      run: echo "::set-output name=fragment::${BRANCH##*-}"
+      run: echo "fragment=${BRANCH##*-}" >> "$GITHUB_OUTPUT"
     - name: Test variable
       run: |
         echo ${{ steps.split.outputs.fragment }}
