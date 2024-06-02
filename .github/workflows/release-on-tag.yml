@@ -67,4 +67,4 @@ jobs:
         push: true          
         context: .
         file: ./docker/app-batch.Dockerfile
-        tags: 'inseefr/arc-ws:${{ steps.split.outputs.fragment }}'
+        tags: 'inseefr/arc-batch:${{ steps.split.outputs.fragment }}'
