@@ -10,6 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: show event
+      run: |
+        echo "Tag name : $${{ github.event.release.tag_name }}"
+        echo "ref name : $${{github.ref_name}}"
+        echo "Event name : ${{github.event_name}}"
+        echo "Ref type : ${{github.ref_type}}"
+    - name: Split branch name
+      env:
+        BRANCH: ${{ github.ref_name }}
+      id: split
+      run: echo "::set-output name=fragment::${BRANCH##*-}"
+    - name: Test variable
+      run: |
+        echo ${{ steps.split.outputs.fragment }}
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
