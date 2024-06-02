@@ -45,7 +45,7 @@ ARG KEYCLOAK_CREDENTIALS
 COPY . /usr/src/app/
 
 # Run a conditional script for the maven build
-RUN chmod +x usr/src/app/script.sh && usr/src/app/script.sh
+RUN chmod +x usr/src/app/docker/script.sh && usr/src/app/docker/script.sh
 
 #
 ENV ARC_LOGLEVEL=$LOG_LEVEL
