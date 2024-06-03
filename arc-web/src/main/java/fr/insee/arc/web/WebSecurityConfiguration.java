@@ -38,19 +38,29 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 
 	@Bean
 	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
-
-		// disable debugging screens when property is set
-		if (!properties.getDisableDebugGui().isEmpty()) {
-			http.authorizeHttpRequests(t -> t.requestMatchers("/debug/**").denyAll());
-		}
 		
 		// oath2 keycloak
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
+			
 			http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
-			.authorizeHttpRequests(t -> t.requestMatchers("/secure/**", "/debug/**").hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
+			.authorizeHttpRequests(t -> t.requestMatchers("/secure/**").hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
+			
+
+			// disable debugging screens when property is not set else filter to this role
+			if (properties.getDisableDebugGui().isEmpty()) {
+				http.authorizeHttpRequests(t -> t.requestMatchers("/debug/**").denyAll());
+			}
+			else
+			{
+				http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
+				.authorizeHttpRequests(t -> t.requestMatchers("/debug/**").hasAnyAuthority(PropertiesHandler.getInstance().getDisableDebugGui()));
+			}
+			
 		}
 		
 		http.authorizeHttpRequests(t -> t.anyRequest().permitAll());
+
+		http.exceptionHandling(e -> e.accessDeniedPage("/denied"));
 		
 		return http.build();
 	}
