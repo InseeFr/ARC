@@ -3,7 +3,12 @@
 ## TODO List
 All notable changes to this project will be documented in this file.
 
-## version-94.1.17b
+## version-94.1.41b
+- debug gui access can now be set in a distinct keycloak group (fr.insee.gui.debug.disable)
+- exception handling for access denied
+- docker images now have version. They are deployed through the "released on tag" workflow and handle same version number.
+
+## version-94.1.33b
 - rest webservice securisation for injection
 - gui database securisation for injection (add gui constraints for all rules)
 - new gui generic error message
