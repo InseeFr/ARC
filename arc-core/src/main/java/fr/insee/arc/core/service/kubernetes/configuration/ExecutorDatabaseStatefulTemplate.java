@@ -150,7 +150,16 @@ public class ExecutorDatabaseStatefulTemplate {
               }
             },
             "securityContext": {
-              "runAsUser": 0
+              "runAsNonRoot": true,
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              },
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
             },
             "terminationMessagePath": "/dev/termination-log",
             "terminationMessagePolicy": "File",
