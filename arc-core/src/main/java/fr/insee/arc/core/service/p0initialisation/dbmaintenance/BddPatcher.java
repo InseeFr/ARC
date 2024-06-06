@@ -154,7 +154,6 @@ public class BddPatcher {
 		executeBddScript(connexion, "BdD/script_function_integrity.sql", userNameWithRestrictedRights, nbSandboxes,
 				null);
 		executeBddScript(connexion, "BdD/script_function_utility.sql", userNameWithRestrictedRights, nbSandboxes, null);
-		executeBddScript(connexion, "BdD/script_function_constraint.sql", userNameWithRestrictedRights, nbSandboxes, null);
 
 		// iterate over each phase and try to load its global script
 
@@ -162,6 +161,9 @@ public class BddPatcher {
 			executeBddScript(connexion, "BdD/script_global_phase_" + t.toString().toLowerCase() + ".sql",
 					userNameWithRestrictedRights, nbSandboxes, null);
 		}
+		
+		executeBddScript(connexion, "BdD/script_function_constraint.sql", userNameWithRestrictedRights, nbSandboxes, null);
+
 	}
 
 	/**
