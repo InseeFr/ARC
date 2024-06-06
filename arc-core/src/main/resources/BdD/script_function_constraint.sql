@@ -1,3 +1,29 @@
+CREATE OR REPLACE FUNCTION public.check_sandbox(unsafe text) RETURNS boolean
+as
+$BODY$
+begin
+if (unsafe is null or not (unsafe in (select replace(id,'.','_') from arc.ext_etat_jeuderegle where isenv)))
+then
+RAISE EXCEPTION '% format is not correct. Must be a declared sandbox.', unsafe; 
+end if;
+return true;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public.check_sandboxes(unsafe text) RETURNS boolean
+as
+$BODY$
+begin
+if unsafe is null or not ((select ARRAY(select jsonb_array_elements_text(unsafe::jsonb))) <@ (select array_agg(replace(id,'.','_')) from arc.ext_etat_jeuderegle where isenv))
+then
+RAISE EXCEPTION '% format is not correct. As an example, correct syntax is ["arc_prod","arc_bas1"]', unsafe; 
+end if;
+return true;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION public.check_word(unsafe text) RETURNS boolean
 as
 $BODY$
@@ -302,13 +328,15 @@ select public.check_function('preaction', 'public.check_sql');
 -- normage rules
 select public.check_function('rubrique', 'public.check_identifier_with_schema');
 
-do $$ begin alter table arc.ihm_normage_regle add constraint ihm_normage_regle_rubrique_nmcl_c 
+
+do $$ begin alter table arc.ihm_normage_regle drop constraint ihm_normage_regle_rubrique_nmcl_c; exception when others then end;  $$; 
+alter table arc.ihm_normage_regle add constraint ihm_normage_regle_rubrique_nmcl_c 
 check (
 case when id_classe= 'partition' 
 	then public.check_integer(split_part(rubrique_nmcl,',',1)) and public.check_integer(split_part(rubrique_nmcl,',',2))
 	else public.check_identifier_with_schema(rubrique_nmcl)
 end
-); exception when others then end;  $$; 
+);
 
 -- mapping rules
 select public.check_function('variable_sortie', 'public.check_identifier'); 
@@ -332,4 +360,36 @@ select public.check_function('nom_table', 'public.check_identifier');
 -- ihm_entrepot
 select public.check_function('id_entrepot', 'public.check_directory_token');
 select public.check_function('id_loader', 'public.check_directory_token');
+
+-- parameters rules
+do $$ begin alter table arc.parameter drop constraint parameter_val_c; exception when others then end;  $$; 
+alter table arc.parameter add constraint parameter_val_c 
+check (
+case 
+when key= 'ApiInitialisationService.Nb_Jour_A_Conserver' then public.check_integer(val) 
+when key= 'ApiInitialisationService.NB_FICHIER_PER_ARCHIVE' then public.check_integer(val)
+when key= 'ApiService.HEURE_INITIALISATION_PRODUCTION' then public.check_integer(val)
+when key= 'LanceurARC.keepInDatabase' then val::boolean in (true,false)
+when key= 'LanceurARC.deltaStepAllowed' then public.check_integer(val)
+when key= 'ApiReceptionService.batch.maxNumberOfFiles' then public.check_integer(val)
+when key= 'ApiReceptionService.ihm.maxNumberOfFiles' then public.check_integer(val)
+when key= 'LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL' then public.check_integer(val)
+when key= 'LanceurARC.tailleMaxReceptionEnMb' then public.check_integer(val)
+when key= 'LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL' then public.check_integer(val)
+when key= 'ArcAction.productionEnvironments' then public.check_sandboxes(val)
+when key= 'LanceurARC.envFromDatabase' then val::boolean in (true,false)
+when key= 'LanceurARC.envExecution' then public.check_sandbox(val)
+when key= 'LanceurARC.poolingDelay' then public.check_integer(val)
+when key= 'LanceurARC.maxFilesPerPhase' then public.check_integer(val)
+when key= 'ApiChargementService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
+when key= 'ApiNormageService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
+when key= 'ApiControleService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
+when key= 'LanceurARC.INTERVAL_JOUR_INITIALISATION' then public.check_integer(val)
+when key= 'ArcAction.batchMode' then public.check_sandboxes(val)
+when key= 'LanceurARC.maxFilesToLoad' then public.check_integer(val)
+when key= 'LanceurIHM.maxFilesPerPhase' then public.check_integer(val)
+when key= 'MappingService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
+else true
+end
+);
 
