@@ -24,6 +24,7 @@ import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 import fr.insee.arc.web.gui.all.util.VObjectService;
@@ -177,6 +178,10 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	}
 
 	private void creationTableDeNomenclature(Connection connection, String nomenclatureTableName, String[] colonnes, String[] types) throws ArcException {
+		
+		for (int i=0; i < colonnes.length; i++) {
+			colonnes[i] = ManipString.translateAscii(colonnes[i]).toLowerCase();
+		}
 		
 		ArcPreparedStatementBuilder createTableRequest = new ArcPreparedStatementBuilder();
 		createTableRequest.append("CALL safe_create_table(")
