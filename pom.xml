@@ -298,7 +298,7 @@
 		<dependency>
 		    <groupId>io.minio</groupId>
 		    <artifactId>minio</artifactId>
-		    <version>8.5.9</version>
+		    <version>8.5.10</version>
 		</dependency>
 		
 		<!-- tests dependencies -->
