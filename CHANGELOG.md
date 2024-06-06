@@ -3,6 +3,10 @@
 ## TODO List
 All notable changes to this project will be documented in this file.
 
+## version-94.1.42b
+- reduce privilege level for kubernetes executor databases
+- sql constraints on the table parameter
+
 ## version-94.1.41b
 - debug gui access can now be set in a distinct keycloak group (fr.insee.gui.debug.disable)
 - exception handling for access denied

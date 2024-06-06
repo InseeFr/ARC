@@ -7,8 +7,7 @@
 	
 	<body>
 		<p>
- 		Page JSP ARC-DADS v006.5.2 16012018
-<!-- 		Page JSP ARC-CTS v006.5.2 16012018 -->
+			arc-ws
 	    </p>
 	</body>
 </html>
