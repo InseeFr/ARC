@@ -29,9 +29,9 @@ public class ExportDao {
 
 	private Sandbox coordinatorSandbox;
 	private String exportTimeStamp;
-	
+
 	private static final String EXPORT_CLIENT_NAME = "EXPORT";
-	
+
 	private String directoryOut;
 	private String s3Out;
 
@@ -40,10 +40,10 @@ public class ExportDao {
 	}
 
 	/**
-	 * Compute a timestamp that identifies the export
-	 * This timestamp will be used to mark data as retrieved (column date_client in pilotage_fichier table)
-	 * It is saved in exportTimeStamp variable.
-	 * This timestamp will also be converted as a directory name where the files will be exported
+	 * Compute a timestamp that identifies the export This timestamp will be used to
+	 * mark data as retrieved (column date_client in pilotage_fichier table) It is
+	 * saved in exportTimeStamp variable. This timestamp will also be converted as a
+	 * directory name where the files will be exported
 	 * 
 	 * @return
 	 * @throws ArcException
@@ -51,8 +51,10 @@ public class ExportDao {
 	public String dateExport() throws ArcException {
 		ArcPreparedStatementBuilder query;
 		query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "localtimestamp as ts, to_char(localtimestamp,'YYYY_MM_DD_HH24_MI_SS_MS') as ts_as_directory");
-		Map<String,List<String>> gb = new GenericBean(UtilitaireDao.get(0).executeRequest(this.coordinatorSandbox.getConnection(), query)).mapContent();
+		query.build(SQL.SELECT,
+				"localtimestamp as ts, to_char(localtimestamp,'YYYY_MM_DD_HH24_MI_SS_MS') as ts_as_directory");
+		Map<String, List<String>> gb = new GenericBean(
+				UtilitaireDao.get(0).executeRequest(this.coordinatorSandbox.getConnection(), query)).mapContent();
 		this.exportTimeStamp = gb.get("ts").get(0);
 		return gb.get("ts_as_directory").get(0);
 	}
@@ -106,54 +108,57 @@ public class ExportDao {
 		// business mapping table tagged to executor nod if connection is scaled
 		mappingTablesName.stream()
 				.forEach(t -> tablesToExport.add(
-						new TableToRetrieve(
-								ArcDatabase.isScaled() ? ArcDatabase.EXECUTOR : ArcDatabase.COORDINATOR, //
+						new TableToRetrieve(ArcDatabase.isScaled() ? ArcDatabase.EXECUTOR : ArcDatabase.COORDINATOR, //
 								ViewEnum.getFullName(this.coordinatorSandbox.getSchema(), t) //
-								)));
+						)));
 		return tablesToExport;
 	}
 
 	/**
-	 * export the list of business table to parquet in the directory /bas/export/timestamp
+	 * export the list of business table to parquet in the directory
+	 * /bas/export/timestamp
+	 * 
 	 * @param dateExport
 	 * @param tablesToExport
 	 * @throws ArcException
 	 */
 	public void exportTablesToParquet(String dateExport, List<TableToRetrieve> tablesToExport) throws ArcException {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
-		 this.directoryOut = DirectoryPathExport
-					.directoryExport(properties.getBatchParametersDirectory(), this.coordinatorSandbox.getSchema(), dateExport);
-		 this.s3Out = DirectoryPathExport
-					.s3Export(this.coordinatorSandbox.getSchema(), dateExport);
-		 
-		 ParquetEncryptionKey p = properties.getS3OutputParquetKey().isEmpty()?null:new ParquetEncryptionKey(EncryptionType.KEY256, dateExport);
-		 
-		 new ParquetDao().exportToParquet(tablesToExport, directoryOut, p);
+		this.directoryOut = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
+				this.coordinatorSandbox.getSchema(), dateExport);
+		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), dateExport);
+
+		ParquetEncryptionKey parquetEncryptionKey = properties.getS3OutputParquetKey().isEmpty() ? null
+				: new ParquetEncryptionKey(EncryptionType.KEY256, properties.getS3OutputParquetKey());
+
+		new ParquetDao().exportToParquet(tablesToExport, directoryOut, parquetEncryptionKey);
 	}
 
 	/**
 	 * mark exported data
+	 * 
 	 * @throws ArcException
 	 */
 	public void markExportedData() throws ArcException {
-		
+
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.UPDATE, ViewEnum.PILOTAGE_FICHIER.getFullName(this.coordinatorSandbox.getSchema()));
-		query.build(SQL.SET, ColumnEnum.DATE_CLIENT, "=", "array_append( date_client, "+query.quoteText(exportTimeStamp)+"::timestamp )");
-		query.build(",", ColumnEnum.CLIENT, "=", "array_append( client, "+query.quoteText(EXPORT_CLIENT_NAME)+"::text)");
+		query.build(SQL.SET, ColumnEnum.DATE_CLIENT, "=",
+				"array_append( date_client, " + query.quoteText(exportTimeStamp) + "::timestamp )");
+		query.build(",", ColumnEnum.CLIENT, "=",
+				"array_append( client, " + query.quoteText(EXPORT_CLIENT_NAME) + "::text)");
 		query.build(SQL.WHERE, ConditionExecution.PIPELINE_TERMINE_DONNEES_NON_EXPORTEES.getSqlFilter());
-		
+
 		UtilitaireDao.get(0).executeRequest(this.coordinatorSandbox.getConnection(), query);
 	}
 
 	public void copyToS3Out() throws ArcException {
 		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3Out);
-		
-		for (File f:new File(this.directoryOut).listFiles())
-		{
-			ArcS3.OUTPUT_BUCKET.upload(f, this.s3Out+ File.separator+ f.getName());
+
+		for (File f : new File(this.directoryOut).listFiles()) {
+			ArcS3.OUTPUT_BUCKET.upload(f, this.s3Out + File.separator + f.getName());
 		}
-		
+
 	}
 
 }
