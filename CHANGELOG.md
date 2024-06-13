@@ -1,8 +1,9 @@
 # Change Log
 
 ## TODO List
-All notable changes to this project will be documented in this file.
-
+- All notable changes to this project will be documented in this file.
+- Add a retention timer for file
+- Delete KO after retention time
 
 ## version-94.1.43
 - rework external table column red for file to be valid in database
