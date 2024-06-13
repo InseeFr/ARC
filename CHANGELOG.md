@@ -3,6 +3,11 @@
 ## TODO List
 All notable changes to this project will be documented in this file.
 
+
+## version-94.1.43
+- rework external table column red for file to be valid in database
+- bug fix on parquet encryption key
+
 ## version-94.1.42b
 - reduce privilege level for kubernetes executor databases
 - sql constraints on the table parameter
