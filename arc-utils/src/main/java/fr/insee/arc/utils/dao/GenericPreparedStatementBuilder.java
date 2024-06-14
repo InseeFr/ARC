@@ -430,4 +430,10 @@ public class GenericPreparedStatementBuilder {
 		query.append(")");
 	}
 	
+	public GenericPreparedStatementBuilder appendNewLine(Object s) {
+		query.append(SQL.NEW_LINE);
+		query.append(s);
+		return this;
+	}
+	
 }

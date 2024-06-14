@@ -41,7 +41,7 @@ public enum SQL {
 	
 	VALUES("VALUES"),
 	
-	SPACE(" "),
+	SPACE(" "), NEW_LINE("\n"),
 	
 	// symbol
 	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false), DOT(".",false)
