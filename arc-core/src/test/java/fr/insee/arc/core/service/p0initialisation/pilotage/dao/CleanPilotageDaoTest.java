@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.p0initialisation.pilotage.dao;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -49,15 +50,22 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		// fichier récupéré par les 2 clients DSN déclarés depuis plus de 10j -> à effacer
 		query.build("('fichier_1', 'archive_1', 'DSN_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', '{app_2, app_1}', '{2023-11-30 10:29:25.000, 2023-11-15 11:15:14.000}')");
 		query.appendNewLine(",");
-		
-		// fichier récupéré par les 1 seul client DSN depuis plus de 10j -> il ne doit pas être effacé car pas encore récupéré par l'autre client
+		// fichier récupéré par 1 seul client DSN déclaré depuis plus de 10j -> ne pas effacer car pas encore récupéré par l'autre client
 		query.build("('fichier_2', 'archive_2', 'DSN_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', '{app_2}', '{2023-11-30 10:29:25.000}')");
 		query.appendNewLine(",");
-
-		// fichier récupéré par les 2 clients DSN déclarés depuis moins de 10j -> à effacer
-		query.build("('fichier_3', 'archive_3', 'DSN_2024', 'M', current_timestamp, 2, 'MAPPING', '{OK}', '{app_2, app_1}', array[current_timestamp, current_timestamp])");
-		
+		// fichier récupéré par les 2 clients DSN déclarés depuis moins de 10j -> ne pas effacer car durée de rétention non écoulée
+		query.build("('fichier_3', 'archive_3', 'DSN_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', '{app_2, app_1}', array['2023-11-30 10:29:25.000', current_timestamp])");
+		query.appendNewLine(",");
+		// fichier récupéré par l'unique client RESIL depuis plus de 10j -> à effacer
+		query.build("('fichier_4', 'archive_4', 'RESIL_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', '{app_1}', '{2023-11-30 10:29:25.000}')");
+		query.appendNewLine(",");
+		// fichier RESIL KO depuis plus de 10j -> à effacer
+		query.build("('fichier_5', 'archive_5', 'RESIL_2024', 'M', '2023-11-30 10:29:25.000', 2, 'CHARGEMENT', '{KO}', null, null)");
+		query.appendNewLine(",");
+		// fichier RESIL KO depuis moins de 10j -> ne pas effacer car durée de rétention non écoulée
+		query.build("('fichier_6', 'archive_6', 'RESIL_2024', 'M', current_timestamp, 2, 'MAPPING', '{KO}', null, null)");
 		query.build(SQL.END_QUERY);
+		
 		u.executeRequest(c, query);
 		
 		// execute test : delay is 10 days
@@ -67,8 +75,13 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		
 		// retrieve files to delete
 		List<String> filesToDelete = new GenericBean(u.executeRequest(c, new ArcPreparedStatementBuilder("SELECT * FROM fichier_to_delete"))).getColumnValues("id_source");
-		assertEquals(1, filesToDelete.size());
 		
+		// compare to expected files to delete
+		List<String> expectedFilesToDelete = new ArrayList<String>();
+		expectedFilesToDelete.add("fichier_1"); // fichier récupéré par tous les clients depuis plus de 10j
+		expectedFilesToDelete.add("fichier_4"); // fichier récupéré par client unique depuis plus de 10j
+		expectedFilesToDelete.add("fichier_5"); // fichier KO depuis plus de 10j
+		assertTrue(expectedFilesToDelete.size() == filesToDelete.size() && filesToDelete.containsAll(expectedFilesToDelete));
 		
 		// clean
 		query = new ArcPreparedStatementBuilder();
