@@ -63,6 +63,8 @@
 		<property name="s3OutputSecret" value="#{systemEnvironment['S3_OUTPUT_SECRET'] ?: '${fr.insee.arc.s3.output.secret}' }"></property>	
 		<property name="s3OutputParquetKey" value="#{systemEnvironment['S3_OUTPUT_PARQUET_KEY'] ?: '${fr.insee.arc.s3.output.parquet.key}' }"></property>	
 
+		<property name="filesRetentionDays" value="#{systemEnvironment['FILES_RETENTION_DAYS'] ?: '${files.retention.days}' }"></property>
+
 	</bean>
 	
 	<bean id="activeLoggerDispatcher" class="fr.insee.arc.core.util.DefaultLoggerDispatcher"></bean>

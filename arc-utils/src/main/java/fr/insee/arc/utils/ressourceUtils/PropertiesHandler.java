@@ -88,6 +88,8 @@ public class PropertiesHandler {
 	private String keycloakResource;
 	private String keycloakCredential;
 	
+	private Integer filesRetentionDays;
+	
 	private static PropertiesHandler instanceOfPropertiesHandler;
 
 	// remap database host address ; can be useful to prevent dns spam for example
@@ -609,6 +611,14 @@ public class PropertiesHandler {
 
 	public void setKeycloakCredential(String keycloakCredential) {
 		this.keycloakCredential = keycloakCredential;
+	}
+
+	public Integer getFilesRetentionDays() {
+		return filesRetentionDays;
+	}
+
+	public void setFilesRetentionDays(Integer filesRetentionDays) {
+		this.filesRetentionDays = filesRetentionDays;
 	}
 
 }
