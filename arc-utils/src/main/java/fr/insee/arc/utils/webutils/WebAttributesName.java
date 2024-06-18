@@ -21,7 +21,7 @@ public class WebAttributesName {
 
 	public static boolean isKeycloakActive(String realmProperty)
 	{
-		return !realmProperty.isEmpty();
+		return !realmProperty.equals(KEYCLOAK_ATTRIBUTE_REALM);
 	}
 	
 	// json healthcheck attribute
