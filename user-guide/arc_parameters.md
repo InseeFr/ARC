@@ -126,12 +126,21 @@ ___
 
 |                |                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------- |
-| **properties** | **batchParametersDirectory**                                                                  |
+| **properties** | **fr.insee.arc.batch.parametre.repertoire**                                                   |
 | **env**        | **APPLICATION_DIRECTORY**                                                                     |
-| java           | logConfiguration                                                                              |
-| describe       | The root directory where the sandbox folders are. "/" at the end of the path is mandatory |
+| java           | batchParametersDirectory                                                                      |
+| describe       | The root directory where the sandbox folders are. "/" at the end of the path is mandatory     |
 | default value  |                                                                                               |
 | example value  | C:/arc_root/                                                                                  |
+
+|                |                                                                                               |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| **properties** | **files.retention.days**                                                                      |
+| **env**        | **FILES_RETENTION_DAYS**                                                                      |
+| java           | logConfiguration                                                                              |
+| describe       | The number of days after which to delete archived files. -1 means archived files musn't be deleted |
+| default value  | -1                                                                                            |
+| example value  | 45                                                                                            |
 
 ___
 
