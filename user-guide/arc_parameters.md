@@ -135,10 +135,10 @@ ___
 
 |                |                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------- |
-| **properties** | **files.retention.days**                                                                      |
+| **properties** | **fr.insee.arc.files.retention.days**                                                                      |
 | **env**        | **FILES_RETENTION_DAYS**                                                                      |
 | java           | logConfiguration                                                                              |
-| describe       | The number of days after which to delete archived files. -1 means archived files musn't be deleted |
+| describe       | The number of days after which to delete archived files. Not set means archived files musn't be deleted |
 | default value  | -1                                                                                            |
 | example value  | 45                                                                                            |
 

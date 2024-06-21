@@ -64,6 +64,11 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		query.appendNewLine(",");
 		// fichier RESIL KO depuis moins de 10j -> ne pas effacer car durée de rétention non écoulée
 		query.build("('fichier_6', 'archive_6', 'RESIL_2024', 'M', current_timestamp, 2, 'MAPPING', '{KO}', null, null)");
+		query.appendNewLine(",");
+		// fichier pas encore récupéré -> ne pas effacer car pas récupéré
+		query.build("('fichier_7', 'archive_7', 'DSN_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', null, null)");
+		
+		
 		query.build(SQL.END_QUERY);
 		
 		u.executeRequest(c, query);

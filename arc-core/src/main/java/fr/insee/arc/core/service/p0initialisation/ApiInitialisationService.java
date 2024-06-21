@@ -42,7 +42,7 @@ public class ApiInitialisationService extends ApiService {
 		// Supprime les lignes devenues inutiles récupérées par le webservice de la
 		// table pilotage_fichier
 		// Déplace les archives dans OLD
-		new CleanPilotageOperation(this.coordinatorSandbox).removeDeprecatedFiles();
+		new CleanPilotageOperation(this.coordinatorSandbox).execute();
 		
 		// Recopie/remplace les règles définie par l'utilisateur (table de ihm_) dans
 		// l'environnement d'excécution courant
