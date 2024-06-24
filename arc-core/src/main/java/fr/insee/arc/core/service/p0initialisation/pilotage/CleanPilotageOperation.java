@@ -1,8 +1,6 @@
 package fr.insee.arc.core.service.p0initialisation.pilotage;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -74,14 +72,11 @@ public class CleanPilotageOperation {
 		// retrieve parameters
 		retrieveOperationParameters();
 
-		// create the temporary table containing files to be deleted from database
-		materializeFilesToBeDeletedFromDatabase();
-
 		// delete deprecated data from database and archives files in old directory
-		moveDeletedArchivesToArchiveDirectory(deleteArchivesFromDatabase());
+		moveOldArchivesToArchiveDirectory(deleteOldArchivesFromDatabase());
 
 		// y'a-t-il des fichiers ou répertoire à supprimer dans le répertoire OLD/ ?
-		executeIfFileRetentionPeriodDefined(this::deletedArchivesIfTooOld);
+		executeIfFileRetentionPeriodDefined(this::deletedOldArchivesFromArchiveDirectory);
 
 		LoggerHelper.info(LOGGER, "Archivage Fin");
 
@@ -93,7 +88,10 @@ public class CleanPilotageOperation {
 					"File retention is not defined. Archive files are not deleted from OLD directory.");
 			return;
 		} else {
-			LoggerHelper.info(LOGGER, "File retention period is defined to "+fileRetentionPeriodInDays+" days. Files with modified date before "+ minDateForFileToBeKept.getTime() +" will be deleted from OLD directory.");
+			LoggerHelper.info(LOGGER,
+					"File retention period is defined to " + fileRetentionPeriodInDays
+							+ " days. Files with modified date before " + minDateForFileToBeKept.getTime()
+							+ " will be deleted from OLD directory.");
 		}
 		method.run();
 	}
@@ -120,18 +118,16 @@ public class CleanPilotageOperation {
 		this.fileRetentionPeriodInDays = properties.getFilesRetentionDays();
 
 		// date en dessous de laquelle les fichiers vont être effacés
-		
-		if (this.fileRetentionPeriodInDays == null)
-		{
+
+		if (this.fileRetentionPeriodInDays == null) {
 			this.minDateForFileToBeKept = null;
-		}
-		else
-		{
+		} else {
 			this.minDateForFileToBeKept = Calendar.getInstance();
-			// remove the fileRetentionPeriodInDays from current date to get the minDateForFileToBeKept
-			this.minDateForFileToBeKept.setTime(DateUtils.addDays(new Date(),-fileRetentionPeriodInDays));
+			// remove the fileRetentionPeriodInDays from current date to get the
+			// minDateForFileToBeKept
+			this.minDateForFileToBeKept.setTime(DateUtils.addDays(new Date(), -fileRetentionPeriodInDays));
 		}
-		
+
 	}
 
 	/**
@@ -141,9 +137,14 @@ public class CleanPilotageOperation {
 	 * @return
 	 * @throws ArcException
 	 */
-	private Map<String, List<String>> deleteArchivesFromDatabase() throws ArcException {
+	private Map<String, List<String>> deleteOldArchivesFromDatabase() throws ArcException {
+
+		// materialized the file to be deleted
+		cleanPilotageDao.execQueryMaterializeFilesToDelete(numberOfDaysToKeepData);
+
 		// initialisation de la liste contenant les archives à déplacer
 		Map<String, List<String>> recordedArchives = new HashMap<>();
+
 		recordedArchives.put(ColumnEnum.ENTREPOT.getColumnName(), new ArrayList<>());
 		recordedArchives.put(ColumnEnum.NOM_ARCHIVE.getColumnName(), new ArrayList<>());
 
@@ -169,19 +170,6 @@ public class CleanPilotageOperation {
 	}
 
 	/**
-	 * Materialize the file to be deleted from database
-	 * 
-	 * @param numberOfDaysToKeepData : number of days the file data can be kept in
-	 *                               the database after all clients had retrieved
-	 *                               them
-	 * @throws ArcException
-	 */
-	private void materializeFilesToBeDeletedFromDatabase() throws ArcException {
-		// materialized the file to be deleted
-		cleanPilotageDao.execQueryMaterializeFilesToDelete(numberOfDaysToKeepData);
-	}
-
-	/**
 	 * Delete the archives from the file system if they are too old according to the
 	 * files retention period
 	 * 
@@ -189,22 +177,23 @@ public class CleanPilotageOperation {
 	 * @param fileRetentionPeriodInDays
 	 * @throws ArcException
 	 */
-	protected void deletedArchivesIfTooOld() throws ArcException {
+	protected void deletedOldArchivesFromArchiveDirectory() throws ArcException {
 		List<String> entrepots = DataStorage.execQuerySelectEntrepots(sandbox.getConnection());
 		// scan des entrepots
-		deletedArchivesIfTooOld(entrepots);
+		deletedOldArchivesFromArchiveDirectory(entrepots);
 	}
 
 	/**
 	 * Delete too old archives in the entrepots
+	 * 
 	 * @param entrepots
 	 * @throws ArcException
 	 */
-	protected void deletedArchivesIfTooOld(List<String> entrepots) throws ArcException {
+	protected void deletedOldArchivesFromArchiveDirectory(List<String> entrepots) throws ArcException {
 
 		for (String entrepot : entrepots) {
 
-			deletedArchivesIfTooOld(entrepot);
+			deletedOldArchivesFromArchiveDirectory(entrepot);
 
 		}
 
@@ -212,10 +201,11 @@ public class CleanPilotageOperation {
 
 	/**
 	 * Delete too old archives in an entrepot
+	 * 
 	 * @param entrepot
 	 * @throws ArcException
 	 */
-	protected void deletedArchivesIfTooOld(String entrepot) throws ArcException {
+	protected void deletedOldArchivesFromArchiveDirectory(String entrepot) throws ArcException {
 
 		File dirOut = new File(
 				DirectoryPath.directoryReceptionEntrepotArchiveOld(rootDirectory, this.sandbox.getSchema(), entrepot));
@@ -242,14 +232,15 @@ public class CleanPilotageOperation {
 			// if directory year is strictly too old as compared to yearThreshold, delete
 			// the whole directory
 			if (yearDirectoryName < this.minDateForFileToBeKept.get(Calendar.YEAR)) {
-				LoggerHelper.info(LOGGER, "DELETE old directory "+ yearDirectory.getAbsolutePath());
+				LoggerHelper.info(LOGGER, "DELETE old directory " + yearDirectory.getAbsolutePath());
 				FileUtilsArc.deleteDirectory(yearDirectory);
 			}
-			
+
 			if (yearDirectoryName == this.minDateForFileToBeKept.get(Calendar.YEAR)) {
 				for (File fileInDirYearThreshold : yearDirectory.listFiles()) {
 					if (minDateForFileToBeKept.getTimeInMillis() > fileInDirYearThreshold.lastModified()) {
-						LoggerHelper.info(LOGGER, "DELETE old archive file "+fileInDirYearThreshold.getAbsolutePath());
+						LoggerHelper.info(LOGGER,
+								"DELETE old archive file " + fileInDirYearThreshold.getAbsolutePath());
 						FileUtilsArc.delete(fileInDirYearThreshold);
 					}
 				}
@@ -296,7 +287,7 @@ public class CleanPilotageOperation {
 	 * @param recordedArchives
 	 * @throws ArcException
 	 */
-	private void moveDeletedArchivesToArchiveDirectory(Map<String, List<String>> recordedArchives) throws ArcException {
+	private void moveOldArchivesToArchiveDirectory(Map<String, List<String>> recordedArchives) throws ArcException {
 		if (recordedArchives.get(ColumnEnum.ENTREPOT.getColumnName()).isEmpty()) {
 			return;
 		}
