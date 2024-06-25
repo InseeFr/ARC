@@ -122,6 +122,8 @@
 									<zip basedir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp" destfile="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdb/extensions.zip">
 									</zip>
 									<delete dir="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdbtmp"></delete>
+									<mkdir dir="${java.io.tmpdir}/duckdb"/>
+									<unzip src="${project.build.outputDirectory}/fr/insee/arc/utils/parquet/duckdb/extensions.zip" dest="${java.io.tmpdir}/duckdb"/>
 							</target>
 						</configuration>
 					</execution>
