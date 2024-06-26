@@ -10,8 +10,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
@@ -34,6 +38,8 @@ import io.minio.messages.Item;
 import okhttp3.OkHttpClient;
 
 public class S3Template {
+
+	private static final Logger LOGGER = LogManager.getLogger(S3Template.class);
 
 	private static final String EXISTS_FILE = ".exists";
 	
@@ -343,7 +349,9 @@ public class S3Template {
 					.object(asFile(path)).build());
 			found = true;
 		} catch (ErrorResponseException e) {
-			if (e.response().code() != 404) {
+			int errorCode = e.response().code();
+			if (errorCode != 404) {
+				LoggerHelper.error(LOGGER, e, "Erreur lors de l'interrogation S3. Code HTTP : ", errorCode);
 				throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, path);
 			}
 			found = false;
@@ -351,6 +359,7 @@ public class S3Template {
 				| NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException
 				| IOException e) {
 
+			LoggerHelper.error(LOGGER, e, "Erreur lors de l'interrogation S3");
 			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, path);
 		}
 		return found;
