@@ -94,6 +94,7 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 				
 			} catch (ArcException e) {
 				this.views.getViewPilotageBAS().setMessage("managementSandbox.upload.fail");
+				LoggerHelper.error(LOGGER, e);
 			}
 		} else {
 			if (!isAnyFileSelected) {
