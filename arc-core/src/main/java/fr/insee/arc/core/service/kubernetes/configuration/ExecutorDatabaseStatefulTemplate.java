@@ -145,8 +145,8 @@ public class ExecutorDatabaseStatefulTemplate {
                 "memory": "16Mi"
               },
               "limits": {
-                "cpu": 1,
-                "memory": "1Gi"
+                "cpu": "{cpu}",
+                "memory": "{ram}"
               }
             },
             "securityContext": {

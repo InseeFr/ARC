@@ -5,6 +5,13 @@
 - Add a retention timer for file
 - Delete KO after retention time
 
+## version-94.1.45b
+- add parameters KUBERNETES_EXECUTOR_CPU, KUBERNETES_EXECUTOR_RAM
+
+## version-94.1.44b
+- file retention period can be in set fr.insee.arc.files.retention.days
+- KO will now be deleted from database after data retention period
+
 ## version-94.1.43
 - rework external table column red for file to be valid in database
 - bug fix on parquet encryption key

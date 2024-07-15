@@ -178,6 +178,8 @@ ___
 | kubernetesExecutorUser     | KUBERNETES_EXECUTOR_USER     | fr.insee.arc.kubernetes.executor.user     |
 | kubernetesExecutorDatabase | KUBERNETES_EXECUTOR_DATABASE | fr.insee.arc.kubernetes.executor.database |
 | kubernetesExecutorPort     | KUBERNETES_EXECUTOR_PORT     | fr.insee.arc.kubernetes.executor.port     |
+| kubernetesExecutorCpu     | KUBERNETES_EXECUTOR_CPU     | fr.insee.arc.kubernetes.executor.cpu     |
+| kubernetesExecutorRam     | KUBERNETES_EXECUTOR_RAM     | fr.insee.arc.kubernetes.executor.ram     |
 | kubernetesExecutorVolatile | KUBERNETES_EXECUTOR_VOLATILE | fr.insee.arc.kubernetes.executor.volatile |
 
 

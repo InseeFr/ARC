@@ -78,6 +78,8 @@ public class BuildJsonConfiguration {
 				, JsonFileParameter.EXECUTOR_DATABASE, properties.getKubernetesExecutorDatabase() //
 				, JsonFileParameter.EXECUTOR_PORT, properties.getKubernetesExecutorPort()
 				, JsonFileParameter.IMAGE, properties.getKubernetesExecutorImage()
+				, JsonFileParameter.CPU, properties.getKubernetesExecutorCpu()
+				, JsonFileParameter.RAM, properties.getKubernetesExecutorRam()
 		};
 	}
 

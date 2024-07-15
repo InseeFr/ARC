@@ -67,6 +67,8 @@ public class PropertiesHandler {
 	private String kubernetesExecutorUser;
 	private String kubernetesExecutorDatabase;
 	private String kubernetesExecutorPort;
+	private String kubernetesExecutorCpu;
+	private String kubernetesExecutorRam;
 	private String kubernetesExecutorVolatile;
 	
 	/* export data end of batch ? */
@@ -390,6 +392,22 @@ public class PropertiesHandler {
 
 	public void setKubernetesExecutorPort(String kubernetesExecutorPort) {
 		this.kubernetesExecutorPort = kubernetesExecutorPort;
+	}
+
+	public String getKubernetesExecutorCpu() {
+		return kubernetesExecutorCpu;
+	}
+
+	public void setKubernetesExecutorCpu(String kubernetesExecutorCpu) {
+		this.kubernetesExecutorCpu = kubernetesExecutorCpu;
+	}
+
+	public String getKubernetesExecutorRam() {
+		return kubernetesExecutorRam;
+	}
+
+	public void setKubernetesExecutorRam(String kubernetesExecutorRam) {
+		this.kubernetesExecutorRam = kubernetesExecutorRam;
 	}
 
 	public String getKubernetesExecutorVolatile() {
