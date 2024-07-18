@@ -202,7 +202,7 @@ public class S3Template {
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
 
-			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, sourceS3Path, targetFile.getName());
+			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, sourceS3Path, targetFile.getAbsolutePath());
 		}
 	}
 	
@@ -234,7 +234,7 @@ public class S3Template {
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
 
-			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, fileFrom.getName(), pathTo);
+			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, fileFrom.getAbsolutePath(), pathTo);
 		}
 	}
 
