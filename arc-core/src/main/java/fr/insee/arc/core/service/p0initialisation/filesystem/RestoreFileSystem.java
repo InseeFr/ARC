@@ -79,13 +79,6 @@ public class RestoreFileSystem {
 		System.out.println(new File(dirEntrepotArchive).exists());
 		System.out.println(new File(dirEntrepotArchive).isDirectory());
 
-		try (Stream<Path> stream = Files.walk(Paths.get(directories.getDirectoryRoot()))) {
-		    stream.forEach(System.out::println);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		File[] filesInDirEntrepotArchive = new File(dirEntrepotArchive).listFiles();
 
 		if (filesInDirEntrepotArchive == null)
