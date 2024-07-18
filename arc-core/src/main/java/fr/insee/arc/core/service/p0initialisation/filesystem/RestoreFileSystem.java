@@ -1,9 +1,14 @@
 package fr.insee.arc.core.service.p0initialisation.filesystem;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,12 +73,32 @@ public class RestoreFileSystem {
 		String dirEntrepotArchive = directories.getDirectoryEntrepotArchive();
 		String dirEntrepot = directories.getDirectoryEntrepotIn();
 
+		
+		System.out.println("§§§§§§§§§§§§§§§§§§§§");
+		System.out.println(dirEntrepotArchive);
+		System.out.println(new File(dirEntrepotArchive).exists());
+		System.out.println(new File(dirEntrepotArchive).isDirectory());
+
+		try (Stream<Path> stream = Files.walk(Paths.get(directories.getDirectoryRoot()))) {
+		    stream.forEach(System.out::println);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		File[] filesInDirEntrepotArchive = new File(dirEntrepotArchive).listFiles();
+
+		if (filesInDirEntrepotArchive == null)
+		{
+			return;
+		}
+		
 		// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table
 		// archive
 		// Si on en trouve ce n'est pas cohérent et on doit remettre ces fichiers dans
 		// le répertoire de reception
 		// pour être rechargés				
-		List<File> dirEntrepotArchiveFiles = Arrays.asList(new File(dirEntrepotArchive).listFiles());
+		List<File> dirEntrepotArchiveFiles = Arrays.asList(filesInDirEntrepotArchive);
 		// on les insere dans une table temporaires t_files
 		DataStorage.execQueryRegisterFilesInDatabase(connection, dirEntrepotArchiveFiles);
 
