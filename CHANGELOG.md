@@ -5,6 +5,9 @@
 - Add a retention timer for file
 - Delete KO after retention time
 
+## version-94.1.48b
+- bug fix for deirectory creation in kubernetes pvc
+
 ## version-94.1.45b
 - add parameters KUBERNETES_EXECUTOR_CPU, KUBERNETES_EXECUTOR_RAM
 
