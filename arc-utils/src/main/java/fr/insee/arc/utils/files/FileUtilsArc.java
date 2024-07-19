@@ -49,18 +49,6 @@ public class FileUtilsArc {
 	 * @param f
 	 */
 	public static void createDirIfNotexist(String fPath) {
-		
-		File fileToProceed = new File(fPath);
-		
-		if (fileToProceed.exists() && !fileToProceed.isDirectory())
-		{
-			try {
-				delete(fileToProceed);
-			} catch (ArcException e) {
-				LoggerHelper.error(LOGGER, "Le fichier ", fileToProceed.getAbsolutePath(), " n'a pas pu être effacé");
-			}
-		}
-		
 		createDirIfNotexist(new File(fPath));
 	}
 

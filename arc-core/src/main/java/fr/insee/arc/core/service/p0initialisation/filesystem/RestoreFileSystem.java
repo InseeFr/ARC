@@ -73,25 +73,12 @@ public class RestoreFileSystem {
 		String dirEntrepotArchive = directories.getDirectoryEntrepotArchive();
 		String dirEntrepot = directories.getDirectoryEntrepotIn();
 
-		
-		System.out.println("§§§§§§§§§§§§§§§§§§§§");
-		System.out.println(dirEntrepotArchive);
-		System.out.println(new File(dirEntrepotArchive).exists());
-		System.out.println(new File(dirEntrepotArchive).isDirectory());
-
-		File[] filesInDirEntrepotArchive = new File(dirEntrepotArchive).listFiles();
-
-		if (filesInDirEntrepotArchive == null)
-		{
-			return;
-		}
-		
 		// On cherche les fichiers du répertoire d'archive qui ne sont pas dans la table
 		// archive
 		// Si on en trouve ce n'est pas cohérent et on doit remettre ces fichiers dans
 		// le répertoire de reception
 		// pour être rechargés				
-		List<File> dirEntrepotArchiveFiles = Arrays.asList(filesInDirEntrepotArchive);
+		List<File> dirEntrepotArchiveFiles = Arrays.asList(new File(dirEntrepotArchive).listFiles());
 		// on les insere dans une table temporaires t_files
 		DataStorage.execQueryRegisterFilesInDatabase(connection, dirEntrepotArchiveFiles);
 
