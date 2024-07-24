@@ -36,19 +36,14 @@ public class Sandbox {
 	public String getSchema() {
 		return schema;
 	}
-	
 
-	public boolean isEnvSetForProduction() {
-		return isEnvSetForProduction(this.schema);
-	}
-	
 	/** Return true if the environment is defined as a production environment.*/
-	public static boolean isEnvSetForProduction(String env) {
-		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.productionEnvironments",DEFAULT_PRODUCTION_ENVIRONMENTS));
+	public boolean isEnvSetForProduction() {
+		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(this.connection, "ArcAction.productionEnvironments",DEFAULT_PRODUCTION_ENVIRONMENTS));
 		Set<String> found=new HashSet<>();
 		
 		j.forEach(item -> {
-            if (item.toString().equals(env))
+            if (item.toString().equals(this.schema))
             {
             	found.add(item.toString());
             }
@@ -56,12 +51,12 @@ public class Sandbox {
 		return !found.isEmpty();
 	}
 	
-	public static String isEnvSetForBatch(String env) {
-		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(null, "ArcAction.batchMode", "[]"));
+	public String isEnvSetForBatch() {
+		JSONArray j=new JSONArray(new BDParameters(ArcDatabase.COORDINATOR).getString(this.connection, "ArcAction.batchMode", "[]"));
 		Set<String> found=new HashSet<>();
 		
 		j.forEach(item -> {
-            if (item.toString().equals(env))
+            if (item.toString().equals(this.schema))
             {
             	found.add(item.toString());
             }

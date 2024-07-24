@@ -22,7 +22,6 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -183,8 +182,10 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		
 		this.dataObjectService.setSandboxSchema(this.bacASable);
 		
-		this.isEnvProd = Sandbox.isEnvSetForProduction(this.bacASable);
-		this.isEnvBatch = Sandbox.isEnvSetForBatch(this.bacASable);
+		Sandbox s = new Sandbox(null, this.bacASable);
+		
+		this.isEnvProd = s.isEnvSetForProduction();
+		this.isEnvBatch = s.isEnvSetForBatch();
 
 		this.isKube = PropertiesHandler.getInstance().getKubernetesExecutorNumber() > 0;
 		
