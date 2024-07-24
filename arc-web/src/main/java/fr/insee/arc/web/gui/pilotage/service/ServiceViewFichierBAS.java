@@ -108,7 +108,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 	 * @return
 	 */
 	public String toRestoreBAS(Model model) {
-		return restore(model, "'R'", "managementSandbox.batch.replay.files");
+		return restore(model, "R", "managementSandbox.batch.replay.files");
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 	 * @return
 	 */
 	public String toRestoreArchiveBAS(Model model) {
-		return restore(model, "'RA'", "managementSandbox.batch.replay.archives");
+		return restore(model, "RA", "managementSandbox.batch.replay.archives");
 	}
 
 	private String restore(Model model, String code, String messageOk) {
@@ -193,7 +193,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 	public String toDeleteBAS(Model model) {
 
 		loggerDispatcher.trace("*** Marquage de fichier à supprimer ***", LOGGER);
-		ArcPreparedStatementBuilder updateToDelete = dao.queryUpdateToDelete(views.getViewFichierBAS(), "'1'");
+		ArcPreparedStatementBuilder updateToDelete = dao.queryUpdateToDelete(views.getViewFichierBAS(), "1");
 		String message;
 		try {
 			dao.execQueryUpdateToDelete(updateToDelete);
@@ -226,7 +226,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 	public String undoActionBAS(Model model) {
 
 		loggerDispatcher.trace("*** Suppression du marquage de fichier à supprimer ***", LOGGER);
-		ArcPreparedStatementBuilder updateToDelete = dao.queryUpdateToDelete(views.getViewFichierBAS(), "null");
+		ArcPreparedStatementBuilder updateToDelete = dao.queryUpdateToDelete(views.getViewFichierBAS(), null);
 		try {
 			dao.execQueryUpdateToDelete(updateToDelete);
 		} catch (ArcException e) {
