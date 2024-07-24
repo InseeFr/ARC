@@ -99,8 +99,8 @@ public class FileRegistrationDao {
 			if (requete.getParameters().size()>FormatSQL.MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT)
 			{
 				requete.build(SQL.END_QUERY, SQL.COMMIT, SQL.END_QUERY);
-				UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
-				requete = new ArcPreparedStatementBuilder();	
+				UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
+				requete = new ArcPreparedStatementBuilder();
 			}
 			
 		}
@@ -108,7 +108,7 @@ public class FileRegistrationDao {
 
 		queryUpdateArchiveWithoutFileName(requete);
 
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 
 	}
 

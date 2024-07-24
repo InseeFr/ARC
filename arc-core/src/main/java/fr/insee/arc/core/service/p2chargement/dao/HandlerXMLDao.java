@@ -108,10 +108,10 @@ public class HandlerXMLDao {
 				.append(",") //
 				.append(XMLColumns.getShort(ColumnEnum.VALIDITE)); //
 
-		req2.append("(").appendText(fileIdCard.getIdSource()).append(",").append(this.idLigne).append(",")
-				.append(this.fileIdCard.getIntegrationDate()).append(",").appendText(this.fileIdCard.getIdNorme())
-				.append(",").appendText(this.fileIdCard.getPeriodicite()).append(",")
-				.appendText(this.fileIdCard.getValidite());
+		req2.append("(").appendTextWithoutBinding(fileIdCard.getIdSource()).append(",").append(this.idLigne).append(",")
+				.append(this.fileIdCard.getIntegrationDate()).append(",").appendTextWithoutBinding(this.fileIdCard.getIdNorme())
+				.append(",").appendTextWithoutBinding(this.fileIdCard.getPeriodicite()).append(",")
+				.appendTextWithoutBinding(this.fileIdCard.getValidite());
 
 		for (int i = 0; i < lineCols.size(); i++) {
 
@@ -125,7 +125,7 @@ public class HandlerXMLDao {
 
 				if (lineValues.get(i) != null) {
 					req.append(",v").append(lineCols.get(i));
-					req2.append(",").appendText(lineValues.get(i)).append("");
+					req2.append(",").appendTextWithoutBinding(lineValues.get(i)).append("");
 				}
 			}
 		}
@@ -217,14 +217,8 @@ public class HandlerXMLDao {
 	}
 
 	public void execQueryInsert() throws SAXParseException {
-
-		int numberOfParameters = 0;
-		for (Map.Entry<String,ArcPreparedStatementBuilder> entry : requetes.entrySet()) {
-			numberOfParameters+=entry.getValue().getParameters().size();
-		}
 		
-		if (numberOfParameters > FormatSQL.MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT) {
-
+		if (requetesLength > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
 			ArcPreparedStatementBuilder query = computeFinalQuery();
 
 			waitForParallelInsertAndReport();

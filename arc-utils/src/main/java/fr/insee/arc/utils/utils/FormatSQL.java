@@ -313,11 +313,11 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @return
 	 */
 	public static String quoteText(String val) {
-		return val == null ? "NULL" : new StringBuilder("'").append(quoteTextWithoutEnclosings(val)).append("'").toString();
+		return val == null ? "NULL" : new StringBuilder("'").append(convertSqlQuotes(val)).append("'").toString();
 	}
 
 	
-	public static String quoteTextWithoutEnclosings(String val) {
+	private static String convertSqlQuotes(String val) {
 		return val.replace("'", "''");
 	}
 

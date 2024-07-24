@@ -72,6 +72,16 @@ public class GenericPreparedStatementBuilder {
 	}
 	
 	/**
+	 * append a text without binding a variable
+	 * @param s
+	 * @return
+	 */
+	public GenericPreparedStatementBuilder appendTextWithoutBinding(String s) {
+		query.append(FormatSQL.quoteText(s));
+		return this;
+	}
+	
+	/**
 	 * Add transaction command to the prepared statement builder
 	 * 
 	 * @return
