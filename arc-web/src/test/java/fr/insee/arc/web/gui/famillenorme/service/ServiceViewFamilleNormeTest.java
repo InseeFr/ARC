@@ -9,12 +9,14 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.opencsv.exceptions.CsvValidationException;
+
 import fr.insee.arc.web.gui.famillenorme.ddi.DDIModeler;
 
 public class ServiceViewFamilleNormeTest extends ServiceViewFamilleNorme {
 
 	@Test
-	public void uploadFamilleNormeDansBaseNominalTU() throws FileNotFoundException, IOException {
+	public void uploadFamilleNormeDansBaseNominalTU() throws FileNotFoundException, IOException, CsvValidationException {
 
 		String path = "src/test/resources/fr/insee/testfiles/regles_famille_test.zip";
 		File file = new File(path);

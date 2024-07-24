@@ -11,7 +11,11 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -134,9 +138,14 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 
 	public void importNomenclatureDansBase(VObject viewListNomenclatures, MultipartFile fileUpload)
 			throws ArcException {
+		
+        CSVParser parser = new CSVParserBuilder()
+                .withSeparator(Delimiters.DEFAULT_CSV_DELIMITER.charAt(0))
+                .build();
 
 		try (BufferedReader rd = new BufferedReader(new InputStreamReader(fileUpload.getInputStream()));
-				CSVReader readerCSV = new CSVReader(rd, Delimiters.DEFAULT_CSV_DELIMITER.charAt(0));) {
+				CSVReader readerCSV = new CSVReaderBuilder(rd).withCSVParser(parser).build();
+			) {
 
 			// Colonnes et types pour le schéma de la table temporaire
 	        String[] colonnes = readerCSV.readNext();
@@ -146,7 +155,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 
 	        createNomenclatureTable(nomenclatureTableName, colonnes, types, rd);
 			
-		} catch (IOException e) {
+		} catch (IOException | CsvValidationException e) {
 			throw new ArcException(e, ArcExceptionMessage.IHM_NMCL_IMPORT_FAILED);
 		}
 

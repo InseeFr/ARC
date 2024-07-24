@@ -17,7 +17,11 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.IChargeur;
@@ -133,10 +137,14 @@ public class ChargeurClefValeur implements IChargeur {
         // Lecture du fichier contenant les données et écriture d'un fichier xml
 		InputStreamReader inputStreamReader = new InputStreamReader(tmpInx2, StandardCharsets.ISO_8859_1);
 
+        CSVParser parser = new CSVParserBuilder()
+        .withSeparator(fileIdCard.getIdCardChargement().getDelimiter().charAt(0))
+        .build();
+		
         try
         (
         		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        		CSVReader readerCSV = new CSVReader(bufferedReader, fileIdCard.getIdCardChargement().getDelimiter().charAt(0));
+        		CSVReader readerCSV = new CSVReaderBuilder(bufferedReader).withCSVParser(parser).build();
         )
         {
 	        // On lit le fichier ligne par ligne
@@ -154,7 +162,7 @@ public class ChargeurClefValeur implements IChargeur {
 	        }
 	
 	        finaliserOutputStream(listePeresRubriquePrecedante);
-        } catch (IOException readFileException) {
+        } catch (IOException | CsvValidationException readFileException) {
 			throw new ArcException(readFileException, ArcExceptionMessage.FILE_READ_FAILED, this.idSource);
 		}
 

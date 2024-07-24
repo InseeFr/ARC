@@ -16,7 +16,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -25,6 +29,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -553,9 +558,13 @@ public class GererNormeDao extends VObjectHelperDao {
 			// test them
 			String nomTableImage = FormatSQL.temporaryTableName(vObjectToUpdate.getTable() + "_img" + 0);
 
+	        CSVParser parser = new CSVParserBuilder()
+	                .withSeparator(Delimiters.DEFAULT_CSV_DELIMITER.charAt(0))
+	                .build();
+			
 			try (BufferedReader bufferedReader = new BufferedReader(
 					new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));
-				CSVReader readerCSV = new CSVReader(bufferedReader, IConstanteCaractere.semicolon.charAt(0));	
+				CSVReader readerCSV = new CSVReaderBuilder(bufferedReader).withCSVParser(parser).build();
 					) {
 				// Get headers and type
 				GenericBean fileSchema= getHeaderFromFile(readerCSV);
@@ -671,9 +680,10 @@ public class GererNormeDao extends VObjectHelperDao {
 	 * @return the name of the temporary table
 	 * @throws IOException
 	 * @throws ArcException
+	 * @throws CsvValidationException 
 	 */
 	private String copyFileIntoTemporaryTable(VObject viewMapping, MultipartFile theFileToUpload)
-			throws IOException, ArcException {
+			throws IOException, ArcException, CsvValidationException {
 		// A file -> can process it
 		LoggerHelper.debug(LOGGER, " filesUpload  : " + theFileToUpload);
 
@@ -682,10 +692,14 @@ public class GererNormeDao extends VObjectHelperDao {
 		
 		// schema provided by the file
 		GenericBean fileSchema;
+		
+        CSVParser parser = new CSVParserBuilder()
+                .withSeparator(Delimiters.DEFAULT_CSV_DELIMITER.charAt(0))
+                .build();
 
 		try (BufferedReader bufferedReader = new BufferedReader(
 				new InputStreamReader(theFileToUpload.getInputStream(), StandardCharsets.UTF_8));
-			 CSVReader readerCSV = new CSVReader(bufferedReader, IConstanteCaractere.semicolon.charAt(0));
+			 CSVReader readerCSV = new CSVReaderBuilder(bufferedReader).withCSVParser(parser).build();
 				)
 		{
 		fileSchema = getHeaderFromFile(readerCSV);
@@ -792,7 +806,7 @@ public class GererNormeDao extends VObjectHelperDao {
 		UtilitaireDao.get(0).executeRequest(null, requete);
 	}
 
-	private static GenericBean getHeaderFromFile(CSVReader csvReader) throws IOException {	
+	private static GenericBean getHeaderFromFile(CSVReader csvReader) throws IOException, CsvValidationException {	
 		return new GenericBean(Arrays.asList(csvReader.readNext()), Arrays.asList(csvReader.readNext()), null);
 	}
 

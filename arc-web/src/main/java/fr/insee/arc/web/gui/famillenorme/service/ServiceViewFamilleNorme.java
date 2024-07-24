@@ -19,7 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -130,7 +134,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 
 		try {
 			new DDIInsertDAO(this.dataObjectService).insertDDI(uploadFamilleNormeDansBase(fileUpload.getInputStream()));
-		} catch (IOException | ArcException e) {
+		} catch (IOException | ArcException | CsvValidationException e) {
 			this.views.getViewFamilleNorme().setMessage("familyManagement.import.error");
 			loggerDispatcher.error("Error in ServiceViewFamilleNorme.uploadFamilleNorme", LOGGER);
 		}
@@ -144,15 +148,21 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 	 * 
 	 * @param fileUploadInputStream the input stream of the zip file to upload
 	 * @throws IOException
+	 * @throws CsvValidationException 
 	 */
-	protected DDIModeler uploadFamilleNormeDansBase(InputStream fileUploadInputStream) throws IOException {
+	protected DDIModeler uploadFamilleNormeDansBase(InputStream fileUploadInputStream) throws IOException, CsvValidationException {
 
 		DDIModeler modeler = new DDIModeler();
 
+        CSVParser parser = new CSVParserBuilder()
+                .withSeparator(';')
+                .build();
+		
 		try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fileUploadInputStream));
 				BufferedReader buffReader = new BufferedReader(new InputStreamReader(zis));
-				CSVReader readerTables = new CSVReader(buffReader, ';');
-				CSVReader readerVariables = new CSVReader(buffReader, ';');) {
+				CSVReader readerTables = new CSVReaderBuilder(buffReader).withCSVParser(parser).build();
+				CSVReader readerVariables = new CSVReaderBuilder(buffReader).withCSVParser(parser).build();
+				) {
 
 			ZipEntry ze;
 			while ((ze = zis.getNextEntry()) != null) {

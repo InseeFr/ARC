@@ -9,7 +9,11 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
@@ -129,21 +133,31 @@ public class ChargeurCSV implements IChargeur {
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
 		// premier ligne
 		if (userDefinedHeaders == null) {
-			try {
+				
+		        CSVParser parser = new CSVParserBuilder()
+		                .withSeparator(csvDelimiter.charAt(0))
+		                .build();
+				
 				try (InputStreamReader inputStreamReader = new InputStreamReader(streamHeader);
 						BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-						CSVReader readerCSV = new CSVReader(bufferedReader, csvDelimiter.charAt(0));) {
+						CSVReader readerCSV = new CSVReaderBuilder(bufferedReader).withCSVParser(parser).build();
+						) {
 
 					String[] headers = getHeader(readerCSV);
 					registerHeaders(headers);
 
+				} catch (CsvValidationException | IOException e) {
+					throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED,
+							fileIdCard.getIdSource());
 				} finally {
-					streamHeader.close();
+					try {
+						streamHeader.close();
+					} catch (IOException fileReadException) {
+						throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
+								fileIdCard.getIdSource());
+					}
 				}
-			} catch (IOException fileReadException) {
-				throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
-						fileIdCard.getIdSource());
-			}
+
 		} else {
 			String[] headers = Format.tokenizeAndTrim(userDefinedHeaders, Delimiters.HEADERS_DELIMITER);
 			registerHeaders(headers);
@@ -196,8 +210,9 @@ public class ChargeurCSV implements IChargeur {
 	 * @return
 	 * @return
 	 * @throws IOException
+	 * @throws CsvValidationException 
 	 */
-	private String[] getHeader(CSVReader readerCSV) throws IOException {
+	private String[] getHeader(CSVReader readerCSV) throws IOException, CsvValidationException {
 
 		return readerCSV.readNext();
 	}
