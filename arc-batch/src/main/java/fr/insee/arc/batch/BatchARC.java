@@ -25,6 +25,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
+import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.service.kubernetes.ApiManageExecutorDatabase;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
@@ -373,6 +374,19 @@ class BatchARC implements IReturnCode {
 		message(ApiManageExecutorDatabase.delete().toString());
 	}
 
+	
+	private void archiveDirectoryDelete() throws ArcException {
+		
+		File[] archiveDirectories = FileSystemManagement.getArchiveDirectories(repertoire, envExecution);
+		
+		for (File f:archiveDirectories)
+		{
+			FileUtilsArc.deleteDirectory(f);
+			FileUtilsArc.createDirIfNotexist(f);
+		}
+	}
+	
+	
 	/***
 	 * Delete files, export to parquet
 	 * 
@@ -386,6 +400,8 @@ class BatchARC implements IReturnCode {
 		executeIfParquetActive(this::exportToParquet);
 
 		executeIfVolatile(this::executorsDatabaseDelete);
+		
+		executeIfVolatile(this::archiveDirectoryDelete);
 
 		message("Traitement Fin");
 		System.exit(STATUS_SUCCESS);

@@ -25,9 +25,27 @@ public class FileSystemManagement {
 
 	private static final String DIRECTORY_TOKEN = "_";
 
-	private static final String DIRECTORY_ARCHIVE_QUALIFIIER = "ARCHIVE";
+	private static final String DIRECTORY_ARCHIVE_QUALIFIER = "ARCHIVE";
 
 	private static final String DIRECTORY_OLD_QUALIFIIER = "OLD";
+	
+	
+	/**
+	 * return archives directories found in environment
+	 * @param directory
+	 * @param env
+	 * @return
+	 */
+	public static File[] getArchiveDirectories(String directory, String env)
+	{
+		File root = new File(FileSystemManagement.directoryEnvRoot(directory, env));	
+		return root.listFiles(t-> 
+		{return t.isDirectory() && t.getName().startsWith(TraitementPhase.RECEPTION.toString() + FileSystemManagement.DIRECTORY_TOKEN) 
+				&&  t.getName().endsWith(DIRECTORY_TOKEN + FileSystemManagement.DIRECTORY_ARCHIVE_QUALIFIER);
+				});
+	}
+	
+	
 
 	public static String directoryEnvRoot(String rootDirectory, String env) {
 		return Paths.get(rootDirectory).toString() + File.separator + env.toUpperCase();
@@ -58,7 +76,7 @@ public class FileSystemManagement {
 
 	public static String directoryPhaseEntrepotArchive(String rootDirectory, String env, TraitementPhase t,
 			String entrepot) {
-		return directoryPhaseEntrepot(rootDirectory, env, t, entrepot) + DIRECTORY_TOKEN + DIRECTORY_ARCHIVE_QUALIFIIER;
+		return directoryPhaseEntrepot(rootDirectory, env, t, entrepot) + DIRECTORY_TOKEN + DIRECTORY_ARCHIVE_QUALIFIER;
 	}
 
 	public static String directoryPhaseEntrepotArchiveOld(String rootDirectory, String env, TraitementPhase t,
