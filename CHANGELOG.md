@@ -5,6 +5,13 @@
 - Add a retention timer for file
 - Delete KO after retention time
 
+## version-94.1.52b
+- pvc is deleted in volatile mode after batch ends
+- fix file action (delete, replay, archive replay)
+- fix batch exit when production is set to off
+- fix the total file size limiter used by reception phase in batch mode
+- Add a new database parameter LanceurIHM.tailleMaxReceptionEnMb to limit the total file size to be received in gui mode.
+
 ## version-94.1.48b
 - bug fix for deirectory creation in kubernetes pvc
 
