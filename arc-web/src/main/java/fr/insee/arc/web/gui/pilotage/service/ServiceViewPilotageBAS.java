@@ -193,9 +193,17 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		}
 		
 		// Maximum number of files processed in each phase iteration
-		int maxFilesPerPhase = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
+		int capacityParameter;
 		
-		ApiServiceFactory.getService(phaseAExecuter, getBacASable(), maxFilesPerPhase, isEnvBatch()).invokeApi();
+		if (phaseAExecuter.equals(TraitementPhase.RECEPTION) || phaseAExecuter.equals(TraitementPhase.INITIALISATION)) {
+			capacityParameter = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.tailleMaxReceptionEnMb", 100000);
+		}
+		else
+		{
+			capacityParameter = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
+		}
+		
+		ApiServiceFactory.getService(phaseAExecuter, getBacASable(), capacityParameter, isEnvBatch()).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

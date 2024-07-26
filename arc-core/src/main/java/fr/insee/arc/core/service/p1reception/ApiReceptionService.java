@@ -48,9 +48,9 @@ public class ApiReceptionService extends ApiService {
 		} else {
 			maxNumberOfFiles = bdParameters.getInt(null, "ApiReceptionService.ihm.maxNumberOfFiles", 5000);
 		}
-		
+
 		// Enregistrement des fichiers
-		ArchiveRegistrationOperation archiveRegistration = new ArchiveRegistrationOperation(coordinatorSandbox, maxNumberOfFiles, maxNumberOfFiles);
+		ArchiveRegistrationOperation archiveRegistration = new ArchiveRegistrationOperation(coordinatorSandbox, this.getNbEnr(), maxNumberOfFiles);
 		
 		FilesDescriber archiveContent = archiveRegistration.moveAndCheckClientFiles();
 		this.setReportNumberOfObject(archiveRegistration.getFileNb());

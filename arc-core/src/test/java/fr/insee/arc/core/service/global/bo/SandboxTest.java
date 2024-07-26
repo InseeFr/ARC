@@ -15,10 +15,7 @@ public class SandboxTest extends InitializeQueryTest {
 
 	@Test
 	public void isEnvSetForProductionTest() throws IOException, SQLException, ArcException {
-		
-		System.out.println("§§§§§§§§§§§§§§§§§§§");
-		System.out.println(c);
-		
+
 		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc CASCADE;");
 		u.executeImmediate(c, "CREATE schema arc;");
 		u.executeImmediate(c, "CREATE TABLE arc.parameter (key text, val text, description text);");

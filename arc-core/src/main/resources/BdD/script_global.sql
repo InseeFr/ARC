@@ -61,6 +61,9 @@ UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFiles
 INSERT INTO arc.parameter VALUES ('LanceurARC.tailleMaxReceptionEnMb','100');
 UPDATE arc.parameter set description='parameter.batch.execution.maxCompressedArchiveSizeRegisteredInReceptionModule' where key='LanceurARC.tailleMaxReceptionEnMb';
 
+INSERT INTO arc.parameter VALUES ('LanceurIHM.tailleMaxReceptionEnMb','100000');
+UPDATE arc.parameter set description='parameter.batch.execution.maxCompressedArchiveSizeRegisteredInReceptionModuleGui' where key='LanceurIHM.tailleMaxReceptionEnMb';
+
 INSERT INTO arc.parameter VALUES ('LanceurARC.maxFilesToLoad','101');
 UPDATE arc.parameter set description='parameter.batch.execution.maxNumberOfFilesProceedInLoadModule' where key='LanceurARC.maxFilesToLoad';
 

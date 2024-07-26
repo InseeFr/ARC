@@ -388,6 +388,7 @@ when key= 'LanceurARC.INTERVAL_JOUR_INITIALISATION' then public.check_integer(va
 when key= 'ArcAction.batchMode' then public.check_sandboxes(val)
 when key= 'LanceurARC.maxFilesToLoad' then public.check_integer(val)
 when key= 'LanceurIHM.maxFilesPerPhase' then public.check_integer(val)
+when key= 'LanceurIHM.tailleMaxReceptionEnMb' then public.check_integer(val)
 when key= 'MappingService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
 else true
 end

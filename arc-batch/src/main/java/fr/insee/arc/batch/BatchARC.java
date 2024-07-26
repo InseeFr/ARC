@@ -158,6 +158,7 @@ class BatchARC implements IReturnCode {
 		}
 
 		message("Fin du batch");
+		System.exit(STATUS_SUCCESS);
 
 	}
 
@@ -361,7 +362,7 @@ class BatchARC implements IReturnCode {
 		message(ApiManageExecutorDatabase.delete().toString());
 		message(ApiManageExecutorDatabase.create().toString());
 		
-		Sleep.sleep(20000);
+		Sleep.sleep(30000);
 	}
 
 	/**
@@ -404,7 +405,6 @@ class BatchARC implements IReturnCode {
 		executeIfVolatile(this::archiveDirectoryDelete);
 
 		message("Traitement Fin");
-		System.exit(STATUS_SUCCESS);
 
 	}
 
