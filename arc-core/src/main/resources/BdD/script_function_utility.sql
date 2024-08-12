@@ -290,7 +290,7 @@ exception when others then end; $$;
 
 do $$ begin
 if ('{{userRestricted}}'!='') then 
-	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public to {{userRestricted}}; GRANT USAGE ON SCHEMA arc TO {{userRestricted}}; GRANT EXECUTE ON FUNCTION arc.isdate to {{userRestricted}}; GRANT USAGE, SELECT, UPDATE ON SEQUENCE arc.number_generator to {{userRestricted}};';
+	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT USAGE ON SCHEMA arc TO {{userRestricted}}; GRANT EXECUTE ON FUNCTION arc.isdate to {{userRestricted}}; GRANT USAGE, SELECT, UPDATE ON SEQUENCE arc.number_generator to {{userRestricted}};';
 end if; 
 exception when others then end;
 $$;
