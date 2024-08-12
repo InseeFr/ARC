@@ -5,6 +5,9 @@
 - Add a retention timer for file
 - Delete KO after retention time
 
+## version-94.1.54b
+- user_restricted right fix
+
 ## version-94.1.52b
 - pvc is deleted in volatile mode after batch ends
 - fix file action (delete, replay, archive replay)
