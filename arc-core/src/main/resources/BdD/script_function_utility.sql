@@ -284,7 +284,7 @@ REVOKE ALL ON SCHEMA arc FROM public;
 do $$ 
 begin
 if ('{{userRestricted}}'!='') then 
-	execute 'CREATE ROLE {{userRestricted}} with NOINHERIT; GRANT {{userRestricted}} TO '||current_role||';';
+	execute 'CREATE ROLE {{userRestricted}} with NOINHERIT; GRANT {{userRestricted}} TO current_role;';
 end if;
 exception when others then end; $$;
 
