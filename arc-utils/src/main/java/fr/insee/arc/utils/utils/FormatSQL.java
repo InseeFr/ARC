@@ -99,6 +99,17 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	}
 
 	/**
+	 * reset role
+	 * 
+	 * @param roleName
+	 * @return
+	 * @throws ArcException
+	 */
+	public static GenericPreparedStatementBuilder resetRole() {
+		return new GenericPreparedStatementBuilder("RESET role;").append(SQL.COMMIT).append(SQL.END_QUERY);
+	}
+	
+	/**
 	 * Switch the database user
 	 * 
 	 * @param roleName

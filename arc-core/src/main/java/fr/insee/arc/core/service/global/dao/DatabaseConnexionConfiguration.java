@@ -29,7 +29,7 @@ public class DatabaseConnexionConfiguration {
 	public static GenericPreparedStatementBuilder switchToFullRightRole() {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		if (!properties.getDatabaseRestrictedUsername().equals("")) {
-			return FormatSQL.changeRole(properties.getDatabaseUsername());
+			return FormatSQL.resetRole();
 		}
 		return new GenericPreparedStatementBuilder();
 	}
