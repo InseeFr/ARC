@@ -25,6 +25,7 @@ execute 'alter database '||c.n||' set synchronous_commit=off;';
 execute 'alter database '||c.n||' set max_parallel_workers_per_gather=0;';
 execute 'alter database '||c.n||' set max_parallel_maintenance_workers=0;';
 execute 'alter database '||c.n||' set jit=off;';
+execute 'alter database '||c.n||' set client_min_messages=error;';
 end loop;
 end;
 $$;
