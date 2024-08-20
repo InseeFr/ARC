@@ -2,8 +2,6 @@
 
 ## TODO List
 - All notable changes to this project will be documented in this file.
-- Add a retention timer for file
-- Delete KO after retention time
 
 ## version-94.1.54b
 - user_restricted right fix
