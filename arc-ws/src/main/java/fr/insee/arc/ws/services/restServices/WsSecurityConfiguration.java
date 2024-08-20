@@ -7,14 +7,12 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -50,16 +48,11 @@ public class WsSecurityConfiguration {
 	}
 
 	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web.ignoring().requestMatchers(new AntPathRequestMatcher("/webservice/**"));
-	}
-
-	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtResourceServer -> jwtResourceServer
 					.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak())))
-					.authorizeHttpRequests(t -> t.requestMatchers(new AntPathRequestMatcher("/execute/**"))
+					.authorizeHttpRequests(t -> t.requestMatchers(new AntPathRequestMatcher("/execute/**") , new AntPathRequestMatcher("/webservice/**"))
 							.hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
 		}
 		else
