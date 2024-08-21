@@ -3,8 +3,8 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
-## version-94.1.56
-- long term release
+## version-94.1.58
+- jwt auth for data retrieval webservice if keycloak is set
 
 ## version-94.1.54b
 - user_restricted right fix
