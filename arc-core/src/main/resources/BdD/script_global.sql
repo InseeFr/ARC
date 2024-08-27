@@ -351,6 +351,10 @@ CREATE TABLE IF NOT EXISTS arc.ihm_entrepot
 ); 
 INSERT INTO arc.ihm_entrepot values ('DEFAULT','DEFAULT') ON CONFLICT DO NOTHING;
 
+-- priorisations des entrepôts et leurs fichiers
+ALTER TABLE arc.ihm_entrepot ADD COLUMN IF NOT EXISTS ordre_priorite integer;
+ALTER TABLE arc.ihm_entrepot ADD COLUMN IF NOT EXISTS regle_priorite text;
+
 -- table de gestion des webservices
 CREATE TABLE IF NOT EXISTS arc.ihm_ws_context 
 ( 

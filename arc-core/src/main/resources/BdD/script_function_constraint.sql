@@ -314,6 +314,9 @@ select public.check_function('type_variable_metier', 'public.check_type');
 -- nmcl
 select public.check_function('nom_table', 'public.check_identifier');
 
+-- entrepot
+select public.check_function('regle_priorite', 'public.check_sql');
+
 -- chargement rules
 select public.check_function('format', 'public.check_sql');
 

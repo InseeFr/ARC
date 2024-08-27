@@ -37,7 +37,8 @@ public enum ViewEnum {
 			ColumnEnum.BORNE_SUP, ColumnEnum.CONDITION, ColumnEnum.PRE_ACTION, ColumnEnum.TODO, ColumnEnum.COMMENTAIRE,
 			ColumnEnum.XSD_ORDRE, ColumnEnum.XSD_LABEL_FILS, ColumnEnum.XSD_ROLE, ColumnEnum.BLOCKING_THRESHOLD,
 			ColumnEnum.ERROR_ROW_PROCESSING) //
-	, IHM_ENTREPOT("ihm_entrepot", SchemaEnum.ARC_METADATA, ColumnEnum.ID_ENTREPOT, ColumnEnum.ID_LOADER) //
+	, IHM_ENTREPOT("ihm_entrepot", SchemaEnum.ARC_METADATA, ColumnEnum.ID_ENTREPOT, ColumnEnum.ID_LOADER,
+			ColumnEnum.ORDRE_PRIORITE, ColumnEnum.REGLE_PRIORITE) //
 	, IHM_EXPRESSION("ihm_expression", SchemaEnum.ARC_METADATA, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME,
 			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE,
 			ColumnEnum.EXPR_NOM, ColumnEnum.EXPR_VALEUR, ColumnEnum.COMMENTAIRE) //

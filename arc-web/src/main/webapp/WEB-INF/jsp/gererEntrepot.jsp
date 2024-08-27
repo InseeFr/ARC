@@ -21,7 +21,7 @@ spellcheck="false" method="post" accept-charset="UTF-8">
 
 <div class="container-fluid">
 <div class="row">
-<div class="col-md-4">
+<div class="col-md-6">
 <!-- filestore list -->
 <c:set var="view" value="${viewEntrepot}"  scope="request"/>
 <c:import url="tiles/templateVObject.jsp">
