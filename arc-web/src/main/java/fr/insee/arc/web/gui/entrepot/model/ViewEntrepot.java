@@ -13,8 +13,10 @@ public class ViewEntrepot extends VObject {
 
 	static {
 		columnMap.put("i", new ColumnRendering(false, "i", "0%", "text", null, false));
-		columnMap.put("id_entrepot", new ColumnRendering(true, "label.filestore", "50%", "text", null, true));
-		columnMap.put("id_loader", new ColumnRendering(true, "label.loader", "50%", "text", null, true));
+		columnMap.put("id_entrepot", new ColumnRendering(true, "label.filestore", "20%", "text", null, true));
+		columnMap.put("id_loader", new ColumnRendering(true, "label.loader", "20%", "text", null, true));
+		columnMap.put("ordre_priorite", new ColumnRendering(true, "label.priorityOrder", "10%", "text", null, true));
+		columnMap.put("regle_priorite", new ColumnRendering(true, "label.priorityRule", "50%", "text", null, true));
 
 	}
 	

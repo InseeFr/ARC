@@ -26,7 +26,7 @@ public class EntrepotDao extends VObjectHelperDao {
 		// view query
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		StringBuilder columns = query.sqlListeOfColumnsFromModel(dataModelEntrepot);
-		query.build(SQL.SELECT, "row_number() over (order by id_entrepot,id_loader)", SQL.AS, ColumnEnum.I, SQL.COMMA, columns);
+		query.build(SQL.SELECT, "row_number() over (order by ordre_priorite,id_entrepot,id_loader)", SQL.AS, ColumnEnum.I, SQL.COMMA, columns);
 		query.build(SQL.FROM, nameOfViewEntrepot);
 		// default value
 		Map<String, String> defaultInputFields = new HashMap<>();

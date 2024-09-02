@@ -62,11 +62,13 @@ public enum ColumnEnum {
 	, NORME("norme", TypeEnum.TEXT, "") // ihm_ws_context
 	, OPERATION("operation", TypeEnum.TEXT, "") // pilotage_batch
 	, ORDRE("ordre", TypeEnum.INTEGER, "") // ext_type_fichier_chargement,ext_type_controle,ext_type_normage
+	, ORDRE_PRIORITE("ordre_priorite", TypeEnum.INTEGER, "") // ihm_entrepot
 	, PERIODICITE("periodicite", TypeEnum.TEXT, "") // ihm_controle_regle,ihm_jeuderegle,ihm_calendrier,ihm_mapping_regle,ihm_normage_regle,ihm_expression,ihm_ws_context,ihm_norme,ihm_chargement_regle
 	, PRE_ACTION("pre_action", TypeEnum.TEXT, "") // ihm_controle_regle
 	, QUERY_ID("query_id", TypeEnum.INTEGER, "") // ihm_ws_query
 	, QUERY_NAME("query_name", TypeEnum.TEXT, "") // ihm_ws_query
 	, QUERY_VIEW("query_view", TypeEnum.INTEGER, "") // ihm_ws_query
+	, REGLE_PRIORITE("regle_priorite", TypeEnum.TEXT, "") // ihm_entrepot
 	, RUBRIQUE("rubrique", TypeEnum.TEXT, "") // ihm_normage_regle
 	, RUBRIQUE_FILS("rubrique_fils", TypeEnum.TEXT, "") // ihm_controle_regle
 	, RUBRIQUE_NMCL("rubrique_nmcl", TypeEnum.TEXT, "") // ihm_normage_regle
