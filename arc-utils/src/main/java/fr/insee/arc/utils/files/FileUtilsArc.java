@@ -52,6 +52,10 @@ public class FileUtilsArc {
 		createDirIfNotexist(new File(fPath));
 	}
 
+	public static void deleteDirectory(String directoryToBeDeleted) throws ArcException {
+		deleteDirectory(new File(directoryToBeDeleted));
+	}
+	
 	
 	/**
 	 * delete directory recursively

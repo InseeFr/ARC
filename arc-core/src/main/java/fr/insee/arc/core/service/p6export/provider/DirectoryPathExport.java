@@ -18,13 +18,17 @@ public class DirectoryPathExport {
 	 * @param env
 	 * @return
 	 */
-	public static String directoryExport(String rootDirectory, String env, String dateExport) {
-		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT,
-				dateExport);
+	public static String directoryExport(String rootDirectory, String env) {
+		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT);
 	}
 
-	public static String s3Export(String env, String dateExport) {
-		return FileSystemManagement.directoryPhaseRootSubdirectories(S3_EXPORT_ROOT, env, TraitementPhase.EXPORT,
+	public static String directoryExport(String rootDirectory, String env, String clientExport, String dateExport) {
+		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport,
+				dateExport);
+	}
+	
+	public static String s3Export(String env, String clientExport, String dateExport) {
+		return FileSystemManagement.directoryRootSubdirectories(S3_EXPORT_ROOT, env, clientExport,
 				dateExport);
 	}
 

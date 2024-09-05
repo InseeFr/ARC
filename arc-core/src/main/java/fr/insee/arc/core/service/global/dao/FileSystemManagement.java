@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -55,15 +56,20 @@ public class FileSystemManagement {
 		return directoryEnvRoot(rootDirectory, env) + File.separator + t.toString();
 	}
 
-	public static String directoryPhaseRootSubdirectories(String rootDirectory, String env, TraitementPhase t, String...subdirectories) {
+	public static String directoryRootSubdirectories(String rootDirectory, String env, String...subdirectories) {
 		
 		StringBuilder directoryPath = new StringBuilder();
-		directoryPath.append(directoryEnvRoot(rootDirectory, env) + File.separator + t.toString());
+		directoryPath.append(directoryEnvRoot(rootDirectory, env));
 		for (String subdirectory:subdirectories)
 		{
 			directoryPath.append(File.separator + subdirectory);
 		}
 		return directoryPath.toString();
+	}
+	
+	
+	public static String directoryPhaseRootSubdirectories(String rootDirectory, String env, TraitementPhase t, String...subdirectories) {
+		return directoryRootSubdirectories(rootDirectory, env, ArrayUtils.insert(0, subdirectories, t.toString()));
 	}
 	
 	public static String directoryEnvDownload(String rootDirectory, String env) {

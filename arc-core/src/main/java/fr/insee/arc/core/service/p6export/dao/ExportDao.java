@@ -22,6 +22,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 
@@ -32,6 +33,7 @@ public class ExportDao {
 
 	private static final String EXPORT_CLIENT_NAME = "EXPORT";
 
+	private String directoryExport;
 	private String directoryOut;
 	private String s3Out;
 
@@ -124,9 +126,14 @@ public class ExportDao {
 	 */
 	public void exportTablesToParquet(String dateExport, List<TableToRetrieve> tablesToExport) throws ArcException {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
+		
+		this.directoryExport = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
+				this.coordinatorSandbox.getSchema());
+		
 		this.directoryOut = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
-				this.coordinatorSandbox.getSchema(), dateExport);
-		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), dateExport);
+				this.coordinatorSandbox.getSchema(), EXPORT_CLIENT_NAME, dateExport);
+		
+		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), EXPORT_CLIENT_NAME, dateExport);
 
 		ParquetEncryptionKey parquetEncryptionKey = properties.getS3OutputParquetKey().isEmpty() ? null
 				: new ParquetEncryptionKey(EncryptionType.KEY256, properties.getS3OutputParquetKey());
@@ -158,7 +165,11 @@ public class ExportDao {
 		for (File f : new File(this.directoryOut).listFiles()) {
 			ArcS3.OUTPUT_BUCKET.upload(f, this.s3Out + File.separator + f.getName());
 		}
-
+		
+		// delete export directory if S3 output bucket is declared in order to not duplicate data
+		if (ArcS3.OUTPUT_BUCKET.isS3Off()) return;
+		FileUtilsArc.deleteDirectory(this.directoryExport);
+		FileUtilsArc.createDirIfNotexist(this.directoryExport);
 	}
 
 }
