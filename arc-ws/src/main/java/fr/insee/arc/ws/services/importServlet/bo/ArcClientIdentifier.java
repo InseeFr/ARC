@@ -32,6 +32,8 @@ public class ArcClientIdentifier {
 	private ExportFormat format;
 	
 	private List<ExportSource> source;
+
+	private List<String> mappingTablesFilter;
 	
 	private Boolean reprise;
 
@@ -49,6 +51,8 @@ public class ArcClientIdentifier {
 		
 		validateFormat();
 		validateSource();
+		validateMappingTables();
+		
 		this.clientInputParameter = rawParameters.getClientInputParameterUnsafe();
 
 		this.environnement = SecurityDao.validateEnvironnement(rawParameters.getEnvironnementUnsafe());
@@ -73,22 +77,29 @@ public class ArcClientIdentifier {
 	
 	private void validateSource() throws ArcException {
 		this.source = new ArrayList<>();
+		
 		if (unsafe.getSourceUnsafe().isEmpty()) {
 			this.source.addAll(DEFAULT_SOURCE);
+			return;
 		}
-		else
+		
+		for (String unsafeSource : unsafe.getSourceUnsafe())
 		{
-			for (String unsafeSource : unsafe.getSourceUnsafe())
-			{
-				try {
-					this.source.add(ExportSource.valueOf(unsafeSource.toUpperCase()));
-				} catch (IllegalArgumentException e) {
-					throw new ArcException(ArcExceptionMessage.JSON_PARSING_FAILED);
-				}
+			try {
+				this.source.add(ExportSource.valueOf(unsafeSource.toUpperCase()));
+			} catch (IllegalArgumentException e) {
+				throw new ArcException(ArcExceptionMessage.JSON_PARSING_FAILED);
 			}
-		}				
+		}
 	}
 
+	/**
+	 * validation not required as it will be used for an equality test on mapping table name
+	 * @throws ArcException
+	 */
+	private void validateMappingTables() throws ArcException {
+		this.mappingTablesFilter = unsafe.getMappingTablesFilterUnsafe();
+	}
 
 	private void validateFormat() throws ArcException {
 		if (unsafe.getFormatUnsafe() == null) {
@@ -159,5 +170,8 @@ public class ArcClientIdentifier {
 		return sessionId;
 	}
 
+	public List<String> getMappingTablesFilter() {
+		return mappingTablesFilter;
+	}
 	
 }

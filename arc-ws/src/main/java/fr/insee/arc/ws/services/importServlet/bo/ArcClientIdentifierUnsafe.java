@@ -51,6 +51,7 @@ public class ArcClientIdentifierUnsafe {
 		this.familleUnsafe = getStringFromKeyIfExists(JsonKeys.FAMILLE);
 		this.formatUnsafe = getStringFromKeyIfExists(JsonKeys.FORMAT);
 		this.sourceUnsafe = getArrayFromKeyIfExists(JsonKeys.SOURCE);
+		this.mappingTablesFilterUnsafe = getArrayFromKeyIfExists(JsonKeys.MAPPING_TABLES_FILTER);
 
 		this.repriseUnsafe = getBooleanFromKeyIfExists(JsonKeys.REPRISE);
 		this.validiteInfUnsafe = getStringFromKeyIfExists(JsonKeys.VALINF);
@@ -76,7 +77,8 @@ public class ArcClientIdentifierUnsafe {
 	private String formatUnsafe;
 	
 	private List<String> sourceUnsafe;
-	
+	private List<String> mappingTablesFilterUnsafe;
+
 	private Boolean repriseUnsafe;
 
 	private String validiteInfUnsafe;
@@ -139,6 +141,11 @@ public class ArcClientIdentifierUnsafe {
 
 	public List<String> getSourceUnsafe() {
 		return sourceUnsafe;
+	}
+
+	
+	public List<String> getMappingTablesFilterUnsafe() {
+		return mappingTablesFilterUnsafe;
 	}
 
 	public ServletService getServiceSafe() {

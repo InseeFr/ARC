@@ -81,6 +81,13 @@ public class ImportStep1InitializeClientTablesService {
 			
 			clientDao.createTableOfIdSource();
 			tablesMetierNames = clientDao.selectBusinessDataTables();
+			
+			// filter Mapping tables if any filter declared
+			if (!arcClientIdentifier.getMappingTablesFilter().isEmpty())
+			{
+				tablesMetierNames.retainAll(arcClientIdentifier.getMappingTablesFilter());
+			}
+			
 		}
 	}
 
@@ -115,14 +122,15 @@ public class ImportStep1InitializeClientTablesService {
 			public void run() {
 				try {
 					if (tablesMetierNames != null) {
-
 						executeIf(ExportSource.MAPPING, () -> createImages(tablesMetierNames));
 						executeIf(ExportSource.METADATA, () -> clientDao.createTableMetier());
 						executeIf(ExportSource.METADATA, () -> clientDao.createTableVarMetier());
 					}
+					
 					executeIf(ExportSource.NOMENCLATURE, () -> clientDao.createTableNmcl());
 					executeIf(ExportSource.METADATA, () -> clientDao.createTableFamille());
 					executeIf(ExportSource.METADATA, () -> clientDao.createTablePeriodicite());
+					
 				} catch (ArcException e) {
 						e.logFullException();
 						clientDao.registerWsKO();

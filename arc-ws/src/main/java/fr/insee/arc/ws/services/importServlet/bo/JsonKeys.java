@@ -18,6 +18,7 @@ public enum JsonKeys {
 	,TABLE( "table" )
 	,FILEDATA("filedata")
 	,SOURCE("source")
+	,MAPPING_TABLES_FILTER("mappingTablesFilter")
 
 	// 
 	,FORMAT("format")
