@@ -55,7 +55,7 @@ public class ImportStep1InitializeClientTablesService {
 		createWsTables();
 
 		// create tables to retrieve family data table
-		createMetaFamilyTables();
+		createFamilyMappingTables();
 
 		// create data table in an asynchronous parallel thread
 		startTableCreationInParallel();
@@ -72,22 +72,28 @@ public class ImportStep1InitializeClientTablesService {
 	 * 3. return the list of family data table to retrieve
 	 * @throws ArcException
 	 */
-	private void createMetaFamilyTables() throws ArcException {
-		if (!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
-			
-			if (!clientDao.verificationClientFamille()) {
-				throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_FAMILY_FORBIDDEN);
-			}
-			
-			clientDao.createTableOfIdSource();
-			tablesMetierNames = clientDao.selectBusinessDataTables();
-			
-			// filter Mapping tables if any filter declared
-			if (!arcClientIdentifier.getMappingTablesFilter().isEmpty())
-			{
-				tablesMetierNames.retainAll(arcClientIdentifier.getMappingTablesFilter());
-			}
-			
+	private void createFamilyMappingTables() throws ArcException {
+
+		// mapping tables can only be requested on sandbox environments
+		if (arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
+			return;
+		}
+
+		// check if client is allowed to retrieve family data
+		if (!clientDao.verificationClientFamille()) {
+			throw new ArcException(ArcExceptionMessage.WS_RETRIEVE_DATA_FAMILY_FORBIDDEN);
+		}
+		
+		// create the table that contains the list of files to be retrieved
+		clientDao.createTableOfIdSource();
+		
+		// get the family mapping tables name to be retrieved
+		tablesMetierNames = clientDao.selectBusinessDataTables();
+		
+		// filter the mapping tables if any filter declared
+		if (!arcClientIdentifier.getMappingTablesFilter().isEmpty())
+		{
+			tablesMetierNames.retainAll(arcClientIdentifier.getMappingTablesFilter());
 		}
 	}
 
