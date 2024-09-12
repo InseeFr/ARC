@@ -3,6 +3,12 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.61b
+- parquet support for data retrieval webservice
+
+## version-94.1.59b
+- clear parquet export directory if s3 output bucket is defined
+
 ## version-94.1.58
 - jwt authentification for data retrieval webservice if keycloak is set
 
