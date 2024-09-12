@@ -43,7 +43,10 @@ public class ImportStep3GetTableDataService {
 
 		if (this.clientDao.isWebServiceNotPending()) {
 			this.clientDao.dropTable(table);
-			this.clientDao.deleteParquet(table);
+			
+			if (arcClientIdentifier.getFormat().isParquet())
+				this.clientDao.deleteParquet(table);
+			
 			this.clientDao.deleteFromTrackTable(table.getTableName());
 			
 			LoggerHelper.info(LOGGER, "Table " + table.getTableName() + " had been retrieved and dropped.");

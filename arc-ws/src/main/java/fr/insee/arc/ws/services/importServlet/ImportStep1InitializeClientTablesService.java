@@ -72,7 +72,9 @@ public class ImportStep1InitializeClientTablesService {
 		}
 
 		// drop tables from the client that had been requested from a former call
-		this.clientDao.dropPendingClientObjects();
+		this.clientDao.dropPendingClientTables();
+		
+		executeIfParquetDeclared(() -> this.clientDao.deletePendingClientParquet());
 		
 		// create the table that will track the data table which has been built and retrieved
 		createTrackTable();
