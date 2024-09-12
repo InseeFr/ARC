@@ -1,16 +1,16 @@
 package fr.insee.arc.ws.services.importServlet;
 
+import java.io.IOException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.Sleep;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
-import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifierUnsafe;
-import fr.insee.arc.ws.services.importServlet.bo.ExportFormat;
 import fr.insee.arc.ws.services.importServlet.dao.ClientDao;
 import fr.insee.arc.ws.services.importServlet.dao.ServiceDao;
 
@@ -37,18 +37,23 @@ public class ImportStep3GetTableDataService {
 	public void execute(SendResponse resp) throws ArcException {
 
 		TableToRetrieve table = clientDao.getAClientTableByName(arcClientIdentifier.getClientInputParameter());
-		
-		// binary transfer
-		ServiceDao.execQueryExportDataToResponse(resp.getWr(), table, ExportFormat.isCsv(this.arcClientIdentifier.getFormat()));
+
+		// transfer data to http response
+		ServiceDao.execQueryExportDataToResponse(resp.getWr(), table, this.arcClientIdentifier.getFormat(), clientDao);
 
 		if (this.clientDao.isWebServiceNotPending()) {
 			this.clientDao.dropTable(table);
+			this.clientDao.deleteParquet(table);
 			this.clientDao.deleteFromTrackTable(table.getTableName());
+			
+			LoggerHelper.info(LOGGER, "Table " + table.getTableName() + " had been retrieved and dropped.");
+			
 		} else {
 			Sleep.sleep(WAIT_DELAY_ON_PENDING_TABLES_CREATION_IN_MS);
 		}
 
-		resp.endSending();	
+		resp.endSending();
+
 	}
 
 }

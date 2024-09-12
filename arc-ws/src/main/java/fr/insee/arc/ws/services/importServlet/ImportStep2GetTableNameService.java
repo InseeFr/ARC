@@ -17,6 +17,8 @@ import fr.insee.arc.ws.services.importServlet.dao.NameDao;
 public class ImportStep2GetTableNameService {
 
 	protected static final Logger LOGGER = LogManager.getLogger(ImportStep2GetTableNameService.class);
+	
+	private static final String NO_MORE_TABLE_TO_BE_RETRIEVED = " ";
 
 	private ClientDao clientDao;
 
@@ -80,7 +82,7 @@ public class ImportStep2GetTableNameService {
 		table = this.clientDao.getAClientTableByType(ExportTrackingType.TRACK);
 		this.clientDao.dropTable(table);
 		
-		resp.send(" ");
+		resp.send(NO_MORE_TABLE_TO_BE_RETRIEVED);
 		resp.endSending();
 
 	}

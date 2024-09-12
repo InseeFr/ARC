@@ -1,14 +1,19 @@
 package fr.insee.arc.ws.services.importServlet;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.SchemaEnum;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.database.ArcDatabase;
+import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.ExportSource;
@@ -35,18 +40,40 @@ public class ImportStep1InitializeClientTablesService {
 
 	}
 
-	private void executeIf(ExportSource source, Executable exe) throws ArcException {
-		if (!arcClientIdentifier.getSource().contains(source)) {
+	private void executeIfNotMetadataSchema(Executable exe) throws ArcException {
+		executeIf(!arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName()), exe);
+	}
+	
+	
+	private void executeIfSourceDeclared(ExportSource source, Executable exe) throws ArcException {
+		executeIf(arcClientIdentifier.getSource().contains(source), exe);
+	}
+	
+	private void executeIfParquetDeclared(Executable exe) throws ArcException {
+		executeIf(arcClientIdentifier.getFormat().isParquet(), exe);
+	}
+	
+
+	private void executeIf(Boolean condition, Executable exe) throws ArcException {
+		if (!condition) {
 			return;
 		}
 		exe.execute();
 	}
 
 	public void execute(SendResponse resp) throws ArcException {
-		
-		// drop tables from the client that had been requested from a former call
-		dropPendingClientTables();
 
+		LoggerHelper.info(LOGGER, "Data retrieval webservice invoked for client " + this.arcClientIdentifier.getClientIdentifier() + " on "+ this.arcClientIdentifier.getEnvironnement() + " with timestamp "+ this.arcClientIdentifier.getTimestamp());
+		
+		long formerCallTimestamp = clientDao.extractWsTrackingTimestamp();
+		if (formerCallTimestamp > 0L)
+		{
+			LoggerHelper.info(LOGGER, "CONCURRENT CLIENT CALL WITH TIMESTAMP " + formerCallTimestamp );
+		}
+
+		// drop tables from the client that had been requested from a former call
+		this.clientDao.dropPendingClientObjects();
+		
 		// create the table that will track the data table which has been built and retrieved
 		createTrackTable();
 		
@@ -55,7 +82,7 @@ public class ImportStep1InitializeClientTablesService {
 		createWsTables();
 
 		// create tables to retrieve family data table
-		createFamilyMappingTables();
+		executeIfNotMetadataSchema(() -> createFamilyMappingTables());
 
 		// create data table in an asynchronous parallel thread
 		startTableCreationInParallel();
@@ -73,11 +100,6 @@ public class ImportStep1InitializeClientTablesService {
 	 * @throws ArcException
 	 */
 	private void createFamilyMappingTables() throws ArcException {
-
-		// mapping tables can only be requested on sandbox environments
-		if (arcClientIdentifier.getEnvironnement().equalsIgnoreCase(SchemaEnum.ARC_METADATA.getSchemaName())) {
-			return;
-		}
 
 		// check if client is allowed to retrieve family data
 		if (!clientDao.verificationClientFamille()) {
@@ -113,7 +135,10 @@ public class ImportStep1InitializeClientTablesService {
 	 * @throws ArcException
 	 */
 	private void createWsTables() throws ArcException {
-		this.clientDao.createTableWsInfo();
+		
+		List<TableToRetrieve> tablesToExport = new ArrayList<>();
+		tablesToExport.addAll(this.clientDao.createTableWsInfo());
+		executeIfParquetDeclared(() -> exportToParquet(tablesToExport));
 	}
 
 	/**
@@ -127,15 +152,21 @@ public class ImportStep1InitializeClientTablesService {
 			@Override
 			public void run() {
 				try {
+					
+					List<TableToRetrieve> tablesToExport = new ArrayList<>();
+					
 					if (tablesMetierNames != null) {
-						executeIf(ExportSource.MAPPING, () -> createImages(tablesMetierNames));
-						executeIf(ExportSource.METADATA, () -> clientDao.createTableMetier());
-						executeIf(ExportSource.METADATA, () -> clientDao.createTableVarMetier());
+
+						executeIfSourceDeclared(ExportSource.MAPPING, () -> tablesToExport.addAll(createImages(tablesMetierNames)));
+						executeIfSourceDeclared(ExportSource.METADATA, () -> tablesToExport.addAll(clientDao.createTableMetier()));
+						executeIfSourceDeclared(ExportSource.METADATA, () -> tablesToExport.addAll(clientDao.createTableVarMetier()));
 					}
 					
-					executeIf(ExportSource.NOMENCLATURE, () -> clientDao.createTableNmcl());
-					executeIf(ExportSource.METADATA, () -> clientDao.createTableFamille());
-					executeIf(ExportSource.METADATA, () -> clientDao.createTablePeriodicite());
+					executeIfSourceDeclared(ExportSource.NOMENCLATURE, () -> tablesToExport.addAll(clientDao.createTableNmcl()));
+					executeIfSourceDeclared(ExportSource.METADATA, () -> tablesToExport.addAll(clientDao.createTableFamille()));
+					executeIfSourceDeclared(ExportSource.METADATA, () -> tablesToExport.addAll(clientDao.createTablePeriodicite()));
+
+					executeIfParquetDeclared(() -> exportToParquet(tablesToExport));
 					
 				} catch (ArcException e) {
 						e.logFullException();
@@ -155,24 +186,6 @@ public class ImportStep1InitializeClientTablesService {
 		maintenance.start();
 	}
 
-	
-	/**
-	 * drop tables on coordinator and executors if the exists
-	 * @throws ArcException
-	 */
-	private void dropPendingClientTables() throws ArcException {
-		
-		this.clientDao.dropPendingClientTables(0);
-		
-		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
-		for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
-				.getIndex() + numberOfExecutorNods; executorConnectionId++) {
-			this.clientDao.dropPendingClientTables(executorConnectionId);
-		}
-	}
-
-	
-	
 	/**
 	 * create image tables on executor nods if connection is scaled, on coordinator
 	 * nod if not
@@ -180,10 +193,16 @@ public class ImportStep1InitializeClientTablesService {
 	 * @param tablesMetierNames
 	 * @throws ArcException
 	 */
-	private void createImages(List<String> tablesMetierNames) throws ArcException {
+	private List<TableToRetrieve> createImages(List<String> tablesMetierNames) throws ArcException {
 		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
+		
+		List<TableToRetrieve> tablesToRetrieve = new ArrayList<>();
+
 		if (numberOfExecutorNods == 0) {
-			clientDao.createImages(tablesMetierNames, ArcDatabase.COORDINATOR.getIndex());
+			clientDao.createImages(tablesMetierNames, ArcDatabase.COORDINATOR.getIndex())
+			.forEach(t -> tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.COORDINATOR, t)));
+			
+			
 		} else {
 			for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
 					.getIndex() + numberOfExecutorNods; executorConnectionId++) {
@@ -192,9 +211,18 @@ public class ImportStep1InitializeClientTablesService {
 				clientDao.copyTableOfIdSourceToExecutorNod(executorConnectionId);
 				
 				// create the business table containing data of id_source found in table tableOfIdSource
-				clientDao.createImages(tablesMetierNames, executorConnectionId);
+				clientDao.createImages(tablesMetierNames, executorConnectionId)
+				.forEach(t -> tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.EXECUTOR, t)))
+				;
 			}
 		}
+
+		return tablesToRetrieve;
+	}
+	
+	private void exportToParquet(List<TableToRetrieve> tablesToExport) throws ArcException
+	{
+		clientDao.exportToParquet(tablesToExport);
 	}
 
 }

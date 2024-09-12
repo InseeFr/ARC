@@ -7,9 +7,10 @@ import org.junit.Test;
 public class ExportFormatTest {
 
 	@Test
-	public void isCsv() {
-		assertFalse(ExportFormat.isCsv(ExportFormat.BINARY));
-		assertTrue(ExportFormat.isCsv(ExportFormat.CSV_GZIP));
+	public void exportFormat_isParquet_test() {
+		assertTrue(ExportFormat.PARQUET.isParquet());
+		assertFalse(ExportFormat.BINARY.isParquet());
+
 	}
 
 }

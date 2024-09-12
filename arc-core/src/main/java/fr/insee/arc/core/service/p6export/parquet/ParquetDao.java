@@ -45,10 +45,11 @@ public class ParquetDao {
 
 	ParquetEncryptionKey encryptionKey;
 	
+	boolean exportIfEmpty;
+	
 	
 	/**
-	 * Export to parquet
-	 * 
+	 * Export to parquet. Empty tables won't be exported.
 	 * @param tables
 	 * @param outputDirectory
 	 * @param encryptionKey
@@ -56,8 +57,23 @@ public class ParquetDao {
 	 */
 	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
+		exportToParquet(tables, outputDirectory, encryptionKey, false);
+	}
+	
+	
+	/**
+	 * Export to parquet
+	 * @param tables
+	 * @param outputDirectory
+	 * @param encryptionKey
+	 * @param exportOnlyIfNotEmpty
+	 * @throws ArcException
+	 */
+	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
+			ParquetEncryptionKey encryptionKey, boolean exportIfEmpty) throws ArcException {
 
 		this.encryptionKey=encryptionKey;
+		this.exportIfEmpty=exportIfEmpty;
 		
 		// load duckdb extension
 		loadDuckdb();
@@ -130,7 +146,7 @@ public class ParquetDao {
 			query.append("SELECT * FROM " + attachedTableName(connectionIndex, table.getTableName()));
 		}
 		
-		if (checkNotEmpty(connection, query)) {
+		if (checkExportCondition(connection, query)) {
 			executeCopy(connection, query, outputFileName);
 		}
 		
@@ -153,11 +169,24 @@ public class ParquetDao {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SELECT * FROM " + attachedTableName(ArcDatabase.COORDINATOR.getIndex(), table.getTableName()));
 		
-		if (checkNotEmpty(connection, query)) {
+		if (checkExportCondition(connection, query)) {
 			executeCopy(connection, query, outputFileName);
 		}
 	}
 
+	/**
+	 * check if export must be executed
+	 * @param connection
+	 * @param query
+	 * @return
+	 * @throws SQLException
+	 */
+	private boolean checkExportCondition(Connection connection, GenericPreparedStatementBuilder query) throws SQLException
+	{
+		return this.exportIfEmpty || checkNotEmpty(connection, query);
+	}
+	
+	
 	/**
 	 * check if the table selected by the query is not empty
 	 * @param connection
@@ -334,7 +363,7 @@ public class ParquetDao {
 	 * @param outputDirectory
 	 * @return
 	 */
-	protected String exportTablePath(TableToRetrieve table, String outputDirectory)
+	public static String exportTablePath(TableToRetrieve table, String outputDirectory)
 	{
 		return outputDirectory + File.separator + FormatSQL.extractTableNameToken(table.getTableName())
 		+ PARQUET_FILE_EXTENSION;

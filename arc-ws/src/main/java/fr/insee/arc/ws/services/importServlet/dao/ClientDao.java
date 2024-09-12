@@ -1,14 +1,15 @@
 package fr.insee.arc.ws.services.importServlet.dao;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -16,6 +17,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.TableNaming;
+import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
 import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -23,13 +25,15 @@ import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.FileUtilsArc;
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
-import fr.insee.arc.ws.services.importServlet.bo.JsonKeys;
+import fr.insee.arc.ws.services.importServlet.provider.DirectoryPathExportWs;
 
 public class ClientDao {
 
@@ -103,7 +107,7 @@ public class ClientDao {
 	public List<String> selectBusinessDataTables() throws ArcException {
 
 		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
-		request.append("SELECT " + ColumnEnum.NOM_TABLE_METIER + " ");
+		request.append("SELECT DISTINCT " + ColumnEnum.NOM_TABLE_METIER + " ");
 		request.append("FROM " + ViewEnum.MOD_TABLE_METIER.getFullName(environnement) + " T1 ");
 		request.append("WHERE T1.id_famille='" + this.famille + "' ");
 		request.append(";");
@@ -127,6 +131,9 @@ public class ClientDao {
 		query.build(SQL.SELECT, query.quoteText(wsTrackingType.toString()), ",", query.quoteText(targetNod.toString()),
 				",", query.quoteText(nomTable));
 		UtilitaireDao.get(0).executeRequest(connection, query);
+		
+		LoggerHelper.info(LOGGER, "Register table "+ nomTable +" as "+ wsTrackingType.toString() + " on nod "+ targetNod.toString());
+
 	}
 
 	/**
@@ -190,6 +197,20 @@ public class ClientDao {
 		registerTableToBeRetrieved(ExportTrackingType.TRACK, ArcDatabase.COORDINATOR, this.tableWsTracking);
 	}
 
+	public long extractWsTrackingTimestamp() throws ArcException {
+		
+		String findClientTable = ViewEnum.normalizeTableName(regExpClientTable() + ViewEnum.WS_TRACKING.getTableName());
+
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("SELECT coalesce(max(substring(tablename," + requete.quoteText(findClientTable) + ")::bigint),0) as ts FROM pg_tables");
+		requete.append(" WHERE tablename ~ " + requete.quoteText(findClientTable));
+		requete.append(" AND schemaname = " + requete.quoteText(this.environnement) + " ");
+		
+		return UtilitaireDao.get(0).getLong(connection, requete);
+
+	}	
+	
+	
 	/**
 	 * Create the container with all the files name (idSource) that will be retrieve
 	 * This query is built around the parameters given in the json request
@@ -257,7 +278,6 @@ public class ClientDao {
 	 */
 	public List<String> createImages(List<String> tablesMetierNames, int executorConnectionId) throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl.createImage()");
-
 		List<String> dataTableImages = new ArrayList<>(); 
 		
 		for (String tableMetier : tablesMetierNames) {
@@ -271,7 +291,7 @@ public class ClientDao {
 	 * Create image of nomenclature tables
 	 * @throws ArcException
 	 */
-	public void createTableNmcl() throws ArcException {
+	public List<TableToRetrieve> createTableNmcl() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createNmcl()");
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
@@ -281,12 +301,17 @@ public class ClientDao {
 
 		List<List<String>> nmclNames = UtilitaireDao.get(0).executeRequestWithoutMetadata(connection, requete);
 
+		List<TableToRetrieve> tablesToRetrieve = new ArrayList<>(); 
+		
 		for (List<String> nmcl : nmclNames) {
 			String nomTableImage = ViewEnum.getFullNameNotNormalized(environnement, client + "_" + timestamp + "_" + nmcl.get(0));
 			UtilitaireDao.get(0).executeImmediate(connection, "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
 					+ " AS SELECT * FROM " + ViewEnum.getFullName(environnement, nmcl.get(0)) + ";");
 			registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
+			tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
 		}
+		
+		return tablesToRetrieve;
 
 	}
 
@@ -294,7 +319,7 @@ public class ClientDao {
 	 * Create image of model tables
 	 * @throws ArcException
 	 */
-	public void createTableVarMetier() throws ArcException {
+	public List<TableToRetrieve> createTableVarMetier() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createVarMetier()");
 
 		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.MOD_VARIABLE_METIER, client,
@@ -308,6 +333,9 @@ public class ClientDao {
 		UtilitaireDao.get(0).executeRequest(connection, requete);
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
+		
+		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
+
 
 	}
 
@@ -317,7 +345,7 @@ public class ClientDao {
 	 * @see fr.insee.arc_essnet.ws.dao.ClientDarcleMetier(java.lang.String,
 	 * fr.insee.arc_essnet.ws.actions.Senarc
 	 */
-	public void createTableMetier() throws ArcException {
+	public List<TableToRetrieve> createTableMetier() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.sendTableMetier()");
 	
 		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.MOD_TABLE_METIER, client,
@@ -331,6 +359,7 @@ public class ClientDao {
 		UtilitaireDao.get(0).executeRequest(connection, requete);
 	
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
+		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
 	}
 
 	/*
@@ -339,7 +368,7 @@ public class ClientDao {
 	 * @see fr.insee.arc_essnet.ws.dao.ClientDarcablesFamilles(long,
 	 * java.lang.String)
 	 */
-	public void createTableFamille() throws ArcException {
+	public List<TableToRetrieve> createTableFamille() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTableFamille()");
 
 		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.EXT_MOD_FAMILLE, client,
@@ -353,6 +382,7 @@ public class ClientDao {
 		UtilitaireDao.get(0).executeRequest(connection, requete);
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
+		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
 
 	}
 
@@ -362,7 +392,7 @@ public class ClientDao {
 	 * @see fr.insee.arc_essnet.ws.dao.ClientDarcablesFamilles(long,
 	 * java.lang.String)
 	 */
-	public void createTablePeriodicite() throws ArcException {
+	public List<TableToRetrieve> createTablePeriodicite() throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createTablePeriodicite()");
 
 		String nomTableImage = ViewEnum.getFullNameNotNormalized(environnement,
@@ -372,7 +402,7 @@ public class ClientDao {
 				+ " AS SELECT DISTINCT id, val FROM " + ViewEnum.EXT_MOD_PERIODICITE.getFullName() + ";");
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
-
+		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
 	}
 
 	/**
@@ -429,6 +459,8 @@ public class ClientDao {
 
 	public void dropTable(TableToRetrieve table) {
 
+		LoggerHelper.info(LOGGER, "Drop table on " + table.getTableName());		
+		
 		dropTable(ArcDatabase.COORDINATOR.getIndex(), table.getTableName());
 		
 		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
@@ -442,18 +474,60 @@ public class ClientDao {
 
 	}
 
+	
+	/**
+	 * return regexp to check client table name
+	 * important because we do not want to delete wrong tables
+	 * @return
+	 */
+	private String regExpClientTable()
+	{
+		return client + "_([0123456789]{13,})_.*";
+	}
+	
+	
+	/**
+	 * drop objects generated by a client for called
+	 * @throws ArcException
+	 */
+	public void dropPendingClientObjects() throws ArcException
+	{
+		LoggerHelper.info(LOGGER, "Dropping all client objects for client : "+this.client);
+		
+		// drop tables from the client that had been requested from a former call
+		dropPendingClientTables();
+		
+		// drop parquet files that had been requested from a former call
+		deletePendingParquet();
+	}
+	
+	
+	/**
+	 * drop tables on coordinator and executors if it exists
+	 * @throws ArcException
+	 */
+	private void dropPendingClientTables() throws ArcException
+	{
+		dropPendingClientTables(0);
+		
+		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
+		for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
+				.getIndex() + numberOfExecutorNods; executorConnectionId++) {
+			dropPendingClientTables(executorConnectionId);
+		}
+	}
+	
+	
 	/**
 	 * drop table from the client if some already exists
 	 * 
 	 * @throws ArcException
 	 */
-	public void dropPendingClientTables(int connectionId) throws ArcException {
-
-		String findClientTable = ViewEnum.normalizeTableName(client + "\\_%");
-
+	private void dropPendingClientTables(int connectionId) throws ArcException {
+		String findClientTable = ViewEnum.normalizeTableName(regExpClientTable());
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("SELECT schemaname||'.'||tablename as " + ColumnEnum.TABLE_NAME + " FROM pg_tables");
-		requete.append(" WHERE tablename like " + requete.quoteText(findClientTable));
+		requete.append(" WHERE tablename ~ " + requete.quoteText(findClientTable));
 		requete.append(" AND schemaname = " + requete.quoteText(this.environnement));
 
 		List<String> tablesToDrop = new GenericBean(UtilitaireDao.get(connectionId).executeRequest(connection, requete))
@@ -468,7 +542,7 @@ public class ClientDao {
 	 * 
 	 * @throws ArcException
 	 */
-	public void createTableWsInfo() throws ArcException {
+	public List<TableToRetrieve> createTableWsInfo() throws ArcException {
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("\n DROP TABLE IF EXISTS " + tableWsInfo + ";");
@@ -483,6 +557,8 @@ public class ClientDao {
 
 		UtilitaireDao.get(0).executeImmediate(connection, requete);
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, tableWsInfo);
+		
+		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, tableWsInfo));
 
 	}
 
@@ -532,10 +608,14 @@ public class ClientDao {
 	}
 
 	public void deleteFromTrackTable(String tableName) throws ArcException {
+		
+		LoggerHelper.info(LOGGER, "Unregister " + tableName);		
+		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.DELETE, this.tableWsTracking);
-		query.build(SQL.WHERE, "table_to_retrieve=", query.quoteText(tableName));
-		UtilitaireDao.get(0).executeImmediate(connection, query);
+		query.build(SQL.WHERE, "table_to_retrieve=", query.quoteText(tableName), SQL.END_QUERY);
+		query.build(SQL.COMMIT, SQL.END_QUERY);
+		UtilitaireDao.get(0).executeRequest(connection, query);
 	}
 
 	public long getTimestamp() {
@@ -570,6 +650,36 @@ public class ClientDao {
 		return connection;
 	}
 	
+	public String getParquetDirectory()
+	{
+		PropertiesHandler properties = PropertiesHandler.getInstance();
+		return DirectoryPathExportWs.directoryExport(properties.getBatchParametersDirectory(), arcClientIdentifier.getEnvironnement());
+	}
+
+	public void exportToParquet(List<TableToRetrieve> mappingTables) throws ArcException {
+		new ParquetDao().exportToParquet(mappingTables, getParquetDirectory(), null, true);
+		
+	}
+
+	public void deleteParquet(TableToRetrieve table) throws ArcException {
+		FileUtilsArc.deleteIfExists(new File(ParquetDao.exportTablePath(table,getParquetDirectory())));
+	}
+	
+	private void deletePendingParquet() throws ArcException
+	{
+		File parquetDirectory = new File(getParquetDirectory());
+		
+		if (!parquetDirectory.exists())
+			return;
+		
+		for (File t : parquetDirectory.listFiles())
+		{
+			if (t.getName().matches(regExpClientTable()))
+			{
+				FileUtilsArc.deleteIfExists(t);
+			}
+		}
+	}
 	
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.insee.arc.core.dataobjects.SchemaEnum;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -55,7 +56,8 @@ public class ArcClientIdentifier {
 		
 		this.clientInputParameter = rawParameters.getClientInputParameterUnsafe();
 
-		this.environnement = SecurityDao.validateEnvironnement(rawParameters.getEnvironnementUnsafe());
+		validateEnvironnement();
+		
 		this.clientIdentifier = WsSecurityDao.validateClientIdentifier(rawParameters.getClientIdentifierUnsafe());
 		this.timestamp = rawParameters.getTimestampUnsafe();
 		this.famille = rawParameters.getFamilleUnsafe();
@@ -75,6 +77,26 @@ public class ArcClientIdentifier {
 	}
 	
 	
+	/**
+	 * validate environment declared
+	 * arc metadata schema or execution sandbox schemas are valid
+	 * @throws ArcException
+	 */
+	private void validateEnvironnement() throws ArcException {
+		
+		String environnementDeclared = unsafe.getEnvironnementUnsafe();
+		
+		if (environnementDeclared.toLowerCase().equals(SchemaEnum.ARC_METADATA.getSchemaName()))
+		{
+			this.environnement = environnementDeclared;
+			return;
+		}
+
+		this.environnement = SecurityDao.validateEnvironnement(environnementDeclared);
+		
+	}
+
+
 	private void validateSource() throws ArcException {
 		this.source = new ArrayList<>();
 		

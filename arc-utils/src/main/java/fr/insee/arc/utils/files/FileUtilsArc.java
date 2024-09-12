@@ -119,6 +119,19 @@ public class FileUtilsArc {
 	}
 	
 	/**
+	 * Delete a file if it exists
+	 */
+	public static void deleteIfExists(File fileInput) throws ArcException {
+		
+		if (!fileInput.exists())
+			return;
+		
+		delete(fileInput);
+		
+	}
+	
+	
+	/**
 	 * Deplacer un fichier d'un repertoire source vers répertoire cible (pas de
 	 * slash en fin du nom de repertoire) Si le fichier existe déjà, il est écrasé
 	 *

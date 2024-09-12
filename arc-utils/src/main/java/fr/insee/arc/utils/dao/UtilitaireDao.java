@@ -249,7 +249,22 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 		return ZERO;
 	}
-
+	
+	/**
+	 * Exécute une requête qui renvoie exactement un argument de type
+	 * {@link Integer}.
+	 *
+	 * @param connexion la connexion à la base
+	 * @param sql       la requête
+	 * @param args      les arguments de la requête (optionnels)
+	 * @return
+	 * @throws ArcException 
+	 */
+	public long getLong(Connection connexion, GenericPreparedStatementBuilder sql, ModeRequete... modes) throws ArcException {
+		List<List<String>> returned = executeRequest(connexion, sql, modes);
+		return Long.parseLong(returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
+	}
+	
 	/**
 	 * Check if a column exists in a table
 	 * 
