@@ -38,6 +38,8 @@ public class ImportStep3GetTableDataService {
 
 		TableToRetrieve table = clientDao.getAClientTableByName(arcClientIdentifier.getClientInputParameter());
 
+		this.clientDao.deleteFromTrackTable(table.getTableName());
+
 		// transfer data to http response
 		ServiceDao.execQueryExportDataToResponse(resp.getWr(), table, this.arcClientIdentifier.getFormat(), clientDao);
 
@@ -46,8 +48,6 @@ public class ImportStep3GetTableDataService {
 			
 			if (arcClientIdentifier.getFormat().isParquet())
 				this.clientDao.deleteParquet(table);
-			
-			this.clientDao.deleteFromTrackTable(table.getTableName());
 			
 			LoggerHelper.info(LOGGER, "Table " + table.getTableName() + " had been retrieved and dropped.");
 			
