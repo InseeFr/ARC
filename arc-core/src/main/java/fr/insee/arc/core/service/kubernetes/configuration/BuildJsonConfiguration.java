@@ -78,9 +78,13 @@ public class BuildJsonConfiguration {
 				, JsonFileParameter.EXECUTOR_DATABASE, properties.getKubernetesExecutorDatabase() //
 				, JsonFileParameter.EXECUTOR_PORT, properties.getKubernetesExecutorPort()
 				, JsonFileParameter.IMAGE, properties.getKubernetesExecutorImage()
-				, JsonFileParameter.CPU, properties.getKubernetesExecutorCpu()
-				, JsonFileParameter.RAM, properties.getKubernetesExecutorRam()
-				, JsonFileParameter.EPHEMERAL, properties.getKubernetesExecutorEphemeral()
+				, JsonFileParameter.LIMITS_CPU, properties.getKubernetesLimitsExecutorCpu()
+				, JsonFileParameter.LIMITS_MEMORY, properties.getKubernetesLimitsExecutorMemory()
+				, JsonFileParameter.LIMITS_EPHEMERAL, properties.getKubernetesLimitsExecutorEphemeral()
+				, JsonFileParameter.REQUESTS_CPU, properties.getKubernetesRequestsExecutorCpu()
+				, JsonFileParameter.REQUESTS_MEMORY, properties.getKubernetesRequestsExecutorMemory()
+				, JsonFileParameter.REQUESTS_EPHEMERAL, properties.getKubernetesRequestsExecutorEphemeral()
+				, JsonFileParameter.GENERIC_EPHEMERAL_VOLUME_SIZE, properties.getKubernetesGenericEphemeralVolumeSize()
 		};
 	}
 

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.util.Arrays;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import fr.insee.arc.utils.consumer.ThrowingFunction;
@@ -14,7 +13,6 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.webutils.WebAttributesName;
 
 @Service("properties")
 public class PropertiesHandler {
@@ -54,7 +52,7 @@ public class PropertiesHandler {
 	private String disableDebugGui;
 
 	private String gitCommitId;
-	
+
 	/* Kubernetes */
 	private String kubernetesApiUri;
 	private String kubernetesApiNamespace;
@@ -67,11 +65,15 @@ public class PropertiesHandler {
 	private String kubernetesExecutorUser;
 	private String kubernetesExecutorDatabase;
 	private String kubernetesExecutorPort;
-	private String kubernetesExecutorCpu;
-	private String kubernetesExecutorRam;
-	private String kubernetesExecutorEphemeral;
+	private String kubernetesLimitsExecutorCpu;
+	private String kubernetesLimitsExecutorMemory;
+	private String kubernetesLimitsExecutorEphemeral;
+	private String kubernetesRequestsExecutorCpu;
+	private String kubernetesRequestsExecutorMemory;
+	private String kubernetesRequestsExecutorEphemeral;
+	private String kubernetesGenericEphemeralVolumeSize;
 	private String kubernetesExecutorVolatile;
-	
+
 	/* export data end of batch ? */
 	private String processExport;
 
@@ -79,7 +81,7 @@ public class PropertiesHandler {
 	private String s3InputBucket;
 	private String s3InputAccess;
 	private String s3InputSecret;
-	
+
 	private String s3OutputApiUri;
 	private String s3OutputBucket;
 	private String s3OutputAccess;
@@ -90,15 +92,16 @@ public class PropertiesHandler {
 	private String keycloakServer;
 	private String keycloakResource;
 	private String keycloakCredential;
-	
+
 	private Integer filesRetentionDays;
-	
+
 	private static PropertiesHandler instanceOfPropertiesHandler;
 
 	// remap database host address ; can be useful to prevent dns spam for example
-	private ThrowingFunction<String, String> remapHostAddress = t -> {return t;};
+	private ThrowingFunction<String, String> remapHostAddress = t -> {
+		return t;
+	};
 
-	
 	public void initializeLog() {
 		LogConfigurator logConf = new LogConfigurator(logConfiguration);
 
@@ -141,7 +144,7 @@ public class PropertiesHandler {
 	public void setDatabaseUrl(String databaseUrl) {
 		this.databaseUrl = databaseUrl;
 		// reset the connection getter
-		this.connectionProperties=null;
+		this.connectionProperties = null;
 	}
 
 	public String getDatabaseUsername() {
@@ -151,7 +154,7 @@ public class PropertiesHandler {
 	public void setDatabaseUsername(String databaseUsername) {
 		this.databaseUsername = databaseUsername;
 		// reset the connection getter
-		this.connectionProperties=null;
+		this.connectionProperties = null;
 	}
 
 	public String getDatabasePassword() {
@@ -161,7 +164,7 @@ public class PropertiesHandler {
 	public void setDatabasePassword(String databasePassword) {
 		this.databasePassword = databasePassword;
 		// reset the connection getter
-		this.connectionProperties=null;
+		this.connectionProperties = null;
 	}
 
 	public String getDatabaseDriverClassName() {
@@ -171,7 +174,7 @@ public class PropertiesHandler {
 	public void setDatabaseDriverClassName(String databaseDriverClassName) {
 		this.databaseDriverClassName = databaseDriverClassName;
 		// reset the connection getter
-		this.connectionProperties=null;
+		this.connectionProperties = null;
 	}
 
 	public String getDatabaseSchema() {
@@ -314,7 +317,6 @@ public class PropertiesHandler {
 		this.gitCommitId = gitCommitId;
 	}
 
-	
 	public String getKubernetesApiUri() {
 		return kubernetesApiUri;
 	}
@@ -322,7 +324,7 @@ public class PropertiesHandler {
 	public void setKubernetesApiUri(String kubernetesApiUri) {
 		this.kubernetesApiUri = kubernetesApiUri;
 	}
-	
+
 	public String getKubernetesApiTokenValue() {
 		return kubernetesApiTokenValue;
 	}
@@ -370,7 +372,7 @@ public class PropertiesHandler {
 	public void setKubernetesExecutorLabel(String kubernetesExecutorLabel) {
 		this.kubernetesExecutorLabel = kubernetesExecutorLabel;
 	}
-	
+
 	public String getKubernetesExecutorUser() {
 		return kubernetesExecutorUser;
 	}
@@ -395,28 +397,52 @@ public class PropertiesHandler {
 		this.kubernetesExecutorPort = kubernetesExecutorPort;
 	}
 
-	public String getKubernetesExecutorCpu() {
-		return kubernetesExecutorCpu;
+	public String getKubernetesLimitsExecutorCpu() {
+		return kubernetesLimitsExecutorCpu;
 	}
 
-	public void setKubernetesExecutorCpu(String kubernetesExecutorCpu) {
-		this.kubernetesExecutorCpu = kubernetesExecutorCpu;
+	public void setKubernetesLimitsExecutorCpu(String kubernetesLimitsExecutorCpu) {
+		this.kubernetesLimitsExecutorCpu = kubernetesLimitsExecutorCpu;
 	}
 
-	public String getKubernetesExecutorRam() {
-		return kubernetesExecutorRam;
+	public String getKubernetesLimitsExecutorEphemeral() {
+		return kubernetesLimitsExecutorEphemeral;
 	}
 
-	public void setKubernetesExecutorRam(String kubernetesExecutorRam) {
-		this.kubernetesExecutorRam = kubernetesExecutorRam;
-	}
-	
-	public String getKubernetesExecutorEphemeral() {
-		return kubernetesExecutorEphemeral;
+	public void setKubernetesLimitsExecutorEphemeral(String kubernetesLimitsExecutorEphemeral) {
+		this.kubernetesLimitsExecutorEphemeral = kubernetesLimitsExecutorEphemeral;
 	}
 
-	public void setKubernetesExecutorEphemeral(String kubernetesExecutorEphemeral) {
-		this.kubernetesExecutorEphemeral = kubernetesExecutorEphemeral;
+	public String getKubernetesLimitsExecutorMemory() {
+		return kubernetesLimitsExecutorMemory;
+	}
+
+	public void setKubernetesLimitsExecutorMemory(String kubernetesLimitsExecutorMemory) {
+		this.kubernetesLimitsExecutorMemory = kubernetesLimitsExecutorMemory;
+	}
+
+	public String getKubernetesRequestsExecutorCpu() {
+		return kubernetesRequestsExecutorCpu;
+	}
+
+	public void setKubernetesRequestsExecutorCpu(String kubernetesRequestsExecutorCpu) {
+		this.kubernetesRequestsExecutorCpu = kubernetesRequestsExecutorCpu;
+	}
+
+	public String getKubernetesRequestsExecutorEphemeral() {
+		return kubernetesRequestsExecutorEphemeral;
+	}
+
+	public void setKubernetesRequestsExecutorEphemeral(String kubernetesRequestsExecutorEphemeral) {
+		this.kubernetesRequestsExecutorEphemeral = kubernetesRequestsExecutorEphemeral;
+	}
+
+	public String getKubernetesRequestsExecutorMemory() {
+		return kubernetesRequestsExecutorMemory;
+	}
+
+	public void setKubernetesRequestsExecutorMemory(String kubernetesRequestsExecutorMemory) {
+		this.kubernetesRequestsExecutorMemory = kubernetesRequestsExecutorMemory;
 	}
 
 	public String getKubernetesExecutorVolatile() {
@@ -426,7 +452,15 @@ public class PropertiesHandler {
 	public void setKubernetesExecutorVolatile(String kubernetesExecutorVolatile) {
 		this.kubernetesExecutorVolatile = kubernetesExecutorVolatile;
 	}
-	
+
+	public String getKubernetesGenericEphemeralVolumeSize() {
+		return kubernetesGenericEphemeralVolumeSize;
+	}
+
+	public void setKubernetesGenericEphemeralVolumeSize(String kubernetesGenericEphemeralVolumeSize) {
+		this.kubernetesGenericEphemeralVolumeSize = kubernetesGenericEphemeralVolumeSize;
+	}
+
 	public String getProcessExport() {
 		return processExport;
 	}
@@ -512,7 +546,8 @@ public class PropertiesHandler {
 		map.put("version", getVersion());
 		map.put("buildDate", getVersionDate());
 		map.put("gitCommitId", getGitCommitId());
-		map.put("databaseUri", String.valueOf(connectionProperties().stream().map(ConnectionAttribute::getDatabaseUrl).toList()));
+		map.put("databaseUri",
+				String.valueOf(connectionProperties().stream().map(ConnectionAttribute::getDatabaseUrl).toList()));
 		map.put("number_of_nods", String.valueOf(connectionProperties().size()));
 		map.put("volatile", String.valueOf(!getKubernetesExecutorVolatile().isEmpty()));
 		map.put("number_of_volatile_executors", String.valueOf(getKubernetesExecutorNumber()));
@@ -524,29 +559,27 @@ public class PropertiesHandler {
 		return map;
 	}
 
-
 	/**
 	 * Unserialize the connection data found in properties
 	 * 
 	 * @return
-	 * @throws ArcException 
+	 * @throws ArcException
 	 */
 	public List<ConnectionAttribute> connectionProperties() {
-		
+
 		if (this.connectionProperties != null) {
 			return this.connectionProperties;
 		}
-		
+
 		connectionProperties = new ArrayList<>();
-		
+
 		String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
 		String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
 		String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
 		String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
-		
+
 		// driver may only be declared once for all databases
-		if (databaseDriverClassNames.length==1 && databaseUrls.length>1)
-		{
+		if (databaseDriverClassNames.length == 1 && databaseUrls.length > 1) {
 			String driverClassName = databaseDriverClassNames[0];
 			databaseDriverClassNames = new String[databaseUrls.length];
 			Arrays.fill(databaseDriverClassNames, driverClassName);
@@ -554,42 +587,40 @@ public class PropertiesHandler {
 
 		// fill the connectionProperties
 		for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
-			
-			ConnectionAttribute connectionAttribute = new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
+
+			ConnectionAttribute connectionAttribute = new ConnectionAttribute(databaseUrls[tokenIndex],
+					databaseUsernames[tokenIndex],
 					databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]);
-			
+
 			try {
 				connectionAttribute.setHost(remapHostAddress.apply(connectionAttribute.getHost()));
 			} catch (ArcException e) {
 				this.connectionProperties = null;
 				return this.connectionProperties;
 			}
-			
+
 			connectionProperties
 					.add(connectionAttribute);
 		}
 
 		// if executors are declared on pool, set kubernetesExecutorNumber to 0
-		// cannot have at the same time executors declared on pool and executors declared by kubernetes
-		if (connectionProperties.size()>1 && this.getKubernetesExecutorNumber()>0)
-		{
+		// cannot have at the same time executors declared on pool and executors
+		// declared by kubernetes
+		if (connectionProperties.size() > 1 && this.getKubernetesExecutorNumber() > 0) {
 			this.setKubernetesExecutorNumber(0);
 		}
-		
-		
+
 		// if kubernetes active, add the number of executors nods to connection pool
 		// this can happen if and only if one coordinator had been declared in pool
-		if (this.kubernetesExecutorNumber > 0)
-		{
-			for (int i=0; i<this.getKubernetesExecutorNumber(); i++)
-			{
+		if (this.kubernetesExecutorNumber > 0) {
+			for (int i = 0; i < this.getKubernetesExecutorNumber(); i++) {
 				connectionProperties
-				.add(new ConnectionAttribute(
-						KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i, this.kubernetesExecutorDatabase, this.kubernetesExecutorPort) //
-						, this.kubernetesExecutorUser
-						, this.databasePassword //
-						, this.databaseDriverClassName //
-						));					
+						.add(new ConnectionAttribute(
+								KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i,
+										this.kubernetesExecutorDatabase, this.kubernetesExecutorPort) //
+								, this.kubernetesExecutorUser, this.databasePassword //
+								, this.databaseDriverClassName //
+						));
 			}
 		}
 		return this.connectionProperties;
