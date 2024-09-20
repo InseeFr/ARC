@@ -22,5 +22,7 @@ public class JsonFileParameter {
 	public static final String IMAGE = "{image}";
 	public static final String CPU = "{cpu}";
 	public static final String RAM = "{ram}";
+	public static final String EPHEMERAL = "{ephemeral}";
+
 
 }

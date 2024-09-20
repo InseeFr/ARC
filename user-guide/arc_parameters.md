@@ -180,6 +180,7 @@ ___
 | kubernetesExecutorPort     | KUBERNETES_EXECUTOR_PORT     | fr.insee.arc.kubernetes.executor.port     |
 | kubernetesExecutorCpu     | KUBERNETES_EXECUTOR_CPU     | fr.insee.arc.kubernetes.executor.cpu     |
 | kubernetesExecutorRam     | KUBERNETES_EXECUTOR_RAM     | fr.insee.arc.kubernetes.executor.ram     |
+| kubernetesExecutorEphemeral     | KUBERNETES_EXECUTOR_EPHEMERAL     | fr.insee.arc.kubernetes.executor.ephemeral     |
 | kubernetesExecutorVolatile | KUBERNETES_EXECUTOR_VOLATILE | fr.insee.arc.kubernetes.executor.volatile |
 
 

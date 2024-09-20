@@ -80,6 +80,7 @@ public class BuildJsonConfiguration {
 				, JsonFileParameter.IMAGE, properties.getKubernetesExecutorImage()
 				, JsonFileParameter.CPU, properties.getKubernetesExecutorCpu()
 				, JsonFileParameter.RAM, properties.getKubernetesExecutorRam()
+				, JsonFileParameter.EPHEMERAL, properties.getKubernetesExecutorEphemeral()
 		};
 	}
 
