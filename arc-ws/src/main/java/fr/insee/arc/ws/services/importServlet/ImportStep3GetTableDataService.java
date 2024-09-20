@@ -38,8 +38,10 @@ public class ImportStep3GetTableDataService {
 
 		TableToRetrieve table = clientDao.getAClientTableByName(arcClientIdentifier.getClientInputParameter());
 
-		this.clientDao.deleteFromTrackTable(table.getTableName());
-
+		if (this.clientDao.isWebServiceNotPending()) {
+			this.clientDao.deleteFromTrackTable(table.getTableName());
+		}
+		
 		// transfer data to http response
 		ServiceDao.execQueryExportDataToResponse(resp.getWr(), table, this.arcClientIdentifier.getFormat(), clientDao);
 
