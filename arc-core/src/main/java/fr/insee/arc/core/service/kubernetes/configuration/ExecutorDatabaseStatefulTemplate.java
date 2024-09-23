@@ -143,12 +143,12 @@ public class ExecutorDatabaseStatefulTemplate {
               "requests": {
                 "cpu": "10m",
                 "memory": "16Mi",
-                "ephemeral-storage": "{ephemeral}",
+                "ephemeral-storage": "{ephemeral}"
               },
               "limits": {
                 "cpu": "{cpu}",
                 "memory": "{ram}",
-                "ephemeral-storage": "{ephemeral}",
+                "ephemeral-storage": "{ephemeral}"
               }
             },
             "securityContext": {
