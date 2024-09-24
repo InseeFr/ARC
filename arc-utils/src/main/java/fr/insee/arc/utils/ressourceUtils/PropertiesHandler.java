@@ -70,6 +70,7 @@ public class PropertiesHandler {
 	private String kubernetesExecutorCpu;
 	private String kubernetesExecutorRam;
 	private String kubernetesExecutorEphemeral;
+	private String kubernetesExecutorEphemeralVolumeSize;
 	private String kubernetesExecutorVolatile;
 	
 	/* export data end of batch ? */
@@ -417,6 +418,14 @@ public class PropertiesHandler {
 
 	public void setKubernetesExecutorEphemeral(String kubernetesExecutorEphemeral) {
 		this.kubernetesExecutorEphemeral = kubernetesExecutorEphemeral;
+	}
+
+	public String getKubernetesExecutorEphemeralVolumeSize() {
+		return kubernetesExecutorEphemeralVolumeSize;
+	}
+
+	public void setKubernetesExecutorEphemeralVolumeSize(String kubernetesExecutorEphemeralVolumeSize) {
+		this.kubernetesExecutorEphemeralVolumeSize = kubernetesExecutorEphemeralVolumeSize;
 	}
 
 	public String getKubernetesExecutorVolatile() {

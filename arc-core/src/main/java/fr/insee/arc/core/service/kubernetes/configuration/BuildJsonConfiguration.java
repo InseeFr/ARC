@@ -81,6 +81,7 @@ public class BuildJsonConfiguration {
 				, JsonFileParameter.CPU, properties.getKubernetesExecutorCpu()
 				, JsonFileParameter.RAM, properties.getKubernetesExecutorRam()
 				, JsonFileParameter.EPHEMERAL, properties.getKubernetesExecutorEphemeral()
+				, JsonFileParameter.EPHEMERAL_VOLUME_SIZE, properties.getKubernetesExecutorEphemeralVolumeSize()
 		};
 	}
 
