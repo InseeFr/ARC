@@ -173,6 +173,10 @@ public class ExecutorDatabaseStatefulTemplate {
               {
                 "mountPath": "/docker-entrypoint-initdb.d/",
                 "name": "custom-init-scripts"
+              },
+              {
+                "mountPath": "/bitnami/postgresql",
+                "name": "tmp-volume"
               }
             ]
           }
@@ -189,12 +193,26 @@ public class ExecutorDatabaseStatefulTemplate {
               "medium": "Memory"
             },
             "name": "dshm"
+          },
+          {
+            "name": "tmp-volume",
+            "ephemeral": {
+              "volumeClaimTemplate": {
+                "spec": {
+                  "accessModes": ["ReadWriteOnce"],
+                  "resources": {
+                    "requests": {
+                      "storage": "{generic_ephemeral_volume_size}"
+                    }
+                  }
+                }
+              }
+            }
           }
         ]
       }
     }
   }
 }
-
 """;
 }
