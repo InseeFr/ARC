@@ -28,6 +28,14 @@ public class ExecutorDatabaseStatefulTemplate {
         }
       },
       "spec": {
+        "securityContext": {
+          "fsGroupChangePolicy": "Always",
+          "fsGroup": 1001,
+          "supplementalGroups": [
+            1001
+          ],
+          "runAsUser": 1001
+		},
         "containers": [
           {
             "env": [
@@ -175,7 +183,7 @@ public class ExecutorDatabaseStatefulTemplate {
                 "name": "custom-init-scripts"
               },
               {
-                "mountPath": "/bitnami/postgresql",
+                "mountPath": "/bitnami",
                 "name": "tmp-volume"
               }
             ]
