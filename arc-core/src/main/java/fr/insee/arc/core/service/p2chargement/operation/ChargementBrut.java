@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.List;
 
+import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.utils.dao.SQL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -81,8 +83,8 @@ public class ChargementBrut {
     
     /** Calcule la norme. Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
      * @throws IOException
-     * @throws ArcException si aucune norme ou plus d'une norme trouvée */
-    public void calculeNormeAndValiditeFichiers(InputStream file, FileIdCard normeOk)
+     * @throws ArcException si aucune norme ou plus d'une norme trouvée, ou si le fichier est hors calendrier */
+    public void calculeNormeAndValiditeFichiers(InputStream file, FileIdCard normeOk, String envExecution)
     		throws ArcException {
     	StaticLoggerDispatcher.info(LOGGER, "** calculeNormeFichiers **");
 
@@ -103,7 +105,9 @@ public class ChargementBrut {
 	        throw new ArcException(ArcExceptionMessage.LOAD_NORM_NOT_FOUND, normeOk.getIdSource());
 	    }
 	    
-	    
+	    if (estHorsCalendrier(normeOk, envExecution)) {
+            throw new ArcException(ArcExceptionMessage.LOAD_NORM_OUT_OF_CALENDAR, normeOk.getIdNorme(), normeOk.getIdSource());
+        }
 	    
     }
 
@@ -157,8 +161,33 @@ public class ChargementBrut {
         normeOk.setFileIdCard(normFound.getIdNorme(), result.get(0).get(2), normFound.getPeriodicite(), null);
 
     }
-    
-    
+
+    /** Retourne VRAI si la date de validité du fichier est hors de la période de validité de la norme du fichier.
+     * Retourne FAUX sinon.
+     * @param normeOk les métadonnées du fichier à vérifier
+     * @param envExecution le schéma d'exécution du traitement
+     * @throws ArcException si aucune norme ou plus d'une norme trouvée
+     */
+    private boolean estHorsCalendrier(FileIdCard normeOk, String envExecution) throws ArcException {
+        ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+        query.build(SQL.SELECT, ColumnEnum.VALIDITE_INF.getColumnName(), ",");
+        query.build(ColumnEnum.VALIDITE_SUP.getColumnName(), SQL.FROM, ViewEnum.CALENDRIER.getFullName(envExecution));
+        query.build(SQL.WHERE, ColumnEnum.ID_NORME.getColumnName(), "=", query.quoteText(normeOk.getIdNorme()));
+
+        List<List<String>> result = UtilitaireDao.get(0).executeRequestWithoutMetadata(this.connexion, query);
+
+        if (result.size() > 1) {
+            throw new ArcException(ArcExceptionMessage.LOAD_SEVERAL_NORM_FOUND, normeOk.getIdNorme());
+        } else if (result.isEmpty()) {
+            throw new ArcException(ArcExceptionMessage.LOAD_ZERO_NORM_FOUND);
+        }
+
+        String validite_inf = result.get(0).get(0);
+        String validite_sup = result.get(0).get(1);
+        String validite = normeOk.getValidite();
+        return (validite.compareTo(validite_inf) <= 0) || (validite.compareTo(validite_sup) >= 0);
+
+    }
     
     /**
      * @return the connexion
