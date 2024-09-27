@@ -185,7 +185,7 @@ public class ChargementBrut {
         String validite_inf = result.get(0).get(0);
         String validite_sup = result.get(0).get(1);
         String validite = normeOk.getValidite();
-        return (validite.compareTo(validite_inf) <= 0) || (validite.compareTo(validite_sup) >= 0);
+        return (validite.compareTo(validite_inf) < 0) || (validite.compareTo(validite_sup) > 0);
 
     }
     
