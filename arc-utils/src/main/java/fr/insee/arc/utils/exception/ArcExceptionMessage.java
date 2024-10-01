@@ -39,6 +39,7 @@ public enum ArcExceptionMessage {
 	LOAD_SEVERAL_NORM_FOUND("Plusieurs normes ou validités correspondent à l'expression : %s"),
 	LOAD_NORM_NOT_FOUND("Aucune norme trouvée pour le fichier %s"),
 	LOAD_ZERO_NORM_FOUND("Aucune norme trouvée"),
+	LOAD_NORM_OUT_OF_CALENDAR("La norme %s n'est pas valide à la date de validité du fichier %s"),
 	LOAD_TYPE_NOT_FOUND("Le type de chargement %s n'existe pas"),
 
 	

@@ -254,7 +254,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		this.fileIdCard = new FileIdCard(this.idSource);
 		
 		try {
-			chgrBrtl.calculeNormeAndValiditeFichiers(this.filesInputStreamLoad.getTmpInxNormage(), this.fileIdCard);
+			chgrBrtl.calculeNormeAndValiditeFichiers(this.filesInputStreamLoad.getTmpInxNormage(), this.fileIdCard, envExecution);
 		} catch (Exception e) {
 			LoggerHelper.error(LOGGER, e);
 			throw e;
