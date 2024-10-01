@@ -152,6 +152,10 @@ public enum ColumnEnum {
 	, M3("m3", TypeEnum.TEXT, "short column m3 in xml parser")
 	, M4("m4", TypeEnum.TEXT, "short column m4 in xml parser")
 	, M5("m5", TypeEnum.TEXT, "short column m5 in xml parser")
+	
+	, ARCHIVE_NAME("archive_name", TypeEnum.TEXT, "name of archive file")
+	, ARCHIVE_SIZE("archive_size", TypeEnum.TEXT, "name of archive file")
+	, ARCHIVE_DATE("archive_date", TypeEnum.TEXT, "name of archive file")
 
 	;
 

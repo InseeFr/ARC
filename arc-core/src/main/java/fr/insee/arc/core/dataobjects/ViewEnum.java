@@ -136,7 +136,7 @@ public enum ViewEnum {
 	, TMP_CHARGEMENT_ARC(PgViewEnum.ALIAS_A), TMP_CHARGEMENT_BRUT(PgViewEnum.ALIAS_B)
 
 	
-	, ALIAS_A(PgViewEnum.ALIAS_A), ALIAS_B(PgViewEnum.ALIAS_B), ALIAS_C(PgViewEnum.ALIAS_C)
+	, ALIAS_A(PgViewEnum.ALIAS_A), ALIAS_B(PgViewEnum.ALIAS_B), ALIAS_C(PgViewEnum.ALIAS_C), ALIAS_TABLE(PgViewEnum.ALIAS_TABLE)
 
 	, TMP_FILES("tmp_files", SchemaEnum.TEMPORARY, ColumnEnum.FILE_NAME)
 
@@ -184,6 +184,9 @@ public enum ViewEnum {
 
 	private Map<ColumnEnum, ColumnEnum> columns;
 
+	/** return the tablename without schema
+	 * @return
+	 */
 	public String getTableName() {
 		return tableName;
 	}
@@ -196,10 +199,19 @@ public enum ViewEnum {
 		return columns;
 	}
 
+	/**
+	 * return tablename with schema
+	 * if the schema declared for the view is set as "TEMPORARY", return the tablename only
+	 * @return
+	 */
 	public String getFullName() {
 		return DataObjectService.getFullTableNameInSchema(this.tableLocation, this.tableName);
 	}
 
+	/**
+	 * return tablename with schema (normalize lower case)
+	 * @return
+	 */
 	public String getFullName(String schema) {
 		return normalizeTableName(schema + SQL.DOT.getSqlCode() + this.tableName);
 	}

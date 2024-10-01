@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.p1reception.registerarchive;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -207,11 +206,8 @@ public class ArchiveRegistrationOperation {
 		// vérifier le type (répertoire)
 		if (fDirIn.isDirectory()) {
 
-			File[] filesDirIn = fDirIn.listFiles();
-
-			// trier par nom
-			Arrays.sort(filesDirIn, (f1, f2) -> f1.getName().compareTo(f2.getName()));
-
+			File[] filesDirIn = moveFilesToRegisterDao.sortArchives(directories.getEntrepot(), fDirIn.listFiles());
+			
 			for (File f : filesDirIn) {
 
 				// ignorer le fichier s'il est en cours d'ecriture

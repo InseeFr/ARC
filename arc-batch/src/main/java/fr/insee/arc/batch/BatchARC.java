@@ -89,6 +89,9 @@ class BatchARC implements IReturnCode {
 	// reste à faire
 	private Integer numberOfIterationBewteenCheckTodo;
 
+	// temps à attendre pour que les executors soient montés
+	private Integer waitExecutorTimerInMS;
+
 	// true = the batch will resume the process from a formerly interrupted batch
 	// false = the batch will proceed to a new load
 	// Maintenance initialization process can only occur in this case
@@ -290,6 +293,11 @@ class BatchARC implements IReturnCode {
 		numberOfIterationBewteenCheckTodo = bdParameters.getInt(null, "LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL",
 				10);
 
+		// wait executor pods
+		waitExecutorTimerInMS = bdParameters.getInt(null, "LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS",
+				30000);
+		
+		
 		repertoire = properties.getBatchParametersDirectory();
 
 		mapParam.put(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION, repertoire);
@@ -361,8 +369,7 @@ class BatchARC implements IReturnCode {
 	private void executorsDatabaseCreate() throws ArcException {
 		message(ApiManageExecutorDatabase.delete().toString());
 		message(ApiManageExecutorDatabase.create().toString());
-		
-		Sleep.sleep(30000);
+		Sleep.sleep(waitExecutorTimerInMS);
 	}
 
 	/**

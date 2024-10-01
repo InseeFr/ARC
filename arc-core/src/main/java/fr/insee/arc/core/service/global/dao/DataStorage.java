@@ -29,10 +29,11 @@ public class DataStorage {
 	public static List<String> execQuerySelectEntrepots(Connection connection) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, ColumnEnum.ID_ENTREPOT, SQL.FROM, ViewEnum.IHM_ENTREPOT.getFullName());
+		query.build(SQL.ORDER_BY, ColumnEnum.ORDRE_PRIORITE, ",",  ColumnEnum.ID_ENTREPOT);
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query))
 				.getColumnValues(ColumnEnum.ID_ENTREPOT.getColumnName());
 	}
-
+	
 	/**
 	 * register a list of files in a table
 	 * 

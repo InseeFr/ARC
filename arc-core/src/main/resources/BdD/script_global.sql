@@ -93,6 +93,9 @@ UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p2.xmlSt
 INSERT INTO arc.parameter VALUES ('ApiControleService.MAX_PARALLEL_WORKERS','3');
 UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p3.control' where key='ApiControleService.MAX_PARALLEL_WORKERS';
 
+INSERT INTO arc.parameter VALUES ('LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS','30000');
+UPDATE arc.parameter set description='parameter.batch.execution.executor.wait.time' where key='LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS';
+
 -- effacer le parametrage de la phase de filtrage
 delete from arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
 

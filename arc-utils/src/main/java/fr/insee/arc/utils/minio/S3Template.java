@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import io.minio.CopyObjectArgs;
@@ -177,7 +178,7 @@ public class S3Template {
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
-
+			LoggerHelper.error(LOGGER, e);
 			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, pathFrom, pathTo);
 		}
 	}
@@ -194,6 +195,11 @@ public class S3Template {
 		if (isS3Off()) return;
 		
 		File targetFile = new File(targetFilePath);
+
+		// delete file if it already exists
+		if (targetFile.exists())
+			FileUtilsArc.delete(targetFile);
+		
 		
 		try {
 			getMinioClient().downloadObject(
@@ -201,7 +207,7 @@ public class S3Template {
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IllegalArgumentException | IOException e) {
-
+			LoggerHelper.error(LOGGER, e);
 			throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, sourceS3Path, targetFile.getAbsolutePath());
 		}
 	}

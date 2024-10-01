@@ -356,7 +356,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @return
 	 */
 	public static GenericPreparedStatementBuilder toDate(String dateTextIn, String formatIn) {
-		return new GenericPreparedStatementBuilder().append("to_date(").appendText(dateTextIn).append("::text,").appendText(formatIn).append(")");
+		return new GenericPreparedStatementBuilder().append("to_date(").appendTextWithoutBinding(dateTextIn).append("::text,").appendTextWithoutBinding(formatIn).append(")");
 	}
 
 	public static GenericPreparedStatementBuilder truncate(String fullName) {
