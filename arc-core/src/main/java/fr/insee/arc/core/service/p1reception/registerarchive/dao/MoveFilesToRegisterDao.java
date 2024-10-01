@@ -93,6 +93,7 @@ public class MoveFilesToRegisterDao {
 		for (String orderedIndex:orderedIndexes)
 		{
 			sortedArchives[index]=archives[Integer.parseInt(orderedIndex)];
+			index++;
 		}
 		
 		return sortedArchives;
