@@ -3,8 +3,23 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
-## version-94.1.61b
+## version-94.1.74b
+- spring security update
+- datawarehouse and archives inside datawarehouse can be loaded according to an order defined by user. Check "entrepot" gui.
+
+## version-94.1.70
+- add kubernetes ephemeral volume management for executor pods
+
+## version-94.1.65
+- fix web service not waiting for large data to be created
+
+## version-94.1.64
+- spring update
+
+
+## version-94.1.65
 - parquet support for data retrieval webservice
+- enhanced logs for data retrieval webservice
 
 ## version-94.1.59b
 - clear parquet export directory if s3 output bucket is defined
