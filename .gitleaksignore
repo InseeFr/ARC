@@ -1,0 +1,9 @@
+arc-web/src/main/java/fr/insee/arc/web/SecurityConfiguration.java:generic-api-key:77
+arc-utils/src/main/java/fr/insee/arc/utils/ressourceUtils/ConnectionAttribute.java:insee-password-simple:20
+arc-utils/src/main/java/fr/insee/arc/utils/ressourceUtils/ConnectionAttribute.java:insee-password-simple:100
+arc-utils/src/main/java/fr/insee/arc/utils/ressourceUtils/ConnectionAttribute.java:insee-password-simple:31
+arc-utils/src/main/java/fr/insee/arc/utils/ressourceUtils/ConnectionAttribute.java:insee-password-simple:116
+arc-utils/src/main/java/fr/insee/arc/utils/ressourceUtils/PropertiesHandler.java:insee-password-simple:105
+arc-utils/src/main/java/fr/insee/arc/utils/ressourceUtils/PropertiesHandler.java:insee-password-simple:166
+arc-utils/src/main/java/fr/insee/arc/utils/ressourceUtils/PropertiesHandler.java:insee-password-simple:163
+arc_essnet-web/src/main/webapp/js/lib/jquery-ui.min.js:generic-api-key:12
