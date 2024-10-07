@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
 import fr.insee.arc.core.service.p0initialisation.filesystem.RestoreFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p0initialisation.pilotage.CleanPilotageOperation;
@@ -38,6 +39,9 @@ public class ApiInitialisationService extends ApiService {
 
 	@Override
 	public void executer() throws ArcException {
+		
+		// build filesystem for sandbox
+		new BuildFileSystem(this.coordinatorSandbox.getConnection(), new String[] {this.coordinatorSandbox.getSchema()}).execute();
 		
 		// Supprime les lignes devenues inutiles récupérées par le webservice de la
 		// table pilotage_fichier

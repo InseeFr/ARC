@@ -21,7 +21,7 @@ public class DateConversion {
 	public static GenericPreparedStatementBuilder queryDateConversion(Date dateToCompute) 
 	{		
 		return FormatSQL.toDate(
-				FormatSQL.quoteText(new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).format(dateToCompute)),
-				FormatSQL.quoteText(ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat()));
+				new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).format(dateToCompute),
+				ArcDateFormat.DATE_FORMAT_CONVERSION.getDatastoreFormat());
 	}
 }

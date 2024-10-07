@@ -29,6 +29,7 @@ import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.service.kubernetes.ApiManageExecutorDatabase;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
+import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.core.util.BDParameters;
@@ -135,7 +136,7 @@ class BatchARC implements IReturnCode {
 			batchAvoidDnsSpam();
 			
 			// patch database
-			batchPatchDatabase();
+			batchPatchDatabaseAndFileSystem();
 
 			// set batch parameters
 			executeIfProductionActive(this::batchParametersGet);
@@ -226,11 +227,14 @@ class BatchARC implements IReturnCode {
 	 * Patch or create the ARC database with tiniotialization script
 	 * @throws ArcException 
 	 */
-	private void batchPatchDatabase() throws ArcException {
+	private void batchPatchDatabaseAndFileSystem() throws ArcException {
 		
 		message("Main");
 		message("Batch ARC " + properties.fullVersionInformation().toString());
 		
+		
+		message("Patching database");
+
 		new BddPatcher().bddScript(null);
 		
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
@@ -245,10 +249,18 @@ class BatchARC implements IReturnCode {
 
 		envExecution = Patch.normalizeSchemaName(envExecution);
 		
+		message("Execution sandbox is "+envExecution);
+		
 		// security check if envExecution is valid
+		message("Patching filesytem");
 		envExecution=SecurityDao.validateEnvironnement(envExecution);
 		
 		new BddPatcher().bddScript(null, envExecution);
+		
+		
+		// build sandbox filesystem
+		new BuildFileSystem(null, new String[] {this.envExecution}).execute();
+		
 	}
 	
 	/**
