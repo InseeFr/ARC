@@ -203,7 +203,7 @@ Pour définir une règle de chargement, différents champs sont disponibles :
 
 Pour que ARC puisse lire et mettre en forme les données en entrée de processus, on lui indiquera un ensemble d'éléments qui lui est nécessaire. En fonction du fichier, on pourra :
 
-- Déclarer l'encoding du fichier
+- Déclarer l'encoding du fichier parmi les [charsets Postgres](https://www.postgresql.org/docs/current/multibyte.html#CHARSET-TABLE)
 - Créer des variables
 - Faire la jointure entre les données et des nomenclatures
 - Générer de nouvelles variables
