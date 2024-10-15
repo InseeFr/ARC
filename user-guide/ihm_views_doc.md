@@ -500,6 +500,15 @@ C'est ici que le choix d'entrepôt entre en jeu. Lorsque la phase de réception 
 
 À la réception, les fichiers sont copiés dans [ENTREPÔT]_ARCHIVE pour archivage, et déplacés dans ENCOURS le temps du traitement, puis OK ou KO selon l'état final.
 
+Il y a deux moyens de prioriser les traitements de ARC, et cela passe par l'écran des entrepôts :
+
+- La colonne **Priorité de l'entrepôt** permet d'ordonner les entrepôts pour choisir l'ordre dans lequel ils sont traités. Les entrepôts seront traités par ordre croissant des nombres renseignés.
+- La colonne **Règle de priorité des fichiers** permet d'ordonner les archives au sein même d'un entrepôt pour choisir l'ordre dans lequel elles sont traitées. Cette règle s'écrit comme la clause suivant un ORDER BY dans une requête SQL. On pourra utiliser les variables suivantes :
+  - `archive_name` pour le nom des archives
+  - `archive_date` pour la date d'arrivée des archives
+  - `archive_size` pour la taille des archives
+Par défaut, les archives sont traitées par ordre alphabétique des noms (`archive_name ASC`).
+
 ## Piloter l'environnement
 
 ### `viewPilotageBAS`
