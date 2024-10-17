@@ -203,7 +203,7 @@ Pour définir une règle de chargement, différents champs sont disponibles :
 
 Pour que ARC puisse lire et mettre en forme les données en entrée de processus, on lui indiquera un ensemble d'éléments qui lui est nécessaire. En fonction du fichier, on pourra :
 
-- Déclarer l'encoding du fichier
+- Déclarer l'encoding du fichier parmi les [charsets Postgres](https://www.postgresql.org/docs/current/multibyte.html#CHARSET-TABLE)
 - Créer des variables
 - Faire la jointure entre les données et des nomenclatures
 - Générer de nouvelles variables
@@ -499,6 +499,15 @@ Dans le système de fichiers sur lequel il pointe, ARC crée un dossier par bac 
 C'est ici que le choix d'entrepôt entre en jeu. Lorsque la phase de réception est lancée, ARC lit dans les dossiers RECEPTION_[ENTREPÔT] pour les fichiers à réceptionner. Les fichiers chargés sont alors préfixés du nom de leur entrepôt pour la suite du traitement. L'entrepôt par défaut s'appelle DEFAULT.
 
 À la réception, les fichiers sont copiés dans [ENTREPÔT]_ARCHIVE pour archivage, et déplacés dans ENCOURS le temps du traitement, puis OK ou KO selon l'état final.
+
+Il y a deux moyens de prioriser les traitements de ARC, et cela passe par l'écran des entrepôts :
+
+- La colonne **Priorité de l'entrepôt** permet d'ordonner les entrepôts pour choisir l'ordre dans lequel ils sont traités. Les entrepôts seront traités par ordre croissant des nombres renseignés.
+- La colonne **Règle de priorité des fichiers** permet d'ordonner les archives au sein même d'un entrepôt pour choisir l'ordre dans lequel elles sont traitées. Cette règle s'écrit comme la clause suivant un ORDER BY dans une requête SQL. On pourra utiliser les variables suivantes :
+  - `archive_name` pour le nom des archives
+  - `archive_date` pour la date d'arrivée des archives
+  - `archive_size` pour la taille des archives
+Par défaut, les archives sont traitées par ordre alphabétique des noms (`archive_name ASC`).
 
 ## Piloter l'environnement
 
