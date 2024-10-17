@@ -429,10 +429,18 @@ class BatchARC implements IReturnCode {
 
 	/**
 	 * Export business mapping tables to parquet Only in volatile mode
+	 * @throws ArcException 
 	 */
-	private void exportToParquet() {
+	private void exportToParquet() throws ArcException {
 		PhaseThreadFactory exportToParquet = new PhaseThreadFactory(mapParam, TraitementPhase.EXPORT);
 		exportToParquet.execute();
+		
+		if (exportToParquet.getReport().getException() != null)
+		{
+			message("Erreur export parquet");
+			throw exportToParquet.getReport().getException();
+		}
+		
 		message("Fin export parquet");
 	}
 

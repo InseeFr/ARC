@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.p1reception.registerarchive.dao;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -13,6 +12,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.FormatSQL;
 import io.micrometer.common.util.StringUtils;
 
 public class MoveFilesToRegisterDao {
@@ -45,14 +45,29 @@ public class MoveFilesToRegisterDao {
 	}
 
 	/**
-	 * Sort archives located in directory according to the user priority rules defined in entrepot gui
+	 * Sort archives located in directory /reception_entrepot directory according to the user priority rules defined in entrepot gui
 	 */
 	public File[] sortArchives(String entrepot, File[] archives) throws ArcException {
+		
 		String reglePrioriteForEntrepot = execQuerySelectReglesPrioriteFromEntrepot(entrepot);
 
+		createTemporaryTableForArchives();
+
+		insertArchivesIntoTemporaryTable(archives);
+
+		return sortArchivesAccordingToReglePrioriteForEntrepot(archives, reglePrioriteForEntrepot);
+
+	}
+
+	/**
+	 * Create a temporary container that will store the archives attributes (name, size, creation date) found in the entrepot /reception_$entrepot$ directory
+	 * @throws ArcException
+	 */
+	private void createTemporaryTableForArchives() throws ArcException {
+		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, ViewEnum.T1, SQL.END_QUERY);
-		query.build(SQL.CREATE, SQL.TEMPORARY, SQL.TABLE, ViewEnum.T1, "("
+		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, ViewEnum.ALIAS_TABLE, SQL.END_QUERY);
+		query.build(SQL.CREATE, SQL.TEMPORARY, SQL.TABLE, ViewEnum.ALIAS_TABLE, "("
 				, ColumnEnum.I, " ", TypeEnum.BIGINT, "," //
 				,ColumnEnum.ARCHIVE_NAME, " ", TypeEnum.TEXT, "," //
 				, ColumnEnum.ARCHIVE_SIZE, " ", TypeEnum.BIGINT, "," //
@@ -60,19 +75,28 @@ public class MoveFilesToRegisterDao {
 				, ")", SQL.END_QUERY);
 
 		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), query);
+		
+	}
+	
 
-		query = new ArcPreparedStatementBuilder();
+	/**
+	 * Insert the archives attributes found in the entrepot /reception_$entrepot$ directory into the archive temporary table 
+	 * @param archives
+	 * @throws ArcException
+	 */
+	private void insertArchivesIntoTemporaryTable(File[] archives) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		for (int i = 0; i < archives.length; i++) {
 
 			File f = archives[i];
-			query.build(SQL.INSERT_INTO, ViewEnum.T1, SQL.VALUES, "("
+			query.build(SQL.INSERT_INTO, ViewEnum.ALIAS_TABLE, SQL.VALUES, "("
 					, query.quoteText(i + ""), SQL.CAST_OPERATOR, TypeEnum.BIGINT, "," //
 					, query.quoteText(f.getName()), "," //
 					, query.quoteText(f.getTotalSpace() + ""), SQL.CAST_OPERATOR, TypeEnum.BIGINT, "," //
 					, query.quoteText(f.lastModified() + ""), SQL.CAST_OPERATOR, TypeEnum.BIGINT //
 					, ")", SQL.END_QUERY);
 
-			if ((i - 1) % 100 == 0) {
+			if ((i - 1) % FormatSQL.MAXIMUM_NUMBER_OF_LINE_IN_PREPARED_STATEMENT_BLOCK == 0) {
 				UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), query);
 				query = new ArcPreparedStatementBuilder();
 			}
@@ -81,10 +105,23 @@ public class MoveFilesToRegisterDao {
 		{
 			UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), query);
 		}
-		
-		query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, ColumnEnum.I, SQL.FROM, ViewEnum.T1, SQL.ORDER_BY);
+	}
+
+	
+
+	/**
+	 * return the archives sorted according to the reglePrioriteForEntrepot
+	 * if reglePrioriteForEntrepot is not provided, archives are sorted by name by default
+	 * @param archives
+	 * @param reglePrioriteForEntrepot
+	 * @return
+	 * @throws ArcException
+	 */
+	private File[] sortArchivesAccordingToReglePrioriteForEntrepot(File[] archives, String reglePrioriteForEntrepot) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, ColumnEnum.I, SQL.FROM, ViewEnum.ALIAS_TABLE, SQL.ORDER_BY);
 		query.build(StringUtils.isBlank(reglePrioriteForEntrepot)? "" : reglePrioriteForEntrepot+",");
+		// default sort is by name asc
 		query.build(ColumnEnum.ARCHIVE_NAME + " ASC ");
 		List<String> orderedIndexes = new GenericBean(UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), query)).getColumnValues(ColumnEnum.I.getColumnName());
 		

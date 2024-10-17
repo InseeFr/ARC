@@ -1,10 +1,13 @@
 package fr.insee.arc.core.service.global;
 
+import fr.insee.arc.utils.exception.ArcException;
+
 public class ServiceReporting {
 
-	public ServiceReporting(Integer init, double d) {
+	public ServiceReporting(Integer init, double d, ArcException e) {
 		this.nbObject=init;
 		this.duree=d;
+		this.exception = e;
 	}
 
 	public ServiceReporting() {
@@ -14,6 +17,8 @@ public class ServiceReporting {
 	
 	private Integer nbObject;
 	private double duree;
+	private ArcException exception;
+	
 	public Integer getNbObject() {
 		return nbObject;
 	}
@@ -28,6 +33,14 @@ public class ServiceReporting {
 
 	public void setDuree(double duree) {
 		this.duree = duree;
+	}
+
+	public ArcException getException() {
+		return exception;
+	}
+
+	public void setException(ArcException exception) {
+		this.exception = exception;
 	}
 	
 	

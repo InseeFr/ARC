@@ -314,6 +314,8 @@ public abstract class ApiService implements IConstanteNumerique {
 	 */
 	public ServiceReporting invokeApi() {
 		double start = System.currentTimeMillis();
+		
+		ArcException registeredException = null;
 
 		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " dans " + this.getCoordinatorSandbox().getSchema().toUpperCase() + " *******");
 		try {
@@ -326,6 +328,7 @@ public abstract class ApiService implements IConstanteNumerique {
 				} catch (ArcException ex) {
 					LoggerHelper.error(LOGGER_APISERVICE, "Erreur dans " + this.getCurrentPhase());
 					ex.logFullException();
+					registeredException = ex;
 					try {
 						this.repriseSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(),
 								this.getTablePil(), ex);
@@ -340,8 +343,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		}
 
 		LoggerHelper.info(LOGGER_APISERVICE, "****** Fin " + this.getCurrentPhase() + " *******");
-
-		return new ServiceReporting(this.reportNumberOfObject, System.currentTimeMillis() - start);
+		return new ServiceReporting(this.reportNumberOfObject, System.currentTimeMillis() - start, registeredException);
 
 	}
 
