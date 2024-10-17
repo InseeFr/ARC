@@ -3,6 +3,12 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.76b
+- postgres scanner version upgrade
+
+## version-94.1.75b
+- bug fix to catch when parquet export fail in order to interrupt batch correctly
+
 ## version-94.1.74b
 - spring security update
 - datawarehouse and archives inside datawarehouse can be loaded according to an order defined by user. Check "entrepot" gui.
@@ -15,7 +21,6 @@
 
 ## version-94.1.64
 - spring update
-
 
 ## version-94.1.65
 - parquet support for data retrieval webservice
