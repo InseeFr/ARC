@@ -33,7 +33,7 @@ public enum TraitementPhase {
     	
     	AUCUN_PREREQUIS("null"),
     	PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE("etape=1"),
-    	PIPELINE_TERMINE_DONNEES_NON_EXPORTEES("etape=2 AND client is null"),
+    	PIPELINE_TERMINE_DONNEES_NON_EXPORTEES("etape=2 AND client is null AND etat_traitement='{OK}'"),
     	;
     	
     	private String sqlFilter;
