@@ -184,6 +184,20 @@ public class S3Template {
 	}
 
 	/**
+	 * Copie un répertoire et son contenu d'un bucket dans un autre emplacement de ce bucket
+	 *
+	 * @param pathFrom le chemin du répertoire à copier
+	 * @param pathTo   le chemin de la copie
+	 * @throws ArcException
+	 */
+	public void copyDirectory(String pathFrom, String pathTo) throws ArcException {
+		for (String fileFrom : listObjectsInDirectory(pathFrom, true, true, false)) {
+			String fileTo = fileFrom.replace(pathFrom, pathTo);
+			copy(fileFrom, fileTo);
+		}
+	}
+
+	/**
 	 * Télécharge un objet d'un bucket vers un emplacement hors S3
 	 * 
 	 * @param sourceS3Path le chemin de l'objet à copier
@@ -298,6 +312,19 @@ public class S3Template {
 	public void move(String pathFrom, String pathTo) throws ArcException {
 		copy(pathFrom, pathTo);
 		delete(pathFrom);
+	}
+
+	/**
+	 * Déplace un répertoire et son contenu d'un bucket vers un nouvel emplacement dans le même bucket.
+	 * Cette méthode peut être aussi utilisée pour renommer un répertoire.
+	 *
+	 * @param pathFrom le chemin du répertoire à déplacer
+	 * @param pathTo   le nouveau chemin du répertoire
+	 * @throws ArcException
+	 */
+	public void moveDirectory(String pathFrom, String pathTo) throws ArcException {
+		copyDirectory(pathFrom, pathTo);
+		deleteDirectory(pathFrom);
 	}
 
 	/**

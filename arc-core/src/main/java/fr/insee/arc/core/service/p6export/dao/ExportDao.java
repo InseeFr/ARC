@@ -1,11 +1,7 @@
 package fr.insee.arc.core.service.p6export.dao;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -36,6 +32,7 @@ public class ExportDao {
 	private String directoryExport;
 	private String directoryOut;
 	private String s3Out;
+	private String s3OutTemp;
 
 	public ExportDao(Sandbox coordinatorSandbox) {
 		this.coordinatorSandbox = coordinatorSandbox;
@@ -135,6 +132,8 @@ public class ExportDao {
 		
 		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), EXPORT_CLIENT_NAME, dateExport);
 
+		this.s3OutTemp = DirectoryPathExport.s3ExportTemp(this.coordinatorSandbox.getSchema(), EXPORT_CLIENT_NAME, dateExport);
+
 		ParquetEncryptionKey parquetEncryptionKey = properties.getS3OutputParquetKey().isEmpty() ? null
 				: new ParquetEncryptionKey(EncryptionType.KEY256, properties.getS3OutputParquetKey());
 
@@ -160,11 +159,16 @@ public class ExportDao {
 	}
 
 	public void copyToS3Out() throws ArcException {
-		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3Out);
+		// copy first to a temporary folder
+		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3OutTemp);
 
-		for (File f : new File(this.directoryOut).listFiles()) {
-			ArcS3.OUTPUT_BUCKET.upload(f, this.s3Out + File.separator + f.getName());
+		for (File f : Objects.requireNonNull(new File(this.directoryOut).listFiles())) {
+			ArcS3.OUTPUT_BUCKET.upload(f, this.s3OutTemp + File.separator + f.getName());
 		}
+
+		// once upload to S3 complete, move to the permanent directory
+		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3Out);
+		ArcS3.OUTPUT_BUCKET.moveDirectory(this.s3OutTemp, this.s3Out);
 		
 		// delete export directory if S3 output bucket is declared in order to not duplicate data
 		if (ArcS3.OUTPUT_BUCKET.isS3Off()) return;
