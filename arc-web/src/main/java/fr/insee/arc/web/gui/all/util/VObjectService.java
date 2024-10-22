@@ -768,7 +768,8 @@ public class VObjectService {
 				reqUpdate.append(" WHERE ");
 
 				comma = false;
-				for (int j = 0; j < currentData.getContent().get(lineToBeUpdated).d.size(); j++) {
+
+				for (int j = 0; j < v0.getContent().get(lineToBeUpdated).d.size(); j++) {
 					String label = v0.getHeadersDLabel().get(j);
 					if (nativeFieldsList.contains(label)) {
 						if (comma) {
@@ -777,6 +778,7 @@ public class VObjectService {
 						comma = true;
 
 						String oldValue = v0.getContent().get(lineToBeUpdated).d.get(j);
+												
 						if (ManipString.isStringNull(oldValue)) {
 							reqUpdate.append(label + " IS NULL");
 						} else {
@@ -786,7 +788,8 @@ public class VObjectService {
 						}
 
 						// Updates value in v0
-						String newValue = currentData.getContent().get(lineToBeUpdated).d.get(j);
+						String newValue = currentData.getContent().get(lineToBeUpdated).getCell(j);
+
 						if (newValue != null) {
 							v0.getContent().get(lineToBeUpdated).d.set(j, newValue);
 						}

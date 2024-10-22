@@ -41,4 +41,15 @@ public class LineObject implements Cloneable, Iterable<String> {
     public Iterator<String> iterator() {
         return this.d.iterator();
     }
+    
+    /**
+     * returns the value in cell at position pos
+     * If position is out of range, return null
+     * @param pos
+     * @return
+     */
+    public String getCell(int pos)
+    {
+    	return (pos<d.size())?d.get(pos):null;
+    }
 }
