@@ -307,6 +307,7 @@ select public.check_function('def_validite', 'public.check_sql');
 
 -- famille & model
 select public.check_function('id_famille', 'public.check_identifier_token');
+select public.check_function('id_famille_parent', 'public.check_identifier_token');
 select public.check_function('nom_table_metier', 'public.check_identifier');
 select public.check_function('nom_variable_metier', 'public.check_identifier');
 select public.check_function('type_variable_metier', 'public.check_type');

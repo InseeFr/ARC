@@ -44,6 +44,7 @@ public enum ColumnEnum {
 	, ID_CLASSE("id_classe", TypeEnum.TEXT, "") // ihm_normage_regle,ihm_controle_regle
 	, ID_ENTREPOT("id_entrepot", TypeEnum.TEXT, "") // ihm_entrepot
 	, ID_FAMILLE("id_famille", TypeEnum.TEXT, "") // ihm_norme,security_webservice_log,ihm_mod_variable_metier,ihm_famille,ihm_mod_table_metier,ihm_webservice_whitelist,ihm_client
+	, ID_FAMILLE_PARENT("id_famille_parent", TypeEnum.TEXT, "") // ihm_famille
 	, ID_LOADER("id_loader", TypeEnum.TEXT, "") // ihm_entrepot
 	, ID_NORME("id_norme", TypeEnum.TEXT, "") // ihm_calendrier,ihm_expression,ihm_controle_regle,ihm_jeuderegle,ihm_norme,ihm_chargement_regle,ihm_normage_regle,ihm_mapping_regle
 	, ID_REGLE("id_regle", TypeEnum.BIGINT, "") // ihm_chargement_regle,ihm_expression,ihm_mapping_regle, ihm_controle_regle,ihm_normage_regle

@@ -199,8 +199,13 @@ CREATE TABLE IF NOT EXISTS arc.ihm_famille
 ( 
   id_famille text NOT NULL, 
   CONSTRAINT ihm_famille_pkey PRIMARY KEY (id_famille) 
-); 
-        
+);
+
+-- "bilan" families are linked to a parent family
+ALTER TABLE arc.ihm_famille ADD COLUMN IF NOT EXISTS id_famille_parent text;
+do $$ begin ALTER TABLE arc.ihm_famille ADD CONSTRAINT fk_bilan_famille FOREIGN KEY (id_famille_parent) REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
+
+
 -- client names for the data retrieval webservice 
 CREATE TABLE IF NOT EXISTS arc.ihm_client 
 (id_famille text NOT NULL, 

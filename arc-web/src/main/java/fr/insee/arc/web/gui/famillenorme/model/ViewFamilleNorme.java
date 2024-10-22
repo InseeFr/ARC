@@ -22,7 +22,8 @@ public class ViewFamilleNorme extends VObject {
             private static final long serialVersionUID = -8367423233501279261L;
 
             {
-                put("id_famille", new ColumnRendering(true, "label.normFamily", "100%", "text", null, true));
+                put("id_famille", new ColumnRendering(true, "label.normFamily", "50%", "text", null, true));
+                put("id_famille_parent", new ColumnRendering(true, "label.parentNormFamily", "50%", "text", null, true));
             }
         }
 
