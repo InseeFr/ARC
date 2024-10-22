@@ -3,6 +3,9 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.77b
+- common.io security version update
+
 ## version-94.1.76b
 - postgres scanner version upgrade
 

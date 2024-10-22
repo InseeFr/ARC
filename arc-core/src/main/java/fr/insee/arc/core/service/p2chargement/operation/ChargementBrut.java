@@ -46,9 +46,10 @@ public class ChargementBrut {
     	
     	StringBuilder requete=new StringBuilder();
     	int idLigne = 0;
+    	
     	String line;
 		try {
-			line = br.readLine(maxNumberOfCharacterByLineToRead);
+			line = readLine(br);
 		} catch (IOException e) {
     		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 		}
@@ -71,7 +72,7 @@ public class ChargementBrut {
           idLigne++;
           if (idLigne < maxNumberOfLinesToRead) {
               try {
-				line = br.readLine(maxNumberOfCharacterByLineToRead);
+				line = readLine(br);
 			} catch (IOException e) {
 	    		throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, idSource);
 			}
@@ -80,6 +81,19 @@ public class ChargementBrut {
     	return requete.toString();
 
     }
+    
+    /**
+     * Read the line with a maximum of maxNumberOfCharacterByLineToRead
+     * Trim the NULL char code to be able to read both utf16 and utf8 simple characters
+     * @param br
+     * @return
+     * @throws IOException
+     */
+    private String readLine(BoundedBufferedReader br) throws IOException
+    {
+    	return br.readLine(maxNumberOfCharacterByLineToRead).replaceAll("\0","");
+    }
+    
     
     /** Calcule la norme. Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
      * @throws IOException

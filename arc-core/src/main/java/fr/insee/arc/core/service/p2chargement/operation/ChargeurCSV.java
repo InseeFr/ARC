@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -129,6 +131,12 @@ public class ChargeurCSV implements IChargeur {
 	private void computeHeaders() throws ArcException {
 		String userDefinedHeaders = parser.getValue(CSVFormatRules.HEADERS);
 		String csvDelimiter = fileIdCard.getIdCardChargement().getDelimiter();
+		
+		String encoding = parser.getValue(CSVFormatRules.ENCODING);
+		encoding = (encoding==null) ? StandardCharsets.UTF_8.name() : encoding;
+		
+		String file_encoding = parser.getValue(CSVFormatRules.FILE_ENCODING);
+		file_encoding = (file_encoding==null) ? encoding: file_encoding;
 
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
 		// premier ligne
@@ -138,8 +146,10 @@ public class ChargeurCSV implements IChargeur {
 		                .withSeparator(csvDelimiter.charAt(0))
 		                .build();
 				
-				try (InputStreamReader inputStreamReader = new InputStreamReader(streamHeader);
-						BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+				try (
+						InputStreamReader inputStreamReader = new InputStreamReader(streamHeader, file_encoding);
+						InputStream inputStreamReaderConvertedEncoding = ReaderInputStream.builder().setReader(inputStreamReader).setCharset(encoding).get();
+						BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStreamReaderConvertedEncoding,encoding));
 						CSVReader readerCSV = new CSVReaderBuilder(bufferedReader).withCSVParser(parser).build();
 						) {
 
@@ -270,6 +280,7 @@ public class ChargeurCSV implements IChargeur {
 
 	@Override
 	public void charger() throws ArcException {
+		
 		initialisation();
 		execution();
 		finalisation();

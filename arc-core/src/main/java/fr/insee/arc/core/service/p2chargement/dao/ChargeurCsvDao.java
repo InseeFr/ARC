@@ -1,8 +1,11 @@
 package fr.insee.arc.core.service.p2chargement.dao;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.StringUtils;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -21,6 +24,7 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 public class ChargeurCsvDao {
 
@@ -88,9 +92,29 @@ public class ChargeurCsvDao {
 		String quote = parser.getValue(CSVFormatRules.QUOTE);
 
 		String encoding = parser.getValue(CSVFormatRules.ENCODING);
+		encoding = (encoding==null) ? StandardCharsets.UTF_8.name() : encoding;
+		
+		String file_encoding = parser.getValue(CSVFormatRules.FILE_ENCODING);
+		
+		if (file_encoding!=null)
+		{
+			// rework the inputstream to read it as set in the "file_encoding" parameter of format rules and convert it to encoding set in the "encoding" parameter
+			// The database must accept encoding.
+			try {
+				InputStream is = ReaderInputStream.builder().setReader(new InputStreamReader(streamContent, file_encoding)).setCharset(encoding).get();
+				UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
+						columns, is, ignoreFirstLine, separateur, quote, encoding);
+			} catch (Exception e) {
+				throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, fileIdCard.getIdSource());
+			} 
+			
+		}
+		else
+		{
+			UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
+					columns, streamContent, ignoreFirstLine, separateur, quote, encoding);			
+		}
 
-		UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
-				columns, streamContent, ignoreFirstLine, separateur, quote, encoding);
 	}
 
 	/**

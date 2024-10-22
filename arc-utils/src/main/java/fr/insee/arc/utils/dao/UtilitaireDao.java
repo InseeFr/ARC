@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -962,7 +963,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			String delimiter = "";
 			String quote = "";
 			String columnName = "";
-			String encode = "UTF8";
+			String encode = StandardCharsets.UTF_8.name();
 
 			if (aDelim != null && aDelim.length() == 1) {
 				delimiter = ", DELIMITER '" + aDelim + "'";
