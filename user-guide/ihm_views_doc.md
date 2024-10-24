@@ -231,6 +231,20 @@ v_choice_fiscal=row_number() over (partition by v_cle_entete,v_id_insee order by
 <where>v_choice_fiscal$new$=1
 ```
 
+##### Liste des balises des règles de formatage
+
+| Balise xml           | Valeur par défaut | Effet                                                                                                                                                         |
+| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| encoding             | UTF8              | Encodage des données stockées dans la base de données                                                                                                         |
+| file-encoding        | encoding          | Encodage pour lire le fichier                                                                                                                                 |
+| headers              |                   | Nom des colonnes séparés par le séparateur. Si cette balise est précisée, arc ne lira pas la premiere ligne du fichier pour extraire les colonnes des données |
+| join-table           |                   | Arc peut faire des jointures de la table de chargement avec des tables du bac à sable. Nom de table                                                           |
+| join-type            |                   | Type de jointure : inner join, outer join, left join, ... (syntaxe sql postgres)                                                                              |
+| join-select          |                   | Les colonnes à récupérer post jointure (syntaxe sql postgres)                                                                                                 |
+| partition-expression |                   | Pour partitionner le calcul de la table finale                                                                                                                |
+| i_xxx=               |                   | SQL de calcul d'un champ index, à ajouter ou à remplacer dans la table finale du charegment                                                                   |
+| v_xxx=               |                   | SQL de calcul d'un champ valeur à ajouter ou à remplacer dans la table finale du charegment                                                                   |
+
 #### Description du processus de chargement
 
 À l'étape de chargement, ARC structure l'information contenue dans les fichiers de façon hiérarchique, c'est à dire que pour chaque variable, il va définir d'une part sa position hiérarchique, et d'autre part sa valeur.
