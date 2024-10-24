@@ -74,13 +74,5 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	public String quoteText(ColumnEnum column) {
 		return quoteText(column.getColumnName());
 	}
-	
-	@Override
-	public ArcPreparedStatementBuilder build(Object... queryElements) {
-		for (Object queryElement : queryElements) {
-			getQuery().append(queryElement);
-		}
-		return this;
-	}
-	
+
 }

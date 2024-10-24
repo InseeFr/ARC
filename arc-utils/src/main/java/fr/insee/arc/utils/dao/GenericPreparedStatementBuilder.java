@@ -35,6 +35,11 @@ public class GenericPreparedStatementBuilder {
 
 	public GenericPreparedStatementBuilder build(Object... queryElements) {
 		for (Object queryElement : queryElements) {
+			if (queryElement instanceof GenericPreparedStatementBuilder q)
+			{
+				this.append(q);
+				continue;
+			}
 			query.append(queryElement);
 		}
 		return this;
