@@ -601,3 +601,13 @@ end;
 $$;
 
 
+-- add ARC family and report table
+insert into arc.ihm_famille (id_famille) values('ARC') on conflict do nothing;
+
+insert into arc.ihm_mod_table_metier (id_famille, nom_table_metier, description_table_metier) values ('ARC','mapping_arc_report_ok','arc report table') on conflict do nothing; 
+
+insert into arc.ihm_mod_variable_metier (id_famille, nom_table_metier, nom_variable_metier, type_variable_metier, description_variable_metier) values ('ARC','mapping_arc_report_ok','archive_filename','text','filename of the archive received') on conflict do nothing;
+insert into arc.ihm_mod_variable_metier (id_famille, nom_table_metier, nom_variable_metier, type_variable_metier, description_variable_metier) values ('ARC','mapping_arc_report_ok','entrepot','text','entrepot where archives received') on conflict do nothing;
+insert into arc.ihm_mod_variable_metier (id_famille, nom_table_metier, nom_variable_metier, type_variable_metier, description_variable_metier) values ('ARC','mapping_arc_report_ok','id_report','bigint','id of report table') on conflict do nothing;
+insert into arc.ihm_mod_variable_metier (id_famille, nom_table_metier, nom_variable_metier, type_variable_metier, description_variable_metier) values ('ARC','mapping_arc_report_ok','id_source','text','report file name') on conflict do nothing;
+insert into arc.ihm_mod_variable_metier (id_famille, nom_table_metier, nom_variable_metier, type_variable_metier, description_variable_metier) values ('ARC','mapping_arc_report_ok','archive_timestamp','timestamp without time zone','timestamp of archive received') on conflict do nothing;

@@ -94,26 +94,26 @@ public class ChargeurCsvDao {
 		String encoding = parser.getValue(CSVFormatRules.ENCODING);
 		encoding = (encoding==null) ? StandardCharsets.UTF_8.name() : encoding;
 		
-		String file_encoding = parser.getValue(CSVFormatRules.FILE_ENCODING);
+		String fileEncoding = parser.getValue(CSVFormatRules.FILE_ENCODING);
 		
-		if (file_encoding!=null)
+		InputStream inputStreamToCopyInDatabase;
+		
+		// convert stream from "file_encoding" to "encoding" if the "file_encoding" parameter is set 
+		if (fileEncoding!=null)
 		{
-			// rework the inputstream to read it as set in the "file_encoding" parameter of format rules and convert it to encoding set in the "encoding" parameter
-			// The database must accept encoding.
 			try {
-				InputStream is = ReaderInputStream.builder().setReader(new InputStreamReader(streamContent, file_encoding)).setCharset(encoding).get();
-				UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
-						columns, is, ignoreFirstLine, separateur, quote, encoding);
+				inputStreamToCopyInDatabase = ReaderInputStream.builder().setReader(new InputStreamReader(streamContent, fileEncoding)).setCharset(encoding).get();
 			} catch (Exception e) {
 				throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, fileIdCard.getIdSource());
 			} 
-			
 		}
 		else
 		{
-			UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
-					columns, streamContent, ignoreFirstLine, separateur, quote, encoding);			
+			inputStreamToCopyInDatabase = streamContent;
 		}
+
+		UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
+				columns, inputStreamToCopyInDatabase, ignoreFirstLine, separateur, quote, encoding);
 
 	}
 

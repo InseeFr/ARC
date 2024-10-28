@@ -91,7 +91,8 @@ public class ChargementBrut {
      */
     private String readLine(BoundedBufferedReader br) throws IOException
     {
-    	return br.readLine(maxNumberOfCharacterByLineToRead).replaceAll("\0","");
+    	String line = br.readLine(maxNumberOfCharacterByLineToRead);
+    	return line==null ? null : line.replaceAll("\0","");
     }
     
     

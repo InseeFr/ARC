@@ -7,7 +7,7 @@ public enum CSVFormatRules implements IParseFormatRules {
 	// java encoding charset
 	// UTF-8, WIN1252, ISO88591, ...
 	ENCODING("<encoding>","</encoding>", true),
-	FILE_ENCODING("<file_encoding>","</file_encoding>", true),
+	FILE_ENCODING("<file-encoding>","</file-encoding>", true),
 	
 	// postgres quote character
 	// <quote>E'\2'</quote> if you don't want to use " as csv quote delimiter

@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ObjectUtils;
@@ -154,6 +159,7 @@ public class ChargeurCSV implements IChargeur {
 						) {
 
 					String[] headers = getHeader(readerCSV);
+					manageDuplicates(headers);
 					registerHeaders(headers);
 
 				} catch (CsvValidationException | IOException e) {
@@ -172,6 +178,40 @@ public class ChargeurCSV implements IChargeur {
 			String[] headers = Format.tokenizeAndTrim(userDefinedHeaders, Delimiters.HEADERS_DELIMITER);
 			registerHeaders(headers);
 		}
+	}
+
+
+	/**
+	 * change duplicate headers name
+	 * 1st occur of duplicate header > keeps its name
+	 * 2nd occur of duplicate > add "__1" at the end of the duplicate header name
+ 	 * 3nd occur of duplicate > add "__2" at the end of the duplicate header name
+	 * ...
+	 * @param headers
+	 */
+	public static void manageDuplicates(String[] headers) {
+
+		// collect duplicates if any
+		Set<String> distinctElements = new HashSet<>();
+	    List<String> duplicates =  Arrays.stream(headers).filter(e -> !distinctElements.add(e)).collect(Collectors.toList());
+
+	    for (String dup:duplicates)
+	    {
+	    	int indexDup = 0;
+	    	for (int i=0; i<headers.length; i++)
+	    	{
+	    		if (headers[i].equals(dup))
+	    		{
+	    			if (indexDup>0)
+	    			{
+	    				headers[i] =headers[i]+ Delimiters.SQL_TOKEN_DELIMITER + Delimiters.SQL_TOKEN_DELIMITER + indexDup;
+	    			}
+	    			
+	    			indexDup++;
+	    		}
+	    	}
+	    }
+	    
 	}
 
 	private void registerHeaders(String[] headers) {
