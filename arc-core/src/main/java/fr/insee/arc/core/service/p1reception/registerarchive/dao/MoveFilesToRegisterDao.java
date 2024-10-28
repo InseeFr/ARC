@@ -92,7 +92,7 @@ public class MoveFilesToRegisterDao {
 			query.build(SQL.INSERT_INTO, ViewEnum.ALIAS_TABLE, SQL.VALUES, "("
 					, query.quoteText(i + ""), SQL.CAST_OPERATOR, TypeEnum.BIGINT, "," //
 					, query.quoteText(f.getName()), "," //
-					, query.quoteText(f.getTotalSpace() + ""), SQL.CAST_OPERATOR, TypeEnum.BIGINT, "," //
+					, query.quoteText(f.length() + ""), SQL.CAST_OPERATOR, TypeEnum.BIGINT, "," //
 					, query.quoteText(f.lastModified() + ""), SQL.CAST_OPERATOR, TypeEnum.BIGINT //
 					, ")", SQL.END_QUERY);
 
