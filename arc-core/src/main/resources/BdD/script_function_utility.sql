@@ -30,6 +30,19 @@ end loop;
 end;
 $$;
 
+-- technical funciton to try a dynamic query and validate syntax
+create or replace function public.try_query(dynamic_query text) returns boolean
+as $$
+begin
+	begin
+		execute dynamic_query;
+	exception when others then 
+		return false;
+	end;
+return true;
+end; 
+$$ LANGUAGE plpgsql;
+
 -- fonctions technique sur les tableaux
 do $$ begin create type public.cle_valeur as (i bigint, v text collate "C"); exception when others then end; $$;
 

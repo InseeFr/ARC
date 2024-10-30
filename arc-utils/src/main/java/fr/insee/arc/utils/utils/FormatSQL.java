@@ -154,6 +154,18 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	}
 
 	/**
+	 * build a query that try a generic query and report the result
+	 * @param query
+	 * @return
+	 */
+	public static GenericPreparedStatementBuilder tryQueryAndReport(GenericPreparedStatementBuilder query) {
+		GenericPreparedStatementBuilder queryToTestInputQuery = new GenericPreparedStatementBuilder();
+		queryToTestInputQuery.build(SQL.SELECT, "public.try_query(", queryToTestInputQuery.quoteText(query.getQueryWithParameters()), "::text)");
+		return queryToTestInputQuery;
+	}
+	
+	
+	/**
 	 * Lance un vacuum d'un certain type sur une table
 	 * 
 	 * @param table

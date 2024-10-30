@@ -230,6 +230,21 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				: returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
 
 	}
+	
+	/**
+	 * Exécute une requête qui renvoie exactement un argument de type
+	 * {@link Boolean}.
+	 *
+	 * @param connexion la connexion à la base
+	 * @param sql       la requête
+	 * @param args      les arguments de la requête (optionnels)
+	 * @return
+	 * @throws ArcException 
+	 */
+	public boolean getBoolean(Connection connexion, GenericPreparedStatementBuilder sql) throws ArcException {
+		String result = getString(connexion, sql);
+		return result.equals("t");
+	}
 
 	/**
 	 * Exécute une requête qui renvoie exactement un argument de type
@@ -470,6 +485,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 						return null;
 					} catch (SQLException e) {
 						LoggerHelper.error(LOGGER, stmt.toString());
+						LoggerHelper.error(LOGGER, ModeRequete.configureQuery(requete).getQueryWithParameters());
 						throw e;
 					} finally {
 						connexionWrapper.getConnexion().commit();
