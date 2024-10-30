@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
@@ -28,9 +30,13 @@ import fr.insee.arc.utils.parquet.ParquetExtension;
 import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
+import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.utils.utils.Sleep;
 
 public class ParquetDao {
 
+	private static final Logger LOGGER = LogManager.getLogger(ParquetDao.class);
+	
 	private static final String ATTACHMENT_NAME_PREFIX = "pg";
 
 	// classpath file containing extension files
@@ -92,7 +98,9 @@ public class ParquetDao {
 			// export tables one by one to parquet
 			for (TableToRetrieve table : tables) {
 				// export table to parquet
+				LoggerHelper.custom(LOGGER, "Parquet started on : " + table.getTableName());
 				exportTableToParquet(connection, table, outputDirectory);
+				LoggerHelper.custom(LOGGER, "Parquet ended on : " + table.getTableName());
 			}
 
 		} catch (SQLException | IOException e) {
@@ -251,13 +259,12 @@ public class ParquetDao {
 		int numberOfPods = postgresConnections.length;
 
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		
 		query.append("SET custom_extension_repository = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY)
 				+ ";\n");
 		query.append("SET extension_directory  = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
 		query.append("INSTALL postgres;\n");
-
-		
-		
+				
 		for (int connectionIndex = 0; connectionIndex < numberOfPods; connectionIndex++) {
 			ConnectionAttribute c = postgresConnections[connectionIndex];
 
@@ -273,8 +280,7 @@ public class ParquetDao {
 			}
 		}
 
-		executeQuery(connection, query);
-
+		executeQuery(connection, query);		
 	}
 
 	/**
