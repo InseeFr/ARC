@@ -458,6 +458,7 @@ public class S3Template {
 	}
 
 	public void closeMinioClient() {
+		if (isS3Off()) return;
 		httpClient.dispatcher().executorService().shutdown();
 		httpClient.connectionPool().evictAll();
 		this.minioClient = null;

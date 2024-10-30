@@ -84,6 +84,11 @@ public class FileSystemManagement {
 			String entrepot) {
 		return directoryPhaseEntrepot(rootDirectory, env, t, entrepot) + DIRECTORY_TOKEN + DIRECTORY_ARCHIVE_QUALIFIER;
 	}
+	
+	public static String directoryPhaseEntrepotKO(String rootDirectory, String env, TraitementPhase t,
+			String entrepot) {
+		return directoryPhaseEntrepot(rootDirectory, env, t, entrepot) + DIRECTORY_TOKEN + TraitementEtat.KO;
+	}
 
 	public static String directoryPhaseEntrepotArchiveOld(String rootDirectory, String env, TraitementPhase t,
 			String entrepot) {

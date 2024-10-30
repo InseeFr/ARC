@@ -36,7 +36,17 @@ public class DirectoryPath {
 		return FileSystemManagement.directoryPhaseEntrepotArchive(rootDirectory, env, TraitementPhase.RECEPTION,
 				entrepot);
 	}
+	
+	public static String s3ReceptionEntrepotArchive(String env, String entrepot) {
+		return FileSystemManagement.directoryPhaseEntrepotArchive("", env, TraitementPhase.RECEPTION,
+				entrepot);
+	}
 
+	public static String s3ReceptionEntrepotKO(String env, String entrepot) {
+		return FileSystemManagement.directoryPhaseEntrepotKO("", env, TraitementPhase.RECEPTION,
+				entrepot);
+	}
+	
 	public static String directoryReceptionEntrepotArchiveOld(String rootDirectory, String env, String entrepot) {
 		return FileSystemManagement.directoryPhaseEntrepotArchiveOld(rootDirectory, env, TraitementPhase.RECEPTION,
 				entrepot);

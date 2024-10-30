@@ -32,6 +32,7 @@ import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
+import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.batch.IReturnCode;
 import fr.insee.arc.utils.consumer.ThrowingRunnable;
@@ -39,6 +40,7 @@ import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
+import fr.insee.arc.utils.minio.S3Template;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.security.SecurityDao;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -621,6 +623,13 @@ class BatchARC implements IReturnCode {
 				throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, fIn.getAbsolutePath(),
 						fOut.getAbsolutePath());
 			}
+			
+			// copy files to s3 ko directory if error had occured in batch before
+			String s3ArchiveDirectory = DirectoryPath.s3ReceptionEntrepotKO(envExecution, entrepotContainer);
+			ArcS3.INPUT_BUCKET.createDirectory(s3ArchiveDirectory);
+			ArcS3.INPUT_BUCKET.upload(fIn, s3ArchiveDirectory + File.separator + originalContainer);
+			ArcS3.INPUT_BUCKET.closeMinioClient();
+			
 		}
 	}
 
