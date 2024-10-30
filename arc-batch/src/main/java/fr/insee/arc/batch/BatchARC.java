@@ -603,7 +603,7 @@ class BatchARC implements IReturnCode {
 	 * @param aBouger
 	 * @throws IOException
 	 */
-	private void copyFileFromArchiveDirectoryToOK(String envExecution, String repertoire, List<String> aBouger)
+	private void copyFileInErrorLastBatchFromArchiveDirectoryToOKDirectory(String envExecution, String repertoire, List<String> aBouger)
 			throws ArcException {
 
 		for (String container : aBouger) {
@@ -624,7 +624,7 @@ class BatchARC implements IReturnCode {
 						fOut.getAbsolutePath());
 			}
 			
-			// copy files to s3 ko directory if error had occured in batch before
+			// if s3 in exists, copy files to s3 ko directory if error had occured in batch before
 			String s3ArchiveDirectory = DirectoryPath.s3ReceptionEntrepotKO(envExecution, entrepotContainer);
 			ArcS3.INPUT_BUCKET.createDirectory(s3ArchiveDirectory);
 			ArcS3.INPUT_BUCKET.upload(fIn, s3ArchiveDirectory + File.separator + originalContainer);
@@ -650,7 +650,7 @@ class BatchARC implements IReturnCode {
 
 		// si oui, on essaie de recopier les archives dans chargement OK
 		if (dejaEnCours) {
-			copyFileFromArchiveDirectoryToOK(envExecution, repertoire, aBouger);
+			copyFileInErrorLastBatchFromArchiveDirectoryToOKDirectory(envExecution, repertoire, aBouger);
 		}
 
 		message("Fin des déplacements de fichiers");
