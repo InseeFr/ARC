@@ -3,6 +3,9 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.79b
+- add priority rules to sort incoming files
+
 ## version-94.1.77b
 - common.io security version update
 
