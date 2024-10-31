@@ -98,9 +98,9 @@ public class ParquetDao {
 			// export tables one by one to parquet
 			for (TableToRetrieve table : tables) {
 				// export table to parquet
-				LoggerHelper.custom(LOGGER, "Parquet started on : " + table.getTableName());
+				LoggerHelper.custom(LOGGER, "Parquet export start : " + table.getTableName());
 				exportTableToParquet(connection, table, outputDirectory);
-				LoggerHelper.custom(LOGGER, "Parquet ended on : " + table.getTableName());
+				LoggerHelper.custom(LOGGER, "Parquet export end");
 			}
 
 		} catch (SQLException | IOException e) {

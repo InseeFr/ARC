@@ -152,6 +152,18 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static String tryQuery(String query) {
 		return "do $$ begin " + query + " exception when others then end; $$; ";
 	}
+	
+	/**
+	 * build a query to limit the number of row given of a given query
+	 * @param query
+	 * @return
+	 */
+	public static GenericPreparedStatementBuilder limitQuery(GenericPreparedStatementBuilder query, int limit)
+	{
+		GenericPreparedStatementBuilder limitQuery = new GenericPreparedStatementBuilder();
+		limitQuery.build(SQL.SELECT, "*", SQL.FROM, "(", query, ") ww ", SQL.LIMIT, limit );
+		return limitQuery;
+	}
 
 	/**
 	 * build a query that try a generic query and report the result

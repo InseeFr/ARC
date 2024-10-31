@@ -280,27 +280,32 @@ public class PilotageDao extends VObjectHelperDao {
 		
 		ArcPreparedStatementBuilder requete;
 		
+		requete = new ArcPreparedStatementBuilder();
+		requete.append("SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
+		requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase.toString()) + " ");
+		requete.append("\n AND etat_traitement=" + requete.quoteText(etat.getSqlArrayExpression()) + "::text[] ");
+		requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
+
+		// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
+		// fichiers
+		if (!viewFichierBAS.mapContentSelected().isEmpty()) {
+			requete.append("AND id_source IN (");
+			requete.append(requete.sqlListeOfValues(viewFichierBAS.mapContentSelected().get("id_source")));
+			requete.append(")");
+		}
+
+		List<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
+				.mapContent().get("id_source");
+		
+		
 		for (String t : tableDownload) {
 			if (phase.equals(TraitementPhase.MAPPING))
 			{
 				requete = new ArcPreparedStatementBuilder();
-				requete.append("WITH prep as ( ");
-				requete.append("SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
-				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase.toString()) + " ");
-				requete.append("\n AND etat_traitement=" + requete.quoteText(etat.getSqlArrayExpression()) + "::text[] ");
-				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
-
-				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
-				// fichiers
-				if (!viewFichierBAS.mapContentSelected().isEmpty()) {
-					requete.append("\n AND id_source IN (");
-					requete.append(
-							requete.sqlListeOfValues(viewFichierBAS.mapContentSelected().get("id_source")));
-					requete.append(")");
-				}
-				requete.append(" ) ");
-				requete.append("\n SELECT * from " + t
-						+ " a where exists (select 1 from prep b where a.id_source=b.id_source) ");
+				requete.append("\n SELECT * FROM " + t + " a ");
+				requete.append("\n WHERE id_source IN ( ");
+				requete.append(requete.sqlListeOfValues(idSources));
+				requete.append(")");
 
 				tableauRequete.add(requete);
 				fileNames.add(t);
@@ -308,22 +313,7 @@ public class PilotageDao extends VObjectHelperDao {
 			}
 			else
 			{
-				requete = new ArcPreparedStatementBuilder();
-				requete.append("SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
-				requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase.toString()) + " ");
-				requete.append("\n AND etat_traitement=" + requete.quoteText(etat.getSqlArrayExpression()) + "::text[] ");
-				requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
 
-				// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
-				// fichiers
-				if (!viewFichierBAS.mapContentSelected().isEmpty()) {
-					requete.append("AND id_source IN (");
-					requete.append(requete.sqlListeOfValues(viewFichierBAS.mapContentSelected().get("id_source")));
-					requete.append(")");
-				}
-
-				List<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
-						.mapContent().get("id_source");
 
 				// for each files, generate the download query
 				for (String idSource : idSources) {

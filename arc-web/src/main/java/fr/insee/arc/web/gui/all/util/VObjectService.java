@@ -35,11 +35,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
@@ -1112,11 +1110,15 @@ public class VObjectService {
 					int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
 					for (int executorConnectionId = ArcDatabase.COORDINATOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
 							.getIndex() + numberOfExecutorNods; executorConnectionId++) {
-					
-						ArcPreparedStatementBuilder limit = new ArcPreparedStatementBuilder();
-						limit.build(SQL.SELECT, "*", SQL.FROM, "(", requetes.get(i), ")", ViewEnum.ALIAS_A,  SQL.LIMIT, 0 );
-						
-						if (!UtilitaireDao.get(executorConnectionId).getBoolean(connection, FormatSQL.tryQueryAndReport(limit)))
+
+						// check if query is valid on database (data may not be foud on every executors)
+						if (!UtilitaireDao.get(executorConnectionId).getBoolean(connection, FormatSQL.tryQueryAndReport(FormatSQL.limitQuery(requetes.get(i), 0))))
+						{
+							continue;
+						}
+
+						// keep in zip only query that returns rows
+						if (!UtilitaireDao.get(executorConnectionId).hasResults(connection, FormatSQL.limitQuery(requetes.get(i), 1)))
 						{
 							continue;
 						}
@@ -1125,11 +1127,12 @@ public class VObjectService {
 								(executorConnectionId> ArcDatabase.COORDINATOR.getIndex() ? "_"+executorConnectionId : "") + ".csv");
 						zos.putNextEntry(entry);
 						
-						LoggerHelper.custom(LOGGER, "Downloading : " + entry.getName());
-						
+						LoggerHelper.custom(LOGGER, "Build entry start : " + entry.getName());
 						// Ecriture dans le fichier
 						UtilitaireDao.get(executorConnectionId).outStreamRequeteSelect(this.connection, requetes.get(i),
 								zos);
+						LoggerHelper.custom(LOGGER, "Build entry end");
+						
 						zos.closeEntry();
 					}
 				}
@@ -1137,6 +1140,9 @@ public class VObjectService {
 		} catch (IOException | ArcException ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "download()", LOGGER, ex);
 		}
+		
+		LoggerHelper.custom(LOGGER, "Download end");
+
 		return fOut;
 	}
 

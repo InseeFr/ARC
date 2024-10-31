@@ -530,23 +530,43 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public void outStreamRequeteSelect(Connection connexion, GenericPreparedStatementBuilder requete, OutputStream out)
 			throws ArcException {
+		
+			writeSelectQueryMetadataToOutputStreamAsCSV(connexion, requete, out);
+		
+			exporting(connexion, "(" + requete + ")", out, true);
+
+	}
+
+	/**
+	 * write query metadata to outputstream in csv format
+	 * @param connection
+	 * @param requete
+	 * @param out
+	 * @throws ArcException
+	 */
+	public void writeSelectQueryMetadataToOutputStreamAsCSV(Connection connexion, GenericPreparedStatementBuilder requete,
+			OutputStream out) throws ArcException {
 
 		try (ConnectionWrapper connexionWrapper = initConnection(connexion)) {
+
+			// limit query output as only metadata is required
+			GenericPreparedStatementBuilder limit = FormatSQL.limitQuery(requete , 0);
+	
 			try (PreparedStatement stmt = connexionWrapper.getConnexion()
-					.prepareStatement(requete.getQuery().toString())) {
-
+					.prepareStatement(limit.getQuery().toString())) {
+	
 				// bind parameters
-				for (int i = 0; i < requete.getParameters().size(); i++) {
-					registerBindVariable(stmt, requete, i);
+				for (int i = 0; i < limit.getParameters().size(); i++) {
+					registerBindVariable(stmt, limit, i);
 				}
-
+	
 				StringBuilder str = new StringBuilder();
 				String lineSeparator = System.lineSeparator();
-
+	
 				// write metadata in output
 				try (ResultSet res = stmt.executeQuery()) {
 					ResultSetMetaData rsmd = res.getMetaData();
-
+	
 					// Noms des colonnes
 					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 						str.append(rsmd.getColumnLabel(i));
@@ -563,18 +583,16 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 						}
 					}
 					str.append(lineSeparator);
-
+	
 					out.write(str.toString().getBytes());
-
+	
 				} catch (SQLException | IOException e) {
 					throw new ArcException(ArcExceptionMessage.GUI_EXPORT_TABLE_FAILED);
 				}
 			} catch (SQLException e1) {
 				throw new ArcException(ArcExceptionMessage.GUI_EXPORT_TABLE_FAILED);
 			}
-
-			exporting(connexion, "(" + requete + ")", out, true);
-
+			
 		}
 	}
 
