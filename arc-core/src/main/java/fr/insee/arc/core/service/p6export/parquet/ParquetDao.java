@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -83,8 +84,11 @@ public class ParquetDao {
 		
 		// load duckdb extension
 		loadDuckdb();
-
-		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:")) {
+		
+		Properties connectionProperties = new Properties();
+		connectionProperties.setProperty("preserve_insertion_order", "false");
+		
+		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:",connectionProperties)) {
 
 			// unzip extensions
 			unzipExtensions(connection);
@@ -279,7 +283,6 @@ public class ParquetDao {
 						+ query.quoteText(encryptionKey.getValue()) + ");");
 			}
 		}
-
 		executeQuery(connection, query);		
 	}
 
