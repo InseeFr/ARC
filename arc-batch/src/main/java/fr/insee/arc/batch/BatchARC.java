@@ -25,7 +25,6 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
-import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.service.kubernetes.ApiManageExecutorDatabase;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
