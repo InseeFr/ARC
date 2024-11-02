@@ -40,7 +40,6 @@ import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
-import fr.insee.arc.utils.minio.S3Template;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.security.SecurityDao;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -385,29 +384,6 @@ class BatchARC implements IReturnCode {
 		message(ApiManageExecutorDatabase.create().toString());
 		Sleep.sleep(waitExecutorTimerInMS);
 	}
-
-	/**
-	 * Delete the volatile executor database Can only happen if executors are
-	 * declared on kubernetes
-	 * 
-	 * @throws ArcException
-	 */
-	private void executorsDatabaseDelete() throws ArcException {
-		message(ApiManageExecutorDatabase.delete().toString());
-	}
-
-	
-	private void archiveDirectoryDelete() throws ArcException {
-		
-		File[] archiveDirectories = FileSystemManagement.getArchiveDirectories(repertoire, envExecution);
-		
-		for (File f:archiveDirectories)
-		{
-			FileUtilsArc.deleteDirectory(f);
-			FileUtilsArc.createDirIfNotexist(f);
-		}
-	}
-	
 	
 	/***
 	 * Delete files, export to parquet
@@ -420,10 +396,6 @@ class BatchARC implements IReturnCode {
 		effacerRepertoireChargement(repertoire, envExecution);
 
 		executeIfParquetActive(this::exportToParquet);
-
-		executeIfVolatile(this::executorsDatabaseDelete);
-		
-		executeIfVolatile(this::archiveDirectoryDelete);
 
 		message("Traitement Fin");
 
@@ -596,6 +568,36 @@ class BatchARC implements IReturnCode {
 	}
 
 	/**
+	 * mark if the batch has been interrupted get the list of archives which process
+	 * was interrupted to move them back in the input directory
+	 * 
+	 * @throws ArcException
+	 * @throws IOException
+	 */
+	private void deplacerFichiersNonTraites() throws ArcException {
+
+		List<String> aBouger = exportOn ? //
+				BatchArcDao.execQuerySelectArchiveNotExported(envExecution) //
+				: BatchArcDao.execQuerySelectArchiveEnCours(envExecution);
+
+		dejaEnCours = (!aBouger.isEmpty());
+
+		// si oui, on essaie de recopier les archives dans chargement OK
+		if (dejaEnCours) {
+			copyPendingFilesOfLastBatchFromArchiveDirectoryToOKDirectory(envExecution, repertoire, aBouger);
+		}
+		
+		// si le s3 est actif, on sauvegarde les archives pending ou KO vers le s3
+		List<String> aBougerToS3 = ArcS3.INPUT_BUCKET.isS3Off() ? new ArrayList<>():BatchArcDao.execQuerySelectArchivePendingOrKO(envExecution);
+		if (!aBougerToS3.isEmpty()) {
+			savePendingOrKOArchivesToS3(envExecution, repertoire, aBougerToS3);
+		}
+		
+		message("Fin des déplacements de fichiers");
+
+	}
+	
+	/**
 	 * Copy the files from the archive directory to ok directory
 	 * 
 	 * @param envExecution
@@ -603,7 +605,7 @@ class BatchARC implements IReturnCode {
 	 * @param aBouger
 	 * @throws IOException
 	 */
-	private void copyFileInErrorLastBatchFromArchiveDirectoryToOKDirectory(String envExecution, String repertoire, List<String> aBouger)
+	private void copyPendingFilesOfLastBatchFromArchiveDirectoryToOKDirectory(String envExecution, String repertoire, List<String> aBouger)
 			throws ArcException {
 
 		for (String container : aBouger) {
@@ -623,38 +625,41 @@ class BatchARC implements IReturnCode {
 				throw new ArcException(ArcExceptionMessage.FILE_COPY_FAILED, fIn.getAbsolutePath(),
 						fOut.getAbsolutePath());
 			}
-			
-			// if s3 in exists, copy files to s3 ko directory if error had occured in batch before
-			String s3ArchiveDirectory = DirectoryPath.s3ReceptionEntrepotKO(envExecution, entrepotContainer);
-			ArcS3.INPUT_BUCKET.createDirectory(s3ArchiveDirectory);
-			ArcS3.INPUT_BUCKET.upload(fIn, s3ArchiveDirectory + File.separator + originalContainer);
-			ArcS3.INPUT_BUCKET.closeMinioClient();
-			
 		}
 	}
 
 	/**
-	 * mark if the batch has been interrupted get the list of archives which process
-	 * was interrupted to move them back in the input directory
-	 * 
+	 * Copy files to s3 KO directory if archive was KO or pending from previous batch
+	 * @param envExecution2
+	 * @param repertoire2
+	 * @param aBougerToS3
 	 * @throws ArcException
-	 * @throws IOException
 	 */
-	private void deplacerFichiersNonTraites() throws ArcException {
+	private void savePendingOrKOArchivesToS3(String envExecution2, String repertoire2, List<String> aBougerToS3) throws ArcException {
+		for (String container : aBougerToS3) {
+			String entrepotContainer = ManipString.substringBeforeFirst(container, "_");
+			String originalContainer = ManipString.substringAfterFirst(container, "_");
 
-		List<String> aBouger = exportOn ? //
-				BatchArcDao.execQuerySelectArchiveNotExported(envExecution) //
-				: BatchArcDao.execQuerySelectArchiveEnCours(envExecution);
-
-		dejaEnCours = (!aBouger.isEmpty());
-
-		// si oui, on essaie de recopier les archives dans chargement OK
-		if (dejaEnCours) {
-			copyFileInErrorLastBatchFromArchiveDirectoryToOKDirectory(envExecution, repertoire, aBouger);
+			File fIn = Paths
+					.get(DirectoryPath.directoryReceptionEntrepotArchive(repertoire, envExecution, entrepotContainer),
+							originalContainer)
+					.toFile();
+			
+			if (!fIn.exists())
+				continue;
+			
+			// save files to s3 if not already exist
+			String s3ArchiveDirectory = DirectoryPath.s3ReceptionEntrepotKO(envExecution, entrepotContainer);
+			ArcS3.INPUT_BUCKET.createDirectory(s3ArchiveDirectory);
+			String targetS3File= s3ArchiveDirectory + File.separator + originalContainer;
+			if (!ArcS3.INPUT_BUCKET.isExists(targetS3File))
+			{
+				ArcS3.INPUT_BUCKET.upload(fIn, targetS3File);
+			}
+			ArcS3.INPUT_BUCKET.closeMinioClient();
+			
 		}
-
-		message("Fin des déplacements de fichiers");
-
+		
 	}
 
 	/**

@@ -67,6 +67,25 @@ public class BatchArcDao {
 		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
+	
+	/**
+	 * Select the archives KO used for volatile mode
+	 * 
+	 * @param envExecution
+	 * @return
+	 * @throws ArcException
+	 */
+	public static List<String> execQuerySelectArchivePendingOrKO(String envExecution) throws ArcException {
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE));
+		query.build(SQL.UNION);
+		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PIPELINE_TERMINE_DONNEES_KO));
+		
+		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query))
+				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
+	}
+	
 
 	/**
 	 * Reset the status of interrupted archives in the pilotage table Archives entry
