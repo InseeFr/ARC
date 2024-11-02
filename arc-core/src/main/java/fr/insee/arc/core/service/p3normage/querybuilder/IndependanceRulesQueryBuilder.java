@@ -91,7 +91,12 @@ public class IndependanceRulesQueryBuilder {
 			if (type.equals(TypeNormage.INDEPENDANCE)) {
 				String rubrique = reglesNormage.get(j).getRubrique().toLowerCase();
 				String rubriqueNmcl = reglesNormage.get(j).getRubriqueNmcl().toLowerCase();
-				rubriquesAvecRegleDIndependance.put(JoinParser.anyToM(rubrique), rubriqueNmcl);
+
+				// ignore rule if rubrique nmcl not found
+				if (JoinParser.getLine(blocCreate, rubriqueNmcl)!=null)
+				{
+					rubriquesAvecRegleDIndependance.put(JoinParser.anyToM(rubrique), rubriqueNmcl);
+				}
 			}
 
 		}
