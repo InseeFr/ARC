@@ -183,7 +183,7 @@ public class ExecutorDatabaseStatefulTemplate {
                 "name": "custom-init-scripts"
               },
               {
-                "mountPath": "/bitnami",
+                "mountPath": "/bitnami/postgresql",
                 "name": "tmp-volume"
               }
             ]
