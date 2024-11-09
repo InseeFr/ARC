@@ -3,6 +3,13 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.87b
+- fix parquet file export memory leak
+- download data to s3 gui button works again
+- if s3 is active, files which have triggered batch error are sent to s3
+- fix executor ephemral pvc
+- ignore independance rules when child tag doesn't exist
+
 ## version-94.1.79b
 - add priority rules to sort incoming files
 
