@@ -53,8 +53,12 @@ COPY . /usr/src/app/
 # Run a conditional script for the maven build
 RUN chmod +x usr/src/app/docker/script.sh && usr/src/app/docker/script.sh
 
-#
+# get jre light image
+FROM eclipse-temurin:17-jre-alpine
+
 ENV ARC_LOGLEVEL=$LOG_LEVEL
+
+COPY --from=build usr/src/app/arc-batch/target/ArcMain.jar usr/src/app/arc-batch/target/ArcMain.jar
 
 ## execute batch
 ## ENTRYPOINT ["java","-jar","usr/src/app/arc-batch/target/ArcMain.jar"]
