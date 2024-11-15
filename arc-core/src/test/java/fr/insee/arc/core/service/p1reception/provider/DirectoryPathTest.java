@@ -13,40 +13,40 @@ import fr.insee.arc.utils.utils.PrivateConstructorTest;
 public class DirectoryPathTest {
 
 	@Test
-	public void testDirectoryPathIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+	public void testDirectoryPathIsUtilityClass()
+			throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		PrivateConstructorTest.testConstructorIsPrivate(DirectoryPath.class);
 	}
-	
+
 	@Test
-	public void directoryReceptionRootTest()
-	{
-		assertEquals(new File("/root/ARC_BAS1/RECEPTION").toPath(),new File(DirectoryPath.directoryReceptionRoot("/root","arc_bas1")).toPath());
+	public void directoryReceptionRootTest() {
+		assertEquals(new File("/root/ARC_BAS1/RECEPTION").toPath(),
+				new File(DirectoryPath.directoryReceptionRoot("/root", "arc_bas1")).toPath());
 	}
-	
+
 	@Test
-	public void s3ReceptionEntrepotArchiveTest()
-	{
-		assertEquals(new File("/root/RECEPTION_ENTREPOT_ARCHIVE").toPath(),new File(DirectoryPath.s3ReceptionEntrepotArchive("root","ENTREPOT")).toPath());
+	public void s3ReceptionEntrepotArchiveTest() {
+		assertEquals(new File("/ROOT/RECEPTION_ENTREPOT_ARCHIVE").toPath(),
+				new File(DirectoryPath.s3ReceptionEntrepotArchive("root", "ENTREPOT")).toPath());
 	}
-	
+
 	@Test
-	public void s3ReceptionEntrepotKOTest()
-	{
-		assertEquals(new File("/root/RECEPTION_ENTREPOT_KO").toPath(),new File(DirectoryPath.s3ReceptionEntrepotKO("root","ENTREPOT")).toPath());
+	public void s3ReceptionEntrepotKOTest() {
+		assertEquals(new File("/ROOT/RECEPTION_ENTREPOT_KO").toPath(),
+				new File(DirectoryPath.s3ReceptionEntrepotKO("root", "ENTREPOT")).toPath());
 	}
-	
+
 	@Test
-	public void directoryReceptionEntrepotArchiveOldTest()
-	{
-		assertEquals(new File("/root/ARC_BAS1/RECEPTION_ENTREPOT_ARCHIVE/OLD").toPath(),new File(DirectoryPath.directoryReceptionEntrepotArchiveOld("/root","arc_bas1", "ENTREPOT")).toPath());
+	public void directoryReceptionEntrepotArchiveOldTest() {
+		assertEquals(new File("/root/ARC_BAS1/RECEPTION_ENTREPOT_ARCHIVE/OLD").toPath(),
+				new File(DirectoryPath.directoryReceptionEntrepotArchiveOld("/root", "arc_bas1", "ENTREPOT")).toPath());
 	}
-	
+
 	@Test
-	public void directoryReceptionEntrepotArchiveOldYearStampedTest()
-	{
-		assertEquals(new File(("/root/ARC_BAS1/RECEPTION_ENTREPOT_ARCHIVE/OLD/"+Year.now().getValue())).toPath(),new File(DirectoryPath.directoryReceptionEntrepotArchiveOldYearStamped("/root","arc_bas1", "ENTREPOT")).toPath());
+	public void directoryReceptionEntrepotArchiveOldYearStampedTest() {
+		assertEquals(new File(("/root/ARC_BAS1/RECEPTION_ENTREPOT_ARCHIVE/OLD/" + Year.now().getValue())).toPath(),
+				new File(DirectoryPath.directoryReceptionEntrepotArchiveOldYearStamped("/root", "arc_bas1", "ENTREPOT"))
+						.toPath());
 	}
-	
-	
-	
+
 }
