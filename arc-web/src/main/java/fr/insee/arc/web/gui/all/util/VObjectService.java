@@ -25,7 +25,6 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -36,7 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
-import fr.insee.arc.core.util.LoggerDispatcher;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
@@ -66,6 +64,11 @@ import jakarta.servlet.http.HttpServletResponse;
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class VObjectService {
 
+	public VObjectService(Session session)
+	{
+		this.session=session;
+	}
+	
 	private static final Logger LOGGER = LogManager.getLogger(VObjectService.class);
 
 	// filter constants
@@ -85,11 +88,7 @@ public class VObjectService {
 
 	public static final String DEFAULT_FILTER_FUNCTION = "upper";
 
-	@Autowired
 	private Session session;
-
-	@Autowired
-	private LoggerDispatcher loggerDispatcher;
 
 	// default database target for query is META_DATA
 	private Integer connectionIndex = ArcDatabase.COORDINATOR.getIndex();
@@ -1432,7 +1431,7 @@ public class VObjectService {
 						temporaryFolder = Files.createTempDirectory("tmp_" + System.currentTimeMillis()).toFile();
 
 						Path locationTmp = Paths.get(temporaryFolder.getAbsolutePath(), fileName);
-						loggerDispatcher.info("Upload >> " + locationTmp, LOGGER);
+						LoggerHelper.info(LOGGER, "Upload >> " + locationTmp);
 
 						File newFileTmp = locationTmp.toFile();
 
@@ -1440,7 +1439,7 @@ public class VObjectService {
 						uploadedFile.transferTo(newFileTmp);
 
 						Path location = Paths.get(repertoireCible, fileName);
-						loggerDispatcher.info("Transfering uploaded file to  >> " + location, LOGGER);
+						LoggerHelper.info(LOGGER, "Transfering uploaded file to  >> " + location);
 						Files.copy(locationTmp, location, StandardCopyOption.REPLACE_EXISTING);
 
 					} catch (IOException ex) {

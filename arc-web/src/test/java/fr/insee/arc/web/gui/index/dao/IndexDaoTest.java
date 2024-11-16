@@ -27,9 +27,10 @@ public class IndexDaoTest extends InitializeQueryTest {
 	@BeforeClass
 	public static void setup() throws ArcException {
 		BddPatcherTest.createDatabase();
-		vObjectService = new VObjectService();
+
+		vObjectService = new VObjectService(new Session());
 		vObjectService.setConnection(c);
-		vObjectService.setSession(new Session());
+
 		dao = new DataObjectService();
 		dao.setSandboxSchema(BddPatcherTest.testSandbox1);
 		pdao = new IndexDao();

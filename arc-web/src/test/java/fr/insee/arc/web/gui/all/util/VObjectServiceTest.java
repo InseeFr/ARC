@@ -31,14 +31,16 @@ public class VObjectServiceTest extends InitializeQueryTest {
 
 	@BeforeClass
 	public static void setup() throws ArcException {
+		
 		BddPatcherTest.createDatabase();
-		vObjectService = new VObjectService();
-		vObjectService.setConnection(c);
 		
 		Session session = new Session();
 		HttpSessionTemplate z = new HttpSessionTemplate();
 		session.setHttpSession(z);
-		vObjectService.setSession(session);
+	
+		vObjectService = new VObjectService(session);
+		vObjectService.setConnection(c);
+
 	}
 	
 	@Rule
@@ -49,6 +51,8 @@ public class VObjectServiceTest extends InitializeQueryTest {
 
 		File root = testFolder.newFolder("root");
 		String repertoire = root.getAbsolutePath();
+		
+		buildPropertiesWithoutScalability(repertoire);
 
 		String testSandbox1 = "arc_bas1";
 		VObject viewFichierBAS = new ViewFichierBAS();

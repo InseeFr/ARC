@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -27,14 +26,12 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.ressourceUtils.SpringApplicationContext;
 import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
-@Component
 public abstract class ApiService implements IConstanteNumerique {
 
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ApiService.class);
@@ -71,7 +68,6 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	public ApiService() {
 		super();
-		springInit();
 	}
 
 	protected ApiService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
@@ -133,15 +129,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		}
 
 		return this.todo;
-	}
-
-	/** Manually autowire the factory-produced instance. */
-	private void springInit() {
-		try {
-			SpringApplicationContext.autowire(this);
-		} catch (Exception e) {
-			//
-		}
 	}
 
 	/**
