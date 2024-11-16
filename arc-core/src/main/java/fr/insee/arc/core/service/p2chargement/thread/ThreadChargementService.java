@@ -228,7 +228,9 @@ public class ThreadChargementService extends ApiChargementService implements Run
 				targetLoader.charger();
 				
 			} finally {
-				this.filesInputStreamLoad.closeAll();
+				if (filesInputStreamLoad!=null) {
+					this.filesInputStreamLoad.closeAll();
+				}
 			}
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_CLOSE_FAILED, fileChargement.getAbsolutePath());
