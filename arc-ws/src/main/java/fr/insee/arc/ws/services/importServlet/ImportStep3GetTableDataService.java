@@ -38,14 +38,17 @@ public class ImportStep3GetTableDataService {
 
 		TableToRetrieve table = clientDao.getAClientTableByName(arcClientIdentifier.getClientInputParameter());
 
-		if (this.clientDao.isWebServiceNotPending()) {
+		// check if the web service is not in pending state i.e. check if the web service has finished to compute the business tables to be transfered
+		boolean isWebServiceNotPending = this.clientDao.isWebServiceNotPending();
+		
+		if (isWebServiceNotPending) {
 			this.clientDao.deleteFromTrackTable(table.getTableName());
 		}
 		
 		// transfer data to http response
 		ServiceDao.execQueryExportDataToResponse(resp.getWr(), table, this.arcClientIdentifier.getFormat(), clientDao);
 
-		if (this.clientDao.isWebServiceNotPending()) {
+		if (isWebServiceNotPending) {
 			this.clientDao.dropTable(table);
 			
 			if (arcClientIdentifier.getFormat().isParquet())
