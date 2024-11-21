@@ -1,7 +1,5 @@
 package fr.insee.arc.ws.services.importServlet;
 
-import java.io.IOException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

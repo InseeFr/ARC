@@ -13,7 +13,6 @@
 		
 		<project.log4j.version>2.17.1</project.log4j.version>
 		<project.spring.version>6.1.14</project.spring.version>
-		<project.springboot.version>3.3.5</project.springboot.version>
 		<project.jackson.version>2.16.1</project.jackson.version>
 		<project.postgres.version>42.7.3</project.postgres.version>
 		<project.duckdb.version>1.1.1</project.duckdb.version>
@@ -23,7 +22,6 @@
 		<project.org.json.version>20231013</project.org.json.version>
 		<project.commons.compress.version>1.26.0</project.commons.compress.version>
 		<project.commons.fileupload.version>1.5</project.commons.fileupload.version>
-		
 
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
