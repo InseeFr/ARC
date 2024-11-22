@@ -42,7 +42,7 @@ public class SynchronizeDataByPilotageOperation {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public void synchronizeDataByPilotage(boolean fullRebuild) throws ArcException {
+	public void synchronizeDataByPilotage() throws ArcException {
 		LoggerHelper.info(LOGGER, "synchronisationEnvironmentByPilotage");
 
 		// maintenance de la table de pilotage
@@ -54,7 +54,7 @@ public class SynchronizeDataByPilotageOperation {
 		resetEtapePilotage();
 
 		// recrée la table de pilotage, ses index, son trigger
-		rebuildPilotage(fullRebuild);
+		rebuildPilotage();
 	
 		// drop des tables temporaires de travail
 		dropUnusedTemporaryTablesAllNods();
@@ -88,8 +88,8 @@ public class SynchronizeDataByPilotageOperation {
 	
 	
 
-	private void rebuildPilotage(boolean fullRebuild) throws ArcException {
-		SynchronizeDataByPilotageDao.rebuildPilotageDao(this.sandbox.getConnection(), this.sandbox.getSchema(), fullRebuild);
+	private void rebuildPilotage() throws ArcException {
+		SynchronizeDataByPilotageDao.rebuildPilotageDao(this.sandbox.getConnection(), this.sandbox.getSchema());
 	}
 
 

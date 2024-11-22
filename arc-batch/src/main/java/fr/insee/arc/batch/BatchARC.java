@@ -775,7 +775,7 @@ class BatchARC implements IReturnCode {
 			@Override
 			public void run() {
 				try {
-					DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_FREEZE);
+					DatabaseMaintenance.maintenancePgCatalogAllNods(null, FormatSQL.VACUUM_OPTION_NONE);
 					DatabaseMaintenance.maintenancePilotage(null, envExecution, FormatSQL.VACUUM_OPTION_NONE);
 				} catch (ArcException e) {
 					e.logMessageException();

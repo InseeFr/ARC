@@ -56,7 +56,7 @@ public class ResetEnvironmentService {
 			new ResetEnvironmentOperation(service.getCoordinatorSandbox()).clearPilotageAndDirectories(rootDirectory);
 			
 			// synchronize
-			new SynchronizeDataByPilotageOperation(service.getCoordinatorSandbox()).synchronizeDataByPilotage(false);
+			new SynchronizeDataByPilotageOperation(service.getCoordinatorSandbox()).synchronizeDataByPilotage();
 			
 		} catch (ArcException e) {
 			e.logFullException();

@@ -133,7 +133,8 @@ public class CleanPilotageDao {
 	{
 		StringBuilder query = new StringBuilder();
 		query.append(FormatSQL.vacuumSecured(ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), FormatSQL.VACUUM_OPTION_ANALYZE));
-		query.append(FormatSQL.vacuumSecured(ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema()), FormatSQL.VACUUM_OPTION_ANALYZE));
+		query.append(FormatSQL.vacuumSecured(ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema()), FormatSQL.VACUUM_OPTION_FREEZE));
+		query.append(FormatSQL.analyzeSecured(ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema())));
 		
 		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
 	}
