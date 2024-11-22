@@ -75,7 +75,7 @@ public class ResetEnvironmentOperation {
 		nbLignes += resetEnvironmentDao.executeDeletePhaseEntriesInPilotageAndCount(phase, querySelection);
 
 		// Run a database synchronization with the pilotage table
-		new SynchronizeDataByPilotageOperation(this.sandbox).synchronizeDataByPilotage();
+		new SynchronizeDataByPilotageOperation(this.sandbox).synchronizeDataByPilotage(false);
 
 		if (nbLignes > 0) {
 			DatabaseMaintenance.maintenanceDatabaseClassic(connection, envExecution);

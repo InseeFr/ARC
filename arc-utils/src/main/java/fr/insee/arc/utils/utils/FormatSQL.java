@@ -39,6 +39,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final int TIMEOUT_MAINTENANCE = 600000;
 
 	public static final String VACUUM_OPTION_NONE = "";
+	public static final String VACUUM_OPTION_FREEZE = "freeze";
 	public static final String VACUUM_OPTION_FULL = "full";
 	public static final String VACUUM_OPTION_ANALYZE = "analyze";
 

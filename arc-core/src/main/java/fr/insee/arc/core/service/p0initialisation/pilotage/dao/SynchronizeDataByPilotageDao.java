@@ -71,11 +71,13 @@ public class SynchronizeDataByPilotageDao {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	public static void rebuildPilotageDao(Connection connexion, String envExecution) throws ArcException {
+	public static void rebuildPilotageDao(Connection connexion, String envExecution, boolean fullRebuild) throws ArcException {
 
 		String tablePilotage = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
-		
-		UtilitaireDao.get(0).executeRequest(connexion, new ArcPreparedStatementBuilder("analyze " + tablePilotage + ";"));
+
+		UtilitaireDao.get(0).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePilotage, fullRebuild?FormatSQL.VACUUM_OPTION_FULL:FormatSQL.VACUUM_OPTION_NONE));
+
+		UtilitaireDao.get(0).executeImmediate(connexion, FormatSQL.analyzeSecured(tablePilotage));
 	}
 
 	/**

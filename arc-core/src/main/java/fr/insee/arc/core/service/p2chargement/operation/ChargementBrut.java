@@ -119,11 +119,7 @@ public class ChargementBrut {
 	    if (normeOk.getIdNorme()==null) {
 	        throw new ArcException(ArcExceptionMessage.LOAD_NORM_NOT_FOUND, normeOk.getIdSource());
 	    }
-	    
-	    if (estHorsCalendrier(normeOk, envExecution)) {
-            throw new ArcException(ArcExceptionMessage.LOAD_NORM_OUT_OF_CALENDAR, normeOk.getIdNorme(), normeOk.getIdSource());
-        }
-	    
+
     }
 
     /** Retourne (par référence) la norme dans normeOk[0] et la validité dans validiteOk[0].
@@ -177,32 +173,6 @@ public class ChargementBrut {
 
     }
 
-    /** Retourne VRAI si la date de validité du fichier est hors de la période de validité de la norme du fichier.
-     * Retourne FAUX sinon.
-     * @param normeOk les métadonnées du fichier à vérifier
-     * @param envExecution le schéma d'exécution du traitement
-     * @throws ArcException si aucune norme ou plus d'une norme trouvée
-     */
-    private boolean estHorsCalendrier(FileIdCard normeOk, String envExecution) throws ArcException {
-        ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-        query.build(SQL.SELECT, ColumnEnum.VALIDITE_INF.getColumnName(), ",");
-        query.build(ColumnEnum.VALIDITE_SUP.getColumnName(), SQL.FROM, ViewEnum.CALENDRIER.getFullName(envExecution));
-        query.build(SQL.WHERE, ColumnEnum.ID_NORME.getColumnName(), "=", query.quoteText(normeOk.getIdNorme()));
-
-        List<List<String>> result = UtilitaireDao.get(0).executeRequestWithoutMetadata(this.connexion, query);
-
-        if (result.size() > 1) {
-            throw new ArcException(ArcExceptionMessage.LOAD_SEVERAL_NORM_FOUND, normeOk.getIdNorme());
-        } else if (result.isEmpty()) {
-            throw new ArcException(ArcExceptionMessage.LOAD_ZERO_NORM_FOUND);
-        }
-
-        String validite_inf = result.get(0).get(0);
-        String validite_sup = result.get(0).get(1);
-        String validite = normeOk.getValidite();
-        return (validite.compareTo(validite_inf) < 0) || (validite.compareTo(validite_sup) > 0);
-
-    }
     
     /**
      * @return the connexion

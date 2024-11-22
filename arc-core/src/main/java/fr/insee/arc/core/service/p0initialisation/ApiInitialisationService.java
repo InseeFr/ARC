@@ -61,7 +61,7 @@ public class ApiInitialisationService extends ApiService {
 		// Met en cohérence les tables de données avec la table de pilotage de
 		// l'environnement
 		// La table de pilotage fait foi
-		new SynchronizeDataByPilotageOperation(this.coordinatorSandbox).synchronizeDataByPilotage();
+		new SynchronizeDataByPilotageOperation(this.coordinatorSandbox).synchronizeDataByPilotage(true);
 
 		// remettre les archives ou elle doivent etre en cas de restauration de la base
 		new RestoreFileSystem(this.coordinatorSandbox).execute();
