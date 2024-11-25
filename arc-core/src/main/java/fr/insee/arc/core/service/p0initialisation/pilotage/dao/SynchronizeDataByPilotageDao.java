@@ -76,8 +76,6 @@ public class SynchronizeDataByPilotageDao {
 		String tablePilotage = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
 		
 		UtilitaireDao.get(0).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePilotage, FormatSQL.VACUUM_OPTION_FREEZE));
-
-		UtilitaireDao.get(0).executeImmediate(connexion, FormatSQL.analyzeSecured(tablePilotage));
 	}
 
 	/**

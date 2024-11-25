@@ -748,7 +748,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			StringBuilder requete = new StringBuilder();
 			for (String t : gb.mapContent().get("tablename")) {
 				requete.append(FormatSQL.vacuumSecured(t, type));
-				requete.append(FormatSQL.analyzeSecured(t));
 			}
 			executeImmediate(connexion, requete.toString());
 		} catch (Exception ex) {

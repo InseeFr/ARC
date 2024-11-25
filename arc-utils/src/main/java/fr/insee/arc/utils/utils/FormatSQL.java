@@ -41,8 +41,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final String VACUUM_OPTION_NONE = "";
 	public static final String VACUUM_OPTION_FREEZE = "freeze";
 	public static final String VACUUM_OPTION_FULL = "full";
-	public static final String VACUUM_OPTION_ANALYZE = "analyze";
-
 
 	private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
 
@@ -186,7 +184,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @return
 	 */
 	public static String vacuumSecured(String table, String type) {
-		return "VACUUM " + type + " " + table + "; COMMIT; \n";
+		return "VACUUM " + type + " ANALYZE " + table + "; COMMIT; \n";
 	}
 
 	/**
