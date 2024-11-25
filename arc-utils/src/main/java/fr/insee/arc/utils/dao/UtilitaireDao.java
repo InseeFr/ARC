@@ -744,9 +744,9 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			executeImmediate(connexion, FormatSQL.setTimeOutMaintenance());
 
 			GenericBean gb = new GenericBean(executeRequest(connexion, new GenericPreparedStatementBuilder(
-					"select tablename from pg_tables where schemaname='pg_catalog'")));
+					"select relname from pg_stat_all_tables where schemaname='pg_catalog' and n_dead_tup>"+FormatSQL.NUMBER_OF_DEAD_TUPLES_FOR_VACUUM)));
 			StringBuilder requete = new StringBuilder();
-			for (String t : gb.mapContent().get("tablename")) {
+			for (String t : gb.getColumnValues("relname")) {
 				requete.append(FormatSQL.vacuumSecured(t, type));
 			}
 			executeImmediate(connexion, requete.toString());

@@ -41,8 +41,10 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final String VACUUM_OPTION_NONE = "";
 	public static final String VACUUM_OPTION_FREEZE = "freeze";
 	public static final String VACUUM_OPTION_FULL = "full";
-
+	public static final int NUMBER_OF_DEAD_TUPLES_FOR_VACUUM = 100000;
+	
 	private static final Logger LOGGER = LogManager.getLogger(FormatSQL.class);
+	
 
 	/**
 	 * query to drop a table in database

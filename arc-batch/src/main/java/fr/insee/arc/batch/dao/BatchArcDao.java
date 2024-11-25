@@ -1,5 +1,9 @@
 package fr.insee.arc.batch.dao;
 
+import java.sql.Connection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -8,15 +12,25 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
+import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class BatchArcDao {
 
+	public BatchArcDao(Connection batchConnection) {
+		super();
+		this.batchConnection = batchConnection;
+	}
+
+	private Connection batchConnection;
+	
+	
 	/**
 	 * Query to check what archives had not been fully proceeded depending on the phase execution condition
 	 * 
@@ -41,12 +55,12 @@ public class BatchArcDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static List<String> execQuerySelectArchiveEnCours(String envExecution) throws ArcException {
+	public List<String> execQuerySelectArchiveEnCours(String envExecution) throws ArcException {
 
 		ArcPreparedStatementBuilder query = queryPipelineNotFinished(envExecution,
 				ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE);
 
-		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query))
+		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
 
@@ -57,14 +71,14 @@ public class BatchArcDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static List<String> execQuerySelectArchiveNotExported(String envExecution) throws ArcException {
+	public List<String> execQuerySelectArchiveNotExported(String envExecution) throws ArcException {
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE));
 		query.build(SQL.UNION);
 		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PIPELINE_TERMINE_DONNEES_NON_EXPORTEES));
 		
-		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query))
+		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
 	
@@ -75,14 +89,14 @@ public class BatchArcDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static List<String> execQuerySelectArchivePendingOrKO(String envExecution) throws ArcException {
+	public List<String> execQuerySelectArchivePendingOrKO(String envExecution) throws ArcException {
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE));
 		query.build(SQL.UNION);
 		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PIPELINE_TERMINE_DONNEES_KO));
 		
-		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query))
+		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
 	
@@ -96,7 +110,7 @@ public class BatchArcDao {
 	 * @throws ArcException
 	 */
 	@SqlInjectionChecked
-	public static void execQueryResetPendingFilesInPilotageTable(String envExecution) throws ArcException {
+	public void execQueryResetPendingFilesInPilotageTable(String envExecution) throws ArcException {
 		// delete files that are en cours
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("\n DELETE FROM " + ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
@@ -108,7 +122,7 @@ public class BatchArcDao {
 		query.append("\n set etape=1 ");
 		query.append("\n WHERE etape=3");
 		query.append(";");
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeBlock(null, query);
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeBlock(batchConnection, query);
 
 	}
 	
@@ -118,7 +132,7 @@ public class BatchArcDao {
 	 * @param envExecution
 	 * @throws ArcException 
 	 */
-	public static void execQueryResetPendingFilesInPilotageTableVolatile(String envExecution) throws ArcException {
+	public void execQueryResetPendingFilesInPilotageTableVolatile(String envExecution) throws ArcException {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("WITH tmp_pending_files AS ( ");
@@ -140,7 +154,7 @@ public class BatchArcDao {
 		query.append("\n AND a.phase_traitement = "+query.quoteText(TraitementPhase.RECEPTION.toString()));
 		query.append("\n AND a.etat_traitement = "+query.quoteText(TraitementEtat.OK.getSqlArrayExpression())+"::text[]");
 
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query);
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query);
 					
 	}
 
@@ -150,10 +164,10 @@ public class BatchArcDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String execQueryLastInitialisationTimestamp(String envExecution) throws ArcException {
+	public String execQueryLastInitialisationTimestamp(String envExecution) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("select last_init from " + ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
-		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(null, query);
+		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(batchConnection, query);
 	}
 
 	/**
@@ -163,7 +177,7 @@ public class BatchArcDao {
 	 * @param hourToTriggerInitializationInProduction
 	 * @throws ArcException
 	 */
-	public static void execUpdateLastInitialisationTimestamp(String envExecution, Integer intervalForInitializationInDay,
+	public void execUpdateLastInitialisationTimestamp(String envExecution, Integer intervalForInitializationInDay,
 			Integer hourToTriggerInitializationInProduction) throws ArcException {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
@@ -173,10 +187,10 @@ public class BatchArcDao {
 		query.build(",", "operation=case when operation='R' then 'O' else operation end ");
 		query.build(SQL.END_QUERY);
 
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query);
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query);
 	}
 
-	public static Integer execQueryAnythingLeftTodo(String envExecution) {
+	public Integer execQueryAnythingLeftTodo(String envExecution) {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
 		query.build(SQL.SELECT, "count(*)", SQL.FROM);
@@ -186,14 +200,47 @@ public class BatchArcDao {
 		query.build(SQL.LIMIT, "1");
 		query.build(")", ViewEnum.ALIAS_A);
 
-		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getInt(null, query);
+		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getInt(batchConnection, query);
 	}
 
-	public static Boolean execQueryIsProductionOn(String envExecution) throws ArcException {
+	public Boolean execQueryIsProductionOn(String envExecution) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
 		query.build(SQL.WHERE, ColumnEnum.OPERATION, "=", query.quoteText("O"));
-		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(null, query);
+		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
+	}
+
+	/**
+	 * The initialization phase can trigger when the current date is more than
+	 * the initialization date stored in database
+	 * true if Initialization date 
+	 * @return
+	 * @throws ArcException
+	 */
+	public boolean isInitializationMustTrigger(String envExecution) throws ArcException
+	{
+		String lastInitialize = execQueryLastInitialisationTimestamp(envExecution);
+
+		Date dNow = new Date();
+		Date dLastInitialize;
+
+		try {
+			dLastInitialize = new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat())
+					.parse(lastInitialize);
+		} catch (ParseException dateParseException) {
+			throw new ArcException(dateParseException, ArcExceptionMessage.BATCH_INITIALIZATION_DATE_PARSE_FAILED);
+		}
+		
+		return (dLastInitialize.compareTo(dNow) < 0);
+	}
+	
+	
+	public Connection getBatchConnection() {
+		return batchConnection;
+	}
+
+	public void setBatchConnection(Connection batchConnection) {
+		this.batchConnection = batchConnection;
 	}
 
 }
