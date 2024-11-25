@@ -749,7 +749,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			for (String t : gb.getColumnValues("relname")) {
 				requete.append(FormatSQL.vacuumSecured(t, type));
 			}
-			executeImmediate(connexion, requete.toString());
+			if (requete.length()>0)
+			{
+				executeImmediate(connexion, requete.toString());
+			}
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER, ex);
 		} finally {
