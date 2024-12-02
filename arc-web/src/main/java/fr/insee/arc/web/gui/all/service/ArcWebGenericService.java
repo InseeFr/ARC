@@ -100,7 +100,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 
 	/** Is the current environment a production environment?*/
 	private boolean isEnvProd;
-	/** Is the current environment must be executed as a batch ? */
+	/** Is the current environment must be executed as a batch ? What is the batch mode ? */
 	private String isEnvBatch;
 	
 	/** Are the Kubernetes options enabled?*/
@@ -185,7 +185,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		Sandbox s = new Sandbox(null, this.bacASable);
 		
 		this.isEnvProd = s.isEnvSetForProduction();
-		this.isEnvBatch = s.isEnvSetForBatch();
+		this.isEnvBatch = s.computeBatchMode();
 
 		this.isKube = PropertiesHandler.getInstance().getKubernetesExecutorNumber() > 0;
 		

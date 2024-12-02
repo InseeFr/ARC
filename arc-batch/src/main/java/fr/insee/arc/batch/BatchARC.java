@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fr.insee.arc.batch.dao.BatchArcDao;
 import fr.insee.arc.batch.threadrunners.PhaseParameterKeys;
 import fr.insee.arc.batch.threadrunners.PhaseThreadFactory;
+import fr.insee.arc.core.model.BatchMode;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
@@ -319,7 +320,7 @@ class BatchARC implements IReturnCode {
 		repertoire = properties.getBatchParametersDirectory();
 
 		mapParam.put(PhaseParameterKeys.KEY_FOR_DIRECTORY_LOCATION, repertoire);
-		mapParam.put(PhaseParameterKeys.KEY_FOR_BATCH_CHUNK_ID, new SimpleDateFormat("yyyyMMddHH").format(new Date()));
+		mapParam.put(PhaseParameterKeys.KEY_FOR_BATCH_MODE, BatchMode.NORMAL);
 		mapParam.put(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT, envExecution);
 		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_SIZE_RECEPTION, String.valueOf(tailleMaxReceptionEnMb));
 		mapParam.put(PhaseParameterKeys.KEY_FOR_MAX_FILES_TO_LOAD, String.valueOf(maxFilesToLoad));

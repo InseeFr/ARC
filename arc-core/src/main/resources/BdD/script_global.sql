@@ -83,6 +83,9 @@ UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListWithProdu
 INSERT INTO arc.parameter VALUES ('ArcAction.batchMode','[]');
 UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListWithBatchMode' where key='ArcAction.batchMode';
 
+INSERT INTO arc.parameter VALUES ('ArcAction.batchModeKeepIntermediateData','[]');
+UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListAsBatchKeepIntermediateData' where key='ArcAction.batchModeKeepIntermediateData';
+
 -- parallelism parameters
 INSERT INTO arc.parameter VALUES ('ApiChargementService.MAX_PARALLEL_WORKERS','2');
 UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p1.load' where key='ApiChargementService.MAX_PARALLEL_WORKERS';

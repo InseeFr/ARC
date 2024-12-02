@@ -5,6 +5,7 @@ import java.util.Date;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.model.BatchMode;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
@@ -107,7 +108,7 @@ public class ThreadOperations {
 			query.append(marquageFinal(tablePilotageGlobale, tablePilotageThread, idSource));
 		}
 
-		if (paramBatch != null) {
+		if (paramBatch != null && !paramBatch.equals(BatchMode.KEEP_INTERMEDIATE_DATA)) {
 			query.append("DROP TABLE IF EXISTS "+HashFileNameConversion.tableOfIdSource(this.tablePrevious,idSource)+";");
 		}
 		
@@ -125,6 +126,19 @@ public class ThreadOperations {
 			UtilitaireDao.get(0).executeBlock(connexion.getCoordinatorConnection(), query);
 		}
 	}
+	
+	
+	/**
+	 * Test batch mode to know if the data output of the previous phase must be dropped
+	 * @param paramBatch
+	 * @return
+	 */
+	protected static boolean checkPreviousPhaseDataDropCondition(String paramBatch)
+	{
+		return paramBatch != null && !paramBatch.equals(BatchMode.KEEP_INTERMEDIATE_DATA);
+	}
+	
+	
 
 	/**
 	 * clean temporary thread objects connexion
