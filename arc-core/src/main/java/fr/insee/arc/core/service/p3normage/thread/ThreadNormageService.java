@@ -210,7 +210,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 			UtilitaireDao.get(0).executeImmediate(this.connexion.getExecutorConnection(), query);
 			
 			rubriqueUtiliseeDansRegles = RulesOperations.getBean(this.connexion.getExecutorConnection(),
-					RulesOperations.getRegles(tableTmpRubriqueDansregles, this.fileIdCard));
+					RulesOperations.getRegles(tableTmpRubriqueDansregles, this.fileIdCard, "var"));
 		}
 
 		NormageOperation n = new NormageOperation(this.connexion.getExecutorConnection(), fileIdCard,

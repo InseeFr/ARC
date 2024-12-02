@@ -44,7 +44,7 @@ public class SuppressionRulesQueryBuilder {
 		List<String> listVarUtilisee = new ArrayList<>();
 		List<Integer> lineASupprimer = new ArrayList<>();
 
-		for (int j = 0; j < rubriqueUtiliseeDansRegles.get("id_norme").size(); j++) {
+		for (int j = 0; j < rubriqueUtiliseeDansRegles.get("var").size(); j++) {
 			listVarUtilisee.add(rubriqueUtiliseeDansRegles.get("var").get(j));
 		}
 
@@ -168,7 +168,6 @@ public class SuppressionRulesQueryBuilder {
 			k0--;
 
 		}
-
 	}
 
 	/**
