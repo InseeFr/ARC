@@ -49,16 +49,8 @@ public class Sandbox {
 		boolean isBatchMode = isEnvSetForGivenParameter("ArcAction.batchMode", "[]");
 		boolean isBatchModeMustKeepIntermediateData = isEnvSetForGivenParameter("ArcAction.batchModeKeepIntermediateData", "[]");
 		
-		if (!isBatchMode) {
-			return BatchMode.UNSET;
-		}
-		
-		if (isBatchModeMustKeepIntermediateData) {
-			return BatchMode.KEEP_INTERMEDIATE_DATA;
-		}
-		
-		return BatchMode.KEEP_INTERMEDIATE_DATA;
-		
+		return BatchMode.computeBatchMode(isBatchMode, isBatchModeMustKeepIntermediateData);
+	
 	}
 
 	/**
