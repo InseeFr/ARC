@@ -3,6 +3,24 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.96
+- optimization : keep intermediate columns in gui batch mode
+
+## version-94.1.95b
+- optimization : single batch connection and vacuum strategy
+
+## version-94.1.95b
+- optimization : single batch connection
+
+## version-94.1.91
+- fix bug in data retieval webservice
+
+## version-94.1.91
+- fix bug in data retieval webservice
+
+## version-94.1.89
+- fix java null pointer exception when crc error on reader
+
 ## version-94.1.87b
 - fix parquet file export memory leak
 - download data to s3 gui button works again
