@@ -31,8 +31,9 @@ public class CompressedUtils {
 
 	private static final Logger LOGGER = LogManager.getLogger(CompressedUtils.class);
 	
-	public static final int READ_BUFFER_SIZE = 131072;
-
+	public static final int READ_BUFFER_SIZE = 81920;
+	public static final int WRITE_BUFFER_SIZE = 81920;
+	
 	private CompressedUtils() {
 		throw new IllegalStateException("Utility class");
 	}
