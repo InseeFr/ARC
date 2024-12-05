@@ -72,10 +72,15 @@ public class SynchronizeRulesAndMetadataDao {
 				condition.setLength(0);
 				if (parameterTable == TraitementTableParametre.NORME) {
 					condition.append(" WHERE etat='1'");
+					condition.append(" AND EXISTS (select 1 from "+ViewEnum.IHM_CALENDRIER.getFullName()+" b ");
+					condition.append(" WHERE a.id_norme=b.id_norme ");
+					condition.append(" AND EXISTS (SELECT 1 FROM "+ ViewEnum.IHM_JEUDEREGLE.getFullName()+" c WHERE b.id_norme=c.id_norme AND b.validite_inf=c.validite_inf AND b.validite_sup=c.validite_sup AND c.etat=lower("+ condition.quoteText(modaliteEtat) +"))");
+					condition.append(" ) ");
 				} else if (parameterTable == TraitementTableParametre.CALENDRIER) {
 					condition.append(" WHERE etat='1' ");
 					condition.append(" and exists (select 1 from " + ViewEnum.IHM_NORME.getFullName()
 							+ " b where a.id_norme=b.id_norme and b.etat='1')");
+					condition.append(" AND EXISTS (SELECT 1 FROM "+ ViewEnum.IHM_JEUDEREGLE.getFullName()+" b WHERE a.id_norme=b.id_norme AND a.validite_inf=b.validite_inf AND a.validite_sup=b.validite_sup AND b.etat=lower("+ condition.quoteText(modaliteEtat) +"))");
 				} else if (parameterTable == TraitementTableParametre.JEUDEREGLE) {
 					condition.append(" WHERE etat=lower(" + condition.quoteText(modaliteEtat) + ")");
 					condition.append(" and exists (select 1 from " + ViewEnum.IHM_NORME.getFullName()
@@ -166,20 +171,24 @@ public class SynchronizeRulesAndMetadataDao {
 			throws ArcException {
 		LoggerHelper.info(LOGGER, "mettreAJourSchemaTableMetier");
 
-		
-		HierarchicalView familleToTableToVariableToTypeRef = retrieveDeclaredVariableMetier(coordinatorOrExecutorConnexion, envExecution);
-		HierarchicalView familleToTableToVariableToType = retrieveEffectiveVariableMetier(coordinatorOrExecutorConnexion, envExecution);
-		
+		HierarchicalView familleToTableToVariableToTypeRef = retrieveDeclaredVariableMetier(
+				coordinatorOrExecutorConnexion, envExecution);
+		HierarchicalView familleToTableToVariableToType = retrieveEffectiveVariableMetier(
+				coordinatorOrExecutorConnexion, envExecution);
+
 		ArcPreparedStatementBuilder requeteMAJSchema = new ArcPreparedStatementBuilder();
 
-		addAndUpdateColumnsOfModelTable(requeteMAJSchema, familleToTableToVariableToTypeRef, familleToTableToVariableToType);
+		addAndUpdateColumnsOfModelTable(requeteMAJSchema, familleToTableToVariableToTypeRef,
+				familleToTableToVariableToType);
 		deleteColumnsOfModelTable(requeteMAJSchema, familleToTableToVariableToTypeRef, familleToTableToVariableToType);
 
 		UtilitaireDao.get(0).executeBlock(coordinatorOrExecutorConnexion, requeteMAJSchema);
 	}
-	
+
 	/**
-	 * delete the columns of business model table that shouldn't exists according to what user have declared in ihm_mod_variable_metier
+	 * delete the columns of business model table that shouldn't exists according to
+	 * what user have declared in ihm_mod_variable_metier
+	 * 
 	 * @param requeteMAJSchema
 	 * @param familleToTableToVariableToTypeRef
 	 * @param familleToTableToVariableToType
@@ -218,7 +227,9 @@ public class SynchronizeRulesAndMetadataDao {
 	}
 
 	/**
-	 * add or update the columns of business model table according to what user have declared in ihm_mod_variable_metier
+	 * add or update the columns of business model table according to what user have
+	 * declared in ihm_mod_variable_metier
+	 * 
 	 * @param requeteMAJSchema
 	 * @param familleToTableToVariableToTypeRef
 	 * @param familleToTableToVariableToType
@@ -305,6 +316,7 @@ public class SynchronizeRulesAndMetadataDao {
 
 	/**
 	 * Retrieve the real columns, names of business model table found in database
+	 * 
 	 * @param coordinatorOrExecutorConnexion
 	 * @param envExecution
 	 * @return
@@ -337,43 +349,43 @@ public class SynchronizeRulesAndMetadataDao {
 		List<List<String>> relationalView = UtilitaireDao.get(0)
 				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requete);
 
-		
-		return HierarchicalView.asRelationalToHierarchical(
-				"(Phy) Famille -> Table -> Variable -> Type",
+		return HierarchicalView.asRelationalToHierarchical("(Phy) Famille -> Table -> Variable -> Type",
 				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
 				relationalView);
 	}
 
 	/**
-	 * Retrieve the business model table schema (famille, nom_de_table, variable, ...) declared by user
+	 * Retrieve the business model table schema (famille, nom_de_table, variable,
+	 * ...) declared by user
+	 * 
 	 * @param coordinatorOrExecutorConnexion
 	 * @param envExecution
 	 * @return
 	 * @throws ArcException
 	 */
 	@SqlInjectionChecked
-	private static HierarchicalView retrieveDeclaredVariableMetier(Connection coordinatorOrExecutorConnexion, String envExecution) throws ArcException {
+	private static HierarchicalView retrieveDeclaredVariableMetier(Connection coordinatorOrExecutorConnexion,
+			String envExecution) throws ArcException {
 		/*
 		 * Récupérer la table qui mappe : famille / table métier / variable métier et
 		 * type de la variable
 		 */
 		ArcPreparedStatementBuilder requeteRef = new ArcPreparedStatementBuilder();
 		requeteRef.append("SELECT lower(id_famille), lower(").appendText(envExecution)
-		.append("||'.'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
-				+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
+				.append("||'.'||nom_table_metier), lower(nom_variable_metier), lower(type_variable_metier) FROM "
+						+ ViewEnum.IHM_MOD_VARIABLE_METIER.getFullName());
 
 		List<List<String>> relationalViewRef = UtilitaireDao.get(0)
 				.executeRequestWithoutMetadata(coordinatorOrExecutorConnexion, requeteRef);
 
-		return HierarchicalView.asRelationalToHierarchical(
-				"(Réf) Famille -> Table -> Variable -> Type",
+		return HierarchicalView.asRelationalToHierarchical("(Réf) Famille -> Table -> Variable -> Type",
 				Arrays.asList("id_famille", "nom_table_metier", "variable_metier", "type_variable_metier"),
 				relationalViewRef);
 	}
 
 	/**
-	 * Query to return data from target table
-	 * if emptyTable is true, only metadata will be return without data
+	 * Query to return data from target table if emptyTable is true, only metadata
+	 * will be return without data
 	 * 
 	 * @param coordinatorConnexion
 	 * @param table
@@ -381,14 +393,15 @@ public class SynchronizeRulesAndMetadataDao {
 	 * @throws ArcException
 	 */
 	@SqlInjectionChecked(requiredAsSafe = "table")
-	private static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table, boolean emptyTable)
-			throws ArcException {
+	private static GenericBean execQuerySelectDataFrom(Connection coordinatorConnexion, String table,
+			boolean emptyTable) throws ArcException {
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(coordinatorConnexion,
 				new ArcPreparedStatementBuilder("SELECT * FROM " + table + " " + (emptyTable ? "LIMIT 0" : ""))));
 	}
 
 	/**
 	 * Query to return data and metadata from target table
+	 * 
 	 * @param coordinatorConnexion
 	 * @param table
 	 * @return
@@ -399,13 +412,11 @@ public class SynchronizeRulesAndMetadataDao {
 		return execQuerySelectDataFrom(coordinatorConnexion, table, false);
 	}
 
-
 	public static GenericBean execQuerySelectMetaDataOnlyFrom(Connection coordinatorConnexion, String table)
 			throws ArcException {
 		return execQuerySelectDataFrom(coordinatorConnexion, table, true);
 	}
-	
-	
+
 	public void execQueryApplyExpressionsToControl(ApplyExpressionRulesOperation expressionService, JeuDeRegle ruleSet,
 			GenericBean expressions) throws ArcException {
 		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(),
