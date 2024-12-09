@@ -17,7 +17,9 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.PhaseOperations;
+import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFilesOperation;
 import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
@@ -138,9 +140,6 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			// Lancement de l'initialisation dans la foulée
 			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
 			ApiServiceFactory
-					.getService(TraitementPhase.INITIALISATION, getBacASable(), TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
-					.invokeApi();
-			ApiServiceFactory
 					.getService(TraitementPhase.RECEPTION, getBacASable(), TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
 					.invokeApi();
 		}
@@ -207,9 +206,13 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		// production
 		if (!isEnvProd()) {
 			loggerDispatcher.info("Synchronisation de l'environnement  ", LOGGER);
-			ApiServiceFactory
-					.getService(TraitementPhase.INITIALISATION, getBacASable(), TraitementPhase.INITIALISATION.getNbLigneATraiter(), null)
-					.invokeApi();
+			Sandbox sandbox = new Sandbox(null, getBacASable());
+			try {
+				new ReplayOrDeleteFilesOperation(sandbox).processMarkedFiles();
+			} catch (ArcException e) {
+				loggerDispatcher.error("Error in PilotageBASAction.toDeleteBAS", LOGGER);
+				message = "managementSandbox.batch.delete.error";
+			}
 		}
 
 		this.views.getViewPilotageBAS().setMessage(message);
