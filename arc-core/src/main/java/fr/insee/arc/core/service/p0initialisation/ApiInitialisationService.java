@@ -53,11 +53,6 @@ public class ApiInitialisationService extends ApiService {
 		// mettre à jour les tables métier avec les paramêtres de la famille de norme
 		new SynchronizeRulesAndMetadataOperation(this.coordinatorSandbox).synchroniserSchemaExecutionAllNods();
 
-		// marque les fichiers ou les archives à rejouer
-		// efface des fichiers de la table de pilotage marqués par l'utilisateur comme
-		// étant à effacer
-		new ReplayOrDeleteFilesOperation(this.coordinatorSandbox).processMarkedFiles();
-
 		// Met en cohérence les tables de données avec la table de pilotage de
 		// l'environnement
 		// La table de pilotage fait foi

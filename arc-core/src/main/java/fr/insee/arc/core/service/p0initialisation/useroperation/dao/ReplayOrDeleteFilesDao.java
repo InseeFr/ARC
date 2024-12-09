@@ -52,8 +52,10 @@ public class ReplayOrDeleteFilesDao {
 	 * @param schema
 	 * @throws ArcException
 	 */
-	public void execQueryDeleteArchiveToReplay() throws ArcException {
+	public List<String> execQueryDeleteArchiveToReplay() throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		
+		query.build(SQL.WITH, ViewEnum.ALIAS_A, SQL.AS, "(");
 		query.build(SQL.DELETE, ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), SQL.AS, ViewEnum.ALIAS_A);
 		
 		query.build(SQL.WHERE, SQL.EXISTS, "(");
@@ -65,8 +67,11 @@ public class ReplayOrDeleteFilesDao {
 				ColumnEnum.CONTAINER.alias(ViewEnum.ALIAS_B));
 		
 		query.build(")");
-
-		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
+		query.build(SQL.RETURNING, ColumnEnum.ID_SOURCE);
+		query.build(")");
+		query.build(SQL.SELECT, SQL.DISTINCT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.ALIAS_A);
+		
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query)).getColumnValues(ColumnEnum.ID_SOURCE.getColumnName());
 	}
 
 	/**
@@ -76,10 +81,12 @@ public class ReplayOrDeleteFilesDao {
 	 * @param schema
 	 * @throws ArcException
 	 */
-	public void execQueryDeleteFileToDelete() throws ArcException {
+	public List<String> execQueryDeleteFileToDelete() throws ArcException {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		
+		query.build(SQL.WITH, ViewEnum.ALIAS_A, SQL.AS, "(");
+
 		query.build(SQL.DELETE, ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), SQL.AS, ViewEnum.ALIAS_A);
 		query.build(SQL.WHERE, SQL.EXISTS, "(");
 		query.build(SQL.SELECT, SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), SQL.AS, ViewEnum.ALIAS_B);
@@ -92,6 +99,10 @@ public class ReplayOrDeleteFilesDao {
 				ColumnEnum.CONTAINER.alias(ViewEnum.ALIAS_B));
 		
 		query.build(")");
-		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
+		query.build(SQL.RETURNING, ColumnEnum.ID_SOURCE);
+		query.build(")");
+		query.build(SQL.SELECT, SQL.DISTINCT, ColumnEnum.ID_SOURCE, SQL.FROM, ViewEnum.ALIAS_A);
+		
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query)).getColumnValues(ColumnEnum.ID_SOURCE.getColumnName());
 	}
 }

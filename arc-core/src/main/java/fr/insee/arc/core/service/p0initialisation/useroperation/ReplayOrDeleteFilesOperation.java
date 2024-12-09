@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.useroperation.dao.ReplayOrDeleteFilesDao;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
 import fr.insee.arc.utils.exception.ArcException;
@@ -31,9 +32,19 @@ public class ReplayOrDeleteFilesOperation {
 	
 	public void processMarkedFiles() throws ArcException
 	{
-		replayMarkedFiles();
+		List<String> idSourceMarkedToDelete = replayMarkedFiles();
 		
-		deleteMarkedFiles();
+		idSourceMarkedToDelete.addAll(deleteMarkedFiles());
+		
+		// synchronize data files if some files had been marked for replay
+		// as they must be deleted from data
+		if (idSourceMarkedToDelete != null) {
+			SynchronizeDataByPilotageOperation synchronizationInstance = new SynchronizeDataByPilotageOperation(
+					this.sandbox);
+			synchronizationInstance.dropUnusedDataTablesAllNods(idSourceMarkedToDelete);
+			synchronizationInstance.deleteUnusedDataRecordsAllNods(idSourceMarkedToDelete);
+		}
+		
 	}
 	
 	
@@ -44,7 +55,7 @@ public class ReplayOrDeleteFilesOperation {
 	 * @param tablePil
 	 * @throws ArcException
 	 */
-	public void replayMarkedFiles() throws ArcException {
+	public List<String> replayMarkedFiles() throws ArcException {
 		LoggerHelper.info(LOGGER, "reinstateWithRename");
 
 		String envExecution=sandbox.getSchema();
@@ -72,7 +83,7 @@ public class ReplayOrDeleteFilesOperation {
 
 		}
 
-		replayOrDeleteFilesDao.execQueryDeleteArchiveToReplay();
+		return replayOrDeleteFilesDao.execQueryDeleteArchiveToReplay();
 	}
 
 	/**
@@ -83,10 +94,10 @@ public class ReplayOrDeleteFilesOperation {
 	 * @param tablePil
 	 * @throws ArcException
 	 */
-	private void deleteMarkedFiles() throws ArcException {
+	private List<String> deleteMarkedFiles() throws ArcException {
 		LoggerHelper.info(LOGGER, "Delete file marked by user as to be deleted");
 		
-		replayOrDeleteFilesDao.execQueryDeleteFileToDelete();
+		return replayOrDeleteFilesDao.execQueryDeleteFileToDelete();
 	}
 
 

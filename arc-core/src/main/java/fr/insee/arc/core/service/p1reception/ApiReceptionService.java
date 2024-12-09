@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFilesOperation;
 import fr.insee.arc.core.service.p1reception.registerarchive.ArchiveRegistrationOperation;
 import fr.insee.arc.core.service.p1reception.registerarchive.bo.FilesDescriber;
 import fr.insee.arc.core.service.p1reception.registerfiles.FileRegistration;
@@ -48,6 +49,10 @@ public class ApiReceptionService extends ApiService {
 		} else {
 			maxNumberOfFiles = bdParameters.getInt(null, "ApiReceptionService.ihm.maxNumberOfFiles", 5000);
 		}
+		
+		// marque les fichiers à effacer ou les archives à rejouer
+		// efface des fichiers de la table de pilotage et synchronise avant la reception de fichier
+		new ReplayOrDeleteFilesOperation(this.coordinatorSandbox).processMarkedFiles();
 
 		// Enregistrement des fichiers
 		ArchiveRegistrationOperation archiveRegistration = new ArchiveRegistrationOperation(coordinatorSandbox, this.getNbEnr(), maxNumberOfFiles);
