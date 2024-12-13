@@ -24,7 +24,8 @@ public class InitializeTestDataNoScalability {
 		query.append("CREATE SCHEMA arc_bas1;");
 
 		query.append("CREATE TABLE arc.ext_etat_jeuderegle as select 'arc_bas1' as id, true as isenv;");
-		
+		query.append("CREATE TABLE arc_bas1.ext_etat_jeuderegle as select * from arc.ext_etat_jeuderegle;");
+
 		// family and client tables
 		query.append("CREATE TABLE arc.ihm_client AS ");
 		query.append("SELECT 'DSN' as id_famille,'ARTEMIS' as id_application");
