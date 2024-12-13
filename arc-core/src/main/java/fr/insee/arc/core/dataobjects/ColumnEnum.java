@@ -156,6 +156,9 @@ public enum ColumnEnum {
 	, ARCHIVE_NAME("archive_name", TypeEnum.TEXT, "name of the archive file")
 	, ARCHIVE_SIZE("archive_size", TypeEnum.TEXT, "size of the archive file")
 	, ARCHIVE_DATE("archive_date", TypeEnum.TEXT, "date of the archive file")
+	
+	, ARCHIVE_FILENAME("archive_filename", TypeEnum.TEXT, "name of the archive file")
+	, ARCHIVE_TIMESTAMP("archive_timestamp", TypeEnum.TEXT, "timestamp of the reception of the archive file")
 
 	;
 
@@ -213,6 +216,11 @@ public enum ColumnEnum {
 	public String alias(ViewEnum v)
 	{
 		return v.getTableName()+SQL.DOT.getSqlCode()+this.columnName;
+	}
+	
+	public String alias(String v)
+	{
+		return v+SQL.DOT.getSqlCode()+this.columnName;
 	}
 	
 }

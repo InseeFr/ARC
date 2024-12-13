@@ -12,6 +12,8 @@ public class DataObjectService {
 	 */
 	public static final int MAX_NUMBER_OF_RECORD_PER_PARTITION = 100000;
 
+	public static final String APPLICATION_NAME = "ARC";
+	
 	/**
 	 * the sandbox schema
 	 */

@@ -19,7 +19,7 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.PhaseOperations;
-import fr.insee.arc.core.service.p0initialisation.useroperation.ReplayOrDeleteFilesOperation;
+import fr.insee.arc.core.service.p1reception.useroperation.ReplayOrDeleteFilesOperation;
 import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;

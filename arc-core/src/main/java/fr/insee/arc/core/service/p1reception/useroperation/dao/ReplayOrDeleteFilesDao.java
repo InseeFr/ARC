@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p0initialisation.useroperation.dao;
+package fr.insee.arc.core.service.p1reception.useroperation.dao;
 
 import java.util.List;
 

@@ -9,6 +9,7 @@ import java.util.List;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.BatchEtat;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
@@ -164,7 +165,7 @@ public class BatchArcDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	public String execQueryLastInitialisationTimestamp(String envExecution) throws ArcException {
+	public String execQueryNextInitialisationTimestamp(String envExecution) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("select last_init from " + ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getString(batchConnection, query);
@@ -184,7 +185,6 @@ public class BatchArcDao {
 		query.build(SQL.UPDATE, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
 		query.build(SQL.SET, "last_init=to_char(current_date+interval '" + intervalForInitializationInDay
 				+ " days','yyyy-mm-dd')||':" + hourToTriggerInitializationInProduction + "'");
-		query.build(",", "operation=case when operation='R' then 'O' else operation end ");
 		query.build(SQL.END_QUERY);
 
 		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query);
@@ -206,7 +206,7 @@ public class BatchArcDao {
 	public Boolean execQueryIsProductionOn(String envExecution) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
-		query.build(SQL.WHERE, ColumnEnum.OPERATION, "=", query.quoteText("O"));
+		query.build(SQL.WHERE, ColumnEnum.OPERATION, "=", query.quoteText(BatchEtat.ON));
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
 	}
 
@@ -219,19 +219,19 @@ public class BatchArcDao {
 	 */
 	public boolean isInitializationMustTrigger(String envExecution) throws ArcException
 	{
-		String lastInitialize = execQueryLastInitialisationTimestamp(envExecution);
+		String nextInitialize = execQueryNextInitialisationTimestamp(envExecution);
 
 		Date dNow = new Date();
-		Date dLastInitialize;
+		Date dnextInitialize;
 
 		try {
-			dLastInitialize = new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat())
-					.parse(lastInitialize);
+			dnextInitialize = new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat())
+					.parse(nextInitialize);
 		} catch (ParseException dateParseException) {
 			throw new ArcException(dateParseException, ArcExceptionMessage.BATCH_INITIALIZATION_DATE_PARSE_FAILED);
 		}
 		
-		return (dLastInitialize.compareTo(dNow) < 0);
+		return (dnextInitialize.compareTo(dNow) < 0);
 	}
 	
 	

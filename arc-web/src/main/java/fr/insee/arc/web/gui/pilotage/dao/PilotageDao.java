@@ -15,6 +15,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.BatchEtat;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
@@ -421,7 +422,7 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	public String execQueryState() throws ArcException {
-		return UtilitaireDao.get(0).getString(null, new ArcPreparedStatementBuilder("SELECT case when operation='O' then 'active' else 'inactive' end FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)));
+		return UtilitaireDao.get(0).getString(null, new ArcPreparedStatementBuilder("SELECT case when operation='"+BatchEtat.ON+"' then 'active' else 'inactive' end FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)));
 	}
 	
 	public void execQueryDelayBatchTime() throws ArcException {
@@ -435,11 +436,11 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public void execQueryToggleOn() throws ArcException {
-		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='O'; "));
+		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='"+BatchEtat.ON+"'; "));
 	}
 	
 	public void execQueryToggleOff() throws ArcException {
-		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='N'; "));
+		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='"+BatchEtat.OFF+"'; "));
 	}
 	
 	

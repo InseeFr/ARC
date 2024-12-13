@@ -371,7 +371,7 @@ check (
 case 
 when key= 'ApiInitialisationService.Nb_Jour_A_Conserver' then public.check_integer(val) 
 when key= 'ApiInitialisationService.NB_FICHIER_PER_ARCHIVE' then public.check_integer(val)
-when key= 'ApiService.HEURE_INITIALISATION_PRODUCTION' then public.check_integer(val)
+when key= 'ApiService.HEURE_INITIALISATION_PRODUCTION' then case when public.check_integer(val) then val::int>=0 and val::int<24 else false end
 when key= 'LanceurARC.keepInDatabase' then val::boolean in (true,false)
 when key= 'LanceurARC.deltaStepAllowed' then public.check_integer(val)
 when key= 'ApiReceptionService.batch.maxNumberOfFiles' then public.check_integer(val)

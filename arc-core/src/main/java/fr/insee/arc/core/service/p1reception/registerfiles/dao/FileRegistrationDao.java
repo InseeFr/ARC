@@ -9,6 +9,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementOperationFichier;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementTypeFichier;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
@@ -169,16 +170,25 @@ public class FileRegistrationDao {
 	}
 
 	/**
-	 * Build query to find files that had been selected and taht had been marked as
+	 * Build query to the find files in pilotage table that are marked as replayed and also found among the new received files
 	 * to be replayed
 	 * 
 	 * @return
 	 */
-	private StringBuilder querySelectFilesMarkedToReplay() {
-		return new StringBuilder("SELECT " + ColumnEnum.ID_SOURCE.getColumnName() + " FROM (SELECT DISTINCT "
-				+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + this.tablePil
-				+ " where to_delete='R') a WHERE exists (select 1 from " + this.tablePilTemp + " b where a."
-				+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName() + ")");
+	private ArcPreparedStatementBuilder querySelectFilesMarkedToReplay() {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, ColumnEnum.ID_SOURCE.getColumnName());
+		query.build(SQL.FROM, "(");
+		query.build(SQL.SELECT, SQL.DISTINCT, ColumnEnum.ID_SOURCE.getColumnName());
+		query.build(SQL.FROM, this.tablePil);
+		query.build(SQL.WHERE, ColumnEnum.TO_DELETE.getColumnName(), "=", query.quoteText(TraitementOperationFichier.R.getDbValue()));
+		query.build(") a");
+		query.build(SQL.WHERE, SQL.EXISTS);
+		query.build("(", SQL.SELECT, SQL.FROM, this.tablePilTemp, " b ");
+		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE.alias("a"), "=", ColumnEnum.ID_SOURCE.alias("b"));
+		query.build(")");
+		
+		return query;
 	}
 
 	/**
@@ -189,7 +199,7 @@ public class FileRegistrationDao {
 	 */
 	public List<String> execQuerySelectFilesMarkedToReplay() throws ArcException {
 		return new GenericBean(UtilitaireDao.get(0).executeRequest(sandbox.getConnection(),
-				new ArcPreparedStatementBuilder(querySelectFilesMarkedToReplay())))
+				querySelectFilesMarkedToReplay()))
 				.getColumnValues(ColumnEnum.ID_SOURCE.getColumnName());
 	}
 
@@ -273,7 +283,7 @@ public class FileRegistrationDao {
 	 * @throws ArcException
 	 */
 	public List<String> execQueryFindDuplicateFiles() throws ArcException {
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		// bloc recherche de doublon dans les fichiers recus
 		requete.append("select container, " + ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + this.tablePilTemp
 				+ " where " + ColumnEnum.ID_SOURCE.getColumnName() + " in ( ");
@@ -290,34 +300,50 @@ public class FileRegistrationDao {
 		requete.append("where exists (select 1 from " + this.tablePil + " b where a."
 				+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName() + ") \n");
 		requete.append("and a." + ColumnEnum.ID_SOURCE.getColumnName() + " not in (select distinct "
-				+ ColumnEnum.ID_SOURCE.getColumnName() + " from " + this.tablePil + " b where b.to_delete='R') ;\n");
+				+ ColumnEnum.ID_SOURCE.getColumnName());
+		requete.append(" from " + this.tablePil + " b");
+		requete.append(" where b.to_delete="+requete.quoteText(TraitementOperationFichier.R.getDbValue())+") ;\n");
 
 		// récupérer les doublons pour mettre à jour le dispatcher
 		return new GenericBean(
-				UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), new ArcPreparedStatementBuilder(requete)))
+				UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), requete))
 				.getColumnValues(ColumnEnum.ID_SOURCE.getColumnName());
 	}
 
+	
+	/**
+	 * In the received files, found the ones that are marked to be replayed
+	 * Return their container name and their file name in the container  
+	 * @param listContainerARejouer
+	 * @param listIdsourceARejouer
+	 * @throws ArcException
+	 */
 	public void execQueryFindFilesMarkedAsReplay(List<String> listContainerARejouer, List<String> listIdsourceARejouer)
 			throws ArcException {
 
 		// on ignore les doublons pour les fichiers à rejouer
 		// on recrée un nouvelle liste en ne lui ajoutant pas ces doublons à ignorer
-		StringBuilder requete = new StringBuilder();
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
-		requete.append("SELECT container, container||'" + File.separator + "'||" + ColumnEnum.ID_SOURCE.getColumnName()
-				+ " as " + ColumnEnum.ID_SOURCE.getColumnName() + " from " + this.tablePilTemp + " a ");
-		requete.append("where exists (select 1 from " + this.tablePil + " b where to_delete='R' and a."
-				+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName() + ") ;\n");
+		requete.build(SQL.SELECT, "container", ",");
+		requete.build("container||'" + File.separator + "'||" + ColumnEnum.ID_SOURCE.getColumnName(), SQL.AS, ColumnEnum.ID_SOURCE.getColumnName());
+		requete.build(SQL.FROM, this.tablePilTemp, " a ");
+		requete.build(SQL.WHERE, SQL.EXISTS, "(");
+		requete.build(	SQL.SELECT, SQL.FROM, this.tablePil, " b ");
+		requete.build(	SQL.WHERE, ColumnEnum.TO_DELETE.getColumnName(), "=", requete.quoteText(TraitementOperationFichier.R.getDbValue()));
+		requete.build(	SQL.AND, ColumnEnum.ID_SOURCE.alias("a"), "=", ColumnEnum.ID_SOURCE.alias("b"));
+		requete.build(")");
 
 		GenericBean m = new GenericBean(UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(),
-				new ArcPreparedStatementBuilder(requete)));
+				requete));
 
 		if (!m.isEmpty()) {
 			listContainerARejouer.addAll(m.getColumnValues(ColumnEnum.CONTAINER.getColumnName()));
 			listIdsourceARejouer.addAll(m.getColumnValues(ColumnEnum.ID_SOURCE.getColumnName()));
 		}
 
+
+		
 	}
 
 	public void execQueryInsertCorruptedArchiveInPilotage(FilesDescriber content) throws ArcException {

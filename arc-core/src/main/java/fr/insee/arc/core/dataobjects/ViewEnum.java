@@ -123,6 +123,9 @@ public enum ViewEnum {
 	, MAPPING_REGLE("mapping_regle", SchemaEnum.SANDBOX_GENERATED) //
 	, EXPRESSION("expression", SchemaEnum.SANDBOX_GENERATED) //
 			
+	// tables pour le reporting
+	, MAPPING_ARC_REPORT_OK("mapping_arc_report_ok", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ENTREPOT, ColumnEnum.ARCHIVE_TIMESTAMP, ColumnEnum.ARCHIVE_FILENAME)
+	
 	// tables utilisés pour les tests
 	, TABLE_TEST_IN_PUBLIC(PgViewEnum.TABLE_TEST_IN_PUBLIC)
 	, TABLE_TEST_OUT_PUBLIC(PgViewEnum.TABLE_TEST_OUT_PUBLIC)

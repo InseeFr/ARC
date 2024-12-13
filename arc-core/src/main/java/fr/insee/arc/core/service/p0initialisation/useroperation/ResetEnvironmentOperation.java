@@ -15,6 +15,7 @@ import fr.insee.arc.core.service.global.dao.FileSystemManagement;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
 import fr.insee.arc.core.service.p0initialisation.useroperation.dao.ResetEnvironementDao;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
+import fr.insee.arc.core.service.p1reception.useroperation.ReplayOrDeleteFilesOperation;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 

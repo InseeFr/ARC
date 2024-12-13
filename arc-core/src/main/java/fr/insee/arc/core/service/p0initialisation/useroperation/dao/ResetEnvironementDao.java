@@ -5,6 +5,7 @@ import java.util.List;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.TraitementOperationFichier;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
@@ -72,7 +73,7 @@ public class ResetEnvironementDao {
 			throws ArcException {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("UPDATE  " + ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema())
-				+ " set to_delete='R' WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
+				+ " set to_delete="+requete.quoteText(TraitementOperationFichier.R.getDbValue())+" WHERE phase_traitement = " + requete.quoteText(phase.toString()) + " ");
 		if (!selectedEntries.isEmpty()) {
 			requete.append("AND " + ColumnEnum.ID_SOURCE.getColumnName() + " IN (SELECT distinct "
 					+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM (");

@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.p0initialisation.useroperation;
+package fr.insee.arc.core.service.p1reception.useroperation;
 
 import java.util.List;
 
@@ -7,8 +7,8 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p0initialisation.pilotage.SynchronizeDataByPilotageOperation;
-import fr.insee.arc.core.service.p0initialisation.useroperation.dao.ReplayOrDeleteFilesDao;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
+import fr.insee.arc.core.service.p1reception.useroperation.dao.ReplayOrDeleteFilesDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
