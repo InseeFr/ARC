@@ -60,6 +60,7 @@
 
 			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="enterPilotageBAS" /><c:param name="linkId" value="envManagement" /></c:import>
 			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectExport" /><c:param name="linkId" value="export" /></c:import>
+			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectReport" /><c:param name="linkId" value="reportManagement" /></c:import>
 			
 			<li><h5 class="mt-4">Maintenance</h5></li>
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectParameters" /><c:param name="linkId" value="parameters" /></c:import>
