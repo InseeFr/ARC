@@ -83,6 +83,22 @@
 	</build>
 
 	<dependencies>
+	
+		<dependency>
+		  <groupId>fr.insee.arc</groupId>
+		  <artifactId>arc-utils</artifactId>
+		  <version>${project.version}</version>
+		  <type>test-jar</type>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>fr.insee.arc</groupId>
+		  <artifactId>arc-core</artifactId>
+		  <version>${project.version}</version>
+		  <type>test-jar</type>
+		  <scope>test</scope>
+		</dependency>
+	
 		<dependency>
 			<groupId>fr.insee.arc</groupId>
 			<artifactId>arc-core</artifactId>
