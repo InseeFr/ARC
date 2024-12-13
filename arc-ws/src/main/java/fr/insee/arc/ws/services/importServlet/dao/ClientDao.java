@@ -335,6 +335,27 @@ public class ClientDao {
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
 		
 		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
+	}
+	
+	/**
+	 * Create image of model tables
+	 * @throws ArcException
+	 */
+	public List<TableToRetrieve> createTableExtEtatJeuDeRegle() throws ArcException {
+		LoggerHelper.debugAsComment(LOGGER, "ClientDaoImpl.createExtEtatJeuDeRegle()");
+
+		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, ViewEnum.EXT_ETAT_JEUDEREGLE, client,
+				timestamp);
+
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM + " AS");
+		requete.append("\n SELECT * FROM " + ViewEnum.EXT_ETAT_JEUDEREGLE.getFullName(environnement));
+		requete.append(";");
+		UtilitaireDao.get(0).executeRequest(connection, requete);
+
+		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
+		
+		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
 
 
 	}

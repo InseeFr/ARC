@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.ws.services.importServlet.actions.SendResponse;
 import fr.insee.arc.ws.services.importServlet.bo.ArcClientIdentifier;
 import fr.insee.arc.ws.services.importServlet.bo.ExportTrackingType;
@@ -44,6 +45,8 @@ public class ImportStep2GetTableNameService {
 		TableToRetrieve table = this.clientDao.getAClientTableByType(ExportTrackingType.DATA);
 
 		if (table.getTableName() != null) {
+			
+			LoggerHelper.info(LOGGER, "Table " + table.getTableName() + " had been required by the client.");
 
 			StringBuilder type = new StringBuilder();
 
@@ -60,23 +63,31 @@ public class ImportStep2GetTableNameService {
 				}
 			}
 			
+			LoggerHelper.info(LOGGER, "Table metadata is " + type + ".");
+
+			
 			String output = table.getTableName() + " " + type;
 			
 			// renvoie un nom de table du client si il en reste une
 			resp.send(output);
 			resp.endSending();
-
+			
 			return;
 		}
 
 		// if no data table found, get source table to register
 		table = this.clientDao.getAClientTableByType(ExportTrackingType.ID_SOURCE);
-
+		
 		if (table.getTableName() != null) {
+
+			LoggerHelper.info(LOGGER, "Table ID_SOURCE : " + table.getTableName() + " had been required by the client.");
+
 			if (!reprise) {
 				this.clientDao.updatePilotage(table.getTableName());
 			}
+			
 			this.clientDao.dropTable(table);
+			
 		}
 		
 		table = this.clientDao.getAClientTableByType(ExportTrackingType.TRACK);

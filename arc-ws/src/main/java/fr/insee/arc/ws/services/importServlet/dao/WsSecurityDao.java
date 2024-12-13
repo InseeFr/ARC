@@ -100,7 +100,7 @@ public class WsSecurityDao {
 		// forbidden
 		if (hostDeclaredAsSecured && !requestSecured) {
 			LoggerHelper.error(LOGGER, hostName + " connexion is not secured. Abort.");
-			throw new ArcException(ArcExceptionMessage.HOST_NOT_RESOLVED);
+			throw new ArcException(ArcExceptionMessage.CONNEXION_NOT_SECURE);
 		}
 
 		// log the access

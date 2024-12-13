@@ -113,7 +113,9 @@ public enum ArcExceptionMessage {
 
 	PARQUET_EXPORT_FAILED("L'export en parquet a échoué"),
 	
-	HOST_NOT_RESOLVED("Hôte non résolu")
+	HOST_NOT_RESOLVED("Hôte non résolu"),
+	CONNEXION_NOT_SECURE("La connection n'est pas sécurisée")
+	
 	;
 	
 	private String message;

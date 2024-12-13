@@ -162,6 +162,7 @@ public class ImportStep1InitializeClientTablesService {
 						executeIfSourceDeclared(ExportSource.MAPPING, () -> tablesToExport.addAll(createImages(tablesMetierNames)));
 						executeIfSourceDeclared(ExportSource.METADATA, () -> tablesToExport.addAll(clientDao.createTableMetier()));
 						executeIfSourceDeclared(ExportSource.METADATA, () -> tablesToExport.addAll(clientDao.createTableVarMetier()));
+						executeIfSourceDeclared(ExportSource.METADATA, () -> tablesToExport.addAll(clientDao.createTableExtEtatJeuDeRegle()));
 					}
 					
 					executeIfSourceDeclared(ExportSource.NOMENCLATURE, () -> tablesToExport.addAll(clientDao.createTableNmcl()));
