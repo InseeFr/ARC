@@ -3,6 +3,11 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.101b
+- new library to read tar.gz as apache one throws crc32 errors randomly
+- the data retrieval webservice now gives the sandbox meta table in metadata
+- optimisation for pilotage dead tuples maintenance
+
 ## version-94.1.96
 - optimization : keep intermediate columns in gui batch mode
 

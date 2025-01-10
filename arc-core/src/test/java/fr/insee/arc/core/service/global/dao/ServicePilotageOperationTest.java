@@ -29,6 +29,9 @@ public class ServicePilotageOperationTest extends InitializeQueryTest {
 				)).mapContent().get("id_source");
 		
 		assertEquals(2, listOfIdSource.size());
+		
+		u.dropTable(c, tablePil);
+		
 	}
 
 }
