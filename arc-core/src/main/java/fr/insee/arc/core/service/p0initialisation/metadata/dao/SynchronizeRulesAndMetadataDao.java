@@ -13,6 +13,7 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementTableParametre;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.global.dao.TableMetadata;
 import fr.insee.arc.core.service.p0initialisation.metadata.ApplyExpressionRulesOperation;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
@@ -261,12 +262,8 @@ public class SynchronizeRulesAndMetadataDao {
 
 							// BUG POSTGRES : pb drop et add column : recréer la table sinon ca peut excéder
 							// la limite postgres de 1500
-							requeteMAJSchema.append("DROP TABLE IF EXISTS " + table.getLocalRoot() + "_IMG ;");
-							requeteMAJSchema.append("CREATE TABLE " + table.getLocalRoot() + "_IMG "
-									+ FormatSQL.WITH_NO_VACUUM + " AS SELECT * FROM " + table.getLocalRoot() + ";");
-							requeteMAJSchema.append("DROP TABLE IF EXISTS " + table.getLocalRoot() + " ;");
-							requeteMAJSchema.append("ALTER TABLE " + table.getLocalRoot() + "_IMG RENAME TO "
-									+ ManipString.substringAfterFirst(table.getLocalRoot(), ".") + ";");
+							
+							requeteMAJSchema.append(TableMetadata.rebuildTable(table.getLocalRoot()));
 
 							/*
 							 * Si la variable existe

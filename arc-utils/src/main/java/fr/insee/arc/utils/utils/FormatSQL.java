@@ -11,6 +11,7 @@ import org.postgresql.core.Utils;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
+import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
@@ -29,6 +30,8 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final String TMP = "$tmp$";
 	public static final String REGEX_TMP = "\\$tmp\\$";
 
+	public static final String IMG = "img";
+	
 	public static final boolean DROP_FIRST_FALSE = false;
 	public static final boolean DROP_FIRST_TRUE = true;
 
@@ -297,7 +300,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 		return new StringBuilder(newName.toLowerCase()).append(TMP).append(new TemporaryToken().getToken()).toString();
 	}
 
-
 	/**
 	 * Ajoute un suffixe de table temporaire au nom de table {@code prefix}
 	 *
@@ -310,6 +312,15 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 		return temporaryTableName(newName + underscore + suffix);
 	}
 
+	/**
+	 * Ajoute un suffixe image à un objet de base de données
+	 * @param databaseObject
+	 * @return
+	 */
+	public static final String imageObjectName(String databaseObject) {
+		return databaseObject + Delimiters.SQL_TOKEN_DELIMITER + IMG;
+	}
+	
 	/**
 	 * Ne garde que les séparateurs
 	 *

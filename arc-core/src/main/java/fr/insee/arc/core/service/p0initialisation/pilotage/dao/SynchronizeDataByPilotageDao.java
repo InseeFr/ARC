@@ -8,6 +8,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
+import fr.insee.arc.core.service.global.dao.TableMetadata;
 import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -72,12 +73,22 @@ public class SynchronizeDataByPilotageDao {
 	 * @throws ArcException
 	 */
 	public static void rebuildPilotageDao(Connection connexion, String envExecution) throws ArcException {
-
-		String tablePilotage = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
 		
-		UtilitaireDao.get(0).executeImmediate(connexion, FormatSQL.vacuumSecured(tablePilotage, FormatSQL.VACUUM_OPTION_FREEZE));
+		String tablePilotageFichier = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
+		String tablePilotageArchive = ViewEnum.PILOTAGE_ARCHIVE.getFullName(envExecution);
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		
+		// transactionnal bloc !!important to do that in a single transaction!! 
+		query.build(SQL.BEGIN);
+		query.append(TableMetadata.rebuildTable(tablePilotageFichier, new GenericBean(UtilitaireDao.get(0).executeRequest(connexion, TableMetadata.queryIndexesInformations(tablePilotageFichier)))));
+		query.append(TableMetadata.rebuildTable(tablePilotageArchive));
+		query.build(SQL.COMMIT, SQL.END_QUERY);
+		
+		UtilitaireDao.get(0).executeRequest(connexion, query);
 	}
 
+	
 	/**
 	 * Récupere toutes les tables temporaires d'un environnement
 	 *
