@@ -18,6 +18,7 @@ public class ServicePilotageOperationTest extends InitializeQueryTest {
 	public void retrieveIdSourceFromPilotageQueryTest() throws ArcException {
 		String tablePil = "public.pilotage_fichier";
 
+		u.dropTable(c, tablePil);
 		u.executeImmediate(c, "CREATE TABLE "+tablePil+" (id_source text, phase_traitement text, etat_traitement text[]);");
 		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f1', 'MAPPING', '{OK}'");
 		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f2', 'MAPPING', '{OK}'");

@@ -16,6 +16,7 @@ public class TableMetadataTest extends InitializeQueryTest {
 		
 		String tablePil = "public.pilotage_fichier";
 
+		u.dropTable(c, tablePil);
 		u.executeImmediate(c, "CREATE TABLE "+tablePil+" (id_source text, phase_traitement text, etat_traitement text[]);");
 		
 		u.executeImmediate(c, "CREATE INDEX idx1_pilotage_fichier on "+tablePil+" (id_source);");
