@@ -31,7 +31,7 @@ public class TableMetadata {
 	 * @return
 	 * @throws ArcException 
 	 */
-	public static ArcPreparedStatementBuilder queryIndexesInformations(String tablename) throws ArcException
+	public static ArcPreparedStatementBuilder queryIndexesInformations(String tablename)
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build("select indexdef from pg_indexes where schemaname||'.'||tablename = ", query.quoteText(tablename));

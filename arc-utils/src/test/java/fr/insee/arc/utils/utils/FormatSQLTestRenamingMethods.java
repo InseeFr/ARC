@@ -13,7 +13,7 @@ public class FormatSQLTestRenamingMethods {
 	}
 	
 	@Test
-	public void imageObjectNameImg()
+	public void imageObjectNameImgTest()
 	{
 		assertEquals("schema.myobject_img", FormatSQL.imageObjectName("schema.myobject"));
 	}
