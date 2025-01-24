@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -84,14 +85,9 @@ public class ServiceDao {
 		
 		File fileToTransfer = new File(ParquetDao.exportTablePath(table,clientDao.getParquetDirectory()));
 		
-		try (FileInputStream fis = new FileInputStream(fileToTransfer);
-			 BufferedInputStream bis = new BufferedInputStream(fis, CompressedUtils.READ_BUFFER_SIZE);)
+		try (FileInputStream fis = new FileInputStream(fileToTransfer);)
 		{
-			byte[] buffer = new byte[CompressedUtils.READ_BUFFER_SIZE];
-			int len;
-			while ((len = bis.read(buffer)) != -1) {
-			    os.write(buffer, 0, len);
-			}
+			IOUtils.copy(fis, os, CompressedUtils.READ_BUFFER_SIZE);
 		} catch (FileNotFoundException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, fileToTransfer);
 		} catch (IOException e) {
