@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class FormatSQLTestRenamingMethods {
+public class FormatSQLRenamingMethodsTest {
 	
 	@Test
 	public void temporaryTableNameTest()
