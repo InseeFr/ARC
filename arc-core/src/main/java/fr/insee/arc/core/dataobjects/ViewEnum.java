@@ -152,6 +152,9 @@ public enum ViewEnum {
 	, WS_PENDING("ws_pending", SchemaEnum.SANDBOX_GENERATED)
 	, WS_KO("ws_ko", SchemaEnum.SANDBOX_GENERATED)
 	, WS_TRACKING("ws_tracking", SchemaEnum.SANDBOX_GENERATED)
+	
+	// used by webservice to provide the arc sandbox list
+	, MOD_ENVIRONNEMENT_ARC("mod_environnement_arc", SchemaEnum.SANDBOX_GENERATED) 
 
 	;
 

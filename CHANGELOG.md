@@ -3,6 +3,9 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.102
+- sandbox list retrieved by data retrieval webservice are stored in mod_environnement_arc entity
+
 ## version-94.1.101b
 - new library to read tar.gz as apache one throws crc32 errors randomly
 - the data retrieval webservice now gives the sandbox meta table in metadata
