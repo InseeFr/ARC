@@ -1,8 +1,12 @@
 package fr.insee.arc.batch.dao;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -210,6 +214,34 @@ public class BatchArcDao {
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
 	}
 
+
+	/**
+	 * check if batch is currently running
+	 * @return
+	 */
+	public List<String> arcProcessesCurrentlyRunning()
+	{
+		Runtime runtime = Runtime.getRuntime();
+		
+		String findArcMainCommand = "ps -aux | grep ArcMain.jar | grep java";
+		
+        String[] commands  = {"bash", "-c", findArcMainCommand};
+        Process process;
+		try {
+			process = runtime.exec(commands);
+	        
+			try(BufferedReader lineReader = new BufferedReader(new InputStreamReader(process.getInputStream())))
+			{
+				return lineReader.lines().filter(line -> !line.contains(findArcMainCommand)).toList();
+			}
+
+		} catch (IOException e) {
+			return new ArrayList<>();
+		}
+
+	}
+	
+	
 	/**
 	 * The initialization phase can trigger when the current date is more than
 	 * the initialization date stored in database

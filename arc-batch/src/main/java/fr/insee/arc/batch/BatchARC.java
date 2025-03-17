@@ -138,6 +138,10 @@ class BatchARC implements IReturnCode {
 			
 			dao = new BatchArcDao(batchConnection);
 			
+			if (arcAlreadyRunning())
+				return;
+
+			// cache dns ip adress
 			batchAvoidDnsSpam();
 			
 			// patch database
@@ -169,6 +173,30 @@ class BatchARC implements IReturnCode {
 		message("Fin du batch");
 		System.exit(STATUS_SUCCESS);
 
+	}
+
+	/**
+	 * check if arc is already running
+	 * @return
+	 */
+	private boolean arcAlreadyRunning() {
+		
+		List<String> arcProcesses = dao.arcProcessesCurrentlyRunning();
+				
+		if (arcProcesses.size()>1)
+		{
+			message("An instance of ArcMain is already running > EXIT");
+			message(arcProcesses.toString());
+			return true;
+		}
+		
+		if (arcProcesses.isEmpty())
+		{
+			message("Cannot test if ArcMain is already running");
+		}
+		
+		return false;
+		
 	}
 
 	/**
