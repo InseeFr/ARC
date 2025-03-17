@@ -1,7 +1,9 @@
 package fr.insee.arc.batch;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -133,13 +135,15 @@ class BatchARC implements IReturnCode {
 	 * @param args
 	 */
 	void execute() {
+				
+		// if an instance of Arc is already running, exit
+		if (arcAlreadyRunning())
+			endBatch();
+		
 		try (Connection batchConnection = UtilitaireDao.get(0).getDriverConnexion();)
 		{
 			
 			dao = new BatchArcDao(batchConnection);
-			
-			if (arcAlreadyRunning())
-				return;
 
 			// cache dns ip adress
 			batchAvoidDnsSpam();
@@ -170,18 +174,53 @@ class BatchARC implements IReturnCode {
 			System.exit(STATUS_FAILURE_TECHNICAL_WARNING);
 		}
 
-		message("Fin du batch");
-		System.exit(STATUS_SUCCESS);
+		// exit code
+		endBatch();
 
 	}
 
+	/**
+	 * end the batch
+	 */
+	private void endBatch() {
+		message("Fin du batch");
+		System.exit(STATUS_SUCCESS);
+	}
+
+	/**
+	 * check if batch is currently running
+	 * @return
+	 */
+	private List<String> arcProcessesCurrentlyRunning()
+	{
+		Runtime runtime = Runtime.getRuntime();
+		
+		String findArcMainCommand = "ps -aux | grep ArcMain.jar | grep java";
+		
+        String[] commands  = {"bash", "-c", findArcMainCommand};
+        Process process;
+		try {
+			process = runtime.exec(commands);
+	        
+			try(BufferedReader lineReader = new BufferedReader(new InputStreamReader(process.getInputStream())))
+			{
+				return lineReader.lines().filter(line -> !line.contains(findArcMainCommand)).toList();
+			}
+
+		} catch (IOException e) {
+			return new ArrayList<>();
+		}
+
+	}
+	
+	
 	/**
 	 * check if arc is already running
 	 * @return
 	 */
 	private boolean arcAlreadyRunning() {
 		
-		List<String> arcProcesses = dao.arcProcessesCurrentlyRunning();
+		List<String> arcProcesses = arcProcessesCurrentlyRunning();
 				
 		if (arcProcesses.size()>1)
 		{

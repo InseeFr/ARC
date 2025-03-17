@@ -214,32 +214,6 @@ public class BatchArcDao {
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
 	}
 
-
-	/**
-	 * check if batch is currently running
-	 * @return
-	 */
-	public List<String> arcProcessesCurrentlyRunning()
-	{
-		Runtime runtime = Runtime.getRuntime();
-		
-		String findArcMainCommand = "ps -aux | grep ArcMain.jar | grep java";
-		
-        String[] commands  = {"bash", "-c", findArcMainCommand};
-        Process process;
-		try {
-			process = runtime.exec(commands);
-	        
-			try(BufferedReader lineReader = new BufferedReader(new InputStreamReader(process.getInputStream())))
-			{
-				return lineReader.lines().filter(line -> !line.contains(findArcMainCommand)).toList();
-			}
-
-		} catch (IOException e) {
-			return new ArrayList<>();
-		}
-
-	}
 	
 	
 	/**

@@ -3,6 +3,9 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.104
+- check if an instance of arc batch is already running
+
 ## version-94.1.102
 - sandbox list retrieved by data retrieval webservice are stored in mod_environnement_arc entity
 
