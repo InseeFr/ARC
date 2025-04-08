@@ -32,7 +32,7 @@ public class ResetEnvironmentService {
 		if (phaseAExecuter.getOrdre() == TraitementPhase.INITIALISATION.getOrdre()) {
 			resetBAS(env, rootDirectory);
 		} else {
-			ApiInitialisationService serv = new ApiInitialisationService(TraitementPhase.INITIALISATION, env, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
+			ApiInitialisationService serv = new ApiInitialisationService(env, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
 			try {
 				new ResetEnvironmentOperation(serv.getCoordinatorSandbox()).retourPhasePrecedente(phaseAExecuter, undoFilesSelection);
 			} finally {
@@ -50,7 +50,7 @@ public class ResetEnvironmentService {
 	 */
 	public static void resetBAS(String env, String rootDirectory) {
 
-		ApiInitialisationService service = new ApiInitialisationService(TraitementPhase.INITIALISATION, env, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
+		ApiInitialisationService service = new ApiInitialisationService(env, TraitementPhase.INITIALISATION.getNbLigneATraiter(), null);
 		try {
 			// delete files and pilotage tables
 			new ResetEnvironmentOperation(service.getCoordinatorSandbox()).clearPilotageAndDirectories(rootDirectory);

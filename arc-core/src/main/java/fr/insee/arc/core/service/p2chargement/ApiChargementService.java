@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.thread.MultiThreading;
@@ -46,9 +45,9 @@ public class ApiChargementService extends ApiService {
 		super();
 	}
 
-	public ApiChargementService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
+	public ApiChargementService(String aEnvExecution, Integer aNbEnr,
 			String paramBatch) {
-		super(aCurrentPhase, aEnvExecution, aNbEnr, paramBatch);
+		super(aEnvExecution, aNbEnr, paramBatch, TraitementPhase.CHARGEMENT);
 	}
 	
 	protected List<NormeRules> listeNorme;
@@ -68,13 +67,13 @@ public class ApiChargementService extends ApiService {
 		// récupération des différentes normes dans la base
 		this.listeNorme = NormeRules.getNormesBase(this.connexion.getCoordinatorConnection(), this.envExecution);
 
-		this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
+		int maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiChargementService.MAX_PARALLEL_WORKERS", 4);
 
 		// Récupérer la liste des fichiers selectionnés
 		StaticLoggerDispatcher.info(LOGGER, "Récupérer la liste des fichiers selectionnés");
 		
-		this.tabIdSource = pilotageListIdsource(this.tablePilTemp, this.currentPhase, TraitementEtat.ENCOURS.toString());
+		this.tabIdSource = pilotageListIdsource(this.tablePilTemp);
 
 		MultiThreading<ApiChargementService, ThreadChargementService> mt = new MultiThreading<>(this,
 				new ThreadChargementService());

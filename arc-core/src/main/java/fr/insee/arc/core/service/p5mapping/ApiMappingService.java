@@ -54,9 +54,9 @@ public class ApiMappingService extends ApiService {
      * @param aCurrentPhase
      * @param aNbEnr
      */
-    public ApiMappingService(TraitementPhase aCurrentPhase, String anEnvironnementExecution,
+    public ApiMappingService(String anEnvironnementExecution,
             Integer aNbEnr, String paramBatch) {
-        super(aCurrentPhase, anEnvironnementExecution, aNbEnr, paramBatch);
+        super(anEnvironnementExecution, aNbEnr, paramBatch, TraitementPhase.MAPPING);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ApiMappingService extends ApiService {
     	
         BDParameters bdParameters=new BDParameters(ArcDatabase.COORDINATOR);
 
-        this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "MappingService.MAX_PARALLEL_WORKERS",4);
+        int maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(), "MappingService.MAX_PARALLEL_WORKERS",4);
         
         // récupère le nombre de fichier à traiter
         this.tabIdSource = recuperationIdSource();

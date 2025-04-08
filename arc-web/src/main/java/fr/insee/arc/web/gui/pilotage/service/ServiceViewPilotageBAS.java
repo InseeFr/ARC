@@ -15,9 +15,11 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.p0initialisation.ResetEnvironmentService;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;
+import fr.insee.arc.core.service.p6export.ApiExportService;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
@@ -197,13 +199,21 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		
 		if (phaseAExecuter.equals(TraitementPhase.RECEPTION) || phaseAExecuter.equals(TraitementPhase.INITIALISATION)) {
 			capacityParameter = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.tailleMaxReceptionEnMb", 100000);
+			ApiServiceFactory.getService(phaseAExecuter, getBacASable(), capacityParameter, isEnvBatch()).invokeApi();
 		}
 		else
 		{
 			capacityParameter = new BDParameters(ArcDatabase.COORDINATOR).getInt(null, "LanceurIHM.maxFilesPerPhase", 10000000);
+			
+			//ApiServiceFactory.getService(phaseAExecuter, getBacASable(), capacityParameter, isEnvBatch()).invokeApi();
+			new ApiMultiphaseService(getBacASable(), capacityParameter, isEnvBatch()
+					, TraitementPhase.CHARGEMENT
+					, TraitementPhase.NORMAGE
+					).invokeApi();
 		}
+			
 		
-		ApiServiceFactory.getService(phaseAExecuter, getBacASable(), capacityParameter, isEnvBatch()).invokeApi();
+		//ApiServiceFactory.getService(phaseAExecuter, getBacASable(), capacityParameter, isEnvBatch()).invokeApi();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

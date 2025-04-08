@@ -7,6 +7,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.BatchMode;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -29,6 +30,12 @@ public class ThreadOperations {
 	private String paramBatch;	
 
 	private String idSource;
+	
+	private TraitementPhase currentExecutedPhase;
+
+	private boolean beginNextPhase;
+	
+	private boolean cleanPhase;
 
 	
 	/**
@@ -41,9 +48,12 @@ public class ThreadOperations {
 	 * @param paramBatch
 	 * @param idSource
 	 */
-	public ThreadOperations(ScalableConnection connexion, String tablePilotageGlobale, String tablePilotagePhase, String tablePilotageThread,
+	public ThreadOperations(TraitementPhase currentExecutedPhase, boolean beginNextPhase, boolean cleanPhase, ScalableConnection connexion, String tablePilotageGlobale, String tablePilotagePhase, String tablePilotageThread,
 			String tablePrevious, String paramBatch, String idSource) {
 		super();
+		this.currentExecutedPhase = currentExecutedPhase;
+		this.beginNextPhase = beginNextPhase;
+		this.cleanPhase = cleanPhase;
 		this.connexion = connexion;
 		this.tablePilotageGlobale = tablePilotageGlobale;
 		this.tablePilotagePhase = tablePilotagePhase;
@@ -62,14 +72,20 @@ public class ThreadOperations {
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		
-		// nettoyage des objets base de données du thread
-		query.append(ThreadOperations.cleanThread());
+				// nettoyage des objets base de données du thread
+		if (cleanPhase)
+		{
+			query.append(ThreadOperations.cleanThread());
+		}
 
 		// création des tables temporaires de données
-		query.append(ThreadOperations.createTablePilotageIdSource(tablePilotagePhase, tablePilotageThread, idSource));
+		query.append(createTablePilotageIdSource(tablePilotagePhase, tablePilotageThread, idSource));
 
 		// enregistrement de la date de traitement du fichier
-		query.append("UPDATE "+tablePilotageThread+" set date_traitement=to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(new Date()) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()+"');" );
+		// marquer par défaut la phase et que le traitement s'est bien déroulé
+		
+		query.append(markDefaultValuesOnTablePilotageIdSource());
+
 		
 		// if scalable thread
 		if (connexion.isScaled()) {		
@@ -79,7 +95,10 @@ public class ThreadOperations {
 			query = new ArcPreparedStatementBuilder();
 
 			// nettoyage des objets base de données du thread
-			query.append(ThreadOperations.cleanThread());
+			if (cleanPhase)
+			{
+				query.append(ThreadOperations.cleanThread());
+			}
 
 			// création des tables temporaires de données
 			// get the records from tablePilotageThread in coordinator
@@ -90,6 +109,19 @@ public class ThreadOperations {
 			query.append(query.copyFromGenericBean(tablePilotageThread, gb));
 
 		}
+		return query;
+	}
+
+	private ArcPreparedStatementBuilder markDefaultValuesOnTablePilotageIdSource() {
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+		query.append("UPDATE "+tablePilotageThread);
+		query.append(" set date_traitement=to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(new Date()) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()+"')" );
+		query.append(",etat_traitement = '{" + TraitementEtat.OK + "}'");
+		query.append(",phase_traitement = '" + this.currentExecutedPhase + "'");
+		query.append(";");
+		
 		return query;
 	}
 
@@ -167,7 +199,7 @@ public class ThreadOperations {
 			requete.append("UNLOGGED ");
 		}
 		requete.append(
-				"TABLE " + tableOut + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ");
+				"TABLE IF NOT EXISTS " + tableOut + " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS ");
 		requete.append("\n SELECT * FROM " + tableIn + " ");
 		requete.append("\n WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + " = ").appendText(idSource);
 		requete.append("\n AND etape = 1 ");
@@ -186,16 +218,21 @@ public class ThreadOperations {
 	 * @return
 	 */
 	@SqlInjectionChecked
-	private static ArcPreparedStatementBuilder marquageFinal(String tablePil, String tablePilTemp, String idSource) {
+	private ArcPreparedStatementBuilder marquageFinal(String tablePil, String tablePilTemp, String idSource) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		
 		requete.append("\n set enable_hashjoin=off; ");
+		
+		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));
+		
 		requete.append("\n UPDATE " + tablePil + " a ");
+		
+		// si la phase suivante n'est pas à commencer
 		requete.append("\n SET etat_traitement =  b.etat_traitement, ");
+		requete.append("\n phase_traitement = b.phase_traitement, ");
 		requete.append("\n id_norme = b.id_norme, ");
 		requete.append("\n validite = b.validite, ");
 		requete.append("\n periodicite = b.periodicite, ");
-		requete.append("\n taux_ko = b.taux_ko, ");
 		requete.append("\n date_traitement = to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(new Date()) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()
 				+ "'), ");
 		requete.append("\n nb_enr = b.nb_enr, ");
@@ -203,7 +240,8 @@ public class ThreadOperations {
 		requete.append("\n validite_inf = b.validite_inf, ");
 		requete.append("\n validite_sup = b.validite_sup, ");
 		requete.append("\n version = b.version, ");
-		requete.append("\n etape = case when b.etat_traitement='{" + TraitementEtat.KO + "}' then 2 else b.etape end, ");
+		requete.append("\n etape = case when b.etat_traitement='{" + TraitementEtat.KO + "}' then 2 else ")
+			.append(beginNextPhase?"3":"b.etape").append(" end, ");
 		requete.append("\n jointure = b.jointure, ");
 		requete.append("\n generation_composite = b.date_traitement::text ");
 
@@ -211,8 +249,24 @@ public class ThreadOperations {
 		requete.append("\n FROM " + tablePilTemp + " as b ");
 		requete.append("\n WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 		requete.append("\n AND a.etape = 1 ; ");
-
-		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));
+		
+		
+		if (beginNextPhase)
+		{
+			Date date = new Date();
+			requete.append("\n INSERT INTO " + tablePil + " ");
+			requete.append("\n (container, " + ColumnEnum.ID_SOURCE.getColumnName()
+					+ ", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, nb_enr, etape, jointure) ");
+			requete.append("\n SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName()
+					+ ", date_entree, id_norme, validite, periodicite, '" + this.currentExecutedPhase.nextPhase() + "' as phase_traitement, '{"
+					+ TraitementEtat.ENCOURS + "}' as etat_traitement ");
+			requete.append("\n , to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(date) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()
+					+ "') , nb_enr, 1 as etape, jointure ");
+			requete.append("\n FROM " + tablePilTemp + " ");
+			requete.append("\n WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
+			requete.append("\n AND etape = 1 ; ");
+		}
+		
 
 		requete.append("\n set enable_hashjoin = on; ");
 		return requete;

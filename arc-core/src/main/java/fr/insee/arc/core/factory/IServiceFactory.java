@@ -15,6 +15,6 @@ public interface IServiceFactory {
 	 * @param paramBatch
 	 * @return
 	 */
-	public ApiService get(TraitementPhase phaseService, String executionSchema, Integer capacityParameter, String paramBatch);
+	public ApiService get(String executionSchema, Integer capacityParameter, String paramBatch);
 
 }

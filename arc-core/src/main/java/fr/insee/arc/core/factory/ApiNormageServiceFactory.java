@@ -2,7 +2,7 @@ package fr.insee.arc.core.factory;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.p3normage.ApiNormageService;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 
 public class ApiNormageServiceFactory implements IServiceFactory {
 
@@ -15,8 +15,8 @@ public class ApiNormageServiceFactory implements IServiceFactory {
 	 * @param aDirectoryRoot
 	 * @param aNbEnr
 	 */
-	public ApiService get(TraitementPhase phaseService, String executionSchema, Integer capacityParameter, String paramBatch) {
-		return new ApiNormageService(phaseService, executionSchema, capacityParameter, paramBatch);	
+	public ApiService get(String executionSchema, Integer capacityParameter, String paramBatch) {
+		return new ApiMultiphaseService(executionSchema, capacityParameter, paramBatch, TraitementPhase.NORMAGE);	
 	}
 
 	public static IServiceFactory getInstance() {

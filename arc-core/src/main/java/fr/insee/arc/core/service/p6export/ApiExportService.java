@@ -11,9 +11,9 @@ public class ApiExportService  extends ApiService {
         super();
     }
 	
-    public ApiExportService(TraitementPhase aCurrentPhase, String anEnvironnementExecution,
+    public ApiExportService(String anEnvironnementExecution,
             Integer aNbEnr, String paramBatch) {
-        super(aCurrentPhase, anEnvironnementExecution, aNbEnr, paramBatch);
+        super(anEnvironnementExecution, aNbEnr, paramBatch, TraitementPhase.EXPORT);
         exportOperation= new ExportOperation(this.coordinatorSandbox, paramBatch);
     }
 	

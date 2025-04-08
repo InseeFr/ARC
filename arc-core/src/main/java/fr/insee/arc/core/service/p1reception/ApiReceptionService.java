@@ -31,9 +31,9 @@ public class ApiReceptionService extends ApiService {
 		super();
 	}
 
-	public ApiReceptionService(TraitementPhase aCurrentPhase, String aEnvExecution,
+	public ApiReceptionService(String aEnvExecution,
 			Integer aNbEnr, String paramBatch) {
-		super(aCurrentPhase, aEnvExecution, aNbEnr, paramBatch);
+		super(aEnvExecution, aNbEnr, paramBatch, TraitementPhase.RECEPTION);
 	}
 	
 	@Override

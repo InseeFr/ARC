@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,6 +65,27 @@ public class PilotageOperations {
 	}
 
 	
+	@SqlInjectionChecked
+	public static ArcPreparedStatementBuilder queryBuildTablePilotage(String tablePil, String tablePilTemp) {
+		
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("\n DROP TABLE IF EXISTS " + tablePilTemp + "; ");
+
+		requete.append("\n CREATE ");
+		if (!tablePilTemp.contains(".")) {
+			requete.append("TEMPORARY ");
+		} else {
+			requete.append(" ");
+		}
+		requete.append("\n TABLE " + tablePilTemp
+				+ " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS  ");
+		requete.append("\n SELECT *  FROM " + tablePil + " a ");
+		requete.append("\n LIMIT 0; ");
+		
+		return requete;
+	}
+	
+	
 	/**
 	 * Selection d'un lot d'id_source pour appliquer le traitement Les id_sources
 	 * sont selectionnés parmi les id_source présent dans la phase précédentes avec
@@ -87,17 +110,6 @@ public class PilotageOperations {
 
 		Date date = new Date();
 
-		requete.append("\n DROP TABLE IF EXISTS " + tablePilTemp + "; ");
-
-		requete.append("\n CREATE ");
-		if (!tablePilTemp.contains(".")) {
-			requete.append("TEMPORARY ");
-		} else {
-			requete.append(" ");
-		}
-		requete.append("\n TABLE " + tablePilTemp
-				+ " with (autovacuum_enabled = false, toast.autovacuum_enabled = false) AS  ");
-
 		requete.append("\n WITH prep AS (");
 		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, " + ColumnEnum.ID_SOURCE.getColumnName()
 				+ ") as cum_enr ");
@@ -116,20 +128,22 @@ public class PilotageOperations {
 		// insert the line in pilotage with etape=1 for the current step
 		requete.append("\n , insert as (INSERT INTO " + tablePil + " ");
 		requete.append("\n (container, " + ColumnEnum.ID_SOURCE.getColumnName()
-				+ ", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, rapport, taux_ko, nb_enr, etape, generation_composite,jointure) ");
+				+ ", date_entree, id_norme, validite, periodicite, phase_traitement, etat_traitement, date_traitement, nb_enr, etape, jointure) ");
 		requete.append("\n SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName()
 				+ ", date_entree, id_norme, validite, periodicite, '" + phaseNouveau + "' as phase_traitement, '{"
 				+ TraitementEtat.ENCOURS + "}' as etat_traitement ");
 		requete.append("\n , to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(date) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()
-				+ "') , rapport, taux_ko, nb_enr, 1 as etape, generation_composite, jointure ");
+				+ "') , nb_enr, 1 as etape, jointure ");
 		requete.append("\n FROM mark ");
 		requete.append("\n RETURNING *) ");
 
-		requete.append("\n SELECT * from insert; ");
+		requete.append("\n INSERT INTO " + tablePilTemp + " SELECT * from insert; ");
+		
 		requete.append("\n ANALYZE " + tablePilTemp + ";");
 		return requete;
 	}
-
+	
+	
 	/**
 	 * Query to update pilotage table when error occurs
 	 * 
@@ -139,12 +153,17 @@ public class PilotageOperations {
 	 * @return
 	 */
 	@SqlInjectionChecked
-	public static ArcPreparedStatementBuilder queryUpdatePilotageError(TraitementPhase phase, String tablePil, Exception exception) {
+	public static ArcPreparedStatementBuilder queryUpdatePilotageError(TraitementPhase[] phase, String tablePil, Exception exception) {
+		
+		List<String> phaseList = Stream.of(phase).map(p -> p.toString()).toList();
+		
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("UPDATE " + tablePil + " ");
 		requete.append("SET etape=2, etat_traitement= '{" + TraitementEtat.KO + "}'");
 		requete.append(", rapport=").appendText(exception.toString().replace("\r", ""));
-		requete.append(" WHERE phase_traitement='" + phase + "' AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
+		requete.append("WHERE phase_traitement IN (");
+		requete.append(requete.sqlListeOfValues(phaseList));
+		requete.append(") AND etat_traitement='{" + TraitementEtat.ENCOURS + "}' ");
 		return requete;
 	}
 
@@ -252,7 +271,7 @@ public class PilotageOperations {
 			String idSource, ArcException exception) throws ArcException 
 	{
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append(PilotageOperations.queryUpdatePilotageError(phase, tablePil, exception));
+		requete.append(PilotageOperations.queryUpdatePilotageError(new TraitementPhase[] {phase}, tablePil, exception));
 		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 		requete.append("\n ;");
 		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));

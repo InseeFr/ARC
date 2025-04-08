@@ -6,6 +6,8 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.GenericQueryDao;
@@ -17,6 +19,7 @@ import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
+import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p4controle.ApiControleService;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
 import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
@@ -41,6 +44,8 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 	private Thread t = null;
 	
+	private String idSource;
+	
 	private String tableControleDataTemp;
 	private String tableControlePilTemp;
 	private String tableOutOkTemp = "tableOutOkTemp";
@@ -52,7 +57,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		
     private ThreadOperations arcThreadGenericDao;
 	private GenericQueryDao genericExecutorDao;
-    
+	
+	private TraitementPhase currentExecutedPhase = TraitementPhase.CONTROLE;
+	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
+	private String previousExecutedPhaseTable;
+	
 
 	@Override
 	public void configThread(ScalableConnection connexion, int currentIndice, ApiControleService theApi) {
@@ -62,8 +71,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		this.connexion = connexion;
 		this.tablePil = theApi.getTablePil();
 		this.tablePilTemp = theApi.getTablePilTemp();
-		this.currentPhase = theApi.getCurrentPhase();
-		this.tablePrevious = theApi.getTablePrevious();
 		this.tabIdSource=theApi.getTabIdSource();
 		this.paramBatch=theApi.getParamBatch();
 
@@ -71,18 +78,51 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 		// Nom des tables temporaires
 		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
-		this.tableControlePilTemp = FormatSQL.temporaryTableName("controle_pil_temp");
+		this.tableControlePilTemp = ApiService.TABLE_PILOTAGE_THREAD;
 
 		// tables finales
-		this.tableOutOk = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.OK);
-		this.tableOutKo = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(), TraitementEtat.KO);
+		this.tableOutOk = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.OK);
+		this.tableOutKo = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.KO);
+		
+
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+
 		
 		// arc thread dao
-		arcThreadGenericDao=new ThreadOperations(connexion, tablePil, tablePilTemp, tableControlePilTemp, tablePrevious, paramBatch, idSource);
+		arcThreadGenericDao=new ThreadOperations(this.currentExecutedPhase, false, true, connexion, tablePil, tablePilTemp, tableControlePilTemp, previousExecutedPhaseTable, paramBatch, idSource);
     	genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
 
 	}
 
+	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService theApi, boolean beginNextPhase, boolean cleanPhase) {
+
+		this.envExecution = theApi.getEnvExecution();
+		this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
+		this.connexion = connexion;
+		this.tablePil = theApi.getTablePil();
+		this.tablePilTemp = theApi.getTablePilTemp();
+		this.tabIdSource=theApi.getTabIdSource();
+		this.paramBatch=theApi.getParamBatch();
+
+		this.sjdr = new ServiceJeuDeRegleOperation();
+
+		// Nom des tables temporaires
+		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
+		this.tableControlePilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+
+		// tables finales
+		this.tableOutOk = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.OK);
+		this.tableOutKo = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.KO);
+		
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+		
+		// arc thread dao
+		arcThreadGenericDao=new ThreadOperations(this.currentExecutedPhase, beginNextPhase, cleanPhase, connexion, tablePil, tablePilTemp, tableControlePilTemp, previousExecutedPhaseTable, paramBatch, idSource);
+    	genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
+
+	}
+	
+	
 	@Override
 	public void run() {
 		try {
@@ -96,7 +136,7 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error(LOGGER, "Error in control Thread");
 			try {
-				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.tablePil,
+				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.currentExecutedPhase, this.tablePil,
 						this.idSource, e);
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(LOGGER, e2);
@@ -135,11 +175,11 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 		
 		// Marquage du jeux de règles appliqué
 		StaticLoggerDispatcher.info(LOGGER, "Marquage du jeux de règles appliqués ");
-		genericExecutorDao.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.getCurrentPhase(), this.envExecution, this.tableControlePilTemp, TraitementEtat.OK.toString()));
+		genericExecutorDao.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.currentExecutedPhase, this.envExecution, this.tableControlePilTemp, TraitementEtat.OK.toString()));
 
 		// Fabrication de la table de controle temporaire
 		StaticLoggerDispatcher.info(LOGGER, "Fabrication de la table de controle temporaire ");
-		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.getTablePrevious(), this.tableControleDataTemp, this.idSource,
+		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.previousExecutedPhaseTable, this.tableControleDataTemp, this.idSource,
 				ThreadControleQueryBuilder.extraColumnsAddedByControle()));
 
 		genericExecutorDao.executeAsTransaction();

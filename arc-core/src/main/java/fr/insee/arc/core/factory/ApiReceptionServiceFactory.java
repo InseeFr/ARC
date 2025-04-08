@@ -15,8 +15,8 @@ public class ApiReceptionServiceFactory implements IServiceFactory {
 	 * @param aDirectoryRoot
 	 * @param aNbEnr
 	 */
-	public ApiService get(TraitementPhase phaseService, String executionSchema, Integer capacityParameter, String paramBatch) {
-		return new ApiReceptionService(phaseService, executionSchema, capacityParameter, paramBatch);
+	public ApiService get(String executionSchema, Integer capacityParameter, String paramBatch) {
+		return new ApiReceptionService(executionSchema, capacityParameter, paramBatch);
 	}
 
 	public static IServiceFactory getInstance() {

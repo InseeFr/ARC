@@ -2,6 +2,11 @@ package fr.insee.arc.core.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import fr.insee.arc.core.service.p4controle.bo.ControleTypeCode;
 
 public enum TraitementPhase {
     
@@ -58,6 +63,11 @@ public enum TraitementPhase {
         return this.nbLigneATraiter;
     }  
 
+    
+	private final static Map<Integer, TraitementPhase> traitementPhaseMapByOrdre = Stream.of(TraitementPhase.values())
+			.collect(Collectors.toMap(TraitementPhase::getOrdre, t -> t)); 
+
+    
     /**
      * Renvoie la phase en fonction de l'ordre
      * 
@@ -66,12 +76,8 @@ public enum TraitementPhase {
      * @return
      */
     public static TraitementPhase getPhase(int ordre) {
-        for (TraitementPhase phase : TraitementPhase.values()) {
-            if (phase.getOrdre() == ordre) {
-                return phase;
-            }
-        }
-        return null;
+    	
+    	return traitementPhaseMapByOrdre.get(ordre);
     }
     
     
@@ -95,13 +101,7 @@ public enum TraitementPhase {
      * @return
      */
     public List<TraitementPhase> nextPhases() {
-        List<TraitementPhase> listPhase = new ArrayList<>();
-        for (TraitementPhase phase : TraitementPhase.values()) {
-            if (phase.getOrdre() > ordre) {
-                listPhase.add(phase);
-            }
-        }
-        return listPhase;
+    	return Stream.of(TraitementPhase.values()).filter(phase -> { return (phase.getOrdre() > this.ordre); } ).toList();
     }
 
     /**
@@ -110,10 +110,11 @@ public enum TraitementPhase {
      * @return
      */
     public TraitementPhase previousPhase() {
-        TraitementPhase phase = null;
-        int i = this.getOrdre();
-        phase = getPhase(i - 1);
-        return phase;
+    	return getPhase(this.getOrdre() - 1);
+    }
+    
+    public TraitementPhase nextPhase() {
+    	return getPhase(this.getOrdre() + 1);
     }
     
 	public static List<TraitementPhase> listPhasesBetween(TraitementPhase phase, TraitementPhase phaseEnd) {

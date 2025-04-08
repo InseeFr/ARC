@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,20 +37,19 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ApiService.class);
 
-	protected int maxParallelWorkers;
-
 	// anti-spam delay when thread chain error
 	protected static final int PREVENT_ERROR_SPAM_DELAY = 100;
 
+	protected static final String TABLE_PILOTAGE_THREAD = "p";
+	
 	protected ScalableConnection connexion;
 
 	protected Sandbox coordinatorSandbox;
 
 	protected String envExecution;
-	protected String tablePrevious;
 
-	protected TraitementPhase previousPhase;
-	protected TraitementPhase currentPhase;
+	protected TraitementPhase[] previousPhase;
+	protected TraitementPhase[] currentPhase;
 
 	protected String tablePil;
 	protected String tablePilTemp;
@@ -60,7 +60,6 @@ public abstract class ApiService implements IConstanteNumerique {
 	// made to report the number of object processed by the phase
 	private int reportNumberOfObject = 0;
 
-	protected String idSource;
 	
 	protected boolean todo = false;
 
@@ -70,8 +69,8 @@ public abstract class ApiService implements IConstanteNumerique {
 		super();
 	}
 
-	protected ApiService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
-			String paramBatch) {
+	protected ApiService(String aEnvExecution, Integer aNbEnr,
+			String paramBatch, TraitementPhase...aCurrentPhase) {
 
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** initialiserVariable **");
 
@@ -87,7 +86,7 @@ public abstract class ApiService implements IConstanteNumerique {
 
 		// current phase and compute the previous phase
 		this.currentPhase = aCurrentPhase;
-		this.previousPhase = this.getCurrentPhase().previousPhase();
+		this.previousPhase = Stream.of(aCurrentPhase).map(phase -> phase.previousPhase()).toArray(TraitementPhase[]::new);
 
 		// number of object to be proceed
 		this.nbEnr = aNbEnr;
@@ -95,13 +94,9 @@ public abstract class ApiService implements IConstanteNumerique {
 		// indicate if api is triggered by batch or not
 		this.paramBatch = paramBatch;
 
-		// inputTables
-		this.tablePrevious = TableNaming.phaseDataTableName(this.envExecution, this.getPreviousPhase(),
-				TraitementEtat.OK);
-
 		// Tables de pilotage et pilotage temporaire
 		this.tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(this.envExecution);
-		this.tablePilTemp = TableNaming.temporaryTableName(this.envExecution, aCurrentPhase, ViewEnum.PILOTAGE_FICHIER);
+		this.tablePilTemp = TableNaming.temporaryTableName(this.envExecution, aCurrentPhase[0], ViewEnum.PILOTAGE_FICHIER);
 		
 		StaticLoggerDispatcher.info(LOGGER_APISERVICE, "** Fin constructeur ApiService **");
 	}
@@ -124,8 +119,7 @@ public abstract class ApiService implements IConstanteNumerique {
 			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
 			}
-			register(this.connexion.getCoordinatorConnection(), this.getPreviousPhase(), this.getCurrentPhase(),
-					this.getTablePil(), this.tablePilTemp, this.nbEnr);
+			register(this.connexion.getCoordinatorConnection(), this.getTablePil(), this.tablePilTemp, this.nbEnr, this.getCurrentPhase());
 		}
 
 		return this.todo;
@@ -139,22 +133,31 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param phaseAncien
 	 * @return
 	 */
-	private boolean checkTodo(String tablePil, TraitementPhase phaseAncien) {
+	private boolean checkTodo(String tablePil, TraitementPhase...phaseAncien) {
 		
-		if (this.getCurrentPhase().getConditionExecution().equals(ConditionExecution.AUCUN_PREREQUIS))
+		if (this.getCurrentPhase()[0].getConditionExecution().equals(ConditionExecution.AUCUN_PREREQUIS))
 		{
 			return true;
 		}
 		
+		List<String> phaseAncienList = Stream.of(phaseAncien).map(phase -> phase.toString()).toList();
+		
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		boolean checkTodoResult = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
-		requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien.toString()) + " AND "
-				+ requete.quoteText(TraitementEtat.OK.toString()) + "=ANY(etat_traitement) ");
+		//requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien.toString()));
+		requete.append("WHERE phase_traitement IN (");
+		requete.append(requete.sqlListeOfValues(phaseAncienList));
+		requete.append(") AND " + requete.quoteText(TraitementEtat.OK.toString()) + "=ANY(etat_traitement) ");
 		requete.append(" AND ");
-		requete.append(this.getCurrentPhase().getConditionExecution().getSqlFilter());
+		requete.append(this.getCurrentPhase()[0].getConditionExecution().getSqlFilter());
 		requete.append(" LIMIT 1 ");
-				
+		
+		
+		System.out.println("§§§§§§§§§§");
+		System.out.println(requete.getQueryWithParameters());
+
+		
 		try {
 			checkTodoResult = UtilitaireDao.get(0).hasResults(this.connexion.getCoordinatorConnection(), requete);
 		} catch (Exception ex) {
@@ -178,12 +181,13 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param nbEnr
 	 * @throws ArcException
 	 */
-	private void register(Connection connexion, TraitementPhase phaseIn, TraitementPhase phase, String tablePil, String tablePilTemp,
-			Integer nbEnr) {
+	private void register(Connection connexion, String tablePil, String tablePilTemp, Integer nbEnr, TraitementPhase...phasesToRegister) {
 		LoggerHelper.info(LOGGER_APISERVICE, "** register **");
 		try {
-			UtilitaireDao.get(0).executeBlock(connexion,
-					PilotageOperations.queryCopieTablePilotage(tablePil, tablePilTemp, phaseIn, phase, nbEnr));
+			
+			ArcPreparedStatementBuilder query = PilotageOperations.queryBuildTablePilotage(tablePil, tablePilTemp);
+			Stream.of(phasesToRegister).forEach(p -> query.append(PilotageOperations.queryCopieTablePilotage(tablePil, tablePilTemp, p.previousPhase(), p, nbEnr)));
+			UtilitaireDao.get(0).executeBlock(connexion,query);
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "register()", ex);
 		}
@@ -231,12 +235,10 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param etat
 	 * @return
 	 */
-	public Map<String, List<String>> pilotageListIdsource(String tablePilotage, TraitementPhase aCurrentPhase, String etat) {
+	public Map<String, List<String>> pilotageListIdsource(String tablePilotage) {
 		LoggerHelper.info(LOGGER_APISERVICE, "pilotageListIdsource");
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		requete.append("SELECT container, " + ColumnEnum.ID_SOURCE.getColumnName() + " FROM " + tablePilotage + " ");
-		requete.append("WHERE phase_traitement=" + requete.quoteText(aCurrentPhase.toString()) + " ");
-		requete.append("AND " + requete.quoteText(etat) + "=ANY(etat_traitement); ");
+		requete.append("SELECT phase_traitement , container, id_source FROM " + tablePilotage + ";");
 		try {
 			return new GenericBean(
 					UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), requete))
@@ -354,7 +356,7 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @throws ArcException
 	 */
 	@SqlInjectionChecked
-	private void repriseSurErreur(Connection connexion, TraitementPhase phase, String tablePil, ArcException exception) throws ArcException {
+	private void repriseSurErreur(Connection connexion, TraitementPhase[] phase, String tablePil, ArcException exception) throws ArcException {
 		// nettoyage de la connexion
 		// comme on arrive ici à cause d'une erreur, la base de donnée attend une fin de
 		// la transaction
@@ -390,7 +392,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("SELECT p." + ColumnEnum.ID_SOURCE.getColumnName() + " ");
 		query.append("FROM " + this.getTablePilTemp() + " p ");
-		query.append("ORDER BY " + ColumnEnum.ID_SOURCE.getColumnName());
 		query.append(";");
 
 		Map<String, List<String>> pil = new GenericBean(
@@ -412,31 +413,20 @@ public abstract class ApiService implements IConstanteNumerique {
 		return tablePil;
 	}
 
-	public TraitementPhase getPreviousPhase() {
+	public TraitementPhase[] getPreviousPhase() {
 		return previousPhase;
 	}
 
-	public TraitementPhase getCurrentPhase() {
+	public TraitementPhase[] getCurrentPhase() {
 		return currentPhase;
 	}
-
-	public String getTablePrevious() {
-		return tablePrevious;
-	}
-
+	
 	public String getParamBatch() {
 		return paramBatch;
 	}
 
 	public ScalableConnection getConnexion() {
 		return connexion;
-	}
-
-	/**
-	 * @return the idSource
-	 */
-	public String getIdSource() {
-		return idSource;
 	}
 
 	public int getReportNumberOfObject() {

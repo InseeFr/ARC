@@ -9,7 +9,9 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
+import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
@@ -19,6 +21,7 @@ import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
+import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p2chargement.ApiChargementService;
 import fr.insee.arc.core.service.p2chargement.archiveloader.ArchiveChargerFactory;
 import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad;
@@ -47,6 +50,8 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	private Thread t;
 
+	private String idSource;
+	
 	private String container;
 
 	private String tableChargementPilTemp;
@@ -60,7 +65,45 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	protected String tableChargementOK;
 
 	private String tableTempA;
+	
+	private TraitementPhase currentExecutedPhase = TraitementPhase.CHARGEMENT;
+	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
+	private String previousExecutedPhaseTable;
+	
+	
+	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService aApi, boolean beginNextPhase, boolean cleanPhase) {
 
+		this.envExecution = aApi.getEnvExecution();
+		this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
+		this.connexion = connexion;
+		this.container = aApi.getTabIdSource().get("container").get(currentIndice);
+		this.tablePilTemp = aApi.getTablePilTemp();
+		this.tablePil = aApi.getTablePil();
+		this.paramBatch = aApi.getParamBatch();
+		this.directoryIn = aApi.getDirectoryIn();
+		this.listeNorme = aApi.getListeNorme();
+
+		// Noms des tables temporaires utiles au chargement
+		// nom court pour les perfs
+
+		// table A de reception de l'ensemble des fichiers avec nom de colonnes
+		// courts
+		this.tableTempA = "a";
+		this.tableChargementPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+
+		// table de sortie des données dans l'application (hors du module)
+		this.tableChargementOK = TableNaming.phaseDataTableName(envExecution, this.currentExecutedPhase,
+				TraitementEtat.OK);
+		
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+
+
+		// thread generic dao
+		arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, beginNextPhase, cleanPhase, connexion, tablePil, tablePilTemp, tableChargementPilTemp,
+				previousExecutedPhaseTable, paramBatch, idSource);
+
+	}
+	
 
 	@Override
 	public void configThread(ScalableConnection connexion, int currentIndice, ApiChargementService aApi) {
@@ -70,7 +113,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		this.connexion = connexion;
 		this.container = aApi.getTabIdSource().get("container").get(currentIndice);
 		this.tablePilTemp = aApi.getTablePilTemp();
-		this.currentPhase = aApi.getCurrentPhase();
 		this.tablePil = aApi.getTablePil();
 		this.paramBatch = aApi.getParamBatch();
 		this.directoryIn = aApi.getDirectoryIn();
@@ -82,15 +124,17 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		// table A de reception de l'ensemble des fichiers avec nom de colonnes
 		// courts
 		this.tableTempA = "A";
-		this.tableChargementPilTemp = "chargement_pil_temp";
+		this.tableChargementPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
 
 		// table de sortie des données dans l'application (hors du module)
-		this.tableChargementOK = TableNaming.phaseDataTableName(envExecution, this.currentPhase,
+		this.tableChargementOK = TableNaming.phaseDataTableName(envExecution, this.currentExecutedPhase,
 				TraitementEtat.OK);
 
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+		
 		// thread generic dao
-		arcThreadGenericDao = new ThreadOperations(connexion, tablePil, tablePilTemp, tableChargementPilTemp,
-				tablePrevious, paramBatch, idSource);
+		arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, false, true, connexion, tablePil, tablePilTemp, tableChargementPilTemp,
+				previousExecutedPhaseTable, paramBatch, idSource);
 
 	}
 
@@ -120,7 +164,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 			try {
 				// En cas d'erreur on met le fichier en KO avec l'erreur obtenu.
-				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.getCurrentPhase(), this.tablePil,
+				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(), this.currentExecutedPhase, this.tablePil,
 						this.idSource, processException);
 			} catch (ArcException marquageException) {
 				marquageException.logFullException();
@@ -326,7 +370,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		}
 
 		query.append(" WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "=").appendText(idSource);
-		query.append(" AND phase_traitement='"+ this.currentPhase + "';\n");
+		query.append(" AND phase_traitement='"+ this.currentExecutedPhase + "';\n");
 		UtilitaireDao.get(0).executeRequest(this.getConnexion().getExecutorConnection(), query);
 
 		StaticLoggerDispatcher.info(LOGGER,	"Fin mettre à jour la table de pilotage");
@@ -377,7 +421,10 @@ public class ThreadChargementService extends ApiChargementService implements Run
 	public void setFilesInputStreamLoad(FilesInputStreamLoad filesInputStreamLoad) {
 		this.filesInputStreamLoad = filesInputStreamLoad;
 	}
-	
-	
+
+
+	public TraitementPhase getCurrentExecutedPhase() {
+		return currentExecutedPhase;
+	}
 
 }

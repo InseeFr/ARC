@@ -10,6 +10,8 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
@@ -20,6 +22,8 @@ import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
+import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p3normage.ApiNormageService;
 import fr.insee.arc.core.service.p3normage.operation.NormageOperation;
 import fr.insee.arc.core.service.p3normage.operation.NormageRulesOperation;
@@ -55,6 +59,8 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
 	private Thread t;
 
+	private String idSource;
+	
 	private String tableNormageDataTemp;
 	private String tableNormagePilTemp;
 
@@ -69,6 +75,13 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 	private FileIdCard fileIdCard;
 
 	private ThreadOperations arcThreadGenericDao;
+	
+	private TraitementPhase currentExecutedPhase = TraitementPhase.NORMAGE;
+	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
+	private String previousExecutedPhaseTable;
+	
+	
+	
 
 	@Override
 	public void configThread(ScalableConnection connexion, int currentIndice, ApiNormageService theApi) {
@@ -79,31 +92,66 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 		// tables du thread
 
 		this.tableNormageDataTemp = FormatSQL.temporaryTableName("normage_data_temp");
-		this.tableNormagePilTemp = FormatSQL.temporaryTableName("normage_pil_Temp");
+		this.tableNormagePilTemp = ApiService.TABLE_PILOTAGE_THREAD;
 
 		this.tableNormageOKTemp = FormatSQL.temporaryTableName("ok_Temp");
 		this.tableNormageKOTemp = FormatSQL.temporaryTableName("ko_Temp");
 
-		this.tableNormageOK = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(),
+		this.tableNormageOK = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase,
 				TraitementEtat.OK);
-		this.tableNormageKO = TableNaming.phaseDataTableName(theApi.getEnvExecution(), theApi.getCurrentPhase(),
+		this.tableNormageKO = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase,
 				TraitementEtat.KO);
 
 		// tables héritées
 		this.tablePil = theApi.getTablePil();
 		this.tablePilTemp = theApi.getTablePilTemp();
-		this.currentPhase = theApi.getCurrentPhase();
-		this.tablePrevious = theApi.getTablePrevious();
 		this.tabIdSource = theApi.getTabIdSource();
 		this.envExecution = theApi.getEnvExecution();
 		this.paramBatch = theApi.getParamBatch();
 
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+		
 		// arc thread dao
-		arcThreadGenericDao = new ThreadOperations(connexion, tablePil, tablePilTemp, tableNormagePilTemp,
-				tablePrevious, paramBatch, idSource);
+		arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, false, true, connexion, tablePil, tablePilTemp, tableNormagePilTemp,
+				previousExecutedPhaseTable, paramBatch, idSource);
 
 	}
 
+	
+	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService theApi, boolean beginNextPhase, boolean cleanPhase) {
+
+		this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
+		this.connexion = connexion;
+
+		// tables du thread
+
+		this.tableNormageDataTemp = FormatSQL.temporaryTableName("normage_data_temp");
+		this.tableNormagePilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+
+		this.tableNormageOKTemp = FormatSQL.temporaryTableName("ok_Temp");
+		this.tableNormageKOTemp = FormatSQL.temporaryTableName("ko_Temp");
+
+		this.tableNormageOK = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase,
+				TraitementEtat.OK);
+		this.tableNormageKO = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase,
+				TraitementEtat.KO);
+
+		// tables héritées
+		this.tablePil = theApi.getTablePil();
+		this.tablePilTemp = theApi.getTablePilTemp();
+		this.tabIdSource = theApi.getTabIdSource();
+		this.envExecution = theApi.getEnvExecution();
+		this.paramBatch = theApi.getParamBatch();
+		
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+
+		// arc thread dao
+		arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, beginNextPhase, cleanPhase, connexion, tablePil, tablePilTemp, tableNormagePilTemp,
+				previousExecutedPhaseTable, paramBatch, idSource);
+
+	}
+	
+	
 	public void start() {
 		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadNormageService");
 		t = new Thread(this);
@@ -128,7 +176,7 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 			StaticLoggerDispatcher.error(LOGGER, e);
 			try {
 				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(),
-						this.getCurrentPhase(), this.tablePil, this.idSource, e);
+						this.currentExecutedPhase, this.tablePil, this.idSource, e);
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(LOGGER, e2);
 			}
@@ -148,18 +196,10 @@ public class ThreadNormageService extends ApiNormageService implements Runnable,
 
 		// Créer la table image de la phase précédente (ajouter les colonnes qu'il faut)
 		// création des tables temporaires de données
-		query.append(TableOperations.createTableTravailIdSource(this.getTablePrevious(), this.tableNormageDataTemp,
+		query.append(TableOperations.createTableTravailIdSource(this.previousExecutedPhaseTable, this.tableNormageDataTemp,
 				this.idSource));
 
-		// On indique que le normage s'est bien passé par défaut
-		query.append("\n UPDATE " + this.tableNormagePilTemp);
-		query.append("\n SET etat_traitement = '{" + TraitementEtat.OK + "}'");
-		query.append("\n , phase_traitement = '" + this.currentPhase + "'");
-		query.append("\n WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + "=").appendText(this.idSource);
-		query.append(SQL.END_QUERY);
-
 		query.append(TableOperations.creationTableResultat(this.tableNormageDataTemp, this.tableNormageKOTemp));
-
 		UtilitaireDao.get(0).executeBlock(this.getConnexion().getExecutorConnection(), query);
 		
 		

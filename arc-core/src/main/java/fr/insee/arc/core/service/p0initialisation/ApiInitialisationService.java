@@ -32,9 +32,9 @@ public class ApiInitialisationService extends ApiService {
 		super();
 	}
 
-	public ApiInitialisationService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
+	public ApiInitialisationService(String aEnvExecution, Integer aNbEnr,
 			String paramBatch) {
-		super(aCurrentPhase, aEnvExecution, aNbEnr, paramBatch);
+		super(aEnvExecution, aNbEnr, paramBatch, TraitementPhase.INITIALISATION);
 	}
 
 	@Override

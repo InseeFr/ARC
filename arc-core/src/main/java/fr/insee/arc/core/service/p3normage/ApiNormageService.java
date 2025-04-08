@@ -41,9 +41,9 @@ public class ApiNormageService extends ApiService {
 		super();
 	}
 
-	public ApiNormageService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
+	public ApiNormageService(String aEnvExecution, Integer aNbEnr,
 			String paramBatch) {
-		super(aCurrentPhase, aEnvExecution, aNbEnr, paramBatch);
+		super(aEnvExecution, aNbEnr, paramBatch, TraitementPhase.NORMAGE);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class ApiNormageService extends ApiService {
 
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
 
-		this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
+		int maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiNormageService.MAX_PARALLEL_WORKERS", 4);
 
 		// récupère le nombre de fichier à traiter

@@ -169,7 +169,7 @@ public class PilotageDao extends VObjectHelperDao {
 			// get the file with the selected date_entree, state, and phase_tratement
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 			requete.append(
-					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
+					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, nb_enr, to_delete, jointure ");
 			requete.append(" FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " ");
 			requete.append(" WHERE date_entree" + requete.sqlEqual(selectionLigne.get("date_entree").get(0), TypeEnum.TEXT.getTypeName()));
 			requete.append(" AND array_to_string(etat_traitement,'$')" + requete.sqlEqual(etat, TypeEnum.TEXT.getTypeName()));
@@ -183,7 +183,7 @@ public class PilotageDao extends VObjectHelperDao {
 
 			ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 			requete.append(
-					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, round(taux_ko*100,2) as taux_ko, nb_enr, to_delete, jointure ");
+					"SELECT container, id_source,id_norme,validite,periodicite,phase_traitement,array_to_string(etat_traitement,'_') as etat_traitement ,date_traitement, rapport, nb_enr, to_delete, jointure ");
 			requete.append(" FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER) + " ");
 			requete.append(
 					" WHERE date_entree" + requete.sqlEqual(selectionLigneRapport.get("date_entree").get(0), TypeEnum.TEXT.getTypeName()));

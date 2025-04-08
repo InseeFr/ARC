@@ -7,16 +7,21 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.GenericQueryDao;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.RulesOperations;
+import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
+import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p5mapping.ApiMappingService;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
 import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
@@ -35,6 +40,8 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 	private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
 
 	private Thread t;
+	
+	private String idSource;
 
 	private int indice;
 	private String tableTempControleOk;
@@ -43,7 +50,36 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 	private ThreadOperations arcThreadGenericDao;
 
 	private GenericQueryDao genericExecutorDao;
+	
+	
+	private TraitementPhase currentExecutedPhase = TraitementPhase.MAPPING;
+	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
+	private String previousExecutedPhaseTable;
+	
+	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService anApi, boolean beginNextPhase, boolean cleanPhase) {
 
+		this.connexion = connexion;
+		this.indice = currentIndice;
+		this.idSource = anApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
+		this.envExecution = anApi.getEnvExecution();
+		this.tablePilTemp = anApi.getTablePilTemp();
+		this.tabIdSource = anApi.getTabIdSource();
+		this.paramBatch = anApi.getParamBatch();
+
+		this.tableTempControleOk = "tableTempControleOk".toLowerCase();
+		this.tableMappingPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+
+		this.tablePil = anApi.getTablePil();
+		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
+
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+		
+		// thread generic dao
+		this.arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, beginNextPhase, cleanPhase, connexion, tablePil, tablePilTemp, tableMappingPilTemp,
+				this.previousExecutedPhaseTable, paramBatch, idSource);
+	}
+	
+	
 	@Override
 	public void configThread(ScalableConnection connexion, int currentIndice, ApiMappingService anApi) {
 
@@ -52,21 +88,20 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 		this.idSource = anApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
 		this.envExecution = anApi.getEnvExecution();
 		this.tablePilTemp = anApi.getTablePilTemp();
-		this.currentPhase = anApi.getCurrentPhase();
-		this.tablePrevious = anApi.getTablePrevious();
 		this.tabIdSource = anApi.getTabIdSource();
 		this.paramBatch = anApi.getParamBatch();
 
-		this.tableTempControleOk = "tableTempControleOk".toLowerCase();
-		this.tableMappingPilTemp = "tableMappingPilTemp".toLowerCase();
+		this.tableTempControleOk = "tableTempControleOk";
+		this.tableMappingPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
 
 		this.tablePil = anApi.getTablePil();
+		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
 
+		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
+		
 		// thread generic dao
-		arcThreadGenericDao = new ThreadOperations(connexion, tablePil, tablePilTemp, tableMappingPilTemp,
-				tablePrevious, paramBatch, idSource);
-		genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
-
+		this.arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, false, true, connexion, tablePil, tablePilTemp, tableMappingPilTemp,
+				this.previousExecutedPhaseTable, paramBatch, idSource);
 	}
 
 	public void start() {
@@ -87,7 +122,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
 			try {
 				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(),
-						this.getCurrentPhase(), this.tablePil, this.idSource, e);
+						this.currentExecutedPhase, this.tablePil, this.idSource, e);
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(LOGGER, e);
 
@@ -102,9 +137,9 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 	private void preparerExecution() throws ArcException {
 		genericExecutorDao.initialize();
 		genericExecutorDao.addOperation(this.arcThreadGenericDao.preparationDefaultDao());
-		genericExecutorDao.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.getCurrentPhase(),
+		genericExecutorDao.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.currentExecutedPhase,
 				this.envExecution, this.tableMappingPilTemp));
-		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.getTablePrevious(),
+		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.previousExecutedPhaseTable,
 				this.tableTempControleOk, this.idSource));
 		genericExecutorDao.executeAsTransaction();
 	}

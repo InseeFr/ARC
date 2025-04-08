@@ -2,7 +2,9 @@ package fr.insee.arc.core.service.p4controle.bo;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
@@ -30,17 +32,18 @@ public enum ControleTypeCode {
 	public void setNom(String nom) {
 		this.nom = nom;
 	}
+	
+	private final static Map<String, ControleTypeCode> controleTypeCodeMapByNom = Stream.of(ControleTypeCode.values()).collect(Collectors.toMap(ControleTypeCode::getNom, t -> t)); 
 
 	public static ControleTypeCode getEnum(String code) throws ArcException {
 
-		List<ControleTypeCode> filtered = Arrays.asList(ControleTypeCode.values()).stream()
-				.filter(t -> t.getNom().equals(code)).collect(Collectors.toList());
-
-		if (filtered.isEmpty()) {
+		ControleTypeCode result = controleTypeCodeMapByNom.get(code);
+		
+		if (result==null) {
 			throw new ArcException(ArcExceptionMessage.CONTROLE_TYPE_NOT_FOUND, code);
 		}
 
-		return filtered.get(0);
+		return result;
 	}
 
 }

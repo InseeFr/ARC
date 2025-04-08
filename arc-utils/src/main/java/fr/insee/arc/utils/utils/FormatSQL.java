@@ -407,7 +407,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 */
 	public static String javaArrayToSqlArray(String[] colonnes) {
 		return Arrays.asList(colonnes).toString().replaceFirst("^\\[", "{").replaceFirst("\\]$", "}");
-		
 	}
 
 }

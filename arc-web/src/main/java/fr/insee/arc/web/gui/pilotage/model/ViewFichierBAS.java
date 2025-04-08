@@ -26,7 +26,6 @@ public class ViewFichierBAS extends VObject {
                 put("periodicite", new ColumnRendering(true, "label.periodicity", "6%", "text", null, true));
                 put("phase_traitement", new ColumnRendering(true, "label.step.name", "8%", "text", null, true));
                 put("etat_traitement", new ColumnRendering(true, "label.step.status", "5%", "text", null, true));
-                put("taux_ko", new ColumnRendering(true, "label.step.error", "5%", "text", null, true));
                 put("date_traitement", new ColumnRendering(true, "label.date.processing", "10%", "text", null, true));
                 put("rapport", new ColumnRendering(true, "label.step.report", "8%", "text", null, true));
                 put("nb_enr", new ColumnRendering(true, "label.step.count.line", "4%", "text", null, true));

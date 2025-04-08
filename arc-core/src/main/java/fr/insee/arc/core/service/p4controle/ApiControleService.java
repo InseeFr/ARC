@@ -38,9 +38,9 @@ public class ApiControleService extends ApiService {
 		super();
 	}
 
-	public ApiControleService(TraitementPhase aCurrentPhase, String aEnvExecution, Integer aNbEnr,
+	public ApiControleService(String aEnvExecution, Integer aNbEnr,
 			String paramBatch) {
-		super(aCurrentPhase, aEnvExecution, aNbEnr, paramBatch);
+		super(aEnvExecution, aNbEnr, paramBatch, TraitementPhase.CONTROLE);
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class ApiControleService extends ApiService {
 
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
 
-		this.maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
+		int maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
 				"ApiControleService.MAX_PARALLEL_WORKERS", 3);
 
 		this.tabIdSource = recuperationIdSource();

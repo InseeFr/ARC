@@ -60,7 +60,7 @@ public class ChargeurXmlComplexe implements IChargeur {
 		
 		this.tableTempA = threadChargementService.getTableTempA();
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
-		this.currentPhase = threadChargementService.getCurrentPhase();
+		this.currentPhase = threadChargementService.getCurrentExecutedPhase();
 		this.f = threadChargementService.getFilesInputStreamLoad().getTmpInxChargement();
 		this.fileIdCard = threadChargementService.getFileIdCard();
 		

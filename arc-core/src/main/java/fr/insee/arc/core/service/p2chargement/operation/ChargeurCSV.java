@@ -73,7 +73,7 @@ public class ChargeurCSV implements IChargeur {
 		this.dao = new ChargeurCsvDao(this.sandbox, this.fileAttributes, this.fileIdCard, this.parser);
 
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
-		this.currentPhase = threadChargementService.getCurrentPhase();
+		this.currentPhase = threadChargementService.getCurrentExecutedPhase();
 		this.streamContent = threadChargementService.getFilesInputStreamLoad().getTmpInxCSV();
 		this.streamHeader = threadChargementService.getFilesInputStreamLoad().getTmpInxChargement();
 
