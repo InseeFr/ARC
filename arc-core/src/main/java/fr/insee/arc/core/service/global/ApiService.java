@@ -152,10 +152,6 @@ public abstract class ApiService implements IConstanteNumerique {
 		requete.append(" AND ");
 		requete.append(this.getCurrentPhase()[0].getConditionExecution().getSqlFilter());
 		requete.append(" LIMIT 1 ");
-		
-		
-		System.out.println("§§§§§§§§§§");
-		System.out.println(requete.getQueryWithParameters());
 
 		
 		try {
