@@ -145,6 +145,7 @@ public class S3Template {
 	 */
 	private static String normalizePath(String path)
 	{
+		if (path == null) return null;
 		if (path.isBlank()) return path;
 		String reworkedPath = path.replace("\\", "/").replace("//", "/");
 		reworkedPath = reworkedPath.charAt(0) == '/' ? reworkedPath.substring(1) : reworkedPath;
