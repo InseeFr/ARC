@@ -69,10 +69,12 @@
 		
 		<property name="s3InputApiUri" value="#{systemEnvironment['S3_INPUT_API_URI'] ?: '${fr.insee.arc.s3.input.api.uri}' }"></property>
 		<property name="s3InputBucket" value="#{systemEnvironment['S3_INPUT_BUCKET'] ?: '${fr.insee.arc.s3.input.bucket}' }"></property>
+		<property name="s3InputDirectory" value="#{systemEnvironment['S3_INPUT_DIRECTORY'] ?: '${fr.insee.arc.s3.input.directory}' }"></property>
 		<property name="s3InputAccess" value="#{systemEnvironment['S3_INPUT_ACCESS'] ?: '${fr.insee.arc.s3.input.access}' }"></property>
 		<property name="s3InputSecret" value="#{systemEnvironment['S3_INPUT_SECRET'] ?: '${fr.insee.arc.s3.input.secret}' }"></property>		
 		<property name="s3OutputApiUri" value="#{systemEnvironment['S3_OUTPUT_API_URI'] ?: '${fr.insee.arc.s3.output.api.uri}' }"></property>
 		<property name="s3OutputBucket" value="#{systemEnvironment['S3_OUTPUT_BUCKET'] ?: '${fr.insee.arc.s3.output.bucket}' }"></property>
+		<property name="s3OutputDirectory" value="#{systemEnvironment['S3_OUTPUT_DIRECTORY'] ?: '${fr.insee.arc.s3.output.directory}' }"></property>
 		<property name="s3OutputAccess" value="#{systemEnvironment['S3_OUTPUT_ACCESS'] ?: '${fr.insee.arc.s3.output.access}' }"></property>
 		<property name="s3OutputSecret" value="#{systemEnvironment['S3_OUTPUT_SECRET'] ?: '${fr.insee.arc.s3.output.secret}' }"></property>
 		<property name="s3OutputParquetKey" value="#{systemEnvironment['S3_OUTPUT_PARQUET_KEY'] ?: '${fr.insee.arc.s3.output.parquet.key}' }"></property>	

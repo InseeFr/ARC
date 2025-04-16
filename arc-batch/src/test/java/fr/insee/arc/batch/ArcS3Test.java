@@ -90,27 +90,27 @@ public class ArcS3Test {
 		assertEquals(24, ArcS3.INPUT_BUCKET.size("test/"));
 		
 		// test des différentes listes
-		List<String> listTTTExpected = Arrays.asList("test/.exists", "test/testFile.txt", "test/foo/.exists", "test/foo/testFile.txt");
+		List<String> listTTTExpected = absolutePathList(Arrays.asList("test/.exists", "test/testFile.txt", "test/foo/.exists", "test/foo/testFile.txt"));
 		List<String> listTTTActual = ArcS3.INPUT_BUCKET.listObjectsInDirectory("test/", true, true, true);
 		assertTrue(areSameList(listTTTExpected, listTTTActual));
 		
-		List<String> listTFTExpected = Arrays.asList("test/testFile.txt", "test/foo/testFile.txt");
+		List<String> listTFTExpected = absolutePathList(Arrays.asList("test/testFile.txt", "test/foo/testFile.txt"));
 		List<String> listTFTActual = ArcS3.INPUT_BUCKET.listObjectsInDirectory("test/", true, false, true);
 		assertTrue(areSameList(listTFTExpected, listTFTActual));
 		
-		List<String> listFTTExpected = Arrays.asList("test/.exists", "test/testFile.txt", "test/foo/");
+		List<String> listFTTExpected = absolutePathList(Arrays.asList("test/.exists", "test/testFile.txt", "test/foo/"));
 		List<String> listFTTActual = ArcS3.INPUT_BUCKET.listObjectsInDirectory("test/", false, true, true);
 		assertTrue(areSameList(listFTTExpected, listFTTActual));
 		
-		List<String> listFTFExpected = Arrays.asList("test/.exists", "test/testFile.txt");
+		List<String> listFTFExpected = absolutePathList(Arrays.asList("test/.exists", "test/testFile.txt"));
 		List<String> listFTFActual = ArcS3.INPUT_BUCKET.listObjectsInDirectory("test/", false, true, false);
 		assertTrue(areSameList(listFTFExpected, listFTFActual));
 		
-		List<String> listFFTExpected = Arrays.asList("test/testFile.txt", "test/foo/");
+		List<String> listFFTExpected = absolutePathList(Arrays.asList("test/testFile.txt", "test/foo/"));
 		List<String> listFFTActual = ArcS3.INPUT_BUCKET.listObjectsInDirectory("test/", false, false, true);
 		assertTrue(areSameList(listFFTExpected, listFFTActual));
 		
-		List<String> listFFFExpected = Arrays.asList("test/testFile.txt");
+		List<String> listFFFExpected = absolutePathList(Arrays.asList("test/testFile.txt"));
 		List<String> listFFFActual = ArcS3.INPUT_BUCKET.listObjectsInDirectory("test/", false, false, false);
 		assertTrue(areSameList(listFFFExpected, listFFFActual));
 
@@ -135,6 +135,10 @@ public class ArcS3Test {
 	
 	private boolean areSameList(List<?> listExpected, List<?> listActual) {
 		return listExpected.size() == listActual.size() && listActual.containsAll(listExpected);
+	}
+
+	private List<String> absolutePathList(List<String> relativePathList) {
+		return relativePathList.stream().map(ArcS3.INPUT_BUCKET::absolutePath).toList();
 	}
 
 }
