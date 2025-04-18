@@ -14,10 +14,6 @@ import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
-import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
-import fr.insee.arc.core.service.p3normage.thread.ThreadNormageService;
-import fr.insee.arc.core.service.p4controle.thread.ThreadControleService;
-import fr.insee.arc.core.service.p5mapping.thread.ThreadMappingService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -47,7 +43,6 @@ public class MultiThreading2 {
 		this.threadModel = threadModel;
 	}
 
-	@SuppressWarnings("unchecked")
 	public ThreadMultiphaseService getInstance() throws ArcException {
 		return new ThreadMultiphaseService();
 	}
