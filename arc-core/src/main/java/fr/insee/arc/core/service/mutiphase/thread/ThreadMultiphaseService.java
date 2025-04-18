@@ -47,7 +47,7 @@ public class ThreadMultiphaseService extends ApiMultiphaseService implements Run
 
 	@Override
 	public void start() {
-		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadChargementService");
+		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadMultiPhaseService");
 		this.t = new Thread(this);
 		t.start();
 	}
@@ -59,7 +59,7 @@ public class ThreadMultiphaseService extends ApiMultiphaseService implements Run
 		int startingPhase = TraitementPhase
 				.valueOf(this.tabIdSource.get(ColumnEnum.PHASE_TRAITEMENT.getColumnName()).get(currentIndice))
 				.getOrdre();
-		
+	
 		if (startingPhase <= TraitementPhase.CHARGEMENT.getOrdre() && this.currentPhaseSet.contains(TraitementPhase.CHARGEMENT)) {
 			ThreadChargementService chargementService = new ThreadChargementService();
 			chargementService.configThread(connexion, this.currentIndice, this, this.currentPhaseSet.contains(TraitementPhase.NORMAGE),

@@ -143,7 +143,6 @@ public class ThreadOperations {
 		if (paramBatch != null && !paramBatch.equals(BatchMode.KEEP_INTERMEDIATE_DATA)) {
 			query.append("DROP TABLE IF EXISTS "+HashFileNameConversion.tableOfIdSource(this.tablePrevious,idSource)+";");
 		}
-		
 		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query);
 
 		query = new ArcPreparedStatementBuilder();
@@ -246,7 +245,7 @@ public class ThreadOperations {
 		requete.append("\n generation_composite = b.date_traitement::text ");
 
 		// Si on dispose d'un id source on met à jour seulement celui ci
-		requete.append("\n FROM " + tablePilTemp + " as b ");
+		requete.append("\n FROM " + tablePilTemp + " b ");
 		requete.append("\n WHERE a."+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 		requete.append("\n AND a.etape = 1 ; ");
 		
@@ -266,9 +265,8 @@ public class ThreadOperations {
 			requete.append("\n WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 			requete.append("\n AND etape = 1 ; ");
 		}
-		
-
 		requete.append("\n set enable_hashjoin = on; ");
+
 		return requete;
 
 	}

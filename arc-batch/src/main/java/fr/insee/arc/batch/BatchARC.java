@@ -26,6 +26,7 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.global.dao.DatabaseMaintenance;
 import fr.insee.arc.core.service.global.util.Patch;
 import fr.insee.arc.core.service.kubernetes.ApiManageExecutorDatabase;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.filesystem.BuildFileSystem;
 import fr.insee.arc.core.service.p0initialisation.metadata.SynchronizeRulesAndMetadataOperation;

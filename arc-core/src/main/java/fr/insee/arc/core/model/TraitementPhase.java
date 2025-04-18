@@ -136,7 +136,7 @@ public enum TraitementPhase {
 	}
 
 	public static List<TraitementPhase> getListPhaseBatchToLoopOver() {
-		return listPhasesBetween(TraitementPhase.CHARGEMENT, TraitementPhase.MAPPING);
+		return listPhasesBetween(TraitementPhase.CHARGEMENT, TraitementPhase.CHARGEMENT);
 	}
 	
 	public String tableRegleOfPhaseInSandbox() {

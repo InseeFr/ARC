@@ -59,8 +59,7 @@ public class PilotageOperations {
 	@SqlInjectionChecked
 	public static ArcPreparedStatementBuilder queryUpdatePilotageMapping(String tableMappingPilTemp, String idSource) {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-        query.append("UPDATE " + tableMappingPilTemp + " SET etape=2, etat_traitement = '{" + TraitementEtat.OK + "}' WHERE etat_traitement='{"
-                        + TraitementEtat.ENCOURS + "}' AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource).append(";");
+        query.append("UPDATE " + tableMappingPilTemp + " SET etape=2, etat_traitement = '{" + TraitementEtat.OK + "}' WHERE "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource).append(";");
 		return query;
 	}
 

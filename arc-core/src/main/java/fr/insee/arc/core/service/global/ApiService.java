@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.global;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,18 +146,12 @@ public abstract class ApiService implements IConstanteNumerique {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		boolean checkTodoResult = false;
 		requete.append("SELECT 1 FROM " + tablePil + " a ");
-		//requete.append("WHERE phase_traitement=" + requete.quoteText(phaseAncien.toString()));
 		requete.append("WHERE phase_traitement IN (");
 		requete.append(requete.sqlListeOfValues(phaseAncienList));
 		requete.append(") AND " + requete.quoteText(TraitementEtat.OK.toString()) + "=ANY(etat_traitement) ");
 		requete.append(" AND ");
 		requete.append(this.getCurrentPhase()[0].getConditionExecution().getSqlFilter());
 		requete.append(" LIMIT 1 ");
-		
-		
-		System.out.println("§§§§§§§§§§");
-		System.out.println(requete.getQueryWithParameters());
-
 		
 		try {
 			checkTodoResult = UtilitaireDao.get(0).hasResults(this.connexion.getCoordinatorConnection(), requete);
@@ -306,10 +301,10 @@ public abstract class ApiService implements IConstanteNumerique {
 		
 		ArcException registeredException = null;
 
-		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + this.getCurrentPhase() + " dans " + this.getCoordinatorSandbox().getSchema().toUpperCase() + " *******");
+		LoggerHelper.info(LOGGER_APISERVICE, "****** Execution " + Arrays.asList(this.getCurrentPhase()) + " dans " + this.getCoordinatorSandbox().getSchema().toUpperCase() + " *******");
 		try {
 			this.todo = checkTodo(this.getTablePil(), this.getPreviousPhase());
-			LoggerHelper.info(LOGGER_APISERVICE, "A faire - " + this.getCurrentPhase() + " : " + this.todo);
+			LoggerHelper.info(LOGGER_APISERVICE, "A faire - " + Arrays.asList(this.getCurrentPhase()) + " : " + this.todo);
 
 			if (this.initialiser()) {
 				try {

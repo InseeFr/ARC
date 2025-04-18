@@ -5,6 +5,7 @@ import java.util.Map;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ServiceReporting;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 
 public class PhaseThreadFactory extends Thread {
 
@@ -27,13 +28,34 @@ public class PhaseThreadFactory extends Thread {
 
 	public void execute() {
 
-		this.report = ApiServiceFactory.getService( //
-				getPhaseName(), //
-				mapParam.get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT), //
-				Integer.parseInt(mapParam.get(capacityParameterName())), //
-				Boolean.parseBoolean(PhaseParameterKeys.KEY_FOR_KEEP_IN_DATABASE) ? null
-						: mapParam.get(PhaseParameterKeys.KEY_FOR_BATCH_MODE)) //
-				.invokeApi();
+		
+		String sandbox = mapParam.get(PhaseParameterKeys.KEY_FOR_EXECUTION_ENVIRONMENT);
+		Integer capacity = Integer.parseInt(mapParam.get(capacityParameterName()));
+		String keepIntermediateData = Boolean.parseBoolean(PhaseParameterKeys.KEY_FOR_KEEP_IN_DATABASE) ? null
+				: mapParam.get(PhaseParameterKeys.KEY_FOR_BATCH_MODE);
+
+		switch (getPhaseName()) {
+		case CHARGEMENT: case NORMAGE : case CONTROLE : case MAPPING :
+			// pipeline phases are invoked by api multiphase
+			this.report = new ApiMultiphaseService(sandbox, capacity, keepIntermediateData
+					, TraitementPhase.CHARGEMENT
+					, TraitementPhase.NORMAGE
+					, TraitementPhase.CONTROLE
+					, TraitementPhase.MAPPING
+					).invokeApi();
+			break;
+		default:
+			this.report = ApiServiceFactory.getService( //
+					getPhaseName(), //
+					sandbox, //
+					capacity, //
+					keepIntermediateData) //
+					.invokeApi();
+			break;
+		
+		}
+		
+		
 
 	}
 

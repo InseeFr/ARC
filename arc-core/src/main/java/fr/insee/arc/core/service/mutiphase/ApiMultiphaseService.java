@@ -28,7 +28,7 @@ public class ApiMultiphaseService extends ApiService {
 
 	public ApiMultiphaseService(String aEnvExecution, Integer aNbEnr,
 			String paramBatch, TraitementPhase...aCurrentPhase) {
-		super(aEnvExecution, aNbEnr, paramBatch, aCurrentPhase[0]);
+		super(aEnvExecution, aNbEnr, paramBatch, aCurrentPhase);
 	}
 
 		
@@ -50,7 +50,7 @@ public class ApiMultiphaseService extends ApiService {
 		this.listeNorme = NormeRules.getNormesBase(this.connexion.getCoordinatorConnection(), this.envExecution);
 
 		int maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
-				"ApiChargementService.MAX_PARALLEL_WORKERS", 4);
+				"ApiNormageService.MAX_PARALLEL_WORKERS", 4);
 
 		// Récupérer la liste des fichiers selectionnés
 		StaticLoggerDispatcher.info(LOGGER, "Récupérer la liste des fichiers selectionnés");
