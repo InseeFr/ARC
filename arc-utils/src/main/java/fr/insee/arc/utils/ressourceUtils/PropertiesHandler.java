@@ -78,11 +78,13 @@ public class PropertiesHandler {
 
 	private String s3InputApiUri;
 	private String s3InputBucket;
+	private String s3InputDirectory;
 	private String s3InputAccess;
 	private String s3InputSecret;
 	
 	private String s3OutputApiUri;
 	private String s3OutputBucket;
+	private String s3OutputDirectory;
 	private String s3OutputAccess;
 	private String s3OutputSecret;
 	private String s3OutputParquetKey;
@@ -460,6 +462,14 @@ public class PropertiesHandler {
 		this.s3InputBucket = s3InputBucket;
 	}
 
+	public String getS3InputDirectory() {
+		return s3InputDirectory;
+	}
+
+	public void setS3InputDirectory(String s3InputDirectory) {
+		this.s3InputDirectory = s3InputDirectory;
+	}
+
 	public String getS3InputAccess() {
 		return s3InputAccess;
 	}
@@ -490,6 +500,14 @@ public class PropertiesHandler {
 
 	public void setS3OutputBucket(String s3OutputBucket) {
 		this.s3OutputBucket = s3OutputBucket;
+	}
+
+	public String getS3OutputDirectory() {
+		return s3OutputDirectory;
+	}
+
+	public void setS3OutputDirectory(String s3OutputDirectory) {
+		this.s3OutputDirectory = s3OutputDirectory;
 	}
 
 	public String getS3OutputAccess() {

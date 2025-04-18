@@ -191,10 +191,12 @@ ___
 |--------------------|---------------------------|--------------------------------------|
 | s3InputApiUri      | S3_INPUT_API_URI          | fr.insee.arc.s3.input.api.uri        |
 | s3InputBucket      | S3_INPUT_BUCKET           | fr.insee.arc.s3.input.bucket         |
+| s3InputDirectory   | S3_INPUT_DIRECTORY        | fr.insee.arc.s3.input.directory      |
 | s3InputAccess      | S3_INPUT_ACCESS           | fr.insee.arc.s3.input.access         |
 | s3InputSecret      | S3_INPUT_SECRET           | fr.insee.arc.s3.input.secret         |
 | s3OutputApiUri     | S3_OUTPUT_API_URI         | fr.insee.arc.s3.output.api.uri       |
 | s3OutputBucket     | S3_OUTPUT_BUCKET          | fr.insee.arc.s3.output.bucket        |
+| s3OutputDirectory  | S3_OUTPUT_DIRECTORY       | fr.insee.arc.s3.output.directory     |
 | s3OutputAccess     | S3_OUTPUT_ACCESS          | fr.insee.arc.s3.output.access        |
 | s3OutputSecret     | S3_OUTPUT_SECRET          | fr.insee.arc.s3.output.secret        |
 | s3OutputParquetKey | S3_OUTPUT_PARQUET_KEY     | fr.insee.arc.s3.output.parquet.key   |

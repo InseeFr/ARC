@@ -24,7 +24,7 @@ public class ApiServiceFactoryTest {
 
 			assertEquals(null, p.getParamBatch());
 			assertEquals(capacity, p.getNbEnr().intValue());
-			assertEquals(p.getCurrentPhase().toString(), arcPhase.toString());
+			assertEquals(p.getCurrentPhase()[0].toString(), arcPhase.toString());
 		}
 
 	}
