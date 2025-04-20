@@ -181,6 +181,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		try {
 			
 			ArcPreparedStatementBuilder query = PilotageOperations.queryBuildTablePilotage(tablePil, tablePilTemp);
+			query.append(FormatSQL.analyzeSecured(tablePil));
 			Stream.of(phasesToRegister).forEach(p -> query.append(PilotageOperations.queryCopieTablePilotage(tablePil, tablePilTemp, p.previousPhase(), p, nbEnr)));
 			query.append(FormatSQL.analyzeSecured(tablePil));
 			query.append(FormatSQL.analyzeSecured(tablePilTemp));
