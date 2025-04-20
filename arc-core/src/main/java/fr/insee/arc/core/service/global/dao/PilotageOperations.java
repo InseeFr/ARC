@@ -81,6 +81,8 @@ public class PilotageOperations {
 		requete.append("\n SELECT *  FROM " + tablePil + " a ");
 		requete.append("\n LIMIT 0; ");
 		
+		requete.append("CREATE INDEX idx_table_pil_temp ON " + tablePilTemp + "(id_source);");
+		
 		return requete;
 	}
 	
@@ -109,13 +111,14 @@ public class PilotageOperations {
 
 		Date date = new Date();
 
+		requete.append("\n BEGIN; ");
 		requete.append("\n WITH prep AS (");
 		requete.append("\n SELECT a.*, count(1) OVER (ORDER BY date_traitement, " + ColumnEnum.ID_SOURCE.getColumnName()
 				+ ") as cum_enr ");
 		requete.append("\n FROM " + tablePil + " a ");
 		requete.append("\n WHERE phase_traitement='" + phaseAncien + "'  AND '" + TraitementEtat.OK
 				+ "'=ANY(etat_traitement) and etape=1 ) ");
-		requete.append("\n , mark AS (SELECT a.* FROM prep a WHERE cum_enr<" + nbEnr + " ");
+		requete.append("\n , mark AS MATERIALIZED (SELECT a.* FROM prep a WHERE cum_enr<" + nbEnr + " ");
 		requete.append("\n UNION   (SELECT a.* FROM prep a LIMIT 1)) ");
 
 		// update the line in pilotage with etape=3 for the previous step
@@ -137,8 +140,9 @@ public class PilotageOperations {
 		requete.append("\n RETURNING *) ");
 
 		requete.append("\n INSERT INTO " + tablePilTemp + " SELECT * from insert; ");
+	
+		requete.append("\n COMMIT; ");
 		
-		requete.append("\n ANALYZE " + tablePilTemp + ";");
 		return requete;
 	}
 	
