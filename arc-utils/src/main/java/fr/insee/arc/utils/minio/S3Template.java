@@ -83,7 +83,7 @@ public class S3Template {
 			try {
 				buildMinioClient();
 			} catch (KeyManagementException | NoSuchAlgorithmException e) {
-				e.printStackTrace();
+				LoggerHelper.error(LOGGER, e);
 			}
 		}
 

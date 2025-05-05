@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.util.Arrays;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import fr.insee.arc.utils.consumer.ThrowingFunction;
@@ -14,7 +13,6 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.kubernetes.provider.KubernetesServiceLayer;
 import fr.insee.arc.utils.utils.ManipString;
-import fr.insee.arc.utils.webutils.WebAttributesName;
 
 @Service("properties")
 public class PropertiesHandler {
