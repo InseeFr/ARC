@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ThreadTemplate;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
 import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
@@ -18,7 +17,7 @@ import fr.insee.arc.core.service.p4controle.thread.ThreadControleService;
 import fr.insee.arc.core.service.p5mapping.thread.ThreadMappingService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 
-public class ThreadMultiphaseService extends ThreadTemplate implements Runnable, IThread<ApiMultiphaseService> {
+public class ThreadMultiphaseService extends ThreadMultiphaseTemplate implements Runnable, IThread<ApiMultiphaseService> {
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadMultiphaseService.class);
 

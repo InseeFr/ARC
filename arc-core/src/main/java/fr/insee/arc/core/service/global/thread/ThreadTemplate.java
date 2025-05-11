@@ -1,4 +1,4 @@
-package fr.insee.arc.core.service.global;
+package fr.insee.arc.core.service.global.thread;
 
 import java.util.List;
 import java.util.Map;
