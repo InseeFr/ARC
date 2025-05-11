@@ -332,15 +332,6 @@ public class ThreadChargementService extends ThreadTemplate {
 		return erreur;
 	}
 
-
-	public ScalableConnection getConnexion() {
-		return connexion;
-	}
-
-	public void setConnexion(ScalableConnection connexion) {
-		this.connexion = connexion;
-	}
-
 	public String getTableChargementPilTemp() {
 		return tableChargementPilTemp;
 	}

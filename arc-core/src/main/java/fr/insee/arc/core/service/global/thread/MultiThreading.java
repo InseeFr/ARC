@@ -43,7 +43,7 @@ public class MultiThreading {
 		this.threadModel = threadModel;
 	}
 
-	public ThreadMultiphaseService getInstance() throws ArcException {
+	public ThreadMultiphaseService getInstance() {
 		return new ThreadMultiphaseService();
 	}
 
@@ -59,7 +59,7 @@ public class MultiThreading {
 	 * @throws ArcException
 	 */
 	public void execute(int maxParallelWorkers, List<String> listIdSource, String envExecution,
-			String restrictedUserName) throws ArcException {
+			String restrictedUserName) {
 
 		StaticLoggerDispatcher.info(LOGGER, "/* Generation des threads multiphase */");
 
@@ -132,7 +132,7 @@ public class MultiThreading {
 	 * @throws ArcException
 	 */
 	private void iterateOverThreadConnections(Map<Integer, List<Integer>> filesByNods,
-			List<ScalableConnection> connexionList) throws ArcException {
+			List<ScalableConnection> connexionList) {
 		int currentIndice;
 
 		// register thread by connection (1-1 relationship)

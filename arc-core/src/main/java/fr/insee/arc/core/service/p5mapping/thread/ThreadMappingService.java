@@ -177,9 +177,4 @@ public class ThreadMappingService extends ThreadTemplate {
 		return listeJeuxDeRegles.get(0);
 	}
 
-	@Override
-	public ScalableConnection getConnexion() {
-		return connexion;
-	}
-
 }

@@ -273,13 +273,4 @@ public class ThreadControleService extends ThreadTemplate {
 		this.sjdr = sjdr;
 	}
 
-	@Override
-	public ScalableConnection getConnexion() {
-		return connexion;
-	}
-
-	public void setConnexion(ScalableConnection connexion) {
-		this.connexion = connexion;
-	}
-
 }

@@ -248,12 +248,4 @@ public class ThreadNormageService extends ThreadTemplate {
 
 	}
 
-	public ScalableConnection getConnexion() {
-		return connexion;
-	}
-
-	public void setConnexion(ScalableConnection connexion) {
-		this.connexion = connexion;
-	}
-
 }

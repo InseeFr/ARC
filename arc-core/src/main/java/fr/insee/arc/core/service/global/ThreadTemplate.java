@@ -46,6 +46,9 @@ public class ThreadTemplate {
 	public String getDirectoryIn() {
 		return directoryIn;
 	}
+	public Map<String, List<String>> getTabIdSource() {
+		return tabIdSource;
+	}
 	
 	
 }
