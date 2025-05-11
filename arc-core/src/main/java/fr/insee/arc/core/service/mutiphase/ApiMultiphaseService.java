@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
-import fr.insee.arc.core.service.global.thread.MultiThreading2;
+import fr.insee.arc.core.service.global.thread.MultiThreading;
 import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
 import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.core.util.BDParameters;
@@ -56,7 +56,7 @@ public class ApiMultiphaseService extends ApiService {
 		
 		this.tabIdSource = pilotageListIdsource(this.tablePilTemp);
 
-		MultiThreading2 mt = new MultiThreading2(this);
+		MultiThreading mt = new MultiThreading(this);
 		
 		mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution,
 				properties.getDatabaseRestrictedUsername());

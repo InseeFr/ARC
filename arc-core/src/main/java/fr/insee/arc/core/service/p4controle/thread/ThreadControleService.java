@@ -7,7 +7,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.ThreadTemplate;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.GenericQueryDao;
@@ -18,7 +18,6 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
 import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
@@ -37,7 +36,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadControleService extends ApiMultiphaseService {
+public class ThreadControleService extends ThreadTemplate {
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadControleService.class);
 	
@@ -73,7 +72,7 @@ public class ThreadControleService extends ApiMultiphaseService {
 
 		// Nom des tables temporaires
 		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
-		this.tableControlePilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+		this.tableControlePilTemp = TABLE_PILOTAGE_THREAD;
 
 		// tables finales
 		this.tableOutOk = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.OK);

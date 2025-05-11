@@ -11,7 +11,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.ThreadTemplate;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
@@ -20,7 +20,6 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p2chargement.archiveloader.ArchiveChargerFactory;
 import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad;
@@ -44,7 +43,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadChargementService extends ApiMultiphaseService {
+public class ThreadChargementService extends ThreadTemplate {
 	private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
 
 	private String idSource;
@@ -86,7 +85,7 @@ public class ThreadChargementService extends ApiMultiphaseService {
 		// table a de reception de l'ensemble des fichiers avec nom de colonnes
 		// courts
 		this.tableTempA = "a";
-		this.tableChargementPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+		this.tableChargementPilTemp = TABLE_PILOTAGE_THREAD;
 
 		// table de sortie des données dans l'application (hors du module)
 		this.tableChargementOK = TableNaming.phaseDataTableName(envExecution, this.currentExecutedPhase,
@@ -334,7 +333,6 @@ public class ThreadChargementService extends ApiMultiphaseService {
 	}
 
 
-	@Override
 	public ScalableConnection getConnexion() {
 		return connexion;
 	}

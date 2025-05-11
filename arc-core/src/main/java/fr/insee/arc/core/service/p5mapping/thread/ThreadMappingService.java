@@ -9,7 +9,7 @@ import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.ThreadTemplate;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
@@ -20,8 +20,6 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.global.thread.IThread;
-import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
@@ -36,7 +34,7 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadMappingService extends ApiMultiphaseService {
+public class ThreadMappingService extends ThreadTemplate {
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
 	
@@ -71,7 +69,7 @@ public class ThreadMappingService extends ApiMultiphaseService {
 		this.paramBatch = anApi.getParamBatch();
 
 		this.tableTempControleOk = "tableTempControleOk".toLowerCase();
-		this.tableMappingPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+		this.tableMappingPilTemp = TABLE_PILOTAGE_THREAD;
 
 		this.tablePil = anApi.getTablePil();
 		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());

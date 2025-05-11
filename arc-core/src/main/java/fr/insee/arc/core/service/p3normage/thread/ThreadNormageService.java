@@ -11,7 +11,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
-import fr.insee.arc.core.service.global.ApiService;
+import fr.insee.arc.core.service.global.ThreadTemplate;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
@@ -21,7 +21,6 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p3normage.operation.NormageOperation;
 import fr.insee.arc.core.service.p3normage.operation.NormageRulesOperation;
@@ -50,11 +49,10 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author Manuel SOULIER
  *
  */
-public class ThreadNormageService extends ApiMultiphaseService {
+public class ThreadNormageService extends ThreadTemplate {
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadNormageService.class);
 
-	private Thread t;
 
 	private String idSource;
 	
@@ -86,7 +84,7 @@ public class ThreadNormageService extends ApiMultiphaseService {
 		// tables du thread
 
 		this.tableNormageDataTemp = FormatSQL.temporaryTableName("normage_data_temp");
-		this.tableNormagePilTemp = ApiService.TABLE_PILOTAGE_THREAD;
+		this.tableNormagePilTemp = TABLE_PILOTAGE_THREAD;
 
 		this.tableNormageOKTemp = FormatSQL.temporaryTableName("ok_Temp");
 		this.tableNormageKOTemp = FormatSQL.temporaryTableName("ko_Temp");
@@ -256,10 +254,6 @@ public class ThreadNormageService extends ApiMultiphaseService {
 
 	public void setConnexion(ScalableConnection connexion) {
 		this.connexion = connexion;
-	}
-
-	public Thread getT() {
-		return t;
 	}
 
 }

@@ -12,10 +12,8 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.p2chargement.thread.ThreadChargementService;
-import fr.insee.arc.core.service.p3normage.thread.ThreadNormageService;
-import fr.insee.arc.core.service.p4controle.thread.ThreadControleService;
-import fr.insee.arc.core.service.p5mapping.thread.ThreadMappingService;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
+import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -32,41 +30,21 @@ import fr.insee.arc.utils.utils.FormatSQL;
  * @param <U> : U is the thread model class
  * @param <T> : T is the thread class
  */
-public class MultiThreading<U, T extends IThread<U>> {
+public class MultiThreading {
 
 	protected static final Logger LOGGER = LogManager.getLogger(MultiThreading.class);
 
 	// thread model
-	U threadModel;
+	ApiMultiphaseService threadModel;
 
-	// thread template
-	T threadTemplate;
 
-	public MultiThreading(U threadModel, T threadTemplate) {
+	public MultiThreading(ApiMultiphaseService threadModel) {
 		super();
 		this.threadModel = threadModel;
-		this.threadTemplate = threadTemplate;
 	}
 
-	@SuppressWarnings("unchecked")
-	public T getInstance() throws ArcException {
-		if (threadTemplate instanceof ThreadChargementService) {
-			return (T) new ThreadChargementService();
-		}
-
-		if (threadTemplate instanceof ThreadNormageService) {
-			return (T) new ThreadNormageService();
-		}
-
-		if (threadTemplate instanceof ThreadControleService) {
-			return (T) new ThreadControleService();
-		}
-
-		if (threadTemplate instanceof ThreadMappingService) {
-			return (T) new ThreadMappingService();
-		}
-
-		throw new ArcException(ArcExceptionMessage.MULTITHREADING_CLASS_NOT_USEABLE);
+	public ThreadMultiphaseService getInstance() throws ArcException {
+		return new ThreadMultiphaseService();
 	}
 
 	/**
@@ -83,7 +61,7 @@ public class MultiThreading<U, T extends IThread<U>> {
 	public void execute(int maxParallelWorkers, List<String> listIdSource, String envExecution,
 			String restrictedUserName) throws ArcException {
 
-		StaticLoggerDispatcher.info(LOGGER, "/* Generation des threads pour " + threadTemplate.getClass() + " */");
+		StaticLoggerDispatcher.info(LOGGER, "/* Generation des threads multiphase */");
 
 		long dateDebut = java.lang.System.currentTimeMillis();
 
@@ -158,7 +136,7 @@ public class MultiThreading<U, T extends IThread<U>> {
 		int currentIndice;
 
 		// register thread by connection (1-1 relationship)
-		Map<ScalableConnection, T> threadByConnection = new HashMap<>();
+		Map<ScalableConnection, ThreadMultiphaseService> threadByConnection = new HashMap<>();
 
 		// iterate thru connexionList
 
@@ -176,7 +154,7 @@ public class MultiThreading<U, T extends IThread<U>> {
 						&& !filesByNods.get(connection.getNodIdentifier()).isEmpty()) {
 					currentIndice = filesByNods.get(connection.getNodIdentifier()).remove(0);
 
-					T r = getInstance();
+					ThreadMultiphaseService r = getInstance();
 					r.configThread(connection, currentIndice, threadModel);
 					r.start();
 

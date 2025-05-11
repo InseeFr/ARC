@@ -38,11 +38,6 @@ public abstract class ApiService implements IConstanteNumerique {
 
 	protected static final Logger LOGGER_APISERVICE = LogManager.getLogger(ApiService.class);
 
-	// anti-spam delay when thread chain error
-	protected static final int PREVENT_ERROR_SPAM_DELAY = 100;
-
-	protected static final String TABLE_PILOTAGE_THREAD = "p";
-	
 	protected ScalableConnection connexion;
 
 	protected Sandbox coordinatorSandbox;
