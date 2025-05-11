@@ -21,9 +21,10 @@ import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.IThread;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
-import fr.insee.arc.core.service.p5mapping.ApiMappingService;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
+import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
 import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
 import fr.insee.arc.core.service.p5mapping.operation.MappingOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -35,11 +36,11 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadMappingService extends ApiMappingService implements Runnable, IThread<ApiMappingService> {
+public class ThreadMappingService extends ApiMultiphaseService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadMappingService.class);
-
-	private Thread t;
+	
+    private static final String PREFIX_IDENTIFIANT_RUBRIQUE = "i_";
 	
 	private String idSource;
 
@@ -55,6 +56,9 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 	private TraitementPhase currentExecutedPhase = TraitementPhase.MAPPING;
 	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
 	private String previousExecutedPhaseTable;
+	
+    private MappingQueriesFactory regleMappingFactory;
+
 	
 	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService anApi, boolean beginNextPhase, boolean cleanPhase) {
 
@@ -78,39 +82,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 		this.arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, beginNextPhase, cleanPhase, connexion, tablePil, tablePilTemp, tableMappingPilTemp,
 				this.previousExecutedPhaseTable, paramBatch, idSource);
 	}
-	
-	
-	@Override
-	public void configThread(ScalableConnection connexion, int currentIndice, ApiMappingService anApi) {
 
-		this.connexion = connexion;
-		this.indice = currentIndice;
-		this.idSource = anApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(indice);
-		this.envExecution = anApi.getEnvExecution();
-		this.tablePilTemp = anApi.getTablePilTemp();
-		this.tabIdSource = anApi.getTabIdSource();
-		this.paramBatch = anApi.getParamBatch();
-
-		this.tableTempControleOk = "tableTempControleOk";
-		this.tableMappingPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
-
-		this.tablePil = anApi.getTablePil();
-		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
-
-		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
-		
-		// thread generic dao
-		this.arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, false, true, connexion, tablePil, tablePilTemp, tableMappingPilTemp,
-				this.previousExecutedPhaseTable, paramBatch, idSource);
-	}
-
-	public void start() {
-		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadMappingService");
-		t = new Thread(this);
-		t.start();
-	}
-
-	@Override
 	public void run() {
 		try {
 			this.preparerExecution();
@@ -150,7 +122,7 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 
 		MappingOperation serviceMapping = new MappingOperation();
 		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(),
-				this.getEnvExecution(), this.tableTempControleOk, getPrefixidentifiantrubrique());
+				this.getEnvExecution(), this.tableTempControleOk, PREFIX_IDENTIFIANT_RUBRIQUE);
 
 		/*
 		 * Récupération de l'id_famille
@@ -212,8 +184,4 @@ public class ThreadMappingService extends ApiMappingService implements Runnable,
 		return connexion;
 	}
 
-	@Override
-	public Thread getT() {
-		return t;
-	}
 }

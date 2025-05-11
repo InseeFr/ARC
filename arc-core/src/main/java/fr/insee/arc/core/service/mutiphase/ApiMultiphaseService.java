@@ -11,7 +11,6 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.thread.MultiThreading2;
 import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
-import fr.insee.arc.core.service.p2chargement.ApiChargementService;
 import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -20,7 +19,7 @@ import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class ApiMultiphaseService extends ApiService {
-	private static final Logger LOGGER = LogManager.getLogger(ApiChargementService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ApiMultiphaseService.class);
 
 	public ApiMultiphaseService() {
 		super();

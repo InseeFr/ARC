@@ -72,7 +72,7 @@ public class ThreadOperations {
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		
-				// nettoyage des objets base de données du thread
+		// nettoyage des objets base de données du thread
 		if (cleanPhase)
 		{
 			query.append(ThreadOperations.cleanThread());

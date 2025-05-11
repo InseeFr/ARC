@@ -133,8 +133,11 @@ public class FileUtilsArc {
 	
 	/**
 	 * Deplacer un fichier d'un repertoire source vers répertoire cible (pas de
-	 * slash en fin du nom de repertoire) Si le fichier existe déjà, il est écrasé
-	 *
+	 * slash en fin du nom de repertoire) 
+
+	 * si le fichier source n'existe pas, la commande est ignorée
+	 * si le fichier destination existe déjà, il est écrasé
+	 * 
 	 * @param dirIn    , répertoire en entrée, pas de slash à la fin
 	 * @param dirOut   , répertoire en sortie, pas de slash à la fin
 	 * @param FileName , nom du fichier
@@ -143,11 +146,16 @@ public class FileUtilsArc {
 	public static void deplacerFichier(String dirIn, String dirOut, String fileNameIn, String fileNameOut)
 			throws ArcException {
 		if (!dirIn.equals(dirOut)) {
+
 			File fileIn = new File(dirIn + File.separator + fileNameIn);
+			if (!fileIn.exists()) {return;}
+			
 			File fileOut = new File(dirOut + File.separator + fileNameOut);
+			
 			if (fileOut.exists()) {
 				FileUtilsArc.delete(fileOut);
 			}
+			
 			FileUtilsArc.renameTo(fileIn, fileOut);
 		}
 	}

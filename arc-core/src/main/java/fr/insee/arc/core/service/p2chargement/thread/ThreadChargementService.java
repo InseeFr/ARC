@@ -20,9 +20,8 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.global.thread.IThread;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
-import fr.insee.arc.core.service.p2chargement.ApiChargementService;
 import fr.insee.arc.core.service.p2chargement.archiveloader.ArchiveChargerFactory;
 import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad;
 import fr.insee.arc.core.service.p2chargement.archiveloader.IArchiveFileLoader;
@@ -45,10 +44,8 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadChargementService extends ApiChargementService implements Runnable, IThread<ApiChargementService> {
+public class ThreadChargementService extends ApiMultiphaseService {
 	private static final Logger LOGGER = LogManager.getLogger(ThreadChargementService.class);
-
-	private Thread t;
 
 	private String idSource;
 	
@@ -86,7 +83,7 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		// Noms des tables temporaires utiles au chargement
 		// nom court pour les perfs
 
-		// table A de reception de l'ensemble des fichiers avec nom de colonnes
+		// table a de reception de l'ensemble des fichiers avec nom de colonnes
 		// courts
 		this.tableTempA = "a";
 		this.tableChargementPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
@@ -104,47 +101,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 
 	}
 	
-
-	@Override
-	public void configThread(ScalableConnection connexion, int currentIndice, ApiChargementService aApi) {
-
-		this.envExecution = aApi.getEnvExecution();
-		this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
-		this.connexion = connexion;
-		this.container = aApi.getTabIdSource().get("container").get(currentIndice);
-		this.tablePilTemp = aApi.getTablePilTemp();
-		this.tablePil = aApi.getTablePil();
-		this.paramBatch = aApi.getParamBatch();
-		this.directoryIn = aApi.getDirectoryIn();
-		this.listeNorme = aApi.getListeNorme();
-
-		// Noms des tables temporaires utiles au chargement
-		// nom court pour les perfs
-
-		// table A de reception de l'ensemble des fichiers avec nom de colonnes
-		// courts
-		this.tableTempA = "A";
-		this.tableChargementPilTemp = ApiService.TABLE_PILOTAGE_THREAD;
-
-		// table de sortie des données dans l'application (hors du module)
-		this.tableChargementOK = TableNaming.phaseDataTableName(envExecution, this.currentExecutedPhase,
-				TraitementEtat.OK);
-
-		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
-		
-		// thread generic dao
-		arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, false, true, connexion, tablePil, tablePilTemp, tableChargementPilTemp,
-				previousExecutedPhaseTable, paramBatch, idSource);
-
-	}
-
-	public void start() {
-		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadChargementService");
-		this.t = new Thread(this);
-		t.start();
-	}
-
-	@Override
 	public void run() {
 		StaticLoggerDispatcher.info(LOGGER, "Chargement des Fichiers");
 
@@ -377,13 +333,6 @@ public class ThreadChargementService extends ApiChargementService implements Run
 		return erreur;
 	}
 
-	/*
-	 * Gettes-Setter
-	 */
-	@Override
-	public Thread getT() {
-		return t;
-	}
 
 	@Override
 	public ScalableConnection getConnexion() {

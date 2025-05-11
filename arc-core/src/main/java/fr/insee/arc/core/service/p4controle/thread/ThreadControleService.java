@@ -18,9 +18,8 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.global.thread.IThread;
+import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
-import fr.insee.arc.core.service.p4controle.ApiControleService;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
 import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
 import fr.insee.arc.core.service.p4controle.dao.ThreadControleQueryBuilder;
@@ -38,11 +37,9 @@ import fr.insee.arc.utils.utils.Sleep;
  * @author S4LWO8
  *
  */
-public class ThreadControleService extends ApiControleService implements Runnable, IThread<ApiControleService> {
+public class ThreadControleService extends ApiMultiphaseService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ThreadControleService.class);
-
-	private Thread t = null;
 	
 	private String idSource;
 	
@@ -61,38 +58,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	private TraitementPhase currentExecutedPhase = TraitementPhase.CONTROLE;
 	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
 	private String previousExecutedPhaseTable;
-	
-
-	@Override
-	public void configThread(ScalableConnection connexion, int currentIndice, ApiControleService theApi) {
-
-		this.envExecution = theApi.getEnvExecution();
-		this.idSource = theApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
-		this.connexion = connexion;
-		this.tablePil = theApi.getTablePil();
-		this.tablePilTemp = theApi.getTablePilTemp();
-		this.tabIdSource=theApi.getTabIdSource();
-		this.paramBatch=theApi.getParamBatch();
-
-		this.sjdr = new ServiceJeuDeRegleOperation();
-
-		// Nom des tables temporaires
-		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
-		this.tableControlePilTemp = ApiService.TABLE_PILOTAGE_THREAD;
-
-		// tables finales
-		this.tableOutOk = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.OK);
-		this.tableOutKo = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.KO);
-		
-
-		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
-
-		
-		// arc thread dao
-		arcThreadGenericDao=new ThreadOperations(this.currentExecutedPhase, false, true, connexion, tablePil, tablePilTemp, tableControlePilTemp, previousExecutedPhaseTable, paramBatch, idSource);
-    	genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
-
-	}
 
 	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService theApi, boolean beginNextPhase, boolean cleanPhase) {
 
@@ -123,7 +88,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 	}
 	
 	
-	@Override
 	public void run() {
 		try {
 
@@ -143,12 +107,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 			}
 			Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
 		}
-	}
-
-	public void start() {
-		StaticLoggerDispatcher.debug(LOGGER, "Starting ThreadControleService");
-		t = new Thread(this);
-	    t.start();
 	}
 
 	/**
@@ -314,11 +272,6 @@ public class ThreadControleService extends ApiControleService implements Runnabl
 
 	public void setSjdr(ServiceJeuDeRegleOperation sjdr) {
 		this.sjdr = sjdr;
-	}
-
-	@Override
-	public Thread getT() {
-		return t;
 	}
 
 	@Override

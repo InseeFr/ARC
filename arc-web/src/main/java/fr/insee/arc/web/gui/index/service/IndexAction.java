@@ -32,7 +32,7 @@ public class IndexAction extends ArcWebGenericService<ModelIndex,IndexDao> {
 		
 		views.setViewIndex(vObjectService.preInitialize(arcModel.getViewIndex()));
 		
-		putVObject(views.getViewIndex(), t -> initializeIndex(t));
+		putVObject(views.getViewIndex(), this::initializeIndex);
 
 		loggerDispatcher.debug("putAllVObjects() end", LOGGER);
 	}

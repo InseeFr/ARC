@@ -3,7 +3,6 @@ package fr.insee.arc.core.factory;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.mutiphase.ApiMultiphaseService;
-import fr.insee.arc.core.service.p4controle.ApiControleService;
 
 public class ApiControleServiceFactory implements IServiceFactory {
 

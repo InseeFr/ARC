@@ -1,6 +1,5 @@
 package fr.insee.arc.core.factory;
 
-import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.p1reception.ApiReceptionService;
 
