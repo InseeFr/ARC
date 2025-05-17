@@ -19,7 +19,9 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
+import fr.insee.arc.core.service.global.thread.ThreadConstant;
 import fr.insee.arc.core.service.global.thread.ThreadTemplate;
+import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
@@ -55,9 +57,6 @@ public class ThreadMappingService extends ThreadTemplate {
 	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
 	private String previousExecutedPhaseTable;
 	
-    private MappingQueriesFactory regleMappingFactory;
-
-	
 	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService anApi, boolean beginNextPhase, boolean cleanPhase) {
 
 		this.connexion = connexion;
@@ -69,7 +68,7 @@ public class ThreadMappingService extends ThreadTemplate {
 		this.paramBatch = anApi.getParamBatch();
 
 		this.tableTempControleOk = "tableTempControleOk".toLowerCase();
-		this.tableMappingPilTemp = TABLE_PILOTAGE_THREAD;
+		this.tableMappingPilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
 		this.tablePil = anApi.getTablePil();
 		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
@@ -97,7 +96,7 @@ public class ThreadMappingService extends ThreadTemplate {
 				StaticLoggerDispatcher.error(LOGGER, e);
 
 			}
-			Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
+			Sleep.sleep(ThreadConstant.PREVENT_ERROR_SPAM_DELAY);
 		}
 	}
 
@@ -119,7 +118,7 @@ public class ThreadMappingService extends ThreadTemplate {
 		JeuDeRegle jdr = getTheRulesSetOfTheFile();
 
 		MappingOperation serviceMapping = new MappingOperation();
-		this.regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(),
+	    MappingQueriesFactory regleMappingFactory = serviceMapping.construireRegleMappingFactory(this.connexion.getExecutorConnection(),
 				this.getEnvExecution(), this.tableTempControleOk, PREFIX_IDENTIFIANT_RUBRIQUE);
 
 		/*
@@ -131,7 +130,7 @@ public class ThreadMappingService extends ThreadTemplate {
 		 * Instancier une requête de mapping générique pour ce jeu de règles.
 		 */
 		MappingQueries requeteMapping = new MappingQueries(this.connexion.getExecutorConnection(),
-				this.regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk,
+				regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk,
 				this.indice);
 		/*
 		 * Construire la requête de mapping (dérivation des règles)

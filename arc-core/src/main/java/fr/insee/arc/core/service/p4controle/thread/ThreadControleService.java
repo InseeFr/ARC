@@ -17,7 +17,9 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
+import fr.insee.arc.core.service.global.thread.ThreadConstant;
 import fr.insee.arc.core.service.global.thread.ThreadTemplate;
+import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
 import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
@@ -72,7 +74,7 @@ public class ThreadControleService extends ThreadTemplate {
 
 		// Nom des tables temporaires
 		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
-		this.tableControlePilTemp = TABLE_PILOTAGE_THREAD;
+		this.tableControlePilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
 		// tables finales
 		this.tableOutOk = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase, TraitementEtat.OK);
@@ -104,7 +106,7 @@ public class ThreadControleService extends ThreadTemplate {
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(LOGGER, e2);
 			}
-			Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
+			Sleep.sleep(ThreadConstant.PREVENT_ERROR_SPAM_DELAY);
 		}
 	}
 
@@ -228,6 +230,11 @@ public class ThreadControleService extends ThreadTemplate {
 		String tableIdSourceKO = HashFileNameConversion.tableOfIdSource(tableOutKo, this.idSource);
 		query.append(TableOperations.createTableInherit(tableOutKoTemp, tableIdSourceKO));
 
+		query.append(FormatSQL.dropTable(ThreadTemporaryTable.TABLE_CONTROLE_DATA_TEMP
+				, ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP
+				, ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP
+				, ThreadTemporaryTable.TABLE_CONTROLE_ROW_TOTAL_COUNT_TEMP));
+		
 		// mark file as done in the pilotage table
 		arcThreadGenericDao.marquageFinalDefaultDao(query);
 		
@@ -246,9 +253,9 @@ public class ThreadControleService extends ThreadTemplate {
 		blocFin.append("\n UPDATE " + this.tableControlePilTemp + " ");
 		blocFin.append("\n SET etat_traitement= ");
 		blocFin.append("\n case ");
-		blocFin.append("\n when exists (select from " + ControleRegleDao.TABLE_TEMP_META
+		blocFin.append("\n when exists (select from " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP
 				+ " where blocking) then '{" + TraitementEtat.KO + "}'::text[] ");
-		blocFin.append("\n when exists (select from " + ControleRegleDao.TABLE_TEMP_META + " where controle='"
+		blocFin.append("\n when exists (select from " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + " where controle='"
 				+ ControleMarkCode.RECORD_WITH_ERROR_TO_EXCLUDE.getCode() + "') then '{" + TraitementEtat.OK + ","
 				+ TraitementEtat.KO + "}'::text[] ");
 		blocFin.append("\n else '{OK}'::text[] ");
@@ -257,8 +264,8 @@ public class ThreadControleService extends ThreadTemplate {
 				"\n , rapport='Control failed on : '||(select array_agg(brokenrules||case when blocking then ' (blocking rules)' else '' end||case when controle='"
 						+ ControleMarkCode.RECORD_WITH_ERROR_TO_EXCLUDE.getCode()
 						+ "' then ' (exclusion rules)' else '' end)::text from "
-						+ ControleRegleDao.TABLE_TEMP_META + ") ");
-		blocFin.append("\n WHERE exists (select from " + ControleRegleDao.TABLE_TEMP_META + ") ");
+						+ ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + ") ");
+		blocFin.append("\n WHERE exists (select from " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + ") ");
 		blocFin.append(";");
 		return blocFin.toString();
 	}

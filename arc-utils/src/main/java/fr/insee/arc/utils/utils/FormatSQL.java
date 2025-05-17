@@ -229,30 +229,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	}
 
 	/**
-	 * Recopie une table à l'identique
-	 *
-	 * @param table
-	 * @param where
-	 * @param triggersAndIndexes
-	 * @return
-	 */
-	public static GenericPreparedStatementBuilder rebuildTableAsSelectWhere(String table, String where) {
-		String tableRebuild = temporaryTableName(table, "RB");
-
-		GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
-		requete.append("set enable_nestloop=off; ");
-
-		requete.append(createTableAsSelectWhere(table, tableRebuild, where));
-
-		requete.append(FormatSQL.dropTable(table));
-
-		requete.append(
-				"\n ALTER TABLE " + tableRebuild + " RENAME TO " + ManipString.substringAfterFirst(table, ".") + " ;");
-		requete.append("set enable_nestloop=on; ");
-		return requete;
-	}
-
-	/**
 	 * this sql block test is the query to test is true to execute the other query
 	 * 
 	 * @param queryToTest

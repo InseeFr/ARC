@@ -17,6 +17,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.ApiService;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFileAttributes;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
 import fr.insee.arc.core.service.p2chargement.operation.ParseFormatRulesOperation;
@@ -32,6 +33,8 @@ public class ChargeurCsvDao {
 	private FileIdCard fileIdCard;
 	private CSVFileAttributes fileAttributes;
 	private ParseFormatRulesOperation<CSVFormatRules> parser;
+	private String tmpChargementBrut;
+	private String tmpChargementArc;
 
 	public ChargeurCsvDao(Sandbox sandbox, CSVFileAttributes fileAttributes, FileIdCard fileIdCard,
 			ParseFormatRulesOperation<CSVFormatRules> parser) {
@@ -39,6 +42,8 @@ public class ChargeurCsvDao {
 		this.fileAttributes = fileAttributes;
 		this.fileIdCard = fileIdCard;
 		this.parser = parser;
+		this.tmpChargementArc = ThreadTemporaryTable.TABLE_TEMP_CHARGEMENT_A;
+		this.tmpChargementBrut = ThreadTemporaryTable.TABLE_TEMP_CHARGEMENT_B;
 	}
 
 	private static final int SINGLE_FULL_PARTITION = 1;
@@ -68,9 +73,9 @@ public class ChargeurCsvDao {
 	 */
 	public void initializeCsvTableContainer() throws ArcException {
 		StringBuilder req = new StringBuilder();
-		req.append("DROP TABLE IF EXISTS " + ViewEnum.TMP_CHARGEMENT_BRUT.getFullName() + ";");
+		req.append("DROP TABLE IF EXISTS " + this.tmpChargementBrut + ";");
 
-		req.append("CREATE TEMPORARY TABLE " + ViewEnum.TMP_CHARGEMENT_BRUT.getFullName() + " (");
+		req.append("CREATE TEMPORARY TABLE " + this.tmpChargementBrut + " (");
 		for (String nomCol : fileAttributes.getHeadersV()) {
 			req.append(nomCol).append(" text,");
 		}
@@ -112,7 +117,7 @@ public class ChargeurCsvDao {
 			inputStreamToCopyInDatabase = streamContent;
 		}
 
-		UtilitaireDao.get(0).importing(this.sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_BRUT.getFullName(),
+		UtilitaireDao.get(0).importing(this.sandbox.getConnection(), this.tmpChargementBrut,
 				columns, inputStreamToCopyInDatabase, ignoreFirstLine, separateur, quote, encoding);
 
 	}
@@ -125,8 +130,8 @@ public class ChargeurCsvDao {
 	 */
 	public void execQueryCreateContainerWithArcMetadata() throws ArcException {
 		ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
-		req.append("DROP TABLE IF EXISTS " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
-		req.append("CREATE TEMPORARY TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName());
+		req.append("DROP TABLE IF EXISTS " + this.tmpChargementArc + ";");
+		req.append("CREATE TEMPORARY TABLE " + this.tmpChargementArc);
 		req.append(" AS (SELECT ");
 		req.appendText(fileIdCard.getIdSource()).append("::text collate \"C\" as "+ ColumnEnum.ID_SOURCE.getColumnName());
 		req.append(",").append("id::integer");
@@ -143,8 +148,9 @@ public class ChargeurCsvDao {
 
 		req.setLength(req.length() - 1);
 
-		req.append(SQL.FROM).append(ViewEnum.TMP_CHARGEMENT_BRUT.getFullName()).append(");");
-		req.append("DROP TABLE IF EXISTS " + ViewEnum.TMP_CHARGEMENT_BRUT.getFullName() + ";");
+		req.append(SQL.FROM).append(this.tmpChargementBrut).append(");");
+		
+		req.append("DROP TABLE IF EXISTS " + this.tmpChargementBrut + ";");
 
 		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), req);
 	}
@@ -156,7 +162,7 @@ public class ChargeurCsvDao {
 
 		StringBuilder query = new StringBuilder();
 		for (int i = 0; i < parser.getValues(CSVFormatRules.INDEX).size(); i++) {
-			query.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName()
+			query.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + this.tmpChargementArc
 					+ "(" + parser.getValues(CSVFormatRules.INDEX).get(i) + ");\n");
 		}
 		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), query);
@@ -182,7 +188,7 @@ public class ChargeurCsvDao {
 		for (int i = 0; i < parser.getValues(CSVFormatRules.JOIN_TABLE).size(); i++) {
 			query.append("\n , v" + i + ".* ");
 		}
-		query.append("FROM  " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " l ");
+		query.append("FROM  " + this.tmpChargementArc + " l ");
 
 		// apply joint table
 		queryForJoinTables(query);
@@ -190,8 +196,8 @@ public class ChargeurCsvDao {
 		query.append("\n ;");
 		query.append("\n ALTER TABLE TTT DROP COLUMN id; ");
 		query.append("\n ALTER TABLE TTT RENAME COLUMN id$new$ TO id; ");
-		query.append("\n DROP TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
-		query.append("\n ALTER TABLE TTT RENAME TO " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
+		query.append("\n DROP TABLE " + this.tmpChargementArc + ";");
+		query.append("\n ALTER TABLE TTT RENAME TO " + this.tmpChargementArc + ";");
 		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), query);
 	}
 
@@ -303,7 +309,7 @@ public class ChargeurCsvDao {
 
 		queryColumnsExpression(query, false, 0);
 
-		query.append("\n FROM " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " u ) v ) w ");
+		query.append("\n FROM " + this.tmpChargementArc + " u ) v ) w ");
 		query.append("\n WHERE false ");
 		for (String s : parser.getValues(CSVFormatRules.FILTER_WHERE)) {
 			query.append("\n AND (" + s + ")");
@@ -346,7 +352,7 @@ public class ChargeurCsvDao {
 		// comptage rapide sur échantillon à 1/10000 pour trouver le nombre de partiton
 		return UtilitaireDao.get(0).getInt(sandbox.getConnection(),
 				new ArcPreparedStatementBuilder("select ((count(*)*10000)/" + partitionSize + ")+1 from "
-						+ ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " tablesample system(0.01)"));
+						+ this.tmpChargementArc + " tablesample system(0.01)"));
 	}
 
 	/**
@@ -363,7 +369,7 @@ public class ChargeurCsvDao {
 		}
 
 		StringBuilder query = new StringBuilder();
-		query.append("\n CREATE INDEX idx_partition_by_arc on " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName()
+		query.append("\n CREATE INDEX idx_partition_by_arc on " + this.tmpChargementArc
 				+ " ((abs(hashtext(" + parser.getValues(CSVFormatRules.PARTITION_EXPRESSION).get(0) + "::text)) % "
 				+ nbPartition + "));");
 		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
@@ -408,7 +414,7 @@ public class ChargeurCsvDao {
 
 		queryColumnsExpression(req, false, part);
 
-		req.append("\n FROM " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + " u ");
+		req.append("\n FROM " + this.tmpChargementArc + " u ");
 
 		// add partition key if more than one partition
 		if (numberOfPartition > SINGLE_FULL_PARTITION) {
@@ -448,14 +454,14 @@ public class ChargeurCsvDao {
 					+ ";");
 		}
 
-		query.append("\n DROP TABLE " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
-		query.append("\n ALTER TABLE TTT RENAME TO " + ViewEnum.TMP_CHARGEMENT_ARC.getFullName() + ";");
+		query.append("\n DROP TABLE " + this.tmpChargementArc + ";");
+		query.append("\n ALTER TABLE TTT RENAME TO " + this.tmpChargementArc + ";");
 
 		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
 	}
 
 	private List<String> execQuerySelectColumnsFromLoadTable() throws ArcException {
-		return UtilitaireDao.get(0).getColumns(sandbox.getConnection(), ViewEnum.TMP_CHARGEMENT_ARC.getFullName());
+		return UtilitaireDao.get(0).getColumns(sandbox.getConnection(), this.tmpChargementArc);
 	}
 
 	public void execQueryBilan(String tableChargementPilTemp, TraitementPhase currentPhase) throws ArcException {

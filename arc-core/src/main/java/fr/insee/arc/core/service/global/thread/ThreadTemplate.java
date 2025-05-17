@@ -8,13 +8,6 @@ import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
 
 public class ThreadTemplate {
 
-
-	// anti-spam delay when thread chain error
-	protected static final int PREVENT_ERROR_SPAM_DELAY = 100;
-	
-	// thread temporary pilotage table name
-	protected static final String TABLE_PILOTAGE_THREAD = "p";
-	
 	protected String envExecution;
 	protected ScalableConnection connexion;
 	protected String tablePilTemp;

@@ -2,15 +2,24 @@ package fr.insee.arc.core.service.global.dao;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.Test;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.utils.utils.PrivateConstructorTest;
 
 public class TableMetadataTest extends InitializeQueryTest {
 
+	@Test
+	public void testTableMetadataIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+		PrivateConstructorTest.testConstructorIsPrivate(TableMetadata.class);
+	}
+	
+	
 	@Test
 	public void rebuildTableAndIndexTest () throws ArcException {
 		

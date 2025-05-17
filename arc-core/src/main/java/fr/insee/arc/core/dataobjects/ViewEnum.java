@@ -88,10 +88,10 @@ public enum ViewEnum {
 
 	// tables représentant le contenu des vobject (utilisées pour les tests)
 	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE) //
-	, VIEW_RAPPORT_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE,
+	, VIEW_RAPPORT_FICHIER(VIEW_PILOTAGE_FICHIER.getTableName(), SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE,
 			ColumnEnum.PHASE_TRAITEMENT, ColumnEnum.ETAT_TRAITEMENT, ColumnEnum.RAPPORT, ColumnEnum.NB) //
 	// tables de pilotage
-	, PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.ID_SOURCE, ColumnEnum.ID_NORME,
+	, PILOTAGE_FICHIER(VIEW_PILOTAGE_FICHIER.getTableName(), SchemaEnum.SANDBOX, ColumnEnum.ID_SOURCE, ColumnEnum.ID_NORME,
 			ColumnEnum.VALIDITE, ColumnEnum.PERIODICITE, ColumnEnum.PHASE_TRAITEMENT, ColumnEnum.ETAT_TRAITEMENT,
 			ColumnEnum.DATE_TRAITEMENT, ColumnEnum.RAPPORT, ColumnEnum.TAUX_KO, ColumnEnum.NB_ENR, ColumnEnum.NB_ESSAIS,
 			ColumnEnum.ETAPE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION,
@@ -136,8 +136,20 @@ public enum ViewEnum {
 	// view for table aliases or temporary table in query
 	, T1(PgViewEnum.T1), T2(PgViewEnum.T2), T3(PgViewEnum.T3)
 	
+	
+	, TABLE_PILOTAGE_THREAD("p", SchemaEnum.TEMPORARY)
+	
 	, TMP_CHARGEMENT_ARC(PgViewEnum.ALIAS_A), TMP_CHARGEMENT_BRUT(PgViewEnum.ALIAS_B)
+	
+	, TMP_NORMAGE_OK_TEMP("tno", SchemaEnum.TEMPORARY), TMP_NORMAGE_KO_TEMP("tnk", SchemaEnum.TEMPORARY), TMP_NORMAGE_DATA_TEMP("tnd", SchemaEnum.TEMPORARY)
+	, TMP_NORMAGE_RUBRIQUES_DANS_REGLES("tnr", SchemaEnum.TEMPORARY)
+	
+	, TMP_CONTROLE_DATA_TEMP("tcd", SchemaEnum.TEMPORARY), TMP_CONTROLE_MARK_TEMP("tck", SchemaEnum.TEMPORARY)
+	, TMP_CONTROLE_META_TEMP("tca", SchemaEnum.TEMPORARY), TMP_CONTROLE_ROW_TOTAL_COUNT_TEMP("tcc", SchemaEnum.TEMPORARY)
+	
+	, TMP_MAPPING_DATA_TEMP("tmd", SchemaEnum.TEMPORARY)
 
+	
 	
 	, ALIAS_A(PgViewEnum.ALIAS_A), ALIAS_B(PgViewEnum.ALIAS_B), ALIAS_C(PgViewEnum.ALIAS_C), ALIAS_TABLE(PgViewEnum.ALIAS_TABLE)
 

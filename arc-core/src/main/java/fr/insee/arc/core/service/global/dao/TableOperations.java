@@ -35,8 +35,8 @@ public class TableOperations {
 	 * Query to create a target table if the source table has records
 	 * 
 	 * @param connexion
-	 * @param tableIn
-	 * @param tableIdSource
+	 * @param tableIn : table a copier
+	 * @param tableIdSource : table cible
 	 * @return
 	 */
 	public static String createTableInherit(String tableIn, String tableIdSource) {

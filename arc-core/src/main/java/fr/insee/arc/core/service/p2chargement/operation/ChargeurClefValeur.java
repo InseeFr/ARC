@@ -83,7 +83,7 @@ public class ChargeurClefValeur implements IChargeur {
                 }
             }
         }
-        
+
         public Optional<Exception> getExceptionThrown() {
         	return Optional.ofNullable(exceptionThrown);
         }

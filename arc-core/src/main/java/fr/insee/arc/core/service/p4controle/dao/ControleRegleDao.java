@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
 import fr.insee.arc.core.service.p4controle.bo.ControleXsdCode;
 import fr.insee.arc.core.service.p4controle.bo.RegleControle;
@@ -25,9 +26,6 @@ public class ControleRegleDao {
 
 	private String tableResultat;
 	private String tableTempData;
-	private static final String TABLE_TEMP_MARK = "t_mark";
-	public static final String TABLE_TEMP_META = "t_meta";
-	private static final String TABLE_ROW_TOTAL_COUNT = "t_rtc";
 
 	private static final Logger logger = LogManager.getLogger(ControleRegleDao.class);
 
@@ -46,15 +44,15 @@ public class ControleRegleDao {
 		sb.append(dropControleTemporaryTables());
 
 		// creation de la table de marquage
-		sb.append("CREATE TEMPORARY TABLE " + TABLE_TEMP_MARK + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		sb.append("CREATE TEMPORARY TABLE " + ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 		sb.append("select id, null::text as brokenrules, null::text as controle from " + table + " where false ;\n");
 
 		// creation de la table meta
-		sb.append("CREATE TEMPORARY TABLE " + TABLE_TEMP_META + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		sb.append("CREATE TEMPORARY TABLE " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 		sb.append("select null::text as brokenrules, null::boolean as blocking, null::text as controle where false;\n");
 
 		// total count of record in the table to evaluate the error ratio
-		sb.append("CREATE TEMPORARY TABLE " + TABLE_ROW_TOTAL_COUNT + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		sb.append("CREATE TEMPORARY TABLE " + ThreadTemporaryTable.TABLE_CONTROLE_ROW_TOTAL_COUNT_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 		sb.append("select count(1)::numeric as n FROM " + table + ";\n");
 
 		return sb.toString();
@@ -71,7 +69,7 @@ public class ControleRegleDao {
 
 		sb.append("\n UPDATE " + this.tableResultat + " v set brokenrules=w.brokenrules, controle= w.controle FROM ");
 		sb.append("\n (SELECT id, array_agg(brokenrules) as brokenrules, min(controle) as controle ");
-		sb.append("\n FROM " + TABLE_TEMP_MARK + " ");
+		sb.append("\n FROM " + ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP + " ");
 		sb.append("\n GROUP BY id ) w ");
 		sb.append("\n WHERE v.id=w.id");
 		sb.append(";");
@@ -79,14 +77,14 @@ public class ControleRegleDao {
 		// tag all record to exclude if file is blocked
 		sb.append("\n UPDATE " + this.tableResultat + " v set controle='"
 				+ ControleMarkCode.RECORD_WITH_ERROR_TO_EXCLUDE.getCode() + "'");
-		sb.append("\n WHERE EXISTS (SELECT FROM " + TABLE_TEMP_META + " where blocking)");
+		sb.append("\n WHERE EXISTS (SELECT FROM " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + " where blocking)");
 		sb.append(";");
 
 		return sb.toString();
 	}
 
 	public String dropControleTemporaryTables() {
-		return FormatSQL.dropTable(TABLE_TEMP_MARK).toString();
+		return FormatSQL.dropTable(ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP).toString();
 	}
 
 	/**
@@ -113,9 +111,9 @@ public class ControleRegleDao {
 		// case for no blocking threshold
 		// by default not blocking
 		if (blockingThreshold == null || blockingThreshold.isEmpty()) {
-			requete.append("\n, ins as (INSERT into " + TABLE_TEMP_MARK + " select id, '" + regleId + "', '"
+			requete.append("\n, ins as (INSERT into " + ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP + " select id, '" + regleId + "', '"
 					+ mapRowProcessing.get(errorRowProcessing) + "' as controle from ctl returning true) ");
-			requete.append("\n INSERT into " + TABLE_TEMP_META + " SELECT '" + regleId + "', false, '"
+			requete.append("\n INSERT into " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + " SELECT '" + regleId + "', false, '"
 					+ mapRowProcessing.get(errorRowProcessing) + "' as controle where EXISTS (SELECT FROM ins); ");
 			return requete.toString();
 		}
@@ -126,7 +124,7 @@ public class ControleRegleDao {
 		Matcher matcher = pattern.matcher(blockingThreshold);
 		matcher.find();
 
-		requete.append("\n, ins as (INSERT into " + TABLE_TEMP_MARK + " ");
+		requete.append("\n, ins as (INSERT into " + ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP + " ");
 		requete.append("SELECT id, '" + regleId + "'");
 
 		// mark record to keep or exclude
@@ -135,12 +133,12 @@ public class ControleRegleDao {
 		requete.append("FROM ctl RETURNING true) ");
 
 		// insert into meta table
-		requete.append("\n INSERT into " + TABLE_TEMP_META + " SELECT * FROM (SELECT '" + regleId + "',");
+		requete.append("\n INSERT into " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + " SELECT * FROM (SELECT '" + regleId + "',");
 
 		// ratio or count evaluation
 		requete.append("((count(*)::numeric");
 		if (matcher.group(3).equals("%")) {
-			requete.append("*100.0/(select n from " + TABLE_ROW_TOTAL_COUNT + ")");
+			requete.append("*100.0/(select n from " + ThreadTemporaryTable.TABLE_CONTROLE_ROW_TOTAL_COUNT_TEMP + ")");
 		}
 		requete.append(")");
 
@@ -173,7 +171,7 @@ public class ControleRegleDao {
 		String requete = "WITH ctl AS (	SELECT id FROM " + this.tableTempData + " "
 				+ " WHERE ({2} ~ '^-?\\d*(\\.\\d+)?$') IS FALSE " + cond + ") "
 				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
-		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere());
+		requete = getRequete(requete, ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()), reg.getRubriquePere());
 		return requete;
 	}
 
@@ -203,13 +201,13 @@ public class ControleRegleDao {
 			reqBuilder.append("\n WHEN {2} is null THEN false ");
 			reqBuilder.append("\n ELSE true END) ");
 			reqBuilder.append(insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle())));
-			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere());
+			requete = getRequete(reqBuilder.toString(), ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()), reg.getRubriquePere());
 		} else {
 			reqBuilder.append("\n WHERE CASE WHEN arc.isdate({2},'{3}') THEN false");
 			reqBuilder.append("\n WHEN {2} is null THEN false ");
 			reqBuilder.append("\n ELSE true END) ");
 			reqBuilder.append(insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle())));
-			requete = getRequete(reqBuilder.toString(), TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(),
+			requete = getRequete(reqBuilder.toString(), ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(),
 					reg.getCondition());
 		}
 		return requete;
@@ -219,7 +217,7 @@ public class ControleRegleDao {
 		String cond = conditionLongueur(reg);
 		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData + " WHERE false " + cond + ")"
 				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
-		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()));
+		requete = getRequete(requete, ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()));
 		return requete;
 	}
 
@@ -308,7 +306,7 @@ public class ControleRegleDao {
 		requete.append(" ) ");
 		requete.append(insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle())));
 
-		return getRequete(requete.toString(), TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(),
+		return getRequete(requete.toString(), ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(),
 				reg.getRubriqueFils());
 	}
 
@@ -327,7 +325,7 @@ public class ControleRegleDao {
 				+ cond + " THEN FALSE ELSE TRUE END ELSE FALSE END as condition_a_tester " + " FROM "
 				+ this.tableTempData + " " + ") ww where condition_a_tester ) "
 				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
-		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()));
+		requete = getRequete(requete, ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()));
 		return requete;
 	}
 
@@ -341,7 +339,7 @@ public class ControleRegleDao {
 	public String ctlMatchesRegexp(RegleControle reg) {
 		String requete = "WITH ctl AS (SELECT id FROM " + this.tableTempData + " " + "WHERE ({2} ~ '{3}') IS FALSE ) "
 				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
-		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(), reg.getCondition());
+		requete = getRequete(requete, ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
 
@@ -362,7 +360,7 @@ public class ControleRegleDao {
 		String requete = "WITH " + "ctl AS ( SELECT id " + " FROM " + this.tableTempData + " "
 				+ "WHERE {2} not in ({3}) ) "
 				+ insertBloc(reg.getSeuilBloquant(), reg.getTraitementLignesErreur(), Integer.toString(reg.getIdRegle()));
-		requete = getRequete(requete, TABLE_TEMP_MARK, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(), reg.getCondition());
+		requete = getRequete(requete, ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP, Integer.toString(reg.getIdRegle()), reg.getRubriquePere(), reg.getCondition());
 		return requete;
 	}
 

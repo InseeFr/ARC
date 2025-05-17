@@ -140,22 +140,22 @@ public class ChargeurCSV implements IChargeur {
 		String encoding = parser.getValue(CSVFormatRules.ENCODING);
 		encoding = (encoding==null) ? StandardCharsets.UTF_8.name() : encoding;
 		
-		String file_encoding = parser.getValue(CSVFormatRules.FILE_ENCODING);
-		file_encoding = (file_encoding==null) ? encoding: file_encoding;
+		String fileEncoding = parser.getValue(CSVFormatRules.FILE_ENCODING);
+		fileEncoding = (fileEncoding==null) ? encoding: fileEncoding;
 
 		// si le headers n'est pas spécifié, alors on le cherche dans le fichier en
 		// premier ligne
 		if (userDefinedHeaders == null) {
 				
-		        CSVParser parser = new CSVParserBuilder()
+		        CSVParser parserCsv = new CSVParserBuilder()
 		                .withSeparator(csvDelimiter.charAt(0))
 		                .build();
 				
 				try (
-						InputStreamReader inputStreamReader = new InputStreamReader(streamHeader, file_encoding);
+						InputStreamReader inputStreamReader = new InputStreamReader(streamHeader, fileEncoding);
 						InputStream inputStreamReaderConvertedEncoding = ReaderInputStream.builder().setReader(inputStreamReader).setCharset(encoding).get();
 						BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStreamReaderConvertedEncoding,encoding));
-						CSVReader readerCSV = new CSVReaderBuilder(bufferedReader).withCSVParser(parser).build();
+						CSVReader readerCSV = new CSVReaderBuilder(bufferedReader).withCSVParser(parserCsv).build();
 						) {
 
 					String[] headers = getHeader(readerCSV);
@@ -166,12 +166,7 @@ public class ChargeurCSV implements IChargeur {
 					throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED,
 							fileIdCard.getIdSource());
 				} finally {
-					try {
-						streamHeader.close();
-					} catch (IOException fileReadException) {
-						throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
-								fileIdCard.getIdSource());
-					}
+					closeInputStreamCsvHeaders();
 				}
 
 		} else {
@@ -180,6 +175,22 @@ public class ChargeurCSV implements IChargeur {
 		}
 	}
 
+	
+	/**
+	 * Close InputStream that read csv headers
+	 * @throws ArcException 
+	 */
+	private void closeInputStreamCsvHeaders() throws ArcException
+	{
+		try {
+			streamHeader.close();
+		} catch (IOException fileReadException) {
+			throw new ArcException(fileReadException, ArcExceptionMessage.FILE_READ_FAILED,
+					fileIdCard.getIdSource());
+		}
+	}
+	
+	
 
 	/**
 	 * change duplicate headers name

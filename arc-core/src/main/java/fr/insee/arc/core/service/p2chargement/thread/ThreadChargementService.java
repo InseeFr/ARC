@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementRapport;
@@ -19,7 +20,9 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
+import fr.insee.arc.core.service.global.thread.ThreadConstant;
 import fr.insee.arc.core.service.global.thread.ThreadTemplate;
+import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p2chargement.archiveloader.ArchiveChargerFactory;
 import fr.insee.arc.core.service.p2chargement.archiveloader.FilesInputStreamLoad;
@@ -64,10 +67,11 @@ public class ThreadChargementService extends ThreadTemplate {
 	
 	private TraitementPhase currentExecutedPhase = TraitementPhase.CHARGEMENT;
 	private TraitementPhase previousExecutedPhase = this.currentExecutedPhase.previousPhase();
-	private String previousExecutedPhaseTable;
+	
 	
 	
 	public void configThread(ScalableConnection connexion, int currentIndice, ThreadMultiphaseService aApi, boolean beginNextPhase, boolean cleanPhase) {
+  
 
 		this.envExecution = aApi.getEnvExecution();
 		this.idSource = aApi.getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()).get(currentIndice);
@@ -84,15 +88,14 @@ public class ThreadChargementService extends ThreadTemplate {
 
 		// table a de reception de l'ensemble des fichiers avec nom de colonnes
 		// courts
-		this.tableTempA = "a";
-		this.tableChargementPilTemp = TABLE_PILOTAGE_THREAD;
+		this.tableTempA = ThreadTemporaryTable.TABLE_TEMP_CHARGEMENT_A;
+		this.tableChargementPilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
 		// table de sortie des données dans l'application (hors du module)
 		this.tableChargementOK = TableNaming.phaseDataTableName(envExecution, this.currentExecutedPhase,
 				TraitementEtat.OK);
 		
-		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
-
+		String previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
 
 		// thread generic dao
 		arcThreadGenericDao = new ThreadOperations(this.currentExecutedPhase, beginNextPhase, cleanPhase, connexion, tablePil, tablePilTemp, tableChargementPilTemp,
@@ -125,7 +128,7 @@ public class ThreadChargementService extends ThreadTemplate {
 				marquageException.logFullException();
 			}
 
-			Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
+			Sleep.sleep(ThreadConstant.PREVENT_ERROR_SPAM_DELAY);
 		}
 	}
 
@@ -227,14 +230,25 @@ public class ThreadChargementService extends ThreadTemplate {
 				targetLoader.charger();
 				
 			} finally {
-				if (filesInputStreamLoad==null) {
-					throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, fileChargement.getAbsolutePath());
-				}
-				this.filesInputStreamLoad.closeAll();
+				closeInputStreamLoad(fileChargement);
 			}
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_CLOSE_FAILED, fileChargement.getAbsolutePath());
 		}
+	}
+	
+	/**
+	 * Close the filesInputStreamLoad
+	 * @throws ArcException 
+	 * Close InputStream that read csv headers
+	 * @throws IOException 
+	 */
+	private void closeInputStreamLoad(File fileChargement) throws ArcException, IOException
+	{
+		if (filesInputStreamLoad==null) {
+			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, fileChargement.getAbsolutePath());
+		}
+		this.filesInputStreamLoad.closeAll();
 	}
 
 	/**
@@ -290,6 +304,9 @@ public class ThreadChargementService extends ThreadTemplate {
 
 		// Créer la table des données de la table des donénes chargées
 		query.append(TableOperations.createTableInherit(getTableTempA(), tableIdSource));
+		
+		// dropper les tables temporaires
+		query.append(FormatSQL.dropTable(getTableTempA()));
 
 		return query.toString();
 	}

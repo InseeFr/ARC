@@ -20,7 +20,9 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
+import fr.insee.arc.core.service.global.thread.ThreadConstant;
 import fr.insee.arc.core.service.global.thread.ThreadTemplate;
+import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p3normage.operation.NormageOperation;
 import fr.insee.arc.core.service.p3normage.operation.NormageRulesOperation;
@@ -55,10 +57,11 @@ public class ThreadNormageService extends ThreadTemplate {
 
 
 	private String idSource;
-	
+
 	private String tableNormageDataTemp;
 	private String tableNormagePilTemp;
 
+	private String tableTmpRubriqueDansregles;
 	private String tableNormageOKTemp;
 	private String tableNormageKOTemp;
 
@@ -83,11 +86,12 @@ public class ThreadNormageService extends ThreadTemplate {
 
 		// tables du thread
 
-		this.tableNormageDataTemp = FormatSQL.temporaryTableName("normage_data_temp");
-		this.tableNormagePilTemp = TABLE_PILOTAGE_THREAD;
+		this.tableNormagePilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
-		this.tableNormageOKTemp = FormatSQL.temporaryTableName("ok_Temp");
-		this.tableNormageKOTemp = FormatSQL.temporaryTableName("ko_Temp");
+		this.tableNormageDataTemp = ThreadTemporaryTable.TABLE_NORMAGE_DATA_TEMP;
+		this.tableNormageOKTemp = ThreadTemporaryTable.TABLE_NORMAGE_OK_TEMP;
+		this.tableNormageKOTemp = ThreadTemporaryTable.TABLE_NORMAGE_KO_TEMP;
+		this.tableTmpRubriqueDansregles = ThreadTemporaryTable.TABLE_NORMAGE_RUBRIQUES_DANS_REGLES;
 
 		this.tableNormageOK = TableNaming.phaseDataTableName(theApi.getEnvExecution(), this.currentExecutedPhase,
 				TraitementEtat.OK);
@@ -131,7 +135,7 @@ public class ThreadNormageService extends ThreadTemplate {
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(LOGGER, e2);
 			}
-			Sleep.sleep(PREVENT_ERROR_SPAM_DELAY);
+			Sleep.sleep(ThreadConstant.PREVENT_ERROR_SPAM_DELAY);
 		}
 	}
 
@@ -189,7 +193,6 @@ public class ThreadNormageService extends ThreadTemplate {
 		Map<String, List<String>> rubriqueUtiliseeDansRegles = null;
 
 		if (paramBatch != null) {
-			String tableTmpRubriqueDansregles = "TMP_RUBRIQUE_DANS_REGLES";
 
 			StringBuilder query = new StringBuilder();
 			query.append("\n DROP TABLE IF EXISTS " + tableTmpRubriqueDansregles + ";");
@@ -242,6 +245,8 @@ public class ThreadNormageService extends ThreadTemplate {
 		query.append(TableOperations.createTableInherit(this.tableNormageOKTemp, tableIdSourceOK));
 		String tableIdSourceKO = HashFileNameConversion.tableOfIdSource(this.tableNormageKO, this.idSource);
 		query.append(TableOperations.createTableInherit(this.tableNormageKOTemp, tableIdSourceKO));
+
+		query.append(FormatSQL.dropTable(this.tableNormageDataTemp, this.tableNormageOKTemp, this.tableNormageKOTemp, this.tableTmpRubriqueDansregles));
 
 		// mark file as done into global pilotage table
 		arcThreadGenericDao.marquageFinalDefaultDao(query);
