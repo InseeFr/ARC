@@ -3,6 +3,13 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.110b
+- fix in multiphase api : temporary data are deleted when no longer used
+
+## version-94.1.108b
+- new multiphase api : file are now fully proceed in separate threads
+- fix filesystem maintenance problem when files no longer exists
+
 ## version-94.1.105
 - removed hotfix version-94.1.104
 - spring security and zonky io maven dependencies upgrade
