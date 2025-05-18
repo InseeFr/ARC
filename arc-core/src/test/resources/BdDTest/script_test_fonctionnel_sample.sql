@@ -1352,11 +1352,7 @@ INSERT INTO arc.parameter VALUES ('git.commit.id.arc_bas8', '1fee2249a98298f4a33
 INSERT INTO arc.parameter VALUES ('ApiInitialisationService.nbSandboxes', '20', 'parameter.ihm.sandbox.numberOfSandboxes');
 INSERT INTO arc.parameter VALUES ('ApiReceptionService.ihm.maxNumberOfFiles', '5000', 'parameter.ihm.sandbox.maxNumberOfFilesRegisteredAtTheSameTime');
 INSERT INTO arc.parameter VALUES ('ArcAction.productionEnvironments', '[]', 'parameter.ihm.sandbox.sandboxListWithProductionGUI');
-INSERT INTO arc.parameter VALUES ('ApiChargementService.MAX_PARALLEL_WORKERS', '8', 'parameter.parallel.numberOfThread.p1.load');
-INSERT INTO arc.parameter VALUES ('ApiNormageService.MAX_PARALLEL_WORKERS', '8', 'parameter.parallel.numberOfThread.p2.xmlStructurize');
-INSERT INTO arc.parameter VALUES ('ApiControleService.MAX_PARALLEL_WORKERS', '8', 'parameter.parallel.numberOfThread.p3.control');
-INSERT INTO arc.parameter VALUES ('ApiFiltrageService.MAX_PARALLEL_WORKERS', '8', 'parameter.parallel.numberOfThread.p4.filter');
-INSERT INTO arc.parameter VALUES ('MappingService.MAX_PARALLEL_WORKERS', '8', 'parameter.parallel.numberOfThread.p5.mapmodel');
+INSERT INTO arc.parameter VALUES ('ApiService.MAX_PARALLEL_WORKERS', '8', 'parameter.parallel.numberOfThread');
 INSERT INTO arc.parameter VALUES ('git.commit.id.arc_bas7', 'a52a8fa72c1a28772c17293f037dadebcdc1c525', 'parameter.database.version.sandbox');
 INSERT INTO arc.parameter VALUES ('git.commit.id.arc_bas6', '4bb9abd962f0a9a8396a7555ff36b696588c7807', 'parameter.database.version.sandbox');
 INSERT INTO arc.parameter VALUES ('git.commit.id.arc_bas10', 'af5f3e838ab541fb47948c650b0ab465bdef05b8', 'parameter.database.version.sandbox');

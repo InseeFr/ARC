@@ -86,24 +86,20 @@ UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListWithBatch
 INSERT INTO arc.parameter VALUES ('ArcAction.batchModeKeepIntermediateData','[]');
 UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListAsBatchKeepIntermediateData' where key='ArcAction.batchModeKeepIntermediateData';
 
--- parallelism parameters
-INSERT INTO arc.parameter VALUES ('ApiChargementService.MAX_PARALLEL_WORKERS','2');
-UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p1.load' where key='ApiChargementService.MAX_PARALLEL_WORKERS';
-
-INSERT INTO arc.parameter VALUES ('ApiNormageService.MAX_PARALLEL_WORKERS','5');
-UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p2.xmlStructurize' where key='ApiNormageService.MAX_PARALLEL_WORKERS';
-
-INSERT INTO arc.parameter VALUES ('ApiControleService.MAX_PARALLEL_WORKERS','3');
-UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p3.control' where key='ApiControleService.MAX_PARALLEL_WORKERS';
-
 INSERT INTO arc.parameter VALUES ('LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS','30000');
 UPDATE arc.parameter set description='parameter.batch.execution.executor.wait.time' where key='LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS';
 
+
+-- parallelism parameters
+-- patch api multiphase 18/05/2025
+DELETE FROM arc.parameter where key = 'ApiChargementService.MAX_PARALLEL_WORKERS';
+UPDATE arc.parameter set key='ApiService.MAX_PARALLEL_WORKERS', description='parameter.parallel.numberOfThread'
+where key = 'ApiNormageService.MAX_PARALLEL_WORKERS';
+DELETE FROM arc.parameter where key = 'ApiControleService.MAX_PARALLEL_WORKERS';
+DELETE FROM arc.parameter where key = 'MappingService.MAX_PARALLEL_WORKERS';
+
 -- effacer le parametrage de la phase de filtrage
 delete from arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
-
-INSERT INTO arc.parameter VALUES ('MappingService.MAX_PARALLEL_WORKERS','4');
-UPDATE arc.parameter set description='parameter.parallel.numberOfThread.p4.mapmodel' where key='MappingService.MAX_PARALLEL_WORKERS';
 
 -- patch 23/06/2023
 -- remove deprecated parameters

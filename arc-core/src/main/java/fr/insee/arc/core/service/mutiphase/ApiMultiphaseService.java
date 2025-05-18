@@ -49,7 +49,7 @@ public class ApiMultiphaseService extends ApiService {
 		this.listeNorme = NormeRules.getNormesBase(this.connexion.getCoordinatorConnection(), this.envExecution);
 
 		int maxParallelWorkers = bdParameters.getInt(this.connexion.getCoordinatorConnection(),
-				"ApiNormageService.MAX_PARALLEL_WORKERS", 4);
+				"ApiService.MAX_PARALLEL_WORKERS", 4);
 
 		// Récupérer la liste des fichiers selectionnés
 		StaticLoggerDispatcher.info(LOGGER, "Récupérer la liste des fichiers selectionnés");

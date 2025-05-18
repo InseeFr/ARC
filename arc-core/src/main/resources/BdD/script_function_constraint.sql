@@ -1,7 +1,23 @@
+
+CREATE OR REPLACE FUNCTION public.check_object_exists(table_identifier text) RETURNS boolean
+as
+$BODY$
+begin
+perform table_identifier::regclass;
+return true;
+exception when others 
+then return false;
+END; 
+$BODY$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION public.check_sandbox(unsafe text) RETURNS boolean
 as
 $BODY$
 begin
+-- fix dump restore : return true if reference table doesn't exist
+if (not public.check_object_exists('arc.ext_etat_jeuderegle')) then return true; end if;
+
 if (unsafe is null or not (unsafe in (select replace(id,'.','_') from arc.ext_etat_jeuderegle where isenv)))
 then
 RAISE EXCEPTION '% format is not correct. Must be a declared sandbox.', unsafe; 
@@ -15,6 +31,9 @@ CREATE OR REPLACE FUNCTION public.check_sandboxes(unsafe text) RETURNS boolean
 as
 $BODY$
 begin
+-- fix dump restore : return true if reference table doesn't exist
+if (not public.check_object_exists('arc.ext_etat_jeuderegle')) then return true; end if;
+
 if unsafe is null or not ((select ARRAY(select jsonb_array_elements_text(unsafe::jsonb))) <@ (select array_agg(replace(id,'.','_')) from arc.ext_etat_jeuderegle where isenv))
 then
 RAISE EXCEPTION '% format is not correct. As an example, correct syntax is ["arc_prod","arc_bas1"]', unsafe; 
@@ -385,15 +404,12 @@ when key= 'LanceurARC.envFromDatabase' then val::boolean in (true,false)
 when key= 'LanceurARC.envExecution' then public.check_sandbox(val)
 when key= 'LanceurARC.poolingDelay' then public.check_integer(val)
 when key= 'LanceurARC.maxFilesPerPhase' then public.check_integer(val)
-when key= 'ApiChargementService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
-when key= 'ApiNormageService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
-when key= 'ApiControleService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
+when key= 'ApiService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
 when key= 'LanceurARC.INTERVAL_JOUR_INITIALISATION' then public.check_integer(val)
 when key= 'ArcAction.batchMode' then public.check_sandboxes(val)
 when key= 'LanceurARC.maxFilesToLoad' then public.check_integer(val)
 when key= 'LanceurIHM.maxFilesPerPhase' then public.check_integer(val)
 when key= 'LanceurIHM.tailleMaxReceptionEnMb' then public.check_integer(val)
-when key= 'MappingService.MAX_PARALLEL_WORKERS' then public.check_integer(val)
 else true
 end
 );
