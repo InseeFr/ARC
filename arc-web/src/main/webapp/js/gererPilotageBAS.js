@@ -17,7 +17,7 @@ function alimenterPhase(t){
 	return true;
 }
 
-$(document).on('ready readyAgain', function() {
+function pilotageReady() {
 
 	$("#viewPilotageBAS").find("td").off('click').on('click',function() {
 		updateCheckBoxGrid('viewPilotageBAS;viewRapportBAS',$(this));
@@ -35,4 +35,8 @@ $(document).on('ready readyAgain', function() {
 	$("[name^='viewRapport']").filter("[name*='selectedColumns']:checked").closest("table").find("tbody").find("tr").eq($("[name^='viewRapport']").filter("[name*='selectedLines']:checked").closest("tr").index()).css("background-color","#aaaabb");
 	$("[id^='viewPilotage'] .sort:contains(' KO')").attr('style',$("[id^='viewPilotage'] .sort:contains(' KO')").attr('style')+";outline: rgb(255, 0, 0) solid 3px;");
 
-});
+}
+
+$(document).ready(pilotageReady);
+$(document).on('readyAgain', pilotageReady);
+

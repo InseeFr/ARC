@@ -70,7 +70,7 @@ function formatDecimal(s, n) {
 	
 }
 
-$(document).on('ready readyAgain',function() {
+function documentReady() {
 	try {
 		configJS;
 	}
@@ -309,10 +309,6 @@ $(document).on('ready readyAgain',function() {
 				pos=pos+$t.get(0).offsetTop*zoomLvl/100;
 				$t=$t.parent();
 			}
-
-		
-		
-// $(this).css("height",(((realY*zoomLvl/100)-pos)/zoomLvl*100)+"px");
 	}		
 	
 	);
@@ -335,7 +331,6 @@ $(document).on('ready readyAgain',function() {
 			function() {
 
 				// on donne la bonne dimension au table (plus propre)
-// $(this).parent().css("width",width);
 				
 				var $tb=$(this).parent().find("tbody");
 				if ($tb.attr("style")!=undefined && $tb.attr("style").toLowerCase().indexOf("max-height")>-1)
@@ -366,19 +361,6 @@ $(document).on('ready readyAgain',function() {
 	
 	// symbolise les valeurs manquantes
 	$("text:not([h^='etat']):not([h^='code']):not([h^='bilan_']):not([h^='def_'])").filter(function(){return $(this).text()=="";}).css("background","repeating-linear-gradient(0deg, #555555, #ffffff 1%)");
-	
-// if (configJS.indexOf("Render:Comment;")>-1)
-// {
-// $("[name='comment']").each(function(){if
-// ($(this).find(".comment").text()==""){$(this).css('display','none');} else
-// {$(this).css('display','block');}});
-// }
-
-// $("textarea").off('mouseup').on('mouseup',function(e){if (e.which == 3)
-// {e.preventDefault(); copyToClipboard(e.target)}});
-// $("body").off('contextemenu').on('contextmenu',function(e){e.preventDefault();});
-// $("textarea").off('contextmenu').on('contextmenu',function(e){copyToClipboard(e.target)});
-
 
 	if (configJS.indexOf("Render:AlertBox;")>-1) 
 	{
@@ -392,7 +374,11 @@ $(document).on('ready readyAgain',function() {
 	}
 
 	
-});
+}
+
+// event triggered when ready
+$(document).ready(documentReady);
+$(document).on('readyAgain',documentReady);
 
 function renderTableBlock()
 {
@@ -875,9 +861,7 @@ function ajaxConfigurationCall()
 			}
 			else
 			{
-				e.preventDefault();
-				var z0=new Date().getTime();
-				
+				e.preventDefault();		
 				$.ajax({
 					url: $this.attr('action'),
 					type: $this.attr('method'),
@@ -895,7 +879,6 @@ function ajaxConfigurationCall()
 						$("table.light thead").css("display","table-header-group");
 						
 						xml="<root>"+xml+"</root>";
-						var z1=new Date().getTime();
 
 						var scope=splitAndEvalArray(splitAndEval($this.attr('scope')));
 
@@ -916,8 +899,6 @@ function ajaxConfigurationCall()
 
 						}
 
-
-						var z2=new Date().getTime();
 
 						$(document).trigger('readyAgain');
 						$("#hourglass").remove();

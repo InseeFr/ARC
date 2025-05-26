@@ -4,15 +4,12 @@ var couleurSelection="rgb(106, 171, 224)";
 var couleurOver="rgb(206, 171, 224)";
 var opaciteSelection='0.8';
 
-$(document).on('ready readyAgain', function() {
-
-
+function arcReady() {
 	// Add a connection check
 	$("#connectionCheck").click(function() {
 		checkConnection(event, this);
 	})
-
-});
+}
 
 //ping the database to check the connection
 function checkConnection (event, el){
@@ -34,3 +31,6 @@ function checkConnection (event, el){
 			console.log("an error occured :( ")
 		});
 }
+
+$(document).ready(arcReady);
+$(document).on('readyAgain', arcReady);
