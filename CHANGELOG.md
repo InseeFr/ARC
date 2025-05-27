@@ -3,6 +3,10 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.1.112
+- spring security critical upgrade
+- webjar for js dependencies
+
 ## version-94.1.110b
 - fix in multiphase api : temporary data are deleted when no longer used
 
