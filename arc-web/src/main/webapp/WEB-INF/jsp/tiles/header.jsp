@@ -41,14 +41,25 @@
 <nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse show pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
 		<ul class="navbar-nav flex-column ml-1 mr-0 mb-4">
 			<li><h4 class="">Menu</h4></li>
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="index"/><c:param name="linkId" value="home"/></c:import>
-
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="index"/><c:param name="linkId" value="home"/></c:import>
+			</li>
 			<li><h5 class="mt-4">Règles</h5></li>
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectFamilleNorme" /><c:param name="linkId" value="familyManagement" /></c:import>
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectNorme" /><c:param name="linkId" value="normManagement" /></c:import>
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectListNomenclatures" /><c:param name="linkId" value="externalFile" /></c:import>
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectWebserviceContext" /><c:param name="linkId" value="webserviceManagement" /></c:import>
-    		<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectEntrepot" /><c:param name="linkId" value="entrepot" /></c:import>
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectFamilleNorme" /><c:param name="linkId" value="familyManagement" /></c:import>
+			</li>
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectNorme" /><c:param name="linkId" value="normManagement" /></c:import>
+			</li>
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectListNomenclatures" /><c:param name="linkId" value="externalFile" /></c:import>
+			</li>
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectWebserviceContext" /><c:param name="linkId" value="webserviceManagement" /></c:import>
+			</li>
+			<li class="nav-item mt-1 mb-1 text-left">
+    			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectEntrepot" /><c:param name="linkId" value="entrepot" /></c:import>
+    		</li>
 
 			<li><h5 class="mt-4">Bacs à sable</h5></li>
 			<li class="nobullet mt-1 mb-1 text-left">
@@ -58,13 +69,23 @@
 					</c:forEach>
 				</select></li>
 
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="enterPilotageBAS" /><c:param name="linkId" value="envManagement" /></c:import>
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectExport" /><c:param name="linkId" value="export" /></c:import>
-			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectReport" /><c:param name="linkId" value="reportManagement" /></c:import>
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="enterPilotageBAS" /><c:param name="linkId" value="envManagement" /></c:import>
+			</li>
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectExport" /><c:param name="linkId" value="export" /></c:import>
+			</li>
+			<li class="nav-item mt-1 mb-1 text-left">
+				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectReport" /><c:param name="linkId" value="reportManagement" /></c:import>
+			</li>
 			
 			<li><h5 class="mt-4">Maintenance</h5></li>
+			<li class="nav-item mt-1 mb-1 text-left">
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectParameters" /><c:param name="linkId" value="parameters" /></c:import>
+			</li>
+			<li class="nav-item mt-1 mb-1 text-left">
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectOperations" /><c:param name="linkId" value="operations" /></c:import>
+			</li>
     	</ul>
 </nav>
 
