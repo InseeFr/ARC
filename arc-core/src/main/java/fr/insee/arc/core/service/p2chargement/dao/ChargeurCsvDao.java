@@ -460,7 +460,7 @@ public class ChargeurCsvDao {
 		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
 	}
 
-	private List<String> execQuerySelectColumnsFromLoadTable() throws ArcException {
+	List<String> execQuerySelectColumnsFromLoadTable() throws ArcException {
 		return UtilitaireDao.get(0).getColumns(sandbox.getConnection(), this.tmpChargementArc);
 	}
 
