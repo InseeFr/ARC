@@ -7,6 +7,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
+import org.junit.Test;
+
 public class PrivateConstructorTest {
 
 	public static void testConstructorIsPrivate(final Class<?> clazz) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
@@ -18,5 +20,9 @@ public class PrivateConstructorTest {
 	    }); //this add the full coverage on private constructor
 	}
 	
+	@Test(expected = AssertionError.class)
+	public void testConstructorIsPrivateTest() throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+		testConstructorIsPrivate(PrivateConstructorTest.class);
+	}
 	
 }
