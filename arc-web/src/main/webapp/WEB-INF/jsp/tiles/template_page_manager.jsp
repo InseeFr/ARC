@@ -20,10 +20,10 @@
 				</label>
 			</div>
 			<div class="ml-2 mr-2">
-				<span class="smallButton" role="button" onclick="gotoPage('${view.sessionName}',${1 - view.idPage});">&lt;&lt;</span>
-				<span class="smallButton" role="button" onclick="gotoPage('${view.sessionName}',-1);">&lt;</span>
-				<span class="smallButton" role="button" onclick="gotoPage('${view.sessionName}',1);">&gt;</span>
-				<span class="smallButton" role="button" onclick="gotoPage('${view.sessionName}',${view.nbPages - view.idPage});">&gt;&gt;</span>
+				<span class="smallButton" role="button" onKeyDown="gotoPage('${view.sessionName}',${1 - view.idPage});" onclick="gotoPage('${view.sessionName}',${1 - view.idPage});">&lt;&lt;</span>
+				<span class="smallButton" role="button" onKeyDown="gotoPage('${view.sessionName}',-1);" onclick="gotoPage('${view.sessionName}',-1);">&lt;</span>
+				<span class="smallButton" role="button" onKeyDown="gotoPage('${view.sessionName}',1);" onclick="gotoPage('${view.sessionName}',1);">&gt;</span>
+				<span class="smallButton" role="button" onKeyDown="gotoPage('${view.sessionName}',${view.nbPages - view.idPage});" onclick="gotoPage('${view.sessionName}',${view.nbPages - view.idPage});">&gt;&gt;</span>
 				</div>
 		</c:if>
 </div>
