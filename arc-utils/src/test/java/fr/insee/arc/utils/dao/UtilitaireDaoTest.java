@@ -1,10 +1,13 @@
 package fr.insee.arc.utils.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -83,5 +86,29 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		assertEquals(28, StringUtils.countMatches(new String(outputArray), "\n"));
 		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS test CASCADE;");
 	}
+	
+	@Test
+	public void getColumnsTest() throws ArcException
+	{
+		
+		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeImmediate(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE tmp_a (a1 text, a2 int);"));
+		u.executeImmediate(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE tmp_b (b1 text, b2 date);"));
+		
+		List<String> cols = new ArrayList<String>();
+		
+		u.getColumns(c, cols, "tmp_a");
+		u.getColumns(c, cols, "tmp_b");
+		
+		assertTrue(cols.contains("a1"));
+		assertTrue(cols.contains("a2"));
+		assertTrue(cols.contains("b1"));
+		assertTrue(cols.contains("b2"));
+		assertEquals(4, cols.size());
+		
+		u.executeImmediate(c, "DISCARD TEMP;");
+	}
+	
+	
 	
 }
