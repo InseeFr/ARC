@@ -14,13 +14,13 @@ public class ControleRegleDaoTest extends InitializeQueryTest  {
 	@Test
 	public void test() throws ArcException {
 		
-		String tableControle = "ttt";
+		u.executeImmediate(c, "DISCARD TEMP;");
 
-		u.dropTable(c, tableControle);
-		u.executeImmediate(c, "CREATE TABLE "+tableControle+" AS SELECT 1 as id, null as brokenrules, null as controle ");
-		
+		u.executeImmediate(c, "CREATE TEMPORARY TABLE tmp_table_controle AS SELECT 1 as id, null as brokenrules, null as controle ");
+
+		// execute dao initTemporaryTable from tmp_table_controle
 		ControleRegleDao dao = new ControleRegleDao();
-		u.executeImmediate(c, dao.initTemporaryTable("ttt"));
+		u.executeImmediate(c, dao.initTemporaryTable("tmp_table_controle"));
 
 		int numberOfRowInTcMark = u.getInt(c, new ArcPreparedStatementBuilder("SELECT count(*) FROM "+ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP));
 		int numberOfRowInTcMeta = u.getInt(c, new ArcPreparedStatementBuilder("SELECT count(*) FROM "+ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP));
