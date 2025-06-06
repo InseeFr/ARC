@@ -18,6 +18,7 @@ import fr.insee.arc.core.service.p4controle.bo.ControleXsdCode;
 import fr.insee.arc.core.service.p4controle.bo.RegleControle;
 import fr.insee.arc.core.service.p4controle.bo.XsdDate;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.ManipString;
 
@@ -41,18 +42,21 @@ public class ControleRegleDao {
 		this.tableTempData = table;
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(dropControleTemporaryTables());
+		sb.append(FormatSQL.dropTable(ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP
+				, ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP
+				, ThreadTemporaryTable.TABLE_CONTROLE_ROW_TOTAL_COUNT_TEMP
+				).toString());
 
 		// creation de la table de marquage
-		sb.append("CREATE TEMPORARY TABLE " + ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		sb.append(SQL.CREATE.toString() + SQL.TEMPORARY + SQL.TABLE + ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 		sb.append("select id, null::text as brokenrules, null::text as controle from " + table + " where false ;\n");
 
 		// creation de la table meta
-		sb.append("CREATE TEMPORARY TABLE " + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		sb.append(SQL.CREATE.toString() + SQL.TEMPORARY + SQL.TABLE + ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 		sb.append("select null::text as brokenrules, null::boolean as blocking, null::text as controle where false;\n");
 
 		// total count of record in the table to evaluate the error ratio
-		sb.append("CREATE TEMPORARY TABLE " + ThreadTemporaryTable.TABLE_CONTROLE_ROW_TOTAL_COUNT_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		sb.append(SQL.CREATE.toString() + SQL.TEMPORARY + SQL.TABLE + ThreadTemporaryTable.TABLE_CONTROLE_ROW_TOTAL_COUNT_TEMP + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 		sb.append("select count(1)::numeric as n FROM " + table + ";\n");
 
 		return sb.toString();
@@ -83,10 +87,14 @@ public class ControleRegleDao {
 		return sb.toString();
 	}
 
-	public String dropControleTemporaryTables() {
+	/**
+	 * query to drop control mark table
+	 * @return
+	 */
+	public String dropControleTemporaryMarkTable() {
 		return FormatSQL.dropTable(ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP).toString();
 	}
-
+	
 	/**
 	 * insert the source file line and the rules number whom evaluation is false in
 	 * the mark table insert the count of line with false evaluation and the rules

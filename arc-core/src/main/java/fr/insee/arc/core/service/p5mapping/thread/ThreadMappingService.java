@@ -67,7 +67,7 @@ public class ThreadMappingService extends ThreadTemplate {
 		this.tabIdSource = anApi.getTabIdSource();
 		this.paramBatch = anApi.getParamBatch();
 
-		this.tableTempControleOk = "tableTempControleOk".toLowerCase();
+		this.tableTempControleOk = ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP;
 		this.tableMappingPilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
 		this.tablePil = anApi.getTablePil();

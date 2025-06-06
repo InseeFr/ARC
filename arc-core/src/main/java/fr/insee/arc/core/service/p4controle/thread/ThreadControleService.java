@@ -22,7 +22,6 @@ import fr.insee.arc.core.service.global.thread.ThreadTemplate;
 import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p4controle.bo.ControleMarkCode;
-import fr.insee.arc.core.service.p4controle.dao.ControleRegleDao;
 import fr.insee.arc.core.service.p4controle.dao.ThreadControleQueryBuilder;
 import fr.insee.arc.core.service.p4controle.operation.ControleRulesOperation;
 import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;
@@ -73,7 +72,7 @@ public class ThreadControleService extends ThreadTemplate {
 		this.sjdr = new ServiceJeuDeRegleOperation();
 
 		// Nom des tables temporaires
-		this.tableControleDataTemp = FormatSQL.temporaryTableName("controle_data_temp");
+		this.tableControleDataTemp = ThreadTemporaryTable.TABLE_CONTROLE_DATA_TEMP;
 		this.tableControlePilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
 		// tables finales

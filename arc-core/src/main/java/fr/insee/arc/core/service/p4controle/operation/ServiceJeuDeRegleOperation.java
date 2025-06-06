@@ -202,7 +202,7 @@ public class ServiceJeuDeRegleOperation {
 
 		StaticLoggerDispatcher.info(LOGGER, "Execution de " + nbRegles + "/" + nbTotalRegles);
 		blocRequete.append(this.dao.markTableResultat());
-		blocRequete.append(this.dao.dropControleTemporaryTables());
+		blocRequete.append(this.dao.dropControleTemporaryMarkTable());
 
 		UtilitaireDao.get(0).executeImmediate(connexion,
 				"SET enable_nestloop=off; " + blocRequete + "SET enable_nestloop=on; ");
