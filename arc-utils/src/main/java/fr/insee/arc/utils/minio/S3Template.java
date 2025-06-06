@@ -143,10 +143,10 @@ public class S3Template {
 	 * @param path
 	 * @return
 	 */
-	private static String normalizePath(String path)
+	static String normalizePath(String path)
 	{
-		if (path == null) return null;
-		if (path.isBlank()) return path;
+		if (path == null) return "";
+		if (path.isBlank()) return "";
 		String reworkedPath = path.replace("\\", "/").replace("//", "/");
 		reworkedPath = reworkedPath.charAt(0) == '/' ? reworkedPath.substring(1) : reworkedPath;
 		return reworkedPath;
