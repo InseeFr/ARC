@@ -218,5 +218,41 @@ public class FileUtilsArcTest {
 
 	}
 	
+	@Test
+	public void deplacerFichierTest() throws IOException, ArcException
+	{
+		File root=testFolder.newFolder("root");
+		File dirA=new File(root,"/a");
+		File dirB=new File(root,"/b");
+		dirA.mkdir();
+		dirB.mkdir();
+		
+		String pathDirA = dirA.getAbsolutePath();
+		String pathDirB = dirB.getAbsolutePath();
+		
+		String nameOfFileInA = "fileInA.txt";
+		String nameOfFileInB = "fileInB.txt";
+
+		// no exception expected even the fileInA doesn't exists
+		FileUtilsArc.deplacerFichier(pathDirA, pathDirB, nameOfFileInA, nameOfFileInB);
+		
+		// create fileInA
+		File fileA = new File(pathDirA, nameOfFileInA);
+		fileA.createNewFile();
+		
+		// as source and target directories are the same, fileInB shouldn't exists after operation
+		FileUtilsArc.deplacerFichier(pathDirA, pathDirA, nameOfFileInA, nameOfFileInB);
+		assertFalse(new File(pathDirA, nameOfFileInB).exists());
+		
+		// move fileA to fileB in two separated directory
+		FileUtilsArc.deplacerFichier(pathDirA, pathDirB, nameOfFileInA, nameOfFileInB);
+		assertFalse(new File(pathDirA, nameOfFileInA).exists());
+		assertTrue(new File(pathDirB, nameOfFileInB).exists());
+
+		
+		
+	}
+	
+	
 	
 }
