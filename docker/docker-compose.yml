@@ -1,0 +1,31 @@
+# To set database and start arc-web, use the command
+# docker compose --env-file arc-dc.env up
+# Use http://localhot:58080 to access arc gui
+
+services:
+  db:
+    image: postgres:14-alpine
+    command: -c max_connections=1000 -c max_wal_senders=0 -c wal_level=minimal -c work_mem=16MB -c maintenance_work_mem=32MB -c temp_buffers=16MB -c enable_mergejoin=off -c enable_seqscan=off -c extra_float_digits=0 -c tcp_keepalives_idle=60 -c synchronous_commit=off -c fsync=off -c shared_buffers=256MB -c full_page_writes=off -c track_activities=off -c log_min_messages=error
+    ports:
+      - ${DATABASE_PORT}:5432
+    volumes:
+      - ${DATABASE_DATA_ROOT_DIRECTORY}:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=arc
+  arc:
+    image: inseefr/arc:latest
+    ports:
+      - ${ARCWEB_PORT}:8080
+    depends_on:
+      - db
+# Check the full list of docker envionment variables for arc configuration
+# at https://github.com/InseeFr/ARC/blob/master/user-guide/arc_parameters.md
+    environment:
+      - DATABASE_URL=jdbc:postgresql://db:5432/arc
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - APPLICATION_DIRECTORY= /files/
+    volumes:
+      - ${ARCWEB_DATA_ROOT_DIRECTORY}:/home/$USER/arc_data:/files
