@@ -142,10 +142,14 @@ After the image build,
 
 ### Running the app with docker-compose
 
-If you want do not have a postgreSQL database ready and want to try the app on the fly use docker-compose. It will build the wep application, the database ans link them. So just run
+If you want do not have a postgreSQL database ready and want to try the app on the fly use docker-compose. It will build the wep application, the database and link them.
+
+1. Fill the file arc-dc.env. A non blank password must be set.
+
+2. Run docker compose
 
 ```shell
-docker-compose up
+docker compose --env-file arc-dc.env up
 ```
 
 ### Running the app with tomcat
