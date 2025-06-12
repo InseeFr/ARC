@@ -1,6 +1,6 @@
 # To set database and start arc-web, use the command
 # docker compose --env-file arc-dc.env up
-# Use http://localhot:58080 to access arc gui
+# Use http://localhot:port to access arc gui
 
 services:
   db:
