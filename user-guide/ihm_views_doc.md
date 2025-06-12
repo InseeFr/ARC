@@ -492,15 +492,67 @@ Le contenu des nomenclatures est seulement consulté, il ne peut pas être modif
 
 ## Gérer les webservices
 
+Cet écran fait référence aux webservices pour exécuter le moteur ARC.
+
+L'exécution peut être effectuée selon 2 modes :
+- en mode "service"
+  - Le moteur est exécuté et une trace est conservée dans la table de pilotage
+  - entrypoint : /execute/service/{serviceName}/{serviceId}
+- en mode "engine", le moteur est exécuté en tables temporaires
+  - entrypoint : /execute/engine/{serviceName}/{serviceId}
+
+- en body de la requete est passé optionnellement le contenu du fichier en utf8, ...
+
+```	
+{
+	"fileContent":"..."
+}
+```
+
+
 ### `viewWebserviceContext`
 
 ***"Définition des webservices"*** : ce tableau liste les webservices renseignés dans ARC.
+
+nom du service : nom du service à exposer défini par l'utilisateur. Cela fait référence au champ {serviceName} de l'entrypoint
+type de service (ENGINE / SERVICE) : mode d'utilisation du moteur
+identifiant du service : numéro de service défini par l'utilisateur. Cela fait référence au champ {serviceId} de l'entrypoint
+environnement : le bac à sable dans lequel va s'exécuter le moteur
+n° de phase : numéro de la phase à atteindre (0=initialisation, 1=reception, 2=chargement, ...)
+norme : norme à utiliser pour le traitement (optionnel en mode service)
+validité : validité définie pour le traitement (optionnel en mode service)
+périodicité : périodicité définie pour le traitement (optionnel en mode service)
 
 ---
 
 ### `viewWebserviceQuery`
 
-***"Requête des webservices"*** : ce tableau détaille les requêtes du webservice sélectionné et l'expression SQL permettant d'y répondre.
+***"Requête des webservices"*** : ce tableau détaille les requêtes demandées au webservice et dont les résultats seront intégrés au retour
+
+Par convention, le nom de table en sortie de la phase 1 = A, le nom de table en sortie de la phase 2 = B, le nom de table en sortie de la phase 2 = C, ...
+
+```
+{
+    "ReturnView": {
+		"receptionTime":"YYYY-MM-DD'T'HH:mm:ss",
+		"returnTime":"YYYY-MM-DD'T'HH:mm:ss",
+		"dataSetView":{
+				"datasetId":"datasetId"
+				"datasetName":"Nom de la requête"
+				"content":
+						{
+							"nom de colonne":
+							[
+								"record" : [
+									"dataType":"text", 
+									"data":"valeur"
+								]
+							]
+						}
+				}
+		}
+}
+```
 
 ## Gérer les entrepôts
 
