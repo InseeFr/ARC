@@ -379,7 +379,7 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 				UtilitaireDao.get(0).executeRequest(c, queryAssert)).mapContent();
 		assertEquals(132, viewMappingUpload.get(ColumnEnum.VARIABLE_SORTIE.toString()).size()); // number of variables
 
-		assertEquals(3, viewMappingUpload.get(ColumnEnum.EXPR_REGLE_COL.toString()).stream().filter(Objects::isNull)
+		assertEquals(4, viewMappingUpload.get(ColumnEnum.EXPR_REGLE_COL.toString()).stream().filter(Objects::isNull)
 				.toList().size()); // number of metadata absent from the file
 	}
 
