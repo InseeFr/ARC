@@ -179,6 +179,7 @@ INSERT INTO arc.ihm_mod_variable_metier VALUES ('DSN', 'mapping_dsn_poste_ok', '
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('DSN', 'mapping_dsn_personne_ok', 'formation', 'text', 'null', '{nombre_occurence_max}');
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('DSN', 'mapping_dsn_poste_ok', 'id_employeur', 'bigint', 'identification technique de employeur', '{exclus}');
 INSERT INTO arc.ihm_mod_variable_metier VALUES ('DSN', 'mapping_dsn_employeur_ok', 'id_employeur', 'bigint', 'identification technique de employeur', '{exclus}');
+INSERT INTO arc.ihm_mod_variable_metier VALUES ('DSN', 'mapping_dsn_employeur_ok', 'test_regle_globale', 'bigint', 'test de la classe RegleMappingGlobale', '{exclus}');
 
 
 --
@@ -382,7 +383,7 @@ INSERT INTO arc.ihm_mapping_regle VALUES (128, 'PHASE3V1', '2015-01-01', '2050-1
 INSERT INTO arc.ihm_mapping_regle VALUES (129, 'PHASE3V1', '2015-01-01', '2050-12-31', 'v002', 'M', 'unitmesureactv', '{{1}(public.array_agg_distinct(row({i_s21_g00_53},{v_s21_g00_53_003})::public.cle_valeur) over (partition by {i_s21_g00_51}))}', NULL);
 INSERT INTO arc.ihm_mapping_regle VALUES (130, 'PHASE3V1', '2015-01-01', '2050-12-31', 'v002', 'M', 'unitmesureref', '{v_s21_g00_40_011}', NULL);
 INSERT INTO arc.ihm_mapping_regle VALUES (131, 'PHASE3V1', '2015-01-01', '2050-12-31', 'v002', 'M', 'validite', 'coalesce(CASE WHEN EXTRACT (DAY FROM ({validite}  :: TIMESTAMP)) <> ''1'' THEN date_trunc(''month'', {validite} :: TIMESTAMP)::text ELSE {validite} END,''2000-01-01'')', NULL);
-
+INSERT INTO arc.ihm_mapping_regle VALUES (131, 'PHASE3V1', '2015-01-01', '2050-12-31', 'v002', 'M', 'test_regle_globale', '{:select count(*) from arc.nmcl_code_pays_etranger_2017}', NULL);
 
 --
 -- TOC entry 3663 (class 0 OID 43074477)

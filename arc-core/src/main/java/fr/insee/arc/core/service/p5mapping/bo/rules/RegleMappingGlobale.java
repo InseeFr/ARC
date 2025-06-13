@@ -24,17 +24,17 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
     /**
      * Comment reconnaître une règle globale ?
      */
-    public final static String regexRegleGlobale = "^\\{:.*\\}$";
+    public static final String REGEX_REGLE_GLOBALE = "^\\{:.*\\}$";
 
-    private static final String tokenDebutTable = "{:";
-    private static final String tokenFinTable = "}";
-    private static final String tokenRegexdebut = "^\\{:";
-    private static final String tokenRegexFin = "\\}$";
-    private static final String tokenRegexDebutOuFin = "(" + tokenRegexdebut + ")|(" + tokenRegexFin + ")";
-    private static final String tokenRegexExpressionEchappee = "[^\\{:\\}]+";
-    private static final String tokenRegexExpressionTable = "\\{:" + tokenRegexExpressionEchappee + "\\}";
-    public static final String tokenRegexExpressionMappingGlobale = "\\{:" + tokenRegexExpressionEchappee + "(" + tokenRegexExpressionTable + "|"
-            + tokenRegexExpressionEchappee + ")*\\}";
+    private static final String TOKEN_DEBUT_TABLE = "{:";
+    private static final String TOKEN_FIN_TABLE = "}";
+    private static final String TOKEN_REGEXDEBUT = "^\\{:";
+    private static final String TOKEN_REGEX_FIN = "\\}$";
+    private static final String TOKEN_REGEX_DEBUT_OU_FIN = "(" + TOKEN_REGEXDEBUT + ")|(" + TOKEN_REGEX_FIN + ")";
+    private static final String TOKEN_REGEX_EXPRESSION_ECHAPPEE = "[^\\{:\\}]+";
+    private static final String TOKEN_REGEX_EXPRESSION_TABLE = "\\{:" + TOKEN_REGEX_EXPRESSION_ECHAPPEE + "\\}";
+    public static final String TOKEN_REGEX_EXPRESSION_MAPPING_GLOBALE = "\\{:" + TOKEN_REGEX_EXPRESSION_ECHAPPEE + "(" + TOKEN_REGEX_EXPRESSION_TABLE + "|"
+            + TOKEN_REGEX_EXPRESSION_ECHAPPEE + ")*\\}";
 
     private Connection connexion;
 
@@ -43,7 +43,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
     private Set<TableMapping> ensembleTableMapping;
 
     public RegleMappingGlobale(Connection aConnexion, String anExpression, String anEnvironnement, Set<TableMapping> someTablesMapping,
-            VariableMapping aVariableMapping) {
+                               VariableMapping aVariableMapping) {
         super(anExpression, aVariableMapping);
         this.environnement = anEnvironnement;
         this.connexion = aConnexion;
@@ -67,7 +67,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
 
     @Override
     public void deriverTest() throws ArcException {
-        String intermediaire = this.getExpression().replaceAll(tokenRegexDebutOuFin, empty);
+        String intermediaire = this.getExpression().replaceAll(TOKEN_REGEX_DEBUT_OU_FIN, empty);
         Pattern pattern = Pattern.compile("\\{:[^\\{:\\}]+\\}");
         Matcher matcher = pattern.matcher(intermediaire);
         StringBuilder returned = new StringBuilder();
@@ -85,11 +85,11 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
     }
 
     private final static String tokenTable(String nomCourt) {
-        return tokenDebutTable + nomCourt + tokenFinTable;
+        return TOKEN_DEBUT_TABLE + nomCourt + TOKEN_FIN_TABLE;
     }
 
     private String obtenirRequeteExecutable() {
-        String returned = this.getExpression().replaceAll(tokenRegexDebutOuFin, empty);
+        String returned = this.getExpression().replaceAll(TOKEN_REGEX_DEBUT_OU_FIN, empty);
         for (TableMapping table : this.ensembleTableMapping) {
             returned = returned.replace(tokenTable(table.getNomTableCourt()), ViewEnum.getFullName(environnement, table.toString()));
         }

@@ -24,9 +24,9 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
 public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMapping {
 
 
-    private static final String regexMappingRegleGlobaleOuRubrique = "(" + RegleMappingGlobale.tokenRegexExpressionMappingGlobale + ")|("
-            + RubriqueMapping.regexRubriqueMappingAcceptante + ")";
-    private static final Pattern patternMappingRegleGlobaleOuRubrique = Pattern.compile(regexMappingRegleGlobaleOuRubrique);
+    private static final String REGEX_MAPPING_REGLE_GLOBALE_OU_RUBRIQUE = "(" + RegleMappingGlobale.TOKEN_REGEX_EXPRESSION_MAPPING_GLOBALE + ")|("
+            + RubriqueMapping.REGEXP_RUBRIQUE_MAPPING_ACCEPTANTE + ")";
+    private static final Pattern PATTERN_MAPPING_REGLE_GLOBALE_OU_RUBRIQUE = Pattern.compile(REGEX_MAPPING_REGLE_GLOBALE_OU_RUBRIQUE);
 
     private MappingQueriesFactory regleMappingFactory;
 
@@ -107,7 +107,7 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
         String boutGauche = empty;
         String boutDroite = empty;
         String boutMilieu = empty;
-        Matcher matcher = patternMappingRegleGlobaleOuRubrique.matcher(this.getExpression());
+        Matcher matcher = PATTERN_MAPPING_REGLE_GLOBALE_OU_RUBRIQUE.matcher(this.getExpression());
         int start = 0;
         int end = 0;
         if (matcher.find()) {

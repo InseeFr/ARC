@@ -55,19 +55,19 @@ public class MappingQueriesFactory {
         /*
          * Est-ce que c'est une règle de groupe ?
          */
-        else if (anExpression.matches(RegleMappingGroupe.regexRegleGroupe)) {
+        else if (anExpression.matches(RegleMappingGroupe.REGEX_REGLE_GROUPE)) {
             return new RegleMappingGroupe(this, anExpression, aVariableMapping);
         }
         /*
          * Est-ce que c'est une règle globale ?
          */
-        else if (anExpression.matches(RegleMappingGlobale.regexRegleGlobale)) {
+        else if (anExpression.matches(RegleMappingGlobale.REGEX_REGLE_GLOBALE)) {
             return new RegleMappingGlobale(this.connexion, anExpression, this.environnement, this.ensembleTableMapping, aVariableMapping);
         }
         /*
          * Est-ce que c'est un nom de rubrique ?
          */
-        else if (anExpression.matches(RubriqueMapping.regexRubriqueMappingAcceptante)) {
+        else if (anExpression.matches(RubriqueMapping.REGEXP_RUBRIQUE_MAPPING_ACCEPTANTE)) {
             return new RubriqueMapping(anExpression, aVariableMapping, this.ensembleIdentifiantRubriqueExistante, this.ensembleNomRubriqueExistante);
         }
         /*

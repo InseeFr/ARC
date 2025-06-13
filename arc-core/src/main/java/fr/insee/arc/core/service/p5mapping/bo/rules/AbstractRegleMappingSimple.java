@@ -103,13 +103,13 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
         private static final String PSEUDO_COLUMN_IGNORED_ID="1";
         
 
-        public static final String regexRubriqueMapping = "((\\"+SEPARATOR_START_IDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_IDENTIFIER_RUBRIQUE+")|(\\"+SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE+"))";
+        public static final String REGEXP_RUBRIQUE_MAPPING = "((\\"+SEPARATOR_START_IDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_IDENTIFIER_RUBRIQUE+")|(\\"+SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE+"))";
         
         /**
          * Regex un peu plus permissive que nécessaire : la fabrique doit identifier {n'importe quoi} comme une rubrique, charge à la
          * méthode {@link #deriver()} et à la méthode {@link #deriverTest()} de lever les exceptions si besoin est.
          */
-        public static final String regexRubriqueMappingAcceptante = "((\\"+SEPARATOR_START_IDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_IDENTIFIER_RUBRIQUE+")|(\\"+SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE+"))";
+        public static final String REGEXP_RUBRIQUE_MAPPING_ACCEPTANTE = "((\\"+SEPARATOR_START_IDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_IDENTIFIER_RUBRIQUE+")|(\\"+SEPARATOR_START_NONIDENTIFIER_RUBRIQUE+"[a-zA-Z0-9_]+\\"+SEPARATOR_END_NONIDENTIFIER_RUBRIQUE+"))";
 
 
         @Override
@@ -189,10 +189,10 @@ public abstract class AbstractRegleMappingSimple extends AbstractRegleMapping {
                         + this.variableMapping.getExpressionRegle().getExpression() + ".\nUne " + this.getClass().getName()
                         + " ne peut pas recevoir d'expression vide.");
             }
-            if (!getExpression().matches(regexRubriqueMapping)) {
+            if (!getExpression().matches(REGEXP_RUBRIQUE_MAPPING)) {
                 throw new IllegalArgumentException("Pour la variable " + this.variableMapping.getNomVariable() + " ::= "
                         + this.variableMapping.getExpressionRegle().getExpression() + ".\nUne " + this.getClass().getName()
-                        + " doit être de la forme " + regexRubriqueMapping + ".");
+                        + " doit être de la forme " + REGEXP_RUBRIQUE_MAPPING + ".");
             }
         }
 

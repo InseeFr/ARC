@@ -30,18 +30,18 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
     /**
      * Comment reconnaître une règle de groupe ?
      */
-    public final static String regexRegleGroupe = "^\\{\\{.*\\}";
+    public final static String REGEX_REGLE_GROUPE = "^\\{\\{.*\\}";
 
-    private static final String regexExpressionNombre = " *[1-9][0-9]* *";
+    private static final String REGEX_EXPRESSION_NOMBRE = " *[1-9]\\d* *";
 
-    private static final String regexSeparateurDeListe = " *, *";
+    private static final String REGEX_SEPARATEUR_DE_LISTE = " *, *";
 
-    private static final String regexExpressionListeNombre = regexExpressionNombre + "(," + regexExpressionNombre + ")*";
-    private static final String regexExpressionListeNombreAccolade = "\\{" + regexExpressionListeNombre + "\\}";
-    private static final Pattern patternExpressionListeNombreAccolade = Pattern.compile(regexExpressionListeNombreAccolade);
+    private static final String REGEX_EXPRESSION_LISTE_NOMBRE = REGEX_EXPRESSION_NOMBRE;
+    private static final String REGEX_EXPRESSION_LISTE_NOMBRE_ACCOLADE = "\\{" + REGEX_EXPRESSION_LISTE_NOMBRE + "\\}";
+    private static final Pattern PATTERN_EXPRESSION_LISTE_NOMBRE_ACCOLADE = Pattern.compile(REGEX_EXPRESSION_LISTE_NOMBRE_ACCOLADE);
 
-    private static final String regexExpressionDebutRegleGroupe = "\\{" + regexExpressionListeNombreAccolade;
-    private static final Pattern patternDebutRegleGroupe = Pattern.compile(regexExpressionDebutRegleGroupe);
+    private static final String REGEX_EXPRESSION_DEBUT_REGLE_GROUPE = "\\{" + REGEX_EXPRESSION_LISTE_NOMBRE_ACCOLADE;
+    private static final Pattern PATTERN_DEBUT_REGLE_GROUPE = Pattern.compile(REGEX_EXPRESSION_DEBUT_REGLE_GROUPE);
 
     /**
      * Cette table associe chaque numéro de groupe à sa règle
@@ -87,13 +87,13 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
          * Éliminer les accolades de début ou de fin
          */
         String expressionGroupe = anExpressionGroupe.replaceAll(REGEX_DEBUT_OU_FIN_ECHAPPEMENT, empty);
-        Matcher matcher = patternExpressionListeNombreAccolade.matcher(expressionGroupe);
+        Matcher matcher = PATTERN_EXPRESSION_LISTE_NOMBRE_ACCOLADE.matcher(expressionGroupe);
         /*
-         * Repérer {1, 2}
+         * Repérer 1, 2
          */
         if (matcher.find()) {
             /*
-             * Récupérer {1, 2} (heu en fait juste 1, 2)
+             * Récupérer 1, 2
              */
             String expressionListeNumeroGroupe = expressionGroupe.substring(matcher.start() + ONE, matcher.end() - ONE);
             /*
@@ -103,13 +103,13 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
             /*
              * Je récupère les entiers 1 et 2
              */
-            for (String numeroGroupe : expressionListeNumeroGroupe.split(regexSeparateurDeListe)) {
+            for (String numeroGroupe : expressionListeNumeroGroupe.split(REGEX_SEPARATEUR_DE_LISTE)) {
                 listeGroupe.add(Integer.parseInt(numeroGroupe));
             }
             /*
              * Je renvoie la liste des groupes pour cette règle et cette règle
              */
-            return new Pair<List<Integer>, AbstractRegleMapping>(listeGroupe, this.regleMappingFactory.get(expressionGroupeReturned,
+            return new Pair<>(listeGroupe, this.regleMappingFactory.get(expressionGroupeReturned,
                     this.variableMapping));
         }
         throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_GROUP_INVALID, anExpressionGroupe, this.getExpression());
@@ -125,7 +125,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
     }
 
     private void decomposerElementsSimple() throws ArcException {
-        Matcher matcher = patternDebutRegleGroupe.matcher(this.getExpression());
+        Matcher matcher = PATTERN_DEBUT_REGLE_GROUPE.matcher(this.getExpression());
         int end = 0;
         String expressionGroupe;
         /*
@@ -195,7 +195,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
      *         Il se peut qu'une règle à groupe ne contienne pas de règle POUR le groupe demandé.<br/>
      *         Par exemple, la variable A a trois groupes 1, 2 et 3 et la variable B a deux groupes 1 et 2. Le groupe 3 existe bien, mais
      *         est valorisé à {@code "null"} pour la variable B.
-     * @throws ArcException 
+     * @throws ArcException
      */
     @Override
     public String getExpressionSQL(Integer aNumeroGroupe) throws ArcException {
@@ -209,5 +209,5 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
     public Set<Integer> getEnsembleGroupes() {
         return this.mapRegleGroupe.keySet();
     }
-
 }
+
