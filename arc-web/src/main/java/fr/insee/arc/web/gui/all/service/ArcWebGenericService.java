@@ -26,6 +26,7 @@ import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.AttributeValue;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import fr.insee.arc.web.Oauth2ClientForKeycloak;
 import fr.insee.arc.web.gui.all.dao.ArcWebGenericDao;
 import fr.insee.arc.web.gui.all.dao.IDao;
 import fr.insee.arc.web.gui.all.model.ArcModel;
@@ -229,7 +230,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		}
 		
 		OAuth2AuthenticationToken oauth2 = (OAuth2AuthenticationToken) token;
-		this.userName = oauth2.getPrincipal().getAttribute("preferred_username");
+		this.userName = oauth2.getPrincipal().getAttribute(Oauth2ClientForKeycloak.CLAIM_USERNAME);
         WebAuthenticationDetails webDetails = (WebAuthenticationDetails) token.getDetails();
         this.userName+="@"+webDetails.getRemoteAddress();
     	

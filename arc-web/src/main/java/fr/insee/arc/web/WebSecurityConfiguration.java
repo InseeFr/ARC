@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authorization.AuthorityAuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,7 +40,7 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 
 	@Bean
 	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
-		
+
 		// oath2 keycloak
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			
@@ -53,7 +55,10 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 			else
 			{
 				http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
-				.authorizeHttpRequests(t -> t.requestMatchers("/debug/**").hasAnyAuthority(PropertiesHandler.getInstance().getDisableDebugGui()));
+				.authorizeHttpRequests(t -> t.requestMatchers("/debug/**")
+						.access(debugGuiAccessAtUserLevel())
+						.requestMatchers("/debug/**")
+						.hasAnyAuthority(getDebugGuiAccessSecurityGroupName()));
 			}
 			
 		}
