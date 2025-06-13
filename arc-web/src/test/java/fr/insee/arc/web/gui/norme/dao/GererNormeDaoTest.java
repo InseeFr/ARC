@@ -258,8 +258,8 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 
 		assertEquals(0, viewColumns.size());
 
-		// in test data, must return 131 mapping rules
-		assertEquals(131, viewMapping.getContent().t.size());
+		// in test data, must return 132 mapping rules
+		assertEquals(132, viewMapping.getContent().t.size());
 	}
 
 	@Test
@@ -377,10 +377,10 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 
 		Map<String, List<String>> viewMappingUpload = new GenericBean(
 				UtilitaireDao.get(0).executeRequest(c, queryAssert)).mapContent();
-		assertEquals(131, viewMappingUpload.get(ColumnEnum.VARIABLE_SORTIE.toString()).size()); // number of variables
+		assertEquals(132, viewMappingUpload.get(ColumnEnum.VARIABLE_SORTIE.toString()).size()); // number of variables
 
 		assertEquals(3, viewMappingUpload.get(ColumnEnum.EXPR_REGLE_COL.toString()).stream().filter(Objects::isNull)
-				.collect(Collectors.toList()).size()); // number of metadata absent from the file
+				.toList().size()); // number of metadata absent from the file
 	}
 
 }
