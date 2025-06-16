@@ -115,7 +115,7 @@ public abstract class ApiService implements IConstanteNumerique {
 			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
 			}
-			register(this.connexion.getCoordinatorConnection(), this.getTablePil(), this.tablePilTemp, this.nbEnr, this.getCurrentPhase());
+			register();
 		}
 
 		return this.todo;
@@ -171,16 +171,22 @@ public abstract class ApiService implements IConstanteNumerique {
 	 * @param nbEnr
 	 * @throws ArcException
 	 */
-	private void register(Connection connexion, String tablePil, String tablePilTemp, Integer nbEnr, TraitementPhase...phasesToRegister) {
+	private void register() {
 		LoggerHelper.info(LOGGER_APISERVICE, "** register **");
 		try {
+
+			ArcPreparedStatementBuilder query = PilotageOperations.queryBuildTablePilotage(this.envExecution, this.tablePil, tablePilTemp);
 			
-			ArcPreparedStatementBuilder query = PilotageOperations.queryBuildTablePilotage(tablePil, tablePilTemp);
-			query.append(FormatSQL.analyzeSecured(tablePil));
-			Stream.of(phasesToRegister).forEach(p -> query.append(PilotageOperations.queryCopieTablePilotage(tablePil, tablePilTemp, p.previousPhase(), p, nbEnr)));
-			query.append(FormatSQL.analyzeSecured(tablePil));
-			query.append(FormatSQL.analyzeSecured(tablePilTemp));
-			UtilitaireDao.get(0).executeRequest(connexion,query);
+			query.append(FormatSQL.analyzeSecured(this.tablePil));
+			
+			Stream.of(this.getCurrentPhase()).forEach(p -> 
+				query.append(PilotageOperations.queryCopieTablePilotage(this.tablePil, this.tablePilTemp, p.previousPhase(), p, this.nbEnr)));
+			
+			query.append(FormatSQL.analyzeSecured(this.tablePil));
+			
+			query.append(FormatSQL.analyzeSecured(this.tablePilTemp));
+			
+			UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(),query);
 			
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "register()", ex);

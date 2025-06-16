@@ -19,9 +19,9 @@ import java.util.Map;
  */
 public class HierarchicalView implements ITree<String, String> {
 
-    private static final int levelZero = 0;
-    public static final String rootLevel = "root";
-    private static final String dummyLevel = "dummy";
+    private static final int LEVEL_ZERO = 0;
+    public static final String ROOT_LEVEL = "root";
+    private static final String DUMMY_LEVEL = "dummy";
     private String name;
     private HierarchicalView parent;
     private HierarchicalView absoluteRoot;
@@ -45,6 +45,12 @@ public class HierarchicalView implements ITree<String, String> {
      */
     private Map<String, HierarchicalView> mapView;
 
+
+    private HierarchicalView()
+    {
+    	super();
+    }
+    
     /**
      * The constructor for a non-root element.
      *
@@ -57,16 +63,15 @@ public class HierarchicalView implements ITree<String, String> {
      * @param aLevelOrder
      * @param aMapView
      */
-    private HierarchicalView(String aName, HierarchicalView aParent, HierarchicalView anAbsoluteRoot, String aLevelName, int aLevelNumber,
-            Map<String, List<HierarchicalView>> aLevelView, List<String> aLevelOrder, Map<String, HierarchicalView> aMapView) {
+    private HierarchicalView(String aName, HierarchicalView aParent, HierarchicalView anAbsoluteRoot, String aLevelName, int aLevelNumber) {
         this.name = aName;
         this.parent = aParent;
         this.absoluteRoot = anAbsoluteRoot == null ? this : anAbsoluteRoot;
         this.levelName = aLevelName;
         this.levelNumber = aLevelNumber;
-        this.levelView = aLevelView;
-        this.levelOrder = aLevelOrder;
-        this.mapView = aMapView;
+        this.levelView = new HashMap<>();
+        this.levelOrder = new ArrayList<>();
+        this.mapView = new HashMap<>();
     }
 
     /**
@@ -79,16 +84,15 @@ public class HierarchicalView implements ITree<String, String> {
      * @param aLevelOrder
      * @param aMapView
      */
-    private HierarchicalView(String aName, String aLevelName, int aLevelNumber, Map<String, List<HierarchicalView>> aLevelView,
-            List<String> aLevelOrder, Map<String, HierarchicalView> aMapView) {
+    private HierarchicalView(String aName, String aLevelName, int aLevelNumber) {
         this.name = aName;
         this.parent = null;
         this.absoluteRoot = this;
         this.levelName = aLevelName;
         this.levelNumber = aLevelNumber;
-        this.levelView = aLevelView;
-        this.levelOrder = aLevelOrder;
-        this.mapView = aMapView;
+        this.levelView = new HashMap<>();
+        this.levelOrder = new ArrayList<>();
+        this.mapView = new HashMap<>();
     }
 
 
@@ -98,8 +102,7 @@ public class HierarchicalView implements ITree<String, String> {
 	 * @return
 	 */
     public static final HierarchicalView asRoot(String aName) {
-        return new HierarchicalView(aName, rootLevel, levelZero, new HashMap<>(), new ArrayList<>(),
-                new HashMap<>());
+        return new HierarchicalView(aName, ROOT_LEVEL, LEVEL_ZERO);
     }
 
 	/**
@@ -109,9 +112,9 @@ public class HierarchicalView implements ITree<String, String> {
 	 * @return
 	 */
     public static final HierarchicalView asChild(String aName, HierarchicalView aParent) {
-        HierarchicalView returned = new HierarchicalView(aName, aParent, aParent.absoluteRoot, aParent.levelOrder.get(levelZero),
-                aParent.levelNumber + 1, new HashMap<>(), new ArrayList<>(),
-                new HashMap<>());
+        HierarchicalView returned = new HierarchicalView(aName, aParent, aParent.absoluteRoot, aParent.levelOrder.get(LEVEL_ZERO),
+                aParent.levelNumber + 1);
+
         // Grabbing the following levels
         for (int i = 1; i < aParent.levelOrder.size(); i++) {
             returned.levelOrder.add(aParent.levelOrder.get(i));
@@ -261,10 +264,17 @@ public class HierarchicalView implements ITree<String, String> {
      * @return the parent of the nth {@code generation}
      */
     public HierarchicalView getAncestor(int generation) {
-        return generation < 0 ? null : //
-                (generation == 0 ? this : //
-                        (generation == 1 ? this.getParent() : //
-                                (this.getParent().getAncestor(generation - 1))));
+    	if (generation < 0)
+    		return null;
+    	
+    	if (generation == 0)
+    		return this;
+
+    	if (generation == 1)
+    		return this.getParent();
+    	
+    	return this.getParent().getAncestor(generation - 1);
+    	
     }
 
     /**
@@ -327,6 +337,7 @@ public class HierarchicalView implements ITree<String, String> {
     }
 
     public static HierarchicalView dummy() {
-        return HierarchicalView.asRoot(dummyLevel);
+        return HierarchicalView.asRoot(DUMMY_LEVEL);
     }
+    
 }

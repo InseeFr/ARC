@@ -4,8 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authorization.AuthorityAuthorizationDecision;
-import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +23,10 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 	
 	private static final Logger LOGGER = LogManager.getLogger(WebSecurityConfiguration.class);
 
+	private static final String DEBUG_URI_FILTER = "/debug/**";
+	private static final String SECURE_URI_FILTER = "/secure/**";
+
+	
 	// register Keycloak oauth2 client for authentification flow
 	@Bean
 	public ClientRegistrationRepository clientRegistrationRepository(PropertiesHandler properties) {
@@ -45,19 +47,19 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			
 			http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
-			.authorizeHttpRequests(t -> t.requestMatchers("/secure/**").hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
+			.authorizeHttpRequests(t -> t.requestMatchers(SECURE_URI_FILTER).hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
 			
 
 			// disable debugging screens when property is not set else filter to this role
 			if (properties.getDisableDebugGui().isEmpty()) {
-				http.authorizeHttpRequests(t -> t.requestMatchers("/debug/**").denyAll());
+				http.authorizeHttpRequests(t -> t.requestMatchers(DEBUG_URI_FILTER).denyAll());
 			}
 			else
 			{
 				http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
-				.authorizeHttpRequests(t -> t.requestMatchers("/debug/**")
+				.authorizeHttpRequests(t -> t.requestMatchers(DEBUG_URI_FILTER)
 						.access(debugGuiAccessAtUserLevel())
-						.requestMatchers("/debug/**")
+						.requestMatchers(DEBUG_URI_FILTER)
 						.hasAnyAuthority(getDebugGuiAccessSecurityGroupName()));
 			}
 			

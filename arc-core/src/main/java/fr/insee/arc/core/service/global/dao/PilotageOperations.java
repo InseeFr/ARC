@@ -65,7 +65,7 @@ public class PilotageOperations {
 
 	
 	@SqlInjectionChecked
-	public static ArcPreparedStatementBuilder queryBuildTablePilotage(String tablePil, String tablePilTemp) {
+	public static ArcPreparedStatementBuilder queryBuildTablePilotage(String envExecution, String tablePil, String tablePilTemp) {
 		
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("\n DROP TABLE IF EXISTS " + tablePilTemp + "; ");
@@ -81,6 +81,8 @@ public class PilotageOperations {
 		requete.append("\n SELECT *  FROM " + tablePil + " a ");
 		requete.append("\n LIMIT 0; ");
 		
+		// drop is necessary as index could had been set from a previous load which had crashed
+		requete.append("DROP INDEX IF EXISTS "+envExecution+".idx_table_pil_temp;");
 		requete.append("CREATE INDEX idx_table_pil_temp ON " + tablePilTemp + "(id_source);");
 		
 		return requete;
