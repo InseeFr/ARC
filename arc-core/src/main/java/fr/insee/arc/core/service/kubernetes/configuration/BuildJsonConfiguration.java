@@ -54,7 +54,7 @@ public class BuildJsonConfiguration {
 	 * @return
 	 * @throws ArcException
 	 */
-	private static String replicaStatefulConfiguration(int executorReplicaIndex)
+	protected static String replicaStatefulConfiguration(int executorReplicaIndex)
 	{
 		return applyKubernetesParameters(ExecutorDatabaseStatefulTemplate.configuration, kubernetesParameters(executorReplicaIndex));
 	}
@@ -65,7 +65,7 @@ public class BuildJsonConfiguration {
 	 * @return
 	 * @throws ArcException
 	 */
-	private static String replicaServiceConfiguration(int executorReplicaIndex)
+	protected static String replicaServiceConfiguration(int executorReplicaIndex)
 	{
 		return applyKubernetesParameters(ExecutorDatabaseServiceTemplate.configuration, kubernetesParameters(executorReplicaIndex));
 	}
@@ -82,6 +82,7 @@ public class BuildJsonConfiguration {
 				, JsonFileParameter.RAM, properties.getKubernetesExecutorRam()
 				, JsonFileParameter.EPHEMERAL, properties.getKubernetesExecutorEphemeral()
 				, JsonFileParameter.EPHEMERAL_VOLUME_SIZE, properties.getKubernetesExecutorEphemeralVolumeSize()
+				, JsonFileParameter.TEMPORARY_TABLESPACE_MEDIUM, properties.getKubernetesExecutorTemptablespaceMedium()
 		};
 	}
 

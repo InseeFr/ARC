@@ -24,6 +24,7 @@ public class JsonFileParameter {
 	public static final String RAM = "{ram}";
 	public static final String EPHEMERAL = "{ephemeral}";
 	public static final String EPHEMERAL_VOLUME_SIZE = "{generic_ephemeral_volume_size}";
+	public static final String TEMPORARY_TABLESPACE_MEDIUM = "{temporary_tablespace_medium}";
 
 
 }

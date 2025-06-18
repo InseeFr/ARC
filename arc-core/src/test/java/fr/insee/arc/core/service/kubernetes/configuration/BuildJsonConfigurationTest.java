@@ -1,30 +1,49 @@
 package fr.insee.arc.core.service.kubernetes.configuration;
 
-public class ExecutorDatabaseStatefulTemplate {
+import static org.junit.Assert.assertEquals;
 
-	private ExecutorDatabaseStatefulTemplate() {
-		throw new IllegalStateException("Database template for kubernetes database executors");
-	}
-	
-	protected static String configuration =
+import org.junit.Test;
+
+import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
+
+public class BuildJsonConfigurationTest {
+
+	@Test
+	public void kubernetesParametersTest() {
+		
+		PropertiesHandler properties=PropertiesHandler.getInstance();
+		
+		properties.setKubernetesExecutorLabel("pg-arc-executor-batch-w");
+		properties.setKubernetesExecutorUser("arc");
+		properties.setDatabasePassword("");
+		properties.setKubernetesExecutorDatabase("arc_db");
+		properties.setKubernetesExecutorPort("5432");
+		properties.setKubernetesExecutorImage("bitnami/postgresql:14");
+		properties.setKubernetesExecutorCpu("8");
+		properties.setKubernetesExecutorRam("8Gi");
+		properties.setKubernetesExecutorEphemeral("50Gi");
+		properties.setKubernetesExecutorEphemeralVolumeSize("400Gi");
+		properties.setKubernetesExecutorTemptablespaceMedium("Memory");
+		
+		String expectedTemplate = 
 """
 {
   "apiVersion": "apps/v1",
   "kind": "StatefulSet",
   "metadata": {
-    "name": "{pg-arc-executor-label}"
+    "name": "pg-arc-executor-batch-w-1"
   },
   "spec": {
     "replicas": 1,
     "selector": {
       "matchLabels": {
-        "app": "{pg-arc-executor-label}"
+        "app": "pg-arc-executor-batch-w-1"
       }
     },
     "template": {
       "metadata": {
         "labels": {
-          "app": "{pg-arc-executor-label}"
+          "app": "pg-arc-executor-batch-w-1"
         }
       },
       "spec": {
@@ -76,7 +95,7 @@ public class ExecutorDatabaseStatefulTemplate {
               },
               {
                 "name": "POSTGRESQL_PORT_NUMBER",
-                "value": "{port}"
+                "value": "5432"
               },
               {
                 "name": "POSTGRESQL_VOLUME_DIR",
@@ -88,19 +107,19 @@ public class ExecutorDatabaseStatefulTemplate {
               },
               {
                 "name": "POSTGRES_USER",
-                "value": "{user}"
+                "value": "arc"
               },
               {
                 "name": "POSTGRES_POSTGRES_PASSWORD",
-                "value": "{password}"
+                "value": ""
               },
               {
                 "name": "POSTGRES_PASSWORD",
-                "value": "{password}"
+                "value": ""
               },
               {
                 "name": "POSTGRES_DB",
-                "value": "{database}"
+                "value": "arc_db"
               },
               {
                 "name": "POSTGRESQL_ENABLE_LDAP",
@@ -139,14 +158,14 @@ public class ExecutorDatabaseStatefulTemplate {
                 "value": "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
               }
             ],
-            "image": "{image}",
+            "image": "bitnami/postgresql:14",
             "imagePullPolicy": "IfNotPresent",
             "livenessProbe": {
               "exec": {
                 "command": [
                   "/bin/sh",
                   "-c",
-                  "exec pg_isready -U \\"{user}\\" -d \\"dbname={database}\\" -h 127.0.0.1 -p {port}"
+                  "exec pg_isready -U \\"arc\\" -d \\"dbname=arc_db\\" -h 127.0.0.1 -p 5432"
                 ]
               },
               "failureThreshold": 6,
@@ -158,7 +177,7 @@ public class ExecutorDatabaseStatefulTemplate {
             "name": "postgresql",
             "ports": [
               {
-                "containerPort": {port},
+                "containerPort": 5432,
                 "name": "tcp-postgresql",
                 "protocol": "TCP"
               }
@@ -169,7 +188,7 @@ public class ExecutorDatabaseStatefulTemplate {
                   "/bin/sh",
                   "-c",
                   "-e",
-                  "exec pg_isready -U \\"{user}\\" -d \\"dbname={database}\\" -h 127.0.0.1 -p {port}\\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\\n"
+                  "exec pg_isready -U \\"arc\\" -d \\"dbname=arc_db\\" -h 127.0.0.1 -p 5432\\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\\n"
                 ]
               },
               "failureThreshold": 6,
@@ -181,13 +200,13 @@ public class ExecutorDatabaseStatefulTemplate {
             "resources": {
               "requests": {
                 "cpu": "10m",
-                "memory": "{ram}",
+                "memory": "8Gi",
                 "ephemeral-storage": "40Mi"
               },
               "limits": {
-                "cpu": "{cpu}",
-                "memory": "{ram}",
-                "ephemeral-storage": "{ephemeral}"
+                "cpu": "8",
+                "memory": "8Gi",
+                "ephemeral-storage": "50Gi"
               }
             },
             "securityContext": {
@@ -239,7 +258,7 @@ public class ExecutorDatabaseStatefulTemplate {
           },
           {
             "emptyDir": {
-              "medium": "{temporary_tablespace_medium}"
+              "medium": "Memory"
             },
             "name": "tbstmp"
           },
@@ -251,7 +270,7 @@ public class ExecutorDatabaseStatefulTemplate {
                   "accessModes": ["ReadWriteOnce"],
                   "resources": {
                     "requests": {
-                      "storage": "{generic_ephemeral_volume_size}"
+                      "storage": "400Gi"
                     }
                   }
                 }
@@ -263,5 +282,39 @@ public class ExecutorDatabaseStatefulTemplate {
     }
   }
 }
-""";
+"""
+;	
+
+		assertEquals(expectedTemplate, BuildJsonConfiguration.replicaStatefulConfiguration(1));
+		
+expectedTemplate =
+"""
+{
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": {
+    "name": "pg-arc-executor-batch-w-1",
+    "labels": {
+      "app": "pg-arc-executor-batch-w-1"
+    }
+  },
+  "spec": {
+    "type": "ClusterIP",
+    "ports": [
+      {
+        "port": 5432
+      }
+    ],
+    "selector": {
+      "app": "pg-arc-executor-batch-w-1"
+    }
+  }
+}		
+"""
+;
+		assertEquals(expectedTemplate, BuildJsonConfiguration.replicaServiceConfiguration(1));
+	
+		
+	}
+
 }
