@@ -53,6 +53,18 @@ public class ExecutorDatabaseStatefulTemplate {
                 "mountPath": "/tbstmp"
               }
             ],
+            "resources": {
+              "requests": {
+                "cpu": "10m",
+                "memory": "16Mi",
+                "ephemeral-storage": "1Mi"
+              },
+              "limits": {
+                "cpu": "100m",
+                "memory": "32Mi",
+                "ephemeral-storage": "100Mi"
+              }
+            },
             "securityContext": {
               "runAsNonRoot": true,
               "allowPrivilegeEscalation": false,
