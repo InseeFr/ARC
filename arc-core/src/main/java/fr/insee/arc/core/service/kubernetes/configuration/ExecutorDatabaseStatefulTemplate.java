@@ -39,7 +39,7 @@ public class ExecutorDatabaseStatefulTemplate {
         "initContainers": [
           {
             "name": "tbstmp-init",
-            "image": "proxy-docker-io.insee.fr/bitnami/postgresql:14",
+            "image": "{image}",
             "command": [
               "/bin/sh",
               "-c"
@@ -62,7 +62,7 @@ public class ExecutorDatabaseStatefulTemplate {
               "limits": {
                 "cpu": "100m",
                 "memory": "32Mi",
-                "ephemeral-storage": "100Mi"
+                "ephemeral-storage": "500Mi"
               }
             },
             "securityContext": {
