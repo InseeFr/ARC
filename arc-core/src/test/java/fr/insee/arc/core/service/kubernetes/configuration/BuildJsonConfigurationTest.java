@@ -18,7 +18,7 @@ public class BuildJsonConfigurationTest {
 		properties.setDatabasePassword("");
 		properties.setKubernetesExecutorDatabase("arc_db");
 		properties.setKubernetesExecutorPort("5432");
-		properties.setKubernetesExecutorImage("bitnami/postgresql:14");
+		properties.setKubernetesExecutorImage("bitnami/postgresql:17.5.0");
 		properties.setKubernetesExecutorCpu("8");
 		properties.setKubernetesExecutorRam("8Gi");
 		properties.setKubernetesExecutorEphemeral("50Gi");
@@ -58,7 +58,7 @@ public class BuildJsonConfigurationTest {
         "initContainers": [
           {
             "name": "tbstmp-init",
-            "image": "proxy-docker-io.insee.fr/bitnami/postgresql:14",
+            "image": "bitnami/postgresql:17.5.0",
             "command": [
               "/bin/sh",
               "-c"
@@ -81,7 +81,7 @@ public class BuildJsonConfigurationTest {
               "limits": {
                 "cpu": "100m",
                 "memory": "32Mi",
-                "ephemeral-storage": "100Mi"
+                "ephemeral-storage": "500Mi"
               }
             },
             "securityContext": {
@@ -170,7 +170,7 @@ public class BuildJsonConfigurationTest {
                 "value": "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
               }
             ],
-            "image": "bitnami/postgresql:14",
+            "image": "bitnami/postgresql:17.5.0",
             "imagePullPolicy": "IfNotPresent",
             "livenessProbe": {
               "exec": {
