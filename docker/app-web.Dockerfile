@@ -58,6 +58,9 @@ RUN chmod +x usr/src/app/docker/script.sh && usr/src/app/docker/script.sh
 # Get a tomcat
 FROM tomcat:10-jdk17
 
+# Change the tomcat connector to prevent the RFC 7230 and RFC 3986 compliance error
+RUN sed -i 's/<Connector /<Connector relaxedQueryChars="\&#x5B;\&#x5D;\&#x7C;\&#x7B;\&#x7D;\&#x5E;\&#x5C;\&#x60;\&#x22;\&#x3C;\&#x3E;" relaxedPathChars="&#x5B;\&#x5D;\&#x7C;\&#x7B;\&#x7D;\&#x5E;\&#x5C;\&#x60;\&#x22;\&#x3C;\&#x3E;" /' ${CATALINA_HOME}/conf/server.xml
+
 # Clean it
 RUN rm -rf $CATALINA_HOME/webapps/*
 
