@@ -605,7 +605,7 @@ class BatchARC implements IReturnCode {
 		// si le s3 est actif, on sauvegarde les archives pending ou KO vers le s3
 		List<String> aBougerToS3 = ArcS3.INPUT_BUCKET.isS3Off() ? new ArrayList<>():dao.execQuerySelectArchivePendingOrKO(envExecution);
 		if (!aBougerToS3.isEmpty()) {
-			savePendingOrKOArchivesToS3(envExecution, repertoire, aBougerToS3);
+			savePendingOrKOArchivesToS3(aBougerToS3);
 		}
 		
 		message("Fin des déplacements de fichiers");
@@ -650,7 +650,7 @@ class BatchARC implements IReturnCode {
 	 * @param aBougerToS3
 	 * @throws ArcException
 	 */
-	private void savePendingOrKOArchivesToS3(String envExecution2, String repertoire2, List<String> aBougerToS3) throws ArcException {
+	private void savePendingOrKOArchivesToS3(List<String> aBougerToS3) throws ArcException {
 		for (String container : aBougerToS3) {
 			String entrepotContainer = ManipString.substringBeforeFirst(container, "_");
 			String originalContainer = ManipString.substringAfterFirst(container, "_");
