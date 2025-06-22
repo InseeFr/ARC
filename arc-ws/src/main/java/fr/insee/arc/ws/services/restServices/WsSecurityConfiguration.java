@@ -20,7 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -49,15 +49,18 @@ public class WsSecurityConfiguration {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
+
+		
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtResourceServer -> jwtResourceServer
 					.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak())))
-					.authorizeHttpRequests(t -> t.requestMatchers(new AntPathRequestMatcher("/execute/**") , new AntPathRequestMatcher("/webservice/**"))
+					.authorizeHttpRequests(t -> t.requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/execute/**") 
+							, PathPatternRequestMatcher.withDefaults().matcher("/webservice/**"))
 							.hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
 		}
 		else
 		{
-			http.csrf(t-> t.requireCsrfProtectionMatcher(new AntPathRequestMatcher("/execute/**")).disable());
+			http.csrf(t-> t.requireCsrfProtectionMatcher(PathPatternRequestMatcher.withDefaults().matcher("/execute/**")).disable());
 		}
 
 		http.authorizeHttpRequests(t -> t.anyRequest().permitAll());

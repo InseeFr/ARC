@@ -558,6 +558,15 @@ public class PropertiesHandler {
 		return map;
 	}
 
+	public Map<String, String> lightVersionInformation() {
+		Map<String, String> map = new LinkedHashMap<>();
+		map.put("version", getVersion());
+		map.put("buildDate", getVersionDate());
+		map.put("gitCommitId", getGitCommitId());
+		return map;
+	}
+	
+	
 
 	/**
 	 * Unserialize the connection data found in properties

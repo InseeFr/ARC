@@ -27,7 +27,7 @@ public class HomeAction extends ArcWebGenericService<NoModel, HomeDao> {
 	private static final String RESULT_SUCCESS = "jsp/home.jsp";
 	
 	@RequestMapping("/home")
-	public String home(Model model, HttpServletRequest request) {
+	public String home(Model model) {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

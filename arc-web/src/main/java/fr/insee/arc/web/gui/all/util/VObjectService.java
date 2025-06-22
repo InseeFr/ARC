@@ -234,7 +234,7 @@ public class VObjectService {
 				aContent = reworkContent.apply(UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
 						requete, ModeRequeteImpl.arcModeRequeteIHM()));
 			} catch (ArcException ex) {
-				data.setMessage(ex.getMessage());
+				data.setMessage(ex.getShortMessage());
 				LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
 			}
 			if (aContent != null && !aContent.isEmpty()) {
@@ -346,7 +346,7 @@ public class VObjectService {
 					aContent = UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete,
 							ModeRequeteImpl.arcModeRequeteIHM());
 				} catch (ArcException ex) {
-					currentData.setMessage(ex.getMessage());
+					currentData.setMessage(ex.getShortMessage());
 					LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
 				}
 				aContent.remove(0);
@@ -517,7 +517,7 @@ public class VObjectService {
 					}
 					headerVSelect.add(m);
 				} catch (ArcException ex) {
-					data.setMessage(ex.getMessage());
+					data.setMessage(ex.getShortMessage());
 					LoggerHelper.errorGenTextAsComment(getClass(), "buildHeadersVSelect()", LOGGER, ex);
 				}
 			} else {
@@ -634,10 +634,10 @@ public class VObjectService {
 				UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection, requete);
 			}
 
-		} catch (Exception ex) {
+		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("vObject.insert.error");
-			currentData.setMessageArgs(ex.getCause());
+			currentData.setMessageArgs(ex.getShortMessage());
 			return false;
 		}
 		return true;
@@ -656,7 +656,7 @@ public class VObjectService {
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("vObject.delete.error");
-			currentData.setMessageArgs(ex.getCause());
+			currentData.setMessageArgs(ex.getShortMessage());
 		}
 	}
 
@@ -810,9 +810,8 @@ public class VObjectService {
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("vObject.update.error");
-			currentData.setMessageArgs(ex.getCause());
+			currentData.setMessageArgs(ex.getShortMessage());
 		}
-
 	}
 
 	public ArcPreparedStatementBuilder queryView(VObject currentData) {

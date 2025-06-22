@@ -450,7 +450,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	}
 	
 	public String getVersion() {
-		return properties.fullVersionInformation().toString();
+		return properties.lightVersionInformation().toString();
 	}
 
 	public String getApplication() {

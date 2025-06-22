@@ -53,6 +53,9 @@ public class ArcException extends Exception {
 		return error;
 	}
 	
+	 public String getShortMessage() {
+		return this.getMessage().split("\n")[0];
+	}
 	
 
 }

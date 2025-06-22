@@ -15,7 +15,6 @@ public class ServiceIndex extends IndexAction {
   
 	
 	public String index(Model model) {
-		getSession().put("console", "");
 		trackThisAction();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -30,7 +29,7 @@ public class ServiceIndex extends IndexAction {
 	}
 	
 	public ResponseEntity<Map<String, String>> version() {
-		Map<String, String> map = WebAttributesName.fullVersionInformation();
+		Map<String, String> map = WebAttributesName.lightVersionInformation();
 		return new ResponseEntity<>(map, HttpStatus.OK);
 	}
 	

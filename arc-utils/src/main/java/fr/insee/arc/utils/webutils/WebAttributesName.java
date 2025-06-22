@@ -29,6 +29,7 @@ public class WebAttributesName {
 	private static final String HEALTHCHECK_ATTRIBUTE_DETAILS = "details";
 	private static final String HEALTHCHECK_ATTRIBUTE_DATABASEHEALTHCHECK = "dataBaseHealthCheck";
 	private static final String HEALTHCHECK_ATTRIBUTE_VERSION = "version";
+	private static final String HEALTHCHECK_ATTRIBUTE_KEYCLOAK = "keycloak";
 
 	// result values
 	private static final String HEALTHCHECK_RESULT_UP = "up";
@@ -52,16 +53,16 @@ public class WebAttributesName {
 		Map<String, String> dbHealthCheck = new HashMap<>();
 		details.put(HEALTHCHECK_ATTRIBUTE_DATABASEHEALTHCHECK, dbHealthCheck);
 		dbHealthCheck.put(HEALTHCHECK_ATTRIBUTE_STATUS, status);
-
 		map.put(HEALTHCHECK_ATTRIBUTE_VERSION, properties.getVersion());
-		
-		map.put(KEYCLOAK_ATTRIBUTE_REALM, properties.getKeycloakRealm());
-		map.put(KEYCLOAK_ATTRIBUTE_SERVER, properties.getKeycloakServer());
-		map.put(KEYCLOAK_ATTRIBUTE_RESOURCE, properties.getKeycloakResource());
+		map.put(HEALTHCHECK_ATTRIBUTE_KEYCLOAK, isKeycloakActive(properties.getKeycloakRealm()));
 
 		return map.getOrDefault(HEALTHCHECK_ATTRIBUTE_STATUS, "").equals(HEALTHCHECK_RESULT_UP);
 	}
 
+	public static Map<String, String> lightVersionInformation() {
+		return properties.lightVersionInformation();
+	}
+	
 	public static Map<String, String> fullVersionInformation() {
 		return properties.fullVersionInformation();
 	}
