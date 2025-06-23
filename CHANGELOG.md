@@ -3,6 +3,17 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.2.1b
+- security fix
+- most of the process queries now don't use autocommit in order to avoid database connection locks
+
+## version-94.1.117
+- fix a crash bug when stopping and resuming batch pipeline
+- quality
+- added a configurable emptyDir usable to set a temporary tablespace for the kubernetes postgres executors
+  - set KUBERNETES_EXECUTOR_TEMPTABLESPACE_MEDIUM to "Memory"for a memory drive
+  - set KUBERNETES_EXECUTOR_TEMPTABLESPACE_MEDIUM to "" for a normal ephemeral drive
+
 ## version-94.1.112
 - spring security critical upgrade
 - webjar for js dependencies
