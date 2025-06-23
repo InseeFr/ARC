@@ -73,7 +73,7 @@ public class ImportKOTest extends ServletArc {
 		while (i<maxIteration && UtilitaireDao.get(0).isTableExiste(InitializeQueryTest.c, arcResponse+"_ws_pending"))
 		{
 			i++;
-			UtilitaireDao.get(0).executeImmediate(InitializeQueryTest.c, "SELECT pg_sleep(1);");
+			UtilitaireDao.get(0).executeRequest(InitializeQueryTest.c, "SELECT pg_sleep(1);");
 		}
 		
 		assertTrue(i>0);

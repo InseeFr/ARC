@@ -305,7 +305,7 @@ public class ClientDao {
 		
 		for (List<String> nmcl : nmclNames) {
 			String nomTableImage = ViewEnum.getFullNameNotNormalized(environnement, client + "_" + timestamp + "_" + nmcl.get(0));
-			UtilitaireDao.get(0).executeImmediate(connection, "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
+			UtilitaireDao.get(0).executeRequest(connection, "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
 					+ " AS SELECT * FROM " + ViewEnum.getFullName(environnement, nmcl.get(0)) + ";");
 			registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
 			tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.COORDINATOR, nomTableImage));
@@ -419,7 +419,7 @@ public class ClientDao {
 		String nomTableImage = ViewEnum.getFullNameNotNormalized(environnement,
 				client + "_" + timestamp + "_" + ViewEnum.EXT_MOD_PERIODICITE.getTableName());
 
-		UtilitaireDao.get(0).executeImmediate(connection, "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
+		UtilitaireDao.get(0).executeRequest(connection, "CREATE TABLE " + nomTableImage + FormatSQL.WITH_NO_VACUUM
 				+ " AS SELECT DISTINCT id, val FROM " + ViewEnum.EXT_MOD_PERIODICITE.getFullName() + ";");
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, nomTableImage);
@@ -539,7 +539,7 @@ public class ClientDao {
 		List<String> tablesToDrop = new GenericBean(UtilitaireDao.get(connectionId).executeRequest(connection, requete))
 				.getColumnValues(ColumnEnum.TABLE_NAME.getColumnName());
 
-		UtilitaireDao.get(connectionId).executeImmediate(null,
+		UtilitaireDao.get(connectionId).executeRequest(null,
 				FormatSQL.dropTable(tablesToDrop.toArray(new String[0])));
 	}
 
@@ -561,7 +561,7 @@ public class ClientDao {
 		requete.append("\n DROP TABLE IF EXISTS " + tableWsPending + ";");
 		requete.append("\n CREATE TABLE " + tableWsPending + "();");
 
-		UtilitaireDao.get(0).executeImmediate(connection, requete);
+		UtilitaireDao.get(0).executeRequest(connection, requete);
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.COORDINATOR, tableWsInfo);
 		
 		return Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, tableWsInfo));
@@ -579,7 +579,7 @@ public class ClientDao {
 	public void dropTableWsPending() throws ArcException {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append("DROP TABLE IF EXISTS " + tableWsPending + ";");
-		UtilitaireDao.get(0).executeImmediate(connection, requete);
+		UtilitaireDao.get(0).executeRequest(connection, requete);
 	}
 
 	/**

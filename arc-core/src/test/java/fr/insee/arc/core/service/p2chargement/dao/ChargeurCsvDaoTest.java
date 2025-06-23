@@ -17,13 +17,13 @@ public class ChargeurCsvDaoTest extends InitializeQueryTest {
 	@Test
 	public void execQuerySelectColumnsFromLoadTableTest() throws ArcException {
 		
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DISCARD TEMP;");
 
 		
 		Sandbox s = new Sandbox(c, null);
 		ChargeurCsvDao chargeurCsv = new ChargeurCsvDao(s, null, null, null);
 		
-		u.executeImmediate(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE "+ThreadTemporaryTable.TABLE_TEMP_CHARGEMENT_A+" (a1 text, a2 int);"));
+		u.executeRequest(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE "+ThreadTemporaryTable.TABLE_TEMP_CHARGEMENT_A+" (a1 text, a2 int);"));
 
 		List<String> cols = chargeurCsv.execQuerySelectColumnsFromLoadTable();
 		
@@ -31,7 +31,7 @@ public class ChargeurCsvDaoTest extends InitializeQueryTest {
 		assertTrue(cols.contains("a2"));
 		assertEquals(2, cols.size());
 		
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DISCARD TEMP;");
 		
 	}
 

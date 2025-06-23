@@ -201,7 +201,7 @@ public class ThreadNormageService extends ThreadTemplate {
 			query.append(RulesOperations.getAllRubriquesInRegles(this.tableNormagePilTemp,
 					ViewEnum.NORMAGE_REGLE.getFullName(envExecution), ViewEnum.CONTROLE_REGLE.getFullName(envExecution),
 					ViewEnum.MAPPING_REGLE.getFullName(envExecution)));
-			UtilitaireDao.get(0).executeImmediate(this.connexion.getExecutorConnection(), query);
+			UtilitaireDao.get(0).executeRequest(this.connexion.getExecutorConnection(), query);
 			
 			rubriqueUtiliseeDansRegles = RulesOperations.getBean(this.connexion.getExecutorConnection(),
 					RulesOperations.getRegles(tableTmpRubriqueDansregles, this.fileIdCard, "var"));

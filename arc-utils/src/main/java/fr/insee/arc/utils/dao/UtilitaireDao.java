@@ -192,7 +192,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public void dropTable(Connection connexion, String... someTables) {
 		try {
-			executeImmediate(connexion, FormatSQL.dropTable(someTables));
+			executeRequest(connexion, FormatSQL.dropTable(someTables));
 		} catch (ArcException ex) {
 			ex.logFullException();
 		}
@@ -205,7 +205,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public void dropTable(Connection connexion, List<String> someTables) {
 		try {
-			executeImmediate(connexion, FormatSQL.dropTable(someTables.toArray(new String[0])));
+			executeRequest(connexion, FormatSQL.dropTable(someTables.toArray(new String[0])));
 		} catch (ArcException ex) {
 			ex.logFullException();
 		}
@@ -312,17 +312,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return returned;
 	}
 
-	public void executeImmediate(Connection connexion, StringBuilder requete, ModeRequete... modes)
-			throws ArcException {
-		executeImmediate(connexion, requete.toString(), modes);
-	}
-
-	public void executeImmediate(Connection connexion, String requete, ModeRequete... modes)
-			throws ArcException {
-		executeImmediate(connexion, new GenericPreparedStatementBuilder(requete), modes);
-	}
-
-	public void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes) throws ArcException {
+	private void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes) throws ArcException {
 
 		if (LOGGER.isEnabled(Level.TRACE)) {
 			LoggerHelper.traceAsComment(LOGGER, "START executeImmediate");
@@ -369,7 +359,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		GenericPreparedStatementBuilder requeteLimit = new GenericPreparedStatementBuilder();
 		requeteLimit.append("SELECT * from (").append(requete).append(") dummy LIMIT 1");
 		try {
-			executeImmediate(connexion, requeteLimit);
+			executeRequest(connexion, requeteLimit);
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -399,10 +389,19 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 	}
 
+	public List<List<String>> executeRequest(Connection connexion, StringBuilder requete)
+			throws ArcException {
+		return executeRequest(connexion, new GenericPreparedStatementBuilder(requete));
+	}
+	
+	public List<List<String>> executeRequest(Connection connexion, String requete)
+			throws ArcException {
+		return executeRequest(connexion, new GenericPreparedStatementBuilder(requete));
+	}
+	
 	public List<List<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete)
 			throws ArcException {
 		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), new ModeRequete[] {});
-
 	}
 
 	/**
@@ -454,6 +453,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 		try {
 			ConnectionWrapper connexionWrapper = initConnection(connexion);
+			boolean rollback = false;
 			try {
 				connexionWrapper.getConnexion().setAutoCommit(false);
 				try (PreparedStatement stmt = connexionWrapper.getConnexion()
@@ -461,41 +461,40 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 					for (int i = 0; i < requete.getParameters().size(); i++) {
 						registerBindVariable(stmt, requete, i);
 					}
-					try {
-						// the first result found will be output
-						boolean isresult = stmt.execute();
-						LoggerHelper.traceAsComment(LOGGER, "End executeRequest");
+					
+					// the first result found will be output
+					boolean isresult = stmt.execute();
+					LoggerHelper.traceAsComment(LOGGER, "End executeRequest");
 
-						if (!isresult) {
-							do {
-								isresult = stmt.getMoreResults();
-								if (isresult) {
-									break;
-								}
-								if (stmt.getUpdateCount() == -1) {
-									break;
-								}
-							} while (true);
-						}
-
-						if (isresult) {
-							ResultSet res = stmt.getResultSet();
-							return entityProvider.apply(res);
-						}
-						return null;
-					} catch (SQLException e) {
-						LoggerHelper.error(LOGGER, stmt.toString());
-						LoggerHelper.error(LOGGER, ModeRequete.configureQuery(requete).getQueryWithParameters());
-						throw e;
-					} finally {
-						connexionWrapper.getConnexion().commit();
+					if (!isresult) {
+						do {
+							isresult = stmt.getMoreResults();
+							if (isresult) {
+								break;
+							}
+							if (stmt.getUpdateCount() == -1) {
+								break;
+							}
+						} while (true);
 					}
+
+					if (isresult) {
+						ResultSet res = stmt.getResultSet();
+						return entityProvider.apply(res);
+					}
+					return null;
 				}
 			} catch (SQLException e) {
-				LoggerHelper.error(LOGGER, "executeRequest()", e);
 				connexionWrapper.getConnexion().rollback();
+				rollback = true;
+				LoggerHelper.error(LOGGER, ModeRequete.configureQuery(requete).getQueryWithParameters());						
+				LoggerHelper.error(LOGGER, "ROLLBACK !!", e);
 				throw e;
 			} finally {
+				if (!rollback)
+				{
+					connexionWrapper.getConnexion().commit();
+				}
 				connexionWrapper.close();
 			}
 		} catch (SQLException sqlException) {
@@ -656,18 +655,13 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		LoggerHelper.debugFinMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
 	}
 
+
 	/**
 	 * exécute un bloque transactionnel
+	 * @param connexion
+	 * @param listeRequete
+	 * @throws ArcException
 	 */
-//	public void executeBlock(Connection connexion, String... listeRequete) throws ArcException {
-//		StringBuilder bloc = new StringBuilder("BEGIN;\n");
-//		for (int i = 0; i < listeRequete.length; i++) {
-//			bloc.append(listeRequete[i]).append(semicolon);
-//		}
-//		bloc.append("END;\n");
-//		executeImmediate(connexion, bloc.toString());
-//	}
-
 	public void executeBlock(Connection connexion, GenericPreparedStatementBuilder... listeRequete)
 			throws ArcException {
 		GenericPreparedStatementBuilder bloc = new GenericPreparedStatementBuilder("BEGIN;\n");
@@ -677,28 +671,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		bloc.append("END;\n");
 		executeRequest(connexion, bloc);
 	}
-
-	/**
-	 *
-	 * @param connexion
-	 * @param requete
-	 * @throws ArcException
-	 */
-//	public void executeBlock(Connection connexion, StringBuilder requete) throws ArcException {
-//		executeBlock(connexion, requete.toString());
-//	}
-
-	/**
-	 *
-	 * @param connexion
-	 * @param requete
-	 * @throws ArcException
-	 */
-//	public void executeBlock(Connection connexion, String requete) throws ArcException {
-//		if (!requete.trim().isEmpty()) {
-//			executeImmediate(connexion, "BEGIN;" + requete + "COMMIT;");
-//		}
-//	}
 
 	public List<String> getList(Connection connexion, StringBuilder requete, List<String> returned) {
 		return getList(connexion, requete.toString(), returned);
@@ -741,23 +713,26 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		try {
 			LoggerHelper.debugAsComment(LOGGER, "vacuum", type, "sur le catalogue.");
 
-			executeImmediate(connexion, FormatSQL.setTimeOutMaintenance());
+			executeRequest(connexion, FormatSQL.setTimeOutMaintenance());
 
 			GenericBean gb = new GenericBean(executeRequest(connexion, new GenericPreparedStatementBuilder(
 					"select relname from pg_stat_all_tables where schemaname='pg_catalog' and n_dead_tup>"+FormatSQL.NUMBER_OF_DEAD_TUPLES_FOR_VACUUM)));
-			StringBuilder requete = new StringBuilder();
+			
+			
+			GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
 			for (String t : gb.getColumnValues("relname")) {
 				requete.append(FormatSQL.vacuumSecured(t, type));
 			}
 			if (requete.length()>0)
 			{
-				executeImmediate(connexion, requete.toString());
+				// vacuumSecured requires executeImmediate autocommit set to true
+				executeImmediate(connexion, requete);
 			}
 		} catch (Exception ex) {
 			LoggerHelper.error(LOGGER, ex);
 		} finally {
 			try {
-				executeImmediate(connexion, FormatSQL.resetTimeOutMaintenance());
+				executeRequest(connexion, FormatSQL.resetTimeOutMaintenance());
 			} catch (Exception e) {
 				LoggerHelper.error(LOGGER, e);
 			}
@@ -890,7 +865,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		requete.append(
 				"\n alter table " + tableImage + " rename to " + ManipString.substringAfterFirst(tableName, ".") + ";");
 		requete.append("analyze " + tableName + " (" + keys + ");");
-		executeImmediate(aConnexion, requete);
+		executeRequest(aConnexion, requete);
 		requete.setLength(0);
 	}
 
@@ -1045,6 +1020,32 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 	}
 
+	/**
+	 * Send a vacuum query
+	 * @param connexion
+	 * @param table
+	 * @param mode
+	 * @throws ArcException
+	 */
+	public void vacuumSecured(Connection connexion, String tableToVacuum, String vacuumMode) throws ArcException
+	{
+		// vacuumSecured requires executeImmediate autocommit set to true
+		executeImmediate(connexion,new GenericPreparedStatementBuilder(FormatSQL.vacuumSecured(tableToVacuum, vacuumMode)));	
+	}
+	
+	/**
+	 * Send a analyze query
+	 * @param connexion
+	 * @param table
+	 * @param mode
+	 * @throws ArcException
+	 */
+	public void analyzeSecured(Connection connexion, String table) throws ArcException
+	{
+		executeRequest(connexion,FormatSQL.analyzeSecured(table));
+	}
+
+	
 	public PropertiesHandler getProperties() {
 		return properties;
 	}

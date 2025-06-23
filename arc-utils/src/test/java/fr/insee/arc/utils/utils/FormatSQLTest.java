@@ -29,13 +29,13 @@ public class FormatSQLTest extends InitializeQueryTest {
 	public void dropTable() throws ArcException
 	{
 		// create table
-		UtilitaireDao.get(0).executeImmediate(c,
+		UtilitaireDao.get(0).executeRequest(c,
 				"CREATE TABLE " + tableInPublic + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 		assertTrue(UtilitaireDao.get(0).isTableExiste(c, tableInPublic));
 		
 		
 		// test the query
-		UtilitaireDao.get(0).executeImmediate(c, FormatSQL.dropTable(tableInPublic));
+		UtilitaireDao.get(0).executeRequest(c, FormatSQL.dropTable(tableInPublic));
 		// the table must have been drop
 		assertFalse(UtilitaireDao.get(0).isTableExiste(c, tableInPublic));
 	}
@@ -51,13 +51,13 @@ public class FormatSQLTest extends InitializeQueryTest {
 		assertFalse(UtilitaireDao.get(0).isTableExiste(c, tableInTemporary));
 
 		// test for temporary table
-		UtilitaireDao.get(0).executeImmediate(c,
+		UtilitaireDao.get(0).executeRequest(c,
 				"CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 		assertTrue(UtilitaireDao.get(0).isTableExiste(c, tableInTemporary));
 		UtilitaireDao.get(0).dropTable(c, tableInTemporary);
 
 		// test for schema table
-		UtilitaireDao.get(0).executeImmediate(c,
+		UtilitaireDao.get(0).executeRequest(c,
 				"CREATE TABLE " + tableInPublic + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 		assertTrue(UtilitaireDao.get(0).isTableExiste(c, tableInPublic));
 		UtilitaireDao.get(0).dropTable(c, tableInPublic);
@@ -75,23 +75,23 @@ public class FormatSQLTest extends InitializeQueryTest {
 		
 		// create a role with test role
 		String myTestRole = "arc";
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE ROLE " + myTestRole + " with NOINHERIT;");
+		UtilitaireDao.get(0).executeRequest(c, "CREATE ROLE " + myTestRole + " with NOINHERIT;");
 		// change role test
-		UtilitaireDao.get(0).executeImmediate(c, FormatSQL.changeRole(myTestRole));
+		UtilitaireDao.get(0).executeRequest(c, FormatSQL.changeRole(myTestRole));
 
 		// check the current role used
 		
 		String currentRoleInDatabase = UtilitaireDao.get(0).getString(c, testQuery);
 
 		assertEquals(myTestRole, currentRoleInDatabase);
-		UtilitaireDao.get(0).executeImmediate(c, FormatSQL.changeRole(defaultRoleInDatabase));
+		UtilitaireDao.get(0).executeRequest(c, FormatSQL.changeRole(defaultRoleInDatabase));
 		
 	}
 
 	@Test
 	public void listeColonneByHeaders_Test() throws ArcException {
 		// create a test table
-		UtilitaireDao.get(0).executeImmediate(c,
+		UtilitaireDao.get(0).executeRequest(c,
 				"CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i as col_1, i as col_2 FROM generate_series(1,5) i");
 
 		// execute query
@@ -108,7 +108,7 @@ public class FormatSQLTest extends InitializeQueryTest {
 	@Test
 	public void hasRecord_TableWithRecords() throws ArcException {
 		// create a non empty table
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i FROM generate_series(1,5) i");
+		UtilitaireDao.get(0).executeRequest(c, "CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i FROM generate_series(1,5) i");
 
 		// execute the query "hasRecord"
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder(FormatSQL.hasRecord(tableInTemporary));
@@ -124,7 +124,7 @@ public class FormatSQLTest extends InitializeQueryTest {
 	public void hasRecord_TableWithoutRecords() throws ArcException {
 
 		// create an empty table
-		UtilitaireDao.get(0).executeImmediate(c,
+		UtilitaireDao.get(0).executeRequest(c,
 				"CREATE TEMPORARY TABLE " + tableInTemporary + " as SELECT i FROM generate_series(1,5) i WHERE false");
 
 		// execute the query "hasRecord"
@@ -140,15 +140,15 @@ public class FormatSQLTest extends InitializeQueryTest {
 	@Test
 	public void analyzeAndVacuumSecuredTest() throws ArcException
 	{
-		UtilitaireDao.get(0).executeImmediate(c,
+		UtilitaireDao.get(0).executeRequest(c,
 				"CREATE TABLE " + tableInPublic + " as SELECT i FROM generate_series(1,5) i WHERE false");
 
 		boolean maintenanceSucess=true;
 		
 		// test if maintenance is a success
 		try {
-			UtilitaireDao.get(0).executeImmediate(c,FormatSQL.vacuumSecured(tableInPublic,"full"));
-			UtilitaireDao.get(0).executeImmediate(c,FormatSQL.analyzeSecured(tableInPublic));
+			UtilitaireDao.get(0).vacuumSecured(c,tableInPublic,"full");
+			UtilitaireDao.get(0).analyzeSecured(c,tableInPublic);
 		} catch (ArcException e) {
 			maintenanceSucess=false;
 		}

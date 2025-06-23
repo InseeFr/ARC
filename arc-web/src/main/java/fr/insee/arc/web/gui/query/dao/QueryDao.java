@@ -46,7 +46,7 @@ public class QueryDao extends VObjectHelperDao {
 			query = new ArcPreparedStatementBuilder();
 
 			try {
-				UtilitaireDao.get(myDbConnection).executeImmediate(null, myQuery);
+				UtilitaireDao.get(myDbConnection).executeRequest(null, myQuery);
 				query.build(SQL.SELECT, query.quoteText("query succeed"), SQL.AS, "query_result");
 			} catch (Exception e) {
 				query.build(SQL.SELECT, query.quoteText(e.getMessage()), SQL.AS, "query_result");

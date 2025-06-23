@@ -94,7 +94,7 @@ public class InitializeTestDataScalability {
 		query.append("CREATE TABLE arc.ext_mod_periodicite AS SELECT 1 as id, 'A' as VAL");
 		query.append(SQL.END_QUERY);
 
-		UtilitaireDao.get(0).executeImmediate(null, query);
+		UtilitaireDao.get(0).executeRequest(null, query);
 		
 		
 		// data tables containing two files
@@ -107,7 +107,7 @@ public class InitializeTestDataScalability {
 		query.append("SELECT 'file1_to_retrieve.xml' as id_source, 'data1_of_file_to_retrieve' as data UNION ALL ");
 		query.append("SELECT 'file1_not_to_retrieve_when_reprise_false.xml' as id_source, 'data1_of_file_not_to_retrieve_when_reprise_false' as data");
 		query.append(SQL.END_QUERY);
-		UtilitaireDao.get(1).executeImmediate(null, query);
+		UtilitaireDao.get(1).executeRequest(null, query);
 
 		query = new ArcPreparedStatementBuilder();
 
@@ -117,7 +117,7 @@ public class InitializeTestDataScalability {
 		query.append("SELECT 'file2_to_retrieve.xml' as id_source, 'data2_of_file_to_retrieve' as data UNION ALL ");
 		query.append("SELECT 'file2_not_to_retrieve_when_reprise_false.xml' as id_source, 'data2_of_file_not_to_retrieve_when_reprise_false' as data");
 		query.append(SQL.END_QUERY);
-		UtilitaireDao.get(2).executeImmediate(null, query);
+		UtilitaireDao.get(2).executeRequest(null, query);
 		
 		
 	}
@@ -138,9 +138,9 @@ public class InitializeTestDataScalability {
 
 		query.append("DROP SCHEMA IF EXISTS arc CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		UtilitaireDao.get(0).executeImmediate(null, query);
-		UtilitaireDao.get(1).executeImmediate(null, query);
-		UtilitaireDao.get(2).executeImmediate(null, query);
+		UtilitaireDao.get(0).executeRequest(null, query);
+		UtilitaireDao.get(1).executeRequest(null, query);
+		UtilitaireDao.get(2).executeRequest(null, query);
 	}
 	
 	

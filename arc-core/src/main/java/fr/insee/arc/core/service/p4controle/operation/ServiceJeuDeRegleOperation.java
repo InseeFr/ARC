@@ -193,7 +193,7 @@ public class ServiceJeuDeRegleOperation {
 			StaticLoggerDispatcher.info(LOGGER, "Execution de " + nbRegles + "/" + nbTotalRegles);
 
 			if (blocRequete.length() > FormatSQL.TAILLE_MAXIMAL_BLOC_SQL) {
-				UtilitaireDao.get(0).executeImmediate(connexion,
+				UtilitaireDao.get(0).executeRequest(connexion,
 						"SET enable_nestloop=off; " + blocRequete.toString() + "SET enable_nestloop=on; ");
 				blocRequete.setLength(0);
 			}
@@ -204,7 +204,7 @@ public class ServiceJeuDeRegleOperation {
 		blocRequete.append(this.dao.markTableResultat());
 		blocRequete.append(this.dao.dropControleTemporaryMarkTable());
 
-		UtilitaireDao.get(0).executeImmediate(connexion,
+		UtilitaireDao.get(0).executeRequest(connexion,
 				"SET enable_nestloop=off; " + blocRequete + "SET enable_nestloop=on; ");
 		StaticLoggerDispatcher.info(LOGGER, "Fin executeJeuDeRegle");
 

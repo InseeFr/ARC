@@ -96,7 +96,7 @@ public class BddPatcher {
 		String query;
 
 		if ((query = readBddScript(scriptName, userRestricted, nbSandboxes, envExecution)) != null) {
-			UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeImmediate(connexion, query);
+			UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(connexion, query);
 		}
 	}
 

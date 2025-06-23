@@ -69,11 +69,11 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 
 	@Test
 	public void outStreamRequeteSelect() throws ArcException {
-		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS test CASCADE;");
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE SCHEMA test;");
+		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
+		UtilitaireDao.get(0).executeRequest(c, "CREATE SCHEMA test;");
 		
 		// create a test table with 26 lines
-		UtilitaireDao.get(0).executeImmediate(c, "CREATE TABLE test.table_test as select i as id, chr(i+64) as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
+		UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE test.table_test as select i as id, chr(i+64) as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
 		
 		// test method
 		GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder("SELECT * FROM test.table_test");
@@ -84,16 +84,16 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		byte[] outputArray = bos.toByteArray();
 		// export must contain 1 line for columns name + 1 line for columns type + 26 lines of data
 		assertEquals(28, StringUtils.countMatches(new String(outputArray), "\n"));
-		UtilitaireDao.get(0).executeImmediate(c, "DROP SCHEMA IF EXISTS test CASCADE;");
+		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
 	}
 	
 	@Test
 	public void getColumnsTest() throws ArcException
 	{
 		
-		u.executeImmediate(c, "DISCARD TEMP;");
-		u.executeImmediate(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE tmp_a (a1 text, a2 int);"));
-		u.executeImmediate(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE tmp_b (b1 text, b2 date);"));
+		u.executeRequest(c, new GenericPreparedStatementBuilder("DISCARD TEMP;"));
+		u.executeRequest(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE tmp_a (a1 text, a2 int);"));
+		u.executeRequest(c, new GenericPreparedStatementBuilder("CREATE TEMPORARY TABLE tmp_b (b1 text, b2 date);"));
 		
 		List<String> cols = new ArrayList<String>();
 		
@@ -106,7 +106,7 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		assertTrue(cols.contains("b2"));
 		assertEquals(4, cols.size());
 		
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DISCARD TEMP;");
 	}
 	
 	

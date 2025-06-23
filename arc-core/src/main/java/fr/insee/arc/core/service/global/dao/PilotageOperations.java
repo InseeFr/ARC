@@ -256,7 +256,7 @@ public class PilotageOperations {
 			throw new ArcException(rollbackException, ArcExceptionMessage.DATABASE_ROLLBACK_FAILED);
 		}
 		// promote the application user account to full right
-		UtilitaireDao.get(0).executeImmediate(connexion, DatabaseConnexionConfiguration.switchToFullRightRole());
+		UtilitaireDao.get(0).executeRequest(connexion, DatabaseConnexionConfiguration.switchToFullRightRole());
 
 		traitementSurErreurPilotage(connexion, phase, tablePil, idSource, exception);
 

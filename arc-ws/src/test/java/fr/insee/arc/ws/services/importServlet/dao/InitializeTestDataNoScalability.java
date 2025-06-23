@@ -91,7 +91,7 @@ public class InitializeTestDataNoScalability {
 		query.append("CREATE TABLE arc.ext_mod_periodicite AS SELECT 1 as id, 'A' as VAL");
 		query.append(SQL.END_QUERY);
 
-		UtilitaireDao.get(0).executeImmediate(InitializeQueryTest.c, query);
+		UtilitaireDao.get(0).executeRequest(InitializeQueryTest.c, query);
 	}
 
 	
@@ -110,7 +110,7 @@ public class InitializeTestDataNoScalability {
 
 		query.append("DROP SCHEMA IF EXISTS arc CASCADE;");
 		query.append("DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		UtilitaireDao.get(0).executeImmediate(InitializeQueryTest.c, query);
+		UtilitaireDao.get(0).executeRequest(InitializeQueryTest.c, query);
 	}
 	
 	

@@ -101,7 +101,7 @@ public class ParquetDaoTest extends ParquetDao {
 		query.append(",array[current_timestamp, current_timestamp] as column_array_timestamp");
 		query.append(",array[current_date, current_date] as column_array_date");
 
-		UtilitaireDao.get(0).executeImmediate(connection, query);
+		UtilitaireDao.get(0).executeRequest(connection, query);
 	}
 
 }

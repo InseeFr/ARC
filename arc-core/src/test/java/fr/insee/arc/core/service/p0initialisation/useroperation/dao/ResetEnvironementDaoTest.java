@@ -21,14 +21,14 @@ public class ResetEnvironementDaoTest extends InitializeQueryTest {
 
 		String tablePil = "arc_bas1.pilotage_fichier";
 
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		u.executeImmediate(c, "CREATE SCHEMA arc_bas1;");
-		u.executeImmediate(c, "CREATE TABLE "+tablePil+" (id_source text, phase_traitement text, etat_traitement text[], to_delete text);");
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f1', 'RECEPTION', '{OK}', null");
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f1', 'CHARGEMENT', '{OK}', null");
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f1', 'CONTROLE', '{OK}', null");
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f3', 'RECEPTION', '{OK}', null");
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f3', 'CHARGEMENT', '{OK}', null");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
+		u.executeRequest(c, "CREATE SCHEMA arc_bas1;");
+		u.executeRequest(c, "CREATE TABLE "+tablePil+" (id_source text, phase_traitement text, etat_traitement text[], to_delete text);");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f1', 'RECEPTION', '{OK}', null");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f1', 'CHARGEMENT', '{OK}', null");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f1', 'CONTROLE', '{OK}', null");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f3', 'RECEPTION', '{OK}', null");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f3', 'CHARGEMENT', '{OK}', null");
 		
 		ResetEnvironementDao dao = new ResetEnvironementDao(new Sandbox(c, "arc_bas1"));
 		
@@ -41,8 +41,8 @@ public class ResetEnvironementDaoTest extends InitializeQueryTest {
 		
 		assertEquals(2, numberOfLine);
 		
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
+		u.executeRequest(c, "DISCARD TEMP;");
 
 	}
 	

@@ -188,7 +188,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		} catch (IOException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED);
 		}
-		UtilitaireDao.get(0).executeImmediate(c, scriptDataTest);
+		UtilitaireDao.get(0).executeRequest(c, scriptDataTest);
 		
 	}
 		
@@ -197,32 +197,32 @@ public class BddPatcherTest extends InitializeQueryTest {
 		
 		createDatabase(null);
 		
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
-		u.executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS "+testSandbox3+";");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
+		u.executeRequest(c, "CREATE SCHEMA IF NOT EXISTS "+testSandbox3+";");
 
 		// tables que la fonction testée ne doit pas retenir
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".pilotage_fichier (a text);");
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".reception_regle (a text);");
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".fake_regle (a text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".pilotage_fichier (a text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".reception_regle (a text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".fake_regle (a text);");
 		
 		// tables que la fonction testée doit retenir
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".chargement_regle (regle text);");
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mapping_regle (id_norme text, regle text, commentaire text);");
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_variable_metier (a text);");
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mod_table_metier (a text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".chargement_regle (regle text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mapping_regle (id_norme text, regle text, commentaire text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mod_variable_metier (a text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mod_table_metier (a text);");
 		
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".mapping_dsn_employeur_ok (id_source text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mapping_dsn_employeur_ok (id_source text);");
 		
-		u.executeImmediate(c, "CREATE TABLE arc.nmcl_vs3 as select '1' as cod_metier, 'ee' as cod_sicore;");
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".nmcl_vs3 as select * from arc.nmcl_vs3;");
+		u.executeRequest(c, "CREATE TABLE arc.nmcl_vs3 as select '1' as cod_metier, 'ee' as cod_sicore;");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".nmcl_vs3 as select * from arc.nmcl_vs3;");
 
-		u.executeImmediate(c, "CREATE TABLE arc.nmcl_code_pays_etranger_2023 as select '19000' as codcom, 'fr' as pays;");
-		u.executeImmediate(c, "CREATE TABLE "+testSandbox3+".nmcl_code_pays_etranger_2023 as select * from arc.nmcl_code_pays_etranger_2023;");
+		u.executeRequest(c, "CREATE TABLE arc.nmcl_code_pays_etranger_2023 as select '19000' as codcom, 'fr' as pays;");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".nmcl_code_pays_etranger_2023 as select * from arc.nmcl_code_pays_etranger_2023;");
 
 		
-		u.executeImmediate(c, "INSERT INTO arc.ihm_nmcl (nom_table) values ('nmcl_code_pays_etranger_2023'), ('nmcl_sicore_2014'), ('nmcl_vs3');");
-		u.executeImmediate(c, "INSERT INTO "+testSandbox3+".mapping_regle (id_norme, regle, commentaire) values ('PHASE1V3', '{v0012}','relation avec la colonne nmcl_sicore_2014'), ('PHASE1V3', 'select codegeo from nmcl_code_pays_etranger_2023 where pays={v008}','relation avec la colonne nmcl_code_pays_etranger_2021');");
-		u.executeImmediate(c, "INSERT INTO "+testSandbox3+".chargement_regle (regle) values ('select * from arc.nmcl_vs3 where pcs={v001');");
+		u.executeRequest(c, "INSERT INTO arc.ihm_nmcl (nom_table) values ('nmcl_code_pays_etranger_2023'), ('nmcl_sicore_2014'), ('nmcl_vs3');");
+		u.executeRequest(c, "INSERT INTO "+testSandbox3+".mapping_regle (id_norme, regle, commentaire) values ('PHASE1V3', '{v0012}','relation avec la colonne nmcl_sicore_2014'), ('PHASE1V3', 'select codegeo from nmcl_code_pays_etranger_2023 where pays={v008}','relation avec la colonne nmcl_code_pays_etranger_2021');");
+		u.executeRequest(c, "INSERT INTO "+testSandbox3+".chargement_regle (regle) values ('select * from arc.nmcl_vs3 where pcs={v001');");
 
 	}
 	
@@ -263,7 +263,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		assertEquals(1, result.size());
 
 
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS "+testSandbox3+" CASCADE;");
 		
 	}
 }

@@ -29,13 +29,13 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 	public void initDatabaseBeforeTest() throws SQLException, ArcException {
 		buildPropertiesWithoutScalability("tmp");
 
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE");
-		u.executeImmediate(c, "CREATE SCHEMA arc_bas1");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE");
+		u.executeRequest(c, "CREATE SCHEMA arc_bas1");
 
 		
-		u.executeImmediate(c, "DROP TABLE IF EXISTS " + tablePilotageBatch);
-		u.executeImmediate(c, "CREATE TABLE " + tablePilotageBatch + " (last_init text, operation text)");
-		u.executeImmediate(c, "INSERT INTO " + tablePilotageBatch + " select '2024-01-01:22','"+BatchEtat.ON+"'");
+		u.executeRequest(c, "DROP TABLE IF EXISTS " + tablePilotageBatch);
+		u.executeRequest(c, "CREATE TABLE " + tablePilotageBatch + " (last_init text, operation text)");
+		u.executeRequest(c, "INSERT INTO " + tablePilotageBatch + " select '2024-01-01:22','"+BatchEtat.ON+"'");
 		
 	}
 
@@ -44,8 +44,8 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 	@After
 	public void cleanDatabaseAfterTest() throws SQLException, ArcException {
 		// clear
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
+		u.executeRequest(c, "DISCARD TEMP;");
 	}
 	
 	

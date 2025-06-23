@@ -1110,3 +1110,16 @@ body.help {
 }
 
 
+.fa {
+  display: inline-block;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-question-circle::before {
+  content: "\fffd";
+  font-size: 15px;
+}
+

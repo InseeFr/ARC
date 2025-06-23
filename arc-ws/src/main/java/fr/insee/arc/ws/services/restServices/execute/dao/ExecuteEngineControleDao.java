@@ -18,7 +18,7 @@ public class ExecuteEngineControleDao {
 		String query = TableOperations.createTableTravail(inputTable, outputTable,
 				ThreadControleQueryBuilder.extraColumnsAddedByControle());
 
-		UtilitaireDao.get(0).executeImmediate(connection, query);
+		UtilitaireDao.get(0).executeRequest(connection, query);
 	}
 
 }

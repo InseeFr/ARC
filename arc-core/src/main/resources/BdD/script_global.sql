@@ -109,9 +109,6 @@ DELETE FROM arc.parameter WHERE key='LanceurARC.env';
 DELETE FROM arc.parameter where key like 'kubernetes%';
 COMMIT;
 
-VACUUM arc.parameter;
-COMMIT;
-
 -- table de pilotage du batch de production
 DROP TABLE IF EXISTS arc.pilotage_batch;
   

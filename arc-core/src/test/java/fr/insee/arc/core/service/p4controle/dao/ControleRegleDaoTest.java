@@ -12,15 +12,15 @@ import fr.insee.arc.utils.query.InitializeQueryTest;
 public class ControleRegleDaoTest extends InitializeQueryTest  {
 
 	@Test
-	public void test() throws ArcException {
+	public void initTemporaryTableTest() throws ArcException {
 		
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DISCARD TEMP;");
 
-		u.executeImmediate(c, "CREATE TEMPORARY TABLE tmp_table_controle AS SELECT 1 as id, null as brokenrules, null as controle ");
+		u.executeRequest(c, "CREATE TEMPORARY TABLE tmp_table_controle AS SELECT 1 as id, null as brokenrules, null as controle ");
 
 		// execute dao initTemporaryTable from tmp_table_controle
 		ControleRegleDao dao = new ControleRegleDao();
-		u.executeImmediate(c, dao.initTemporaryTable("tmp_table_controle"));
+		u.executeRequest(c, dao.initTemporaryTable("tmp_table_controle"));
 
 		int numberOfRowInTcMark = u.getInt(c, new ArcPreparedStatementBuilder("SELECT count(*) FROM "+ThreadTemporaryTable.TABLE_CONTROLE_MARK_TEMP));
 		int numberOfRowInTcMeta = u.getInt(c, new ArcPreparedStatementBuilder("SELECT count(*) FROM "+ThreadTemporaryTable.TABLE_CONTROLE_META_TEMP));
@@ -31,7 +31,7 @@ public class ControleRegleDaoTest extends InitializeQueryTest  {
 		assertEquals(1, numberOfRowInTcCount);
 		
 		// clean connection
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DISCARD TEMP;");
 	}
 
 }

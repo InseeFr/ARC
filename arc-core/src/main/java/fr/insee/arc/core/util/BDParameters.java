@@ -76,7 +76,7 @@ public class BDParameters {
         
         
         try {
-			UtilitaireDao.get(targetDatabase.getIndex()).executeImmediate(c, requete);
+			UtilitaireDao.get(targetDatabase.getIndex()).executeRequest(c, requete);
 		} catch (ArcException e1) {
 			StaticLoggerDispatcher.error(LOGGER, "Error on selecting key in parameter table");
 		}
@@ -118,7 +118,7 @@ public class BDParameters {
 	protected void insertDefaultValue(Connection c,String key, String defaultValue)
 	{
 		try {
-			UtilitaireDao.get(targetDatabase.getIndex()).executeImmediate(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
+			UtilitaireDao.get(targetDatabase.getIndex()).executeRequest(c,"INSERT INTO "+PARAMETER_TABLE+" values ('"+key+"','"+defaultValue+"');");
 		} catch (ArcException e) {
 			StaticLoggerDispatcher.error(LOGGER, "Error on inserting key in parameter table");
 		}

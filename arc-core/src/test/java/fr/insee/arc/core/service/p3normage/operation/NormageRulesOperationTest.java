@@ -24,8 +24,8 @@ public class NormageRulesOperationTest {
 	@Test
 	public void fillNormageRulesTest() throws ArcException {
 		// insert test data
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		u.executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS arc_bas1;");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
+		u.executeRequest(c, "CREATE SCHEMA IF NOT EXISTS arc_bas1;");
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build("CREATE TABLE IF NOT EXISTS arc_bas1.normage_regle (\r\n"

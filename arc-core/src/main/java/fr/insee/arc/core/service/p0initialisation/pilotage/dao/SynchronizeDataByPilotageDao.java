@@ -140,7 +140,7 @@ public class SynchronizeDataByPilotageDao {
 		// analyze table
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(FormatSQL.analyzeSecured(ViewEnum.T1.getFullName()));
-		UtilitaireDao.get(0).executeImmediate(executorConnection, query);
+		UtilitaireDao.get(0).executeRequest(executorConnection, query);
 
 	}
 	
@@ -161,7 +161,7 @@ public class SynchronizeDataByPilotageDao {
 		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_A), "=", ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_B));
 		query.build(")");
 		query.build(SQL.END_QUERY);
-		UtilitaireDao.get(0).executeImmediate(executorConnection, query);
+		UtilitaireDao.get(0).executeRequest(executorConnection, query);
 	}
 
 
@@ -195,7 +195,7 @@ public class SynchronizeDataByPilotageDao {
 		
 		query.build(SQL.INSERT_INTO, targetDataTable, SQL.SELECT, "*", SQL.FROM, ViewEnum.T2.getFullName(), SQL.END_QUERY);
 		
-		UtilitaireDao.get(0).executeImmediate(executorConnection, query);
+		UtilitaireDao.get(0).executeRequest(executorConnection, query);
 	}
 
 	

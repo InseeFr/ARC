@@ -82,7 +82,7 @@ public class ChargeurCsvDao {
 		req.append("id SERIAL");
 		req.append(");");
 
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), req);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), req);
 	}
 
 	public void execQueryCopyCsv(InputStream streamContent) throws ArcException {
@@ -165,7 +165,7 @@ public class ChargeurCsvDao {
 			query.append("CREATE INDEX idx" + i + "_chargeurcsvidxrule ON " + this.tmpChargementArc
 					+ "(" + parser.getValues(CSVFormatRules.INDEX).get(i) + ");\n");
 		}
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), query);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), query);
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class ChargeurCsvDao {
 		query.append("\n ALTER TABLE TTT RENAME COLUMN id$new$ TO id; ");
 		query.append("\n DROP TABLE " + this.tmpChargementArc + ";");
 		query.append("\n ALTER TABLE TTT RENAME TO " + this.tmpChargementArc + ";");
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), query);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), query);
 	}
 
 	/**
@@ -315,7 +315,7 @@ public class ChargeurCsvDao {
 			query.append("\n AND (" + s + ")");
 		}
 		query.append(";");
-		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
 
 	}
 
@@ -372,7 +372,7 @@ public class ChargeurCsvDao {
 		query.append("\n CREATE INDEX idx_partition_by_arc on " + this.tmpChargementArc
 				+ " ((abs(hashtext(" + parser.getValues(CSVFormatRules.PARTITION_EXPRESSION).get(0) + "::text)) % "
 				+ nbPartition + "));");
-		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
 	}
 
 	/**
@@ -429,7 +429,7 @@ public class ChargeurCsvDao {
 			req.append("\n AND (" + s + ")");
 		}
 		req.append(";");
-		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), req);
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), req);
 	}
 
 	/**
@@ -457,7 +457,7 @@ public class ChargeurCsvDao {
 		query.append("\n DROP TABLE " + this.tmpChargementArc + ";");
 		query.append("\n ALTER TABLE TTT RENAME TO " + this.tmpChargementArc + ";");
 
-		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
 	}
 
 	List<String> execQuerySelectColumnsFromLoadTable() throws ArcException {

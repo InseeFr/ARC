@@ -154,7 +154,7 @@ public class NormageOperation {
 		query.append(reqSelect);
 		query.append(" FROM " + tableSource + " ;");
 
-		UtilitaireDao.get(0).executeImmediate(connection, query);
+		UtilitaireDao.get(0).executeRequest(connection, query);
 	}
 
 	/**

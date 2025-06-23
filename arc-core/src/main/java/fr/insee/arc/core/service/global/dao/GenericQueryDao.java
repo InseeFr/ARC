@@ -46,11 +46,7 @@ public class GenericQueryDao {
 	
 	public void executeAsTransaction() throws ArcException
 	{
-        UtilitaireDao.get(0).executeImmediate(this.connection, query.asTransaction().getQueryWithParameters());
-	}
-
-	public void executeNoParameters() throws ArcException {
-		UtilitaireDao.get(0).executeImmediate(connection, query);
+        UtilitaireDao.get(0).executeRequest(this.connection, query.asTransaction().getQueryWithParameters());
 	}
 
 	public ArcPreparedStatementBuilder getQuery() {

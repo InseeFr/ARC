@@ -133,7 +133,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		ArcPreparedStatementBuilder queryRename = new ArcPreparedStatementBuilder();
 		queryRename.build(SQL.ALTER, SQL.TABLE, SQL.IF_EXISTS, fullNameBefore);
 		queryRename.build(SQL.RENAME_TO, nameAfter);
-		UtilitaireDao.get(0).executeImmediate(null, queryRename);
+		UtilitaireDao.get(0).executeRequest(null, queryRename);
 	}
 
 	public void importNomenclatureDansBase(VObject viewListNomenclatures, MultipartFile fileUpload)
@@ -230,7 +230,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 		String nomTable = ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(),
 				viewListNomenclatures.mapContentSelected().get(ColumnEnum.NOM_TABLE.getColumnName()).get(0));
 
-		UtilitaireDao.get(0).executeImmediate(null, FormatSQL.dropTable(nomTable));
+		UtilitaireDao.get(0).executeRequest(null, FormatSQL.dropTable(nomTable));
 
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.build(SQL.SELECT, ColumnEnum.NOM_TABLE.getColumnName(), SQL.FROM, ViewEnum.IHM_NMCL.getFullName());
@@ -255,7 +255,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	 */
 	public boolean isColonneValide(String nomColonne) {
 		try {
-			UtilitaireDao.get(0).executeImmediate(null, "SELECT null as " + nomColonne);
+			UtilitaireDao.get(0).executeRequest(null, "SELECT null as " + nomColonne);
 		} catch (ArcException e) {
 			return false;
 		}
@@ -272,7 +272,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	 */
 	public boolean isTypeValide(String typeColonne) {
 		try {
-			UtilitaireDao.get(0).executeImmediate(null, "SELECT null::" + typeColonne);
+			UtilitaireDao.get(0).executeRequest(null, "SELECT null::" + typeColonne);
 		} catch (ArcException e) {
 			return false;
 		}

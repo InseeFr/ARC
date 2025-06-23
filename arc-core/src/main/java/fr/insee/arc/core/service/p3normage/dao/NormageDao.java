@@ -27,7 +27,7 @@ public class NormageDao {
 
 		StringBuilder query = new StringBuilder(
 				"alter table " + partitionTableName + " rename to " + partitionTableNameWithAllRecords + ";");
-		UtilitaireDao.get(0).executeImmediate(connection, query);
+		UtilitaireDao.get(0).executeRequest(connection, query);
 	}
 
 }

@@ -28,36 +28,36 @@ public class FileRegistrationDaoTest extends InitializeQueryTest {
 	public void initDatabaseBeforeTest() throws SQLException, ArcException {
 		buildPropertiesWithoutScalability("tmp");
 
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE");
-		u.executeImmediate(c, "CREATE SCHEMA arc_bas1");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE");
+		u.executeRequest(c, "CREATE SCHEMA arc_bas1");
 
-		u.executeImmediate(c, "CREATE TABLE " + tablePilTemp + " (container text, id_source text)");
-		u.executeImmediate(c, "CREATE TABLE " + tablePil
+		u.executeRequest(c, "CREATE TABLE " + tablePilTemp + " (container text, id_source text)");
+		u.executeRequest(c, "CREATE TABLE " + tablePil
 				+ " (container text, id_source text, phase_traitement text, etat_traitement text[], to_delete text)");
 
 		// f1 is a duplicate
-		u.executeImmediate(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f1'");
-		u.executeImmediate(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f1'");
+		u.executeRequest(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f1'");
+		u.executeRequest(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f1'");
 
 		// f2 not a duplicate
-		u.executeImmediate(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f2'");
+		u.executeRequest(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f2'");
 
 		// f3 is a duplicate as it is found in files received (tablePilTemp) and also in
 		// pilotage table (tablePil)
 		// and it is not set as to be replayed
-		u.executeImmediate(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f3'");
-		u.executeImmediate(c, "INSERT INTO " + tablePil + " select 'c2', 'f3', 'RECEPTION', '{OK}', null");
-		u.executeImmediate(c, "INSERT INTO " + tablePil + " select 'c2', 'f3', 'CHARGEMENT', '{OK}', null");
+		u.executeRequest(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f3'");
+		u.executeRequest(c, "INSERT INTO " + tablePil + " select 'c2', 'f3', 'RECEPTION', '{OK}', null");
+		u.executeRequest(c, "INSERT INTO " + tablePil + " select 'c2', 'f3', 'CHARGEMENT', '{OK}', null");
 
 		// f4 is not a duplicate as it is found in files received (tablePilTemp) and
 		// also in pilotage table (tablePil)
 		// but as it is set to be replayed, it doesn't count as duplicate
-		u.executeImmediate(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f4'");
-		u.executeImmediate(c, "INSERT INTO " + tablePil + " select 'c3', 'f4', 'RECEPTION', '{OK}', null");
-		u.executeImmediate(c, "INSERT INTO " + tablePil + " select 'c3', 'f4', 'CHARGEMENT', '{OK}', 'R'");
+		u.executeRequest(c, "INSERT INTO " + tablePilTemp + " select 'c1', 'f4'");
+		u.executeRequest(c, "INSERT INTO " + tablePil + " select 'c3', 'f4', 'RECEPTION', '{OK}', null");
+		u.executeRequest(c, "INSERT INTO " + tablePil + " select 'c3', 'f4', 'CHARGEMENT', '{OK}', 'R'");
 
 		// f5 is set as replayed but not found among the new files received
-		u.executeImmediate(c, "INSERT INTO " + tablePil + " select 'c4', 'f5', 'RECEPTION', '{OK}', 'R'");
+		u.executeRequest(c, "INSERT INTO " + tablePil + " select 'c4', 'f5', 'RECEPTION', '{OK}', 'R'");
 
 		this.dao = new FileRegistrationDao(new Sandbox(c, "arc_bas1"), tablePilTemp);
 	}
@@ -65,8 +65,8 @@ public class FileRegistrationDaoTest extends InitializeQueryTest {
 	@After
 	public void cleanDatabaseAfterTest() throws SQLException, ArcException {
 		// clear
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		u.executeImmediate(c, "DISCARD TEMP;");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
+		u.executeRequest(c, "DISCARD TEMP;");
 	}
 
 	@Test

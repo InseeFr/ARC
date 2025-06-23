@@ -48,7 +48,7 @@ public class DatabaseMaintenance {
 		String tablePil = ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution);
 		
 		try {
-			UtilitaireDao.get(0).executeImmediate(coordinatorConnection, FormatSQL.vacuumSecured(tablePil, type));
+			UtilitaireDao.get(0).vacuumSecured(coordinatorConnection,tablePil, type);
 		} catch (Exception e) {
 			StaticLoggerDispatcher.error(LOGGER, "Error in ApiService.maintenancePilotage");
 		}

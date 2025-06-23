@@ -24,8 +24,8 @@ public class ChargementRulesOperationTest {
 	@Test
 	public void fillChargementRulesTest() throws ArcException {
 		// insert test data
-		u.executeImmediate(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
-		u.executeImmediate(c, "CREATE SCHEMA IF NOT EXISTS arc_bas1;");
+		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
+		u.executeRequest(c, "CREATE SCHEMA IF NOT EXISTS arc_bas1;");
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build("CREATE TABLE arc_bas1.chargement_regle (\r\n"
 				+ "	id_regle int8 NULL,\r\n"

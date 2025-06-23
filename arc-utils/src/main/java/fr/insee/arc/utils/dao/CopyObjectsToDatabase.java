@@ -66,7 +66,7 @@ public class CopyObjectsToDatabase {
 				query.append(FormatSQL.analyzeSecured(targetTableName));
 			}
 			
-			UtilitaireDao.get(0).executeImmediate(targetConnection, query);
+			UtilitaireDao.get(0).executeRequest(targetConnection, query);
 			query = new GenericPreparedStatementBuilder();
 			
 		} while (stillToDo);

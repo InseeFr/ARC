@@ -47,7 +47,7 @@ public class FileRegistrationDao {
 		StringBuilder requete = new StringBuilder();
 		requete.append(FormatSQL.dropTable(this.tablePilTemp));
 		requete.append(TableOperations.creationTableResultat(this.tablePil, this.tablePilTemp));
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 
 	}
 
@@ -100,7 +100,7 @@ public class FileRegistrationDao {
 			if (requete.getParameters().size()>FormatSQL.MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT)
 			{
 				requete.build(SQL.END_QUERY, SQL.COMMIT, SQL.END_QUERY);
-				UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+				UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 				requete = new ArcPreparedStatementBuilder();
 			}
 			
@@ -109,7 +109,7 @@ public class FileRegistrationDao {
 
 		queryUpdateArchiveWithoutFileName(requete);
 
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 
 	}
 
@@ -144,10 +144,10 @@ public class FileRegistrationDao {
 		requete.append(",").appendText(newContainer);
 		requete.append(",").appendText(virtualContainer);
 		requete.append(",").appendText(fileName);
-		requete.append(",").appendText(
+		requete.append(",").appendTextWithoutBinding(
 				new SimpleDateFormat(ArcDateFormat.DATE_HOUR_FORMAT_CONVERSION.getApplicationFormat()).format(d));
-		requete.append(",").appendText(TraitementPhase.RECEPTION.toString());
-		requete.append(",").appendText("{" + etat + "}");
+		requete.append(",").appendTextWithoutBinding(TraitementPhase.RECEPTION.toString());
+		requete.append(",").appendTextWithoutBinding("{" + etat + "}");
 		requete.append(",to_timestamp(")
 			.appendText(new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(d))
 			.append(",").appendText(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat())
@@ -224,7 +224,7 @@ public class FileRegistrationDao {
 		// effacer de la table pilotage des to_delete à R
 		requete.append("DELETE FROM " + this.tablePil + " a using a_rejouer b where a."
 				+ ColumnEnum.ID_SOURCE.getColumnName() + "=b." + ColumnEnum.ID_SOURCE.getColumnName() + "; ");
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 	}
 
 	/**
@@ -237,7 +237,7 @@ public class FileRegistrationDao {
 		StringBuilder requete = new StringBuilder();
 		requete.append("INSERT INTO " + this.tablePil + " select * from " + this.tablePilTemp + "; \n");
 		requete.append("DISCARD TEMP; \n");
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 	}
 
 	/**
@@ -359,7 +359,7 @@ public class FileRegistrationDao {
 						+ "," + requete.quoteText(z.getFileName()) + "); \n");
 			}
 		}
-		UtilitaireDao.get(0).executeImmediate(this.sandbox.getConnection(), requete);
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), requete);
 	}
 
 	public void execQueryVersionDuplicateArchives(List<String> listContainerDoublons,

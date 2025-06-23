@@ -26,14 +26,14 @@ public class TableMetadataTest extends InitializeQueryTest {
 		String tablePil = "public.pilotage_fichier";
 
 		u.dropTable(c, tablePil);
-		u.executeImmediate(c, "CREATE TABLE "+tablePil+" (id_source text, phase_traitement text, etat_traitement text[]);");
+		u.executeRequest(c, "CREATE TABLE "+tablePil+" (id_source text, phase_traitement text, etat_traitement text[]);");
 		
-		u.executeImmediate(c, "CREATE INDEX idx1_pilotage_fichier on "+tablePil+" (id_source);");
-		u.executeImmediate(c, "CREATE INDEX idx2_pilotage_fichier on "+tablePil+" (phase_traitement);");
+		u.executeRequest(c, "CREATE INDEX idx1_pilotage_fichier on "+tablePil+" (id_source);");
+		u.executeRequest(c, "CREATE INDEX idx2_pilotage_fichier on "+tablePil+" (phase_traitement);");
 		
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f1', 'MAPPING', '{OK}'");
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f2', 'MAPPING', '{OK}'");
-		u.executeImmediate(c, "INSERT INTO "+tablePil+" select 'f3', 'CHARGEMENT', '{OK}'");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f1', 'MAPPING', '{OK}'");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f2', 'MAPPING', '{OK}'");
+		u.executeRequest(c, "INSERT INTO "+tablePil+" select 'f3', 'CHARGEMENT', '{OK}'");
 		
 
 		// there should be 2 indexes

@@ -131,10 +131,8 @@ public class CleanPilotageDao {
 	
 	public void execQueryMaintenancePilotage() throws ArcException 
 	{
-		StringBuilder query = new StringBuilder();
-		query.append(FormatSQL.vacuumSecured(ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), FormatSQL.VACUUM_OPTION_NONE));
-		query.append(FormatSQL.vacuumSecured(ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema()), FormatSQL.VACUUM_OPTION_FREEZE));		
-		UtilitaireDao.get(0).executeImmediate(sandbox.getConnection(), query);
+		UtilitaireDao.get(0).vacuumSecured(sandbox.getConnection(), ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()), FormatSQL.VACUUM_OPTION_NONE);
+		UtilitaireDao.get(0).vacuumSecured(sandbox.getConnection(), ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema()), FormatSQL.VACUUM_OPTION_FREEZE);
 	}
 	
 
