@@ -149,13 +149,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static String resetTimeOutMaintenance() {
 		return "BEGIN;RESET statement_timeout;COMMIT;";
 	}
-
-	/**
-	 * essaie d'exectuer une requete et si elle n'échoue ne fait rien
-	 */
-	public static String tryQuery(String query) {
-		return "do $$ begin " + query + " exception when others then end; $$; ";
-	}
 	
 	/**
 	 * build a query to limit the number of row given of a given query

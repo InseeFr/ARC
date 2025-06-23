@@ -18,6 +18,7 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.TableMetadata;
 import fr.insee.arc.core.service.p0initialisation.ApiInitialisationService;
 import fr.insee.arc.core.util.BDParameters;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
@@ -91,12 +92,21 @@ public class BddPatcher {
 		return null;
 	}
 
+	/**
+	 * execute a database script
+	 * @param connexion
+	 * @param scriptName
+	 * @param userRestricted
+	 * @param nbSandboxes
+	 * @param envExecution
+	 * @throws ArcException
+	 */
 	public static void executeBddScript(Connection connexion, String scriptName, String userRestricted,
 			Integer nbSandboxes, String envExecution) throws ArcException {
 		String query;
 
 		if ((query = readBddScript(scriptName, userRestricted, nbSandboxes, envExecution)) != null) {
-			UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(connexion, query);
+			UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeImmediate(connexion, new GenericPreparedStatementBuilder(query));
 		}
 	}
 

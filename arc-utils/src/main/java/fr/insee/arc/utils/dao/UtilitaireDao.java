@@ -312,7 +312,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return returned;
 	}
 
-	private void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes) throws ArcException {
+	public void executeImmediate(Connection connexion, GenericPreparedStatementBuilder requete, ModeRequete... modes) throws ArcException {
 
 		if (LOGGER.isEnabled(Level.TRACE)) {
 			LoggerHelper.traceAsComment(LOGGER, "START executeImmediate");

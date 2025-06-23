@@ -163,14 +163,14 @@ public class DuplicationRulesRegleQueryBuilder {
 						if (!blocCreate.contains(" add " + c + " ")
 								&& !blocCreateNew.toString().contains(" add " + c + " ")) {
 							if (c.startsWith("i_")) {
-								String addCol = "do $$ begin alter table {table_destination} add " + c
-										+ " integer; exception when others then end; $$;";
+								String addCol = "do 'begin alter table {table_destination} add " + c
+										+ " integer; exception when others then end;';";
 								if (!columnToBeAdded.toString().contains(addCol)) {
 									columnToBeAdded.append(addCol);
 								}
 							} else {
-								String addCol = "do $$ begin alter table {table_destination} add " + c
-										+ " text; exception when others then end; $$;";
+								String addCol = "do 'begin alter table {table_destination} add " + c
+										+ " text; exception when others then end;';";
 								if (!columnToBeAdded.toString().contains(addCol)) {
 									columnToBeAdded.append(addCol);
 								}
