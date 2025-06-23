@@ -252,7 +252,7 @@ public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 				} else {
 					requete.append("\n UNION ALL ");
 				}
-				requete.append("SELECT " + requete.quoteText(s) + " as nom_fichier ");
+				requete.append("SELECT " + requete.quoteText(s) + "::text as nom_fichier ");
 			}
 
 			List<String> r = new ArrayList<>(Arrays.asList("/"));

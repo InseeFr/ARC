@@ -554,8 +554,8 @@ public class ClientDao {
 		requete.append("\n DROP TABLE IF EXISTS " + tableWsInfo + ";");
 
 		requete.append("\n CREATE TABLE " + tableWsInfo + FormatSQL.WITH_NO_VACUUM + " AS");
-		requete.append("\n SELECT " + requete.quoteText(client) + " as client ");
-		requete.append(", " + requete.quoteText(Long.toString(timestamp)) + " as timestamp ");
+		requete.append("\n SELECT " + requete.quoteText(client) + "::text as client ");
+		requete.append(", " + requete.quoteText(Long.toString(timestamp)) + "::text as timestamp ");
 		requete.append(";");
 
 		requete.append("\n DROP TABLE IF EXISTS " + tableWsPending + ";");

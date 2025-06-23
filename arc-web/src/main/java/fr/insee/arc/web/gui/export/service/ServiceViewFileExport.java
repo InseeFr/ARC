@@ -88,7 +88,7 @@ public class ServiceViewFileExport extends InteractorExport {
 				} else {
 					requete.append("\n UNION ALL ");
 				}
-				requete.append("SELECT " + requete.quoteText(s) + " as nom_fichier ");
+				requete.append("SELECT " + requete.quoteText(s) + "::text as nom_fichier ");
 			}
 
 			String repertoire = properties.getBatchParametersDirectory();
