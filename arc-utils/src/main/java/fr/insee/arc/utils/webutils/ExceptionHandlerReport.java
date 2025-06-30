@@ -1,19 +1,17 @@
 package fr.insee.arc.utils.webutils;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.security.Sanitize;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Component
@@ -38,16 +36,10 @@ public class ExceptionHandlerReport {
 
 	public ModelAndView reportException(HttpServletRequest request)
 	{
-		HttpHeaders httpHeaders = Collections.list(request.getHeaderNames())
-			    .stream()
-			    .collect(Collectors.toMap(
-			        Function.identity(),
-			        h -> Collections.list(request.getHeaders(h)),
-			        (oldValue, newValue) -> newValue,
-			        HttpHeaders::new
-			    ));
-		return reportException(new NoHandlerFoundException(request.getMethod(), request.getRequestURI(),
-				httpHeaders));
+		return reportException(new ArcException(ArcExceptionMessage.INVALID_HTTP_REQUEST,
+				Sanitize.htmlParameter(request.getMethod())
+				, Sanitize.htmlParameter(request.getRequestURI()))
+				);
 	}
 	
 	public ModelAndView reportException(Exception ex)
