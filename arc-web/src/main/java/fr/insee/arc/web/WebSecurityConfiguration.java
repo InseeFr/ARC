@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -42,7 +43,14 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 
 	@Bean
 	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
-
+		
+        http.headers(
+                headers -> headers
+                        .xssProtection(xXssConfig -> xXssConfig.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED))
+                        .contentSecurityPolicy(
+                                csp ->
+                                        csp.policyDirectives("img-src 'self' data:; style-src-elem 'self' data:; script-src-elem 'self' data:; style-src 'unsafe-inline'; default-src 'self'; script-src 'unsafe-inline'; form-action 'self'; object-src 'none';")));
+		
 		// oath2 keycloak
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			
