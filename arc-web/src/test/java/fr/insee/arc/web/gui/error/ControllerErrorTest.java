@@ -37,8 +37,8 @@ public class ControllerErrorTest {
 	public void indexOk() throws Exception {
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/errors"))
 			.andExpect(MockMvcResultMatchers.status().is(200)).andReturn();
-		String content = result.getResponse().getContentAsString();
-		assertTrue(content.contains("\"No endpoint GET /errors.\""));
+		String content = result.getResponse().getContentAsString();		
+		assertTrue(content.contains("Invalid http request. Method : GET - Uri : /errors"));
 	}
 
 }
