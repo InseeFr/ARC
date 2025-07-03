@@ -7,13 +7,8 @@ var configJS = "Render:FixedHeader;"
 		+ "Render:AlertBox;";
 
 function alimenterPhase(t){
-	console.log("savePhaseChoice :"+$("#savePhaseChoice").attr("value"));
-	console.log("$(t) :"+$(t).attr("value"));
 	$("#savePhaseChoice").attr("value",$(t).attr("value"));
 	$("#savePhaseChoice").attr("m","js");
-	console.log("savePhaseChoice :"+$("#savePhaseChoice").attr("value"));
-	console.log("savePhaseChoice :"+$("#savePhaseChoice").attr("m"));
-
 	return true;
 }
 

@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -50,6 +51,18 @@ public class WsSecurityConfiguration {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
 
+        http.headers(
+                headers -> headers
+                        .xssProtection(xXssConfig -> xXssConfig.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .preload(true)
+                                .maxAgeInSeconds(31536000)
+                        )
+                        .contentSecurityPolicy(
+                                csp ->
+                                        csp.policyDirectives("style-src 'none'; default-src 'none'; script-src 'none'; form-action 'none'; object-src 'none';")));
+		
 		
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 			http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwtResourceServer -> jwtResourceServer
