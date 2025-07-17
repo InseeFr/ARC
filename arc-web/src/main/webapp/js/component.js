@@ -915,11 +915,6 @@ function ajaxConfigurationCall()
 
 }
 
-function AfficherDimension(){
-	var $z=$('textarea').filter('[name="viewmapping.content.t[6].d[7]"]');
-	setTimeout(function(){AfficherDimension();},3000);}
-
-
 /**
  * Mise à jour du visuel des boutons d'onglet (quand un est cliqué, il apparait
  * cliqué et les autres remontent)
