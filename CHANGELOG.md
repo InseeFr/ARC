@@ -3,6 +3,10 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.2.4b
+- minimal csp policy
+- changed uploads because of tomcat 10.1.43 multipart files changes
+
 ## version-94.2.1b
 - security fix
 - most of the process queries now don't use autocommit in order to avoid database connection locks
