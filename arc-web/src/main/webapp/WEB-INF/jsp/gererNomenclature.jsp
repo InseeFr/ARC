@@ -76,7 +76,6 @@ doAction="importListNomenclatures"
 scope="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;"
 multipart="true"
 ajax="true"
-onclick="submitForm()"
 ><span class="fa fa-upload">&nbsp;</span> <spring:message code="managementSandbox.load"/></button>
 </div>
 </div>
