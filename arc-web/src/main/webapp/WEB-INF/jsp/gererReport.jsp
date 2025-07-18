@@ -7,7 +7,7 @@
 <link rel="icon" href="data:,"/>
 <title><spring:message code="header.reportManagement"/></title>
 <c:import url="tiles/defaulthead.jsp">
-<c:param name="pageJs" value="/js/gererNorme.js" />
+<c:param name="pageJs" value="/js/gererReport.js" />
 </c:import>
 </head>
 

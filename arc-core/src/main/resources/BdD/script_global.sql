@@ -93,13 +93,15 @@ UPDATE arc.parameter set description='parameter.batch.execution.executor.wait.ti
 -- parallelism parameters
 -- patch api multiphase 18/05/2025
 DELETE FROM arc.parameter where key = 'ApiChargementService.MAX_PARALLEL_WORKERS';
-UPDATE arc.parameter set key='ApiService.MAX_PARALLEL_WORKERS', description='parameter.parallel.numberOfThread'
-where key = 'ApiNormageService.MAX_PARALLEL_WORKERS';
+UPDATE arc.parameter set key='ApiService.MAX_PARALLEL_WORKERS', description='parameter.parallel.numberOfThread' where key = 'ApiNormageService.MAX_PARALLEL_WORKERS';
 DELETE FROM arc.parameter where key = 'ApiControleService.MAX_PARALLEL_WORKERS';
 DELETE FROM arc.parameter where key = 'MappingService.MAX_PARALLEL_WORKERS';
 
 -- effacer le parametrage de la phase de filtrage
-delete from arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
+DELETE FROM arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
+
+INSERT INTO arc.parameter VALUES ('ApiService.MAX_PARALLEL_WORKERS','4');
+UPDATE arc.parameter set description='parameter.parallel.numberOfThread' where key='ApiService.MAX_PARALLEL_WORKERS';
 
 -- patch 23/06/2023
 -- remove deprecated parameters

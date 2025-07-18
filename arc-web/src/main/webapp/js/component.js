@@ -141,17 +141,6 @@ function documentReady() {
 	}
 
 
-/* Fix Bootstrap  not showing the file name with custom-file-input class.*/
-	if (configJS.indexOf("Render:ChooseFileWithName;"))
-	{
-		$('.custom-file-input').on('change', function(e){
-			var fileName = this.files[0].name;
-			var nextSibling = e.target.nextElementSibling;
-			nextSibling.innerText = fileName;
-		});
-	}
-
-
 	if (configJS.indexOf("ICS:AjaxDataSelector;")>-1)
 	{		
 		// pour rendre la chose plus propre par rapport à html
@@ -174,24 +163,31 @@ function documentReady() {
 			$(this).parents().filter("form").attr("scope",$(this).attr('scope'));
 		});
 
-		$('textarea').not('.noselect').not('.tree').on('textchange',function(){
+		$('textarea').not('.noselect').not('.tree').off('textchange').on('textchange',function(){
 			$(this).css("background-color","#ffcccc");
 			$(this).attr('m','js');
 		});
 		
-		$('input').not('.noselect').not('.tree').on('textchange',function(){
+		$('input').not('.noselect').not('.tree').off('textchange').on('textchange',function(){
 			$(this).css("background-color","#ffcccc");
 			$(this).attr('m','js');
 		});
 
-		$('.datepicker').on('focus',function(){$(this).attr('m','js');});
+		$('.custom-file-input').off('change').on('change',function(e){
+			var fileName = this.files[0].name;
+			var nextSibling = e.target.nextElementSibling;
+			nextSibling.innerText = fileName;
+			$(this).attr('m','js');
+		});
+		
+		$('.datepicker').off('focus').on('focus',function(){$(this).attr('m','js');});
 
-		$('select').on('change',function(){
+		$('select').off('change').on('change',function(){
 			$(this).css("background-color","#ffcccc");
 			$(this).attr('m','js');
 		});
 
-		$(":checkbox").on('change',function(){
+		$(":checkbox").off('change').on('change',function(){
 			$(this).attr('m','js');
 			$(this).siblings().attr('m','js');
 		});
@@ -782,137 +778,200 @@ function doubleClickAction(button,fnInit,fnDo,e,t, initOnDoubleClick, doOnDouble
 		}
 }	
 
+/**
+ * prepare a non ajax request
+ * multipart input are disabled
+ */
+function ajaxConfigurationCallNoAjax($this)
+{
+	// multipart is forbidden with ajax to false			
+	$("[class='custom-file-input']").attr('disabled',"");
+	setTimeout(function(){$("[class='custom-file-input']").removeAttr('disabled');},1000);
+
+	if ( $("meta[name='_csrf']").length ) {
+		$('<input>').attr({
+			type: 'hidden',
+			name: '_csrf',
+			value: $("meta[name='_csrf']").attr("content")
+		}).appendTo($this);
+	}
+	
+	$this.attr('multipart','false');
+	$this.attr('ajax','true');
+
+}
 
 
+/**
+ * prepare an ajax request with multipart inputs
+ */
+function ajaxConfigurationCallMultipart(e,$this)
+{
+	$("body").append("<div id='hourglass'></div>");
+	var attributesSaved=savElementAttributes($this.attr('scope'));
+	e.preventDefault();
+	
+	var formdataOriginal = new FormData($this.get(0));	
+	var formdata = new FormData($this.get(0));
+	
+	for (const key of formdataOriginal.keys()) {
+		if ($('[name="'+key+'"]').attr('m') == undefined)
+		{
+			formdata.delete(key);
+		}
+	}
+	
+	formdata.append("scope", splitAndEval($this.attr('scope')));
+
+	$.ajax( {
+		url: $this.attr('action'),
+		type: 'POST',
+		data: formdata,
+		enctype: 'multipart/form-data',
+		processData: false,
+		contentType: false,
+	    beforeSend: function(xhr) {
+	    	if ( $("meta[name='_csrf']").length ) { 
+	        	var token = $("meta[name='_csrf']").attr("content");
+	        	var header = $("meta[name='_csrf_header']").attr("content");
+	        	xhr.setRequestHeader(header, token);
+	        }
+	    },
+		success: function(xml) {
+			xml="<root>"+xml+"</root>";
+			var scope=splitAndEvalArray($this.attr('scope'));
+
+			for (var i=0;i<scope.length;i++)
+			{
+				if (scope[i].substr(0,1)=="-")
+				{
+					document.getElementById(scope[i].substr(1)).innerHTML="";
+				}
+				else
+				{
+					document.getElementById(scope[i]).innerHTML=$(xml).find("#"+scope[i]).get(0).innerHTML;
+				}
+
+			}
+
+			$(document).trigger('readyAgain');
+			$("#hourglass").remove();
+			$("[m='js']").remove("attr","m");
+			
+			applyElementAttributes($this.attr('scope'),attributesSaved);
+			
+			$this.attr('multipart','false');
+			$this.attr('ajax','true');
+		}
+		,
+		error: function() {
+			// multipart false by default
+			$("#hourglass").remove();
+			alert("multipart action error");
+			
+			$this.attr('multipart','false');
+			$this.attr('ajax','true');
+			
+		}
+	} );
+
+}
+
+/**
+ * prepare an ajax request without multipart inputs
+ */
+function ajaxConfigurationCallNoMultipart(e,$this)
+{
+
+	$("body").append("<div id='hourglass'></div>");	
+	var attributesSaved=savElementAttributes($this.attr('scope'));
+	e.preventDefault();		
+	$.ajax({
+		url: $this.attr('action'),
+		type: $this.attr('method'),
+	    beforeSend: function(xhr) {
+	    	if ( $("meta[name='_csrf']").length ) { 
+	        	var token = $("meta[name='_csrf']").attr("content");
+	        	var header = $("meta[name='_csrf_header']").attr("content");
+	        	xhr.setRequestHeader(header, token);
+	        }
+	    },
+		data: $this.serialize2()+"&scope="+splitAndEval($this.attr('scope')),
+		dataType: 'text',
+		success: function(xml) {
+			
+			$("table.light thead").css("display","table-header-group");
+			
+			xml="<root>"+xml+"</root>";
+
+			var scope=splitAndEvalArray(splitAndEval($this.attr('scope')));
+
+			for (var i=0;i<scope.length;i++)
+			{
+				try{
+				if (scope[i].substr(0,1)=="-")
+				{
+					document.getElementById(scope[i].substr(1)).innerHTML="";
+				}
+				else
+				{
+						
+						document.getElementById(scope[i]).innerHTML=$(xml).find("#"+scope[i]).get(0).innerHTML;
+				}
+				}catch(error) {
+				}
+
+			}
+
+
+			$(document).trigger('readyAgain');
+			$("#hourglass").remove();
+			
+			applyElementAttributes($this.attr('scope'),attributesSaved);
+			
+			$this.attr('multipart','false');
+			$this.attr('ajax','true');
+			
+		}
+		,
+		error: function() {
+			// multipart false by default
+			$("#hourglass").remove();
+			alert("action error");
+
+			$this.attr('multipart','false');
+			$this.attr('ajax','true');
+
+		}
+	});
+}
+
+
+/**
+ * prepare the listener on form submit
+ * according to form attribute, request will be non ajax, ajax multipart or ajax no multipart
+ */
 function ajaxConfigurationCall()
 {
 	$('form').off('submit').on('submit', function(e) {
-		// on met l'écran d'attente avec le sablier
-		var $this = $(this);
 
+		var $this = $(this);
+		
 		if ($this.attr('ajax')=="false")
 		{
-			// multipart is forbidden with ajax to false			
-			$("[class='custom-file-input']").attr('disabled',"");
-			setTimeout(function(){$("[class='custom-file-input']").removeAttr('disabled');},1000);
-
-			if ( $("meta[name='_csrf']").length ) {
-				$('<input>').attr({
-	    			type: 'hidden',
-	    			name: '_csrf',
-	    			value: $("meta[name='_csrf']").attr("content")
-				}).appendTo($(this));
-			}
-			// default is ajax
-			$this.attr('ajax','true');
+			ajaxConfigurationCallNoAjax($this);
+			return;
 		}
-		else
+
+		if ($this.attr('multipart')=="true")
 		{
-			var attributesSaved=savElementAttributes($this.attr('scope'));
-			
-			$("body").append("<div id='hourglass'></div>");
-
-			if ($this.attr('ajax')!="false" && $this.attr('multipart')=="true")
-			{
-				e.preventDefault();
-				var formdata = new FormData(this);
-				formdata.append("scope", splitAndEval($this.attr('scope')));
-
-				$.ajax( {
-					url: $this.attr('action'),
-					type: 'POST',
-					data: formdata,
-					enctype: 'multipart/form-data',
-					processData: false,
-					contentType: false,
-		            beforeSend: function(xhr) {
-		            	if ( $("meta[name='_csrf']").length ) { 
-		                	var token = $("meta[name='_csrf']").attr("content");
-		                	var header = $("meta[name='_csrf_header']").attr("content");
-		                	xhr.setRequestHeader(header, token);
-		                }
-		            },
-					success: function(xml) {
-						xml="<root>"+xml+"</root>";
-						var scope=splitAndEvalArray($this.attr('scope'));
-
-						for (var i=0;i<scope.length;i++)
-						{
-							if (scope[i].substr(0,1)=="-")
-							{
-								document.getElementById(scope[i].substr(1)).innerHTML="";
-							}
-							else
-							{
-								document.getElementById(scope[i]).innerHTML=$(xml).find("#"+scope[i]).get(0).innerHTML;
-							}
-
-						}
-						$(document).trigger('readyAgain');
-
-
-						$("#hourglass").remove();
-						$("[m='js']").remove("attr","m");
-						
-						applyElementAttributes($this.attr('scope'),attributesSaved);
-						
-					}
-				} );
-			}
-			else
-			{
-				e.preventDefault();		
-				$.ajax({
-					url: $this.attr('action'),
-					type: $this.attr('method'),
-		            beforeSend: function(xhr) {
-		            	if ( $("meta[name='_csrf']").length ) { 
-		                	var token = $("meta[name='_csrf']").attr("content");
-		                	var header = $("meta[name='_csrf_header']").attr("content");
-		                	xhr.setRequestHeader(header, token);
-		                }
-		            },
-					data: $this.serialize2()+"&scope="+splitAndEval($this.attr('scope')),
-					dataType: 'text',
-					success: function(xml) {
-						
-						$("table.light thead").css("display","table-header-group");
-						
-						xml="<root>"+xml+"</root>";
-
-						var scope=splitAndEvalArray(splitAndEval($this.attr('scope')));
-
-						for (var i=0;i<scope.length;i++)
-						{
-							try{
-							if (scope[i].substr(0,1)=="-")
-							{
-								document.getElementById(scope[i].substr(1)).innerHTML="";
-							}
-							else
-							{
-									
-									document.getElementById(scope[i]).innerHTML=$(xml).find("#"+scope[i]).get(0).innerHTML;
-							}
-							}catch(error) {
-							}
-
-						}
-
-
-						$(document).trigger('readyAgain');
-						$("#hourglass").remove();
-						
-						applyElementAttributes($this.attr('scope'),attributesSaved);
-						
-					}
-				});
-			}
+			ajaxConfigurationCallMultipart(e,$this);
+			return;	
 		}
+		
+		ajaxConfigurationCallNoMultipart(e,$this);
 
 	});
-
-
 }
 
 /**

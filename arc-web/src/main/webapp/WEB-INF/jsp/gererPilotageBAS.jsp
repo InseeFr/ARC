@@ -63,7 +63,7 @@ for="ActionsBAS.selectFiles"
 </div>
 <div class="input-group-append">
 <label class="ml-4 mt-2 mr-1" for="entrepotCible"><spring:message code="managementSandbox.repository"/> :</label>
-<select id="entrepotCible" name="viewEntrepotBAS.customValues['entrepotEcriture']">
+<select id="entrepotCible" name="viewEntrepotBAS.customValues['entrepotEcriture']" m="js">
 <c:forEach items="${viewEntrepotBAS.getV(0,viewEntrepotBAS.content)}" var="entrepot">
 <option ${entrepot == viewEntrepotBAS.customValues['entrepotEcriture'] ? 'selected' : ''}>${entrepot}</option>
 </c:forEach>
