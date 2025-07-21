@@ -21,7 +21,7 @@
 		<project.maven.compiler.version>3.12.0</project.maven.compiler.version>
 		<project.org.json.version>20231013</project.org.json.version>
 		<project.commons.compress.version>1.26.0</project.commons.compress.version>
-		<project.commons.fileupload.version>1.5</project.commons.fileupload.version>
+		<project.commons.fileupload.version>1.6.0</project.commons.fileupload.version>
 
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
