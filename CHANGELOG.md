@@ -3,7 +3,8 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
-## version-94.2.8
+## version-94.2.9
+- minio client version
 - security fix
 
 ## version-94.2.4b
