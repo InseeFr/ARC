@@ -266,6 +266,10 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		return ZERO;
 	}
 	
+	public int getInt(Connection connexion, String sql, ModeRequete... modes) {
+		return getInt(connexion, new GenericPreparedStatementBuilder(sql), modes);
+	}
+	
 	/**
 	 * Exécute une requête qui renvoie exactement un argument de type
 	 * {@link Integer}.
