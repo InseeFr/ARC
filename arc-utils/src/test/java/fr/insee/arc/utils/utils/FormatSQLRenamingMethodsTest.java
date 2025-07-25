@@ -16,6 +16,22 @@ public class FormatSQLRenamingMethodsTest {
 	public void imageObjectNameImgTest()
 	{
 		assertEquals("schema.myobject_img", FormatSQL.imageObjectName("schema.myobject"));
+		assertEquals("myobject_img", FormatSQL.imageObjectName("myobject"));
+
+		String tableName63Bytes= "123456789012345678901234567890123456789012345678901234567890123";
+		assertEquals(63,tableName63Bytes.length());
+		assertEquals("56789012345678901234567890123456789012345678901234567890123_img",
+				FormatSQL.imageObjectName(tableName63Bytes));
+
+		String tableName63BytesWithSchema= "arc_bas2."+tableName63Bytes;
+		assertEquals("arc_bas2.56789012345678901234567890123456789012345678901234567890123_img",
+				FormatSQL.imageObjectName(tableName63BytesWithSchema));
+
+		String tableName61Bytes= "1234567890123456789012345678901234567890123456789012345678901";
+		assertEquals(61,tableName61Bytes.length());
+		assertEquals("34567890123456789012345678901234567890123456789012345678901_img",
+				FormatSQL.imageObjectName(tableName61Bytes));
+		
 	}
 
 }

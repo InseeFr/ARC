@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.p0initialisation.pilotage.dao;
 
 import java.sql.Connection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -175,14 +176,16 @@ public class SynchronizeDataByPilotageDao {
 	 */
 	public static void keepDataRecordsFoundInIdSourceOnly(Connection executorConnection, String targetDataTable) throws ArcException {
 		
+		String targetDataTableImg = FormatSQL.imageObjectName(targetDataTable);
+		String targetDataTableIdentifier = FormatSQL.extractTableNameToken(targetDataTable);
 		
 		// recreate full table instead of delete as large volume of data may be involved
 		// this operation occurs once a week
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, ViewEnum.T2.getFullName(), SQL.END_QUERY);
+		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, targetDataTableImg, SQL.END_QUERY);
 		
-		query.build(SQL.CREATE, SQL.TEMPORARY, SQL.TABLE, ViewEnum.T2.getFullName(), SQL.AS);
+		query.build(SQL.CREATE, SQL.TABLE, targetDataTableImg, FormatSQL.WITH_NO_VACUUM, SQL.AS);
 		query.build(SQL.SELECT, "*", SQL.FROM, targetDataTable, SQL.AS, ViewEnum.ALIAS_A);
 		query.build(SQL.WHERE, SQL.EXISTS);
 		query.build("(");
@@ -191,9 +194,10 @@ public class SynchronizeDataByPilotageDao {
 		query.build(")");
 		query.build(SQL.END_QUERY);
 		
-		query.build(SQL.TRUNCATE, SQL.TABLE, targetDataTable, SQL.END_QUERY);
+		query.build(SQL.DROP, SQL.TABLE, targetDataTable, SQL.END_QUERY);
+		query.build(SQL.ALTER, SQL.TABLE, targetDataTableImg, SQL.RENAME_TO, targetDataTableIdentifier, SQL.END_QUERY);
 		
-		query.build(SQL.INSERT_INTO, targetDataTable, SQL.SELECT, "*", SQL.FROM, ViewEnum.T2.getFullName(), SQL.END_QUERY);
+		query.build(SQL.ANALYZE, targetDataTable, SQL.END_QUERY);
 		
 		UtilitaireDao.get(0).executeRequest(executorConnection, query);
 	}
@@ -203,7 +207,7 @@ public class SynchronizeDataByPilotageDao {
 	public static void dropDataTables(Connection executorConnection, List<String> dataTablesToDrop) {
 		UtilitaireDao.get(0).dropTable(executorConnection, dataTablesToDrop);
 	}
-	
+
 
 	/**
 	 * drop the unused temporary table on the target connection / environment
@@ -222,6 +226,90 @@ public class SynchronizeDataByPilotageDao {
 		}
 	}
 
+	/*
+	 * Check if any table if not empty
+	 */
+//	public static boolean execQueryCheckIfNotEmpty(Connection targetConnexion, List<String> envTablesWithRecords) throws ArcException {
+//		
+//		boolean result = false;
+//		
+//		for (String envTablesWithRecords : envTablesWithRecords)
+//		
+//		UtilitaireDao.get(0).hasResults(targetConnexion,
+//				new ArcPreparedStatementBuilder("select 1 from fichier_to_delete limit 1"));
+//
+//		
+//		return result;
+//		
+//		
+//	}
 
+	/**
+	 * Create the table TABLES_WITH_RECORDS 
+	 * This table is meant to held the name of the mapping tables containing at least one record 
+	 * @param targetConnexion
+	 * @param envExecution
+	 * @throws ArcException 
+	 */
+	public static void unregisterTablesWithRecord(Connection targetConnexion, String envExecution) throws ArcException {
+	
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		
+		query.build(FormatSQL.dropTable(ViewEnum.TABLES_WITH_RECORDS.getFullName(envExecution)));
+		query.build(SQL.CREATE, SQL.TABLE, ViewEnum.TABLES_WITH_RECORDS.getFullName(envExecution)); 
+		query.build("(",query.sqlDDLOfColumnsFromModel(ViewEnum.TABLES_WITH_RECORDS),")");
+		
+		UtilitaireDao.get(0).executeRequest(targetConnexion, query);
+		
+	}
+
+	/**
+	 * insert into TABLES_WITH_RECORDS the name of the mapping tables containing at least one record 
+	 * @param targetConnexion
+	 * @param envExecution
+	 * @param dataTables
+	 * @throws ArcException 
+	 */
+	public static void registerTablesWithRecord(Connection targetConnexion, String envExecution, List<String> dataTables) throws ArcException {
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.INSERT_INTO, ViewEnum.TABLES_WITH_RECORDS.getFullName(envExecution));
+		query.build("(", query.sqlListeOfColumnsFromModel(ViewEnum.TABLES_WITH_RECORDS), ")");
+		query.build(SQL.VALUES);
+		query.build(dataTables.stream().map(dataTable -> "(" + query.quoteText(dataTable) + ")" ).collect( Collectors.joining( "," )));
+		query.build(SQL.END_QUERY);
+		UtilitaireDao.get(0).executeRequest(targetConnexion, query);
+		
+	}
+
+	/**
+	 * test if table is empty
+	 * @param connection
+	 * @param nomTable
+	 * @return
+	 */
+	public static boolean isDataTableHasRecords(Connection connection, String nomTable) {
+		try {
+			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+			query.build(SQL.SELECT, SQL.FROM, nomTable, SQL.LIMIT, "1");
+			return UtilitaireDao.get(0).hasResults(connection, query);
+		} catch (ArcException e) {
+			return false;
+		}
+	}
+
+	
+	/**
+	 * Query the mapping tables saved in TABLES_WITH_RECORDS : the ones that has at least one record
+	 * @param targetConnexion
+	 * @param envExecution
+	 * @return
+	 * @throws ArcException
+	 */
+	public static List<String> execQueryMappingTablesWithRecords(Connection targetConnexion, String envExecution) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, ColumnEnum.NOM_TABLE_METIER , SQL.FROM, ViewEnum.TABLES_WITH_RECORDS.getFullName(envExecution));
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(targetConnexion, query)).getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName());
+	}
 	
 }

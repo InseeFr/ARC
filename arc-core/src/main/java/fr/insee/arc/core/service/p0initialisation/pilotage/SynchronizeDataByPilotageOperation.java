@@ -240,21 +240,63 @@ public class SynchronizeDataByPilotageOperation {
 		Connection coordinatorConnexion = sandbox.getConnection();
 		String envExecution = sandbox.getSchema();
 		
+		// mark mapping tables
+		List<String> tablesWithRecords = new ArrayList<>();
+		ThrowingConsumer<Connection> functionMarkMappingTablesWithRecords = connection -> markMappingTablesWithRecords(
+				connection, envExecution, tablesWithRecords);
+		ServiceScalability.dispatchOnNods(coordinatorConnexion, functionMarkMappingTablesWithRecords, functionMarkMappingTablesWithRecords);
+		
+		// if there is no mapping tables with records, exit
+		if (tablesWithRecords.isEmpty())
+		{
+			return;
+		}
+		
+		// retrieve id_source from pilotage table if not provided
 		ListIdSourceInPilotage listIdSourceInPilotage = new ListIdSourceInPilotage();
-
 		if (optionalProvidedIdSourceToDelete == null) {
 			listIdSourceInPilotage
 					.addSource(coordinatorConnexion, envExecution, TraitementPhase.MAPPING, TraitementEtat.OK)
 					.addSource(coordinatorConnexion, envExecution, TraitementPhase.MAPPING, TraitementEtat.KO);
 		}
 
-		ThrowingConsumer<Connection> function = executorConnection -> deleteUnusedDataRecordsAllTables(
-				executorConnection, envExecution, listIdSourceInPilotage, optionalProvidedIdSourceToDelete);
+		ThrowingConsumer<Connection> function = connection -> deleteUnusedDataRecordsAllTables(
+				connection, envExecution, listIdSourceInPilotage, optionalProvidedIdSourceToDelete);
 
 		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
 
 	}
 
+	/**
+	 * Mark tables with data records
+	 * 
+	 * @param executorConnection
+	 * @param envExecution
+	 * @param listIdSourceInPilotage
+	 * @throws ArcException
+	 */
+	private static void markMappingTablesWithRecords(Connection connection, String envExecution, List<String> tablesWithRecord ) throws ArcException {
+		
+		SynchronizeDataByPilotageDao.unregisterTablesWithRecord(connection, envExecution);
+		List<String> dataTables = PhaseOperations.selectPhaseDataTablesFoundInEnv(connection, envExecution);
+		
+		// récupérer la liste des tables de la phase
+		List<String> dataTablesFilteredOnMappingPhase = dataTables.stream()
+				.filter(nomTable -> PhaseOperations.extractPhaseFromTableName(nomTable).equals(TraitementPhase.MAPPING))
+				.filter(nomTable -> SynchronizeDataByPilotageDao.isDataTableHasRecords(connection, nomTable))
+				.collect(Collectors.toList());
+
+		// if no phase tables detected, exit
+		if (dataTablesFilteredOnMappingPhase.isEmpty()) {
+			return;
+		}
+		
+		tablesWithRecord.addAll(dataTablesFilteredOnMappingPhase);
+		SynchronizeDataByPilotageDao.registerTablesWithRecord(connection, envExecution, dataTablesFilteredOnMappingPhase);
+		
+	}
+	
+	
 	/**
 	 * Delete the unreferenced data records found in all tables that may contains
 	 * data i.e. currently tables of the "mapping" phase
@@ -264,20 +306,16 @@ public class SynchronizeDataByPilotageOperation {
 	 * @param listIdSourceInPilotage
 	 * @throws ArcException
 	 */
-	private static void deleteUnusedDataRecordsAllTables(Connection executorConnection, String envExecution,
+	private static void deleteUnusedDataRecordsAllTables(Connection connection, String envExecution,
 			ListIdSourceInPilotage listIdSourceInPilotage, List<String> providedIdSourceToDelete) throws ArcException {
 
-		List<String> dataTables = PhaseOperations.selectPhaseDataTablesFoundInEnv(executorConnection, envExecution);
+		// query the mapping table that contain data
+		List<String> dataTables = SynchronizeDataByPilotageDao.execQueryMappingTablesWithRecords(connection, envExecution);
 
-		// if no phase tables, exit
-		if (dataTables.isEmpty()) {
-			return;
-		}
-
-		deleteUnusedDataRecords(executorConnection, listIdSourceInPilotage, dataTables, TraitementPhase.MAPPING,
+		deleteUnusedDataRecords(connection, listIdSourceInPilotage, dataTables, TraitementPhase.MAPPING,
 				TraitementEtat.OK, providedIdSourceToDelete);
 
-		deleteUnusedDataRecords(executorConnection, listIdSourceInPilotage, dataTables, TraitementPhase.MAPPING,
+		deleteUnusedDataRecords(connection, listIdSourceInPilotage, dataTables, TraitementPhase.MAPPING,
 				TraitementEtat.KO, providedIdSourceToDelete);
 
 	}
@@ -294,17 +332,18 @@ public class SynchronizeDataByPilotageOperation {
 	private static void deleteUnusedDataRecords(Connection executorConnection,
 			ListIdSourceInPilotage listIdSourceInPilotage, List<String> envTables, TraitementPhase phase,
 			TraitementEtat etat, List<String> providedIdSourceToDelete) throws ArcException {
+		
 		// récupérer la liste des tables de la phase
 		List<String> envTablesWithRecords = envTables.stream()
 				.filter(nomTable -> PhaseOperations.extractPhaseFromTableName(nomTable).equals(phase)
 						&& PhaseOperations.extractEtatFromTableName(nomTable).equals(etat))
 				.collect(Collectors.toList());
-
-		// quels enregistrements à effacer
+		
+		// if no tables with records, exit
 		if (envTablesWithRecords.isEmpty()) {
 			return;
 		}
-		
+
 		// materialize the table id_source table
 		if (providedIdSourceToDelete == null) {
 			SynchronizeDataByPilotageDao.execQueryMaterializeOnExecutorIdSource(executorConnection, listIdSourceInPilotage.getIdSourceInPilotage(phase, etat));

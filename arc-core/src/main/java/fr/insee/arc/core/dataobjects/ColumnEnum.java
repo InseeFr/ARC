@@ -202,6 +202,16 @@ public enum ColumnEnum {
 		return listOfColumnEnum.stream().map(ColumnEnum::getColumnName).collect(Collectors.toList());
 	}
 
+	/**
+	 * return the list of columnEnum name
+	 * 
+	 * @param listOfColumnEnum
+	 * @return
+	 */
+	public static List<String> listColumnEnumDDL(Collection<ColumnEnum> listOfColumnEnum) {
+		return listOfColumnEnum.stream().map(column -> { return column.getColumnName() + " " + column.getColumnType().getTypeName();}).collect(Collectors.toList());
+	}
+	
 	@Override
 	public String toString() {
 		return this.getColumnName();

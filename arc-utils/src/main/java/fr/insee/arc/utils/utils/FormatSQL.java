@@ -35,6 +35,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final boolean DROP_FIRST_FALSE = false;
 	public static final boolean DROP_FIRST_TRUE = true;
 
+	public static final int MAX_DATABASE_IDENTIFIER_LENGTH = 63;
 	public static final int TAILLE_MAXIMAL_BLOC_SQL = 700000;
 	public static final int MAXIMUM_NUMBER_OF_BIND_IN_PREPARED_STATEMENT = 10000;
 	public static final int MAXIMUM_NUMBER_OF_LINE_IN_PREPARED_STATEMENT_BLOCK = 100;
@@ -283,11 +284,24 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 
 	/**
 	 * Ajoute un suffixe image à un objet de base de données
+	 * Gère la longeur maximale des identifiers dans la base (63 dans postgres)
 	 * @param databaseObject
 	 * @return
 	 */
 	public static final String imageObjectName(String databaseObject) {
-		return databaseObject + Delimiters.SQL_TOKEN_DELIMITER + IMG;
+		
+		String imgSuffix = Delimiters.SQL_TOKEN_DELIMITER + IMG;
+		
+		String databaseObjectIdentifier = extractTableNameToken(databaseObject);
+		String databaseObjectSchema = extractSchemaNameToken(databaseObject);
+		
+		// databaseObject name will be cut so that its size won't exceed MAX_DATABASE_IDENTIFIER_LENGTH
+		int imageObjectNameLength =  databaseObjectIdentifier.length() + imgSuffix.length() ;
+		
+		int overlength = imageObjectNameLength - MAX_DATABASE_IDENTIFIER_LENGTH;
+		overlength = (overlength<=0) ? 0 : overlength;
+				
+		return ((databaseObjectSchema!=null) ? databaseObjectSchema + Delimiters.SQL_SCHEMA_DELIMITER : "") + databaseObjectIdentifier.substring(overlength) + imgSuffix;
 	}
 	
 	/**

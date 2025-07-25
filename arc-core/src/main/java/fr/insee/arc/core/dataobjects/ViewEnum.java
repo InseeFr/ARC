@@ -122,7 +122,9 @@ public enum ViewEnum {
 	, CONTROLE_REGLE("controle_regle", SchemaEnum.SANDBOX_GENERATED) //
 	, MAPPING_REGLE("mapping_regle", SchemaEnum.SANDBOX_GENERATED) //
 	, EXPRESSION("expression", SchemaEnum.SANDBOX_GENERATED) //
-			
+	
+	, TABLES_WITH_RECORDS("tables_with_records", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.NOM_TABLE_METIER) //
+	
 	// tables pour le reporting
 	, MAPPING_ARC_REPORT_OK("mapping_arc_report_ok", SchemaEnum.SANDBOX_GENERATED, ColumnEnum.ENTREPOT, ColumnEnum.ARCHIVE_TIMESTAMP, ColumnEnum.ARCHIVE_FILENAME)
 	

@@ -32,6 +32,17 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	}
 
 	/**
+	 * build the DDL list of column based on a collection of arc column enumeration
+	 * elements
+	 * 
+	 * @param listOfColumns
+	 * @return
+	 */
+	public StringBuilder sqlDDLOfColumnsFromModel(Collection<ColumnEnum> listOfColumns) {
+		return sqlListeOfColumns(ColumnEnum.listColumnEnumDDL(listOfColumns));
+	}
+	
+	/**
 	 * return a liste of column based on a variable array of arc column enumeration
 	 * elements
 	 * 
@@ -40,6 +51,17 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	 */
 	public StringBuilder sqlListeOfColumnsFromModel(ColumnEnum... columns) {
 		return sqlListeOfColumnsFromModel(Arrays.asList(columns));
+	}
+	
+	/**
+	 * return the DDL of columns based on a variable array of arc column enumeration
+	 * elements
+	 * 
+	 * @param columns
+	 * @return
+	 */
+	public StringBuilder sqlDDLOfColumnsFromModel(ColumnEnum... columns) {
+		return sqlDDLOfColumnsFromModel(Arrays.asList(columns));
 	}
 
 	/**
@@ -54,6 +76,17 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 	}
 
 	/**
+	 * return a liste of column based on a variable array of arc column enumeration
+	 * elements
+	 * 
+	 * @param columns
+	 * @return
+	 */
+	public StringBuilder sqlDDLOfColumnsFromModel(Map<ColumnEnum, ColumnEnum> mapOfColumnEnum) {
+		return sqlDDLOfColumnsFromModel(mapOfColumnEnum.keySet());
+	}
+	
+	/**
 	 * return sql expression of table columns
 	 * 
 	 * @param columns
@@ -63,6 +96,17 @@ public class ArcPreparedStatementBuilder extends GenericPreparedStatementBuilder
 		return sqlListeOfColumnsFromModel(tableEnum.getColumns());
 	}
 
+	/**
+	 * return DDL expression of table columns
+	 * 
+	 * @param columns
+	 * @return
+	 */
+	public StringBuilder sqlDDLOfColumnsFromModel(ViewEnum tableEnum) {
+		return sqlDDLOfColumnsFromModel(tableEnum.getColumns());
+	}
+	
+	
 	public ArcPreparedStatementBuilder append(ViewEnum view) {
 		return (ArcPreparedStatementBuilder) this.append(view.getTableName());
 	}

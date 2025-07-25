@@ -20,12 +20,27 @@ public class ArcPreparedStatementBuilderTest {
 	}
 
 	@Test
+	public void sqlDDLColumnsByList() {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		Assert.assertEquals(new StringBuilder("id_famille text,id_norme text").toString(),
+				query.sqlDDLOfColumnsFromModel(ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME).toString());
+	}
+	
+	@Test
 	public void sqlListeColumnsByView() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		Assert.assertEquals(new StringBuilder("test1,test2").toString(),
 				query.sqlListeOfColumnsFromModel(ViewEnum.TABLE_TEST_IN_TEMPORARY).toString());
 	}
 
+	@Test
+	public void sqlDDLColumnsByView() {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		Assert.assertEquals(new StringBuilder("test1 text,test2 text").toString(),
+				query.sqlDDLOfColumnsFromModel(ViewEnum.TABLE_TEST_IN_TEMPORARY).toString());
+	}
+
+	
 	@Test
 	public void arcPreparedStatementAppenderTest() throws ArcException {
 

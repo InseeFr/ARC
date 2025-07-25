@@ -45,6 +45,8 @@ public enum SQL {
 	
 	WITH("WITH"), RETURNING("RETURNING"),
 	
+	ANALYZE("ANALYZE"),
+	
 	SPACE(" "), NEW_LINE("\n"),
 	
 	// symbol
