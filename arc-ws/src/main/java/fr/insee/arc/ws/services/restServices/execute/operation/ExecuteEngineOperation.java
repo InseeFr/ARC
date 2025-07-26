@@ -9,7 +9,6 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.security.SecurityDao;
 import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
 import fr.insee.arc.ws.services.restServices.execute.model.PhaseInterface;
 import fr.insee.arc.ws.services.restServices.execute.model.ResponseAttributes;
@@ -83,7 +82,6 @@ public class ExecuteEngineOperation {
 		
 	}
 	
-	
 	// les tables temporaires des phases respectives valent a,b,c,d ...
 	private final static int TEMPORARY_TABLE_ASCII_BASE_NAME=97;
 
@@ -97,12 +95,5 @@ public class ExecuteEngineOperation {
 	{
 		return generateTemporaryTableName(i);
 	}
-	
-	
-	private String previousTemporaryTable(int i)
-	{
-		return generateTemporaryTableName(i-1);
-	}
-	
-	
+
 }

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -308,9 +308,9 @@ public class GenericPreparedStatementBuilder {
 			String val = (p.getValue() == null) ? null : ("" + p.getValue());
 
 			if (Arrays.asList(ParameterType.INT).contains(p.getType())) {
-				q = StringUtils.replaceOnce(q, BIND_VARIABLE_PLACEHOLDER, quoteNumberWithoutBinding(val));
+				q = Strings.CS.replaceOnce(q, BIND_VARIABLE_PLACEHOLDER, quoteNumberWithoutBinding(val));
 			} else {
-				q = StringUtils.replaceOnce(q, BIND_VARIABLE_PLACEHOLDER, quoteTextWithoutBinding(val));
+				q = Strings.CS.replaceOnce(q, BIND_VARIABLE_PLACEHOLDER, quoteTextWithoutBinding(val));
 			}
 		}
 

@@ -24,7 +24,6 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Pair;
 import fr.insee.arc.utils.utils.SecuredSaxParser;
 

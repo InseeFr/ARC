@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.List;
 
-import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.utils.dao.SQL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
