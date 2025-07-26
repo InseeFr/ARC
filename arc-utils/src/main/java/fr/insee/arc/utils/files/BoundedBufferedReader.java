@@ -118,8 +118,6 @@ public class BoundedBufferedReader extends Reader {
    * source stream has been reached.
    */
   private int fillBuf() throws IOException {
-    // assert(pos == end);
- 
     if (mark == -1 || (pos - mark >= markLimit)) {
             /* mark isn't set or has exceeded its limit. use the whole buffer */
       int result = in.read(buf, 0, buf.length);
@@ -287,14 +285,12 @@ public class BoundedBufferedReader extends Reader {
           break;
         }
  
-        // assert(pos == end);
- 
-                /*
-                 * If we're unmarked and the requested size is greater than our
-                 * buffer, read the chars directly into the caller's buffer. We
-                 * don't read into smaller buffers because that could result in
-                 * a many reads.
-                 */
+        /*
+         * If we're unmarked and the requested size is greater than our
+         * buffer, read the chars directly into the caller's buffer. We
+         * don't read into smaller buffers because that could result in
+         * a many reads.
+         */
         if ((mark == -1 || (pos - mark >= markLimit)) && outstanding >= buf.length) {
           int count = in.read(buffer, offset, outstanding);
           if (count > 0) {
