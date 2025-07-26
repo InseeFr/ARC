@@ -94,8 +94,6 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
 
         File files=new File(dir);
 
-        int nb=0;
-
         if (filter==null)
         {
             filter=new HashMap<>();

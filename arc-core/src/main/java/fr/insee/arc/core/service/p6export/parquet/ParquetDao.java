@@ -32,7 +32,6 @@ import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
-import fr.insee.arc.utils.utils.Sleep;
 
 public class ParquetDao {
 

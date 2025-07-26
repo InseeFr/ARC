@@ -226,24 +226,6 @@ public class SynchronizeDataByPilotageDao {
 		}
 	}
 
-	/*
-	 * Check if any table if not empty
-	 */
-//	public static boolean execQueryCheckIfNotEmpty(Connection targetConnexion, List<String> envTablesWithRecords) throws ArcException {
-//		
-//		boolean result = false;
-//		
-//		for (String envTablesWithRecords : envTablesWithRecords)
-//		
-//		UtilitaireDao.get(0).hasResults(targetConnexion,
-//				new ArcPreparedStatementBuilder("select 1 from fichier_to_delete limit 1"));
-//
-//		
-//		return result;
-//		
-//		
-//	}
-
 	/**
 	 * Create the table TABLES_WITH_RECORDS 
 	 * This table is meant to held the name of the mapping tables containing at least one record 

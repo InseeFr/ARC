@@ -10,7 +10,6 @@ import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p2chargement.operation.ChargementRulesOperation;
 import fr.insee.arc.core.service.p2chargement.operation.ChargeurXmlComplexe;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
 import fr.insee.arc.ws.services.restServices.execute.model.PhaseInterface;
 

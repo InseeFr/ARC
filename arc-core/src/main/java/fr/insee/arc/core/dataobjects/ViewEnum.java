@@ -225,9 +225,21 @@ public enum ViewEnum {
 	 * @return
 	 */
 	public String getFullName() {
-		return DataObjectService.getFullTableNameInSchema(this.tableLocation, this.tableName);
+		return getFullTableNameInSchema(this.tableLocation, this.tableName);
 	}
 
+
+	/**
+	 * Compute the full table name
+	 * @param schema
+	 * @param tablename
+	 * @return
+	 */
+	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename) {
+		return (schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename).toLowerCase();
+	}
+
+	
 	/**
 	 * return tablename with schema (normalize lower case)
 	 * @return

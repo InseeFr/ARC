@@ -3,8 +3,6 @@ package fr.insee.arc.web.gui.report.dao;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
@@ -20,8 +18,6 @@ import fr.insee.arc.web.gui.all.util.VObjectService;
 
 @Component
 public class GererReportDao extends VObjectHelperDao {
-
-	private static final Logger LOGGER = LogManager.getLogger(GererReportDao.class);
 
 	/**
 	 * dao call to build norm vobject

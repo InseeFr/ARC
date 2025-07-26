@@ -9,7 +9,6 @@ import fr.insee.arc.core.service.p3normage.bo.IdCardNormage;
 import fr.insee.arc.core.service.p4controle.operation.ControleRulesOperation;
 import fr.insee.arc.core.service.p4controle.operation.ServiceJeuDeRegleOperation;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.ws.services.restServices.execute.dao.ExecuteEngineControleDao;
 import fr.insee.arc.ws.services.restServices.execute.model.ExecuteParameterModel;
 import fr.insee.arc.ws.services.restServices.execute.model.PhaseInterface;

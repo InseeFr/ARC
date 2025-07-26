@@ -2,7 +2,6 @@ package fr.insee.arc.core.service.global.bo;
 
 import java.util.Date;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.dao.DateConversion;
 import fr.insee.arc.core.service.p2chargement.bo.IdCardChargement;
 import fr.insee.arc.core.service.p3normage.bo.IdCardNormage;

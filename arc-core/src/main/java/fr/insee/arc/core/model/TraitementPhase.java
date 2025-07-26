@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import fr.insee.arc.core.service.p4controle.bo.ControleTypeCode;
-
 public enum TraitementPhase {
     
 	DUMMY(-1, 1, ConditionExecution.AUCUN_PREREQUIS) //

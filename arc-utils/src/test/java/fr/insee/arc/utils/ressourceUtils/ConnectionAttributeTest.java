@@ -1,7 +1,7 @@
 package fr.insee.arc.utils.ressourceUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;

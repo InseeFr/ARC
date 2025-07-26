@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,13 +12,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.DataObjectService;
 import fr.insee.arc.core.dataobjects.SchemaEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.dao.SQL;
-import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class ServiceViewListNomenclatures extends InteractorNomenclature {
@@ -102,7 +100,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 			
 			ArcPreparedStatementBuilder requeteNomenclature = new ArcPreparedStatementBuilder();
 			requeteNomenclature.append(SQL.SELECT).append("a.*").append(SQL.FROM);
-			requeteNomenclature.append(DataObjectService.getFullTableNameInSchema(SchemaEnum.ARC_METADATA, selectedNomenclature));
+			requeteNomenclature.append(ViewEnum.getFullTableNameInSchema(SchemaEnum.ARC_METADATA, selectedNomenclature));
 			requeteNomenclature.append(" a");
 			
 			this.vObjectService.download(views.getViewListNomenclatures(), response, Arrays.asList(selectedNomenclature)

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -21,7 +22,12 @@ public class SynchronizeDataByPilotageOperationTest extends InitializeQueryTest 
 	public void deleteUnusedDataRecordsAllNods() throws SQLException, ArcException {
 		buildPropertiesWithTwoExecutors("/tmp");
 
-		// build test case
+		// test case 1 : the files data are kept according to pilotage table
+		// the service keeps the data of mapping tables only for the files rightly referenced in the pilotage table 
+		clearTest(c);
+		clearTest(e1);
+		clearTest(e2);
+		
 		pilotageTableTest();
 		coodinatorDataTest();
 		executor1DataTest();
@@ -77,6 +83,32 @@ public class SynchronizeDataByPilotageOperationTest extends InitializeQueryTest 
 		assertEquals(0,countMappingTable2(e2));
 		assertEquals(1,countMappingTableKo(e2));
 		
+		clearTest(c);
+		clearTest(e1);
+		clearTest(e2);
+		
+		// test case 2 : a list of of file (id_source) to delete is provided to the service.
+		// the service delete their data in mapping tables
+		pilotageTableTest();
+		coodinatorDataTest();
+		executor1DataTest();
+		executor2DataTest();
+				
+		sync.deleteUnusedDataRecordsAllNods(Arrays.asList("f01", "f11", "f12", "f23"));
+		assertEquals(0,countMappingTable1(c));
+		assertEquals(0,countMappingTable2(c));
+		
+		assertEquals(1,countMappingTable1(e1));
+		assertEquals(1,countMappingTable2(e1));
+
+		assertEquals(2,countMappingTable1(e2));
+		assertEquals(2,countMappingTable2(e2));
+		assertEquals(0,countMappingTableKo(e2));
+
+		clearTest(c);
+		clearTest(e1);
+		clearTest(e2);
+		
 	}
 
 	private int countMappingTable1(Connection connection) throws ArcException
@@ -101,10 +133,16 @@ public class SynchronizeDataByPilotageOperationTest extends InitializeQueryTest 
 				.getColumnValues("nom_table_metier"); 
 	}
 
+	
+	private void clearTest(Connection connection) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append("DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
+		u.executeRequest(connection, query);
+	}
+	
 	private void pilotageTableTest() throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
-		query.append("DROP SCHEMA IF EXISTS arc_bas1;");
 		query.append("CREATE SCHEMA arc_bas1;");
 
 		query.append("DROP TABLE IF EXISTS arc_bas1.pilotage_fichier;");
@@ -156,7 +194,6 @@ public class SynchronizeDataByPilotageOperationTest extends InitializeQueryTest 
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
-		query.append("DROP SCHEMA IF EXISTS arc_bas1;");
 		query.append("CREATE SCHEMA arc_bas1;");
 
 		query.append(
@@ -184,7 +221,6 @@ public class SynchronizeDataByPilotageOperationTest extends InitializeQueryTest 
 		// test data on executor 1
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
-		query.append("DROP SCHEMA IF EXISTS arc_bas1;");
 		query.append("CREATE SCHEMA arc_bas1;");
 
 		query.append(

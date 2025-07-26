@@ -31,7 +31,7 @@ public class ZipReader implements IArchiveStream {
 
 	@Override
 	public Entry getEntry() throws IOException {
-		ZipArchiveEntry currentEntry = zipInputStream.getNextZipEntry();
+		ZipArchiveEntry currentEntry = zipInputStream.getNextEntry();
 
 		if (currentEntry == null) {
 			return null;

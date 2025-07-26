@@ -3,15 +3,11 @@ package fr.insee.arc.web.gui.norme.service;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 @Service
 public class ServiceViewNorme extends InteractorNorme {
-
-	private static final Logger LOGGER = LogManager.getLogger(ServiceViewNorme.class);
 
 	/**
 	 * Action trigger by selecting a norm in the GUI. Update the GUI
