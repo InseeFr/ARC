@@ -1,3 +1,11 @@
+-- trigger that generates a new version number when inserting a new ruleset with no version provided
+drop trigger if exists own_insert_jdr on arc.ihm_jeuderegle;
+create trigger own_insert_jdr before insert on arc.ihm_jeuderegle for each row when ((new.version is null)) execute function arc.insert_jeuderegle();
+
+-- trigger that prevent ruleset to be modified if already in arc_prod sandbox
+-- removed for now as production sandbox are no longer only called "arc_prod"
+-- drop trigger if exists tg_update_jeuderegle on arc.ihm_jeuderegle;
+-- create trigger tg_update_jeuderegle before update on arc.ihm_jeuderegle for each row execute function arc.update_jeuderegle();
 
 CREATE OR REPLACE FUNCTION public.check_object_exists(table_identifier text) RETURNS boolean
 as

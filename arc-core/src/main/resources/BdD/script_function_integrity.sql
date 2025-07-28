@@ -104,3 +104,60 @@ END;
 $BODY$ 
 LANGUAGE plpgsql volatile;
 
+
+CREATE OR REPLACE FUNCTION arc.insert_jeuderegle()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+	DECLARE version_current text;
+	DECLARE version_new int;
+	DECLARE version_length integer;
+	DECLARE v text;
+    BEGIN
+	-- Découverte du numéro de version la plus haute pour un calendrier donné
+	version_current = (	SELECT substring(version from 2) 
+		FROM arc.ihm_jeuderegle 
+		WHERE version IS NOT NULL AND version ~ 'v[0123456789]*' AND id_norme=new.id_norme AND periodicite=new.periodicite AND validite_inf=new.validite_inf AND validite_sup=new.validite_sup
+		ORDER BY substring(version from 2)::int desc limit 1);
+	-- traitement du cas si table vide
+	if (version_current is null) 
+	then 
+		version_new=1;
+		version_length=3;
+	else 
+		version_new=version_current::integer + 1;
+		version_length=greatest(length(version_new::text),length(version_current));
+	end if;
+	-- reconstruction de la variable version au format v0000i
+	v='v'||lpad(version_new::text,version_length,'0');
+	-- affectation de la nouvelle valeur
+	NEW.version:=v;
+	RETURN NEW;
+    END;
+$function$
+;
+
+
+-- not used
+CREATE OR REPLACE FUNCTION arc.update_jeuderegle()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $BODY$
+    BEGIN
+	-- Un jeuDeRegle dans l'état arc.prod ne peut devenir que inactif ou rester lui même
+	IF OLD.etat='arc.prod' THEN
+		RAISE NOTICE 'Je tente de modifier un jeuderegle dans l''état arc.prod';
+		IF NEW.etat <> 'inactif' AND NEW.etat <>'arc.prod' THEN
+			RAISE EXCEPTION 'L''état d''un jeu de règle en production ne peut passer qu''à inactif'; 
+		END IF;
+	END IF;
+	-- Un jeuDeRegle dans l'état inactif ne peut devenir que rester lui même
+	IF OLD.etat='inactif' THEN
+		IF NEW.etat <> 'inactif' THEN
+			RAISE EXCEPTION 'Un jeu de règle dans l''état inactif doit le rester'; 
+		END IF;
+	END IF;
+	RETURN NEW;
+    END;
+$BODY$
+;
