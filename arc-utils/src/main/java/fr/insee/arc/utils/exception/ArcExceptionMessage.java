@@ -66,7 +66,8 @@ public enum ArcExceptionMessage {
 	CONTROLE_XSD_INFINITE_LOOP("L'élément %s appartient à une relation cyclique : %s"),
 	EXTRACT_XSD_TYPE_UNSOLVED("Le type XSD ne peut pas être determiné : plusieurs types possibles pour le même élémént"),
 	CONTROLE_TYPE_NOT_FOUND("Le type de contrôle %s n'existe pas"),
-	
+
+	MULTITHREADING_DISPATCH_FAILED("L'action à dispatcher sur les différents noeuds à échouée"),
 	MULTITHREADING_CLASS_NOT_USEABLE("Ce type de classe n'est pas pris en charge dans le multithreading"),
 	MULTITHREADING_CONNECTIONS_CLOSE_FAILED("Error in closing threads connections"),
 		
