@@ -218,7 +218,7 @@ host_allowed text, id_famille text, id_application text, is_secured text
 ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webservice_whitelist_pkey; alter table arc.ihm_webservice_whitelist ADD PRIMARY KEY (id_famille, id_application); EXCEPTION WHEN OTHERS then end; $$;
+do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webservice_whitelist_pkey; alter table arc.ihm_webservice_whitelist ADD PRIMARY KEY (id_famille, id_application, host_allowed); EXCEPTION WHEN OTHERS then end; $$;
 
 
 -- data retrieval webservice logs 
