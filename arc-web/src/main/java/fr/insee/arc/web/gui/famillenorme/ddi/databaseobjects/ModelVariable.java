@@ -1,5 +1,7 @@
 package fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Représente une variable dans une table de ARC.
  * 
@@ -15,8 +17,8 @@ public class ModelVariable {
 		this.nomTableMetier = nomTableMetier;
 		this.nomVariableMetier = nomVariableMetier;
 		this.typeVariableMetier = typeVariableMetier;
-		this.descriptionVariableMetier = descriptionVariableMetier;
-		this.typeConsolidation = typeConsolidation;
+		this.descriptionVariableMetier = StringUtils.trimToNull(descriptionVariableMetier);
+		this.typeConsolidation = StringUtils.trimToNull(typeConsolidation);
 	}
 
 	public ModelVariable() {

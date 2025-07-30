@@ -32,8 +32,8 @@ public class ServiceViewFamilleNormeTest extends ServiceViewFamilleNorme {
 		assertEquals("table", modeler.getModelVariables().get(0).getNomTableMetier());
 		assertEquals("text2", modeler.getModelVariables().get(0).getNomVariableMetier());
 		assertEquals("text", modeler.getModelVariables().get(0).getTypeVariableMetier());
-		assertEquals("", modeler.getModelVariables().get(0).getDescriptionVariableMetier());
-		assertEquals(null, modeler.getModelVariables().get(0).getTypeConsolidation()); // on ne prend pas en compte TypeConsolidation qui reste donc null
+		assertEquals(null, modeler.getModelVariables().get(0).getDescriptionVariableMetier());
+		assertEquals(null, modeler.getModelVariables().get(0).getTypeConsolidation());
 
 	}
 	
