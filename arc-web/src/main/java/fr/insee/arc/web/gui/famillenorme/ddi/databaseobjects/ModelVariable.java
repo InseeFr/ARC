@@ -9,13 +9,14 @@ package fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects;
 public class ModelVariable {
 
 	public ModelVariable(String idFamille, String nomTableMetier, String nomVariableMetier, String typeVariableMetier,
-			String descriptionVariableMetier) {
+			String descriptionVariableMetier, String typeConsolidation) {
 		super();
 		this.idFamille = idFamille;
 		this.nomTableMetier = nomTableMetier;
 		this.nomVariableMetier = nomVariableMetier;
 		this.typeVariableMetier = typeVariableMetier;
 		this.descriptionVariableMetier = descriptionVariableMetier;
+		this.typeConsolidation = typeConsolidation;
 	}
 
 	public ModelVariable() {
@@ -41,6 +42,9 @@ public class ModelVariable {
      * Description et particularités de la variable.
      */
     private String descriptionVariableMetier;
+    /**
+     * Type de consolidation
+     */
     private String typeConsolidation;
 
     public void setIdFamille(String idFamille) {

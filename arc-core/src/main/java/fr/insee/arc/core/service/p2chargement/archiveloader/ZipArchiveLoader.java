@@ -33,7 +33,6 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 		return this.filesInputStreamLoad;
 	}
 
-    @SuppressWarnings("resource")
     @Override
     public FilesInputStreamLoad readFileWithoutExtracting() throws ArcException {
 	StaticLoggerDispatcher.info(LOGGER, "begin readFileWithoutExtracting() ");

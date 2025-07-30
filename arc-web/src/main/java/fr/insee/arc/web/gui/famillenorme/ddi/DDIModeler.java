@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelTable;
 import fr.insee.arc.web.gui.famillenorme.ddi.databaseobjects.ModelVariable;
@@ -90,6 +91,10 @@ public class DDIModeler {
     @Override
     public String toString()
     {
-    	return this.modelTables.get(0).toString();
+    	return 
+    			"TABLES" + "\n" +
+    			this.modelTables.stream().map(t -> t.toString()).collect(Collectors.joining ("\n")) + "\n" + 
+    			"VARIABLES" + "\n" +
+    			this.modelVariables.stream().map(t -> t.toString()).collect(Collectors.joining ("\n"));
     }
 }

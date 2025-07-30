@@ -188,7 +188,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 						String idFamille = recordOfVariables[0];
 						String nomTableMetier = keepTableName(recordOfVariables[1], idFamille);
 						modeler.getModelVariables().add(new ModelVariable(idFamille, nomTableMetier,
-								recordOfVariables[2], recordOfVariables[3], recordOfVariables[4]));
+								recordOfVariables[2], recordOfVariables[3], recordOfVariables[4], recordOfVariables[5]));				
 					}
 				}
 			}
