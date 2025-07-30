@@ -56,6 +56,7 @@ for="inputGroupFileLoad"
 aria-describedby="Choose file to upload"
 ><spring:message code="general.chooseFile"/></label>
 </div>
+<div>
 <button class="btn btn-primary btn-sm"
 id="viewFamilleNorme.importFamilleNorme"
 type="submit"
@@ -76,6 +77,7 @@ scope="viewFamilleNorme;"
 <span class="fa fa-upload">&nbsp;</span>
 <spring:message code="gui.button.importDDI" />
 </button>
+</div>
 </c:param>
 </c:import>
 

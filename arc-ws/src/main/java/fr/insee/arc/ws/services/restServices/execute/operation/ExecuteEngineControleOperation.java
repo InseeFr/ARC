@@ -28,7 +28,6 @@ public class ExecuteEngineControleOperation {
 	}
 
 	private Sandbox sandbox;
-	@SuppressWarnings("unused")
 	private ExecuteParameterModel bodyPojo;
 	private PhaseInterface phaseInterface;
 	

@@ -4,24 +4,16 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
-import fr.insee.arc.utils.utils.LoggerHelper;
 
 public class ServiceScalability {
-
-	private static final Logger LOGGER = LogManager.getLogger(ServiceScalability.class);
-
 	
 	  private ServiceScalability() {
 		    throw new IllegalStateException("Utility class to dispatch a treatment over connections");
 		  }
-
 	
 	/**
 	 * Execute actions on coordinator and on all the executors
