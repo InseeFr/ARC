@@ -34,6 +34,8 @@ public class ZipArchiveLoader extends AbstractArchiveFileLoader {
 	}
 
     @Override
+    // finally block with close is in upper nest
+    @SuppressWarnings("java:S2095")
     public FilesInputStreamLoad readFileWithoutExtracting() throws ArcException {
 	StaticLoggerDispatcher.info(LOGGER, "begin readFileWithoutExtracting() ");
 	try {
