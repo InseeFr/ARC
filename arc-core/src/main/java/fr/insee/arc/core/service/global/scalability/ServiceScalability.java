@@ -48,13 +48,20 @@ public class ServiceScalability {
 		}
 		
 		// join threads
+		boolean errorInThread = false;
 		for (Thread t : threadPool)
 		{
 			try {
 				t.join();
 			} catch (InterruptedException e) {
-				throw new ArcException(ArcExceptionMessage.MULTITHREADING_DISPATCH_FAILED);
+				t.interrupt();
+				errorInThread = true;
 			}
+		}
+		
+		if (errorInThread)
+		{
+			throw new ArcException(ArcExceptionMessage.MULTITHREADING_DISPATCH_FAILED);
 		}
 		
 		return numberOfExecutorNods;
