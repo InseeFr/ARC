@@ -41,10 +41,14 @@ public class KubernetesApi {
 					return new X509Certificate[0];
 				}
 
+				// internal use
+				@SuppressWarnings("java:S4830")
 				public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
 					// selfsigned cetificate
 				}
 
+				// internal use
+				@SuppressWarnings("java:S4830")
 				public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
 					// selfsigned cetificate
 				}
