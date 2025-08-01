@@ -57,11 +57,11 @@ COPY . /usr/src/app/
 RUN chmod +x usr/src/app/docker/script.sh && usr/src/app/docker/script.sh
 
 # get jre light image
-#FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-ubi9-minimal
 
 ENV ARC_LOGLEVEL=$LOG_LEVEL
 
-#COPY --from=build usr/src/app/arc-batch/target/ArcMain.jar usr/src/app/arc-batch/target/ArcMain.jar
+COPY --from=build usr/src/app/arc-batch/target/ArcMain.jar usr/src/app/arc-batch/target/ArcMain.jar
 
 ## execute batch
 ## ENTRYPOINT ["java","-jar","usr/src/app/arc-batch/target/ArcMain.jar"]
