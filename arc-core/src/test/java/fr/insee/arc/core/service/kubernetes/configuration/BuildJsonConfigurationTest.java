@@ -18,7 +18,7 @@ public class BuildJsonConfigurationTest {
 		properties.setDatabasePassword("");
 		properties.setKubernetesExecutorDatabase("arc_db");
 		properties.setKubernetesExecutorPort("5432");
-		properties.setKubernetesExecutorImage("bitnami/postgresql:17.5.0");
+		properties.setKubernetesExecutorImage("postgres:17.5.0");
 		properties.setKubernetesExecutorCpu("8");
 		properties.setKubernetesExecutorRam("8Gi");
 		properties.setKubernetesExecutorEphemeral("50Gi");
@@ -58,7 +58,8 @@ public class BuildJsonConfigurationTest {
         "initContainers": [
           {
             "name": "tbstmp-init",
-            "image": "bitnami/postgresql:17.5.0",
+            "image": "postgres:17.5.0",
+            "imagePullPolicy": "IfNotPresent",
             "command": [
               "/bin/sh",
               "-c"
@@ -102,28 +103,16 @@ public class BuildJsonConfigurationTest {
           {
             "env": [
               {
-                "name": "BITNAMI_DEBUG",
-                "value": "false"
-              },
-              {
                 "name": "POSTGRESQL_PORT_NUMBER",
                 "value": "5432"
               },
               {
-                "name": "POSTGRESQL_VOLUME_DIR",
-                "value": "/bitnami/postgresql"
-              },
-              {
                 "name": "PGDATA",
-                "value": "/bitnami/postgresql/data"
+                "value": "/postgresql/data"
               },
               {
                 "name": "POSTGRES_USER",
                 "value": "arc"
-              },
-              {
-                "name": "POSTGRES_POSTGRES_PASSWORD",
-                "value": ""
               },
               {
                 "name": "POSTGRES_PASSWORD",
@@ -134,43 +123,11 @@ public class BuildJsonConfigurationTest {
                 "value": "arc_db"
               },
               {
-                "name": "POSTGRESQL_ENABLE_LDAP",
-                "value": "no"
-              },
-              {
-                "name": "POSTGRESQL_ENABLE_TLS",
-                "value": "no"
-              },
-              {
-                "name": "POSTGRESQL_LOG_HOSTNAME",
-                "value": "false"
-              },
-              {
-                "name": "POSTGRESQL_LOG_CONNECTIONS",
-                "value": "false"
-              },
-              {
-                "name": "POSTGRESQL_LOG_DISCONNECTIONS",
-                "value": "false"
-              },
-              {
-                "name": "POSTGRESQL_PGAUDIT_LOG_CATALOG",
-                "value": "off"
-              },
-              {
-                "name": "POSTGRESQL_CLIENT_MIN_MESSAGES",
-                "value": "error"
-              },
-              {
-                "name": "POSTGRESQL_SHARED_PRELOAD_LIBRARIES",
-                "value": "pgaudit"
-              },
-              {
                 "name": "POSTGRES_INITDB_ARGS",
                 "value": "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
               }
             ],
-            "image": "bitnami/postgresql:17.5.0",
+            "image": "postgres:17.5.0",
             "imagePullPolicy": "IfNotPresent",
             "livenessProbe": {
               "exec": {
@@ -200,7 +157,7 @@ public class BuildJsonConfigurationTest {
                   "/bin/sh",
                   "-c",
                   "-e",
-                  "exec pg_isready -U \\"arc\\" -d \\"dbname=arc_db\\" -h 127.0.0.1 -p 5432\\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\\n"
+                  "exec pg_isready -U \\"arc\\" -d \\"dbname=arc_db\\" -h 127.0.0.1 -p 5432"
                 ]
               },
               "failureThreshold": 6,
@@ -245,7 +202,7 @@ public class BuildJsonConfigurationTest {
                 "name": "custom-init-scripts"
               },
               {
-                "mountPath": "/bitnami/postgresql",
+                "mountPath": "/postgresql",
                 "name": "tmp-volume"
               },
               {
@@ -296,7 +253,7 @@ public class BuildJsonConfigurationTest {
 }
 """
 ;	
-
+		
 		assertEquals(expectedTemplate, BuildJsonConfiguration.replicaStatefulConfiguration(1));
 		
 expectedTemplate =
