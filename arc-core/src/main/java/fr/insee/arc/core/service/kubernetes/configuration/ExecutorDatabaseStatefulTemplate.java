@@ -40,6 +40,7 @@ public class ExecutorDatabaseStatefulTemplate {
           {
             "name": "tbstmp-init",
             "image": "{image}",
+            "imagePullPolicy": "IfNotPresent",
             "command": [
               "/bin/sh",
               "-c"
@@ -83,28 +84,16 @@ public class ExecutorDatabaseStatefulTemplate {
           {
             "env": [
               {
-                "name": "BITNAMI_DEBUG",
-                "value": "false"
-              },
-              {
                 "name": "POSTGRESQL_PORT_NUMBER",
                 "value": "{port}"
               },
               {
-                "name": "POSTGRESQL_VOLUME_DIR",
-                "value": "/bitnami/postgresql"
-              },
-              {
                 "name": "PGDATA",
-                "value": "/bitnami/postgresql/data"
+                "value": "/postgresql/data"
               },
               {
                 "name": "POSTGRES_USER",
                 "value": "{user}"
-              },
-              {
-                "name": "POSTGRES_POSTGRES_PASSWORD",
-                "value": "{password}"
               },
               {
                 "name": "POSTGRES_PASSWORD",
@@ -113,38 +102,6 @@ public class ExecutorDatabaseStatefulTemplate {
               {
                 "name": "POSTGRES_DB",
                 "value": "{database}"
-              },
-              {
-                "name": "POSTGRESQL_ENABLE_LDAP",
-                "value": "no"
-              },
-              {
-                "name": "POSTGRESQL_ENABLE_TLS",
-                "value": "no"
-              },
-              {
-                "name": "POSTGRESQL_LOG_HOSTNAME",
-                "value": "false"
-              },
-              {
-                "name": "POSTGRESQL_LOG_CONNECTIONS",
-                "value": "false"
-              },
-              {
-                "name": "POSTGRESQL_LOG_DISCONNECTIONS",
-                "value": "false"
-              },
-              {
-                "name": "POSTGRESQL_PGAUDIT_LOG_CATALOG",
-                "value": "off"
-              },
-              {
-                "name": "POSTGRESQL_CLIENT_MIN_MESSAGES",
-                "value": "error"
-              },
-              {
-                "name": "POSTGRESQL_SHARED_PRELOAD_LIBRARIES",
-                "value": "pgaudit"
               },
               {
                 "name": "POSTGRES_INITDB_ARGS",
@@ -181,7 +138,7 @@ public class ExecutorDatabaseStatefulTemplate {
                   "/bin/sh",
                   "-c",
                   "-e",
-                  "exec pg_isready -U \\"{user}\\" -d \\"dbname={database}\\" -h 127.0.0.1 -p {port}\\n[ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]\\n"
+                  "exec pg_isready -U \\"{user}\\" -d \\"dbname={database}\\" -h 127.0.0.1 -p {port}"
                 ]
               },
               "failureThreshold": 6,
@@ -226,7 +183,7 @@ public class ExecutorDatabaseStatefulTemplate {
                 "name": "custom-init-scripts"
               },
               {
-                "mountPath": "/bitnami/postgresql",
+                "mountPath": "/postgresql",
                 "name": "tmp-volume"
               },
               {
