@@ -84,7 +84,7 @@ public class ExecutorDatabaseStatefulTemplate {
           {
             "env": [
               {
-                "name": "POSTGRESQL_PORT_NUMBER",
+                "name": "PGPORT",
                 "value": "{port}"
               },
               {
@@ -96,7 +96,15 @@ public class ExecutorDatabaseStatefulTemplate {
                 "value": "{user}"
               },
               {
+                "name": "PGUSER ",
+                "value": "{user}"
+              },
+              {
                 "name": "POSTGRES_PASSWORD",
+                "value": "{password}"
+              },
+              {
+                "name": "PGPASSWORD",
                 "value": "{password}"
               },
               {
