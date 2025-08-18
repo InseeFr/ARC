@@ -103,7 +103,7 @@ public class BuildJsonConfigurationTest {
           {
             "env": [
               {
-                "name": "POSTGRESQL_PORT_NUMBER",
+                "name": "PGPORT",
                 "value": "5432"
               },
               {
@@ -115,7 +115,15 @@ public class BuildJsonConfigurationTest {
                 "value": "arc"
               },
               {
+                "name": "PGUSER",
+                "value": "arc"
+              },
+              {
                 "name": "POSTGRES_PASSWORD",
+                "value": ""
+              },
+              {
+                "name": "PGPASSWORD",
                 "value": ""
               },
               {

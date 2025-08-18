@@ -96,7 +96,7 @@ public class ExecutorDatabaseStatefulTemplate {
                 "value": "{user}"
               },
               {
-                "name": "PGUSER ",
+                "name": "PGUSER",
                 "value": "{user}"
               },
               {
