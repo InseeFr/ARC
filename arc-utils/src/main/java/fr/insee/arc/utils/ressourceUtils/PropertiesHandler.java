@@ -1,9 +1,12 @@
 package fr.insee.arc.utils.ressourceUtils;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.bouncycastle.util.Arrays;
 import org.springframework.stereotype.Service;
@@ -637,6 +640,28 @@ public class PropertiesHandler {
 		}
 		return this.connectionProperties;
 
+	}
+	
+	/**
+	 * Retrieve connection attributes for a given connection
+	 * @param c
+	 * @return
+	 * @throws ArcException
+	 */
+	public ConnectionAttribute retrieveConnectionAttribute(Connection c) throws ArcException
+	{
+		List<ConnectionAttribute> infos = this.connectionProperties();
+		try {
+			String databaseUrl= c.getMetaData().getURL();
+			String userName = c.getMetaData().getUserName();
+			return infos.stream()
+					.filter(t-> t.getDatabaseUrl().equals(databaseUrl) 
+							&& t.getDatabaseUsername().equals(userName))
+					.findFirst().get();
+
+		} catch (SQLException | NoSuchElementException e) {
+			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
+		}	
 	}
 
 	public void setConnectionProperties(List<ConnectionAttribute> connectionProperties) {

@@ -253,11 +253,11 @@ public class SynchronizeDataByPilotageOperation {
 		}
 		
 		// retrieve id_source from pilotage table if not provided
-		ListIdSourceInPilotage listIdSourceInPilotage = new ListIdSourceInPilotage();
+		ListIdSourceInPilotage listIdSourceInPilotage = new ListIdSourceInPilotage(coordinatorConnexion, envExecution);
 		if (optionalProvidedIdSourceToDelete == null) {
 			listIdSourceInPilotage
-					.addSource(coordinatorConnexion, envExecution, TraitementPhase.MAPPING, TraitementEtat.OK)
-					.addSource(coordinatorConnexion, envExecution, TraitementPhase.MAPPING, TraitementEtat.KO);
+					.addSource(TraitementPhase.MAPPING, TraitementEtat.OK)
+					.addSource(TraitementPhase.MAPPING, TraitementEtat.KO);
 		}
 
 		ThrowingConsumer<Connection> function = connection -> deleteUnusedDataRecordsAllTables(
@@ -265,6 +265,8 @@ public class SynchronizeDataByPilotageOperation {
 
 		ServiceScalability.dispatchOnNods(coordinatorConnexion, function, function);
 
+		listIdSourceInPilotage.dropSources();
+		
 	}
 
 	/**
@@ -346,7 +348,10 @@ public class SynchronizeDataByPilotageOperation {
 
 		// materialize the table id_source table
 		if (providedIdSourceToDelete == null) {
-			SynchronizeDataByPilotageDao.execQueryMaterializeOnExecutorIdSource(executorConnection, listIdSourceInPilotage.getIdSourceInPilotage(phase, etat));
+			SynchronizeDataByPilotageDao.execQueryMaterializeOnExecutorIdSource(
+					listIdSourceInPilotage.getCoordinatorConnexion()
+					, executorConnection
+					, listIdSourceInPilotage.getIdSourceInPilotage(phase, etat));
 		}
 		else
 		{

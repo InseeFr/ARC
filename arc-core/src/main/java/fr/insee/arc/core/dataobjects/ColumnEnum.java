@@ -36,6 +36,8 @@ public enum ColumnEnum {
 	, EXPR_NOM("expr_nom", TypeEnum.TEXT, "") // ihm_expression
 	, EXPR_REGLE_COL("expr_regle_col", TypeEnum.TEXT, "") // ihm_mapping_regle
 	, EXPR_VALEUR("expr_valeur", TypeEnum.TEXT, "") // ihm_expression
+	, EXPORT_PARQUET_OPTION("export_parquet_option", TypeEnum.TEXT, "")
+	, EXPORT_COORDINATOR_OPTION("export_coordinator_option", TypeEnum.TEXT, "")
 	, FORMAT("format", TypeEnum.TEXT, "") // ihm_chargement_regle
 	, HOST_ALLOWED("host_allowed", TypeEnum.TEXT, "") // ihm_webservice_whitelist,security_webservice_log
 	, ID("id", TypeEnum.TEXT, "") // ext_webservice_type,ext_mod_periodicite,ext_webservice_queryview,ext_export_format,ext_etat,ext_type_normage,ext_type_fichier_chargement,ext_type_controle,ext_etat_jeuderegle

@@ -125,25 +125,51 @@ public class SynchronizeDataByPilotageDao {
 		execQueryMaterializeOnExecutorIdSource(executorConnection, gb);
 		}
 	
-	
-
 	/**
 	 * materialize on executor nod a table containing the GenericBean of idSource provided
 	 * @param executorConnection
 	 * @param idSourceToDelete
 	 * @throws ArcException
 	 */
-	public static void execQueryMaterializeOnExecutorIdSource(Connection executorConnection,
+	private static void execQueryMaterializeOnExecutorIdSource(Connection executorConnection,
 			GenericBean idSourceInPilotageToKeep) throws ArcException {
 
 		CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, ViewEnum.T1.getFullName(), idSourceInPilotageToKeep);
 		
 		// analyze table
+		analyzeT1(executorConnection);
+	}
+
+	/**
+	 * materialize on executor nod the input table of coordinator nod
+	 * @param executorConnection
+	 * @param idSourceToDelete
+	 * @throws ArcException
+	 */
+	public static void execQueryMaterializeOnExecutorIdSource(Connection coordinatorConnection, Connection executorConnection,
+			String tableOfIdSourceToCopy) throws ArcException {
+
+		
+		CopyObjectsToDatabase.execCopyFromTable(coordinatorConnection, executorConnection, tableOfIdSourceToCopy, ViewEnum.T1.getFullName());
+
+		analyzeT1(executorConnection);
+		
+	}
+	
+	/**
+	 * Analyze the
+	 * @param executorConnection
+	 * @throws ArcException
+	 */
+	private static void analyzeT1(Connection executorConnection) throws ArcException
+	{
+		
+		// analyze table
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(FormatSQL.analyzeSecured(ViewEnum.T1.getFullName()));
 		UtilitaireDao.get(0).executeRequest(executorConnection, query);
-
 	}
+	
 	
 	/**
 	 * Delete the records from a target data table according to a given list of id_source

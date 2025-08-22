@@ -133,17 +133,6 @@ public class GenericPreparedStatementBuilder {
 	}
 
 	/**
-	 * Append a SQL bind variable to query
-	 * 
-	 * @param p
-	 * @return
-	 */
-	public GenericPreparedStatementBuilder appendQuoteText(String s) {
-		this.append(quoteText(s));
-		return this;
-	}
-
-	/**
 	 * Register and return the SQL bind variable placeholder
 	 * 
 	 * @param p
@@ -345,7 +334,7 @@ public class GenericPreparedStatementBuilder {
 	}
 	
 	/**
-	 * Generate a query that create the strucutre of table according to GenericBean headers and types
+	 * Generate a query that create the structure of table according to GenericBean headers and types
 	 * @param tableName
 	 * @param gb
 	 * @return
@@ -392,7 +381,7 @@ public class GenericPreparedStatementBuilder {
 			query.append(SQL.INSERT_INTO).append(tableName).append(SQL.VALUES);
 			boolean firstLine = true;
 			
-			// if chunkstop too high, limit it to the size of generic bean content
+			// if chunk stop too high, limit it to the size of generic bean content
 			chunkStop = (chunkStop > gb.getContent().size()) ? gb.getContent().size() : chunkStop;
 
 			List<String> types = gb.getTypes();

@@ -89,13 +89,13 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 			requeteTableMetier.append("SELECT a.* ");
 			requeteTableMetier.append("FROM arc.ihm_mod_table_metier a ");
 			requeteTableMetier.append("WHERE " + ColumnEnum.ID_FAMILLE.getColumnName() + "=");
-			requeteTableMetier.appendQuoteText(selectedFamille);
+			requeteTableMetier.appendText(selectedFamille);
 
 			ArcPreparedStatementBuilder requeteVariableMetier = new ArcPreparedStatementBuilder();
 			requeteVariableMetier.append("SELECT a.* ");
 			requeteVariableMetier.append("FROM arc.ihm_mod_variable_metier a ");
 			requeteVariableMetier.append("WHERE " + ColumnEnum.ID_FAMILLE.getColumnName() + "=");
-			requeteVariableMetier.appendQuoteText(selectedFamille);
+			requeteVariableMetier.appendText(selectedFamille);
 
 			List<ArcPreparedStatementBuilder> queries = new ArrayList<>();
 			queries.add(requeteTableMetier);

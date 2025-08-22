@@ -269,10 +269,9 @@ public class ParquetDao {
 		query.append("INSTALL postgres;\n");
 				
 		for (int connectionIndex = 0; connectionIndex < numberOfPods; connectionIndex++) {
-			ConnectionAttribute c = postgresConnections[connectionIndex];
 
-			String connexionChain = "dbname=" + c.getDatabase() + " user=" + c.getDatabaseUsername() + " port="
-					+ c.getPort() + " password=" + c.getDatabasePassword() + " host=" + c.getHost();
+			ConnectionAttribute c = postgresConnections[connectionIndex];
+			String connexionChain = c.getConnectionChainInLibpqFormat();
 
 			query.append("ATTACH " + query.quoteText(connexionChain) + " AS " + attachmentName(connectionIndex)
 					+ " (TYPE postgres, READ_ONLY);\n");
