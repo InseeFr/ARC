@@ -52,6 +52,26 @@ public class ExportDao extends VObjectHelperDao {
 		// initialize vobject
 		vObjectService.initialize(viewExport, query, nameOfViewExport, defaultInputFields);
 	}
+	
+	/**
+	 * Query to get export rules view
+	 * 
+	 * @param viewExportOption
+	 */
+	public void initializeExportOption(VObject viewExportOption) {
+
+		ViewEnum dataModelExportOption = ViewEnum.EXPORT_OPTION;
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+        query.append(SQL.SELECT);
+		query.append(query.sqlListeOfColumnsFromModel(dataModelExportOption));
+		query.append(SQL.FROM);
+		query.append(dataObjectService.getView(dataModelExportOption));
+		// default value
+		Map<String, String> defaultInputFields = new HashMap<>();
+
+		vObjectService.initialize(viewExportOption, query, dataObjectService.getView(dataModelExportOption), defaultInputFields);
+	}
 
 	/**
 	 * dao call to retrieve exports to make

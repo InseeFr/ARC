@@ -171,6 +171,33 @@ public class PilotageOperations {
 		return requete;
 	}
 
+
+	/**
+	 * retrieve the list of documents (i.e. files referenced in the field "id_source") for the given phase and state
+	 * @param tablePilotage
+	 * @param phase
+	 * @param etat
+	 * @return
+	 */
+	public static ArcPreparedStatementBuilder queryCreateIdSourceFromPilotage(String envExecution, TraitementPhase phase, TraitementEtat etat)
+	{
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
+		
+		String tableOfIdSource = tableOfIdSourceForPhaseAndEtat(envExecution, phase, etat);
+		
+		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, tableOfIdSource, SQL.END_QUERY);
+		query.build(SQL.CREATE, SQL.UNLOGGED, SQL.TABLE, tableOfIdSource, SQL.AS);
+		query.build(querySelectIdSourceFromPilotage(envExecution, phase, etat));
+		return query;
+	}
+	
+	
+	
+	public static String tableOfIdSourceForPhaseAndEtat(String envExecution, TraitementPhase phase, TraitementEtat etat)
+	{
+		return ViewEnum.ID_SOURCE.getFullNameWithSuffix(envExecution, phase.toString(), etat.toString());
+	}
+	
 	
 	/**
 	 * retrieve the list of documents (i.e. files referenced in the field "id_source") for the given phase and state
@@ -185,7 +212,8 @@ public class PilotageOperations {
 		
 		query.build(SQL.SELECT, ColumnEnum.ID_SOURCE.getColumnName(), SQL.FROM, ViewEnum.PILOTAGE_FICHIER.getFullName(envExecution));
 		query.build(SQL.WHERE, ColumnEnum.PHASE_TRAITEMENT, "=" , query.quoteText(phase.toString()));
-		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.getSqlArrayExpression()), SQL.CAST_OPERATOR, "text[]");		
+		query.build(SQL.AND, ColumnEnum.ETAT_TRAITEMENT, "=", query.quoteText(etat.getSqlArrayExpression()), SQL.CAST_OPERATOR, "text[]");
+		query.build(SQL.END_QUERY);
 		return query;
 	}
 

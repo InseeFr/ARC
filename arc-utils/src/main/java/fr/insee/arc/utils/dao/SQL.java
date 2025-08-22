@@ -25,6 +25,8 @@ public enum SQL {
 
 	CREATE("CREATE"), DROP("DROP"), TRUNCATE("TRUNCATE"),
 	
+	EXTENSION("EXTENSION"),
+	
 	TEMPORARY("TEMPORARY"), TABLE("TABLE"), IF_NOT_EXISTS("IF NOT EXISTS"), IF_EXISTS("IF EXISTS"), CASCADE("CASCADE"),
 	
 	LIKE("LIKE"),
@@ -48,6 +50,10 @@ public enum SQL {
 	ANALYZE("ANALYZE"),
 	
 	SPACE(" "), NEW_LINE("\n"),
+	
+	DBLINK("dblink"),
+	
+	UNLOGGED("UNLOGGED"),
 	
 	// symbol
 	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false), DOT(".",false)

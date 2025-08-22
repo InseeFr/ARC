@@ -370,7 +370,7 @@
 				<c:otherwise>${view.message}</c:otherwise>
 			</c:choose>
 		</div>
-		<!--            Les boutons pour faire défiler les pages de résultat -->
+		<!--            Les boutons pour faire defiler les pages de resultat -->
 
 		<div class="row mt-0-1 ${view.sessionName}_collapse collapse show">
 			<!--             Les boutons d'action -->

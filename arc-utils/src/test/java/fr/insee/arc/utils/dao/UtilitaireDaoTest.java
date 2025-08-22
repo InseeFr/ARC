@@ -52,6 +52,10 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		int testQuery=u.getInt(z, new GenericPreparedStatementBuilder("select 1"));
 		
 		assertEquals(1, testQuery);
+		
+		// test retrieveConnectionAttribute
+		assertEquals("NA", testProperties.retrieveConnectionAttribute(z).getDatabasePassword());
+		
 	}
 
 	@Test(expected = ArcException.class)

@@ -1,19 +1,3 @@
--- create export rules table
-CREATE TABLE IF NOT EXISTS {{envExecution}}.export
-(
-file_name text,
-table_to_export text,
-nomenclature_export text,
-filter_table text,
-columns_array_header text,
-columns_array_value text,
-etat text,
-nulls text,
-headers text,
-order_table text,
-zip text,
-PRIMARY KEY (file_name)
-);
 
 do $$ begin alter table {{envExecution}}.export add CONSTRAINT export_zip_fkey FOREIGN KEY (zip) REFERENCES arc.ext_export_format(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
@@ -24,3 +8,9 @@ select public.check_function('{{envExecution}}.export', 'columns_array_header', 
 select public.check_function('{{envExecution}}.export', 'columns_array_value', 'public.check_identifier');
 select public.check_function('{{envExecution}}.export', 'filter_table', 'public.check_sql');
 select public.check_function('{{envExecution}}.export', 'order_table', 'public.check_sql');
+
+select public.check_function('{{envExecution}}.export_option', 'nom_table_metier', 'public.check_identifier');
+
+do $$ begin alter table {{envExecution}}.export_option add CONSTRAINT export_parquet_option_fkey FOREIGN KEY (export_parquet_option) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+do $$ begin alter table {{envExecution}}.export_option add CONSTRAINT export_coordinator_option_fkey FOREIGN KEY (export_coordinator_option) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+

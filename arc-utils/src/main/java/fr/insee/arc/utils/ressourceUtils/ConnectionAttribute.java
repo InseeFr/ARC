@@ -40,6 +40,11 @@ public class ConnectionAttribute {
 		this.database = ManipString.substringAfterLast(this.databaseUrl, SERVICE_SEPARATOR);
 	}
 	
+	public String getConnectionChainInLibpqFormat()
+	{
+		return "dbname=" + this.getDatabase() + " user=" + this.getDatabaseUsername() + " port="
+				+ this.getPort() + " password=" + this.getDatabasePassword() + " host=" + this.getHost();
+	}
 	
 	public void updateDatabaseUrl() {
 		this.databaseUrl = this.prefix + HOST_SEPARATOR + this.host + PORT_SEPARATOR + this.port + SERVICE_SEPARATOR + this.database;

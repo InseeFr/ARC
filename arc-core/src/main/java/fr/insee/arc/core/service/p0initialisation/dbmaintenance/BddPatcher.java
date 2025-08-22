@@ -204,10 +204,10 @@ public class BddPatcher {
 	 * @param envExecutions
 	 * @throws ArcException
 	 */
-	public static void bddScriptEnvironmentExportRules(Connection connexion, String userNameWithRestrictedRights,
+	public static void bddScriptEnvironmentConstraint(Connection connexion, String userNameWithRestrictedRights,
 			String[] envExecutions) throws ArcException {
 		for (String envExecution : envExecutions) {
-			executeBddScript(connexion, "BdD/script_sandbox_export.sql", userNameWithRestrictedRights, null, envExecution);
+			executeBddScript(connexion, "BdD/script_sandbox_contraint.sql", userNameWithRestrictedRights, null, envExecution);
 		}
 	}
 	
@@ -279,7 +279,7 @@ public class BddPatcher {
 				bddScriptGlobal(connexion, userNameWithRestrictedRights);
 			} else {
 				bddScriptEnvironment(connexion, userNameWithRestrictedRights, envExecutions);
-				bddScriptEnvironmentExportRules(connexion, userNameWithRestrictedRights, envExecutions);
+				bddScriptEnvironmentConstraint(connexion, userNameWithRestrictedRights, envExecutions);
 			}
 
 		} catch (ArcException e) {

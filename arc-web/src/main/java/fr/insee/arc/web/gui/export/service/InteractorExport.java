@@ -42,9 +42,11 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
 		loggerDispatcher.debug("putAllVObjects()", LOGGER);
 				
 		views.setViewExport(this.vObjectService.preInitialize(arcModel.getViewExport()));
+		views.setViewExportOption(this.vObjectService.preInitialize(arcModel.getViewExportOption()));
 		views.setViewFileExport(this.vObjectService.preInitialize(arcModel.getViewFileExport()));
 		
 		putVObject(views.getViewExport(), t -> initializeExport(t));
+		putVObject(views.getViewExportOption(), t -> initializeExportOption(t));
 		putVObject(views.getViewFileExport(), t -> initializeFileExport());
 	}
 
@@ -53,7 +55,10 @@ public class InteractorExport extends ArcWebGenericService<ModelExport,ExportDao
 		dao.initializeViewExport(viewExport);
     }
 
- 
+    public void initializeExportOption(VObject viewExportOption) {
+    	LoggerHelper.debug(LOGGER, "/* initializeExport */");
+		dao.initializeExportOption(viewExportOption);
+    }
 
 	public String initExportDir()
 	{

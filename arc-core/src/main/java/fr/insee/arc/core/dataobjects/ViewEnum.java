@@ -2,8 +2,11 @@ package fr.insee.arc.core.dataobjects;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import fr.insee.arc.utils.dao.SQL;
+import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.dataobjects.PgColumnEnum;
 import fr.insee.arc.utils.dataobjects.PgViewEnum;
 
@@ -85,7 +88,9 @@ public enum ViewEnum {
 			ColumnEnum.HEADERS, ColumnEnum.NULLS, ColumnEnum.FILTER_TABLE, ColumnEnum.ORDER_TABLE,
 			ColumnEnum.NOMENCLATURE_EXPORT, ColumnEnum.COLUMNS_ARRAY_HEADER, ColumnEnum.COLUMNS_ARRAY_VALUE,
 			ColumnEnum.ETAT) //
-
+	, EXPORT_OPTION("export_option",  SchemaEnum.SANDBOX, ColumnEnum.NOM_TABLE_METIER
+			, ColumnEnum.EXPORT_PARQUET_OPTION, ColumnEnum.EXPORT_COORDINATOR_OPTION) //
+	
 	// tables représentant le contenu des vobject (utilisées pour les tests)
 	, VIEW_PILOTAGE_FICHIER("pilotage_fichier", SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE) //
 	, VIEW_RAPPORT_FICHIER(VIEW_PILOTAGE_FICHIER.getTableName(), SchemaEnum.SANDBOX, ColumnEnum.DATE_ENTREE,
@@ -235,8 +240,18 @@ public enum ViewEnum {
 	 * @param tablename
 	 * @return
 	 */
-	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename) {
+	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename, String...suffix) {
 		return (schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename).toLowerCase();
+	}
+	
+	
+	
+	/**
+	 * return tablename with schema (normalize lower case)
+	 * @return
+	 */
+	public String getFullNameWithSuffix(String schema, String...suffix) {
+		return normalizeTableName(getFullName(schema) + (suffix.length==0?"":Delimiters.SQL_TOKEN_DELIMITER)+ Stream.of(suffix).collect(Collectors.joining(Delimiters.SQL_TOKEN_DELIMITER))); 
 	}
 
 	

@@ -58,12 +58,10 @@ public class SynchronizeRulesAndMetadataDao {
 			ArcPreparedStatementBuilder condition = new ArcPreparedStatementBuilder();
 
 			
-			TraitementTableParametre[] r = TraitementTableParametre.values();
 			String modaliteEtat = anExecutionEnvironment.replace("_", ".");
-			for (int i = 0; i < r.length; i++) {
+			for (TraitementTableParametre parameterTable : TraitementTableParametre.values()) {
 				// on créé une table image de la table venant de l'ihm
 				// (environnement de parametre)
-				TraitementTableParametre parameterTable = r[i];
 				String tableImage = FormatSQL
 						.temporaryTableName(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment));
 
@@ -100,7 +98,7 @@ public class SynchronizeRulesAndMetadataDao {
 				requete.append(FormatSQL.dropTable(tableImage));
 
 				requete.append("CREATE TABLE " + tableImage + " " + FormatSQL.WITH_NO_VACUUM + " AS SELECT a.* FROM "
-						+ r[i].getTablenameInMetadata().getFullName() + " AS a " + condition + ";\n");
+						+ parameterTable.getTablenameInMetadata().getFullName() + " AS a " + condition + ";\n");
 
 				requete.append(FormatSQL
 						.dropTable(parameterTable.getTablenameInSandbox().getFullName(anExecutionEnvironment)));

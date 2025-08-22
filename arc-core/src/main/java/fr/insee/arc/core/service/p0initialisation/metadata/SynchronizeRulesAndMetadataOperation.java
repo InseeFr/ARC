@@ -138,9 +138,8 @@ public class SynchronizeRulesAndMetadataOperation {
 
 		for (String table : new HashSet<String>(tablesToCopyIntoExecutor)) {
 			
-			GenericBean gb = SynchronizeRulesAndMetadataDao.execQuerySelectDataFrom(coordinatorConnexion, table);
+			CopyObjectsToDatabase.execCopyFromTable(coordinatorConnexion, executorConnection, table, table);
 
-			CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, table, gb);
 		}
 		
 		// copy an empty image of  

@@ -12,9 +12,12 @@ public class ModelExport implements ArcModel {
 
     private VObject viewFileExport;
 
+	private VObject viewExportOption;
+    
     public ModelExport() {
 		this.viewExport = new ViewExport();
 		this.viewFileExport = new ViewFileExport();
+		this.viewExportOption = new ViewExportOption();
 	}
 
 	public VObject getViewExport() {
@@ -32,7 +35,13 @@ public class ModelExport implements ArcModel {
 	public void setViewFileExport(VObject viewFileExport) {
 		this.viewFileExport = viewFileExport;
 	}
-    
-    
-	
+
+	public VObject getViewExportOption() {
+		return viewExportOption;
+	}
+
+	public void setViewExportOption(VObject viewExportOption) {
+		this.viewExportOption = viewExportOption;
+	}
+
 }

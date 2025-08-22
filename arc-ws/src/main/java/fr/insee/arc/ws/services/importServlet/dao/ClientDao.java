@@ -601,11 +601,8 @@ public class ClientDao {
 	}
 
 	public void copyTableOfIdSourceToExecutorNod(int connectionId) throws ArcException {
-		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(connection,
-				new ArcPreparedStatementBuilder("SELECT * FROM " + tableOfIdSource)));
-
 		try (Connection executorConnection = UtilitaireDao.get(connectionId).getDriverConnexion()) {
-			CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, tableOfIdSource, gb);
+			CopyObjectsToDatabase.execCopyFromTable(connection, executorConnection, tableOfIdSource, tableOfIdSource);
 		} catch (SQLException e) {
 			ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
 			customException.logFullException();

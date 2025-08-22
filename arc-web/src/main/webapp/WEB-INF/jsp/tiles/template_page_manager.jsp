@@ -8,7 +8,7 @@
 				<label class="text-body w-100"><spring:message code="gui.page.size" />:&nbsp;
 					<input type="number" class="input-sm"
 					name="${view.sessionName}.paginationSize"
-					value="${view.paginationSize}" min="5" max="100" />
+					value="${view.paginationSize}" min="1" max="500" />
 				</label>
 			</div>
 		</c:if>
