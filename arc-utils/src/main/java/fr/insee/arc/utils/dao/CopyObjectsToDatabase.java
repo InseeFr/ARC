@@ -108,7 +108,9 @@ public class CopyObjectsToDatabase {
 	 */
 	private static void execCopyFromTableCore(Connection inputConnection, Connection targetConnection, String inputTable, String targetTable, boolean replaceTargetTable) throws ArcException
 	{
-		
+	
+		// normalize table name
+
 		createExtensionDblink(targetConnection);
 		
 		connectDblink(inputConnection, targetConnection);
@@ -175,7 +177,7 @@ public class CopyObjectsToDatabase {
 				String.format("""
 				SELECT STRING_AGG(column_name, ',' ORDER BY ordinal_position) as cols 
 				, STRING_AGG(column_name || ' ' || udt_name, ',' ORDER BY ordinal_position) as cols_with_type
-				from information_schema.columns where table_schema||'.'||table_name='%s'
+				from information_schema.columns where table_schema||'.'||table_name=lower('%s')
 				""", inputTable);
 		
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
