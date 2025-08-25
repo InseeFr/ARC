@@ -140,4 +140,30 @@ public class InitializeQueryTest {
 
 	}
 	
+
+    /**
+     * Create a test table in the schema "test".
+     * Name of table = test.table_test.
+     * Number of records : 26.
+     * Columns definition : id int4, val text, arr array[int4], dd date.
+     * @param c
+     * @return
+     * @throws ArcException
+     */
+	public static String createSimpleTableTest(Connection c) throws ArcException
+	{
+		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
+		UtilitaireDao.get(0).executeRequest(c, "CREATE SCHEMA test;");
+		// create a test table with 26 lines
+		UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE test.table_test as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
+		return "test.table_test";
+		
+	}
+	
+	public static void dropSimpleTableTest(Connection c) throws ArcException
+	{
+		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
+	}
+    
+    
 }

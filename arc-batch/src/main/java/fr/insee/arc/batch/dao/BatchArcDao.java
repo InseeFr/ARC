@@ -51,7 +51,6 @@ public class BatchArcDao {
 	/**
 	 * Select the archives not fully proceeded by former batch (etape=1)
 	 * 
-	 * @param volatileOn
 	 * @param envExecution
 	 * @return
 	 * @throws ArcException
