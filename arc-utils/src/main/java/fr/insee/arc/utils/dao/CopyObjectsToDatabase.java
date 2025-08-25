@@ -12,7 +12,7 @@ import fr.insee.arc.utils.utils.FormatSQL;
 
 public class CopyObjectsToDatabase {
 
-	private final static String CONNECTION_ALIAS = "con"; 
+	private static final String CONNECTION_ALIAS = "con"; 
 
 	private static final int CHUNK_SIZE = 10000;
 	
@@ -203,13 +203,11 @@ public class CopyObjectsToDatabase {
 	 */
 	private static void createOutputTableIfRequired(Connection targetConnection, String targetTable, ColumnAttributes inputTableColumnAttributes, boolean replaceTargetTable) throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		if (replaceTargetTable) {
-			
-			// drop target table if exists
-			if (replaceTargetTable)
-			{
-				query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(targetTable).append(SQL.END_QUERY);
-			}
+		
+		// drop target table if it must be replaced
+		if (replaceTargetTable)
+		{
+			query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(targetTable).append(SQL.END_QUERY);
 		}
 
 		query.append(SQL.CREATE);
