@@ -600,9 +600,25 @@ public class ClientDao {
 		return !UtilitaireDao.get(0).hasResults(connection, requete);
 	}
 
+	/**
+	 * Copy to an executor nod, the table containing id_source to transmit through the webservice  
+	 * @param connectionId
+	 * @throws ArcException
+	 */
 	public void copyTableOfIdSourceToExecutorNod(int connectionId) throws ArcException {
-		try (Connection executorConnection = UtilitaireDao.get(connectionId).getDriverConnexion()) {
-			CopyObjectsToDatabase.execCopyFromTable(connection, executorConnection, tableOfIdSource, tableOfIdSource);
+		
+		try (Connection coordinatorConnection = UtilitaireDao.get(0).getDriverConnexion()) {
+			
+			try (Connection executorConnection = UtilitaireDao.get(connectionId).getDriverConnexion()) {
+			
+				CopyObjectsToDatabase.execCopyFromTable(coordinatorConnection, executorConnection, tableOfIdSource, tableOfIdSource);
+
+			} catch (SQLException e) {
+				ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
+				customException.logFullException();
+				throw customException;
+			}
+			
 		} catch (SQLException e) {
 			ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
 			customException.logFullException();
