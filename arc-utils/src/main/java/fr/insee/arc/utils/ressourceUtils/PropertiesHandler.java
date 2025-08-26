@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.bouncycastle.util.Arrays;
 import org.springframework.stereotype.Service;
@@ -654,10 +655,11 @@ public class PropertiesHandler {
 		try {
 			String databaseUrl= c.getMetaData().getURL();
 			String userName = c.getMetaData().getUserName();
+			
 			return infos.stream()
 					.filter(t-> t.getDatabaseUrl().equals(databaseUrl) 
 							&& t.getDatabaseUsername().equals(userName))
-					.findFirst().get();
+					.findFirst().orElseThrow();
 
 		} catch (SQLException | NoSuchElementException e) {
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_FAILED);
